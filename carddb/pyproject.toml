@@ -1,0 +1,274 @@
+[project]
+name = "sve-carddb"
+dynamic = ["version"]
+description = "Unofficial card database for Shadowverse: EVOLVE"
+
+requires-python = ">=3.14.7,<3.15"
+dependencies = [
+    "rich>=15.0.0",
+    "loguru>=0.7.3",
+    "python-dotenv>=1.2.3",
+    "pydantic>=2.13.5",
+    "pydantic-settings>=2.15.0",
+    "orjson>=3.12.0",
+    "ruamel-yaml>=0.19.1",
+]
+
+[dependency-groups]
+dev = [
+    "pre-commit>=4.6.2",
+    "ruff>=0.16.8",
+    "mypy>=2.3.1",
+    "commitizen>=4.18.1",
+    "cz-conventional-gitmoji>=0.7.0",
+    "taplo>=0.9.3",
+    "pyright[nodejs]>=1.1.414",
+]
+
+test = [
+    "pytest>=9.1.1",
+    "pytest-asyncio>=1.4.0",
+    "pytest-mock>=3.15.1",
+    "pytest-xdist>=3.8.0",
+    "pytest-dotenv>=0.5.2",
+    "pytest-emoji>=0.2.0",
+    "pytest-md>=0.2.0",
+    "pytest-html>=4.2.0",
+    "pytest-cov>=7.1.0",
+    "pytest-clarity>=1.0.1",
+    "pytest-random-order>=1.2.0",
+]
+
+[tool.uv]
+# Version comes from git tags (hatch-vcs); rebuild the editable install on commit/tag changes so _version.py stays current.
+cache-keys = [
+    { file = "pyproject.toml" },
+    { git = { commit = true, tags = true } },
+]
+default-groups = ["dev", "test"]
+
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+# Single version source: git tags (v1.2.3). Untagged local builds look like 0.1.dev3+g1a2b3c4.
+# <https://github.com/ofek/hatch-vcs>
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.version.raw-options]
+root = ".." # monorepo: this project lives in carddb/, .git is one level up
+git_describe_command = [
+    "git",
+    "describe",
+    "--dirty",
+    "--tags",
+    "--long",
+    "--match",
+    "v*",
+]
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/sve_carddb/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sve_carddb"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src"]
+
+
+## pytest
+# <https://docs.pytest.org/en/stable/>
+[tool.pytest.ini_options]
+testpaths = ["./tests/"]
+filterwarnings = ["ignore::DeprecationWarning"]
+disable_test_id_escaping_and_forfeit_all_rights_to_community_support = true # show non-ASCII test IDs as-is
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+env_files = [
+    ".env",
+]
+env_override_existing_values = false
+addopts = [
+    "--import-mode=importlib",
+    "-vv",
+    "--strict-markers",
+    "--maxfail=3",
+    # "--durations=5",
+    "--emoji",
+    "--cov-config=pyproject.toml",
+    "--cov-report=term-missing",
+]
+## The --cov-* options above only take effect together with --cov
+
+# <https://pytest-cov.readthedocs.io/en/latest/>  # pytest-cov
+# <https://coverage.readthedocs.io/en/latest/config.html>  # Coverage.py
+# <https://coverage.readthedocs.io/en/latest/config.html#report-exclude-also>  # exclude_also
+[tool.coverage.run]
+source = ["./src/"]
+omit = []
+data_file = "htmlcov/.coverage"
+branch = true
+
+[tool.coverage.report]
+skip_covered = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "if __name__ == .__main__.:",
+    "@overload",
+    "@(abc\\.)?abstractmethod",
+    "raise NotImplementedError",
+    "raise AssertionError",
+    "class .*\\bProtocol\\):",
+    "if settings.is_dev()",
+]
+# fail_under = 50
+
+[tool.coverage.html]
+directory = "htmlcov"
+
+
+## ruff
+# <https://docs.astral.sh/ruff/settings/>
+[tool.ruff]
+required-version = ">=0.16.0"
+target-version = "py314"
+output-format = "concise"
+show-fixes = true
+line-length = 88
+extend-exclude = ["src/sve_carddb/_version.py"]
+
+[tool.ruff.lint]
+preview = true
+future-annotations = false # TODO: 預設就是 false，未來會改成 true
+select = ["ALL"]
+
+ignore = [
+    ### Intentionally disabled
+    "line-too-long",             # format 會自動處理
+    "prohibited-trailing-comma", # 與 ruff format 同時使用時候，執行順序將影響結果
+    "missing-trailing-comma",    # 會與 ruff format 衝突
+
+    "assert",                                # 不允許使用 assert
+    "ambiguous-unicode-character-string",    # 不要使用不明確的 Unicode 字元
+    "ambiguous-unicode-character-docstring", # 不要使用不明確的 Unicode 字元
+    "ambiguous-unicode-character-comment",   # 不要使用不明確的 Unicode 字元
+    "missing-terminal-punctuation",          # 註釋結尾應該有標點符號
+    "invalid-todo-tag",                      # 禁止使用 TODO 以外的 tag
+    "line-contains-fixme",                   # 註釋包含 FIXME
+    "line-contains-todo",                    # 註釋包含 TODO
+
+    "function-call-in-default-argument", # 不要在默認參數中調用函數
+    "FBT",                               # flake8-boolean-trap (不要使用 True/False 作為函數的位置參數)
+    "multiple-with-statements",          # 不要使用嵌套 with
+    "EM",                                # flake8-errmsg (錯誤訊息字串要先分配給變數)
+    "raise-vanilla-args",                # 自定義例外包含額外的長訊息
+    "error-instead-of-exception",        # logging 應該用 exception 取代 error
+    # "G", # flake8-logging-format (各種對 logging 的限制)
+
+    ### TODO: Enable gradually
+    "undocumented-public-class",   # 未註釋的 public class
+    "undocumented-public-package", # 未註釋的 public package
+    "undocumented-public-init",    # 未註釋的 public __init__
+
+    ### preview
+    "DOC",                                    # pydoclint (docstring 需要完整寫出 return / yield / raise)
+    "missing-copyright-notice",
+    "non-empty-init-module",
+    "blocking-path-method-in-async-function",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"./tests/*.py" = [
+    "D",                      # pydocstyle (測試允許缺少模組文檔)
+    "relative-imports",       # 測試允許使用父母/兄弟以外的相對導入
+    "private-member-access",  # 測試允許訪問私有成員，方便 mock
+    "magic-value-comparison", # 測試允許使用魔法數字
+    "no-self-use",            # 測試允許 method 中未使用到 self
+    "import-private-name",    # 測試允許導入私有名稱
+    # "yoda-conditions", # 測試允許不遵守 yoda 條件
+]
+
+[tool.ruff.lint.isort]
+known-first-party = []
+split-on-trailing-comma = false
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-type-checking]
+exempt-modules = ["typing", "typing_extensions", "pydantic"]
+
+[tool.ruff.lint.pylint]
+max-returns = 6            # default is 6
+max-branches = 12          # default is 12
+max-args = 6               # default is 5
+max-statements = 50        # default is 50
+max-statements-in-try = 15 # default is 5
+
+[tool.ruff.format]
+docstring-code-format = true
+skip-magic-trailing-comma = false # 預設就是 false。 當你想要盡可能消除尾隨逗號時候可以暫時性開啟
+
+
+## mypy
+# <https://mypy.readthedocs.io/en/stable/config_file.html>
+[tool.mypy]
+python_version = "3.14"
+plugins = ["pydantic.mypy"]
+files = ["."]
+exclude = ["playground"]
+strict = true
+pretty = true
+# <https://mypy.readthedocs.io/en/stable/error_code_list2.html>
+enable_error_code = [
+    "ignore-without-code",
+    "possibly-undefined",
+    "truthy-bool",
+    "truthy-iterable",
+    "redundant-expr",
+    "explicit-override",
+    "mutable-override",
+    "unused-awaitable",
+    "unimported-reveal",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "icecream",
+]
+ignore_missing_imports = true
+
+
+## pyright
+# <https://microsoft.github.io/pyright/#/configuration>
+[tool.pyright]
+pythonVersion = "3.14"
+extraPaths = []
+include = ["src/", "tests/"]
+
+# Type Evaluation Settings
+strictListInference = true
+strictDictionaryInference = true
+strictSetInference = true
+deprecateTypingAliases = true
+enableReachabilityAnalysis = true
+enableExperimentalFeatures = true
+
+# Level Setting
+typeCheckingMode = "strict"
+
+# basic level
+reportCallIssue = "none"
+reportArgumentType = "none"
+
+# strict level
+reportUnnecessaryCast = "none"          # casts pyright deems unnecessary may be needed by mypy; mypy wins
+reportUntypedFunctionDecorator = "none" # disagrees with mypy; mypy wins
+reportUnknownLambdaType = "none"        # lambdas cannot be annotated
+reportMissingTypeStubs = "none"         # some packages ship no stubs
+
+reportUnknownVariableType = "none" # too many Unknowns from third-party packages
+reportUnknownArgumentType = "none" # same as above
+reportUnknownMemberType = "none"   # same as above; treated as Any for now

@@ -1,0 +1,8 @@
+# https://github.com/DavidAnson/markdownlint/blob/main/schema/.markdownlint.yaml
+# https://github.com/DavidAnson/markdownlint/blob/main/doc/Rules.md
+# https://github.com/DavidAnson/markdownlint-cli2#configuration
+
+config:
+  MD013: false # Line length
+  MD024: false # Multiple headings with the same content
+  MD026: false # Trailing punctuation in heading

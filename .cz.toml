@@ -1,0 +1,10 @@
+# The commit-msg hook runs at the repo root, so this config must live here.
+# <https://commitizen-tools.github.io/commitizen/config/>
+[tool.commitizen]
+name = "cz_gitmoji"
+# Version comes from git tags (scm provider); bump never writes back to pyproject.toml.
+version_provider = "scm"
+version_scheme = "semver2"
+tag_format = "v$version"
+bump_message = "🔖 bump: v$current_version → v$new_version"
+update_changelog_on_bump = false
