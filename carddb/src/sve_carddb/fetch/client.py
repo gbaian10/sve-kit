@@ -39,6 +39,10 @@ class StopCrawlError(RuntimeError):
     """A condition that must stop the whole run, such as 403 or a repeated 429."""
 
 
+class BudgetExhaustedError(RuntimeError):
+    """The run reached its `max_requests` budget; stop cleanly."""
+
+
 class FetchError(RuntimeError):
     """This URL could not be fetched; the run may go on (the circuit breaker counts it)."""
 
@@ -81,6 +85,8 @@ class ClientPolicy:
     max_hops: int = 5
     default_retry_after: float = 60.0
     """Seconds to wait after a 429 whose Retry-After is missing or invalid."""
+    max_requests: int | None = None
+    """Hard cap on actual HTTP requests in this run, retries and redirects included."""
 
 
 def retry_after_seconds(value: str | None, now: datetime, default: float) -> float:
@@ -121,6 +127,12 @@ class Client:
         self._clock = clock
         self._not_before: float | None = None
         self._seen_429 = 0
+        self._requests_sent = 0
+
+    @property
+    def requests_sent(self) -> int:
+        """Actual HTTP requests sent so far in this run."""
+        return self._requests_sent
 
     async def get(self, request: Request) -> Response:
         """Fetch `request`; raise `FetchError` or `StopCrawlError` on failure."""
@@ -152,7 +164,12 @@ class Client:
             if not request.allowed(url):
                 msg = f"{request.url}: redirect to disallowed {url}"
                 raise FetchError(msg)
+            budget = self._policy.max_requests
+            if budget is not None and self._requests_sent >= budget:
+                msg = f"request budget of {budget} reached"
+                raise BudgetExhaustedError(msg)
             await self._throttle.wait(not_before=self._not_before)
+            self._requests_sent += 1
             if_none_match = request.if_none_match if hop == 0 else None
             request_id = self._manifest.requests.start(
                 RequestStart(

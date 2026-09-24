@@ -118,6 +118,15 @@ class Writer:
             else LocalState.UNTRUSTED
         )
 
+    def read(self, url: str) -> bytes:
+        """Return the stored content of a trusted local copy, decompressed."""
+        resource = self._manifest.resources.get(url)
+        if resource is None or self.local_state(url) is not LocalState.TRUSTED:
+            msg = f"no trusted local copy of {url}"
+            raise RuntimeError(msg)
+        stored = resolve_within(self._root, resource.path).read_bytes()
+        return decompress(stored) if _is_compressed(resource) else stored
+
     def write(
         self,
         fetched: Fetched,

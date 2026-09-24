@@ -6,6 +6,7 @@ import httpx
 import pytest
 
 from sve_carddb.fetch.client import (
+    BudgetExhaustedError,
     Client,
     ClientPolicy,
     FetchError,
@@ -221,6 +222,22 @@ async def test_if_none_match_only_on_the_first_hop(
     await client.get(request(etag='"abc"'))
     sent = [r.headers.get("if-none-match") for _, r in server.calls]
     assert sent == ['"abc"', None]
+
+
+async def test_request_budget_counts_retries(
+    manifest: Manifest, clock: FakeClock
+) -> None:
+    server = Server(clock, iter([status(503), status(503), ok()]))
+    http = httpx.AsyncClient(transport=httpx.MockTransport(server))
+    throttle = Throttle(INTERVAL, 0.0, clock=clock, sleep=clock.sleep)
+    policy = ClientPolicy(
+        wait_initial=0.0, wait_max=0.0, wait_jitter=0.0, max_requests=2
+    )
+    client = Client(http, throttle, manifest, run_id="run", policy=policy, clock=clock)
+    with pytest.raises(BudgetExhaustedError, match="budget of 2"):
+        await client.get(request())
+    assert client.requests_sent == 2
+    assert len(server.calls) == 2
 
 
 NOW = datetime(2026, 9, 24, 12, 0, tzinfo=UTC)

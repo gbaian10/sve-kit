@@ -222,3 +222,13 @@ def test_remove_temp_files(root: Path) -> None:
     keep.write_bytes(b"done")
     assert remove_temp_files(root) == [leftover]
     assert keep.exists()
+
+
+def test_read_returns_the_trusted_local_copy(
+    writer: Writer, manifest: Manifest, root: Path
+) -> None:
+    write(writer, manifest, fetched())
+    assert writer.read(URL) == b"<html>v1</html>"
+    (root / PATH).write_bytes(b"damaged")
+    with pytest.raises(RuntimeError, match="trusted"):
+        writer.read(URL)
