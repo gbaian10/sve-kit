@@ -56,6 +56,27 @@ def list_root(set_code: str) -> str:
     return f"{jp.REGION.value}:list:{set_code}"
 
 
+def current_sets(manifest: Manifest) -> list[str]:
+    """Product codes from the validated product generation."""
+    current = manifest.generations.current(SETS_ROOT)
+    if current is None:
+        return []
+    return [edge.link.original for edge in manifest.generations.edges(current.id)]
+
+
+def card_numbers(manifest: Manifest, set_codes: list[str] | None = None) -> list[str]:
+    """Card numbers from validated list generations, deduplicated, in list order."""
+    numbers: dict[str, None] = {}
+    codes = set_codes if set_codes is not None else current_sets(manifest)
+    for code in codes:
+        current = manifest.generations.current(list_root(code))
+        if current is None:
+            continue
+        for edge in manifest.generations.edges(current.id):
+            numbers.setdefault(edge.link.original)
+    return list(numbers)
+
+
 @dataclass(frozen=True, slots=True)
 class Page[T]:
     """A parsed page and the hash of the content it was parsed from."""
@@ -203,12 +224,7 @@ class Crawler:
 
     def current_sets(self) -> list[str]:
         """Product codes from the validated product generation."""
-        current = self.manifest.generations.current(SETS_ROOT)
-        if current is None:
-            return []
-        return [
-            edge.link.original for edge in self.manifest.generations.edges(current.id)
-        ]
+        return current_sets(self.manifest)
 
     async def first_page(self, set_code: str) -> ListSummary:
         """P0: page 1 of a product list and the totals it declares."""
@@ -288,14 +304,7 @@ class Crawler:
 
     def card_numbers(self, set_codes: list[str] | None = None) -> list[str]:
         """Card numbers from validated list generations, deduplicated, in list order."""
-        numbers: dict[str, None] = {}
-        for code in set_codes if set_codes is not None else self.current_sets():
-            current = self.manifest.generations.current(list_root(code))
-            if current is None:
-                continue
-            for edge in self.manifest.generations.edges(current.id):
-                numbers.setdefault(edge.link.original)
-        return list(numbers)
+        return card_numbers(self.manifest, set_codes)
 
     async def card(self, number: str) -> jp.CardPage:
         """Fetch one card page and record its images as the card's current links."""
