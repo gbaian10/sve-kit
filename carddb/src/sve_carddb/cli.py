@@ -321,7 +321,7 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
                 urls += _list_urls(code, writer)
         case Stage.P2:
             urls = [jp.card_url(n) for n in card_numbers(manifest, job.sets)]
-    fetch = [u for u in urls if _would_fetch(job, writer.local_state(u))]
+    fetch = [u for u in urls if _would_fetch(job, u, writer.local_state(u))]
     for url in fetch:
         console.print(url)
     console.print(f"{len(fetch)} of {len(urls)} URLs would be requested")
@@ -336,8 +336,11 @@ def _list_urls(code: str, writer: Writer) -> list[str]:
     return [jp.list_url(code, n) for n in range(1, max_page + 1)]
 
 
-def _would_fetch(job: Job, state: LocalState) -> bool:
-    # P0 and P1 always re-read their pages to build a new generation.
-    if job.stage is not Stage.P2 or state is not LocalState.TRUSTED:
+def _would_fetch(job: Job, url: str, state: LocalState) -> bool:
+    # The product page and P1's list pages are always re-read to build a new
+    # generation; everything else follows the mode.
+    if url == jp.sets_url() or job.stage is Stage.P1:
+        return True
+    if state is not LocalState.TRUSTED:
         return True
     return job.mode is Mode.REFRESH

@@ -129,6 +129,16 @@ def test_dry_run_p2_lists_only_missing_cards() -> None:
     assert jp.card_url("BP02-001") not in result.output
 
 
+def test_dry_run_p0_skips_stored_first_pages(site: FakeSite) -> None:
+    assert invoke("crawl", "p0", "--max-requests", "2").exit_code == 0
+    calls = len(site.calls)
+    result = invoke("crawl", "p0", "--dry-run")
+    assert len(site.calls) == calls
+    # The product page is always re-read; BP01 page 1 is stored, BP02 is not.
+    assert "2 of 3 URLs would be requested" in result.output
+    assert jp.list_url("BP01", 1) not in result.output
+
+
 def test_refresh_needs_a_scope(site: FakeSite) -> None:
     result = invoke("crawl", "p2", "--mode", "refresh")
     assert result.exit_code == 2
