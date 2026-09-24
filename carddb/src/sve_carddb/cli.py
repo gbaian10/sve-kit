@@ -12,7 +12,6 @@ import httpx
 import typer
 from pydantic import ValidationError as SettingsError
 from rich.console import Console
-from rich.table import Table
 
 from sve_carddb.config import Settings
 from sve_carddb.crawl import (
@@ -256,16 +255,18 @@ async def _crawl(
 
 async def _p0(crawler: Crawler) -> int:
     sets = await crawler.discover_sets()
-    table = Table("product", "cards", "pages")
+    console.print(f"{len(sets)} products")
     pages = cards = 0
+    # One line per product, so a run stopped by --limit still shows what it read.
     for card_set in sets:
         summary = await crawler.first_page(card_set.code)
-        table.add_row(card_set.code, str(summary.total), str(summary.max_page))
+        console.print(
+            f"{card_set.code:>8}: {summary.total:>4} cards, {summary.max_page:>3} pages"
+        )
         pages += summary.max_page
         cards += summary.total
-    console.print(table)
     console.print(
-        f"{len(sets)} products. P1 needs about {pages + len(sets)} requests; "
+        f"P1 needs about {pages + len(sets)} requests; "
         f"P2 at most {cards} (fewer, as products share cards)."
     )
     return 0

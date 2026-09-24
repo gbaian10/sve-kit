@@ -85,6 +85,13 @@ def test_full_pipeline(data_dir: Path) -> None:
         assert manifest.resources.get(jp.card_url("BP02-003")) is not None
 
 
+def test_p0_stopped_early_still_reports_what_it_read(site: FakeSite) -> None:
+    result = invoke("crawl", "p0", "--max-requests", "2")
+    assert result.exit_code == 0, result.output
+    assert "BP01:   17 cards,   2 pages" in result.output
+    assert len(site.calls) == 2
+
+
 @pytest.mark.usefixtures("site")
 def test_requests_are_spaced_by_the_configured_interval(clock: FakeClock) -> None:
     assert invoke("crawl", "p0").exit_code == 0
