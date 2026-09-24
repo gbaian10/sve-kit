@@ -263,10 +263,6 @@ enableExperimentalFeatures = true
 # Level Setting
 typeCheckingMode = "strict"
 
-# basic level
-reportCallIssue = "none"
-reportArgumentType = "none"
-
 # strict level
 reportUnnecessaryCast = "none"          # casts pyright deems unnecessary may be needed by mypy; mypy wins
 reportUntypedFunctionDecorator = "none" # disagrees with mypy; mypy wins
