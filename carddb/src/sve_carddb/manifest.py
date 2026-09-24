@@ -147,6 +147,7 @@ class Outcome(StrEnum):
     CHANGED = "changed"
     UNCHANGED = "unchanged"
     NOT_MODIFIED = "not_modified"
+    REDIRECTED = "redirected"
     FAILED = "failed"
     UNKNOWN = "unknown"
 
