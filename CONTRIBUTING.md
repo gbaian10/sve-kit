@@ -92,6 +92,26 @@ AI-generated code tends to over-comment. Keep comments few and short:
 # Card numbers may contain Ⓢ (U+24C8); keep them as-is (see ADR-0004).
 ```
 
+## Lint and types
+
+ruff (all rules), mypy strict and pyright strict run on every commit. Type hints are required.
+Follow the rules; if a rule is wrong for the whole project, propose changing the config
+instead of silencing it everywhere.
+
+When a rule must be silenced, use rule **names** (not codes) and give the reason:
+
+```python
+x = random.random()  # ruff: ignore[suspicious-non-cryptographic-random-usage] -- timing jitter
+```
+
+```python
+# ruff: file-ignore[magic-value-comparison] -- parser tests compare literal page values
+```
+
+- One line: `# ruff: ignore[...]` at the end of that line
+- A whole file (the same rule repeated many times): `# ruff: file-ignore[...]` at the top
+- The old `# noqa` form is rejected by the linter
+
 ## What goes into git
 
 - **In:** code, shared human-written data (`authored/`), formal docs (`docs/`).
