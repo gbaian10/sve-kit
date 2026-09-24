@@ -55,79 +55,78 @@ def make_start(url: str = CARD_URL, attempt: int = 1) -> RequestStart:
     )
 
 
-@pytest.fixture
-def manifest(tmp_path: Path) -> Manifest:
-    return Manifest.open(tmp_path / "manifest" / "manifest.sqlite")
-
-
 def test_resource_round_trip(manifest: Manifest) -> None:
     resource = make_resource()
     with manifest.transaction():
-        manifest.put_resource(resource)
-    assert manifest.get_resource(CARD_URL) == resource
-    assert manifest.get_resource("https://example.com/") is None
+        manifest.resources.put(resource)
+    assert manifest.resources.get(CARD_URL) == resource
+    assert manifest.resources.get("https://example.com/") is None
 
 
 def test_path_owner(manifest: Manifest) -> None:
     with manifest.transaction():
-        manifest.put_resource(make_resource())
+        manifest.resources.put(make_resource())
     assert (
-        manifest.path_owner(PurePosixPath("raw/jp/card/BP01-001.html.zst")) == CARD_URL
+        manifest.resources.path_owner(PurePosixPath("raw/jp/card/BP01-001.html.zst"))
+        == CARD_URL
     )
-    assert manifest.path_owner(PurePosixPath("raw/jp/card/other.html.zst")) is None
+    assert (
+        manifest.resources.path_owner(PurePosixPath("raw/jp/card/other.html.zst"))
+        is None
+    )
 
 
 def test_put_resource_updates_same_url(manifest: Manifest) -> None:
     with manifest.transaction():
-        manifest.put_resource(make_resource())
+        manifest.resources.put(make_resource())
     updated = replace(make_resource(), sha256="b" * 64)
     with manifest.transaction():
-        manifest.put_resource(updated)
-    assert manifest.get_resource(CARD_URL) == updated
+        manifest.resources.put(updated)
+    assert manifest.resources.get(CARD_URL) == updated
 
 
 def test_path_clash_keeps_the_original_owner(manifest: Manifest) -> None:
     with manifest.transaction():
-        manifest.put_resource(make_resource())
+        manifest.resources.put(make_resource())
     other = make_resource(url="https://shadowverse-evolve.com/cardlist/?cardno=X")
     with pytest.raises(sqlite3.IntegrityError), manifest.transaction():
-        manifest.put_resource(other)
-    assert manifest.get_resource(CARD_URL) == make_resource()
+        manifest.resources.put(other)
+    assert manifest.resources.get(CARD_URL) == make_resource()
 
 
 def test_transaction_rolls_back_on_error(manifest: Manifest) -> None:
     def put_then_fail() -> None:
         with manifest.transaction():
-            manifest.put_resource(make_resource())
+            manifest.resources.put(make_resource())
             raise RuntimeError
 
     with pytest.raises(RuntimeError):
         put_then_fail()
-    assert manifest.get_resource(CARD_URL) is None
+    assert manifest.resources.get(CARD_URL) is None
 
 
 def test_request_lifecycle(manifest: Manifest) -> None:
-    request_id = manifest.start_request(make_start())
-    assert manifest.request_outcomes(CARD_URL) == [Outcome.STARTED]
+    request_id = manifest.requests.start(make_start())
+    assert manifest.requests.outcomes(CARD_URL) == [Outcome.STARTED]
     with manifest.transaction():
-        manifest.finish_request(
+        manifest.requests.finish(
             request_id, RequestResult(outcome=Outcome.CHANGED, status=200)
         )
-    assert manifest.request_outcomes(CARD_URL) == [Outcome.CHANGED]
+    assert manifest.requests.outcomes(CARD_URL) == [Outcome.CHANGED]
 
 
 def test_interrupted_requests_become_unknown(tmp_path: Path) -> None:
     path = tmp_path / "manifest.sqlite"
     with Manifest.open(path) as first:
-        first.start_request(make_start())
+        first.requests.start(make_start())
     with Manifest.open(path) as second:
-        assert second.mark_interrupted_requests() == 1
-        assert second.request_outcomes(CARD_URL) == [Outcome.UNKNOWN]
+        assert second.requests.mark_interrupted() == 1
+        assert second.requests.outcomes(CARD_URL) == [Outcome.UNKNOWN]
 
 
 def test_finish_request_rejects_unknown_id(manifest: Manifest) -> None:
     with pytest.raises(ManifestError, match="no fetch_log row"), manifest.transaction():
-        manifest.finish_request(999, RequestResult(outcome=Outcome.FAILED))
+        manifest.requests.finish(999, RequestResult(outcome=Outcome.FAILED))
 
 
 def test_rejects_unsupported_schema_version(tmp_path: Path) -> None:
@@ -144,11 +143,11 @@ def test_backup_is_consistent_and_restorable(
     manifest: Manifest, tmp_path: Path
 ) -> None:
     with manifest.transaction():
-        manifest.put_resource(make_resource())
+        manifest.resources.put(make_resource())
     info = manifest.backup(tmp_path / "backup" / "manifest.sqlite")
     assert len(info.sha256) == 64
     with Manifest.open(info.path) as restored:
-        assert restored.get_resource(CARD_URL) == make_resource()
+        assert restored.resources.get(CARD_URL) == make_resource()
 
 
 def test_backup_refuses_to_overwrite(manifest: Manifest, tmp_path: Path) -> None:

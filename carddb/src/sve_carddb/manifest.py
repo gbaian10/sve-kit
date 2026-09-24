@@ -8,7 +8,7 @@ import fcntl
 import hashlib
 import os
 import sqlite3
-from contextlib import contextmanager
+from contextlib import AbstractContextManager, contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -16,7 +16,7 @@ from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Self
 
 if TYPE_CHECKING:
-    from collections.abc import Generator, Iterator
+    from collections.abc import Callable, Generator, Iterator, Sequence
     from types import TracebackType
 
 SCHEMA_VERSION = 1
@@ -63,6 +63,63 @@ CREATE TABLE IF NOT EXISTS fetch_log (
 ) STRICT;
 
 CREATE INDEX IF NOT EXISTS fetch_log_url ON fetch_log (url);
+
+-- Current links of single-page sources (card, limit, errata, news, rules).
+CREATE TABLE IF NOT EXISTS link (
+    from_url     TEXT NOT NULL,
+    to_url       TEXT NOT NULL,
+    to_kind      TEXT NOT NULL,
+    position     INTEGER NOT NULL,
+    original     TEXT NOT NULL,
+    from_sha256  TEXT NOT NULL,
+    PRIMARY KEY (from_url, to_kind, position)
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS link_log (
+    id           INTEGER PRIMARY KEY,
+    from_url     TEXT NOT NULL,
+    to_url       TEXT NOT NULL,
+    to_kind      TEXT NOT NULL,
+    position     INTEGER NOT NULL,
+    original     TEXT NOT NULL,
+    from_sha256  TEXT NOT NULL,
+    event        TEXT NOT NULL,
+    at           TEXT NOT NULL
+) STRICT;
+
+-- Multi-page discoveries (sets, list per set, errata index, paged Q&A).
+-- Each generation keeps its own immutable snapshot of pages and edges.
+CREATE TABLE IF NOT EXISTS discovery_generation (
+    id              INTEGER PRIMARY KEY,
+    root            TEXT NOT NULL,
+    status          TEXT NOT NULL,
+    started_at      TEXT NOT NULL,
+    finished_at     TEXT,
+    declared_total  INTEGER,
+    max_page        INTEGER
+) STRICT;
+
+CREATE UNIQUE INDEX IF NOT EXISTS one_validated_generation_per_root
+    ON discovery_generation (root) WHERE status = 'validated';
+
+CREATE TABLE IF NOT EXISTS generation_page (
+    generation_id  INTEGER NOT NULL REFERENCES discovery_generation (id),
+    page_url       TEXT NOT NULL,
+    page_sha256    TEXT NOT NULL,
+    PRIMARY KEY (generation_id, page_url)
+) STRICT;
+
+CREATE TABLE IF NOT EXISTS generation_edge (
+    generation_id  INTEGER NOT NULL,
+    from_url       TEXT NOT NULL,
+    to_url         TEXT NOT NULL,
+    to_kind        TEXT NOT NULL,
+    position       INTEGER NOT NULL,
+    original       TEXT NOT NULL,
+    PRIMARY KEY (generation_id, from_url, to_kind, position),
+    FOREIGN KEY (generation_id, from_url)
+        REFERENCES generation_page (generation_id, page_url)
+) STRICT;
 """
 
 
@@ -92,6 +149,13 @@ class Outcome(StrEnum):
     NOT_MODIFIED = "not_modified"
     FAILED = "failed"
     UNKNOWN = "unknown"
+
+
+class GenerationStatus(StrEnum):
+    IN_PROGRESS = "in_progress"
+    VALIDATED = "validated"
+    FAILED = "failed"
+    SUPERSEDED = "superseded"
 
 
 class ManifestError(RuntimeError):
@@ -159,9 +223,356 @@ class BackupInfo:
     created_at: datetime
 
 
+@dataclass(frozen=True, slots=True)
+class Link:
+    """A link found on a page. `original` is the exact string on the page."""
+
+    to_url: str
+    to_kind: Kind
+    position: int
+    original: str
+
+
+@dataclass(frozen=True, slots=True)
+class Edge:
+    """A link recorded in a discovery generation."""
+
+    from_url: str
+    link: Link
+
+
+@dataclass(frozen=True, slots=True)
+class Generation:
+    """One discovery of a root such as `jp:list:BP15`."""
+
+    id: int
+    root: str
+    status: GenerationStatus
+    started_at: datetime
+    finished_at: datetime | None
+    declared_total: int | None
+    max_page: int | None
+
+
 def utcnow() -> datetime:
     """Return the current time in UTC."""
     return datetime.now(UTC)
+
+
+@dataclass(frozen=True)
+class _Store:
+    _conn: sqlite3.Connection
+    _transaction: Callable[[], AbstractContextManager[None]]
+
+
+class ResourceStore(_Store):
+    """Latest successful state of each canonical URL."""
+
+    def get(self, url: str) -> Resource | None:
+        """Return the latest successful state of `url`, if any."""
+        row = self._conn.execute(
+            "SELECT * FROM resource WHERE url = ?", (url,)
+        ).fetchone()
+        return None if row is None else _resource(row)
+
+    def path_owner(self, path: PurePosixPath) -> str | None:
+        """Return the URL that owns `path`, if any."""
+        row = self._conn.execute(
+            "SELECT url FROM resource WHERE path = ?", (str(path),)
+        ).fetchone()
+        return None if row is None else _str(row[0])
+
+    def put(self, resource: Resource) -> None:
+        """Insert or replace a resource. Call inside `Manifest.transaction()`."""
+        self._conn.execute(
+            # Upsert on url only: OR REPLACE would also resolve a clash on the UNIQUE
+            # path by deleting the other URL's row, silently losing its record.
+            "INSERT INTO resource VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+            " ON CONFLICT (url) DO UPDATE SET region = excluded.region,"
+            " kind = excluded.kind, path = excluded.path, sha256 = excluded.sha256,"
+            " raw_bytes = excluded.raw_bytes, stored_bytes = excluded.stored_bytes,"
+            " content_type = excluded.content_type, etag = excluded.etag,"
+            " last_modified = excluded.last_modified,"
+            " first_fetched_at = excluded.first_fetched_at,"
+            " last_checked_at = excluded.last_checked_at,"
+            " last_changed_at = excluded.last_changed_at,"
+            " archived_at = excluded.archived_at",
+            (
+                resource.url,
+                resource.region.value,
+                resource.kind.value,
+                str(resource.path),
+                resource.sha256,
+                resource.raw_bytes,
+                resource.stored_bytes,
+                resource.content_type,
+                resource.etag,
+                resource.last_modified,
+                resource.first_fetched_at.isoformat(),
+                resource.last_checked_at.isoformat(),
+                resource.last_changed_at.isoformat(),
+                None
+                if resource.archived_at is None
+                else resource.archived_at.isoformat(),
+            ),
+        )
+
+    def all(self) -> Iterator[Resource]:
+        """Yield every resource, ordered by URL."""
+        for row in self._conn.execute("SELECT * FROM resource ORDER BY url"):
+            yield _resource(row)
+
+
+class RequestLog(_Store):
+    """One row per actual HTTP request."""
+
+    def start(self, start: RequestStart) -> int:
+        """Record a request before it is sent and commit at once.
+
+        If the process dies mid-request the row stays `started`; see
+        `mark_interrupted`.
+        """
+        cursor = self._conn.execute(
+            "INSERT INTO fetch_log (run_id, logical_fetch_id, attempt, hop, url,"
+            " requested_url, started_at, sent_if_none_match, outcome)"
+            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+            (
+                start.run_id,
+                start.logical_fetch_id,
+                start.attempt,
+                start.hop,
+                start.url,
+                start.requested_url,
+                utcnow().isoformat(),
+                start.sent_if_none_match,
+                Outcome.STARTED.value,
+            ),
+        )
+        self._conn.commit()
+        if cursor.lastrowid is None:
+            msg = "fetch_log insert returned no row id"
+            raise ManifestError(msg)
+        return cursor.lastrowid
+
+    def finish(self, request_id: int, result: RequestResult) -> None:
+        """Record the result of a request. Call inside `Manifest.transaction()`."""
+        finished = utcnow()
+        row = self._conn.execute(
+            "SELECT started_at FROM fetch_log WHERE id = ?", (request_id,)
+        ).fetchone()
+        if row is None:
+            msg = f"no fetch_log row {request_id}"
+            raise ManifestError(msg)
+        elapsed = finished - _datetime(row[0])
+        self._conn.execute(
+            "UPDATE fetch_log SET final_url = ?, finished_at = ?, elapsed_ms = ?,"
+            " status = ?, error_class = ?, response_sha256 = ?, response_bytes = ?,"
+            " response_etag = ?, response_last_modified = ?, outcome = ?,"
+            " validation_error = ? WHERE id = ?",
+            (
+                result.final_url,
+                finished.isoformat(),
+                round(elapsed.total_seconds() * 1000),
+                result.status,
+                result.error_class,
+                result.response_sha256,
+                result.response_bytes,
+                result.response_etag,
+                result.response_last_modified,
+                result.outcome.value,
+                result.validation_error,
+                request_id,
+            ),
+        )
+
+    def mark_interrupted(self) -> int:
+        """Turn leftover `started` rows into `unknown`; return how many."""
+        cursor = self._conn.execute(
+            "UPDATE fetch_log SET outcome = ? WHERE outcome = ?",
+            (Outcome.UNKNOWN.value, Outcome.STARTED.value),
+        )
+        self._conn.commit()
+        return cursor.rowcount
+
+    def outcomes(self, url: str) -> list[Outcome]:
+        """Return the outcomes of all requests for `url`, oldest first."""
+        rows = self._conn.execute(
+            "SELECT outcome FROM fetch_log WHERE url = ? ORDER BY id", (url,)
+        ).fetchall()
+        return [Outcome(_str(row[0])) for row in rows]
+
+
+class LinkStore(_Store):
+    """Current links of single-page sources, with history."""
+
+    def current(self, from_url: str) -> list[Link]:
+        """Return the current links of a single-page source, in position order."""
+        rows = self._conn.execute(
+            "SELECT to_url, to_kind, position, original FROM link"
+            " WHERE from_url = ? ORDER BY to_kind, position",
+            (from_url,),
+        ).fetchall()
+        return [_link(row) for row in rows]
+
+    def replace(self, from_url: str, from_sha256: str, links: Sequence[Link]) -> None:
+        """Replace a page's current links and log what changed.
+
+        Call inside `Manifest.transaction()`, together with the page's resource update.
+        """
+        old = set(self.current(from_url))
+        new = set(links)
+        if len(new) != len(links):
+            msg = f"duplicate links from {from_url}"
+            raise ManifestError(msg)
+        now = utcnow().isoformat()
+        for event, changed in (("removed", old - new), ("added", new - old)):
+            for link in sorted(changed, key=_link_order):
+                self._conn.execute(
+                    "INSERT INTO link_log (from_url, to_url, to_kind, position,"
+                    " original, from_sha256, event, at) VALUES (?, ?, ?, ?, ?, ?, ?, ?)",
+                    (from_url, *_link_values(link), from_sha256, event, now),
+                )
+        self._conn.execute("DELETE FROM link WHERE from_url = ?", (from_url,))
+        self._conn.executemany(
+            "INSERT INTO link VALUES (?, ?, ?, ?, ?, ?)",
+            [(from_url, *_link_values(link), from_sha256) for link in links],
+        )
+
+    def history(self, from_url: str) -> list[tuple[str, Link]]:
+        """Return `(event, link)` pairs for a page, oldest first."""
+        rows = self._conn.execute(
+            "SELECT event, to_url, to_kind, position, original FROM link_log"
+            " WHERE from_url = ? ORDER BY id",
+            (from_url,),
+        ).fetchall()
+        return [(_str(row[0]), _link(row[1:])) for row in rows]
+
+
+class GenerationStore(_Store):
+    """Discovery generations and their immutable snapshots."""
+
+    def start(self, root: str) -> Generation:
+        """Begin a new discovery of `root` and commit at once.
+
+        An unfinished generation of the same root is marked failed; the
+        validated one, if any, stays in use until this one is validated.
+        """
+        now = utcnow()
+        with self._transaction():
+            self._conn.execute(
+                "UPDATE discovery_generation SET status = ?, finished_at = ?"
+                " WHERE root = ? AND status = ?",
+                (
+                    GenerationStatus.FAILED.value,
+                    now.isoformat(),
+                    root,
+                    GenerationStatus.IN_PROGRESS.value,
+                ),
+            )
+            cursor = self._conn.execute(
+                "INSERT INTO discovery_generation (root, status, started_at)"
+                " VALUES (?, ?, ?)",
+                (root, GenerationStatus.IN_PROGRESS.value, now.isoformat()),
+            )
+        if cursor.lastrowid is None:
+            msg = "discovery_generation insert returned no row id"
+            raise ManifestError(msg)
+        return self.get(cursor.lastrowid)
+
+    def get(self, generation_id: int) -> Generation:
+        """Return a generation by id."""
+        row = self._conn.execute(
+            "SELECT * FROM discovery_generation WHERE id = ?", (generation_id,)
+        ).fetchone()
+        if row is None:
+            msg = f"no generation {generation_id}"
+            raise ManifestError(msg)
+        return _generation(row)
+
+    def current(self, root: str) -> Generation | None:
+        """Return the validated generation of `root`, the only one scheduling may use."""
+        row = self._conn.execute(
+            "SELECT * FROM discovery_generation WHERE root = ? AND status = ?",
+            (root, GenerationStatus.VALIDATED.value),
+        ).fetchone()
+        return None if row is None else _generation(row)
+
+    def add_page(
+        self, generation_id: int, page_url: str, page_sha256: str, links: Sequence[Link]
+    ) -> None:
+        """Record a page and its links in an unfinished generation.
+
+        Call inside `Manifest.transaction()`. A page can be added once; generations
+        are immutable snapshots, so a recheck of the same page is not added.
+        """
+        self._require_status(generation_id, GenerationStatus.IN_PROGRESS)
+        self._conn.execute(
+            "INSERT INTO generation_page VALUES (?, ?, ?)",
+            (generation_id, page_url, page_sha256),
+        )
+        self._conn.executemany(
+            "INSERT INTO generation_edge VALUES (?, ?, ?, ?, ?, ?)",
+            [(generation_id, page_url, *_link_values(link)) for link in links],
+        )
+
+    def validate(
+        self,
+        generation_id: int,
+        *,
+        declared_total: int | None = None,
+        max_page: int | None = None,
+    ) -> None:
+        """Publish a finished generation and retire the previous validated one, atomically."""
+        generation = self._require_status(generation_id, GenerationStatus.IN_PROGRESS)
+        with self._transaction():
+            self._conn.execute(
+                "UPDATE discovery_generation SET status = ? WHERE root = ? AND status = ?",
+                (
+                    GenerationStatus.SUPERSEDED.value,
+                    generation.root,
+                    GenerationStatus.VALIDATED.value,
+                ),
+            )
+            self._conn.execute(
+                "UPDATE discovery_generation SET status = ?, finished_at = ?,"
+                " declared_total = ?, max_page = ? WHERE id = ?",
+                (
+                    GenerationStatus.VALIDATED.value,
+                    utcnow().isoformat(),
+                    declared_total,
+                    max_page,
+                    generation_id,
+                ),
+            )
+
+    def fail(self, generation_id: int) -> None:
+        """Mark an unfinished generation as failed; it will never be scheduled from."""
+        self._require_status(generation_id, GenerationStatus.IN_PROGRESS)
+        with self._transaction():
+            self._conn.execute(
+                "UPDATE discovery_generation SET status = ?, finished_at = ? WHERE id = ?",
+                (GenerationStatus.FAILED.value, utcnow().isoformat(), generation_id),
+            )
+
+    def edges(self, generation_id: int) -> list[Edge]:
+        """Return a generation's edges in page and position order."""
+        rows = self._conn.execute(
+            "SELECT from_url, to_url, to_kind, position, original FROM generation_edge"
+            " WHERE generation_id = ? ORDER BY from_url, to_kind, position",
+            (generation_id,),
+        ).fetchall()
+        return [Edge(from_url=_str(row[0]), link=_link(row[1:])) for row in rows]
+
+    def _require_status(
+        self, generation_id: int, status: GenerationStatus
+    ) -> Generation:
+        generation = self.get(generation_id)
+        if generation.status is not status:
+            msg = (
+                f"generation {generation_id} is {generation.status}, expected {status}"
+            )
+            raise ManifestError(msg)
+        return generation
 
 
 class Manifest:
@@ -170,6 +581,10 @@ class Manifest:
     def __init__(self, conn: sqlite3.Connection) -> None:
         """Wrap an open connection; use `Manifest.open` instead."""
         self._conn = conn
+        self.resources = ResourceStore(conn, self.transaction)
+        self.requests = RequestLog(conn, self.transaction)
+        self.links = LinkStore(conn, self.transaction)
+        self.generations = GenerationStore(conn, self.transaction)
 
     @classmethod
     def open(cls, path: Path) -> Self:
@@ -216,139 +631,6 @@ class Manifest:
             self._conn.rollback()
             raise
         self._conn.commit()
-
-    # --- resource -------------------------------------------------------
-
-    def get_resource(self, url: str) -> Resource | None:
-        """Return the latest successful state of `url`, if any."""
-        row = self._conn.execute(
-            "SELECT * FROM resource WHERE url = ?", (url,)
-        ).fetchone()
-        return None if row is None else _resource(row)
-
-    def path_owner(self, path: PurePosixPath) -> str | None:
-        """Return the URL that owns `path`, if any."""
-        row = self._conn.execute(
-            "SELECT url FROM resource WHERE path = ?", (str(path),)
-        ).fetchone()
-        return None if row is None else _str(row[0])
-
-    def put_resource(self, resource: Resource) -> None:
-        """Insert or replace a resource. Call inside `transaction()`."""
-        self._conn.execute(
-            # Upsert on url only: OR REPLACE would also resolve a clash on the UNIQUE
-            # path by deleting the other URL's row, silently losing its record.
-            "INSERT INTO resource VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
-            " ON CONFLICT (url) DO UPDATE SET region = excluded.region,"
-            " kind = excluded.kind, path = excluded.path, sha256 = excluded.sha256,"
-            " raw_bytes = excluded.raw_bytes, stored_bytes = excluded.stored_bytes,"
-            " content_type = excluded.content_type, etag = excluded.etag,"
-            " last_modified = excluded.last_modified,"
-            " first_fetched_at = excluded.first_fetched_at,"
-            " last_checked_at = excluded.last_checked_at,"
-            " last_changed_at = excluded.last_changed_at,"
-            " archived_at = excluded.archived_at",
-            (
-                resource.url,
-                resource.region.value,
-                resource.kind.value,
-                str(resource.path),
-                resource.sha256,
-                resource.raw_bytes,
-                resource.stored_bytes,
-                resource.content_type,
-                resource.etag,
-                resource.last_modified,
-                resource.first_fetched_at.isoformat(),
-                resource.last_checked_at.isoformat(),
-                resource.last_changed_at.isoformat(),
-                None
-                if resource.archived_at is None
-                else resource.archived_at.isoformat(),
-            ),
-        )
-
-    def resources(self) -> Iterator[Resource]:
-        """Yield every resource, ordered by URL."""
-        for row in self._conn.execute("SELECT * FROM resource ORDER BY url"):
-            yield _resource(row)
-
-    # --- fetch_log ------------------------------------------------------
-
-    def start_request(self, start: RequestStart) -> int:
-        """Record a request before it is sent and commit at once.
-
-        If the process dies mid-request the row stays `started`; see
-        `mark_interrupted_requests`.
-        """
-        cursor = self._conn.execute(
-            "INSERT INTO fetch_log (run_id, logical_fetch_id, attempt, hop, url,"
-            " requested_url, started_at, sent_if_none_match, outcome)"
-            " VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-            (
-                start.run_id,
-                start.logical_fetch_id,
-                start.attempt,
-                start.hop,
-                start.url,
-                start.requested_url,
-                utcnow().isoformat(),
-                start.sent_if_none_match,
-                Outcome.STARTED.value,
-            ),
-        )
-        self._conn.commit()
-        if cursor.lastrowid is None:
-            msg = "fetch_log insert returned no row id"
-            raise ManifestError(msg)
-        return cursor.lastrowid
-
-    def finish_request(self, request_id: int, result: RequestResult) -> None:
-        """Record the result of a request. Call inside `transaction()`."""
-        finished = utcnow()
-        row = self._conn.execute(
-            "SELECT started_at FROM fetch_log WHERE id = ?", (request_id,)
-        ).fetchone()
-        if row is None:
-            msg = f"no fetch_log row {request_id}"
-            raise ManifestError(msg)
-        elapsed = finished - _datetime(row[0])
-        self._conn.execute(
-            "UPDATE fetch_log SET final_url = ?, finished_at = ?, elapsed_ms = ?,"
-            " status = ?, error_class = ?, response_sha256 = ?, response_bytes = ?,"
-            " response_etag = ?, response_last_modified = ?, outcome = ?,"
-            " validation_error = ? WHERE id = ?",
-            (
-                result.final_url,
-                finished.isoformat(),
-                round(elapsed.total_seconds() * 1000),
-                result.status,
-                result.error_class,
-                result.response_sha256,
-                result.response_bytes,
-                result.response_etag,
-                result.response_last_modified,
-                result.outcome.value,
-                result.validation_error,
-                request_id,
-            ),
-        )
-
-    def mark_interrupted_requests(self) -> int:
-        """Turn leftover `started` rows into `unknown`; return how many."""
-        cursor = self._conn.execute(
-            "UPDATE fetch_log SET outcome = ? WHERE outcome = ?",
-            (Outcome.UNKNOWN.value, Outcome.STARTED.value),
-        )
-        self._conn.commit()
-        return cursor.rowcount
-
-    def request_outcomes(self, url: str) -> list[Outcome]:
-        """Return the outcomes of all requests for `url`, oldest first."""
-        rows = self._conn.execute(
-            "SELECT outcome FROM fetch_log WHERE url = ? ORDER BY id", (url,)
-        ).fetchall()
-        return [Outcome(_str(row[0])) for row in rows]
 
     # --- backup ---------------------------------------------------------
 
@@ -440,6 +722,39 @@ def _datetime(value: object) -> datetime:
 
 def _opt_datetime(value: object) -> datetime | None:
     return None if value is None else _datetime(value)
+
+
+def _opt_int(value: object) -> int | None:
+    return None if value is None else _int(value)
+
+
+def _link(row: Sequence[object]) -> Link:
+    return Link(
+        to_url=_str(row[0]),
+        to_kind=Kind(_str(row[1])),
+        position=_int(row[2]),
+        original=_str(row[3]),
+    )
+
+
+def _link_values(link: Link) -> tuple[str, str, int, str]:
+    return (link.to_url, link.to_kind.value, link.position, link.original)
+
+
+def _link_order(link: Link) -> tuple[str, int]:
+    return (link.to_kind.value, link.position)
+
+
+def _generation(row: tuple[object, ...]) -> Generation:
+    return Generation(
+        id=_int(row[0]),
+        root=_str(row[1]),
+        status=GenerationStatus(_str(row[2])),
+        started_at=_datetime(row[3]),
+        finished_at=_opt_datetime(row[4]),
+        declared_total=_opt_int(row[5]),
+        max_page=_opt_int(row[6]),
+    )
 
 
 def _resource(row: tuple[object, ...]) -> Resource:
