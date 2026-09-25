@@ -1,0 +1,188 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP15-056
+kind: card
+must_pass: true
+mechanisms:
+  - 2.5.1
+  - 5.24.1
+  - 10.4.4.1
+cards:
+  - BP01-173
+  - BP06-035
+  - BP11-041
+  - BP12-038
+  - BP15-056
+  - BP19-007
+  - SD03-005
+why: 双刃の魔剣士減費看原費用種類，不看墓場張數；0、14、15 都是獨立種類。
+discriminates: 把張數當種類會讓五種分支也花2成功；截掉超過10的費用會讓六種分支失敗。
+refs:
+  rules:
+    - 2.5.1
+    - 5.24.1
+    - 10.4.4.1
+  qa: []
+evidence:
+  - ref: cr 2.5.1
+    quote: このカードをプレイする際に支払う必要のある PPの数です（10.4.3）。
+  - ref: cr 5.24.1
+    quote: あるカードの‘元の’情報を参照する場合、それはそのカード自身に表記されている情報を参照します。
+  - ref: cr 10.4.4.1
+    quote: カードをプレイする際のコストの数値を変更する効果は、このカードのコストの情報の値を変更するのではなく、そのコストのために減少する PP の点数を変更します。
+  - ref: BP15-056
+    quote: "これをプレイする際、自分の墓場にあるカードの元のコストの種類数が6種類以上なら、コストを-6する。\n【疾走】\n{ファンファーレ}相手の場のフォロワー2体まで選ぶ。それに3ダメージ。"
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 六張但只五種原費用
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 2
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP15-056
+            cemetery:
+              - id: g0
+                card: BP11-041
+              - id: g1
+                card: SD03-005
+              - id: g2
+                card: BP01-173
+              - id: g3
+                card: BP19-007
+              - id: g4
+                card: BP12-038
+              - id: g5
+                card: BP12-038
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 2
+          P1.field: []
+          P1.hand:
+            - a
+  - name: 六種原費用含0、14、15
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 2
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP15-056
+            cemetery:
+              - id: g0
+                card: BP11-041
+              - id: g1
+                card: SD03-005
+              - id: g2
+                card: BP01-173
+              - id: g3
+                card: BP19-007
+              - id: g4
+                card: BP12-038
+              - id: g5
+                card: BP06-035
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 3
+        targets:
+          1: []
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - a
+          P1.hand: []

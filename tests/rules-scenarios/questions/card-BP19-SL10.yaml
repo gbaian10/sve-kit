@@ -1,0 +1,248 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP19-SL10
+kind: card
+must_pass: true
+mechanisms:
+  - 融合
+  - 前一步的結果
+cards:
+  - BP01-173
+  - BP19-078
+  - BP19-P25
+  - BP19-SL10
+why: 只在實際融合八獄從者時抽一；手牌捨棄帶謝幕曲的卡不會誘發場到墓場能力。
+discriminates: 只查來源本身八獄或把捨棄當死亡會多抽或多待機。
+refs:
+  rules:
+    - 12.18.4.1
+    - 12.5.3
+  qa:
+    - Q2571
+evidence:
+  - ref: Q2571
+    quote: はい。『耽溺の咎人・セフィー』が手札にある場合に有効となる能力です。
+  - ref: cr 12.18.4.1
+    quote: "あるカードが‘融合した’条件を満たした\n際、その融合を行うために手札から捨てたり\nEX エリアから墓場に置いたりしたカードがな\nんらかの情報を持つ場合、‘（その情報の）\nカードを融合した’条件を満たします。\n13. クラス別の情報やキーワード"
+    derivation:
+      - 只在實際融合八獄從者時抽一；手牌捨棄帶謝幕曲的卡不會誘發場到墓場能力。
+  - ref: cr 12.5.3
+    quote: "‘ラストワード （テキスト）’は、‘このカードを場か\nら墓場に置いたとき、（テキスト）’を意味します。"
+    derivation:
+      - 只在實際融合八獄從者時抽一；手牌捨棄帶謝幕曲的卡不會誘發場到墓場能力。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: BP01-173
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP19-SL10
+              - id: b
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        costs:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.ex.a:
+            counters:
+              融合: 1
+          P1.hand: []
+          P1.deck:
+            - d
+          P1.cemetery:
+            - b
+  - name: BP19-078
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP19-SL10
+              - id: b
+                card: BP19-078
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        costs:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.ex.a:
+            counters:
+              融合: 1
+          P1.hand:
+            - d
+          P1.deck: []
+          P1.cemetery:
+            - b
+  - name: BP19-P25
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP19-SL10
+              - id: b
+                card: BP19-P25
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        costs:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.ex.a:
+            counters:
+              融合: 1
+          P1.hand:
+            - d
+          P1.deck: []
+          P1.cemetery:
+            - b

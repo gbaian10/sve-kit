@@ -1,0 +1,123 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP11-042
+kind: card
+must_pass: true
+mechanisms: [持續效果與禁止, 堆疊、土之秘術, '12.14', 11.3.2, 由持續效果給予的必殺, 13.3.3.2, 10.9.1.2]
+cards: [BP11-042, EBD02-T01, SD02-002, BP01-176]
+why: >-
+  アーティストメイジ「{起動}【土の秘術】：自分の場の他のフォロワー1体を選ぶ。それは【突進】か【必殺】か【ドレイン】を持つ」：土の秘術是可選追加費用（13.3.3.2），
+  付了才有效果；給予的【必殺】是持續效果（10.9.1.2 能力層）→ 交戰後 11.3.2 破壞對方，即使交戰傷害沒打死它。沒付追加費用 → 能力打出但沒有效果。
+discriminates: >-
+  只把印刷的必殺當必殺（忽略持續效果給予）的引擎 A 的 b1 會活著（體力 3）；沒付土の秘術仍給予能力的引擎 B 的 b1 會被破壞。
+refs:
+  rules: [13.3.3.2, 13.3.3.2.1, 10.9.1.2, 12.14.2, 11.3.2, 8.4.9.1, 8.4.9.2, 10.4.7.1]
+  qa: [Q1483]
+evidence:
+  - ref: cr 12.14.2
+    quote: ‘【必殺】’は‘このフォロワーと交戦したフォロワーは、次のルール処理で破壊される’を意味します。
+  - ref: cr 13.3.3.2
+    quote: 追加コストとしてスタックカウンターを取り除いていたら、（テキスト）
+    derivation:
+      - 沒付 → 「（テキスト）」不適用；能力仍被打出（沒有目標以外的前提）
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 付土の秘術 → レイサム得到必殺 → 交戰後天剣の乙女被必殺破壞
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ウィッチ, life: 20}
+          pp: {current: 3, max: 5}
+          zones:
+            field:
+              - {id: a1, card: BP11-042}                                       # アーティストメイジ 1/4
+              - {id: a2, card: EBD02-T01, state: {counters: {スタックカウンター: 2}}}   # 大地の魔片
+              - {id: a3, card: SD02-002}                                       # ヴァンガード・レイサム 3/3
+            hand:
+              - {filler: 2}
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 5}
+          zones:
+            field:
+              - {id: b1, card: BP01-176, state: {acted: true}}   # 天剣の乙女 4/6 アクト
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 3}, optional_costs: {additional: {stack_counter_from: a2}}, targets: {1: [a3]}}
+      # 9.12 關鍵字 N 選一：resolve-choice.keyword
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, keyword: 必殺}
+      - {n: 3, by: P1, at: main, do: attack, attacker: a3, target: b1}
+      - {n: 4, by: P2, at: quick, do: pass}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, keyword: 突進}
+            - {do: resolve-choice, keyword: 必殺}
+            - {do: resolve-choice, keyword: ドレイン}
+        assert:
+          P1.field.a2: {counters: {スタックカウンター: 1}}
+        events:
+          - {kind: カウンター, object: a2, name: スタックカウンター, delta: -1}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a2: {counters: {スタックカウンター: 1}}
+          P1.pp.current: 3
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P2.cemetery: [b1]
+          P1.field: [a1, a2]
+          P1.cemetery: [a3]
+        events:
+          - {kind: ダメージ, source: a3, target: b1, amount: 3, group: 1}
+          - {kind: ダメージ, source: b1, target: a3, amount: 4, group: 1}
+          - {kind: 破壊, object: a3, by: rule-11.3.1, group: 2}
+          - {kind: 破壊, object: b1, by: rule-11.3.2, group: 2}
+
+  - name: B 不付土の秘術 → 沒有給予能力 → 交戰後天剣の乙女存活
+    inherit: A 付土の秘術 → レイサム得到必殺 → 交戰後天剣の乙女被必殺破壞
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 3}, optional_costs: {additional: decline}, targets: {1: [a3]}}
+      - {n: 2, by: P1, at: main, do: attack, attacker: a3, target: b1}
+      - {n: 3, by: P2, at: quick, do: pass}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a2: {counters: {スタックカウンター: 2}}
+        events:
+          - {kind: プレイ, ability: {source: a1, line: 3}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: [b1]
+          P2.field.b1: {hp: 3}
+          P1.field: [a1, a2]
+        forbidden_events:
+          - {kind: 破壊, object: b1}

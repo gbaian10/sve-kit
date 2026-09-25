@@ -1,0 +1,271 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.6.2.5.2-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.6.2.5
+  - 取代效果
+  - 堆疊、土之秘術
+cards:
+  - BP21-P60
+  - EBD02-T01
+why: 送墓費用被 stack 取代仍算付費；一個 stack 用完後規則送墓並立即消去 token。
+discriminates: 用實際離場與否判付費會漏掉主戰者加減體力；token 留墓場也不符。
+refs:
+  rules:
+    - 10.6.2.5.2
+    - 13.3.2.2
+    - 13.3.2.3
+    - 9.1.4.4
+  qa: []
+evidence:
+  - ref: cr 10.6.2.5.2
+    quote: "コストとして行われる処理の一部が置\n換効果により他の処理になった場合でも、\nその元となった処理は実行されたものとみ\nなされます。"
+    derivation:
+      - 送墓費用被 stack 取代仍算付費；一個 stack 用完後規則送墓並立即消去 token。
+  - ref: cr 13.3.2.2
+    quote: "‘【スタック】’は以下の 3 つの能力を意味し\nます。\n* このカードを場に置く場合、その上にスタッ\nクカウンターが 1 個置かれた状態で場に出\nる。\n* このカードにスタックカウンターが置かれて\nいる状態でこのカードが場を離れる場合、代\nわりにこのカードのスタックカウンターを 1 個\n取り除き、このカードは場に残る。\n*\n：自分の他の【スタック】を持つアミュ\nレット 1 つを選ぶ。それにこれのスタックカウン\nターをすべて移す。"
+    derivation:
+      - 送墓費用被 stack 取代仍算付費；一個 stack 用完後規則送墓並立即消去 token。
+  - ref: cr 13.3.2.3
+    quote: "スタック能力を持つカードにスタックカウン\nターが置かれていない場合、ルール処理によ\nりそのカードをオーナーの墓場に移動します\n（11.7）。"
+    derivation:
+      - 送墓費用被 stack 取代仍算付費；一個 stack 用完後規則送墓並立即消去 token。
+  - ref: cr 9.1.4.4
+    quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
+    derivation:
+      - 送墓費用被 stack 取代仍算付費；一個 stack 用完後規則送墓並立即消去 token。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: stack=2 已橫置=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP21-P60
+                state:
+                  acted: false
+              - id: b
+                card: EBD02-T01
+                state:
+                  counters:
+                    スタック: 2
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 21
+          P2.leader.life: 19
+          P1.field:
+            - a
+            - b
+          P1.cemetery: []
+          P1.field.b:
+            counters:
+              スタック: 1
+        events:
+          - kind: 費用成立
+            ability:
+              source: a
+              line: 1
+            replaced: true
+  - name: stack=1 已橫置=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP21-P60
+                state:
+                  acted: false
+              - id: b
+                card: EBD02-T01
+                state:
+                  counters:
+                    スタック: 1
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 21
+          P2.leader.life: 19
+          P1.field:
+            - a
+          P1.cemetery: []
+        events:
+          - kind: 費用成立
+            ability:
+              source: a
+              line: 1
+            replaced: true
+  - name: stack=2 已橫置=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP21-P60
+                state:
+                  acted: true
+              - id: b
+                card: EBD02-T01
+                state:
+                  counters:
+                    スタック: 2
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.leader.life: 20
+          P2.leader.life: 20
+          P1.field:
+            - a
+            - b
+          P1.cemetery: []
+          P1.field.b:
+            counters:
+              スタック: 2

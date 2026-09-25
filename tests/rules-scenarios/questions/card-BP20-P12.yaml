@@ -1,0 +1,468 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP20-P12
+kind: card
+must_pass: true
+mechanisms:
+  - optional-cost-scope
+  - 10.6.2.3
+  - 可選費用與範圍
+  - 10.4.7
+  - 10.6.2.3.3
+cards:
+  - BP01-152
+  - BP20-P11
+  - BP20-P12
+  - BP21-016
+  - BP01-176
+  - BP01-173
+why: "[astra] 追加費用支配 5 傷害及抽 1 張；不支付只有 3 傷害。沒有目標時即使宣告要支付，也不能打出或扣除費用。使用體力 7 的ルシフェル避免破壞與其他待機干擾。\n[fable] 追加費用「手札の獣・カード1枚を捨ててよい」在打出時決定（10.6.2.2.2）；「払っていたなら」管轄到段落結尾（10.4.7.1）， 所以沒付時連「1枚引く」也不做。必選 1 個目標，選不到就不能打出、回溯（10.6.2.3.3），追加費用也不會被扣。"
+discriminates: "[astra] 不付追加費用仍抽牌或先支付再檢查目標，會得到不同手牌、墓場與 PP。\n[fable] 把「払っていたなら」只管到「代わりに5ダメージ」的實作，會在局面 B 多抽 1 張；先付費再選目標的實作，會在局面 C 把獣・カード留在墓場。 目標是體力 6 的天剣の乙女，3 與 5 傷害都不會破壞它，傷害值可以直接看到。"
+refs:
+  rules:
+    - 10.4.7.1
+    - 10.6.2.2.2
+    - 10.6.2.3.3
+    - 10.6.2.5
+    - 10.6.2.8.3
+    - 10.4.7.2
+  qa:
+    - Q2633
+    - Q2634
+evidence:
+  - ref: Q2633
+    quote: いいえ。追加コストを支払っていない場合、「これの追加コストを払っていたなら、」以降の効果は働かず、1枚引くことができません。
+  - ref: Q2634
+    quote: いいえ。相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができないため、コストの支払いもできず、1枚引くことができません。
+  - ref: cr 10.6.2.3.3
+    quote: このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
+    derivation:
+      - 目標選擇 .3 在費用支付 .5 之前；無目標局面不能先棄 a2 再失敗，也不能抽 a3。
+  - ref: cards BP20-P12 faces[0].text
+    quote: "これをプレイする際、追加コストとして手札の獣・カード1枚を捨ててよい。\n相手の場のフォロワー1体を選ぶ。それに3ダメージ。これの追加コストを払っていたなら、代わりに5ダメージ。1枚引く。"
+    derivation:
+      - Q2633 直接限定後段效果；有支付時依卡面改為 5 傷害再抽 1，沒有支付則僅 3 傷害。
+  - ref: Q2633
+    quote: 追加コストを支払っていない場合、「これの追加コストを払っていたなら、」以降の効果は働かず、1枚引くことができません。
+  - ref: Q2634
+    quote: 相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができないため、コストの支払いもできず、1枚引くことができません。
+status: draft
+author:
+  - astra
+  - fable
+verified_by: []
+scenarios:
+  - name: '[astra] 付了追加費用'
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: none
+      players:
+        P1:
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 4
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: a3
+                card: BP20-P11
+              - filler: 20
+            hand:
+              - id: a1
+                card: BP20-P12
+              - id: a2
+                card: BP20-P11
+          construction: class
+        P2:
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 3
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b1
+                card: BP01-152
+          construction: class
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        optional_costs:
+          additional:
+            discard:
+              - a2
+        targets:
+          1:
+            - b1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.pp.current: 2
+          P1.hand:
+            - a3
+          P1.cemetery:
+            - a1
+            - a2
+          P1.deck:
+            - filler: 20
+          P2.field.b1:
+            damage: 5
+          semantic_state.pending_triggers: []
+        outcome: resolved
+        events:
+          - kind: 捨てる
+            player: P1
+            object: a2
+          - kind: ダメージ
+            source: a1
+            target: b1
+            amount: 5
+          - kind: 引く
+            player: P1
+            object: a3
+  - name: '[astra] 沒付追加費用'
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: none
+      players:
+        P1:
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 4
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: a3
+                card: BP20-P11
+              - filler: 20
+            hand:
+              - id: a1
+                card: BP20-P12
+              - id: a2
+                card: BP20-P11
+          construction: class
+        P2:
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 3
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b1
+                card: BP01-152
+          construction: class
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        optional_costs:
+          additional: decline
+        targets:
+          1:
+            - b1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.pp.current: 2
+          P1.hand:
+            - a2
+          P1.cemetery:
+            - a1
+          P1.deck:
+            - a3
+            - filler: 20
+          P2.field.b1:
+            damage: 3
+          semantic_state.pending_triggers: []
+        outcome: resolved
+        events:
+          - kind: ダメージ
+            source: a1
+            target: b1
+            amount: 3
+        forbidden_events:
+          - kind: 引く
+  - name: '[astra] 沒有目標，宣告付費仍不能打出'
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: none
+      players:
+        P1:
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 4
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: a3
+                card: BP20-P11
+              - filler: 20
+            hand:
+              - id: a1
+                card: BP20-P12
+              - id: a2
+                card: BP20-P11
+          construction: class
+        P2:
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 3
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field: []
+          construction: class
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        optional_costs:
+          additional:
+            discard:
+              - a2
+        targets:
+          1: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.pp.current: 4
+          P1.hand:
+            - a1
+            - a2
+          P1.deck:
+            - a3
+            - filler: 20
+          P1.cemetery: []
+          P2.field: []
+          semantic_state.pending_triggers: []
+        outcome: cannot-play
+        forbidden_events:
+          - kind: プレイ
+          - kind: ダメージ
+          - kind: 引く
+          - kind: 捨てる
+  - name: '[fable] A 付了追加費用'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 4
+            max: 4
+          zones:
+            hand:
+              - id: a1
+                card: BP20-P12
+              - id: a2
+                card: BP21-016
+            deck:
+              - id: a3
+                card: BP01-173
+              - filler: 20
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 3
+          zones:
+            field:
+              - id: b1
+                card: BP01-176
+            hand:
+              - filler: 3
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        optional_costs:
+          additional:
+            discard:
+              - a2
+        targets:
+          1:
+            - b1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 2
+          P1.hand:
+            - a3
+          P1.cemetery:
+            - a1
+            - a2
+          P1.deck:
+            - filler: 20
+          P2.field.b1:
+            hp: 1
+        events:
+          - kind: 捨てる
+            player: P1
+            object: a2
+          - kind: ダメージ
+            source: a1
+            target: b1
+            amount: 5
+          - kind: 引く
+            player: P1
+            object: a3
+        forbidden_events:
+          - kind: ダメージ
+            source: a1
+            target: b1
+            amount: 3
+  - name: '[fable] B 沒付追加費用'
+    inherit: '[fable] A 付了追加費用'
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        optional_costs:
+          additional: decline
+        targets:
+          1:
+            - b1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 2
+          P1.hand:
+            - a2
+          P1.cemetery:
+            - a1
+          P1.deck:
+            - a3
+            - filler: 20
+          P2.field.b1:
+            hp: 3
+        events:
+          - kind: ダメージ
+            source: a1
+            target: b1
+            amount: 3
+        forbidden_events:
+          - kind: 引く
+            player: P1
+  - name: '[fable] C 對手場上沒有從者'
+    inherit: '[fable] A 付了追加費用'
+    setup:
+      players:
+        P2:
+          zones:
+            field: []
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+        optional_costs:
+          additional:
+            discard:
+              - a2
+        targets:
+          1: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 4
+          P1.hand:
+            - a1
+            - a2
+          P1.cemetery: []
+          P1.deck:
+            - a3
+            - filler: 20
+        forbidden_events:
+          - kind: 捨てる
+          - kind: 引く
+          - kind: ダメージ

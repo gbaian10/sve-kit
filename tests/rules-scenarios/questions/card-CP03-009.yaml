@@ -1,0 +1,351 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-CP03-009
+kind: card
+must_pass: true
+mechanisms:
+  - Vanguard：憑依、驅動
+cards:
+  - CP03-009
+  - CSD03a-017
+why: 憑依費用移動 drivepoint，之後獲得時能力另行待機，加 1/1。缺費用不可起動。
+discriminates: 把獲得時當同一能力立即處理或不移動 drivepoint 會改變比較点。
+refs:
+  rules:
+    - 14.4.9.2
+    - 14.4.7.3.2
+    - 14.4.8.2
+  qa: []
+evidence:
+  - ref: cr 14.4.9.2
+    quote: "‘【憑依】（コスト）：（テキスト）’は‘ （コス\nト） あなたのエボルヴデッキの『ドライブポイン\nト』1 枚をあなたのドライブ領域に置く：この能\n力をプレイするためのコストの PP のうち 1 点\nを、PP ではなく 1 点の EP で支払ってよい。こ\nの能力のコストとしてドライブ領域に置いた『ド\nライブポイント』をこのカードに関連付ける。こ\nの能力は、このゲーム中にこのカードの【憑\n依】能力をプレイしていない場合のみプレイで\nきる。（テキスト）’を意味します。"
+    derivation:
+      - 憑依費用移動 drivepoint，之後獲得時能力另行待機，加 1/1。缺費用不可起動。
+  - ref: cr 14.4.7.3.2
+    quote: "そのフォロワーはドライブ能力と【シン\nグルドライブ】（14.4.6.2）と【突進】（12.10）を\n得ます。"
+    derivation:
+      - 憑依費用移動 drivepoint，之後獲得時能力另行待機，加 1/1。缺費用不可起動。
+  - ref: cr 14.4.8.2
+    quote: "‘【ドライブ獲得時】（テキスト）’は、‘この\nカードがドライブを得たとき、（テキスト）’を意\n味します。"
+    derivation:
+      - 憑依費用移動 drivepoint，之後獲得時能力另行待機，加 1/1。缺費用不可起動。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: drivepoint=True PP=1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: title
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: CP03-009
+            evolve_deck:
+              - id: d
+                card: CSD03a-017
+          title: カードファイト!! ヴァンガード
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - d
+        pay:
+          pp: 1
+          ep: 0
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.drive:
+            - d
+          P1.field.a:
+            power: 2
+            hp: 2
+            links:
+              憑依:
+                - d
+          semantic_state.counters_this_turn:
+            P1.evolve_played: 1
+            P1.evolutions: 0
+  - name: drivepoint=False PP=1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: title
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: CP03-009
+            evolve_deck: []
+          title: カードファイト!! ヴァンガード
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1: []
+        pay:
+          pp: 1
+          ep: 0
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.pp.current: 1
+          P1.drive: []
+          P1.field.a:
+            power: 1
+            hp: 1
+            links:
+              憑依: []
+          semantic_state.counters_this_turn:
+            P1.evolve_played: 0
+            P1.evolutions: 0
+  - name: drivepoint=True PP=0
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: title
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: CP03-009
+            evolve_deck:
+              - id: d
+                card: CSD03a-017
+          title: カードファイト!! ヴァンガード
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - d
+        pay:
+          pp: 1
+          ep: 0
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.pp.current: 0
+          P1.drive: []
+          P1.field.a:
+            power: 1
+            hp: 1
+            links:
+              憑依: []
+          semantic_state.counters_this_turn:
+            P1.evolve_played: 0
+            P1.evolutions: 0
+  - name: PP 0 以 EP 1 代付
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: title
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 1
+          ep: 1
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: CP03-009
+            evolve_deck:
+              - id: d
+                card: CSD03a-017
+          title: カードファイト!! ヴァンガード
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 1
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - d
+        pay:
+          pp: 0
+          ep: 1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.drive:
+            - d
+          P1.field.a:
+            power: 2
+            hp: 2
+            links:
+              憑依:
+                - d
+          P1.ep: 0
+          semantic_state.counters_this_turn:
+            P1.evolve_played: 1
+            P1.evolutions: 0

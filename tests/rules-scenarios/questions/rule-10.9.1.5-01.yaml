@@ -1,0 +1,189 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.9.1.5-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.9.1.2
+  - 10.9.1.5
+  - 10.9.1.6
+cards:
+  - BP01-173
+  - BP11-041
+  - CP04-009
+  - PCS01-048
+why: 同在10.9.1.2能力層：プリンセスナイト的守護授予依存於其來源能力未被抹除。後來的ジャッジメントワード先套用，授予效果不再存在；不能只按時間戳先給守護後抹來源。
+discriminates: 純時間戳單次掃描會殘留別張從者的守護，錯拒絕攻擊主戰者；未抹來源的對照則必須拒絕。
+refs:
+  rules:
+    - 10.9.1.2
+    - 10.9.1.5
+    - 10.9.1.6
+  qa: []
+evidence:
+  - ref: cr 10.9.1.2
+    quote: 次に、能力を与える/失わせる/有効にする/無効にする効果を適用します。
+  - ref: cr 10.9.1.5
+    quote: 以上の 10.9.1.2 -10.9.1.4 で適用順の前後が決定されない継続効果 A と継続効果 B が存在している状態で、効果 A を先に適用するか否かによって効果 B が何に対して適用されるか、またどのように適用されるかが変わる場合、効果 B は効果 A に依存しているものとします。いずれかの効果に依存している効果は、依存されている効果よりも常に後に処理されます。
+  - ref: cr 10.9.1.6
+    quote: 以上の 10.9.1.2 -10.9.1.5 で適用順の前後が決定されない複数の継続効果が存在する場合、それらの継続効果は、効果が発生した順に従って順番に適用します。XXXX
+  - ref: PCS01-048
+    quote: "{進化}{コスト1}：これは進化する。\nこれが場にいる限り、自分の場の他のプリコネ・フォロワーすべては【守護】を持つ。\n{ファンファーレ}自分のデッキの上1枚を公開する。それがプリコネ・フォロワーなら、それを場に出す。"
+  - ref: BP11-041
+    quote: 相手の場のフォロワー1体を選ぶ。このターン、それは能力すべてを失う。自分の墓場にあるカードの元のコストの種類数が6種類以上なら、自分のリーダーは{体力}+2する。
+  - ref: cr 10.9.1.5 推導
+    quote: 以上の 10.9.1.2 -10.9.1.4 で適用順の前後が決定されない継続効果 A と継続効果 B が存在している状態で、効果 A を先に適用するか否かによって効果 B が何に対して適用されるか、またどのように適用されるかが変わる場合、効果 B は効果 A に依存しているものとします。いずれかの効果に依存している効果は、依存されている効果よりも常に後に処理されます。
+    derivation:
+      - A=使source失去全部能力；B=source的永續能力給其他プリコネ從者守護。
+      - A與B都在能力增減層；A改變B能否發生，B不改變A的對象或內容。
+      - 因此B依存A，先A後B，不能把更早的B結果永久保留。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 未抹除來源，守護擋住主戰者
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: spell
+                card: BP11-041
+            field:
+              - id: attacker
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: source
+                card: PCS01-048
+              - id: guard
+                card: CP04-009
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: attacker
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P2.leader.life: 20
+          P1.field.attacker:
+            acted: false
+  - name: 較晚失去能力使較早守護授予無效
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: spell
+                card: BP11-041
+            field:
+              - id: attacker
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: source
+                card: PCS01-048
+              - id: guard
+                card: CP04-009
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: spell
+        targets:
+          1:
+            - source
+      - n: 2
+        by: P1
+        at: main
+        do: attack
+        attacker: attacker
+        target: P2.leader
+      - n: 3
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 18
+          P1.field.attacker:
+            acted: true

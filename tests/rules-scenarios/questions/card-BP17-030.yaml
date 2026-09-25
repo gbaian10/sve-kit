@@ -1,0 +1,446 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP17-030
+kind: card
+must_pass: true
+mechanisms:
+  - 打出時的選擇
+  - 名稱包含比對
+  - 區域移動
+  - 10.4.4.1
+  - 4.1.4
+  - 區域移動清除修正
+  - 4.8.3.2
+cards:
+  - BP01-173
+  - BP04-P07
+  - BP17-030
+  - BP21-PR05
+  - BP17-022
+  - BP17-019
+why: "[astra] 含リオード的目標才減 2；換區清除場上修正，EX 已滿則沒有移動也不重設。\n[fable] 隠伏の記憶「これをプレイする際、自分の場の「カード名に『リオード』を含むフォロワー」を選んでいたなら、コストを-2する／自分の場の暗殺者・フォロワー1体を選ぶ。それをEXエリアに置く」： 費用取決於打出時選的目標（10.6.2.3 在 10.6.2.5 之前）；選『月光の執行者・リオード』→ 費用 0；選其他暗殺者 → 2。移到 EX 的從者是新物件，傷害與效果全部清除（Q2236）。"
+discriminates: "[astra] 完全同名比對會多扣 2 PP；無視 EX 上限或未清除修正會使場或 EX 的斷言失敗。\n[fable] 先算費用再選目標的引擎（或用卡面費用檢查可否打出的引擎）在 A（PP 0）會 cannot-play；沒清除傷害的引擎在 A 之後從 EX 打出時體力不對（本題以 EX 內容為觀察點）； B 中 PP 0 選エリカ應該 cannot-play。"
+refs:
+  rules:
+    - 4.1.4
+    - 10.6.2.3
+    - 10.6.2.5
+    - 10.4.4.1
+    - 10.10.2.4
+    - 2.1.2
+    - 4.8.3.2
+  qa:
+    - Q2235
+    - Q2236
+evidence:
+  - ref: Q2235
+    quote: いいえ。EXエリアが上限枚数に達しているため、カードの移動は行われず、場に残ります。
+  - ref: Q2236
+    quote: はい。失われます。
+  - ref: cr 4.1.4
+    quote: "カードが領域間の移動を行う場合、特に指示がな\nいかぎり、それは新しい領域における新しいカードで\nあるとみなされます。特に指定がないかぎり、前の\n領域で適用されていた効果がそのまま適用されるこ\nとはありません。"
+    derivation:
+      - 含リオード的目標才減 2；換區清除場上修正，EX 已滿則沒有移動也不重設。
+  - ref: cr 10.6.2.3
+    quote: "そのカードや能力が非公開領域のカード\n以外のなんらかの事物を‘選ぶ’場合、それ\n（以下‘目標’）を選びます。"
+    derivation:
+      - 含リオード的目標才減 2；換區清除場上修正，EX 已滿則沒有移動也不重設。
+  - ref: cr 10.6.2.5
+    quote: プレイするためのコストがある場合、そのコストを決定し、その後すべてのコストを支払います。
+    derivation:
+      - 10.6.2.3 選目標在 10.6.2.5 決定費用之前 → 「選んでいたなら」在決定費用時已知
+status: draft
+author:
+  - astra
+  - fable
+verified_by: []
+scenarios:
+  - name: '[astra] BP21-PR05 EX滿=False'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP17-030
+            field:
+              - id: b
+                card: BP21-PR05
+                state:
+                  hp: 1
+                  power: 7
+                  acted: true
+            ex: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 10
+          P1.cemetery:
+            - a
+          P1.field: []
+          P1.ex:
+            - b
+          P1.ex.b:
+            hp: 3
+            power: 1
+            acted: false
+  - name: '[astra] BP04-P07 EX滿=False'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP17-030
+            field:
+              - id: b
+                card: BP04-P07
+                state:
+                  hp: 1
+                  power: 7
+                  acted: true
+            ex: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.cemetery:
+            - a
+          P1.field: []
+          P1.ex:
+            - b
+          P1.ex.b:
+            hp: 2
+            power: 1
+            acted: false
+  - name: '[astra] BP21-PR05 EX滿=True'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP17-030
+            field:
+              - id: b
+                card: BP21-PR05
+                state:
+                  hp: 1
+                  power: 7
+                  acted: true
+            ex:
+              - id: x0
+                card: BP01-173
+              - id: x1
+                card: BP01-173
+              - id: x2
+                card: BP01-173
+              - id: x3
+                card: BP01-173
+              - id: x4
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.pp.current: 10
+          P1.cemetery: []
+          P1.field.b:
+            hp: 1
+            power: 7
+            acted: true
+          P1.ex:
+            - x0
+            - x1
+            - x2
+            - x3
+            - x4
+          P1.resolution:
+            - a
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select: []
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 10
+          P1.cemetery:
+            - a
+          P1.field.b:
+            hp: 1
+            power: 7
+            acted: true
+          P1.ex:
+            - x0
+            - x1
+            - x2
+            - x3
+            - x4
+          P1.resolution: []
+  - name: '[fable] A PP 0：選リオード → 費用 0 → 打出，リオード進 EX'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          zones:
+            field:
+              - id: a1
+                card: BP17-022
+                state:
+                  hp: 1
+              - id: a2
+                card: BP17-019
+            hand:
+              - id: a3
+                card: BP17-030
+            deck:
+              - filler: 20
+        P2:
+          construction: class
+          leader:
+            class: ドラゴン
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          zones:
+            hand:
+              - filler: 3
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a3
+        targets:
+          1:
+            - a1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - a2
+          P1.ex:
+            - a1
+          P1.cemetery:
+            - a3
+        events:
+          - kind: 移動
+            object: a1
+            from: P1.field
+            to: P1.ex
+  - name: '[fable] B PP 0：選エリカ → 費用 2 → 不能打出'
+    inherit: '[fable] A PP 0：選リオード → 費用 0 → 打出，リオード進 EX'
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a3
+        targets:
+          1:
+            - a2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.hand:
+            - a3
+          P1.field:
+            - a1
+            - a2
+          P1.ex: []
+  - name: '[fable] B2 PP 2：選エリカ → 付 2 → エリカ進 EX'
+    inherit: '[fable] A PP 0：選リオード → 費用 0 → 打出，リオード進 EX'
+    setup:
+      players:
+        P1:
+          pp:
+            current: 2
+            max: 4
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a3
+        targets:
+          1:
+            - a2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - a1
+          P1.ex:
+            - a2

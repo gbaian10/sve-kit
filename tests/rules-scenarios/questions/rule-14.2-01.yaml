@@ -1,0 +1,218 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: rule-14.2-01
+kind: rule
+must_pass: true
+mechanisms: [14.2.1, 14.2.1.2, 14.2.2.5, 14.2.3, 14.2.4, 8.3.2.1, 10.7.2.1, '5.11', 賽馬娘：食事、出走, 查看牌庫上方多步驟, 進化每回合一次]
+cards: [ECP01-012, CP01-085, ECP01-014, ECP01-023, BP01-173, BP01-176, ECP01-010, ECP01-011]
+why: >-
+  シンボリルドルフ「{食事}{食事}{コスト2}：これは2回出走する」：食事＝把エボルヴデッキ的『にんじん』放到出走領域並關聯（14.2.1.1），2 回食事需要 2 張（Q1820）；
+  「2回出走」→【出走時】誘發 2 次（Q1821、10.7.2.1），各自：+1/+1、看牌庫上 3 張、可把元のコスト 3 以下的ウマ娘從者放到場上、其餘依喜好順序放底。
+  已關聯にんじん的從者再食事什麼都不做，也不能當費用（14.2.1.2.1、Q1822）；食事是進化相当能力（14.2.2.5）→ 同回合不能再進化（8.3.2.1）。
+  D：食事的 PP 費用中 1 點可改用 EP 支付（14.2.2.4）。
+discriminates: >-
+  A：只誘發一次出走時、或把兩次合併的引擎，a1 只會 +1/+1 一次、只看一次牌庫；牌庫最終順序可看出「看 3 張放底」做了兩次。
+  B：不檢查にんじん張數的引擎會讓 2 回食事成功。C：食事後允許進化、或允許再食事的引擎會 resolved 而不是 cannot-*。D：不允許 EP 代付的引擎 cannot-activate。
+refs:
+  rules: [14.2.1.1, 14.2.1.2, 14.2.1.2.1, 14.2.2.3, 14.2.2.5, 14.2.3.1, 14.2.4.2, 8.3.2.1, 10.7.2.1, 10.4.2.2, 5.11.1, 4.1.5, 4.6.3]
+  qa: [Q1820, Q1821, Q1822, Q1827]
+evidence:
+  - ref: Q1821
+    quote: はい。【出走時】能力が2回誘発します。
+  - ref: Q1820
+    quote: はい。エボルヴデッキに『にんじん』が3枚ない場合「《食事》《食事》《食事》《コスト3》：これは3回出走する。」のコストを支払うことができず、能力をプレイすることができません。
+  - ref: Q1822
+    quote: いいえ。一度出走したフォロワーは再び《食事》能力をプレイすることはできません。
+  - ref: cr 14.2.1.2.1
+    quote: この場合、この食事する処理をコストとして実行することはできません。
+  - ref: cr 14.2.2.5
+    quote: 食事能力は進化相当能力（8.3.2）です。
+  - ref: cr 8.3.2.1
+    quote: 起動能力を指定する際、それが進化能力または進化相当能力である場合、このターンにターンプレイヤーがいずれかの進化能力や進化相当能力をすでにプレイ済みである場合、その起動能力は指定できません。
+  - ref: cr 14.2.2.4
+    quote: 食事能力をプレイする際、そのコストに含まれる PP のうち 1 点を、PP ではなく 1 点の EP で支払うことができます。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: ウマ娘 プリティーダービー
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 3, max: 5}
+          ep: 2
+          zones:
+            field:
+              - {id: a1, card: ECP01-012}         # 〔Enchaínement〕シンボリルドルフ 3/3
+              - {id: a2, card: ECP01-010}         # ジェンティルドンナ 6/6（用於 C 的進化嘗試）
+            evolve_deck:
+              - {id: n1, card: CP01-085}          # にんじん
+              - {id: n2, card: CP01-085}          # にんじん
+              - {id: g1, card: ECP01-011}         # ジェンティルドンナ（エボルヴ）
+            hand:
+              - {filler: 2}
+            deck:
+              - {id: d1, card: ECP01-014}         # アストンマーチャン（コスト1 ウマ娘）
+              - {id: d2, card: ECP01-023}         # ヴィルシーナ（コスト4，不合資格）
+              - {id: d3, card: BP01-173}
+              - {id: d4, card: BP01-173}
+              - {id: d5, card: BP01-173}
+              - {id: d6, card: BP01-176}
+              - {filler: 14}
+        P2:
+          construction: class
+          leader: {class: ドラゴン, life: 20}
+          pp: {current: 0, max: 5}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, pay: {pp: 2, ep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d1]}
+      # 9.8：「残りを好きな順にデッキの下に置く」是另一句 → 另一個輸入點；列表由前到後＝放完後由上到下
+      - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d3, d2]}
+      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 2}}}
+      - {n: 6, by: P1, at: resolve, of: {decision: 5, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 7, by: P1, at: resolve, of: {decision: 5, occurrence: 2}, do: resolve-choice, order: [d6, d5, d4]}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 2}}}
+        assert:
+          P1.pp.current: 1
+          P1.ep: 2
+          P1.race: [n1, n2]
+          P1.field.a1: {links: {出走: [n1, n2]}}
+          P1.evolve_deck: [g1]
+          semantic_state.counters_this_turn: {P1.evolve_played: 1}
+        events:
+          # 兩次食事是同一筆費用（10.6.2.5 一次全部支付）→ 同時；兩次出走是先後的事件
+          - {kind: 移動, object: n1, from: P1.evolve_deck, to: P1.race, group: 1}
+          - {kind: 移動, object: n2, from: P1.evolve_deck, to: P1.race, group: 1}
+          - {kind: 待機, ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}
+          - {kind: 待機, ability: {source: a1, line: 4}, event: {raced: a1, n: 2}}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 2}}}
+        assert:
+          P1.field.a1: {power: 4, hp: 4}
+          P1.field: [a1, a2, d1]
+          P1.field.d1: {entered_from: deck, entered_by: effect}
+          P1.deck: [d4, d5, d6, filler: 14, d3, d2]
+        events:
+          - {kind: 場に出す, object: d1, from: P1.deck}
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a1: {power: 5, hp: 5}
+          P1.deck: [filler: 14, d3, d2, d6, d5, d4]
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - {kind: 場に出す}
+
+  - name: B 只有 1 張にんじん → 2 回食事付不出 → cannot-activate；1 回食事可以
+    inherit: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
+    setup:
+      players:
+        P1:
+          zones:
+            evolve_deck:
+              - {id: n1, card: CP01-085}
+              - {id: g1, card: ECP01-011}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, pay: {pp: 2, ep: 0}}
+      - {n: 2, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.pp.current: 3
+          P1.race: []
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+        assert:
+          P1.pp.current: 2
+          P1.race: [n1]
+          P1.field.a1: {links: {出走: [n1]}}
+          P1.evolve_deck: [g1]
+
+  - name: C 出走後：再食事不行（已關聯にんじん）；同回合進化另一隻也不行（食事是進化相当）
+    inherit: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3]}
+      - {n: 5, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
+      - {n: 6, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 1}, evolve_card: g1, pay: {pp: 0, ep: 1, sep: 0}}
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 2
+          P1.race: [n1]
+          P1.field.a1: {power: 4, hp: 4}
+      - at: after-decision-5
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.pp.current: 2
+          P1.race: [n1]
+      - at: after-decision-6
+        view: omniscient
+        outcome: cannot-evolve
+        assert:
+          P1.field.a2: {evolved: false}
+          P1.ep: 2
+          P1.evolve_deck: [n2, g1]
+
+  - name: D 食事的 PP 1 改用 EP 支付（14.2.2.4）
+    inherit: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 0, ep: 1}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+        assert:
+          P1.pp.current: 3
+          P1.ep: 1
+          P1.race: [n1]
+          P1.field.a1: {links: {出走: [n1]}}
+          semantic_state.counters_this_turn: {P1.evolve_played: 1}

@@ -1,0 +1,140 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-SP01-SP30
+kind: card
+must_pass: true
+mechanisms: [卡片出處, 5.5.3, 4.1.4, 4.8.3.2, 10.7.3.1, 區域移動清除修正]
+cards: [SP01-SP30, BP01-173, BP01-180, BP01-099]
+why: >-
+  不思議な青空・アリス「これが手札以外から場に出ていたなら、それをEXエリアに置く」：5.5.3 把「（領域）以外から場に出る」定義成「從該領域以外的領域直接出場，或從該領域以外的領域**打出**後經解決領域出場」。
+  所以從 EX 區打出也算「手札以外から」（Q2532 同旨）；從手牌打出不算。兩個ファンファーレ可自選順序（Q1616）。
+  被放進 EX 的從者失去所有傷害與效果（Q1620，4.1.4 新物件）；對手 EX 已滿 5 張時不移動、留在場上（Q1617）。
+discriminates: >-
+  只把「直接放到場上」當作「手札以外から場に出た」、忽略「從 EX 打出」的引擎，B 不會把 b1 移到 EX；
+  沒清除 b1 傷害的引擎在 B 的 P2.ex 裡 b1 仍帶 hp 1（無法直接斷言，改斷言之後不再有 damage 狀態的 hp）；C 中 EX 滿還硬塞的引擎會違反 4.8.3.2。
+refs:
+  rules: [5.5.3, 4.1.4, 4.8.3.2, 10.7.3.1, 12.4.3, 8.2.1]
+  qa: [Q1616, Q1617, Q1620, Q2532]
+evidence:
+  - ref: cr 5.5.3
+    quote: >-
+      同様に、カードが‘（領域）以外から場に出る’ことを参照する場合、それはそのカードがその領域でも解決領域でもない領域から直接場に出ること、
+      およびそのカードがその領域以外の領域からプレイされた後解決領域で解決されて場に出ることの両方を参照します。
+  - ref: Q2532
+    quote: はい。EXエリアやデッキや墓場などから出た場合、条件を満たします。
+  - ref: Q1617
+    quote: いいえ。EXエリアが上限枚数に達しているため、カードの移動は行われず、場に残ります。
+  - ref: Q1620
+    quote: はい。失われます。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 從手牌打出 → 條件不成立，只抽 1 張
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 3, P2: 2}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ビショップ, life: 20}
+          pp: {current: 2, max: 3}
+          zones:
+            hand:
+              - {id: a1, card: SP01-SP30}         # 不思議な青空・アリス 2/3
+            deck:
+              - {id: d1, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 3}
+          zones:
+            field:
+              - {id: b1, card: BP01-173, state: {hp: 1}}     # ファイター 2/3（元のコスト2），已受傷
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: [b1]
+          P2.ex: []
+          P1.hand: [d1]
+          P1.field.a1: {entered_from: hand, entered_by: play}
+        forbidden_events:
+          - {kind: 移動, object: b1}
+
+  - name: B 從 EX 區打出 → 「手札以外から場に出ていた」成立 → 目標移到對手 EX，傷害清除
+    inherit: A 從手牌打出 → 條件不成立，只抽 1 張
+    setup:
+      players:
+        P1:
+          zones:
+            hand: []
+            ex:
+              - {id: a1, card: SP01-SP30}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P2.ex: [b1]
+          P1.field: [a1]
+          P1.field.a1: {entered_from: ex, entered_by: play}
+          P1.ex: []
+        events:
+          - {kind: 移動, object: b1, from: P2.field, to: P2.ex}
+
+  - name: C 對手 EX 已滿 5 張 → 不移動、留在場上
+    inherit: B 從 EX 區打出 → 「手札以外から場に出ていた」成立 → 目標移到對手 EX，傷害清除
+    setup:
+      players:
+        P2:
+          zones:
+            ex:
+              - {id: e1, card: BP01-180}
+              - {id: e2, card: BP01-180}
+              - {id: e3, card: BP01-180}
+              - {id: e4, card: BP01-099}
+              - {id: e5, card: BP01-099}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: [b1]
+          P2.field.b1: {hp: 1}
+          P2.ex: [e1, e2, e3, e4, e5]
+        forbidden_events:
+          - {kind: 移動, object: b1}

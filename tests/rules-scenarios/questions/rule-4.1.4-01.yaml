@@ -1,0 +1,262 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-4.1.4-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 區域移動
+  - 進化卡自身的能力
+  - token
+cards:
+  - BP01-171
+  - BP01-172
+  - BP01-173
+  - BP21-T11
+  - EBD01-015
+why: 回手後原效果消失；進化卡分離回進化牌庫，token 回手立即消去，後續抽牌照做。
+discriminates: 把進化卡一起帶手牌或讓 token 留手牌，会多物件或錯區域。
+refs:
+  rules:
+    - 4.1.4
+    - 5.16.3
+    - 9.1.4.4
+    - 11.6.1
+  qa: []
+evidence:
+  - ref: cr 4.1.4
+    quote: "カードが領域間の移動を行う場合、特に指示がな\nいかぎり、それは新しい領域における新しいカードで\nあるとみなされます。特に指定がないかぎり、前の\n領域で適用されていた効果がそのまま適用されるこ\nとはありません。"
+    derivation:
+      - 回手後原效果消失；進化卡分離回進化牌庫，token 回手立即消去，後續抽牌照做。
+  - ref: cr 5.16.3
+    quote: "場のカードが場以外に移動する場合、その移動直\n後にそのカードに関連付けられている進化領域の\nカードとの関連付けを失います。"
+    derivation:
+      - 回手後原效果消失；進化卡分離回進化牌庫，token 回手立即消去，後續抽牌照做。
+  - ref: cr 9.1.4.4
+    quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
+    derivation:
+      - 回手後原效果消失；進化卡分離回進化牌庫，token 回手立即消去，後續抽牌照做。
+  - ref: cr 11.6.1
+    quote: "進化領域のカードが場のいずれのカードとも関連\n付けされていない場合、そのカードをエボルヴデッ\nキ置き場に表向きで移動します。"
+    derivation:
+      - 回手後原效果消失；進化卡分離回進化牌庫，token 回手立即消去，後續抽牌照做。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: normal
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: s
+                card: EBD01-015
+            field:
+              - id: b
+                card: BP01-171
+                state:
+                  hp: 1
+                  power: 7
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - b
+            - d
+          P1.field: []
+          P1.cemetery:
+            - s
+  - name: evolved
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: s
+                card: EBD01-015
+            field:
+              - id: b
+                card: BP01-171
+                state:
+                  hp: 1
+                  power: 7
+                  evolved: true
+                  evolved_with: e
+            evolution:
+              - id: e
+                card: BP01-172
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - b
+            - d
+          P1.field: []
+          P1.cemetery:
+            - s
+          P1.evolution: []
+          P1.evolve_deck:
+            - e
+  - name: token
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: s
+                card: EBD01-015
+            field:
+              - id: b
+                card: BP21-T11
+                state:
+                  hp: 1
+                  power: 7
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d
+          P1.field: []
+          P1.cemetery:
+            - s
+        events:
+          - kind: 消去
+            object: b
+            by: rule-9.1.4.4

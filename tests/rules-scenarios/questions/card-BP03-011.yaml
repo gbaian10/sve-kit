@@ -1,0 +1,160 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP03-011
+kind: card
+must_pass: true
+mechanisms: [回合特定時點, 7.3.1, 持續效果與禁止, 給予能力, 8.4.9, 攻撃時把目標打死後不交戰]
+cards: [BP03-011, SD02-002, BP01-173, BP16-T10]
+why: >-
+  茨の森「自分のメインフェイズが来たとき、これを破壊する」（7.3.1 誘發，7.3.2 檢查時點結算）與「これがある限り、自分のフォロワーすべては「【攻撃時】フォロワーへ攻撃したなら、それに2ダメージ」を持つ」。
+  A：對手回合結束 → 自己的主要階段來臨 → 誘發 → 自毀 → 之後攻擊沒有 2 傷害、正常交戰。B（Q449）：打出當回合攻擊體力 2 的從者 → 攻撃時 2 傷害 → 目標在 8.4.6 的檢查時點被破壞 → 8.4.9 不交戰、攻擊者保持アクト、體力不減。
+discriminates: >-
+  沒在 7.3.1 誘發的引擎 A 的 a1 還在場，攻擊會多 2 傷害；B 中在目標被破壞後仍讓它反擊的引擎 a2 體力會是 1。
+refs:
+  rules: [7.3.1, 7.3.2, 10.7.1, 5.6.1, 10.9.1.2, 12.7.2, 8.4.6, 8.4.9, 10.3.5]
+  qa: [Q449]
+evidence:
+  - ref: Q449
+    quote: 自分のフォロワーはアクト状態で場に残り、相手のフォロワーは破壊されます。…【攻撃時】の能力によって相手のフォロワーに2ダメージ与え、相手のフォロワーの体力が0になり、その後のチェックタイミングによって相手のフォロワーが破壊されます。相手のフォロワーがおらず、ダメージを与え合う交戦はしないため、攻撃の処理が終了し、自分のフォロワーはアクト状態で場に残ります。
+  - ref: cr 7.3.1
+    quote: ‘メインフェイズが来たとき’の誘発条件が発生します。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 自己的主要階段來臨 → 茨の森自毀 → 之後攻擊沒有附加傷害
+    setup:
+      turn: {active: P2, first_player: P1, elapsed_turns: {P1: 4, P2: 4}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: エルフ, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            field:
+              - {id: a1, card: BP03-011}          # 茨の森
+              - {id: a2, card: SD02-002}          # ヴァンガード・レイサム 3/3
+            hand:
+              - {filler: 2}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            field:
+              - {id: b1, card: BP01-173, state: {acted: true}}   # ファイター 2/3
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P2, at: main, do: end-phase}
+      - {n: 2, by: P1, at: quick, do: pass}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - {n: 4, by: P1, at: main, do: attack, attacker: a2, target: b1}
+      - {n: 5, by: P2, at: quick, do: pass}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+        assert:
+          turn: {active: P1, phase: main}
+          P1.hand: [filler: 2, d1]
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [a2]
+          P1.cemetery: [a1]
+        events:
+          - {kind: 破壊, object: a1}
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P1.field.a2: {hp: 1, acted: true}
+        events:
+          - {kind: ダメージ, source: a2, target: b1, amount: 3, group: 1}
+          - {kind: ダメージ, source: b1, target: a2, amount: 2, group: 1}
+        forbidden_events:
+          - {kind: 待機}
+
+  - name: B 打出當回合：攻撃時 2 傷害打死體力 2 的目標 → 不交戰、攻擊者體力不減
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: エルフ, life: 20}
+          pp: {current: 1, max: 4}
+          zones:
+            field:
+              - {id: a2, card: SD02-002}          # ヴァンガード・レイサム 3/3，非本回合進場
+            hand:
+              - {id: a1, card: BP03-011}          # 茨の森（コスト1）
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            field:
+              - {id: b1, card: BP01-173, state: {acted: true, hp: 2}}
+            hand:
+              # after-decision-4 要完整列出 P2 的合法選項（只有 pass）→ 手牌用真實的非クイック卡，不能用 filler（契約 2.3；互驗第二輪修正，astra）
+              - {id: b2, card: BP01-173}
+              - {id: b3, card: BP01-173}
+              - {id: b4, card: BP01-173}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
+      - {n: 3, by: P1, at: main, do: attack, attacker: a2, target: b1}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: BP03-011, line: 2, keyword: 攻撃時}}}
+      - {n: 5, by: P2, at: quick, do: pass}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [a2, a1, new-1]
+          P1.field.new-1: {entered_from: other, entered_by: effect}
+        events:
+          - {kind: 場に出す, object: new-1, card: BP16-T10, to: P1.field}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - {do: pass}
+        assert:
+          P2.field: []
+          P2.cemetery: [b1]
+        events:
+          - {kind: ダメージ, source: a2, target: b1, amount: 2}
+          - {kind: 破壊, object: b1, by: rule-11.3.1}
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a2: {hp: 3, acted: true}
+        forbidden_events:
+          - {kind: ダメージ, target: a2}

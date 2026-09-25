@@ -1,0 +1,407 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP19-P21
+kind: card
+must_pass: true
+mechanisms:
+  - 10.4.6.1
+  - 12.4.3
+  - 10.7.4.2
+  - 5.5.3
+cards:
+  - BP01-115
+  - BP01-176
+  - BP14-076
+  - BP19-P21
+  - BP19-P22
+why: 死の祝福與寒冷の死霊術師都能拉七費ミロエル；自己回場也觸發傷害。寒冷設1/1不抹能力，回場當回合可付橫置費用再拉八獄。
+discriminates: 不計自己進場會少1傷害；把橫置費用當攻擊限制會拒絕當回合起動；1/1當無能力會完全沒有鏈。
+refs:
+  rules:
+    - 10.4.6.1
+    - 12.4.3
+    - 10.7.4.2
+    - 5.5.3
+    - 10.4.7.3
+    - 10.4.2.2
+  qa:
+    - Q2621
+evidence:
+  - ref: cr 10.4.6.1
+    quote: このコストは、このコストをもつカードが場に出たターンであっても実行する事が可能です。
+  - ref: cr 12.4.3
+    quote: ‘ファンファーレ （テキスト）’は、‘このカードを場以外から場に置いたとき、（テキスト）’を意味します。
+  - ref: cr 10.7.4.2
+    quote: あるカードが領域移動誘発能力を持ち、そのカードがその能力が有効になる領域に入るまたはその領域から出る時にいずれかのカードがその領域移動誘発能力の誘発条件を満たす領域移動を行った場合、その誘発条件は満たされたものとします。
+  - ref: cr 5.5.3
+    quote: カードが‘（領域）から場に出る’ことを参照する場合、それはそのカードがその領域から直接場に出ること、およびそのカードがその領域からプレイされた後解決領域で解決されて場に出ることの両方を参照します。同様に、カードが‘（領域）以外から場に出る’ことを参照する場合、それはそのカードがその領域でも解決領域でもない領域から直接場に出ること、およびそのカードがその領域以外の領域からプレイされた後解決領域で解決されて場に出ることの両方を参照します。
+  - ref: Q2621
+    quote: はい。誘発します。
+  - ref: BP01-115
+    quote: 自分の墓場のコスト8以下のフォロワー1枚を選ぶ。それを場に出す。それは【守護】を持つ。
+  - ref: BP14-076
+    quote: "{ラストワード}これは消滅する。\n{起動}これを{アクト}：自分の墓場の元のコスト8以下のフォロワー1枚を選ぶ。それを場に出す。それの攻撃力と体力を1にする。"
+  - ref: BP19-P21
+    quote: "自分の場にフォロワーが出たとき、それが墓場から場に出ていたなら、相手の場のフォロワーすべてに1ダメージ。\n{ファンファーレ}手札の八獄・カード1枚を捨てる：1枚引く。\n{起動}これを{アクト}：自分の墓場の元のコスト5以下の八獄・フォロワーと元のコスト3以下の八獄・フォロワーそれぞれ1枚まで選ぶ。それを場に出す。"
+  - ref: cr 10.4.7.3
+    quote: なんらかの自動能力において‘～とき、（処理）：（効果）’と書かれている場合、これはその自動能力を解決する際にその処理を実行することで、その効果を適用することを選択することができます。
+    derivation:
+      - 12.4.3 把ファンファーレ展開為進場時的自動能力；此處是結算時的可選費用。
+      - 手牌為空，無法完整支付，依契約 9.8 仍保留唯一 decline 輸入；能力已打出並解決，不是待機取消。
+      - 新增 after-decision-2、3 後，兩次傷害均發生在 after-decision-3 至 6 的最後區間。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: blessing 蘇生ミロエル後當回合起動
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 6
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: m
+                card: BP19-P21
+              - id: target
+                card: BP19-P22
+            hand:
+              - id: a
+                card: BP01-115
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - m
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 2
+      - by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        choice: decline
+        n: 3
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 1
+          event:
+            entered_field: m
+      - n: 5
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: m
+          line: 3
+        targets:
+          1:
+            - target
+      - n: 6
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 1
+          event:
+            entered_field: target
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.hand: []
+          P2.field.b:
+            hp: 6
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: decline
+        events:
+          - kind: プレイ
+            ability:
+              source: m
+              line: 2
+        forbidden_events:
+          - kind: 待機取消
+            ability:
+              source: m
+              line: 2
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: []
+          P2.field.b:
+            hp: 6
+        events:
+          - kind: 解決
+            ability:
+              source: m
+              line: 2
+        forbidden_events:
+          - kind: 待機取消
+            ability:
+              source: m
+              line: 2
+          - kind: 引く
+          - kind: 捨てる
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.m:
+            acted: true
+            power: 5
+            hp: 5
+            entered_from: cemetery
+            entered_by: effect
+          P1.field.target:
+            entered_from: cemetery
+            entered_by: effect
+            evolved: false
+          P2.field.b:
+            hp: 4
+          P1.pp.current: 0
+          semantic_state.counters_this_turn.P1.cards_played: 1
+        events:
+          - kind: ダメージ
+            source: m
+            target: b
+            amount: 1
+          - kind: ダメージ
+            source: m
+            target: b
+            amount: 1
+  - name: necromancer 蘇生ミロエル後當回合起動
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 6
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: m
+                card: BP19-P21
+              - id: target
+                card: BP19-P22
+            field:
+              - id: a
+                card: BP14-076
+                state:
+                  entered_this_turn: true
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        targets:
+          1:
+            - m
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 2
+      - by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        choice: decline
+        n: 3
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 1
+          event:
+            entered_field: m
+      - n: 5
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: m
+          line: 3
+        targets:
+          1:
+            - target
+      - n: 6
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 1
+          event:
+            entered_field: target
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.hand: []
+          P2.field.b:
+            hp: 6
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: decline
+        events:
+          - kind: プレイ
+            ability:
+              source: m
+              line: 2
+        forbidden_events:
+          - kind: 待機取消
+            ability:
+              source: m
+              line: 2
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: []
+          P2.field.b:
+            hp: 6
+        events:
+          - kind: 解決
+            ability:
+              source: m
+              line: 2
+        forbidden_events:
+          - kind: 待機取消
+            ability:
+              source: m
+              line: 2
+          - kind: 引く
+          - kind: 捨てる
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.m:
+            acted: true
+            power: 1
+            hp: 1
+            entered_from: cemetery
+            entered_by: effect
+          P1.field.target:
+            entered_from: cemetery
+            entered_by: effect
+            evolved: false
+          P2.field.b:
+            hp: 4
+          P1.pp.current: 6
+          semantic_state.counters_this_turn.P1.cards_played: 0
+        events:
+          - kind: ダメージ
+            source: m
+            target: b
+            amount: 1
+          - kind: ダメージ
+            source: m
+            target: b
+            amount: 1

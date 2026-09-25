@@ -1,0 +1,302 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-11.2.1-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.5.2
+  - 額外回合、跳過、勝利
+cards:
+  - BP01-173
+  - BP01-P25
+  - BP19-078
+why: 每結算一個自動能力就規則處理；兔子造成己方零生命時立即結束，不能繼續深淵大佐。
+discriminates: 一次處理整個佇列或敗北仍結算剩餘能力會破壞 t。
+refs:
+  rules:
+    - 10.5.2.1
+    - 11.2.1
+    - 1.2.1
+  qa: []
+evidence:
+  - ref: cr 10.5.2.1
+    quote: "現在処理を行うべきルール処理すべてを\n同時に実行します。その結果新たに行うべき\nルール処理が発生している場合、この手順を\n行うべきルール処理が残っている間繰り返し\nます。"
+    derivation:
+      - 每結算一個自動能力就規則處理；兔子造成己方零生命時立即結束，不能繼續深淵大佐。
+  - ref: cr 11.2.1
+    quote: "自身のリーダーの体力が 0 以下であるプレイヤー\nがいる場合、そのプレイヤーはこのゲームに敗北し\nます。"
+    derivation:
+      - 每結算一個自動能力就規則處理；兔子造成己方零生命時立即結束，不能繼續深淵大佐。
+  - ref: cr 1.2.1
+    quote: "いずれかのプレイヤーが敗北した場合、ゲームは\nその時点で終了します。対戦相手が敗北し、自身は\n敗北していないプレイヤーがゲームに勝利します。"
+    derivation:
+      - 每結算一個自動能力就規則處理；兔子造成己方零生命時立即結束，不能繼續深淵大佐。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 生命 1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 1
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: a
+                card: BP01-P25
+              - id: b
+                card: BP19-078
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: t
+                card: BP01-173
+      semantic_state:
+        pending_triggers:
+          - id: ta
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              left_field: a
+          - id: tb
+            controller: P1
+            ability:
+              source: b
+              line: 3
+            event:
+              left_field: b
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: ta
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: game-end
+        assert:
+          P1.leader.life: -1
+          P2.leader.life: 18
+          P2.field:
+            - t
+          game:
+            ended: true
+            winner: P2
+            by: 11.2.1
+        forbidden_events:
+          - kind: プレイ
+            ability:
+              source: b
+              line: 3
+  - name: 生命 2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 2
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: a
+                card: BP01-P25
+              - id: b
+                card: BP19-078
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: t
+                card: BP01-173
+      semantic_state:
+        pending_triggers:
+          - id: ta
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              left_field: a
+          - id: tb
+            controller: P1
+            ability:
+              source: b
+              line: 3
+            event:
+              left_field: b
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: ta
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: game-end
+        assert:
+          P1.leader.life: 0
+          P2.leader.life: 18
+          P2.field:
+            - t
+          game:
+            ended: true
+            winner: P2
+            by: 11.2.1
+        forbidden_events:
+          - kind: プレイ
+            ability:
+              source: b
+              line: 3
+  - name: 生命 3
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 3
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: a
+                card: BP01-P25
+              - id: b
+                card: BP19-078
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: t
+                card: BP01-173
+      semantic_state:
+        pending_triggers:
+          - id: ta
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              left_field: a
+          - id: tb
+            controller: P1
+            ability:
+              source: b
+              line: 3
+            event:
+              left_field: b
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: ta
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 1
+          P2.leader.life: 18
+          P2.field:
+            - t
+        forbidden_events:
+          - kind: プレイ
+            ability:
+              source: b
+              line: 3

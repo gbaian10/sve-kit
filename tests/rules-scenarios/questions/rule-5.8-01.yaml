@@ -1,0 +1,328 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-5.8-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 搜尋有條件
+cards:
+  - BP01-042
+  - BP01-173
+  - BP18-SP01
+why: 完整列出可搜尋牌庫；即使有符合卡也可不找到，之後仍洗牌。
+discriminates: 強制找出、拒絕空結果或空結果跳過洗牌會改變 EX 或牌庫次序。
+refs:
+  rules:
+    - 4.1.2.2
+    - 5.8.1.2
+    - 5.8.2
+  qa: []
+evidence:
+  - ref: cr 4.1.2.2
+    quote: "非公開領域においては、その領域のカード\nがなんらかの効果によりすべてのプレイヤー\nに対して公開されているのでないかぎり、その\n領域に特定の条件を満たすカードが存在する\nことは保証されません。その領域が公開され\nているプレイヤーは、その条件を満たすカード\nがあっても、そのようなカードが存在しないも\nのとして扱うことができます。"
+    derivation:
+      - 完整列出可搜尋牌庫；即使有符合卡也可不找到，之後仍洗牌。
+  - ref: cr 5.8.1.2
+    quote: "特定条件に枚数以外の条件がある場合、そ\nれを見つけた後に、そのカードが条件を満た\nすことを相手に示します。"
+    derivation:
+      - 完整列出可搜尋牌庫；即使有符合卡也可不找到，之後仍洗牌。
+  - ref: cr 5.8.2
+    quote: "デッキからカードを探し、その見つけたカードを指定\nの領域に移動したか、見つけたカードを移動しない\nことを選んだか、カードを見つけなかった後、その\nデッキをシャッフルします。"
+    derivation:
+      - 完整列出可搜尋牌庫；即使有符合卡也可不找到，之後仍洗牌。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 有符合=True 找到=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-042
+              - id: e
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP18-SP01
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select:
+          - d
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - e
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.ex: []
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select: []
+            - do: resolve-choice
+              select:
+                - d
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - d
+          P1.deck:
+            - e
+        events:
+          - kind: 公開
+            object: d
+            to: P2
+            source: a
+  - name: 有符合=True 找到=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-042
+              - id: e
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP18-SP01
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select: []
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - e
+            - d
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.ex: []
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select: []
+            - do: resolve-choice
+              select:
+                - d
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: []
+          P1.deck:
+            - e
+            - d
+        forbidden_events:
+          - kind: 公開
+            object: d
+  - name: 有符合=False 找到=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+              - id: e
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP18-SP01
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select: []
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - e
+            - d
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.ex: []
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select: []
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: []
+          P1.deck:
+            - e
+            - d
+        forbidden_events:
+          - kind: 公開
+            object: d

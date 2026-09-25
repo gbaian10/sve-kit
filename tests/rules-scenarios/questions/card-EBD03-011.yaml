@@ -1,0 +1,244 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-EBD03-011
+kind: card
+must_pass: true
+mechanisms:
+  - 10.3.4
+  - 10.4.2.2
+cards:
+  - BP01-173
+  - EBD03-005
+  - EBD03-011
+why: デッドペナルティ的起動只在墓場有效；本體與指定名材料是完整費用。
+discriminates: 只掃場上能力會拒絕成功分支；容許手牌起動或少材料先消滅本體會錯改區域。
+refs:
+  rules:
+    - 10.3.4
+    - 10.4.2.2
+  qa:
+    - Q1554
+evidence:
+  - ref: cr 10.3.4
+    quote: 特定の領域で処理することが明確である効果は、その領域でのみ有効です。
+  - ref: cr 10.4.2.2
+    quote: コストのうち一部または全部を支払うことが不可能である場合、このコストはまったく支払うことはできません。
+  - ref: Q1554
+    quote: はい。『デッドペナルティ』が墓場にある場合に有効となる能力です。
+  - ref: EBD03-011
+    quote: "{起動}墓場のこれと『カオスルーラー・アイシィレンドリング』1枚を消滅：相手の場のフォロワー1体を選ぶ。それをアクトする。\n{クイック}\n相手の場のフォロワー1体を選ぶ。それは{攻撃力}-2/{体力}-2する。"
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 來源cemetery 指定材料=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: a
+                card: EBD03-011
+              - id: g
+                card: EBD03-005
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - g
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            acted: true
+          P1.banish:
+            - a
+            - g
+          P1.cemetery: []
+  - name: 來源cemetery 指定材料=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: a
+                card: EBD03-011
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1: []
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P2.field.b:
+            acted: false
+          P1.banish: []
+          P1.cemetery:
+            - a
+  - name: 來源hand 指定材料=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: EBD03-011
+            cemetery:
+              - id: g
+                card: EBD03-005
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        costs:
+          1:
+            - g
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P2.field.b:
+            acted: false
+          P1.banish: []
+          P1.cemetery:
+            - g

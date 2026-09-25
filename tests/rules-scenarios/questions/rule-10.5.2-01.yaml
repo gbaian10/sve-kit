@@ -1,0 +1,679 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.5.2-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.5.2
+  - 10.7.3.1
+  - 11.3.1
+  - 11.2.1
+  - 檢查時點迴圈
+  - 回合特定時點
+cards:
+  - BP01-152
+  - BP01-P25
+  - BP19-078
+  - BP01-180
+  - BP08-078
+  - BP04-092
+  - BP11-027
+  - BP14-024
+  - BP01-173
+why: "[astra] 雙方各兩個謝幕曲已同時待機，先處理 P1 的兩個；P2 第一個謝幕曲破壞 P1 第三隻兔子，使 P1 新待機優先於 P2 第二個。以 explicit 固定檢查時點入口，不要求適配器猜出上一個清場效果；離場來源仍以實體卡代號參照。\n[fable] 回合玩家 P1 用エンジェルバレッジ同時破壞非回合玩家 P2 的サロメ與デモンビーター（兩個ラストワード待機，P2）。 P2 先結算サロメ（2 傷害給アウトローガンナー）→ 回到 10.5.2.1 → 規則處理破壞アウトローガンナー → 回合玩家 P1 產生新的待機 → 依 10.5.2.2 下一個先處理 P1 的，不是 P2 剩下的デモンビーター。用 P2 リーダー體力 1 讓順序變成勝負：正確順序下 P1 的 2 傷害先落地 → 11.2.1 敗北， デモンビーター的 +1 永遠來不及。局面 B 是 P2 選另一個合法順序（先デモンビーター）→ 存活。"
+discriminates: "[astra] FIFO 或雙方輪流的實作會在 after-decision-1 或 3 提供錯誤的待機玩家／來源。\n[fable] 「雙方輪流」或「非回合玩家把自己的待機全部處理完才換人」的實作，局面 A 會讓 P2 以體力 1 存活（+1 先於 −2）、遊戲不結束； 只比最終體力的話加減法可交換，所以用敗北處理當觀察點。局面 B 驗證 P2 的順序選擇是合法且結果不同。"
+refs:
+  rules:
+    - 10.5.2.1
+    - 10.5.2.2
+    - 10.5.2.3
+    - 10.7.2
+    - 10.7.3.1
+    - 12.5.3
+    - 11.3.1
+    - 5.14.1
+    - 10.5.2.4
+    - 10.7.3
+    - 10.6.2.3
+    - 11.1.3
+    - 11.2.1
+    - 12.3.5
+    - 1.2.1
+    - 10.6.2.8.3
+  qa:
+    - Q1110
+evidence:
+  - ref: cr 10.5.2.2
+    quote: ターンプレイヤーはそのうち 1 つを選び、プレイと解決を行い、その後 10.5.2.1 に戻ります。
+    derivation:
+      - 最初 P1 的 a1、a2 與 P2 的 b1、b2 同時待機；由 P1 選 a1，再選 a2，不能交替處理 P2。
+  - ref: cr 10.5.2.3
+    quote: 非ターンプレイヤーはそのうち 1 つを選び、プレイと解決を行い、その後 10.5.2.1 に戻ります。
+    derivation:
+      - P1 無待機後，P2 選 b1，打出時選 a3，結算造成 3 傷害。
+      - 回 .1，a3 體力歸零，依 11.3.1 破壞；12.5.3 與 10.7.2 使 a3 謝幕曲待機。
+      - 再檢查 .2，此時 P1 有 a3；必須先結算 a3，之後才能處理 b2。
+      - 三次兔子謝幕曲共使雙方各失去 6 體力；b2 最後選 a4，a4 受 3 傷害仍存活。
+  - ref: cr 12.5.3
+    quote: このカードを場から墓場に置いたとき、（テキスト）
+    derivation:
+      - a1、a2、b1、b2 初始已離場；a3 在 b1 結算後才因規則處理離場，屬不同事件。
+  - ref: cr 10.5.2.2
+    quote: ターンプレイヤーがマスターであるいずれかの自動能力が待機状態になっている場合、ターンプレイヤーはそのうち 1 つを選び、プレイと解決を行い、その後 10.5.2.1 に戻ります。
+  - ref: cr 10.5.2.3
+    quote: 非ターンプレイヤーがマスターであるいずれかの自動能力が待機状態になっている場合、非ターンプレイヤーはそのうち 1 つを選び、プレイと解決を行い、その後 10.5.2.1 に戻ります。
+    derivation:
+      - 每結算一個都「10.5.2.1 に戻ります」，回到 10.5.2.1 後下一步一定是 10.5.2.2（先查回合玩家），不是接著 10.5.2.3
+      - P2 結算サロメ後：10.5.2.1 破壞 a2 → a2 的ラストワード待機（P1 是 master）→ 10.5.2.2 命中 → P1 先打出
+      - P1 結算後回到 10.5.2.1：P2 リーダー體力 0 → 11.2.1 P2 敗北 → 1.2.1 遊戲立即結束；デモンビーター的待機不再被處理
+  - ref: cr 10.7.3.1
+    quote: 待機状態の自動能力のプレイは強制で、プレイしないことを選択することはできません。ただし、自身がマスターである自動能力が複数待機している場合、そのうちのどれを先にプレイするかを選ぶことは可能です。
+  - ref: cr 11.2.1
+    quote: 自身のリーダーの体力が 0 以下であるプレイヤーがいる場合、そのプレイヤーはこのゲームに敗北します。
+  - ref: cr 1.2.1
+    quote: いずれかのプレイヤーが敗北した場合、ゲームはその時点で終了します。
+  - ref: Q1110
+    quote: 相手の場のフォロワーを選ぶことができないので、このフォロワーの《ファンファーレ》能力や《ラストワード》能力をプレイすることができず、自分のリーダーの体力を+1することができません。
+    derivation:
+      - 佐證サロメ的ラストワード在打出時必須選到目標；本題 P1 場上有 a1、a2 可選
+  - ref: cr 10.6.2.8.3
+    quote: この時点で解決領域にカードや能力が残っている場合、それがカードならオーナーの墓場に移動し
+    derivation:
+      - エンジェルバレッジ結算完就進墓場，after-decision-1 起 P1.cemetery 含 a3
+status: draft
+author:
+  - astra
+  - fable
+verified_by: []
+scenarios:
+  - name: '[astra] 非回合玩家尚有待機時，優先回到回合玩家的新待機'
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: explicit
+      players:
+        P1:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a3
+                card: BP01-P25
+              - id: a4
+                card: BP01-152
+            cemetery:
+              - id: a1
+                card: BP01-P25
+              - id: a2
+                card: BP01-P25
+          construction: class
+        P2:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: b1
+                card: BP19-078
+              - id: b2
+                card: BP19-078
+          construction: class
+      semantic_state:
+        pending_triggers:
+          - controller: P1
+            ability:
+              source: a1
+              line: 1
+            event:
+              left_field: a1
+          - controller: P1
+            ability:
+              source: a2
+              line: 1
+            event:
+              left_field: a2
+          - controller: P2
+            ability:
+              source: b1
+              line: 3
+            event:
+              left_field: b1
+          - controller: P2
+            ability:
+              source: b2
+              line: 3
+            event:
+              left_field: b2
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 1
+          event:
+            left_field: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a2
+            line: 1
+          event:
+            left_field: a2
+      - n: 3
+        by: P2
+        at: check-timing
+        do: choose-pending
+        targets:
+          1:
+            - a3
+        pending:
+          ability:
+            source: b1
+            line: 3
+          event:
+            left_field: b1
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a3
+            line: 1
+          event:
+            left_field: a3
+      - n: 5
+        by: P2
+        at: check-timing
+        do: choose-pending
+        targets:
+          1:
+            - a4
+        pending:
+          ability:
+            source: b2
+            line: 3
+          event:
+            left_field: b2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.leader.life: 18
+          P2.leader.life: 18
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: a2
+                  line: 1
+        events:
+          - kind: プレイ
+            ability:
+              source: a1
+              line: 1
+        events_exact:
+          - プレイ
+      - at: after-decision-2
+        view: omniscient
+        assert:
+          P1.leader.life: 16
+          P2.leader.life: 16
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b1
+                  line: 3
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b2
+                  line: 3
+        events:
+          - kind: プレイ
+            ability:
+              source: a2
+              line: 1
+        events_exact:
+          - プレイ
+      - at: after-decision-3
+        view: omniscient
+        assert:
+          P1.field:
+            - a4
+          P1.cemetery:
+            - a1
+            - a2
+            - a3
+          P1.leader.life: 16
+          P2.leader.life: 16
+          semantic_state.pending_triggers:
+            - controller: P1
+              ability:
+                source: a3
+                line: 1
+              event:
+                left_field: a3
+            - controller: P2
+              ability:
+                source: b2
+                line: 3
+              event:
+                left_field: b2
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: a3
+                  line: 1
+        events:
+          - kind: プレイ
+            ability:
+              source: b1
+              line: 3
+          - kind: ダメージ
+            source: b1
+            target: a3
+            amount: 3
+          - kind: 破壊
+            object: a3
+            by: rule-11.3.1
+          - kind: 待機
+            controller: P1
+            ability:
+              source: a3
+              line: 1
+            event:
+              left_field: a3
+        events_exact:
+          - プレイ
+      - at: after-decision-4
+        view: omniscient
+        assert:
+          P1.leader.life: 14
+          P2.leader.life: 14
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b2
+                  line: 3
+        events:
+          - kind: プレイ
+            ability:
+              source: a3
+              line: 1
+        events_exact:
+          - プレイ
+      - at: after-decision-5
+        view: omniscient
+        assert:
+          P1.field:
+            - a4
+          P1.field.a4:
+            damage: 3
+          P1.cemetery:
+            - a1
+            - a2
+            - a3
+          P2.field: []
+          P2.cemetery:
+            - b1
+            - b2
+          P1.leader.life: 14
+          P2.leader.life: 14
+          semantic_state.pending_triggers: []
+        outcome: resolved
+        events:
+          - kind: プレイ
+            ability:
+              source: b2
+              line: 3
+        events_exact:
+          - プレイ
+  - name: '[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 6
+          P2: 5
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 6
+            max: 6
+          ep: 2
+          zones:
+            field:
+              - id: a1
+                card: BP14-024
+              - id: a2
+                card: BP11-027
+            hand:
+              - id: a3
+                card: BP01-180
+            deck:
+              - id: a4
+                card: BP01-173
+              - filler: 20
+        P2:
+          construction: class
+          leader:
+            class: ナイトメア
+            life: 1
+          pp:
+            current: 0
+            max: 6
+          ep: 2
+          zones:
+            field:
+              - id: b1
+                card: BP08-078
+                state:
+                  hp: 1
+              - id: b2
+                card: BP04-092
+            hand:
+              - filler: 3
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a3
+      - n: 2
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b1
+            line: 1
+            keyword: ラストワード
+        targets:
+          1:
+            - a2
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a2
+            line: 2
+            keyword: ラストワード
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b1
+                  line: 1
+                  keyword: ラストワード
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b2
+                  line: 3
+                  keyword: ラストワード
+        assert:
+          P1.pp.current: 5
+          P1.cemetery:
+            - a3
+          P2.field: []
+          P2.cemetery:
+            - b1
+            - b2
+        events:
+          - kind: ダメージ
+            source: a3
+            target: b1
+            amount: 1
+            group: 1
+          - kind: ダメージ
+            source: a3
+            target: b2
+            amount: 1
+            group: 1
+          - kind: 破壊
+            object: b1
+            by: rule-11.3.1
+            group: 2
+          - kind: 破壊
+            object: b2
+            by: rule-11.3.1
+            group: 2
+          - kind: 待機
+            ability:
+              source: b1
+              line: 1
+              keyword: ラストワード
+            group: 3
+          - kind: 待機
+            ability:
+              source: b2
+              line: 3
+              keyword: ラストワード
+            group: 3
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: a2
+                  line: 2
+                  keyword: ラストワード
+        assert:
+          P2.leader.life: 2
+          P1.field:
+            - a1
+          P1.cemetery:
+            - a3
+            - a2
+        events:
+          - kind: プレイ
+            ability:
+              source: b1
+              line: 1
+              keyword: ラストワード
+          - kind: ダメージ
+            source: b1
+            target: a2
+            amount: 2
+          - kind: 体力増加
+            target: P2.leader
+            amount: 1
+          - kind: 破壊
+            object: a2
+            by: rule-11.3.1
+          - kind: 待機
+            ability:
+              source: a2
+              line: 2
+              keyword: ラストワード
+      - at: after-decision-3
+        view: omniscient
+        outcome: game-end
+        assert:
+          P2.leader.life: 0
+          P1.hand: []
+          P1.deck:
+            - a4
+            - filler: 20
+          game:
+            ended: true
+            winner: P1
+            by: 11.2.1
+        events:
+          - kind: プレイ
+            ability:
+              source: a2
+              line: 2
+              keyword: ラストワード
+          - kind: ダメージ
+            source: a2
+            target: P2.leader
+            amount: 2
+          - kind: 敗北
+            player: P2
+            by: rule-11.2.1
+        events_exact:
+          - プレイ
+        forbidden_events:
+          - kind: プレイ
+            ability:
+              source: b2
+              line: 3
+              keyword: ラストワード
+          - kind: 体力増加
+  - name: '[fable] B P2 先結算デモンビーター → 再サロメ → P1 的新待機 → P2 以體力 1 存活'
+    inherit: '[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及'
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a3
+      - n: 2
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b2
+            line: 3
+            keyword: ラストワード
+      - n: 3
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b1
+            line: 1
+            keyword: ラストワード
+        targets:
+          1:
+            - a2
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a2
+            line: 2
+            keyword: ラストワード
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b1
+                  line: 1
+                  keyword: ラストワード
+        assert:
+          P2.leader.life: 2
+          P1.field:
+            - a1
+            - a2
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 1
+          P1.field:
+            - a1
+          P1.cemetery:
+            - a3
+            - a2
+          P2.cemetery:
+            - b1
+            - b2
+          semantic_state.pending_triggers: []
+          game:
+            ended: false
+        events:
+          - kind: プレイ
+            ability:
+              source: b1
+              line: 1
+              keyword: ラストワード
+          - kind: プレイ
+            ability:
+              source: a2
+              line: 2
+              keyword: ラストワード
+        events_exact:
+          - プレイ

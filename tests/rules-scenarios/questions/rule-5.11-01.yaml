@@ -1,0 +1,222 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-5.11-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 5.11.1
+  - 10.6.2.8.2
+cards:
+  - BP01-173
+  - CP03-112
+  - CP03-124
+why: 神鷹 一拍子同一句的選張與排頂合併為一個輸入；下一句排底是下一個 occurrence。底牌列表第一張最靠上。
+discriminates: 拆成額外輸入點、把頂底處理混成同一步或把底部顺序顛倒會造成決定序列或牌序不同。
+refs:
+  rules:
+    - 5.11.1
+    - 10.6.2.8.2
+  qa: []
+evidence:
+  - ref: cr 5.11.1
+    quote: "‘デッキを上から N 枚見る’指示がある場合、指定\nプレイヤーはそのデッキ置き場の一番上から N 枚\nの情報を知ることができます。"
+    derivation:
+      - 神鷹 一拍子同一句的選張與排頂合併為一個輸入；下一句排底是下一個 occurrence。底牌列表第一張最靠上。
+  - ref: cr 10.6.2.8.2
+    quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
+    derivation:
+      - 神鷹 一拍子同一句的選張與排頂合併為一個輸入；下一句排底是下一個 occurrence。底牌列表第一張最靠上。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 頂部選 2 張並排序；下一句排底部
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d0
+                card: BP01-173
+              - id: d1
+                card: BP01-173
+              - id: d2
+                card: BP01-173
+              - id: tail
+                card: BP01-173
+            field:
+              - id: a
+                card: CP03-124
+              - id: f
+                card: CP03-112
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - d2
+          - d0
+        order:
+          - d2
+          - d0
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        order:
+          - d1
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.deck:
+            - d2
+            - d0
+            - tail
+            - d1
+          P1.field:
+            - f
+          P1.cemetery:
+            - a
+  - name: 頂部選 0 張並排序；下一句排底部
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d0
+                card: BP01-173
+              - id: d1
+                card: BP01-173
+              - id: d2
+                card: BP01-173
+              - id: tail
+                card: BP01-173
+            field:
+              - id: a
+                card: CP03-124
+              - id: f
+                card: CP03-112
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select: []
+        order: []
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        order:
+          - d2
+          - d1
+          - d0
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.deck:
+            - tail
+            - d2
+            - d1
+            - d0
+          P1.field:
+            - f
+          P1.cemetery:
+            - a

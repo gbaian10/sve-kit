@@ -1,0 +1,429 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP01-001
+kind: card
+must_pass: false
+mechanisms:
+  - 奪取、交換、變身
+  - token
+cards:
+  - BP01-001
+  - BP01-173
+  - BP01-T03
+  - BP08-T04
+  - BP21-T11
+why: 變身消滅原 token 並立即消去，再同區新建相同數量薔薇；只能斷言消去與區域計數，生成 id 契約尚缺。
+discriminates: 把變身原物件改名、把原 token 留消滅區都違反消去事件。
+refs:
+  rules:
+    - 5.17.1
+    - 9.1.4.4
+  qa:
+    - Q146
+evidence:
+  - ref: Q146
+    quote: 「変身する」とは、その能力で選んだカードを消滅させ、消滅した枚数と同数、指定のトークンを同じ領域に作成することを指します。（消滅したトークンはゲームから取り除かれます。）
+  - ref: cr 5.17.1
+    quote: "あるカードを‘『（トークン名）』に変身する’指示が\nある場合、そのカードを消滅し、新たにその領域に\n（ト―クン名）のトークンを、消滅したカードの枚数と\n同じ数作成します。"
+    derivation:
+      - 變身消滅原 token 並立即消去，再同區新建相同數量薔薇；只能斷言消去與區域計數，生成 id 契約尚缺。
+  - ref: cr 9.1.4.4
+    quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
+    derivation:
+      - 變身消滅原 token 並立即消去，再同區新建相同數量薔薇；只能斷言消去與區域計數，生成 id 契約尚缺。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 變身 0
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-001
+            ex: []
+            hand: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        targets:
+          1: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.banish: []
+          P1.ex_count: 0
+          P1.ex: []
+        forbidden_events:
+          - kind: 消滅
+  - name: 變身 1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-001
+            ex:
+              - id: f0
+                card: BP21-T11
+            hand: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        targets:
+          1:
+            - f0
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.banish: []
+          P1.ex_count: 1
+          P1.ex:
+            - new-1
+          P1.ex.new-1:
+            card: BP08-T04
+        events:
+          - kind: 消去
+            object: f0
+            by: rule-9.1.4.4
+          - kind: 移動
+            object: new-1
+            card: BP08-T04
+            to: P1.ex
+            source: a
+        forbidden_events:
+          - kind: 場に出す
+            object: new-1
+  - name: 變身 2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-001
+            ex:
+              - id: f0
+                card: BP21-T11
+              - id: f1
+                card: BP21-T11
+            hand: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        targets:
+          1:
+            - f0
+            - f1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.banish: []
+          P1.ex_count: 2
+          P1.ex:
+            - new-1
+            - new-2
+          P1.ex.new-1:
+            card: BP08-T04
+          P1.ex.new-2:
+            card: BP08-T04
+        events:
+          - kind: 消去
+            object: f0
+            by: rule-9.1.4.4
+            group: erase-transformed-fairies
+          - kind: 消去
+            object: f1
+            by: rule-9.1.4.4
+            group: erase-transformed-fairies
+          - kind: 移動
+            object: new-1
+            card: BP08-T04
+            to: P1.ex
+            source: a
+            group: create-roses
+          - kind: 移動
+            object: new-2
+            card: BP08-T04
+            to: P1.ex
+            source: a
+            group: create-roses
+        forbidden_events:
+          - kind: 場に出す
+            object: new-1
+          - kind: 場に出す
+            object: new-2
+  - name: 變身後以 new-1 打出新玫瑰
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: draw
+                card: BP01-173
+            field:
+              - id: a
+                card: BP01-001
+            ex:
+              - id: f0
+                card: BP21-T11
+            hand: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        targets:
+          1:
+            - f0
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: new-1
+        targets:
+          1:
+            - P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.banish: []
+          P1.ex_count: 1
+          P1.ex:
+            - new-1
+          P1.ex.new-1:
+            card: BP08-T04
+        events:
+          - kind: 消去
+            object: f0
+            by: rule-9.1.4.4
+          - kind: 移動
+            object: new-1
+            card: BP08-T04
+            to: P1.ex
+            source: a
+        forbidden_events:
+          - kind: 場に出す
+            object: new-1
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P2.leader.life: 17
+          P1.hand:
+            - draw
+          P1.ex: []
+          P1.cemetery: []
+        events:
+          - kind: ダメージ
+            source: new-1
+            target: P2.leader
+            amount: 3
+          - kind: 引く
+            player: P1
+            object: draw
+          - kind: 消去
+            object: new-1
+            by: rule-9.1.4.4

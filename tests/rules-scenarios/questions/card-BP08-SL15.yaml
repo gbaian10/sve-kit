@@ -1,0 +1,688 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP08-SL15
+kind: card
+must_pass: false
+mechanisms:
+  - 查看牌庫上方多步驟
+  - 10.7.4
+  - 10.5.2
+  - 5.11.1
+  - '10.5'
+  - 10.7.7
+  - 10.7.3.1
+  - 效果中途不插入誘發
+  - 多個待機任意順序
+  - 10.7.3.2
+cards:
+  - BP01-173
+  - BP01-P25
+  - BP05-SL14
+  - BP08-SL15
+  - BP19-078
+  - BP04-092
+  - BP08-078
+  - BP06-080
+  - EBD03-007
+  - BP05-070
+  - BP05-SL13
+why: "[astra] 先完成選出多張、剩餘置底、破壞剛出的從者；所有入場曲與謝幕曲都等原能力结束。\n[fable] ネフティス「デッキの上7枚を見る。その中から、元のコスト6以下の{ナイトメア}フォロワーをカード名が異なるように4枚まで場に出してよい。残りを好きな順にデッキの下に置く。 これによって場に出したフォロワーすべてを破壊する」：整段效果先做完（出場 → 放底 → 破壞），期間誘發的ファンファーレ與ラストワード都要等到檢查時點， 由 P1 自選順序（Q1100）；來源已在墓場仍要打出（10.7.7）。デモンビーター的ファンファーレ費用 2 付不出 → 取消一次。 互驗第二輪修正（astra）：デモンビーター d1 有【守護】，放到場上時要問 place-acted（12.8.2、契約 9.2），算一個 occurrence。"
+discriminates: "[astra] 每出一張就先結算會讓生命、場、墓場或待機集合不符。\n[fable] 在「場に出す」之後立刻插入結算ファンファーレ的引擎，會在破壞前就搜牌／造成傷害（事件順序）；把 4 個待機硬排順序的引擎 awaiting 只會列 1 個； 把來源在墓場的ファンファーレ當成失效的引擎會少 2 個待機。"
+refs:
+  rules:
+    - 10.7.1
+    - 10.6.2.8.2
+    - 5.11.1
+    - 10.5.2.2
+    - 10.7.3.1
+    - 10.7.3.2
+    - 10.7.7
+    - 12.4.3
+    - 12.5.3
+    - 4.1.5
+  qa:
+    - Q1100
+    - Q1101
+evidence:
+  - ref: Q1100
+    quote: "任意の順番で解決することができます。\nまず『ネフティス』の《ファンファーレ》能力の解決を行います。その後、場に出て破壊されたフォロワーの《ファンファーレ》能力や《ラストワード》能力などの誘発条件を満たし待機状態となった能力の中からどれを先に解決するか選択することができます。"
+  - ref: cr 10.7.1
+    quote: "自動能力とは、特定の誘発条件が発生したとき\nに、その後に発生したチェックタイミングでプレイされ\nる能力を指します。"
+    derivation:
+      - 先完成選出多張、剩餘置底、破壞剛出的從者；所有入場曲與謝幕曲都等原能力结束。
+  - ref: cr 10.6.2.8.2
+    quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
+    derivation:
+      - 先完成選出多張、剩餘置底、破壞剛出的從者；所有入場曲與謝幕曲都等原能力结束。
+  - ref: Q1100
+    quote: まず『ネフティス』の《ファンファーレ》能力の解決を行います。その後、場に出て破壊されたフォロワーの《ファンファーレ》能力や《ラストワード》能力などの誘発条件を満たし待機状態となった能力の中からどれを先に解決するか選択することができます。
+  - ref: cr 10.7.7
+    quote: 待機状態の自動能力のプレイ時に、その自動能力を有していたカードの領域が変わっていた場合でも、その自動能力はプレイする義務があります。
+status: draft
+author:
+  - astra
+  - fable
+verified_by: []
+scenarios:
+  - name: '[astra] 出場 0 張'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: r
+                card: BP01-P25
+              - id: c
+                card: BP19-078
+              - id: l
+                card: BP05-SL14
+              - id: x0
+                card: BP01-173
+              - id: x1
+                card: BP01-173
+              - id: x2
+                card: BP01-173
+              - id: x3
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP08-SL15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select: []
+      - n: 4
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 2
+        order:
+          - r
+          - c
+          - l
+          - x0
+          - x1
+          - x2
+          - x3
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a
+          P1.cemetery: []
+          P1.deck:
+            - r
+            - c
+            - l
+            - x0
+            - x1
+            - x2
+            - x3
+          P2.leader.life: 20
+          semantic_state.pending_triggers: []
+  - name: '[astra] 出場 1 張'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: r
+                card: BP01-P25
+              - id: c
+                card: BP19-078
+              - id: l
+                card: BP05-SL14
+              - id: x0
+                card: BP01-173
+              - id: x1
+                card: BP01-173
+              - id: x2
+                card: BP01-173
+              - id: x3
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP08-SL15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select:
+          - r
+      - n: 4
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 2
+        order:
+          - c
+          - l
+          - x0
+          - x1
+          - x2
+          - x3
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a
+          P1.cemetery:
+            - r
+          P1.deck:
+            - c
+            - l
+            - x0
+            - x1
+            - x2
+            - x3
+          P2.leader.life: 20
+          semantic_state.pending_triggers:
+            - controller: P1
+              ability:
+                source: r
+                line: 1
+              event:
+                left_field: r
+  - name: '[astra] 出場 3 張'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: r
+                card: BP01-P25
+              - id: c
+                card: BP19-078
+              - id: l
+                card: BP05-SL14
+              - id: x0
+                card: BP01-173
+              - id: x1
+                card: BP01-173
+              - id: x2
+                card: BP01-173
+              - id: x3
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP08-SL15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select:
+          - r
+          - c
+          - l
+      - n: 4
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 2
+        order:
+          - x0
+          - x1
+          - x2
+          - x3
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a
+          P1.cemetery:
+            - r
+            - c
+            - l
+          P1.deck:
+            - x0
+            - x1
+            - x2
+            - x3
+          P2.leader.life: 20
+          semantic_state.pending_triggers:
+            - controller: P1
+              ability:
+                source: r
+                line: 1
+              event:
+                left_field: r
+            - controller: P1
+              ability:
+                source: c
+                line: 3
+              event:
+                left_field: c
+            - controller: P1
+              ability:
+                source: l
+                line: 3
+              event:
+                entered_field: l
+  - name: '[fable] A 看 7 張出 2 隻（デモンビーター、サロメ）→ 其餘放底 → 破壞 → 4 個待機自選順序'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 7
+          P2: 6
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 7
+            max: 7
+          zones:
+            hand:
+              - id: a1
+                card: BP08-SL15
+            deck:
+              - id: d1
+                card: BP04-092
+              - id: d2
+                card: BP08-078
+              - id: d3
+                card: BP06-080
+              - id: d4
+                card: EBD03-007
+              - id: d5
+                card: BP04-092
+              - id: d6
+                card: BP05-070
+              - id: d7
+                card: BP05-SL13
+              - id: d8
+                card: BP01-173
+              - filler: 12
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            field:
+              - id: b1
+                card: BP01-173
+            hand:
+              - filler: 3
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 1
+      - n: 3
+        by: P1
+        at: resolve
+        of:
+          decision: 2
+          occurrence: 1
+        do: resolve-choice
+        select:
+          - d1
+          - d2
+      - n: 4
+        by: P1
+        at: resolve
+        of:
+          decision: 2
+          occurrence: 2
+        do: place-acted
+        object: d1
+        acted: false
+      - n: 5
+        by: P1
+        at: resolve
+        of:
+          decision: 2
+          occurrence: 3
+        do: resolve-choice
+        order:
+          - d3
+          - d4
+          - d5
+          - d6
+          - d7
+      - n: 6
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: d2
+            line: 1
+            keyword: ラストワード
+        targets:
+          1:
+            - b1
+      - n: 7
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: d2
+            line: 1
+            keyword: ファンファーレ
+        targets:
+          1:
+            - b1
+      - n: 8
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: d1
+            line: 3
+      - n: 9
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: d1
+            line: 2
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - do: place-acted
+              object: d1
+              acted: false
+            - do: place-acted
+              object: d1
+              acted: true
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: d1
+                  line: 2
+            - do: choose-pending
+              pending:
+                ability:
+                  source: d1
+                  line: 3
+            - do: choose-pending
+              pending:
+                ability:
+                  source: d2
+                  line: 1
+                  keyword: ファンファーレ
+              targets:
+                1:
+                  - b1
+            - do: choose-pending
+              pending:
+                ability:
+                  source: d2
+                  line: 1
+                  keyword: ラストワード
+              targets:
+                1:
+                  - b1
+        assert:
+          P1.field:
+            - a1
+          P1.field.a1:
+            entered_from: hand
+            entered_by: play
+          P1.cemetery:
+            - d1
+            - d2
+          P1.deck:
+            - d8
+            - filler: 12
+            - d3
+            - d4
+            - d5
+            - d6
+            - d7
+          P1.pp.current: 0
+          P2.field.b1:
+            hp: 3
+        events:
+          - kind: 場に出す
+            object: d1
+            from: P1.deck
+            group: 1
+          - kind: 場に出す
+            object: d2
+            from: P1.deck
+            group: 1
+          - kind: 破壊
+            object: d1
+            group: 2
+          - kind: 破壊
+            object: d2
+            group: 2
+        forbidden_events:
+          - kind: プレイ
+            ability:
+              source: d1
+              line: 2
+          - kind: ダメージ
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P1.leader.life: 22
+        events:
+          - kind: ダメージ
+            source: d2
+            target: b1
+            amount: 2
+          - kind: 体力増加
+            target: P1.leader
+            amount: 1
+          - kind: ダメージ
+            source: d2
+            target: b1
+            amount: 2
+          - kind: 体力増加
+            target: P1.leader
+            amount: 1
+      - at: after-decision-9
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.leader.life: 23
+          P1.deck:
+            - d8
+            - filler: 12
+            - d3
+            - d4
+            - d5
+            - d6
+            - d7
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - kind: 場に出す

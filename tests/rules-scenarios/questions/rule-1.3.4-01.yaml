@@ -1,0 +1,746 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-1.3.4-01
+kind: rule
+must_pass: false
+mechanisms:
+  - 奪取、交換、變身
+  - 1.3.4
+  - '5.12'
+  - 1.3.2
+  - 同時選擇：回合玩家先選
+  - 持續效果與禁止
+cards:
+  - BP01-173
+  - BP13-043
+  - BP10-076
+  - BP01-176
+  - BP01-180
+  - BP01-099
+why: "[astra] 先由 P1 指定再由看見指定內容的 P2 指定，兩者指定完成後才依序渡す；不是原子交換，滿場可只成功後半。\n[fable] 《節制》・ルーゼン「各プレイヤーは、自身の手札が2枚になるように自身の手札を捨てる」：兩位玩家都要選擇捨哪些 → 1.3.4 回合玩家先選並執行， 非回合玩家看到結果後才選。局面 B：回合玩家手牌已 ≤2 → 依 1.3.2 不做，只有非回合玩家捨。"
+discriminates: "[astra] 先渡再讓 P2 指定會在中間點改變場面；當原子交換會使 1/5 分支結果不同。\n[fable] 讓 P2 先選、或兩人同時盲選的引擎，after-decision-2 的 awaiting 不會是 P1；P2 視角在輪到自己時必須已看得到 P1 捨的卡（knowledge）。 局面 B：要求 P1 也做一次「捨 0 張」決定而停下來的引擎，after-decision-2 會 paused 等 P1 而不是等 P2。"
+refs:
+  rules:
+    - 1.3.4
+    - 5.22.2
+    - 1.3.4.1
+    - 5.12.1
+    - 1.3.2
+    - 4.9.2
+    - 12.4.3
+  qa:
+    - Q1766
+evidence:
+  - ref: Q1766
+    quote: "複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、ターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。\n以下、処理順です。\n\n①ターンプレイヤーは、自身のフォロワー1体を指定します。\n②非ターンプレイヤーは、自身のフォロワー1体を指定します。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）\n③ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。\n④非ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。"
+  - ref: cr 1.3.4
+    quote: "複数のプレイヤーが同時になんらかの選択を伴う\n処理を行うよう求められた場合、それがゲームの開\n始前であれば先攻プレイヤーから、それがゲーム中\nであればターンプレイヤーから先に処理を行いま\nす。非ターンプレイヤーは、ターンプレイヤーの処理\nの内容を知ってから自分の選択を行います。"
+    derivation:
+      - 先由 P1 指定再由看見指定內容的 P2 指定，兩者指定完成後才依序渡す；不是原子交換，滿場可只成功後半。
+  - ref: cr 5.22.2
+    quote: "自分の場のカードを‘渡す’指示がある場合、その\nカードを相手の場に移動します。移動した場合、そ\nのカードのマスターは相手になります。"
+    derivation:
+      - 先由 P1 指定再由看見指定內容的 P2 指定，兩者指定完成後才依序渡す；不是原子交換，滿場可只成功後半。
+  - ref: Q1766
+    quote: "複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、ターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。\n以下、処理順です。\n\n①ターンプレイヤーは、自身のフォロワー1体を指定します。\n②非ターンプレイヤーは、自身のフォロワー1体を指定します。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）\n③ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。\n④非ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。"
+    derivation:
+      - 同一句要求雙方各指定；按 Q1766 與 1.3.4 以 P1、P2 兩個輸入點表達。契約 10.7 已明定不同玩家各有一個輸入點；此項不再待裁定。
+  - ref: cr 1.3.4
+    quote: 複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、…それがゲーム中であればターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。
+    derivation:
+      - 「各プレイヤーは…捨てる」是兩位玩家各自伴隨選擇的同一處理 → P1 先選並捨、P2 再選
+      - 墓場是公開領域（4.9.2）→ P2 選時能識別 P1 捨了哪張
+  - ref: cr 1.3.2
+    quote: なんらかの理由によりプレイヤーが実行不可能なことを行うように求められた場合、それは単に行われません。
+    derivation:
+      - 局面 B：P1 手牌 1 張，「2枚になるように捨てる」＝捨 0 張 → 沒有選擇、什麼都不做
+status: draft
+author:
+  - astra
+  - fable
+verified_by: []
+scenarios:
+  - name: '[astra] 場數 1/1'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+            field:
+              - id: a0
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b0
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a0
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b0
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.field:
+            - a0
+          P2.field:
+            - b0
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b0
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - b0
+          P2.field:
+            - a0
+          P2.field.a0:
+            acted: true
+            hp: 1
+            power: 5
+  - name: '[astra] 場數 1/5'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+            field:
+              - id: a0
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b0
+                card: BP01-173
+              - id: b1
+                card: BP01-173
+              - id: b2
+                card: BP01-173
+              - id: b3
+                card: BP01-173
+              - id: b4
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a0
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b0
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.field:
+            - a0
+          P2.field:
+            - b0
+            - b1
+            - b2
+            - b3
+            - b4
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b0
+            - do: resolve-choice
+              select:
+                - b1
+            - do: resolve-choice
+              select:
+                - b2
+            - do: resolve-choice
+              select:
+                - b3
+            - do: resolve-choice
+              select:
+                - b4
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a0
+            - b0
+          P2.field:
+            - b1
+            - b2
+            - b3
+            - b4
+          P1.field.a0:
+            acted: true
+            hp: 1
+            power: 5
+  - name: '[astra] 場數 5/5'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+            field:
+              - id: a0
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+              - id: a1
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+              - id: a2
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+              - id: a3
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+              - id: a4
+                card: BP01-173
+                state:
+                  hp: 1
+                  power: 5
+                  acted: true
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b0
+                card: BP01-173
+              - id: b1
+                card: BP01-173
+              - id: b2
+                card: BP01-173
+              - id: b3
+                card: BP01-173
+              - id: b4
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a0
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b0
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.field:
+            - a0
+            - a1
+            - a2
+            - a3
+            - a4
+          P2.field:
+            - b0
+            - b1
+            - b2
+            - b3
+            - b4
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b0
+            - do: resolve-choice
+              select:
+                - b1
+            - do: resolve-choice
+              select:
+                - b2
+            - do: resolve-choice
+              select:
+                - b3
+            - do: resolve-choice
+              select:
+                - b4
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a0
+            - a1
+            - a2
+            - a3
+            - a4
+          P2.field:
+            - b0
+            - b1
+            - b2
+            - b3
+            - b4
+          P1.field.a0:
+            acted: true
+            hp: 1
+            power: 5
+  - name: '[fable] A P1（回合玩家）先選捨 1 張，P2 看到後再選捨 2 張'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 7
+          P2: 6
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 7
+            max: 7
+          zones:
+            hand:
+              - id: a1
+                card: BP10-076
+              - id: a2
+                card: BP01-173
+              - id: a3
+                card: BP01-176
+              - id: a4
+                card: BP01-180
+            deck:
+              - filler: 20
+        P2:
+          construction: class
+          leader:
+            class: ドラゴン
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            hand:
+              - id: b1
+                card: BP01-173
+              - id: b2
+                card: BP01-176
+              - id: b3
+                card: BP01-099
+              - id: b4
+                card: BP01-099
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 3
+      - n: 3
+        by: P1
+        at: resolve
+        of:
+          decision: 2
+          occurrence: 1
+        do: resolve-choice
+        select:
+          - a4
+      - n: 4
+        by: P2
+        at: resolve
+        of:
+          decision: 2
+          occurrence: 2
+        do: resolve-choice
+        select:
+          - b3
+          - b4
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select:
+                - a2
+            - do: resolve-choice
+              select:
+                - a3
+            - do: resolve-choice
+              select:
+                - a4
+      - at: after-decision-3
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b1
+                - b2
+            - do: resolve-choice
+              select:
+                - b1
+                - b3
+            - do: resolve-choice
+              select:
+                - b1
+                - b4
+            - do: resolve-choice
+              select:
+                - b2
+                - b3
+            - do: resolve-choice
+              select:
+                - b2
+                - b4
+            - do: resolve-choice
+              select:
+                - b3
+                - b4
+        assert:
+          P1.hand:
+            - a2
+            - a3
+          P1.cemetery:
+            - a4
+        events:
+          - kind: 捨てる
+            player: P1
+            object: a4
+      - at: after-decision-3
+        view: P2
+        outcome: paused
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b1
+                - b2
+            - do: resolve-choice
+              select:
+                - b1
+                - b3
+            - do: resolve-choice
+              select:
+                - b1
+                - b4
+            - do: resolve-choice
+              select:
+                - b2
+                - b3
+            - do: resolve-choice
+              select:
+                - b2
+                - b4
+            - do: resolve-choice
+              select:
+                - b3
+                - b4
+        assert:
+          P1.cemetery:
+            - a4
+          P1.hand_count: 2
+          knowledge:
+            knows:
+              - a4
+            does_not_know:
+              - a2
+              - a3
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.hand:
+            - b1
+            - b2
+          P2.cemetery:
+            - b3
+            - b4
+          P1.field:
+            - a1
+        events:
+          - kind: 捨てる
+            player: P2
+            object: b3
+            group: 1
+          - kind: 捨てる
+            player: P2
+            object: b4
+            group: 1
+  - name: '[fable] B P1 手牌已 ≤2 → P1 不捨、不停下；只有 P2 選'
+    inherit: '[fable] A P1（回合玩家）先選捨 1 張，P2 看到後再選捨 2 張'
+    setup:
+      players:
+        P1:
+          zones:
+            hand:
+              - id: a1
+                card: BP10-076
+              - id: a2
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 3
+      - n: 3
+        by: P2
+        at: resolve
+        of:
+          decision: 2
+          occurrence: 1
+        do: resolve-choice
+        select:
+          - b1
+          - b2
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b1
+                - b2
+            - do: resolve-choice
+              select:
+                - b1
+                - b3
+            - do: resolve-choice
+              select:
+                - b1
+                - b4
+            - do: resolve-choice
+              select:
+                - b2
+                - b3
+            - do: resolve-choice
+              select:
+                - b2
+                - b4
+            - do: resolve-choice
+              select:
+                - b3
+                - b4
+        assert:
+          P1.hand:
+            - a2
+          P1.cemetery: []
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - a2
+          P2.hand:
+            - b3
+            - b4
+          P2.cemetery:
+            - b1
+            - b2
+        forbidden_events:
+          - kind: 捨てる
+            player: P1

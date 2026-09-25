@@ -1,0 +1,457 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP13-043
+kind: card
+must_pass: false
+mechanisms:
+  - 奪取、交換、變身
+  - 區域移動
+  - '5.22'
+  - 1.3.4
+  - 3.1.2.3
+  - 10.7.4.3
+  - 8.4.2.1
+  - 同時選擇
+cards:
+  - BP01-173
+  - BP02-041
+  - BP13-043
+  - BP20-073
+  - BP04-092
+  - SD02-002
+  - BP01-180
+why: "[astra] 渡す只改 master 不改 owner；從对方場離場時仍回原擁有者區域。\n[fable] 混沌の流儀「各プレイヤーは、自身の場のフォロワー1体を指定し、ターンプレイヤーから順にそれを自身以外のプレイヤーに渡す」： 指定依 1.3.4 回合玩家先、對手看到後再指定（Q1766）；渡す不是新物件（5.22.4）、ファンファーレ不誘發（Q1751、10.7.4.3）； 被渡的從者當回合不能攻擊（Q1755，8.4.2.1）；離場時回擁有者的區域（5.22.5），但ラストワード由現在的主人打出（Q1761）→ 「自分のリーダー」是 P2 的リーダー。"
+discriminates: "[astra] 把 master 當 owner 會把 a 放到 P2 的墓場或手牌。\n[fable] 讓兩人同時盲選、或 P2 先選的引擎 awaiting 順序不同；把渡す做成「重新出場」的引擎會誘發ファンファーレ（多出待機）； 允許被渡的從者當回合攻擊的引擎 after-decision-4 會 resolved；LW 由擁有者結算的引擎會讓 P1 而不是 P2 回體力；被破壞的 a1 若進 P2 墓場也錯。"
+refs:
+  rules:
+    - 5.22.3
+    - 5.22.5
+    - 1.3.4
+    - 5.22.2
+    - 5.22.4
+    - 3.1.2
+    - 3.1.2.3
+    - 10.7.4.3
+    - 8.4.2.1
+    - 12.5.3
+    - 10.7.7
+  qa:
+    - Q1747
+    - Q1766
+    - Q1751
+    - Q1755
+    - Q1761
+evidence:
+  - ref: Q1747
+    quote: "「渡す」とは自分の場のカードを相手の場へ移動し、そのカードやそのカードの持つ能力を相手が使用することができる能力です。\n渡したフォロワーが場から場以外の領域へ移動する場合、持ち主の領域へ移動します。\n例えば、渡したフォロワーが場から墓場へ移動する場合、持ち主の墓場へ移動します。"
+  - ref: cr 5.22.3
+    quote: "カードのマスターが変更された場合でも、カードの\nオーナーは変更されません。"
+    derivation:
+      - 渡す只改 master 不改 owner；從对方場離場時仍回原擁有者區域。
+  - ref: cr 5.22.5
+    quote: "奪ったまたは渡したカードが場以外の領域に移動\nする場合、そのカードのオーナーの領域に移動しま\nす。"
+    derivation:
+      - 渡す只改 master 不改 owner；從对方場離場時仍回原擁有者區域。
+  - ref: Q1766
+    quote: "複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、ターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。\n以下、処理順です。\n\n①ターンプレイヤーは、自身のフォロワー1体を指定します。\n②非ターンプレイヤーは、自身のフォロワー1体を指定します。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）\n③ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。\n④非ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。"
+    derivation:
+      - 同一句要求雙方各指定；按 Q1766 與 1.3.4 以 P1、P2 兩個輸入點表達。契約 10.7 已明定不同玩家各有一個輸入點；此項不再待裁定。
+  - ref: Q1766
+    quote: ①ターンプレイヤーは、自身のフォロワー1体を指定します。②非ターンプレイヤーは、自身のフォロワー1体を指定します。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）③ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。④非ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。
+  - ref: Q1751
+    quote: いいえ。誘発しません。
+  - ref: Q1755
+    quote: いいえ。攻撃することはできません。渡されたフォロワーが【疾走】や【突進】を持っている場合、そのフォロワーは渡されたターンに攻撃することができます。
+  - ref: Q1761
+    quote: 渡されたフォロワーの《ラストワード》能力は、渡されたプレイヤーがプレイします。
+  - ref: cr 5.22.5
+    quote: 奪ったまたは渡したカードが場以外の領域に移動する場合、そのカードのオーナーの領域に移動します。
+status: draft
+author:
+  - astra
+  - fable
+verified_by: []
+scenarios:
+  - name: '[astra] cemetery'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+              - id: q
+                card: BP20-073
+            field:
+              - id: a
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b
+      - n: 4
+        by: P1
+        at: main
+        do: play
+        card: q
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - b
+          P2.field: []
+          P1.cemetery:
+            - s
+            - q
+            - a
+          P2.cemetery: []
+  - name: '[astra] hand'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+              - id: q
+                card: BP02-041
+            field:
+              - id: a
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b
+      - n: 4
+        by: P1
+        at: main
+        do: play
+        card: q
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - b
+          P2.field: []
+          P1.hand:
+            - a
+          P2.hand: []
+  - name: '[fable] A P1 先指定、P2 後指定；交換後被渡的不能攻擊；被渡的デモンビーター被破壞 → 回 P1 墓場、LW 由 P2 打出讓 P2 回體力'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 7
+          P2: 6
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ウィッチ
+            life: 20
+          pp:
+            current: 7
+            max: 7
+          zones:
+            field:
+              - id: a1
+                card: BP04-092
+              - id: a2
+                card: BP01-173
+            hand:
+              - id: a0
+                card: BP13-043
+              - id: a3
+                card: BP01-180
+            deck:
+              - filler: 20
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 7
+          zones:
+            field:
+              - id: b1
+                card: SD02-002
+              - id: b2
+                card: BP04-092
+            hand:
+              - filler: 3
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a0
+      - n: 2
+        by: P1
+        at: resolve
+        of:
+          decision: 1
+          occurrence: 1
+        do: resolve-choice
+        select:
+          - a1
+      - n: 3
+        by: P2
+        at: resolve
+        of:
+          decision: 1
+          occurrence: 2
+        do: resolve-choice
+        select:
+          - b2
+      - n: 4
+        by: P1
+        at: main
+        do: attack
+        attacker: b2
+        target: P2.leader
+      - n: 5
+        by: P1
+        at: main
+        do: play
+        card: a3
+      - n: 6
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 3
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select:
+                - a1
+            - do: resolve-choice
+              select:
+                - a2
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P2
+          choices:
+            - do: resolve-choice
+              select:
+                - b1
+            - do: resolve-choice
+              select:
+                - b2
+        assert:
+          P1.field:
+            - a1
+            - a2
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a2
+            - b2
+          P2.field:
+            - b1
+            - a1
+          P1.pp.current: 1
+          semantic_state.pending_triggers: []
+        events:
+          - kind: 移動
+            object: a1
+            from: P1.field
+            to: P2.field
+          - kind: 移動
+            object: b2
+            from: P2.field
+            to: P1.field
+        forbidden_events:
+          - kind: 待機
+      - at: after-decision-4
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P1.field.b2:
+            acted: false
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: a1
+                  line: 3
+        assert:
+          P2.field:
+            - b1
+          P2.field.b1:
+            hp: 2
+          P1.cemetery:
+            - a0
+            - a3
+            - a1
+          P2.cemetery: []
+        events:
+          - kind: ダメージ
+            source: a3
+            target: a1
+            amount: 1
+          - kind: 破壊
+            object: a1
+            by: rule-11.3.1
+          - kind: 待機
+            ability:
+              source: a1
+              line: 3
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 21
+          P1.leader.life: 20
+        events:
+          - kind: 体力増加
+            target: P2.leader
+            amount: 1

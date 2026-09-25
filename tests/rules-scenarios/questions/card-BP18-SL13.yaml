@@ -1,0 +1,444 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP18-SL13
+kind: card
+must_pass: true
+mechanisms:
+  - 10.4.4.1
+  - 10.4.7.2
+  - 10.6.2.5
+  - 7.4.8
+cards:
+  - BP01-173
+  - BP01-176
+  - BP13-060
+  - BP18-SL13
+  - BP18-SL14
+why: El 給特定 EX 卡的本回合 -3 與爆炎の咆哮的可選 +3 合算後才截至零；不減費是期限已結束的對照，另實際跨過兩方回合檢查7.4.8。
+discriminates: 先把 2-3 截零再加 3 會錯付 3；遺漏減費會付 5；未付追加費仍搜尋會多出輸入點；減費未到期移除會令下回合少付2。
+refs:
+  rules:
+    - 10.4.4.1
+    - 10.4.7.2
+    - 10.6.2.5
+    - 7.4.8
+  qa:
+    - Q2386
+evidence:
+  - ref: cr 10.4.4.1
+    quote: カードをプレイする際のコストの数値を変更する効果は、このカードのコストの情報の値を変更するのではなく、そのコストのために減少する PP の点数を変更します。
+  - ref: cr 10.4.7.2
+    quote: 何らかのカードや能力を‘プレイする際、（処理）：（効果）’と書かれている場合、これはそのカードや能力をプレイする際にコストとしてその処理を実行することでその効果を適用することを選択できる選択肢（10.6.2.2）を意味します。
+  - ref: cr 10.6.2.5
+    quote: プレイするためのコストがある場合、そのコストを決定し、その後すべてのコストを支払います。
+  - ref: cr 7.4.8
+    quote: すべての‘ターンの終わりまで’を期限とする効果や‘そのターン中’期限とする効果が取り除かれます。
+  - ref: Q2386
+    quote: はい。コスト2でプレイできます。
+  - ref: BP18-SL14
+    quote: "【進化時】自分のデッキの上3枚を見る。その中から、武闘竜人・カード1枚をEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを-3する。\n【超進化時】『青春の一撃』1枚をEXエリアに置く。"
+  - ref: BP13-060
+    quote: "これをプレイする際、コストを+3してよい。\n相手の場のフォロワー1体を選ぶ。それに3ダメージ。コストを+3したなら、自分のデッキから『焦熱の竜翼・ドラーク』1枚を探し、場に出す。それは【指定攻撃】を持つ。"
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 本回合減費=True 追加費用=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP13-060
+            field:
+              - id: el
+                card: BP18-SL13
+                state:
+                  evolved: true
+                  evolved_with: ee
+            evolution:
+              - id: ee
+                card: BP18-SL14
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+      semantic_state:
+        continuous_effects:
+          - id: discount
+            source: el
+            text: このターン、それをプレイする際、コストを-3する。
+            applies_to:
+              - a
+            until: end-of-turn
+            order: 1
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+        optional_costs:
+          additional:
+            pp: 3
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select: []
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - d
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 3
+          P2.field.b:
+            hp: 3
+          P1.cemetery:
+            - a
+          P1.ex: []
+          P1.deck:
+            - d
+  - name: 本回合減費=True 追加費用=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP13-060
+            field:
+              - id: el
+                card: BP18-SL13
+                state:
+                  evolved: true
+                  evolved_with: ee
+            evolution:
+              - id: ee
+                card: BP18-SL14
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+      semantic_state:
+        continuous_effects:
+          - id: discount
+            source: el
+            text: このターン、それをプレイする際、コストを-3する。
+            applies_to:
+              - a
+            until: end-of-turn
+            order: 1
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+        optional_costs:
+          additional: decline
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 5
+          P2.field.b:
+            hp: 3
+          P1.cemetery:
+            - a
+          P1.ex: []
+          P1.deck:
+            - d
+  - name: 本回合減費=False 追加費用=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP13-060
+            field:
+              - id: el
+                card: BP18-SL13
+                state:
+                  evolved: true
+                  evolved_with: ee
+            evolution:
+              - id: ee
+                card: BP18-SL14
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+        optional_costs:
+          additional:
+            pp: 3
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select: []
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - d
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P2.field.b:
+            hp: 3
+          P1.cemetery:
+            - a
+          P1.ex: []
+          P1.deck:
+            - d
+  - name: 保留EX卡跨過本回合結束，下次自回合減費失效
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+              - filler: 20
+            ex:
+              - id: a
+                card: BP13-060
+            field:
+              - id: el
+                card: BP18-SL13
+                state:
+                  evolved: true
+                  evolved_with: ee
+            evolution:
+              - id: ee
+                card: BP18-SL14
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: bd
+                card: BP01-173
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+      semantic_state:
+        continuous_effects:
+          - id: discount
+            source: el
+            text: このターン、それをプレイする際、コストを-3する。
+            applies_to:
+              - a
+            until: end-of-turn
+            order: 1
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+      - n: 3
+        by: P2
+        at: main
+        do: end-phase
+      - n: 4
+        by: P2
+        at: end
+        do: guard-act
+        select: []
+      - n: 5
+        by: P1
+        at: quick
+        do: pass
+      - n: 6
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+        optional_costs:
+          additional: decline
+    random: {}
+    expected:
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn.active: P1
+          turn.elapsed_turns.P1: 9
+          P1.pp.current: 10
+          semantic_state.continuous_effects: []
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.ex: []
+          P1.hand:
+            - d
+          P2.field.b:
+            hp: 3

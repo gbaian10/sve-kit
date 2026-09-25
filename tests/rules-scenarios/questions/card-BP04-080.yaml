@@ -1,0 +1,110 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP04-080
+kind: card
+must_pass: true
+mechanisms: [連擊、覺醒、真紅, 13.5.2, 取代效果, 持續效果與禁止, 1.3.2.2, 本回合歷史]
+cards: [BP04-080, BP19-090, BP05-108, BP01-176, BP01-173]
+why: >-
+  ハウリングデーモン{ファンファーレ}「それに4ダメージ。【真紅】状態なら、代わりに8ダメージ」：真紅＝自己回合中本回合リーダー體力曾減少（13.5.2.2）。
+  A：先用バイオレントスクリーム【2】自傷 1 → 真紅 → 8 傷害。B：自己場上有リリエル「自分のリーダーは能力によるダメージを受けない」→ 自傷 1 變 0 →
+  傷害行動不存在、體力沒減少 → 不是真紅（Q1329、Q780 同旨）→ 4 傷害。
+discriminates: >-
+  沒記錄體力減少的引擎 A 只造成 4；把「受けない」實作成「受了 0 傷害但仍算減少／仍算受傷」的引擎 B 會造成 8。
+refs:
+  rules: [13.5.2.1, 13.5.2.2, 10.10.2.5.1, 5.14.2, 1.3.2.2, 10.4.7.4, 12.4.3]
+  qa: [Q1329, Q780, Q2623]
+evidence:
+  - ref: cr 13.5.2.2
+    quote: ‘【真紅】状態’とは‘現在があなたのターン中で、このターン中にあなたのリーダーの体力が減少したことがあった’を意味します。
+  - ref: Q780
+    quote: いいえ。【真紅】状態も「このターン中に自分のリーダーの体力が減少した」も満たしません。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 自傷 1 → 真紅 → 8 傷害
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 6, max: 6}
+          zones:
+            hand:
+              - {id: a1, card: BP04-080}          # ハウリングデーモン（コスト5）
+              - {id: a2, card: BP19-090}          # バイオレントスクリーム（コスト0；【2】{コスト1}）
+            deck:
+              - {id: d1, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            field:
+              - {id: b1, card: BP01-176}          # 天剣の乙女 4/6
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a2, options: [2]}
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, choice: execute}
+      - {n: 3, by: P1, at: main, do: play, card: a1}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 19
+          P1.pp.current: 5
+          P1.hand: [a1, d1]
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P1.pp.current: 0
+        events:
+          - {kind: ダメージ, source: a1, target: b1, amount: 8}
+        forbidden_events:
+          - {kind: ダメージ, amount: 4}
+
+  - name: B 有リリエル：自傷變 0 → 體力沒減少 → 不是真紅 → 4 傷害
+    inherit: A 自傷 1 → 真紅 → 8 傷害
+    setup:
+      players:
+        P1:
+          zones:
+            field:
+              - {id: a3, card: BP05-108}          # 神弓の座天使・リリエル
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a2, options: [2]}
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, choice: execute}
+      - {n: 3, by: P1, at: main, do: play, card: a1}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 20
+          P1.hand: [a1, d1]
+        forbidden_events:
+          - {kind: ダメージ, target: P1.leader}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b1: {hp: 2}
+        events:
+          - {kind: ダメージ, source: a1, target: b1, amount: 4}

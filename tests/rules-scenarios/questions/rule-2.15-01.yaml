@@ -1,0 +1,411 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-2.15-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 進化卡自身的能力
+  - 持續效果與禁止
+cards:
+  - BP01-173
+  - BP01-176
+  - BP09-055
+  - BP09-P17
+why: 同一雙面進化卡，場上資訊從進化領域實際朝上的面取得；邪竜可無視守護，聖竜不行。
+discriminates: 永遠讀 faces[0] 的實作會拒絕邪竜攻擊；把兩面合併則錯允許聖竜。
+refs:
+  rules:
+    - 2.15.3.1
+    - 5.16.1.2
+  qa:
+    - Q1188
+    - Q1188
+evidence:
+  - ref: Q1188
+    quote: はい。『聖竜・リントヴルム』か『邪竜・リントヴルム』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。
+  - ref: cr 2.15.3.1
+    quote: "場や進化領域にある両面カードの情報を\n参照する場合、実際にプレイヤーに見えてい\nる面の情報を参照します。\n3. プレイヤーに関する情報"
+    derivation:
+      - 同一雙面進化卡，場上資訊從進化領域實際朝上的面取得；邪竜可無視守護，聖竜不行。
+  - ref: cr 5.16.1.2
+    quote: "これ以降、場のカードに進化領域のカード\nが関連付けられている間、そのカードの情報\nは、コストを除きその進化領域のカードの情報\nを持つものとして扱います（10.9.1.1.1）。"
+    derivation:
+      - 同一雙面進化卡，場上資訊從進化領域實際朝上的面取得；邪竜可無視守護，聖竜不行。
+  - ref: Q1188
+    quote: はい。『聖竜・リントヴルム』か『邪竜・リントヴルム』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 朝上面 0 有橫置守護=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP09-055
+                state:
+                  evolved: true
+                  evolved_with: e
+            evolution:
+              - id: e
+                card: BP09-P17
+                state:
+                  face: 0
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field: []
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+  - name: 朝上面 0 有橫置守護=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP09-055
+                state:
+                  evolved: true
+                  evolved_with: e
+            evolution:
+              - id: e
+                card: BP09-P17
+                state:
+                  face: 0
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: g
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P1.field.a:
+            acted: false
+  - name: 朝上面 1 有橫置守護=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP09-055
+                state:
+                  evolved: true
+                  evolved_with: e
+            evolution:
+              - id: e
+                card: BP09-P17
+                state:
+                  face: 1
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: g
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+  - name: 實際進化選面 0 再攻擊守護後方主戰者
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            field:
+              - id: a
+                card: BP09-055
+            evolve_deck:
+              - id: e
+                card: BP09-P17
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: g
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a
+        evolve_card: e
+        face: 0
+        pay:
+          pp: 5
+          ep: 0
+      - n: 2
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 5
+          P1.field.a:
+            evolved: true
+            evolved_with: e
+          P1.evolution.e:
+            face: 0
+      - at: after-decision-2
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P1.field.a:
+            acted: false
+  - name: 實際進化選面 1 再攻擊守護後方主戰者
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            field:
+              - id: a
+                card: BP09-055
+            evolve_deck:
+              - id: e
+                card: BP09-P17
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: g
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a
+        evolve_card: e
+        face: 1
+        pay:
+          pp: 5
+          ep: 0
+      - n: 2
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 5
+          P1.field.a:
+            evolved: true
+            evolved_with: e
+          P1.evolution.e:
+            face: 1
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
