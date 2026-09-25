@@ -1,0 +1,109 @@
+# Fixed inputs and third-party expectations for `sve_scenario_runner::arch`.
+# Node k is the position after the k-th decision of the path (N0 is the start).
+game: arch-fixture-game
+seed: 9f3c1a7e5b2d4c6f8a0e1b3d5f7a9c2e4b6d8f0a1c3e5a7b9d2f4a6c8e0b1d3f
+alt_seed: 2e4b6d8f0a1c3e5a7b9d2f4a6c8e0b1d3f9f3c1a7e5b2d4c6f8a0e1b3d5f7a9c
+
+replay:
+  # Path P on position M (flow-missed-trigger-01 A, legal decisions only).
+  path:
+    - {n: 1, by: P1, at: main, do: play, card: a1}
+    - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a1, acted: false}
+    - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+    - {n: 4, by: P1, at: resolve, of: {decision: 3, occurrence: 1}, do: resolve-choice, select: [a3]}
+    - {n: 5, by: P1, at: resolve, of: {decision: 3, occurrence: 2}, do: place-acted, object: a3, acted: false}
+    - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+    - {n: 7, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
+    - {n: 8, by: P2, at: quick, do: pass}
+    - {n: 9, by: P1, at: main, do: end-phase}
+    - {n: 10, by: P1, at: end, do: guard-act, select: []}
+    - {n: 11, by: P2, at: quick, do: pass}
+    - {n: 12, by: P2, at: main, do: end-phase}
+    - {n: 13, by: P1, at: quick, do: pass}
+  # R3: the other branch places a3 acted instead of standing.
+  alt_step5: {n: 5, by: P1, at: resolve, of: {decision: 3, occurrence: 2}, do: place-acted, object: a3, acted: true}
+  fixed:
+    - node: 4
+      awaiting_exact:
+        by: P1
+        choices:
+          - {do: place-acted, object: a3, acted: false}
+          - {do: place-acted, object: a3, acted: true}
+      assert: {P1.pp.current: 1}
+    - node: 5
+      assert: {P1.field: [a2, a6, a1, a3]}
+      record_deck: {path: P1.deck, of: [a4, a5]}
+    - node: 8
+      assert: {P2.leader.life: 17}
+    - node: 9
+      awaiting_do: {by: P1, do: guard-act}
+    - node: 10
+      awaiting_do: {by: P2, do: pass}
+    - node: 11
+      contains: {P2.hand: b1}
+    - node: 12
+      awaiting_do: {by: P1, do: pass}
+    - node: 13
+      drew_recorded: {hand: P1.hand, deck: P1.deck}
+  # The node where P1 is searching its deck (R5 pair 2).
+  search_node: 3
+  search_do: resolve-choice
+  # Objects whose identity a view may not know, by node range on path P (inclusive).
+  hidden:
+    - {view: P1, objects: [b1], from: 0, to: 13}
+    - {view: P2, objects: [a3], from: 0, to: 3}
+    - {view: P2, objects: [a4, a5], from: 0, to: 13}
+    - {view: P2, objects: [b1], from: 0, to: 10}
+  # R2b: after the path is played to N13, a replay branch from N3 carries identities.
+  branch_from: 3
+  # P2 also saw its own b1 (drawn at N11) on the source branch.
+  branch_known: {P1: [a3, a4, a5], P2: [a3, b1]}
+  branch_unknown: {P2: [a4, a5]}
+  # R6
+  cause:
+    placed: {kind: 場に出す, object: a3}
+    ability: {source: a1, line: 2}
+    ability_step: 3
+    trigger: {kind: 待機, ability: {source: a3, line: 2}}
+  # R4 on position L.
+  undo:
+    path:
+      - {n: 1, by: P1, at: main, do: play, card: a}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a, line: 2}}}
+    continue_with: {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d]}
+    known: {P1: [d, x], P2: [a]}
+    unknown: {P2: [d, x]}
+    board: [P1.hand_count, P1.deck_count, P1.field, P2.hand_count, P2.deck_count, P2.field]
+    hidden:
+      - {view: P1, objects: [d, x], from: 0, to: 1}
+      - {view: P2, objects: [a], from: 0, to: 0}
+      - {view: P2, objects: [d, x], from: 0, to: 2}
+
+assist:
+  # Sequence A (position M): the first two decisions of path P, then a manual attack.
+  prefix: 2
+  manual_attack: {n: 3, by: P1, at: main, do: attack, attacker: a2, target: P2.leader, manual: true}
+  a2_path: P1.field.a2
+  pending: {source: a1, line: 2}
+  refs_any: [7.3.4, 10.7.3.1]
+  # A3: after Rewind, path P steps 3 to 6.
+  resume_outcomes: [paused, paused, resolved, pending-cancelled]
+  resume_events:
+    - {kind: 費用成立, ability: {source: a1, line: 2}}
+    - {kind: 公開, object: a3, to: P2, source: a1}
+    - {kind: 場に出す, object: a3, from: P1.deck}
+    - {kind: 待機, ability: {source: a3, line: 2}}
+    - {kind: 待機取消, ability: {source: a3, line: 2}}
+  resume_field: {P1.field: [a2, a6, a1, a3]}
+  # A4 and sequence B.
+  other_attack: {by: P1, at: main, do: attack, attacker: a6, target: P2.leader}
+  opponent_pass: {by: P2, at: quick, do: pass}
+  search_do: resolve-choice
+  # Sequence B: path P to N8, then P1 sets P2's life by hand.
+  override_after: 8
+  manual_set: {n: 9, by: P1, at: main, do: set, path: P2.leader.life, value: 18, manual: true}
+  life_path: P2.leader.life
+  life_shadow: 17
+  life_manual: 18
+  life_after_rewind: 14
+  life_after_adopt: 15

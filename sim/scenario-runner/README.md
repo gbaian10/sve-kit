@@ -111,3 +111,74 @@ engine and its adapter are connected:
   - When the viewer can identify a public card with the same number as a hidden one, a leak of the hidden card's number looks like a mention of the public card
   - The runner cannot tell these apart in a payload of arbitrary shape (`known_limit_public_copy_masks_a_card_number_leak` pins this down)
   - Cover it with paired positions on the real player payload: same public information, different hidden cards, identical output for the viewer
+
+## Architecture fixtures (`arch`)
+
+Phase D also asks each design for two thin prototypes: **replay** and **assist**.
+`sve_scenario_runner::arch` checks both with the same positions and third-party
+expectations, in [`tests/architecture-fixtures/`](../../tests/architecture-fixtures/):
+`positions.yaml` (contract-format setups) and `checks.yaml` (paths, fixed assertions,
+seeds, hidden identities). The design is `spec/design/d-prep/arch-fixture-design.md` (r5).
+
+```rust
+use sve_scenario_runner::arch::{ArchOptions, check_assist, check_replay, load_fixtures};
+
+let fixtures = load_fixtures("tests/architecture-fixtures".as_ref())?;
+// A fresh instance per call: several assertions need an engine that never saw the game.
+let mut replay = || -> Box<dyn ReplayEngine> { Box::new(MyReplayAdapter::new()) };
+let mut assist = || -> Box<dyn AssistEngine> { Box::new(MyAssistAdapter::new()) };
+let options = ArchOptions::default(); // plus the approved id and skip paths, see below
+for report in check_replay(&mut replay, &fixtures, &options)
+    .into_iter()
+    .chain(check_assist(&mut assist, &fixtures, &options))
+{
+    println!("{} {:?}", report.id, report.outcome);
+}
+```
+
+| Id | What it checks |
+| --- | --- |
+| R0 | The digest tells states apart: along the path, across a hidden card or deck order, across seeds |
+| R1 | Save at a pause mid-resolution, restore into a fresh instance, continue: same outcomes, events, digests; the same shuffle and draw as a run that was never saved |
+| R2 | A replay branch at N3 has the digest of a fresh replay to N3 |
+| R2b | A replay branch taken after the game went on carries what each player saw, and no more |
+| R3 | Branching does not change the source line; node ids stay put and are unique per branch |
+| R4 | Undo carries seen identities for both players, is not a decision, is logged, and keeps the original line playable |
+| R5 | No hidden id, hidden card number or seed in any player output; paired positions give equal player exports (hidden card, deck order, shuffle result) |
+| R6 | Events trace their `cause` back to the deciding node through the ability |
+| A1–A3 | A skipped trigger is recorded as a divergence, automation halts, Rewind realigns and play continues |
+| A4 | Adopt keeps the pending trigger |
+| B1–B3 | A manual value override is recorded; Rewind and Adopt give different, correct follow-ups |
+
+Each result is `pass`, `fail` (with reasons), `unsupported` or `adapter-error`, as in the runner.
+
+### Adapter contract for `arch`
+
+- `advance` returns `None` when it refuses (it must, while a divergence is unresolved)
+- `admin_log` entries carry `kind: undo` or `kind: branch`
+- Events carry `id` and `cause`: `{event: <id>}`, `{decision: <node id>}` or `{rule: "<clause>"}`
+- Divergences are `{id, kind, expected, actual, refs, resolved}`; only `resolved` may change
+- Node and event ids may be random; paired comparisons relabel them by the order the checks
+  received them. Node ids inside player payloads are only relabelled at paths listed in
+  `ArchOptions::node_id_paths`; other engine identifiers (transport counters and the like)
+  go in `ArchOptions::skip_paths`. **Both lists are approved by the third party before the
+  run** and reported with the results; the leak scan always sees the raw payload
+
+### Tests of the checks
+
+`tests/arch.rs` runs scripted engines (`tests/arch_support/`): a correct skeleton that
+passes every assertion, and one mutation per broken skeleton that must be caught:
+
+| Mutation | Caught by |
+| --- | --- |
+| Save keeps the board but not the seed | R1 |
+| Branch shares mutable state with its source | R3 |
+| Constant digest | R0 |
+| Digest without carried knowledge | R2b, R4 |
+| Undo forgets what was seen / forgets the opponent's side | R4 |
+| Undo deletes the original line | R4 |
+| Export leaks the seed / the shuffled deck order / the opponent's hidden cards | R5 |
+| Broken `cause` link | R6 |
+| Rewind drops or rewrites the divergence | A3, B2 |
+| Automation advances while diverged | A2 |
+| Adopt ignored / Adopt clears the pending trigger | A4, B3 / A4 |

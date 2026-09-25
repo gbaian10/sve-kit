@@ -479,7 +479,7 @@ fn leaks(
 }
 
 /// Object id → card number, from every zone of the setup.
-fn card_numbers(setup: &Value) -> BTreeMap<String, String> {
+pub(crate) fn card_numbers(setup: &Value) -> BTreeMap<String, String> {
     let mut out = BTreeMap::new();
     let players = setup.get("players").and_then(Value::as_object);
     for player in players.into_iter().flat_map(|p| p.values()) {

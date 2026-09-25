@@ -1,0 +1,105 @@
+# Positions for the architecture fixtures (replay and assist prototypes).
+# Derived from verified questions; see spec design "arch-fixture-design" r5.
+# M: flow-missed-trigger-01 A without scripted shuffles, one real card on top of
+#    P2's deck, and a second ready attacker a6 for P1.
+# L: flow-private-look-01 BP01-042, unchanged.
+schema: sve-exam/2.1
+id: arch-positions
+kind: flow
+must_pass: false
+status: draft
+scenarios:
+  - name: M
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 4, max: 4}
+          zones:
+            field:
+              - {id: a2, card: SD02-002}
+              - {id: a6, card: SD02-002}
+            hand:
+              - {id: a1, card: BP04-092}
+            deck:
+              - {id: a3, card: BP04-092}
+              - {id: a4, card: BP01-173}
+              - {id: a5, card: BP01-173}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {id: b1, card: BP01-173}
+              - {filler: 19}
+    random: {}
+
+  - name: M'
+    inherit: M
+    setup:
+      players:
+        P1:
+          zones:
+            deck:
+              - {id: a3, card: BP04-092}
+              - {id: a4, card: BP01-173}
+              - {id: a5, card: BP01-042}
+    random: {}
+
+  - name: M''
+    inherit: M
+    setup:
+      players:
+        P1:
+          zones:
+            deck:
+              - {id: a4, card: BP01-173}
+              - {id: a3, card: BP04-092}
+              - {id: a5, card: BP01-173}
+    random: {}
+
+  - name: M' shuffled a4 a5
+    inherit: M'
+    random:
+      shuffles:
+        - {player: P1, zone: deck, result: [a4, a5]}
+
+  - name: M' shuffled a5 a4
+    inherit: M'
+    random:
+      shuffles:
+        - {player: P1, zone: deck, result: [a5, a4]}
+
+  - name: L
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 8, P2: 7}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ニュートラル, life: 20}
+          pp: {current: 10, max: 10}
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - {id: d, card: BP01-042}
+              - {id: x, card: BP01-173}
+            hand:
+              - {id: a, card: BP19-SL26}
+        P2:
+          construction: class
+          leader: {class: ニュートラル, life: 20}
+          pp: {current: 10, max: 10}
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - {filler: 20}
+    random: {}
