@@ -65,6 +65,7 @@ class CardRecord:
     faces: list[Face]
     release_date: str | None
     errata_url: str | None
+    notes: list[str]
     qa: list[QA]
 
 
@@ -83,6 +84,7 @@ def extract_card(body: bytes, *, number: str) -> CardRecord:
         faces=faces,
         release_date=_release_date(under),
         errata_url=attribute(errata, "href") if errata is not None else None,
+        notes=_notes(detail),
         qa=_qa(under),
     )
 
@@ -151,6 +153,15 @@ def _illustrator(inner: LexborNode) -> str | None:
         if heading is not None:
             return _text(heading) or None
     return None
+
+
+def _notes(detail: LexborNode) -> list[str]:
+    # Errata and distribution notices share the `.illustrator` class but have no `.heading`.
+    return [
+        text
+        for node in select_all(detail, ".illustrator")
+        if select_one(node, ".heading") is None and (text := _render(node))
+    ]
 
 
 def _release_date(under: LexborNode | None) -> str | None:

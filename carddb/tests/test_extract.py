@@ -60,6 +60,7 @@ def test_errata_release_date_and_rulings() -> None:
     assert card.release_date == "2022-04-28"
     # The errata notice must not be mistaken for the illustrator.
     assert card.faces[0].illustrator == "ねじ太"
+    assert card.notes == ["能力テキストにエラッタが含まれます。くわしくはこちら"]
     assert card.qa
     first = card.qa[0]
     assert isinstance(first, QA)
