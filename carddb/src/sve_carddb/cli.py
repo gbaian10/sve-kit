@@ -1,6 +1,7 @@
 """Command line entry point: `sve-carddb`."""
 
 import asyncio
+import shutil
 import uuid
 from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
@@ -21,6 +22,7 @@ from sve_carddb.crawl import (
     Mode,
     card_numbers,
     current_sets,
+    image_urls,
 )
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.client import (
@@ -54,6 +56,9 @@ app.add_typer(extract_app, name="extract")
 
 console = Console(soft_wrap=True)
 
+# Card images run to about 1.5 MB; keep room for this much per image to fetch.
+_IMAGE_RESERVE_BYTES = 3 * 1024 * 1024
+
 # Runs that stop on purpose (--limit, --max-requests) exit 0; these exit 1.
 _FATAL = (AlreadyRunningError, StopCrawlError, CircuitOpenError, DiskFullError)
 
@@ -62,6 +67,7 @@ class Stage(StrEnum):
     P0 = "p0"
     P1 = "p1"
     P2 = "p2"
+    P5 = "p5"
 
 
 @dataclass(frozen=True, slots=True)
@@ -141,6 +147,18 @@ def crawl_p2(
 ) -> None:
     """Fetch the card pages listed by the validated product lists."""
     _run(Job(Stage.P2, mode, sets, limit, max_requests, dry_run))
+
+
+@crawl_app.command("p5")
+def crawl_p5(
+    mode: ModeOption = Mode.RESUME,
+    sets: SetOption = None,
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """Fetch the card images linked from the stored card pages."""
+    _run(Job(Stage.P5, mode, sets, limit, max_requests, dry_run))
 
 
 @manifest_app.command("check")
@@ -270,6 +288,8 @@ async def _crawl(
                     return await _p1(crawler, job.sets)
                 case Stage.P2:
                     return await _p2(crawler, job.sets)
+                case Stage.P5:
+                    return await _p5(crawler, job, settings, writer)
         finally:
             console.print(f"HTTP requests sent: {client.requests_sent}")
 
@@ -329,6 +349,34 @@ async def _p2(crawler: Crawler, sets: list[str] | None) -> int:
     return failures
 
 
+async def _p5(crawler: Crawler, job: Job, settings: Settings, writer: Writer) -> int:
+    urls = image_urls(crawler.manifest, job.sets)
+    if not urls:
+        console.print("[red]no stored card pages; run `crawl p2` first[/red]")
+        return 1
+    pending = sum(_would_fetch(job, u, writer.local_state(u)) for u in urls)
+    if job.limit is not None:
+        pending = min(pending, job.limit)
+    free = shutil.disk_usage(settings.data_dir).free
+    if free < pending * _IMAGE_RESERVE_BYTES:
+        msg = (
+            f"{pending} images to fetch need about {pending * _IMAGE_RESERVE_BYTES >> 20} MiB,"
+            f" only {free >> 20} MiB free"
+        )
+        raise DiskFullError(msg)
+    console.print(f"{len(urls)} images, {pending} to fetch; {free >> 30} GiB free")
+    failures = 0
+    for index, url in enumerate(urls, start=1):
+        try:
+            await crawler.image(url)
+        except FetchError as exc:
+            failures += 1
+            console.print(f"[red]{url}:[/red] {exc}")
+        if index % 200 == 0:
+            console.print(f"{index}/{len(urls)} images")
+    return failures
+
+
 def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
     known = current_sets(manifest)
     urls: list[str] = []
@@ -342,6 +390,8 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
                 urls += _list_urls(code, writer)
         case Stage.P2:
             urls = [jp.card_url(n) for n in card_numbers(manifest, job.sets)]
+        case Stage.P5:
+            urls = image_urls(manifest, job.sets)
     fetch = [u for u in urls if _would_fetch(job, u, writer.local_state(u))]
     for url in fetch:
         console.print(url)

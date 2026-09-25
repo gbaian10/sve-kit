@@ -1,5 +1,7 @@
 """A fake Japanese official site, shaped like the real pages."""
 
+import struct
+import zlib
 from urllib.parse import parse_qs, urlsplit
 
 import httpx
@@ -18,6 +20,7 @@ class FakeSite:
         self.calls: list[str] = []
         self.card_number_override: dict[str, str] = {}
         self.list_page_one_totals: list[int] = []
+        self.broken_images: set[str] = set()
 
     def numbers(self, code: str) -> list[str]:
         return [f"{code}-{i:03d}" for i in range(1, self.sets[code] + 1)]
@@ -26,6 +29,14 @@ class FakeSite:
         self.calls.append(str(request.url))
         parts = urlsplit(str(request.url))
         query = {k: v[0] for k, v in parse_qs(parts.query).items()}
+        if parts.path.startswith(IMG):
+            if parts.path in self.broken_images:
+                return httpx.Response(
+                    200, content=PNG[:40], headers={"Content-Type": "image/png"}
+                )
+            return httpx.Response(
+                200, content=PNG, headers={"Content-Type": "image/png"}
+            )
         if parts.path == "/cardlist/" and "cardno" in query:
             return html(self.card_page(query["cardno"]))
         if parts.path == "/cardlist/":
@@ -88,6 +99,20 @@ class FakeSite:
             f'<div class="illustrator"><span class="heading">{shown}</span></div>'
             "</div></div>"
         )
+
+
+def png_chunk(kind: bytes, data: bytes) -> bytes:
+    body = kind + data
+    return struct.pack(">I", len(data)) + body + struct.pack(">I", zlib.crc32(body))
+
+
+# The smallest well-formed PNG: a 1x1 grey pixel.
+PNG = (
+    b"\x89PNG\r\n\x1a\n"
+    + png_chunk(b"IHDR", struct.pack(">IIBBBBB", 1, 1, 8, 0, 0, 0, 0))
+    + png_chunk(b"IDAT", zlib.compress(b"\x00\x80"))
+    + png_chunk(b"IEND", b"")
+)
 
 
 def page(body: str) -> str:

@@ -14,7 +14,7 @@ from sve_carddb.manifest import ExclusiveLock, Manifest
 from sve_carddb.sources import official_jp as jp
 
 from .conftest import FakeClock
-from .fakesite import FakeSite
+from .fakesite import IMG, FakeSite
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -236,3 +236,49 @@ def test_manifest_backup(tmp_path: Path) -> None:
     assert result.exit_code == 0, result.output
     with Manifest.open(dest) as copy:
         assert copy.resources.get(jp.sets_url()) is not None
+
+
+def test_p5_fetches_each_card_image_once(site: FakeSite, data_dir: Path) -> None:
+    for stage in ("p0", "p1", "p2"):
+        assert invoke("crawl", stage).exit_code == 0
+    result = invoke("crawl", "p5")
+    assert result.exit_code == 0, result.output
+    images = [c for c in site.calls if c.endswith(".png")]
+    assert len(images) == len(set(images)) == sum(site.sets.values())
+    stored = data_dir / jp.image_path(images[0])
+    assert stored.read_bytes().startswith(b"\x89PNG")
+    again = invoke("crawl", "p5")
+    assert "HTTP requests sent: 0" in again.output
+
+
+def test_p5_records_a_broken_image_and_goes_on(site: FakeSite, data_dir: Path) -> None:
+    for stage in ("p0", "p1", "p2"):
+        assert invoke("crawl", stage).exit_code == 0
+    broken = f"{IMG}/BP02/bp02-001.png"
+    site.broken_images.add(broken)
+    result = invoke("crawl", "p5", "--set", "BP02")
+    assert result.exit_code == 1
+    assert "1 failed" in result.output
+    with manifest_at(data_dir) as manifest:
+        assert manifest.resources.get(jp.image_url(broken)) is None
+        assert (
+            manifest.resources.get(jp.image_url(f"{IMG}/BP02/bp02-002.png")) is not None
+        )
+
+
+@pytest.mark.usefixtures("site")
+def test_p5_before_p2_says_what_to_run() -> None:
+    assert invoke("crawl", "p0").exit_code == 0
+    result = invoke("crawl", "p5")
+    assert result.exit_code == 1
+    assert "run `crawl p2` first" in result.output
+
+
+def test_p5_dry_run_lists_missing_images(site: FakeSite) -> None:
+    for stage in ("p0", "p1", "p2"):
+        assert invoke("crawl", stage).exit_code == 0
+    calls = len(site.calls)
+    result = invoke("crawl", "p5", "--dry-run", "--set", "BP02")
+    assert result.exit_code == 0, result.output
+    assert len(site.calls) == calls
+    assert "3 of 3 URLs would be requested" in result.output

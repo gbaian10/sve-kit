@@ -16,7 +16,7 @@ from enum import StrEnum
 from typing import TYPE_CHECKING, NoReturn
 
 from sve_carddb.fetch.client import FetchError, Request
-from sve_carddb.fetch.validate import ValidationError, require_media_type
+from sve_carddb.fetch.validate import ValidationError, check_image, require_media_type
 from sve_carddb.fetch.writer import Fetched, LocalState, sha256
 from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Link, Outcome, RequestResult
@@ -35,6 +35,8 @@ SETS_ROOT = f"{jp.REGION.value}:sets"
 _OK = 200
 _NOT_MODIFIED = 304
 _PAGE_ERRORS = (ValidationError, MissingElementError)
+# The largest card image seen is about 2 MB; anything far above is not a card image.
+IMAGE_MAX_BYTES = 20 * 1024 * 1024
 
 
 class Mode(StrEnum):
@@ -75,6 +77,16 @@ def card_numbers(manifest: Manifest, set_codes: list[str] | None = None) -> list
         for edge in manifest.generations.edges(current.id):
             numbers.setdefault(edge.link.original)
     return list(numbers)
+
+
+def image_urls(manifest: Manifest, set_codes: list[str] | None = None) -> list[str]:
+    """Card image URLs recorded by P2, deduplicated, in card and page order."""
+    urls: dict[str, None] = {}
+    for number in card_numbers(manifest, set_codes):
+        for link in manifest.links.current(jp.card_url(number)):
+            if link.to_kind is Kind.IMAGE:
+                urls.setdefault(link.to_url)
+    return list(urls)
 
 
 @dataclass(frozen=True, slots=True)
@@ -301,6 +313,43 @@ class Crawler:
         self._add_generation_page(generation_id, url, Page(links, page.sha256))
 
     # --- P2 ---------------------------------------------------------------
+
+    async def image(self, url: str) -> None:
+        """Fetch one card image unless the mode lets a trusted copy stand.
+
+        Images are stored as downloaded (PNG and JPEG are compressed already)
+        and only structurally checked; decoding is left to thumbnail generation.
+        """
+        state = self.writer.local_state(url)
+        if state is LocalState.TRUSTED and self.mode is not Mode.REFRESH:
+            return
+        path = jp.image_path(url)
+        response = await self._fetch(url, path, conditional=state is LocalState.TRUSTED)
+        if response.status == _NOT_MODIFIED:
+            self.writer.mark_not_modified(url, request_id=response.request_id)
+            self.breaker.record_success()
+            return
+        try:
+            require_media_type(response.content_type, "image/")
+            check_image(response.body, max_bytes=IMAGE_MAX_BYTES)
+        except ValidationError as exc:
+            self._fail(response, str(exc))
+        self.writer.write(
+            Fetched(
+                url=url,
+                region=jp.REGION,
+                kind=Kind.IMAGE,
+                path=path,
+                body=response.body,
+                content_type=response.content_type or "",
+                etag=response.etag,
+                last_modified=response.last_modified,
+                compressed=False,
+            ),
+            request_id=response.request_id,
+            rewrite=self.mode is Mode.REPAIR,
+        )
+        self.breaker.record_success()
 
     def card_numbers(self, set_codes: list[str] | None = None) -> list[str]:
         """Card numbers from validated list generations, deduplicated, in list order."""
