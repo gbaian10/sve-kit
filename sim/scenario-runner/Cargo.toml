@@ -1,0 +1,17 @@
+[package]
+name = "sve-scenario-runner"
+version = "0.1.0"
+description = "Engine-neutral runner for the rules scenarios in tests/rules-scenarios"
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish.workspace = true
+
+[lints]
+workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+serde-saphyr = "1.3"
+thiserror = "2"
