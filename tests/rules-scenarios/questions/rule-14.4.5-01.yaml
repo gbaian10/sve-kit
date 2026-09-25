@@ -216,11 +216,6 @@ scenarios:
         outcome: paused
         awaiting:
           by: P1
-          choices:
-            - do: resolve-choice
-              choice: execute
-            - do: resolve-choice
-              choice: decline
       - at: after-decision-4
         view: omniscient
         assert:
@@ -413,11 +408,6 @@ scenarios:
         outcome: paused
         awaiting:
           by: P1
-          choices:
-            - do: resolve-choice
-              choice: execute
-            - do: resolve-choice
-              choice: decline
       - at: after-decision-4
         view: omniscient
         assert:
@@ -609,11 +599,6 @@ scenarios:
         outcome: paused
         awaiting:
           by: P1
-          choices:
-            - do: resolve-choice
-              choice: execute
-            - do: resolve-choice
-              choice: decline
         assert:
           P1.trigger:
             - a3

@@ -121,13 +121,6 @@ scenarios:
               - x
         awaiting:
           by: P1
-          choices:
-            - do: resolve-choice
-              select:
-                - d
-            - do: resolve-choice
-              select:
-                - x
   - name: BP01-173
     setup:
       turn:
@@ -216,13 +209,6 @@ scenarios:
               - x
         awaiting:
           by: P1
-          choices:
-            - do: resolve-choice
-              select:
-                - d
-            - do: resolve-choice
-              select:
-                - x
   - name: BP01-176
     setup:
       turn:
@@ -311,10 +297,3 @@ scenarios:
               - x
         awaiting:
           by: P1
-          choices:
-            - do: resolve-choice
-              select:
-                - d
-            - do: resolve-choice
-              select:
-                - x
