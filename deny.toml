@@ -1,6 +1,6 @@
 # cargo-deny: https://embarkstudios.github.io/cargo-deny/
-# The pre-push hook runs `advisories bans sources`; run `cargo deny check licenses` by hand
-# before choosing a LICENSE (see the licensing TODO).
+# The pre-push hook runs every check when dependencies change. Advisories are
+# time-sensitive, so rerun `cargo deny check` now and then even without changes.
 
 [advisories]
 version = 2

@@ -91,13 +91,21 @@ repos:
         language: system
         entry: cargo fmt --all --check
         pass_filenames: false
-        files: ^(sim/.*\.rs|Cargo\.(toml|lock)|sim/.*/Cargo\.toml)$
+        files: (\.rs|(^|/)Cargo\.toml|^rustfmt\.toml|^rust-toolchain\.toml)$
       - id: cargo-clippy
         name: cargo clippy
         language: system
         entry: cargo clippy --locked --workspace --all-targets -- -D warnings
         pass_filenames: false
-        files: ^(sim/.*\.rs|Cargo\.(toml|lock)|sim/.*/Cargo\.toml|clippy\.toml|rust-toolchain\.toml)$
+        files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^clippy\.toml|^rust-toolchain\.toml)$
+      - id: cargo-test
+        name: cargo test
+        language: system
+        entry: cargo test --locked --workspace
+        pass_filenames: false
+        # The runner tests read the scenario files too.
+        files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^rust-toolchain\.toml|^tests/rules-scenarios/.*\.yaml)$
+        stages: [pre-push]
       - id: cargo-machete
         name: cargo machete (unused dependencies)
         language: system
@@ -106,9 +114,9 @@ repos:
         files: (^|/)Cargo\.toml$
         stages: [pre-push]
       - id: cargo-deny
-        name: cargo deny (advisories, bans, sources)
+        name: cargo deny
         language: system
-        entry: cargo deny check advisories bans sources
+        entry: cargo deny check
         pass_filenames: false
         files: ^(Cargo\.lock|(.*/)?Cargo\.toml|deny\.toml)$
         stages: [pre-push]

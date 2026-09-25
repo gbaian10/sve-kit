@@ -63,6 +63,8 @@ shadow_same = "allow"
 min_ident_chars = "allow"
 single_call_fn = "allow"
 arbitrary_source_item_ordering = "allow"
+# Aimed at constant-time crypto; card effects need `/` and `%`.
+integer_division_remainder_used = "allow"
 # Card text and rule terms are Japanese.
 non_ascii_literal = "allow"
 # Integration tests in `tests/` are their own crates, not `#[cfg(test)]` modules.
