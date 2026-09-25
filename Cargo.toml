@@ -14,18 +14,71 @@ missing_docs = "warn"
 unreachable_pub = "warn"
 unused_qualifications = "warn"
 rust_2018_idioms = { level = "warn", priority = -1 }
+elided_lifetimes_in_paths = "warn"
+explicit_outlives_requirements = "warn"
+let_underscore_drop = "warn"
+macro_use_extern_crate = "warn"
+meta_variable_misuse = "warn"
+missing_copy_implementations = "warn"
+missing_debug_implementations = "warn"
+non_ascii_idents = "warn"
+redundant_lifetimes = "warn"
+single_use_lifetimes = "warn"
+trivial_casts = "warn"
+trivial_numeric_casts = "warn"
+unit_bindings = "warn"
+unused_lifetimes = "warn"
+unused_macro_rules = "warn"
+variant_size_differences = "warn"
 
+# Strict by choice: every group except style-only restriction lints that contradict
+# each other or fight idiomatic Rust (listed below with the reason).
 [workspace.lints.clippy]
 pedantic = { level = "warn", priority = -1 }
 nursery = { level = "warn", priority = -1 }
-unwrap_used = "warn"
-expect_used = "warn"
-panic = "warn"
-allow_attributes_without_reason = "warn"
-dbg_macro = "warn"
-todo = "warn"
-unimplemented = "warn"
-# Rules engine enums keep growing; `_` would silently swallow new variants.
-wildcard_enum_match_arm = "warn"
+cargo = { level = "warn", priority = -1 }
+restriction = { level = "warn", priority = -1 }
+blanket_clippy_restriction_lints = "allow"
+# Contradicts `needless_return`.
+implicit_return = "allow"
+# Pairs where exactly one side must be allowed.
+pub_with_shorthand = "allow"       # keep `pub(crate)`
+self_named_module_files = "allow"  # keep `foo.rs` + `foo/`
+separated_literal_suffix = "allow" # write `1_u32`
+semicolon_inside_block = "allow"   # keep `{ f(); }` over `{ f() };`
+big_endian_bytes = "allow"         # `host_endian_bytes` stays on for determinism
+little_endian_bytes = "allow"
 # Conflicts with rustc's `unreachable_pub`, which we keep.
 redundant_pub_crate = "allow"
+field_scoped_visibility_modifiers = "allow"
+# Contradicts `error_impl_error` for per-module error types such as `EngineError`.
+module_name_repetitions = "allow"
+# `#[expect]` cannot cover code shared by several test binaries; a reason is still required.
+allow_attributes = "allow"
+# Idiomatic Rust that these would forbid outright.
+question_mark_used = "allow"
+pattern_type_mismatch = "allow"
+shadow_reuse = "allow"
+shadow_same = "allow"
+min_ident_chars = "allow"
+single_call_fn = "allow"
+arbitrary_source_item_ordering = "allow"
+# Card text and rule terms are Japanese.
+non_ascii_literal = "allow"
+# Integration tests in `tests/` are their own crates, not `#[cfg(test)]` modules.
+tests_outside_test_module = "allow"
+# Crates are internal (`publish = false`); these only matter for published APIs.
+exhaustive_enums = "allow"
+exhaustive_structs = "allow"
+pub_use = "allow"
+missing_trait_methods = "allow"
+# LTO inlines across crates; forcing `#[inline]` bloats the WASM build.
+missing_inline_in_public_items = "allow"
+# CONTRIBUTING: comment only where a reader would get it wrong.
+missing_docs_in_private_items = "allow"
+
+# The engine runs AI search in the browser (WASM) and on the server; speed matters more
+# than build time for release builds.
+[profile.release]
+lto = "fat"
+codegen-units = 1

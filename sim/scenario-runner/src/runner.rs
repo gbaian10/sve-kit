@@ -1,17 +1,18 @@
 //! Runs scenarios against an engine and reports rule failures apart from
 //! adapter failures and unsupported features.
 
-use std::collections::BTreeMap;
+use alloc::collections::BTreeMap;
+use std::fs;
 use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
-use crate::Error;
+use crate::ScenarioError;
 use crate::compare;
 use crate::engine::{Engine, EngineError, View};
 use crate::inherit::{Fixture, expand};
-use crate::model::{Expected, Question, parse_question};
+use crate::model::{Expected, Question, from_yaml, parse_question};
 
 /// Result of one scenario.
 #[derive(Debug, Clone, Serialize)]
@@ -105,32 +106,34 @@ impl Selection {
     ///
     /// # Errors
     /// On an unknown question or scenario, a duplicate name, or a word other than `all`.
-    pub fn validate(&self, questions: &[Question]) -> Result<usize, Error> {
-        let mut total = 0;
+    pub fn validate(&self, questions: &[Question]) -> Result<usize, ScenarioError> {
+        let mut total = 0_usize;
         for (id, pick) in &self.0 {
             let q = questions
                 .iter()
                 .find(|q| &q.id == id)
-                .ok_or_else(|| Error::Selection(format!("unknown question {id:?}")))?;
+                .ok_or_else(|| ScenarioError::Selection(format!("unknown question {id:?}")))?;
             match pick {
-                Pick::All(word) if word == "all" => total += q.scenarios.len(),
+                Pick::All(word) if word == "all" => total = total.saturating_add(q.scenarios.len()),
                 Pick::All(word) => {
-                    return Err(Error::Selection(format!(
+                    return Err(ScenarioError::Selection(format!(
                         "{id}: expected `all`, got {word:?}"
                     )));
                 }
                 Pick::Named(names) => {
                     for (i, name) in names.iter().enumerate() {
-                        if names[..i].contains(name) {
-                            return Err(Error::Selection(format!("{id}: duplicate {name:?}")));
+                        if names.iter().take(i).any(|n| n == name) {
+                            return Err(ScenarioError::Selection(format!(
+                                "{id}: duplicate {name:?}"
+                            )));
                         }
                         if !q.scenarios.iter().any(|s| &s.name == name) {
-                            return Err(Error::Selection(format!(
+                            return Err(ScenarioError::Selection(format!(
                                 "{id}: unknown scenario {name:?}"
                             )));
                         }
                     }
-                    total += names.len();
+                    total = total.saturating_add(names.len());
                 }
             }
         }
@@ -142,27 +145,27 @@ impl Selection {
 ///
 /// # Errors
 /// When the file cannot be read or does not have that shape.
-pub fn load_selection(path: &Path) -> Result<Selection, Error> {
-    let text =
-        std::fs::read_to_string(path).map_err(|e| Error::Io(format!("{}: {e}", path.display())))?;
-    parse_selection(&text).map_err(|e| Error::Selection(format!("{}: {e}", path.display())))
+pub fn load_selection(path: &Path) -> Result<Selection, ScenarioError> {
+    let text = fs::read_to_string(path)
+        .map_err(|e| ScenarioError::Io(format!("{}: {e}", path.display())))?;
+    parse_selection(&text).map_err(|e| ScenarioError::Selection(format!("{}: {e}", path.display())))
 }
 
 /// Parses a selection from text.
 ///
 /// # Errors
 /// When the text does not have the selection shape.
-pub fn parse_selection(text: &str) -> Result<Selection, Error> {
-    crate::model::from_yaml(text).map_err(|e| Error::Selection(e.to_string()))
+pub fn parse_selection(text: &str) -> Result<Selection, ScenarioError> {
+    from_yaml(text).map_err(|e| ScenarioError::Selection(e.to_string()))
 }
 
 /// Loads every question file under a directory (sorted by file name).
 ///
 /// # Errors
 /// When a file cannot be read or parsed.
-pub fn load_dir(dir: &Path) -> Result<Vec<Question>, Error> {
-    let mut paths: Vec<_> = std::fs::read_dir(dir)
-        .map_err(|e| Error::Io(format!("{}: {e}", dir.display())))?
+pub fn load_dir(dir: &Path) -> Result<Vec<Question>, ScenarioError> {
+    let mut paths: Vec<_> = fs::read_dir(dir)
+        .map_err(|e| ScenarioError::Io(format!("{}: {e}", dir.display())))?
         .filter_map(Result::ok)
         .map(|e| e.path())
         .filter(|p| p.extension().is_some_and(|x| x == "yaml"))
@@ -171,9 +174,10 @@ pub fn load_dir(dir: &Path) -> Result<Vec<Question>, Error> {
     paths
         .iter()
         .map(|p| {
-            let text = std::fs::read_to_string(p)
-                .map_err(|e| Error::Io(format!("{}: {e}", p.display())))?;
-            parse_question(&text).map_err(|e| Error::Question(format!("{}: {e}", p.display())))
+            let text = fs::read_to_string(p)
+                .map_err(|e| ScenarioError::Io(format!("{}: {e}", p.display())))?;
+            parse_question(&text)
+                .map_err(|e| ScenarioError::Question(format!("{}: {e}", p.display())))
         })
         .collect()
 }
@@ -188,7 +192,7 @@ pub fn run(
     questions: &[Question],
     selection: Option<&Selection>,
     options: RunOptions,
-) -> Result<Vec<ScenarioReport>, Error> {
+) -> Result<Vec<ScenarioReport>, ScenarioError> {
     let wanted = selection.map(|s| s.validate(questions)).transpose()?;
     let mut reports = Vec::new();
     for q in questions {
@@ -211,7 +215,7 @@ pub fn run(
     if let Some(n) = wanted
         && n != reports.len()
     {
-        return Err(Error::Selection(format!(
+        return Err(ScenarioError::Selection(format!(
             "selection names {n} scenarios but {} ran",
             reports.len()
         )));
@@ -232,15 +236,15 @@ pub fn score_g1(
     questions: &[Question],
     selection: &Selection,
     expected_scenarios: usize,
-) -> Result<Vec<ScenarioReport>, Error> {
+) -> Result<Vec<ScenarioReport>, ScenarioError> {
     if selection.0.values().any(|p| matches!(p, Pick::All(_))) {
-        return Err(Error::Selection(
+        return Err(ScenarioError::Selection(
             "G1 selections must name every scenario".into(),
         ));
     }
     let named = selection.validate(questions)?;
     if named == 0 || named != expected_scenarios {
-        return Err(Error::Selection(format!(
+        return Err(ScenarioError::Selection(format!(
             "G1 expects {expected_scenarios} scenarios, the selection names {named}"
         )));
     }
@@ -252,7 +256,7 @@ pub fn score_g1(
         .iter()
         .find(|r| matches!(r.verdict, Verdict::Ineligible { .. }))
     {
-        return Err(Error::Selection(format!(
+        return Err(ScenarioError::Selection(format!(
             "{} / {} is not eligible for scoring: {:?}",
             r.question, r.scenario, r.verdict
         )));
@@ -287,12 +291,12 @@ pub fn run_one(
     fixture: &Fixture,
     decisions: &[Value],
     expected: &[Expected],
-) -> Result<Verdict, Error> {
+) -> Result<Verdict, ScenarioError> {
     let mut checkpoints: BTreeMap<usize, Vec<&Expected>> = BTreeMap::new();
     for e in expected {
         let n = e.decision_index()?;
         if n == 0 || n > decisions.len() {
-            return Err(Error::Question(format!(
+            return Err(ScenarioError::Question(format!(
                 "{}: {} is outside its {} decisions",
                 fixture.scenario,
                 e.at,
@@ -307,7 +311,7 @@ pub fn run_one(
     let mut failures = Vec::new();
     let mut window: Vec<Value> = Vec::new();
     for (i, decision) in decisions.iter().enumerate() {
-        let n = i + 1;
+        let n = i.saturating_add(1);
         let step = match engine.decide(decision) {
             Ok(step) => step,
             Err(e) => return Ok(engine_verdict(e)),
@@ -513,7 +517,8 @@ pub fn summary(reports: &[ScenarioReport]) -> BTreeMap<&'static str, usize> {
             Verdict::AdapterError { .. } => "adapter-error",
             Verdict::Ineligible { .. } => "ineligible",
         };
-        *counts.entry(key).or_insert(0) += 1;
+        let count = counts.entry(key).or_insert(0_usize);
+        *count = count.saturating_add(1);
     }
     counts
 }

@@ -3,6 +3,16 @@
 //! Each test builds a tiny scenario and a scripted engine, so what counts as correct
 //! comes from the contract text, not from any question's `expected`.
 
+#![allow(
+    clippy::default_numeric_fallback,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects,
+    clippy::float_arithmetic,
+    clippy::absolute_paths,
+    clippy::std_instead_of_alloc,
+    reason = "test code: fixtures are literal JSON and a panic is a test failure"
+)]
+
 use serde_json::{Value, json};
 use sve_scenario_runner::compare::{
     assert_value, awaiting, events_exact, events_subsequence, forbidden_hit,
@@ -255,7 +265,7 @@ fn step(outcome: &str, events: Value) -> Result<Step, EngineError> {
     })
 }
 
-const TWO_DECISIONS: &str = r"
+const TWO_DECISIONS: &str = "
 id: t-1
 status: verified
 scenarios:
@@ -337,7 +347,7 @@ fn unsupported_and_adapter_errors_are_reported_apart() {
     let mut broken = Script::new(vec![Err(EngineError::Adapter("y".into()))]);
     let a = run(
         &mut unsupported,
-        std::slice::from_ref(&q),
+        core::slice::from_ref(&q),
         None,
         RunOptions::default(),
     )
@@ -352,7 +362,7 @@ fn checkpoint_beyond_the_decisions_is_a_question_error() {
     let text = TWO_DECISIONS.replace("after-decision-2", "after-decision-3");
     let q = parse_question(&text).unwrap();
     let mut engine = Script::new(vec![]);
-    assert!(run(&mut engine, &[q], None, RunOptions::default()).is_err());
+    run(&mut engine, &[q], None, RunOptions::default()).unwrap_err();
 }
 
 #[test]
@@ -369,7 +379,7 @@ fn unknown_selection_entries_are_errors_not_skips() {
         assert!(
             run(
                 &mut engine,
-                std::slice::from_ref(&q),
+                core::slice::from_ref(&q),
                 Some(&selection),
                 RunOptions::default()
             )
@@ -408,7 +418,7 @@ fn unconfirmed_card_facts_are_not_scored_when_required() {
 
 #[test]
 fn inherit_merges_maps_and_replaces_lists() {
-    let text = r"
+    let text = "
 id: t-2
 scenarios:
   - name: base
@@ -473,7 +483,7 @@ impl Engine for HandEcho {
     }
 }
 
-const SAME_CARD_PUBLIC: &str = r"
+const SAME_CARD_PUBLIC: &str = "
 id: t-3
 status: verified
 scenarios:
@@ -546,7 +556,7 @@ fn g1_rejects_empty_all_miscounted_and_ineligible() {
         let selection = parse_selection(text).unwrap();
         let result = score_g1(
             &mut engine,
-            std::slice::from_ref(question),
+            core::slice::from_ref(question),
             &selection,
             count,
         );

@@ -9,6 +9,7 @@
 //!   an id or any other field is not a placeholder;
 //! - `awaiting.choices` must equal the complete option set exactly, field for field.
 
+use core::iter;
 use serde_json::{Map, Value};
 
 use crate::engine::View;
@@ -48,23 +49,14 @@ pub fn subset(expected: &Value, actual: &Value) -> bool {
 
 /// Every expected item pairs with a distinct actual item and none is left over.
 fn multiset(expected: &[Value], actual: &[Value]) -> bool {
-    expected.len() == actual.len() && assign(expected, actual, &mut vec![false; actual.len()])
+    expected.len() == actual.len()
+        && pair_up(expected, actual, &mut vec![false; actual.len()], subset)
 }
 
-fn assign(expected: &[Value], actual: &[Value], used: &mut Vec<bool>) -> bool {
-    let Some((first, rest)) = expected.split_first() else {
-        return true;
-    };
-    for i in 0..actual.len() {
-        if !used[i] && subset(first, &actual[i]) {
-            used[i] = true;
-            if assign(rest, actual, used) {
-                return true;
-            }
-            used[i] = false;
-        }
+fn set_used(used: &mut [bool], at: usize, value: bool) {
+    if let Some(slot) = used.get_mut(at) {
+        *slot = value;
     }
-    false
 }
 
 /// Compares the value at an `assert` path.
@@ -112,7 +104,10 @@ fn expand_fillers(items: &[Value]) -> Vec<Value> {
     let mut out = Vec::new();
     for item in items {
         match filler_count(item) {
-            Some(n) => out.extend((0..n).map(|_| filler_one())),
+            Some(n) => out.extend(iter::repeat_n(
+                filler_one(),
+                usize::try_from(n).unwrap_or(usize::MAX),
+            )),
             None => out.push(item.clone()),
         }
     }
@@ -122,19 +117,19 @@ fn expand_fillers(items: &[Value]) -> Vec<Value> {
 fn pair_up(
     expected: &[Value],
     actual: &[Value],
-    used: &mut Vec<bool>,
+    used: &mut [bool],
     same: fn(&Value, &Value) -> bool,
 ) -> bool {
     let Some((first, rest)) = expected.split_first() else {
         return true;
     };
-    for i in 0..actual.len() {
-        if !used[i] && same(first, &actual[i]) {
-            used[i] = true;
+    for (i, item) in actual.iter().enumerate() {
+        if used.get(i) == Some(&false) && same(first, item) {
+            set_used(used, i, true);
             if pair_up(rest, actual, used, same) {
                 return true;
             }
-            used[i] = false;
+            set_used(used, i, false);
         }
     }
     false
@@ -159,7 +154,7 @@ pub fn exact(expected: &Value, actual: &Value) -> bool {
 
 fn filler_one() -> Value {
     let mut m = Map::new();
-    m.insert("filler".into(), Value::from(1));
+    m.insert("filler".into(), Value::from(1_u64));
     Value::Object(m)
 }
 
@@ -179,9 +174,9 @@ fn knowledge(expected: &Value, actual: &Value) -> bool {
 
 /// One expected unit in an event sequence: a single event, or a set of events
 /// that must all fall in one actual `group`, in any order.
-enum Unit<'a> {
-    One(&'a Value),
-    Group(Vec<&'a Value>),
+enum Unit<'ev> {
+    One(&'ev Value),
+    Group(Vec<&'ev Value>),
 }
 
 fn units(expected: &[Value]) -> Vec<Unit<'_>> {
@@ -191,7 +186,7 @@ fn units(expected: &[Value]) -> Vec<Unit<'_>> {
         match event.get("group") {
             Some(label) => {
                 if let Some(&(_, at)) = labels.iter().find(|(l, _)| *l == label) {
-                    if let Unit::Group(members) = &mut out[at] {
+                    if let Some(Unit::Group(members)) = out.get_mut(at) {
                         members.push(event);
                     }
                 } else {
@@ -226,12 +221,16 @@ fn place(units: &[Unit<'_>], actual: &[Value], from: usize) -> bool {
     match first {
         Unit::One(e) => {
             let pattern = without_group(e);
-            (from..actual.len()).any(|i| subset(&pattern, &actual[i]) && place(rest, actual, i + 1))
+            actual
+                .iter()
+                .enumerate()
+                .skip(from)
+                .any(|(i, a)| subset(&pattern, a) && place(rest, actual, i.saturating_add(1)))
         }
         Unit::Group(members) => {
             // Try each actual group label that occurs at or after `from`.
             let mut tried: Vec<&Value> = Vec::new();
-            for event in &actual[from..] {
+            for event in actual.iter().skip(from) {
                 let Some(label) = event.get("group") else {
                     continue;
                 };
@@ -242,13 +241,11 @@ fn place(units: &[Unit<'_>], actual: &[Value], from: usize) -> bool {
                 if !contiguous(actual, label) {
                     continue;
                 }
-                let slots: Vec<usize> = (from..actual.len())
-                    .filter(|&i| actual[i].get("group") == Some(label))
-                    .collect();
+                let slots = positions(actual, label, from);
                 let patterns: Vec<Value> = members.iter().map(|m| without_group(m)).collect();
                 let mut used = vec![false; slots.len()];
                 if let Some(end) = cover(&patterns, actual, &slots, &mut used)
-                    && place(rest, actual, end + 1)
+                    && place(rest, actual, end.saturating_add(1))
                 {
                     return true;
                 }
@@ -270,10 +267,21 @@ pub fn broken_group(events: &[Value]) -> Option<Value> {
 
 /// Whether every event carrying `label` sits in one unbroken run.
 fn contiguous(actual: &[Value], label: &Value) -> bool {
-    let at: Vec<usize> = (0..actual.len())
-        .filter(|&i| actual[i].get("group") == Some(label))
-        .collect();
-    at.windows(2).all(|w| w[1] == w[0] + 1)
+    let at = positions(actual, label, 0);
+    at.iter()
+        .zip(at.iter().skip(1))
+        .all(|(prev, next)| prev.checked_add(1) == Some(*next))
+}
+
+/// Indices at or after `from` of the events carrying `label`.
+fn positions(actual: &[Value], label: &Value, from: usize) -> Vec<usize> {
+    actual
+        .iter()
+        .enumerate()
+        .skip(from)
+        .filter(|(_, e)| e.get("group") == Some(label))
+        .map(|(i, _)| i)
+        .collect()
 }
 
 /// Matches every pattern to a distinct slot; returns the highest slot used.
@@ -281,18 +289,18 @@ fn cover(
     patterns: &[Value],
     actual: &[Value],
     slots: &[usize],
-    used: &mut Vec<bool>,
+    used: &mut [bool],
 ) -> Option<usize> {
     let Some((first, rest)) = patterns.split_first() else {
         return Some(0);
     };
     for (k, &i) in slots.iter().enumerate() {
-        if !used[k] && subset(first, &actual[i]) {
-            used[k] = true;
+        if used.get(k) == Some(&false) && actual.get(i).is_some_and(|a| subset(first, a)) {
+            set_used(used, k, true);
             if let Some(end) = cover(rest, actual, slots, used) {
                 return Some(end.max(i));
             }
-            used[k] = false;
+            set_used(used, k, false);
         }
     }
     None
@@ -313,7 +321,7 @@ pub fn events_exact(kinds: &[String], expected: &[Value], actual: &[Value]) -> b
 
 /// The first forbidden pattern that some actual event matches, if any.
 #[must_use]
-pub fn forbidden_hit<'a>(forbidden: &'a [Value], actual: &[Value]) -> Option<&'a Value> {
+pub fn forbidden_hit<'pat>(forbidden: &'pat [Value], actual: &[Value]) -> Option<&'pat Value> {
     forbidden
         .iter()
         .find(|f| actual.iter().any(|a| subset(&without_group(f), a)))

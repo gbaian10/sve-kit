@@ -170,8 +170,8 @@ pub(crate) const ALL: &[Mutation] = &[
 
 /// The oracle with one mutation applied at the first checkpoint where it applies.
 pub(crate) struct Mutant {
-    pub inner: Oracle,
-    pub mutation: Mutation,
+    inner: Oracle,
+    mutation: Mutation,
     target: Option<usize>,
 }
 

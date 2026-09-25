@@ -5,6 +5,8 @@
 //! `tests/rules-scenarios/CONTRACT.md` specifies. Rule failures, unsupported
 //! features and adapter errors are reported separately.
 
+extern crate alloc;
+
 pub mod compare;
 pub mod engine;
 pub mod inherit;
@@ -21,7 +23,7 @@ pub use runner::{
 
 /// Errors in the questions themselves or in reading them.
 #[derive(Debug, Clone, thiserror::Error)]
-pub enum Error {
+pub enum ScenarioError {
     /// A question file is malformed.
     #[error("question: {0}")]
     Question(String),

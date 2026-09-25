@@ -112,8 +112,9 @@ x = random.random()  # ruff: ignore[suspicious-non-cryptographic-random-usage] -
 - A whole file (the same rule repeated many times): `# ruff: file-ignore[...]` at the top
 - The old `# noqa` form is rejected by the linter
 
-Rust: clippy (pedantic and nursery) runs on every commit with `-D warnings`; the toolchain
-version is pinned in `rust-toolchain.toml`. Silence a lint with `#[expect]` and a reason;
+Rust: clippy runs on every commit with `-D warnings` and every group on, including
+`restriction`; the few lints that contradict each other are allowed in `Cargo.toml` with
+the reason. The toolchain version is pinned in `rust-toolchain.toml`. Silence a lint with `#[expect]` and a reason;
 use `#[allow]` only when the lint does not fire everywhere the attribute applies:
 
 ```rust

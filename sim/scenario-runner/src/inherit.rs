@@ -8,7 +8,7 @@ use std::collections::HashMap;
 
 use serde_json::Value;
 
-use crate::Error;
+use crate::ScenarioError;
 use crate::model::Scenario;
 
 /// A scenario with `inherit` resolved: what an engine is loaded from.
@@ -30,7 +30,7 @@ pub struct Fixture {
 ///
 /// # Errors
 /// On a missing parent or an inheritance cycle.
-pub fn expand(question: &str, scenarios: &[Scenario]) -> Result<Vec<Fixture>, Error> {
+pub fn expand(question: &str, scenarios: &[Scenario]) -> Result<Vec<Fixture>, ScenarioError> {
     let by_name: HashMap<&str, &Scenario> =
         scenarios.iter().map(|s| (s.name.as_str(), s)).collect();
     scenarios
@@ -48,22 +48,24 @@ pub fn expand(question: &str, scenarios: &[Scenario]) -> Result<Vec<Fixture>, Er
         .collect()
 }
 
-fn resolve<'a>(
-    by_name: &HashMap<&str, &'a Scenario>,
-    scenario: &'a Scenario,
-    seen: &mut Vec<&'a str>,
-) -> Result<(Value, Value), Error> {
+fn resolve<'sc>(
+    by_name: &HashMap<&str, &'sc Scenario>,
+    scenario: &'sc Scenario,
+    seen: &mut Vec<&'sc str>,
+) -> Result<(Value, Value), ScenarioError> {
     let own_setup = scenario.setup.clone().unwrap_or_else(empty);
     let own_facts = scenario.card_facts.clone().unwrap_or_else(empty);
     let Some(parent) = scenario.inherit.as_deref() else {
         return Ok((own_setup, own_facts));
     };
     if parent == scenario.name || seen.contains(&parent) {
-        return Err(Error::Question(format!("inherit cycle via {parent:?}")));
+        return Err(ScenarioError::Question(format!(
+            "inherit cycle via {parent:?}"
+        )));
     }
     let base = by_name
         .get(parent)
-        .ok_or_else(|| Error::Question(format!("inherit target {parent:?} not found")))?;
+        .ok_or_else(|| ScenarioError::Question(format!("inherit target {parent:?} not found")))?;
     seen.push(scenario.name.as_str());
     let (mut setup, mut facts) = resolve(by_name, base, seen)?;
     merge(&mut setup, own_setup);

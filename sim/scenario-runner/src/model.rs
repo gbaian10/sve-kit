@@ -7,7 +7,7 @@
 use serde::Deserialize;
 use serde_json::{Map, Value};
 
-use crate::Error;
+use crate::ScenarioError;
 
 /// One question file.
 #[derive(Debug, Clone, Deserialize)]
@@ -80,11 +80,11 @@ impl Expected {
     ///
     /// # Errors
     /// When `at` is not of the form `after-decision-N`.
-    pub fn decision_index(&self) -> Result<usize, Error> {
+    pub fn decision_index(&self) -> Result<usize, ScenarioError> {
         self.at
             .strip_prefix("after-decision-")
             .and_then(|n| n.parse().ok())
-            .ok_or_else(|| Error::Question(format!("bad checkpoint {:?}", self.at)))
+            .ok_or_else(|| ScenarioError::Question(format!("bad checkpoint {:?}", self.at)))
     }
 }
 
@@ -92,8 +92,8 @@ impl Expected {
 ///
 /// # Errors
 /// When the text is not valid YAML or does not have the question shape.
-pub fn parse_question(text: &str) -> Result<Question, Error> {
-    from_yaml(text).map_err(|e| Error::Question(e.to_string()))
+pub fn parse_question(text: &str) -> Result<Question, ScenarioError> {
+    from_yaml(text).map_err(|e| ScenarioError::Question(e.to_string()))
 }
 
 /// The one YAML reader for question and selection files.
@@ -104,6 +104,9 @@ pub fn parse_question(text: &str) -> Result<Question, Error> {
 ///
 /// # Errors
 /// When the text is not valid YAML or does not deserialize into `T`.
-pub fn from_yaml<'de, T: Deserialize<'de>>(text: &'de str) -> Result<T, serde_saphyr::Error> {
+pub fn from_yaml<'de, T>(text: &'de str) -> Result<T, serde_saphyr::Error>
+where
+    T: Deserialize<'de>,
+{
     serde_saphyr::from_str_with_options(text, serde_saphyr::options! { strict_booleans: true })
 }

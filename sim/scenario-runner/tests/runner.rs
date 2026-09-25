@@ -1,5 +1,15 @@
 //! Validates the runner against the real question set with fake engines.
 
+#![allow(
+    clippy::default_numeric_fallback,
+    clippy::indexing_slicing,
+    clippy::arithmetic_side_effects,
+    clippy::float_arithmetic,
+    clippy::absolute_paths,
+    clippy::std_instead_of_alloc,
+    reason = "test code: fixtures are literal JSON and a panic is a test failure"
+)]
+
 mod support;
 
 use std::path::PathBuf;
