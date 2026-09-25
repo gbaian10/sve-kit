@@ -99,9 +99,10 @@ repos:
         pass_filenames: false
         files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^clippy\.toml|^rust-toolchain\.toml)$
       - id: cargo-test
-        name: cargo test
+        name: cargo test (with line coverage >= 90%)
         language: system
-        entry: cargo test --locked --workspace
+        # Runs the whole test suite once, instrumented; raise the bar as the engine grows.
+        entry: cargo llvm-cov --locked --workspace --summary-only --fail-under-lines 90
         pass_filenames: false
         # The runner tests read the scenario files too.
         files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^rust-toolchain\.toml|^tests/rules-scenarios/.*\.yaml)$

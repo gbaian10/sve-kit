@@ -85,7 +85,7 @@ uv --directory carddb run pytest           # 測試
 uv --directory carddb run ruff check       # lint
 uv --directory carddb run mypy             # 型別檢查
 cargo clippy --locked --workspace --all-targets -- -D warnings   # Rust lint
-cargo test --locked --workspace            # Rust 測試
+cargo llvm-cov --locked --workspace --fail-under-lines 90   # Rust 測試＋行覆蓋率門檻（pre-push 也會跑）
 cargo deny check && cargo machete          # 依賴的安全公告與未用依賴（pre-push 也會跑）
 ```
 
