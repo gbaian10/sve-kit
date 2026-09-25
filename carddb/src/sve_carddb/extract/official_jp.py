@@ -74,7 +74,10 @@ def extract_card(body: bytes, *, number: str) -> CardRecord:
     """Transcribe a stored card page."""
     tree = parse(decode_html(body, min_bytes=MIN_PAGE_BYTES))
     detail = require_one(tree, ".cardlist-Detail")
-    faces = [_face(inner) for inner in select_all(detail, ".cardlist-Detail_Box_Inner")]
+    faces = [
+        _face(inner, number=number)
+        for inner in select_all(detail, ".cardlist-Detail_Box_Inner")
+    ]
     if not faces:
         msg = f"{number} has no card face"
         raise ValidationError(msg)
@@ -90,7 +93,7 @@ def extract_card(body: bytes, *, number: str) -> CardRecord:
     )
 
 
-def _face(inner: LexborNode) -> Face:
+def _face(inner: LexborNode, *, number: str) -> Face:
     info = {
         _text(require_one(row, "dt")): _text(require_one(row, "dd"))
         for row in select_all(inner, ".info dl")
@@ -114,7 +117,7 @@ def _face(inner: LexborNode) -> Face:
         text=text,
         sections=[section for section in sections if section is not None],
         flavor=_render(flavor) if flavor is not None else None,
-        illustrator=_illustrator(inner),
+        illustrator=_illustrator(inner, number=number),
         image=attribute(image, "src") or "",
     )
 
@@ -147,12 +150,14 @@ def _traits(value: str) -> list[str]:
     return [] if value in {"", "-"} else value.split("・")
 
 
-def _illustrator(inner: LexborNode) -> str | None:
+def _illustrator(inner: LexborNode, *, number: str) -> str | None:
     # The errata notice reuses the `.illustrator` class; only the real one has `.heading`.
+    # Cards without an illustrator credit show the card number in `.heading` instead.
     for node in select_all(inner, ".illustrator"):
         heading = select_one(node, ".heading")
         if heading is not None:
-            return _text(heading) or None
+            name = _text(heading)
+            return name if name and name != number else None
     return None
 
 

@@ -37,6 +37,12 @@ def test_basic_card() -> None:
     assert face.sections == []
 
 
+def test_card_without_illustrator_credit() -> None:
+    # The site puts the card number where the illustrator name would be.
+    card = extract_card(fixture("card_BP02-070.html"), number="BP02-070")
+    assert [face.illustrator for face in card.faces] == [None]
+
+
 def test_double_faced_card_has_two_faces_and_sections() -> None:
     card = extract_card(fixture("card_BP08-003.html"), number="BP08-003")
     front, back = card.faces
