@@ -176,8 +176,8 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
         ids: Ids::default(),
     };
     let r4 = b.engine.restore(&blob)?;
-    // Node and event ids are immutable: the restored game answers for the ids issued
-    // before the save, and both runs label later ids from the same starting table.
+    // Node and event ids are immutable: every node of the saved line must answer on the
+    // restored game with the same decisions and the same raw events (ids and causes).
     let mut fails = Vec::new();
     if r4 != n4 {
         fails.push(format!(
@@ -185,23 +185,26 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
             r4.0, n4.0
         ));
     }
-    b.ids = a.ids.clone();
     for (k, node) in &line {
-        match b.engine.decisions(node) {
-            Ok(d) if d == a.engine.decisions(node)? => {
-                fails.extend(compare_nodes(
-                    &a,
-                    node,
-                    &b,
-                    node,
-                    options,
-                    &format!("N{k}"),
-                )?);
-            }
-            Ok(_) | Err(_) => fails.push(format!(
-                "N{k}: the restored game does not keep node {} of the saved line",
+        let kept = b.engine.decisions(node).ok() == Some(a.engine.decisions(node)?)
+            && b.engine.events(node).ok() == Some(a.engine.events(node)?);
+        if kept {
+            // Built from the restored game's own answers, in the order `walk` builds `a`'s.
+            b.ids.node(node);
+            b.ids.events(&b.engine.events(node)?);
+            fails.extend(compare_nodes(
+                &a,
+                node,
+                &b,
+                node,
+                options,
+                &format!("N{k}"),
+            )?);
+        } else {
+            fails.push(format!(
+                "N{k}: the restored game does not keep node {} of the saved line with its decisions and events",
                 node.0
-            )),
+            ));
         }
     }
     let (a_line, a_steps) = a.walk(&n4, 4, tail(path, 4))?;

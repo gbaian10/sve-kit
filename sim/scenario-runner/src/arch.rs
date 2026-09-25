@@ -66,6 +66,16 @@ pub struct Layered<T> {
     pub shadow: T,
 }
 
+/// One layer's result of applying one operation.
+#[derive(Debug, Clone)]
+pub struct Applied {
+    /// The id this layer gave the decision it applied. Events of this and later steps
+    /// name it in `cause.decision`.
+    pub decision: String,
+    /// Outcome and events, as for the runner.
+    pub step: Step,
+}
+
 /// What one viewer sees at one position.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Observation {
@@ -158,7 +168,7 @@ pub trait AssistEngine {
     ///
     /// # Errors
     /// When the adapter cannot submit it.
-    fn act(&mut self, op: &Value) -> Result<Layered<Step>, EngineError>;
+    fn act(&mut self, op: &Value) -> Result<Layered<Applied>, EngineError>;
     /// Every divergence ever recorded, resolved ones included.
     ///
     /// # Errors
@@ -174,7 +184,7 @@ pub trait AssistEngine {
     ///
     /// # Errors
     /// When the adapter fails.
-    fn advance(&mut self) -> Result<Option<Layered<Step>>, EngineError>;
+    fn advance(&mut self) -> Result<Option<Layered<Applied>>, EngineError>;
     /// Resolves one divergence.
     ///
     /// # Errors

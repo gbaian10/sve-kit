@@ -19,7 +19,7 @@ use std::collections::hash_map::DefaultHasher;
 
 use serde_json::{Map, Value, json};
 use sve_scenario_runner::arch::{
-    AssistEngine, BranchKind, Layer, Layered, NodeId, Observation, Realign, ReplayEngine,
+    Applied, AssistEngine, BranchKind, Layer, Layered, NodeId, Observation, Realign, ReplayEngine,
 };
 use sve_scenario_runner::{EngineError, Fixture, Step, View};
 
@@ -105,6 +105,8 @@ pub(crate) enum ReplayMutation {
     RestoreNewNodeIds,
     /// A restored game reports the saved line's decisions in the wrong order.
     RestoreReordersDecisions,
+    /// Restore issues a new id for one saved event that no later event names.
+    RestoreReissuesEvent,
 }
 
 pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
@@ -146,6 +148,7 @@ pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
     (ReplayMutation::CarriedFromNowhere, &["R2b", "R4"]),
     (ReplayMutation::RestoreNewNodeIds, &["R1"]),
     (ReplayMutation::RestoreReordersDecisions, &["R1"]),
+    (ReplayMutation::RestoreReissuesEvent, &["R1"]),
 ];
 
 #[derive(Debug, Clone)]
@@ -1048,6 +1051,16 @@ impl ReplayEngine for FakeReplay {
                     .zip(strings(&v["nodes"])),
             );
         }
+        if self.mutation == ReplayMutation::RestoreReissuesEvent
+            && let Some(first) = game
+                .nodes
+                .iter()
+                .flat_map(|n| n.step.events.iter())
+                .find(|e| e["kind"] == "プレイ" && e["object"] == "a1")
+                .and_then(|e| e["id"].as_str().map(str::to_owned))
+        {
+            renamed.insert(first, "reissued".to_owned());
+        }
         let rename = |slot: Option<&mut Value>| {
             if let Some(slot) = slot
                 && let Some(new) = slot.as_str().and_then(|old| renamed.get(old))
@@ -1234,6 +1247,11 @@ pub(crate) enum AssistMutation {
     ResumeDecisionNull,
     /// Both layers agree, but the cancelled trigger names the decision of P3.
     ResumeDecisionWrong,
+    /// Both layers agree, but the cancelled trigger names a decision id never issued.
+    ResumeDecisionGhost,
+    /// Both layers agree, but the cancelled trigger names the decision of P5, which no
+    /// event has named before.
+    ResumeDecisionUnreferenced,
 }
 
 pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
@@ -1255,6 +1273,8 @@ pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
     (AssistMutation::ResumeExtraKind, &["A3"]),
     (AssistMutation::ResumeDecisionNull, &["A3"]),
     (AssistMutation::ResumeDecisionWrong, &["A3"]),
+    (AssistMutation::ResumeDecisionGhost, &["A3"]),
+    (AssistMutation::ResumeDecisionUnreferenced, &["A3"]),
 ];
 
 #[derive(Debug, Clone, Default, Hash, PartialEq, Eq)]
@@ -1306,8 +1326,7 @@ impl FakeAssist {
     /// Path P step `k` with the same events and causes as the replay fake; `#first` and
     /// `#second` name this step's own events, the rest are looked up in `log`.
     fn path_events(mutation: AssistMutation, k: usize, log: &[Value], which: Layer) -> Vec<Value> {
-        // Each decision of this layer has its own reference.
-        let d = json!({"decision": format!("{which:?}-d{k}")});
+        let d = json!({"decision": Self::decision_id(which, k)});
         let find = |pattern: Value| {
             log.iter()
                 .rev()
@@ -1345,6 +1364,12 @@ impl FakeAssist {
             (6, AssistMutation::ResumeCauseMissing) => {
                 vec![json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}})]
             }
+            (6, AssistMutation::ResumeDecisionGhost) => vec![
+                json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": {"decision": "ghost"}}),
+            ],
+            (6, AssistMutation::ResumeDecisionUnreferenced) => vec![
+                json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": {"decision": Self::decision_id(which, 5)}}),
+            ],
             (6, AssistMutation::ResumeDecisionNull) => vec![
                 json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": {"decision": null}}),
             ],
@@ -1364,7 +1389,7 @@ impl FakeAssist {
         }
     }
 
-    fn apply(&mut self, which: Layer, op: &Value) -> Step {
+    fn apply(&mut self, which: Layer, op: &Value) -> Applied {
         self.counter += 1;
         let tag = self.counter;
         let mutation = self.mutation;
@@ -1372,39 +1397,45 @@ impl FakeAssist {
             Layer::Sandbox => (&mut self.sandbox, &mut self.sandbox_log),
             Layer::Shadow => (&mut self.shadow, &mut self.shadow_log),
         };
-        let step = |outcome: &str, events: Vec<Value>, history: &mut Vec<Value>| {
-            let ids: Vec<String> = (0..events.len())
-                .map(|i| format!("{which:?}-{tag}-{i}"))
-                .collect();
-            let events: Vec<Value> = events
-                .into_iter()
-                .zip(&ids)
-                .map(|(mut e, id)| {
-                    e["id"] = Value::from(id.clone());
-                    if let Some(cause) = e.get_mut("cause").and_then(|c| c.get_mut("event")) {
-                        match cause.as_str() {
-                            Some("#first") => *cause = Value::from(ids[0].clone()),
-                            Some("#second") => *cause = Value::from(ids[1].clone()),
-                            _ => {}
+        let step =
+            |decision: String, outcome: &str, events: Vec<Value>, history: &mut Vec<Value>| {
+                let ids: Vec<String> = (0..events.len())
+                    .map(|i| format!("{which:?}-{tag}-{i}"))
+                    .collect();
+                let events: Vec<Value> = events
+                    .into_iter()
+                    .zip(&ids)
+                    .map(|(mut e, id)| {
+                        e["id"] = Value::from(id.clone());
+                        if let Some(cause) = e.get_mut("cause").and_then(|c| c.get_mut("event")) {
+                            match cause.as_str() {
+                                Some("#first") => *cause = Value::from(ids[0].clone()),
+                                Some("#second") => *cause = Value::from(ids[1].clone()),
+                                _ => {}
+                            }
                         }
-                    }
-                    e
-                })
-                .collect();
-            history.extend(events.iter().cloned());
-            Step {
-                outcome: outcome.to_owned(),
-                events,
-            }
-        };
-        let d = json!({"decision": "assist"});
+                        e
+                    })
+                    .collect();
+                history.extend(events.iter().cloned());
+                Applied {
+                    decision,
+                    step: Step {
+                        outcome: outcome.to_owned(),
+                        events,
+                    },
+                }
+            };
+        let other = format!("{which:?}-x{tag}");
+        let d = json!({"decision": other});
         if op["attacker"] == "a6" {
             if state.k == 2 && !state.cleared {
-                return step("cannot-attack", Vec::new(), log);
+                return step(other, "cannot-attack", Vec::new(), log);
             }
             state.quick_pending = true;
             state.a6_attacked = true;
             return step(
+                other,
                 "resolved",
                 vec![json!({"kind": "攻撃", "attacker": "a6", "target": "P2.leader", "cause": d})],
                 log,
@@ -1414,6 +1445,7 @@ impl FakeAssist {
             state.quick_pending = false;
             state.life -= 3;
             return step(
+                other,
                 "resolved",
                 vec![
                     json!({"kind": "ダメージ", "source": "a6", "target": "P2.leader", "amount": 3, "cause": d}),
@@ -1433,7 +1465,17 @@ impl FakeAssist {
             alt: false,
             lookout: false,
         };
-        step(outcome_of(&at), events, log)
+        step(
+            Self::decision_id(which, state.k),
+            outcome_of(&at),
+            events,
+            log,
+        )
+    }
+
+    /// The id this layer gives the decision of path P step `k`.
+    fn decision_id(which: Layer, k: usize) -> String {
+        format!("{which:?}-d{k}")
     }
 
     fn record(&mut self, kind: &str, expected: &Value, actual: &Value, refs: &[&str]) {
@@ -1463,11 +1505,16 @@ impl AssistEngine for FakeAssist {
         Ok(())
     }
 
-    fn act(&mut self, op: &Value) -> Result<Layered<Step>, EngineError> {
+    fn act(&mut self, op: &Value) -> Result<Layered<Applied>, EngineError> {
         if op["manual"] == true {
-            let diverged = Step {
-                outcome: "diverged".to_owned(),
-                events: Vec::new(),
+            self.counter += 1;
+            let manual = format!("manual-{}", self.counter);
+            let diverged = Applied {
+                decision: manual.clone(),
+                step: Step {
+                    outcome: "diverged".to_owned(),
+                    events: Vec::new(),
+                },
             };
             if op["do"] == "attack" {
                 self.sandbox.a2_acted = true;
@@ -1517,9 +1564,12 @@ impl AssistEngine for FakeAssist {
                 }
             }
             return Ok(Layered {
-                sandbox: Step {
-                    outcome: "resolved".to_owned(),
-                    events: Vec::new(),
+                sandbox: Applied {
+                    decision: manual,
+                    step: Step {
+                        outcome: "resolved".to_owned(),
+                        events: Vec::new(),
+                    },
                 },
                 shadow: diverged,
             });
@@ -1537,14 +1587,17 @@ impl AssistEngine for FakeAssist {
         Ok(!self.unresolved())
     }
 
-    fn advance(&mut self) -> Result<Option<Layered<Step>>, EngineError> {
+    fn advance(&mut self) -> Result<Option<Layered<Applied>>, EngineError> {
         if self.unresolved() && self.mutation != AssistMutation::AdvanceWhileDiverged {
             return Ok(None);
         }
         self.shadow.k += 1;
-        let step = Step {
-            outcome: "resolved".to_owned(),
-            events: Vec::new(),
+        let step = Applied {
+            decision: "auto".to_owned(),
+            step: Step {
+                outcome: "resolved".to_owned(),
+                events: Vec::new(),
+            },
         };
         Ok(Some(Layered {
             sandbox: step.clone(),

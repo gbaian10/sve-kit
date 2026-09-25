@@ -236,30 +236,27 @@ pub(super) fn carried_from(knowledge: &Value) -> Vec<(String, Option<String>)> {
         .unwrap_or_default()
 }
 
-/// Relabels every `cause.decision` by the order its value first appears in `seen` (one
-/// table per source), or `#invalid` unless it is a non-empty string. Assist layers have
-/// no node ids, so A3 compares which decision a cause names, not the raw reference.
-pub(super) fn label_decisions(value: &mut Value, seen: &mut Vec<String>) {
+/// Replaces every `cause.decision` by the step it names: `#D{i+1}` when it is the
+/// decision id reported for step `i` of `decisions`, otherwise `#unknown:<raw>`, which
+/// never matches another source.
+pub(super) fn label_decisions(value: &mut Value, decisions: &[String]) {
     match value {
         Value::Object(m) => {
             if let Some(Value::Object(cause)) = m.get_mut("cause")
                 && let Some(d) = cause.get_mut("decision")
             {
-                let label = d.as_str().filter(|s| !s.is_empty()).map_or_else(
-                    || "#invalid".to_owned(),
-                    |raw| {
-                        let at = seen.iter().position(|x| x == raw).unwrap_or_else(|| {
-                            seen.push(raw.to_owned());
-                            seen.len().saturating_sub(1)
-                        });
-                        format!("#D{}", at.saturating_add(1))
-                    },
+                let at = d
+                    .as_str()
+                    .and_then(|raw| decisions.iter().position(|x| x == raw));
+                let label = at.map_or_else(
+                    || format!("#unknown:{d}"),
+                    |i| format!("#D{}", i.saturating_add(1)),
                 );
                 *d = Value::from(label);
             }
-            m.values_mut().for_each(|v| label_decisions(v, seen));
+            m.values_mut().for_each(|v| label_decisions(v, decisions));
         }
-        Value::Array(a) => a.iter_mut().for_each(|v| label_decisions(v, seen)),
+        Value::Array(a) => a.iter_mut().for_each(|v| label_decisions(v, decisions)),
         Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
     }
 }

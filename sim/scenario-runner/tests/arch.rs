@@ -22,8 +22,8 @@ use arch_support::{
 };
 use serde_json::Value;
 use sve_scenario_runner::arch::{
-    ArchFixtures, ArchOptions, AssistEngine, BranchKind, CheckReport, Layer, Layered, NodeId,
-    Observation, Outcome, Realign, ReplayEngine, check_assist, check_replay, load_fixtures,
+    Applied, ArchFixtures, ArchOptions, AssistEngine, BranchKind, CheckReport, Layer, Layered,
+    NodeId, Observation, Outcome, Realign, ReplayEngine, check_assist, check_replay, load_fixtures,
 };
 use sve_scenario_runner::{EngineError, Fixture, Step, View};
 
@@ -180,7 +180,7 @@ impl AssistEngine for Refusing {
     fn start(&mut self, _: &Fixture, _: &str, _: &str) -> Result<(), EngineError> {
         Err(self.0.clone())
     }
-    fn act(&mut self, _: &Value) -> Result<Layered<Step>, EngineError> {
+    fn act(&mut self, _: &Value) -> Result<Layered<Applied>, EngineError> {
         Err(self.0.clone())
     }
     fn divergences(&self) -> Result<Vec<Value>, EngineError> {
@@ -189,7 +189,7 @@ impl AssistEngine for Refusing {
     fn auto_advance(&self) -> Result<bool, EngineError> {
         Err(self.0.clone())
     }
-    fn advance(&mut self) -> Result<Option<Layered<Step>>, EngineError> {
+    fn advance(&mut self) -> Result<Option<Layered<Applied>>, EngineError> {
         Err(self.0.clone())
     }
     fn realign(&mut self, _: &str, _: Realign) -> Result<(), EngineError> {
