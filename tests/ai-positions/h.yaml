@@ -1,0 +1,106 @@
+# AI-H: high branching. Design: spec/design/d-prep/ai-positions-design.md (local draft).
+schema: sve-ai-position/1
+id: ai-h
+setup:
+  turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+  history: none
+  players:
+    P1:
+      construction: class
+      leader: {class: ロイヤル, life: 20}
+      pp: {current: 4, max: 4}
+      ep: 0
+      sep: 0
+      zones:
+        field:
+          - {id: a1, card: BP01-042}      # ニンジャエッグ 2/2
+        hand:
+          - {id: s1, card: BP08-028}      # 簒奪の舞
+        deck:
+          - {filler: 20}
+    P2:
+      construction: class
+      leader: {class: ウィッチ, life: 20}
+      pp: {current: 0, max: 4}
+      ep: 0
+      sep: 0
+      zones:
+        field:
+          - {id: b1, card: BP06-048}      # 符術の門弟 1/1
+          - {id: b2, card: BP06-048}
+          - {id: b3, card: BP01-173, state: {acted: true}}   # ファイター 2/3, acted
+        hand:
+          - {id: b11, card: BP01-173}
+          - {id: b12, card: BP01-163}
+          - {id: b13, card: BP01-176}
+        deck:
+          - {id: b7, card: BP01-173}
+          - {id: b5, card: BP06-042}      # 式神の使役
+          - {id: b8, card: BP01-163}
+          - {id: b6, card: BP06-042}
+          - {id: b9, card: BP01-176}
+          - {id: b10, card: BP01-158}
+        cemetery: []
+random: {}
+checks:
+  - id: H1
+    at: root
+    legal_exact:
+      - {do: end-phase}
+      - {do: attack, attacker: a1, target: P2.leader}
+      - {do: attack, attacker: a1, target: b3}
+      - {do: play, card: s1, targets: {1: []}}
+      - {do: play, card: s1, targets: {1: [b1]}, distribute: {1: {b1: 4}}}
+      - {do: play, card: s1, targets: {1: [b2]}, distribute: {1: {b2: 4}}}
+      - {do: play, card: s1, targets: {1: [b3]}, distribute: {1: {b3: 4}}}
+      - {do: play, card: s1, targets: {1: [b1, b2]}, distribute: {1: {b1: 1, b2: 3}}}
+      - {do: play, card: s1, targets: {1: [b1, b2]}, distribute: {1: {b1: 2, b2: 2}}}
+      - {do: play, card: s1, targets: {1: [b1, b2]}, distribute: {1: {b1: 3, b2: 1}}}
+      - {do: play, card: s1, targets: {1: [b1, b3]}, distribute: {1: {b1: 1, b3: 3}}}
+      - {do: play, card: s1, targets: {1: [b1, b3]}, distribute: {1: {b1: 2, b3: 2}}}
+      - {do: play, card: s1, targets: {1: [b1, b3]}, distribute: {1: {b1: 3, b3: 1}}}
+      - {do: play, card: s1, targets: {1: [b2, b3]}, distribute: {1: {b2: 1, b3: 3}}}
+      - {do: play, card: s1, targets: {1: [b2, b3]}, distribute: {1: {b2: 2, b3: 2}}}
+      - {do: play, card: s1, targets: {1: [b2, b3]}, distribute: {1: {b2: 3, b3: 1}}}
+      - {do: play, card: s1, targets: {1: [b1, b2, b3]}, distribute: {1: {b1: 1, b2: 1, b3: 2}}}
+      - {do: play, card: s1, targets: {1: [b1, b2, b3]}, distribute: {1: {b1: 1, b2: 2, b3: 1}}}
+      - {do: play, card: s1, targets: {1: [b1, b2, b3]}, distribute: {1: {b1: 2, b2: 1, b3: 1}}}
+  - id: H2
+    before:
+      - {n: 1, by: P1, at: main, do: play, card: s1, targets: {1: [b1, b2, b3]}, distribute: {1: {b1: 1, b2: 1, b3: 2}}}
+    legal_exact:
+      - {do: choose-pending, pending: {ability: {source: b1, line: 1}}}
+      - {do: choose-pending, pending: {ability: {source: b2, line: 1}}}
+    branches:
+      - name: b1 first, first search
+        # The first search shuffles P2's deck (5.8.2) before the second search point.
+        before:
+          - {n: 2, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b1, line: 1}}}
+        legal_exact:
+          - {do: resolve-choice, select: [b5]}
+          - {do: resolve-choice, select: [b6]}
+          - {do: resolve-choice, select: []}
+        branches:
+          - name: took b5, second search
+            random:
+              shuffles: [{player: P2, zone: deck, result: [b8, b6, b10, b7, b9]}]
+            before:
+              - {n: 3, by: P2, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [b5]}
+              - {n: 4, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b2, line: 1}}}
+            legal_exact:
+              - {do: resolve-choice, select: [b6]}
+              - {do: resolve-choice, select: []}
+          - name: found nothing, second search
+            random:
+              shuffles: [{player: P2, zone: deck, result: [b9, b5, b7, b10, b6, b8]}]
+            before:
+              - {n: 3, by: P2, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+              - {n: 4, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b2, line: 1}}}
+            legal_exact:
+              - {do: resolve-choice, select: [b5]}
+              - {do: resolve-choice, select: [b6]}
+              - {do: resolve-choice, select: []}
+  - id: H3
+    at: root
+    think: {seat: P1, profile: general, budget: 5000, seed: 5f1e0c2d9a7b4e3f8c6a1d0b9e8f7a6c5b4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f}
+    decision_in: H1

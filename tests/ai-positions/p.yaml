@@ -1,0 +1,47 @@
+# AI-P: two deck profiles. Design: spec/design/d-prep/ai-positions-design.md (local draft).
+schema: sve-ai-position/1
+id: ai-p
+setup:
+  turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+  history: none
+  players:
+    P1:
+      construction: class
+      leader: {class: ロイヤル, life: 20}
+      pp: {current: 0, max: 5}
+      ep: 0
+      sep: 0
+      zones:
+        field:
+          - {id: a1, card: SD02-002}      # ヴァンガード・レイサム 3/3
+        hand: []
+        deck:
+          - {filler: 20}
+    P2:
+      construction: class
+      leader: {class: ロイヤル, life: 10}
+      pp: {current: 0, max: 5}
+      ep: 0
+      sep: 0
+      zones:
+        field:
+          - {id: b1, card: BP01-173, state: {acted: true}}   # ファイター 2/3, acted
+        hand: []
+        deck:
+          - {filler: 20}
+random: {}
+checks:
+  - id: P-legal
+    at: root
+    legal_exact:
+      - {do: end-phase}
+      - {do: attack, attacker: a1, target: P2.leader}
+      - {do: attack, attacker: a1, target: b1}
+  - id: P1
+    at: root
+    same_instance:
+      - think: {seat: P1, profile: aggro, budget: 5000, seed: 0c6b1a9f2e8d7c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b}
+        decision: {do: attack, attacker: a1, target: P2.leader}
+      - think: {seat: P1, profile: control, budget: 5000, seed: 0c6b1a9f2e8d7c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c7b6a5f4e3d2c1b}
+        decision: {do: attack, attacker: a1, target: b1}
+    unchanged: omniscient

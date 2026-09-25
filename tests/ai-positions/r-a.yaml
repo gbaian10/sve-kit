@@ -1,0 +1,70 @@
+# AI-R (r-a): a choice after private information is revealed mid-resolution. 上 8 張含ギルガメッシュ;
+# r-b has the same ten cards and object ids in a different order.
+schema: sve-ai-position/1
+id: ai-r-a
+setup:
+  turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+  history: none
+  players:
+    P1:
+      construction: class
+      leader: {class: ロイヤル, life: 20}
+      pp: {current: 1, max: 5}
+      ep: 0
+      sep: 0
+      zones:
+        field: []
+        hand:
+          - {id: a, card: BP19-SL26}      # 機鋒の咎人・カットスロート
+        deck:
+          - {id: c1, card: BP01-173}   # ファイター
+          - {id: c2, card: BP10-122}   # ウィングメッセンジャー
+          - {id: c3, card: BP01-163}   # リザードマン
+          - {id: c4, card: BP01-176}   # 天剣の乙女
+          - {id: c5, card: BP01-158}   # ギルガメッシュ
+          - {id: c6, card: BP01-042}   # ニンジャエッグ
+          - {id: c7, card: BP01-046}   # 歴戦のランサー
+          - {id: c8, card: SD02-002}   # ヴァンガード・レイサム
+          - {id: c9, card: BP01-P10}   # ノーヴィストルーパー
+          - {id: c10, card: BP14-032}   # バイオレンスソルジャー
+    P2:
+      construction: class
+      leader: {class: ロイヤル, life: 20}
+      pp: {current: 0, max: 5}
+      ep: 0
+      sep: 0
+      zones:
+        field: []
+        hand:
+          - {filler: 3}
+        deck:
+          - {filler: 20}
+random: {}
+pair: r-b
+checks:
+  - id: R0
+    at: root
+    projection_equal_to_pair: P1
+  - id: R1
+    at: root
+    think: {seat: P1, profile: general, budget: 5000, seed: 3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b}
+    equal_to_pair: [decision, candidates]
+  - id: R2
+    before:
+      - {n: 1, by: P1, at: main, do: play, card: a}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a, line: 2}}}
+    legal_exact:
+      - {do: resolve-choice, select: [c1]}
+      - {do: resolve-choice, select: [c2]}
+      - {do: resolve-choice, select: [c3]}
+      - {do: resolve-choice, select: [c4]}
+      - {do: resolve-choice, select: [c5]}
+      - {do: resolve-choice, select: [c6]}
+      - {do: resolve-choice, select: [c7]}
+      - {do: resolve-choice, select: [c8]}
+    think: {seat: P1, profile: general, budget: 5000, seed: 3a2b1c0d9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4b3c2d1e0f9a8b7c6d5e4f3a2b}
+    decision_in: R2
+  - id: R3
+    before: R2
+    projection_hides_from: P2
+    objects: [c1, c2, c3, c4, c5, c6, c7, c8]

@@ -26,7 +26,8 @@ import yaml
 SCHEMAS = {"sve-exam/2.1"}
 KINDS = {"card", "rule", "flow"}
 STATUSES = {"draft", "verified", "disputed"}
-AUTHORS = {"fable", "astra"}
+# opus writes the holdout positions kept outside the repo.
+AUTHORS = {"fable", "astra", "opus"}
 PLAYERS = {"P1", "P2"}
 CONSTRUCTIONS = {"class", "title", "crossover"}
 PHASES = {"start", "main", "end"}

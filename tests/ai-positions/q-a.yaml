@@ -1,0 +1,114 @@
+# AI-Q (q-a): opponent Quick timing. P2's hand is エンジェルスナイプ; q-b differs only in which card is in hand.
+schema: sve-ai-position/1
+id: ai-q-a
+room: {open_decklists: true}
+setup:
+  turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+  history: none
+  players:
+    P1:
+      construction: class
+      leader: {class: ロイヤル, life: 20}
+      pp: {current: 0, max: 5}
+      ep: 0
+      sep: 0
+      zones:
+        field:
+          - {id: a1, card: BP01-042}      # ニンジャエッグ 2/2
+          - {id: a2, card: BP01-042}
+        hand: []
+        deck:
+          - {filler: 20}
+    P2:
+      construction: class
+      leader: {class: ロイヤル, life: 4}
+      pp: {current: 1, max: 5}
+      ep: 0
+      sep: 0
+      deck_list:
+        - {card: BP01-042, count: 3}
+        - {card: BP01-046, count: 3}
+        - {card: SD02-002, count: 3}
+        - {card: BP01-P10, count: 3}
+        - {card: BP14-032, count: 3}
+        - {card: BP03-033, count: 3}
+        - {card: BP01-179, count: 3}
+        - {card: BP01-173, count: 3}
+        - {card: BP01-163, count: 3}
+        - {card: BP01-176, count: 3}
+        - {card: BP01-158, count: 3}
+        - {card: BP10-122, count: 3}
+        - {card: BP01-180, count: 3}
+        - {card: BP01-168, count: 1}
+      zones:
+        field: []
+        hand:
+          - {id: h1, card: BP01-179}
+        deck:
+          - {id: d1, card: BP01-042}
+          - {id: d2, card: BP01-046}
+          - {id: d3, card: SD02-002}
+          - {id: d4, card: BP01-P10}
+          - {id: d5, card: BP14-032}
+          - {id: d6, card: BP03-033}
+          - {id: d7, card: BP01-173}
+          - {id: d8, card: BP01-163}
+          - {id: d9, card: BP01-176}
+          - {id: d10, card: BP01-158}
+          - {id: d11, card: BP10-122}
+          - {id: d12, card: BP01-180}
+          - {id: d13, card: BP01-168}
+          - {id: d14, card: BP01-042}
+          - {id: d15, card: BP01-046}
+          - {id: d16, card: SD02-002}
+          - {id: d17, card: BP01-P10}
+          - {id: d18, card: BP14-032}
+          - {id: d19, card: BP03-033}
+          - {id: d20, card: BP01-179}
+          - {id: d21, card: BP01-173}
+          - {id: d22, card: BP01-163}
+          - {id: d23, card: BP01-176}
+          - {id: d24, card: BP01-158}
+          - {id: d25, card: BP10-122}
+          - {id: d26, card: BP01-180}
+          - {id: d27, card: BP01-042}
+          - {id: d28, card: BP01-046}
+          - {id: d29, card: SD02-002}
+          - {id: d30, card: BP01-P10}
+          - {id: d31, card: BP14-032}
+          - {id: d32, card: BP03-033}
+          - {id: d33, card: BP01-179}
+          - {id: d34, card: BP01-173}
+          - {id: d35, card: BP01-163}
+          - {id: d36, card: BP01-176}
+          - {id: d37, card: BP01-158}
+          - {id: d38, card: BP10-122}
+          - {id: d39, card: BP01-180}
+        cemetery: []
+random: {}
+pair: q-b
+checks:
+  - id: Q0
+    at: root
+    projection_equal_to_pair: P1
+  - id: Q0b
+    at: root
+    query: {view: P1, path: P2.deck_list}
+    equals_setup: P2.deck_list
+  - id: Q1
+    at: root
+    legal_exact:
+      - {do: end-phase}
+      - {do: attack, attacker: a1, target: P2.leader}
+      - {do: attack, attacker: a2, target: P2.leader}
+  - id: Q1b
+    before:
+      - {n: 1, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+    legal_exact:
+      - {do: pass}
+      - {do: play, card: h1, targets: {1: [a1]}}
+      - {do: play, card: h1, targets: {1: [a2]}}
+  - id: Q2
+    at: root
+    think: {seat: P1, profile: general, budget: 5000, seed: 9d8c7b6a5f4e3d2c1b0a9f8e7d6c5b4a3f2e1d0c9b8a7f6e5d4c3b2a1f0e9d8c}
+    equal_to_pair: [decision, candidates]
