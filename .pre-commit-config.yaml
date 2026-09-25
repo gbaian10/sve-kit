@@ -19,6 +19,7 @@ repos:
         args: [--maxkb=1024, --enforce-all]
       - id: check-ast
       - id: check-case-conflict
+      - id: check-merge-conflict
       - id: check-yaml
       - id: check-toml
 
@@ -94,9 +95,23 @@ repos:
       - id: cargo-clippy
         name: cargo clippy
         language: system
-        entry: cargo clippy --workspace --all-targets -- -D warnings
+        entry: cargo clippy --locked --workspace --all-targets -- -D warnings
         pass_filenames: false
-        files: ^(sim/.*\.rs|Cargo\.(toml|lock)|sim/.*/Cargo\.toml|clippy\.toml)$
+        files: ^(sim/.*\.rs|Cargo\.(toml|lock)|sim/.*/Cargo\.toml|clippy\.toml|rust-toolchain\.toml)$
+      - id: cargo-machete
+        name: cargo machete (unused dependencies)
+        language: system
+        entry: cargo machete
+        pass_filenames: false
+        files: (^|/)Cargo\.toml$
+        stages: [pre-push]
+      - id: cargo-deny
+        name: cargo deny (advisories, bans, sources)
+        language: system
+        entry: cargo deny check advisories bans sources
+        pass_filenames: false
+        files: ^(Cargo\.lock|(.*/)?Cargo\.toml|deny\.toml)$
+        stages: [pre-push]
       - id: mypy
         name: mypy_check
         stages: [pre-push]

@@ -1,0 +1,4 @@
+# Pin the toolchain so clippy's lint set does not drift between machines.
+[toolchain]
+channel = "1.98.1"
+components = ["rustfmt", "clippy"]

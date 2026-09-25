@@ -4,7 +4,7 @@
 //! must pass every scenario with it. `Mutant` wraps the oracle and breaks exactly one
 //! thing, so a correct runner must fail every scenario the mutation applies to.
 
-#![allow(dead_code)]
+#![allow(dead_code, reason = "each test binary uses a different subset")]
 
 use std::collections::HashMap;
 
@@ -15,14 +15,14 @@ use sve_scenario_runner::{Engine, EngineError, Fixture, Step, View};
 type Key = (String, String);
 
 /// Plays back each scenario's expected results.
-pub struct Oracle {
+pub(crate) struct Oracle {
     scripts: HashMap<Key, Vec<Expected>>,
     current: Vec<Expected>,
     n: usize,
 }
 
 impl Oracle {
-    pub fn new(questions: &[Question]) -> Self {
+    pub(crate) fn new(questions: &[Question]) -> Self {
         let mut scripts = HashMap::new();
         for q in questions {
             for s in &q.scenarios {
@@ -37,7 +37,7 @@ impl Oracle {
     }
 
     /// Checkpoint entries after the current decision.
-    pub fn here(&self) -> Vec<&Expected> {
+    pub(crate) fn here(&self) -> Vec<&Expected> {
         self.current
             .iter()
             .filter(|e| e.decision_index().ok() == Some(self.n))
@@ -138,7 +138,7 @@ impl Engine for Oracle {
 
 /// One way to break the oracle.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub enum Mutation {
+pub(crate) enum Mutation {
     WrongOutcome,
     DropEvent,
     SplitGroup,
@@ -153,7 +153,7 @@ pub enum Mutation {
     InterleaveGroup,
 }
 
-pub const ALL: &[Mutation] = &[
+pub(crate) const ALL: &[Mutation] = &[
     Mutation::WrongOutcome,
     Mutation::DropEvent,
     Mutation::SplitGroup,
@@ -169,14 +169,14 @@ pub const ALL: &[Mutation] = &[
 ];
 
 /// The oracle with one mutation applied at the first checkpoint where it applies.
-pub struct Mutant {
+pub(crate) struct Mutant {
     pub inner: Oracle,
     pub mutation: Mutation,
     target: Option<usize>,
 }
 
 impl Mutant {
-    pub const fn new(inner: Oracle, mutation: Mutation) -> Self {
+    pub(crate) const fn new(inner: Oracle, mutation: Mutation) -> Self {
         Self {
             inner,
             mutation,
@@ -185,7 +185,7 @@ impl Mutant {
     }
 
     /// Whether the mutation can apply to these checkpoint entries.
-    pub fn applies(mutation: Mutation, entries: &[&Expected]) -> bool {
+    pub(crate) fn applies(mutation: Mutation, entries: &[&Expected]) -> bool {
         entries.iter().any(|e| match mutation {
             Mutation::WrongOutcome => true,
             Mutation::DropEvent => !e.events.is_empty(),
@@ -266,7 +266,7 @@ fn bump(v: &mut Value) -> bool {
         }
         Value::Object(m) => m.values_mut().any(bump),
         Value::Array(a) => a.iter_mut().any(bump),
-        _ => false,
+        Value::Null | Value::Bool(_) | Value::String(_) => false,
     }
 }
 
@@ -297,6 +297,10 @@ impl Engine for Mutant {
         Ok(())
     }
 
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "each mutant only touches the calls it targets"
+    )]
     fn decide(&mut self, decision: &Value) -> Result<Step, EngineError> {
         let mut step = self.inner.decide(decision)?;
         if !self.active() {
@@ -362,6 +366,10 @@ impl Engine for Mutant {
         Ok(step)
     }
 
+    #[expect(
+        clippy::wildcard_enum_match_arm,
+        reason = "each mutant only touches the calls it targets"
+    )]
     fn query(&self, view: View, path: &str) -> Result<Option<Value>, EngineError> {
         let got = self.inner.query(view, path)?;
         if !self.active() {

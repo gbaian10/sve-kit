@@ -16,7 +16,9 @@ use sve_scenario_runner::{
 fn arr(v: Value) -> Vec<Value> {
     match v {
         Value::Array(a) => a,
-        _ => Vec::new(),
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) | Value::Object(_) => {
+            Vec::new()
+        }
     }
 }
 
@@ -242,7 +244,10 @@ impl Engine for Script {
     }
 }
 
-#[allow(clippy::unnecessary_wraps)] // scripts mix steps with engine errors
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "scripts mix steps with engine errors"
+)]
 fn step(outcome: &str, events: Value) -> Result<Step, EngineError> {
     Ok(Step {
         outcome: outcome.to_owned(),

@@ -1,0 +1,35 @@
+# cargo-deny: https://embarkstudios.github.io/cargo-deny/
+# The pre-push hook runs `advisories bans sources`; run `cargo deny check licenses` by hand
+# before choosing a LICENSE (see the licensing TODO).
+
+[advisories]
+version = 2
+yanked = "warn"
+# Only our direct dependencies; unmaintained transitive crates are not ours to fix.
+unmaintained = "workspace"
+
+[bans]
+multiple-versions = "warn"
+
+[sources]
+unknown-registry = "deny"
+unknown-git = "deny"
+
+[licenses]
+version = 2
+allow = [
+    "MIT",
+    "Apache-2.0",
+    "Apache-2.0 WITH LLVM-exception",
+    "BSD-2-Clause",
+    "BSD-3-Clause",
+    "ISC",
+    "Unicode-3.0",
+    "Zlib",
+]
+# Keep the list ready for future dependencies without warning about unused entries.
+unused-allowed-license = "allow"
+
+[licenses.private]
+# Our own crates are `publish = false` and the LICENSE is still undecided.
+ignore = true

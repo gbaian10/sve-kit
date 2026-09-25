@@ -112,6 +112,14 @@ x = random.random()  # ruff: ignore[suspicious-non-cryptographic-random-usage] -
 - A whole file (the same rule repeated many times): `# ruff: file-ignore[...]` at the top
 - The old `# noqa` form is rejected by the linter
 
+Rust: clippy (pedantic and nursery) runs on every commit with `-D warnings`; the toolchain
+version is pinned in `rust-toolchain.toml`. Silence a lint with `#[expect]` and a reason;
+use `#[allow]` only when the lint does not fire everywhere the attribute applies:
+
+```rust
+#[expect(clippy::unnecessary_wraps, reason = "scripts mix steps with engine errors")]
+```
+
 ## What goes into git
 
 - **In:** code, shared human-written data (`authored/`), formal docs (`docs/`).
@@ -123,6 +131,7 @@ x = random.random()  # ruff: ignore[suspicious-non-cryptographic-random-usage] -
 
 ```bash
 uv --directory carddb sync --all-groups
+cargo install --locked cargo-deny cargo-machete   # checked on pre-push
 pre-commit install
 ```
 
@@ -132,6 +141,8 @@ Run the checks before committing:
 uv --directory carddb run ruff check
 uv --directory carddb run mypy
 uv --directory carddb run pytest
+cargo clippy --locked --workspace --all-targets -- -D warnings
+cargo test --locked --workspace
 ```
 
 ## Crawling etiquette

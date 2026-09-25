@@ -356,7 +356,7 @@ pub fn mentions(haystack: &Value, needle: &Value) -> bool {
             .iter()
             .any(|(k, v)| Some(k.as_str()) == needle.as_str() || mentions(v, needle)),
         Value::Array(a) => a.iter().any(|v| mentions(v, needle)),
-        other => other == needle,
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => haystack == needle,
     }
 }
 
@@ -372,6 +372,6 @@ pub fn contains_text(haystack: &Value, text: &str) -> bool {
             .any(|(k, v)| k.contains(text) || contains_text(v, text)),
         Value::Array(a) => a.iter().any(|v| contains_text(v, text)),
         Value::String(s) => s.contains(text),
-        _ => false,
+        Value::Null | Value::Bool(_) | Value::Number(_) => false,
     }
 }

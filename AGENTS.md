@@ -84,7 +84,12 @@ uv --directory carddb sync                 # 安裝依賴
 uv --directory carddb run pytest           # 測試
 uv --directory carddb run ruff check       # lint
 uv --directory carddb run mypy             # 型別檢查
+cargo clippy --locked --workspace --all-targets -- -D warnings   # Rust lint
+cargo test --locked --workspace            # Rust 測試
+cargo deny check && cargo machete          # 依賴的安全公告與未用依賴（pre-push 也會跑）
 ```
+
+Rust 工具鏈版本釘在 `rust-toolchain.toml`，升級時一併改 `Cargo.toml` 的 `rust-version`。
 
 ## 慣例
 
