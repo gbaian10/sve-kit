@@ -201,7 +201,9 @@ fn edge(
     rule: &str,
     decision: &Value,
 ) -> Value {
-    json!({"edge": edge, "parent": parent, "sample": sample, "by": by, "at": "quick",
+    // Only P2's answer happens at a Quick point; P1 acts in the main phase.
+    let at = if by == "P2" { "quick" } else { "main" };
+    json!({"edge": edge, "parent": parent, "sample": sample, "by": by, "at": at,
            "rule": rule, "decision": decision})
 }
 
@@ -290,6 +292,12 @@ fn search_logs_that_prove_nothing_fail() {
         "count differs from the report"
     );
     assert!(!log_ok(&good_log(), 3, 2, "q-b"), "over budget");
+    let mut at_main = good_log();
+    at_main[1]["at"] = json!("main");
+    assert!(fails(&at_main), "the Quick edge is not at a Quick point");
+    let mut no_at = good_log();
+    no_at[1].as_object_mut().unwrap().remove("at");
+    assert!(fails(&no_at), "the Quick edge has no at");
     let mut end = good_log();
     end[1]["rule"] = json!("7.4.5");
     assert!(fails(&end), "only the end-phase Quick");

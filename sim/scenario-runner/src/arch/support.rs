@@ -236,19 +236,30 @@ pub(super) fn carried_from(knowledge: &Value) -> Vec<(String, Option<String>)> {
         .unwrap_or_default()
 }
 
-/// Replaces every `cause.decision` by one marker: assist layers have no node ids, so
-/// A3 compares only that such a cause is a decision.
-pub(super) fn mark_decisions(value: &mut Value) {
+/// Relabels every `cause.decision` by the order its value first appears in `seen` (one
+/// table per source), or `#invalid` unless it is a non-empty string. Assist layers have
+/// no node ids, so A3 compares which decision a cause names, not the raw reference.
+pub(super) fn label_decisions(value: &mut Value, seen: &mut Vec<String>) {
     match value {
         Value::Object(m) => {
             if let Some(Value::Object(cause)) = m.get_mut("cause")
                 && let Some(d) = cause.get_mut("decision")
             {
-                *d = Value::from("#decision");
+                let label = d.as_str().filter(|s| !s.is_empty()).map_or_else(
+                    || "#invalid".to_owned(),
+                    |raw| {
+                        let at = seen.iter().position(|x| x == raw).unwrap_or_else(|| {
+                            seen.push(raw.to_owned());
+                            seen.len().saturating_sub(1)
+                        });
+                        format!("#D{}", at.saturating_add(1))
+                    },
+                );
+                *d = Value::from(label);
             }
-            m.values_mut().for_each(mark_decisions);
+            m.values_mut().for_each(|v| label_decisions(v, seen));
         }
-        Value::Array(a) => a.iter_mut().for_each(mark_decisions),
+        Value::Array(a) => a.iter_mut().for_each(|v| label_decisions(v, seen)),
         Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
     }
 }

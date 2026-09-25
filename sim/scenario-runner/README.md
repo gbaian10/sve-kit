@@ -162,8 +162,11 @@ Each result is `pass`, `fail` (with reasons), `unsupported` or `adapter-error`, 
 - Events carry `id` and `cause`: `{event: <id>}`, `{decision: <node id>}` or `{rule: "<clause>"}`
 - Divergences are `{id, kind, expected, actual, refs, resolved}`; only `resolved` may change
 - Node and event ids may be random but are immutable: a restored game keeps the ids of
-  events it had before the save, and each assist layer keeps the ids of the events it
-  returned (Rewind and Adopt do not rename them). Paired comparisons relabel ids by the
+  the nodes and events it had before the save (`restore` returns the saved node's id, and
+  the earlier nodes still answer), and each assist layer keeps the ids of the events it
+  returned (Rewind and Adopt do not rename them).
+- In assist steps, `cause.decision` is a non-empty reference, one per decision; A3 compares
+  which decision it names (relabelled by first appearance), not the raw value. Paired comparisons relabel ids by the
   order the checks received them. An id the checks never received keeps its raw value, so it is never
   folded together with another one. Node ids inside player payloads are only relabelled at paths listed in
   `ArchOptions::node_id_paths`; other engine identifiers (transport counters and the like)
@@ -173,12 +176,12 @@ Each result is `pass`, `fail` (with reasons), `unsupported` or `adapter-error`, 
 ### Tests of the checks
 
 `tests/arch.rs` runs scripted engines (`tests/arch_support/`): a correct skeleton that
-passes every assertion, and 52 broken skeletons (36 replay, 16 assist), each caught by the
+passes every assertion, and 56 broken skeletons (38 replay, 18 assist), each caught by the
 assertion meant for it. Some of them:
 
 | Mutation | Caught by |
 | --- | --- |
-| Save keeps the board but not the seed; saving consumes randomness; the restored copy drops or miswires an event, names an event that never existed, or reports the shuffled deck the other way round | R1 |
+| Save keeps the board but not the seed; saving consumes randomness; the restored copy drops or miswires an event, names an event that never existed, issues new ids for the saved nodes or reorders their decisions, or reports the shuffled deck the other way round | R1 |
 | Branch shares mutable state with its source; branching touches the source line; ids reused across branches | R3 |
 | Constant digest | R0 |
 | Digest without carried knowledge | R2b, R4 |
@@ -187,7 +190,7 @@ assertion meant for it. Some of them:
 | Undo forgets what was seen / the opponent's side, deletes or rewrites the original line; board queries unanswered | R4 |
 | Export leaks the seed, the shuffled order (also on a replay branch), the opponent's hidden cards, the deck before the search (ids or a hash of the order); knowledge carries a hidden card; a never-issued id encodes the top card | R5 |
 | Broken `cause` link | R6 |
-| After Rewind a card enters a step early, a trigger fires twice, a cause is wrong or missing, or an extra kind of event appears (both layers alike) | A3 |
+| After Rewind a card enters a step early, a trigger fires twice, a cause is wrong or missing, a decision cause is null or names another decision, or an extra kind of event appears (both layers alike) | A3 |
 | Rewind drops or rewrites the divergence | A3, B2 |
 | Automation advances while diverged | A2 |
 | Adopt ignored / Adopt clears the pending trigger | A4, B3 / A4 |

@@ -179,6 +179,7 @@ fn quick_after_attack(
     position: &AiPosition,
 ) -> bool {
     let is_quick_play = is(entry, "by", "P2")
+        && is(entry, "at", "quick")
         && is(entry, "rule", "8.4.7")
         && decision_do(entry) == Some("play")
         && plays_quick(entry, hands, position);

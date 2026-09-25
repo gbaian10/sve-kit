@@ -176,12 +176,34 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
         ids: Ids::default(),
     };
     let r4 = b.engine.restore(&blob)?;
-    // Labels count from the save point in both runs. Event ids are immutable, so a cause
-    // into the events before the save keeps its raw id, which must be the same in both.
-    a.ids = Ids::default();
-    a.ids.node(&n4);
-    b.ids.node(&r4);
-    let mut fails = compare_nodes(&a, &n4, &b, &r4, options, "N4")?;
+    // Node and event ids are immutable: the restored game answers for the ids issued
+    // before the save, and both runs label later ids from the same starting table.
+    let mut fails = Vec::new();
+    if r4 != n4 {
+        fails.push(format!(
+            "restore returned node {} for the saved node {}",
+            r4.0, n4.0
+        ));
+    }
+    b.ids = a.ids.clone();
+    for (k, node) in &line {
+        match b.engine.decisions(node) {
+            Ok(d) if d == a.engine.decisions(node)? => {
+                fails.extend(compare_nodes(
+                    &a,
+                    node,
+                    &b,
+                    node,
+                    options,
+                    &format!("N{k}"),
+                )?);
+            }
+            Ok(_) | Err(_) => fails.push(format!(
+                "N{k}: the restored game does not keep node {} of the saved line",
+                node.0
+            )),
+        }
+    }
     let (a_line, a_steps) = a.walk(&n4, 4, tail(path, 4))?;
     let (b_line, b_steps) = b.walk(&r4, 4, tail(path, 4))?;
     for ((k, sa), sb) in a_line

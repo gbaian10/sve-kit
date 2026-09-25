@@ -101,6 +101,10 @@ pub(crate) enum ReplayMutation {
     CarriedFromStart,
     /// Carried identities name a node that does not exist.
     CarriedFromNowhere,
+    /// Restore keeps event ids but issues new ids for the nodes before the save.
+    RestoreNewNodeIds,
+    /// A restored game reports the saved line's decisions in the wrong order.
+    RestoreReordersDecisions,
 }
 
 pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
@@ -140,6 +144,8 @@ pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
     (ReplayMutation::RestoredOrderFlipped, &["R1"]),
     (ReplayMutation::CarriedFromStart, &["R2b", "R4"]),
     (ReplayMutation::CarriedFromNowhere, &["R2b", "R4"]),
+    (ReplayMutation::RestoreNewNodeIds, &["R1"]),
+    (ReplayMutation::RestoreReordersDecisions, &["R1"]),
 ];
 
 #[derive(Debug, Clone)]
@@ -811,6 +817,16 @@ impl FakeReplay {
         out
     }
 
+    /// Node ids on the line from the start to node `at`, in order.
+    fn line_node_ids(game: &Game, at: usize) -> Vec<String> {
+        let mut nodes = Self::ancestors(game, at);
+        nodes.reverse();
+        nodes
+            .into_iter()
+            .map(|i| game.nodes[i].id.clone())
+            .collect()
+    }
+
     /// Event ids on the line from the start to node `at`, in order.
     fn line_event_ids(game: &Game, at: usize) -> Vec<String> {
         let mut nodes = Self::ancestors(game, at);
@@ -976,6 +992,7 @@ impl ReplayEngine for FakeReplay {
             "seed": if visible_only { "" } else { game.seed.as_str() },
             "decisions": node.decisions,
             "events": Self::line_event_ids(game, self.find(at)?.0),
+            "nodes": Self::line_node_ids(game, self.find(at)?.0),
         });
         serde_json::to_vec(&blob).map_err(|e| adapter(&e.to_string()))
     }
@@ -1016,13 +1033,21 @@ impl ReplayEngine for FakeReplay {
         for decision in v["decisions"].as_array().cloned().unwrap_or_default() {
             id = self.decide(&NodeId(id), &decision)?.0.0;
         }
-        // Event ids are immutable: the replayed events take back the ids they had.
+        // Ids are immutable: the replayed nodes and events take back the ids they had.
+        let keep_nodes = self.mutation != ReplayMutation::RestoreNewNodeIds;
         let game = self.game.as_mut().ok_or_else(|| adapter("no game"))?;
         let last = game.nodes.len() - 1;
-        let renamed: BTreeMap<String, String> = Self::line_event_ids(game, last)
+        let mut renamed: BTreeMap<String, String> = Self::line_event_ids(game, last)
             .into_iter()
             .zip(strings(&v["events"]))
             .collect();
+        if keep_nodes {
+            renamed.extend(
+                Self::line_node_ids(game, last)
+                    .into_iter()
+                    .zip(strings(&v["nodes"])),
+            );
+        }
         let rename = |slot: Option<&mut Value>| {
             if let Some(slot) = slot
                 && let Some(new) = slot.as_str().and_then(|old| renamed.get(old))
@@ -1030,11 +1055,19 @@ impl ReplayEngine for FakeReplay {
                 *slot = Value::from(new.clone());
             }
         };
-        for event in game.nodes.iter_mut().flat_map(|n| n.step.events.iter_mut()) {
-            rename(event.get_mut("id"));
-            rename(event.get_mut("cause").and_then(|c| c.get_mut("event")));
+        for node in &mut game.nodes {
+            if let Some(new) = renamed.get(&node.id) {
+                node.id.clone_from(new);
+            }
+            for event in &mut node.step.events {
+                rename(event.get_mut("id"));
+                if let Some(cause) = event.get_mut("cause") {
+                    rename(cause.get_mut("event"));
+                    rename(cause.get_mut("decision"));
+                }
+            }
         }
-        Ok(NodeId(id))
+        Ok(NodeId(renamed.get(&id).cloned().unwrap_or(id)))
     }
 
     fn export(&self, at: &NodeId, view: View) -> Result<Value, EngineError> {
@@ -1144,11 +1177,18 @@ impl ReplayEngine for FakeReplay {
 
     fn decisions(&self, at: &NodeId) -> Result<Vec<Value>, EngineError> {
         let (_, node) = self.find(at)?;
-        Ok(if node.dead {
+        let mut decisions = if node.dead {
             Vec::new()
         } else {
             node.decisions.clone()
-        })
+        };
+        if self.restored
+            && self.mutation == ReplayMutation::RestoreReordersDecisions
+            && decisions.len() <= 4
+        {
+            decisions.reverse();
+        }
+        Ok(decisions)
     }
 
     fn events(&self, at: &NodeId) -> Result<Vec<Value>, EngineError> {
@@ -1190,6 +1230,10 @@ pub(crate) enum AssistMutation {
     ResumeCauseMissing,
     /// Both layers agree, but revealing a3 also emits a move event.
     ResumeExtraKind,
+    /// Both layers agree, but the cancelled trigger names a null decision.
+    ResumeDecisionNull,
+    /// Both layers agree, but the cancelled trigger names the decision of P3.
+    ResumeDecisionWrong,
 }
 
 pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
@@ -1209,6 +1253,8 @@ pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
     (AssistMutation::ResumeCauseWrong, &["A3"]),
     (AssistMutation::ResumeCauseMissing, &["A3"]),
     (AssistMutation::ResumeExtraKind, &["A3"]),
+    (AssistMutation::ResumeDecisionNull, &["A3"]),
+    (AssistMutation::ResumeDecisionWrong, &["A3"]),
 ];
 
 #[derive(Debug, Clone, Default, Hash, PartialEq, Eq)]
@@ -1259,8 +1305,9 @@ impl FakeAssist {
 
     /// Path P step `k` with the same events and causes as the replay fake; `#first` and
     /// `#second` name this step's own events, the rest are looked up in `log`.
-    fn path_events(mutation: AssistMutation, k: usize, log: &[Value]) -> Vec<Value> {
-        let d = json!({"decision": "assist"});
+    fn path_events(mutation: AssistMutation, k: usize, log: &[Value], which: Layer) -> Vec<Value> {
+        // Each decision of this layer has its own reference.
+        let d = json!({"decision": format!("{which:?}-d{k}")});
         let find = |pattern: Value| {
             log.iter()
                 .rev()
@@ -1298,6 +1345,12 @@ impl FakeAssist {
             (6, AssistMutation::ResumeCauseMissing) => {
                 vec![json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}})]
             }
+            (6, AssistMutation::ResumeDecisionNull) => vec![
+                json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": {"decision": null}}),
+            ],
+            (6, AssistMutation::ResumeDecisionWrong) => vec![
+                json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": {"decision": format!("{which:?}-d3")}}),
+            ],
             (6, _) => vec![
                 json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": d}),
             ],
@@ -1374,7 +1427,7 @@ impl FakeAssist {
             8 => state.life -= 3,
             _ => {}
         }
-        let events = Self::path_events(mutation, state.k, log);
+        let events = Self::path_events(mutation, state.k, log, which);
         let at = At {
             k: state.k,
             alt: false,

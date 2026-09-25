@@ -2,7 +2,7 @@
 
 use serde_json::Value;
 
-use super::support::{Ids, Probe, check_fixed, has_match, mark_decisions, normalize};
+use super::support::{Ids, Probe, check_fixed, has_match, label_decisions, normalize};
 use super::{
     ArchFixtures, ArchOptions, AssistEngine, AssistFactory, CheckReport, Layer, Layered, Realign,
     ReplayFactory, positions,
@@ -404,17 +404,18 @@ fn replay_steps(
 }
 
 /// Outcome and events of each step, event ids labelled by first appearance over the whole
-/// history of that source and decision causes reduced to a marker.
+/// history of that source and decision causes labelled the same way (see `label_decisions`).
 fn relabelled(steps: &[Step], options: &ArchOptions) -> Vec<(String, Value)> {
     let mut ids = Ids::default();
     for step in steps {
         ids.events(&step.events);
     }
+    let mut decisions = Vec::new();
     steps
         .iter()
         .map(|step| {
             let mut events = Value::from(step.events.clone());
-            mark_decisions(&mut events);
+            label_decisions(&mut events, &mut decisions);
             (step.outcome.clone(), normalize(&events, &ids, options))
         })
         .collect()
