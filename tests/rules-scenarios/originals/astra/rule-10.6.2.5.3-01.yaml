@@ -1,0 +1,191 @@
+schema: sve-exam/2.1
+id: rule-10.6.2.5.3-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.6.2.5.3
+  - 1.3.2.2
+cards:
+  - BP20-P38
+why: 以真實印刷的零 PP 起動費用測試：PP 為零仍視為付費成立，必須造成 1 傷害。對照本回合已用過時不能起動；沒有將 0 傷害冒充 0 費用。此題選 brief 允許的「0 單位」分支，不宣稱覆蓋費用取代。
+refs:
+  rules:
+    - 10.6.2.5.3
+    - 1.3.2.2
+    - 8.3.1
+    - 10.6.2.8.2
+  qa: []
+evidence:
+  - ref: cr 10.6.2.5.3
+    quote: コストとして実行する内容のうち、その内容を 0 単位実行するものは、何も実行せずにその内容を実行したものとみなされます（1.3.2.2）。
+    derivation:
+      - BP20-P38 起動的費用是 0 PP，沒有橫置或其他費用；P1 有 0 PP 也符合費用。
+      - 選自己 a1 是合法的自方從者目標；能力結算造成 1 傷害、PP 維持 0。
+  - ref: cr 1.3.2.2
+    quote: その行動はまったく行われません。
+    derivation:
+      - 零單位 PP 支付不實際扣 PP，但 .5.3 明定費用視為執行，不能取消後面的效果。
+  - ref: cards BP20-P38 faces[0].text
+    quote: '{起動}{コスト0}：自分の場のフォロワー1体を選ぶ。それに1ダメージ。この能力は1ターンに1回使える。'
+    derivation:
+      - 對照局面明列已用一次，同一來源仍在場；卡面每回合一次的限制使第二次不能起動。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 零 PP 支付成立，效果正常結算
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: none
+      players:
+        P1:
+          leader:
+            class: ドラゴン
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a1
+                card: BP20-P38
+          construction: class
+        P2:
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+          construction: class
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a1
+          line: 1
+        targets:
+          1:
+            - a1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.pp.current: 0
+          P1.field.a1:
+            damage: 1
+            acted: false
+          semantic_state.used_this_turn:
+            - ability:
+                source: a1
+                line: 1
+              count: 1
+          semantic_state.pending_triggers: []
+        outcome: resolved
+        events:
+          - kind: ダメージ
+            source: a1
+            target: a1
+            amount: 1
+  - name: 本回合已用過仍不能再起動
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: explicit
+      players:
+        P1:
+          leader:
+            class: ドラゴン
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a1
+                card: BP20-P38
+                state:
+                  damage: 1
+          construction: class
+        P2:
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+          construction: class
+      semantic_state:
+        used_this_turn:
+          - ability:
+              source: a1
+              line: 1
+            count: 1
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a1
+          line: 1
+        targets:
+          1:
+            - a1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.pp.current: 0
+          P1.field.a1:
+            damage: 1
+            acted: false
+          semantic_state.used_this_turn:
+            - ability:
+                source: a1
+                line: 1
+              count: 1
+          semantic_state.pending_triggers: []
+        outcome: cannot-activate
+        forbidden_events:
+          - kind: プレイ
+          - kind: ダメージ
+          - kind: 引く
+          - kind: 捨てる
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+discriminates: 把零單位誤認為沒付費會少掉 1 傷害；忽略每回合次數會在失敗局面多掉 1 體力。

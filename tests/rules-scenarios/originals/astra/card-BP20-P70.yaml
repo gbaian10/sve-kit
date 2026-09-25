@@ -1,0 +1,248 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP20-P70
+kind: card
+must_pass: true
+mechanisms:
+  - 回合特定時點
+  - 手牌、墓場中有效的能力
+  - token
+cards:
+  - BP01-173
+  - BP20-P70
+why: 紋章存在 EX，其能力在 EX 有效；一張以下才抽，filler 只被計數不被抽選。
+discriminates: 只啟用場上能力會少抽；把條件當小於一會在一張分支少抽。
+refs:
+  rules:
+    - 9.1.4.2
+    - 7.4.1
+    - 10.3.4
+    - 10.3.6
+  qa: []
+evidence:
+  - ref: cr 9.1.4.2
+    quote: "種類がクレストであるトークンは、EX エリア\nでのみ存在できます。"
+    derivation:
+      - 紋章存在 EX，其能力在 EX 有效；一張以下才抽，filler 只被計數不被抽選。
+  - ref: cr 7.4.1
+    quote: "‘エンドフェイズが来たとき’で示されている誘発条\n件が発生します。"
+    derivation:
+      - 紋章存在 EX，其能力在 EX 有效；一張以下才抽，filler 只被計數不被抽選。
+  - ref: cr 10.3.4
+    quote: "特定の領域で処理することが明確である効果は、\nその領域でのみ有効です。"
+    derivation:
+      - 紋章存在 EX，其能力在 EX 有效；一張以下才抽，filler 只被計數不被抽選。
+  - ref: cr 10.3.6
+    quote: "クレストのトークンが持つ能力は、そのカードが EX\nエリアにある間のみ有効です。"
+    derivation:
+      - 紋章在 EX 的結束时能力有效；依當時手牌數判定。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 手牌 0
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP20-P70
+            hand: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d
+          P1.deck: []
+          P1.ex:
+            - a
+  - name: 手牌 1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP20-P70
+            hand:
+              - filler: 1
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - filler: 1
+            - d
+          P1.deck: []
+          P1.ex:
+            - a
+  - name: 手牌 2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP20-P70
+            hand:
+              - filler: 2
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - filler: 2
+          P1.deck:
+            - d
+          P1.ex:
+            - a
+        forbidden_events:
+          - kind: 引く

@@ -1,0 +1,247 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP04-007
+kind: card
+must_pass: false
+mechanisms:
+  - 連擊、覺醒、真紅
+  - 本回合歷史
+  - 抉擇＋條件改變選擇數
+cards:
+  - BP01-173
+  - BP04-007
+why: Combo 看本回合卡片打出數，不把起動能力當卡片；未達三時不執行條件內抉擇，但仍付橫置。
+discriminates: 把能力也計入 Combo 會讓 2 的局面錯加值；把條件外費用跳過則不橫置。
+refs:
+  rules:
+    - 13.2.1.2
+    - 5.18.2.2
+    - 10.6.2.7
+  qa: []
+evidence:
+  - ref: cr 13.2.1.2
+    quote: "‘【コンボ （数値）】（テキスト）’は‘このター\nン、あなたがこのカードを含めて（数値）枚以上\nのカードをプレイしていた場合、（テキスト）’を\n意味します。"
+    derivation:
+      - Combo 看本回合卡片打出數，不把起動能力當卡片；未達三時不執行條件內抉擇，但仍付橫置。
+  - ref: cr 5.18.2.2
+    quote: "チョイスの個数が 0 である場合、その一連\nの指示はまったく実行しません。"
+    derivation:
+      - Combo 看本回合卡片打出數，不把起動能力當卡片；未達三時不執行條件內抉擇，但仍付橫置。
+  - ref: cr 10.6.2.7
+    quote: "この時点で、そのカードや能力が‘プレイさ\nれた’事象が発生します。"
+    derivation:
+      - Combo 看本回合卡片打出數，不把起動能力當卡片；未達三時不執行條件內抉擇，但仍付橫置。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 已打出卡片 0
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP04-007
+              - id: b
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: t
+                card: BP01-173
+      semantic_state:
+        counters_this_turn:
+          P1.cards_played: 0
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        options: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+          P1.field.b:
+            power: 2
+            hp: 3
+  - name: 已打出卡片 2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP04-007
+              - id: b
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: t
+                card: BP01-173
+      semantic_state:
+        counters_this_turn:
+          P1.cards_played: 2
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        options: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+          P1.field.b:
+            power: 2
+            hp: 3
+  - name: 已打出卡片 3
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP04-007
+              - id: b
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: t
+                card: BP01-173
+      semantic_state:
+        counters_this_turn:
+          P1.cards_played: 3
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 1
+        options:
+          - 1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+          P1.field.b:
+            power: 4
+            hp: 5

@@ -1,0 +1,209 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.7.2.1-01
+kind: rule
+must_pass: false
+mechanisms:
+  - 10.7 其他
+  - 動態數值
+cards:
+  - BP01-176
+  - BP14-027
+  - BP16-T15
+why: explicit 列出不同金幣進 EX 的兩個事件，各自對應一次待機，不可按能力指稱去重。此題測既有待機處理，不宣稱測生成金幣事件。
+discriminates: 能力去重會在雙待機分支留下 b 或少 1 主戰者傷害。
+refs:
+  rules:
+    - 10.7.2.1
+    - 10.7.3
+  qa:
+    - Q1886
+evidence:
+  - ref: cr 10.7.2.1
+    quote: "自動能力の誘発条件が複数回満たされた\n場合、その自動能力はその回数分待機状態\nになります。"
+    derivation:
+      - explicit 列出不同金幣進 EX 的兩個事件，各自對應一次待機，不可按能力指稱去重。此題測既有待機處理，不宣稱測生成金幣事件。
+  - ref: cr 10.7.3
+    quote: "チェックタイミングが発生した段階で、自動能力の\nプレイを求められているプレイヤーは、自身がマス\nターである自動能力のうち待機状態のものを 1 つ選\nび、それをプレイします。プレイされた能力の解決\n後、その自動能力の待機状態が 1 回取り消されま\nす。"
+    derivation:
+      - explicit 列出不同金幣進 EX 的兩個事件，各自對應一次待機，不可按能力指稱去重。此題測既有待機處理，不宣稱測生成金幣事件。
+  - ref: Q1886
+    quote: はい。2回誘発します。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 同能力待機 1 次
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP14-027
+            ex:
+              - id: f0
+                card: BP16-T15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+      semantic_state:
+        pending_triggers:
+          - id: t0
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_ex: f0
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t0
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 19
+          semantic_state.pending_triggers: []
+          P2.field.b:
+            hp: 3
+  - name: 同能力待機 2 次
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP14-027
+            ex:
+              - id: f0
+                card: BP16-T15
+              - id: f1
+                card: BP16-T15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+      semantic_state:
+        pending_triggers:
+          - id: t0
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_ex: f0
+          - id: t1
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              entered_ex: f1
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t0
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 18
+          semantic_state.pending_triggers: []
+          P2.field: []
+          P2.cemetery:
+            - b

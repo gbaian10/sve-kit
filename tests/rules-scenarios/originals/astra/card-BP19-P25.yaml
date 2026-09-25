@@ -1,0 +1,345 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP19-P25
+kind: card
+must_pass: true
+mechanisms:
+  - 抉擇＋條件改變選擇數
+  - 法術鏈、死靈充能
+cards:
+  - BP01-173
+  - BP19-P25
+why: NC 不足仍可合法選傷害模式及目標，只是不造成傷害；另一模式只送頂牌。
+discriminates: 把 NC 當整個選項合法性的先決條件，或不管選項都送頂牌，結果不同。
+refs:
+  rules:
+    - 5.18.4
+    - 13.5.1.3.2
+  qa:
+    - Q2599
+evidence:
+  - ref: Q2599
+    quote: いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。
+  - ref: cr 5.18.4
+    quote: "カードや能力のプレイに際し、チョイスする行動で\nの採用する選択肢を選んだ後、その選択肢以外の\n選択肢は存在しないものとして扱います。"
+    derivation:
+      - NC 不足仍可合法選傷害模式及目標，只是不造成傷害；另一模式只送頂牌。
+  - ref: cr 13.5.1.3.2
+    quote: "そのカードや能力のネクロチャージが\n参照する墓場のカードの枚数は、原則とし\nてそのネクロチャージを含む効果の解決の\n開始時点で固定され、その解決中にカード\nの枚数が変わっても変更されません。"
+    derivation:
+      - NC 不足仍可合法選傷害模式及目標，只是不造成傷害；另一模式只送頂牌。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: NC=9 模式=1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            cemetery:
+              - id: a
+                card: BP19-P25
+              - id: g0
+                card: BP01-173
+              - id: g1
+                card: BP01-173
+              - id: g2
+                card: BP01-173
+              - id: g3
+                card: BP01-173
+              - id: g4
+                card: BP01-173
+              - id: g5
+                card: BP01-173
+              - id: g6
+                card: BP01-173
+              - id: g7
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              left_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        options:
+          - 1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            hp: 3
+          P1.deck:
+            - d
+          P1.cemetery:
+            - a
+            - g0
+            - g1
+            - g2
+            - g3
+            - g4
+            - g5
+            - g6
+            - g7
+  - name: NC=10 模式=1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            cemetery:
+              - id: a
+                card: BP19-P25
+              - id: g0
+                card: BP01-173
+              - id: g1
+                card: BP01-173
+              - id: g2
+                card: BP01-173
+              - id: g3
+                card: BP01-173
+              - id: g4
+                card: BP01-173
+              - id: g5
+                card: BP01-173
+              - id: g6
+                card: BP01-173
+              - id: g7
+                card: BP01-173
+              - id: g8
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              left_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        options:
+          - 1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            hp: 1
+          P1.deck:
+            - d
+          P1.cemetery:
+            - a
+            - g0
+            - g1
+            - g2
+            - g3
+            - g4
+            - g5
+            - g6
+            - g7
+            - g8
+  - name: NC=9 模式=2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            cemetery:
+              - id: a
+                card: BP19-P25
+              - id: g0
+                card: BP01-173
+              - id: g1
+                card: BP01-173
+              - id: g2
+                card: BP01-173
+              - id: g3
+                card: BP01-173
+              - id: g4
+                card: BP01-173
+              - id: g5
+                card: BP01-173
+              - id: g6
+                card: BP01-173
+              - id: g7
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+      semantic_state:
+        pending_triggers:
+          - id: t
+            controller: P1
+            ability:
+              source: a
+              line: 1
+            event:
+              left_field: a
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending: t
+        options:
+          - 2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            hp: 3
+          P1.deck: []
+          P1.cemetery:
+            - a
+            - g0
+            - g1
+            - g2
+            - g3
+            - g4
+            - g5
+            - g6
+            - g7
+            - d

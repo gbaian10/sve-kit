@@ -1,0 +1,336 @@
+schema: sve-exam/2.1
+id: rule-10.5.2-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.5.2
+  - 10.7.3.1
+  - 11.3.1
+cards:
+  - BP01-152
+  - BP01-P25
+  - BP19-078
+why: 雙方各兩個謝幕曲已同時待機，先處理 P1 的兩個；P2 第一個謝幕曲破壞 P1 第三隻兔子，使 P1 新待機優先於 P2 第二個。以 explicit 固定檢查時點入口，不要求適配器猜出上一個清場效果；離場來源仍以實體卡代號參照。
+refs:
+  rules:
+    - 10.5.2.1
+    - 10.5.2.2
+    - 10.5.2.3
+    - 10.7.2
+    - 10.7.3.1
+    - 12.5.3
+    - 11.3.1
+    - 5.14.1
+  qa: []
+evidence:
+  - ref: cr 10.5.2.2
+    quote: ターンプレイヤーはそのうち 1 つを選び、プレイと解決を行い、その後 10.5.2.1 に戻ります。
+    derivation:
+      - 最初 P1 的 a1、a2 與 P2 的 b1、b2 同時待機；由 P1 選 a1，再選 a2，不能交替處理 P2。
+  - ref: cr 10.5.2.3
+    quote: 非ターンプレイヤーはそのうち 1 つを選び、プレイと解決を行い、その後 10.5.2.1 に戻ります。
+    derivation:
+      - P1 無待機後，P2 選 b1，打出時選 a3，結算造成 3 傷害。
+      - 回 .1，a3 體力歸零，依 11.3.1 破壞；12.5.3 與 10.7.2 使 a3 謝幕曲待機。
+      - 再檢查 .2，此時 P1 有 a3；必須先結算 a3，之後才能處理 b2。
+      - 三次兔子謝幕曲共使雙方各失去 6 體力；b2 最後選 a4，a4 受 3 傷害仍存活。
+  - ref: cr 12.5.3
+    quote: このカードを場から墓場に置いたとき、（テキスト）
+    derivation:
+      - a1、a2、b1、b2 初始已離場；a3 在 b1 結算後才因規則處理離場，屬不同事件。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 非回合玩家尚有待機時，優先回到回合玩家的新待機
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 4
+          P2: 3
+      history: explicit
+      players:
+        P1:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a3
+                card: BP01-P25
+              - id: a4
+                card: BP01-152
+            cemetery:
+              - id: a1
+                card: BP01-P25
+              - id: a2
+                card: BP01-P25
+          construction: class
+        P2:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            cemetery:
+              - id: b1
+                card: BP19-078
+              - id: b2
+                card: BP19-078
+          construction: class
+      semantic_state:
+        pending_triggers:
+          - controller: P1
+            ability:
+              source: a1
+              line: 1
+            event:
+              left_field: a1
+          - controller: P1
+            ability:
+              source: a2
+              line: 1
+            event:
+              left_field: a2
+          - controller: P2
+            ability:
+              source: b1
+              line: 3
+            event:
+              left_field: b1
+          - controller: P2
+            ability:
+              source: b2
+              line: 3
+            event:
+              left_field: b2
+        check_timing:
+          in_progress: true
+          rules_processed: true
+    decisions:
+      - n: 1
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 1
+          event:
+            left_field: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a2
+            line: 1
+          event:
+            left_field: a2
+      - n: 3
+        by: P2
+        at: check-timing
+        do: choose-pending
+        targets:
+          1:
+            - a3
+        pending:
+          ability:
+            source: b1
+            line: 3
+          event:
+            left_field: b1
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a3
+            line: 1
+          event:
+            left_field: a3
+      - n: 5
+        by: P2
+        at: check-timing
+        do: choose-pending
+        targets:
+          1:
+            - a4
+        pending:
+          ability:
+            source: b2
+            line: 3
+          event:
+            left_field: b2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        assert:
+          P1.leader.life: 18
+          P2.leader.life: 18
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: a2
+                  line: 1
+        events:
+          - kind: プレイ
+            ability:
+              source: a1
+              line: 1
+        events_exact:
+          - プレイ
+      - at: after-decision-2
+        view: omniscient
+        assert:
+          P1.leader.life: 16
+          P2.leader.life: 16
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b1
+                  line: 3
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b2
+                  line: 3
+        events:
+          - kind: プレイ
+            ability:
+              source: a2
+              line: 1
+        events_exact:
+          - プレイ
+      - at: after-decision-3
+        view: omniscient
+        assert:
+          P1.field:
+            - a4
+          P1.cemetery:
+            - a1
+            - a2
+            - a3
+          P1.leader.life: 16
+          P2.leader.life: 16
+          semantic_state.pending_triggers:
+            - controller: P1
+              ability:
+                source: a3
+                line: 1
+              event:
+                left_field: a3
+            - controller: P2
+              ability:
+                source: b2
+                line: 3
+              event:
+                left_field: b2
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: a3
+                  line: 1
+        events:
+          - kind: プレイ
+            ability:
+              source: b1
+              line: 3
+          - kind: ダメージ
+            source: b1
+            target: a3
+            amount: 3
+          - kind: 破壊
+            object: a3
+            by: rule-11.3.1
+          - kind: 待機
+            controller: P1
+            ability:
+              source: a3
+              line: 1
+            event:
+              left_field: a3
+        events_exact:
+          - プレイ
+      - at: after-decision-4
+        view: omniscient
+        assert:
+          P1.leader.life: 14
+          P2.leader.life: 14
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - do: choose-pending
+              pending:
+                ability:
+                  source: b2
+                  line: 3
+        events:
+          - kind: プレイ
+            ability:
+              source: a3
+              line: 1
+        events_exact:
+          - プレイ
+      - at: after-decision-5
+        view: omniscient
+        assert:
+          P1.field:
+            - a4
+          P1.field.a4:
+            damage: 3
+          P1.cemetery:
+            - a1
+            - a2
+            - a3
+          P2.field: []
+          P2.cemetery:
+            - b1
+            - b2
+          P1.leader.life: 14
+          P2.leader.life: 14
+          semantic_state.pending_triggers: []
+        outcome: resolved
+        events:
+          - kind: プレイ
+            ability:
+              source: b2
+              line: 3
+        events_exact:
+          - プレイ
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+discriminates: FIFO 或雙方輪流的實作會在 after-decision-1 或 3 提供錯誤的待機玩家／來源。

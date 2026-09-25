@@ -1,0 +1,470 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP15-PR10
+kind: card
+must_pass: true
+mechanisms:
+  - 抉擇＋條件改變選擇數
+  - 打出時的選擇
+  - 取代效果
+cards:
+  - BP01-173
+  - BP15-PR10
+why: 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+discriminates: 忽略模式上限、把兩項當成必選、先看牌後選傷害目標或未套用替代傷害會在回溯、體力或暫停時點不同。
+refs:
+  rules:
+    - 5.18.2.1
+    - 5.18.3.1
+    - 5.18.3.1.2
+    - 10.6.2.8.2
+    - 1.3.2
+    - 9.1.4.4
+  qa:
+    - Q2048
+    - Q2047
+    - Q1993
+evidence:
+  - ref: Q2048
+    quote: いいえ。カードや能力によって目標を選ぶ場合、そのカードや能力をプレイする際に目標を選びます。そのため【1】と【2】をチョイスした場合、相手の場のフォロワー1体を先に選択し、選択したフォロワーにダメージを与えます。その後、自分のデッキの上3枚を見て、その中から、盗賊・カード1枚を公開して手札に加え、残りを好きな順にデッキの下に置きます。
+  - ref: Q2047
+    quote: いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。
+  - ref: Q1993
+    quote: いいえ。1つの選択肢を2回以上チョイスすることはできません。
+  - ref: cr 5.18.2.1
+    quote: "‘（数値）までチョイスする’指示がある場\n合、1 以上（数値）までの値を選択し、その個\n数の選択肢を選択して実行します。"
+    derivation:
+      - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+  - ref: cr 5.18.3.1
+    quote: "チョイスする行動で採用する選択肢の数を\n決定するためになんらかの条件を参照する場\n合、それはプレイを開始する時点でのその値\nや条件を参照します。"
+    derivation:
+      - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+  - ref: cr 5.18.3.1.2
+    quote: "選択する選択肢は、適正にプレイでき\nるものである必要があります。その選択肢\nを選んだ場合になんらかの理由でその選\n択肢部分が適正にプレイできない場合、そ\nの選択肢を選択することはできません。"
+    derivation:
+      - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+  - ref: cr 10.6.2.8.2
+    quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
+    derivation:
+      - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+  - ref: cr 1.3.2
+    quote: "なんらかの理由によりプレイヤーが実行不可能なこ\nとを行うように求められた場合、それは単に行われ\nません。同様に、効果により一定の量の行動を行う\nよう求められた場合、その一部のみ実行不可能な\n場合、可能な限りその行動を行います。"
+    derivation:
+      - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+  - ref: cr 9.1.4.4
+    quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
+    derivation:
+      - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 對手墓場 9 選項 [1]
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP15-PR10
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+                state:
+                  hp: 10
+            cemetery:
+              - id: c0
+                card: BP01-173
+              - id: c1
+                card: BP01-173
+              - id: c2
+                card: BP01-173
+              - id: c3
+                card: BP01-173
+              - id: c4
+                card: BP01-173
+              - id: c5
+                card: BP01-173
+              - id: c6
+                card: BP01-173
+              - id: c7
+                card: BP01-173
+              - id: c8
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        options:
+          - 1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.ex: []
+          P1.cemetery: []
+          P2.field.b:
+            hp: 7
+  - name: 對手墓場 9 選項 [1, 2]
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP15-PR10
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+                state:
+                  hp: 10
+            cemetery:
+              - id: c0
+                card: BP01-173
+              - id: c1
+                card: BP01-173
+              - id: c2
+                card: BP01-173
+              - id: c3
+                card: BP01-173
+              - id: c4
+                card: BP01-173
+              - id: c5
+                card: BP01-173
+              - id: c6
+                card: BP01-173
+              - id: c7
+                card: BP01-173
+              - id: c8
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        options:
+          - 1
+          - 2
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 10
+          P1.ex:
+            - a
+          P2.field.b:
+            hp: 10
+        forbidden_events:
+          - kind: プレイ
+          - kind: ダメージ
+  - name: 對手墓場 10 選項 [1]
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP15-PR10
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+                state:
+                  hp: 10
+            cemetery:
+              - id: c0
+                card: BP01-173
+              - id: c1
+                card: BP01-173
+              - id: c2
+                card: BP01-173
+              - id: c3
+                card: BP01-173
+              - id: c4
+                card: BP01-173
+              - id: c5
+                card: BP01-173
+              - id: c6
+                card: BP01-173
+              - id: c7
+                card: BP01-173
+              - id: c8
+                card: BP01-173
+              - id: c9
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        options:
+          - 1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.ex: []
+          P1.cemetery: []
+          P2.field.b:
+            hp: 2
+  - name: 對手墓場 10 選項 [1, 2]
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            ex:
+              - id: a
+                card: BP15-PR10
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+                state:
+                  hp: 10
+            cemetery:
+              - id: c0
+                card: BP01-173
+              - id: c1
+                card: BP01-173
+              - id: c2
+                card: BP01-173
+              - id: c3
+                card: BP01-173
+              - id: c4
+                card: BP01-173
+              - id: c5
+                card: BP01-173
+              - id: c6
+                card: BP01-173
+              - id: c7
+                card: BP01-173
+              - id: c8
+                card: BP01-173
+              - id: c9
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        options:
+          - 1
+          - 2
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        choice: decline
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        order:
+          - d
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.pp.current: 8
+          P2.field.b:
+            hp: 2
+          P1.hand: []
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: decline
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.hand: []
+          P1.resolution:
+            - a
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              order:
+                - d
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: []
+          P1.deck:
+            - d
+          P1.ex: []
+          P1.resolution: []
+          P1.cemetery: []
+          P2.field.b:
+            hp: 2
+        events:
+          - kind: 消去
+            object: a
+            by: rule-9.1.4.4

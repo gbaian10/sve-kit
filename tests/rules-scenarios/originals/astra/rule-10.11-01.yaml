@@ -1,0 +1,291 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.11-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 卡片出處
+  - '10.11'
+  - 10.7 其他
+cards:
+  - BP01-173
+  - BP18-073
+  - ETD03-019
+why: ダメージ觸發先待機，但條件要求結算時自己仍在場；死亡後不能靠最後資訊假稱仍在場。
+discriminates: 把位置條件凍結在誘發時會進行搜尋及洗牌，死亡分支牌庫不符。
+refs:
+  rules:
+    - 10.7.7
+    - 10.6.2.8.2
+    - 10.11.1
+  qa:
+    - Q2353
+    - Q2354
+evidence:
+  - ref: Q2353
+    quote: はい。自分のデッキから『ドラゴスネーク』1枚を探し、場に出すことができます。
+  - ref: Q2354
+    quote: "いいえ。自分のデッキから『ドラゴスネーク』1枚を探し、場に出すことができません。\nこの場合、『ドラゴスネーク』の能力は誘発しますが、『ドラゴスネーク』の能力の解決時にこの『ドラゴスネーク』は自分の場にいないので、「これが自分の場にいるなら、」以降の効果を適用することができません。"
+  - ref: cr 10.7.7
+    quote: "待機状態の自動能力のプレイ時に、その自動能\n力を有していたカードの領域が変わっていた場合で\nも、その自動能力はプレイする義務があります。"
+    derivation:
+      - ダメージ觸發先待機，但條件要求結算時自己仍在場；死亡後不能靠最後資訊假稱仍在場。
+  - ref: cr 10.6.2.8.2
+    quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
+    derivation:
+      - ダメージ觸發先待機，但條件要求結算時自己仍在場；死亡後不能靠最後資訊假稱仍在場。
+  - ref: cr 10.11.1
+    quote: "ある効果が特定のカードの情報や配置状態を参\n照している場合、その効果の実行時にそのカードが\nその領域から、場から場への移動以外の移動を\n行っていた場合、その効果は、そのカードが最後に\nその領域にあったときの情報や配置状態を参照しま\nす。"
+    derivation:
+      - ダメージ觸發先待機，但條件要求結算時自己仍在場；死亡後不能靠最後資訊假稱仍在場。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 來源原體力 1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: ETD03-019
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP18-073
+              - id: x
+                card: BP01-173
+            field:
+              - id: b
+                card: BP18-073
+                state:
+                  hp: 1
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b
+            line: 2
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P2.cemetery:
+            - b
+          P2.deck:
+            - d
+            - x
+  - name: 來源原體力 2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: ETD03-019
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP18-073
+              - id: x
+                card: BP01-173
+            field:
+              - id: b
+                card: BP18-073
+                state:
+                  hp: 2
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b
+            line: 2
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: []
+          P2.cemetery:
+            - b
+          P2.deck:
+            - d
+            - x
+  - name: 來源原體力 3
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: ETD03-019
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP18-073
+              - id: x
+                card: BP01-173
+            field:
+              - id: b
+                card: BP18-073
+                state:
+                  hp: 3
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P2
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b
+            line: 2
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select: []
+    random:
+      shuffles:
+        - player: P2
+          zone: deck
+          result:
+            - x
+            - d
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field:
+            - b
+          P2.cemetery: []
+          P2.deck:
+            - x
+            - d

@@ -1,0 +1,261 @@
+schema: sve-exam/2.1
+id: rule-10.7.4.2-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.7.4.2
+  - 10.7.4.1.2
+cards:
+  - BP02-SL20
+  - BP15-SL23
+why: 兩隻ギンセツ同時離場時互相誘發；只剩一隻離場時不會把自己當成「其他」。以バハムート留下合法傷害目標，讓待機不只可觀察還能完整結算。Q2022 使用テミス，本題改用同樣同時破壞其他從者的入場曲，依規則推導移植。
+refs:
+  rules:
+    - 10.7.4.2
+    - 10.7.4.1.2
+    - 10.7.2
+    - 10.5.2
+    - 10.6.2.3
+    - 12.4.3
+  qa:
+    - Q2022
+    - Q2021
+evidence:
+  - ref: Q2022
+    quote: それぞれ『テラーバンケット・ギンセツ』の能力が1回ずつ誘発し、合計で2回誘発します。
+  - ref: Q2021
+    quote: はい。誘発します。
+  - ref: cr 10.7.4.2
+    quote: そのカードがその能力が有効になる領域に入るまたはその領域から出る時にいずれかのカードがその領域移動誘発能力の誘発条件を満たす領域移動を行った場合、その誘発条件は満たされたものとします。
+    derivation:
+      - a1 的入場曲同時破壞 b1、b2；離場前兩張均是妖怪從者，彼此都符合「自分の他の」。
+      - 各有一次待機，離場後能力仍須處理。a1 留場，故兩次都可選 a1，合計對它及 P1 主戰者各 2 傷害。
+      - 只有 b1 時，a1 不離場、b1 不是自己的「他の」；不會產生待機。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 互相誘發兩次並各結算一次
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 10
+          P2: 9
+      history: none
+      players:
+        P1:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 9
+            max: 9
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a1
+                card: BP02-SL20
+          construction: class
+        P2:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b1
+                card: BP15-SL23
+              - id: b2
+                card: BP15-SL23
+          construction: class
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 3
+      - n: 3
+        by: P2
+        at: check-timing
+        do: choose-pending
+        targets:
+          1:
+            - a1
+        pending:
+          ability:
+            source: b1
+            line: 1
+          event:
+            left_field: b2
+      - n: 4
+        by: P2
+        at: check-timing
+        do: choose-pending
+        targets:
+          1:
+            - a1
+        pending:
+          ability:
+            source: b2
+            line: 1
+          event:
+            left_field: b1
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        assert:
+          P1.pp.current: 0
+          P1.field.a1:
+            damage: 0
+          P2.field: []
+          P2.cemetery:
+            - b1
+            - b2
+          semantic_state.pending_triggers:
+            - controller: P2
+              ability:
+                source: b1
+                line: 1
+              event:
+                left_field: b2
+            - controller: P2
+              ability:
+                source: b2
+                line: 1
+              event:
+                left_field: b1
+        outcome: resolved
+        events:
+          - kind: 破壊
+            object: b1
+            group: simultaneous-leave
+            source: a1
+          - kind: 破壊
+            object: b2
+            group: simultaneous-leave
+            source: a1
+      - at: after-decision-4
+        view: omniscient
+        assert:
+          P1.leader.life: 18
+          P1.field.a1:
+            damage: 2
+          P2.leader.life: 20
+          P2.field: []
+          P2.cemetery:
+            - b1
+            - b2
+          semantic_state.pending_triggers: []
+        outcome: resolved
+  - name: 單獨離場，不誘發自身
+    setup:
+      turn:
+        active: P1
+        phase: main
+        first_player: P1
+        elapsed_turns:
+          P1: 10
+          P2: 9
+      history: none
+      players:
+        P1:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 9
+            max: 9
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a1
+                card: BP02-SL20
+          construction: class
+        P2:
+          leader:
+            class: ナイトメア
+            life: 20
+          pp:
+            current: 0
+            max: 4
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b1
+                card: BP15-SL23
+          construction: class
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a1
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a1
+            line: 3
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        assert:
+          P1.pp.current: 0
+          P1.field.a1:
+            damage: 0
+          P2.field: []
+          P2.cemetery:
+            - b1
+          semantic_state.pending_triggers: []
+        outcome: resolved
+        events:
+          - kind: 破壊
+            object: b1
+            group: simultaneous-leave
+            source: a1
+      - at: after-decision-2
+        view: omniscient
+        assert:
+          P1.leader.life: 20
+          P1.field.a1:
+            damage: 0
+          P2.leader.life: 20
+          P2.field: []
+          P2.cemetery:
+            - b1
+          semantic_state.pending_triggers: []
+        outcome: resolved
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+discriminates: 忽略同時離場來源會少掉兩個待機與 2 點傷害；把自己算作其他會在單卡局面錯誤誘發。

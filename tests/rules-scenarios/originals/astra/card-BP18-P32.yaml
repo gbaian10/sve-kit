@@ -1,0 +1,203 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP18-P32
+kind: card
+must_pass: true
+mechanisms:
+  - 5.21.1
+  - 10.4.2.2
+  - 10.6.2.5.4
+cards:
+  - BP01-173
+  - BP01-176
+  - BP18-P32
+why: 貪りの蛇以公開兩張二費手牌為必要費用；同名兩張實體卡可付，公開不移區。
+discriminates: 把公開當棄牌會清空手牌；把兩張當兩種名稱會拒絕合法費用；不足仍先橫置會破壞回溯。
+refs:
+  rules:
+    - 5.21.1
+    - 10.4.2.2
+    - 10.6.2.5.4
+  qa: []
+evidence:
+  - ref: cr 5.21.1
+    quote: カードを‘公開する’指示がある場合、そのカードを現在の領域にある状態で、その情報をすべてのプレイヤーに見えるようにします。
+  - ref: cr 10.4.2.2
+    quote: コストのうち一部または全部を支払うことが不可能である場合、このコストはまったく支払うことはできません。
+  - ref: cr 10.6.2.5.4
+    quote: なんらかの理由でこの時点でこのコストを支払うことができない場合、このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
+  - ref: BP18-P32
+    quote: "{進化}{コスト5}：これは進化する。\n{起動}これを{アクト}手札の元のコスト2のカード2枚を公開：相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 公開兩張後仍留手牌
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP18-P32
+            hand:
+              - id: h1
+                card: BP01-173
+              - id: h2
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        costs:
+          1:
+            - h1
+            - h2
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - h1
+            - h2
+          P1.cemetery: []
+          P1.field.a:
+            acted: true
+          P2.field.b:
+            hp: 2
+        events:
+          - kind: 公開
+            object: h1
+            to: all
+            source: a
+            group: reveal-cost
+          - kind: 公開
+            object: h2
+            to: all
+            source: a
+            group: reveal-cost
+        forbidden_events:
+          - kind: 捨てる
+  - name: 只有一張不能付部分費用
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP18-P32
+            hand:
+              - id: h1
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        costs:
+          1:
+            - h1
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.hand:
+            - h1
+          P1.cemetery: []
+          P1.field.a:
+            acted: false
+          P2.field.b:
+            hp: 6
+        forbidden_events:
+          - kind: 捨てる
+          - kind: 公開
+          - kind: アクト

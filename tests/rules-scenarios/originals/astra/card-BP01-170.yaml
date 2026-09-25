@@ -1,0 +1,217 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP01-170
+kind: card
+must_pass: true
+mechanisms:
+  - 手牌、墓場中有效的能力
+  - 額外回合、跳過、勝利
+cards:
+  - BP01-170
+  - BP01-173
+why: 打出光の道筋只抽本體的一張，不觸發捨棄能力；最後一張可正常抽，空庫抽牌才敗北。
+discriminates: 把送墓當捨棄會多出待機；把牌庫零張直接當敗北會錯判恰好抽完。
+refs:
+  rules:
+    - 5.10.1.1
+    - 11.2.2
+    - 10.6.2.8.3
+  qa:
+    - Q242
+evidence:
+  - ref: Q242
+    quote: いいえ。このスペルを手札から捨てていないため、デッキから1枚引くことはできません。
+  - ref: cr 5.10.1.1
+    quote: "この指示の実行の際に、そのプレイヤーの\nデッキ置き場にカードがない場合、そのプレイ\nヤーは次のルール処理でゲームに敗北します\n（11.2.2）。"
+    derivation:
+      - 打出光の道筋只抽本體的一張，不觸發捨棄能力；最後一張可正常抽，空庫抽牌才敗北。
+  - ref: cr 11.2.2
+    quote: "直前のルール処理より後にいずれかのプレイヤー\nがカードを引くことを求められ、その際にデッキ置き\n場にカードがなかった場合、そのプレイヤーはこの\nゲームに敗北します。"
+    derivation:
+      - 打出光の道筋只抽本體的一張，不觸發捨棄能力；最後一張可正常抽，空庫抽牌才敗北。
+  - ref: cr 10.6.2.8.3
+    quote: "この時点で解決領域にカードや能力\nが残っている場合、それがカードならオー\nナーの墓場に移動し、それが能力なら解決\n領域から取り除きます。"
+    derivation:
+      - 打出光の道筋只抽本體的一張，不觸發捨棄能力；最後一張可正常抽，空庫抽牌才敗北。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 牌庫 0 張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck: []
+            hand:
+              - id: a
+                card: BP01-170
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: game-end
+        assert:
+          P1.hand: []
+          P1.cemetery:
+            - a
+          game:
+            ended: true
+            winner: P2
+            by: 11.2.2
+  - name: 牌庫 1 張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d0
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP01-170
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d0
+          P1.cemetery:
+            - a
+          semantic_state.pending_triggers: []
+  - name: 牌庫 2 張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d0
+                card: BP01-173
+              - id: d1
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP01-170
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d0
+          P1.cemetery:
+            - a
+          semantic_state.pending_triggers: []

@@ -1,0 +1,176 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP20-P28
+kind: card
+must_pass: true
+mechanisms:
+  - 10.6.2.3.3
+cards:
+  - BP06-042
+  - BP15-P33
+  - BP20-P28
+why: 陰陽師・カードやスペル採聯集；同張式神の使役同時符合兩類，仍只算一張。
+discriminates: 把兩種數量相加會把 6 算成 12 而錯放行起動、生成形代。
+refs:
+  rules:
+    - 10.6.2.3.3
+  qa:
+    - Q2654
+    - Q2655
+evidence:
+  - ref: cr 10.6.2.3.3
+    quote: 選ぶ数として指定された数が 1 以上で、かつその数の目標を選ぶことが不可能である場合、このカードや能力のプレイは不正で、このカードや能力はプレイできません。このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
+  - ref: Q2654
+    quote: "いいえ。『式神の使役』は1枚分として数えます。\n「自分の墓場の陰陽師・カードやスペルが7枚以上なら」とは、自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの合計枚数を参照します。"
+  - ref: Q2655
+    quote: 自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの枚数を参照します。
+  - ref: BP20-P28
+    quote: "{ファンファーレ}手札1枚を捨てる：自分のデッキの上3枚を見る。その中から、陰陽師・フォロワー1枚かスペル1枚を公開して手札に加えてよい。残りを好きな順にデッキの下に置く。\n{起動}これを{アクト}：『形代』1体を場に出す。この能力は自分の墓場の陰陽師・カードやスペルが7枚以上なら使える。\n『形代』{ウィッチ}式神・フォロワー{コスト2}{攻撃力}2/{体力}2{ラストワード}1枚引く。自分の手札1枚を捨てる。"
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 同時是陰陽師與法術的卡 6 張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP20-P28
+            cemetery:
+              - id: g0
+                card: BP06-042
+              - id: g1
+                card: BP06-042
+              - id: g2
+                card: BP06-042
+              - id: g3
+                card: BP06-042
+              - id: g4
+                card: BP06-042
+              - id: g5
+                card: BP06-042
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.field_count: 1
+          P1.field.a:
+            acted: false
+  - name: 同時是陰陽師與法術的卡 7 張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: エルフ
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP20-P28
+            cemetery:
+              - id: g0
+                card: BP06-042
+              - id: g1
+                card: BP06-042
+              - id: g2
+                card: BP06-042
+              - id: g3
+                card: BP06-042
+              - id: g4
+                card: BP06-042
+              - id: g5
+                card: BP06-042
+              - id: g6
+                card: BP06-042
+        P2:
+          construction: class
+          leader:
+            class: ロイヤル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field_count: 2
+          P1.field.a:
+            acted: true

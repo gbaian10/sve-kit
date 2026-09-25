@@ -1,0 +1,252 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP10-SL06
+kind: card
+must_pass: false
+mechanisms:
+  - 重複
+  - 隨機與擲骰
+  - 10.5.2
+cards:
+  - BP01-173
+  - BP10-SL06
+why: 兩次擲骰是同一能力，第一次令對手零生命也必須做第二次，結算後才判敗北。
+discriminates: 第一次零血就停會把 [3,5] 判 P1 勝而不是同時敗北和局。
+refs:
+  rules:
+    - 11.2.1
+    - 1.2.2
+    - 10.6.2.8.2
+  qa:
+    - Q1278
+evidence:
+  - ref: Q1278
+    quote: いいえ。1回目のサイコロで相手のリーダーの体力が0になった場合でも、その時点でバトルに勝利することはなく、もう1回サイコロをふります。『《暴走》する戦車・オルオーン』の能力の解決が終わった後のチェックタイミングの際に、自身のリーダーの体力が0以下のプレイヤーはバトルに敗北します。（自分のリーダーと相手のリーダーの体力がともに0以下の場合、引き分けとなります。）
+  - ref: cr 11.2.1
+    quote: "自身のリーダーの体力が 0 以下であるプレイヤー\nがいる場合、そのプレイヤーはこのゲームに敗北し\nます。"
+    derivation:
+      - 兩次擲骰是同一能力，第一次令對手零生命也必須做第二次，結算後才判敗北。
+  - ref: cr 1.2.2
+    quote: "すべてのプレイヤーが同時に敗北する場合、その\nゲームは引き分けになります。"
+    derivation:
+      - 兩次擲骰是同一能力，第一次令對手零生命也必須做第二次，結算後才判敗北。
+  - ref: cr 10.6.2.8.2
+    quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
+    derivation:
+      - 兩次擲骰是同一能力，第一次令對手零生命也必須做第二次，結算後才判敗北。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: '[3, 4]'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP10-SL06
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+    random:
+      dice:
+        - 3
+        - 4
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 20
+          P2.leader.life: 6
+          P2.field:
+            - b
+  - name: '[3, 5]'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 7
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP10-SL06
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 7
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+    random:
+      dice:
+        - 3
+        - 5
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: game-end
+        assert:
+          P1.leader.life: 0
+          P2.leader.life: 0
+          P2.field:
+            - b
+          game:
+            ended: true
+            winner:
+            by: 1.2.2
+  - name: '[1, 2]'
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP10-SL06
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: end-phase
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+    random:
+      dice:
+        - 1
+        - 2
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 20
+          P2.leader.life: 20
+          P2.field: []

@@ -1,0 +1,227 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-12.2.4-02
+kind: rule
+must_pass: true
+mechanisms:
+  - 進化卡自身的能力
+cards:
+  - BP01-171
+  - BP01-172
+why: SEP 門檻依先後攻及自己的經過回合數，不能用全局回合總數。
+discriminates: 把雙方回合相加或忽略先後攻，先攻第六回合會錯誤成功。
+refs:
+  rules:
+    - 12.2.4
+    - 3.3.1
+  qa: []
+evidence:
+  - ref: cr 12.2.4
+    quote: "進化能力をプレイする際、現在の経過ターン数\n（3.3）が、先攻プレイヤーであるなら 7 以上、後攻プ\nレイヤーであるなら 6 以上の場合、そのプレイヤー\nは追加で SEP（3.2.6）を 1 点支払うことができます。\nそうした場合、通常の進化の処理（5.16）に加えて以\n下を追加で実行します。"
+    derivation:
+      - SEP 門檻依先後攻及自己的經過回合數，不能用全局回合總數。
+  - ref: cr 3.3.1
+    quote: "経過ターン数は、それぞれのプレイヤーが持つ数\n値情報です。"
+    derivation:
+      - SEP 門檻依先後攻及自己的經過回合數，不能用全局回合總數。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 先攻 P1 自身第 6 回合
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 6
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 1
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-171
+            evolve_deck:
+              - id: e
+                card: BP01-172
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a
+        evolve_card: e
+        pay:
+          pp: 4
+          ep: 0
+          sep: 1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-evolve
+        assert:
+          P1.sep: 1
+          P1.field.a:
+            evolved: false
+            hp: 2
+          P1.pp.current: 10
+  - name: 先攻 P1 自身第 7 回合
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 7
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 1
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-171
+            evolve_deck:
+              - id: e
+                card: BP01-172
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a
+        evolve_card: e
+        pay:
+          pp: 4
+          ep: 0
+          sep: 1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.sep: 0
+          P1.field.a:
+            evolved: true
+            hp: 5
+          P1.pp.current: 6
+  - name: 先攻 P2 自身第 6 回合
+    setup:
+      turn:
+        active: P1
+        first_player: P2
+        elapsed_turns:
+          P1: 6
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 1
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-171
+            evolve_deck:
+              - id: e
+                card: BP01-172
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: evolve
+        source: a
+        evolve_card: e
+        pay:
+          pp: 4
+          ep: 0
+          sep: 1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.sep: 0
+          P1.field.a:
+            evolved: true
+            hp: 5
+          P1.pp.current: 6

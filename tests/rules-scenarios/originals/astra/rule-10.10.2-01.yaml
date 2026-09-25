@@ -1,0 +1,287 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.10.2-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 10.10.2
+  - 10.10.2.2
+  - 10.10.2.3
+  - 1.3.2.2
+cards:
+  - BP01-173
+  - BP14-090
+  - CP04-PR16
+why: 受影響的 P2 決定 1 點攻擊傷害的加減順序；先減至零則傷害行為消失，先加 2 再減 1 得 2。每個效果最多適用一次。
+discriminates: 固定以加傷優先會錯判第一局；減到零仍繼續加傷會造成 2 傷害。
+refs:
+  rules:
+    - 10.10.2
+    - 10.10.2.2
+    - 10.10.2.3
+    - 1.3.2.2
+  qa:
+    - Q1944
+    - Q2498
+evidence:
+  - ref: cr 10.10.2
+    quote: "同一の事象に対し複数の置換効果が発生してい\nる場合、どの置換効果を先に適用するかは、それに\nより影響を受けるプレイヤーが決定します。"
+    derivation:
+      - 受影響的 P2 決定 1 點攻擊傷害的加減順序；先減至零則傷害行為消失，先加 2 再減 1 得 2。每個效果最多適用一次。
+  - ref: cr 10.10.2.2
+    quote: "影響を受ける事象がゲーム中の行動で\nある場合、その行動を実行するプレイヤー、ま\nたはその行動が適用されるカードのマスター\nが決定します。"
+    derivation:
+      - 受影響的 P2 決定 1 點攻擊傷害的加減順序；先減至零則傷害行為消失，先加 2 再減 1 得 2。每個效果最多適用一次。
+  - ref: cr 10.10.2.3
+    quote: "同一の事象に対しては、各置換効果は最\n大 1 回しか適用しません。"
+    derivation:
+      - 受影響的 P2 決定 1 點攻擊傷害的加減順序；先減至零則傷害行為消失，先加 2 再減 1 得 2。每個效果最多適用一次。
+  - ref: cr 1.3.2.2
+    quote: "なんらかの理由で、ある行動を実行する際\nの単位数や回数が 0 以下である場合、あるい\nは 0 以下の値を基準として数値の加減算や比\n較を除くなんらかの行動を実行する場合、そ\nの行動はまったく行われません。マイナスで\nあっても逆の行動を求められることもありませ\nん。\n例：0 点のダメージを与える処理を実行する指示がある\n場合、そのダメージは与えられません。"
+    derivation:
+      - 受影響的 P2 決定 1 點攻擊傷害的加減順序；先減至零則傷害行為消失，先加 2 再減 1 得 2。每個效果最多適用一次。
+  - ref: Q1944
+    quote: "自分の選択により、「ダメージを受けない」もしくは「1ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるのは自分のリーダーなので、自分が適用順を選択します。\n『一ツ尾狐』に適用されている「与えるダメージを+1」と『永久の盾・シオン』の「これが場にいる限り、これと自分のリーダーが受けるダメージを-1する。」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+1」の順で適用する場合\n「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが0ダメージになります。この時点で、0ダメージを与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+1」を適用しますが、ダメージを与える行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを与えない」となります。\n\n②「与えるダメージを+1」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+1」を適用し、『一ツ尾狐』が与えるダメージが2ダメージになります。その後、「受けるダメージを-1」を適用し、『一ツ尾狐』が与えるダメージが1ダメージになります。"
+  - ref: Q2498
+    quote: "自分の選択により、「ダメージを受けない」もしくは「2ダメージ」のどちらかになります。\n\n与えるダメージや受けるダメージを増減する効果が複数適用される場合、その影響を受けるプレイヤーがその適用順を選択し、効果を適用します。\n今回の場合、ダメージを受けるのは自分の場の『永久の盾・シオン』なので、自分が適用順を選択します。\n相手の場のフォロワーに適用されている「与えるダメージを+2」と『永久の盾・シオン』の「これが場にいる限り、これと自分のリーダーが受けるダメージを-1する。」を任意の順で適用することができます。\n\n①「受けるダメージを-1」→「与えるダメージを+2」の順で適用する場合\n「受けるダメージを-1」を適用し、相手の場の攻撃力が1のフォロワーが与えるダメージが0ダメージになります。この時点で、0ダメージを与える行動は全く行われなくなるため、ダメージを与えるという行動自体が存在しなくなります。その後、「与えるダメージを+2」を適用しますが、ダメージを与える行動自体がすでに存在しないため、何も適用されません。よって、最終的に「ダメージを受けない」となります。\n\n②「与えるダメージを+2」→「受けるダメージを-1」の順で適用する場合\n「与えるダメージを+2」を適用し、相手の場の攻撃力が1のフォロワーが与えるダメージが3ダメージになります。その後、「受けるダメージを-1」を適用し、相手の場の攻撃力が1のフォロワーが与えるダメージが2ダメージになります。"
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 減傷先套用
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            field:
+              - id: a
+                card: BP01-173
+                state:
+                  power: 1
+            equipment:
+              - id: sword
+                card: CP04-PR16
+                state:
+                  equipped_to: a
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: shield
+                card: BP14-090
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+      - n: 3
+        by: P2
+        at: resolve
+        do: order-replacements
+        of:
+          decision: 1
+          occurrence: 1
+        order:
+          - source: shield
+            card: BP14-090
+            line: 3
+          - source: sword
+            card: CP04-PR16
+            line: 1
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 20
+        awaiting:
+          by: P2
+          choices:
+            - do: order-replacements
+              order:
+                - source: shield
+                  card: BP14-090
+                  line: 3
+                - source: sword
+                  card: CP04-PR16
+                  line: 1
+            - do: order-replacements
+              order:
+                - source: sword
+                  card: CP04-PR16
+                  line: 1
+                - source: shield
+                  card: BP14-090
+                  line: 3
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 20
+          P1.field.a:
+            acted: true
+          semantic_state.counters_this_turn:
+            P1.attacks: 1
+            a.attacks: 1
+        forbidden_events:
+          - kind: ダメージ
+  - name: 加傷先套用
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            field:
+              - id: a
+                card: BP01-173
+                state:
+                  power: 1
+            equipment:
+              - id: sword
+                card: CP04-PR16
+                state:
+                  equipped_to: a
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: shield
+                card: BP14-090
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+      - n: 3
+        by: P2
+        at: resolve
+        do: order-replacements
+        of:
+          decision: 1
+          occurrence: 1
+        order:
+          - source: sword
+            card: CP04-PR16
+            line: 1
+          - source: shield
+            card: BP14-090
+            line: 3
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 20
+        awaiting:
+          by: P2
+          choices:
+            - do: order-replacements
+              order:
+                - source: shield
+                  card: BP14-090
+                  line: 3
+                - source: sword
+                  card: CP04-PR16
+                  line: 1
+            - do: order-replacements
+              order:
+                - source: sword
+                  card: CP04-PR16
+                  line: 1
+                - source: shield
+                  card: BP14-090
+                  line: 3
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 18
+          P1.field.a:
+            acted: true
+          semantic_state.counters_this_turn:
+            P1.attacks: 1
+            a.attacks: 1
+        events:
+          - kind: ダメージ
+            source: a
+            target: P2.leader
+            amount: 2
+        events_exact:
+          - ダメージ

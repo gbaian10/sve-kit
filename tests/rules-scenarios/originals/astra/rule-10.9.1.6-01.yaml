@@ -1,0 +1,192 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.9.1.6-01
+kind: rule
+must_pass: false
+mechanisms:
+  - 持續效果與禁止
+  - '10.9'
+cards:
+  - BP01-173
+  - BP06-072
+  - BP16-049
+why: 同層無依存的 +2 與設為 1 按時間戳，攻擊傷害分別為 1 和 3。fixture 直接給定效果，來源卡的目標可由對方施放取得。
+discriminates: 一律先設值再加值会把第一分支傷害也算 3。
+refs:
+  rules:
+    - 10.9.1.4
+    - 10.9.1.6
+  qa: []
+evidence:
+  - ref: cr 10.9.1.4
+    quote: "次に、継続効果のうち情報の数値を変更\nするものをすべて適用します。"
+    derivation:
+      - 同層無依存的 +2 與設為 1 按時間戳，攻擊傷害分別為 1 和 3。fixture 直接給定效果，來源卡的目標可由對方施放取得。
+  - ref: cr 10.9.1.6
+    quote: "以上の 10.9.1.2 -10.9.1.5 で適用順の前後\nが決定されない複数の継続効果が存在する\n場合、それらの継続効果は、効果が発生した\n順に従って順番に適用します。\nXX\nXX"
+    derivation:
+      - 同層無依存的 +2 與設為 1 按時間戳，攻擊傷害分別為 1 和 3。fixture 直接給定效果，來源卡的目標可由對方施放取得。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: buff→set
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-173
+            cemetery:
+              - id: buff
+                card: BP06-072
+              - id: set
+                card: BP16-049
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+      semantic_state:
+        continuous_effects:
+          - id: buff
+            source: buff
+            text: これは攻撃力+2する。
+            applies_to:
+              - a
+            until: permanent
+            order: 1
+          - id: set
+            source: set
+            text: これの攻撃力と体力を1にする。
+            applies_to:
+              - a
+            until: permanent
+            order: 2
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 19
+  - name: set→buff
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: explicit
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-173
+            cemetery:
+              - id: buff
+                card: BP06-072
+              - id: set
+                card: BP16-049
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+      semantic_state:
+        continuous_effects:
+          - id: set
+            source: set
+            text: これの攻撃力と体力を1にする。
+            applies_to:
+              - a
+            until: permanent
+            order: 1
+          - id: buff
+            source: buff
+            text: これは攻撃力+2する。
+            applies_to:
+              - a
+            until: permanent
+            order: 2
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 17

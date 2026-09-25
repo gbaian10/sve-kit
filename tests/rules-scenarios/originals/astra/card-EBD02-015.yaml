@@ -1,0 +1,359 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-EBD02-015
+kind: card
+must_pass: true
+mechanisms:
+  - 分配傷害
+  - 1.3.2
+cards:
+  - BP01-173
+  - BP01-176
+  - EBD02-015
+why: 分配在打出時且先於費用決定；每個已選目標至少分配 1。可以選零體，但選兩體分配 3 加 0 非法。
+discriminates: 把分配延後、容許已選目標得到 0，或只驗目標數量的實作會接受 3 加 0；合法 2 加 1 應留下不同體力。
+refs:
+  rules:
+    - 10.6.2.3.2
+    - 10.6.2.4.1
+    - 10.6.2.4
+    - 10.6.2.4.2
+  qa:
+    - Q78
+    - Q279
+    - Q79
+evidence:
+  - ref: Q78
+    quote: はい。0体を選ぶことができます。
+  - ref: Q279
+    quote: はい。2体まで選ぶとき、0体を選ぶことができるため、プレイすることができます。
+  - ref: cr 10.6.2.3.2
+    quote: "選ぶ数が「～まで」や「好きな枚数」と\n表記されている場合、0 から指定された数\nまでの間の任意の数を実際に選ぶ数として\n指定します。"
+    derivation:
+      - 選零目標合法，完全不發生分配傷害。非零分配缺打出時欄位，另列報告，不用結算選擇冒充。
+  - ref: cr 10.6.2.4.1
+    quote: "目標として選んだ数が 0 である等、割\nり振る先が存在しない場合、割り振りは行\nわず、割り振って行われるべき処理は実行\nされません。"
+    derivation:
+      - 選零目標合法，完全不發生分配傷害。非零分配缺打出時欄位，另列報告，不用結算選擇冒充。
+  - ref: Q79
+    quote: いいえ。「割りふる」の場合、選んだフォロワーには少なくとも1以上のダメージを割りふらなければならないため、0ダメージを与えることはできません。
+  - ref: cr 10.6.2.4
+    quote: "このカードや能力がなんらかの値を割り振\nる場合、その割り振りを決定します。"
+    derivation:
+      - 先指定目標及非零分配，之後才支付 PP；非法 3 加 0 應整個打出回溯。
+  - ref: cr 10.6.2.4.2
+    quote: "値の割り振りを決定する際、そのため\nに 10.6.2.3.1 で割り振る先として目標を選ん\nでいる場合、その各目標に対して 1 単位以\n上の割り振りを行う義務があります。これが\n行えない場合、その目標の選び方は不正\nで、ゲームはこの目標を選ぶ前の状態まで\n巻き戻されます。"
+    derivation:
+      - 先指定目標及非零分配，之後才支付 PP；非法 3 加 0 應整個打出回溯。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 選零目標
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: EBD02-015
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1: []
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.cemetery:
+            - a
+          P2.field.b:
+            hp: 6
+        forbidden_events:
+          - kind: ダメージ
+  - name: 兩體分配 2 加 1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            hand:
+              - id: a
+                card: EBD02-015
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: b
+                card: BP01-176
+              - id: c
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+            - c
+        distribute:
+          1:
+            b: 2
+            c: 1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.hand: []
+          P1.cemetery:
+            - a
+          P2.field.b:
+            hp: 4
+          P2.field.c:
+            hp: 5
+        events:
+          - kind: ダメージ
+            source: a
+            target: b
+            amount: 2
+            group: distributed-damage
+          - kind: ダメージ
+            source: a
+            target: c
+            amount: 1
+            group: distributed-damage
+  - name: 單體分配 3
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            hand:
+              - id: a
+                card: EBD02-015
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: b
+                card: BP01-176
+              - id: c
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+        distribute:
+          1:
+            b: 3
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 8
+          P1.hand: []
+          P1.cemetery:
+            - a
+          P2.field.b:
+            hp: 3
+          P2.field.c:
+            hp: 6
+        events:
+          - kind: ダメージ
+            source: a
+            target: b
+            amount: 3
+  - name: 選兩體但分配 3 加 0
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P1-draw
+                card: BP01-173
+            hand:
+              - id: a
+                card: EBD02-015
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: P2-draw
+                card: BP01-173
+            field:
+              - id: b
+                card: BP01-176
+              - id: c
+                card: BP01-176
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: a
+        targets:
+          1:
+            - b
+            - c
+        distribute:
+          1:
+            b: 3
+            c: 0
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 10
+          P1.hand:
+            - a
+          P1.cemetery: []
+          P2.field.b:
+            hp: 6
+          P2.field.c:
+            hp: 6
+        forbidden_events:
+          - kind: ダメージ
+          - kind: プレイ

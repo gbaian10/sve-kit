@@ -1,0 +1,228 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP13-043
+kind: card
+must_pass: false
+mechanisms:
+  - 奪取、交換、變身
+  - 區域移動
+cards:
+  - BP01-173
+  - BP02-041
+  - BP13-043
+  - BP20-073
+why: 渡す只改 master 不改 owner；從对方場離場時仍回原擁有者區域。
+discriminates: 把 master 當 owner 會把 a 放到 P2 的墓場或手牌。
+refs:
+  rules:
+    - 5.22.3
+    - 5.22.5
+  qa:
+    - Q1747
+evidence:
+  - ref: Q1747
+    quote: "「渡す」とは自分の場のカードを相手の場へ移動し、そのカードやそのカードの持つ能力を相手が使用することができる能力です。\n渡したフォロワーが場から場以外の領域へ移動する場合、持ち主の領域へ移動します。\n例えば、渡したフォロワーが場から墓場へ移動する場合、持ち主の墓場へ移動します。"
+  - ref: cr 5.22.3
+    quote: "カードのマスターが変更された場合でも、カードの\nオーナーは変更されません。"
+    derivation:
+      - 渡す只改 master 不改 owner；從对方場離場時仍回原擁有者區域。
+  - ref: cr 5.22.5
+    quote: "奪ったまたは渡したカードが場以外の領域に移動\nする場合、そのカードのオーナーの領域に移動しま\nす。"
+    derivation:
+      - 渡す只改 master 不改 owner；從对方場離場時仍回原擁有者區域。
+  - ref: Q1766
+    quote: "複数のプレイヤーが同時になんらかの選択を伴う処理を行うよう求められた場合、ターンプレイヤーから先に処理を行います。非ターンプレイヤーは、ターンプレイヤーの処理の内容を知ってから自分の選択を行います。\n以下、処理順です。\n\n①ターンプレイヤーは、自身のフォロワー1体を指定します。\n②非ターンプレイヤーは、自身のフォロワー1体を指定します。（ターンプレイヤーの処理の内容を知ってから自身の選択を行うことができます。）\n③ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。\n④非ターンプレイヤーは、指定したフォロワーを自身以外のプレイヤーに渡します。"
+    derivation:
+      - 同一句要求雙方各指定；按 Q1766 與 1.3.4 以 P1、P2 兩個輸入點表達。契約 10.7 已明定不同玩家各有一個輸入點；此項不再待裁定。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: cemetery
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+              - id: q
+                card: BP20-073
+            field:
+              - id: a
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b
+      - n: 4
+        by: P1
+        at: main
+        do: play
+        card: q
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - b
+          P2.field: []
+          P1.cemetery:
+            - s
+            - q
+            - a
+          P2.cemetery: []
+  - name: hand
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP13-043
+              - id: q
+                card: BP02-041
+            field:
+              - id: a
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        select:
+          - a
+      - n: 3
+        by: P2
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 2
+        select:
+          - b
+      - n: 4
+        by: P1
+        at: main
+        do: play
+        card: q
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - b
+          P2.field: []
+          P1.hand:
+            - a
+          P2.hand: []

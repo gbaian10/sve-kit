@@ -1,0 +1,172 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: rule-10.9.1-01
+kind: rule
+must_pass: true
+mechanisms:
+  - 持續效果與禁止
+  - 必殺
+cards:
+  - BP01-176
+  - BP17-077
+  - BP17-P18
+why: ニコラ的必殺由其他機械持續給予，交戰時按當下場面判定。來源攻擊者死亡不撤掉已確定的必殺規則破壞。
+discriminates: 只解析印刷關鍵字會在有機械分支留下 b。
+refs:
+  rules:
+    - 10.9.1
+    - 12.14.2
+  qa:
+    - Q2252
+evidence:
+  - ref: Q2252
+    quote: "はい。永続能力です。自分の場に他の機械・フォロワーがいる限り、『永続の機構・ニコラ』は【突進】と【必殺】を持ちます。\n『永続の機構・ニコラ』を場に出した後に自分の場に他の機械・フォロワーを出した場合、【突進】と【必殺】を持ちます。\n『永続の機構・ニコラ』を場に出した後に自分の場の他の機械・フォロワーが0体になった場合、【突進】と【必殺】を失います。"
+  - ref: cr 10.9.1
+    quote: "なんらかの継続効果が存在する状態でカードの情\n報が求められる場合、以下の順でその情報に対す\nる継続効果を適用します。"
+    derivation:
+      - ニコラ的必殺由其他機械持續給予，交戰時按當下場面判定。來源攻擊者死亡不撤掉已確定的必殺規則破壞。
+  - ref: cr 12.14.2
+    quote: "‘【必殺】’は‘このフォロワーと交戦したフォロ\nワーは、次のルール処理で破壊される’を意味しま\nす。"
+    derivation:
+      - ニコラ的必殺由其他機械持續給予，交戰時按當下場面判定。來源攻擊者死亡不撤掉已確定的必殺規則破壞。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 其他機械=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP17-P18
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: b
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: []
+          P2.field:
+            - b
+          P2.cemetery: []
+  - name: 其他機械=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP17-P18
+              - id: m
+                card: BP17-077
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-176
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: b
+      - n: 2
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+          P2.field: []
+          P2.cemetery:
+            - b

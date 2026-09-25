@@ -1,0 +1,270 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP18-SP01
+kind: card
+must_pass: true
+mechanisms:
+  - 封箱、操縱、變成種類
+  - 1.3.2
+  - 10.7.4
+cards:
+  - BP01-P25
+  - BP18-SP01
+  - BP20-073
+why: 已橫置仍可封箱；封箱失去能力，之後離場不觸發謝幕曲。對照不封箱有一次待機。
+discriminates: 把 act 沒發生當整段失敗或離場後重建印刷謝幕曲會多待機。
+refs:
+  rules:
+    - 1.3.2.1
+    - 5.31.2
+    - 10.7.4.1.2
+  qa:
+    - Q1501
+    - Q1497
+evidence:
+  - ref: Q1501
+    quote: "はい。アクト状態の相手の場のフォロワーを選んだ場合でも、次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にすることができます。\nアクト状態の相手の場のフォロワーを選んだ場合、「それをアクトする。」は既にアクト状態なため単に行われず、続く効果である「次のそれのプレイヤーのターン終了時まで、それを【箱詰め】状態にする。」が適用されます。"
+  - ref: Q1497
+    quote: いいえ。能力を失っているので《ラストワード》能力は誘発しません。
+  - ref: cr 1.3.2.1
+    quote: "すでにある状態にあるものを改めてその状\n態にするよう求められた場合、それは改めて\nその状態になるわけではなく、その行為自体\nが行われません。"
+    derivation:
+      - 已橫置仍可封箱；封箱失去能力，之後離場不觸發謝幕曲。對照不封箱有一次待機。
+  - ref: cr 5.31.2
+    quote: "【箱詰め】状態になったカードは、【箱詰め】状態で\nある間、そのカードが持つ能力、および【箱詰め】状\n態になった時点でそのカードが得ていたすべての能\n力を失います。"
+    derivation:
+      - 已橫置仍可封箱；封箱失去能力，之後離場不觸發謝幕曲。對照不封箱有一次待機。
+  - ref: cr 10.7.4.1.2
+    quote: "カードが場からそれ以外の領域に移\n動することによって誘発する自動能力が\nカードの情報を求める場合、そのカードが\n場にある時点での情報を用います。"
+    derivation:
+      - 已橫置仍可封箱；封箱失去能力，之後離場不觸發謝幕曲。對照不封箱有一次待機。
+status: draft
+author: astra
+verified_by: []
+scenarios:
+  - name: 原橫置=False 封箱=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP18-SP01
+            hand:
+              - id: burn
+                card: BP20-073
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-P25
+                state:
+                  acted: false
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: burn
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.cemetery:
+            - b
+          semantic_state.pending_triggers: []
+  - name: 原橫置=True 封箱=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP18-SP01
+            hand:
+              - id: burn
+                card: BP20-073
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-P25
+                state:
+                  acted: true
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: burn
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.cemetery:
+            - b
+          semantic_state.pending_triggers: []
+  - name: 原橫置=False 封箱=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP18-SP01
+            hand:
+              - id: burn
+                card: BP20-073
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-P25
+                state:
+                  acted: false
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: burn
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.cemetery:
+            - b
+          semantic_state.pending_triggers:
+            - controller: P2
+              ability:
+                source: b
+                line: 1
+              event:
+                left_field: b
