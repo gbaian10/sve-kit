@@ -2,6 +2,7 @@ from functools import partial
 from typing import TYPE_CHECKING
 
 import httpx
+import orjson
 import pytest
 import stamina
 from typer.testing import CliRunner
@@ -90,6 +91,18 @@ def test_p0_stopped_early_still_reports_what_it_read(site: FakeSite) -> None:
     assert result.exit_code == 0, result.output
     assert "BP01:   17 cards,   2 pages" in result.output
     assert len(site.calls) == 2
+
+
+def test_extract_cards_after_crawl(site: FakeSite, data_dir: Path) -> None:
+    for stage in ("p0", "p1", "p2"):
+        assert invoke("crawl", stage).exit_code == 0
+    result = invoke("extract", "cards")
+    assert result.exit_code == 0, result.output
+    lines = (data_dir / "derived" / "jp" / "cards.jsonl").read_bytes().splitlines()
+    assert len(lines) == sum(site.sets.values())
+    first = orjson.loads(lines[0])
+    assert first["number"] == "BP01-001"
+    assert first["faces"][0]["card_type"] == "フォロワー"
 
 
 @pytest.mark.usefixtures("site")

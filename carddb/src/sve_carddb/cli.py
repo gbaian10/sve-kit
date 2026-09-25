@@ -22,6 +22,7 @@ from sve_carddb.crawl import (
     card_numbers,
     current_sets,
 )
+from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.client import (
     BudgetExhaustedError,
     Client,
@@ -46,6 +47,10 @@ manifest_app = typer.Typer(
 )
 app.add_typer(crawl_app, name="crawl")
 app.add_typer(manifest_app, name="manifest")
+extract_app = typer.Typer(
+    no_args_is_help=True, help="Turn stored pages into structured files."
+)
+app.add_typer(extract_app, name="extract")
 
 console = Console(soft_wrap=True)
 
@@ -166,6 +171,22 @@ def manifest_backup(dest: Path) -> None:
     with Manifest.open(settings.manifest_path) as manifest:
         info = manifest.backup(dest)
     console.print(f"backup: {info.path}\nsha256: {info.sha256}")
+
+
+@extract_app.command("cards")
+def extract_cards_command() -> None:
+    """Transcribe the stored card pages into `derived/jp/cards.jsonl`."""
+    settings = _settings()
+    dest = settings.data_dir / "derived" / "jp" / "cards.jsonl"
+    with Manifest.open(settings.manifest_path) as manifest:
+        report = extract_cards(manifest, Writer(settings.data_dir, manifest), dest)
+    console.print(f"{report.written} cards written to {dest}")
+    for number in report.missing:
+        console.print(f"  not stored: {number}")
+    for number, reason in report.failed.items():
+        console.print(f"  [red]failed[/red] {number}: {reason}")
+    if report.missing or report.failed:
+        raise typer.Exit(1)
 
 
 def main() -> None:

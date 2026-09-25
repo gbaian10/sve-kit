@@ -70,11 +70,23 @@ class FakeSite:
         shown = self.card_number_override.get(number, number)
         code = number.split("-", maxsplit=1)[0]
         return page(
-            '<div class="cardlist-Detail">'
+            '<div class="cardlist-Detail"><div class="cardlist-Detail_Box_Inner">'
             f'<div class="img"><img src="{IMG}/{code}/{number.lower()}.png"></div>'
             f'<p class="ttl">Card {number}</p>'
-            f'<div class="illustrator"><span class="heading">{shown}</span></div>'
+            '<div class="info">'
+            "<dl><dt>クラス</dt><dd>エルフ</dd></dl>"
+            "<dl><dt>カード種類</dt><dd>フォロワー</dd></dl>"
+            "<dl><dt>タイプ</dt><dd>妖精</dd></dl>"
+            "<dl><dt>レアリティ</dt><dd>BR</dd></dl>"
+            f"<dl><dt>収録商品</dt><dd>{code} pack</dd></dl>"
             "</div>"
+            '<div class="status">'
+            '<span class="status-Item status-Item-Cost"><span class="heading">コスト</span>1</span>'
+            '<span class="status-Item status-Item-Power"><span class="heading">攻撃力</span>1</span>'
+            '<span class="status-Item status-Item-Hp"><span class="heading">体力</span>1</span>'
+            "</div>"
+            f'<div class="illustrator"><span class="heading">{shown}</span></div>'
+            "</div></div>"
         )
 
 
