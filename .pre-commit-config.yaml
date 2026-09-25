@@ -107,6 +107,14 @@ repos:
         # The runner tests read the scenario files too.
         files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^rust-toolchain\.toml|^tests/rules-scenarios/.*\.yaml)$
         stages: [pre-push]
+      # Slow (minutes): run by hand with `pre-commit run --hook-stage manual cargo-mutants`.
+      - id: cargo-mutants
+        name: cargo mutants (tests catch every injected bug)
+        language: system
+        entry: cargo mutants --workspace -j 4 --timeout 120
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
       - id: cargo-machete
         name: cargo machete (unused dependencies)
         language: system

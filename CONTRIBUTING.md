@@ -132,7 +132,7 @@ use `#[allow]` only when the lint does not fire everywhere the attribute applies
 
 ```bash
 uv --directory carddb sync --all-groups
-cargo install --locked cargo-deny cargo-machete cargo-llvm-cov   # checked on pre-push
+cargo install --locked cargo-deny cargo-machete cargo-llvm-cov cargo-mutants
 pre-commit install
 ```
 
@@ -144,6 +144,13 @@ uv --directory carddb run mypy
 uv --directory carddb run pytest
 cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo llvm-cov --locked --workspace --fail-under-lines 90   # tests + coverage
+```
+
+Now and then, and before a release, run the mutation test. Every surviving mutant
+is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:
+
+```bash
+pre-commit run --hook-stage manual cargo-mutants
 ```
 
 ## Crawling etiquette

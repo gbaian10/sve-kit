@@ -15,9 +15,10 @@
 
 use serde_json::{Value, json};
 use sve_scenario_runner::compare::{
-    assert_value, awaiting, events_exact, events_subsequence, forbidden_hit,
+    assert_value, awaiting, events_exact, events_subsequence, exact, forbidden_hit, subset,
 };
 use sve_scenario_runner::model::parse_question;
+use sve_scenario_runner::runner::{Failure, ScenarioReport, summary};
 use sve_scenario_runner::{
     Engine, EngineError, Fixture, RunOptions, Selection, Step, Verdict, View, load_dir,
     parse_selection, run, score_g1,
@@ -577,4 +578,191 @@ fn the_g1_selection_names_exactly_41_scenarios() {
             .all(|p| matches!(p, sve_scenario_runner::runner::Pick::Named(_)))
     );
     assert_eq!(selection.validate(&questions).unwrap(), 41);
+}
+
+// --- value comparison (contract 2.3) ---
+
+#[test]
+fn numbers_compare_by_value_at_any_depth() {
+    assert!(subset(&json!(1), &json!(1.0)));
+    for (e, a) in [
+        (json!(1), json!(1.0)),
+        (json!([1]), json!([1.0])),
+        (json!({"n": 1}), json!({"n": 1.0})),
+    ] {
+        assert!(exact(&e, &a), "{e} vs {a}");
+    }
+}
+
+#[test]
+fn lists_outside_zones_are_multisets_of_partial_items() {
+    assert!(subset(&json!([1, 2]), &json!([2, 1])));
+    assert!(subset(&json!([{"a": 1}]), &json!([{"a": 1, "b": 2}])));
+    // Each actual item may be used only once.
+    assert!(!subset(
+        &json!([{"a": 1}, {"a": 1}]),
+        &json!([{"a": 1}, {"b": 2}])
+    ));
+}
+
+#[test]
+fn exact_rejects_extra_keys() {
+    assert!(!exact(&json!({"a": 1}), &json!({"a": 1, "b": 2})));
+}
+
+#[test]
+fn placeholders_apply_only_to_zone_paths() {
+    let expected = json!([{"filler": 2}]);
+    let actual = json!([{"filler": 1}, {"filler": 1}]);
+    assert!(assert_value("P1.hand", &expected, &actual));
+    assert!(!assert_value("P1.notes", &expected, &actual));
+}
+
+#[test]
+fn a_placeholder_does_not_match_a_null_card() {
+    assert!(!assert_value(
+        "P1.hand",
+        &json!([{"filler": 1}]),
+        &json!([null])
+    ));
+}
+
+// --- awaiting (contract 6.5) ---
+
+#[test]
+fn own_view_compares_choices() {
+    let want = json!({"by": "P1", "choices": [{"do": "pass"}]});
+    assert!(awaiting(View::P1, &want, Some(&want)));
+    assert!(awaiting(
+        View::P2,
+        &json!({"by": "P2", "choices": []}),
+        Some(&json!({"by": "P2", "choices": []}))
+    ));
+}
+
+#[test]
+fn unwritten_choices_are_not_compared() {
+    assert!(awaiting(
+        View::Omniscient,
+        &json!({"by": "P1"}),
+        Some(&json!({"by": "P1", "choices": [{"do": "pass"}]}))
+    ));
+}
+
+#[test]
+fn views_parse_from_the_contract_spelling() {
+    assert_eq!(View::parse("omniscient"), Some(View::Omniscient));
+    assert_eq!(View::parse("P1"), Some(View::P1));
+    assert_eq!(View::parse("P2"), Some(View::P2));
+    assert_eq!(View::parse("p1"), None);
+}
+
+// --- inherit (contract 3) ---
+
+#[test]
+fn an_inherit_cycle_through_another_scenario_is_an_error() {
+    let text = "
+id: t-3
+scenarios:
+  - {name: a, inherit: b}
+  - {name: b, inherit: a}
+";
+    let q = parse_question(text).unwrap();
+    sve_scenario_runner::inherit::expand(&q.id, &q.scenarios).unwrap_err();
+}
+
+#[test]
+fn a_scenario_without_setup_gets_empty_maps() {
+    let q = parse_question("id: t-4\nscenarios:\n  - {name: a}\n").unwrap();
+    let fixtures = sve_scenario_runner::inherit::expand(&q.id, &q.scenarios).unwrap();
+    assert_eq!(fixtures[0].setup, json!({}));
+    assert_eq!(fixtures[0].card_facts, json!({}));
+}
+
+// --- selections ---
+
+#[test]
+fn a_valid_selection_counts_its_scenarios() {
+    let q = parse_question(TWO_DECISIONS).unwrap();
+    for (text, count) in [("{t-1: all}", 1), ("{t-1: [s]}", 1), ("{}", 0)] {
+        let selection = parse_selection(text).unwrap();
+        assert_eq!(
+            selection.validate(core::slice::from_ref(&q)).unwrap(),
+            count,
+            "{text}"
+        );
+    }
+    let unknown = parse_selection("{t-1: [nope]}").unwrap();
+    unknown.validate(core::slice::from_ref(&q)).unwrap_err();
+}
+
+// --- events_exact at a checkpoint ---
+
+#[test]
+fn events_exact_fails_the_scenario_on_an_extra_event() {
+    let text = TWO_DECISIONS.replace(
+        "        assert:",
+        "        events_exact: [引く]\n        assert:",
+    );
+    let q = parse_question(&text).unwrap();
+    let mut engine = Script::new(vec![
+        step(
+            "resolved",
+            json!([{"kind": "引く", "player": "P1"}, {"kind": "引く", "player": "P1"}]),
+        ),
+        step("resolved", json!([{"kind": "捨てる", "player": "P1"}])),
+    ]);
+    engine
+        .answers
+        .push(("knowledge".into(), json!({"identifiable": []})));
+    let reports = run(&mut engine, &[q], None, RunOptions::default()).unwrap();
+    let Verdict::Fail { failures } = &reports[0].verdict else {
+        panic!("{:?}", reports[0].verdict);
+    };
+    assert!(failures.iter().any(|f| f.what.starts_with("events_exact")));
+}
+
+// --- summary ---
+
+#[test]
+fn summary_counts_each_verdict() {
+    let report = |verdict| ScenarioReport {
+        question: "q".into(),
+        scenario: "s".into(),
+        verdict,
+    };
+    let failure = Failure {
+        at: "after-decision-1".into(),
+        view: "P1".into(),
+        what: "outcome".into(),
+        expected: json!("resolved"),
+        actual: json!("illegal"),
+    };
+    let reports = [
+        report(Verdict::Pass),
+        report(Verdict::Pass),
+        report(Verdict::Fail {
+            failures: vec![failure],
+        }),
+        report(Verdict::Unsupported {
+            reason: String::new(),
+        }),
+        report(Verdict::AdapterError {
+            reason: String::new(),
+        }),
+        report(Verdict::Ineligible {
+            reason: String::new(),
+        }),
+    ];
+    let counts: Vec<(&str, usize)> = summary(&reports).into_iter().collect();
+    assert_eq!(
+        counts,
+        [
+            ("adapter-error", 1),
+            ("fail", 1),
+            ("ineligible", 1),
+            ("pass", 2),
+            ("unsupported", 1),
+        ]
+    );
 }
