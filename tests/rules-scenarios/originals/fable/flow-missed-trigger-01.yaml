@@ -1,0 +1,177 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: flow-missed-trigger-01
+kind: flow
+must_pass: true
+mechanisms: [7.3.4, 10.5.2, 10.7.3.1, 流程：漏做觸發後又繼續, 輔助模式：待機能力未處理時不能進行主要階段行動]
+cards: [BP04-092, BP01-173, SD02-002]
+why: >-
+  輔助／全自動模式的核心：打出後的檢查時點裡有待機能力時（10.7.3.1 強制打出），玩家不能跳過它去做下一個主要階段行動（7.3.4：檢查時點結束才回到 7.3.3）。
+  本題玩家「漏做」デモンビーター的ファンファーレ，直接嘗試攻擊 → 引擎必須拒絕並停在 choose-pending；處理完才能攻擊。
+  互驗修正（astra）：被拉出來的第二隻デモンビーター a3 也誘發ファンファーレ（Q619）→ 又是一個待機；PP 1 付不出 2 → 選它時依 10.7.3.2 取消；
+  取消前再次嘗試攻擊仍要被拒絕。
+  互驗第二輪修正（astra）：デモンビーター 有【守護】，a1 打出、a3 被效果放上場時都要問 place-acted（12.8.2、契約 9.2）；搜尋結果依 5.8.1.2 向對手出示（契約 10.5）。
+discriminates: >-
+  接受攻擊、把待機能力留到之後（或靜默丟棄）的引擎會在 after-decision-3 得到 resolved 與傷害；正確引擎是 cannot-attack 且 awaiting 仍是 choose-pending。
+  沒讓 a3 誘發（或因付不起就不列入待機）的引擎 after-decision-6 沒有 awaiting、after-decision-7 會 resolved。
+refs:
+  rules: [7.3.3, 7.3.4, 10.5.2.2, 10.7.3.1, 10.1.1.2.2, 8.4.2.1]
+  qa: [Q619]
+evidence:
+  - ref: cr 7.3.4
+    quote: 7.3.3 でメインフェイズの終了を選択した場合、エンドフェイズに進みます。それ以外を選択した場合、チェックタイミングが発生し、その後再び 7.3.3 に戻ります。
+    derivation:
+      - 檢查時點未結束（10.5.2.2 還有回合玩家的待機）→ 不會回到 7.3.3 → 攻擊不是合法輸入
+  - ref: cr 10.7.3.1
+    quote: 待機状態の自動能力のプレイは強制で、プレイしないことを選択することはできません。
+  - ref: Q619
+    quote: はい。コストを支払ってプレイすることができます。
+    derivation:
+      - 被拉出的デモンビーター的ファンファーレ會誘發；{コスト2} 是打出費用（10.1.1.2.2）→ PP 1 付不出 → 不能打出 → 10.7.3.2 取消一次
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 打出デモンビーター後跳過ファンファーレ直接攻擊 → 拒絕；處理完待機後攻擊成功
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 4, max: 4}
+          zones:
+            field:
+              - {id: a2, card: SD02-002}          # ヴァンガード・レイサム 3/3，非本回合進場
+            hand:
+              - {id: a1, card: BP04-092}          # デモンビーター
+            deck:
+              - {id: a3, card: BP04-092}
+              - {id: a4, card: BP01-173}
+              - {id: a5, card: BP01-173}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      # 12.8.2：デモンビーター 有【守護】→ 放上場時選直立／アクト（9.2 place-acted，屬決定 1 的結算）
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a1, acted: false}
+      - {n: 3, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, select: [a3]}
+      - {n: 6, by: P1, at: resolve, of: {decision: 4, occurrence: 2}, do: place-acted, object: a3, acted: false}
+      - {n: 7, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
+      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+      - {n: 9, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
+      - {n: 10, by: P2, at: quick, do: pass}
+    random:
+      shuffles:
+        - {player: P1, zone: deck, result: [a5, a4]}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: place-acted, object: a1, acted: false}
+            - {do: place-acted, object: a1, acted: true}
+        assert:
+          P1.pp.current: 3
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+        assert:
+          P1.pp.current: 3
+          P1.field: [a2, a1]
+          P1.field.a1: {acted: false}
+        events:
+          - {kind: 場に出す, object: a1}
+          - {kind: 待機, ability: {source: a1, line: 2}, event: {entered_field: a1}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: cannot-attack
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+        assert:
+          P1.field.a2: {acted: false}
+          P2.leader.life: 20
+        forbidden_events:
+          - {kind: 攻撃}
+      - at: after-decision-5
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: place-acted, object: a3, acted: false}
+            - {do: place-acted, object: a3, acted: true}
+        assert:
+          P1.pp.current: 1
+        events:
+          - {kind: 費用成立, ability: {source: a1, line: 2}}
+          - {kind: 公開, object: a3, to: P2, source: a1}     # 5.8.1.2 向對手出示（契約 10.5）
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+        assert:
+          P1.pp.current: 1
+          P1.field: [a2, a1, a3]
+          P1.field.a3: {entered_from: deck, entered_by: effect, acted: false}
+          P1.deck: [a5, a4]
+        events:
+          - {kind: 場に出す, object: a3, from: P1.deck}
+          - {kind: 待機, ability: {source: a3, line: 2}, event: {entered_field: a3}}
+      - at: after-decision-7
+        view: omniscient
+        outcome: cannot-attack
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+        assert:
+          P1.field.a2: {acted: false}
+          P2.leader.life: 20
+        forbidden_events:
+          - {kind: 攻撃}
+      - at: after-decision-8
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.pp.current: 1
+          P1.field: [a2, a1, a3]
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 待機取消, ability: {source: a3, line: 2}}
+        forbidden_events:
+          - {kind: プレイ}
+          - {kind: 場に出す}
+      - at: after-decision-10
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 17
+          P1.field.a2: {acted: true}
+        events:
+          - {kind: 攻撃, attacker: a2, target: P2.leader}
+          - {kind: ダメージ, source: a2, target: P2.leader, amount: 3}

@@ -1,0 +1,133 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP05-SL13
+kind: card
+must_pass: true
+mechanisms: [動態數值, 本回合歷史, 連擊、覺醒、真紅, 13.5.2, 10.4.7.4, 抉擇＋條件改變選擇數, 效果中的「費用：效果」]
+cards: [BP05-SL13, BP19-090, BP01-173]
+why: >-
+  欲望の絶傑・ヴァーナレク「【真紅】状態である限り、これは【疾走】を持つ」「【攻撃時】相手のリーダーすべてに「このターン中に自分のリーダーの体力が減少した回数」と同じダメージ。
+  自分のリーダーの{体力}7なら、これは+2/+2する」：真紅＝自己回合中、本回合リーダー體力曾減少（13.5.2.2）；減少回數是本回合歷史（Q731 每次算一次）。
+  用バイオレントスクリーム【2】「{コスト1}：自分のリーダーに1ダメージ。1枚引く」（結算時可選費用，10.4.7.4；Q2623）自傷兩次 → 真紅、回數 2、體力 9→7。
+discriminates: >-
+  沒有記本回合體力減少次數的引擎，攻撃時傷害不是 2；沒有真紅判定的引擎 a1 沒有疾走 → after-decision-6 是 cannot-attack；
+  把「体力7なら」用攻擊宣告前的體力（9）判斷的引擎不會 +2/+2（攻撃ダメージ 2 而非 4）。B：本回合沒自傷 → 本回合進場且無疾走 → cannot-attack。
+refs:
+  rules: [13.5.2.1, 13.5.2.2, 12.9.2, 8.4.2.1, 10.4.7.4, 5.18.2.1, 5.14.1, 12.7.2]
+  qa: [Q730, Q731, Q732, Q2623, Q2622]
+evidence:
+  - ref: cr 13.5.2.2
+    quote: ‘【真紅】状態’とは‘現在があなたのターン中で、このターン中にあなたのリーダーの体力が減少したことがあった’を意味します。
+  - ref: Q731
+    quote: はい。2回カウントされます。
+  - ref: Q730
+    quote: はい。以降の効果は働き、攻撃力+2/体力+2されます。
+  - ref: Q2623
+    quote: はい。コストを支払わないことで、何も起こらないことを選択できます。
+    derivation:
+      - 【2】的「{コスト1}：」是 10.4.7.4 的結算時可選費用 → resolve-choice execute
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 自傷兩次 → 真紅 → 疾走攻擊：攻撃時 2 傷害；體力剛好 7 → +2/+2 → 攻擊傷害 4
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 9}
+          pp: {current: 4, max: 4}
+          zones:
+            hand:
+              - {id: a1, card: BP05-SL13}         # 欲望の絶傑・ヴァーナレク 2/2
+              - {id: a2, card: BP19-090}          # バイオレントスクリーム（コスト0）
+              - {id: a3, card: BP19-090}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {id: d2, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: main, do: play, card: a2, options: [2]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute}
+      - {n: 4, by: P1, at: main, do: play, card: a3, options: [2]}
+      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, choice: execute}
+      - {n: 6, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - {n: 8, by: P2, at: quick, do: pass}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, choice: execute}
+            - {do: resolve-choice, choice: decline}
+        assert:
+          P1.pp.current: 2
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 7
+          P1.pp.current: 0
+          P1.hand: [d1, d2]
+        events:
+          - {kind: ダメージ, source: a2, target: P1.leader, amount: 1}
+          - {kind: 引く, player: P1, object: d1}
+          - {kind: ダメージ, source: a3, target: P1.leader, amount: 1}
+          - {kind: 引く, player: P1, object: d2}
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+        assert:
+          P1.field.a1: {acted: true}
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 18
+          P1.field.a1: {power: 4, hp: 4}
+        events:
+          - {kind: ダメージ, source: a1, target: P2.leader, amount: 2}
+      - at: after-decision-8
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 14
+        events:
+          - {kind: ダメージ, source: a1, target: P2.leader, amount: 4}
+
+  - name: B 本回合沒自傷 → 不是真紅 → 沒有疾走 → 本回合進場不能攻擊
+    inherit: A 自傷兩次 → 真紅 → 疾走攻擊：攻撃時 2 傷害；體力剛好 7 → +2/+2 → 攻擊傷害 4
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P1.field.a1: {acted: false}
+          P2.leader.life: 20

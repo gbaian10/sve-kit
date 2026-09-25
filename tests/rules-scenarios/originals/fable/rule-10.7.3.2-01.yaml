@@ -1,0 +1,268 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: rule-10.7.3.2-01
+kind: rule
+must_pass: true
+mechanisms: [10.7.3.2, 10.1.1.2.2, 10.7.2.1, 12.4.3, '5.8', 待機取消：費用付不出、同一能力多次待機, 搜尋有條件]
+cards: [BP04-092, BP01-173, BP15-079, BP15-T06, BP01-180]
+why: >-
+  10.7.3.2 的兩種「無法打出」：（A／A2）デモンビーター的「{ファンファーレ}{コスト2}：探す」是 10.1.1.2.2 的打出費用（Q619），PP 不足時待機取消一次；
+  A2 先付得出，從牌庫找到的另一張デモンビーター由效果放到場上也誘發ファンファーレ（12.4.3 場以外から場に置いたとき），此時 PP 0 → 取消。
+  （B）ギンセツ的能力被兩隻一ツ尾狐同時離場誘發兩次（10.7.2.1，各記不同的離場卡），第一次打死唯一目標，第二次選不到 → 取消一次；取消只影響那一次待機。
+  互驗第二輪修正（astra）：デモンビーター 有【守護】，a1 打出、a2 被效果放上場時都要問 place-acted（12.8.2、契約 9.2）；搜尋結果依 5.8.1.2 向對手出示（契約 10.5）。
+discriminates: >-
+  把 10.7.3.2 實作成「跳過整個檢查時點」的引擎，A2 不會停在最後的 choose-pending；把「付不出」與「拒付」混成一種的引擎在 A 也許一樣，但 A2 的搜尋、洗牌、場に出す 事件序列會缺；
+  把同一能力的多次待機合併成一次的引擎，B 的 after-decision-1 只會列一個選項，且 P2 體力 19 後不會再有第二次 choose-pending。
+refs:
+  rules: [10.7.3, 10.7.3.1, 10.7.3.2, 10.1.1.2.2, 10.4.2.2, 10.6.2.5.4, 10.7.2.1, 12.4.3, 5.8.1.2, 5.8.2, 10.6.2.3.3, 9.1.4.4]
+  qa: [Q619, Q2021, Q838]
+evidence:
+  - ref: Q619
+    quote: >-
+      Q: 『デモンビーター』の《ファンファーレ》能力によってデッキから他の『デモンビーター』を場に出したとき、その『デモンビーター』の《ファンファーレ》能力を2PP支払ってプレイすることはできますか？
+      A: はい。コストを支払ってプレイすることができます。
+    derivation:
+      - 「{ファンファーレ}{コスト2}：」是打出費用（10.1.1.2.2），且由效果放到場上的那張也誘發
+  - ref: cr 10.7.3.2
+    quote: なんらかの理由で、選んだ待機状態の自動能力がプレイできない場合、その待機状態は 1 回取り消されます。
+    derivation:
+      - PP 不足 → 10.4.2.2 費用完全付不出 → 10.6.2.5.4 打出取消 → 待機取消一次
+  - ref: cr 10.7.2.1
+    quote: 自動能力の誘発条件が複数回満たされた場合、その自動能力はその回数分待機状態になります。
+  - ref: Q838
+    quote: はい。妖怪・フォロワーである『一ツ尾狐』4体が場を離れているので、『大妖狐・ギンセツ（EVOLVE）』の能力が4回誘発し、攻撃力を+4します。
+    derivation:
+      - 同一能力因多張卡同時離場而待機多次；本題 2 隻 → 2 次
+  - ref: cr 5.8.1.2
+    quote: 特定条件に枚数以外の条件がある場合、それを見つけた後に、そのカードが条件を満たすことを相手に示します。
+    derivation:
+      - 條件含卡名 → 找到與否是玩家決定（結算中途），找完洗牌（5.8.2）
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A PP 不足付不出ファンファーレ費用 → 待機取消一次
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 3, P2: 2}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 2, max: 3}
+          zones:
+            hand:
+              - {id: a1, card: BP04-092}          # デモンビーター 1/1
+            deck:
+              - {id: a2, card: BP04-092}
+              - {id: a3, card: BP01-173}
+              - {id: a4, card: BP01-173}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 3}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      # 12.8.2：デモンビーター 有【守護】→ 放上場時選直立／アクト（9.2 place-acted，屬決定 1 的結算）
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a1, acted: false}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: place-acted, object: a1, acted: false}
+            - {do: place-acted, object: a1, acted: true}
+        assert:
+          P1.pp.current: 1
+        events:
+          - {kind: プレイ, object: a1}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+        assert:
+          P1.pp.current: 1
+          P1.field: [a1]
+          P1.field.a1: {entered_from: hand, entered_by: play, acted: false}
+        events:
+          - {kind: 場に出す, object: a1}
+          - {kind: 待機, ability: {source: a1, line: 2}, event: {entered_field: a1}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.pp.current: 1
+          P1.field: [a1]
+          P1.deck: [a2, a3, a4]
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 待機取消, ability: {source: a1, line: 2}}
+        forbidden_events:
+          - {kind: 費用成立}
+          - {kind: プレイ, ability: {source: a1, line: 2}}
+          - {kind: 場に出す}
+          - {kind: 移動, object: a2}
+
+  - name: A2 付得出 → 搜到另一張放到場上 → 它也誘發 → 這次 PP 0 付不出 → 取消
+    inherit: A PP 不足付不出ファンファーレ費用 → 待機取消一次
+    setup:
+      players:
+        P1:
+          pp: {current: 3, max: 3}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a1}
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a1, acted: false}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+      - {n: 4, by: P1, at: resolve, of: {decision: 3, occurrence: 1}, do: resolve-choice, select: [a2]}
+      # 被效果放上場的 a2 也有【守護】→ place-acted 是這次結算的第 2 個輸入點
+      - {n: 5, by: P1, at: resolve, of: {decision: 3, occurrence: 2}, do: place-acted, object: a2, acted: false}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}}
+    random:
+      shuffles:
+        - {player: P1, zone: deck, result: [a4, a3]}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: [a2]}
+            - {do: resolve-choice, select: []}
+        assert:
+          P1.pp.current: 0
+        events:
+          - {kind: 費用成立, ability: {source: a1, line: 2}}
+          - {kind: プレイ, ability: {source: a1, line: 2}}
+      - at: after-decision-4
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: place-acted, object: a2, acted: false}
+            - {do: place-acted, object: a2, acted: true}
+        assert:
+          P1.pp.current: 0
+        events:
+          - {kind: 公開, object: a2, to: P2, source: a1}     # 5.8.1.2 向對手出示（契約 10.5）
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}}
+        assert:
+          P1.field: [a1, a2]
+          P1.field.a2: {entered_from: deck, entered_by: effect, acted: false}
+          P1.deck: [a4, a3]
+          P1.pp.current: 0
+        events:
+          - {kind: 場に出す, object: a2, from: P1.deck}
+          - {kind: 待機, ability: {source: a2, line: 2}, event: {entered_field: a2}}
+      - at: after-decision-6
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.field: [a1, a2]
+          P1.deck: [a4, a3]
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 待機取消, ability: {source: a2, line: 2}}
+        forbidden_events:
+          - {kind: プレイ, ability: {source: a2, line: 2}}
+
+  - name: B 同一能力待機兩次（兩隻一ツ尾狐同時離場）；第一次打死唯一目標，第二次取消
+    setup:
+      turn: {active: P2, first_player: P1, elapsed_turns: {P1: 6, P2: 6}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            field:
+              - {id: a1, card: BP15-079}                    # テラーバンケット・ギンセツ 3/5
+              - {id: a2, card: BP15-T06, state: {hp: 1}}
+              - {id: a3, card: BP15-T06, state: {hp: 1}}
+            hand:
+              - {filler: 2}
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 6, max: 6}
+          zones:
+            field:
+              - {id: b1, card: BP01-173, state: {hp: 1}}     # ファイター：1 傷害就死
+            hand:
+              - {id: b2, card: BP01-180}                    # エンジェルバレッジ
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P2, at: main, do: play, card: b2}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}, targets: {1: [b1]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a3}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a3}}}
+        assert:
+          P1.field: [a1]
+          P1.field.a1: {hp: 4}
+          P2.field.b1: {hp: 1}
+        events:
+          - {kind: 待機, ability: {source: a1, line: 1}, event: {left_field: a2}, group: 1}
+          - {kind: 待機, ability: {source: a1, line: 1}, event: {left_field: a3}, group: 1}
+          - {kind: 消去, object: a2, group: 2}
+          - {kind: 消去, object: a3, group: 2}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a3}}}
+        assert:
+          P2.field: []
+          P2.cemetery: [b1, b2]
+          P2.leader.life: 19
+        events:
+          # 「それとそれのリーダーに1ダメージ」是同一個指示 → 同時
+          - {kind: ダメージ, source: a1, target: b1, amount: 1, group: 1}
+          - {kind: ダメージ, source: a1, target: P2.leader, amount: 1, group: 1}
+          - {kind: 破壊, object: b1, by: rule-11.3.1}
+      - at: after-decision-3
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P2.leader.life: 19
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 待機取消, ability: {source: a1, line: 1}, event: {left_field: a3}}
+        forbidden_events:
+          - {kind: ダメージ}

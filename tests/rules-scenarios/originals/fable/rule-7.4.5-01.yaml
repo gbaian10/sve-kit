@@ -1,0 +1,141 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: rule-7.4.5-01
+kind: rule
+must_pass: true
+mechanisms: [7.4.1, 7.4.3, 7.4.5, 7.4.6, 7.2.3, 12.3.3, 結束階段：結束時誘發 → 守護アクト → 非回合玩家 Quick → 下回合スタンド, 回合特定時點, Quick 起動能力, 持續效果與禁止]
+cards: [BP20-R15, BP01-176, BP05-108, BP01-173]
+why: >-
+  結束階段的順序是規則寫死的：7.4.1「エンドフェイズが来たとき」誘發（マゼルベイン：手牌 0 枚 → 兩段都做，Q761）→ 7.4.2 檢查時點 →
+  7.4.3 回合玩家選守護アクト → 7.4.5 非回合玩家クイック時點（リリエル的 {Q}{起動}：アクト → 相手リーダー 2 傷害）→ 7.4.6 檢查時點 → 回到 7.4.5 → 7.4.7 手牌上限。
+  下一回合開始階段 7.2.3 リリエル站起。互驗修正（astra）：P2 場上的リリエル「自分のリーダーは能力によるダメージを受けない」，
+  マゼルベイン對リーダー的 3 傷害是能力傷害（Q772）→ 被擋、P2 保持 20；對從者的 3 傷害照常，リリエル自己 5 → 2。
+discriminates: >-
+  把クイック時點放在結束時誘發之前的引擎，b1 受傷與 b1 起動的先後（after-decision-2 與 after-decision-4 的事件）相反；沒有 7.4.3 這一步的引擎不會讓 a2 變アクト；
+  在 7.4.6 之後不回到 7.4.5 的引擎不會再問 P2 一次（after-decision-4 的 awaiting 應該仍是 P2 的 pass）；
+  把リーダー傷害算成非能力傷害的引擎 P2 體力 17；下回合沒有 7.2.3 的引擎，b1 仍是アクト。
+refs:
+  rules: [7.4.1, 7.4.2, 7.4.3, 7.4.4, 7.4.5, 7.4.6, 7.4.7, 7.4.9, 7.2.3, 12.3.3, 12.3.4, 10.4.6, 10.5.2.2, 1.3.3]
+  qa: [Q761, Q772]
+evidence:
+  - ref: cr 7.4.3
+    quote: ターンプレイヤーは、自分のフォロワーのうち【守護】を持っているものを望む数選択し、それらをアクトします。
+  - ref: cr 7.4.5
+    quote: 非ターンプレイヤーは、以下のいずれかを実行します。* 手札か EX エリアの【クイック】を持つカードを 1 枚プレイする（10.6）。* 【クイック】を持つ起動能力を 1 つプレイする。* 何もしない。
+  - ref: cr 7.4.6
+    quote: 7.4.5 でカードまたは能力をプレイした場合、チェックタイミングが発生し、その後再び 7.4.5 に戻ります。
+  - ref: cr 7.2.3
+    quote: ターンプレイヤーは、自身の場にあるカードをすべてスタンドします。
+  - ref: Q761
+    quote: はい。両方とも処理を行います。
+    derivation:
+      - 本題手牌 0 張 → 「2枚以下」與「0枚」都成立 → リーダー 3 傷害與フォロワーすべて 3 傷害都處理
+  - ref: Q772
+    quote: 「能力によるダメージ」とは、フォロワー同士の交戦によってお互いに与える交戦ダメージや攻撃ダメージを除くあらゆるダメージです。
+    derivation:
+      - マゼルベイン的結束時 3 傷害是能力傷害 → リリエル「自分のリーダーは能力によるダメージを受けない」→ 不發生（1.3.3 禁止優先）
+      - 「相手の場のフォロワーすべてに3ダメージ」不是對リーダー → 照常，リリエル 5 → 2，仍在場、起動能力仍可用
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 結束時誘發（リーダー傷害被リリエル擋下、從者傷害照常）→ 守護アクト → P2 用クイック起動 → 再問一次 → 下回合站起
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            field:
+              - {id: a1, card: BP20-R15}          # 唯我の絶傑・マゼルベイン 5/5
+              - {id: a2, card: BP01-176}          # 天剣の乙女【守護】，直立
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ビショップ, life: 20}
+          pp: {current: 3, max: 6}
+          zones:
+            field:
+              - {id: b1, card: BP05-108}          # 神弓の座天使・リリエル 2/5（能力傷害不傷リーダー；{Q}{起動}これをアクト：相手リーダー 2 ダメージ）
+            hand:
+              - {id: b3, card: BP01-173}          # 非クイック卡：讓 7.4.5 的合法選項可以完整列出
+            deck:
+              - {id: b2, card: BP01-173}          # P2 下回合開始階段抽到
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: end-phase}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
+      - {n: 3, by: P1, at: end, do: guard-act, select: [a2]}
+      - {n: 4, by: P2, at: quick, do: activate, ability: {source: b1, line: 2}}
+      - {n: 5, by: P2, at: quick, do: pass}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 3}}}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: guard-act, select: []}
+            - {do: guard-act, select: [a2]}
+        assert:
+          P2.leader.life: 20
+          P2.field.b1: {hp: 2}
+        events:
+          - {kind: ダメージ, source: a1, target: b1, amount: 3}
+        forbidden_events:
+          - {kind: ダメージ, target: P2.leader}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - {do: pass}
+            - {do: activate, ability: {source: b1, line: 2}}
+        assert:
+          P1.field.a2: {acted: true}
+        events:
+          - {kind: アクト, object: a2}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+          choices:
+            - {do: pass}
+        assert:
+          P1.leader.life: 18
+          P2.field.b1: {acted: true}
+        events:
+          - {kind: アクト, object: b1}
+          - {kind: ダメージ, source: b1, target: P1.leader, amount: 2}
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn: {active: P2, phase: main}
+          P2.field.b1: {acted: false, hp: 2}
+          P1.field.a2: {acted: true}
+          P2.leader.life: 20
+          P1.leader.life: 18
+          P2.hand: [b3, b2]
+        events:
+          - {kind: スタンド, object: b1}
+          - {kind: 引く, player: P2, object: b2}
+        forbidden_events:
+          - {kind: ダメージ}

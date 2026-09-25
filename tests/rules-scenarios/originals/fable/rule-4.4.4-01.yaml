@@ -1,0 +1,147 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: rule-4.4.4-01
+kind: rule
+must_pass: true
+mechanisms: [4.4.4, 4.4.4.2, 10.6.2.6, 場上限, 抉擇, 本回合歷史]
+cards: [BP16-036, BP17-T12, BP17-T13, BP17-T11, BP01-173, SD02-002]
+why: >-
+  場的上限 5（4.4.4.1）。（A）王断の威光【1】要出 3 個 token 但只有 2 個空位 → 依 4.4.4.2 由玩家從 3 個中選 2 個（Q2094）；（B）場上 5 張時打出從者 → 10.6.2.6 不能打出、回溯；
+  （C）場上 5 張時打出法術仍可以，只是 0 個 token 被建立；4.4.4.2 仍要求「選 5−5＝0 張」，契約 9.8 規定只剩 select: [] 也是輸入點 → C 補上這個決定（互驗第二輪修正，astra）。
+  「このターン、自分の場のフォロワーが進化していたなら、代わりに2つまで」本題不成立（只選 1 個）。契約 10.4：建立前的選擇用卡號。
+discriminates: >-
+  把上限做成「先出再送墓」（11.4 的超過處理）的引擎 A 會有 3 個 場に出す、場上 6 張或多一筆 token 的墓場移動；B 中允許第 6 張的引擎會 resolved；C 中把法術也擋掉的引擎會 cannot-play。
+  互驗修正（astra）：A 原本禁止所有進 P1 墓場的移動，但 w1 結算後依 10.6.2.8.3 送墓是必要處理 → 改成只斷言沒有第三個 token。
+refs:
+  rules: [4.4.4.1, 4.4.4.2, 10.6.2.6, 5.5.2, 11.4.1, 5.18.2.1]
+  qa: [Q2094]
+evidence:
+  - ref: Q2094
+    quote: はい。場に出すことができる2枚のカードは、『スティールナイト』『シールドガーディアン』『ナイト』の中から選択することができます。
+  - ref: cr 10.6.2.6
+    quote: プレイするカードがフォロワーかアミュレットである場合、この時点で自分の場のカードが上限枚数以上でないかを確認します。上限枚数以上である場合、このフォロワーやアミュレットのプレイは認められず、ゲームはこのカードをプレイする前の状態まで巻き戻されます。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 場上 3 張、要出 3 個 token → 只能選 2 個
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 3, max: 4}
+          zones:
+            field:
+              - {id: a1, card: BP01-173}
+              - {id: a2, card: BP01-173}
+              - {id: a3, card: SD02-002}
+            hand:
+              - {id: w1, card: BP16-036}          # 王断の威光
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ドラゴン, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: w1, options: [1]}
+      # 4.4.4.2 的選擇：要建立的物件還不存在，依契約 10.4 以 token 卡號指定
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: [BP17-T12, BP17-T11]}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: [BP17-T12, BP17-T13]}
+            - {do: resolve-choice, select: [BP17-T12, BP17-T11]}
+            - {do: resolve-choice, select: [BP17-T13, BP17-T11]}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.cemetery: [w1]
+          P1.field: [a1, a2, a3, new-1, new-2]
+          P1.field_count: 5
+        events:
+          # new-n 依效果文字順序：スティールナイト（T12）先於ナイト（T11）；同一個指示建立 → 同時（group）
+          - {kind: 場に出す, object: new-1, card: BP17-T12, to: P1.field, group: 1}
+          - {kind: 場に出す, object: new-2, card: BP17-T11, to: P1.field, group: 1}
+          - {kind: 移動, object: w1, from: P1.resolution, to: P1.cemetery, by: rule-10.6.2.8.3}
+        events_exact: [場に出す]
+        forbidden_events:
+          - {kind: 場に出す, card: BP17-T13}
+          - {kind: 移動, to: P1.cemetery, object: new-1}
+          - {kind: 移動, to: P1.cemetery, object: new-2}
+
+  - name: B 場上 5 張 → 打出從者不合法、回溯
+    inherit: A 場上 3 張、要出 3 個 token → 只能選 2 個
+    setup:
+      players:
+        P1:
+          zones:
+            field:
+              - {id: a1, card: BP01-173}
+              - {id: a2, card: BP01-173}
+              - {id: a3, card: SD02-002}
+              - {id: a4, card: SD02-002}
+              - {id: a5, card: BP01-173}
+            hand:
+              - {id: w1, card: BP16-036}
+              - {id: f1, card: BP01-173}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: f1}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 3
+          P1.hand: [w1, f1]
+          P1.field: [a1, a2, a3, a4, a5]
+
+  - name: C 場上 5 張 → 法術可以打出，但 0 個 token 建立
+    inherit: B 場上 5 張 → 打出從者不合法、回溯
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: w1, options: [1]}
+      # 4.4.4.2：選「5−5＝0」張；契約 9.8 只剩 select: [] 也是輸入點
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: []}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: []}
+        assert:
+          P1.pp.current: 0
+          P1.field_count: 5
+        forbidden_events:
+          - {kind: 場に出す}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.cemetery: [w1]
+          P1.field: [a1, a2, a3, a4, a5]
+          P1.field_count: 5
+        forbidden_events:
+          - {kind: 場に出す}

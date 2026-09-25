@@ -1,0 +1,89 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP21-P56
+kind: card
+must_pass: true
+mechanisms: [10.7.2.2, '5.27', 每回合 N 次, 數值變化事件, 持續效果與禁止]
+cards: [BP21-P56, BP08-034, BP01-173]
+why: >-
+  純真の花少女「ターンごとに1回、これの{体力}を+したとき、1枚引く」：「＋した」是數值變大的事件（5.27.1）；神速の歩法的 +3/+2 讓它誘發；同回合第二次 +2 因「ターンごとに1回」不再待機（10.7.2.2）。
+discriminates: >-
+  沒把「体力+」當事件的引擎不抽牌；沒有每回合 1 次限制的引擎第二次也抽（手牌 2 張）。
+refs:
+  rules: [5.27.1, 10.7.2.2, 10.9.1.4]
+  qa: [Q2760]
+evidence:
+  - ref: cr 5.27.1
+    quote: ある情報を‘＋した’とは、その情報の数値が現在の値からより大きい値に変化したことを意味します。
+  - ref: cr 10.7.2.2
+    quote: ‘ターンごとに（数値）回’という表記を持つ自動能力が誘発条件を満たした場合、この自動能力は最大で、（数値）からこのターン中にこの自動能力が待機状態になった回数を引いた回数まで待機状態になります。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 第一次 +2 抽 1 張；同回合第二次不抽
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 4, max: 4}
+          zones:
+            field:
+              - {id: a1, card: BP21-P56}          # 純真の花少女 2/3
+            hand:
+              - {id: s1, card: BP08-034}          # 神速の歩法（+3/+2、突進）
+              - {id: s2, card: BP08-034}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {id: d2, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ドラゴン, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: s1, targets: {1: [a1]}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - {n: 3, by: P1, at: main, do: play, card: s2, targets: {1: [a1]}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+        assert:
+          P1.field.a1: {power: 5, hp: 5}
+        events:
+          - {kind: 待機, ability: {source: a1, line: 1}}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: [s2, d1]
+        events:
+          - {kind: 引く, player: P1, object: d1}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a1: {power: 8, hp: 7}
+          P1.hand: [d1]
+          P1.deck: [d2, filler: 20]
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - {kind: 待機}
+          - {kind: 引く}

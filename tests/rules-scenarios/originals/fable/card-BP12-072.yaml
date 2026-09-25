@@ -1,0 +1,149 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP12-072
+kind: card
+must_pass: true
+mechanisms: [卡片出處, 進化卡自身的能力, 5.16.1.1, 5.16.2.1, 8.3.2.1, 10.9.1.4, 持續效果與禁止]
+cards: [BP12-072, BP12-073, BP14-076, BP12-T10, BP19-050, BP19-051, BP01-173]
+why: >-
+  モーターグレイブディガー「{ファンファーレ}これが能力によって場に出ていたなら、これは進化する」：由寒冷の死霊術師的起動能力從墓場放到場上（並設成 1/1）→ 條件成立 → 進化；
+  不是進化能力引起的進化，要從エボルヴデッキ的裏向き卡中指定同名卡（5.16.1.1）；進化後依 Q1923 用差額算成 2/2（設 1/1 對 0/1 是 +1/0，套到 1/2）；
+  【進化時】出プロダクトマシーン、牌庫頂放墓場。這種進化不算進化能力的每回合一次（Q1681），之後仍能對別的從者用進化能力。
+  從手牌打出時條件不成立（B）。
+discriminates: >-
+  把「能力によって場に出ていた」判成 true 的來源判斷錯（B 也進化）、或不允許非進化能力的進化指定エボルヴデッキ卡的引擎，A 不會進化；
+  進化後用逐層重算得到 1/1 而非 2/2；把這次進化算進 8.3.2.1 的引擎在 after-decision-5 會 cannot-evolve。
+refs:
+  rules: [5.5.3, 5.16.1, 5.16.1.1, 5.16.1.1.1, 5.16.2.1, 8.3.2.1, 12.6.2, 12.4.3, 10.9.1.1.1]
+  qa: [Q1682, Q1681, Q1923]
+evidence:
+  - ref: Q1682
+    quote: はい。能力によって場に出ているので進化します。
+  - ref: Q1681
+    quote: いいえ。1ターンに1回の回数に含まれません。
+  - ref: Q1923
+    quote: 場に出した『モーターグレイブディガー』の攻撃力と体力は1になります。この『モーターグレイブディガー』が進化した場合、攻撃力と体力は2になります。
+  - ref: cr 5.16.1.1
+    quote: そうでない場合、エボルヴデッキ置き場の裏向きのカードの中から適正なカードを 1 枚選択し、それを公開して指定します。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 由能力從墓場出場 → ファンファーレ進化 → 2/2 → 進化時；之後仍可用進化能力
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 2, max: 6}
+          ep: 2
+          zones:
+            field:
+              - {id: a1, card: BP14-076}          # 寒冷の死霊術師 5/5
+              - {id: a4, card: BP19-050}          # ライトニングキャット 2/2（進化能力測試用）
+            cemetery:
+              - {id: a2, card: BP12-072}          # モーターグレイブディガー 0/1
+            evolve_deck:
+              - {id: a3, card: BP12-073}          # モーターグレイブディガー（エボルヴ）1/2
+              - {id: a5, card: BP19-051}          # ライトニングキャット（エボルヴ）
+            hand:
+              - {filler: 2}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, targets: {1: [a2]}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 3}}}
+      # 5.16.1.1：非進化能力的進化要從エボルヴデッキ裏向き卡中指定；只有一個合法候選仍是輸入點（9.8）
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [a3]}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: BP12-073, line: 2}}}
+      - {n: 5, by: P1, at: main, do: evolve, source: a4, ability: {source: a4, line: 1}, evolve_card: a5, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a4, card: BP19-051, line: 1}}, targets: {1: [P2.leader]}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a2, line: 3}}}
+        assert:
+          P1.field.a1: {acted: true}
+          P1.field.a2: {power: 1, hp: 1, evolved: false, entered_from: cemetery, entered_by: effect}
+          P1.cemetery: []
+        events:
+          - {kind: 場に出す, object: a2, from: P1.cemetery}
+          - {kind: 待機, ability: {source: a2, line: 3}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a2, card: BP12-073, line: 2}}}
+        assert:
+          P1.field.a2: {evolved: true, evolved_with: a3, power: 2, hp: 2}
+          P1.evolve_deck: [a5]
+          P1.pp.current: 2
+          P1.ep: 2
+          semantic_state.counters_this_turn: {P1.evolve_played: 0, P1.evolutions: 1}
+        events:
+          - {kind: 進化, object: a2, with: a3}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery: [d1]
+          P1.deck: [filler: 20]
+          P1.field: [a1, a4, a2, new-1]
+          P1.field.new-1: {entered_from: other, entered_by: effect}
+        events:
+          - {kind: 場に出す, object: new-1, card: BP12-T10, to: P1.field}
+          - {kind: 移動, object: d1, from: P1.deck, to: P1.cemetery}
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a4: {evolved: true, evolved_with: a5}
+          P1.ep: 1
+          P2.leader.life: 18
+          semantic_state.counters_this_turn: {P1.evolve_played: 1, P1.evolutions: 2}
+
+  - name: B 從手牌打出 → 「能力によって」不成立 → 不進化，仍 0/1
+    inherit: A 由能力從墓場出場 → ファンファーレ進化 → 2/2 → 進化時；之後仍可用進化能力
+    setup:
+      players:
+        P1:
+          zones:
+            cemetery: []
+            hand:
+              - {id: a2, card: BP12-072}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: a2}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 3}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a2: {evolved: false, power: 0, hp: 1, entered_from: hand, entered_by: play}
+          P1.evolve_deck: [a3, a5]
+          P1.pp.current: 0
+        forbidden_events:
+          - {kind: 進化}

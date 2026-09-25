@@ -1,0 +1,122 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-ECP02-065
+kind: card
+must_pass: true
+mechanisms: [隨機與擲骰, '5.20', 5.20.2, 偶像大師, 對手在結算中途的選擇, 1.3.4]
+cards: [ECP02-065, ECP02-066, BP01-176, BP01-173]
+why: >-
+  〔強運の才女〕鷹富士茄子（進化後）「これが場にいる限り、自分はサイコロを1回ふりなおしてよい」＋【進化時】「サイコロをふる。1なら…2なら…3なら…」：
+  擲骰結果由受控亂數給；擲完可以選擇重擲一次（5.20.2），重擲後只看新的目（Q2206）。3 → 對手把自己攻擊力最高的從者放到墓場（不是破壞），由對手選（同分時）。
+discriminates: >-
+  不在擲完後停下來問「要不要重擲」的引擎 after-decision-2 不會 paused；重擲後仍參照舊目的引擎 B 會同時做 4（無事）與 2；
+  把「墓場に置く」做成破壞的引擎會發出 破壊 事件；讓 P1 替 P2 選的引擎 awaiting 的 by 不對。
+refs:
+  rules: [5.20.1, 5.20.2, 12.6.2, 5.5.1, 1.3.4, 3.1.2.4.1]
+  qa: [Q2206, Q2207, Q2750]
+evidence:
+  - ref: cr 5.20.2
+    quote: テキストに‘サイコロをふりなおす’指示がある場合、その直前のサイコロをふる指示による目をそれ以降の効果に適用する代わりに、再びサイコロをふり、その新たに出た目を以降の効果に適用します。
+  - ref: Q2206
+    quote: いいえ。…サイコロをふりなおした場合、ふりなおす前の目を参照することができません。
+status: draft
+author: fable
+verified_by: []
+
+scenarios:
+  - name: A 擲到 3、不重擲 → 對手把攻擊力最高的從者放到墓場
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: アイドルマスター シンデレラガールズ
+          leader: {class: ビショップ, life: 20}
+          pp: {current: 1, max: 5}
+          ep: 2
+          zones:
+            field:
+              - {id: a1, card: ECP02-065}         # 〔強運の才女〕鷹富士茄子 3/3
+            evolve_deck:
+              - {id: a2, card: ECP02-066}
+            hand:
+              - {filler: 2}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {id: d2, card: BP01-173}
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 5}
+          zones:
+            field:
+              - {id: b1, card: BP01-176}          # 天剣の乙女 4/6（攻撃力最大）
+              - {id: b2, card: BP01-173}          # ファイター 2/3
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: a2, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: ECP02-066, line: 2}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: decline}
+      - {n: 4, by: P2, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, select: [b1]}
+    random:
+      dice: [3]
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, choice: execute}
+            - {do: resolve-choice, choice: decline}
+      - at: after-decision-3
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P2
+          choices:
+            - {do: resolve-choice, select: [b1]}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field: [b2]
+          P2.cemetery: [b1]
+          P2.leader.life: 20
+          P1.hand: [filler: 2]
+        events:
+          - {kind: 移動, object: b1, from: P2.field, to: P2.cemetery}
+        forbidden_events:
+          - {kind: 破壊}
+          - {kind: 引く}
+
+  - name: B 擲到 4（無事）→ 重擲 → 2 → 對手リーダー 3 傷害、自己 +3；舊目不再參照
+    inherit: A 擲到 3、不重擲 → 對手把攻擊力最高的從者放到墓場
+    decisions:
+      - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: a2, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: ECP02-066, line: 2}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute}
+    random:
+      dice: [4, 2]
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 17
+          P1.leader.life: 23
+          P2.field: [b1, b2]
+          P1.hand: [filler: 2]
+        events:
+          - {kind: ダメージ, source: a1, target: P2.leader, amount: 3}
+          - {kind: 体力増加, target: P1.leader, amount: 3}
+        forbidden_events:
+          - {kind: 引く}
+          - {kind: 移動, to: P2.cemetery}
