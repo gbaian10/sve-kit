@@ -5,7 +5,7 @@ use alloc::collections::BTreeMap;
 use serde_json::Value;
 
 use super::support::{
-    Ids, Probe, awaits, check_fixed, has_match, hidden_at, known, leaks, normalize,
+    Ids, Probe, awaits, carried_from, check_fixed, has_match, hidden_at, known, leaks, normalize,
     observation_value, view_name,
 };
 use super::{
@@ -176,7 +176,8 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
         ids: Ids::default(),
     };
     let r4 = b.engine.restore(&blob)?;
-    // Labels count from the save point in both runs, so earlier raw ids do not matter.
+    // Labels count from the save point in both runs. Event ids are immutable, so a cause
+    // into the events before the save keeps its raw id, which must be the same in both.
     a.ids = Ids::default();
     a.ids.node(&n4);
     b.ids.node(&r4);
@@ -196,8 +197,8 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
                 sb.outcome, sa.outcome
             ));
         }
-        let ea = normalize(&before_save(&sa.events, &a.ids), &a.ids, options);
-        let eb = normalize(&before_save(&sb.events, &b.ids), &b.ids, options);
+        let ea = normalize(&Value::from(sa.events.clone()), &a.ids, options);
+        let eb = normalize(&Value::from(sb.events.clone()), &b.ids, options);
         if ea != eb {
             fails.push(format!("N{k}: events differ after restore: {eb} vs {ea}"));
         }
@@ -211,28 +212,12 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
     let (c_line, _) = c.walk(&c_root, 0, path)?;
     let (fc, dc) = c.fixed(fixtures, &c_line, "reference run")?;
     fails.extend(fa.into_iter().chain(fb).chain(fc));
-    // Saved and restored runs are already compared node by node above.
-    if da != dc {
+    if da != dc || db != dc {
         fails.push(format!(
             "deck after the shuffle: restored {db:?}, saved {da:?}, never saved {dc:?}"
         ));
     }
     Ok(fails)
-}
-
-/// Events whose cause is an event from before the save point: the restored instance
-/// never handed those ids to us, so both runs name them alike. Only R1 compares a run
-/// with a restored copy of itself; paired comparisons never do this.
-fn before_save(events: &[Value], ids: &Ids) -> Value {
-    let mut out = events.to_vec();
-    for event in &mut out {
-        if let Some(Value::String(cause)) = event.get_mut("cause").and_then(|c| c.get_mut("event"))
-            && !ids.knows_event(cause)
-        {
-            "#pre-save".clone_into(cause);
-        }
-    }
-    Value::from(out)
 }
 
 /// Digest and the three observations of two nodes, ids normalized per run.
@@ -301,6 +286,7 @@ fn r2b(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
     let mut fails = carried_checks(
         &*a.engine,
         &branch,
+        &line,
         &replay.branch_known,
         &replay.branch_unknown,
         "replay branch",
@@ -326,10 +312,12 @@ fn r2b(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
 }
 
 /// Identities each view must carry on `branch` (marked as carried, even when the branch
-/// point would show them anyway) and must not know.
+/// point would show them anyway, with `from` naming a node of `source` where that view
+/// could identify it) and must not know.
 fn carried_checks(
     engine: &dyn ReplayEngine,
     branch: &NodeId,
+    source: &Line,
     must_know: &BTreeMap<String, Vec<String>>,
     must_not: &BTreeMap<String, Vec<String>>,
     label: &str,
@@ -337,10 +325,18 @@ fn carried_checks(
     let mut fails = Vec::new();
     for view in PLAYERS {
         let name = view_name(view);
-        let (identifiable, carried) = known(&engine.observe(branch, view)?.knowledge);
+        let knowledge = engine.observe(branch, view)?.knowledge;
+        let (identifiable, carried) = known(&knowledge);
+        let entries = carried_from(&knowledge);
         for object in must_know.get(name).into_iter().flatten() {
-            if !carried.contains(object) {
-                fails.push(format!("{label}: {name} does not carry {object}"));
+            let mut ok = false;
+            for (_, from) in entries.iter().filter(|(o, _)| o == object) {
+                ok |= from_is_valid(engine, source, from.as_deref(), view, object)?;
+            }
+            if !ok {
+                fails.push(format!(
+                    "{label}: {name} does not carry {object} from a node of the source line where it knew it"
+                ));
             }
         }
         for object in must_not.get(name).into_iter().flatten() {
@@ -350,6 +346,25 @@ fn carried_checks(
         }
     }
     Ok(fails)
+}
+
+/// `from` is a node of the source line at which `view` could identify `object`.
+fn from_is_valid(
+    engine: &dyn ReplayEngine,
+    source: &Line,
+    from: Option<&str>,
+    view: View,
+    object: &str,
+) -> Result<bool, EngineError> {
+    let Some(node) = source
+        .iter()
+        .map(|(_, n)| n)
+        .find(|n| Some(n.0.as_str()) == from)
+    else {
+        return Ok(false);
+    };
+    let (identifiable, carried) = known(&engine.observe(node, view)?.knowledge);
+    Ok(identifiable.iter().chain(&carried).any(|o| o == object))
 }
 
 fn r3(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
@@ -415,7 +430,7 @@ fn r4(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
     let (line, steps) = a.walk(&root, 0, &undo.path)?;
     let logged = a.engine.admin_log()?.len();
     let u0 = a.branch(&root, BranchKind::Undo)?;
-    let mut fails = carried_checks(&*a.engine, &u0, &undo.known, &undo.unknown, "undo")?;
+    let mut fails = carried_checks(&*a.engine, &u0, &line, &undo.known, &undo.unknown, "undo")?;
     for path in &undo.board {
         let now = a.engine.query(&u0, View::Omniscient, path)?;
         let then = a.engine.query(&root, View::Omniscient, path)?;

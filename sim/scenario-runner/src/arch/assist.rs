@@ -2,10 +2,10 @@
 
 use serde_json::Value;
 
-use super::support::{Ids, Probe, check_fixed, has_match, normalize};
+use super::support::{Ids, Probe, check_fixed, has_match, mark_decisions, normalize};
 use super::{
     ArchFixtures, ArchOptions, AssistEngine, AssistFactory, CheckReport, Layer, Layered, Realign,
-    positions,
+    ReplayFactory, positions,
 };
 use crate::compare;
 use crate::engine::{EngineError, Step, View};
@@ -15,13 +15,17 @@ type Checked = Result<Vec<String>, EngineError>;
 const LAYERS: [Layer; 2] = [Layer::Sandbox, Layer::Shadow];
 
 /// Runs A1–A4 and B1–B3 against fresh instances from `factory`.
+///
+/// `replay` gives the design's replay engine: A3 compares each step after Rewind with
+/// the same step of path P played by it.
 pub fn check_assist(
     factory: &mut AssistFactory<'_>,
+    replay: &mut ReplayFactory<'_>,
     fixtures: &ArchFixtures,
     options: &ArchOptions,
 ) -> Vec<CheckReport> {
     let mut reports = Vec::new();
-    match sequence_a(factory, fixtures, options) {
+    match sequence_a(factory, replay, fixtures, options) {
         Ok([a1, a2, a3]) => reports.extend([
             CheckReport::from_result("A1", Ok(a1)),
             CheckReport::from_result("A2", Ok(a2)),
@@ -170,6 +174,8 @@ fn kept(engine: &dyn AssistEngine, original: &Value, mode: &str, label: &str) ->
 /// Sequence A up to the manual attack; returns the digests after the prefix and the new divergence.
 struct Diverged {
     engine: Box<dyn AssistEngine>,
+    /// Both layers' steps of the ordinary decisions before the manual one.
+    before: Vec<Layered<Step>>,
     aligned: (String, String),
     record: Option<Value>,
     a1: Vec<String>,
@@ -181,7 +187,7 @@ fn diverge(
 ) -> Result<Diverged, EngineError> {
     let spec = &fixtures.spec.assist;
     let mut engine = start(factory, fixtures)?;
-    prefix(&mut *engine, fixtures, spec.prefix)?;
+    let before_steps = prefix(&mut *engine, fixtures, spec.prefix)?;
     let mut a1 = Vec::new();
     let aligned = digests(&*engine)?;
     if aligned.0 != aligned.1 {
@@ -224,6 +230,7 @@ fn diverge(
     }
     Ok(Diverged {
         engine,
+        before: before_steps,
         aligned,
         record,
         a1,
@@ -281,11 +288,13 @@ fn halted(engine: &mut dyn AssistEngine, label: &str) -> Checked {
 
 fn sequence_a(
     factory: &mut AssistFactory<'_>,
+    replay: &mut ReplayFactory<'_>,
     fixtures: &ArchFixtures,
     options: &ArchOptions,
 ) -> Result<[Vec<String>; 3], EngineError> {
     let Diverged {
         mut engine,
+        before,
         aligned,
         record,
         a1,
@@ -308,81 +317,107 @@ fn sequence_a(
         a3.push("A3: auto_advance is still off after Rewind".to_owned());
     }
     a3.extend(kept(&*engine, &record, "rewind", "A3")?);
-    a3.extend(resume(&mut *engine, fixtures, options)?);
+    a3.extend(resume(&mut *engine, &before, replay, fixtures, options)?);
     Ok([a1, a2, a3])
 }
 
-/// A3: path P steps 3–6 after Rewind, compared step by step in both layers, with the
-/// third-party fixed assertions at the nodes they reach.
+/// A3: path P continued after Rewind. Each step, in each layer, has the outcome and the
+/// events (causes included, ids relabelled per source) of the same step played by the
+/// design's replay engine; the third-party fixed assertions run at the nodes reached.
 fn resume(
     engine: &mut dyn AssistEngine,
+    before: &[Layered<Step>],
+    replay: &mut ReplayFactory<'_>,
     fixtures: &ArchFixtures,
     options: &ArchOptions,
 ) -> Checked {
-    let spec = &fixtures.spec.assist;
-    let decisions = fixtures.spec.replay.path.iter().skip(spec.prefix);
+    let spec = &fixtures.spec;
+    let first = spec.assist.prefix;
+    let path: Vec<&Value> = spec
+        .replay
+        .path
+        .iter()
+        .take(spec.assist.resume_to)
+        .collect();
+    let baseline = replay_steps(replay, fixtures, &path)?;
+    let mut sandbox: Vec<Step> = before.iter().map(|s| s.sandbox.clone()).collect();
+    let mut shadow: Vec<Step> = before.iter().map(|s| s.shadow.clone()).collect();
     let mut fails = Vec::new();
-    let (mut ids_sandbox, mut ids_shadow) = (Ids::default(), Ids::default());
     let mut decks: [Option<Vec<String>>; 2] = [None, None];
-    for (i, (decision, want)) in decisions.zip(&spec.resume_steps).enumerate() {
-        let node = spec.prefix.saturating_add(i).saturating_add(1);
+    for (i, decision) in path.iter().enumerate().skip(first) {
         let got = engine.act(decision)?;
-        for (layer, step) in [(Layer::Sandbox, &got.sandbox), (Layer::Shadow, &got.shadow)] {
-            fails.extend(step_matches(step, want, &spec.resume_kinds, layer, node));
-        }
-        ids_sandbox.events(&got.sandbox.events);
-        ids_shadow.events(&got.shadow.events);
-        if normalize(
-            &Value::from(got.sandbox.events.clone()),
-            &ids_sandbox,
-            options,
-        ) != normalize(
-            &Value::from(got.shadow.events.clone()),
-            &ids_shadow,
-            options,
-        ) {
-            fails.push(format!(
-                "A3 N{node}: sandbox and shadow produced different events"
-            ));
-        }
+        sandbox.push(got.sandbox);
+        shadow.push(got.shadow);
         for (layer, deck) in LAYERS.into_iter().zip(decks.iter_mut()) {
-            fails.extend(fixed_at(&*engine, fixtures, layer, node, deck)?);
+            fails.extend(fixed_at(
+                &*engine,
+                fixtures,
+                layer,
+                i.saturating_add(1),
+                deck,
+            )?);
         }
     }
-    for layer in LAYERS {
-        for (path, want) in &spec.resume_field {
-            fails.extend(expect(engine, layer, path, want, "A3")?);
+    let want = relabelled(&baseline, options);
+    for (layer, steps) in [(Layer::Sandbox, &sandbox), (Layer::Shadow, &shadow)] {
+        let got = relabelled(steps, options);
+        for (i, ((out_got, ev_got), (out_want, ev_want))) in
+            got.iter().zip(&want).enumerate().skip(first)
+        {
+            let node = i.saturating_add(1);
+            if out_got != out_want {
+                fails.push(format!(
+                    "A3 N{node}: {} outcome {out_got}, replay {out_want}",
+                    layer_name(layer)
+                ));
+            }
+            if ev_got != ev_want {
+                fails.push(format!(
+                    "A3 N{node}: {} events {ev_got}, replay {ev_want}",
+                    layer_name(layer)
+                ));
+            }
         }
     }
     Ok(fails)
 }
 
-/// One step of A3 in one layer: outcome, expected events in order, and nothing else of
-/// the compared kinds.
-fn step_matches(
-    step: &Step,
-    want: &super::ResumeStep,
-    kinds: &[String],
-    layer: Layer,
-    node: usize,
-) -> Vec<String> {
-    let mut fails = Vec::new();
-    let name = layer_name(layer);
-    if step.outcome != want.outcome {
-        fails.push(format!(
-            "A3 N{node}: {name} outcome {}, expected {}",
-            step.outcome, want.outcome
-        ));
+/// Path P played from the start by a fresh replay engine: the baseline of A3.
+fn replay_steps(
+    replay: &mut ReplayFactory<'_>,
+    fixtures: &ArchFixtures,
+    path: &[&Value],
+) -> Result<Vec<Step>, EngineError> {
+    let mut engine = replay();
+    let mut at = engine.start(
+        fixtures.position(positions::M)?,
+        &fixtures.spec.seed,
+        &fixtures.spec.game,
+    )?;
+    let mut steps = Vec::new();
+    for decision in path {
+        let (next, step) = engine.decide(&at, decision)?;
+        steps.push(step);
+        at = next;
     }
-    if !compare::events_subsequence(&want.events, &step.events)
-        || !compare::events_exact(kinds, &want.events, &step.events)
-    {
-        fails.push(format!(
-            "A3 N{node}: {name} events {:?}, expected {:?}",
-            step.events, want.events
-        ));
+    Ok(steps)
+}
+
+/// Outcome and events of each step, event ids labelled by first appearance over the whole
+/// history of that source and decision causes reduced to a marker.
+fn relabelled(steps: &[Step], options: &ArchOptions) -> Vec<(String, Value)> {
+    let mut ids = Ids::default();
+    for step in steps {
+        ids.events(&step.events);
     }
-    fails
+    steps
+        .iter()
+        .map(|step| {
+            let mut events = Value::from(step.events.clone());
+            mark_decisions(&mut events);
+            (step.outcome.clone(), normalize(&events, &ids, options))
+        })
+        .collect()
 }
 
 /// The replay fixed assertions for node `node`, asked of one assist layer.

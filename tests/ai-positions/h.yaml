@@ -45,6 +45,7 @@ random: {}
 checks:
   - id: H1
     at: root
+    awaiting: {by: P1, at: main}
     legal_exact:
       - {do: end-phase}
       - {do: attack, attacker: a1, target: P2.leader}
@@ -68,6 +69,8 @@ checks:
   - id: H2
     before:
       - {n: 1, by: P1, at: main, do: play, card: s1, targets: {1: [b1, b2, b3]}, distribute: {1: {b1: 1, b2: 1, b3: 2}}}
+    outcomes: [resolved]
+    awaiting: {by: P2, at: check-timing}
     legal_exact:
       - {do: choose-pending, pending: {ability: {source: b1, line: 1}}}
       - {do: choose-pending, pending: {ability: {source: b2, line: 1}}}
@@ -76,6 +79,8 @@ checks:
         # The first search shuffles P2's deck (5.8.2) before the second search point.
         before:
           - {n: 2, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b1, line: 1}}}
+        outcomes: [paused]
+        awaiting: {by: P2, at: resolve}
         legal_exact:
           - {do: resolve-choice, select: [b5]}
           - {do: resolve-choice, select: [b6]}
@@ -87,6 +92,8 @@ checks:
             before:
               - {n: 3, by: P2, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [b5]}
               - {n: 4, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b2, line: 1}}}
+            outcomes: [resolved, paused]
+            awaiting: {by: P2, at: resolve}
             legal_exact:
               - {do: resolve-choice, select: [b6]}
               - {do: resolve-choice, select: []}
@@ -96,6 +103,8 @@ checks:
             before:
               - {n: 3, by: P2, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
               - {n: 4, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b2, line: 1}}}
+            outcomes: [resolved, paused]
+            awaiting: {by: P2, at: resolve}
             legal_exact:
               - {do: resolve-choice, select: [b5]}
               - {do: resolve-choice, select: [b6]}

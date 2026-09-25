@@ -53,6 +53,12 @@ pub(crate) enum Mutation {
     TracePartial,
     /// P2's projection shows the card numbers (not the ids) P1 is looking at.
     LeakRevealNumbers,
+    /// Every decision reports `resolved`, even where resolution must pause.
+    AlwaysResolved,
+    /// The first decision ends the game.
+    GameEnd,
+    /// The engine waits at the wrong point, while `legal` still answers from the table.
+    WrongPoint,
 }
 
 pub(crate) const MUTATIONS: &[Mutation] = &[
@@ -68,22 +74,34 @@ pub(crate) const MUTATIONS: &[Mutation] = &[
     Mutation::ThinkMutates,
     Mutation::NoDeckList,
     Mutation::LeakHand,
+    Mutation::AlwaysResolved,
+    Mutation::GameEnd,
+    Mutation::WrongPoint,
 ];
 
-/// Position id + decisions so far → the legal set.
-pub(crate) type Table = BTreeMap<(String, String), Vec<Value>>;
+type Key = (String, String);
 
-fn key(position: &str, decisions: &[Value]) -> (String, String) {
+/// What the positions expect, by position id + decisions so far.
+#[derive(Default)]
+pub(crate) struct Table {
+    legal: BTreeMap<Key, Vec<Value>>,
+    /// Outcome of the last decision of the key.
+    outcome: BTreeMap<Key, String>,
+    /// `{by, at}` of the input point after the key.
+    point: BTreeMap<Key, Value>,
+}
+
+fn key(position: &str, decisions: &[Value]) -> Key {
     (
         position.to_owned(),
         Value::Array(decisions.to_vec()).to_string(),
     )
 }
 
-fn before(checks: &[Check], check: &Check) -> Vec<Value> {
+fn before(checks: &[Check], check: &Check) -> (Vec<Value>, Vec<String>) {
     match check.before() {
-        None => Vec::new(),
-        Some(Before::Decisions(list)) => list,
+        None => (Vec::new(), Vec::new()),
+        Some(Before::Decisions(list)) => (list, check.outcomes.clone()),
         Some(Before::Ref(id)) => checks
             .iter()
             .find(|c| c.id == id)
@@ -92,26 +110,62 @@ fn before(checks: &[Check], check: &Check) -> Vec<Value> {
     }
 }
 
-fn add_branches(table: &mut Table, position: &str, parent: &[Value], branches: &[Branch]) {
-    for branch in branches {
-        let mut decisions = parent.to_vec();
-        decisions.extend(branch.before.iter().cloned());
-        if let Some(legal) = &branch.legal_exact {
-            table.insert(key(position, &decisions), legal.clone());
+impl Table {
+    /// Records a path from `parent` and the point and legal set at its end.
+    fn walk(
+        &mut self,
+        position: &str,
+        parent: &[Value],
+        decisions: &[Value],
+        outcomes: &[String],
+        awaiting: Option<&Value>,
+        legal: Option<&Vec<Value>>,
+    ) -> Vec<Value> {
+        let mut path = parent.to_vec();
+        for (decision, outcome) in decisions.iter().zip(outcomes) {
+            let point = json!({"by": decision["by"], "at": decision["at"]});
+            self.point.insert(key(position, &path), point);
+            path.push(decision.clone());
+            self.outcome.insert(key(position, &path), outcome.clone());
         }
-        add_branches(table, position, &decisions, &branch.branches);
+        if let Some(point) = awaiting {
+            self.point.insert(key(position, &path), point.clone());
+        }
+        if let Some(legal) = legal {
+            self.legal.insert(key(position, &path), legal.clone());
+        }
+        path
+    }
+
+    fn branches(&mut self, position: &str, parent: &[Value], branches: &[Branch]) {
+        for b in branches {
+            let path = self.walk(
+                position,
+                parent,
+                &b.before,
+                &b.outcomes,
+                b.awaiting.as_ref(),
+                b.legal_exact.as_ref(),
+            );
+            self.branches(position, &path, &b.branches);
+        }
     }
 }
 
 pub(crate) fn table(positions: &AiPositions) -> Rc<Table> {
-    let mut table = Table::new();
+    let mut table = Table::default();
     for position in positions.0.values() {
         for check in &position.checks {
-            let decisions = before(&position.checks, check);
-            if let Some(legal) = &check.legal_exact {
-                table.insert(key(&position.id, &decisions), legal.clone());
-            }
-            add_branches(&mut table, &position.id, &decisions, &check.branches);
+            let (decisions, outcomes) = before(&position.checks, check);
+            let path = table.walk(
+                &position.id,
+                &[],
+                &decisions,
+                &outcomes,
+                check.awaiting.as_ref(),
+                check.legal_exact.as_ref(),
+            );
+            table.branches(&position.id, &path, &check.branches);
         }
     }
     Rc::new(table)
@@ -206,10 +260,16 @@ impl AiEngine for FakeAi {
 
     fn decide(&mut self, decision: &Value) -> Result<Step, EngineError> {
         self.decisions.push(decision.clone());
-        let outcome = if self.mutation == Mutation::RejectDecisions {
-            "cannot-play"
-        } else {
-            "resolved"
+        let expected = self
+            .table
+            .outcome
+            .get(&key(self.id(), &self.decisions))
+            .map_or("resolved", String::as_str);
+        let outcome = match self.mutation {
+            Mutation::RejectDecisions => "cannot-play",
+            Mutation::AlwaysResolved => "resolved",
+            Mutation::GameEnd => "game-end",
+            _ => expected,
         };
         Ok(Step {
             outcome: outcome.to_owned(),
@@ -220,6 +280,7 @@ impl AiEngine for FakeAi {
     fn legal(&self) -> Result<Vec<Value>, EngineError> {
         let mut legal = self
             .table
+            .legal
             .get(&key(self.id(), &self.decisions))
             .cloned()
             .unwrap_or_else(|| vec![json!({"do": "end-phase"})]);
@@ -294,6 +355,22 @@ impl AiEngine for FakeAi {
         Ok(out)
     }
 
+    fn awaiting(&self) -> Result<Option<Value>, EngineError> {
+        if self.mutation == Mutation::GameEnd && !self.decisions.is_empty() {
+            return Ok(None);
+        }
+        let mut point = self
+            .table
+            .point
+            .get(&key(self.id(), &self.decisions))
+            .cloned()
+            .unwrap_or_else(|| json!({"by": "P1", "at": "main"}));
+        if self.mutation == Mutation::WrongPoint && !self.decisions.is_empty() {
+            point["at"] = json!("main");
+        }
+        Ok(Some(point))
+    }
+
     fn query(&self, view: View, path: &str) -> Result<Option<Value>, EngineError> {
         let projection = self.projection(view)?;
         let mut node = &projection["players"];
@@ -357,13 +434,14 @@ impl AiEngine for FakeAi {
             Mutation::ThinkMutates => self.decisions.push(json!({"do": "noop"})),
             _ => {}
         }
-        let play = json!([{"do": "play"}]);
+        let play = json!([{"do": "play", "card": "BP01-179"}]);
         let trace = match self.mutation {
             Mutation::TraceQuick => vec![json!({"by": "P2", "at": "quick", "options": play})],
             Mutation::TracePartial => vec![
                 json!({"by": "P2", "at": "main", "options": play}),
                 json!({"by": "P1", "at": "quick", "options": play}),
                 json!({"by": "P2", "at": "quick", "options": [{"do": "pass"}]}),
+                json!({"by": "P2", "at": "quick", "options": [{"do": "play", "card": "BP01-173"}]}),
             ],
             _ => vec![json!({"depth": 0, "by": "P1", "at": "main", "seen": seen.is_object()})],
         };
@@ -403,6 +481,10 @@ impl AiEngine for Recording {
 
     fn query(&self, view: View, path: &str) -> Result<Option<Value>, EngineError> {
         self.inner.query(view, path)
+    }
+
+    fn awaiting(&self) -> Result<Option<Value>, EngineError> {
+        self.inner.awaiting()
     }
 
     fn think(

@@ -53,6 +53,8 @@ checks:
     before:
       - {n: 1, by: P1, at: main, do: play, card: a}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a, line: 2}}}
+    outcomes: [resolved, paused]
+    awaiting: {by: P1, at: resolve}
     legal_exact:
       - {do: resolve-choice, select: [c1]}
       - {do: resolve-choice, select: [c2]}

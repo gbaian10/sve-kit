@@ -93,6 +93,14 @@ pub(crate) enum ReplayMutation {
     BranchForgetsAfterShuffle,
     /// P1's export carries a hash of the deck order before any search.
     ExportInitialOrderHash,
+    /// After restore, the placed card's cause names an event that never existed.
+    RestoreRefersBogus,
+    /// A restored game reports the shuffled deck the other way round, in queries only.
+    RestoredOrderFlipped,
+    /// Carried identities name the start of the source line as where they were seen.
+    CarriedFromStart,
+    /// Carried identities name a node that does not exist.
+    CarriedFromNowhere,
 }
 
 pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
@@ -128,6 +136,10 @@ pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
     (ReplayMutation::RestoreMiswiresCause, &["R1"]),
     (ReplayMutation::BranchForgetsAfterShuffle, &["R2b"]),
     (ReplayMutation::ExportInitialOrderHash, &["R5"]),
+    (ReplayMutation::RestoreRefersBogus, &["R1"]),
+    (ReplayMutation::RestoredOrderFlipped, &["R1"]),
+    (ReplayMutation::CarriedFromStart, &["R2b", "R4"]),
+    (ReplayMutation::CarriedFromNowhere, &["R2b", "R4"]),
 ];
 
 #[derive(Debug, Clone)]
@@ -662,6 +674,9 @@ impl FakeReplay {
                 4 => vec![
                     json!({"kind": "公開", "object": "a3", "to": "P2", "source": "a1", "cause": {"event": play(game)}}),
                 ],
+                5 if self.restored && self.mutation == ReplayMutation::RestoreRefersBogus => vec![
+                    json!({"kind": "場に出す", "object": "a3", "from": "P1.deck", "source": {"source": "a1", "line": 2}, "cause": {"event": "bogus-old"}}),
+                ],
                 5 => vec![
                     json!({"kind": "場に出す", "object": "a3", "from": "P1.deck", "source": {"source": "a1", "line": 2}, "cause": {"event": play(game)}}),
                 ],
@@ -692,7 +707,15 @@ impl FakeReplay {
                 .map(str::to_owned);
             match at.k {
                 2 => events.push(json!({"id": self.fresh("e"), "kind": "待機", "ability": {"source": "a1", "line": 2}, "cause": {"event": first}})),
-                3 => events.push(json!({"id": self.fresh("e"), "kind": "費用成立", "ability": {"source": "a1", "line": 2}, "cause": {"event": first}})),
+                3 => {
+                    // The cost is paid because the pending ability chosen at P3 was waiting.
+                    let pending = Self::earlier(
+                        game,
+                        index,
+                        &json!({"kind": "待機", "ability": {"source": "a1", "line": 2}}),
+                    );
+                    events.push(json!({"id": self.fresh("e"), "kind": "費用成立", "ability": {"source": "a1", "line": 2}, "cause": {"event": pending}}));
+                }
                 5 => {
                     if self.mutation == ReplayMutation::CauseBroken {
                         for e in &mut events {
@@ -788,6 +811,17 @@ impl FakeReplay {
         out
     }
 
+    /// Event ids on the line from the start to node `at`, in order.
+    fn line_event_ids(game: &Game, at: usize) -> Vec<String> {
+        let mut nodes = Self::ancestors(game, at);
+        nodes.reverse();
+        nodes
+            .into_iter()
+            .flat_map(|i| game.nodes[i].step.events.iter())
+            .filter_map(|e| e["id"].as_str().map(str::to_owned))
+            .collect()
+    }
+
     fn line_tail(game: &Game, branch: usize) -> Option<usize> {
         game.nodes
             .iter()
@@ -872,7 +906,14 @@ impl ReplayEngine for FakeReplay {
             if skip {
                 continue;
             }
-            let from = game.nodes[tail].id.clone();
+            let from = if self.mutation == ReplayMutation::CarriedFromNowhere {
+                "nowhere".to_owned()
+            } else if self.mutation == ReplayMutation::CarriedFromStart {
+                let start = Self::ancestors(game, tail).last().copied().unwrap_or(tail);
+                game.nodes[start].id.clone()
+            } else {
+                game.nodes[tail].id.clone()
+            };
             let brought: Vec<(String, String)> = Self::seen(game, tail, here.k, view)
                 .into_iter()
                 .map(|id| (id, from.clone()))
@@ -934,6 +975,7 @@ impl ReplayEngine for FakeReplay {
             "shuffle": if visible_only { Value::Null } else { Value::from(game.shuffle.clone()) },
             "seed": if visible_only { "" } else { game.seed.as_str() },
             "decisions": node.decisions,
+            "events": Self::line_event_ids(game, self.find(at)?.0),
         });
         serde_json::to_vec(&blob).map_err(|e| adapter(&e.to_string()))
     }
@@ -973,6 +1015,24 @@ impl ReplayEngine for FakeReplay {
         let mut id = self.push_node(None, 0, Vec::new(), BTreeMap::new())?;
         for decision in v["decisions"].as_array().cloned().unwrap_or_default() {
             id = self.decide(&NodeId(id), &decision)?.0.0;
+        }
+        // Event ids are immutable: the replayed events take back the ids they had.
+        let game = self.game.as_mut().ok_or_else(|| adapter("no game"))?;
+        let last = game.nodes.len() - 1;
+        let renamed: BTreeMap<String, String> = Self::line_event_ids(game, last)
+            .into_iter()
+            .zip(strings(&v["events"]))
+            .collect();
+        let rename = |slot: Option<&mut Value>| {
+            if let Some(slot) = slot
+                && let Some(new) = slot.as_str().and_then(|old| renamed.get(old))
+            {
+                *slot = Value::from(new.clone());
+            }
+        };
+        for event in game.nodes.iter_mut().flat_map(|n| n.step.events.iter_mut()) {
+            rename(event.get_mut("id"));
+            rename(event.get_mut("cause").and_then(|c| c.get_mut("event")));
         }
         Ok(NodeId(id))
     }
@@ -1042,6 +1102,24 @@ impl ReplayEngine for FakeReplay {
         if self.mutation == ReplayMutation::BoardQueriesMissing && path.ends_with("_count") {
             return Ok(None);
         }
+        if self.mutation == ReplayMutation::RestoredOrderFlipped && self.restored && !here.lookout {
+            let mut flipped = d5;
+            flipped.reverse();
+            match (path, here.k) {
+                ("P1.deck", 5..=12) => return Ok(Some(Value::from(flipped))),
+                ("P1.deck", 13..) => {
+                    return Ok(Some(Value::from(
+                        flipped.into_iter().skip(1).collect::<Vec<_>>(),
+                    )));
+                }
+                ("P1.hand", 13..) => {
+                    return Ok(Some(Value::from(
+                        flipped.into_iter().take(1).collect::<Vec<_>>(),
+                    )));
+                }
+                _ => {}
+            }
+        }
         Ok(Some(match path {
             "P1.pp.current" => Value::from(match here.k {
                 0 => 4,
@@ -1106,6 +1184,12 @@ pub(crate) enum AssistMutation {
     ResumeEventEarly,
     /// After Rewind, placing a3 triggers twice.
     ResumeExtraEvent,
+    /// Both layers agree, but a3's trigger names the shuffle as its cause.
+    ResumeCauseWrong,
+    /// Both layers agree, but the cancelled trigger has no cause.
+    ResumeCauseMissing,
+    /// Both layers agree, but revealing a3 also emits a move event.
+    ResumeExtraKind,
 }
 
 pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
@@ -1122,6 +1206,9 @@ pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
     (AssistMutation::MismatchRecordedTwice, &["B1"]),
     (AssistMutation::ResumeEventEarly, &["A3"]),
     (AssistMutation::ResumeExtraEvent, &["A3"]),
+    (AssistMutation::ResumeCauseWrong, &["A3"]),
+    (AssistMutation::ResumeCauseMissing, &["A3"]),
+    (AssistMutation::ResumeExtraKind, &["A3"]),
 ];
 
 #[derive(Debug, Clone, Default, Hash, PartialEq, Eq)]
@@ -1140,6 +1227,9 @@ pub(crate) struct FakeAssist {
     counter: usize,
     sandbox: Layer1,
     shadow: Layer1,
+    /// Every event each layer has emitted, for causes into earlier steps.
+    sandbox_log: Vec<Value>,
+    shadow_log: Vec<Value>,
     divergences: Vec<Value>,
 }
 
@@ -1150,6 +1240,8 @@ impl FakeAssist {
             counter: 0,
             sandbox: Layer1::default(),
             shadow: Layer1::default(),
+            sandbox_log: Vec::new(),
+            shadow_log: Vec::new(),
             divergences: Vec::new(),
         }
     }
@@ -1165,33 +1257,104 @@ impl FakeAssist {
         self.divergences.iter().any(|d| d["resolved"].is_null())
     }
 
+    /// Path P step `k` with the same events and causes as the replay fake; `#first` and
+    /// `#second` name this step's own events, the rest are looked up in `log`.
+    fn path_events(mutation: AssistMutation, k: usize, log: &[Value]) -> Vec<Value> {
+        let d = json!({"decision": "assist"});
+        let find = |pattern: Value| {
+            log.iter()
+                .rev()
+                .find(|e| sve_scenario_runner::compare::subset(&pattern, e))
+                .and_then(|e| e["id"].as_str().map(str::to_owned))
+        };
+        let play = find(json!({"kind": "プレイ", "ability": {"source": "a1", "line": 2}}));
+        let pending = find(json!({"kind": "待機", "ability": {"source": "a1", "line": 2}}));
+        let placed = json!({"kind": "場に出す", "object": "a3", "from": "P1.deck", "source": {"source": "a1", "line": 2}, "cause": {"event": play}});
+        let shuffle = json!({"kind": "シャッフル", "zone": "P1.deck", "cause": {"event": play}});
+        let trigger = |cause: &str| json!({"kind": "待機", "ability": {"source": "a3", "line": 2}, "cause": {"event": cause}});
+        let reveal = json!({"kind": "公開", "object": "a3", "to": "P2", "source": "a1", "cause": {"event": play}});
+        match (k, mutation) {
+            (1, _) => vec![json!({"kind": "プレイ", "object": "a1", "cause": d})],
+            (2, _) => vec![
+                json!({"kind": "場に出す", "object": "a1", "cause": d}),
+                json!({"kind": "待機", "ability": {"source": "a1", "line": 2}, "cause": {"event": "#first"}}),
+            ],
+            (3, _) => vec![
+                json!({"kind": "プレイ", "ability": {"source": "a1", "line": 2}, "cause": d}),
+                json!({"kind": "費用成立", "ability": {"source": "a1", "line": 2}, "cause": {"event": pending}}),
+            ],
+            (4, AssistMutation::ResumeEventEarly) => vec![reveal, placed],
+            (4, AssistMutation::ResumeExtraKind) => vec![
+                reveal,
+                json!({"kind": "移動", "object": "a3", "cause": {"event": play}}),
+            ],
+            (4, _) => vec![reveal],
+            (5, AssistMutation::ResumeEventEarly) => vec![shuffle, trigger("#first")],
+            (5, AssistMutation::ResumeExtraEvent) => {
+                vec![placed, shuffle, trigger("#first"), trigger("#first")]
+            }
+            (5, AssistMutation::ResumeCauseWrong) => vec![placed, shuffle, trigger("#second")],
+            (5, _) => vec![placed, shuffle, trigger("#first")],
+            (6, AssistMutation::ResumeCauseMissing) => {
+                vec![json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}})]
+            }
+            (6, _) => vec![
+                json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}, "cause": d}),
+            ],
+            (7, _) => {
+                vec![json!({"kind": "攻撃", "attacker": "a2", "target": "P2.leader", "cause": d})]
+            }
+            (8, _) => vec![
+                json!({"kind": "ダメージ", "source": "a2", "target": "P2.leader", "amount": 3, "cause": d}),
+            ],
+            _ => Vec::new(),
+        }
+    }
+
     fn apply(&mut self, which: Layer, op: &Value) -> Step {
         self.counter += 1;
         let tag = self.counter;
-        let state = match which {
-            Layer::Sandbox => &mut self.sandbox,
-            Layer::Shadow => &mut self.shadow,
+        let mutation = self.mutation;
+        let (state, log) = match which {
+            Layer::Sandbox => (&mut self.sandbox, &mut self.sandbox_log),
+            Layer::Shadow => (&mut self.shadow, &mut self.shadow_log),
         };
-        let step = |outcome: &str, events: Vec<Value>| Step {
-            outcome: outcome.to_owned(),
-            events: events
+        let step = |outcome: &str, events: Vec<Value>, history: &mut Vec<Value>| {
+            let ids: Vec<String> = (0..events.len())
+                .map(|i| format!("{which:?}-{tag}-{i}"))
+                .collect();
+            let events: Vec<Value> = events
                 .into_iter()
-                .enumerate()
-                .map(|(i, mut e)| {
-                    e["id"] = Value::from(format!("{which:?}-{tag}-{i}"));
+                .zip(&ids)
+                .map(|(mut e, id)| {
+                    e["id"] = Value::from(id.clone());
+                    if let Some(cause) = e.get_mut("cause").and_then(|c| c.get_mut("event")) {
+                        match cause.as_str() {
+                            Some("#first") => *cause = Value::from(ids[0].clone()),
+                            Some("#second") => *cause = Value::from(ids[1].clone()),
+                            _ => {}
+                        }
+                    }
                     e
                 })
-                .collect(),
+                .collect();
+            history.extend(events.iter().cloned());
+            Step {
+                outcome: outcome.to_owned(),
+                events,
+            }
         };
+        let d = json!({"decision": "assist"});
         if op["attacker"] == "a6" {
             if state.k == 2 && !state.cleared {
-                return step("cannot-attack", Vec::new());
+                return step("cannot-attack", Vec::new(), log);
             }
             state.quick_pending = true;
             state.a6_attacked = true;
             return step(
                 "resolved",
-                vec![json!({"kind": "攻撃", "attacker": "a6", "target": "P2.leader"})],
+                vec![json!({"kind": "攻撃", "attacker": "a6", "target": "P2.leader", "cause": d})],
+                log,
             );
         }
         if state.quick_pending && op["do"] == "pass" {
@@ -1200,52 +1363,24 @@ impl FakeAssist {
             return step(
                 "resolved",
                 vec![
-                    json!({"kind": "ダメージ", "source": "a6", "target": "P2.leader", "amount": 3}),
+                    json!({"kind": "ダメージ", "source": "a6", "target": "P2.leader", "amount": 3, "cause": d}),
                 ],
+                log,
             );
         }
         state.k += 1;
-        let events = match state.k {
-            3 => vec![
-                json!({"kind": "プレイ", "ability": {"source": "a1", "line": 2}}),
-                json!({"kind": "費用成立", "ability": {"source": "a1", "line": 2}}),
-            ],
-            4 if self.mutation == AssistMutation::ResumeEventEarly => vec![
-                json!({"kind": "公開", "object": "a3", "to": "P2", "source": "a1"}),
-                json!({"kind": "場に出す", "object": "a3", "from": "P1.deck"}),
-            ],
-            4 => vec![json!({"kind": "公開", "object": "a3", "to": "P2", "source": "a1"})],
-            5 if self.mutation == AssistMutation::ResumeEventEarly => {
-                vec![json!({"kind": "待機", "ability": {"source": "a3", "line": 2}})]
-            }
-            5 if self.mutation == AssistMutation::ResumeExtraEvent => vec![
-                json!({"kind": "場に出す", "object": "a3", "from": "P1.deck"}),
-                json!({"kind": "待機", "ability": {"source": "a3", "line": 2}}),
-                json!({"kind": "待機", "ability": {"source": "a3", "line": 2}}),
-            ],
-            5 => vec![
-                json!({"kind": "場に出す", "object": "a3", "from": "P1.deck"}),
-                json!({"kind": "待機", "ability": {"source": "a3", "line": 2}}),
-            ],
-            6 => vec![json!({"kind": "待機取消", "ability": {"source": "a3", "line": 2}})],
-            7 => {
-                state.a2_acted = true;
-                vec![json!({"kind": "攻撃", "attacker": "a2", "target": "P2.leader"})]
-            }
-            8 => {
-                state.life -= 3;
-                vec![
-                    json!({"kind": "ダメージ", "source": "a2", "target": "P2.leader", "amount": 3}),
-                ]
-            }
-            _ => Vec::new(),
-        };
+        match state.k {
+            7 => state.a2_acted = true,
+            8 => state.life -= 3,
+            _ => {}
+        }
+        let events = Self::path_events(mutation, state.k, log);
         let at = At {
             k: state.k,
             alt: false,
             lookout: false,
         };
-        step(outcome_of(&at), events)
+        step(outcome_of(&at), events, log)
     }
 
     fn record(&mut self, kind: &str, expected: &Value, actual: &Value, refs: &[&str]) {
@@ -1269,6 +1404,8 @@ impl AssistEngine for FakeAssist {
         };
         self.sandbox = fresh.clone();
         self.shadow = fresh;
+        self.sandbox_log.clear();
+        self.shadow_log.clear();
         self.divergences.clear();
         Ok(())
     }
@@ -1370,6 +1507,8 @@ impl AssistEngine for FakeAssist {
             .ok_or_else(|| adapter("unknown divergence"))?;
         match mode {
             Realign::Rewind => {
+                // The manual operation emitted no events, so each layer's log already
+                // ends before the divergence and keeps its own event ids.
                 self.sandbox = self.shadow.clone();
                 if self.mutation == AssistMutation::RewindDropsRecord {
                     self.divergences.remove(index);

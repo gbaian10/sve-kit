@@ -40,10 +40,6 @@ impl Ids {
         self.nodes.iter().any(|n| n == id)
     }
 
-    pub(super) fn knows_event(&self, id: &str) -> bool {
-        self.events.iter().any(|e| e == id)
-    }
-
     /// An id the third party never received stays as it is: folding unknown ids into
     /// one label would hide differences the paired comparisons must see.
     fn label(list: &[String], prefix: &str, id: &str) -> String {
@@ -221,6 +217,40 @@ pub(super) fn leaks(
         found.push("the seed".to_owned());
     }
     found
+}
+
+/// `knowledge.carried` as `(object, from)`; `from` is `None` when absent.
+pub(super) fn carried_from(knowledge: &Value) -> Vec<(String, Option<String>)> {
+    knowledge
+        .get("carried")
+        .and_then(Value::as_array)
+        .map(|a| {
+            a.iter()
+                .filter_map(|x| {
+                    let object = x.get("object").and_then(Value::as_str)?;
+                    let from = x.get("from").and_then(Value::as_str).map(str::to_owned);
+                    Some((object.to_owned(), from))
+                })
+                .collect()
+        })
+        .unwrap_or_default()
+}
+
+/// Replaces every `cause.decision` by one marker: assist layers have no node ids, so
+/// A3 compares only that such a cause is a decision.
+pub(super) fn mark_decisions(value: &mut Value) {
+    match value {
+        Value::Object(m) => {
+            if let Some(Value::Object(cause)) = m.get_mut("cause")
+                && let Some(d) = cause.get_mut("decision")
+            {
+                *d = Value::from("#decision");
+            }
+            m.values_mut().for_each(mark_decisions);
+        }
+        Value::Array(a) => a.iter_mut().for_each(mark_decisions),
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+    }
 }
 
 /// Objects in `knowledge` (`identifiable` and `carried`).

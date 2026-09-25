@@ -49,7 +49,9 @@ fn replay(mutation: ReplayMutation) -> Vec<CheckReport> {
 fn assist(mutation: AssistMutation) -> Vec<CheckReport> {
     let fx = fixtures();
     let mut factory = || -> Box<dyn AssistEngine> { Box::new(FakeAssist::new(mutation)) };
-    check_assist(&mut factory, &fx, &options())
+    let mut baseline =
+        || -> Box<dyn ReplayEngine> { Box::new(FakeReplay::new(ReplayMutation::None)) };
+    check_assist(&mut factory, &mut baseline, &fx, &options())
 }
 
 fn outcome<'rep>(reports: &'rep [CheckReport], id: &str) -> &'rep Outcome {
@@ -65,6 +67,8 @@ fn a_correct_replay_skeleton_passes_every_check() {
     }
 }
 
+/// The two layers issue different event ids; each refers back to its own P2 events
+/// (the cost of P3 names the pending trigger of P2), and A3 still matches the replay.
 #[test]
 fn a_correct_assist_skeleton_passes_every_check() {
     let reports = assist(AssistMutation::None);
@@ -224,7 +228,15 @@ fn engine_errors_are_reported_apart_from_failures() {
         let reports = check_replay(&mut replay_factory, &fx, &options());
         let reports = reports
             .iter()
-            .chain(check_assist(&mut assist_factory, &fx, &options()).iter())
+            .chain(
+                check_assist(
+                    &mut assist_factory,
+                    &mut || -> Box<dyn ReplayEngine> { Box::new(Refusing(error.clone())) },
+                    &fx,
+                    &options(),
+                )
+                .iter(),
+            )
             .cloned()
             .collect::<Vec<_>>();
         assert_eq!(reports.len(), 15);

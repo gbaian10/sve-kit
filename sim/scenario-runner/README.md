@@ -130,7 +130,7 @@ let mut assist = || -> Box<dyn AssistEngine> { Box::new(MyAssistAdapter::new()) 
 let options = ArchOptions::default(); // plus the approved id and skip paths, see below
 for report in check_replay(&mut replay, &fixtures, &options)
     .into_iter()
-    .chain(check_assist(&mut assist, &fixtures, &options))
+    .chain(check_assist(&mut assist, &mut replay, &fixtures, &options))
 {
     println!("{} {:?}", report.id, report.outcome);
 }
@@ -146,7 +146,7 @@ for report in check_replay(&mut replay, &fixtures, &options)
 | R4 | Undo carries seen identities for both players, is not a decision, is logged, and keeps the original line playable |
 | R5 | No hidden id, hidden card number or seed in any player output (projection, awaiting, knowledge, export); paired positions give equal player exports (hidden card, deck order, shuffle result, also on the replay branch: a carried identity is not a carried position) |
 | R6 | Events trace their `cause` back to the deciding node through the ability |
-| A1–A3 | A skipped trigger is recorded as a divergence, automation halts, Rewind realigns and play continues; after Rewind each step is compared on its own, in both layers, with the fixed assertions at the nodes it reaches |
+| A1–A3 | A skipped trigger is recorded as a divergence, automation halts, Rewind realigns and play continues; after Rewind each step, in each layer, has the outcome and the events (causes included) of the same step played by the design's own replay engine, and the fixed assertions hold at the nodes it reaches |
 | A4 | Adopt keeps the pending trigger |
 | B1–B3 | A manual value override is recorded; Rewind and Adopt give different, correct follow-ups |
 
@@ -155,12 +155,16 @@ Each result is `pass`, `fail` (with reasons), `unsupported` or `adapter-error`, 
 ### Adapter contract for `arch`
 
 - `advance` returns `None` when it refuses (it must, while a divergence is unresolved)
+- `knowledge.carried` entries are `{object, from}`; `from` is a node of the source line where
+  that player could identify the object
 - `admin_log` entries carry `kind: undo` or `kind: branch`
 - `query` must answer the six board paths R4 compares (`P1/P2.hand_count`, `deck_count`, `field`); a missing answer fails R4
 - Events carry `id` and `cause`: `{event: <id>}`, `{decision: <node id>}` or `{rule: "<clause>"}`
 - Divergences are `{id, kind, expected, actual, refs, resolved}`; only `resolved` may change
-- Node and event ids may be random; paired comparisons relabel them by the order the checks
-  received them. An id the checks never received keeps its raw value, so it is never
+- Node and event ids may be random but are immutable: a restored game keeps the ids of
+  events it had before the save, and each assist layer keeps the ids of the events it
+  returned (Rewind and Adopt do not rename them). Paired comparisons relabel ids by the
+  order the checks received them. An id the checks never received keeps its raw value, so it is never
   folded together with another one. Node ids inside player payloads are only relabelled at paths listed in
   `ArchOptions::node_id_paths`; other engine identifiers (transport counters and the like)
   go in `ArchOptions::skip_paths`. **Both lists are approved by the third party before the
@@ -169,20 +173,21 @@ Each result is `pass`, `fail` (with reasons), `unsupported` or `adapter-error`, 
 ### Tests of the checks
 
 `tests/arch.rs` runs scripted engines (`tests/arch_support/`): a correct skeleton that
-passes every assertion, and 45 broken skeletons (32 replay, 13 assist), each caught by the
+passes every assertion, and 52 broken skeletons (36 replay, 16 assist), each caught by the
 assertion meant for it. Some of them:
 
 | Mutation | Caught by |
 | --- | --- |
-| Save keeps the board but not the seed; saving consumes randomness; the restored copy drops or miswires an event | R1 |
+| Save keeps the board but not the seed; saving consumes randomness; the restored copy drops or miswires an event, names an event that never existed, or reports the shuffled deck the other way round | R1 |
 | Branch shares mutable state with its source; branching touches the source line; ids reused across branches | R3 |
 | Constant digest | R0 |
 | Digest without carried knowledge | R2b, R4 |
 | Replay branch does not carry what P1 saw, hands P2 more, or forgets after the shuffle | R2b |
+| Carried identities name the wrong node, or one that does not exist, as where they were seen | R2b, R4 |
 | Undo forgets what was seen / the opponent's side, deletes or rewrites the original line; board queries unanswered | R4 |
 | Export leaks the seed, the shuffled order (also on a replay branch), the opponent's hidden cards, the deck before the search (ids or a hash of the order); knowledge carries a hidden card; a never-issued id encodes the top card | R5 |
 | Broken `cause` link | R6 |
-| After Rewind a card enters a step early, or a trigger fires twice | A3 |
+| After Rewind a card enters a step early, a trigger fires twice, a cause is wrong or missing, or an extra kind of event appears (both layers alike) | A3 |
 | Rewind drops or rewrites the divergence | A3, B2 |
 | Automation advances while diverged | A2 |
 | Adopt ignored / Adopt clears the pending trigger | A4, B3 / A4 |
@@ -191,7 +196,7 @@ assertion meant for it. Some of them:
 
 The shared AI positions of phase D live in [`tests/ai-positions/`](../../tests/ai-positions/)
 (see its README for the file format, budget and horizon). An AI prototype is wrapped in
-`ai::AiEngine`: `load`, `decide`, `legal`, `projection`, `query` and `think`.
+`ai::AiEngine`: `load`, `decide`, `legal`, `projection`, `query`, `awaiting` and `think`.
 
 ```rust
 use sve_scenario_runner::ai::{check_ai, load_positions};
@@ -202,14 +207,17 @@ let reports = check_ai(&mut factory, &positions, "my-design/profiles.yaml".as_re
 ```
 
 - Every check starts from a freshly loaded instance; branches replay their parent's decisions, then their own, with the parent's `random` followed by theirs
+- Before each submitted decision, `awaiting` must report that decision's `by` and `at`; each decision's outcome must equal the position's `outcomes`; where a legal set is compared, `awaiting` must equal the check's `awaiting`
 - `load` gets the position's `room` as `setup.room`, and the seed `ai::LOAD_SEED`
 - Legal sets compare as multisets; lists of chosen targets and selected objects compare as sets
 - Every `think` must return a legal decision within its budget
-- Hard checks report `pass` or `fail`; Q3 and R4 are `diagnostic` only (the AI's self-reported trace, and whether the choice after the reveal changed)
-- Q4 (search evidence) and P3 (profile weights) are audits at hand-in. `ai::check_search_log` runs the Q4 check on an engine-written search log
+- Hard checks report `pass` or `fail`. Q3 and R4 are `diagnostic` only, produced after every `think` has run: Q3 lists the Quick cards (`quick_cards`) the self-reported trace plays at a P2 Quick point; R4 is one report per pair with both choices, candidates and scores
+- Q4 (search evidence) and P3 (profile weights) are audits at hand-in. `ai::check_search_log(log, report, budget, position)` is the **machine-checkable part of Q4**: tree shape per sample, the assumed hand of each sample, a Quick card from that hand that P2 can pay for, and the edge count. That the log is written by the engine, and that samples come from P1's view only, stays a manual audit
+
+`tests/ai_rules.rs` runs H2, Q1b and R2 against hand-written rules for their few cards, independent of the positions' legal sets, and checks the controlled shuffles of H2.
 
 `tests/ai.rs` validates the checks with a scripted AI: it passes every hard check, and
-each of twelve broken behaviours is caught by the check meant for it (incomplete or
+each of fifteen broken behaviours is caught by the check meant for it (incomplete or
 padded legal sets, stale choices, illegal decisions, peeking at the hidden hand or deck
 order, leaking revealed cards, profiles reversed or ignored, `think` changing the
-position, a missing public deck list, a leaked hand).
+position, a missing public deck list, a leaked hand, a wrong outcome, an early game end, a wrong input point).

@@ -11,7 +11,7 @@ use super::{
     Branch, Check, LOAD_SEED, ProfileEntry, Think,
 };
 use crate::compare;
-use crate::engine::{EngineError, Step, View};
+use crate::engine::{EngineError, View};
 use crate::inherit::Fixture;
 use crate::model::from_yaml;
 use crate::runner::card_numbers;
@@ -41,7 +41,10 @@ pub fn check_ai(
         for check in &position.checks {
             out.extend(ctx.run_check(factory, check, &mut cache));
         }
-        out.extend(ctx.diagnostics(&cache));
+    }
+    // Pair diagnostics need both positions' think calls, so they come last.
+    for (stem, position) in &positions.0 {
+        out.extend(diagnostics(stem, position, &cache));
     }
     out
 }
@@ -173,33 +176,79 @@ fn same_set(expected: &[Value], actual: &[Value]) -> Vec<String> {
     reasons
 }
 
-fn engine_fail(step: &Step, decision: &Value) -> Option<String> {
-    step.outcome
-        .starts_with("cannot")
-        .then(|| format!("decision {decision} was rejected: {}", step.outcome))
+/// Decisions to submit, with the outcome each must produce.
+#[derive(Debug, Clone, Default)]
+struct Steps {
+    decisions: Vec<Value>,
+    outcomes: Vec<String>,
 }
 
-/// Loads a fresh instance and submits `decisions` with `random`.
+impl Steps {
+    fn then(&self, decisions: &[Value], outcomes: &[String]) -> Self {
+        let mut out = self.clone();
+        out.decisions.extend(decisions.iter().cloned());
+        out.outcomes.extend(outcomes.iter().cloned());
+        out
+    }
+}
+
+/// Whether the engine waits for `want`'s `by` and `at`.
+fn input_point(engine: &dyn AiEngine, want: &Value, label: &str) -> Checked {
+    let got = engine.awaiting()?;
+    let same = |field: &str| got.as_ref().and_then(|g| g.get(field)) == want.get(field);
+    Ok(if same("by") && same("at") {
+        Vec::new()
+    } else {
+        vec![format!(
+            "{label}: the engine waits at {}, expected by {} at {}",
+            got.map_or_else(|| "game end".to_owned(), |g| g.to_string()),
+            want.get("by").unwrap_or(&Value::Null),
+            want.get("at").unwrap_or(&Value::Null)
+        )]
+    })
+}
+
+/// Loads a fresh instance and submits the path with `random`: before each decision the
+/// engine must wait for that decision's player and point, and each outcome must match.
 fn at(
     factory: &mut AiFactory<'_>,
     position: &AiPosition,
-    decisions: &[Value],
+    path: &Steps,
     random: &Value,
 ) -> Result<(Box<dyn AiEngine>, Vec<String>), EngineError> {
     let mut engine = factory();
     engine.load(&fixture(position, random.clone()), LOAD_SEED)?;
     let mut reasons = Vec::new();
-    for decision in decisions {
+    if path.outcomes.len() != path.decisions.len() {
+        reasons.push(format!(
+            "fixture: {} decisions but {} outcomes",
+            path.decisions.len(),
+            path.outcomes.len()
+        ));
+    }
+    for (i, decision) in path.decisions.iter().enumerate() {
+        reasons.extend(input_point(
+            engine.as_ref(),
+            decision,
+            &format!("before {decision}"),
+        )?);
         let step = engine.decide(decision)?;
-        reasons.extend(engine_fail(&step, decision));
+        if let Some(want) = path.outcomes.get(i)
+            && &step.outcome != want
+        {
+            reasons.push(format!(
+                "decision {decision} gave {}, expected {want}",
+                step.outcome
+            ));
+        }
     }
     Ok((engine, reasons))
 }
 
-fn before_of(position: &AiPosition, check: &Check) -> Vec<Value> {
+fn before_of(position: &AiPosition, check: &Check) -> Steps {
     match check.before() {
-        None => Vec::new(),
-        Some(Before::Decisions(list)) => list,
+        None => Steps::default(),
+        Some(Before::Decisions(list)) => Steps::default().then(&list, &check.outcomes),
         Some(Before::Ref(id)) => position
             .checks
             .iter()
@@ -207,6 +256,23 @@ fn before_of(position: &AiPosition, check: &Check) -> Vec<Value> {
             .map(|c| before_of(position, c))
             .unwrap_or_default(),
     }
+}
+
+/// The input point and legal set where a check or branch compares them.
+fn legal_here(
+    engine: &dyn AiEngine,
+    awaiting: Option<&Value>,
+    want: Option<&Vec<Value>>,
+) -> Checked {
+    let Some(want) = want else {
+        return Ok(Vec::new());
+    };
+    let mut reasons = match awaiting {
+        Some(point) => input_point(engine, point, "legal set")?,
+        None => vec!["fixture: legal_exact without awaiting".to_owned()],
+    };
+    reasons.extend(same_set(want, &engine.legal()?));
+    Ok(reasons)
 }
 
 /// Calls `think`; the decision must be legal here and within the budget.
@@ -285,9 +351,11 @@ impl Ctx<'_> {
     ) -> Checked {
         let before = before_of(self.position, check);
         let (mut engine, mut reasons) = at(factory, self.position, &before, &self.position.random)?;
-        if let Some(want) = &check.legal_exact {
-            reasons.extend(same_set(want, &engine.legal()?));
-        }
+        reasons.extend(legal_here(
+            engine.as_ref(),
+            check.awaiting.as_ref(),
+            check.legal_exact.as_ref(),
+        )?);
         for branch in &check.branches {
             reasons.extend(self.branch(factory, &before, &self.position.random, branch)?);
         }
@@ -329,27 +397,24 @@ impl Ctx<'_> {
     fn branch(
         &self,
         factory: &mut AiFactory<'_>,
-        parent: &[Value],
+        parent: &Steps,
         parent_random: &Value,
         branch: &Branch,
     ) -> Checked {
-        let mut decisions = parent.to_vec();
-        decisions.extend(branch.before.iter().cloned());
+        let path = parent.then(&branch.before, &branch.outcomes);
         let random = merge_random(parent_random, branch.random.as_ref());
-        let (engine, found) = at(factory, self.position, &decisions, &random)?;
-        let mut reasons: Vec<String> = found
+        let (engine, mut reasons) = at(factory, self.position, &path, &random)?;
+        reasons.extend(legal_here(
+            engine.as_ref(),
+            branch.awaiting.as_ref(),
+            branch.legal_exact.as_ref(),
+        )?);
+        let mut reasons: Vec<String> = reasons
             .into_iter()
             .map(|r| format!("{}: {r}", branch.name))
             .collect();
-        if let Some(want) = &branch.legal_exact {
-            reasons.extend(
-                same_set(want, &engine.legal()?)
-                    .into_iter()
-                    .map(|r| format!("{}: {r}", branch.name)),
-            );
-        }
         for child in &branch.branches {
-            reasons.extend(self.branch(factory, &decisions, &random, child)?);
+            reasons.extend(self.branch(factory, &path, &random, child)?);
         }
         Ok(reasons)
     }
@@ -425,46 +490,69 @@ impl Ctx<'_> {
             Err(e) => (Err(e.clone()), Err(e)),
         }
     }
+}
 
-    fn diagnostics(&self, cache: &BTreeMap<(String, String), AiReport>) -> Vec<AiCheckReport> {
-        let id = self.position.id.as_str();
-        let mut out = Vec::new();
-        if let Some(q2) = cache.get(&(self.stem.to_owned(), "Q2".to_owned())) {
-            let found = q2.trace.iter().any(|node| {
+/// Q3 (the self-reported trace names a Quick card of P2 at a Quick point) and R4 (the
+/// choice after the reveal, once per pair).
+fn diagnostics(
+    stem: &str,
+    position: &AiPosition,
+    cache: &BTreeMap<(String, String), AiReport>,
+) -> Vec<AiCheckReport> {
+    let id = position.id.as_str();
+    let mut out = Vec::new();
+    if let Some(q2) = cache.get(&(stem.to_owned(), "Q2".to_owned())) {
+        let numbers = card_numbers(&position.setup);
+        let quick: Vec<&str> = position
+            .quick_cards
+            .iter()
+            .map(|q| q.card.as_str())
+            .collect();
+        let mut found: Vec<String> = q2
+            .trace
+            .iter()
+            .filter(|node| {
                 node.get("by").and_then(Value::as_str) == Some("P2")
                     && node.get("at").and_then(Value::as_str) == Some("quick")
-                    && node
-                        .get("options")
-                        .and_then(Value::as_array)
-                        .is_some_and(|o| {
-                            o.iter()
-                                .any(|d| d.get("do").and_then(Value::as_str) == Some("play"))
-                        })
-            });
-            out.push(diagnostic(
-                id,
-                "Q3",
-                vec![format!("self-reported trace has a P2 Quick play: {found}")],
-            ));
-        }
-        if let (Some(pair), Some(mine)) = (
-            self.position.pair.as_deref(),
-            cache.get(&(self.stem.to_owned(), "R2".to_owned())),
-        ) && let Some(theirs) = cache.get(&(pair.to_owned(), "R2".to_owned()))
-        {
-            out.push(diagnostic(
-                id,
-                "R4",
-                vec![format!(
-                    "choice after the reveal: {} here, {} in {pair}; candidates differ: {}",
-                    mine.decision,
-                    theirs.decision,
-                    mine.candidates != theirs.candidates
-                )],
-            ));
-        }
-        out
+            })
+            .filter_map(|node| node.get("options").and_then(Value::as_array))
+            .flatten()
+            .filter(|d| d.get("do").and_then(Value::as_str) == Some("play"))
+            .filter_map(|d| d.get("card").and_then(Value::as_str))
+            .map(|card| numbers.get(card).map_or(card, String::as_str))
+            .filter(|number| quick.contains(number))
+            .map(ToOwned::to_owned)
+            .collect();
+        found.sort();
+        found.dedup();
+        out.push(diagnostic(
+            id,
+            "Q3",
+            vec![format!(
+                "self-reported trace: P2 Quick plays at quick: {found:?}"
+            )],
+        ));
     }
+    if let Some(pair) = position.pair.as_deref()
+        && stem < pair
+        && let (Some(mine), Some(theirs)) = (
+            cache.get(&(stem.to_owned(), "R2".to_owned())),
+            cache.get(&(pair.to_owned(), "R2".to_owned())),
+        )
+    {
+        let line = |name: &str, r: &AiReport| {
+            format!(
+                "{name}: chose {}; candidates {:?}",
+                r.decision, r.candidates
+            )
+        };
+        out.push(diagnostic(
+            id,
+            "R4",
+            vec![line(stem, mine), line(pair, theirs)],
+        ));
+    }
+    out
 }
 
 fn public_numbers(setup: &Value) -> Vec<String> {

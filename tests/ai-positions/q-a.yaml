@@ -86,6 +86,9 @@ setup:
           - {id: d39, card: BP01-180}
         cemetery: []
 random: {}
+quick_cards:
+  - {card: BP01-179, cost: 1}    # エンジェルスナイプ
+  - {card: BP01-180, cost: 1}    # エンジェルバレッジ
 pair: q-b
 checks:
   - id: Q0
@@ -97,6 +100,7 @@ checks:
     equals_setup: P2.deck_list
   - id: Q1
     at: root
+    awaiting: {by: P1, at: main}
     legal_exact:
       - {do: end-phase}
       - {do: attack, attacker: a1, target: P2.leader}
@@ -104,6 +108,8 @@ checks:
   - id: Q1b
     before:
       - {n: 1, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+    outcomes: [resolved]
+    awaiting: {by: P2, at: quick}
     legal_exact:
       - {do: pass}
       - {do: play, card: h1, targets: {1: [a1]}}

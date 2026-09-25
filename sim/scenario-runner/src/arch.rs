@@ -435,12 +435,9 @@ pub struct AssistSpec {
     pub pending: Value,
     /// One of these must be in the divergence's `refs`.
     pub refs_any: Vec<String>,
-    /// Event kinds compared exactly, step by step, after Rewind.
-    pub resume_kinds: Vec<String>,
-    /// Path P steps 3–6 after Rewind: outcome and events of each step.
-    pub resume_steps: Vec<ResumeStep>,
-    /// State after them.
-    pub resume_field: Map<String, Value>,
+    /// A3 continues path P after Rewind up to this node. Each step is compared with the
+    /// same step of path P played by the design's own replay engine.
+    pub resume_to: usize,
     /// An attack legal only without a pending trigger.
     pub other_attack: Value,
     /// The opponent's pass after it.
@@ -461,15 +458,6 @@ pub struct AssistSpec {
     pub life_after_rewind: i64,
     /// Value after Adopt and one more attack.
     pub life_after_adopt: i64,
-}
-
-/// One step of A3.
-#[derive(Debug, Clone, Deserialize)]
-pub struct ResumeStep {
-    /// Expected outcome in both layers.
-    pub outcome: String,
-    /// Expected events; restricted to `resume_kinds` they must match exactly.
-    pub events: Vec<Value>,
 }
 
 /// Loads `positions.yaml` and `checks.yaml` from a directory.

@@ -71,6 +71,12 @@ pub trait AiEngine {
     /// # Errors
     /// When the state cannot be read.
     fn query(&self, view: View, path: &str) -> Result<Option<Value>, EngineError>;
+    /// The current input point as `{by, at}` (contract section 4), or `None` when the
+    /// game has ended.
+    ///
+    /// # Errors
+    /// When the state cannot be read.
+    fn awaiting(&self) -> Result<Option<Value>, EngineError>;
     /// Lets the AI in `seat` pick a decision; must not change the current position.
     ///
     /// # Errors
@@ -143,8 +149,20 @@ pub struct AiPosition {
     /// File stem of the paired position.
     #[serde(default)]
     pub pair: Option<String>,
+    /// P2's Quick cards and their cost, for the Q4 audit.
+    #[serde(default)]
+    pub quick_cards: Vec<QuickCard>,
     /// The checks.
     pub checks: Vec<Check>,
+}
+
+/// A Quick card of the public deck list.
+#[derive(Debug, Clone, Deserialize)]
+pub struct QuickCard {
+    /// Card number.
+    pub card: String,
+    /// Play cost in PP.
+    pub cost: u64,
 }
 
 /// Decisions to submit first, or the id of a check whose `before` to reuse.
@@ -198,6 +216,12 @@ pub struct Branch {
     /// Controlled randomness applied after the parent's.
     #[serde(default)]
     pub random: Option<Value>,
+    /// Expected outcome of each of this branch's own `before` decisions.
+    #[serde(default)]
+    pub outcomes: Vec<String>,
+    /// `{by, at}` of the input point where `legal_exact` is compared.
+    #[serde(default)]
+    pub awaiting: Option<Value>,
     /// The legal set at this point.
     #[serde(default)]
     pub legal_exact: Option<Vec<Value>>,
@@ -220,6 +244,12 @@ pub struct Check {
     /// Branches continuing from this check's state.
     #[serde(default)]
     pub branches: Vec<Branch>,
+    /// Expected outcome of each `before` decision (taken from the referenced check for a reference).
+    #[serde(default)]
+    pub outcomes: Vec<String>,
+    /// `{by, at}` of the input point where `legal_exact` is compared.
+    #[serde(default)]
+    pub awaiting: Option<Value>,
     /// The legal set equals this list.
     #[serde(default)]
     pub legal_exact: Option<Vec<Value>>,

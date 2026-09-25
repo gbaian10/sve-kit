@@ -33,6 +33,7 @@ random: {}
 checks:
   - id: P-legal
     at: root
+    awaiting: {by: P1, at: main}
     legal_exact:
       - {do: end-phase}
       - {do: attack, attacker: a1, target: P2.leader}

@@ -87,8 +87,17 @@ fn a_correct_ai_passes_every_hard_check() {
         .filter(|r| !matches!(r.outcome, AiOutcome::Pass | AiOutcome::Diagnostic { .. }))
         .collect();
     assert!(bad.is_empty(), "{bad:#?}");
-    assert!(notes(&reports, "ai-q-a", "Q3").contains("false"));
-    assert!(notes(&reports, "ai-r-b", "R4").contains("candidates differ: true"));
+    assert!(notes(&reports, "ai-q-a", "Q3").contains("[]"));
+    assert_eq!(
+        reports.iter().filter(|r| r.id == "R4").count(),
+        1,
+        "one R4 report per pair"
+    );
+    let pair = notes(&reports, "ai-r-a", "R4");
+    assert!(
+        pair.contains("r-a: chose") && pair.contains("r-b: chose"),
+        "{pair}"
+    );
     let ids: Vec<&str> = reports.iter().map(|r| r.id.as_str()).collect();
     for id in [
         "P0", "H1", "H2", "H3", "Q0", "Q0b", "Q1", "Q1b", "Q2", "Q3", "R0", "R1", "R2", "R3", "R4",
@@ -117,6 +126,15 @@ fn every_broken_ai_is_caught_by_its_check() {
         (Mutation::ThinkMutates, &["ai-p/P2"]),
         (Mutation::NoDeckList, &["ai-q-a/Q0b", "ai-q-b/Q0b"]),
         (Mutation::LeakHand, &["ai-q-a/Q0", "ai-q-b/Q0"]),
+        (
+            Mutation::AlwaysResolved,
+            &["ai-h/H2", "ai-r-a/R2", "ai-r-b/R2"],
+        ),
+        (Mutation::GameEnd, &["ai-h/H2", "ai-q-a/Q1b", "ai-r-a/R2"]),
+        (
+            Mutation::WrongPoint,
+            &["ai-h/H2", "ai-q-b/Q1b", "ai-r-b/R2"],
+        ),
     ];
     assert_eq!(expected.len(), MUTATIONS.len());
     let good = profiles("mut", GOOD_PROFILES);
@@ -175,9 +193,16 @@ fn engine_errors_are_reported_apart_from_failures() {
 
 // --- Q4: the search-log audit ---
 
-fn edge(edge: u64, parent: Option<u64>, sample: u64, by: &str, rule: &str, what: &str) -> Value {
+fn edge(
+    edge: u64,
+    parent: Option<u64>,
+    sample: u64,
+    by: &str,
+    rule: &str,
+    decision: &Value,
+) -> Value {
     json!({"edge": edge, "parent": parent, "sample": sample, "by": by, "at": "quick",
-           "rule": rule, "decision": {"do": what}})
+           "rule": rule, "decision": decision})
 }
 
 fn report(edges: u64) -> AiReport {
@@ -191,56 +216,136 @@ fn report(edges: u64) -> AiReport {
     }
 }
 
+/// Sample 0 assumes P2 holds エンジェルスナイプ and answers the attack with it;
+/// sample 1 assumes a ファイター and ends the turn.
 fn good_log() -> Vec<Value> {
+    let mut root0 = edge(
+        1,
+        None,
+        0,
+        "P1",
+        "7.3",
+        &json!({"do": "attack", "attacker": "a1"}),
+    );
+    root0["sample_hand"] = json!([{"id": "s0-h", "card": "BP01-179"}]);
+    let mut root1 = edge(3, None, 1, "P1", "7.3", &json!({"do": "end-phase"}));
+    root1["sample_hand"] = json!([{"id": "s1-h", "card": "BP01-173"}]);
     vec![
-        edge(1, None, 0, "P1", "7.3", "attack"),
-        edge(2, Some(1), 0, "P2", "8.4.7", "play"),
-        edge(3, None, 1, "P1", "7.3", "end-phase"),
+        root0,
+        edge(
+            2,
+            Some(1),
+            0,
+            "P2",
+            "8.4.7",
+            &json!({"do": "play", "card": "s0-h", "targets": {"1": ["a1"]}}),
+        ),
+        root1,
     ]
 }
 
+fn q(stem: &str) -> sve_scenario_runner::ai::AiPosition {
+    positions().0.remove(stem).unwrap()
+}
+
+fn log_ok(log: &[Value], edges: u64, budget: u64, stem: &str) -> bool {
+    check_search_log(log, &report(edges), budget, &q(stem)).is_empty()
+}
+
 #[test]
-fn a_tree_log_with_a_quick_answer_passes() {
-    assert!(check_search_log(&good_log(), &report(3), 5000).is_empty());
-    // Ids may be strings too.
+fn a_tree_log_with_a_sampled_quick_answer_passes() {
+    // The same log passes in both variants: in q-b the real hand has no Quick card.
+    assert!(log_ok(&good_log(), 3, 5000, "q-a"));
+    assert!(log_ok(&good_log(), 3, 5000, "q-b"));
+    assert!(log_ok(&good_log(), 3, 3, "q-b"));
     let mut named = good_log();
     named[0]["edge"] = json!("root");
     named[1]["parent"] = json!("root");
-    assert!(check_search_log(&named, &report(3), 5000).is_empty());
+    assert!(log_ok(&named, 3, 5000, "q-b"));
 }
 
 #[test]
 fn search_logs_that_prove_nothing_fail() {
-    // A flat log: the Quick play hangs off nothing.
+    let fails = |log: &[Value]| !log_ok(log, 3, 5000, "q-b");
     let mut flat = good_log();
     flat[1]["parent"] = Value::Null;
-    assert!(!check_search_log(&flat, &report(3), 5000).is_empty());
-    // The sample switches along the path.
+    assert!(fails(&flat), "a flat log");
     let mut switched = good_log();
     switched[1]["sample"] = json!(1);
-    assert!(!check_search_log(&switched, &report(3), 5000).is_empty());
-    // The count disagrees with the report, or exceeds the budget.
-    assert!(!check_search_log(&good_log(), &report(4), 5000).is_empty());
-    assert!(!check_search_log(&good_log(), &report(3), 2).is_empty());
-    assert!(check_search_log(&good_log(), &report(3), 3).is_empty());
-    // Only the end-phase Quick (7.4.5).
+    assert!(fails(&switched), "the sample switches along the path");
+    // Even when the other sample could also have played it.
+    let mut both = switched.clone();
+    both[2]["sample_hand"] = json!([{"id": "s0-h", "card": "BP01-179"}]);
+    assert!(
+        fails(&both),
+        "the sample switches, both hands hold the card"
+    );
+    let mut unsampled = good_log();
+    for entry in &mut unsampled {
+        entry.as_object_mut().unwrap().remove("sample");
+    }
+    assert!(fails(&unsampled), "no sample field");
+    assert!(
+        !log_ok(&good_log(), 4, 5000, "q-b"),
+        "count differs from the report"
+    );
+    assert!(!log_ok(&good_log(), 3, 2, "q-b"), "over budget");
     let mut end = good_log();
     end[1]["rule"] = json!("7.4.5");
-    assert!(!check_search_log(&end, &report(3), 5000).is_empty());
-    // A parent that comes later, a repeated edge, an edge without id.
+    assert!(fails(&end), "only the end-phase Quick");
     let mut later = good_log();
     later.swap(0, 1);
-    assert!(!check_search_log(&later, &report(3), 5000).is_empty());
+    assert!(fails(&later), "parent after child");
     let mut twice = good_log();
     twice[2]["edge"] = json!(1);
-    assert!(!check_search_log(&twice, &report(3), 5000).is_empty());
+    assert!(fails(&twice), "repeated edge");
     let mut unnamed = good_log();
     unnamed[2]["edge"] = Value::Null;
-    assert!(!check_search_log(&unnamed, &report(3), 5000).is_empty());
-    // The root is not a P1 attack.
+    assert!(fails(&unnamed), "edge without id");
     let mut rooted = good_log();
     rooted[0]["decision"] = json!({"do": "end-phase"});
-    assert!(!check_search_log(&rooted, &report(3), 5000).is_empty());
+    assert!(fails(&rooted), "root is not an attack");
+}
+
+#[test]
+fn the_quick_answer_must_come_from_the_samples_hand() {
+    let fails = |log: &[Value]| !log_ok(log, 3, 5000, "q-b");
+    let mut not_quick = good_log();
+    not_quick[0]["sample_hand"] = json!([{"id": "s0-h", "card": "BP01-173"}]);
+    assert!(fails(&not_quick), "a ファイター is not a Quick card");
+    let mut elsewhere = good_log();
+    elsewhere[1]["decision"]["card"] = json!("h1");
+    assert!(
+        fails(&elsewhere),
+        "the played card is not in the sample's hand"
+    );
+    let mut no_hand = good_log();
+    no_hand[0].as_object_mut().unwrap().remove("sample_hand");
+    assert!(fails(&no_hand), "a root without sample_hand");
+    let mut two_hands = good_log();
+    let mut extra = edge(4, None, 0, "P1", "7.3", &json!({"do": "end-phase"}));
+    extra["sample_hand"] = json!([{"id": "x", "card": "BP01-173"}]);
+    two_hands.push(extra);
+    assert!(!log_ok(&two_hands, 4, 5000, "q-b"), "one sample, two hands");
+    let mut same_hand = good_log();
+    let mut again = edge(4, None, 0, "P1", "7.3", &json!({"do": "end-phase"}));
+    again["sample_hand"] = same_hand[0]["sample_hand"].clone();
+    same_hand.push(again);
+    assert!(
+        log_ok(&same_hand, 4, 5000, "q-b"),
+        "roots of one sample agreeing"
+    );
+    let mut big = good_log();
+    big[0]["sample_hand"] =
+        json!([{"id": "s0-h", "card": "BP01-179"}, {"id": "z", "card": "BP01-173"}]);
+    assert!(fails(&big), "hand size differs from P2's");
+    let mut unlisted = good_log();
+    unlisted[2]["sample_hand"] = json!([{"id": "s1-h", "card": "BP99-999"}]);
+    assert!(fails(&unlisted), "a card outside the public deck list");
+    // Without PP the Quick cannot be paid for.
+    let mut poor = q("q-b");
+    poor.setup["players"]["P2"]["pp"]["current"] = json!(0);
+    assert!(!check_search_log(&good_log(), &report(3), 5000, &poor).is_empty());
 }
 
 #[test]
@@ -270,8 +375,8 @@ fn rejected_decisions_fail_the_check_that_submits_them() {
 #[test]
 fn the_quick_diagnostic_needs_p2_quick_and_a_play() {
     let good = profiles("trace", GOOD_PROFILES);
-    assert!(notes(&run(Mutation::TraceQuick, &good), "ai-q-a", "Q3").contains("true"));
-    assert!(notes(&run(Mutation::TracePartial, &good), "ai-q-a", "Q3").contains("false"));
+    assert!(notes(&run(Mutation::TraceQuick, &good), "ai-q-a", "Q3").contains("BP01-179"));
+    assert!(notes(&run(Mutation::TracePartial, &good), "ai-q-a", "Q3").contains("[]"));
 }
 
 #[test]
