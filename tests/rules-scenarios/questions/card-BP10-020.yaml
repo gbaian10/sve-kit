@@ -20,9 +20,12 @@ evidence:
     quote: いいえ。1回目のサイコロで相手のリーダーの体力が0になった場合でも、その時点でバトルに勝利することはなく、もう1回サイコロをふります。『《暴走》する戦車・オルオーン』の能力の解決が終わった後のチェックタイミングの際に、自身のリーダーの体力が0以下のプレイヤーはバトルに敗北します。
   - ref: Q1277
     quote: いいえ。相手のリーダーや相手のフォロワーを攻撃することはできません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:85〈全部改動局面的核對索引〉；B／C：xverify-1/result.md:97〈其他驗過的題目〉（Q1278、Q1277）
 
 scenarios:
   - name: A 骰 3 → 7 傷害使對手歸 0；再骰 1 → 全體破壞；之後檢查時點才敗北

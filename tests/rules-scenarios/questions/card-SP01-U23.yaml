@@ -28,9 +28,12 @@ evidence:
     quote: 特定条件に枚数以外の条件がある場合、それを見つけた後に、そのカードが条件を満たすことを相手に示します。
     derivation:
       - 條件含「元のコスト1の信仰・フォロワー」→ 可以找不到（4.1.2.2）
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-2/final.md:10〈追加修正最後確認〉；B：xverify-1/result.md:113〈其他驗過的題目〉（5.8、10.4.7.1、Q1611、Q1614）
 
 scenarios:
   - name: A 先 +4 再打出 → 破壞目標並抽 1 張

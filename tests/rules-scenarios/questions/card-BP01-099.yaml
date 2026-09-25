@@ -20,9 +20,12 @@ evidence:
     quote: ‘【覚醒】状態’とは‘あなたの現在の PP 最大値が 7 以上’を意味します。
   - ref: Q107
     quote: いいえ。【覚醒】の条件を満たしているとき、このスペルはフォロワーすべてに3ダメージ与えます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:88〈其他驗過的題目〉（13.4.1.2、Q107、Q109）
 
 scenarios:
   - name: A PP 最大值 7（目前 PP 3）→ 覚醒 → 全場 3 傷害

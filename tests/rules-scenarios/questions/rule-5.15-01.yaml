@@ -30,9 +30,12 @@ evidence:
     quote: "あるプレイヤーの現在の PP の値がそのプレイ\nヤーの PP 最大値を超えている場合、そのプレイ\nヤーの PP はその PP 最大値になります。"
     derivation:
       - 只數 EX 完全同名薔薇の一撃；PP 回復不能超過最大值。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.15.1.1、Q147；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 薔薇 1
     setup:

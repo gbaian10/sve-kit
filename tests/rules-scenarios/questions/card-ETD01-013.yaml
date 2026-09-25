@@ -34,9 +34,12 @@ evidence:
     quote: "カードを‘捨てる’指示がある場合、指定のプレイ\nヤーは自分の手札のカードを指定枚数選択し、それ\nを自分の墓場に移動します。"
     derivation:
       - 先抽牌，再由目前手牌選捨棄；捨棄觸發等原入場曲結束後才處理。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.6.2.8.2、10.7.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 捨棄 h
     setup:

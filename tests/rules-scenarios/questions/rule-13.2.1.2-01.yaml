@@ -27,9 +27,12 @@ evidence:
     quote: このプレイしていた枚数ではあらゆる領域からプレイされていたカードを、カードがトークンであるか否かに関係なく数えます。
   - ref: Q563
     quote: いいえ。フォロワーの進化はカードのプレイには含まず、このターンにプレイしたカードは『小さな勇士・スクナ』と『フェアリー』の2枚のみのため、【コンボ_3】の条件を満たしていません。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 13.2.1.3、Q563；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 打出スクナ及 1 張零費 token 再進化
     setup:

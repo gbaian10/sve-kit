@@ -37,9 +37,12 @@ evidence:
     quote: "なんらかの継続効果が存在する状態でカードの情\n報が求められる場合、以下の順でその情報に対す\nる継続効果を適用します。"
     derivation:
       - 『ドラゴン』在此是完全同名 token，不是所有卡名含ドラゴン的從者；有フォルテ才獲疾走。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 2.1.2「文脈に従い」＋卡面慣例；xverify-1/result.md〈其他驗過的題目〉同意（附註：沒有直接 Q&A，該檔〈發現的規則問題〉第 2 點建議必過前再找 Q&A）
 scenarios:
   - name: BP16-T17 フォルテ=True
     setup:

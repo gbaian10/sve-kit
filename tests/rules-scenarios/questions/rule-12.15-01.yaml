@@ -29,9 +29,12 @@ evidence:
   - ref: cr 12.15.2.1
     quote: オーラはカードや能力をプレイする際に選ぶことのみを禁止します。相手はオーラを持つフォロワーを攻撃目標に選択することができます。
     derivation: [テミスの審判「場のフォロワーすべてを破壊する」沒有「選ぶ」→ オーラ 不擋]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 1／3：xverify-2/recheck.md:114〈全部改動局面的核對索引〉；2a／2b：xverify-2/result.md:273〈全部實質核驗局面的索引〉（12.15.1、12.15.2、Q1369、Q1939）
 
 scenarios:
   - name: 1 オーラ：粛清の一刀 不能選它（唯一目標時不能打出）；テミス 的全體破壞照樣破壞它

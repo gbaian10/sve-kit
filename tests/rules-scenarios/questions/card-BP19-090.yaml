@@ -27,9 +27,12 @@ evidence:
     quote: いいえ。適切な目標を選ぶことができない場合、【1】をチョイスすることができず、【2】をチョイスする必要があります。
   - ref: Q2573
     quote: いいえ。1つの選択肢を2回以上チョイスすることはできません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:112〈全部改動局面的核對索引〉；B／C／D／E：xverify-2/result.md:264〈全部實質核驗局面的索引〉（5.18.2.1、5.18.2.2、Q2622、Q2623）
 
 scenarios:
   - name: A 選【2】、不付費 → 0 PP 打出、什麼都不發生，但算打出了 1 張

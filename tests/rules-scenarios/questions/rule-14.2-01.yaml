@@ -33,9 +33,12 @@ evidence:
     quote: 起動能力を指定する際、それが進化能力または進化相当能力である場合、このターンにターンプレイヤーがいずれかの進化能力や進化相当能力をすでにプレイ済みである場合、その起動能力は指定できません。
   - ref: cr 14.2.2.4
     quote: 食事能力をプレイする際、そのコストに含まれる PP のうち 1 点を、PP ではなく 1 点の EP で支払うことができます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:102〈全部改動局面的核對索引〉（Q1821）；B／C／D：xverify-2/result.md:245〈全部實質核驗局面的索引〉（14.2.1.1、14.2.1.2、Q1820、Q1821）
 
 scenarios:
   - name: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張

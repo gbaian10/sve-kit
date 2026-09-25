@@ -33,9 +33,12 @@ evidence:
     quote: いいえ。体力3以下のフォロワーを選んでいた場合にのみ、それのリーダーに3ダメージ与えることができます。
     derivation:
       - 「選んでいたなら」參照打出時選目標當下的體力；6 傷害後體力 ≤0 不會回頭滿足「3以下」
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C1／C2：xverify-1/result.md:118〈其他驗過的題目〉（Q2716、Q2715）
 
 scenarios:
   - name: A ユリウス【1】【3】：目標在打出時選，抽 2 張後才捨 1 張（可捨剛抽的）

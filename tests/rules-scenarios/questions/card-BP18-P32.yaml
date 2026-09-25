@@ -30,9 +30,12 @@ evidence:
     quote: なんらかの理由でこの時点でこのコストを支払うことができない場合、このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
   - ref: BP18-P32
     quote: "{進化}{コスト5}：これは進化する。\n{起動}これを{アクト}手札の元のコスト2のカード2枚を公開：相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 5.21.1、10.4.2.2；xverify-2/result.md〈補題〉2/2；「公開兩張後仍留手牌」fix-2 加 group 後 xverify-2/recheck.md 同意
 scenarios:
   - name: 公開兩張後仍留手牌
     setup:

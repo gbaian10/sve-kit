@@ -40,9 +40,12 @@ evidence:
     quote: "この時点で攻撃フォロワーと攻撃目標が交\n戦状態である場合、攻撃フォロワーと攻撃目\n標が互いに‘交戦した’事象が発生します。"
     derivation:
       - 防守妖精在 Quick 回 EX 就結束該次攻擊，攻击者維持橫置且不交戰；回 EX 清除先前攻擊力修正。選零則原目標仍在場，等待 Quick 決定。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q675、Q677、8.4.9；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 回 EX=True
     setup:

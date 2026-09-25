@@ -28,9 +28,12 @@ evidence:
       - 由公開領域移到手牌的卡，對手在移動當下已識別它；沒有規則讓它重新變成未知
   - ref: cr 4.1.2.1
     quote: 領域が公開であるか非公開であるかにかかわらず、それぞれの領域にあるカードの枚数は、すべてのプレイヤーがいつでも確認することができます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 見 reverify/result.md〈F1〉；CP04-103 text line 2、全部 sections，CR 5.8.1.2、5.8.2、4.5.2、4.7.2；依契約第 10 節第 5、12 條確認公開 a4 to:P2，再移入手牌、洗牌及 knowledge；無直接 Q&A。
 
 scenarios:
   - name: A 搜尋加入手牌：對手識別那張，不識別其餘手牌

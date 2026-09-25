@@ -23,9 +23,12 @@ evidence:
     quote: いいえ。相手のリーダーに与えるダメージは1になります。『死の舞踏』の能力によるダメージで『永久の盾・シオン』の体力は0以下になりますが、『永久の盾・シオン』の破壊処理は『死の舞踏』の能力の解決後であるため、『永久の盾・シオン』の能力が有効です。
     derivation:
       - 本題シオン體力 7 → 4 傷害後 3，不會歸 0；重點是リーダー傷害 2−1＝1
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-1/result.md:101〈其他驗過的題目〉（12.14.2.1、11.3.2.1、Q1942）
 
 scenarios:
   - name: A 必殺（攻擊力 0）攻擊シオン → シオン不被破壞，攻擊者被交戰傷害破壞

@@ -31,9 +31,12 @@ evidence:
     quote: "これ以降、場のカードに進化領域のカード\nが関連付けられている間、そのカードの情報\nは、コストを除きその進化領域のカードの情報\nを持つものとして扱います（10.9.1.1.1）。"
     derivation:
       - 進化保持同一物件及橫置狀態，將原本攻防與印刷數值差額加到進化卡。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 5.16.2、5.16.2.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 橫置=False 原數值=2/2
     setup:

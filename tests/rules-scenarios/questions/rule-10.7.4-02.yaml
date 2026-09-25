@@ -34,9 +34,12 @@ evidence:
     quote: 現在処理を行うべきルール処理すべてを同時に実行します。
     derivation:
       - 檢查時點：先 11.3.1 破壞 a1、a2，再 10.5.2.2 由 P1 打出待機的至高の凌駕能力；「いるなら」在結算時判定 → 不成立
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-2/result.md:244〈全部實質核驗局面的索引〉（10.5.2.1、10.5.2.2、Q2702、Q2685）；B：xverify-2/recheck.md:101〈全部改動局面的核對索引〉（7.4.7）
 
 scenarios:
   - name: A Q2702：誘發時マゼルベイン體力 ≤0 仍在場，結算時已被規則處理送墓 → 不能放 EX

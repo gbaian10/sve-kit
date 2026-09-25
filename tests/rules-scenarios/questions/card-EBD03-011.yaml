@@ -29,9 +29,12 @@ evidence:
     quote: はい。『デッドペナルティ』が墓場にある場合に有効となる能力です。
   - ref: EBD03-011
     quote: "{起動}墓場のこれと『カオスルーラー・アイシィレンドリング』1枚を消滅：相手の場のフォロワー1体を選ぶ。それをアクトする。\n{クイック}\n相手の場のフォロワー1体を選ぶ。それは{攻撃力}-2/{体力}-2する。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q1554、10.3.4、10.4.2.2；xverify-2/result.md〈補題〉3/3
 scenarios:
   - name: 來源cemetery 指定材料=True
     setup:

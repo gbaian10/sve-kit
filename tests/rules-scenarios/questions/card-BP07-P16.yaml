@@ -38,9 +38,12 @@ evidence:
     quote: "‘エンドフェイズが来たとき’で示されている誘発条\n件が発生します。"
     derivation:
       - EX 的結束時能力依自然卡每 5 張取整數；0 不發傷害事件。墓場內同卡名的能力不因此有效。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.29.1、Q1020、Q1021、10.3.4、1.3.2.2；xverify-1/result.md〈其他驗過的題目〉；題目未斷言 awaiting（見該檔〈發現的規則問題〉第 5 點）
 scenarios:
   - name: 自然墓場 0
     setup:

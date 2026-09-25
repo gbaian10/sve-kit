@@ -27,9 +27,12 @@ evidence:
     quote: いいえ。誘発しません。
   - ref: cr 5.16.1.2.1
     quote: これにより進化前と進化後でカードの種類が異なる場合、そのカードの種類の記載されている情報（10.9.1.1）が進化後の種類になります。他に種類を変更する効果が適用されていない場合、これによりそのカードの種類を進化後の種類にします（5.25）。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:108〈全部改動局面的核對索引〉；B：xverify-2/result.md:254〈全部實質核驗局面的索引〉（5.16.1.2、5.16.1.2.1、Q1122、Q1121）
 
 scenarios:
   - name: A 2 個護符：進化付 1 PP＋1 EP → 變成護符 → 進化時消滅 b1 → 不能攻擊 → テミス 不破壞它 → ダークオファリング 破壞 → ラストワード 3 傷害

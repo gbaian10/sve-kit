@@ -33,9 +33,12 @@ evidence:
     quote: "デッキからカードを探し、その見つけたカードを指定\nの領域に移動したか、見つけたカードを移動しない\nことを選んだか、カードを見つけなかった後、その\nデッキをシャッフルします。"
     derivation:
       - 'ミミ搜尋是完全卡名比對，找到則入手；可不找到但仍洗牌。找到時依 5.8.1.2 先向對手出示，以公開 to: P2 事件比對，再移入手牌；未找到則禁止搜尋卡 d 的公開事件。'
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: '4.1.2.2、5.8.1.2、5.8.2、Q2242；xverify-1/result.md；遷移後 xverify-2/result.md 2/2；「找到=True」fix-2 公開 to: P2 後 xverify-2/recheck.md 同意；followup 只改 why（xverify-2/final.md）'
 scenarios:
   - name: 找到=True
     setup:

@@ -34,9 +34,12 @@ evidence:
     quote: 手札か EX エリアのカードを 1 枚プレイする（8.2）。
     derivation:
       - 8.4.7 同樣寫「手札か EX エリアの【クイック】を持つカードを 1 枚プレイする」→ EX 區的クイック token 可在此打出
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／A2／B／B2：xverify-1/result.md:128〈其他驗過的題目〉（12.8.2、8.4.3.2、Q1375）；C：xverify-2/result.md:251〈全部實質核驗局面的索引〉（8.4.2、8.4.3.1、Q1375、Q2665）
 
 scenarios:
   - name: A クイック時點打死攻擊者 → 8.4.9 不造成傷害；awaiting 列出 pass 與可打的クイック

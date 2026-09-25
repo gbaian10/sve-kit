@@ -35,9 +35,12 @@ evidence:
     quote: "待機状態の自動能力のプレイ時に、その自動能\n力を有していたカードの領域が変わっていた場合で\nも、その自動能力はプレイする義務があります。"
     derivation:
       - 攻擊時先完整結算，Quick 才到；Quick 殺掉來源無法倒掉已造成的攻擊時 2 傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q1378、8.4.6、8.4.7、8.4.9；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: Quick 殺攻擊者=False
     setup:

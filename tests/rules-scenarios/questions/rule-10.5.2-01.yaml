@@ -82,11 +82,17 @@ evidence:
     quote: この時点で解決領域にカードや能力が残っている場合、それがカードならオーナーの墓場に移動し
     derivation:
       - エンジェルバレッジ結算完就進墓場，after-decision-1 起 P1.cemetery 含 a3
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:98〈全部改動局面的核對索引〉；B：xverify-2/result.md:240〈全部實質核驗局面的索引〉（10.5.2.1、10.5.2.2、Q1110）
+  - by: fable
+    method: independent-derivation
+    note: 10.5.2.1、10.5.2.2；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 非回合玩家尚有待機時，優先回到回合玩家的新待機'
     setup:

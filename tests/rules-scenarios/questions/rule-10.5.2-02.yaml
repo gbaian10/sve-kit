@@ -68,11 +68,17 @@ evidence:
     quote: ‘【覚醒】状態’とは‘あなたの現在の PP 最大値が 7 以上’を意味します。
     derivation:
       - P1 PP 最大值 6 → 非覚醒 → 竜の翼是 2 傷害
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:241〈全部實質核驗局面的索引〉（10.5.2.1、10.5.2.2、Q109、Q1110）；B：xverify-1/result.md:53〈22 個重疊題〉（10.5.2、Q109、Q1110）
+  - by: fable
+    method: independent-derivation
+    note: 10.5.2.2／.3；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 回合玩家 P1'
     setup:

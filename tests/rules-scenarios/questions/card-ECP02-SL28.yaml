@@ -28,9 +28,12 @@ evidence:
     quote: いいえ。アミュレットになったフォロワーに攻撃することはできないため、攻撃目標にする必要はありません。
   - ref: cr 5.14.1.2
     quote: フォロワーでもリーダーでもないカードに対してダメージを与える指示がある場合、それは与えられません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-1/result.md:111〈其他驗過的題目〉（5.25、Q2193、Q2201）
 
 scenarios:
   - name: A 超進化 → 兩個能力待機；超進化時把守護從者變護符 → 攻擊リーダー不被擋；全體傷害不打護符

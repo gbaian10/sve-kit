@@ -21,9 +21,12 @@ evidence:
     quote: いいえ。攻撃力0以下のフォロワーによるリーダーへの攻撃はダメージを与えないので、『セイクリッドシープ』の能力は適用されません。また、ダメージを受けていないので『セイクリッドシープ』の能力は継続します。
   - ref: Q2701
     quote: 1回目のダメージを受ける際、1回目の『セイクリッドシープ』の効果が適用されダメージを受けない状況となります。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-2/result.md:226〈全部實質核驗局面的索引〉（7.3.1、7.3.2、Q2676、Q2701）
 
 scenarios:
   - name: A P1 的主要階段來臨 → P2 的セイクリッドシープ誘發 → 第一次攻擊被擋、第二次照受

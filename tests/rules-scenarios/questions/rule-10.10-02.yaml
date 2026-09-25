@@ -31,9 +31,12 @@ evidence:
     quote: 攻撃目標がフォロワーである場合、それと同時に、攻撃目標のフォロワーはその攻撃力に等しいダメージを攻撃フォロワーに与えます。
     derivation:
       - 0 傷害只讓「一ツ尾狐給シオン的傷害」不存在；交戰本身與シオン的反擊 3 照常 → 一ツ尾狐 1/3 被破壞
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: 見 reverify/result.md〈R4、R5〉；Q1944／Q834／Q838 與 CR 10.10.2.2、1.3.2.2、8.4.9.1、11.3.1、9.1.4.4 交叉核對；依契約第 10 節第 2 條確認 of:attack occurrence=1，兩種傷害順序與 token／待機結果均吻合。
 
 scenarios:
   - name: A P2 選「+1 → −1」→ シオン受 1；反擊破壞一ツ尾狐 → ギンセツ誘發

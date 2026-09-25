@@ -57,9 +57,12 @@ evidence:
     quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
     derivation:
       - 對手墓場 9 張只能選一項，10 張可以選一或兩項。兩項先選目標並造成 8 傷害，才停在看牌後的選擇。牌庫唯一一張白板不是盜賊，唯一合法 select 是空集合。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.18.3.1、13.5.1.3.2.1、Q2048；xverify-1/result.md〈其他驗過的題目〉三局面；「對手墓場 10 選項 [1, 2]」遷移後 xverify-2/result.md 1/1
 scenarios:
   - name: 對手墓場 9 選項 [1]
     setup:

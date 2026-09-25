@@ -39,9 +39,12 @@ evidence:
     quote: "‘【スタック】’は以下の 3 つの能力を意味し\nます。\n* このカードを場に置く場合、その上にスタッ\nクカウンターが 1 個置かれた状態で場に出\nる。\n* このカードにスタックカウンターが置かれて\nいる状態でこのカードが場を離れる場合、代\nわりにこのカードのスタックカウンターを 1 個\n取り除き、このカードは場に残る。\n*\n：自分の他の【スタック】を持つアミュ\nレット 1 つを選ぶ。それにこれのスタックカウン\nターをすべて移す。"
     derivation:
       - 自身卡可選帶 aura 的イージス；破壞受禁止或被 stack 取代都不阻止後面加 3 體力與抽牌。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 12.15.2、1.3.3、Q342、13.3.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: BP01-173
     setup:

@@ -34,9 +34,12 @@ evidence:
     quote: "コストを特定の値にする効果\n（10.4.4.1）を適用します。"
     derivation:
       - 超越先把費用固定成 7，再加上場上每張ルルナイ的 1；此題比較支付結果。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 10.10.2.4、10.6.2.5.1.3、Q734／Q735；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 加費來源 0
     setup:

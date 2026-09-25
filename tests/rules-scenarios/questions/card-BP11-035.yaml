@@ -23,9 +23,12 @@ evidence:
     quote: はい。満たします。
   - ref: Q2074
     quote: いいえ。《攻撃力》や《体力》を+していない場合、このフォロワーの《進化》能力をプレイすることができず、超進化することもできません。そのため「このターン、これの《攻撃力》や《体力》を+していたなら、」という条件を満たすことはできません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-2/result.md:256〈全部實質核驗局面的索引〉（8.1.2、8.3.2.1、Q1513、Q2074）
 
 scenarios:
   - name: A 先 +2 攻擊力 → 進化能力可用 → 進化後 7/5

@@ -34,9 +34,12 @@ evidence:
     quote: カードをプレイする際のコストの数値を変更する効果は、このカードのコストの情報の値を変更するのではなく、そのコストのために減少する PP の点数を変更します。
   - ref: BP15-056
     quote: "これをプレイする際、自分の墓場にあるカードの元のコストの種類数が6種類以上なら、コストを-6する。\n【疾走】\n{ファンファーレ}相手の場のフォロワー2体まで選ぶ。それに3ダメージ。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 元のコスト種類數、「2体まで」空目標；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 六張但只五種原費用
     setup:

@@ -56,11 +56,17 @@ evidence:
       - 先指定目標及非零分配，之後才支付 PP；非法 3 加 0 應整個打出回溯。
   - ref: cr 10.6.2.4.2
     quote: 値の割り振りを決定する際、そのために 10.6.2.3.1 で割り振る先として目標を選んでいる場合、その各目標に対して 1 単位以上の割り振りを行う義務があります。これが行えない場合、その目標の選び方は不正で、ゲームはこの目標を選ぶ前の状態まで巻き戻されます。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:89〈全部改動局面的核對索引〉（10.6.2.4）；B：xverify-2/result.md:230〈全部實質核驗局面的索引〉（10.6.2.3.2、10.6.2.4、Q79、Q78）；C：xverify-1/result.md:49〈22 個重疊題〉（10.6.2.4、Q78、Q279）
+  - by: fable
+    method: qa
+    note: Q78、Q79、Q279、10.6.2.3.2、10.6.2.4.2；「選零目標」xverify-1/result.md；「單體分配 3」「3 加 0」xverify-2/result.md 3/3；「兩體分配 2 加 1」fix-2 加 group 後 xverify-2/recheck.md 同意
 scenarios:
   - name: '[astra] 選零目標'
     setup:

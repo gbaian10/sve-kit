@@ -65,11 +65,17 @@ evidence:
     quote: いいえ。自分の場にこのアミュレットがある限り、自分のデッキが0枚のときにカードを引いても、自分はバトルに敗北しません。そのままバトルが続きます。
   - ref: cr 1.3.3
     quote: あるカードの効果によりプレイヤーがなんらかの行動を行うよう指示された場合に、同時にその行動を禁止する効果が発生している場合、常に禁止する効果が優先されます。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:39〈22 個重疊題〉（A：Q775／Q776；B：Q749）
+  - by: fable
+    method: qa
+    note: Q776、Q750、1.3.3、11.2.1；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 護り手 1 枚'
     setup:

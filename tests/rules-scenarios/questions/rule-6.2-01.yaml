@@ -122,11 +122,17 @@ evidence:
     quote: あるプレイヤーの経過ターン数を参照する場合、そのプレイヤーがターンプレイヤーとして、そのターンに初めてスタートフェイズ（7.2）を開始した回数を参照します。
     derivation:
       - 先攻第 1 回合的第一個輸入點：先攻經過回合數 1、後攻 0
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-2/recheck.md:105〈全部改動局面的核對索引〉（6.2.1.7、7.2.4.1）；C：xverify-2/result.md:249〈全部實質核驗局面的索引〉（6.2.1.4、6.2.1.6）
+  - by: fable
+    method: independent-derivation
+    note: 6.2.1.7～12、7.2.1～7.2.4.1、3.3.2、14.3.1.2、14.4.3.1／.2；xverify-2/result.md 3/3；fix-2 補發牌／換牌 移動 事件後 xverify-2/recheck.md 同意
 scenarios:
   - name: '[astra] 一般開局與先攻換牌底牌方向'
     setup:

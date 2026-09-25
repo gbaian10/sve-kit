@@ -27,9 +27,12 @@ evidence:
     quote: この指示の実行の際に、そのプレイヤーのデッキ置き場にカードがない場合、そのプレイヤーは次のルール処理でゲームに敗北します（11.2.2）。
     derivation:
       - 敗北只綁在「引く」；「デッキの上4枚を墓場に置く」不是引く → 1.3.2 單純不做
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:93〈其他驗過的題目〉（Q708、Q710）
 
 scenarios:
   - name: A 三輪：第 1、2 輪各放到 1 張サイ → 第 3 輪沒有 → 停；攻撃力 +9、墓場 12 張

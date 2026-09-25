@@ -20,9 +20,12 @@ evidence:
     quote: ユニオンバースト能力は、デッキがクラス基準（6.1.1.5.1）で構築されているか、タイトル基準（6.1.1.5.2）で構築されていてそのタイトルが‘プリンセスコネクト！Re:Dive’でない場合、すべての領域で常に無効（10.3.2）です。
   - ref: cr 10.3.2
     quote: その条件下で、その部分は能力としては存在しますが、効果を発生することはありません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-1/result.md:109〈其他驗過的題目〉（14.5.1.2、8.4.9、Q2447）；B：xverify-2/result.md:229〈全部實質核驗局面的索引〉（14.5.1.2、10.3.2、Q2531、Q2447）
 
 scenarios:
   - name: A 作品名基準：攻擊從者 → UB 攻撃時把目標移到 EX → 不交戰

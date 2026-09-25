@@ -56,11 +56,17 @@ evidence:
     quote: ‘【スペルチェイン （数値）】（テキスト）’または‘【SC （数値）】（テキスト）’は‘あなたの墓場のスペルが（数値）枚以上である場合、（テキスト）’を意味します。
   - ref: cr 13.3.1.3
     quote: このカード自身の解決中はこのカードはまだ解決領域にあるため、このカードは自身の墓場のスペルの枚数に数えません。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:43〈22 個重疊題〉（13.3.1、Q2104、Q2107）
+  - by: fable
+    method: qa
+    note: Q2107、13.3.1.2、13.3.1.3；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] SC 初始 9'
     setup:

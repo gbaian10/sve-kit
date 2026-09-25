@@ -40,9 +40,12 @@ evidence:
     quote: "【守護】\n{ファンファーレ}/{ラストワード}相手のリーダーすべてに3ダメージ。\n{起動}手札のこれを捨てる：自分の場の八獄・フォロワー1体を選ぶ。それを破壊する。相手のリーダーすべてに1ダメージ。1枚引く。"
   - ref: BP11-P31
     quote: '{起動}これを墓場に置く：自分の場のフォロワー1体を選ぶ。それが荒野・フォロワーなら、それは{攻撃力}+1/{体力}+1する。'
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 13.2.1.1、Q2556；xverify-2/result.md〈補題〉3/3
 scenarios:
   - name: 芳気の看守手牌起動不加コンボ
     setup:

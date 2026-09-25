@@ -36,9 +36,12 @@ evidence:
     quote: "種類がイクイップメントであるカードの\n能力はイクイップメント領域でのみ有効で\nす。"
     derivation:
       - 裝備傷害加 2，但原本 0 傷害行動根本不發生，不能補成 2。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.14.2、Q2496；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 攻擊力 0
     setup:

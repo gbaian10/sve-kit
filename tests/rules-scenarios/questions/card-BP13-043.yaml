@@ -68,11 +68,17 @@ evidence:
     quote: 渡されたフォロワーの《ラストワード》能力は、渡されたプレイヤーがプレイします。
   - ref: cr 5.22.5
     quote: 奪ったまたは渡したカードが場以外の領域に移動する場合、そのカードのオーナーの領域に移動します。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-1/result.md:42〈22 個重疊題〉（3.1.2.3、5.22.5、Q1766、Q1751）
+  - by: fable
+    method: qa
+    note: Q1747、5.22.3、5.22.5；xverify-1/result.md〈22 個重疊題〉。fix-2 只改題目層 why，局面本體未動（xverify-2/recheck.md 已核對）
 scenarios:
   - name: '[astra] cemetery'
     setup:

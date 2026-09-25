@@ -30,9 +30,12 @@ evidence:
     quote: "EX エリアにはプレイヤー毎に上限の数が指定され\nていて、ゲーム中に参照されることがあります。"
     derivation:
       - 逐次從頂牌補到 EX 上限；原本滿 EX 時不移動也不讀牌庫頂。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 4.8.3.1、Q188；xverify-1/result.md〈其他驗過的題目〉。「原 EX 5」followup 補零張 select（4.8.3.2）後 xverify-2/final.md 同意
 scenarios:
   - name: 原 EX 0
     setup:

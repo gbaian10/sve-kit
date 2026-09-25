@@ -29,9 +29,12 @@ evidence:
     quote: "‘デッキを上から N 枚見る’指示がある場合、指定\nプレイヤーはそのデッキ置き場の一番上から N 枚\nの情報を知ることができます。"
     derivation:
       - 卡片解析使用全知資料，但 P2 投影不能因 P1 看頂牌而得到那兩張的身份；三局面公開資訊相同。此題只測投影，不宣稱測了舊版回放分支。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 5.11.1、4.1.2.1、契約 10 節第 14 條；三局面只刪 P2 視角 awaiting.choices，assert／knowledge／omniscient 條目未動；規則結論沿用 xverify-1；見 recheck-3/result.md
 scenarios:
   - name: BP01-042
     setup:

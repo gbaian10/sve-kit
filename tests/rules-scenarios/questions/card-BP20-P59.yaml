@@ -38,9 +38,12 @@ evidence:
     quote: "待機状態の自動能力のプレイ時に、その自動能\n力を有していたカードの領域が変わっていた場合で\nも、その自動能力はプレイする義務があります。"
     derivation:
       - 先完成全體傷害與捨棄，檢查時點破壞零血來源，才結算捨棄能力；マゼル不在場就不進 EX。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2702；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: マゼル體力 5 接受=False
     setup:

@@ -43,9 +43,12 @@ evidence:
     quote: "‘【オーラ】’は‘このカードは相手のカードや能力\nにより選ばれない’を意味します。"
     derivation:
       - 全體消滅仍要先有一個合法目標；選白板後，全體效果可及 aura。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q602、Q603、Q604、12.15.2.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 追加=False 有可選目標=True
     setup:

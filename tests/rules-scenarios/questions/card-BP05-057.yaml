@@ -52,11 +52,17 @@ evidence:
       - 使用祭品離場前攻擊力；token 已消去也能用最後資訊；橫置來源無法付橫置費用。
   - ref: cr 10.11.1
     quote: ある効果が特定のカードの情報や配置状態を参照している場合、その効果の実行時にそのカードがその領域から、場から場への移動以外の移動を行っていた場合、その効果は、そのカードが最後にその領域にあったときの情報や配置状態を参照します。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:38〈22 個重疊題〉（10.11.1、Q714、Q716）
+  - by: fable
+    method: qa
+    note: Q716、Q714、10.11.1、10.4.6；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 攻擊 2 token=False 橫置=False'
     setup:

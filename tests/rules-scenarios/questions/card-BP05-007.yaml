@@ -40,9 +40,12 @@ evidence:
     quote: "選ぶ数が「～まで」や「好きな枚数」と\n表記されている場合、0 から指定された数\nまでの間の任意の数を実際に選ぶ数として\n指定します。"
     derivation:
       - 只有真的移入 EX 才加 2 體力；移入兩張也只加一次，token 在 EX 可存在。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q678、Q676、9.1.4.1、4.8.3.2；xverify-1/result.md〈其他驗過的題目〉。「選 1 張 EX滿=True」followup 補零張 select 後 xverify-2/final.md 同意
 scenarios:
   - name: 選 0 張 EX滿=False
     setup:

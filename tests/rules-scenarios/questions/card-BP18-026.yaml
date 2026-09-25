@@ -24,9 +24,12 @@ evidence:
     derivation: [同句型：「（条件）なら、A。B。」→ B 也在條件範圍內, メリッサ 的 B 是「これは【オーラ】と…を持つ」→ 條件不成立時不獲得]
   - ref: Q1611
     quote: いいえ。自分のリーダーの体力を+4以上していない場合、それ以降の効果は働かず、1枚引くことができません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:259〈全部實質核驗局面的索引〉（10.6.2.8.2、12.10.2、Q1373、Q1611）；B：xverify-2/recheck.md:111〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 對手場上 3 張：破壞目標、獲得保護 → 突進打 b2 不受交戰傷害

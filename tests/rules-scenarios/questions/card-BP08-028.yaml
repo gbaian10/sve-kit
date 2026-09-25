@@ -22,9 +22,12 @@ evidence:
     quote: 割り振る値やその割り振り先を置換する効果がある場合、この時点で適用した上で割り振りを実行します。
     derivation:
       - 「代わりに8ダメージ」在分配時就已套用 → 10 張以上時分配 8
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／C：xverify-2/recheck.md:82〈全部改動局面的核對索引〉（10.6.2.4、6.4）；B：xverify-2/result.md:216〈全部實質核驗局面的索引〉（10.6.2.3.2、10.6.2.4、Q1070、Q1069）
 
 scenarios:
   - name: A 墓場 9 張：選 2 體分配 3＋1

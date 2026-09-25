@@ -42,9 +42,12 @@ evidence:
     quote: このフォロワーの能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。
   - ref: cr 14.4.9.2
     quote: この能力をプレイするためのコストの PP のうち 1 点を、PP ではなく 1 点の EP で支払ってよい。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 見 reverify/result.md〈R1〉；CR 14.4.9、14.4.7.3.2、8.3.2.1、10.1.1.2.1、10.7.2；Q1391～Q1393、Q1385～Q1387 交叉核對。採 CP03-010＝none，確認三個待機、無效果結算及全部事件區間。
 
 scenarios:
   - name: A 憑依 → ドライブ獲得時 → 進化不可 → 疾走攻擊：シングルドライブ與攻撃時同時待機

@@ -31,9 +31,12 @@ evidence:
     quote: はい。「これをプレイする際、場の『ナテラの大樹』2つを《アクト》：コストを-2する。」と「これをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。」をどちらも満たした場合、コストは-3されます。
   - ref: Q1641
     quote: はい。自分の場の自然・フォロワー1体まで選ぶ場合、0体を選ぶことができるため、このスペルをプレイすることができます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／B2：xverify-2/recheck.md:107〈全部改動局面的核對索引〉；A2／C／C2：xverify-2/result.md:253〈全部實質核驗局面的索引〉（10.4.2、10.4.3、Q1641、Q996）
 
 scenarios:
   - name: A ハルバードウルフ 起動：アクト 2 棵大樹 → 2 傷害

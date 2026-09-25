@@ -23,9 +23,12 @@ evidence:
   - ref: cr 8.3.2.1
     quote: 起動能力を指定する際、それが進化能力または進化相当能力である場合、このターンにターンプレイヤーがいずれかの進化能力や進化相当能力をすでにプレイ済みである場合、その起動能力は指定できません。
     derivation: [額度只看「進化能力／進化相当能力」有沒有打出過；ファンファーレ 的「これは進化する」不是進化能力 → 之後第一次進化能力仍合法，第二次才被拒]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:260〈全部實質核驗局面的索引〉（8.3.2.1、5.16.1、Q2558、Q2560）
 
 scenarios:
   - name: A 第 3 張打出的若芽 由ファンファーレ 進化 → 根際 誘發 3 傷害 → 之後進化能力仍可用 1 次 → 第二次被拒

@@ -60,11 +60,17 @@ evidence:
     quote: まず『ネフティス』の《ファンファーレ》能力の解決を行います。その後、場に出て破壊されたフォロワーの《ファンファーレ》能力や《ラストワード》能力などの誘発条件を満たし待機状態となった能力の中からどれを先に解決するか選択することができます。
   - ref: cr 10.7.7
     quote: 待機状態の自動能力のプレイ時に、その自動能力を有していたカードの領域が変わっていた場合でも、その自動能力はプレイする義務があります。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:83〈全部改動局面的核對索引〉（12.8.2、Q1100）
+  - by: fable
+    method: qa
+    note: Q1100、Q1101、10.6.2.8.2、10.7.3.2；xverify-1/result.md〈22 個重疊題〉。之後未再改（非必過）
 scenarios:
   - name: '[astra] 出場 0 張'
     setup:

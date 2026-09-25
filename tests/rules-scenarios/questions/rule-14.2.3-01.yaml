@@ -46,9 +46,12 @@ evidence:
     quote: はい。エボルヴデッキに『にんじん』が3枚ない場合「《食事》《食事》《食事》《コスト3》：これは3回出走する。」のコストを支払うことができず、能力をプレイすることができません。
   - ref: Q1821
     quote: はい。【出走時】能力が2回誘発します。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: '14.2.2.3、14.2.3.1、10.7.2.1、Q1821；xverify-2/result.md〈遷移新增 6 題〉1/1；xverify-2/recheck.md 維持 choice: decline'
 scenarios:
   - name: 同一從者出走兩次；先解第 2 次，再解第 1 次
     setup:

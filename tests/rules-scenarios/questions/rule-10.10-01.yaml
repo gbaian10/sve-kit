@@ -47,9 +47,12 @@ evidence:
     quote: あるプレイヤーが特定の時点での‘追加ターンを行う’指示がある場合、その時点で本来実行するターンの直前に、そのプレイヤーのターンを 1 回実行します。
   - ref: cr 3.3.2.2
     quote: あるプレイヤーが追加ターンを行った（5.28）場合、そのターンは経過ターンに数えます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／A2／A3／B1／B2／C：xverify-2/result.md:237〈全部實質核驗局面的索引〉（10.10.1、10.10.2、Q1944、Q2498）；D：xverify-1/result.md:123〈其他驗過的題目〉（Q1611、Q1373）
 
 scenarios:
   - name: A 自我取代先套：2→4，再 −1 → シオン受 3

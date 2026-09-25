@@ -28,9 +28,12 @@ evidence:
     quote: いいえ。相手の場のフォロワーを選ぶことができない場合、この《ファンファーレ》能力をプレイすることができず、1枚引くことができません。
   - ref: Q1351
     quote: 任意の順番で解決することができます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C／D：xverify-2/result.md:272〈全部實質核驗局面的索引〉（10.6.2.8.2、10.6.2.3.1、Q1373、Q1350）
 
 scenarios:
   - name: A 沒有其他從者、體力 12：第一段破壞並抽 1；第二段不回復

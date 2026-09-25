@@ -38,9 +38,12 @@ evidence:
       - 12.8.2 的強制條款只對「アクト状態」的守護成立；12.11.2「それがアクト状態であるかのように攻撃目標として選択できる」只放寬選目標的許可，不改變從者狀態
       - 直立的守護仍是スタンド状態 → 不作用；指定攻撃 從者可以打リーダー、可以打任何直立從者（含那隻守護）
       - 使用者採用此結論並裁定為必過（2026-09-25）；若日後官方 Q&A 相反，B1～B3 要改
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／A2／A3／A4：xverify-2/result.md:265〈全部實質核驗局面的索引〉（12.11.1、12.11.2、Q47、Q2461）；B1：xverify-2/last.md:34〈card-BP20-036：同意新增 B1～B3〉；B2：xverify-2/last.md:35〈card-BP20-036：同意新增 B1～B3〉；B3：xverify-2/last.md:36〈card-BP20-036：同意新增 B1～B3〉（11.3.1）；B1～B3 依社群回覆＋使用者裁定與 12.8.2／12.11.2 推導，非官方 Q&A。
 
 scenarios:
   - name: A 對手有アクト狀態的守護：指定攻撃 也不能打直立從者或リーダー，只能打守護；攻擊者不受傷

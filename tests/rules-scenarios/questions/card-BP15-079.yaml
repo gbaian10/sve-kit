@@ -44,9 +44,12 @@ evidence:
       - 一ツ尾狐被破壞移到墓場後立即消去；它確實離開了場，所以「場を離れたとき」成立
   - ref: cr 12.3.5
     quote: クイックを持つカードや起動能力は、自分のターンのメインフェイズ中にプレイすることも可能です。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:86〈全部改動局面的核對索引〉（10.7.4、10.7.7）；B／C：xverify-1/result.md:102〈其他驗過的題目〉（10.7.4.2、Q2020、Q2022）
 
 scenarios:
   - name: A 正例：エンジェルバレッジ 讓ギンセツ與一ツ尾狐同時被規則處理破壞 → 誘發，對 b1 與 P2 リーダー各 1 傷害

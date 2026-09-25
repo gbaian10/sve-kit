@@ -28,9 +28,12 @@ evidence:
     quote: いいえ。EXエリアが上限枚数に達しているため、カードの移動は行われず、場に残ります。
   - ref: Q1620
     quote: はい。失われます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-2/result.md:231〈全部實質核驗局面的索引〉（5.5.3、4.1.4、Q1616、Q1617）；C：xverify-1/result.md:112〈其他驗過的題目〉（4.8.3.2、Q1616、Q1620）
 
 scenarios:
   - name: A 從手牌打出 → 條件不成立，只抽 1 張

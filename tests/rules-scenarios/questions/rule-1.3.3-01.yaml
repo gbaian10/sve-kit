@@ -27,9 +27,12 @@ evidence:
     quote: "ターンプレイヤーは自分の手札か EX エリアにある\nカードを 1 枚指定し、そのカードのコストの値と同じ\n値の PP をコストとして支払うことでプレイすることが\nできます（10.6）。"
     derivation:
       - 影の侵食本體在 sections；EX 禁止優先於一般 EX 可以打出。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 1.3.3、8.2.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: hand
     setup:

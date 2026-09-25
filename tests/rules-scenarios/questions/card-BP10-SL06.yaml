@@ -36,9 +36,12 @@ evidence:
     quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
     derivation:
       - 兩次擲骰是同一能力，第一次令對手零生命也必須做第二次，結算後才判敗北。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q1278、1.2.2；xverify-1/result.md〈對方沒把握的題目〉。之後未再改（非必過）
 scenarios:
   - name: '[3, 4]'
     setup:

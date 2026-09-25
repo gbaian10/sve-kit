@@ -25,9 +25,12 @@ evidence:
   - ref: cr 5.26.1
     quote: あるターンを‘スキップする’指示がある場合、そのターンを開始する時点で、そのターンを開始するのではなく、そのターンの次に来るターンを開始します。
     derivation: [被跳過的回合連開始階段都沒有 → 不回復 PP、不抽牌、場上的卡不站起]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:267〈全部實質核驗局面的索引〉（5.26.1、5.26.2、Q747）
 
 scenarios:
   - name: A 以跳過下一回合為費用進化 → 進化時 PP 最大值 +1、+3、抽 1 → 對手回合 → 自己回合被跳過 → 對手再一個回合

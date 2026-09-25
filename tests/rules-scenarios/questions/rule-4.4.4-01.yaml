@@ -22,9 +22,12 @@ evidence:
     quote: はい。場に出すことができる2枚のカードは、『スティールナイト』『シールドガーディアン』『ナイト』の中から選択することができます。
   - ref: cr 10.6.2.6
     quote: プレイするカードがフォロワーかアミュレットである場合、この時点で自分の場のカードが上限枚数以上でないかを確認します。上限枚数以上である場合、このフォロワーやアミュレットのプレイは認められず、ゲームはこのカードをプレイする前の状態まで巻き戻されます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／C：xverify-2/recheck.md:104〈全部改動局面的核對索引〉；B：xverify-1/result.md:127〈其他驗過的題目〉（4.4.4.2、10.6.2.8.3、Q2094）
 
 scenarios:
   - name: A 場上 3 張、要出 3 個 token → 只能選 2 個

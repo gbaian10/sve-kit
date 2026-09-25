@@ -24,9 +24,12 @@ evidence:
     quote: 場のカードは、表向きになっている面の情報を持ちます。
     derivation:
       - 進化領域的進化卡只有選定的那一面有效 → 只誘發那一面的【進化時】
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:84〈全部改動局面的核對索引〉；B：xverify-2/result.md:218〈全部實質核驗局面的索引〉（2.15.3.1、12.2.2、Q1152、Q1361）
 
 scenarios:
   - name: A 選『真紅の絆・ポーラ』（face 1）：進化時把場上其他 2 張放到 EX

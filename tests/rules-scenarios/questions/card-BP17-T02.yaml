@@ -23,9 +23,12 @@ evidence:
     quote: いいえ。能力によって場に出たカードはプレイ枚数に数えません。
   - ref: Q1153
     quote: いいえ。フォロワーの進化はカードのプレイには含まず、このターンにプレイしたカードは『愛の妖精・ポーラ』と『フェアリー』の2枚のみのため、【コンボ_3】の条件を満たしていません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:104〈其他驗過的題目〉（13.2.1.2、Q451、Q1153）
 
 scenarios:
   - name: A 第 3 張打出 → コンボ_3 成立 → 2 傷害

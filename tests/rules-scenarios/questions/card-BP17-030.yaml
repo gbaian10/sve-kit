@@ -51,11 +51,17 @@ evidence:
     quote: プレイするためのコストがある場合、そのコストを決定し、その後すべてのコストを支払います。
     derivation:
       - 10.6.2.3 選目標在 10.6.2.5 決定費用之前 → 「選んでいたなら」在決定費用時已知
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B／B2：xverify-1/result.md:45〈22 個重疊題〉（4.8.3.2、Q2235、Q2236）
+  - by: fable
+    method: qa
+    note: Q2236、Q2235、4.1.4；xverify-1/result.md〈22 個重疊題〉。「BP21-PR05 EX滿=True」在 followup 補零張 select（4.8.3.2），xverify-2/final.md 同意
 scenarios:
   - name: '[astra] BP21-PR05 EX滿=False'
     setup:

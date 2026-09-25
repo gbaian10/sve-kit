@@ -38,9 +38,12 @@ evidence:
     quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
     derivation:
       - 送墓費用被 stack 取代仍算付費；一個 stack 用完後規則送墓並立即消去 token。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.6.2.5.2、11.7.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: stack=2 已橫置=False
     setup:

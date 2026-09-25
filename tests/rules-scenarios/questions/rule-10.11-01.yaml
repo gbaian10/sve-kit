@@ -40,9 +40,12 @@ evidence:
     quote: "ある効果が特定のカードの情報や配置状態を参\n照している場合、その効果の実行時にそのカードが\nその領域から、場から場への移動以外の移動を\n行っていた場合、その効果は、そのカードが最後に\nその領域にあったときの情報や配置状態を参照しま\nす。"
     derivation:
       - ダメージ觸發先待機，但條件要求結算時自己仍在場；死亡後不能靠最後資訊假稱仍在場。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2354、10.7.7、4.1.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 來源原體力 1
     setup:

@@ -33,9 +33,12 @@ evidence:
     quote: "いいえ。1ターンに1回の回数に含まれません。\n進化前の『ゴブリン』が持っているような《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。それ以外の能力によって進化するものなどに、この制限はありません。"
   - ref: BP19-009
     quote: "{進化}{コスト2}：これは進化する。\n{ファンファーレ}【コンボ_3】これは進化する。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.16.1.1、12.2.4、Q2558；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: ファンファーレ自動進化
     setup:

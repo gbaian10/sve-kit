@@ -25,9 +25,12 @@ evidence:
     quote: プレイしたカードがフォロワーやアミュレットであり、自分の場のカードの枚数がその上限未満である場合、それを自分の場に移動します。
   - ref: BP17-067
     quote: "{進化}{コスト1}：これは進化する。\n{ファンファーレ}相手の場のフォロワー1体を選ぶ。これがEXエリアからプレイされていたなら、それに2ダメージ。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 5.5.3；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 從 ex 打出
     setup:

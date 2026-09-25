@@ -23,9 +23,12 @@ evidence:
     quote: いいえ。『ロイド』2枚に変身させることはできません。選んだ『操り人形』のうち1枚が『ロイド』に変身し、もう1枚が『ヴィクトリア』に変身します。
   - ref: Q1060
     quote: いいえ。自分のEXエリアの『操り人形』2枚を選ぶことができない場合、このスペルをプレイすることができません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:81〈全部改動局面的核對索引〉（5.17.1、9.1.4.4）；B：xverify-1/result.md:95〈其他驗過的題目〉（5.17.1、Q1058、Q1060）
 
 scenarios:
   - name: A EX 的 2 張操り人形 → 消滅（消去）→ EX 出現ロイド與ヴィクトリア各 1

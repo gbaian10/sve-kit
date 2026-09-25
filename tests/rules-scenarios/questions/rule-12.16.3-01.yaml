@@ -28,9 +28,12 @@ evidence:
     quote: 起動能力を指定する際、それが進化能力または進化相当能力である場合、このターンにターンプレイヤーがいずれかの進化能力や進化相当能力をすでにプレイ済みである場合、その起動能力は指定できません。
   - ref: BP15-SL13
     quote: "これをプレイする際、手札の陰陽師・カード2枚を公開：コストを-1する。\n{アドバンス起動}{コスト4}：自分のエボルヴデッキの『貴人』1枚を場に出してよい。この能力は自分の墓場の陰陽師・カードやスペルが7枚以上なら使える。\n{ファンファーレ}1枚引く。自分の手札1枚を捨てる。\n{起動}これを{アクト}：自分の墓場の元のコスト4以下の陰陽師・フォロワー1枚を選ぶ。それを場に出す。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.16.3、8.3.2.1；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: advance 先用，共用一次額度
     setup:

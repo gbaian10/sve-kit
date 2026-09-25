@@ -41,9 +41,12 @@ evidence:
     quote: "進化領域のカードが場のいずれのカードとも関連\n付けされていない場合、そのカードをエボルヴデッ\nキ置き場に表向きで移動します。"
     derivation:
       - 回手後原效果消失；進化卡分離回進化牌庫，token 回手立即消去，後續抽牌照做。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 4.1.4、5.16.3、11.6.1、9.1.4.4；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: normal
     setup:

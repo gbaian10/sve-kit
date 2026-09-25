@@ -31,9 +31,12 @@ evidence:
     quote: "‘【ドライブ獲得時】（テキスト）’は、‘この\nカードがドライブを得たとき、（テキスト）’を意\n味します。"
     derivation:
       - 憑依費用移動 drivepoint，之後獲得時能力另行待機，加 1/1。缺費用不可起動。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 14.4.9.2、14.4.7.3.2、14.4.8.2、14.4.9.5、10.4.2.2；xverify-1/result.md〈對方沒把握的題目〉三局面；遷移後含「PP 0 以 EP 1 代付」xverify-2/result.md 4/4。之後只改 must_pass
 scenarios:
   - name: drivepoint=True PP=1
     setup:

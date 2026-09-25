@@ -60,11 +60,17 @@ evidence:
     quote: いいえ。『ジェンティルドンナ』が場にいる場合、相手の《ファンファーレ》能力や【進化時】能力は、誘発条件を満たしたとしても誘発しないため、プレイすることができません。
   - ref: Q1826
     quote: いいえ。【進化時】能力は誘発条件を満たしたとしても誘発しないため、プレイすることができません。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:90〈全部改動局面的核對索引〉（12.8.2、Q1824）；B：xverify-1/result.md:50〈22 個重疊題〉（14.2、Q1824–Q1826）
+  - by: fable
+    method: independent-derivation
+    note: 14.2.1.1、14.2.2.4、14.2.2.5、14.2.3.1、10.4.2.2；xverify-1/result.md〈22 個重疊題〉三局面，遷移後四局面 xverify-2/result.md 4/4 同意（非必過）
 scenarios:
   - name: '[astra] 有胡蘿蔔=True PP=1'
     setup:

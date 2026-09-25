@@ -27,9 +27,12 @@ evidence:
     quote: 場に出した『モーターグレイブディガー』の攻撃力と体力は1になります。この『モーターグレイブディガー』が進化した場合、攻撃力と体力は2になります。
   - ref: cr 5.16.1.1
     quote: そうでない場合、エボルヴデッキ置き場の裏向きのカードの中から適正なカードを 1 枚選択し、それを公開して指定します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-2/result.md:221〈全部實質核驗局面的索引〉（5.5.3、5.16.1、Q1682、Q1681）
 
 scenarios:
   - name: A 由能力從墓場出場 → ファンファーレ進化 → 2/2 → 進化時；之後仍可用進化能力

@@ -32,9 +32,12 @@ evidence:
     quote: "デッキからカードを探し、その見つけたカードを指定\nの領域に移動したか、見つけたカードを移動しない\nことを選んだか、カードを見つけなかった後、その\nデッキをシャッフルします。"
     derivation:
       - 完整列出可搜尋牌庫；即使有符合卡也可不找到，之後仍洗牌。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: '4.1.2.2、5.8.1.2、5.8.2、Q2242；xverify-1/result.md；遷移後 xverify-2/result.md 3/3；「有符合=True 找到=True」fix-2 公開 to: P2 後 xverify-2/recheck.md 同意'
 scenarios:
   - name: 有符合=True 找到=True
     setup:

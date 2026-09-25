@@ -31,9 +31,12 @@ evidence:
     quote: "コストのうち一部または全部を支払うことが\n不可能である場合、このコストはまったく支払\nうことはできません。"
     derivation:
       - 兩個進化能力分別收 PP 或三张手牌，不需同時支付；三張不足不能部分支付。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q314、10.4.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 能力 1 手牌 0
     setup:

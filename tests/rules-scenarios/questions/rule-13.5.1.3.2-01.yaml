@@ -49,9 +49,12 @@ evidence:
     quote: "【ネクロチャージ_10】これは【突進】【必殺】を持つ。（【必殺】を持つフォロワーと交戦した相手のフォロワーは、ダメージを与え合ったあと破壊される）\n{ファンファーレ}下記から1つチョイスする。【1】自分の墓場の『魂の一刀』1枚を選ぶ。それをEXエリアに置く。【NC_20】このターン、それをプレイする際、コストを-2する。【2】自分のデッキの上2枚を墓場に置く。"
   - ref: EBD03-014
     quote: 相手の場のフォロワー1体を選ぶ。それに4ダメージ。【ネクロチャージ_20】それのリーダーに4ダメージ。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 13.5.1.3.2、13.5.1.3.2.1、13.5.1.3.1；xverify-2/result.md〈補題〉9/9
 scenarios:
   - name: 常駐 NC5：墓場 4
     setup:

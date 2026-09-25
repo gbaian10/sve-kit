@@ -25,9 +25,12 @@ evidence:
   - ref: cr 1.3.2
     quote: なんらかの理由によりプレイヤーが実行不可能なことを実行するよう指示された場合、その指示のうち実行可能な部分のみを実行します。
     derivation: [牌庫 2 張時「上3枚を墓場に置く」→ 放 2 張]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:113〈全部改動局面的核對索引〉；B／C：xverify-2/result.md:266〈全部實質核驗局面的索引〉（1.2.1.2、5.10.1.1）
 
 scenarios:
   - name: A 牌庫 2 張：送墓 3 張只放 2 張、牌庫 0 不敗北 → 下個自己開始階段抽不到 → 敗北

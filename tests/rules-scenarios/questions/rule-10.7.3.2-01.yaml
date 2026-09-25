@@ -68,11 +68,17 @@ evidence:
     quote: 特定条件に枚数以外の条件がある場合、それを見つけた後に、そのカードが条件を満たすことを相手に示します。
     derivation:
       - 條件含卡名 → 找到與否是玩家決定（結算中途），找完洗牌（5.8.2）
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／A2／B：xverify-2/recheck.md:100〈全部改動局面的核對索引〉
+  - by: fable
+    method: independent-derivation
+    note: 10.7.3.2、10.6.2.3.3；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 可選目標 0'
     setup:

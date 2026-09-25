@@ -28,9 +28,12 @@ evidence:
   - ref: Q1923
     quote: 場に出した『モーターグレイブディガー』の攻撃力と体力は1になります。この『モーターグレイブディガー』が進化した場合、攻撃力と体力は2になります。
     derivation: [同一條 5.16.2.1 的官方實例：設值造成的差額在進化後保留]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-2/result.md:257〈全部實質核驗局面的索引〉（5.16.2、5.16.2.1、Q1923、Q1934）
 
 scenarios:
   - name: A 復活アンサージュ +1／疾走 → 進化後 4/3 且仍有疾走 → 攻擊リーダー 4

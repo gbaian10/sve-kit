@@ -25,9 +25,12 @@ evidence:
     quote: いいえ。自分の場に選ぶことのできる目標が存在しない場合、『九尾の決意』をプレイすることはできません。
     derivation:
       - 本題【2】有目標 → 可以打出，但【1】不能被選（5.18.3.1.2）
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-1/result.md:100〈其他驗過的題目〉（Q1727–Q1729）
 
 scenarios:
   - name: A 只能選【2】：宿命の狐火・セッカ +2/+2 後，天剣の乙女受 3

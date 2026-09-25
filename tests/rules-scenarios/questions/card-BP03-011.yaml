@@ -20,9 +20,12 @@ evidence:
     quote: 自分のフォロワーはアクト状態で場に残り、相手のフォロワーは破壊されます。…【攻撃時】の能力によって相手のフォロワーに2ダメージ与え、相手のフォロワーの体力が0になり、その後のチェックタイミングによって相手のフォロワーが破壊されます。相手のフォロワーがおらず、ダメージを与え合う交戦はしないため、攻撃の処理が終了し、自分のフォロワーはアクト状態で場に残ります。
   - ref: cr 7.3.1
     quote: ‘メインフェイズが来たとき’の誘発条件が発生します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:212〈全部實質核驗局面的索引〉（7.3.1、7.3.2、Q449）；B：xverify-2/recheck.md:79〈全部改動局面的核對索引〉（Q449）
 
 scenarios:
   - name: A 自己的主要階段來臨 → 茨の森自毀 → 之後攻擊沒有附加傷害

@@ -26,9 +26,12 @@ evidence:
     quote: "コストのうち、 は‘場のスタンド状態のこのカード\nをアクトする’を意味します。"
     derivation:
       - EX 沒有薔薇，回復量零時不發回復事件；仍支付來源橫置費用，不得以手牌張數替代。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 1.3.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 手牌佔位 0
     setup:

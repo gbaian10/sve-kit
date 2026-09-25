@@ -62,11 +62,17 @@ evidence:
     quote: なんらかの理由でコストとして手札から捨てられるカードも EX エリアから墓場に移動するカードも存在しない場合、（効果）は実行されません。
   - ref: cr 10.6.2.8.1.1
     quote: 解決領域のカードになんらかの効果が適用されている、またはそのカードになんらかのカウンターが置かれている場合、場に置かれたカードにも同じ効果やカウンターが適用されます。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:225〈全部實質核驗局面的索引〉（12.18.2、12.18.2.2、Q2575）；B：xverify-1/result.md:47〈22 個重疊題〉（12.18.2、10.6.2.8.1.1、Q2575）
+  - by: fable
+    method: independent-derivation
+    note: 12.18.2、12.18.3、10.4.2.2；xverify-1/result.md〈22 個重疊題〉三局面同意。「ex BP01-173 EX滿=False」第一輪不同意（hand／ex 矛盾），遷移後改正，xverify-2/result.md 1/1 同意
 scenarios:
   - name: '[astra] hand BP01-173 EX滿=False'
     setup:

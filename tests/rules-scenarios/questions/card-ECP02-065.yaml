@@ -21,9 +21,12 @@ evidence:
     quote: テキストに‘サイコロをふりなおす’指示がある場合、その直前のサイコロをふる指示による目をそれ以降の効果に適用する代わりに、再びサイコロをふり、その新たに出た目を以降の効果に適用します。
   - ref: Q2206
     quote: いいえ。…サイコロをふりなおした場合、ふりなおす前の目を参照することができません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:110〈其他驗過的題目〉（5.20、Q2206、Q2207）
 
 scenarios:
   - name: A 擲到 3、不重擲 → 對手把攻擊力最高的從者放到墓場

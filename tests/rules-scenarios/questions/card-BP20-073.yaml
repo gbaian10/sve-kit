@@ -29,9 +29,12 @@ evidence:
     quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
     derivation:
       - 先固定被選時體力，再造成 6 傷害；選擇時大於 3 不追加主戰者傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2665；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 選擇時體力 3
     setup:

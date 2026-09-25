@@ -35,9 +35,12 @@ evidence:
     quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
     derivation:
       - 道具本身也可按 4 費法術使用；加生命後抽空會在檢查時點敗北，並不撤銷加生命。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q899、5.10.1.1、11.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: PP=4 頂牌=1
     setup:

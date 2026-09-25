@@ -49,11 +49,17 @@ evidence:
       - 輝く金貨是 0 費 token 法術，可由 EX 打出；結算送墓後立即消去。手牌 token 不可存在，故只測 EX。
   - ref: Q1968
     quote: はい。プレイすることができます。その場合、スペルとしての能力は持っていないので、特に何も起こらず、『輝く金貨』は墓場に置かれます。（『輝く金貨』はトークンなので、墓場に置かれた直後に消去されます。）
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C：xverify-1/result.md:44〈22 個重疊題〉（10.4.2、Q1968）
+  - by: fable
+    method: qa
+    note: Q1968、9.1.4.3／9.1.4.4；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 從 ex 打出'
     setup:

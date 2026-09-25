@@ -29,9 +29,12 @@ evidence:
     quote: '{起動}{コスト0}：自分の場のフォロワー1体を選ぶ。それに1ダメージ。この能力は1ターンに1回使える。'
     derivation:
       - 對照局面明列已用一次，同一來源仍在場；卡面每回合一次的限制使第二次不能起動。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.6.2.5.3；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 零 PP 支付成立，效果正常結算
     setup:

@@ -38,9 +38,12 @@ evidence:
     quote: なんらかの自動能力において‘～とき、（処理）：（効果）’と書かれている場合、これはその自動能力を解決する際にその処理を実行することで、その効果を適用することを選択することができます。
     derivation:
       - ラストワード＝「場から墓場に置いたとき」（12.5.3）→ 「〜とき、（処理）：（効果）」形式 → 結算時決定是否支付；不付也算已打出並結算
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C／D2／D3：xverify-1/result.md:117〈其他驗過的題目〉（10.4.7.3、Q602–Q604、Q492–Q494）；D1：xverify-2/recheck.md:97〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 付 +5、選ファイター當目標 → 全體消滅（含オーラ的ヘヴンリーイージス）

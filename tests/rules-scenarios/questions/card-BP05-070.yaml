@@ -22,9 +22,12 @@ evidence:
     quote: カードをプレイする際のコストの数値を変更する効果は、このカードのコストの情報の値を変更するのではなく、そのコストのために減少する PP の点数を変更します。
   - ref: Q733
     quote: はい。コストは+1されます。相手は追加で1PPを支払わなければそのスペルをプレイすることはできません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B／B2：xverify-1/result.md:92〈其他驗過的題目〉（Q736、Q733）
 
 scenarios:
   - name: A 進化時：對手隨機捨 1 張（受控亂數指定 b2）

@@ -36,9 +36,12 @@ evidence:
     quote: "あるフォロワーの体力が 0 以下である場合、その\nフォロワーは破壊されます。"
     derivation:
       - 3 體力目標會要求追加主戰者傷害，但零血リリエル仍留場至檢查時點，禁止能力傷害有效。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 11.1.2、Q777／Q770；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 護盾來源體力 3
     setup:

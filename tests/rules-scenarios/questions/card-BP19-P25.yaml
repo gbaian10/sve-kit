@@ -30,9 +30,12 @@ evidence:
     quote: "そのカードや能力のネクロチャージが\n参照する墓場のカードの枚数は、原則とし\nてそのネクロチャージを含む効果の解決の\n開始時点で固定され、その解決中にカード\nの枚数が変わっても変更されません。"
     derivation:
       - NC 不足仍可合法選傷害模式及目標，只是不造成傷害；另一模式只送頂牌。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 13.5.1.3.1、Q2599；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: NC=9 模式=1
     setup:

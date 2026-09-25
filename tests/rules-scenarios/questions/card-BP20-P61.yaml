@@ -29,9 +29,12 @@ evidence:
     quote: プレイしたのがスペルや起動能力や自動能力である場合、そのテキストや能力に示された効果を、表記の順に従って実行します。
   - ref: BP20-P61
     quote: 自分のメインフェイズが来たときか自分の財宝・カードを融合したときか自分が財宝・カードをプレイしたとき、これに返戻カウンター1個を置く。これの返戻カウンターが8個以上なら、これは消滅する。自分のデッキから盗賊・カード1枚を探し、手札に加える。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 9.1.4.2／9.1.4.4、5.8.2、「なら」管到段尾（Q1373 慣例）；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 返戻原有 6 個
     setup:

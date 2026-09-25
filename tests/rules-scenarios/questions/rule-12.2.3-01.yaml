@@ -32,9 +32,12 @@ evidence:
     quote: "なんらかの理由でこの時点でこのコス\nトを支払うことができない場合、このカード\nや能力のプレイは取り消され、ゲームはこ\nのカードや能力をプレイすることを選択する\n前まで戻されます。"
     derivation:
       - 4 費進化可付 3 PP 加 1 EP；總資源不足須完整回溯。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.2.3、10.6.2.5.4；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: PP=3 EP=1
     setup:

@@ -33,9 +33,12 @@ evidence:
     quote: "この時点で攻撃フォロワーが場に存在する場合、\n攻撃フォロワーはその攻撃力に等しいダメージを攻\n撃目標に与えます。"
     derivation:
       - Quick 在傷害前可由手牌或 EX 打出；非 Quick 法術不合法，回溯後攻擊尚未造成傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 8.4.7；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: hand quick=True
     setup:

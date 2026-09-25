@@ -35,9 +35,12 @@ evidence:
   - ref: cr 5.5.3
     quote: カードが‘（領域）から場に出る’ことを参照する場合、それはそのカードがその領域から直接場に出ること、およびそのカードがその領域からプレイされた後解決領域で解決されて場に出ることの両方を参照します。
     derivation: [從手牌打出的從者是「手札から場に出た」，不是「墓場から」→ B 不造成傷害]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C／D：xverify-2/result.md:261〈全部實質核驗局面的索引〉（5.5.3、10.7.2、Q2595、Q2596）；B 是日文原文獨立推導，Q2595／Q2596／Q2621 並非手牌反例的直接 Q&A；last.md 明載不把 Q302 泛化到其他卡。
 
 scenarios:
   - name: A 起動把 2 隻八獄從者從墓場放上場 → 2 隻ミロエル 各誘發 2 次 → b1 受 4 傷害

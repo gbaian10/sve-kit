@@ -41,9 +41,12 @@ evidence:
     quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
     derivation:
       - 神秘の獲得創建的下次自己結束時待機，在來源法術已墓場也生效；消滅當時全部 EX，原有金幣也包括且消去。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: '10.7.5、3.1.2.3、10.7.7、Q189、Q190；xverify-1/result.md〈對方沒把握的題目〉；遷移 delayed: true 純格式 xverify-2/result.md 3/3；「原有金幣 2」fix-2 加 group 後 xverify-2/recheck.md 同意（非必過）'
 scenarios:
   - name: 原有金幣 0
     setup:

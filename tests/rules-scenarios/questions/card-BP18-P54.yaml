@@ -26,9 +26,12 @@ evidence:
     quote: 選ぶ数として指定された数が 1 以上で、かつその数の目標を選ぶことが不可能である場合、このカードや能力のプレイは不正で、このカードや能力はプレイできません。このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
   - ref: BP18-P54
     quote: 自分の墓場の元のコスト2以下の透京・カードをカード名が異なるように3枚まで選ぶ。それを手札に加える。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 「カード名が異なるように」目標不正；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 同費用不同名可選
     setup:

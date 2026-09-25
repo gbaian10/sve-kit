@@ -46,9 +46,12 @@ evidence:
     quote: "‘【超進化時】（テキスト）’は、‘このカードが超進\n化したとき、（テキスト）’を意味します。"
     derivation:
       - 超進化同時產生進化時與超進化時待機；ジェンティルドンナ只禁止前者，不禁止 +1/1 或超進化時。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 12.2.4.1、12.2.4.2、Q2554、Q2076、Q2077；xverify-1/result.md；遷移後 xverify-2/result.md 3/3
 scenarios:
   - name: SEP=0 抑制=False
     setup:

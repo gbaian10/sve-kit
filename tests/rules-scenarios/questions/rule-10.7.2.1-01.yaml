@@ -31,9 +31,12 @@ evidence:
       - explicit 列出不同金幣進 EX 的兩個事件，各自對應一次待機，不可按能力指稱去重。此題測既有待機處理，不宣稱測生成金幣事件。
   - ref: Q1886
     quote: はい。2回誘発します。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 10.7.2.1、Q1886；xverify-1/result.md〈對方沒把握的題目〉。之後未再改（非必過）
 scenarios:
   - name: 同能力待機 1 次
     setup:

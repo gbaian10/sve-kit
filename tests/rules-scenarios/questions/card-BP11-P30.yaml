@@ -54,11 +54,17 @@ evidence:
     quote: この時点で攻撃フォロワーが場に存在する場合、攻撃フォロワーはその攻撃力に等しいダメージを攻撃目標に与えます。
     derivation:
       - 攻擊目標在 8.4.6 的檢查時點已被破壞 → 8.4.9 沒有目標可給傷害、也沒有 8.4.9.1 的反擊
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-2/result.md:220〈全部實質核驗局面的索引〉（5.32.1、10.4.2.1、Q1581、Q1584）；B：xverify-1/result.md:41〈22 個重疊題〉（10.6.2.5.4、Q1581）
+  - by: fable
+    method: qa
+    note: Q1581、10.4.2.2、5.32.1、12.10.2；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 足額=True 已橫置=False'
     setup:

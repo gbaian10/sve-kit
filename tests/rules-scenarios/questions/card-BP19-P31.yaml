@@ -45,9 +45,12 @@ evidence:
     quote: いいえ。満たしません。
   - ref: BP19-P31
     quote: '{ファンファーレ}自分のデッキの上9枚を公開する。その後、それをシャッフルし、デッキの下に置く。これによってカード名がそれぞれ異なる9枚のカードを公開したなら、これを墓場に置く。自分のエボルヴデッキの『流転の統治者・ゼラエル』1枚を場に出してよい。'
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2614、5.21.1、12.8.2；xverify-2/result.md〈補題〉3/3；fix-2 加 group 後 xverify-2/recheck.md 同意
 scenarios:
   - name: nine-distinct
     setup:

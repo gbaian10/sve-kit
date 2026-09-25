@@ -39,9 +39,12 @@ evidence:
     quote: "‘【突進】’は‘このフォロワーは、このターンの最\n初から連続して自分がマスターであった状態でない\n場合でも、攻撃目標としてアクト状態のフォロワーを\n選ぶ場合にのみ攻撃フォロワーとして選択できる’を\n意味します。"
     derivation:
       - 有其他機械使ニコラ持突進；從 EX 打出還得到指定攻擊，所以進場當回合可以攻擊直立目標，手牌來源不行。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2232、5.5.3、12.11.2、Q2252；xverify-1/result.md〈其他驗過的題目〉；遷移 entered_from 純格式 xverify-2/result.md 3/3
 scenarios:
   - name: hand
     setup:

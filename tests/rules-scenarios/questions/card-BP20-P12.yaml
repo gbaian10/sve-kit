@@ -48,11 +48,17 @@ evidence:
     quote: 追加コストを支払っていない場合、「これの追加コストを払っていたなら、」以降の効果は働かず、1枚引くことができません。
   - ref: Q2634
     quote: 相手の場のフォロワーを選ぶことができない場合、このスペルをプレイすることができないため、コストの支払いもできず、1枚引くことができません。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B／C：xverify-1/result.md:48〈22 個重疊題〉（10.6.2.3.3、Q2633、Q2634）
+  - by: fable
+    method: qa
+    note: Q2633、Q2634、10.6.2.3.3；xverify-1/result.md〈22 個重疊題〉（兩邊局面相同）。之後未再改
 scenarios:
   - name: '[astra] 付了追加費用'
     setup:

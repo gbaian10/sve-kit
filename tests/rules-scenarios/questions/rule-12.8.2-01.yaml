@@ -27,9 +27,12 @@ evidence:
     quote: "カードが‘（領域）から場に出る’ことを参照する場\n合、それはそのカードがその領域から直接場に出る\nこと、およびそのカードがその領域からプレイされた\n後解決領域で解決されて場に出ることの両方を参\n照します。同様に、カードが‘（領域）以外から場に出\nる’ことを参照する場合、それはそのカードがその領\n域でも解決領域でもない領域から直接場に出るこ\nと、およびそのカードがその領域以外の領域からプ\nレイされた後解決領域で解決されて場に出ることの\n両方を参照します。"
     derivation:
       - 守護入場可自願橫置，屬於 play 結算中的一個輸入點；两種選擇都保留同一張實體卡。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.8.2、契約 9.2 place-acted；xverify-2/result.md〈遷移新增 6 題〉2/2
 scenarios:
   - name: 守護入場橫置
     setup:

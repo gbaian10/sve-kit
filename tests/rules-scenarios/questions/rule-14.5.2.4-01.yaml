@@ -30,9 +30,12 @@ evidence:
     quote: "イクイップメント領域のトークンが場のいずれの\nカードとも関連付けされていない場合、そのトークン\nを消去（9.1.3）します。"
     derivation:
       - 裝備者離場後失去關聯，規則消去無關聯裝備；裝備不隨從者移往手牌／墓場／消滅區。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 14.5.2.4、11.11.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: damage
     setup:

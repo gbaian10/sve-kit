@@ -28,9 +28,12 @@ evidence:
     quote: "以上の 10.9.1.2 -10.9.1.5 で適用順の前後\nが決定されない複数の継続効果が存在する\n場合、それらの継続効果は、効果が発生した\n順に従って順番に適用します。\nXX\nXX"
     derivation:
       - 同層無依存的 +2 與設為 1 按時間戳，攻擊傷害分別為 1 和 3。fixture 直接給定效果，來源卡的目標可由對方施放取得。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.9.1.4、10.9.1.6；xverify-1/result.md〈對方沒把握的題目〉。之後未再改（非必過）
 scenarios:
   - name: buff→set
     setup:

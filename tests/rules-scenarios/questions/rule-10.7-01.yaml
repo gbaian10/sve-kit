@@ -42,9 +42,12 @@ evidence:
     quote: なんらかの効果により、以降の特定の時点で誘発条件が発生する自動能力が作成されることがあります。これを時限誘発と呼びます。
     derivation:
       - 時限誘發的主人是產生它的效果的主人（3.1.2.3）＝P1；來源卡已在墓場不影響
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-2/recheck.md:99〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 兩隻ゴースト同時離場 → 只待機 1 次 → 出 1 隻ゴースト；同回合再離場不誘發

@@ -26,9 +26,12 @@ evidence:
     quote: "すでにある状態にあるものを改めてその状\n態にするよう求められた場合、それは改めて\nその状態になるわけではなく、その行為自体\nが行われません。"
     derivation:
       - Quick 起動也必須支付橫置費用；已橫置時不造成傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.3.5、10.4.6；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 已橫置=False
     setup:

@@ -22,9 +22,12 @@ evidence:
     quote: 追加コストとしてスタックカウンターを取り除いていたら、（テキスト）
     derivation:
       - 沒付 → 「（テキスト）」不適用；能力仍被打出（沒有目標以外的前提）
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:219〈全部實質核驗局面的索引〉（13.3.3.2、13.3.3.2.1、Q1483）；B：xverify-1/result.md:98〈其他驗過的題目〉（12.14.2、11.3.2）
 
 scenarios:
   - name: A 付土の秘術 → レイサム得到必殺 → 交戰後天剣の乙女被必殺破壞

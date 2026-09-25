@@ -49,11 +49,17 @@ evidence:
     quote: コストのうち、 は‘場のスタンド状態のこのカードをアクトする’を意味します。
   - ref: cr 12.2.5
     quote: 特殊な種類‘エボルヴ’を持つカードが進化能力を持っている場合、その進化能力はプレイできません。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-1/result.md:58〈22 個重疊題〉（5.16.2、8.3.2.1）
+  - by: fable
+    method: independent-derivation
+    note: 8.3.2.1；xverify-1/result.md〈22 個重疊題〉。之後未再改
 scenarios:
   - name: '[astra] 第一次進化'
     setup:

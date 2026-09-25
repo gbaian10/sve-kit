@@ -39,9 +39,12 @@ evidence:
     quote: "直前のルール処理より後に、いずれかのフォロ\nワーが必殺（12.14）を持つフォロワーと交戦していた\n場合、そのフォロワーは破壊されます。"
     derivation:
       - 傷害上限保住體力，仍不阻止下一個規則處理的必殺破壞。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.14.2、12.14.2.1、11.3.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 必殺攻擊力 2 防守裝備=False
     setup:

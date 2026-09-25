@@ -34,9 +34,12 @@ evidence:
     quote: "{クイック}\n相手のフォロワー1体を選ぶ。それを破壊する。【スペルチェイン_10】それのリーダーに3ダメージ。"
   - ref: BP17-P21
     quote: 相手の場のフォロワー1体を選ぶ。それに4ダメージ。【ネクロチャージ_10】自分のデッキから『友魂の少女・ルナ』1枚を探し、場に出す。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 13.3.1.3、13.5.1.3.1；xverify-2/result.md〈補題〉4/4
 scenarios:
   - name: 總墓場10 法術9 使用BP01-073
     setup:

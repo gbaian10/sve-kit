@@ -30,9 +30,12 @@ evidence:
     quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
     derivation:
       - 結束時兩張各待機，但第二張結算時生命已 10，不能再加血抽牌。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q964、Q962；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 楓 1 張
     setup:

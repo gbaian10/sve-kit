@@ -19,9 +19,12 @@ evidence:
     quote: ある情報を‘＋した’とは、その情報の数値が現在の値からより大きい値に変化したことを意味します。
   - ref: cr 10.7.2.2
     quote: ‘ターンごとに（数値）回’という表記を持つ自動能力が誘発条件を満たした場合、この自動能力は最大で、（数値）からこのターン中にこの自動能力が待機状態になった回数を引いた回数まで待機状態になります。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-1/result.md:106〈其他驗過的題目〉（5.27.1、10.7.2.2、Q2760）
 
 scenarios:
   - name: A 第一次 +2 抽 1 張；同回合第二次不抽

@@ -79,11 +79,17 @@ evidence:
     quote: 注釈文はテキストの一部ですが、あくまで能力の解説を目的とした意味を持つだけで、ゲームには影響しません。
     derivation:
       - 圖示是 14.4.1 的卡圖資訊，注釈文只能推認；2026-09-25 已用官方卡圖確認 CP03-016＝draw、CP03-010＝none（card-facts-verified.md）→ card_facts 改 verified: true
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 見 reverify/result.md〈R2、R3〉：A 的遊戲推導同意，但 d2／P2 仍有 awaiting.choices（題檔第 612 行），不符核驗期間新增的契約第 10 節第 14 條；該視角應只留 by:P1。B 的牌序、禁止抽牌及傷害均同意（Q1481、14.4.5／14.4.6.3）。scenarios 列本次已評閱範圍，A 不同意、B verified；不是缺證。
+  - by: fable
+    method: qa
+    note: 契約 10 節第 14 條；兩局面只刪 after-decision-3／view P2 的 awaiting.choices，其餘欄位與 omniscient 條目未動（git diff 三個 hunk＝這兩處＋我改的 [fable] A）；規則結論沿用 xverify-1（Q1481、14.4.5.1.5、4.15.2）；見 recheck-3/result.md 第 3 節
 scenarios:
   - name: '[astra] 第一次執行抽牌，第二次翻到治療'
     setup:

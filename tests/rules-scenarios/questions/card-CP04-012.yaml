@@ -31,9 +31,12 @@ evidence:
     quote: "コストのうち、 は‘場のスタンド状態のこのカード\nをアクトする’を意味します。"
     derivation:
       - UB 在 class 構築無效；title 仍須能支付橫置費用。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 14.5.1.2、Q2548；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: title 已橫置=False
     setup:

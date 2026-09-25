@@ -35,9 +35,12 @@ evidence:
       - 同一雙面進化卡，場上資訊從進化領域實際朝上的面取得；邪竜可無視守護，聖竜不行。
   - ref: Q1188
     quote: はい。『聖竜・リントヴルム』か『邪竜・リントヴルム』のどちらかの面を選択し、そのエボルヴフォロワーに進化することができます。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 2.15.3.1、12.8.2、8.4.3.1；xverify-1/result.md〈其他驗過的題目〉三局面；兩個「實際進化選面」局面 xverify-2/result.md 2/2（Q1188）
 scenarios:
   - name: 朝上面 0 有橫置守護=False
     setup:

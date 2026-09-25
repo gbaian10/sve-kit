@@ -24,9 +24,12 @@ evidence:
       - 檢查時點：P1 與 P2 的 11.2.1（或 P1 的 11.2.2 與 P2 的 11.2.1）同時成立 → 同時敗北 → 1.2.2
   - ref: cr 5.10.1.1
     quote: この指示の実行の際に、そのプレイヤーのデッキ置き場にカードがない場合、そのプレイヤーは次のルール処理でゲームに敗北します（11.2.2）。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C：xverify-2/recheck.md:94〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 雙方リーダー在同一次結算歸 0 → 和局

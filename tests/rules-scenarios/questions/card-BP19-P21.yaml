@@ -51,9 +51,12 @@ evidence:
       - 12.4.3 把ファンファーレ展開為進場時的自動能力；此處是結算時的可選費用。
       - 手牌為空，無法完整支付，依契約 9.8 仍保留唯一 decline 輸入；能力已打出並解決，不是待機取消。
       - 新增 after-decision-2、3 後，兩次傷害均發生在 after-decision-3 至 6 的最後區間。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2621、10.4.6.1、12.4.3、10.4.7.3；xverify-2/result.md〈補題〉2/2；fix-2 改結算中 decline 後 xverify-2/recheck.md 同意
 scenarios:
   - name: blessing 蘇生ミロエル後當回合起動
     setup:

@@ -32,9 +32,12 @@ evidence:
     quote: 自分のエンドフェイズが来たとき、相手のリーダー1人か相手の場のフォロワー1体を選ぶ。それに1ダメージ。自分のEXエリアのクレストが3枚以上なら、代わりに2ダメージ。5枚なら、代わりに4ダメージ。
   - ref: BP20-P47
     quote: "{進化}{コスト1}：これは進化する。\n{ファンファーレ}『クレスト 安息の団結者』1枚をEXエリアに置く。\n『クレスト 安息の団結者』{ビショップ}絶傑・狂信・クレスト自分のエンドフェイズが来たとき、自分の場の絶傑・フォロワー1体を選ぶ。自分のEXエリアのクレストが3枚以上なら、それは{攻撃力}+1/{体力}+1する。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 9.1.5.1.1、卡文；xverify-2/result.md〈補題〉6/6；「尚未存在同名」fix-2 補 移動 事件後 xverify-2/recheck.md 同意
 scenarios:
   - name: EX 紋章 2 枚
     setup:

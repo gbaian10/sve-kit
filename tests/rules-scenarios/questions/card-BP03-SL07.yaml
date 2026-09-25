@@ -26,9 +26,12 @@ evidence:
     quote: >-
       ‘【土の秘術 （数値）】（テキスト）’は‘このカードまたは能力をプレイする際に、追加コストとして、【スタック】を持つあなたのいずれかのアミュレットに置かれているスタックカウンターを（数値）個取り除いてよい。
       これによりそのアミュレットにスタックカウンターが置かれていない状態になった場合、そのアミュレットを墓場に置く。追加コストとしてスタックカウンターを取り除いていたら、（テキスト）’を意味します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:80〈全部改動局面的核對索引〉（6.4）；B：xverify-2/result.md:213〈全部實質核驗局面的索引〉（13.3.2.2、13.3.2.4、Q2773、Q469）；C：xverify-1/result.md:90〈其他驗過的題目〉（13.3.3.2、Q292：土の秘術歸零立即送墓）
 
 scenarios:
   - name: A ファンファーレ：出一個魔片，既有的魔片 +1 計數器，抽 1

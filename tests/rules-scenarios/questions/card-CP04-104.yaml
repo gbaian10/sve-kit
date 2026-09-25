@@ -41,9 +41,12 @@ evidence:
     quote: "ユニオンバースト能力が‘発動した’ことを\n参照する場合、それはその能力が適正にプレ\nイされて（10.6.2.7）解決された（10.6.2.8）ことを\n参照します。"
     derivation:
       - X=0 的費用成立且算 UB；拒付則取消待機但不回溯進化；X=1 橫置護符並造成 2 傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 10.6.2.5.3、Q2520、Q2471、10.7.3.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: zero
     setup:

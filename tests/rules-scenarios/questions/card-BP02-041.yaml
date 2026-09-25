@@ -38,9 +38,12 @@ evidence:
     quote: "置換効果を適用する際、その中に自\n己置換効果が存在する場合、自己置換で\nあるものを先に適用します。"
     derivation:
       - SC 數墓場法術張數，非不同名；自身仍在解決領域，不補成第 10 張。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 13.3.1.2、13.3.1.3；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 0 張同名法術
     setup:

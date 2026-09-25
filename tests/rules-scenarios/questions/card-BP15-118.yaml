@@ -39,9 +39,12 @@ evidence:
     quote: いいえ。自分のリーダーの体力を+4以上していない場合、それ以降の効果は働かず、1枚引くことができません。
     derivation:
       - 這是相同條件句式的旁證，不是本卡直接 Q&A。5 枚以上なら限制到段落末，因此 3 張進化牌時抽牌與 PP 回復都不執行。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 「なら」管到段尾的慣例（Q962／Q2633 同型，非直接 Q&A）；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 表向進化從者 0
     setup:

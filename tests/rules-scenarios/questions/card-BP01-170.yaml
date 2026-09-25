@@ -50,11 +50,17 @@ evidence:
     quote: はい。1枚引きます。その場合、手札の枚数が再び上限を超過するため、改めて手札が7枚になるように捨てる必要があります。
   - ref: cr 7.4.7
     quote: ターンプレイヤーは、自身の手札のカードの枚数が手札の上限を超えている場合、超過分の枚数に等しい枚数のカードを捨てます。これによりカードを捨てた場合、その後にチェックタイミングが発生し、再び 7.4.7 に戻ります。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A：xverify-2/result.md:211〈全部實質核驗局面的索引〉（10.3.4、7.4.7、Q270、Q242）；B：xverify-1/result.md:37〈22 個重疊題〉（Q242：當法術打出只抽本體 1 張）
+  - by: fable
+    method: qa
+    note: Q242、5.10.1.1、11.2.2、1.2.1.2；xverify-1/result.md〈22 個重疊題〉。三個 [astra] 局面之後未再改
 scenarios:
   - name: '[astra] 牌庫 0 張'
     setup:

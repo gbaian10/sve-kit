@@ -24,9 +24,12 @@ evidence:
     quote: このフォロワーの能力が誘発し解決するタイミングが先です。【攻撃時】能力などフォロワーが攻撃したときに誘発する能力をすべて解決した後、非ターンプレイヤーのクイックタイミングが訪れます。
   - ref: Q1385
     quote: はい。3回目の場合のみ有効です。攻撃したフォロワーを含めて、このターン中の自分の場のアクアフォース・フォロワーの攻撃が2回目の場合や、4回目以降の場合は有効ではありません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:269〈全部實質核驗局面的索引〉（8.4.5、8.4.6、Q1375、Q1387）
 
 scenarios:
   - name: A 第 1 次攻擊的攻擊者被神罰破壞仍算一次 → 第 3 次攻擊時アルゴス 生效

@@ -33,9 +33,12 @@ evidence:
   - ref: cr 10.7.2.2
     quote: ‘ターンごとに（数値）回’という表記を持つ自動能力が誘発条件を満たした場合、この自動能力は最大で、（数値）からこのターン中にこの自動能力が待機状態になった回数を引いた回数まで待機状態になります。
     derivation: [団結者本回合已待機 1 次 → 1 − 1 = 0 → 第二次受傷不待機]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-2/result.md:268〈全部實質核驗局面的索引〉（10.5.2.1、10.5.2.2、Q2005、Q2658）
 
 scenarios:
   - name: A ファンファーレ 全體 1 傷害 → 3 個誘發（含致命的崇拝者）→ 大佐被破壞 → ラストワード 打アジュラ → アジュラ 再誘發

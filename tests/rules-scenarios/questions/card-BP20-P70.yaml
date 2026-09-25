@@ -38,9 +38,12 @@ evidence:
     quote: "クレストのトークンが持つ能力は、そのカードが EX\nエリアにある間のみ有効です。"
     derivation:
       - 紋章在 EX 的結束时能力有效；依當時手牌數判定。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.3.6；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 手牌 0
     setup:

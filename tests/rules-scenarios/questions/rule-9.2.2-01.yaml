@@ -34,9 +34,12 @@ evidence:
     quote: いいえ。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができません。
   - ref: Q1268
     quote: はい。アドバンスフォロワーはエボルヴフォロワーではないので、選ぶことができます。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q1267、Q1268、9.2.2；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 表向advance不是生命の量産的合法目標
     setup:

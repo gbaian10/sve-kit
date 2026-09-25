@@ -29,9 +29,12 @@ evidence:
     quote: いいえ。「自分のターン中、自分のリーダーの体力が減少したとき、～」という能力は自分のターン中にのみ誘発します。そのため、相手のターン中に条件を満たしても『羅刹の咎人・ガロダート』は進化しません。
   - ref: cr 12.4.3
     quote: ‘ファンファーレ （テキスト）’は、‘このカードを場以外から場に置いたとき、（テキスト）’を意味します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:263〈全部實質核驗局面的索引〉（12.4.3、12.5.3、Q2560、Q1971）
 
 scenarios:
   - name: A 對手回合：LW 復活特攻隊長 → ファンファーレ 自傷並進化 → ピアシィ 與根際 在對手回合誘發

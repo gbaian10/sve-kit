@@ -59,9 +59,12 @@ evidence:
       A: いいえ。《UB》能力が発動したことを満たしません。
   - ref: cr 14.5.1.3
     quote: ユニオンバースト能力が‘発動した’ことを参照する場合、それはその能力が適正にプレイされて（10.6.2.7）解決された（10.6.2.8）ことを参照します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／A2／B／B2：xverify-1/result.md:119〈其他驗過的題目〉（10.6.2.5.2、11.7.1、Q2520、Q2471）
 
 scenarios:
   - name: A 費用被【スタック】取代（計數器 2 → 1），費用視為成立，效果照常

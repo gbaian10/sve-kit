@@ -30,9 +30,12 @@ evidence:
     quote: はい。コストを支払ってプレイすることができます。
     derivation:
       - 被拉出的デモンビーター的ファンファーレ會誘發；{コスト2} 是打出費用（10.1.1.2.2）→ PP 1 付不出 → 不能打出 → 10.7.3.2 取消一次
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:92〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 打出デモンビーター後跳過ファンファーレ直接攻擊 → 拒絕；處理完待機後攻擊成功

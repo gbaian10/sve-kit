@@ -30,9 +30,12 @@ evidence:
     quote: ‘ファンファーレ （テキスト）’は、‘このカードを場以外から場に置いたとき、（テキスト）’を意味します。
   - ref: PCS01-048
     quote: "{進化}{コスト1}：これは進化する。\nこれが場にいる限り、自分の場の他のプリコネ・フォロワーすべては【守護】を持つ。\n{ファンファーレ}自分のデッキの上1枚を公開する。それがプリコネ・フォロワーなら、それを場に出す。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.10.3、12.8.2、4.4.4.2；xverify-2/result.md〈補題〉2/2；「場上 5 張」followup 補零張 select 後 xverify-2/final.md 同意
 scenarios:
   - name: 場上 4 張
     setup:

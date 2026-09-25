@@ -40,9 +40,12 @@ evidence:
     quote: "コストのうち一部または全部を支払うことが\n不可能である場合、このコストはまったく支払\nうことはできません。"
     derivation:
       - 選項 3 不需要場上目標；不足兩張不能部分翻面；成功翻兩張才抽一及回 2 PP。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2294、Q2295、5.18.3.1.2、5.15.1；「表向自然進化 2」xverify-1/result.md；「0」「1」遷移後 xverify-2/result.md 2/2（非必過）
 scenarios:
   - name: 表向自然進化 0
     setup:

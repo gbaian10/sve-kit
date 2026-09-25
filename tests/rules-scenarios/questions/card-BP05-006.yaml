@@ -26,9 +26,12 @@ evidence:
     quote: チョイスする行動でどの選択肢を採用するかを決定する処理は、プレイのための前提となる選択肢（10.6.2.2）です。そのため、チョイスする行動による選択はプレイの段階で行う義務があります。
     derivation:
       - 打出的是 P1 的待機能力，但チョイス的主體是「相手プレイヤー1人」→ 打出程序中由 P2 輸入（契約 9.12）
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C：xverify-2/result.md:214〈全部實質核驗局面的索引〉（5.18.3、5.18.2、Q672、Q674）
 
 scenarios:
   - name: A P2 選【1】→ P2 的下一個開始階段不抽牌（PP 最大值照常 +1）

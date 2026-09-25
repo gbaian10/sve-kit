@@ -24,9 +24,12 @@ evidence:
     quote: はい。永続能力です。自分のリーダーの体力が10以下である限り、『干絶の飢餓・ギルネリーゼ』は【ドレイン】を持ちます。『干絶の飢餓・ギルネリーゼ』を場に出した後に自分のリーダーの体力が11以上から10以下になった場合、【ドレイン】を持ちます。『干絶の飢餓・ギルネリーゼ』を場に出した後に自分のリーダーの体力が10以下から11以上になった場合、【ドレイン】を失います。
   - ref: cr 12.13.2
     quote: ‘【ドレイン】’は‘このフォロワーが攻撃によるダメージを与えたとき、あなたのリーダーの体力をそのダメージ数に等しい値増加する’を意味します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B／C／D：xverify-2/recheck.md:110〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 體力 11 → 攻擊リーダー → 沒有ドレイン

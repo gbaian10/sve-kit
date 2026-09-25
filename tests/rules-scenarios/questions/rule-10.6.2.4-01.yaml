@@ -41,9 +41,12 @@ evidence:
       - 四點分給 b、c 為 4＋0 違反各目標至少一單位；仍可合法分配 3＋1，因此不是 10.6.2.4.2.1 的完全不能合法打出。
       - 依使用者裁定，此非法 choose-pending 以 cannot-play 表達回到嘗試前；待機保留，本體已進場及其五點 PP 費用不回溯。
       - 重新選同一待機並分配 3＋1 後，b／c 的體力由 6／6 變成 3／5，待機清空；兩個傷害同時發生。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 「選取 1」重寫後依 10.6.2.3.2、Q556、10.6.2.4.1、10.6.2.4.2、10.6.2.4.2.1、10.6.2.7、10.7.3.2 逐鍵重推，三個比對點全部同意；其餘三局面未改（選取 0 xverify-1、3 加 1 xverify-2、4 加 0 ruling.md）；見 recheck-3/result.md
 scenarios:
   - name: 選取 0
     setup:

@@ -33,9 +33,12 @@ evidence:
     quote: "この時点で、そのカードや能力が‘プレイさ\nれた’事象が発生します。"
     derivation:
       - Combo 看本回合卡片打出數，不把起動能力當卡片；未達三時不執行條件內抉擇，但仍付橫置。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 13.2.1.2、13.2.1.3、5.18.3.1、5.18.2.2；xverify-1/result.md〈對方沒把握的題目〉。之後未再改（非必過）
 scenarios:
   - name: 已打出卡片 0
     setup:

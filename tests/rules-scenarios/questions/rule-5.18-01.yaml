@@ -60,11 +60,17 @@ evidence:
     quote: はい。EPは上限がないため、EPが3ある場合も新たにEPを得ます。
   - ref: cr 10.6.2.8.2.2
     quote: チョイスする（5.18）処理により複数の選択肢を選んだ場合、各選択肢はテキストに表記の順で実行します。
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-1/result.md:56〈22 個重疊題〉（5.18.2.1、Q293、Q294）
+  - by: fable
+    method: qa
+    note: 5.18.2.1、Q2251／Q293、Q2275、10.6.2.8.2.2、5.15.1；xverify-1/result.md〈22 個重疊題〉三局面；「重複模式 [1, 1]」xverify-2/result.md 1/1（Q2251）（非必過）
 scenarios:
   - name: '[astra] [1]'
     setup:

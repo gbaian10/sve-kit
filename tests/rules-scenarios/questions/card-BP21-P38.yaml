@@ -30,9 +30,12 @@ evidence:
     quote: "自動能力とは、特定の誘発条件が発生したとき\nに、その後に発生したチェックタイミングでプレイされ\nる能力を指します。"
     derivation:
       - 神秘の獲得逐次放 EX，但ターンごとに1回只待機一次；整個補 EX 效果完成後才處理傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.7.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 放入 EX 1 張
     setup:

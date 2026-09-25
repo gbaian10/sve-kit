@@ -46,9 +46,12 @@ evidence:
     quote: ターンプレイヤーは、カードを 1 枚引きます。
     derivation:
       - 結束階段先選守護橫置，再經非回合玩家 Quick；9 張手牌捨 2 張，光の道筋誘發抽到 8 張後再次捨到 7，之後才換回合。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 7.4.1～7.4.9、4.7.3.1；xverify-2/result.md〈遷移新增 6 題〉2/2
 scenarios:
   - name: 結束守護橫置；捨牌誘發後再次檢查上限
     setup:

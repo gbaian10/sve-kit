@@ -24,9 +24,12 @@ evidence:
     quote: はい。『遮断の触手』1体を場に出すことができます。
   - ref: cr 4.4.4.2
     quote: 場にカードを移動または作成する処理において、その結果場のカードの枚数が上限を超える場合、その移動または作成するカードの中から、その場の上限からその場にあるカードの枚数を引いた数のカードを選択し、それらのカードのみを移動または作成します。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/final.md:9〈追加修正最後確認〉（5.8.1.2、6.4）；B：xverify-2/recheck.md:87〈全部改動局面的核對索引〉；C：xverify-1/result.md:103〈其他驗過的題目〉（5.8.2、Q2243、Q2242）
 
 scenarios:
   - name: A 場上 4 張、付 +2、不找到：遮断出場（5 張）→ 蹂躙不出

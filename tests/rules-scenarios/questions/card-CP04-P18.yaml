@@ -28,9 +28,12 @@ evidence:
     quote: そのフォロワーが交戦して受けるダメージや、能力によって受けるダメージが+2されます。
   - ref: cr 10.4.6.1
     quote: このコストは、このコストをもつカードが場に出たターンであっても実行する事が可能です。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:88〈全部改動局面的核對索引〉
 
 scenarios:
   - name: A 搜到ペコリーヌ放 EX → 本回合 0 費打出（ファンファーレ付不出取消）→ UB +2 → エンジェルバレッジ 1 → 3

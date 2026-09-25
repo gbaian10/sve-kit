@@ -75,11 +75,17 @@ evidence:
     derivation:
       - マゼルベイン的結束時 3 傷害是能力傷害 → リリエル「自分のリーダーは能力によるダメージを受けない」→ 不發生（1.3.3 禁止優先）
       - 「相手の場のフォロワーすべてに3ダメージ」不是對リーダー → 照常，リリエル 5 → 2，仍在場、起動能力仍可用
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:250〈全部實質核驗局面的索引〉（7.4.1、7.4.2、Q761、Q772）
+  - by: fable
+    method: independent-derivation
+    note: 7.4.5；xverify-1/result.md〈22 個重疊題〉。遷移時 Quick=True 多了空 guard-act（xverify-2/result.md 無法判斷），fix-2 移除後 xverify-2/recheck.md 同意；目前版本與第一輪驗過的版本相同
 scenarios:
   - name: '[astra] 結束時 Quick=False'
     setup:

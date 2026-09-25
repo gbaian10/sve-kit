@@ -28,9 +28,12 @@ evidence:
     quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
     derivation:
       - 神鷹 一拍子同一句的選張與排頂合併為一個輸入；下一句排底是下一個 occurrence。底牌列表第一張最靠上。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 卡面兩句兩個輸入、契約 9.8；xverify-2/result.md〈遷移新增 6 題〉2/2（附註：卡表標有エラッタ，以現行文字為準）
 scenarios:
   - name: 頂部選 2 張並排序；下一句排底部
     setup:

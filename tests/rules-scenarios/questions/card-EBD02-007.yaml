@@ -25,9 +25,12 @@ evidence:
     quote: ‘追加ターンを行う’指示が複数ある場合、その中で最も後から適用されたものを 1 つ適用します。これを、すべての‘追加ターンを行う’指示を実行し終えるまで、本来実行するターンの直前で繰り返します。
   - ref: cr 3.3.2.2
     quote: あるプレイヤーが追加ターンを行った（5.28）場合、そのターンは経過ターンに数えます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/result.md:270〈全部實質核驗局面的索引〉（5.28.1、5.28.1.1、Q193、Q192）
 
 scenarios:
   - name: A 第 1 張 → 追加回合 → 追加回合裡打第 2 張 → 再一個追加回合 → 之後才輪到 P2

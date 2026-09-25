@@ -37,9 +37,12 @@ evidence:
     quote: "コストのうち一部または全部を支払うことが\n不可能である場合、このコストはまったく支払\nうことはできません。"
     derivation:
       - 課程費用消滅 EX 道具，token 隨即消去；缺 PP 或道具不可部分支付。PR-155 卡片頁的官方 Q&A Q897 已確認其對戰名稱為「魔法のアイテム」，依契約以 rules_name 記錄已驗證事實。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: '14.3.2.1、Q897、9.1.4.3／9.1.4.4、10.4.2.2；xverify-1/result.md〈對方沒把握的題目〉。之後只改 card_facts（rules_name verified: true）與 must_pass，局面本體未動（diff 核對）'
 scenarios:
   - name: 道具=1 PP=1
     setup:

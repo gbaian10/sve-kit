@@ -28,9 +28,12 @@ evidence:
     quote: はい。コストを支払わないことで、何も起こらないことを選択できます。
     derivation:
       - 【2】的「{コスト1}：」是 10.4.7.4 的結算時可選費用 → resolve-choice execute
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:94〈其他驗過的題目〉（Q730–Q732、Q2623）
 
 scenarios:
   - name: A 自傷兩次 → 真紅 → 疾走攻擊：攻撃時 2 傷害；體力剛好 7 → +2/+2 → 攻擊傷害 4

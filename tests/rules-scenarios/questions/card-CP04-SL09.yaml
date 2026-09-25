@@ -28,9 +28,12 @@ evidence:
     quote: プレイしたのがスペルや起動能力や自動能力である場合、そのテキストや能力に示された効果を、表記の順に従って実行します。
   - ref: CP04-SL10
     quote: "【進化時】相手の場のフォロワー1体を選ぶ。それに5ダメージ。\n【超進化時】自分の墓場のスペルをカード名が異なるように2枚まで選ぶ。それをEXエリアに置く。このターン、それをプレイする際、コストを-2する。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 4.8.3.2；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 只餘一格，選 x
     setup:

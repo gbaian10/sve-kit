@@ -33,9 +33,12 @@ evidence:
     quote: "いずれかのプレイヤーが敗北した場合、ゲームは\nその時点で終了します。対戦相手が敗北し、自身は\n敗北していないプレイヤーがゲームに勝利します。"
     derivation:
       - 每結算一個自動能力就規則處理；兔子造成己方零生命時立即結束，不能繼續深淵大佐。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 11.2.1、1.2.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 生命 1
     setup:

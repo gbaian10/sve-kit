@@ -31,9 +31,12 @@ evidence:
   - ref: cr 11.2.2
     quote: 直前のルール処理より後にいずれかのプレイヤーがカードを引くことを求められ、その際にデッキ置き場にカードがなかった場合、そのプレイヤーはこのゲームに敗北します。
     derivation: [E：護り手只禁止「自分（P2）敗北」與「相手（P1）勝利」，P1 抽不到牌的敗北不在禁止範圍 → 勝利被禁止後，檢查時點的規則處理讓 P1 敗北]
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A：xverify-2/recheck.md:109〈全部改動局面的核對索引〉；B／C／D／E：xverify-2/result.md:255〈全部實質核驗局面的索引〉（1.2.4、1.3.3、Q1480、Q1162）
 
 scenarios:
   - name: A 牌庫 5：捨 2 抽 3 → 剩 2 不勝利；光の道筋 之後才抽第 4 張 → 剩 1 也不勝利

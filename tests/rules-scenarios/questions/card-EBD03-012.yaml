@@ -30,9 +30,12 @@ evidence:
     quote: 選ぶ数として指定された数が 1 以上で、かつその数の目標を選ぶことが不可能である場合、このカードや能力のプレイは不正で、このカードや能力はプレイできません。このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
   - ref: EBD03-012
     quote: "{進化}{コスト1}：これは進化する。この能力はこれが墓場から場に出ていたなら使える。\n【突進】（【突進】を持つフォロワーは、場に出たターンから相手のフォロワーを攻撃できる）\n{ラストワード}『機動二輪車』1つを場に出す。自分のデッキの上2枚を墓場に置く。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 5.5.3 entered_from；xverify-2/result.md〈補題〉4/4
 scenarios:
   - name: 異形來源 cemetery
     setup:

@@ -32,9 +32,12 @@ evidence:
     quote: "‘ラストワード （テキスト）’は、‘このカードを場か\nら墓場に置いたとき、（テキスト）’を意味します。"
     derivation:
       - 只在實際融合八獄從者時抽一；手牌捨棄帶謝幕曲的卡不會誘發場到墓場能力。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.18.4.1、12.5.3；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: BP01-173
     setup:

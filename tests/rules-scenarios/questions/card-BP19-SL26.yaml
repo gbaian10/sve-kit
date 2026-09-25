@@ -37,9 +37,12 @@ evidence:
     quote: "プレイしたのがスペルや起動能力や\n自動能力である場合、そのテキストや能力\nに示された効果を、表記の順に従って実行\nします。"
     derivation:
       - 看牌後才選入手的一張；不足八張看全部，其餘受控洗牌置底。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 1.3.2、5.9.1.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 可看 1 張
     setup:

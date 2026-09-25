@@ -39,9 +39,12 @@ evidence:
       - A=使source失去全部能力；B=source的永續能力給其他プリコネ從者守護。
       - A與B都在能力增減層；A改變B能否發生，B不改變A的對象或內容。
       - 因此B依存A，先A後B，不能把更早的B結果永久保留。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.9.1.2～10.9.1.6；xverify-2/result.md〈對方沒把握清單的判定〉第 1 點 2/2
 scenarios:
   - name: 未抹除來源，守護擋住主戰者
     setup:

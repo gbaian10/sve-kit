@@ -48,11 +48,17 @@ evidence:
     quote: いいえ。できません。カードや能力によって目標を選ぶ場合、そのカードや能力をプレイする際に目標を選びます。…その後、能力に示された効果を、表記の順にしたがって実行します。
     derivation:
       - 「自分の手札1枚をデッキの上か下に置く」不是「選ぶ」目標 → 結算時依表記順序：先抽、再從當時手牌選 → 可以放剛抽的卡
-status: draft
+status: verified
 author:
   - astra
   - fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-2/result.md:222〈全部實質核驗局面的索引〉（10.6.2.8.2、5.9.1、Q2087）
+  - by: fable
+    method: qa
+    note: 10.7.2.1、Q1886、4.8.3.1／4.8.3.2；xverify-1/result.md；遷移後 xverify-2/result.md 3/3；「原 EX 0」「原 EX 3」fix-2 加 移動 與 group 後 xverify-2/recheck.md 同意；「原 EX 5」followup 補零張 select 後 xverify-2/final.md 同意
 scenarios:
   - name: '[astra] 原 EX 0'
     setup:

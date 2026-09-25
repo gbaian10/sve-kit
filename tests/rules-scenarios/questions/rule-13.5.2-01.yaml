@@ -33,9 +33,12 @@ evidence:
     quote: "あるカードの効果によりプレイヤーがなんらかの行\n動を行うよう指示された場合に、同時にその行動を\n禁止する効果が発生している場合、常に禁止する\n効果が優先されます。"
     derivation:
       - 真紅要求實際體力下降；被防護阻止的自傷不算，後續ハウリング只有 4 傷害。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 13.5.2.2、Q780；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 有能力傷害防護=False
     setup:

@@ -29,9 +29,12 @@ evidence:
     quote: "なんらかの自動能力の誘発条件が満たされた場\n合、その自動能力は待機状態になります。"
     derivation:
       - 隨機捨棄由受控結果決定；捨棄光の道筋會另外待機抽一，白板則不會。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 10.3.4；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 隨機捨棄 b
     setup:

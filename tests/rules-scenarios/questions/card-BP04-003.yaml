@@ -41,9 +41,12 @@ evidence:
     quote: "自動能力とは、特定の誘発条件が発生したとき\nに、その後に発生したチェックタイミングでプレイされ\nる能力を指します。"
     derivation:
       - 深き森の異形造成攻擊傷害後，其自動能力讓 P1 勝利，無須把 P2 體力降至零；攻擊力零完全不造成傷害而不誘發。古き護り手的禁止勝利優先於勝利指示。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.23.1、Q558、Q752、1.3.3、1.3.2.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 攻擊力 8 禁止勝利 False
     setup:

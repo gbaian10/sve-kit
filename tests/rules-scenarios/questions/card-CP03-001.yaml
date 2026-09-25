@@ -26,9 +26,12 @@ evidence:
     quote: 特に効果による変更や指定がないかぎり、適正なカードとはそのカードと同じカード名のカードです。
   - ref: Q1376
     quote: いいえ。1ターンに1回の回数に含まれません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: 見 reverify/result.md〈C1、C2〉；Q1374／Q1376／Q1377／Q1481，CR 5.16、8.4.9、10.6.2.3.3、10.7.3.2、14.4.5；採 CP03-010＝none，逐筆確認進化、驅動、傷害與無目標取消。
 
 scenarios:
   - name: A 三隻アクアフォース先攻擊過 → メイルストローム第 4 次攻擊 → 進化成グローリー → 驅動檢查 → 傷害 4

@@ -26,9 +26,12 @@ evidence:
     quote: "経過ターン数は、それぞれのプレイヤーが持つ数\n値情報です。"
     derivation:
       - SEP 門檻依先後攻及自己的經過回合數，不能用全局回合總數。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 12.2.4、3.3.1；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 先攻 P1 自身第 6 回合
     setup:

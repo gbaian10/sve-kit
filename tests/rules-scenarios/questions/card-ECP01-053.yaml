@@ -25,9 +25,12 @@ evidence:
     quote: いいえ。コスト1を支払わず、スタンドしない選択を行うことができます。
   - ref: cr 10.4.7.3
     quote: なんらかの自動能力において‘～とき、（処理）：（効果）’と書かれている場合、これはその自動能力を解決する際にその処理を実行することで、その効果を適用することを選択することができます。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: A／B：xverify-2/result.md:271〈全部實質核驗局面的索引〉（7.2.1、7.2.2、Q1854、Q1855）
 
 scenarios:
   - name: A 對手結束回合 → 開始階段パーマー 不站起、其他從者站起 → 主要階段來臨 → 付 1 PP 站起

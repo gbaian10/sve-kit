@@ -33,9 +33,12 @@ evidence:
     quote: "あるトークンが存在できる領域以外の領域\nに移動した場合、その移動を行った直後に、そ\nの領域で消去されます。この処理はチェックタ\nイミングを待たず、なんらかの効果の途中で移\n動を行った場合は、その移動の続きを行うより\nも前に実行されます。"
     derivation:
       - 變身消滅原 token 並立即消去，再同區新建相同數量薔薇；只能斷言消去與區域計數，生成 id 契約尚缺。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 5.17.1、Q146、9.1.4.3／9.1.4.4；xverify-1/result.md〈對方沒把握的題目〉三局面；遷移後四局面 xverify-2/result.md 4/4；「變身 1」「變身 2」「new-1 打出」fix-2 改 移動 事件與 group 後 xverify-2/recheck.md 同意（非必過）
 scenarios:
   - name: 變身 0
     setup:

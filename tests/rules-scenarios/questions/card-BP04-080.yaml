@@ -21,9 +21,12 @@ evidence:
     quote: ‘【真紅】状態’とは‘現在があなたのターン中で、このターン中にあなたのリーダーの体力が減少したことがあった’を意味します。
   - ref: Q780
     quote: いいえ。【真紅】状態も「このターン中に自分のリーダーの体力が減少した」も満たしません。
-status: draft
+status: verified
 author: fable
-verified_by: []
+verified_by:
+  - by: astra
+    method: qa
+    note: A／B：xverify-1/result.md:91〈其他驗過的題目〉（13.5.2.1、Q780、Q1329）
 
 scenarios:
   - name: A 自傷 1 → 真紅 → 8 傷害

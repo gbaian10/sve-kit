@@ -29,9 +29,12 @@ evidence:
     quote: プレイしたのがスペルや起動能力や自動能力である場合、そのテキストや能力に示された効果を、表記の順に従って実行します。
   - ref: BP09-007
     quote: 相手の場のフォロワーすべてに3ダメージ。自分の墓場にある{エルフ}スペルのカード名の種類数が5種類以上なら、代わりに5ダメージ。相手のリーダーすべてに2ダメージ。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 卡文「カード名の種類数」、自身不算；xverify-2/result.md〈補題〉2/2
 scenarios:
   - name: 五張同名
     setup:

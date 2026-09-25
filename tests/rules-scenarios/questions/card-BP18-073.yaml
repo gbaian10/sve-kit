@@ -20,9 +20,12 @@ evidence:
     quote: "‘【覚醒】状態’とは‘あなたの現在の PP 最\n大値が 7 以上’を意味します。"
     derivation:
       - 覺醒看 PP 最大值，不看打出後剩餘 PP；最大 7 剩 3 仍增強。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 13.4.1.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 最大 PP 6
     setup:

@@ -31,9 +31,12 @@ evidence:
     quote: "‘【必殺】’は‘このフォロワーと交戦したフォロ\nワーは、次のルール処理で破壊される’を意味しま\nす。"
     derivation:
       - ニコラ的必殺由其他機械持續給予，交戰時按當下場面判定。來源攻擊者死亡不撤掉已確定的必殺規則破壞。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2252、10.9.1.2、11.3.2；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 其他機械=False
     setup:

@@ -31,9 +31,12 @@ evidence:
       - a1 的入場曲同時破壞 b1、b2；離場前兩張均是妖怪從者，彼此都符合「自分の他の」。
       - 各有一次待機，離場後能力仍須處理。a1 留場，故兩次都可選 a1，合計對它及 P1 主戰者各 2 傷害。
       - 只有 b1 時，a1 不離場、b1 不是自己的「他の」；不會產生待機。
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: 10.7.4.2、10.7.4.1.2、Q2022、10.7.7；xverify-1/result.md〈其他驗過的題目〉
 scenarios:
   - name: 互相誘發兩次並各結算一次
     setup:

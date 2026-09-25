@@ -41,9 +41,12 @@ evidence:
     quote: "【進化時】自分のデッキの上3枚を見る。その中から、武闘竜人・カード1枚をEXエリアに置いてよい。残りを好きな順にデッキの下に置く。このターン、それをプレイする際、コストを-3する。\n【超進化時】『青春の一撃』1枚をEXエリアに置く。"
   - ref: BP13-060
     quote: "これをプレイする際、コストを+3してよい。\n相手の場のフォロワー1体を選ぶ。それに3ダメージ。コストを+3したなら、自分のデッキから『焦熱の竜翼・ドラーク』1枚を探し、場に出す。それは【指定攻撃】を持つ。"
-status: draft
+status: verified
 author: astra
-verified_by: []
+verified_by:
+  - by: fable
+    method: qa
+    note: Q2386、1.3.2.2.1、7.4.8；xverify-2/result.md〈補題〉3/4，第 4 局面規則同意但 guard-act 寫法待裁定；契約 10 節第 1 點定案後 xverify-2/recheck.md 確認該局面符合
 scenarios:
   - name: 本回合減費=True 追加費用=True
     setup:
