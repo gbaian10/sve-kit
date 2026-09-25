@@ -34,10 +34,10 @@ def test_basic_card() -> None:
         face.text
         == "{進化}{コスト2}：これは進化する。\n【守護】\n{ファンファーレ}自分のリーダーに3ダメージ。"
     )
-    assert face.token_text is None
+    assert face.sections == []
 
 
-def test_double_faced_card_has_two_faces_and_token_details() -> None:
+def test_double_faced_card_has_two_faces_and_sections() -> None:
     card = extract_card(fixture("card_BP08-003.html"), number="BP08-003")
     front, back = card.faces
     assert front.name == "決意の人形・オーキス"
@@ -48,10 +48,8 @@ def test_double_faced_card_has_two_faces_and_token_details() -> None:
     assert back.product is None
     assert front.text is not None
     assert "――" not in front.text
-    assert front.token_text is not None
-    assert front.token_text.startswith(
-        "『操り人形』{ニュートラル}人形・フォロワー{コスト1}"
-    )
+    [tokens] = front.sections
+    assert tokens.startswith("『操り人形』{ニュートラル}人形・フォロワー{コスト1}")
 
 
 def test_errata_release_date_and_rulings() -> None:

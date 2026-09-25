@@ -16,8 +16,9 @@ from sve_carddb.sources.official_jp import MIN_PAGE_BYTES
 if TYPE_CHECKING:
     from selectolax.lexbor import LexborNode
 
-# A line made only of these marks separates the abilities from the token details.
-_TOKEN_SEPARATOR = re.compile(r"^[―─ー-]{5,}$")
+# A line made only of these marks splits the text into sections. What follows it is
+# not always token details: some spells print their main effect there.
+_SECTION_SEPARATOR = re.compile(r"^[―─ー-]{5,}$")
 _QA_TITLE = re.compile(r"^(?P<id>Q\d+)\s*[（(](?P<date>[^）)]+)[）)]$")
 _STAT_HEADINGS = {
     "status-Item-Cost": "cost",
@@ -41,7 +42,7 @@ class Face:
     power: str
     hp: str
     text: str | None
-    token_text: str | None
+    sections: list[str]
     flavor: str | None
     illustrator: str | None
     image: str
@@ -96,7 +97,7 @@ def _face(inner: LexborNode) -> Face:
     }
     stats = _stats(inner)
     detail = select_one(inner, ".detail")
-    text, token_text = _split_tokens(_render(detail) if detail is not None else None)
+    text, *sections = _split_sections(_render(detail) if detail is not None else None)
     flavor = select_one(inner, ".speech")
     image = require_one(inner, ".img img")
     return Face(
@@ -111,7 +112,7 @@ def _face(inner: LexborNode) -> Face:
         power=stats["power"],
         hp=stats["hp"],
         text=text,
-        token_text=token_text,
+        sections=[section for section in sections if section is not None],
         flavor=_render(flavor) if flavor is not None else None,
         illustrator=_illustrator(inner),
         image=attribute(image, "src") or "",
@@ -201,16 +202,18 @@ def _qa_text(node: LexborNode) -> str:
     return text.strip()
 
 
-def _split_tokens(text: str | None) -> tuple[str | None, str | None]:
+def _split_sections(text: str | None) -> list[str | None]:
+    """The text before the first separator line, then every later section."""
     if text is None:
-        return None, None
-    lines = text.split("\n")
-    for index, line in enumerate(lines):
-        if _TOKEN_SEPARATOR.match(line):
-            before = "\n".join(lines[:index]).strip() or None
-            after = "\n".join(lines[index + 1 :]).strip() or None
-            return before, after
-    return text, None
+        return [None]
+    sections: list[list[str]] = [[]]
+    for line in text.split("\n"):
+        if _SECTION_SEPARATOR.match(line):
+            sections.append([])
+        else:
+            sections[-1].append(line)
+    joined = ["\n".join(lines).strip() or None for lines in sections]
+    return [joined[0], *(section for section in joined[1:] if section)]
 
 
 def _render(node: LexborNode) -> str | None:
