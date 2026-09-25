@@ -116,6 +116,16 @@ fn an_unapproved_transport_field_fails_the_paired_checks_until_approved() {
 }
 
 #[test]
+fn assist_failures_name_the_layer() {
+    let reports = assist(AssistMutation::ResumeExtraEvent);
+    let Outcome::Fail { reasons } = outcome(&reports, "A3") else {
+        panic!("A3 should fail");
+    };
+    assert!(reasons.iter().any(|r| r.contains("sandbox")), "{reasons:?}");
+    assert!(reasons.iter().any(|r| r.contains("shadow")), "{reasons:?}");
+}
+
+#[test]
 fn missing_fixture_files_are_errors() {
     load_fixtures(&PathBuf::from("/nonexistent/arch")).unwrap_err();
 }

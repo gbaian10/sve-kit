@@ -40,9 +40,15 @@ impl Ids {
         self.nodes.iter().any(|n| n == id)
     }
 
+    pub(super) fn knows_event(&self, id: &str) -> bool {
+        self.events.iter().any(|e| e == id)
+    }
+
+    /// An id the third party never received stays as it is: folding unknown ids into
+    /// one label would hide differences the paired comparisons must see.
     fn label(list: &[String], prefix: &str, id: &str) -> String {
         list.iter().position(|known| known == id).map_or_else(
-            || format!("#{prefix}?"),
+            || id.to_owned(),
             |i| format!("#{prefix}{}", i.saturating_add(1)),
         )
     }

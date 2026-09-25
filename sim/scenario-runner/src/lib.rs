@@ -7,6 +7,7 @@
 
 extern crate alloc;
 
+pub mod ai;
 pub mod arch;
 pub mod compare;
 pub mod engine;

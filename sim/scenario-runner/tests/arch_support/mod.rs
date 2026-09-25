@@ -69,6 +69,30 @@ pub(crate) enum ReplayMutation {
     AwaitingExtraField,
     /// An event names a decision node the engine never issued.
     CauseUnknownNode,
+    /// P2's knowledge carries an extra field naming P1's hidden deck card.
+    KnowledgePeek,
+    /// P1's export on a replay branch shows the deck order after the shuffle.
+    ExportBranchOrder,
+    /// A replay branch does not carry what P1 saw during the search.
+    BranchNoCarryP1,
+    /// The adapter answers none of the board count queries.
+    BoardQueriesMissing,
+    /// An approved node-id field carries a never-issued id that encodes the top card.
+    UnknownIdEncodesHidden,
+    /// P1's export lists its own deck objects (sorted) before any search.
+    ExportDeckIdsSorted,
+    /// Saving consumes randomness: a run that was never saved shuffles differently.
+    D5DependsOnSave,
+    /// A branch reuses the node ids of its source line.
+    ReuseNodeIds,
+    /// A restored instance leaves out one event when it continues.
+    RestoreDropsEvent,
+    /// A restored instance links the new trigger to the wrong event.
+    RestoreMiswiresCause,
+    /// On a replay branch, P1 forgets the carried identities once the deck is shuffled.
+    BranchForgetsAfterShuffle,
+    /// P1's export carries a hash of the deck order before any search.
+    ExportInitialOrderHash,
 }
 
 pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
@@ -92,6 +116,18 @@ pub(crate) const REPLAY_MUTATIONS: &[(ReplayMutation, &[&str])] = &[
     (ReplayMutation::ExportInitialOrder, &["R5"]),
     (ReplayMutation::AwaitingExtraField, &["R5"]),
     (ReplayMutation::CauseUnknownNode, &["R6"]),
+    (ReplayMutation::KnowledgePeek, &["R5"]),
+    (ReplayMutation::ExportBranchOrder, &["R5"]),
+    (ReplayMutation::BranchNoCarryP1, &["R2b"]),
+    (ReplayMutation::BoardQueriesMissing, &["R4"]),
+    (ReplayMutation::UnknownIdEncodesHidden, &["R5"]),
+    (ReplayMutation::ExportDeckIdsSorted, &["R5"]),
+    (ReplayMutation::D5DependsOnSave, &["R1"]),
+    (ReplayMutation::ReuseNodeIds, &["R3"]),
+    (ReplayMutation::RestoreDropsEvent, &["R1"]),
+    (ReplayMutation::RestoreMiswiresCause, &["R1"]),
+    (ReplayMutation::BranchForgetsAfterShuffle, &["R2b"]),
+    (ReplayMutation::ExportInitialOrderHash, &["R5"]),
 ];
 
 #[derive(Debug, Clone)]
@@ -117,6 +153,10 @@ struct Game {
     /// Branch number → the node it was taken from.
     branches: Vec<Option<usize>>,
     admin: Vec<Value>,
+    /// Set once this game was saved or restored (for `D5DependsOnSave`).
+    saved: core::cell::Cell<bool>,
+    /// `D5DependsOnSave`: an unsaved game shuffles the other way.
+    skew_unsaved: bool,
 }
 
 /// The scripted replay engine.
@@ -125,6 +165,8 @@ pub(crate) struct FakeReplay {
     tag: usize,
     counter: usize,
     game: Option<Game>,
+    /// This instance was built by `restore`.
+    restored: bool,
 }
 
 fn setup_list(fixture: &Fixture, player: &str, zone: &str) -> Vec<(String, String)> {
@@ -165,6 +207,7 @@ impl FakeReplay {
             tag: INSTANCES.fetch_add(1, Ordering::Relaxed),
             counter: 0,
             game: None,
+            restored: false,
         }
     }
 
@@ -178,10 +221,12 @@ impl FakeReplay {
     }
 
     fn find(&self, id: &NodeId) -> Result<(usize, &Node), EngineError> {
+        // Latest first: with `ReuseNodeIds` a reused id names the newest node.
         self.game()?
             .nodes
             .iter()
             .enumerate()
+            .rev()
             .find(|(_, n)| n.id == id.0)
             .ok_or_else(|| adapter("unknown node"))
     }
@@ -230,6 +275,8 @@ impl FakeReplay {
             nodes: Vec::new(),
             branches: vec![None],
             admin: Vec::new(),
+            saved: core::cell::Cell::new(false),
+            skew_unsaved: false,
         }
     }
 
@@ -239,10 +286,11 @@ impl FakeReplay {
         }
         let rest: Vec<String> = game.deck.iter().filter(|id| *id != "a3").cloned().collect();
         let odd = game.seed.bytes().map(usize::from).sum::<usize>() % 2 == 1;
-        if odd {
-            rest.into_iter().rev().collect()
-        } else {
+        let skew = game.skew_unsaved && !game.saved.get();
+        if odd == skew {
             rest
+        } else {
+            rest.into_iter().rev().collect()
         }
     }
 
@@ -497,6 +545,25 @@ impl FakeReplay {
                 if self.mutation == ReplayMutation::ExportInitialOrder && !at.lookout && at.k < 3 {
                     m.insert("deck_order".into(), Value::from(deck.clone()));
                 }
+                if self.mutation == ReplayMutation::ExportInitialOrderHash
+                    && !at.lookout
+                    && at.k < 3
+                {
+                    m.insert("deck_hash".into(), Value::from(digest_of(&deck.join(","))));
+                }
+                if self.mutation == ReplayMutation::ExportDeckIdsSorted && !at.lookout && at.k < 3 {
+                    let mut ids = deck.clone();
+                    ids.sort();
+                    m.insert("deck_ids".into(), Value::from(ids));
+                }
+                let on_branch = node.carried.contains_key("P1");
+                if self.mutation == ReplayMutation::ExportBranchOrder
+                    && on_branch
+                    && !at.lookout
+                    && at.k >= 5
+                {
+                    m.insert("deck_order".into(), Value::from(deck.clone()));
+                }
                 if self.mutation == ReplayMutation::ExportTopCard && !at.lookout && at.k >= 5 {
                     m.insert("deck_order".into(), Value::from(deck));
                 }
@@ -522,6 +589,32 @@ impl FakeReplay {
                 Value::Object(m)
             }
         }
+    }
+
+    fn knowledge_of(&self, game: &Game, node: &Node, view: View) -> Value {
+        let mut k = Self::knowledge(game, node, view);
+        if self.mutation == ReplayMutation::KnowledgePeek && view == View::P2 {
+            k["peek"] = json!(["a4"]);
+        }
+        let at = at_of(game, node);
+        if self.mutation == ReplayMutation::BranchForgetsAfterShuffle
+            && view == View::P1
+            && node.carried.contains_key("P1")
+            && at.k >= 5
+        {
+            for key in ["identifiable", "carried"] {
+                if let Some(list) = k[key].as_array_mut() {
+                    list.retain(|v| {
+                        let id = v
+                            .as_str()
+                            .or_else(|| v["object"].as_str())
+                            .unwrap_or_default();
+                        id != "a4" && id != "a5"
+                    });
+                }
+            }
+        }
+        k
     }
 
     fn knowledge(game: &Game, node: &Node, view: View) -> Value {
@@ -606,8 +699,18 @@ impl FakeReplay {
                             e["cause"] = json!({"event": "missing"});
                         }
                     }
-                    events.push(json!({"id": self.fresh("e"), "kind": "シャッフル", "zone": "P1.deck", "cause": {"event": play(game)}}));
-                    events.push(json!({"id": self.fresh("e"), "kind": "待機", "ability": {"source": "a3", "line": 2}, "cause": {"event": first}}));
+                    let shuffle = self.fresh("e");
+                    events.push(json!({"id": shuffle, "kind": "シャッフル", "zone": "P1.deck", "cause": {"event": play(game)}}));
+                    let trigger_cause = if self.restored
+                        && self.mutation == ReplayMutation::RestoreMiswiresCause
+                    {
+                        Some(shuffle)
+                    } else {
+                        first
+                    };
+                    if !(self.restored && self.mutation == ReplayMutation::RestoreDropsEvent) {
+                        events.push(json!({"id": self.fresh("e"), "kind": "待機", "ability": {"source": "a3", "line": 2}, "cause": {"event": trigger_cause}}));
+                    }
                 }
                 _ => {}
             }
@@ -622,8 +725,17 @@ impl FakeReplay {
         decisions: Vec<Value>,
         carried: BTreeMap<String, Vec<(String, String)>>,
     ) -> Result<String, EngineError> {
-        let id = self.fresh("n");
+        let mut id = self.fresh("n");
         let mut game = self.game.take().ok_or_else(|| adapter("no game"))?;
+        if self.mutation == ReplayMutation::ReuseNodeIds
+            && branch > 0
+            && let Some(twin) = game
+                .nodes
+                .iter()
+                .find(|n| n.branch == 0 && n.decisions.len() == decisions.len())
+        {
+            id.clone_from(&twin.id);
+        }
         let mut node = Node {
             id: id.clone(),
             parent,
@@ -654,9 +766,13 @@ impl FakeReplay {
         Ok(id)
     }
 
-    fn seen(game: &Game, tail: usize, view: &str) -> Vec<String> {
+    /// What `view` identified on the source line below depth `depth`, up to `tail`.
+    fn seen(game: &Game, tail: usize, depth: usize, view: &str) -> Vec<String> {
         let mut out = Vec::new();
-        for i in Self::ancestors(game, tail) {
+        for i in Self::ancestors(game, tail)
+            .into_iter()
+            .filter(|i| game.nodes[*i].decisions.len() > depth)
+        {
             let at = at_of(game, &game.nodes[i]);
             for id in identifiable(&at, view) {
                 if !out.contains(&id) {
@@ -684,7 +800,9 @@ impl FakeReplay {
 
 impl ReplayEngine for FakeReplay {
     fn start(&mut self, fixture: &Fixture, seed: &str, _game: &str) -> Result<NodeId, EngineError> {
-        self.game = Some(Self::start_game(fixture, seed));
+        let mut game = Self::start_game(fixture, seed);
+        game.skew_unsaved = self.mutation == ReplayMutation::D5DependsOnSave;
+        self.game = Some(game);
         Ok(NodeId(self.push_node(
             None,
             0,
@@ -749,15 +867,14 @@ impl ReplayEngine for FakeReplay {
                 (kind, view, self.mutation),
                 (BranchKind::Undo, _, ReplayMutation::UndoNoCarry)
                     | (BranchKind::Undo, "P2", ReplayMutation::UndoForgetOpponent)
+                    | (BranchKind::Replay, "P1", ReplayMutation::BranchNoCarryP1)
             );
             if skip {
                 continue;
             }
-            let now = identifiable(&here, view);
             let from = game.nodes[tail].id.clone();
-            let brought: Vec<(String, String)> = Self::seen(game, tail, view)
+            let brought: Vec<(String, String)> = Self::seen(game, tail, here.k, view)
                 .into_iter()
-                .filter(|id| !now.contains(id))
                 .map(|id| (id, from.clone()))
                 .collect();
             let mut brought = brought;
@@ -809,6 +926,7 @@ impl ReplayEngine for FakeReplay {
         let (_, node) = self.find(at)?;
         let game = self.game()?;
         let visible_only = self.mutation == ReplayMutation::SaveVisibleOnly;
+        game.saved.set(true);
         let blob = json!({
             "lookout": game.lookout,
             "deck": game.deck,
@@ -848,7 +966,10 @@ impl ReplayEngine for FakeReplay {
             nodes: Vec::new(),
             branches: vec![None],
             admin: Vec::new(),
+            saved: core::cell::Cell::new(true),
+            skew_unsaved: self.mutation == ReplayMutation::D5DependsOnSave,
         });
+        self.restored = true;
         let mut id = self.push_node(None, 0, Vec::new(), BTreeMap::new())?;
         for decision in v["decisions"].as_array().cloned().unwrap_or_default() {
             id = self.decide(&NodeId(id), &decision)?.0.0;
@@ -859,10 +980,22 @@ impl ReplayEngine for FakeReplay {
     fn export(&self, at: &NodeId, view: View) -> Result<Value, EngineError> {
         let (_, node) = self.find(at)?;
         let game = self.game()?;
+        let at_here = at_of(game, node);
+        let node_field = if self.mutation == ReplayMutation::UnknownIdEncodesHidden
+            && !at_here.lookout
+            && (5..=12).contains(&at_here.k)
+        {
+            Value::from(format!(
+                "x-{}",
+                Self::d5(game).first().cloned().unwrap_or_default()
+            ))
+        } else {
+            Value::from(node.id.clone())
+        };
         let mut out = json!({
-            "node": node.id,
+            "node": node_field,
             "state": self.projection(game, node, view),
-            "knowledge": Self::knowledge(game, node, view),
+            "knowledge": self.knowledge_of(game, node, view),
         });
         if self.mutation == ReplayMutation::ExportSeed {
             out["rng"] = Value::from(game.seed.clone());
@@ -889,7 +1022,7 @@ impl ReplayEngine for FakeReplay {
                 view,
                 self.mutation == ReplayMutation::AwaitingExtraField,
             )),
-            knowledge: Self::knowledge(game, node, view),
+            knowledge: self.knowledge_of(game, node, view),
         })
     }
 
@@ -906,6 +1039,9 @@ impl ReplayEngine for FakeReplay {
         } else {
             json!([{"filler": 3}])
         };
+        if self.mutation == ReplayMutation::BoardQueriesMissing && path.ends_with("_count") {
+            return Ok(None);
+        }
         Ok(Some(match path {
             "P1.pp.current" => Value::from(match here.k {
                 0 => 4,
@@ -966,6 +1102,10 @@ pub(crate) enum AssistMutation {
     MismatchWrongExpected,
     MismatchWrongActual,
     MismatchRecordedTwice,
+    /// After Rewind, a3 is put onto the field one step early.
+    ResumeEventEarly,
+    /// After Rewind, placing a3 triggers twice.
+    ResumeExtraEvent,
 }
 
 pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
@@ -980,6 +1120,8 @@ pub(crate) const ASSIST_MUTATIONS: &[(AssistMutation, &[&str])] = &[
     (AssistMutation::MismatchWrongExpected, &["B1"]),
     (AssistMutation::MismatchWrongActual, &["B1"]),
     (AssistMutation::MismatchRecordedTwice, &["B1"]),
+    (AssistMutation::ResumeEventEarly, &["A3"]),
+    (AssistMutation::ResumeExtraEvent, &["A3"]),
 ];
 
 #[derive(Debug, Clone, Default, Hash, PartialEq, Eq)]
@@ -1068,7 +1210,19 @@ impl FakeAssist {
                 json!({"kind": "プレイ", "ability": {"source": "a1", "line": 2}}),
                 json!({"kind": "費用成立", "ability": {"source": "a1", "line": 2}}),
             ],
+            4 if self.mutation == AssistMutation::ResumeEventEarly => vec![
+                json!({"kind": "公開", "object": "a3", "to": "P2", "source": "a1"}),
+                json!({"kind": "場に出す", "object": "a3", "from": "P1.deck"}),
+            ],
             4 => vec![json!({"kind": "公開", "object": "a3", "to": "P2", "source": "a1"})],
+            5 if self.mutation == AssistMutation::ResumeEventEarly => {
+                vec![json!({"kind": "待機", "ability": {"source": "a3", "line": 2}})]
+            }
+            5 if self.mutation == AssistMutation::ResumeExtraEvent => vec![
+                json!({"kind": "場に出す", "object": "a3", "from": "P1.deck"}),
+                json!({"kind": "待機", "ability": {"source": "a3", "line": 2}}),
+                json!({"kind": "待機", "ability": {"source": "a3", "line": 2}}),
+            ],
             5 => vec![
                 json!({"kind": "場に出す", "object": "a3", "from": "P1.deck"}),
                 json!({"kind": "待機", "ability": {"source": "a3", "line": 2}}),
@@ -1281,6 +1435,16 @@ impl AssistEngine for FakeAssist {
         Ok(match path {
             "P1.field.a2" => Some(json!({"acted": state.a2_acted})),
             "P2.leader.life" => Some(Value::from(state.life)),
+            "P1.pp.current" => Some(Value::from(match state.k {
+                0 => 4,
+                1 | 2 => 3,
+                _ => 1,
+            })),
+            "P1.deck" => Some(if state.k >= 5 {
+                json!(["a4", "a5"])
+            } else {
+                json!(["a3", "a4", "a5"])
+            }),
             "P1.field" => Some(Value::from(p1_field(&At {
                 k: state.k,
                 alt: false,

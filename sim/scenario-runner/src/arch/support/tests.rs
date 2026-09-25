@@ -32,7 +32,10 @@ fn ids_label_by_first_appearance() {
     assert!(!ids.knows_node("n-c"));
     assert_eq!(ids.node_label("n-a"), "#N1");
     assert_eq!(ids.node_label("n-b"), "#N2");
-    assert_eq!(ids.node_label("n-c"), "#N?");
+    // Unknown ids keep their value, so two different unknown ids never compare equal.
+    assert_eq!(ids.node_label("n-c"), "n-c");
+    assert_eq!(ids.node_label("n-d"), "n-d");
+    assert_eq!(ids.event_label("e-z"), "e-z");
     assert_eq!(ids.event_label("e-x"), "#E1");
     assert_eq!(ids.event_label("e-y"), "#E2");
 }

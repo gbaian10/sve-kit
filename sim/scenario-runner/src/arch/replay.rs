@@ -196,8 +196,8 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
                 sb.outcome, sa.outcome
             ));
         }
-        let ea = normalize(&Value::from(sa.events.clone()), &a.ids, options);
-        let eb = normalize(&Value::from(sb.events.clone()), &b.ids, options);
+        let ea = normalize(&before_save(&sa.events, &a.ids), &a.ids, options);
+        let eb = normalize(&before_save(&sb.events, &b.ids), &b.ids, options);
         if ea != eb {
             fails.push(format!("N{k}: events differ after restore: {eb} vs {ea}"));
         }
@@ -211,12 +211,28 @@ fn r1(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures, options: &ArchOp
     let (c_line, _) = c.walk(&c_root, 0, path)?;
     let (fc, dc) = c.fixed(fixtures, &c_line, "reference run")?;
     fails.extend(fa.into_iter().chain(fb).chain(fc));
-    if db != dc || da != dc {
+    // Saved and restored runs are already compared node by node above.
+    if da != dc {
         fails.push(format!(
             "deck after the shuffle: restored {db:?}, saved {da:?}, never saved {dc:?}"
         ));
     }
     Ok(fails)
+}
+
+/// Events whose cause is an event from before the save point: the restored instance
+/// never handed those ids to us, so both runs name them alike. Only R1 compares a run
+/// with a restored copy of itself; paired comparisons never do this.
+fn before_save(events: &[Value], ids: &Ids) -> Value {
+    let mut out = events.to_vec();
+    for event in &mut out {
+        if let Some(Value::String(cause)) = event.get_mut("cause").and_then(|c| c.get_mut("event"))
+            && !ids.knows_event(cause)
+        {
+            "#pre-save".clone_into(cause);
+        }
+    }
+    Value::from(out)
 }
 
 /// Digest and the three observations of two nodes, ids normalized per run.
@@ -285,8 +301,6 @@ fn r2b(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
     let mut fails = carried_checks(
         &*a.engine,
         &branch,
-        &*f.engine,
-        f_node,
         &replay.branch_known,
         &replay.branch_unknown,
         "replay branch",
@@ -296,16 +310,26 @@ fn r2b(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
     }
     let (b_line, _) = a.walk(&branch, at, tail(&replay.path, at))?;
     fails.extend(a.fixed(fixtures, &b_line, "replay branch")?.0);
+    // Identities stay known after the shuffle; where they are is checked in R5.
+    for (k, node) in b_line.iter().skip(1) {
+        for view in PLAYERS {
+            let name = view_name(view);
+            let (identifiable, carried) = known(&a.engine.observe(node, view)?.knowledge);
+            for object in replay.branch_known.get(name).into_iter().flatten() {
+                if !identifiable.contains(object) && !carried.contains(object) {
+                    fails.push(format!("replay branch N{k}: {name} forgot {object}"));
+                }
+            }
+        }
+    }
     Ok(fails)
 }
 
-/// Identities each view must know on `branch` (carried unless already identifiable at
-/// the same point without the branch) and must not know.
+/// Identities each view must carry on `branch` (marked as carried, even when the branch
+/// point would show them anyway) and must not know.
 fn carried_checks(
     engine: &dyn ReplayEngine,
     branch: &NodeId,
-    reference: &dyn ReplayEngine,
-    at: &NodeId,
     must_know: &BTreeMap<String, Vec<String>>,
     must_not: &BTreeMap<String, Vec<String>>,
     label: &str,
@@ -314,14 +338,8 @@ fn carried_checks(
     for view in PLAYERS {
         let name = view_name(view);
         let (identifiable, carried) = known(&engine.observe(branch, view)?.knowledge);
-        let (before, _) = known(&reference.observe(at, view)?.knowledge);
         for object in must_know.get(name).into_iter().flatten() {
-            let ok = if before.contains(object) {
-                identifiable.contains(object) || carried.contains(object)
-            } else {
-                carried.contains(object)
-            };
-            if !ok {
+            if !carried.contains(object) {
                 fails.push(format!("{label}: {name} does not carry {object}"));
             }
         }
@@ -397,24 +415,17 @@ fn r4(factory: &mut ReplayFactory<'_>, fixtures: &ArchFixtures) -> Checked {
     let (line, steps) = a.walk(&root, 0, &undo.path)?;
     let logged = a.engine.admin_log()?.len();
     let u0 = a.branch(&root, BranchKind::Undo)?;
-    let mut fails = carried_checks(
-        &*a.engine,
-        &u0,
-        &*a.engine,
-        &root,
-        &undo.known,
-        &undo.unknown,
-        "undo",
-    )?;
+    let mut fails = carried_checks(&*a.engine, &u0, &undo.known, &undo.unknown, "undo")?;
     for path in &undo.board {
         let now = a.engine.query(&u0, View::Omniscient, path)?;
         let then = a.engine.query(&root, View::Omniscient, path)?;
-        let same = match (&now, &then) {
-            (Some(x), Some(y)) => compare::exact(x, y),
-            (None, None) => true,
-            (Some(_), None) | (None, Some(_)) => false,
+        let (Some(x), Some(y)) = (&now, &then) else {
+            fails.push(format!(
+                "after undo {path}: the adapter must answer this query"
+            ));
+            continue;
         };
-        if !same {
+        if !compare::exact(x, y) {
             fails.push(format!(
                 "after undo {path} is {now:?}, at the start it was {then:?}"
             ));
@@ -515,8 +526,7 @@ fn scan_node(
 ) -> Checked {
     let observed = engine.observe(node, view)?;
     let outputs = Value::Array(vec![
-        observed.projection,
-        observed.awaiting.unwrap_or(Value::Null),
+        observation_value(&observed),
         engine.export(node, view)?,
     ]);
     Ok(leaks(&outputs, hidden, cards, seed)
@@ -679,6 +689,15 @@ fn paired(
         &shuffled,
         options,
         "M' shuffles",
+    )?);
+    // A carried identity is not a carried position: the replay branch keeps it hidden too.
+    fails.extend(same_exports(
+        (&s45.run, &s45.branch),
+        (&s54.run, &s54.branch),
+        View::P1,
+        &shuffled,
+        options,
+        "M' shuffles branch",
     )?);
     Ok(fails)
 }

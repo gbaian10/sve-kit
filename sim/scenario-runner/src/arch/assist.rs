@@ -2,7 +2,7 @@
 
 use serde_json::Value;
 
-use super::support::{Ids, has_match, normalize};
+use super::support::{Ids, Probe, check_fixed, has_match, normalize};
 use super::{
     ArchFixtures, ArchOptions, AssistEngine, AssistFactory, CheckReport, Layer, Layered, Realign,
     positions,
@@ -312,59 +312,97 @@ fn sequence_a(
     Ok([a1, a2, a3])
 }
 
-/// A3: path P steps 3–6 after Rewind, in both layers.
+/// A3: path P steps 3–6 after Rewind, compared step by step in both layers, with the
+/// third-party fixed assertions at the nodes they reach.
 fn resume(
     engine: &mut dyn AssistEngine,
     fixtures: &ArchFixtures,
     options: &ArchOptions,
 ) -> Checked {
     let spec = &fixtures.spec.assist;
-    let steps: Vec<&Value> = fixtures
-        .spec
-        .replay
-        .path
-        .iter()
-        .skip(spec.prefix)
-        .take(spec.resume_outcomes.len())
-        .collect();
+    let decisions = fixtures.spec.replay.path.iter().skip(spec.prefix);
     let mut fails = Vec::new();
-    let mut sandbox: Vec<Value> = Vec::new();
-    let mut shadow: Vec<Value> = Vec::new();
     let (mut ids_sandbox, mut ids_shadow) = (Ids::default(), Ids::default());
-    for (decision, want) in steps.into_iter().zip(&spec.resume_outcomes) {
+    let mut decks: [Option<Vec<String>>; 2] = [None, None];
+    for (i, (decision, want)) in decisions.zip(&spec.resume_steps).enumerate() {
+        let node = spec.prefix.saturating_add(i).saturating_add(1);
         let got = engine.act(decision)?;
         for (layer, step) in [(Layer::Sandbox, &got.sandbox), (Layer::Shadow, &got.shadow)] {
-            if &step.outcome != want {
-                fails.push(format!(
-                    "A3: {} outcome {} for {decision}, expected {want}",
-                    layer_name(layer),
-                    step.outcome
-                ));
-            }
+            fails.extend(step_matches(step, want, &spec.resume_kinds, layer, node));
         }
         ids_sandbox.events(&got.sandbox.events);
         ids_shadow.events(&got.shadow.events);
-        sandbox.extend(got.sandbox.events);
-        shadow.extend(got.shadow.events);
-    }
-    for (layer, events) in [(Layer::Sandbox, &sandbox), (Layer::Shadow, &shadow)] {
-        if !compare::events_subsequence(&spec.resume_events, events) {
+        if normalize(
+            &Value::from(got.sandbox.events.clone()),
+            &ids_sandbox,
+            options,
+        ) != normalize(
+            &Value::from(got.shadow.events.clone()),
+            &ids_shadow,
+            options,
+        ) {
             fails.push(format!(
-                "A3: {} events {events:?} miss {:?}",
-                layer_name(layer),
-                spec.resume_events
+                "A3 N{node}: sandbox and shadow produced different events"
             ));
         }
-    }
-    if normalize(&Value::from(sandbox), &ids_sandbox, options)
-        != normalize(&Value::from(shadow), &ids_shadow, options)
-    {
-        fails.push("A3: sandbox and shadow produced different events".to_owned());
+        for (layer, deck) in LAYERS.into_iter().zip(decks.iter_mut()) {
+            fails.extend(fixed_at(&*engine, fixtures, layer, node, deck)?);
+        }
     }
     for layer in LAYERS {
         for (path, want) in &spec.resume_field {
             fails.extend(expect(engine, layer, path, want, "A3")?);
         }
+    }
+    Ok(fails)
+}
+
+/// One step of A3 in one layer: outcome, expected events in order, and nothing else of
+/// the compared kinds.
+fn step_matches(
+    step: &Step,
+    want: &super::ResumeStep,
+    kinds: &[String],
+    layer: Layer,
+    node: usize,
+) -> Vec<String> {
+    let mut fails = Vec::new();
+    let name = layer_name(layer);
+    if step.outcome != want.outcome {
+        fails.push(format!(
+            "A3 N{node}: {name} outcome {}, expected {}",
+            step.outcome, want.outcome
+        ));
+    }
+    if !compare::events_subsequence(&want.events, &step.events)
+        || !compare::events_exact(kinds, &want.events, &step.events)
+    {
+        fails.push(format!(
+            "A3 N{node}: {name} events {:?}, expected {:?}",
+            step.events, want.events
+        ));
+    }
+    fails
+}
+
+/// The replay fixed assertions for node `node`, asked of one assist layer.
+fn fixed_at(
+    engine: &dyn AssistEngine,
+    fixtures: &ArchFixtures,
+    layer: Layer,
+    node: usize,
+    deck: &mut Option<Vec<String>>,
+) -> Checked {
+    let mut fails = Vec::new();
+    let label = format!("A3 {}", layer_name(layer));
+    for fixed in fixtures.spec.replay.fixed.iter().filter(|f| f.node == node) {
+        let query = |path: &str| engine.query(layer, View::Omniscient, path);
+        let awaiting = || Ok(engine.observe(layer, View::Omniscient)?.awaiting);
+        let probe = Probe {
+            query: &query,
+            awaiting: &awaiting,
+        };
+        fails.extend(check_fixed(&probe, fixed, deck, &label)?);
     }
     Ok(fails)
 }

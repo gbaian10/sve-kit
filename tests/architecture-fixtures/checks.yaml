@@ -51,6 +51,8 @@ replay:
   # Objects whose identity a view may not know, by node range on path P (inclusive).
   hidden:
     - {view: P1, objects: [b1], from: 0, to: 13}
+    # P1 cannot tell its own deck objects apart before the search.
+    - {view: P1, objects: [a3, a4, a5], from: 0, to: 2}
     - {view: P2, objects: [a3], from: 0, to: 3}
     - {view: P2, objects: [a4, a5], from: 0, to: 13}
     - {view: P2, objects: [b1], from: 0, to: 10}
@@ -86,14 +88,23 @@ assist:
   a2_path: P1.field.a2
   pending: {source: a1, line: 2}
   refs_any: [7.3.4, 10.7.3.1]
-  # A3: after Rewind, path P steps 3 to 6.
-  resume_outcomes: [paused, paused, resolved, pending-cancelled]
-  resume_events:
-    - {kind: 費用成立, ability: {source: a1, line: 2}}
-    - {kind: 公開, object: a3, to: P2, source: a1}
-    - {kind: 場に出す, object: a3, from: P1.deck}
-    - {kind: 待機, ability: {source: a3, line: 2}}
-    - {kind: 待機取消, ability: {source: a3, line: 2}}
+  # A3: after Rewind, path P steps 3 to 6, checked step by step in both layers.
+  # Restricted to `resume_kinds`, each step's events equal its `events` exactly.
+  resume_kinds: [費用成立, 公開, 場に出す, 待機, 待機取消]
+  resume_steps:
+    - outcome: paused
+      events:
+        - {kind: 費用成立, ability: {source: a1, line: 2}}
+    - outcome: paused
+      events:
+        - {kind: 公開, object: a3, to: P2, source: a1}
+    - outcome: resolved
+      events:
+        - {kind: 場に出す, object: a3, from: P1.deck}
+        - {kind: 待機, ability: {source: a3, line: 2}}
+    - outcome: pending-cancelled
+      events:
+        - {kind: 待機取消, ability: {source: a3, line: 2}}
   resume_field: {P1.field: [a2, a6, a1, a3]}
   # A4 and sequence B.
   other_attack: {by: P1, at: main, do: attack, attacker: a6, target: P2.leader}
