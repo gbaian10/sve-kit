@@ -92,13 +92,65 @@ impl Game {
             .collect::<Vec<_>>();
         let min = usize::try_from(self.number(&node["min"], frame)?.max(0)).map_err(invalid)?;
         let max = usize::try_from(self.number(&node["max"], frame)?.max(0)).map_err(invalid)?;
-        let choices = subsets(&ids,min,max).iter().map(|subset|json!({"do":"resolve-choice","options":subset.iter().filter_map(|n|n.parse::<i64>().ok()).collect::<Vec<_>>()})).collect();
+        let mut labels = list(&node["labels"]);
+        for label in &mut labels {
+            if let Some(keyword) = label["keyword"].as_str() {
+                label["keyword"] = json!(self.catalog.keyword_name(keyword));
+            }
+        }
+        let choices = if labels.is_empty() {
+            subsets(&ids,min,max).iter().map(|subset|json!({"do":"resolve-choice","options":subset.iter().filter_map(|n|n.parse::<i64>().ok()).collect::<Vec<_>>()})).collect()
+        } else {
+            labels
+                .iter()
+                .cloned()
+                .map(|mut label| {
+                    label["do"] = json!("resolve-choice");
+                    label
+                })
+                .collect()
+        };
         self.prompt(
             frame,
             choices,
-            json!({"resume":"choice","modes":node["modes"]}),
+            json!({"resume":"choice","modes":node["modes"],"labels":labels}),
         );
         self.set_prompt_side(node, frame);
+        Ok(())
+    }
+
+    pub(super) fn resume_choice(task: &Value, decision: &Value, frame: &mut Frame) -> Result<()> {
+        let labels = list(&task["labels"]);
+        let indices = if labels.is_empty() {
+            let mut selected = list(&decision["options"]);
+            selected.sort_by_key(int);
+            selected
+                .iter()
+                .map(|value| usize::try_from(int(value).saturating_sub(1)).map_err(invalid))
+                .collect::<Result<Vec<_>>>()?
+        } else {
+            vec![
+                labels
+                    .iter()
+                    .position(|label| {
+                        label.as_object().is_some_and(|members| {
+                            members.iter().all(|(key, value)| decision[key] == *value)
+                        })
+                    })
+                    .ok_or_else(|| invalid("unknown choice label"))?,
+            ]
+        };
+        let modes = list(&task["modes"]);
+        let steps = indices
+            .into_iter()
+            .map(|index| {
+                modes
+                    .get(index)
+                    .cloned()
+                    .ok_or_else(|| invalid("choice mode outside range"))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Self::prepend(frame, steps);
         Ok(())
     }
 

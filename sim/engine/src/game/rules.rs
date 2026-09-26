@@ -776,6 +776,13 @@ impl Game {
                 .collect::<Vec<_>>();
         if !dead.is_empty() {
             self.destroy(&dead, None)?;
+            for id in &dead {
+                self.object_mut(id)?
+                    .state
+                    .as_object_mut()
+                    .ok_or_else(|| invalid("object state map"))?
+                    .remove("bane_damaged");
+            }
             return self.checks();
         }
         if self.state.pending.is_empty()

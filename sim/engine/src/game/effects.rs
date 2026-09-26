@@ -85,20 +85,7 @@ impl Game {
                     .values
                     .insert(string(&task["bind"]).into(), decision["declare"].clone());
             }
-            "choice" => {
-                let mut selected = list(&decision["options"]);
-                selected.sort_by_key(int);
-                Self::prepend(
-                    &mut frame,
-                    selected
-                        .iter()
-                        .filter_map(|value| {
-                            let index = usize::try_from(int(value).saturating_sub(1)).ok()?;
-                            task["modes"].as_array()?.get(index).cloned()
-                        })
-                        .collect(),
-                );
-            }
+            "choice" => Self::resume_choice(&task, decision, &mut frame)?,
             "optional" => {
                 if decision["choice"] == "execute" {
                     Self::prepend(&mut frame, vec![task["then"].clone()]);
@@ -701,7 +688,12 @@ impl Game {
                 if let Some(rule) = frame.values.get("movement_rule") {
                     event["by"] = rule.clone();
                 }
-                self.emit(event, &frame.cause, group);
+                let cause = frame
+                    .values
+                    .get("movement_rules")
+                    .and_then(|rules| rules.get(id))
+                    .map_or_else(|| frame.cause.clone(), |rule| json!({"rule":rule}));
+                self.emit(event, &cause, group);
             }
             for viewer in ["P1", "P2"] {
                 let was_known = self
@@ -757,30 +749,34 @@ impl Game {
 
     pub(super) fn destroy(&mut self, ids: &[String], frame: Option<&Frame>) -> Result<()> {
         let mut actual = Vec::new();
+        let mut rules = json!({});
         for id in ids {
             if self.object(id)?.zone != "field" {
                 continue;
             }
-            if frame.is_some() && self.restricted(id, "ability_destroy")? {
+            let life_depleted = int(&self.object(id)?.state["hp"]) <= 0;
+            if (frame.is_some() || !life_depleted) && self.restricted(id, "ability_destroy")? {
                 continue;
             }
             actual.push(id.clone());
+            rules[id] = json!(if life_depleted { "11.3.1" } else { "11.3.2" });
         }
-        let cause = frame.map_or_else(|| json!({"rule":"11.3.1"}), |f| f.cause.clone());
+        let cause = frame.map_or_else(|| json!({"rule":"11.3"}), |f| f.cause.clone());
         let group = self.group();
         for id in &actual {
             let mut event = json!({"kind":"破壊","object":id});
             if let Some(f) = frame {
                 event["source"] = json!(f.source);
+                self.emit(event, &cause, group);
             } else {
-                event["by"] = json!("rule-11.3.1");
+                self.emit(event, &json!({"rule":rules[id]}), group);
             }
-            self.emit(event, &cause, group);
         }
-        let default = Frame {
+        let mut default = Frame {
             cause,
             ..Frame::default()
         };
+        default.values.insert("movement_rules".into(), rules);
         self.move_objects(&actual, "cemetery", None, None, frame.unwrap_or(&default))?;
         Ok(())
     }
@@ -1074,9 +1070,6 @@ impl Game {
                 let object = self.object_mut(id)?;
                 object.state["hp"] = json!(int(&object.state["hp"]).saturating_sub(amount));
                 object.state["damage"] = json!(int(&object.state["damage"]).saturating_add(amount));
-                if hit["battle"] == true && self.keywords(source)?.contains("bane") {
-                    self.object_mut(id)?.state["bane_damaged"] = json!(true);
-                }
             }
             damaged.push(self.event_subject(id)?);
             self.emit(

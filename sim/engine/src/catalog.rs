@@ -5,7 +5,7 @@
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
 
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 use jsonschema::validator_for;
 use std::fs::{read_dir, read_to_string};
 use std::path::Path;
@@ -204,6 +204,33 @@ where
         .map_err(invalid)
 }
 
+fn validate_choice_labels(value: &Value, registry: &BTreeMap<String, Value>) -> Result<()> {
+    let Some(labels) = value["labels"].as_array() else {
+        return Ok(());
+    };
+    if value["modes"].as_array().map(Vec::len) != Some(labels.len()) {
+        return Err(invalid("choice labels must match the number of modes"));
+    }
+    let mut unique = BTreeSet::new();
+    for label in labels {
+        let mut localized = label.clone();
+        if let Some(keyword) = label["keyword"].as_str() {
+            let name = registry
+                .get(keyword)
+                .and_then(|entry| entry["ja"].as_str())
+                .filter(|name| !name.is_empty())
+                .ok_or_else(|| invalid("choice label needs a registered keyword"))?;
+            localized["keyword"] = json!(name);
+        }
+        if !unique.insert(localized.to_string()) {
+            return Err(invalid(
+                "choice labels must remain distinct after localization",
+            ));
+        }
+    }
+    Ok(())
+}
+
 fn expand(value: &Value, registry: &BTreeMap<String, Value>, depth: usize) -> Result<Value> {
     if depth > 64 {
         return Err(invalid("macro expansion depth exceeds 64"));
@@ -222,6 +249,9 @@ fn expand(value: &Value, registry: &BTreeMap<String, Value>, depth: usize) -> Re
         && !registry.contains_key(value["name"].as_str().unwrap_or_default())
     {
         return Err(invalid("unknown keyword id"));
+    }
+    if value["op"] == "choice" {
+        validate_choice_labels(value, registry)?;
     }
     match value {
         Value::Array(values) => values

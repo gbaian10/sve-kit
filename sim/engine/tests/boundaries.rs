@@ -2219,3 +2219,219 @@ fn stack_without_recipient_replaces_entry_count_and_obeys_capacity() {
         }
     }
 }
+
+#[test]
+fn labeled_keyword_choices_preserve_modes_and_survive_restore() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"choice","timing":"resolve","min":1_i64,"max":1_i64,
+         "labels":[{"keyword":"guard"},{"keyword":"drain"}],
+         "modes":[{"op":"modify","subjects":"target.1","keywords":["guard"]},{"op":"modify","subjects":"target.1","keywords":["drain"]}]},
+        {"op":"modify","subjects":"self.leader","hp":-1_i64}
+    ]});
+    let catalog = Arc::new(catalog(&body));
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "labels",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.legal().unwrap(),
+        json!([
+            {"do":"resolve-choice","keyword":"守護"},{"do":"resolve-choice","keyword":"ドレイン"}
+        ])
+        .as_array()
+        .unwrap()
+        .clone()
+    );
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"resolve-choice","options":[2_i64]}),
+                "wrong-label"
+            )
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    let bytes = serde_json::to_string(&engine).unwrap();
+    let mut restored: Game = serde_json::from_str(&bytes).unwrap();
+    let mut sampled = Game::from_observation(
+        catalog,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "labels",
+    )
+    .unwrap();
+    for instance in [&mut restored, &mut sampled] {
+        assert_eq!(
+            instance
+                .decide(
+                    &json!({"do":"resolve-choice","keyword":"ドレイン"}),
+                    "choose"
+                )
+                .unwrap()
+                .outcome,
+            "resolved"
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.keywords").unwrap(),
+            Some(json!(["ドレイン"]))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(19_i64))
+        );
+    }
+}
+
+#[test]
+fn labeled_positions_execute_their_declared_branch_and_invalid_labels_fail_loading() {
+    let body = json!({"op":"choice","timing":"resolve","min":1_i64,"max":1_i64,
+        "labels":[{"position":"top"},{"position":"bottom"}],
+        "modes":[{"op":"move","subjects":"target.1","to":"deck","position":"top"},{"op":"move","subjects":"target.1","to":"deck","position":"bottom"}]});
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"c","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::new(catalog(&body)),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "position",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","position":"bottom"}),
+            "bottom",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::Referee, "P2.deck").unwrap(),
+        Some(json!(["c", "b"]))
+    );
+    for change in [
+        json!({"labels":[{"position":"top"}]}),
+        json!({"labels":[{"position":"top"},{"position":"top"}]}),
+        json!({"labels":[{"keyword":"unregistered"},{"keyword":"drain"}]}),
+        json!({"labels":[{"position":"middle"},{"position":"bottom"}]}),
+        json!({"min":0_i64}),
+        json!({"max":2_i64}),
+        json!({"timing":"play"}),
+    ] {
+        let mut candidate = body.clone();
+        for (key, value) in change.as_object().unwrap() {
+            candidate[key] = value.clone();
+        }
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("bad.yaml".into(), document(&candidate).to_string())],
+        )
+        .unwrap_err();
+    }
+    let mut registry: Value = serde_json::from_str(&registry()).unwrap();
+    registry["keywords"]["drain"]["ja"] = json!("守護");
+    let mut candidate = body;
+    candidate["labels"] = json!([{"keyword":"guard"},{"keyword":"drain"}]);
+    Catalog::from_documents(
+        &snapshot(),
+        &registry.to_string(),
+        &[("duplicate.yaml".into(), document(&candidate).to_string())],
+    )
+    .unwrap_err();
+}
+
+#[test]
+fn bane_rule_destruction_respects_immunity_and_shares_the_lethal_damage_batch() {
+    for (protected, power) in [(true, 0_i64), (true, 2), (true, 3), (false, 0)] {
+        let mut docs =
+            document(&json!({"op":"modify","subjects":"target.1","remove_abilities":true}));
+        docs["cards"]["unit-follower"]["abilities"] =
+            json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"bane"}}]);
+        docs["cards"]["unit-tank"] = json!({"status":"complete","review":"synthetic","abilities":if protected {json!([{"kind":"static","line":1_i64,"body":{"op":"restrict","subjects":"self","action":"ability_destroy"}}])}else{json!([])}});
+        let tank = json!({"number":"unit-tank","faces":[{"name":"tank","card_type":"フォロワー","card_class":"ニュートラル","traits":[],"cost":"1","power":"4","hp":"3","text":null,"sections":[]}]});
+        let registry = json!({"version":"astra/1","keywords":{"bane":{"ja":"必殺","expansion":{"op":"keyword","name":"bane"}}}});
+        let loaded = Catalog::from_documents(
+            &format!("{}\n{tank}", snapshot()),
+            &registry.to_string(),
+            &[("bane.yaml".into(), docs.to_string())],
+        )
+        .unwrap();
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"power":power});
+        initial["players"]["P2"]["zones"]["field"] =
+            json!([{"id":"b","card":"unit-tank","state":{"acted":true}}]);
+        let mut engine = Game::new(
+            Arc::new(loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "bane",
+        )
+        .unwrap();
+        engine
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"b"}),
+                "battle",
+            )
+            .unwrap();
+        let step = engine.decide(&json!({"do":"pass"}), "quick").unwrap();
+        let destroyed = step
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "破壊")
+            .collect::<Vec<_>>();
+        assert_eq!(destroyed[0]["object"], json!("a"));
+        assert_eq!(destroyed[0]["by"], json!("rule-11.3.1"));
+        if protected && power < 3 {
+            assert_eq!(destroyed.len(), 1);
+            assert_eq!(
+                engine.query(View::P1, "P2.field").unwrap(),
+                Some(json!(["b"]))
+            );
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "remove-protection",
+                )
+                .unwrap();
+            assert_eq!(
+                engine.query(View::P1, "P2.field").unwrap(),
+                Some(json!(["b"]))
+            );
+        } else {
+            assert_eq!(destroyed.len(), 2);
+            assert_eq!(destroyed[0]["group"], destroyed[1]["group"]);
+            let reason = if power < 3 {
+                "rule-11.3.2"
+            } else {
+                "rule-11.3.1"
+            };
+            assert_eq!(destroyed[1]["by"], json!(reason));
+            assert!(step.events.iter().any(|event| event["kind"] == "移動"
+                && event["object"] == "b"
+                && event["by"] == reason));
+            assert_eq!(
+                engine.query(View::P1, "P2.cemetery").unwrap(),
+                Some(json!(["b"]))
+            );
+        }
+    }
+}
