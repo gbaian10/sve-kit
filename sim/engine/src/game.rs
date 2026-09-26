@@ -7,6 +7,7 @@
 
 mod belief;
 mod costs;
+mod damage;
 mod effects;
 mod expr;
 mod extensions;

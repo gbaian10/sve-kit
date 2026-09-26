@@ -2435,3 +2435,182 @@ fn bane_rule_destruction_respects_immunity_and_shares_the_lethal_damage_batch() 
         }
     }
 }
+
+#[test]
+fn damage_caps_read_the_incoming_amount_and_reject_unresolved_dynamic_overlap() {
+    for (amount, overlap) in [
+        (0_i64, false),
+        (3, false),
+        (4, false),
+        (9, false),
+        (4, true),
+    ] {
+        let mut docs = document(&json!({"op":"damage","subjects":"target.1","amount":amount}));
+        let mut replacements = vec![
+            json!({"kind":"static","line":1_i64,"body":{"op":"replace_damage","subjects":"self","kind":"any","set":3_i64,"condition":{"fn":"ge","args":[{"read":"damage.amount"},4_i64]}}}),
+        ];
+        if overlap {
+            replacements.push(json!({"kind":"static","line":2_i64,"body":{"op":"replace_damage","subjects":"self","kind":"any","amount":-1_i64}}));
+        }
+        docs["cards"]["unit-follower"]["abilities"] = json!(replacements);
+        let loaded = Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("cap.yaml".into(), docs.to_string())],
+        )
+        .unwrap();
+        let mut initial = setup();
+        initial["players"]["P2"]["zones"]["field"][0]["state"] =
+            json!({"hp":20_i64,"max_hp":20_i64});
+        let mut engine = Game::new(
+            Arc::new(loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "cap",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        let outcome = engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        );
+        if overlap {
+            assert!(matches!(
+                outcome.unwrap_err(),
+                EngineFailure::Unsupported(_)
+            ));
+            assert_eq!(engine.digest().unwrap(), before);
+        } else {
+            let step = outcome.unwrap();
+            assert_eq!(
+                engine.query(View::P1, "P2.field.b.hp").unwrap(),
+                Some(json!(20_i64.saturating_sub(amount.min(3))))
+            );
+            assert_eq!(
+                step.events
+                    .iter()
+                    .filter(|event| event["kind"] == "ダメージ")
+                    .count(),
+                usize::from(amount > 0)
+            );
+        }
+    }
+}
+
+#[test]
+fn temporary_damage_prevention_survives_its_source_and_expires_at_turn_end() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"replace_damage","subjects":"target.1","prevent":true,"kind":"any","until":"end-of-turn"},
+        {"op":"damage","subjects":"target.1","amount":2_i64}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"c","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "prevent",
+    )
+    .unwrap();
+    let cast = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert!(!cast.events.iter().any(|event| event["kind"] == "ダメージ"));
+    let mut restored = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "restore",
+    )
+    .unwrap();
+    for instance in [&mut engine, &mut restored] {
+        instance
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"b"}),
+                "battle",
+            )
+            .unwrap();
+        instance.decide(&json!({"do":"pass"}), "quick").unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(3_i64))
+        );
+        instance.decide(&json!({"do":"end-phase"}), "end").unwrap();
+        instance.decide(&json!({"do":"pass"}), "end-quick").unwrap();
+        instance
+            .decide(
+                &json!({"do":"attack","attacker":"b","target":"a"}),
+                "next-battle",
+            )
+            .unwrap();
+        instance
+            .decide(&json!({"do":"pass"}), "next-quick")
+            .unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(1_i64))
+        );
+    }
+}
+
+#[test]
+fn damage_prevention_tracks_the_recipient_generation_and_attack_kind() {
+    let mut engine = game(&json!({"op":"seq","steps":[
+        {"op":"replace_damage","subjects":"target.1","prevent":true,"kind":"any","until":"end-of-turn"},
+        {"op":"move","subjects":"target.1","to":"hand"},
+        {"op":"move","subjects":"b","to":"field"},
+        {"op":"damage","subjects":"b","amount":2_i64}
+    ]}));
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(1_i64))
+    );
+    let docs =
+        document(&json!({"op":"replace_damage","subjects":"self","prevent":true,"kind":"attack"}));
+    let mut docs = docs;
+    docs["cards"]["unit-follower"]["abilities"] = json!([{"kind":"static","line":1_i64,"body":{"op":"replace_damage","subjects":"self","prevent":true,"kind":"attack"}}]);
+    let loaded = Catalog::from_documents(
+        &snapshot(),
+        &registry(),
+        &[("attack.yaml".into(), docs.to_string())],
+    )
+    .unwrap();
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+    let mut combat = Game::new(
+        Arc::new(loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "attack",
+    )
+    .unwrap();
+    combat
+        .decide(
+            &json!({"do":"attack","attacker":"a","target":"b"}),
+            "battle",
+        )
+        .unwrap();
+    combat.decide(&json!({"do":"pass"}), "quick").unwrap();
+    assert_eq!(
+        combat.query(View::P1, "P1.field.a.hp").unwrap(),
+        Some(json!(1_i64))
+    );
+    assert_eq!(
+        combat.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(3_i64))
+    );
+}
