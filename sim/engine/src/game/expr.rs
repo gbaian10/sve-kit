@@ -86,6 +86,24 @@ impl Game {
     }
 
     fn reference_set(&self, reference: &str, frame: &Frame) -> Result<Vec<String>> {
+        if reference == "event.target" || reference == "event.subject" {
+            return Ok(frame.event[if reference == "event.target" {
+                "target"
+            } else {
+                "subject_id"
+            }]
+            .as_str()
+            .map(str::to_owned)
+            .into_iter()
+            .collect());
+        }
+        if reference == "linked" {
+            return Ok(self.object(&frame.source)?.state["linked_to"]
+                .as_str()
+                .map(str::to_owned)
+                .into_iter()
+                .collect());
+        }
         if reference == "self" {
             return Ok(vec![frame.source.clone()]);
         }
@@ -187,12 +205,15 @@ impl Game {
         let face = self.face(id)?;
         let card_type = string(&face["card_type"]);
         let typ = match string(&selector["type"]) {
-            "follower" => "フォロワー",
+            "follower" | "evolved_follower" => "フォロワー",
             "amulet" => "アミュレット",
             "spell" => "スペル",
             "crest" => "クレスト",
             _ => "",
         };
+        if selector["type"] == "evolved_follower" && !card_type.contains("エボルヴ") {
+            return Ok(false);
+        }
         if !card_type.contains(typ) {
             return Ok(false);
         }
@@ -225,6 +246,14 @@ impl Game {
         }
         if let Some(keyword) = selector["keyword"].as_str()
             && !self.keywords(id)?.contains(keyword)
+        {
+            return Ok(false);
+        }
+        if let Some(event) = selector["ability_event"].as_str()
+            && !self
+                .abilities(id)?
+                .iter()
+                .any(|ability| ability["kind"] == event || ability["event"] == event)
         {
             return Ok(false);
         }
@@ -371,6 +400,18 @@ impl Game {
     }
 
     fn read(&self, path: &str, frame: &Frame) -> Result<Value> {
+        if let Some(value) = frame.values.get(path) {
+            return Ok(value.clone());
+        }
+        if let Some(path) = path.strip_prefix("event.") {
+            return Ok(path
+                .split('.')
+                .fold(&frame.event, |value, key| &value[key])
+                .clone());
+        }
+        if let Some(counter) = path.strip_prefix("self.counters.") {
+            return Ok(self.object(&frame.source)?.state["counters"][counter].clone());
+        }
         if path == "x" {
             return Ok(frame.decision["x"].clone());
         }
@@ -438,6 +479,15 @@ impl Game {
         let Some(id) = ids.first() else {
             return Ok(Value::Null);
         };
+        if reference == "self"
+            && field != "zone"
+            && !frame.event.is_null()
+            && let Some(attrs) = frame.captured.get(id)
+            && Some(self.object(id)?.generation) != attrs["generation"].as_u64()
+            && let Some(value) = attrs.get(field)
+        {
+            return Ok(value.clone());
+        }
         if field == "original_hp" {
             return Ok(frame
                 .captured

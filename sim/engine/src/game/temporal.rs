@@ -30,10 +30,8 @@ impl Game {
     pub(super) fn check_execution_parameters(node: &Value) -> Result<()> {
         let denied: &[&str] = match string(&node["op"]) {
             "modify" => &["type", "abilities", "during", "traits", "cost", "set_cost"],
-            "select" => &["by", "order", "distinct_by"],
-            "choice" => &["by", "timing"],
+            "select" | "search" => &["distinct_by"],
             "pay" => &["cost_selections"],
-            "search" => &["distinct_by"],
             "draw" | "look" => &["up_to"],
             _ => &[],
         };
@@ -102,7 +100,9 @@ impl Game {
         for entry in take(&mut self.state.continuous) {
             if entry["until"] == "end-of-turn" && entry["effect"]["remove_abilities"] == true {
                 expired.push(entry);
-            } else {
+                continue;
+            }
+            if entry["until"] != "end-of-turn" {
                 active.push(entry);
             }
         }

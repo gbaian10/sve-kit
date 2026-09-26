@@ -95,10 +95,11 @@ impl Game {
             "choose-pending" => return self.choose_pending(decision),
             "resolve-choice" | "place-acted" | "order-replacements" => {
                 let matches = self.state.prompt.as_ref().is_some_and(|prompt| {
-                    prompt
-                        .choices
-                        .iter()
-                        .any(|choice| super::legal::decision_matches(choice, decision))
+                    (prompt.resume["resume"] == "declare" && decision["declare"].as_i64().is_some())
+                        || prompt
+                            .choices
+                            .iter()
+                            .any(|choice| super::legal::decision_matches(choice, decision))
                 });
                 if matches {
                     self.resume(decision)?;
@@ -214,10 +215,8 @@ impl Game {
             }
         }
         for id in ids {
-            if let Some(object) = self.state.objects.get(&id) {
-                let mut state = object.state.clone();
-                state["generation"] = json!(object.generation);
-                state["controller"] = json!(object.controller);
+            if self.state.objects.contains_key(&id) {
+                let state = self.object_attributes(&id)?;
                 frame.captured.insert(id, state);
             }
         }
@@ -351,7 +350,18 @@ impl Game {
         let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
         if let Some(context) = &pending.context {
             frame.bindings.clone_from(&context.bindings);
-            frame.captured.clone_from(&context.captured);
+            for (id, attributes) in &context.captured {
+                if id == &context.source {
+                    frame.captured.insert(id.clone(), attributes.clone());
+                    continue;
+                }
+                frame
+                    .captured
+                    .entry(id.clone())
+                    .or_insert_with(|| attributes.clone());
+            }
+            frame.event.clone_from(&context.event);
+            frame.values.clone_from(&context.values);
             frame.controller.clone_from(&context.controller);
         }
         self.freeze(&pending.code, "play-start", &mut frame)?;
@@ -550,16 +560,20 @@ impl Game {
         let max = int(&player.pp["max"]).saturating_add(1).min(10);
         player.pp = json!({"current":max,"max":max});
         for id in self.zone_ids(&seat, "field") {
-            let attrs = &mut self.object_mut(&id)?.state;
-            attrs["acted"] = json!(false);
-            attrs["entered_this_turn"] = json!(false);
+            if !self.restricted(&id, "normal_stand")? {
+                self.object_mut(&id)?.state["acted"] = json!(false);
+            }
+            self.object_mut(&id)?.state["entered_this_turn"] = json!(false);
         }
         let frame = Frame {
             controller: seat.clone(),
             cause: json!({"rule":"7.2"}),
             ..Frame::default()
         };
-        self.draw(&seat, &frame)
+        self.draw(&seat, &frame)?;
+        let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
+        self.enqueue(pending);
+        Ok(())
     }
 
     pub(super) fn checks(&mut self) -> Result<()> {
@@ -627,40 +641,85 @@ impl Game {
     }
 
     pub(super) fn collect_triggers(
-        &self,
+        &mut self,
         event: &str,
         affected: &[Object],
         cause: &Value,
     ) -> Result<Vec<Pending>> {
+        self.collect_event(event, affected, cause, &Value::Null)
+    }
+
+    pub(super) fn collect_event(
+        &mut self,
+        event: &str,
+        affected: &[Object],
+        cause: &Value,
+        metadata: &Value,
+    ) -> Result<Vec<Pending>> {
         let mut result = Vec::new();
-        for source in self.field_ids() {
+        for source in self.ability_sources() {
             for code in self.abilities(&source)? {
-                if code["kind"] != "trigger" || code["event"] != event {
-                    continue;
-                }
-                let frame = self.frame_for(&source)?;
-                if event == "end" && frame.controller != self.active() {
-                    continue;
-                }
-                if let Some(condition) = code.get("trigger_if")
-                    && !self.truth(condition, &frame)?
+                if code["kind"] != "trigger"
+                    || code["event"] != event
+                    || !self.ability_zone(&source, &code)?
                 {
                     continue;
                 }
-                let matches = if event == "end" {
+                let mut frame = self.frame_for(&source)?;
+                let phase_event = matches!(event, "end" | "main_start" | "drive_trigger");
+                if phase_event
+                    && !self
+                        .seats(string(&code["side"]), &frame)
+                        .iter()
+                        .any(|seat| seat == self.active())
+                {
+                    continue;
+                }
+                frame
+                    .captured
+                    .insert(source.clone(), self.object_attributes(&source)?);
+                let candidates = if phase_event {
                     vec![None]
                 } else {
-                    affected
-                        .iter()
-                        .filter(|object| {
-                            code.get("subject").is_none_or(|selector| {
-                                self.matches(&object.id, selector, &frame).unwrap_or(false)
-                            })
-                        })
-                        .map(Some)
-                        .collect::<Vec<_>>()
+                    affected.iter().map(Some).collect()
                 };
-                for object in matches {
+                for object in candidates {
+                    if let Some(object) = object
+                        && let Some(selector) = code.get("subject")
+                        && !self.matches(&object.id, selector, &frame)?
+                    {
+                        continue;
+                    }
+                    frame.event = if metadata.is_object() {
+                        metadata.clone()
+                    } else {
+                        json!({})
+                    };
+                    if let Some(object) = object {
+                        frame.event["subject"] = self.object_attributes(&object.id)?;
+                        frame.event["subject_id"] = json!(object.id);
+                    }
+                    if event == "attack" {
+                        frame.event["target"] = self.state.flow["target"].clone();
+                        frame.event["target_is_follower"] =
+                            json!(!string(&self.state.flow["target"]).ends_with(".leader"));
+                    }
+                    if let Some(condition) = code.get("trigger_if")
+                        && !self.truth(condition, &frame)?
+                    {
+                        continue;
+                    }
+                    if !self.can_use(&source, &code)? {
+                        continue;
+                    }
+                    if code["limit_at"] == "trigger" {
+                        self.mark_use(&source, &code)?;
+                    }
+                    if matches!(event, "enter" | "evolve")
+                        && self.trigger_suppressed(&frame.controller, event)?
+                    {
+                        continue;
+                    }
                     let event_key = match event {
                         "enter" => "entered_field",
                         "leave" | "field_to_cemetery" => "left_field",
@@ -670,21 +729,69 @@ impl Game {
                         _ => "",
                     };
                     let detail = object.map_or(Value::Null, |object| json!({event_key:object.id}));
-                    result.push(Pending {
-                        controller: frame.controller.clone(),
-                        reference: self.reference(&source, &code),
-                        event: detail,
-                        code: code.clone(),
-                        source: source.clone(),
-                        cause: cause.clone(),
-                        retained: false,
-                        id: None,
-                        context: None,
-                    });
+                    let copies = self.trigger_copies(event, &frame.controller)?;
+                    for _ in 0..copies {
+                        result.push(Pending {
+                            controller: frame.controller.clone(),
+                            reference: self.reference(&source, &code),
+                            event: detail.clone(),
+                            code: code.clone(),
+                            source: source.clone(),
+                            cause: cause.clone(),
+                            retained: false,
+                            id: None,
+                            context: Some(frame.clone()),
+                        });
+                    }
                 }
             }
         }
         Ok(result)
+    }
+
+    fn trigger_suppressed(&self, controller: &str, event: &str) -> Result<bool> {
+        for source in self.field_ids() {
+            for code in self.printed_abilities(&source)? {
+                let body = &code["body"];
+                if body["op"] == "restrict"
+                    && body["action"] == "trigger"
+                    && list(&body["events"]).contains(&json!(if event == "enter" {
+                        "fanfare"
+                    } else {
+                        "on_evolve"
+                    }))
+                {
+                    let frame = self.frame_for(&source)?;
+                    if self
+                        .select(&body["subjects"], &frame)?
+                        .contains(&format!("{controller}.leader"))
+                    {
+                        return Ok(true);
+                    }
+                }
+            }
+        }
+        Ok(false)
+    }
+    fn trigger_copies(&self, event: &str, controller: &str) -> Result<i64> {
+        let mut count = 1_i64;
+        for source in self.field_ids() {
+            for code in self.printed_abilities(&source)? {
+                let body = &code["body"];
+                if body["op"] != "repeat_triggers" || body["event"] != event {
+                    continue;
+                }
+                let frame = self.frame_for(&source)?;
+                if self
+                    .seats(string(&body["side"]), &frame)
+                    .iter()
+                    .any(|seat| seat == controller)
+                {
+                    count = count.saturating_add(self.number(&body["additional"], &frame)?);
+                }
+            }
+        }
+        Ok(count.max(0))
     }
     pub(super) fn enqueue(&mut self, batch: Vec<Pending>) {
         let group = self.group();
@@ -714,6 +821,14 @@ impl Game {
     }
 
     pub(super) fn restricted(&self, id: &str, action: &str) -> Result<bool> {
+        for entry in &self.state.continuous {
+            if entry["effect"]["op"] == "restrict"
+                && entry["effect"]["action"] == action
+                && self.continuous_applies(entry, id)
+            {
+                return Ok(true);
+            }
+        }
         for source in self.field_ids() {
             for code in self.abilities(&source)? {
                 let body = &code["body"];

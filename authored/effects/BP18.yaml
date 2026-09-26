@@ -362,6 +362,37 @@ cards:
           - op: reveal
             subjects: cost.1
             to: all
+  BP18-P53:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: modify
+              subjects: target.2
+              keywords:
+                - storm
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+          - key: '2'
+            select:
+              zone: field
+              side: self
+              type: follower
+              trait: 透京
+            min: 1
+            max: 1
   BP18-P54:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

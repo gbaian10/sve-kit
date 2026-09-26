@@ -560,9 +560,11 @@ cards:
       - line: 4
         kind: trigger
         body:
-          op: stand
-          subjects: self
+          op: pay
+          costs:
+            - op: pp
+              amount: 1
+          then:
+            op: stand
+            subjects: self
         event: main_start
-        costs:
-          - op: pp
-            amount: 1

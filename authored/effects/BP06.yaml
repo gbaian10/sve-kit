@@ -360,7 +360,7 @@ cards:
             select:
               side: self
               zone: evolve_deck
-              type: follower
+              type: evolved_follower
               where:
                 read: item.face_up
             min: 1

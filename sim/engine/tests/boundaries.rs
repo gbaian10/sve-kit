@@ -1028,3 +1028,114 @@ fn partial_shuffle_preserves_other_cards_and_rejects_full_deck_scripts() {
         }
     }
 }
+
+#[test]
+fn constrained_selection_order_and_open_integer_declaration_restore_together() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"look","count":3_i64,"bind":"looked"},
+        {"op":"select","select":"looked","min":0_i64,"max":3_i64,"bind":"chosen","constraint":{"fn":"le","args":[{"fn":"sum","args":[{"values":"chosen","field":"cost"}]},1_i64]}},
+        {"op":"select","select":{"difference":["looked","chosen"]},"min":2_i64,"max":2_i64,"bind":"ordered","order":true},
+        {"op":"declare_number","bind":"number"},
+        {"op":"move","subjects":"ordered","to":"deck","position":"bottom"},
+        {"op":"damage","subjects":"opponent.leader","amount":{"read":"number"}}
+    ]});
+    let mut position = setup();
+    position["players"]["P2"]["leader"]["life"] = json!(100_i64);
+    position["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-follower"},{"id":"d3","card":"unit-follower"}
+    ]);
+    let mut engine = Game::new(
+        Arc::new(catalog(&body)),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "constraints",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "start",
+        )
+        .unwrap();
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"resolve-choice","select":["d1","d2"]}),
+                "too-many"
+            )
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    engine
+        .decide(&json!({"do":"resolve-choice","select":["d1"]}), "subset")
+        .unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    assert_eq!(restored.legal().unwrap().len(), 2);
+    restored
+        .decide(&json!({"do":"resolve-choice","order":["d3","d2"]}), "order")
+        .unwrap();
+    let before_declaration = restored.digest().unwrap();
+    assert_eq!(
+        restored
+            .decide(&json!({"do":"resolve-choice","declare":"37"}), "wrong-type")
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    assert_eq!(restored.digest().unwrap(), before_declaration);
+    restored
+        .decide(&json!({"do":"resolve-choice","declare":37_i64}), "integer")
+        .unwrap();
+    assert_eq!(
+        restored.query(View::Referee, "P1.deck").unwrap(),
+        Some(json!(["d1", "d3", "d2"]))
+    );
+    assert_eq!(
+        restored.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(63_i64))
+    );
+}
+
+#[test]
+fn trigger_context_keeps_last_known_values_after_leaving_and_serializing() {
+    let mut doc = document(&json!({"op":"move","subjects":"target.1","to":"cemetery"}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{
+        "line":1_i64,"kind":"trigger","event":"leave","subject":"self",
+        "body":{"op":"damage","subjects":"opponent.leader","amount":{"read":"event.subject.power"}}
+    }]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("context.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    position["players"]["P2"]["zones"]["field"][0]["state"]["power"] = json!(8_i64);
+    let mut engine =
+        Game::new(catalog, &position, &Value::Null, &Value::Null, "last-info").unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "leave",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.cemetery.b.power").unwrap(),
+        Some(json!(2_i64))
+    );
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let decision = restored.legal().unwrap().remove(0);
+    restored.decide(&decision, "resolve").unwrap();
+    assert_eq!(
+        restored.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(12_i64))
+    );
+}

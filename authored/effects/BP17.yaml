@@ -79,7 +79,7 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: &id002
+            select:
               side: opponent
               zone: field
               type: follower
@@ -131,7 +131,7 @@ cards:
           condition:
             fn: gt
             args:
-              - count: &id001
+              - count:
                   side: self
                   zone: field
                   type: follower
@@ -148,7 +148,16 @@ cards:
           op: seq
           steps:
             - op: move
-              subjects: *id001
+              subjects:
+                side: self
+                zone: field
+                type: follower
+                trait: 機械
+                where:
+                  fn: ge
+                  args:
+                    - read: item.cost
+                    - 6
               to: cemetery
               bind: sent
             - op: if
@@ -184,7 +193,10 @@ cards:
                 op: seq
                 steps:
                   - op: damage
-                    subjects: *id002
+                    subjects:
+                      side: opponent
+                      zone: field
+                      type: follower
                     amount: 4
                   - op: modify
                     subjects:
@@ -278,7 +290,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP17-077:
@@ -397,7 +412,10 @@ cards:
                 to: field
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP17-SL28:
@@ -446,7 +464,10 @@ cards:
                     amount: 2
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:
@@ -470,7 +491,10 @@ cards:
             amount: 2
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP17-T11:
@@ -526,9 +550,27 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
+  BP17-T18:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
   BP17-T19:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

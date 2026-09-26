@@ -186,13 +186,6 @@ impl Game {
         }
         let choices = if let Some(prompt) = &self.state.prompt {
             prompt.choices.clone()
-        } else if self.pending_player().is_some() {
-            self.state
-                .pending
-                .iter()
-                .filter(|p| p.controller == seat)
-                .map(Self::pending_choice)
-                .collect()
         } else {
             self.legal()?
         };

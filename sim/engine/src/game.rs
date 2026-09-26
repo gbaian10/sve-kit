@@ -8,6 +8,7 @@
 mod belief;
 mod effects;
 mod expr;
+mod extensions;
 mod legal;
 mod progression;
 mod rules;
@@ -100,6 +101,10 @@ struct Pending {
 struct Frame {
     source: String,
     controller: String,
+    #[serde(default)]
+    event: Value,
+    #[serde(default)]
+    values: BTreeMap<String, Value>,
     reference: Value,
     decision: Value,
     bindings: BTreeMap<String, Vec<String>>,
@@ -464,7 +469,7 @@ impl Game {
             usize::try_from(int(&object.state["face"])).map_err(invalid)?,
         )
     }
-    fn abilities(&self, id: &str) -> Result<Vec<Value>> {
+    fn printed_abilities(&self, id: &str) -> Result<Vec<Value>> {
         let object = self.object(id)?;
         if object.state["silenced"] == true {
             return Ok(Vec::new());
@@ -480,9 +485,99 @@ impl Game {
                     .get("face")
                     .is_none_or(|face| int(face) == int(&object.state["face"]))
             })
+            .flat_map(|ability| {
+                if ability["kind"] == "static" && ability["body"]["op"] == "seq" {
+                    list(&ability["body"]["steps"])
+                        .into_iter()
+                        .map(|body| {
+                            let mut code = ability.clone();
+                            code["body"] = body;
+                            code
+                        })
+                        .collect::<Vec<_>>()
+                } else {
+                    vec![ability]
+                }
+            })
             .collect())
     }
+    fn abilities(&self, id: &str) -> Result<Vec<Value>> {
+        let mut abilities = self.printed_abilities(id)?;
+        if self.object(id)?.zone == "field" {
+            for source in self.field_ids() {
+                for ability in self.printed_abilities(&source)? {
+                    let body = &ability["body"];
+                    if body["op"] != "aura" || body.get("abilities").is_none() {
+                        continue;
+                    }
+                    let frame = self.frame_for(&source)?;
+                    if self.matches(id, &body["subjects"], &frame)?
+                        && body
+                            .get("condition")
+                            .map_or(Ok(true), |condition| self.truth(condition, &frame))?
+                    {
+                        for mut granted in list(&body["abilities"]) {
+                            granted["granted_by"] = json!(source);
+                            abilities.push(granted);
+                        }
+                    }
+                }
+            }
+        }
+        Ok(abilities)
+    }
+    fn object_attributes(&self, id: &str) -> Result<Value> {
+        let object = self.object(id)?;
+        let mut value = self.face(id)?.clone();
+        if let Some(attrs) = object.state.as_object() {
+            for (key, attr) in attrs {
+                value[key] = attr.clone();
+            }
+        }
+        value["id"] = json!(id);
+        value["zone"] = json!(object.zone);
+        value["cost"] = json!(scalar(&self.face(id)?["cost"]));
+        value["token"] = json!(string(&self.face(id)?["card_type"]).contains("トークン"));
+        value["generation"] = json!(object.generation);
+        value["controller"] = json!(object.controller);
+        Ok(value)
+    }
+    fn ability_sources(&self) -> Vec<String> {
+        self.state
+            .objects
+            .values()
+            .filter(|object| {
+                object.zone == "field"
+                    || self
+                        .catalog
+                        .programs
+                        .get(&object.card)
+                        .is_some_and(|program| {
+                            list(&program["abilities"]).iter().any(|code| {
+                                list(&code["active_zones"]).contains(&json!(object.zone))
+                            })
+                        })
+            })
+            .map(|object| object.id.clone())
+            .collect()
+    }
     fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
+        if let Some(code) = self
+            .abilities(id)?
+            .into_iter()
+            .find(|code| legal::reference_matches(reference, &self.reference(id, code)))
+        {
+            return Ok(code);
+        }
+        if let Some(source) = reference["granted_by"].as_str() {
+            return self
+                .abilities(id)?
+                .into_iter()
+                .find(|ability| {
+                    ability["granted_by"] == source && ability["line"] == reference["line"]
+                })
+                .ok_or_else(|| invalid("granted ability is no longer present"));
+        }
         let number = reference["card"].as_str().unwrap_or(&self.object(id)?.card);
         list(&self.catalog.program(number)?["abilities"])
             .into_iter()
@@ -513,6 +608,11 @@ impl Game {
                 .and_then(|evolved_id| self.state.objects.get(evolved_id))
         {
             value["card"] = json!(evolved.card);
+        }
+        if let Some(source) = ability["granted_by"].as_str()
+            && let Some(object) = self.state.objects.get(source)
+        {
+            value["card"] = json!(object.card);
         }
         for key in ["section", "rule", "face"] {
             if let Some(v) = ability.get(key) {

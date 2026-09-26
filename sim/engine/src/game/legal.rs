@@ -216,7 +216,11 @@ impl Game {
                 .map_or_else(|| self.frame_for(&pending.source), Ok)?;
             let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
             if choices.is_empty() {
-                out.push(base);
+                let mut cancellation = base;
+                if !list(&pending.code["costs"]).is_empty() {
+                    cancellation["costs"] = json!("decline");
+                }
+                out.push(cancellation);
             } else {
                 out.extend(choices);
                 if !list(&pending.code["costs"]).is_empty() {
@@ -313,6 +317,20 @@ impl Game {
                 cost = cost.saturating_add(self.number(&body["amount"], &frame)?);
             }
         }
+        for entry in &self.state.continuous {
+            let effect = &entry["effect"];
+            if effect["op"] != "adjust_cost"
+                || !self.continuous_applies(entry, id)
+                || effect["kind"] == "evolve"
+            {
+                continue;
+            }
+            let frame: Frame = serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
+            if let Some(value) = effect.get("set") {
+                cost = self.number(value, &frame)?;
+            }
+            cost = cost.saturating_add(self.number(&effect["amount"], &frame)?);
+        }
         Ok(cost.max(0))
     }
 
@@ -405,7 +423,7 @@ impl Game {
             }
         }
         let body = &code["body"];
-        if body["op"] == "choice" {
+        if body["op"] == "choice" && body["timing"] != "resolve" && body.get("by").is_none() {
             let options = list(&frame.decision["options"]);
             let count = i64::try_from(options.len()).unwrap_or(i64::MAX);
             if count < self.number(&body["min"], frame)?
@@ -492,7 +510,7 @@ impl Game {
         self.freeze(code, "play-start", &mut frame)?;
         let mut options = vec![base];
         let body = &code["body"];
-        if body["op"] == "choice" {
+        if body["op"] == "choice" && body["timing"] != "resolve" && body.get("by").is_none() {
             let ids = (1..=list(&body["modes"]).len())
                 .map(|n| n.to_string())
                 .collect::<Vec<_>>();

@@ -1,0 +1,294 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "Validated JSON uses total read indexing; writes target constructed objects."
+)]
+use alloc::collections::BTreeSet;
+use core::slice::from_ref;
+use serde_json::{Value, json};
+
+use super::legal::{permutations, subsets};
+use super::{Frame, Game, Object, int, list, scalar, string};
+use crate::{EngineFailure, Result, invalid};
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Rule domains share one private state and are split into focused modules."
+)]
+impl Game {
+    pub(super) fn enter_triggers(
+        &mut self,
+        object: &Object,
+        cause: &Value,
+        frame: &Frame,
+    ) -> Result<()> {
+        let entering = self.collect_triggers("enter", from_ref(object), cause)?;
+        if frame.values.get("suppress_fanfare") != Some(&json!(true)) {
+            self.enqueue(entering);
+            return Ok(());
+        }
+        let group = self.group();
+        let mut permitted = Vec::new();
+        for pending in entering {
+            if pending.source == object.id && pending.code["subject"] == "self" {
+                self.emit(json!({"kind":"抑制","ability":pending.reference,"reason":"それの{ファンファーレ}能力は誘発しない"}),cause,group);
+            } else {
+                permitted.push(pending);
+            }
+        }
+        self.enqueue(permitted);
+        Ok(())
+    }
+
+    pub(super) fn resolution_select(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let mut ids = self.select(&node["select"], frame)?;
+        ids.sort();
+        let max = usize::try_from(self.number(&node["max"], frame)?.max(0))
+            .map_err(invalid)?
+            .min(ids.len());
+        let min = usize::try_from(self.number(&node["min"], frame)?.max(0))
+            .map_err(invalid)?
+            .min(max);
+        let mut choices = Vec::new();
+        for selected in subsets(&ids, min, max) {
+            let mut context = frame.clone();
+            context
+                .bindings
+                .insert(string(&node["bind"]).into(), selected.clone());
+            if let Some(constraint) = node.get("constraint")
+                && !self.truth(constraint, &context)?
+            {
+                continue;
+            }
+            if node["order"] == true {
+                for order in permutations(&selected.iter().map(|id| json!(id)).collect::<Vec<_>>())
+                {
+                    choices.push(json!({"do":"resolve-choice","order":order}));
+                }
+            } else {
+                choices.push(json!({"do":"resolve-choice","select":selected}));
+            }
+        }
+        self.prompt(
+            frame,
+            choices,
+            json!({"resume":"select","bind":node["bind"],"order":node["order"]}),
+        );
+        self.set_prompt_side(node, frame);
+        Ok(())
+    }
+
+    fn set_prompt_side(&mut self, node: &Value, frame: &Frame) {
+        let by = self.seats(string(&node["by"]), frame).into_iter().next();
+        if let Some(prompt) = self.state.prompt.as_mut()
+            && let Some(by) = by
+        {
+            prompt.by = by;
+        }
+    }
+
+    pub(super) fn resolution_choice(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let ids = (1..=list(&node["modes"]).len())
+            .map(|n| n.to_string())
+            .collect::<Vec<_>>();
+        let min = usize::try_from(self.number(&node["min"], frame)?.max(0)).map_err(invalid)?;
+        let max = usize::try_from(self.number(&node["max"], frame)?.max(0)).map_err(invalid)?;
+        let choices = subsets(&ids,min,max).iter().map(|subset|json!({"do":"resolve-choice","options":subset.iter().filter_map(|n|n.parse::<i64>().ok()).collect::<Vec<_>>()})).collect();
+        self.prompt(
+            frame,
+            choices,
+            json!({"resume":"choice","modes":node["modes"]}),
+        );
+        self.set_prompt_side(node, frame);
+        Ok(())
+    }
+
+    pub(super) fn extended_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        match string(&node["op"]) {
+            "flip" => {
+                for id in self.select(&node["subjects"], frame)? {
+                    self.object_mut(&id)?.state["face_up"] = json!(node["face"] == "up");
+                    let group = self.group();
+                    self.emit(
+                        json!({"kind":"表向き／裏向き","object":id,"face_up":node["face"] == "up"}),
+                        &frame.cause,
+                        group,
+                    );
+                }
+            }
+            "control" => self.change_controller(node, frame)?,
+            "create" => self.create_tokens(node, frame)?,
+            "counter" => {
+                let amount = self.number(&node["amount"], frame)?;
+                let name = string(&node["name"]);
+                let group = self.group();
+                for id in self.select(&node["subjects"], frame)? {
+                    let count = int(&self.object(&id)?.state["counters"][name]);
+                    self.object_mut(&id)?.state["counters"][name] =
+                        json!(count.saturating_add(amount).max(0));
+                    self.emit(json!({"kind":"カウンター","object":id,"name":self.catalog.keyword_name(name),"delta":amount}),&frame.cause,group);
+                }
+            }
+            "adjust_cost" | "restrict" | "replace_damage" => {
+                self.register_continuous(node, frame)?;
+            }
+            "reveal_until" => self.reveal_until(node, frame)?,
+            unknown => return Err(invalid(format!("unknown extension: {unknown}"))),
+        }
+        Ok(())
+    }
+
+    fn change_controller(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        let controller = self
+            .seats(string(&node["side"]), frame)
+            .into_iter()
+            .next()
+            .unwrap_or_default();
+        for id in self.select(&node["subjects"], frame)? {
+            let previous = self.object(&id)?.clone();
+            if previous.zone != "field" || previous.controller == controller {
+                continue;
+            }
+            if self.zone_count(&controller, "field") >= 5 {
+                return Err(EngineFailure::Unsupported(
+                    "control transfer to a full field".into(),
+                ));
+            }
+            self.player_mut(&previous.controller)?
+                .zones
+                .entry("field".into())
+                .or_default()
+                .retain(|value| *value != id);
+            self.player_mut(&controller)?
+                .zones
+                .entry("field".into())
+                .or_default()
+                .push(json!(id));
+            let object = self.object_mut(&id)?;
+            object.controller.clone_from(&controller);
+            object.state["entered_this_turn"] = json!(true);
+            let group = self.group();
+            self.emit(
+                json!({"kind":"移動","object":id,"from":format!("{}.field",previous.controller),"to":format!("{controller}.field")}),
+                &frame.cause,
+                group,
+            );
+        }
+        Ok(())
+    }
+
+    pub(super) fn new_named_object(&mut self, name: &str, controller: &str) -> Result<String> {
+        let card = self
+            .catalog
+            .cards
+            .values()
+            .find(|card| {
+                self.catalog.programs.contains_key(&card.number)
+                    && card.faces.first().is_some_and(|face| {
+                        string(&face["card_type"]).contains("トークン")
+                            && (face["name"] == name
+                                || self.catalog.programs[&card.number]["rules_name"] == name)
+                    })
+            })
+            .ok_or_else(|| {
+                EngineFailure::Unsupported(format!("no authored token print: {name}"))
+            })?;
+        let card = card.number.clone();
+        let printed = self.catalog.face(&card, 0)?;
+        let state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
+        let id = loop {
+            let next = format!("new-{}", self.state.next_object);
+            self.state.next_object = self.state.next_object.saturating_add(1);
+            if !self.state.objects.contains_key(&next) {
+                break next;
+            }
+        };
+        self.state.objects.insert(
+            id.clone(),
+            Object {
+                id: id.clone(),
+                card,
+                owner: controller.into(),
+                controller: controller.into(),
+                zone: "void".into(),
+                generation: 0,
+                state,
+            },
+        );
+        Ok(id)
+    }
+
+    fn create_tokens(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let specifications = node.get("tokens").map_or_else(|| vec![node.clone()], list);
+        let mut created = Vec::new();
+        for specification in specifications {
+            let name = self.eval(&specification["name"], frame)?;
+            let count = self.number(&specification["count"], frame)?.max(0);
+            if count > 1000 {
+                return Err(EngineFailure::Unsupported(
+                    "token creation exceeds prototype limit".into(),
+                ));
+            }
+            for _ in 0..count {
+                created.push(self.new_named_object(string(&name), &frame.controller)?);
+            }
+        }
+        frame.bindings.insert("created-tokens".into(), created);
+        Self::prepend(
+            frame,
+            vec![
+                json!({"op":"move","subjects":"created-tokens","to":node["to"],"bind":node["bind"]}),
+            ],
+        );
+        Ok(())
+    }
+
+    fn register_continuous(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        let subjects = self.select(&node["subjects"], frame)?;
+        for id in subjects {
+            let generation = self.state.objects.get(&id).map(|object| object.generation);
+            self.state.continuous.push(json!({"source":frame.source,"controller":frame.controller,"applies_to":[id],"generation":generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"during":node["during"],"order":self.state.next_event,"context":frame}));
+        }
+        Ok(())
+    }
+
+    pub(super) fn continuous_applies(&self, entry: &Value, id: &str) -> bool {
+        list(&entry["applies_to"]).contains(&json!(id))
+            && self
+                .state
+                .objects
+                .get(id)
+                .is_none_or(|object| entry["generation"].as_u64() == Some(object.generation))
+    }
+
+    fn reveal_until(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let seat = self
+            .seats(string(&node["side"]), frame)
+            .into_iter()
+            .next()
+            .unwrap_or_default();
+        let wanted = self.number(&node["count"], frame)?.max(0);
+        let mut count = 0_i64;
+        let mut revealed = Vec::new();
+        let qualifies: BTreeSet<_> = self
+            .select(&node["qualifies"], frame)?
+            .into_iter()
+            .collect();
+        for value in self.zone(&seat, "deck") {
+            if count >= wanted {
+                break;
+            }
+            let id = value.as_str().ok_or_else(|| {
+                EngineFailure::Unsupported("unidentified filler reached by reveal-until".into())
+            })?;
+            revealed.push(id.to_owned());
+            if qualifies.contains(id) {
+                count = count.saturating_add(1);
+            }
+        }
+        self.reveal(&revealed, "all", frame, false);
+        frame
+            .bindings
+            .insert(string(&node["bind"]).into(), revealed);
+        Ok(())
+    }
+}

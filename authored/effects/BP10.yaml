@@ -313,3 +313,34 @@ cards:
                     subjects: self.leader
                     amount: 7
         event: end
+  BP10-T09:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          hp: 1
+          traits:
+            - 武装
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              where:
+                fn: eq
+                args:
+                  - read: item.class
+                  - ドラゴン
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery

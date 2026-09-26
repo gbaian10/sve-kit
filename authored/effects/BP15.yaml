@@ -546,6 +546,38 @@ cards:
               type: follower
             min: 1
             max: 1
+  BP15-P29:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 2
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: cemetery
+                      side: opponent
+                  - 10
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
   BP15-P33:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -654,6 +686,36 @@ cards:
             max: 1
             modes:
               - 1
+  BP15-PR13:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects:
+                zone: field
+                side: both
+                type: follower
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.pp.max
+                  - 7
+              then:
+                op: modify
+                subjects:
+                  zone: field
+                  side: self
+                  type: follower
+                  name: 烈絶の侮蔑・ガルミーユ
+                keywords:
+                  - storm
   BP15-SL13:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

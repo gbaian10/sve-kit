@@ -34,10 +34,10 @@ impl Game {
         Ok(())
     }
 
-    fn prepend(frame: &mut Frame, steps: Vec<Value>) {
+    pub(super) fn prepend(frame: &mut Frame, steps: Vec<Value>) {
         frame.todo.splice(0..0, steps);
     }
-    fn prompt(&mut self, frame: &mut Frame, choices: Vec<Value>, resume: Value) {
+    pub(super) fn prompt(&mut self, frame: &mut Frame, choices: Vec<Value>, resume: Value) {
         frame.occurrence = frame.occurrence.saturating_add(1);
         self.state.prompt = Some(Prompt {
             by: frame.controller.clone(),
@@ -46,6 +46,10 @@ impl Game {
         });
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The continuation dispatch keeps all serialized resume variants auditable together."
+    )]
     pub(super) fn resume(&mut self, decision: &Value) -> Result<()> {
         let prompt = self
             .state
@@ -60,14 +64,37 @@ impl Game {
         let task = prompt.resume;
         match string(&task["resume"]) {
             "select" => {
-                let selected = list(&decision["select"])
-                    .iter()
-                    .filter_map(Value::as_str)
-                    .map(str::to_owned)
-                    .collect::<Vec<_>>();
+                let selected = list(if task["order"] == true {
+                    &decision["order"]
+                } else {
+                    &decision["select"]
+                })
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_owned)
+                .collect::<Vec<_>>();
                 frame
                     .bindings
                     .insert(string(&task["bind"]).into(), selected);
+            }
+            "declare" => {
+                frame
+                    .values
+                    .insert(string(&task["bind"]).into(), decision["declare"].clone());
+            }
+            "choice" => {
+                let mut selected = list(&decision["options"]);
+                selected.sort_by_key(int);
+                Self::prepend(
+                    &mut frame,
+                    selected
+                        .iter()
+                        .filter_map(|value| {
+                            let index = usize::try_from(int(value).saturating_sub(1)).ok()?;
+                            task["modes"].as_array()?.get(index).cloned()
+                        })
+                        .collect(),
+                );
             }
             "optional" => {
                 if decision["choice"] == "execute" {
@@ -102,12 +129,33 @@ impl Game {
                 Self::prepend(
                     &mut frame,
                     vec![
-                        json!({"op":"move","subjects":"search-result","to":task["to"],"bind":task["bind"]}),
+                        json!({"op":"move","subjects":"search-result","to":task["to"],"bind":task["bind"],"suppress_fanfare":task["suppress_fanfare"]}),
                         json!({"op":"shuffle","subjects":{"zone":"deck","side":"self"}}),
                     ],
                 );
             }
             "capacity" => {}
+            "move-capacity" => {
+                let selected = list(&decision["select"])
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .map(str::to_owned)
+                    .collect::<Vec<_>>();
+                frame.bindings.insert("capacity-selected".into(), selected);
+                let mut movement = task["node"].clone();
+                movement["subjects"] = json!("capacity-selected");
+                movement["capacity_checked"] = json!(true);
+                Self::prepend(&mut frame, vec![movement]);
+            }
+            "place-batch" => {
+                let id = string(&decision["object"]);
+                self.object_mut(id)?.state["acted"] = decision["acted"].clone();
+                let mut movement = task["node"].clone();
+                let mut placed = list(&movement["placed"]);
+                placed.push(json!(id));
+                movement["placed"] = json!(placed);
+                Self::prepend(&mut frame, vec![movement]);
+            }
             "drive" => {
                 let id = string(&task["object"]);
                 let execute = decision["choice"] == "execute";
@@ -141,7 +189,7 @@ impl Game {
         clippy::too_many_lines,
         reason = "This is the single auditable dispatch table for schema atoms and combinators."
     )]
-    fn execute(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+    pub(super) fn execute(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         Self::check_execution_parameters(node)?;
         match string(&node["op"]) {
             "seq" => Self::prepend(frame, list(&node["steps"])),
@@ -191,6 +239,14 @@ impl Game {
                     vec![string(&node["object"]).into()],
                 );
             }
+            "choice" if node["timing"] == "resolve" || node.get("by").is_some() => {
+                self.resolution_choice(node, frame)?;
+            }
+            "declare_number" => self.prompt(
+                frame,
+                Vec::new(),
+                json!({"resume":"declare","bind":node["bind"]}),
+            ),
             "choice" => {
                 let modes = list(&node["modes"]);
                 let mut indexes = list(&frame.decision["options"])
@@ -234,25 +290,7 @@ impl Game {
                     Self::prepend(frame, vec![node["then"].clone()]);
                 }
             }
-            "select" => {
-                let mut ids = self.select(&node["select"], frame)?;
-                ids.sort();
-                let max = usize::try_from(self.number(&node["max"], frame)?.max(0))
-                    .map_err(invalid)?
-                    .min(ids.len());
-                let min = usize::try_from(self.number(&node["min"], frame)?.max(0))
-                    .map_err(invalid)?
-                    .min(max);
-                let choices = subsets(&ids, min, max)
-                    .into_iter()
-                    .map(|ids| json!({"do":"resolve-choice","select":ids}))
-                    .collect();
-                self.prompt(
-                    frame,
-                    choices,
-                    json!({"resume":"select","bind":node["bind"]}),
-                );
-            }
+            "select" => self.resolution_select(node, frame)?,
             "damage" => {
                 let amount = self.number(&node["amount"], frame)?;
                 let split = node["split"].as_str();
@@ -357,7 +395,7 @@ impl Game {
                 self.prompt(
                     frame,
                     choices,
-                    json!({"resume":"search","to":node["to"],"bind":node["bind"]}),
+                    json!({"resume":"search","to":node["to"],"bind":node["bind"],"suppress_fanfare":node["suppress_fanfare"]}),
                 );
             }
             "shuffle" => {
@@ -433,6 +471,8 @@ impl Game {
                     group,
                 );
             }
+            "flip" | "control" | "create" | "counter" | "adjust_cost" | "restrict"
+            | "replace_damage" | "reveal_until" => self.extended_effect(node, frame)?,
             "unsupported" => {
                 return Err(EngineFailure::Unsupported(string(&node["reason"]).into()));
             }
@@ -486,34 +526,56 @@ impl Game {
             }
             _ => {
                 let zone = string(&node["to"]);
-                if matches!(zone, "field" | "ex") && self.zone_count(&frame.controller, zone) >= 5 {
-                    self.prompt(
-                        frame,
-                        vec![json!({"do":"resolve-choice","select":[]})],
-                        json!({"resume":"capacity"}),
-                    );
+                if ids.is_empty() {
                     return Ok(());
                 }
-                if zone == "field"
-                    && let Some(id) = ids.first()
-                    && self.keywords(id)?.contains("guard")
-                {
-                    self.prompt(
-                        frame,
-                        vec![
-                            json!({"do":"place-acted","object":id,"acted":false}),
-                            json!({"do":"place-acted","object":id,"acted":true}),
-                        ],
-                        json!({"resume":"place","object":id}),
-                    );
-                    return Ok(());
+                if matches!(zone, "field" | "ex") && node["capacity_checked"] != true {
+                    let available = usize::try_from(
+                        5_i64
+                            .saturating_sub(self.zone_count(&frame.controller, zone))
+                            .max(0),
+                    )
+                    .map_err(invalid)?;
+                    if ids.len() > available {
+                        let choices = subsets(&ids, available, available)
+                            .iter()
+                            .map(|chosen| json!({"do":"resolve-choice","select":chosen}))
+                            .collect();
+                        self.prompt(
+                            frame,
+                            choices,
+                            json!({"resume":"move-capacity","node":node}),
+                        );
+                        return Ok(());
+                    }
                 }
+                if zone == "field" {
+                    for id in &ids {
+                        if self.keywords(id)?.contains("guard")
+                            && !list(&node["placed"]).contains(&json!(id))
+                        {
+                            self.prompt(
+                                frame,
+                                vec![
+                                    json!({"do":"place-acted","object":id,"acted":false}),
+                                    json!({"do":"place-acted","object":id,"acted":true}),
+                                ],
+                                json!({"resume":"place-batch","node":node}),
+                            );
+                            return Ok(());
+                        }
+                    }
+                }
+                let mut movement_frame = frame.clone();
+                movement_frame
+                    .values
+                    .insert("suppress_fanfare".into(), node["suppress_fanfare"].clone());
                 self.move_objects(
                     &ids,
                     zone,
                     node["side"].as_str(),
-                    node["position"].as_str(),
-                    frame,
+                    node.get("position"),
+                    &movement_frame,
                 )?;
             }
         }
@@ -529,7 +591,7 @@ impl Game {
         ids: &[String],
         zone: &str,
         side: Option<&str>,
-        position: Option<&str>,
+        position: Option<&Value>,
         frame: &Frame,
     ) -> Result<()> {
         let mut movable = Vec::new();
@@ -592,8 +654,14 @@ impl Game {
                 .zones
                 .entry(zone.into())
                 .or_default();
-            if position == Some("top") {
-                items.insert(0, json!(id));
+            if let Some(position) = position.filter(|pos| **pos != "bottom") {
+                let index = position.as_u64().unwrap_or(1).saturating_sub(1);
+                items.insert(
+                    usize::try_from(index)
+                        .unwrap_or(usize::MAX)
+                        .min(items.len()),
+                    json!(id),
+                );
             } else {
                 items.push(json!(id));
             }
@@ -668,8 +736,7 @@ impl Game {
         }
         self.enqueue(pending);
         for (object, cause) in entered {
-            let entering = self.collect_triggers("enter", &[object], &cause)?;
-            self.enqueue(entering);
+            self.enter_triggers(&object, &cause, frame)?;
         }
         Ok(())
     }
@@ -817,12 +884,12 @@ impl Game {
                 json!({"resume":"drive","object":id,"icon":icon}),
             );
         } else {
-            self.move_objects(&[id], "deck", None, Some("bottom"), frame)?;
+            self.move_objects(&[id], "deck", None, Some(&json!("bottom")), frame)?;
         }
         Ok(())
     }
 
-    fn reveal(&mut self, ids: &[String], to: &str, frame: &Frame, located: bool) {
+    pub(super) fn reveal(&mut self, ids: &[String], to: &str, frame: &Frame, located: bool) {
         let group = self.group();
         for id in ids {
             for seat in ["P1", "P2"] {
@@ -981,7 +1048,12 @@ impl Game {
                 group,
             );
         }
-        let pending = self.collect_triggers("damage", &damaged, &frame.cause)?;
+        let pending = self.collect_event(
+            "damage",
+            &damaged,
+            &frame.cause,
+            &json!({"effect_damage": !list(&node["hits"]).iter().any(|hit|hit["battle"] == true)}),
+        )?;
         self.enqueue(pending);
         Ok(())
     }

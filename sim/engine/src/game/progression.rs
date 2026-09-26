@@ -246,7 +246,8 @@ impl Game {
         );
         frame.cause = json!({"event":event});
         let affected = [self.object(source)?.clone()];
-        self.enqueue(self.collect_triggers("evolve", &affected, &frame.cause)?);
+        let pending = self.collect_triggers("evolve", &affected, &frame.cause)?;
+        self.enqueue(pending);
         if sep > 0 {
             let super_group = self.group();
             self.emit(
@@ -254,7 +255,8 @@ impl Game {
                 &frame.cause,
                 super_group,
             );
-            self.enqueue(self.collect_triggers("super_evolve", &affected, &frame.cause)?);
+            let super_pending = self.collect_triggers("super_evolve", &affected, &frame.cause)?;
+            self.enqueue(super_pending);
         }
         Ok(())
     }
