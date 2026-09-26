@@ -38,11 +38,11 @@ cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo llvm-cov --locked --workspace --fail-under-lines 90
 ```
 
-The G1 regression test checks eight documented differences in the shape of pending
-choices, while requiring matching state, events, controller and pending references.
-The raw evaluator still reports 33 passes and eight failures. The new 139-scenario
-regression requires every scenario to pass without exceptions. Current results and
-reproduction commands are in [RESULTS.md](../../docs/evaluation/seal-2/RESULTS.md).
+The G1 regression requires all 41 scenarios to pass every checkpoint. The new
+139-scenario regression also requires every scenario to pass without exceptions.
+Pending choices include each legal parameter combination, and resolution events
+follow effect completion and removal from the resolution zone. Current results and
+reproduction commands are in [RESULTS.md](../../docs/evaluation/seal-2-addendum-1/RESULTS.md).
 
 `Catalog::from_documents` accepts snapshot and YAML strings without filesystem
 access. The default `runner` feature enables evaluation adapters and the CLI. The
