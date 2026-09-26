@@ -64,6 +64,7 @@ impl Game {
                         let mut card = object.state.clone();
                         card["id"] = json!(id);
                         card["card"] = json!(object.card);
+                        card["name"] = json!(self.card_name(id)?);
                         card["generation"] = json!(object.generation);
                         card["damage"] =
                             json!(int(&card["max_hp"]).saturating_sub(int(&card["hp"])));

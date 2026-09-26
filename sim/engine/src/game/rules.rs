@@ -954,7 +954,7 @@ impl Game {
             "deal_damage" => "damage_source",
             "leader_life_change" => "leader",
             "discard" => "discarded",
-            "evolve" => "evolved",
+            "evolve" | "super_evolve" => "evolved",
             "attack" => "attacked",
             "act" => "acted",
             "stand" => "stood",

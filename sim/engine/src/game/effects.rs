@@ -658,7 +658,11 @@ impl Game {
                 } else {
                     "effect"
                 });
-                let event_id=self.emit(json!({"kind":"場に出す","object":id,"card":previous.card,"from":from,"to":format!("{owner}.field")}),&frame.cause,group);
+                let mut event = json!({"kind":"場に出す","object":id,"from":from,"to":format!("{owner}.field")});
+                if previous.zone != "void" || previous.state["creation_print_selected"] == true {
+                    event["card"] = json!(previous.card);
+                }
+                let event_id = self.emit(event, &frame.cause, group);
                 entered.push((self.object(id)?.clone(), json!({"event":event_id})));
             } else {
                 self.emit_zone_movement(previous, destination, position, frame, group)?;

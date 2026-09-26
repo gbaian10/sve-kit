@@ -29,7 +29,9 @@ impl Game {
         if previous.zone == "void"
             && matches!(destination, "ex" | "equipment" | "cemetery" | "banish")
         {
-            event["card"] = json!(previous.card);
+            if previous.state["creation_print_selected"] == true {
+                event["card"] = json!(previous.card);
+            }
             event["source"] = json!(frame.source);
         }
         if let Some(pos) = position
@@ -241,18 +243,18 @@ impl Game {
                     .map(|item| item.id.clone()),
             );
         }
-        let mut rule_frame = frame.clone();
-        rule_frame.cause = json!({"rule":"11.8.1"});
-        rule_frame
-            .values
-            .insert("movement_rule".into(), json!("rule-11.8.1"));
         for id in resources {
-            if !matches!(
-                self.object(&id)?.zone.as_str(),
-                "evolution" | "race" | "drive"
-            ) {
-                continue;
-            }
+            let rule = match self.object(&id)?.zone.as_str() {
+                "evolution" => "11.6.1",
+                "race" => "11.8.1",
+                "drive" => "11.10.1",
+                _ => continue,
+            };
+            let mut rule_frame = frame.clone();
+            rule_frame.cause = json!({"rule":rule});
+            rule_frame
+                .values
+                .insert("movement_rule".into(), json!(format!("rule-{rule}")));
             self.move_objects(from_ref(&id), "evolve_deck", None, None, &rule_frame)?;
             self.object_mut(&id)?.state["face_up"] = json!(true);
         }
@@ -266,8 +268,8 @@ impl Game {
             self.object_mut(&id)?.zone = "void".into();
             let group = self.group();
             self.emit(
-                json!({"kind":"消去","object":id,"by":"rule-11.8"}),
-                &json!({"rule":"11.8"}),
+                json!({"kind":"消去","object":id,"by":"rule-11.11.1"}),
+                &json!({"rule":"11.11.1"}),
                 group,
             );
         }

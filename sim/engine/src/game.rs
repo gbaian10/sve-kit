@@ -653,6 +653,7 @@ impl Game {
             }
         }
         value["id"] = json!(id);
+        value["name"] = json!(self.card_name(id)?);
         value["zone"] = json!(object.zone);
         value["cost"] = json!(scalar(&self.face(id)?["cost"]));
         value["token"] = json!(string(&self.face(id)?["card_type"]).contains("トークン"));

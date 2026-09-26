@@ -4072,8 +4072,15 @@ fn transformation_banishes_and_erases_before_creating_a_fresh_batch() {
         created[0]["group"].as_u64().unwrap(),
     ];
     assert!(groups[0] < groups[1] && groups[1] < groups[2]);
-    assert_eq!(created[0]["card"], "token-z");
-    assert_eq!(created[1]["card"], "token-b");
+    assert!(created.iter().all(|event| event.get("card").is_none()));
+    assert_eq!(
+        engine.query(View::P1, "P1.ex.new-1.name").unwrap(),
+        Some(json!("shared-token"))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.ex.new-2.name").unwrap(),
+        Some(json!("other-token"))
+    );
     assert_eq!(created[0]["source"], "s");
     assert!(phase("場に出す").is_empty());
     assert_eq!(
@@ -6677,5 +6684,105 @@ fn unresolved_numeric_history_never_silently_uses_printed_defaults() {
             Game::new(loaded, &initial, &Value::Null, &Value::Null, "bad-history"),
             Err(EngineFailure::Unsupported(_))
         ));
+    }
+}
+
+#[test]
+fn visible_names_follow_the_current_face_and_rule_name_without_exposing_hidden_cards() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    let mut rows: Vec<Value> = snapshot()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    let mut second_face = rows[0]["faces"][0].clone();
+    second_face["name"] = json!("second-face-name");
+    rows[0]["faces"].as_array_mut().unwrap().push(second_face);
+    doc["cards"]["unit-spell"]["rules_name"] = json!("private-rule-name");
+    let snapshot = rows
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let loaded = Arc::new(
+        Catalog::from_documents(&snapshot, &registry(), &[("names".into(), doc.to_string())])
+            .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"face":1_i64});
+    initial["players"]["P1"]["zones"]["hand"] = json!([]);
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"secret","card":"unit-spell"}]);
+    let engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "names",
+    )
+    .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.field.a.name").unwrap(),
+        Some(json!("second-face-name"))
+    );
+    assert_eq!(
+        engine.query(View::P2, "P2.hand.secret.name").unwrap(),
+        Some(json!("private-rule-name"))
+    );
+    assert_eq!(engine.query(View::P1, "P2.hand.secret.name").unwrap(), None);
+    let packet = engine.projection(View::P1).unwrap();
+    assert!(!packet.to_string().contains("private-rule-name"));
+    assert!(!packet.to_string().contains("secret"));
+    let restored = Game::from_observation(loaded, &packet, "P1", "names").unwrap();
+    assert_eq!(
+        restored.query(View::P1, "P1.field.a.name").unwrap(),
+        Some(json!("second-face-name"))
+    );
+}
+
+#[test]
+fn named_creation_omits_prints_but_explicit_capacity_selections_retain_them() {
+    for zone in ["field", "ex"] {
+        for capacity_choice in [false, true] {
+            let body = json!({"op":"create","name":"shared-token","count":if capacity_choice {5_i64} else {1_i64},"to":zone});
+            let (facts, doc) = token_fixture(&body);
+            let loaded = Arc::new(
+                Catalog::from_documents(&facts, &registry(), &[("names".into(), doc.to_string())])
+                    .unwrap(),
+            );
+            let mut initial = setup();
+            if zone == "ex" {
+                initial["players"]["P1"]["zones"]["ex"] =
+                    json!([{"id":"occupied","card":"unit-follower"}]);
+            }
+            let mut engine =
+                Game::new(loaded, &initial, &Value::Null, &Value::Null, "named-create").unwrap();
+            let mut step = engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "create",
+                )
+                .unwrap();
+            if capacity_choice {
+                assert_eq!(step.outcome, "paused");
+                let choice = engine.legal().unwrap().remove(0);
+                step = engine.decide(&choice, "prints").unwrap();
+            }
+            let events: Vec<_> = step
+                .events
+                .iter()
+                .filter(|event| event["from"] == "P1.void")
+                .collect();
+            assert_eq!(events.len(), if capacity_choice { 4 } else { 1 });
+            assert!(
+                events
+                    .iter()
+                    .all(|event| event.get("card").is_some() == capacity_choice)
+            );
+            assert_eq!(
+                engine
+                    .query(View::P1, &format!("P1.{zone}.new-1.name"))
+                    .unwrap(),
+                Some(json!("shared-token"))
+            );
+        }
     }
 }

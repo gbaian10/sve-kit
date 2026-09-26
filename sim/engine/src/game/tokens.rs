@@ -142,9 +142,11 @@ impl Game {
             .iter()
             .map(|card| string(card).into())
             .collect::<Vec<_>>();
+        let mut node = task["node"].clone();
+        node["print_selected"] = json!(true);
         self.create_prints(
             &in_print_order(&prints, &selected),
-            &task["node"],
+            &node,
             &frame.controller.clone(),
             frame,
         )
@@ -161,6 +163,11 @@ impl Game {
             .iter()
             .map(|card| self.new_token_object(card, controller))
             .collect::<Result<Vec<_>>>()?;
+        if node["print_selected"] == true {
+            for id in &created {
+                self.object_mut(id)?.state["creation_print_selected"] = json!(true);
+            }
+        }
         frame.bindings.insert("created-tokens".into(), created);
         Self::prepend(
             frame,
