@@ -156,3 +156,184 @@ fn partial_programs_fail_closed_and_unseen_hand_has_no_identity() {
     assert!(packet.get("legal").is_none());
     assert!(engine.query(View::P2, "P1.hand.s.card").unwrap().is_none());
 }
+
+#[test]
+fn resolution_counts_survive_a_pause_and_serialized_resume() {
+    let grave = json!({"count":{"zone":"cemetery","side":"self"}});
+    let mut engine = game(&json!({"op":"seq","steps":[
+        {"op":"move","subjects":"self","to":"cemetery"},
+        {"op":"optional","then":{"op":"seq","steps":[
+            {"op":"damage","subjects":"target.1","amount":{"at":"resolution-start","value":grave}},
+            {"op":"damage","subjects":"target.1","amount":grave}
+        ]}}
+    ]}));
+    let step = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(step.outcome, "paused");
+    let bytes = serde_json::to_string(&engine).unwrap();
+    let mut restored: Game = serde_json::from_str(&bytes).unwrap();
+    restored
+        .decide(&json!({"do":"resolve-choice","choice":"execute"}), "resume")
+        .unwrap();
+    assert_eq!(
+        restored.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(2_i64))
+    );
+}
+
+#[test]
+fn bound_selections_preserve_owner_and_values_support_aggregation() {
+    let mut engine = game(
+        &json!({"op":"damage","subjects":{"from":"target.1","type":"follower"},"amount":{"fn":"sum","args":[{"values":{"zone":"field","side":"self"},"field":"cost"}]}}),
+    );
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(2_i64))
+    );
+}
+
+#[test]
+fn combo_counts_the_card_currently_being_played() {
+    let mut engine = game(
+        &json!({"op":"choice","min":{"if":{"fn":"eq","args":[{"read":"self.combo"},1_i64]},"then":1_i64,"else":0_i64},"max":1_i64,"modes":[{"op":"damage","subjects":"target.1","amount":{"read":"self.combo"}}]}),
+    );
+    let legal = engine.legal().unwrap();
+    assert!(
+        legal
+            .iter()
+            .any(|choice| choice["do"] == "play" && choice["options"] == json!([1_i64]))
+    );
+    assert!(
+        !legal
+            .iter()
+            .any(|choice| choice["do"] == "play" && choice["options"] == json!([]))
+    );
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","options":[1_i64],"targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(2_i64))
+    );
+}
+
+#[test]
+fn movement_receipts_count_changes_and_bind_the_actual_results() {
+    for (destination, expected) in [("field", 20_i64), ("cemetery", 19_i64)] {
+        let mut engine = game(
+            &json!({"op":"if_done","attempt":{"op":"move","subjects":"target.1","to":destination,"bind":"moved"},"then":{"op":"damage","subjects":"opponent.leader","amount":{"count":"moved"}}}),
+        );
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(expected))
+        );
+    }
+}
+
+#[test]
+fn a_card_returning_to_the_field_is_not_the_original_target() {
+    let mut engine = game(&json!({"op":"seq","steps":[
+        {"op":"move","subjects":"target.1","to":"cemetery","bind":"left"},
+        {"op":"move","subjects":"left","to":"field"},
+        {"op":"damage","subjects":"target.1","amount":2_i64},
+        {"op":"damage","subjects":"target.1.leader","amount":1_i64}
+    ]}));
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(3_i64))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(19_i64))
+    );
+}
+
+#[test]
+fn targeting_protection_and_zero_damage_bane_follow_distinct_rules() {
+    for keyword in ["aura", "intimidate", "bane"] {
+        let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":2_i64}));
+        doc["cards"]["unit-follower"]["abilities"] =
+            json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":keyword}}]);
+        let words = json!({"version":"astra/1","keywords":{keyword:{"ja":keyword,"expansion":{"op":"keyword","name":keyword}}}});
+        let loaded = Catalog::from_documents(
+            &snapshot(),
+            &words.to_string(),
+            &[("unit.yaml".into(), doc.to_string())],
+        )
+        .unwrap();
+        let mut position = setup();
+        position["players"]["P1"]["zones"]["field"][0]["state"] = json!({"power":0_i64});
+        position["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+        let mut engine = Game::new(
+            Arc::new(loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "keywords",
+        )
+        .unwrap();
+        let legal = engine.legal().unwrap();
+        if keyword == "aura" {
+            assert!(!legal.iter().any(|choice| choice["do"] == "play"));
+            assert!(
+                legal
+                    .iter()
+                    .any(|choice| choice["do"] == "attack" && choice["target"] == "b")
+            );
+            assert_eq!(
+                engine
+                    .decide(
+                        &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                        "aura"
+                    )
+                    .unwrap()
+                    .outcome,
+                "cannot-play"
+            );
+        } else if keyword == "intimidate" {
+            assert!(
+                !legal
+                    .iter()
+                    .any(|choice| choice["do"] == "attack" && choice["target"] == "b")
+            );
+            assert!(legal.iter().any(|choice| choice["do"] == "play"));
+        } else {
+            engine
+                .decide(
+                    &json!({"do":"attack","attacker":"a","target":"b"}),
+                    "attack",
+                )
+                .unwrap();
+            engine.decide(&json!({"do":"pass"}), "quick-pass").unwrap();
+            assert_eq!(
+                engine.query(View::P1, "P2.cemetery").unwrap(),
+                Some(json!(["b"]))
+            );
+        }
+    }
+}

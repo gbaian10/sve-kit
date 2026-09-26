@@ -22,13 +22,15 @@ cards:
             - line: 2
               kind: trigger
               body:
-                op: damage
-                subjects: event.target
-                amount: 2
+                op: if
+                condition:
+                  read: event.target_is_follower
+                then:
+                  op: damage
+                  subjects: event.target
+                  amount: 2
               event: attack
               subject: self
-              trigger_if:
-                read: event.target_is_follower
       - line: 3
         kind: trigger
         body:

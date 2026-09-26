@@ -189,24 +189,40 @@ impl Game {
                 let amount=self.number(&node["amount"],frame)?;
                 let split=node["split"].as_str();
                 let hits=self.select(&node["subjects"],frame)?.iter().map(|id|json!({"source":frame.source,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
-                Self::prepend(frame,vec![json!({"op":"_damage","hits":hits,"orders":{}})]);
+                Self::prepend(frame,vec![json!({"op":"_damage","hits":hits,"orders":{},"bind":node["bind"]})]);
             }
             "_damage"=>self.damage_batch(node,frame)?,
+            "_movement_receipt"=>{
+                let mut moved=Vec::new();
+                for previous in list(&node["before"]) {
+                    let id=string(&previous["id"]);
+                    if self.object(id)?.generation!=previous["generation"].as_u64().unwrap_or_default() {moved.push(id.to_owned());}
+                }
+                frame.performed=i64::try_from(moved.len()).unwrap_or(i64::MAX);
+                if let Some(name)=node["bind"].as_str() {frame.bindings.insert(name.into(),moved);}
+            }
             "destroy"|"banish"|"discard"|"move"=>self.zone_action(node,frame)?,
             "act"|"stand"=>{
-                frame.performed=0;let group=self.group();
+                frame.performed=0;let group=self.group();let mut changed=Vec::new();
                 for id in self.select(&node["subjects"],frame)? {
                     let acted=node["op"]=="act";
                     if self.object(&id)?.state["acted"]!=acted {
                         self.object_mut(&id)?.state["acted"]=json!(acted);frame.performed=frame.performed.saturating_add(1);
+                        changed.push(id.clone());
                         self.emit(json!({"kind":if acted { "アクト" } else { "スタンド" },"object":id}),&frame.cause,group);
                     }
                 }
+                if let Some(name)=node["bind"].as_str() {frame.bindings.insert(name.into(),changed);}
             }
             "draw"=>{
+                frame.performed=0;let mut drawn=Vec::new();
                 for seat in self.seats(string(&node["side"]),frame) {
+                    let before=self.zone_ids(&seat,"hand");let count=self.zone_count(&seat,"hand");
                     for _ in 0..self.number(&node["count"],frame)?.max(0) { self.draw(&seat,frame)?; }
+                    frame.performed=frame.performed.saturating_add(self.zone_count(&seat,"hand").saturating_sub(count));
+                    drawn.extend(self.zone_ids(&seat,"hand").into_iter().filter(|id|!before.contains(id)));
                 }
+                if let Some(name)=node["bind"].as_str() {frame.bindings.insert(name.into(),drawn);}
             }
             "look"=>{
                 let seat=self.seats(string(&node["side"]),frame).into_iter().next().unwrap_or_default();
@@ -263,7 +279,17 @@ impl Game {
 
     fn zone_action(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let ids = self.select(&node["subjects"], frame)?;
-        frame.performed = i64::try_from(ids.len()).unwrap_or(i64::MAX);
+        let before = ids
+            .iter()
+            .map(|id| {
+                self.object(id)
+                    .map(|object| json!({"id":id,"generation":object.generation}))
+            })
+            .collect::<Result<Vec<_>>>()?;
+        Self::prepend(
+            frame,
+            vec![json!({"op":"_movement_receipt","before":before,"bind":node["bind"]})],
+        );
         match string(&node["op"]) {
             "destroy" => self.destroy(&ids, Some(frame))?,
             "banish" => {
@@ -747,6 +773,7 @@ impl Game {
         }
         let group = self.group();
         let mut damaged = Vec::new();
+        Self::damage_receipt(&actual, node["bind"].as_str(), frame);
         for hit in actual {
             let id = string(&hit["target"]);
             let source = string(&hit["source"]);
@@ -773,6 +800,22 @@ impl Game {
         let pending = self.collect_triggers("damage", &damaged, &frame.cause)?;
         self.enqueue(pending);
         Ok(())
+    }
+
+    fn damage_receipt(actual: &[Value], bind: Option<&str>, frame: &mut Frame) {
+        frame.performed = actual
+            .iter()
+            .map(|hit| int(&hit["amount"]))
+            .fold(0_i64, i64::saturating_add);
+        if let Some(name) = bind {
+            frame.bindings.insert(
+                name.into(),
+                actual
+                    .iter()
+                    .map(|hit| string(&hit["target"]).to_owned())
+                    .collect(),
+            );
+        }
     }
 
     fn damage_replacements(&self, hit: &Value) -> Result<Vec<Value>> {

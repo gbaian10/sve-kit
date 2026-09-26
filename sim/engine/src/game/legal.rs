@@ -228,6 +228,7 @@ impl Game {
             if target_object.controller == *seat
                 || target_object.zone != "field"
                 || !string(&self.face(target)?["card_type"]).contains("フォロワー")
+                || self.keywords(target)?.contains("intimidate")
             {
                 return Ok(false);
             }
@@ -325,6 +326,9 @@ impl Game {
                     {
                         return Ok(false);
                     }
+                    if field == "targets" && !self.targetable(string(target), frame)? {
+                        return Ok(false);
+                    }
                 }
                 if let Some(total) = spec.get("distribute") {
                     if chosen.is_empty() {
@@ -380,15 +384,20 @@ impl Game {
         })
     }
 
-    fn parameterize(&self, base: Value, code: &Value, frame: &Frame) -> Result<Vec<Value>> {
+    fn parameterize(&self, base: Value, code: &Value, initial: &Frame) -> Result<Vec<Value>> {
+        let mut frame = initial.clone();
+        frame.decision = base.clone();
+        self.freeze(code, "play-start", &mut frame)?;
         let mut options = vec![base];
         let body = &code["body"];
         if body["op"] == "choice" {
             let ids = (1..=list(&body["modes"]).len())
                 .map(|n| n.to_string())
                 .collect::<Vec<_>>();
-            let min = usize::try_from(self.number(&body["min"], frame)?.max(0)).map_err(invalid)?;
-            let max = usize::try_from(self.number(&body["max"], frame)?.max(0)).map_err(invalid)?;
+            let min =
+                usize::try_from(self.number(&body["min"], &frame)?.max(0)).map_err(invalid)?;
+            let max =
+                usize::try_from(self.number(&body["max"], &frame)?.max(0)).map_err(invalid)?;
             let mut expanded = Vec::new();
             for option in options {
                 for subset in subsets(&ids, min, max) {
@@ -417,7 +426,12 @@ impl Game {
                         expanded.push(option);
                         continue;
                     }
-                    let ids = self.select(&spec["select"], &context)?;
+                    let mut ids = Vec::new();
+                    for id in self.select(&spec["select"], &context)? {
+                        if field != "targets" || self.targetable(&id, &context)? {
+                            ids.push(id);
+                        }
+                    }
                     let min = usize::try_from(self.number(&spec["min"], &context)?.max(0))
                         .map_err(invalid)?;
                     let max = usize::try_from(self.number(&spec["max"], &context)?.max(0))
@@ -455,5 +469,15 @@ impl Game {
                 }
             })
             .collect()
+    }
+
+    fn targetable(&self, id: &str, frame: &Frame) -> Result<bool> {
+        if let Some(object) = self.state.objects.get(id)
+            && object.controller != frame.controller
+            && object.zone == "field"
+        {
+            return self.keywords(id).map(|keywords| !keywords.contains("aura"));
+        }
+        Ok(true)
     }
 }

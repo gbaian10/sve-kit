@@ -303,7 +303,7 @@ cards:
         subject: self
   EBD03-014:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: NC 張數固定於結算開始；後續傷害使用同一個領袖引用。
     abilities:
       - line: 1
         kind: spell
@@ -317,9 +317,11 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - count:
-                      side: self
-                      zone: cemetery
+                  - at: resolution-start
+                    value:
+                      count:
+                        side: self
+                        zone: cemetery
                   - 20
               then:
                 op: damage

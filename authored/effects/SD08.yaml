@@ -21,7 +21,7 @@ cards:
           op: restrict
           action: attack
           subjects: target.1
-          until: next-controller-turn
+          during: next-controller-turn
         event: end
         targets:
           - key: '1'
@@ -39,6 +39,9 @@ cards:
           count: 1
           to: field
         limit: 1
+        costs:
+          - op: pp
+            amount: 0
   SD08-006:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

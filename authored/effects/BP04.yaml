@@ -201,7 +201,7 @@ cards:
           name: guard
   BP04-080:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 真紅要求目前為自己的回合，並記錄生命減少次數，非只檢查已受傷。
     abilities:
       - line: 1
         kind: evolve
@@ -218,10 +218,13 @@ cards:
           subjects: target.1
           amount:
             if:
-              fn: gt
+              fn: and
               args:
-                - read: self.turn.leader_damaged
-                - 0
+                - read: self.is_active
+                - fn: gt
+                  args:
+                    - read: self.turn.leader_damaged
+                    - 0
             then: 8
             else: 4
         event: enter

@@ -39,6 +39,22 @@ impl Game {
             }
             return Ok(ids);
         }
+        if let Some(source) = selector.get("from") {
+            let top = selector
+                .get("top")
+                .map(|value| self.number(value, frame))
+                .transpose()?
+                .map_or(usize::MAX, |n| {
+                    usize::try_from(n.max(0)).unwrap_or(usize::MAX)
+                });
+            let mut ids = Vec::new();
+            for id in self.select(source, frame)?.into_iter().take(top) {
+                if self.matches(&id, selector, frame)? {
+                    ids.push(id);
+                }
+            }
+            return Ok(ids);
+        }
         let mut ids = Vec::new();
         let seats = self.seats(string(&selector["side"]), frame);
         for seat in seats {
@@ -84,15 +100,31 @@ impl Game {
         }
         if let Some(base) = reference.strip_suffix(".leader") {
             return self
-                .reference_set(base, frame)?
+                .chosen_references(base, frame)?
                 .iter()
-                .map(|id| self.object(id).map(|o| format!("{}.leader", o.controller)))
+                .map(|id| {
+                    frame
+                        .captured
+                        .get(id)
+                        .and_then(|attrs| attrs["controller"].as_str())
+                        .map_or_else(
+                            || self.object(id).map(|o| format!("{}.leader", o.controller)),
+                            |controller| Ok(format!("{controller}.leader")),
+                        )
+                })
                 .collect();
         }
         if let Some(index) = reference.strip_prefix("target.") {
             return Ok(list(&frame.decision["targets"][index])
                 .iter()
                 .filter_map(Value::as_str)
+                .filter(|id| {
+                    frame.captured.get(*id).is_none_or(|attrs| {
+                        self.state.objects.get(*id).is_some_and(|object| {
+                            Some(object.generation) == attrs["generation"].as_u64()
+                        })
+                    })
+                })
                 .map(str::to_owned)
                 .collect());
         }
@@ -112,6 +144,17 @@ impl Game {
         }))
     }
 
+    fn chosen_references(&self, reference: &str, frame: &Frame) -> Result<Vec<String>> {
+        if let Some(key) = reference.strip_prefix("target.") {
+            return Ok(list(&frame.decision["targets"][key])
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_owned)
+                .collect());
+        }
+        self.reference_set(reference, frame)
+    }
+
     pub(super) fn matches(&self, id: &str, selector: &Value, frame: &Frame) -> Result<bool> {
         if selector.is_string()
             || selector.get("union").is_some()
@@ -125,9 +168,16 @@ impl Game {
         let Some(object) = self.state.objects.get(id) else {
             return Ok(id.ends_with(".leader") && selector["zone"] == "leader");
         };
-        if !self
-            .seats(string(&selector["side"]), frame)
-            .contains(&object.controller)
+        if let Some(zone) = selector["zone"].as_str()
+            && zone != "any"
+            && zone != object.zone
+        {
+            return Ok(false);
+        }
+        if (selector.get("from").is_none() || selector.get("side").is_some())
+            && !self
+                .seats(string(&selector["side"]), frame)
+                .contains(&object.controller)
         {
             return Ok(false);
         }
@@ -207,6 +257,24 @@ impl Game {
     }
 
     pub(super) fn eval(&self, expr: &Value, frame: &Frame) -> Result<Value> {
+        if expr.get("at").is_some() {
+            return frame.frozen.get(&expr.to_string()).map_or_else(
+                || self.eval(&expr["value"], frame),
+                |value| Ok(value.clone()),
+            );
+        }
+        if let Some(selector) = expr.get("values") {
+            let mut values = Vec::new();
+            for id in self.select(selector, frame)? {
+                let mut context = frame.clone();
+                context.bindings.insert("item".into(), vec![id]);
+                let value = self.read(&format!("item.{}", string(&expr["field"])), &context)?;
+                if !value.is_null() {
+                    values.push(value);
+                }
+            }
+            return Ok(json!(values));
+        }
         if let Some(path) = expr["read"].as_str() {
             return self.read(path, frame);
         }
@@ -249,8 +317,11 @@ impl Game {
                 "sub" => json!(n.saturating_sub(m)),
                 "mul" => json!(n.saturating_mul(m)),
                 "div" => json!(n.checked_div(m).unwrap_or_default()),
+                "min" if a.is_array() => json!(list(&a).iter().map(int).min().unwrap_or_default()),
+                "max" if a.is_array() => json!(list(&a).iter().map(int).max().unwrap_or_default()),
                 "min" => json!(n.min(m)),
                 "max" => json!(n.max(m)),
+                "sum" => json!(list(&a).iter().map(int).fold(0_i64, i64::saturating_add)),
                 "eq" => json!(a == b),
                 "ne" => json!(a != b),
                 "lt" => json!(n < m),
@@ -275,6 +346,30 @@ impl Game {
         Ok(expr.clone())
     }
 
+    pub(super) fn freeze(&self, code: &Value, phase: &str, frame: &mut Frame) -> Result<()> {
+        if code["at"] == phase {
+            let value = self.eval(&code["value"], frame)?;
+            frame.frozen.insert(code.to_string(), value);
+            return Ok(());
+        }
+        match code {
+            Value::Array(values) => {
+                for value in values {
+                    self.freeze(value, phase, frame)?;
+                }
+            }
+            Value::Object(fields) => {
+                for (key, value) in fields {
+                    if key != "abilities" && !(code["op"] == "delay" && key == "body") {
+                        self.freeze(value, phase, frame)?;
+                    }
+                }
+            }
+            Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
+        }
+        Ok(())
+    }
+
     fn read(&self, path: &str, frame: &Frame) -> Result<Value> {
         if path == "x" {
             return Ok(frame.decision["x"].clone());
@@ -288,6 +383,22 @@ impl Game {
             } else {
                 &frame.controller
             };
+            if rest == "is_active" {
+                return Ok(json!(seat == self.active()));
+            }
+            if rest == "combo" {
+                let played = self
+                    .state
+                    .counters
+                    .get(&format!("{seat}.cards_played"))
+                    .copied()
+                    .unwrap_or_default();
+                let starting = frame.decision["do"] == "play"
+                    && self
+                        .object(&frame.source)
+                        .is_ok_and(|object| matches!(object.zone.as_str(), "hand" | "ex"));
+                return Ok(json!(played.saturating_add(i64::from(starting))));
+            }
             if let Some(counter) = rest.strip_prefix("turn.") {
                 return Ok(json!(
                     self.state
@@ -315,7 +426,15 @@ impl Game {
         let Some((reference, field)) = path.rsplit_once('.') else {
             return Ok(frame.decision[path].clone());
         };
-        let ids = self.reference_set(reference, frame)?;
+        self.read_object_attribute(reference, field, frame)
+    }
+
+    fn read_object_attribute(&self, reference: &str, field: &str, frame: &Frame) -> Result<Value> {
+        let ids = if field == "original_hp" {
+            self.chosen_references(reference, frame)?
+        } else {
+            self.reference_set(reference, frame)?
+        };
         let Some(id) = ids.first() else {
             return Ok(Value::Null);
         };
@@ -340,6 +459,17 @@ impl Game {
         }
         if field == "cost" {
             return Ok(json!(scalar(&self.face(id)?["cost"])));
+        }
+        if field == "current_cost" {
+            return self.play_cost(id).map(|cost| json!(cost));
+        }
+        if field == "id" {
+            return Ok(json!(id));
+        }
+        if field == "token" {
+            return Ok(json!(
+                string(&self.face(id)?["card_type"]).contains("トークン")
+            ));
         }
         Ok(object.state.get(field).cloned().unwrap_or_else(|| {
             self.face(id)

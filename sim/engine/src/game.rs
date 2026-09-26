@@ -101,6 +101,7 @@ struct Frame {
     decision: Value,
     bindings: BTreeMap<String, Vec<String>>,
     captured: BTreeMap<String, Value>,
+    frozen: BTreeMap<String, Value>,
     todo: Vec<Value>,
     cause: Value,
     occurrence: u64,

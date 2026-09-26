@@ -26,19 +26,19 @@ keywords:
       name: assail
   bane:
     ja: 必殺
-    rule: '12.7'
+    rule: '12.14'
     expansion:
       op: keyword
       name: bane
   drain:
     ja: ドレイン
-    rule: '12.12'
+    rule: '12.13'
     expansion:
       op: keyword
       name: drain
   intimidate:
     ja: 威圧
-    rule: '12.14'
+    rule: '12.12'
     expansion:
       op: keyword
       name: intimidate
@@ -62,16 +62,10 @@ keywords:
       name: start_amulet
   aura:
     ja: オーラ
-    rule: '12.13'
+    rule: '12.15'
     expansion:
       op: keyword
       name: aura
-  ambush:
-    ja: 潜伏
-    rule: '12.6'
-    expansion:
-      op: keyword
-      name: ambush
   twin_drive:
     ja: ツインドライブ
     rule: 14.4.6.3

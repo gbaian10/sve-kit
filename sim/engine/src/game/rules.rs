@@ -212,6 +212,7 @@ impl Game {
             if let Some(object) = self.state.objects.get(&id) {
                 let mut state = object.state.clone();
                 state["generation"] = json!(object.generation);
+                state["controller"] = json!(object.controller);
                 frame.captured.insert(id, state);
             }
         }
@@ -241,6 +242,7 @@ impl Game {
             .collect::<Vec<_>>();
         let mut frame = self.start_frame(source, Value::Null, decision)?;
         for ability in &spells {
+            self.freeze(ability, "play-start", &mut frame)?;
             if !self.valid_parameters(ability, &frame)? {
                 return Ok(false);
             }
@@ -262,6 +264,9 @@ impl Game {
         );
         frame.cause = json!({"event":cause});
         if is_spell {
+            for ability in &spells {
+                self.freeze(ability, "resolution-start", &mut frame)?;
+            }
             frame.todo = spells.iter().map(|a| a["body"].clone()).collect();
         } else {
             frame
@@ -287,6 +292,7 @@ impl Game {
             return Ok(false);
         }
         let mut frame = self.start_frame(source, reference.clone(), decision)?;
+        self.freeze(&code, "play-start", &mut frame)?;
         if !self.valid_parameters(&code, &frame)? || !self.can_pay(&list(&code["costs"]), &frame)? {
             return Ok(false);
         }
@@ -314,6 +320,7 @@ impl Game {
             return Err(invalid("wrong pending controller"));
         }
         let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
+        self.freeze(&pending.code, "play-start", &mut frame)?;
         if decision["costs"] == "decline"
             || !self.valid_parameters(&pending.code, &frame)?
             || !self.can_pay(&list(&pending.code["costs"]), &frame)?
@@ -344,6 +351,7 @@ impl Game {
     }
 
     fn begin_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
+        self.freeze(code, "resolution-start", frame)?;
         let group = self.group();
         let id = self.emit(
             json!({"kind":"プレイ","ability":frame.reference}),
@@ -528,6 +536,12 @@ impl Game {
                 ];
                 if !target.ends_with(".leader") {
                     hits.push(json!({"source":target,"target":source,"amount":self.object(target)?.state["power"],"battle":true}));
+                    if self.keywords(source)?.contains("bane") {
+                        self.object_mut(target)?.state["bane_damaged"] = json!(true);
+                    }
+                    if self.keywords(target)?.contains("bane") {
+                        self.object_mut(source)?.state["bane_damaged"] = json!(true);
+                    }
                 }
                 frame.todo = vec![json!({"op":"_damage","hits":hits,"orders":{}})];
                 self.run_frame(frame)?;

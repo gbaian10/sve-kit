@@ -88,7 +88,7 @@ cards:
               hp: 1
   BP16-049:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 先設 1／1；SC 張數固定於結算開始，不能在後續重新計數。
     abilities:
       - line: 1
         kind: spell
@@ -103,10 +103,12 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - count:
-                      side: self
-                      zone: cemetery
-                      type: spell
+                  - at: resolution-start
+                    value:
+                      count:
+                        side: self
+                        zone: cemetery
+                        type: spell
                   - 10
               then:
                 op: modify
