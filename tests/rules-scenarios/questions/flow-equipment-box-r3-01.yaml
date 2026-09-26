@@ -1,0 +1,221 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-equipment-box-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - A 装備
+  - A 箱詰め
+  - C15 裝備者參照
+cards:
+  - BP01-174
+  - BP01-179
+  - BP11-075
+  - BP21-PR04
+  - CP04-PR16
+why: 箱詰め只讓裝備者失去能力；劍本身的減傷照常有效，但攻防數值減二並不是傷害。
+discriminates: 錯把裝備能力複製到從者而一併刪除會承受二傷；把體力減少也當傷害則第二局面 hp 錯誤。
+refs:
+  rules:
+    - 14.5.2.1.3
+    - 5.31.2
+  qa:
+    - Q2522
+    - Q2497
+evidence:
+  - ref: Q2522
+    quote: "Q: 『プリンセスソード』を装備したフォロワーが何らかの能力によって能力を失った場合、「これを装備しているフォロワーが受けるダメージを-2する。」という能力は有効ですか？\nA: はい。有効です。"
+    derivation:
+      - 箱詰め只讓裝備者失去能力；劍本身的減傷照常有效，但攻防數值減二並不是傷害。
+  - ref: Q2497
+    quote: "Q: 「これを装備しているフォロワーが受けるダメージを-2する。」が適用されているフォロワーを目標に『デッドペナルティ』をプレイした場合、そのフォロワーの攻撃力と体力は-2されますか？\nA: はい。『デッドペナルティ』の能力はダメージを与える能力ではないため、攻撃力と体力が-2されます。"
+    derivation:
+      - 箱詰め只讓裝備者失去能力；劍本身的減傷照常有效，但攻防數值減二並不是傷害。
+  - ref: cr 14.5.2.1.3
+    quote: 種類がイクイップメントであるカードの 能力はイクイップメント領域でのみ有効で す。
+    derivation:
+      - 箱詰め只讓裝備者失去能力；劍本身的減傷照常有效，但攻防數值減二並不是傷害。
+  - ref: cr 5.31.2
+    quote: 【箱詰め】状態になったカードは、【箱詰め】状態で ある間、そのカードが持つ能力、および【箱詰め】状 態になった時点でそのカードが得ていたすべての能 力を失います。
+    derivation:
+      - 箱詰め只讓裝備者失去能力；劍本身的減傷照常有效，但攻防數值減二並不是傷害。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 減傷仍有效
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: q
+                card: BP21-PR04
+            hand:
+              - id: s
+                card: BP01-179
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-174
+            equipment:
+              - id: w
+                card: CP04-PR16
+                state:
+                  equipped_to: b
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: q
+          line: 2
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            power: 3
+            hp: 4
+            acted: true
+          P2.equipment:
+            - w
+        forbidden_events:
+          - kind: ダメージ
+  - name: 數值減少不受減傷保護
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: q
+                card: BP21-PR04
+            hand:
+              - id: s
+                card: BP11-075
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-174
+            equipment:
+              - id: w
+                card: CP04-PR16
+                state:
+                  equipped_to: b
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: q
+          line: 2
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            power: 1
+            hp: 2
+            acted: true
+          P2.equipment:
+            - w
+        forbidden_events:
+          - kind: ダメージ

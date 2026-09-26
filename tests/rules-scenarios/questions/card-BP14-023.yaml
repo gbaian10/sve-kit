@@ -1,0 +1,206 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP14-023
+kind: card
+must_pass: true
+mechanisms: [打出一個既有能力, 契約 10.16 內層輸入點, 10.1.1.2.2, 自動能力的費用在打出時支付, 10.6.2.5.4, 9.1.4.3, 9.1.4.4, EX 減費, 10.4.4.1, 不是誘發所以不受「誘発しない」影響, 9.8 兩個輸入點]
+cards: [BP14-022, BP14-023, BP14-T02, BP14-026, BP14-034, BP14-030, BP01-173, BP01-176, ECP01-010]
+why: >-
+  天下の大泥棒・ジエモン（進化後）「{起動}{コスト1}：これの【進化時】能力1つをプレイする」。被打出的【進化時】能力「EXエリアの『輝く金貨』2枚を消滅：…」是「とき、（コスト）：（効果）」型，
+  打出它必須支付費用（10.1.1.2.2、Q1881）：付得出（3 張金貨選 2 張，是內層的輸入點，契約 10.16）→ 看牌庫上 5 張、放 1 張宴楽卡到 EX、其餘依喜好順序放底、本回合該卡 −3。
+  B：EX 只有 1 張金貨 → 進化時能力付不出費用、不能打出（10.6.2.5.4），起動的 1 PP 已付、什麼都不發生。
+  C：對手有ジェンティルドンナ（「相手の【進化時】能力は誘発しない」）→ 這不是誘發，照樣可以打出（Q1882）。
+discriminates: >-
+  A：把進化時能力的費用省略、或改成可選的引擎，B 會照樣看牌，而 A 的 after-decision-1 不會停在費用選擇；把「消滅 token」留在消滅領域的引擎 after-decision-2 的 P1.banish 不是空；
+  沒套用 −3 的引擎在決定 5 時芸者 費用 3 > PP 2 → cannot-play，after-decision-6 的 P1.field 沒有 d1、EX 沒有 new-1、リーダー 體力仍 17。
+  C：把ジェンティルドンナ 的「誘発しない」套到這次打出的引擎會什麼都不發生。
+refs:
+  rules: [10.1.1.2.2, 10.6.2.5, 10.6.2.5.4, 10.4.2.2, 9.1.4.3, 9.1.4.4, 10.4.4.1, 5.11.1, 4.1.5, 12.6.1, 10.7.1]
+  qa: [Q1881, Q1882]
+evidence:
+  - ref: Q1881
+    quote: いいえ。このフォロワーの《起動》能力によってこのフォロワーの【進化時】能力をプレイした場合でも「EXエリアの『輝く金貨』2枚を消滅」というコストを支払わなければ続く能力を処理することはできません。
+  - ref: Q1882
+    quote: はい。『天下の大泥棒・ジエモン』の《起動》能力は【進化時】能力の誘発条件を満たすものではないため、《起動》能力をプレイし、【進化時】能力をプレイすることができます。
+  - ref: cr 10.6.2.5.4
+    quote: なんらかの理由でこの時点でこのコストを支払うことができない場合、このカードや能力のプレイは取り消され、ゲームはこのカードや能力をプレイすることを選択する前まで戻されます。
+    derivation:
+      - 被取消的是**進化時能力**的打出；起動能力本身已合法打出並解決，1 PP 不退
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A EX 有 3 張金貨 → 起動打出進化時 → 選 2 張消滅、看 5 張 → 達人の芸者 進 EX → 0 費打出
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ロイヤル, life: 17}
+          pp: {current: 3, max: 6}
+          zones:
+            field:
+              - {id: a1, card: BP14-022, state: {evolved: true, evolved_with: e1, power: 4, hp: 5}}
+            evolution:
+              - {id: e1, card: BP14-023}
+            ex:
+              - {id: g1, card: BP14-T02}
+              - {id: g2, card: BP14-T02}
+              - {id: g3, card: BP14-T02}          # 3 張金貨 → 內層費用要選 2 張（契約 10.16 的內層輸入點）
+            hand:
+              - {filler: 1}
+            deck:
+              - {id: d1, card: BP14-026}          # 達人の芸者（コスト3 宴楽）
+              - {id: d2, card: BP01-173}
+              - {id: d3, card: BP14-034}          # 盗賊の乱飛（コスト1 宴楽スペル）
+              - {id: d4, card: BP01-176}
+              - {id: d5, card: BP14-030}          # 帳場ガエル（コスト2 宴楽）
+              - {filler: 15}
+        P2:
+          construction: class
+          leader: {class: ドラゴン, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, card: BP14-023, line: 3}}
+      # 內層（進化時能力）的費用選擇：契約 10.16，寫在內層輸入點、of 指向外層決定
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, costs: {1: [g1, g2]}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: resolve-choice, select: [d1]}
+      - {n: 4, by: P1, at: resolve, of: {decision: 1, occurrence: 3}, do: resolve-choice, order: [d4, d2, d3, d5]}
+      - {n: 5, by: P1, at: main, do: play, card: d1}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: d1, line: 2}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, costs: {1: [g1, g2]}}
+            - {do: resolve-choice, costs: {1: [g1, g3]}}
+            - {do: resolve-choice, costs: {1: [g2, g3]}}
+        assert:
+          P1.pp.current: 2
+          P1.ex: [g1, g2, g3]
+        events:
+          - {kind: プレイ, ability: {source: a1, card: BP14-023, line: 3}}
+        forbidden_events:
+          - {kind: 消滅}
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: [d1]}
+            - {do: resolve-choice, select: [d3]}
+            - {do: resolve-choice, select: [d5]}
+            - {do: resolve-choice, select: []}
+        assert:
+          P1.pp.current: 2
+          P1.ex: [g3]
+          P1.banish: []
+        events:
+          - {kind: 消滅, object: g1, group: 1}
+          - {kind: 消滅, object: g2, group: 1}
+          - {kind: 消去, object: g1, by: rule-9.1.4.4}
+          - {kind: 消去, object: g2, by: rule-9.1.4.4}
+          - {kind: プレイ, ability: {source: a1, card: BP14-023, line: 2}}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: [g3, d1]
+          P1.deck: [filler: 15, d4, d2, d3, d5]
+          P1.pp.current: 2
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 2
+          P1.field: [a1, d1]
+          P1.field.d1: {entered_from: ex, entered_by: play}
+          P1.ex: [g3, new-1]
+          P1.ex_count: 2
+          P1.leader.life: 20
+        events:
+          - {kind: プレイ, object: d1}
+          - {kind: 移動, object: new-1, to: P1.ex}
+
+  - name: B EX 只有 1 張金貨 → 進化時能力付不出費用 → 起動的 1 PP 已付、什麼都不發生
+    inherit: A EX 有 3 張金貨 → 起動打出進化時 → 選 2 張消滅、看 5 張 → 達人の芸者 進 EX → 0 費打出
+    setup:
+      players:
+        P1:
+          zones:
+            ex:
+              - {id: g1, card: BP14-T02}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, card: BP14-023, line: 3}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 2
+          P1.ex: [g1]
+          P1.deck: [d1, d2, d3, d4, d5, filler: 15]
+        events:
+          - {kind: プレイ, ability: {source: a1, card: BP14-023, line: 3}}
+        forbidden_events:
+          - {kind: 消滅}
+          - {kind: プレイ, ability: {source: a1, card: BP14-023, line: 2}}
+          - {kind: 移動, to: P1.ex}
+
+  - name: C 對手場上有ジェンティルドンナ → 不是誘發，照樣可以打出進化時能力
+    inherit: A EX 有 3 張金貨 → 起動打出進化時 → 選 2 張消滅、看 5 張 → 達人の芸者 進 EX → 0 費打出
+    setup:
+      players:
+        P2:
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+              - {id: b2, card: ECP01-010}
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, card: BP14-023, line: 3}}
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, costs: {1: [g1, g2]}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: resolve-choice, select: [d1]}
+      - {n: 4, by: P1, at: resolve, of: {decision: 1, occurrence: 3}, do: resolve-choice, order: [d4, d2, d3, d5]}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: [d1]}
+            - {do: resolve-choice, select: [d3]}
+            - {do: resolve-choice, select: [d5]}
+            - {do: resolve-choice, select: []}
+        forbidden_events:
+          - {kind: 抑制}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: [g3, d1]
+          P1.deck: [filler: 15, d4, d2, d3, d5]

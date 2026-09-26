@@ -1,0 +1,162 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP07-SL09
+kind: card
+must_pass: true
+mechanisms: [集合約束：元のコストの合計, 5.11.1, 好きな枚数, 10.6.2.3.2, 9.8 兩個輸入點, 多張同時上場的ファンファーレ 自選順序, Q1005, 10.5.2.2, 5.5.3]
+cards: [BP07-SL09, BP07-035, BP07-076, BP07-072, BP01-173, BP01-176]
+why: >-
+  アイアロンの支配者・ベルフォメット{ファンファーレ}「自分のデッキの上5枚を見る。その中から、機械・フォロワーを元のコストの合計が6以下になるように好きな枚数場に出してよい。残りを好きな順にデッキの下に置く」。
+  5 張裡的機械從者是テトラ（3）、ニコラ（3）、エンネア（4）：合法的集合是空集、任一張、{テトラ, ニコラ}（合計 6）；含エンネア 的兩張組合都是 7 → 不合法。
+  「選んで場に出す」與「残りを…下に置く」是兩句 → 兩個輸入點（契約 9.8）。上場的兩張的ファンファーレ 在上場當下就待機（10.7.2），但要等ベルフォメット 解決完的檢查時點才由 P1 選順序打出（Q1005、10.5.2.2）。
+discriminates: >-
+  只檢查張數不檢查合計、或不檢查機械類型的引擎，after-decision-2 的合法選項會多出含エンネア 的兩張組合或非機械卡（本題沒有費用修正，不測「元の」與現在費用的差異）；
+  把兩個輸入點合併、或先結算上場從者的ファンファーレ 再讓玩家排序的引擎，決定序列對不上；ニコラ 的抽 2 放墓場要在ベルフォメット 把其餘放底之後（牌庫順序可驗）。
+refs:
+  rules: [5.11.1, 5.24.1, 10.6.2.3.2, 4.1.5, 10.5.2.2, 10.7.3.1, 12.4.3, 5.5.3, 4.4.4.2]
+  qa: [Q1005]
+evidence:
+  - ref: Q1005
+    quote: 任意の順番で解決することができます。まず『アイアロンの支配者・ベルフォメット』の《ファンファーレ》能力の解決を行います。その後、場に出たフォロワーの《ファンファーレ》能力などの誘発条件を満たし待機状態となった能力の中からどれを先にプレイするか選択することができます。
+  - ref: cr 5.24.1
+    quote: あるカードの‘元の’情報を参照する場合、それはそのカードに表記されている情報を参照します。
+    derivation:
+      - 合計以卡面費用計：3＋3＝6 合法；3＋4＝7 不合法
+  - ref: cr 10.6.2.3.2
+    quote: 選ぶ数が「～まで」や「好きな枚数」と表記されている場合、0 から指定された数までの間の任意の数を実際に選ぶ数として指定します。
+    derivation:
+      - 「好きな枚数」→ 可以選 0 張；契約 9.8：只有一個合法選項也是輸入點，本題列出全部合法集合（select 視為集合，不比對順序）
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A 選テトラ＋ニコラ（合計 6）→ 其餘放底 → 兩個ファンファーレ 自選順序
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 7, P2: 6}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ウィッチ, life: 20}
+          pp: {current: 7, max: 7}
+          zones:
+            hand:
+              - {id: h1, card: BP07-SL09}
+              - {filler: 1}
+            deck:
+              - {id: d1, card: BP07-035}          # 蒼の反逆者・テトラ 3 費 機械
+              - {id: d2, card: BP01-173}
+              - {id: d3, card: BP07-076}          # 禁絶の腕・ニコラ 3 費 機械
+              - {id: d4, card: BP07-072}          # 紫紺の抵抗者・エンネア 4 費 機械
+              - {id: d5, card: BP01-176}
+              - {id: m1, card: BP01-173}
+              - {id: m2, card: BP01-173}
+              - {filler: 15}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 7}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 3}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d1, d3]}
+      - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d4, d2, d5]}
+      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: d3, line: 2}}}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: d1, line: 2}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, select: [d1]}
+            - {do: resolve-choice, select: [d3]}
+            - {do: resolve-choice, select: [d4]}
+            - {do: resolve-choice, select: [d1, d3]}
+        assert:
+          P1.pp.current: 0
+          P1.field: [h1]
+      - at: after-decision-3
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, order: [d2, d4, d5]}
+            - {do: resolve-choice, order: [d2, d5, d4]}
+            - {do: resolve-choice, order: [d4, d2, d5]}
+            - {do: resolve-choice, order: [d4, d5, d2]}
+            - {do: resolve-choice, order: [d5, d2, d4]}
+            - {do: resolve-choice, order: [d5, d4, d2]}
+        assert:
+          P1.field: [h1, d1, d3]
+          P1.field.d1: {entered_from: deck, entered_by: effect}
+          P1.field.d3: {entered_from: deck, entered_by: effect}
+        events:
+          - {kind: 場に出す, object: d1, from: P1.deck, group: 1}
+          - {kind: 場に出す, object: d3, from: P1.deck, group: 1}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: d1, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: d3, line: 2}}}
+        assert:
+          P1.deck: [m1, m2, filler: 15, d4, d2, d5]
+          P1.cemetery: []
+          P1.ex: []
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery: [m1, m2]
+          P1.deck: [filler: 15, d4, d2, d5]
+          P1.ex: [new-1]
+          P1.ex_count: 1
+          P1.field: [h1, d1, d3]
+        events:
+          - {kind: 移動, object: m1, from: P1.deck, to: P1.cemetery, group: 2}
+          - {kind: 移動, object: m2, from: P1.deck, to: P1.cemetery, group: 2}
+          - {kind: 移動, object: new-1, to: P1.ex}
+
+  - name: B 選 0 張 → 5 張全部放底
+    inherit: A 選テトラ＋ニコラ（合計 6）→ 其餘放底 → 兩個ファンファーレ 自選順序
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 3}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d5, d4, d3, d2, d1]}
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [h1]
+          P1.deck: [m1, m2, filler: 15, d5, d4, d3, d2, d1]
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - {kind: 場に出す, object: d1}
+          - {kind: 場に出す, object: d3}
+          - {kind: 場に出す, object: d4}

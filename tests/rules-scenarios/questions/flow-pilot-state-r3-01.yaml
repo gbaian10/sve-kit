@@ -1,0 +1,241 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-pilot-state-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - A 操縦
+  - 向き不因種類變更重設
+cards:
+  - BP01-173
+  - BP11-P29
+why: 操縦把護符變成卡面 3/3 從者，保留向き；已橫置的車仍不能攻擊，直立車能靠疾走攻擊。
+discriminates: 若操縦自動站起會接受反例攻擊；若把護符既有疾走刪掉或不變成從者則正例失敗。
+refs:
+  rules:
+    - 5.32.1
+    - 5.25.2
+    - 8.4.2
+  qa:
+    - Q1581
+evidence:
+  - ref: Q1581
+    quote: "Q: 「これを操縦する。」とは何ですか？\nA: 「これを操縦する。」とは、そのターン、それをカードに記載されている攻撃力と体力を持つフォロワーにすることを意味します。\n「これは操縦する。」を持つカードが場に出たターンに操縦してフォロワーになった場合、通常のフォロワーと同様に、そのターンは相手を攻撃することができません。（【疾走】を持っている場合、相手のリーダーと相手のアクト状態のフォロワーに、【突進】を持っている場合、相手のアクト状態のフォロワーに攻撃できます。）\n場に出たターンの次のターン以降に操縦してフォロワーになった場合は、相手を攻撃することができます。"
+    derivation:
+      - 操縦把護符變成卡面 3/3 從者，保留向き；已橫置的車仍不能攻擊，直立車能靠疾走攻擊。
+  - ref: cr 5.32.1
+    quote: あるアミュレットを‘操縦する’指示がある場合、そ のアミュレットがカードに表記の攻撃力と体力を持つ なら、そのターンの間、そのアミュレットはフォロワー になり、攻撃力と体力はその値になります。
+    derivation:
+      - 操縦把護符變成卡面 3/3 從者，保留向き；已橫置的車仍不能攻擊，直立車能靠疾走攻擊。
+  - ref: cr 5.25.2
+    quote: カードの種類が変更された場合でも、そのカードが 持っていた種類以外の情報はそのまま保持されま すが、その種類が本来持たない情報を参照しようと した場合、それは参照されません。
+    derivation:
+      - 操縦把護符變成卡面 3/3 從者，保留向き；已橫置的車仍不能攻擊，直立車能靠疾走攻擊。
+  - ref: cr 8.4.2
+    quote: 攻撃フォロワーとして、自分がマスターであるスタン ド状態のフォロワーを 1 体選択します。
+    derivation:
+      - 操縦把護符變成卡面 3/3 從者，保留向き；已橫置的車仍不能攻擊，直立車能靠疾走攻擊。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 操縦前橫置=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: v
+                card: BP11-P29
+                state:
+                  acted: false
+                  entered_this_turn: true
+              - id: p
+                card: BP01-173
+              - id: q
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: v
+          line: 2
+        costs:
+          1:
+            - p
+            - q
+      - n: 2
+        by: P1
+        at: main
+        do: attack
+        attacker: v
+        target: P2.leader
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: v
+            line: 4
+      - n: 4
+        by: P2
+        at: quick
+        do: pass
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.v:
+            power: 3
+            hp: 3
+            acted: false
+          P1.field.p:
+            acted: true
+          P1.field.q:
+            acted: true
+          P1.pp.current: 0
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.v:
+            acted: true
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 17
+          P1.hand: []
+        forbidden_events:
+          - kind: 引く
+  - name: 操縦前橫置=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: v
+                card: BP11-P29
+                state:
+                  acted: true
+                  entered_this_turn: true
+              - id: p
+                card: BP01-173
+              - id: q
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 1
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: v
+          line: 2
+        costs:
+          1:
+            - p
+            - q
+      - n: 2
+        by: P1
+        at: main
+        do: attack
+        attacker: v
+        target: P2.leader
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.v:
+            power: 3
+            hp: 3
+            acted: true
+          P1.field.p:
+            acted: true
+          P1.field.q:
+            acted: true
+          P1.pp.current: 0
+      - at: after-decision-2
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P1.field.v:
+            acted: true

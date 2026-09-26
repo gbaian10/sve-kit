@@ -1,0 +1,186 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-ECP02-SL33
+kind: card
+must_pass: true
+mechanisms: [偶像大師：魔法のアイテム, EX 上限 5, 4.8.3.2, token 建立時 EX 已滿, 打出時改費用, 10.4.4.1, 10.6.2.5.4, 選 0 個要建立的 token 仍是輸入點]
+cards: [ECP02-SL33, CP02-T01, CP02-003, CP02-001, CP02-007, BP01-173, BP01-176]
+why: >-
+  笑顔のカーテンコール（コスト12）「これをプレイする際、自分の墓場のデレマス・カードが10枚以上なら、コストを-5する。場の『デレマス・タイプを持たないフォロワー』すべてを破壊する。
+  『魔法のアイテム』2枚をEXエリアに置く。自分のリーダーは{体力}+4する。2枚引く」。
+  A：EX 已有 5 張 → 依 4.8.3.2 可建立的張數是 0 → 一張都不放（Q2214），但後面的 +4 與抽 2 照常；契約 10.11：選 0 個要建立的 token 仍是輸入點（select 空）。
+  B：EX 3 張 → 2 張都建立（4.8.3.2 不觸發，沒有輸入點）。C：墓場デレマス 9 張 → 費用 12 > PP 10 → 不能打出。
+  兩邊場上沒有デレマス・タイプ的從者都被破壞，自己的前川みく（デレマス）不被破壞。
+discriminates: >-
+  A：EX 滿時整張法術不能打出、或建立 token 後由 11.5 超過處理送墓場的引擎，結果不同（cannot-play／墓場多出 token 的移動事件／EX 內容改變）；
+  沒有把「選 0 個」當輸入點的引擎在 after-decision-1 會直接 resolved。B：只放 1 張的引擎 ex_count 是 4。C：不套用 −5 或套錯條件的引擎 cannot-play／resolved 相反。
+refs:
+  rules: [4.8.3.2, 4.8.3.1, 10.4.4.1, 10.6.2.5.4, 10.6.2.8.2, 5.5.2, 9.1.2, 5.6.1, 5.10]
+  qa: [Q2214]
+evidence:
+  - ref: Q2214
+    quote: はい。自分のリーダーは《体力》+4し、2枚引くことができます。その場合、自分のEXエリアのカードが上限枚数である5枚なので、『魔法のアイテム』を1枚もEXエリアに置くことはありません。
+  - ref: cr 4.8.3.2
+    quote: EX エリアにカードを移動または作成する処理において、その結果 EX エリアのカードの枚数が上限を超える場合、その移動または作成するカードの中から、その EX エリアの上限からその EX エリアにあるカードの枚数を引いた数のカードを選択し、それらのカードのみを移動または作成します。それ以外のカードは移動または作成しません。
+    derivation:
+      - EX 5 張 → 5−5＝0 張可建立 → 依契約 10.11 仍是一個輸入點，唯一合法選項 select: []
+      - EX 3 張 → 5−3＝2 ≥ 2 → 不超過上限，兩張都建立，沒有選擇
+  - ref: cr 10.4.4.1
+    quote: カードをプレイする際のコストの数値を変更する効果は、このカードのコストの情報の値を変更するのではなく、そのコストのために減少する PP の点数を変更します。
+    derivation:
+      - 墓場デレマス 10 張 → 減少的 PP 是 12−5＝7；9 張 → 12 > PP 最大值 10 → 10.6.2.5.4 打出取消（cannot-play）
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A EX 已滿 5 張 → 一張アイテム都不放（select 空），仍 +4 與抽 2；非デレマス從者全破壞
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 10, P2: 9}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: アイドルマスター シンデレラガールズ
+          leader: {class: エルフ, life: 15}
+          pp: {current: 7, max: 10}
+          zones:
+            field:
+              - {id: a1, card: CP02-003}                     # 前川みく（デレマス）
+            ex:
+              - {id: i1, card: CP02-T01}
+              - {id: i2, card: CP02-T01}
+              - {id: i3, card: CP02-T01}
+              - {id: i4, card: CP02-T01}
+              - {id: i5, card: CP02-T01}
+            hand:
+              - {id: h1, card: ECP02-SL33}
+              - {filler: 1}
+            deck:
+              - {id: d1, card: CP02-003}
+              - {id: d2, card: CP02-001}
+              - {filler: 18}
+            cemetery:
+              - {id: c1, card: CP02-003}
+              - {id: c2, card: CP02-003}
+              - {id: c3, card: CP02-003}
+              - {id: c4, card: CP02-003}
+              - {id: c5, card: CP02-001}
+              - {id: c6, card: CP02-001}
+              - {id: c7, card: CP02-001}
+              - {id: c8, card: CP02-007}
+              - {id: c9, card: CP02-007}
+              - {id: c10, card: CP02-007}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 10}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+              - {id: b2, card: BP01-176}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    card_facts:
+      CP02-T01: {rules_name: 魔法のアイテム, source: Q897（CP02-T01 卡片頁的官方 Q&A）, verified: true}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, select: []}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: []}
+        assert:
+          P1.pp.current: 0
+          P2.field: []
+          P2.cemetery: [b1, b2]
+          P1.field: [a1]
+        events:
+          - {kind: 破壊, object: b1, group: 1}
+          - {kind: 破壊, object: b2, group: 1}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: [i1, i2, i3, i4, i5]
+          P1.ex_count: 5
+          P1.leader.life: 19
+          P1.hand: [d1, d2, filler: 1]
+          P1.deck: [filler: 18]
+          P1.cemetery: [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, h1]
+        events:
+          - {kind: 引く, player: P1, object: d1}
+          - {kind: 引く, player: P1, object: d2}
+        forbidden_events:
+          - {kind: 移動, to: P1.ex}
+
+  - name: B EX 3 張 → 兩張アイテム都建立，沒有輸入點
+    inherit: A EX 已滿 5 張 → 一張アイテム都不放（select 空），仍 +4 與抽 2；非デレマス從者全破壞
+    setup:
+      players:
+        P1:
+          zones:
+            ex:
+              - {id: i1, card: CP02-T01}
+              - {id: i2, card: CP02-T01}
+              - {id: i3, card: CP02-T01}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: [i1, i2, i3, new-1, new-2]
+          P1.ex_count: 5
+          P1.leader.life: 19
+          P1.hand: [d1, d2, filler: 1]
+          P2.field: []
+        events:
+          - {kind: 移動, object: new-1, to: P1.ex, group: 1}
+          - {kind: 移動, object: new-2, to: P1.ex, group: 1}
+
+  - name: C 墓場デレマス 只有 9 張 → 費用 12 付不出 → cannot-play
+    inherit: A EX 已滿 5 張 → 一張アイテム都不放（select 空），仍 +4 與抽 2；非デレマス從者全破壞
+    setup:
+      players:
+        P1:
+          pp: {current: 10, max: 10}
+          zones:
+            cemetery:
+              - {id: c1, card: CP02-003}
+              - {id: c2, card: CP02-003}
+              - {id: c3, card: CP02-003}
+              - {id: c4, card: CP02-003}
+              - {id: c5, card: CP02-001}
+              - {id: c6, card: CP02-001}
+              - {id: c7, card: CP02-001}
+              - {id: c8, card: CP02-007}
+              - {id: c9, card: CP02-007}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 10
+          P1.hand: [h1, filler: 1]
+          P2.field: [b1, b2]

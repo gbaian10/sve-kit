@@ -1,0 +1,154 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP10-050
+kind: card
+must_pass: true
+mechanisms: [堆疊、土之秘術, 13.3.2.4, 13.3.3.2, チョイス內的可選追加費用, 10.4.7.1, 5.18.3, 沒有【スタック】卡時建立『大地の魔片』, 9.1 新建物件]
+cards: [BP10-050, EBD02-T01, BP01-173]
+why: >-
+  形成の魔術師{ファンファーレ}「下記から1つチョイスする。【1】自分の場の【スタック】を+1する。【2】【土の秘術】相手のリーダーすべてに2ダメージ」。
+  13.3.2.4（2026-07-31 改版）：「【スタック】を+1する」＝場上有【スタック】卡時在其中一張放 1 個計數器；沒有時建立一個『大地の魔片』並以 1 個計數器進場（Q2773）。
+  【2】的土の秘術（数值 1，13.3.3.2.1）是可選追加費用：付 → 2 傷害；不付 → 什麼都不發生，而且場上沒有【スタック】護符也可以選【2】（Q1298）。
+  チョイス在打出時決定（5.18.3），追加費用是否支付也在打出時決定（10.6.2.2.2）。
+discriminates: >-
+  A：沒有【スタック】卡時不建立魔片、或建立的魔片計數器不是 1 的引擎；有魔片時另外再建一張的引擎（field_count 不同）。
+  B：把土の秘術當必付、或沒有計數器就禁止選【2】的引擎會 cannot-play；C：付了卻沒扣計數器、或計數器歸 0 沒送墓場的引擎。
+refs:
+  rules: [13.3.2.4, 13.3.3.2, 13.3.3.2.1, 13.3.2.2, 5.18.3, 10.6.2.2.2, 10.4.7.1, 9.1.2, 9.1.4.4]
+  qa: [Q2773, Q1298]
+evidence:
+  - ref: Q2773
+    quote: 自分の場にある【スタック】を持つアミュレット1枚の上にスタックカウンターを1つ置くことを指します。自分の場に【スタック】を持つカードが無い場合、スタックカウンターが1個置かれた『大地の魔片』1つを場に出します。※2026年7月31日より、スタック関連のルールが変更され、【スタック】能力を持つカードが場にない場合『大地の魔片』を場に出すようになりました。
+  - ref: Q1298
+    quote: はい。選択できます。その場合、何も起こりません。また、自分の場に【スタック】を持つアミュレットがない場合であっても【2】をチョイスすることができます。
+  - ref: cr 13.3.2.4
+    quote: テキストに‘【スタック】を＋（数値）する’とある場合、それは‘あなたの場に【スタック】を持つカードがある場合、あなたの場の【スタック】を持つカード 1 つにスタックカウンターを（数値）個置く。あなたの場に【スタック】を持つカードが無い場合、あなたの場に『大地の魔片』トークンを 1 つ作成し、そのトークンの【スタック】能力によりスタックカウンターが１個置かれた状態で場に出る代わりに、（数値）個置かれた状態で場に出る’を意味します。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A1 選【1】、場上沒有【スタック】卡 → 建立一個帶 1 個計數器的『大地の魔片』
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 3, P2: 2}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ウィッチ, life: 20}
+          pp: {current: 3, max: 3}
+          zones:
+            hand:
+              - {id: h1, card: BP10-050}
+              - {filler: 1}
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 3}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}}, options: [1]}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 1
+          P1.field: [h1, new-1]
+          P1.field_count: 2
+          P1.field.new-1: {counters: {スタックカウンター: 1}}
+          P2.leader.life: 20
+        events:
+          - {kind: 場に出す, object: new-1, to: P1.field}
+
+  - name: A2 選【1】、場上已有 1 個計數器的魔片 → 該魔片變 2 個，不另建
+    inherit: A1 選【1】、場上沒有【スタック】卡 → 建立一個帶 1 個計數器的『大地の魔片』
+    setup:
+      players:
+        P1:
+          zones:
+            field:
+              - {id: s1, card: EBD02-T01, state: {counters: {スタックカウンター: 1}}}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}}, options: [1]}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [s1, h1]
+          P1.field_count: 2
+          P1.field.s1: {counters: {スタックカウンター: 2}}
+        events:
+          - {kind: カウンター, object: s1, name: スタックカウンター, delta: 1}
+
+  - name: B 場上沒有【スタック】卡也可以選【2】並不付 → 什麼都不發生
+    inherit: A1 選【1】、場上沒有【スタック】卡 → 建立一個帶 1 個計數器的『大地の魔片』
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}}, options: [2], optional_costs: {additional: decline}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: h1, line: 1}}, options: [1]}
+            - {do: choose-pending, pending: {ability: {source: h1, line: 1}}, options: [2], optional_costs: {additional: decline}}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [h1]
+          P2.leader.life: 20
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - {kind: ダメージ}
+
+  - name: C 選【2】並付土の秘術（魔片只有 1 個計數器）→ 2 傷害，魔片歸 0 放墓場並消去
+    inherit: A1 選【1】、場上沒有【スタック】卡 → 建立一個帶 1 個計數器的『大地の魔片』
+    setup:
+      players:
+        P1:
+          zones:
+            field:
+              - {id: s1, card: EBD02-T01, state: {counters: {スタックカウンター: 1}}}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}}, options: [2], optional_costs: {additional: {stack_counter_from: s1}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [h1]
+          P1.cemetery: []
+          P2.leader.life: 18
+        events:
+          - {kind: カウンター, object: s1, name: スタックカウンター, delta: -1}
+          - {kind: 移動, object: s1, from: P1.field, to: P1.cemetery}
+          - {kind: 消去, object: s1, by: rule-9.1.4.4}
+          - {kind: ダメージ, source: h1, target: P2.leader, amount: 2}

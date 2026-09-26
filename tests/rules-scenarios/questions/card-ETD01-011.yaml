@@ -1,0 +1,207 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-ETD01-011
+kind: card
+must_pass: true
+mechanisms:
+  - 抽樣追加
+  - 被選為目標時誘發
+  - 離場後待機仍結算
+cards:
+  - BP01-169
+  - ETD01-011
+why: 被選為目標發生在破壞前；ランスリザード即使離場仍結算已待機能力，無法增加墓場物件攻擊力但仍對主戰者造成一傷。
+discriminates: 若只保留受傷／死亡事件而不記目標選取事件，正例無待機；若忘記自己回合條件則反例多傷害。
+refs:
+  rules:
+    - 10.7.3
+    - 10.7.4
+  qa:
+    - Q420
+    - Q416
+    - Q418
+evidence:
+  - ref: Q420
+    quote: "Q: このフォロワーが『エクスキューション』で選ばれて破壊されたとき、「自分のターンごとに1回、これが能力によって選ばれたとき、」から始まる能力は誘発しますか？\nA: はい。誘発します。誘発した能力は、このフォロワーを破壊する『エクスキューション』の処理を解決した後に解決します。"
+    derivation:
+      - 被選為目標發生在破壞前；ランスリザード即使離場仍結算已待機能力，無法增加墓場物件攻擊力但仍對主戰者造成一傷。
+  - ref: Q416
+    quote: "Q: 自分のターン中に、相手のクイックを持つスペルなどのカードによって『ランスリザード』が選ばれたとき、「自分のターンごとに1回、これが能力によって選ばれたとき、」から始まる能力が誘発しますか？\nA: はい。自分のターン中であれば、相手のカードによって選ばれた場合でも誘発します。"
+    derivation:
+      - 被選為目標發生在破壞前；ランスリザード即使離場仍結算已待機能力，無法增加墓場物件攻擊力但仍對主戰者造成一傷。
+  - ref: Q418
+    quote: "Q: 自分の場に『ランスリザード』、相手の場に『ゴブリン』がいる状況で、『ランスリザード』と『ゴブリン』を目標に選び『アーマーパージ』をプレイしました。この時、『ランスリザード』の「自分のターンごとに1回、これが能力によって選ばれたとき、」から始まる能力が誘発する処理はどのように行われますか？\nA: まず、『アーマーパージ』の能力が解決され、『ランスリザード』がEXエリアへ移動します。その後、誘発した『ランスリザード』の「自分のターンごとに1回、これが能力によって選ばれたとき、」から始まる能力の解決を行います。この時、「これは《攻撃力》+1する。」は、能力が誘発した時点での場のカードを参照するため、EXエリアへ移動した『ランスリザード』に対してこの処理は行われません。「相手のリーダーすべてに1ダメージ。」の処理は行います。"
+    derivation:
+      - 被選為目標發生在破壞前；ランスリザード即使離場仍結算已待機能力，無法增加墓場物件攻擊力但仍對主戰者造成一傷。
+  - ref: cr 10.7.3
+    quote: チェックタイミングが発生した段階で、自動能力の プレイを求められているプレイヤーは、自身がマス ターである自動能力のうち待機状態のものを 1 つ選 び、それをプレイします。プレイされた能力の解決 後、その自動能力の待機状態が 1 回取り消されま す。
+    derivation:
+      - 被選為目標發生在破壞前；ランスリザード即使離場仍結算已待機能力，無法增加墓場物件攻擊力但仍對主戰者造成一傷。
+  - ref: cr 10.7.4
+    quote: あるカードが領域を移動することを誘発条件とす る自動能力が存在します。これを領域移動誘発と呼 びます。
+    derivation:
+      - 被選為目標發生在破壞前；ランスリザード即使離場仍結算已待機能力，無法增加墓場物件攻擊力但仍對主戰者造成一傷。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 自己回合被 Quick 選中
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: ETD01-011
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP01-169
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P2
+        at: quick
+        do: play
+        card: s
+        targets:
+          1:
+            - a
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: []
+          P1.cemetery:
+            - a
+          P2.leader.life: 20
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 19
+          P1.cemetery:
+            - a
+        events:
+          - kind: ダメージ
+            source: a
+            target: P2.leader
+            amount: 1
+  - name: 對手回合被選中不符合誘發條件
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: ETD01-011
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP01-169
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: []
+          P1.cemetery:
+            - a
+          P2.leader.life: 20
+        forbidden_events:
+          - kind: 待機

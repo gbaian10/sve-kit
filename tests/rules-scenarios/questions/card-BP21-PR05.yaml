@@ -1,0 +1,173 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP21-PR05
+kind: card
+must_pass: true
+mechanisms:
+  - C12
+  - 自身橫置條件
+  - Quick
+cards:
+  - BP01-169
+  - BP21-PR05
+why: リオード的直立條件持續檢查；宣告攻擊橫置後即可被對手 Quick 選取破壞。
+discriminates: 把直立條件在入場時快照會令 Quick 不能選取；不檢查條件則直立反例可被破壞。
+refs:
+  rules:
+    - 8.4.5
+  qa:
+    - Q995
+evidence:
+  - ref: Q995
+    quote: "Q: 相手の『月の刃・リオード』が攻撃したとき、クイックタイミングで『エクスキューション』をプレイして相手の『月の刃・リオード』を選び、破壊することはできますか？\nA: はい。自分のクイックタイミングのとき、相手の『月の刃・リオード』はアクト状態なので、【威圧】と【オーラ】を失います。そのため、『エクスキューション』で『月の刃・リオード』を選び、破壊することができます。"
+    derivation:
+      - リオード的直立條件持續檢查；宣告攻擊橫置後即可被對手 Quick 選取破壞。
+  - ref: cr 8.4.5
+    quote: 攻撃フォロワーが‘攻撃した’事象が発生します。
+    derivation:
+      - リオード的直立條件持續檢查；宣告攻擊橫置後即可被對手 Quick 選取破壞。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 直立受オーラ保護
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP21-PR05
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP01-169
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.field:
+            - a
+          P1.cemetery: []
+          P2.hand:
+            - s
+          P2.leader.life: 20
+  - name: 攻擊後失去オーラ
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP21-PR05
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP01-169
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P2
+        at: quick
+        do: play
+        card: s
+        targets:
+          1:
+            - a
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: []
+          P1.cemetery:
+            - a
+          P2.hand: []
+          P2.leader.life: 20

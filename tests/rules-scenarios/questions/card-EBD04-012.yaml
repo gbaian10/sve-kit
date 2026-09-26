@@ -1,0 +1,501 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-EBD04-012
+kind: card
+must_pass: true
+mechanisms:
+  - S5
+  - 墓場で誘発
+  - 可選執行
+  - 多來源
+cards:
+  - EBD04-004
+  - EBD04-012
+why: 悠久の絶望的第一能力只在墓場有效。マーウィン入場後，每份墓場來源各自待機；自願把該來源移到 EX 才增加一點主戰者體力。
+discriminates: 只掃場上來源會漏掉墓場正例並在場上反例多待機；拒絕仍補血會多一點；把同名來源合併只觸發一次會少一張 EX 與一點體力。
+refs:
+  rules:
+    - 10.3.4
+    - 10.7.2
+    - 12.8.2
+  qa:
+    - Q2040
+evidence:
+  - ref: Q2040
+    quote: "Q: 『悠久の絶望』の「自分の場に「カード名に『マーウィン』を含むフォロワー」が出たとき、～」という能力は、『悠久の絶望』が墓場にある場合に有効となる能力ですか？\nA: はい。『悠久の絶望』が墓場にある場合に有効となる能力です。『悠久の絶望』が墓場にある状況で、自分の場に「カード名に『マーウィン』を含むフォロワー」が出たときに、墓場の『悠久の絶望』をEXエリアに置くことで自分のリーダーの体力を+1することができます。"
+    derivation:
+      - 悠久の絶望的第一能力只在墓場有效。マーウィン入場後，每份墓場來源各自待機；自願把該來源移到 EX 才增加一點主戰者體力。
+  - ref: cr 10.3.4
+    quote: 特定の領域で処理することが明確である効果は、 その領域でのみ有効です。
+    derivation:
+      - 悠久の絶望的第一能力只在墓場有效。マーウィン入場後，每份墓場來源各自待機；自願把該來源移到 EX 才增加一點主戰者體力。
+  - ref: cr 10.7.2
+    quote: なんらかの自動能力の誘発条件が満たされた場 合、その自動能力は待機状態になります。
+    derivation:
+      - 悠久の絶望的第一能力只在墓場有效。マーウィン入場後，每份墓場來源各自待機；自願把該來源移到 EX 才增加一點主戰者體力。
+  - ref: cr 12.8.2
+    quote: ‘【守護】’は‘このフォロワーをスタンド状態で場に 置く際、代わりにスタンド状態で場に置きアクトして よい’と‘このフォロワーはあなたのエンドフェイズに アクトすることができる’（7.4.3）と‘これがフォロワー である場合、相手が攻撃目標を選択する際、可能な ら【守護】を持つアクト状態のあなたのフォロワーを 攻撃目標として選択する’を意味します（8.4.3）。
+    derivation:
+      - 悠久の絶望的第一能力只在墓場有效。マーウィン入場後，每份墓場來源各自待機；自願把該來源移到 EX 才增加一點主戰者體力。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 墓場來源自願移入 EX 並增加體力
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: m
+                card: EBD04-004
+            cemetery:
+              - id: a
+                card: EBD04-012
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: resolve
+        do: place-acted
+        of:
+          decision: 1
+          occurrence: 1
+        object: m
+        acted: false
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 4
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 5
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 4
+          occurrence: 1
+        choice: execute
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - m
+      - at: after-decision-4
+        view: omniscient
+        outcome: paused
+        assert: {}
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: execute
+            - do: resolve-choice
+              choice: decline
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery: []
+          P1.ex:
+            - a
+          P1.leader.life: 21
+  - name: 拒絕移入 EX 就不增加體力
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: m
+                card: EBD04-004
+            cemetery:
+              - id: a
+                card: EBD04-012
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: resolve
+        do: place-acted
+        of:
+          decision: 1
+          occurrence: 1
+        object: m
+        acted: false
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 4
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 5
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 4
+          occurrence: 1
+        choice: decline
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - m
+      - at: after-decision-4
+        view: omniscient
+        outcome: paused
+        assert: {}
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: execute
+            - do: resolve-choice
+              choice: decline
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery:
+            - a
+          P1.ex: []
+          P1.leader.life: 20
+  - name: 來源在場，墓場限定能力不待機
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: m
+                card: EBD04-004
+            field:
+              - id: a
+                card: EBD04-012
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: resolve
+        do: place-acted
+        of:
+          decision: 1
+          occurrence: 1
+        object: m
+        acted: false
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 4
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - a
+            - m
+        forbidden_events:
+          - kind: 待機
+            ability:
+              source: a
+              line: 1
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a
+            - m
+          P1.ex: []
+          P1.leader.life: 20
+          semantic_state.pending_triggers: []
+  - name: 兩份墓場來源分別誘發，各自移入 EX 與增加體力
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: m
+                card: EBD04-004
+            cemetery:
+              - id: a
+                card: EBD04-012
+              - id: b
+                card: EBD04-012
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 4
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: resolve
+        do: place-acted
+        of:
+          decision: 1
+          occurrence: 1
+        object: m
+        acted: false
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 4
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 5
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 4
+          occurrence: 1
+        choice: execute
+      - n: 6
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b
+            line: 1
+      - n: 7
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 6
+          occurrence: 1
+        choice: execute
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field:
+            - m
+      - at: after-decision-4
+        view: omniscient
+        outcome: paused
+        assert: {}
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              choice: execute
+            - do: resolve-choice
+              choice: decline
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery:
+            - b
+          P1.ex:
+            - a
+          P1.leader.life: 21
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery: []
+          P1.ex:
+            - a
+            - b
+          P1.leader.life: 22
+          semantic_state.pending_triggers: []

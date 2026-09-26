@@ -1,0 +1,359 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP20-020
+kind: card
+must_pass: true
+mechanisms:
+  - A 融合
+  - X 與必要支付張數
+  - 混合區域支付
+cards:
+  - BP15-026
+  - BP15-T02
+  - BP20-020
+why: X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+discriminates: 只數留在墓場的素材則 X=1 變零、X=2 變一；允許不足支付則 X=2 只選一張仍錯誤成功。
+refs:
+  rules:
+    - 5.2.1.2
+    - 12.18.2.1
+    - 9.1.4.4
+    - 10.4.2.2
+  qa:
+    - Q2636
+    - Q2635
+evidence:
+  - ref: Q2636
+    quote: "Q: 《起動》【融合】能力で複数枚のカードを融合するとき、手札のカードとEXエリアのカードを合わせて融合することができますか？\nA: はい。手札のカードとEXエリアのカードを合わせて融合することができます。たとえば、手札の財宝・カード1枚を捨ててEXエリアの財宝・カード1枚を墓場に置くことで、2枚融合することができます。"
+    derivation:
+      - X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+  - ref: Q2635
+    quote: "Q: 《起動》【融合】能力は、その能力を持つカードが手札にある場合に有効となる能力ですか？\nA: はい。その能力を持つカードが手札にある場合に有効となる能力です。"
+    derivation:
+      - X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+  - ref: cr 5.2.1.2
+    quote: X の値がプレイヤーの意図を問わずに特定 の値として決定されるものでない場合、X の値 はそのカードや能力のプレイ時に決定します （10.6.2.2.3）。
+    derivation:
+      - X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+  - ref: cr 12.18.2.1
+    quote: （条件）で指定されたカードが複数ある場 合、手札から捨てるカードと EX エリアから墓 場に置くカードを合わせて（条件）を満たすこと ができます。
+    derivation:
+      - X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+  - ref: cr 9.1.4.4
+    quote: あるトークンが存在できる領域以外の領域 に移動した場合、その移動を行った直後に、そ の領域で消去されます。この処理はチェックタ イミングを待たず、なんらかの効果の途中で移 動を行った場合は、その移動の続きを行うより も前に実行されます。
+    derivation:
+      - X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+  - ref: cr 10.4.2.2
+    quote: コストのうち一部または全部を支払うことが 不可能である場合、このコストはまったく支払 うことはできません。
+    derivation:
+      - X 於打出時指定並須支付相同張數，不能事後把不足的支付改成較小 X；EX 財寶 token 送墓即消去，仍是已支付的一張並貢獻融合計數器。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: X=1 選擇素材=1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP20-020
+              - id: h
+                card: BP15-026
+            ex:
+              - id: t
+                card: BP15-T02
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        x: 1
+        costs:
+          1:
+            - t
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.hand:
+            - h
+          P1.cemetery: []
+          P1.banish: []
+          P1.ex.a:
+            counters:
+              融合カウンター: 1
+        events:
+          - kind: 消去
+            object: t
+  - name: X=2 選擇素材=2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP20-020
+              - id: h
+                card: BP15-026
+            ex:
+              - id: t
+                card: BP15-T02
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        x: 2
+        costs:
+          1:
+            - h
+            - t
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.hand: []
+          P1.cemetery:
+            - h
+          P1.banish: []
+          P1.ex.a:
+            counters:
+              融合カウンター: 2
+        events:
+          - kind: 消去
+            object: t
+  - name: X=2 選擇素材=1
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP20-020
+              - id: h
+                card: BP15-026
+            ex:
+              - id: t
+                card: BP15-T02
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        x: 2
+        costs:
+          1:
+            - t
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.ex:
+            - t
+          P1.hand:
+            - a
+            - h
+          P1.cemetery: []
+          P1.banish: []
+        forbidden_events:
+          - kind: 消去
+          - kind: 捨てる
+  - name: X=3 選擇素材=2
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: a
+                card: BP20-020
+              - id: h
+                card: BP15-026
+            ex:
+              - id: t
+                card: BP15-T02
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        x: 3
+        costs:
+          1:
+            - h
+            - t
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.ex:
+            - t
+          P1.hand:
+            - a
+            - h
+          P1.cemetery: []
+          P1.banish: []
+        forbidden_events:
+          - kind: 消去
+          - kind: 捨てる

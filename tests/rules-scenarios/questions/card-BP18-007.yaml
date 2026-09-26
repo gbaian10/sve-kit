@@ -1,0 +1,175 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP18-007
+kind: card
+must_pass: true
+mechanisms: [從墓場打出的許可, 墓場中有效的永續能力, 10.3.4, 13.2.1, コンボ 張數條件, 8.2.1 仍要付費, 「手札以外から場に出ていたなら」, 5.5.3, 自己離場的誘發, 10.7.4.2, 10.6.2.3.3]
+cards: [BP18-007, BP01-173, BP01-176]
+why: >-
+  アクティブエルフ・メイ「「このターン中に自分がプレイしたカードの枚数」が3枚以上なら、これは墓場からプレイできる」是在墓場有效的永續能力（Q2306、10.3.4）；
+  從墓場打出仍要付 1 PP（Q2307、8.2.1）。從墓場打出 → 「手札以外から場に出ていた」成立（Q2309、5.5.3）→ ファンファーレ 1 傷害後把自己放到牌庫底
+  → 這是「自分のターン中、これが場を離れた」→ 第 2 行誘發，再選 1 隻 1 傷害。D：對手沒有從者 → ファンファーレ 無法打出（Q2308）→ 不放牌庫底、留在場上。
+discriminates: >-
+  A：只在手牌檢查可打出區域的引擎 cannot-play；不把「墓場→場」算成手札以外的引擎不會放牌庫底、也不會誘發第 2 行。
+  B／C：不檢查 3 張條件、或從墓場打出不扣 PP 的引擎會 resolved。D：把「選不到目標」的ファンファーレ 部分結算（放牌庫底）的引擎，メイ 不在場上。
+refs:
+  rules: [10.3.4, 13.2.1.1, 13.2.1.3, 8.2.1, 10.6.2.1, 5.5.3, 10.7.4.2, 10.6.2.3.3, 10.7.3.2, 4.1.4]
+  qa: [Q2306, Q2307, Q2308, Q2309]
+evidence:
+  - ref: Q2306
+    quote: はい。『アクティブエルフ・メイ』が墓場にある場合に有効となる能力です。
+  - ref: Q2307
+    quote: いいえ。『アクティブエルフ・メイ』のプレイに必要なコストを支払う必要があります。
+  - ref: Q2309
+    quote: はい。EXエリアやデッキや墓場などから出た場合、条件を満たします。
+  - ref: Q2308
+    quote: いいえ。相手の場のフォロワーを選ぶことができない場合、『アクティブエルフ・メイ』の《ファンファーレ》能力をプレイすることができないため、『アクティブエルフ・メイ』をデッキの下に置くことができません。
+  - ref: cr 5.5.3
+    quote: 同様に、カードが‘（領域）以外から場に出る’ことを参照する場合、それはそのカードがその領域でも解決領域でもない領域から直接場に出ること、およびそのカードがその領域以外の領域からプレイされた後解決領域で解決されて場に出ることの両方を参照します。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      history: explicit
+      semantic_state:
+        counters_this_turn: {P1.cards_played: 3}
+      players:
+        P1:
+          construction: class
+          leader: {class: エルフ, life: 20}
+          pp: {current: 3, max: 5}
+          zones:
+            cemetery:
+              - {id: g1, card: BP18-007}
+            hand:
+              - {filler: 2}
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 5}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}        # ファイター 2/3
+              - {id: b2, card: BP01-176}        # 天剣の乙女 4/6
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: g1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: g1, line: 3}}, targets: {1: [b1]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: g1, line: 2}}, targets: {1: [b2]}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: g1, line: 3}}, targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: g1, line: 3}}, targets: {1: [b2]}}
+        assert:
+          P1.pp.current: 2
+          P1.field: [g1]
+          P1.field.g1: {entered_from: cemetery, entered_by: play}
+          P1.cemetery: []
+          semantic_state.counters_this_turn: {P1.cards_played: 4}
+        events:
+          - {kind: プレイ, object: g1}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: g1, line: 2}}, targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: g1, line: 2}}, targets: {1: [b2]}}
+        assert:
+          P2.field.b1: {hp: 2}
+          P1.field: []
+          P1.deck: [filler: 20, g1]
+        events:
+          - {kind: ダメージ, source: g1, target: b1, amount: 1}
+          - {kind: 移動, object: g1, from: P1.field, to: P1.deck, position: bottom}
+          - {kind: 待機, ability: {source: g1, line: 2}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b2: {hp: 5}
+          P1.deck: [filler: 20, g1]
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: ダメージ, source: g1, target: b2, amount: 1}
+
+  - name: B 本回合只打出 2 張 → 不能從墓場打出
+    inherit: A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害
+    setup:
+      semantic_state:
+        counters_this_turn: {P1.cards_played: 2}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: g1}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.pp.current: 3
+          P1.cemetery: [g1]
+          P1.field: []
+
+  - name: C 條件成立但 PP 0 → 仍要付費 → 不能打出
+    inherit: A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害
+    setup:
+      players:
+        P1:
+          pp: {current: 0, max: 5}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: g1}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-play
+        assert:
+          P1.cemetery: [g1]
+          P1.field: []
+
+  - name: D 對手沒有從者 → ファンファーレ 選不到目標 → 待機取消，メイ 留在場上
+    inherit: A 本回合已打出 3 張 → 從墓場付 1 PP 打出 → ファンファーレ 1 傷害後放牌庫底 → 離場誘發再 1 傷害
+    setup:
+      players:
+        P2:
+          zones:
+            field: []
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: g1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: g1, line: 3}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.field: [g1]
+          P1.deck: [filler: 20]
+          P1.pp.current: 2
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - {kind: 移動, object: g1, to: P1.deck}
