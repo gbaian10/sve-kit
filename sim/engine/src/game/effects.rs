@@ -75,9 +75,13 @@ impl Game {
                 .filter_map(Value::as_str)
                 .map(str::to_owned)
                 .collect::<Vec<_>>();
-                frame
-                    .bindings
-                    .insert(string(&task["bind"]).into(), selected);
+                let name = string(&task["bind"]);
+                frame.bindings.insert(name.into(), selected);
+                if task["order"] == true {
+                    frame.ordering.insert(name.into(), prompt.by);
+                } else {
+                    frame.ordering.remove(name);
+                }
             }
             "declare" => {
                 frame
@@ -150,7 +154,11 @@ impl Game {
                         _ => return Err(invalid("unknown verified trigger icon"))
                     });
                 }
-                steps.push(json!({"op":"move","subjects":id,"to":if execute { "cemetery" } else { "deck" },"position":"bottom"}));
+                let mut movement = json!({"op":"move","subjects":id,"to":if execute { "cemetery" } else { "deck" }});
+                if !execute {
+                    movement["position"] = json!("bottom");
+                }
+                steps.push(movement);
                 if execute {
                     steps.push(json!({"op":"_drive_trigger"}));
                 }
@@ -286,6 +294,8 @@ impl Game {
                     let id = string(&previous["id"]);
                     if self.object(id)?.generation
                         != previous["generation"].as_u64().unwrap_or_default()
+                        || (previous["position"].as_u64().is_some()
+                            && previous["position"].as_u64() != self.object_position(id)?)
                     {
                         moved.push(id.to_owned());
                     }
@@ -461,8 +471,16 @@ impl Game {
         let before = ids
             .iter()
             .map(|id| {
-                self.object(id)
-                    .map(|object| json!({"id":id,"generation":object.generation}))
+                let object = self.object(id)?;
+                let position = if node["op"] == "move"
+                    && !node["position"].is_null()
+                    && node["to"] == object.zone
+                {
+                    self.object_position(id)?
+                } else {
+                    None
+                };
+                Ok(json!({"id":id,"generation":object.generation,"position":position}))
             })
             .collect::<Result<Vec<_>>>()?;
         Self::prepend(
@@ -524,6 +542,14 @@ impl Game {
                     }
                 }
                 let mut movement_frame = frame.clone();
+                let binding = node["subjects"]
+                    .as_str()
+                    .or_else(|| node["subjects"]["from"].as_str());
+                if let Some(by) = binding.and_then(|binding| frame.ordering.get(binding)) {
+                    movement_frame
+                        .values
+                        .insert("placement_order_by".into(), json!(by));
+                }
                 movement_frame
                     .values
                     .insert("suppress_fanfare".into(), node["suppress_fanfare"].clone());
@@ -597,49 +623,23 @@ impl Game {
         let group = self.group();
         let mut entered = Vec::new();
         let mut erased = Vec::new();
-        for id in &movable {
-            let destination = destinations.get(id).map_or(zone, String::as_str);
-            let previous = self.object(id)?.clone();
-            if previous.zone == destination && position.is_none() {
+        let plans = self.place_zone_batch(&movable, &destinations, side, position, frame)?;
+        for plan in &plans {
+            if !plan.changed {
                 continue;
             }
-            let owner = if matches!(destination, "field" | "ex") {
-                side.map_or_else(
-                    || previous.controller.clone(),
-                    |s| self.seats(s, frame).into_iter().next().unwrap_or_default(),
-                )
-            } else {
-                previous.owner.clone()
-            };
-            if let Some(items) = self
-                .player_mut(&previous.controller)?
-                .zones
-                .get_mut(&previous.zone)
-            {
-                items.retain(|v| v.as_str() != Some(id));
-            }
-            let items = self
-                .player_mut(&owner)?
-                .zones
-                .entry(destination.into())
-                .or_default();
-            if let Some(position) = position.filter(|pos| **pos != "bottom") {
-                let index = position.as_u64().unwrap_or(1).saturating_sub(1);
-                items.insert(
-                    usize::try_from(index)
-                        .unwrap_or(usize::MAX)
-                        .min(items.len()),
-                    json!(id),
-                );
-            } else {
-                items.push(json!(id));
-            }
+            let previous = &plan.previous;
+            let id = &previous.id;
+            let destination = plan.destination.as_str();
+            let owner = &plan.controller;
             let printed = self.catalog.face(&previous.card, 0)?.clone();
             let object = self.object_mut(id)?;
             object.zone = destination.into();
-            object.controller.clone_from(&owner);
-            object.generation = object.generation.saturating_add(1);
-            object.state = Self::moved_attributes(&previous, &printed, destination);
+            object.controller.clone_from(owner);
+            if previous.zone != destination || previous.controller != *owner {
+                object.generation = object.generation.saturating_add(1);
+                object.state = Self::moved_attributes(previous, &printed, destination);
+            }
             let from = format!("{}.{}", previous.controller, previous.zone);
             if destination == "field" {
                 object.state["entered_this_turn"] = json!(true);
@@ -661,7 +661,7 @@ impl Game {
                 let event_id=self.emit(json!({"kind":"場に出す","object":id,"card":previous.card,"from":from,"to":format!("{owner}.field")}),&frame.cause,group);
                 entered.push((self.object(id)?.clone(), json!({"event":event_id})));
             } else {
-                self.emit_zone_movement(&previous, destination, position, frame, group)?;
+                self.emit_zone_movement(previous, destination, position, frame, group)?;
             }
             for viewer in ["P1", "P2"] {
                 let was_known = self
@@ -687,6 +687,7 @@ impl Game {
                 erased.push(id.clone());
             }
         }
+        self.conceal_placement_order(&plans, frame);
         let erase_group = self.group();
         for id in erased {
             let object = self.object(&id)?.clone();

@@ -17,6 +17,7 @@ mod movement;
 mod nested;
 mod opening;
 mod payments;
+mod placement;
 mod progression;
 mod randomness;
 mod resources;
@@ -129,6 +130,8 @@ struct Frame {
     reference: Value,
     decision: Value,
     bindings: BTreeMap<String, Vec<String>>,
+    #[serde(default)]
+    ordering: BTreeMap<String, String>,
     captured: BTreeMap<String, Value>,
     frozen: BTreeMap<String, Value>,
     todo: Vec<Value>,

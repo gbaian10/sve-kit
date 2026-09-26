@@ -5377,3 +5377,219 @@ fn nonprogressing_rule_movement_fails_closed_instead_of_recursing_forever() {
     ));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn deck_reordering_preserves_order_identity_state_and_only_counts_changed_positions() {
+    for (position, chosen, expected, changed) in [
+        (
+            json!("top"),
+            json!(["d2", "d0"]),
+            json!(["d2", "d0", "d1", "tail"]),
+            2_i64,
+        ),
+        (
+            json!("bottom"),
+            json!(["d2", "d0"]),
+            json!(["d1", "tail", "d2", "d0"]),
+            1_i64,
+        ),
+        (
+            json!(2_i64),
+            json!(["d2", "d0"]),
+            json!(["d1", "d2", "d0", "tail"]),
+            2_i64,
+        ),
+        (
+            json!("top"),
+            json!(["d0", "d1"]),
+            json!(["d0", "d1", "d2", "tail"]),
+            0_i64,
+        ),
+    ] {
+        let body = json!({"op":"seq","steps":[
+            {"op":"reveal","subjects":{"side":"self","zone":"deck"},"to":"all"},
+            {"op":"select","select":{"side":"self","zone":"deck"},"min":2_i64,"max":2_i64,"order":true,"bind":"chosen"},
+            {"op":"move","subjects":"chosen","to":"deck","position":position,"bind":"moved"},
+            {"op":"damage","subjects":"opponent.leader","amount":{"count":"moved"}},
+            {"op":"modify","subjects":"chosen","power":1_i64}
+        ]});
+        let loaded = Arc::new(catalog(&body));
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["deck"] = json!([
+            {"id":"d0","card":"unit-follower","state":{"power":8_i64,"counters":{"memory":2_i64}}},
+            {"id":"d1","card":"unit-follower"},{"id":"d2","card":"unit-spell"},{"id":"tail","card":"unit-spell"}
+        ]);
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "order",
+        )
+        .unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let mut saved: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        let mut sampled =
+            Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "order")
+                .unwrap();
+        for instance in [&mut engine, &mut saved, &mut sampled] {
+            let step = instance
+                .decide(&json!({"do":"resolve-choice","order":chosen}), "place")
+                .unwrap();
+            assert_eq!(step.outcome, "resolved");
+            assert_eq!(
+                instance.query(View::P1, "P1.deck").unwrap(),
+                Some(expected.clone())
+            );
+            for (path, value) in [
+                ("P1.deck.d0.generation", json!(0_i64)),
+                ("P1.deck.d0.power", json!(9_i64)),
+                ("P1.deck.d0.counters.memory", json!(2_i64)),
+                ("P2.leader.life", json!(20_i64 - changed)),
+            ] {
+                assert_eq!(instance.query(View::P1, path).unwrap(), Some(value));
+            }
+            let opponent = instance.projection(View::P2).unwrap();
+            for id in chosen
+                .as_array()
+                .unwrap()
+                .iter()
+                .map(|v| v.as_str().unwrap())
+            {
+                assert!(
+                    !opponent["P1"]["deck"]
+                        .as_array()
+                        .unwrap()
+                        .contains(&json!(id))
+                );
+                assert!(opponent["objects"].get(id).is_none());
+            }
+        }
+    }
+}
+
+#[test]
+fn ordered_deck_insertion_splits_anonymous_runs_at_card_offsets() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"select","select":{"side":"self","zone":"cemetery"},"min":2_i64,"max":2_i64,"order":true,"bind":"chosen"},
+        {"op":"move","subjects":"chosen","to":"deck","position":3_i64}
+    ]});
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"filler":5_i64},{"id":"tail","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] = json!([{"id":"c1","card":"unit-follower","state":{"power":8_i64}},{"id":"c2","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::new(catalog(&body)),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "order",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    for instance in [&mut engine, &mut saved] {
+        instance
+            .decide(&json!({"do":"resolve-choice","order":["c2","c1"]}), "place")
+            .unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P1.deck").unwrap(),
+            Some(json!([{"filler":2_i64},"c2","c1",{"filler":3_i64},{"filler":1_i64}]))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.deck_count").unwrap(),
+            Some(json!(8_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.deck.c1.generation").unwrap(),
+            Some(json!(1_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.deck.c1.power").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P2, "P1.deck").unwrap(),
+            Some(
+                json!([{"filler":2_i64},{"filler":1_i64},{"filler":1_i64},{"filler":3_i64},{"filler":1_i64}])
+            )
+        );
+    }
+}
+
+#[test]
+fn ordered_batches_keep_independent_offsets_for_each_destination_deck() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"select","select":{"side":"both","zone":"cemetery"},"min":4_i64,"max":4_i64,"order":true,"bind":"chosen"},
+        {"op":"move","subjects":"chosen","to":"deck","position":1_i64}
+    ]});
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"t1","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"t2","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"c1","card":"unit-follower"},{"id":"c2","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["cemetery"] =
+        json!([{"id":"x1","card":"unit-follower"},{"id":"x2","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::new(catalog(&body)),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "order",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","order":["x2","c2","x1","c1"]}),
+            "place",
+        )
+        .unwrap();
+    let private: Value = serde_json::to_value(&engine).unwrap();
+    assert_eq!(
+        private["state"]["players"]["P1"]["zones"]["deck"],
+        json!(["c2", "c1", "t1"])
+    );
+    assert_eq!(
+        private["state"]["players"]["P2"]["zones"]["deck"],
+        json!(["x2", "x1", "t2"])
+    );
+    assert_eq!(
+        engine.query(View::P1, "P2.deck").unwrap(),
+        Some(json!(["x2","x1",{"filler":1_i64}]))
+    );
+    let owner = engine.projection(View::P2).unwrap();
+    assert!(owner["objects"].get("x1").is_none());
+    assert!(owner["objects"].get("x2").is_none());
+}
+
+#[test]
+fn explicit_ordering_in_unordered_zones_is_rejected_transactionally() {
+    let mut engine =
+        game(&json!({"op":"move","subjects":"target.1","to":"cemetery","position":"top"}));
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+}
