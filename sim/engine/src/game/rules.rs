@@ -43,7 +43,10 @@ impl Game {
                 request[field] = point[field].clone();
             }
         }
-        match self.decide_inner(&request) {
+        match self.decide_inner(&request).and_then(|outcome| {
+            self.validate_trigger_choices()?;
+            Ok(outcome)
+        }) {
             Ok(outcome) => Ok(Step {
                 outcome,
                 events: take(&mut self.emitted),
@@ -395,13 +398,24 @@ impl Game {
 
     fn choose_pending(&mut self, decision: &Value) -> Result<String> {
         let choice = &decision["pending"];
-        let mut matches = self.state.pending.iter().enumerate().filter(|(_, p)| {
-            if choice.is_string() {
-                return p.id.as_deref() == choice.as_str();
-            }
-            super::legal::reference_matches(&choice["ability"], &p.reference)
-                && (choice["event"].is_null() || choice["event"] == p.event)
-        });
+        self.validate_trigger_choices()?;
+        let mut matches = self
+            .state
+            .pending
+            .iter()
+            .enumerate()
+            .flat_map(|(index, pending)| {
+                Self::pending_variants(pending)
+                    .into_iter()
+                    .map(move |variant| (index, variant))
+            })
+            .filter(|(_, p)| {
+                if choice.is_string() {
+                    return p.id.as_deref() == choice.as_str();
+                }
+                super::legal::reference_matches(&choice["ability"], &p.reference)
+                    && (choice["event"].is_null() || choice["event"] == p.event)
+            });
         let (index, first) = matches
             .next()
             .ok_or_else(|| invalid(format!("pending ability not present: {choice}")))?;
@@ -414,7 +428,7 @@ impl Game {
         }) {
             return Err(invalid(format!("pending ability is ambiguous: {choice}")));
         }
-        let pending = first.clone();
+        let pending = first;
         if pending.controller != string(&decision["by"]) {
             return Err(invalid("wrong pending controller"));
         }
@@ -900,6 +914,7 @@ impl Game {
                 } else {
                     affected.iter().map(Some).collect()
                 };
+                let mut batch = Vec::new();
                 for object in candidates {
                     if let Some(object) = object
                         && let Some(selector) = code.get("subject")
@@ -931,13 +946,15 @@ impl Game {
                     {
                         continue;
                     }
-                    if code["limit_at"] == "trigger" {
-                        self.mark_use(&source, &code)?;
-                    }
                     let detail = Self::trigger_event(event, object, metadata);
                     let copies = self.trigger_copies(event, &frame.controller)?;
+                    if copies > 10_000 {
+                        return Err(EngineFailure::Unsupported(
+                            "trigger copies exceed prototype limit".into(),
+                        ));
+                    }
                     for _ in 0..copies {
-                        result.push(Pending {
+                        batch.push(Pending {
                             controller: frame.controller.clone(),
                             reference: self.reference(&source, &code),
                             event: detail.clone(),
@@ -947,9 +964,11 @@ impl Game {
                             retained: false,
                             id: None,
                             context: Some(frame.clone()),
+                            alternatives: Vec::new(),
                         });
                     }
                 }
+                result.extend(self.limit_trigger_batch(&source, &code, batch)?);
             }
         }
         Ok(result)

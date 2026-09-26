@@ -8560,3 +8560,244 @@ fn explicit_recipient_moves_keep_the_owner_and_reject_undefined_same_zone_transf
         }
     }
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "Synthetic tokens with different names expose an arbitrary first-event choice."
+)]
+fn limited_leave_catalog(body: &Value, limit: i64, extra: &[Value]) -> Arc<Catalog> {
+    let mut doc = document(body);
+    doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
+    let mut abilities = vec![
+        json!({"kind":"trigger","line":1_i64,"event":"leave","subject":{"side":"self","zone":"field","where":{"read":"item.token"}},"limit":limit,"limit_at":"trigger","body":{"op":"create","name":{"read":"event.subject.name"},"count":1_i64,"to":"field"}}),
+    ];
+    abilities.extend_from_slice(extra);
+    doc["cards"]["unit-follower"]["abilities"] = json!(abilities);
+    let mut cards = snapshot();
+    for (number, name) in [("token-red", "red"), ("token-blue", "blue")] {
+        let card = json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー・トークン","cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]});
+        cards.push('\n');
+        cards.push_str(&card.to_string());
+        doc["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[]});
+    }
+    Arc::new(
+        Catalog::from_documents(
+            &cards,
+            &registry(),
+            &[("limited.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[expect(
+    clippy::indexing_slicing,
+    reason = "The fixture builds named public token instances."
+)]
+fn limited_leave_setup() -> Value {
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["field"] = json!([
+        {"id":"a","card":"unit-follower"},
+        {"id":"t1","card":"token-red"},
+        {"id":"t2","card":"token-blue"}
+    ]);
+    position["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"s","card":"unit-spell"},
+        {"id":"s2","card":"unit-spell"}
+    ]);
+    position["players"]["P2"]["zones"]["field"] = json!([]);
+    position
+}
+
+fn move_all_tokens() -> Value {
+    json!({"op":"move","subjects":{"side":"self","zone":"field","where":{"read":"item.token"}},"to":"cemetery"})
+}
+
+#[test]
+fn a_limited_simultaneous_trigger_preserves_both_events_but_consumes_one_waiting_slot() {
+    let loaded = limited_leave_catalog(&move_all_tokens(), 1, &[]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &limited_leave_setup(),
+        &Value::Null,
+        &Value::Null,
+        "limited",
+    )
+    .unwrap();
+    let result = engine
+        .decide(&json!({"do":"play","card":"s"}), "leave")
+        .unwrap();
+    assert_eq!(result.outcome, "resolved");
+    assert_eq!(
+        result
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "待機")
+            .count(),
+        1
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["pending_triggers"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    assert_eq!(
+        packet["semantic_state"]["used_this_turn"][0]["count"],
+        1_i64
+    );
+    assert_eq!(packet["P1"]["cemetery"], json!(["s"]));
+    let choices = engine.legal().unwrap();
+    assert_eq!(
+        choices,
+        vec![
+            json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64},"event":{"left_field":"t1"}}}),
+            json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64},"event":{"left_field":"t2"}}})
+        ]
+    );
+    let before = engine.digest().unwrap();
+    for pending in [
+        json!({"ability":{"source":"a","line":1_i64}}),
+        json!({"ability":{"source":"a","line":1_i64},"event":{"left_field":"missing"}}),
+    ] {
+        engine
+            .decide(
+                &json!({"do":"choose-pending","pending":pending}),
+                "bad-event",
+            )
+            .unwrap_err();
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(Arc::clone(&loaded), &packet, "P1", "limited").unwrap();
+    for original in [engine, saved, sampled] {
+        assert_eq!(original.legal().unwrap(), choices);
+        for (choice, name) in choices.iter().zip(["red", "blue"]) {
+            let mut resumed = original.clone();
+            resumed.decide(choice, "select-event").unwrap();
+            assert_eq!(
+                resumed.query(View::P1, "P1.field.new-1.name").unwrap(),
+                Some(json!(name))
+            );
+            assert_eq!(
+                resumed
+                    .query(View::P1, "semantic_state.pending_triggers")
+                    .unwrap(),
+                Some(json!([]))
+            );
+            let again = resumed
+                .decide(&json!({"do":"play","card":"s2"}), "leave-again")
+                .unwrap();
+            assert!(again.events.iter().all(|event| event["kind"] != "待機"));
+        }
+    }
+    let mut incomplete = packet;
+    incomplete["semantic_state"]["pending_triggers"][0]
+        .as_object_mut()
+        .unwrap()
+        .remove("event_alternatives");
+    assert!(matches!(
+        Game::from_observation(loaded, &incomplete, "P1", "missing-alternatives").unwrap_err(),
+        EngineFailure::Unsupported(_)
+    ));
+}
+
+#[test]
+fn deferred_trigger_conditions_cannot_cross_an_intervening_choice_or_another_pending() {
+    let optional = json!({"op":"optional","then":{"op":"draw","side":"self","count":1_i64}});
+    let other = json!({"kind":"trigger","line":2_i64,"event":"leave","subject":{"side":"self","zone":"field","where":{"read":"item.token"}},"body":{"op":"modify","subjects":"self.leader","hp":1_i64}});
+    for (body, extra) in [
+        (
+            json!({"op":"seq","steps":[move_all_tokens(),optional]}),
+            vec![],
+        ),
+        (move_all_tokens(), vec![other]),
+    ] {
+        let loaded = limited_leave_catalog(&body, 1, &extra);
+        let mut engine = Game::new(
+            loaded,
+            &limited_leave_setup(),
+            &Value::Null,
+            &Value::Null,
+            "intervening",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        assert!(matches!(
+            engine
+                .decide(&json!({"do":"play","card":"s"}), "leave")
+                .unwrap_err(),
+            EngineFailure::Unsupported(_)
+        ));
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+}
+
+#[test]
+fn repeated_triggers_consume_the_actual_waiting_count_without_exceeding_the_limit() {
+    let repeat = json!({"kind":"static","line":2_i64,"body":{"op":"repeat_triggers","event":"leave","side":"self","additional":2_i64}});
+    for limit in [1_i64, 2_i64] {
+        let loaded = limited_leave_catalog(&move_all_tokens(), limit, from_ref(&repeat));
+        let mut position = limited_leave_setup();
+        position["players"]["P1"]["zones"]["field"]
+            .as_array_mut()
+            .unwrap()
+            .pop();
+        let mut engine =
+            Game::new(loaded, &position, &Value::Null, &Value::Null, "copies").unwrap();
+        let result = engine
+            .decide(&json!({"do":"play","card":"s"}), "leave")
+            .unwrap();
+        let count = usize::try_from(limit).unwrap();
+        assert_eq!(
+            result
+                .events
+                .iter()
+                .filter(|event| event["kind"] == "待機")
+                .count(),
+            count
+        );
+        let packet = engine.projection(View::P1).unwrap();
+        assert_eq!(
+            packet["semantic_state"]["used_this_turn"][0]["count"],
+            limit
+        );
+        assert_eq!(
+            packet["semantic_state"]["pending_triggers"]
+                .as_array()
+                .unwrap()
+                .len(),
+            count
+        );
+        for _ in 0..limit {
+            let choice = engine.legal().unwrap().remove(0);
+            engine.decide(&choice, "resolve-copy").unwrap();
+        }
+        assert_eq!(
+            engine.query(View::P1, "P1.field_count").unwrap(),
+            Some(json!(limit.saturating_add(1)))
+        );
+    }
+}
+
+#[test]
+fn oversubscribed_limits_above_one_do_not_select_conditions_adaptively() {
+    let loaded = limited_leave_catalog(&move_all_tokens(), 2, &[]);
+    let mut position = limited_leave_setup();
+    position["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"t3","card":"token-red"}));
+    let mut engine = Game::new(loaded, &position, &Value::Null, &Value::Null, "subset").unwrap();
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine
+            .decide(&json!({"do":"play","card":"s"}), "leave")
+            .unwrap_err(),
+        EngineFailure::Unsupported(_)
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+}

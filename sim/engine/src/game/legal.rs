@@ -275,10 +275,17 @@ impl Game {
     }
 
     fn pending_actions(&self, seat: &str) -> Result<Vec<Value>> {
+        self.validate_trigger_choices()?;
         let mut out = Vec::new();
-        for pending in self.state.pending.iter().filter(|p| p.controller == seat) {
-            let base = Self::pending_choice(pending);
-            let frame = self.pending_frame(pending, &base)?;
+        for pending in self
+            .state
+            .pending
+            .iter()
+            .filter(|p| p.controller == seat)
+            .flat_map(Self::pending_variants)
+        {
+            let base = Self::pending_choice(&pending);
+            let frame = self.pending_frame(&pending, &base)?;
             let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
             if choices.is_empty() {
                 let mut cancellation = base;
@@ -730,15 +737,21 @@ impl Game {
     }
 
     pub(super) fn can_use(&self, id: &str, code: &Value) -> Result<bool> {
-        let Some(limit) = code["limit"].as_u64() else {
-            return Ok(true);
-        };
         Ok(self
+            .remaining_uses(id, code)?
+            .is_none_or(|remaining| remaining > 0))
+    }
+
+    pub(super) fn remaining_uses(&self, id: &str, code: &Value) -> Result<Option<u64>> {
+        let Some(limit) = code["limit"].as_u64() else {
+            return Ok(None);
+        };
+        let used = self
             .state
             .used
             .get(&Self::usage_key(id, self.object(id)?.generation, code))
-            .map_or(0, |entry| entry.count)
-            < limit)
+            .map_or(0, |entry| entry.count);
+        Ok(Some(limit.saturating_sub(used)))
     }
 
     pub(super) fn mark_use(&mut self, id: &str, code: &Value) -> Result<()> {

@@ -124,6 +124,7 @@ impl Game {
                 retained: false,
                 id: None,
                 context: Some(context),
+                alternatives: Vec::new(),
             });
         }
         Ok(pending)

@@ -112,7 +112,7 @@ impl Game {
                 serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
             let mut reference = entry["reference"].clone();
             reference["delayed"] = json!(true);
-            batch.push(Pending{controller:context.controller.clone(),reference,event:Value::Null,code:json!({"kind":"trigger","line":entry["reference"]["line"],"body":entry["body"]}),source:context.source.clone(),cause:cause.clone(),retained:false,id:None,context:Some(context)});
+            batch.push(Pending{controller:context.controller.clone(),reference,event:Value::Null,code:json!({"kind":"trigger","line":entry["reference"]["line"],"body":entry["body"]}),source:context.source.clone(),cause:cause.clone(),retained:false,id:None,context:Some(context),alternatives:Vec::new()});
             if entry["once"] != true {
                 self.state.delayed.push(entry);
             }
@@ -146,6 +146,7 @@ impl Game {
                 retained: false,
                 id: None,
                 context: Some(context),
+                alternatives: Vec::new(),
             });
             if entry["once"] != true {
                 self.state.delayed.push(entry);

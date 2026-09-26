@@ -32,6 +32,7 @@ mod statistics;
 mod suppression;
 mod temporal;
 mod tokens;
+mod trigger_choices;
 mod turns;
 mod view;
 
@@ -121,6 +122,14 @@ struct Pending {
     retained: bool,
     id: Option<String>,
     context: Option<Frame>,
+    #[serde(default)]
+    alternatives: Vec<TriggerAlternative>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+struct TriggerAlternative {
+    event: Value,
+    context: Frame,
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
@@ -515,8 +524,10 @@ impl Game {
                     .get("context")
                     .map(|value| serde_json::from_value(value.clone()).map_err(invalid))
                     .transpose()?,
+                alternatives: Self::import_trigger_alternatives(&pending)?,
             });
         }
+        self.validate_trigger_choices()?;
         if !list(&setup["semantic_state"]["delayed_triggers"]).is_empty() {
             return Err(EngineFailure::Unsupported(
                 "neutral historical delayed text requires a typed history import".into(),
