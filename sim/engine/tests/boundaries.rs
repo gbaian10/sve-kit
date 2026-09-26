@@ -2614,3 +2614,57 @@ fn damage_prevention_tracks_the_recipient_generation_and_attack_kind() {
         Some(json!(3_i64))
     );
 }
+
+#[test]
+fn related_player_counts_distinguish_controller_owner_and_hidden_cardinality() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"control","subjects":"target.1","side":"self"},
+        {"op":"damage","subjects":"opponent.leader","amount":{"read":"target.1.controller.field_count"}},
+        {"op":"damage","subjects":"opponent.leader","amount":{"read":"target.1.owner.field_count"}},
+        {"op":"damage","subjects":"opponent.leader","amount":{"read":"target.1.owner.hand_count"}}
+    ]});
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"filler":4_i64}]);
+    let mut engine = Game::new(
+        Arc::new(catalog(&body)),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "player-count",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(14_i64))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.field").unwrap(),
+        Some(json!(["a", "b"]))
+    );
+    for path in [
+        "target.1.controller.field_count",
+        "target.1.controller.unknown_count",
+    ] {
+        let mut rejected = game(&json!({"op":"seq","steps":[
+            {"op":"move","subjects":"target.1","to":"hand"},
+            {"op":"damage","subjects":"opponent.leader","amount":{"read":path}}
+        ]}));
+        let before = rejected.digest().unwrap();
+        assert!(matches!(
+            rejected
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "unsupported"
+                )
+                .unwrap_err(),
+            EngineFailure::Unsupported(_)
+        ));
+        assert_eq!(rejected.digest().unwrap(), before);
+    }
+}

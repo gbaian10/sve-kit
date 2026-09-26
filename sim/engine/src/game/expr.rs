@@ -409,6 +409,9 @@ impl Game {
         if let Some(value) = frame.values.get(path) {
             return Ok(value.clone());
         }
+        if let Some(value) = self.related_player_count(path, frame)? {
+            return Ok(value);
+        }
         if let Some(path) = path.strip_prefix("event.") {
             return Ok(path
                 .split('.')
@@ -474,6 +477,49 @@ impl Game {
             return Ok(frame.decision[path].clone());
         };
         self.read_object_attribute(reference, field, frame)
+    }
+
+    fn related_player_count(&self, path: &str, frame: &Frame) -> Result<Option<Value>> {
+        let relation = ["controller", "owner"].iter().find_map(|role| {
+            path.split_once(&format!(".{role}."))
+                .map(|(reference, property)| (reference, *role, property))
+        });
+        let Some((reference, role, property)) = relation else {
+            return Ok(None);
+        };
+        let zone = property.strip_suffix("_count").filter(|zone| {
+            matches!(
+                *zone,
+                "field" | "hand" | "deck" | "ex" | "cemetery" | "banish" | "evolve_deck"
+            )
+        });
+        let zone = zone.ok_or_else(|| {
+            crate::EngineFailure::Unsupported(format!("related player property: {property}"))
+        })?;
+        let ids = self.chosen_references(reference, frame)?;
+        let Some(id) = ids.first() else {
+            return Ok(Some(Value::Null));
+        };
+        let seat = if let Some(seat) = id.strip_suffix(".leader") {
+            seat
+        } else {
+            let object = self.object(id)?;
+            if role == "owner" {
+                &object.owner
+            } else {
+                if frame
+                    .captured
+                    .get(id)
+                    .is_some_and(|attrs| attrs["generation"].as_u64() != Some(object.generation))
+                {
+                    return Err(crate::EngineFailure::Unsupported(
+                        "departed object controller needs a retained last-known relation".into(),
+                    ));
+                }
+                &object.controller
+            }
+        };
+        Ok(Some(json!(self.zone_count(seat, zone))))
     }
 
     fn read_object_attribute(&self, reference: &str, field: &str, frame: &Frame) -> Result<Value> {
