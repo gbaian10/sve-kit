@@ -855,6 +855,17 @@ impl Game {
         cause: &Value,
         metadata: &Value,
     ) -> Result<Vec<Pending>> {
+        self.collect_permitted_event(event, affected, cause, metadata, None)
+    }
+
+    pub(super) fn collect_permitted_event(
+        &mut self,
+        event: &str,
+        affected: &[EventSubject],
+        cause: &Value,
+        metadata: &Value,
+        fanfare_reason: Option<&str>,
+    ) -> Result<Vec<Pending>> {
         let mut result = Vec::new();
         for source in self.ability_sources() {
             for code in self.abilities(&source)? {
@@ -908,16 +919,13 @@ impl Game {
                     {
                         continue;
                     }
-                    if !self.can_use(&source, &code)? {
+                    if !self.can_use(&source, &code)?
+                        || !self.permit_trigger(&frame, &code, event, cause, fanfare_reason)?
+                    {
                         continue;
                     }
                     if code["limit_at"] == "trigger" {
                         self.mark_use(&source, &code)?;
-                    }
-                    if matches!(event, "enter" | "evolve")
-                        && self.trigger_suppressed(&frame.controller, event)?
-                    {
-                        continue;
                     }
                     let detail = Self::trigger_event(event, object, metadata);
                     let copies = self.trigger_copies(event, &frame.controller)?;
@@ -970,30 +978,6 @@ impl Game {
         detail
     }
 
-    fn trigger_suppressed(&self, controller: &str, event: &str) -> Result<bool> {
-        for source in self.field_ids() {
-            for code in self.abilities(&source)? {
-                let body = &code["body"];
-                if body["op"] == "restrict"
-                    && body["action"] == "trigger"
-                    && list(&body["events"]).contains(&json!(if event == "enter" {
-                        "fanfare"
-                    } else {
-                        "on_evolve"
-                    }))
-                {
-                    let frame = self.frame_for(&source)?;
-                    if self
-                        .select(&body["subjects"], &frame)?
-                        .contains(&format!("{controller}.leader"))
-                    {
-                        return Ok(true);
-                    }
-                }
-            }
-        }
-        Ok(false)
-    }
     fn trigger_copies(&self, event: &str, controller: &str) -> Result<i64> {
         let mut count = 1_i64;
         for source in self.field_ids() {

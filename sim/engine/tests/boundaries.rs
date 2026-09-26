@@ -6882,3 +6882,139 @@ fn both_start_amulet_choices_are_known_only_to_the_chooser_and_shuffle_hides_lef
         }
     }
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "Synthetic source sentences distinguish provenance from executable declarations."
+)]
+fn suppression_fixture(local: bool, enabled: bool, sentence: &str) -> (Arc<Catalog>, Game) {
+    let body = json!({"op":"optional","then":{"op":"move","subjects":{"side":"self","zone":"hand","type":"follower"},"to":"field","suppress_fanfare":local}});
+    let mut doc = document(&body);
+    doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
+    doc["cards"]["unit-spell"]["abilities"][0]["section"] = json!(0_i64);
+    doc["cards"]["unit-follower"]["abilities"] = json!([{ "kind":"trigger","line":1_i64,"event":"enter","subject":"self","limit":1_i64,"limit_at":"trigger","body":{"op":"modify","subjects":"self.leader","hp":1_i64}}]);
+    doc["cards"]["unit-observer"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"trigger","line":1_i64,"event":"enter","subject":{"zone":"field","side":"self","other":true},"body":{"op":"modify","subjects":"self.leader","hp":1_i64}}]});
+    doc["cards"]["unit-blocker"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"static","line":1_i64,"section":0_i64,"body":{"op":"restrict","action":"trigger","subjects":"opponent.leader","events":["fanfare","on_evolve"],"condition":enabled}}]});
+    let mut cards = snapshot()
+        .lines()
+        .map(|line| serde_json::from_str::<Value>(line).unwrap())
+        .collect::<Vec<_>>();
+    cards[1]["faces"][0]["text"] = json!("別の文。");
+    cards[1]["faces"][0]["sections"] = json!([format!("選んで場に出す。{sentence}後の文。")]);
+    let mut observer = cards[0].clone();
+    observer["number"] = json!("unit-observer");
+    let mut blocker = cards[0].clone();
+    blocker["number"] = json!("unit-blocker");
+    blocker["faces"][0]["text"] = json!("別の文。");
+    blocker["faces"][0]["sections"] = json!([format!("前の文。{sentence}後の文。")]);
+    cards.extend([observer, blocker]);
+    let catalog = Catalog::from_documents(
+        &cards
+            .iter()
+            .map(Value::to_string)
+            .collect::<Vec<_>>()
+            .join("\n"),
+        &registry(),
+        &[("suppression.yaml".into(), doc.to_string())],
+    )
+    .unwrap();
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["field"] = json!([{"id":"observer","card":"unit-observer"}]);
+    position["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"s","card":"unit-spell"},{"id":"entrant","card":"unit-follower"}]);
+    position["players"]["P2"]["zones"]["field"] = if local {
+        json!([])
+    } else {
+        json!([{"id":"blocker","card":"unit-blocker"}])
+    };
+    let shared = Arc::new(catalog);
+    let game = Game::new(
+        Arc::clone(&shared),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "suppress",
+    )
+    .unwrap();
+    (shared, game)
+}
+
+#[test]
+fn suppression_precedes_trigger_limits_and_preserves_unrelated_entry_triggers() {
+    for (local, enabled) in [(true, true), (false, true), (false, false)] {
+        let reason = if local {
+            "それの{ファンファーレ}能力は誘発しない。"
+        } else {
+            "これが場にいる限り、相手プレイヤーすべての{ファンファーレ}能力と【進化時】能力は誘発しない。"
+        };
+        let (catalog, mut engine) = suppression_fixture(local, enabled, reason);
+        assert_eq!(
+            engine
+                .decide(&json!({"do":"play","card":"s"}), "spell")
+                .unwrap()
+                .outcome,
+            "paused"
+        );
+        let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        let sampled = Game::from_observation(
+            catalog,
+            &engine.projection(View::P1).unwrap(),
+            "P1",
+            "suppression",
+        )
+        .unwrap();
+        for mut restored in [saved, sampled] {
+            let result = restored
+                .decide(&json!({"do":"resolve-choice","choice":"execute"}), "entry")
+                .unwrap();
+            let suppressed = result
+                .events
+                .iter()
+                .filter(|event| event["kind"] == "抑制")
+                .collect::<Vec<_>>();
+            let packet = restored.projection(View::P1).unwrap();
+            let pending = packet["semantic_state"]["pending_triggers"]
+                .as_array()
+                .unwrap();
+            assert!(
+                pending
+                    .iter()
+                    .any(|entry| entry["ability"]["source"] == "observer")
+            );
+            if local || enabled {
+                assert_eq!(suppressed.len(), 1);
+                assert_eq!(suppressed[0]["reason"], reason);
+                assert_eq!(suppressed[0]["ability"]["source"], "entrant");
+                assert_eq!(pending.len(), 1);
+                assert_eq!(packet["semantic_state"]["used_this_turn"], json!([]));
+            } else {
+                assert!(suppressed.is_empty());
+                assert_eq!(pending.len(), 2);
+                assert_eq!(
+                    packet["semantic_state"]["used_this_turn"][0]["count"],
+                    1_i64
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn unknown_or_ambiguous_suppression_provenance_rolls_back_the_resolution() {
+    for reason in [
+        "無関係な文。",
+        "{ファンファーレ}能力は誘発しない。別の{ファンファーレ}能力は誘発しない。",
+    ] {
+        let (_, mut engine) = suppression_fixture(true, true, reason);
+        engine
+            .decide(&json!({"do":"play","card":"s"}), "spell")
+            .unwrap();
+        let before = engine.digest().unwrap();
+        assert!(matches!(
+            engine.decide(&json!({"do":"resolve-choice","choice":"execute"}), "entry"),
+            Err(EngineFailure::Unsupported(_))
+        ));
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+}

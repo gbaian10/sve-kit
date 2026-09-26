@@ -21,21 +21,20 @@ impl Game {
         cause: &Value,
         frame: &Frame,
     ) -> Result<()> {
-        let entering = self.collect_triggers("enter", from_ref(object), cause)?;
-        if frame.values.get("suppress_fanfare") != Some(&json!(true)) {
-            self.enqueue(entering);
-            return Ok(());
-        }
-        let group = self.group();
-        let mut permitted = Vec::new();
-        for pending in entering {
-            if pending.source == object.id && pending.code["subject"] == "self" {
-                self.emit(json!({"kind":"抑制","ability":pending.reference,"reason":"それの{ファンファーレ}能力は誘発しない"}),cause,group);
-            } else {
-                permitted.push(pending);
-            }
-        }
-        self.enqueue(permitted);
+        let reason = if frame.values.get("suppress_fanfare") == Some(&json!(true)) {
+            Some(self.suppression_sentence(&frame.reference, "ファンファーレ")?)
+        } else {
+            None
+        };
+        let subject = self.event_subject(&object.id)?;
+        let entering = self.collect_permitted_event(
+            "enter",
+            from_ref(&subject),
+            cause,
+            &Value::Null,
+            reason.as_deref(),
+        )?;
+        self.enqueue(entering);
         Ok(())
     }
 

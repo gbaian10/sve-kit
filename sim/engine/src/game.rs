@@ -29,6 +29,7 @@ mod rules;
 mod selections;
 mod state_rules;
 mod statistics;
+mod suppression;
 mod temporal;
 mod tokens;
 mod turns;
