@@ -469,8 +469,10 @@ impl Game {
             "_finish_card" => {
                 let source = frame.source.clone();
                 if self.object(&source)?.zone == "resolution" {
-                    self.move_objects(&[source], "cemetery", None, None, frame)?;
+                    self.move_objects(from_ref(&source), "cemetery", None, None, frame)?;
                 }
+                let group = self.group();
+                self.emit(json!({"kind":"解決","object":source}), &frame.cause, group);
             }
             "_finish_ability" => {
                 let group = self.group();

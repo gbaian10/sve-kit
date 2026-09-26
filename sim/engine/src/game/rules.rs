@@ -307,12 +307,6 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":cause});
-        let resolve_group = self.group();
-        self.emit(
-            json!({"kind":"解決","object":source}),
-            &frame.cause,
-            resolve_group,
-        );
         if is_spell {
             for ability in &spells {
                 self.freeze(ability, "resolution-start", &mut frame)?;

@@ -174,11 +174,15 @@ fn resolution_counts_survive_a_pause_and_serialized_resume() {
         )
         .unwrap();
     assert_eq!(step.outcome, "paused");
+    assert!(step.events.iter().all(|event| event["kind"] != "解決"));
     let bytes = serde_json::to_string(&engine).unwrap();
     let mut restored: Game = serde_json::from_str(&bytes).unwrap();
-    restored
+    let completed = restored
         .decide(&json!({"do":"resolve-choice","choice":"execute"}), "resume")
         .unwrap();
+    let last = completed.events.last().unwrap();
+    assert_eq!(last["kind"], "解決");
+    assert_eq!(last["object"], "s");
     assert_eq!(
         restored.query(View::P1, "P2.field.b.hp").unwrap(),
         Some(json!(2_i64))
