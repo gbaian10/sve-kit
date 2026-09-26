@@ -93,6 +93,7 @@ impl Game {
             "pay" => self.resume_payment(&task["node"], decision, &mut frame)?,
             "reroll" => self.resume_reroll(&task, decision, &mut frame)?,
             "create" => self.resume_creation(&task, decision, &mut frame)?,
+            "effect-evolve" => self.resume_effect_evolution(&task, decision, &mut frame)?,
             "place" => {
                 let id = string(&task["object"]);
                 self.object_mut(id)?.state["acted"] = decision["acted"].clone();
@@ -296,6 +297,7 @@ impl Game {
             }
             "destroy" | "banish" | "discard" | "move" => self.zone_action(node, frame)?,
             "transform" => self.transform(node, frame)?,
+            "evolve" => self.evolution_effect(node, frame)?,
             "act" | "stand" => {
                 let subjects = self.select(&node["subjects"], frame)?;
                 let changed = self.change_posture(&subjects, node["op"] == "act", &frame.cause)?;
@@ -643,8 +645,13 @@ impl Game {
                 object.state["entered_this_turn"] = json!(true);
                 object.state["entered_from"] = if previous.zone == "resolution" {
                     previous.state["entered_from"].clone()
-                } else {
+                } else if matches!(
+                    previous.zone.as_str(),
+                    "hand" | "ex" | "cemetery" | "deck" | "evolve_deck"
+                ) {
                     json!(previous.zone)
+                } else {
+                    json!("other")
                 };
                 object.state["entered_by"] = json!(if previous.zone == "resolution" {
                     "play"

@@ -4601,3 +4601,227 @@ fn turn_schedule_import_rejects_invalid_records_and_failed_resolutions_rollback_
     ));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The fixture constructs complete synthetic card maps and validates them before use."
+)]
+fn effect_evolution_catalog(body: &Value) -> Catalog {
+    let mut docs = document(&json!({"op":"draw","count":0_i64}));
+    docs["cards"]["unit-follower"]["abilities"] = json!([
+        {"kind":"evolve","line":1_i64,"costs":[{"op":"pp","amount":1_i64}],"body":{"op":"evolve","subjects":"self"}},
+        {"kind":"activated","line":2_i64,"body":body}
+    ]);
+    docs["cards"]["unit-evolved"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"trigger","line":1_i64,"event":"evolve","subject":"self","body":{"op":"modify","subjects":"self.leader","hp":1_i64}}]});
+    docs["cards"]["unit-dual"] = json!({"status":"complete","review":"synthetic","abilities":[]});
+    let face = json!({"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"1","power":"3","hp":"5","traits":[],"text":null,"sections":[]});
+    let mut alternate = face.clone();
+    alternate["name"] = json!("other-evolution");
+    alternate["power"] = json!("5");
+    alternate["hp"] = json!("4");
+    let facts = format!(
+        "{}\n{}\n{}",
+        snapshot(),
+        json!({"number":"unit-evolved","faces":[face]}),
+        json!({"number":"unit-dual","faces":[face,alternate]})
+    );
+    Catalog::from_documents(&facts, &registry(), &[("evolve".into(), docs.to_string())]).unwrap()
+}
+
+#[test]
+fn effect_evolution_does_not_pay_resources_or_consume_an_evolution_ability_slot() {
+    let loaded = Arc::new(effect_evolution_catalog(
+        &json!({"op":"evolve","subjects":"self"}),
+    ));
+    for played in [0_i64, 1_i64] {
+        let mut initial = setup();
+        initial["turn"]["elapsed_turns"]["P1"] = json!(7_i64);
+        initial["players"]["P1"]["ep"] = json!(1_i64);
+        initial["players"]["P1"]["sep"] = json!(1_i64);
+        initial["players"]["P1"]["zones"]["field"] = json!([{"id":"a","card":"unit-follower","state":{"power":4_i64,"hp":1_i64,"max_hp":3_i64,"acted":true}},{"id":"c","card":"unit-follower"}]);
+        initial["players"]["P1"]["zones"]["evolve_deck"] =
+            json!([{"id":"e1","card":"unit-evolved"},{"id":"e2","card":"unit-evolved"}]);
+        initial["semantic_state"] = json!({"counters_this_turn":{"P1.evolve_played":played}});
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "effect-evolve",
+        )
+        .unwrap();
+        assert_eq!(
+            engine
+                .decide(
+                    &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+                    "activate"
+                )
+                .unwrap()
+                .outcome,
+            "paused"
+        );
+        assert_eq!(
+            engine.legal().unwrap(),
+            vec![
+                json!({"do":"resolve-choice","select":["e1"]}),
+                json!({"do":"resolve-choice","select":["e2"]})
+            ]
+        );
+        let before = engine.digest().unwrap();
+        assert_eq!(
+            engine
+                .decide(&json!({"do":"resolve-choice","select":["b"]}), "wrong")
+                .unwrap()
+                .outcome,
+            "cannot-play"
+        );
+        assert_eq!(engine.digest().unwrap(), before);
+        let mut restored: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        let mut sampled = Game::from_observation(
+            Arc::clone(&loaded),
+            &engine.projection(View::P1).unwrap(),
+            "P1",
+            "sample",
+        )
+        .unwrap();
+        for instance in [&mut engine, &mut restored, &mut sampled] {
+            let done = instance
+                .decide(&json!({"do":"resolve-choice","select":["e1"]}), "choose")
+                .unwrap();
+            assert_eq!(done.outcome, "resolved");
+            for (path, value) in [
+                ("P1.field.a.power", json!(5_i64)),
+                ("P1.field.a.hp", json!(3_i64)),
+                ("P1.field.a.max_hp", json!(5_i64)),
+                ("P1.field.a.acted", json!(true)),
+                ("P1.pp.current", json!(2_i64)),
+                ("P1.ep", json!(1_i64)),
+                ("P1.sep", json!(1_i64)),
+                (
+                    "semantic_state.counters_this_turn.P1.evolve_played",
+                    json!(played),
+                ),
+                (
+                    "semantic_state.counters_this_turn.P1.evolutions",
+                    json!(1_i64),
+                ),
+            ] {
+                assert_eq!(instance.query(View::P1, path).unwrap(), Some(value));
+            }
+            assert!(
+                done.events
+                    .iter()
+                    .any(|event| event["kind"] == "進化" && event["object"] == "a")
+            );
+            assert!(!done.events.iter().any(|event| event["kind"] == "超進化"));
+            instance.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}}), "trigger").unwrap();
+            assert_eq!(
+                instance.query(View::P1, "P1.leader.life").unwrap(),
+                Some(json!(21_i64))
+            );
+            assert_eq!(
+                instance
+                    .legal()
+                    .unwrap()
+                    .iter()
+                    .any(|decision| decision["do"] == "evolve" && decision["source"] == "c"),
+                played == 0
+            );
+        }
+    }
+}
+
+#[test]
+fn effect_evolution_selects_named_faces_and_keeps_an_empty_choice_when_unavailable() {
+    let loaded = Arc::new(effect_evolution_catalog(
+        &json!({"op":"if_done","attempt":{"op":"evolve","subjects":"self","name":"other-evolution"},"then":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}),
+    ));
+    for unavailable in [false, true] {
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["evolve_deck"] =
+            json!([{"id":"e","card":"unit-dual","face_up":unavailable}]);
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "effect-evolve",
+        )
+        .unwrap();
+        assert_eq!(
+            engine
+                .decide(
+                    &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+                    "activate"
+                )
+                .unwrap()
+                .outcome,
+            "paused"
+        );
+        let choice = if unavailable {
+            json!({"do":"resolve-choice","select":[]})
+        } else {
+            json!({"do":"resolve-choice","select":["e"],"face":1_i64})
+        };
+        assert_eq!(engine.legal().unwrap(), vec![choice.clone()]);
+        assert_eq!(
+            engine.decide(&choice, "choose").unwrap().outcome,
+            "resolved"
+        );
+        assert_eq!(
+            engine.query(View::P1, "P1.field.a.power").unwrap(),
+            Some(json!(if unavailable { 2_i64 } else { 5_i64 }))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(if unavailable { 20_i64 } else { 19_i64 }))
+        );
+    }
+}
+
+#[test]
+fn already_evolved_cards_ignore_effect_evolution_and_simultaneous_batches_fail_closed() {
+    let body = json!({"op":"evolve","subjects":{"zone":"field","side":"opponent"}});
+    let loaded = Arc::new(effect_evolution_catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"] = json!([{"id":"b","card":"unit-evolved"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "effect-evolve",
+    )
+    .unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+                "activate"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    initial["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"b","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
+    let mut unsupported = Game::new(
+        loaded,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "effect-evolve",
+    )
+    .unwrap();
+    let before = unsupported.digest().unwrap();
+    assert!(matches!(
+        unsupported.decide(
+            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+            "activate"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(unsupported.digest().unwrap(), before);
+}

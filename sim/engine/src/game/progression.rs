@@ -83,12 +83,8 @@ impl Game {
         code: &Value,
     ) -> Result<bool> {
         let object = self.object(source)?;
-        let next = self.object(evolve)?;
-        if object.zone != "field"
-            || object.state["evolved"] == true
-            || next.zone != "evolve_deck"
-            || next.state["face_up"] == true
-            || object.controller != next.controller
+        if code["kind"] != "evolve"
+            || !self.evolution_resource_matches(source, evolve, face, &code["body"])?
             || (!self.unlimited_evolution(&object.controller)?
                 && self
                     .state
@@ -97,7 +93,34 @@ impl Game {
                     .copied()
                     .unwrap_or_default()
                     > 0)
-            || code["kind"] != "evolve"
+        {
+            return Ok(false);
+        }
+        let frame = self.frame_for(source)?;
+        code.get("play_if")
+            .map_or(Ok(true), |condition| self.truth(condition, &frame))
+    }
+
+    fn can_receive_evolution(&self, source: &str) -> Result<bool> {
+        let object = self.object(source)?;
+        Ok(object.zone == "field"
+            && object.state["evolved"] != true
+            && !string(&self.face(source)?["card_type"]).contains("エボルヴ"))
+    }
+
+    fn evolution_resource_matches(
+        &self,
+        source: &str,
+        evolve: &str,
+        face: usize,
+        node: &Value,
+    ) -> Result<bool> {
+        let object = self.object(source)?;
+        let next = self.object(evolve)?;
+        if !self.can_receive_evolution(source)?
+            || next.zone != "evolve_deck"
+            || next.state["face_up"] == true
+            || object.controller != next.controller
         {
             return Ok(false);
         }
@@ -105,25 +128,92 @@ impl Game {
         if !string(&new["card_type"]).contains("エボルヴ") {
             return Ok(false);
         }
-        let names = code["body"].get("names").map_or_else(
+        let names = node.get("names").map_or_else(
             || {
-                vec![code["body"]["name"].as_str().map_or_else(
-                    || self.face(source).map(|printed| printed["name"].clone()),
-                    |name| Ok(json!(name)),
-                )]
+                node["name"].as_str().map_or_else(
+                    || self.card_name(source).map(|name| vec![json!(name)]),
+                    |name| Ok(vec![json!(name)]),
+                )
             },
-            |names| list(names).into_iter().map(Ok).collect(),
-        );
-        if !names
-            .into_iter()
-            .collect::<Result<Vec<_>>>()?
-            .contains(&new["name"])
-        {
-            return Ok(false);
+            |names| Ok(list(names)),
+        )?;
+        Ok(names.contains(&new["name"]))
+    }
+
+    pub(super) fn evolution_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        frame.performed = 0;
+        let mut subjects = Vec::new();
+        for subject in self.select(&node["subjects"], frame)? {
+            if self.can_receive_evolution(&subject)? {
+                subjects.push(subject);
+            }
         }
-        let frame = self.frame_for(source)?;
-        code.get("play_if")
-            .map_or(Ok(true), |condition| self.truth(condition, &frame))
+        if subjects.len() > 1 {
+            return Err(EngineFailure::Unsupported(
+                "simultaneous evolution of multiple subjects".into(),
+            ));
+        }
+        let Some(source) = subjects.first() else {
+            return Ok(());
+        };
+        let mut choices = self.effect_evolution_choices(source, node)?;
+        if choices.is_empty() {
+            choices.push(json!({"do":"resolve-choice","select":[]}));
+        }
+        self.prompt(frame, choices, json!({"resume":"effect-evolve","source":source,"generation":self.object(source)?.generation,"node":node}));
+        let controller = self.object(source)?.controller.clone();
+        if let Some(prompt) = self.state.prompt.as_mut() {
+            prompt.by = controller;
+        }
+        Ok(())
+    }
+
+    fn effect_evolution_choices(&self, source: &str, node: &Value) -> Result<Vec<Value>> {
+        let mut choices = Vec::new();
+        for resource in self.zone_ids(&self.object(source)?.controller, "evolve_deck") {
+            let card = &self.object(&resource)?.card;
+            let count = self
+                .catalog
+                .cards
+                .get(card)
+                .map_or(0, |card| card.faces.len());
+            for face in 0..count {
+                if self.evolution_resource_matches(source, &resource, face, node)? {
+                    let mut choice = json!({"do":"resolve-choice","select":[resource]});
+                    if count > 1 {
+                        choice["face"] = json!(face);
+                    }
+                    choices.push(choice);
+                }
+            }
+        }
+        Ok(choices)
+    }
+
+    pub(super) fn resume_effect_evolution(
+        &mut self,
+        task: &Value,
+        decision: &Value,
+        frame: &mut Frame,
+    ) -> Result<()> {
+        frame.performed = 0;
+        let selected = list(&decision["select"]);
+        let Some(resource) = selected.first().and_then(Value::as_str) else {
+            return Ok(());
+        };
+        let source = string(&task["source"]);
+        let face = usize::try_from(int(&decision["face"])).map_err(invalid)?;
+        if task["generation"].as_u64() != Some(self.object(source)?.generation)
+            || !self.evolution_resource_matches(source, resource, face, &task["node"])?
+        {
+            return Err(invalid(
+                "effect evolution no longer matches its saved subjects",
+            ));
+        }
+        self.reveal(&[resource.into()], "all", frame, false);
+        self.apply_evolution(source, resource, face, 0, frame)?;
+        frame.performed = 1;
+        Ok(())
     }
 
     fn evolution_pp(&self, code: &Value, frame: &Frame) -> Result<i64> {
@@ -205,6 +295,7 @@ impl Game {
         resources.pp["current"] = json!(int(&resources.pp["current"]).saturating_sub(pp));
         resources.ep = resources.ep.saturating_sub(ep);
         resources.sep = resources.sep.saturating_sub(sep);
+        self.bump(&format!("{}.evolve_played", frame.controller), 1);
         self.apply_evolution(source, evolve, face, sep, &mut frame)?;
         Ok(true)
     }
@@ -237,8 +328,10 @@ impl Game {
                 attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(delta));
             }
         }
-        self.bump(&format!("{}.evolve_played", frame.controller), 1);
-        self.bump(&format!("{}.evolutions", frame.controller), 1);
+        self.bump(
+            &format!("{}.evolutions", self.object(source)?.controller),
+            1,
+        );
         let group = self.group();
         let event = self.emit(
             json!({"kind":"進化","object":source,"with":evolve}),
