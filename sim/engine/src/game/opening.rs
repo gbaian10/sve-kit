@@ -32,15 +32,17 @@ impl Game {
         let mut queue = Vec::new();
         for seat in ["P1", "P2"] {
             let player = self.player(seat)?;
-            if player.construction == "title"
-                && player.title == "カードファイト!! ヴァンガード"
-                && !self.start_amulets(seat)?.is_empty()
-            {
+            let vanguard =
+                player.construction == "title" && player.title == "カードファイト!! ヴァンガード";
+            let idol = player.construction == "title"
+                && player.title == "アイドルマスター シンデレラガールズ";
+            if vanguard && !self.start_amulets(seat)?.is_empty() {
                 queue.push(json!(seat));
+                for id in self.start_amulets(seat)? {
+                    self.learn(seat, &id, true);
+                }
             }
-            if player.construction == "title"
-                && player.title == "アイドルマスター シンデレラガールズ"
-            {
+            if idol {
                 let frame = Frame {
                     controller: seat.into(),
                     cause: json!({"rule":"14.3.1.2"}),
@@ -118,21 +120,7 @@ impl Game {
         match string(&decision["do"]) {
             "choose-start-amulet" => {
                 let id = string(&decision["object"]);
-                self.player_mut(seat)?
-                    .zones
-                    .entry("deck".into())
-                    .or_default()
-                    .retain(|value| value != id);
-                self.player_mut(seat)?
-                    .zones
-                    .entry("field".into())
-                    .or_default()
-                    .push(json!(id));
-                let object = self.object_mut(id)?;
-                object.zone = "field".into();
-                object.state["pregame_hidden"] = json!(true);
-                object.state["face_up"] = json!(false);
-                self.learn(seat, id, true);
+                self.place_start_amulet(seat, id)?;
                 self.state.flow["selections"][seat] = json!(id);
                 let mut queue = list(&self.state.flow["queue"]);
                 queue.remove(0);
@@ -179,6 +167,32 @@ impl Game {
             _ => return Ok(false),
         }
         Ok(true)
+    }
+
+    fn place_start_amulet(&mut self, seat: &str, id: &str) -> Result<()> {
+        self.player_mut(seat)?
+            .zones
+            .entry("deck".into())
+            .or_default()
+            .retain(|value| value != id);
+        self.player_mut(seat)?
+            .zones
+            .entry("field".into())
+            .or_default()
+            .push(json!(id));
+        let object = self.object_mut(id)?;
+        object.zone = "field".into();
+        object.generation = object.generation.saturating_add(1);
+        object.state["pregame_hidden"] = json!(true);
+        object.state["face_up"] = json!(false);
+        self.learn(seat, id, true);
+        let group = self.group();
+        self.emit(
+            json!({"kind":"場に出す","object":id,"from":format!("{seat}.deck"),"to":format!("{seat}.field"),"face_up":false}),
+            &json!({"rule":"14.4.3.1"}),
+            group,
+        );
+        Ok(())
     }
 
     fn deal_opening(&mut self, seat: &str, frame: &Frame) -> Result<()> {
@@ -269,6 +283,12 @@ impl Game {
                 }
                 self.player_mut(seat)?.zones.insert("deck".into(), result);
                 self.state.random_index = self.state.random_index.saturating_add(1);
+                let ids = self.zone_ids(seat, "deck");
+                for knowledge in self.state.knowledge.values_mut() {
+                    for id in &ids {
+                        knowledge.located.remove(id);
+                    }
+                }
             } else {
                 if deck.iter().any(Value::is_object) {
                     return Err(EngineFailure::Unsupported(

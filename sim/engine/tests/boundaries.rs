@@ -2015,21 +2015,30 @@ fn nested_play_preserves_outer_continuation_across_inner_target_and_declaration(
     );
 }
 
-#[test]
-fn pregame_facedown_choice_is_private_and_roundtrips_before_mulligan() {
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The opening fixture requires a registered synthetic start amulet."
+)]
+fn opening_catalog() -> Arc<Catalog> {
     let mut doc = document(&json!({"op":"seq","steps":[]}));
     doc["cards"]["unit-follower"]["abilities"] =
         json!([{ "kind":"static","line":1_i64,"body":{"op":"keyword","name":"start_amulet"}}]);
     let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
     keywords["keywords"]["start_amulet"] = json!({"ja":"スタートアミュレット","rule":"14.4.3","expansion":{"op":"keyword","name":"start_amulet"}});
-    let catalog = Arc::new(
+    Arc::new(
         Catalog::from_documents(
             &snapshot(),
             &keywords.to_string(),
             &[("opening.yaml".into(), doc.to_string())],
         )
         .unwrap(),
-    );
+    )
+}
+
+#[test]
+fn pregame_facedown_choice_is_private_and_roundtrips_before_mulligan() {
+    let catalog = opening_catalog();
     let position = json!({"pregame":true,"players":{
         "P1":{"construction":"title","title":"カードファイト!! ヴァンガード","leader":{"class":"ニュートラル"},"deck_list":[{"id":"amulet","card":"unit-follower"},{"filler":40_i64}],"evolve_deck_list":[]},
         "P2":{"construction":"class","leader":{"class":"ニュートラル"},"deck_list":[{"filler":40_i64}],"evolve_deck_list":[]}
@@ -6783,6 +6792,93 @@ fn named_creation_omits_prints_but_explicit_capacity_selections_retain_them() {
                     .unwrap(),
                 Some(json!("shared-token"))
             );
+        }
+    }
+}
+
+#[test]
+fn both_start_amulet_choices_are_known_only_to_the_chooser_and_shuffle_hides_leftovers() {
+    for scripted in [false, true] {
+        let mut position = json!({"pregame":true,"players":{}});
+        let mut scripts = Vec::new();
+        for seat in ["P1", "P2"] {
+            let mut deck = vec![
+                json!({"id":format!("{seat}-start"),"card":"unit-follower"}),
+                json!({"id":format!("{seat}-leftover"),"card":"unit-follower"}),
+            ];
+            let mut order = vec![json!(format!("{seat}-leftover"))];
+            for index in 0_u8..8 {
+                let id = format!("{seat}-card-{index}");
+                deck.push(json!({"id":id,"card":"unit-spell"}));
+                order.push(json!(id));
+            }
+            position["players"][seat] = json!({"construction":"title","title":"カードファイト!! ヴァンガード","leader":{"class":"ニュートラル"},"deck_list":deck,"evolve_deck_list":[]});
+            scripts.push(json!({"player":seat,"zone":"deck","result":order}));
+        }
+        let random = if scripted {
+            json!({"first_chooser":"P1","shuffles":scripts})
+        } else {
+            Value::Null
+        };
+        let mut engine =
+            Game::new(opening_catalog(), &position, &Value::Null, &random, "both").unwrap();
+        let before = engine.projection(View::P2).unwrap();
+        assert_eq!(before["objects"]["P2-start"]["card"], "unit-follower");
+        assert_eq!(
+            before["knowledge"]["identifiable"],
+            json!(["P2-leftover", "P2-start"])
+        );
+        let chosen = engine
+            .decide(
+                &json!({"do":"choose-start-amulet","object":"P1-start"}),
+                "first-amulet",
+            )
+            .unwrap();
+        assert_eq!(chosen.events.len(), 1);
+        assert_eq!(chosen.events[0]["kind"], "場に出す");
+        assert_eq!(chosen.events[0]["by"], "rule-14.4.3.1");
+        assert_eq!(chosen.events[0]["face_up"], false);
+        let private = engine.projection(View::P2).unwrap();
+        assert!(!private.to_string().contains("P1-start"));
+        assert!(!private.to_string().contains("P1-leftover"));
+        assert_eq!(private["P1"]["field_count"], 1_i64);
+        assert_eq!(private["objects"]["P2-start"]["card"], "unit-follower");
+        let mut restored: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        restored
+            .decide(
+                &json!({"do":"choose-start-amulet","object":"P2-start"}),
+                "second-amulet",
+            )
+            .unwrap();
+        for (view, seat, other) in [(View::P1, "P1", "P2"), (View::P2, "P2", "P1")] {
+            let packet = restored.projection(view).unwrap();
+            assert_eq!(packet["objects"][format!("{seat}-start")]["face_up"], false);
+            assert_eq!(
+                packet["objects"][format!("{seat}-start")]["generation"],
+                1_i64
+            );
+            assert!(packet["objects"].get(format!("{seat}-leftover")).is_none());
+            assert_eq!(
+                packet["knowledge"]["located"],
+                json!([format!("{seat}-start")])
+            );
+            assert!(!packet.to_string().contains(&format!("{other}-start")));
+        }
+        restored
+            .decide(&json!({"do":"choose-first","first":"P1"}), "first")
+            .unwrap();
+        restored
+            .decide(&json!({"do":"mulligan","redo":false}), "keep-one")
+            .unwrap();
+        restored
+            .decide(&json!({"do":"mulligan","redo":false}), "keep-two")
+            .unwrap();
+        for view in [View::P1, View::P2] {
+            let packet = restored.projection(view).unwrap();
+            assert_eq!(packet["objects"]["P1-start"]["face_up"], true);
+            assert_eq!(packet["objects"]["P2-start"]["face_up"], true);
+            assert_eq!(packet["objects"]["P1-start"]["generation"], 1_i64);
         }
     }
 }
