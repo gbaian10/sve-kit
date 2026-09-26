@@ -29,6 +29,8 @@ allow = [
 ]
 # Keep the list ready for future dependencies without warning about unused entries.
 unused-allowed-license = "allow"
+# jsonschema's URI parser uses this crate; its LICENSE is the MIT-0 permission text.
+exceptions = [{ crate = "borrow-or-share", allow = ["MIT-0"] }]
 
 [licenses.private]
 # Our own crates are `publish = false` and the LICENSE is still undecided.

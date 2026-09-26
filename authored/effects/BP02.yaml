@@ -1,0 +1,134 @@
+version: astra/1
+cards:
+  BP02-041:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP02-062:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 2
+        event: end
+        trigger_if:
+          fn: gt
+          args:
+            - read: self.turn.discarded
+            - 0
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - opponent.leader
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+  BP02-063:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -2
+          condition:
+            fn: gt
+            args:
+              - read: self.turn.discarded
+              - 0
+  BP02-089:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP02-090:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP02-120:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP02-SL16:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP02-SL17:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP02-SL20:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 0
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          action: attack_leader
+          subjects: self
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: opponent
+                  zone: field
+                  type: follower
+              - 2
+      - line: 3
+        kind: trigger
+        body:
+          op: destroy
+          subjects:
+            side: both
+            zone: field
+            type: follower
+            other: true
+        event: enter
+        subject: self

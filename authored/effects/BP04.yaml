@@ -1,0 +1,131 @@
+version: astra/1
+cards:
+  BP04-001:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-003:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-007:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-010:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-011:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-066:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-075:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-080:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 3
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            if:
+              fn: gt
+              args:
+                - read: self.turn.leader_damaged
+                - 0
+            then: 8
+            else: 4
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP04-092:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            side: self
+            zone: deck
+            name: デモンビーター
+          min: 0
+          max: 1
+          to: field
+        event: enter
+        subject: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: destroy
+        subject: self
+        keyword: ラストワード
+  BP04-115:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-P07:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP04-SL16:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。

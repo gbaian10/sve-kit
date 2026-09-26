@@ -1,0 +1,130 @@
+version: astra/1
+cards:
+  BP14-024:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: cemetery
+                  type: follower
+                  where:
+                    fn: eq
+                    args:
+                      - read: item.class
+                      - ロイヤル
+              - 5
+          then:
+            op: modify
+            subjects: self
+            power: 1
+            keywords:
+              - rush
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: destroy
+        subject: self
+        keyword: ラストワード
+  BP14-027:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-032:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+  BP14-074:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-075:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-076:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-081:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-090:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ability_destroy
+      - line: 3
+        kind: static
+        body:
+          op: replace_damage
+          subjects:
+            union:
+              - self
+              - self.leader
+          amount: -1
+          kind: any
+      - line: 4
+        kind: trigger
+        body:
+          op: create
+          name: 水銀の断絶
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP14-098:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-P20:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP14-T07:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。

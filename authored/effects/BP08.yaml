@@ -1,0 +1,156 @@
+version: astra/1
+cards:
+  BP08-011:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-028:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount:
+                if:
+                  fn: ge
+                  args:
+                    - count:
+                        side: opponent
+                        zone: cemetery
+                    - 10
+                then: 8
+                else: 4
+              split: '1'
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      side: opponent
+                      zone: cemetery
+                  - 20
+              then:
+                op: damage
+                subjects: opponent.leader
+                amount: 8
+        targets:
+          - key: '1'
+            select: &id001
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 5
+            distribute:
+              if:
+                fn: ge
+                args:
+                  - count:
+                      side: opponent
+                      zone: cemetery
+                  - 10
+              then: 8
+              else: 4
+  BP08-034:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-078:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 2
+            - op: modify
+              subjects: self.leader
+              hp: 1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+        keyword: ファンファーレ
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 2
+            - op: modify
+              subjects: self.leader
+              hp: 1
+        event: destroy
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+        keyword: ラストワード
+  BP08-080:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-089:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-090:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-SL15:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-T01:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-T02:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-T04:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP08-T09:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。

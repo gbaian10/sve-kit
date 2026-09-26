@@ -1,0 +1,99 @@
+version: astra/1
+cards:
+  BP11-016:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP11-027:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: create
+          name: 機動二輪車
+          count: 1
+          to: field
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 2
+        event: destroy
+        subject: self
+        keyword: ラストワード
+  BP11-035:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP11-036:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP11-041:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: target.1
+              remove_abilities: true
+              until: end-of-turn
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
+                  - 6
+              then:
+                op: modify
+                subjects: self.leader
+                hp: 2
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP11-042:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP11-074:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP11-P30:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP11-P31:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。

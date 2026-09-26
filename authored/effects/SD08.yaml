@@ -1,0 +1,47 @@
+version: astra/1
+cards:
+  SD08-002:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: aura
+          subjects:
+            side: self
+            zone: field
+            name: ドラゴン
+          keywords:
+            - storm
+            - drain
+      - line: 2
+        kind: trigger
+        body:
+          op: restrict
+          action: attack
+          subjects: target.1
+          until: next-controller-turn
+        event: end
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 2
+      - line: 3
+        kind: activated
+        body:
+          op: create
+          name: ドラゴン
+          count: 1
+          to: field
+        limit: 1
+  SD08-006:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。

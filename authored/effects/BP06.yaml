@@ -1,0 +1,190 @@
+version: astra/1
+cards:
+  BP06-035:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP06-042:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 形代
+              count: 1
+              to: field
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      union:
+                        - side: self
+                          zone: cemetery
+                          trait: 陰陽師
+                        - side: self
+                          zone: cemetery
+                          type: spell
+                  - 7
+              then:
+                op: draw
+                count: 1
+  BP06-048:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            side: self
+            zone: deck
+            name: 式神の使役
+          min: 0
+          max: 1
+          to: hand
+        event: destroy
+        subject: self
+  BP06-072:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: modify
+          subjects: target.1
+          power: 2
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP06-073:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 一ツ尾狐
+          count: 5
+          to: ex
+        event: enter
+        subject: self
+  BP06-074:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects:
+            side: self
+            zone: hand
+            type: follower
+            trait: 妖怪
+          amount: -2
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          sources:
+            side: self
+            zone: field
+            type: follower
+            trait: 妖怪
+          amount: 1
+          kind: any
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 1
+        event: leave
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: 妖怪
+  BP06-079:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。
+  BP06-080:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: seq
+              steps:
+                - op: damage
+                  subjects: target.1
+                  amount: 1
+                - op: move
+                  subjects:
+                    side: self
+                    zone: deck
+                    top: 1
+                  to: cemetery
+            - op: move
+              subjects: target.1
+              to: hand
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 妖怪
+              not_name: self
+            min: 1
+            max: 1
+            modes:
+              - 2
+  BP06-117:
+    status: partial
+    review: 未完成表達審查。
+    abilities: []
+    unresolved:
+      - 尚未逐段轉寫；不得視為無能力卡。

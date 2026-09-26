@@ -1,0 +1,524 @@
+//! Authoritative state, deterministic transitions and player packets.
+
+#![expect(
+    clippy::indexing_slicing,
+    reason = "Validated JSON uses total read indexing; writes target constructed objects."
+)]
+
+mod belief;
+mod effects;
+mod expr;
+mod legal;
+mod rules;
+mod view;
+
+use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::sync::Arc;
+
+use serde::{Deserialize, Serialize};
+use serde_json::{Value, json};
+
+use crate::catalog::Catalog;
+use crate::{EngineFailure, Result, invalid};
+
+/// Seat or referee requesting an observation.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum View {
+    /// Full server state, never sent to a player.
+    Referee,
+    /// First seat.
+    P1,
+    /// Second seat.
+    P2,
+}
+
+impl View {
+    pub(crate) const fn player(self) -> Option<&'static str> {
+        match self {
+            Self::Referee => None,
+            Self::P1 => Some("P1"),
+            Self::P2 => Some("P2"),
+        }
+    }
+}
+
+/// Outcome and causal events emitted by an authoritative transition.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Step {
+    /// Resolution, rejection, pause, cancellation or game end.
+    pub outcome: String,
+    /// Immutable events with causal references and simultaneous group identities.
+    pub events: Vec<Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct Object {
+    id: String,
+    card: String,
+    owner: String,
+    controller: String,
+    zone: String,
+    generation: u64,
+    state: Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct Player {
+    leader: Value,
+    pp: Value,
+    ep: i64,
+    sep: i64,
+    construction: String,
+    title: String,
+    deck_list: Value,
+    zones: BTreeMap<String, Vec<Value>>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct Knowledge {
+    seen: BTreeMap<String, Value>,
+    located: BTreeSet<String>,
+    carried: Vec<Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct Pending {
+    controller: String,
+    reference: Value,
+    event: Value,
+    code: Value,
+    source: String,
+    cause: Value,
+    retained: bool,
+    id: Option<String>,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+struct Frame {
+    source: String,
+    controller: String,
+    reference: Value,
+    decision: Value,
+    bindings: BTreeMap<String, Vec<String>>,
+    captured: BTreeMap<String, Value>,
+    todo: Vec<Value>,
+    cause: Value,
+    occurrence: u64,
+    performed: i64,
+    paid: bool,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct Prompt {
+    by: String,
+    choices: Vec<Value>,
+    resume: Value,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct State {
+    players: BTreeMap<String, Player>,
+    objects: BTreeMap<String, Object>,
+    turn: Value,
+    room: Value,
+    pending: Vec<Pending>,
+    frame: Option<Frame>,
+    prompt: Option<Prompt>,
+    flow: Value,
+    counters: BTreeMap<String, i64>,
+    continuous: Vec<Value>,
+    delayed: Vec<Value>,
+    used: BTreeMap<String, u64>,
+    knowledge: BTreeMap<String, Knowledge>,
+    facts: Value,
+    game: Value,
+    random: Value,
+    random_index: usize,
+    rng: u64,
+    next_object: u64,
+    next_event: u64,
+    next_group: u64,
+    next_decision: u64,
+    draws_failed: BTreeSet<String>,
+}
+
+/// A cloneable game. Only this type resolves effects, creates prompts and hides private state.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Game {
+    catalog: Arc<Catalog>,
+    state: State,
+    #[serde(skip)]
+    emitted: Vec<Value>,
+    #[serde(skip)]
+    node: String,
+}
+
+const ZONES: [&str; 14] = [
+    "deck",
+    "evolve_deck",
+    "hand",
+    "field",
+    "ex",
+    "cemetery",
+    "banish",
+    "resolution",
+    "evolution",
+    "race",
+    "drive",
+    "trigger",
+    "equipment",
+    "void",
+];
+
+pub(crate) fn string(value: &Value) -> &str {
+    value.as_str().unwrap_or_default()
+}
+pub(crate) fn int(value: &Value) -> i64 {
+    value.as_i64().unwrap_or_default()
+}
+pub(crate) fn list(value: &Value) -> Vec<Value> {
+    value.as_array().cloned().unwrap_or_default()
+}
+pub(crate) fn other(player: &str) -> &'static str {
+    if player == "P1" { "P2" } else { "P1" }
+}
+pub(crate) fn scalar(value: &Value) -> i64 {
+    value
+        .as_i64()
+        .or_else(|| {
+            let v = value.as_str()?;
+            v.parse().ok()
+        })
+        .unwrap_or_default()
+}
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Rule domains share one private state and are split into focused modules."
+)]
+impl Game {
+    /// Builds a neutral position without reading question identifiers or expected answers.
+    ///
+    /// # Errors
+    /// Rejects missing card facts, malformed positions and unsupported historical state.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "All initial authoritative fields are assembled together for snapshot auditing."
+    )]
+    pub fn new(
+        catalog: Arc<Catalog>,
+        setup: &Value,
+        facts: &Value,
+        random: &Value,
+        seed: &str,
+    ) -> Result<Self> {
+        let mut players = BTreeMap::new();
+        let mut objects = BTreeMap::new();
+        for seat in ["P1", "P2"] {
+            let entry = &setup["players"][seat];
+            let mut zones = BTreeMap::new();
+            for zone in ZONES {
+                let mut ids = Vec::new();
+                for item in list(&entry["zones"][zone]) {
+                    if item.get("filler").is_some() {
+                        ids.push(item);
+                        continue;
+                    }
+                    let id = string(&item["id"]).to_owned();
+                    let card = string(&item["card"]).to_owned();
+                    let face_index =
+                        usize::try_from(int(&item["state"]["face"])).map_err(invalid)?;
+                    let face = catalog.face(&card, face_index)?;
+                    let mut attrs = json!({"power":scalar(&face["power"]),"hp":scalar(&face["hp"]),"max_hp":scalar(&face["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face_index,"damage":0_i64,"counters":{},"keywords":[],"silenced":false});
+                    if let Some(patch) = item["state"].as_object() {
+                        for (key, value) in patch {
+                            attrs[key] = value.clone();
+                        }
+                    }
+                    if item["state"].get("damage").is_some() && item["state"].get("hp").is_none() {
+                        attrs["hp"] =
+                            json!(int(&attrs["hp"]).saturating_sub(int(&attrs["damage"])));
+                    }
+                    if let Some(face_up) = item.get("face_up") {
+                        attrs["face_up"] = face_up.clone();
+                    }
+                    if objects
+                        .insert(
+                            id.clone(),
+                            Object {
+                                id: id.clone(),
+                                card,
+                                owner: seat.into(),
+                                controller: seat.into(),
+                                zone: zone.into(),
+                                generation: 0,
+                                state: attrs,
+                            },
+                        )
+                        .is_some()
+                    {
+                        return Err(invalid(format!("duplicate physical id: {id}")));
+                    }
+                    ids.push(json!(id));
+                }
+                zones.insert(zone.into(), ids);
+            }
+            players.insert(
+                seat.into(),
+                Player {
+                    leader: entry["leader"].clone(),
+                    pp: entry["pp"].clone(),
+                    ep: int(&entry["ep"]),
+                    sep: int(&entry["sep"]),
+                    construction: string(&entry["construction"]).into(),
+                    title: string(&entry["title"]).into(),
+                    deck_list: entry["deck_list"].clone(),
+                    zones,
+                },
+            );
+        }
+        let mut state = State {
+            players,
+            objects,
+            turn: setup["turn"].clone(),
+            room: setup["room"].clone(),
+            pending: Vec::new(),
+            frame: None,
+            prompt: None,
+            flow: json!({"kind":"main"}),
+            counters: BTreeMap::new(),
+            continuous: list(&setup["semantic_state"]["continuous_effects"]),
+            delayed: Vec::new(),
+            used: BTreeMap::new(),
+            knowledge: BTreeMap::new(),
+            facts: facts.clone(),
+            game: json!({"ended":false}),
+            random: random.clone(),
+            random_index: 0,
+            rng: seed.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |s, b| {
+                (s ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
+            }),
+            next_object: 1,
+            next_event: 1,
+            next_group: 1,
+            next_decision: 1,
+            draws_failed: BTreeSet::new(),
+        };
+        for seat in ["P1", "P2"] {
+            state.knowledge.insert(seat.into(), Knowledge::default());
+            for counter in [
+                "cards_played",
+                "evolve_played",
+                "evolutions",
+                "leader_damaged",
+                "ub_activated",
+                "discarded",
+                "attacks",
+            ] {
+                state.counters.insert(format!("{seat}.{counter}"), 0);
+            }
+        }
+        if let Some(counters) = setup["semantic_state"]["counters_this_turn"].as_object() {
+            for (key, value) in counters {
+                state.counters.insert(key.clone(), int(value));
+            }
+        }
+        let mut game = Self {
+            catalog,
+            state,
+            emitted: Vec::new(),
+            node: "opening".into(),
+        };
+        game.initialize_evolved()?;
+        game.initialize_history(setup)?;
+        #[expect(
+            clippy::needless_collect,
+            reason = "The snapshot releases the immutable state borrow before learning mutates knowledge."
+        )]
+        for object in game.state.objects.values().cloned().collect::<Vec<_>>() {
+            for seat in ["P1", "P2"] {
+                if object.zone != "void"
+                    && (!matches!(object.zone.as_str(), "hand" | "deck" | "evolve_deck")
+                        || (object.controller == seat && object.zone != "deck"))
+                {
+                    game.learn(seat, &object.id, true);
+                }
+            }
+        }
+        Ok(game)
+    }
+
+    fn initialize_evolved(&mut self) -> Result<()> {
+        let ids: Vec<_> = self.state.objects.keys().cloned().collect();
+        for id in ids {
+            let object = self.object(&id)?.clone();
+            let evolved = string(&object.state["evolved_with"]);
+            if evolved.is_empty() {
+                continue;
+            }
+            let face = self.face(evolved)?.clone();
+            let printed = self.catalog.face(&object.card, 0)?;
+            let dp = scalar(&face["power"]).saturating_sub(scalar(&printed["power"]));
+            let dh = scalar(&face["hp"]).saturating_sub(scalar(&printed["hp"]));
+            let attrs = &mut self.object_mut(&id)?.state;
+            attrs["power"] = json!(int(&attrs["power"]).saturating_add(dp));
+            attrs["hp"] = json!(int(&attrs["hp"]).saturating_add(dh));
+            attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(dh));
+        }
+        Ok(())
+    }
+
+    fn initialize_history(&mut self, setup: &Value) -> Result<()> {
+        for pending in list(&setup["semantic_state"]["pending_triggers"]) {
+            let reference = &pending["ability"];
+            let source = string(&reference["source"]).to_owned();
+            let code = self.ability(&source, reference)?;
+            self.state.pending.push(Pending {
+                controller: string(&pending["controller"]).into(),
+                reference: reference.clone(),
+                event: pending["event"].clone(),
+                code,
+                source,
+                cause: json!({"rule":"fixture"}),
+                retained: true,
+                id: pending["id"].as_str().map(str::to_owned),
+            });
+        }
+        if !list(&setup["semantic_state"]["delayed_triggers"]).is_empty() {
+            return Err(EngineFailure::Unsupported(
+                "neutral historical delayed text requires a typed history import".into(),
+            ));
+        }
+        Ok(())
+    }
+
+    fn object(&self, id: &str) -> Result<&Object> {
+        self.state
+            .objects
+            .get(id)
+            .ok_or_else(|| invalid(format!("unknown object: {id}")))
+    }
+    fn object_mut(&mut self, id: &str) -> Result<&mut Object> {
+        self.state
+            .objects
+            .get_mut(id)
+            .ok_or_else(|| invalid(format!("unknown object: {id}")))
+    }
+    fn player(&self, seat: &str) -> Result<&Player> {
+        self.state
+            .players
+            .get(seat)
+            .ok_or_else(|| invalid(format!("unknown seat: {seat}")))
+    }
+    fn player_mut(&mut self, seat: &str) -> Result<&mut Player> {
+        self.state
+            .players
+            .get_mut(seat)
+            .ok_or_else(|| invalid(format!("unknown seat: {seat}")))
+    }
+    fn zone(&self, seat: &str, zone: &str) -> Vec<Value> {
+        self.state
+            .players
+            .get(seat)
+            .and_then(|p| p.zones.get(zone))
+            .cloned()
+            .unwrap_or_default()
+    }
+    fn zone_ids(&self, seat: &str, zone: &str) -> Vec<String> {
+        self.zone(seat, zone)
+            .iter()
+            .filter_map(Value::as_str)
+            .map(str::to_owned)
+            .collect()
+    }
+    fn zone_count(&self, seat: &str, zone: &str) -> i64 {
+        self.zone(seat, zone)
+            .iter()
+            .map(|v| v.get("filler").map_or(1, int))
+            .sum()
+    }
+    fn face(&self, id: &str) -> Result<&Value> {
+        let object = self.object(id)?;
+        let number = object.state["evolved_with"]
+            .as_str()
+            .and_then(|evolved_id| self.state.objects.get(evolved_id))
+            .map_or(object.card.as_str(), |card| card.card.as_str());
+        self.catalog.face(
+            number,
+            usize::try_from(int(&object.state["face"])).map_err(invalid)?,
+        )
+    }
+    fn abilities(&self, id: &str) -> Result<Vec<Value>> {
+        let object = self.object(id)?;
+        if object.state["silenced"] == true {
+            return Ok(Vec::new());
+        }
+        let number = object.state["evolved_with"]
+            .as_str()
+            .and_then(|evolved_id| self.state.objects.get(evolved_id))
+            .map_or(object.card.as_str(), |card| card.card.as_str());
+        Ok(list(&self.catalog.program(number)?["abilities"]))
+    }
+    fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
+        let number = reference["card"].as_str().unwrap_or(&self.object(id)?.card);
+        list(&self.catalog.program(number)?["abilities"])
+            .into_iter()
+            .find(|a| {
+                a["line"] == reference["line"]
+                    && (reference["section"].is_null() || a["section"] == reference["section"])
+                    && (reference["keyword"].is_null() || a["keyword"] == reference["keyword"])
+            })
+            .ok_or_else(|| EngineFailure::Unsupported(format!("ability not authored: {reference}")))
+    }
+    fn reference(&self, id: &str, ability: &Value) -> Value {
+        let mut value = json!({"source":id,"line":ability["line"]});
+        if let Some(object) = self.state.objects.get(id)
+            && let Some(evolved) = object.state["evolved_with"]
+                .as_str()
+                .and_then(|evolved_id| self.state.objects.get(evolved_id))
+        {
+            value["card"] = json!(evolved.card);
+        }
+        for key in ["keyword", "section", "rule"] {
+            if let Some(v) = ability.get(key) {
+                value[key] = v.clone();
+            }
+        }
+        value
+    }
+    fn active(&self) -> &str {
+        string(&self.state.turn["active"])
+    }
+    fn frame_for(&self, id: &str) -> Result<Frame> {
+        Ok(Frame {
+            source: id.into(),
+            controller: self.object(id)?.controller.clone(),
+            ..Frame::default()
+        })
+    }
+    fn bump(&mut self, key: &str, amount: i64) {
+        let value = self.state.counters.entry(key.into()).or_default();
+        *value = value.saturating_add(amount);
+    }
+    fn emit(&mut self, mut event: Value, cause: &Value, group: u64) -> String {
+        let id = format!("{}:e{}", self.node, self.state.next_event);
+        self.state.next_event = self.state.next_event.saturating_add(1);
+        event["id"] = json!(id);
+        event["cause"] = cause.clone();
+        event["group"] = json!(group);
+        self.emitted.push(event);
+        id
+    }
+    const fn group(&mut self) -> u64 {
+        let group = self.state.next_group;
+        self.state.next_group = group.saturating_add(1);
+        group
+    }
+    const fn random_word(&mut self) -> u64 {
+        self.state.rng = self.state.rng.wrapping_add(0x9e37_79b9_7f4a_7c15);
+        let mut n = self.state.rng;
+        n = (n ^ (n >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
+        n = (n ^ (n >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
+        n ^ (n >> 31)
+    }
+}

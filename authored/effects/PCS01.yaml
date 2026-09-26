@@ -1,0 +1,57 @@
+version: astra/1
+cards:
+  PCS01-048:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects:
+            side: self
+            zone: field
+            type: follower
+            trait: プリコネ
+            other: true
+          keywords:
+            - guard
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: reveal
+              subjects:
+                side: self
+                zone: deck
+                top: 1
+              to: all
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      side: self
+                      zone: deck
+                      type: follower
+                      trait: プリコネ
+                      top: 1
+                  - 1
+              then:
+                op: move
+                subjects:
+                  side: self
+                  zone: deck
+                  top: 1
+                to: field
+        event: enter
+        subject: self

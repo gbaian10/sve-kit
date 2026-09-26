@@ -1,0 +1,1462 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:sve-kit:effects:astra:1",
+  "title": "SVE effect programs, independent prototype A",
+  "type": "object",
+  "properties": {
+    "version": {
+      "const": "astra/1"
+    },
+    "cards": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "enum": [
+              "complete",
+              "partial",
+              "unsupported"
+            ]
+          },
+          "review": {
+            "type": "string"
+          },
+          "abilities": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "line": {
+                  "type": "integer",
+                  "minimum": 1
+                },
+                "section": {
+                  "type": "integer"
+                },
+                "face": {
+                  "type": "integer"
+                },
+                "keyword": {
+                  "type": "string"
+                },
+                "rule": {
+                  "type": "string"
+                },
+                "kind": {
+                  "enum": [
+                    "spell",
+                    "trigger",
+                    "static",
+                    "activated",
+                    "evolve",
+                    "construction"
+                  ]
+                },
+                "event": {
+                  "type": "string"
+                },
+                "subject": {
+                  "$ref": "#/$defs/select"
+                },
+                "trigger_if": {
+                  "$ref": "#/$defs/expr"
+                },
+                "targets": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "select": {
+                        "$ref": "#/$defs/select"
+                      },
+                      "min": {
+                        "$ref": "#/$defs/expr"
+                      },
+                      "max": {
+                        "$ref": "#/$defs/expr"
+                      },
+                      "distribute": {
+                        "$ref": "#/$defs/expr"
+                      },
+                      "modes": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "select",
+                      "min",
+                      "max"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "cost_selections": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "key": {
+                        "type": "string"
+                      },
+                      "select": {
+                        "$ref": "#/$defs/select"
+                      },
+                      "min": {
+                        "$ref": "#/$defs/expr"
+                      },
+                      "max": {
+                        "$ref": "#/$defs/expr"
+                      },
+                      "distribute": {
+                        "$ref": "#/$defs/expr"
+                      },
+                      "modes": {
+                        "type": "array",
+                        "items": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "required": [
+                      "key",
+                      "select",
+                      "min",
+                      "max"
+                    ],
+                    "additionalProperties": false
+                  }
+                },
+                "costs": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/$defs/node"
+                  }
+                },
+                "body": {
+                  "$ref": "#/$defs/node"
+                },
+                "quick": {
+                  "type": "boolean"
+                },
+                "limit": {
+                  "type": "integer"
+                },
+                "retain_event": {
+                  "type": "boolean"
+                },
+                "ub": {
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "line",
+                "kind",
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "unresolved": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "status",
+          "review",
+          "abilities"
+        ],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": [
+    "version",
+    "cards"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "expr": {
+      "oneOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "read": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "read"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "count": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fn": {
+              "enum": [
+                "add",
+                "sub",
+                "mul",
+                "div",
+                "min",
+                "max",
+                "eq",
+                "ne",
+                "lt",
+                "le",
+                "gt",
+                "ge",
+                "and",
+                "or",
+                "not",
+                "in",
+                "distinct",
+                "half_up"
+              ]
+            },
+            "args": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/expr"
+              }
+            }
+          },
+          "required": [
+            "fn",
+            "args"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "if": {
+              "$ref": "#/$defs/expr"
+            },
+            "then": {
+              "$ref": "#/$defs/expr"
+            },
+            "else": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "if",
+            "then",
+            "else"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "select": {
+      "oneOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "side": {
+              "enum": [
+                "self",
+                "opponent",
+                "both",
+                "active"
+              ]
+            },
+            "zone": {
+              "enum": [
+                "field",
+                "ex",
+                "deck",
+                "hand",
+                "cemetery",
+                "banish",
+                "resolution",
+                "evolve_deck",
+                "evolution",
+                "race",
+                "drive",
+                "trigger",
+                "equipment",
+                "leader",
+                "any"
+              ]
+            },
+            "type": {
+              "type": "string"
+            },
+            "trait": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "name_contains": {
+              "type": "string"
+            },
+            "not_name": {
+              "type": "string"
+            },
+            "other": {
+              "type": "boolean"
+            },
+            "top": {
+              "$ref": "#/$defs/expr"
+            },
+            "keyword": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "zone"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "union": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/select"
+              }
+            }
+          },
+          "required": [
+            "union"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "difference": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/select"
+              }
+            }
+          },
+          "required": [
+            "difference"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "node": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "seq"
+            },
+            "steps": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/node"
+              }
+            }
+          },
+          "required": [
+            "op",
+            "steps"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "if"
+            },
+            "condition": {
+              "$ref": "#/$defs/expr"
+            },
+            "then": {
+              "$ref": "#/$defs/node"
+            },
+            "else": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "required": [
+            "op",
+            "condition",
+            "then"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "per"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "body": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "required": [
+            "op",
+            "count",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "repeat"
+            },
+            "body": {
+              "$ref": "#/$defs/node"
+            },
+            "until": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "body",
+            "until"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "for_each"
+            },
+            "select": {
+              "$ref": "#/$defs/select"
+            },
+            "bind": {
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "required": [
+            "op",
+            "select",
+            "bind",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "optional"
+            },
+            "then": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "required": [
+            "op",
+            "then"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "pay"
+            },
+            "costs": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/node"
+              }
+            },
+            "then": {
+              "$ref": "#/$defs/node"
+            },
+            "else": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "required": [
+            "op",
+            "costs",
+            "then"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "if_done"
+            },
+            "attempt": {
+              "$ref": "#/$defs/node"
+            },
+            "then": {
+              "$ref": "#/$defs/node"
+            }
+          },
+          "required": [
+            "op",
+            "attempt",
+            "then"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "choice"
+            },
+            "min": {
+              "$ref": "#/$defs/expr"
+            },
+            "max": {
+              "$ref": "#/$defs/expr"
+            },
+            "modes": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/node"
+              }
+            }
+          },
+          "required": [
+            "op",
+            "min",
+            "max",
+            "modes"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "select"
+            },
+            "select": {
+              "$ref": "#/$defs/select"
+            },
+            "min": {
+              "$ref": "#/$defs/expr"
+            },
+            "max": {
+              "$ref": "#/$defs/expr"
+            },
+            "bind": {
+              "type": "string"
+            },
+            "order": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "op",
+            "select",
+            "min",
+            "max",
+            "bind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "damage"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            },
+            "split": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "move"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "to": {
+              "type": "string"
+            },
+            "side": {
+              "type": "string"
+            },
+            "position": {
+              "enum": [
+                "top",
+                "bottom"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "destroy"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "banish"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "discard"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "act"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "stand"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "box"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "draw"
+            },
+            "side": {
+              "type": "string"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "up_to": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "op",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "look"
+            },
+            "side": {
+              "type": "string"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "bind": {
+              "type": "string"
+            },
+            "up_to": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "op",
+            "count",
+            "bind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "search"
+            },
+            "select": {
+              "$ref": "#/$defs/select"
+            },
+            "min": {
+              "$ref": "#/$defs/expr"
+            },
+            "max": {
+              "$ref": "#/$defs/expr"
+            },
+            "to": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "select",
+            "min",
+            "max",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "shuffle"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "reveal"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "to": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "modify"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "power": {
+              "$ref": "#/$defs/expr"
+            },
+            "hp": {
+              "$ref": "#/$defs/expr"
+            },
+            "set_power": {
+              "$ref": "#/$defs/expr"
+            },
+            "set_hp": {
+              "$ref": "#/$defs/expr"
+            },
+            "set_cost": {
+              "$ref": "#/$defs/expr"
+            },
+            "cost": {
+              "$ref": "#/$defs/expr"
+            },
+            "keywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "remove_abilities": {
+              "type": "boolean"
+            },
+            "traits": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "type": {
+              "type": "string"
+            },
+            "until": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "create"
+            },
+            "name": {
+              "type": "string"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "to": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "name",
+            "count",
+            "to"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "evolve"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "pp"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "recover_pp"
+            },
+            "side": {
+              "type": "string"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "counter"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "name": {
+              "type": "string"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "name",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "control"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "side": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "side"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "transform"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "win"
+            },
+            "side": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "side"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "skip_turn"
+            },
+            "side": {
+              "type": "string"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "side",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "extra_turn"
+            },
+            "side": {
+              "type": "string"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "side",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "pilot"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "by": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "by"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "declare_name"
+            },
+            "bind": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "bind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "swap"
+            },
+            "left": {
+              "$ref": "#/$defs/select"
+            },
+            "right": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "op",
+            "left",
+            "right"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "random"
+            },
+            "select": {
+              "$ref": "#/$defs/select"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "bind": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "select",
+            "count",
+            "bind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "dice"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "bind": {
+              "type": "string"
+            },
+            "reroll": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "op",
+            "count",
+            "bind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "drive"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "delay"
+            },
+            "event": {
+              "type": "string"
+            },
+            "body": {
+              "$ref": "#/$defs/node"
+            },
+            "once": {
+              "type": "boolean"
+            }
+          },
+          "required": [
+            "op",
+            "event",
+            "body"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "keyword"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "macro"
+            },
+            "name": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "name"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "aura"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "keywords": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "power": {
+              "$ref": "#/$defs/expr"
+            },
+            "hp": {
+              "$ref": "#/$defs/expr"
+            },
+            "condition": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "replace_damage"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "sources": {
+              "$ref": "#/$defs/select"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            },
+            "prevent": {
+              "type": "boolean"
+            },
+            "kind": {
+              "enum": [
+                "any",
+                "effect",
+                "battle",
+                "attack"
+              ]
+            }
+          },
+          "required": [
+            "op"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "adjust_cost"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            },
+            "set": {
+              "$ref": "#/$defs/expr"
+            },
+            "condition": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "restrict"
+            },
+            "action": {
+              "enum": [
+                "attack_leader",
+                "attack",
+                "ability_destroy",
+                "target",
+                "play",
+                "fanfare",
+                "evolve"
+              ]
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "condition": {
+              "$ref": "#/$defs/expr"
+            },
+            "until": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "action",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "unsupported"
+            },
+            "reason": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "reason"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "deck_limit"
+            },
+            "name_contains": {
+              "type": "string"
+            },
+            "otherwise": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "op",
+            "name_contains",
+            "otherwise"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    }
+  }
+}
