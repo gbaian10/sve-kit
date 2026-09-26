@@ -98,7 +98,7 @@ impl Game {
             .collect());
         }
         if reference == "linked" {
-            return Ok(self.object(&frame.source)?.state["linked_to"]
+            return Ok(self.object(&frame.source)?.state["equipped_to"]
                 .as_str()
                 .map(str::to_owned)
                 .into_iter()
@@ -550,6 +550,13 @@ impl Game {
             .filter_map(Value::as_str)
             .map(str::to_owned)
             .collect();
+        if !list(&object.state["links"]["出走"]).is_empty() {
+            result.insert("rush".into());
+        }
+        if !list(&object.state["links"]["ドライブ"]).is_empty() {
+            result.insert("rush".into());
+            result.insert("single_drive".into());
+        }
         for ability in self.abilities(id)? {
             if ability["kind"] == "static" && ability["body"]["op"] == "keyword" {
                 result.insert(string(&ability["body"]["name"]).into());

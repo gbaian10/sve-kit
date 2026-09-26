@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use super::{Frame, Game, Pending, int, list, string};
+use super::{Frame, Game, Object, Pending, int, list, string};
 use crate::{EngineFailure, Result, invalid};
 use core::mem::take;
 use serde_json::{Value, json};
@@ -47,17 +47,57 @@ impl Game {
     }
 
     pub(super) fn register_delay(&mut self, node: &Value, frame: &Frame) -> Result<()> {
-        if node["event"] != "end" || node.get("side").is_some_and(|side| side != "self") {
+        if !matches!(
+            string(&node["event"]),
+            "end" | "field_to_cemetery" | "leave"
+        ) {
             return Err(EngineFailure::Unsupported(
-                "delayed event outside the controller's end phase".into(),
+                "delayed event not implemented".into(),
             ));
+        }
+        let mut subjects = Vec::new();
+        if let Some(selector) = node.get("subjects") {
+            for id in self.select(selector, frame)? {
+                subjects.push(json!({"id":id,"generation":self.object(&id)?.generation}));
+            }
         }
         let mut context = frame.clone();
         context.todo.clear();
         context.frozen.clear();
         context.cause = Value::Null;
-        self.state.delayed.push(json!({"source":frame.source,"controller":frame.controller,"reference":frame.reference,"event":node["event"],"body":node["body"],"once":node["once"],"context":context}));
+        self.state.delayed.push(json!({"source":frame.source,"controller":frame.controller,"reference":frame.reference,"event":node["event"],"body":node["body"],"once":node["once"],"context":context,"subjects":subjects,"until":node["until"]}));
         Ok(())
+    }
+
+    pub(super) fn collect_delayed(
+        &mut self,
+        event: &str,
+        affected: &[Object],
+        cause: &Value,
+    ) -> Result<Vec<Pending>> {
+        let mut batch = Vec::new();
+        for entry in take(&mut self.state.delayed) {
+            let matches = entry["event"] == event
+                && affected.iter().any(|object| {
+                    list(&entry["subjects"]).iter().any(|subject| {
+                        subject["id"] == object.id
+                            && subject["generation"].as_u64() == Some(object.generation)
+                    })
+                });
+            if !matches {
+                self.state.delayed.push(entry);
+                continue;
+            }
+            let context: Frame =
+                serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
+            let mut reference = entry["reference"].clone();
+            reference["delayed"] = json!(true);
+            batch.push(Pending{controller:context.controller.clone(),reference,event:Value::Null,code:json!({"kind":"trigger","line":entry["reference"]["line"],"body":entry["body"]}),source:context.source.clone(),cause:cause.clone(),retained:false,id:None,context:Some(context)});
+            if entry["once"] != true {
+                self.state.delayed.push(entry);
+            }
+        }
+        Ok(batch)
     }
 
     pub(super) fn enqueue_delayed_end(&mut self) -> Result<()> {
@@ -95,6 +135,9 @@ impl Game {
     }
 
     pub(super) fn expire_silence(&mut self) -> Result<()> {
+        self.state
+            .delayed
+            .retain(|entry| entry["until"] != "end-of-turn");
         let mut active = Vec::new();
         let mut expired = Vec::new();
         for entry in take(&mut self.state.continuous) {

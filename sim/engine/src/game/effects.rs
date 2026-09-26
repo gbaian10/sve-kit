@@ -7,7 +7,7 @@ use crate::game::legal::subsets;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
-use super::{Frame, Game, Prompt, int, list, other, scalar, string};
+use super::{Frame, Game, Prompt, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -193,6 +193,7 @@ impl Game {
         Self::check_execution_parameters(node)?;
         match string(&node["op"]) {
             "seq" => Self::prepend(frame, list(&node["steps"])),
+            "_reference" => frame.reference = node["reference"].clone(),
             "if" => {
                 let branch = if self.truth(&node["condition"], frame)? {
                     &node["then"]
@@ -486,7 +487,7 @@ impl Game {
     }
 
     fn zone_action(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
-        let ids = self.select(&node["subjects"], frame)?;
+        let ids = self.movable_subjects(node, frame)?;
         let before = ids
             .iter()
             .map(|id| {
@@ -616,6 +617,7 @@ impl Game {
                 movable.push(id.clone());
             }
         }
+        let destinations = self.movement_destinations(&movable, zone, frame)?;
         let leaving = movable
             .iter()
             .filter_map(|id| self.state.objects.get(id))
@@ -623,18 +625,28 @@ impl Game {
             .cloned()
             .collect::<Vec<_>>();
         let mut pending = self.collect_triggers("leave", &leaving, &frame.cause)?;
-        if zone == "cemetery" {
-            pending.extend(self.collect_triggers("field_to_cemetery", &leaving, &frame.cause)?);
-        }
+        pending.extend(self.collect_delayed("leave", &leaving, &frame.cause)?);
+        let buried = leaving
+            .iter()
+            .filter(|object| {
+                destinations
+                    .get(&object.id)
+                    .is_some_and(|destination| destination == "cemetery")
+            })
+            .cloned()
+            .collect::<Vec<_>>();
+        pending.extend(self.collect_triggers("field_to_cemetery", &buried, &frame.cause)?);
+        pending.extend(self.collect_delayed("field_to_cemetery", &buried, &frame.cause)?);
         let group = self.group();
         let mut entered = Vec::new();
         let mut erased = Vec::new();
         for id in &movable {
+            let destination = destinations.get(id).map_or(zone, String::as_str);
             let previous = self.object(id)?.clone();
-            if previous.zone == zone && position.is_none() {
+            if previous.zone == destination && position.is_none() {
                 continue;
             }
-            let owner = if matches!(zone, "field" | "ex") {
+            let owner = if matches!(destination, "field" | "ex") {
                 side.map_or_else(
                     || previous.controller.clone(),
                     |s| self.seats(s, frame).into_iter().next().unwrap_or_default(),
@@ -652,7 +664,7 @@ impl Game {
             let items = self
                 .player_mut(&owner)?
                 .zones
-                .entry(zone.into())
+                .entry(destination.into())
                 .or_default();
             if let Some(position) = position.filter(|pos| **pos != "bottom") {
                 let index = position.as_u64().unwrap_or(1).saturating_sub(1);
@@ -667,15 +679,12 @@ impl Game {
             }
             let printed = self.catalog.face(&previous.card, 0)?.clone();
             let object = self.object_mut(id)?;
-            object.zone = zone.into();
+            object.zone = destination.into();
             object.controller.clone_from(&owner);
             object.generation = object.generation.saturating_add(1);
-            if !matches!(previous.zone.as_str(), "ex" | "resolution") {
-                let acted = object.state["acted"].clone();
-                object.state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
-            }
+            object.state = Self::moved_attributes(&previous, &printed, destination);
             let from = format!("{}.{}", previous.controller, previous.zone);
-            if zone == "field" {
+            if destination == "field" {
                 object.state["entered_this_turn"] = json!(true);
                 object.state["entered_from"] = if previous.zone == "resolution" {
                     previous.state["entered_from"].clone()
@@ -690,12 +699,14 @@ impl Game {
                 let event_id=self.emit(json!({"kind":"場に出す","object":id,"from":from,"to":format!("{owner}.field")}),&frame.cause,group);
                 entered.push((self.object(id)?.clone(), json!({"event":event_id})));
             } else {
-                let mut event =
-                    json!({"kind":"移動","object":id,"from":from,"to":format!("{owner}.{zone}")});
+                let mut event = json!({"kind":"移動","object":id,"from":from,"to":format!("{owner}.{destination}")});
                 if let Some(pos) = position
-                    && zone == "deck"
+                    && destination == "deck"
                 {
                     event["position"] = json!(pos);
+                }
+                if let Some(rule) = frame.values.get("movement_rule") {
+                    event["by"] = rule.clone();
                 }
                 self.emit(event, &frame.cause, group);
             }
@@ -705,15 +716,21 @@ impl Game {
                     .knowledge
                     .get(viewer)
                     .is_some_and(|k| k.located.contains(id));
-                if !matches!(zone, "hand" | "deck" | "evolve_deck")
-                    || (owner == viewer && zone == "hand")
+                if !matches!(destination, "hand" | "deck" | "evolve_deck")
+                    || (owner == viewer && destination == "hand")
                     || was_known
                 {
                     self.learn(viewer, id, true);
                 }
             }
+            if previous.zone == "ex"
+                && destination == "banish"
+                && self.card_name(id)? == "魔法のアイテム"
+            {
+                self.bump(&format!("{}.magic_item_banished", previous.controller), 1);
+            }
             let token = string(&printed["card_type"]).contains("トークン");
-            if token && !matches!(zone, "field" | "ex" | "resolution") {
+            if token && !matches!(destination, "field" | "ex" | "resolution") {
                 erased.push(id.clone());
             }
         }
@@ -734,6 +751,7 @@ impl Game {
                 erase_group,
             );
         }
+        self.release_links(&leaving, frame)?;
         self.enqueue(pending);
         for (object, cause) in entered {
             self.enter_triggers(&object, &cause, frame)?;

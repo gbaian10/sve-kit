@@ -10,6 +10,7 @@ mod effects;
 mod expr;
 mod extensions;
 mod legal;
+mod movement;
 mod progression;
 mod rules;
 mod temporal;
@@ -341,7 +342,7 @@ impl Game {
             emitted: Vec::new(),
             node: "opening".into(),
         };
-        game.initialize_evolved()?;
+        game.initialize_evolved(setup)?;
         game.initialize_history(setup)?;
         #[expect(
             clippy::needless_collect,
@@ -360,7 +361,7 @@ impl Game {
         Ok(game)
     }
 
-    fn initialize_evolved(&mut self) -> Result<()> {
+    fn initialize_evolved(&mut self, setup: &Value) -> Result<()> {
         let ids: Vec<_> = self.state.objects.keys().cloned().collect();
         for id in ids {
             let object = self.object(&id)?.clone();
@@ -372,10 +373,20 @@ impl Game {
             let printed = self.catalog.face(&object.card, 0)?;
             let dp = scalar(&face["power"]).saturating_sub(scalar(&printed["power"]));
             let dh = scalar(&face["hp"]).saturating_sub(scalar(&printed["hp"]));
+            let patch = list(&setup["players"][&object.owner]["zones"][&object.zone])
+                .into_iter()
+                .find(|value| value["id"] == id)
+                .unwrap_or(Value::Null);
             let attrs = &mut self.object_mut(&id)?.state;
-            attrs["power"] = json!(int(&attrs["power"]).saturating_add(dp));
-            attrs["hp"] = json!(int(&attrs["hp"]).saturating_add(dh));
-            attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(dh));
+            if patch["state"].get("power").is_none() {
+                attrs["power"] = json!(int(&attrs["power"]).saturating_add(dp));
+            }
+            if patch["state"].get("hp").is_none() {
+                attrs["hp"] = json!(int(&attrs["hp"]).saturating_add(dh));
+            }
+            if patch["state"].get("max_hp").is_none() {
+                attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(dh));
+            }
         }
         Ok(())
     }

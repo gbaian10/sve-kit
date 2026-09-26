@@ -1139,3 +1139,64 @@ fn trigger_context_keeps_last_known_values_after_leaving_and_serializing() {
         Some(json!(12_i64))
     );
 }
+
+#[test]
+fn movement_prohibition_beats_replacement_and_delayed_events_use_actual_destination() {
+    for prohibited in [false, true] {
+        let mut doc = document(&json!({"op":"seq","steps":[
+            {"op":"delay","event":"field_to_cemetery","subjects":"target.1","once":true,"until":"end-of-turn","body":{"op":"damage","subjects":"opponent.leader","amount":4_i64}},
+            {"op":"move","subjects":"target.1","to":"cemetery"}
+        ]}));
+        doc["cards"]["unit-follower"]["abilities"] = json!([
+            {"line":1_i64,"kind":"static","body":{"op":"replace_move","subjects":{"zone":"field","side":"opponent"},"from":"field","to":"cemetery","replacement":"banish"}},
+            {"line":2_i64,"kind":"static","body":{"op":"restrict","subjects":"self","action":"banish","condition":prohibited}}
+        ]);
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("replace.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut engine =
+            Game::new(catalog, &setup(), &Value::Null, &Value::Null, "movement").unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let destination = if prohibited { "cemetery" } else { "banish" };
+        assert_eq!(
+            engine
+                .query(View::Referee, &format!("P2.{destination}"))
+                .unwrap(),
+            Some(json!(["b"]))
+        );
+        let pending = engine
+            .legal()
+            .unwrap()
+            .into_iter()
+            .filter(|choice| choice["do"] == "choose-pending")
+            .collect::<Vec<_>>();
+        assert_eq!(pending.len(), usize::from(prohibited));
+        if prohibited {
+            assert_eq!(pending[0]["pending"]["ability"]["delayed"], true);
+            let mut restored: Game =
+                serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+            restored.decide(&pending[0], "delayed").unwrap();
+            assert_eq!(
+                restored.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(16_i64))
+            );
+            assert!(
+                restored
+                    .legal()
+                    .unwrap()
+                    .iter()
+                    .all(|choice| choice["do"] != "choose-pending")
+            );
+        }
+    }
+}

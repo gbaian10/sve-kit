@@ -281,7 +281,15 @@ impl Game {
             for ability in &spells {
                 self.freeze(ability, "resolution-start", &mut frame)?;
             }
-            frame.todo = spells.iter().map(|a| a["body"].clone()).collect();
+            frame.todo = spells
+                .iter()
+                .flat_map(|code| {
+                    [
+                        json!({"op":"_reference","reference":self.reference(source,code)}),
+                        code["body"].clone(),
+                    ]
+                })
+                .collect();
         } else {
             frame
                 .todo
@@ -416,6 +424,7 @@ impl Game {
         let group = self.group();
         let mut cost_frame = frame.clone();
         cost_frame.todo.clone_from(&costs);
+        cost_frame.values.insert("paying_cost".into(), json!(true));
         self.run_frame(cost_frame)?;
         for event in self.emitted.iter_mut().skip(start) {
             event["group"] = json!(group);
