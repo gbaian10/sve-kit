@@ -41,7 +41,7 @@ impl Game {
             if entry["effect"]["op"] != "restrict"
                 || entry["effect"]["action"] != action
                 || !self.continuous_applies(entry, id)
-                || !self.restriction_window_active(entry)?
+                || !self.continuous_window_active(entry)?
             {
                 continue;
             }
@@ -74,7 +74,7 @@ impl Game {
             .map_or(Ok(true), |condition| self.truth(condition, frame))
     }
 
-    fn restriction_window_active(&self, entry: &Value) -> Result<bool> {
+    pub(super) fn continuous_window_active(&self, entry: &Value) -> Result<bool> {
         if entry["during"].is_null() {
             return Ok(true);
         }

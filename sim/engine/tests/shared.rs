@@ -87,7 +87,7 @@ fn third_round_completed_mechanisms_remain_correct() {
         },
     )
     .unwrap();
-    assert_eq!(reports.len(), 201);
+    assert_eq!(reports.len(), 204);
     for report in reports {
         assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
     }

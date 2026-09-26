@@ -175,7 +175,13 @@ impl Game {
                 .map(|select| json!({"do":"guard-act","select":select}))
                 .collect());
         }
-        let mut out = vec![json!({"do":if quick {"pass"} else {"end-phase"}})];
+        let mut out = if quick {
+            vec![json!({"do":"pass"})]
+        } else if self.attack_required()? {
+            Vec::new()
+        } else {
+            vec![json!({"do":"end-phase"})]
+        };
         if !quick {
             out.extend(self.evolution_actions(seat)?);
             let mut targets = vec![format!("{}.leader", other(seat))];

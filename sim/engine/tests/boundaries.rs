@@ -5917,3 +5917,188 @@ fn ambiguous_or_unsupported_grants_fail_closed_without_partial_payment() {
     ));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The fixture defines all authored ability and setup fields before indexing."
+)]
+fn attack_requirement_fixture(prohibited: bool) -> (Arc<Catalog>, Value) {
+    let requirement = json!({"line":1_i64,"kind":"static","body":{"op":"require_attack","subjects":{"side":"opponent","zone":"field","type":"follower"},"count":1_i64,"condition":{"read":"self.acted"}}});
+    let body = json!({"op":"seq","steps":[
+        {"op":"act","subjects":"a"},
+        {"op":"modify","subjects":"a","during":"next-opponent-turn","abilities":[requirement.clone(),requirement]}
+    ]});
+    let mut doc = document(&body);
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"line":1_i64,"kind":"static","body":{"op":"keyword","name":"storm"}},
+        {"line":2_i64,"kind":"activated","body":{"op":"stand","subjects":"self"}},
+        {"line":3_i64,"kind":"activated","body":{"op":"act","subjects":"self"}},
+        {"line":4_i64,"kind":"activated","body":{"op":"move","subjects":"self","to":"hand"}}
+    ]);
+    if prohibited {
+        doc["cards"]["unit-follower"]["abilities"].as_array_mut().unwrap().push(json!({"line":5_i64,"kind":"static","body":{"op":"restrict","subjects":"self","action":"attack"}}));
+    }
+    let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
+    keywords["keywords"]["storm"] =
+        json!({"ja":"疾走","expansion":{"op":"keyword","name":"storm"}});
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &keywords.to_string(),
+            &[("obligation".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    (loaded, turn_setup())
+}
+
+#[test]
+fn attack_requirements_follow_the_future_period_and_current_object_generation() {
+    let (loaded, initial) = attack_requirement_fixture(false);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "obligation",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "grant",
+        )
+        .unwrap();
+    assert!(engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
+    finish_turn(&mut engine);
+    assert!(!engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine
+            .decide(&json!({"do":"end-phase"}), "early-end")
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    engine
+        .decide(
+            &json!({"do":"attack","attacker":"b","target":"P1.leader"}),
+            "attack",
+        )
+        .unwrap();
+    engine.decide(&json!({"do":"pass"}), "quick-pass").unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"b","line":2_i64}}),
+            "stand",
+        )
+        .unwrap();
+    assert!(engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"b","line":4_i64}}),
+            "bounce",
+        )
+        .unwrap();
+    engine
+        .decide(&json!({"do":"play","card":"b"}), "replay")
+        .unwrap();
+    assert_eq!(
+        engine
+            .query(View::P2, "P2.field.b.attacks_this_turn")
+            .unwrap(),
+        Some(json!(0_i64))
+    );
+    assert!(!engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled = Game::from_observation(
+        loaded,
+        &engine.projection(View::P2).unwrap(),
+        "P2",
+        "obligation",
+    )
+    .unwrap();
+    for instance in [&mut engine, &mut saved, &mut sampled] {
+        assert!(
+            !instance
+                .legal()
+                .unwrap()
+                .contains(&json!({"do":"end-phase"}))
+        );
+        instance
+            .decide(
+                &json!({"do":"activate","ability":{"source":"b","line":3_i64}}),
+                "act-instead",
+            )
+            .unwrap();
+        assert!(
+            instance
+                .legal()
+                .unwrap()
+                .contains(&json!({"do":"end-phase"}))
+        );
+        finish_turn(instance);
+        finish_turn(instance);
+        assert!(
+            instance
+                .legal()
+                .unwrap()
+                .contains(&json!({"do":"end-phase"}))
+        );
+    }
+}
+
+#[test]
+fn attack_requirements_never_override_prohibitions_or_an_inactive_source_condition() {
+    for (prohibited, stand_source) in [(true, false), (false, true)] {
+        let (loaded, initial) = attack_requirement_fixture(prohibited);
+        let mut engine =
+            Game::new(loaded, &initial, &Value::Null, &Value::Null, "obligation").unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "grant",
+            )
+            .unwrap();
+        if stand_source {
+            engine
+                .decide(
+                    &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+                    "stand-source",
+                )
+                .unwrap();
+        }
+        finish_turn(&mut engine);
+        assert!(engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
+        assert_eq!(
+            engine
+                .legal()
+                .unwrap()
+                .iter()
+                .any(|action| action["do"] == "attack"),
+            !prohibited
+        );
+    }
+}
+
+#[test]
+fn unknown_future_grant_periods_and_mixed_numeric_windows_rollback() {
+    for body in [
+        json!({"op":"modify","subjects":"target.1","during":"next-moonrise","abilities":[]}),
+        json!({"op":"modify","subjects":"target.1","during":"next-opponent-turn","power":1_i64,"abilities":[]}),
+        json!({"op":"modify","subjects":"target.1","during":"next-opponent-turn","power":1_i64}),
+    ] {
+        let mut engine = game(&body);
+        let before = engine.digest().unwrap();
+        assert!(matches!(
+            engine.decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "unknown-period"
+            ),
+            Err(EngineFailure::Unsupported(_))
+        ));
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+}

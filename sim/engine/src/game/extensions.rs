@@ -295,7 +295,7 @@ impl Game {
         for id in subjects {
             let generation = self.state.objects.get(&id).map(|object| object.generation);
             let mut entry = json!({"source":frame.source,"controller":frame.controller,"applies_to":[id],"generation":generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"during":node["during"],"duration_controller":self.state.objects.get(&id).map(|object|object.controller.clone()),"expires_turn":self.state.objects.get(&id).map_or(0,|object|int(&self.state.turn["elapsed_turns"][&object.controller]).saturating_add(i64::from(self.active()!=object.controller))),"order":self.state.next_event,"context":frame});
-            self.capture_restriction_period(&mut entry, &id, frame)?;
+            self.capture_effect_period(&mut entry, &id, frame)?;
             self.state.continuous.push(entry);
         }
         Ok(())

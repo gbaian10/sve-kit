@@ -51,7 +51,7 @@ impl Game {
 
     pub(super) fn check_execution_parameters(node: &Value) -> Result<()> {
         let denied: &[&str] = match string(&node["op"]) {
-            "modify" => &["type", "during", "traits", "cost", "set_cost"],
+            "modify" => &["type", "traits", "cost", "set_cost"],
             "draw" | "look" => &["up_to"],
             _ => &[],
         };
@@ -155,13 +155,13 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn capture_restriction_period(
+    pub(super) fn capture_effect_period(
         &self,
         entry: &mut Value,
         id: &str,
         frame: &Frame,
     ) -> Result<()> {
-        if entry["effect"]["op"] != "restrict" || entry["during"].is_null() {
+        if entry["during"].is_null() {
             return Ok(());
         }
         let during = string(&entry["during"]);

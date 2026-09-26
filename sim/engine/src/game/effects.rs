@@ -802,7 +802,9 @@ impl Game {
             } else {
                 frame.reference.clone()
             };
-            self.state.continuous.push(json!({"source":frame.source,"reference":reference,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))}));
+            let mut entry = json!({"source":frame.source,"reference":reference,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"during":node["during"],"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))});
+            self.capture_effect_period(&mut entry, &id, frame)?;
+            self.state.continuous.push(entry);
             previous.push(before);
         }
         let pending = self.stat_change_triggers(&previous, &frame.cause)?;

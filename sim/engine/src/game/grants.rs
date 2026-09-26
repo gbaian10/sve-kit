@@ -14,6 +14,11 @@ use crate::{EngineFailure, Result};
 impl Game {
     pub(super) fn check_granted_abilities(node: &Value) -> Result<()> {
         let Some(abilities) = node["abilities"].as_array() else {
+            if node.get("during").is_some() {
+                return Err(EngineFailure::Unsupported(
+                    "future modification period requires a pure ability grant".into(),
+                ));
+            }
             return Ok(());
         };
         if node.get("until").is_some_and(|until| {
@@ -21,7 +26,7 @@ impl Game {
                 string(until),
                 "game" | "permanent" | "end-of-turn" | "next-controller-end"
             )
-        }) || (node.get("until").is_some()
+        }) || ((node.get("until").is_some() || node.get("during").is_some())
             && [
                 "power",
                 "hp",
@@ -43,11 +48,9 @@ impl Game {
                     .get("active_zones")
                     .is_some_and(|zones| list(zones).iter().any(|zone| zone != "field"))
                 || ability.get("limit").is_some()
-                || ability["body"]["op"] == "require_attack"
             {
                 return Err(EngineFailure::Unsupported(
-                    "ability grant needs unsupported timing, copy limits or attack requirements"
-                        .into(),
+                    "ability grant needs unsupported timing or copy limits".into(),
                 ));
             }
         }
@@ -57,7 +60,7 @@ impl Game {
     pub(super) fn local_abilities(&self, id: &str) -> Result<Vec<Value>> {
         let mut granted = Vec::new();
         for entry in &self.state.continuous {
-            if !self.continuous_applies(entry, id) {
+            if !self.continuous_applies(entry, id) || !self.continuous_window_active(entry)? {
                 continue;
             }
             if entry["effect"]["remove_abilities"] == true {

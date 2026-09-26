@@ -115,8 +115,12 @@ impl Game {
                 matches
             }
             "end-phase" => {
-                self.start_end()?;
-                true
+                if self.attack_required()? {
+                    false
+                } else {
+                    self.start_end()?;
+                    true
+                }
             }
             "guard-act" => self.guard_act(decision)?,
             "end-discard" => self.end_discard(decision)?,
@@ -564,6 +568,8 @@ impl Game {
         self.change_posture(&[id.into()], true, &cause)?;
         self.bump(&format!("{}.attacks", self.active()), 1);
         self.bump(&format!("{id}.attacks"), 1);
+        let attacks = int(&self.object(id)?.state["attacks_this_turn"]);
+        self.object_mut(id)?.state["attacks_this_turn"] = json!(attacks.saturating_add(1));
         for trait_name in list(&self.face(id)?["traits"]) {
             self.bump(
                 &format!("{}.trait_attacks.{}", self.active(), string(&trait_name)),
@@ -688,6 +694,9 @@ impl Game {
         self.state.used.clear();
         for object in self.state.objects.values_mut() {
             object.state["stats_increased_this_turn"] = json!(false);
+            if object.state.get("attacks_this_turn").is_some() {
+                object.state["attacks_this_turn"] = json!(0_i64);
+            }
         }
         let prevent_gain = self.restricted(&format!("{seat}.leader"), "normal_max_pp_gain")?;
         let prevent_draw = self.restricted(&format!("{seat}.leader"), "normal_draw")?;
@@ -963,7 +972,7 @@ impl Game {
 
     fn trigger_suppressed(&self, controller: &str, event: &str) -> Result<bool> {
         for source in self.field_ids() {
-            for code in self.printed_abilities(&source)? {
+            for code in self.abilities(&source)? {
                 let body = &code["body"];
                 if body["op"] == "restrict"
                     && body["action"] == "trigger"
@@ -988,7 +997,7 @@ impl Game {
     fn trigger_copies(&self, event: &str, controller: &str) -> Result<i64> {
         let mut count = 1_i64;
         for source in self.field_ids() {
-            for code in self.printed_abilities(&source)? {
+            for code in self.abilities(&source)? {
                 let body = &code["body"];
                 if body["op"] != "repeat_triggers" || body["event"] != event {
                     continue;

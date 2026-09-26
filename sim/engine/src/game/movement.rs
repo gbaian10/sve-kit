@@ -146,7 +146,7 @@ impl Game {
             return previous.state.clone();
         }
         let acted = destination == "field" && previous.state["acted"] == true;
-        json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false})
+        json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false,"attacks_this_turn":0_i64})
     }
 
     pub(super) fn movable_subjects(&self, node: &Value, frame: &Frame) -> Result<Vec<String>> {
@@ -181,7 +181,7 @@ impl Game {
         for id in ids {
             let mut destination = zone.to_owned();
             for source in self.field_ids() {
-                for code in self.printed_abilities(&source)? {
+                for code in self.abilities(&source)? {
                     let body = &code["body"];
                     if body["op"] != "replace_move"
                         || body["from"] != self.object(id)?.zone

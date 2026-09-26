@@ -6,6 +6,7 @@
 )]
 
 mod belief;
+mod combat;
 mod costs;
 mod damage;
 mod effects;
@@ -464,6 +465,13 @@ impl Game {
     }
 
     fn initialize_history(&mut self, setup: &Value) -> Result<()> {
+        for object in self.state.objects.values_mut() {
+            if object.state.get("attacks_this_turn").is_none()
+                && let Some(count) = self.state.counters.get(&format!("{}.attacks", object.id))
+            {
+                object.state["attacks_this_turn"] = json!(count);
+            }
+        }
         self.import_cost_history()?;
         self.import_event_occurrences(&setup["semantic_state"])?;
         if let Some(used) = setup["semantic_state"].get("used_this_turn") {
