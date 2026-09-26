@@ -2072,3 +2072,150 @@ fn pregame_facedown_choice_is_private_and_roundtrips_before_mulligan() {
         Some(json!(1_i64))
     );
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "Synthetic fixture maps are constructed here; malformed fixtures must fail the test."
+)]
+fn stack_catalog(body: &Value) -> Catalog {
+    let soil = json!({"number":"unit-soil","faces":[{"name":"大地の魔片","card_class":"ウィッチ","card_type":"アミュレット・トークン","cost":"1","traits":[],"text":null,"sections":[]}]});
+    let mut docs = document(body);
+    docs["cards"]["unit-soil"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"stack"}}]});
+    let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
+    keywords["keywords"]["stack"] =
+        json!({"ja":"スタック","rule":"13.3.2","expansion":{"op":"keyword","name":"stack"}});
+    keywords["keywords"]["stack_counter"] =
+        json!({"ja":"スタックカウンター","expansion":{"op":"keyword","name":"stack_counter"}});
+    Catalog::from_documents(
+        &format!("{}\n{soil}", snapshot()),
+        &keywords.to_string(),
+        &[("stack.yaml".into(), docs.to_string())],
+    )
+    .unwrap()
+}
+
+#[test]
+fn stack_enters_with_counters_and_waits_for_recipient_even_when_unique() {
+    for existing in [false, true] {
+        let catalog = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
+            {"op":"create","name":"大地の魔片","count":1_i64,"to":"field"},
+            {"op":"stack","amount":2_i64},
+            {"op":"damage","subjects":"target.1","amount":1_i64}
+        ]})));
+        let mut initial = setup();
+        if existing {
+            initial["players"]["P1"]["zones"]["field"] = json!([{"id":"a","card":"unit-soil","state":{"counters":{"スタックカウンター":4_i64}}}]);
+        }
+        let mut engine = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "stack",
+        )
+        .unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, "paused");
+        assert_eq!(
+            engine
+                .query(View::P1, "P1.field.new-1.counters.スタックカウンター")
+                .unwrap(),
+            Some(json!(1_i64))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(3_i64))
+        );
+        assert!(
+            !step
+                .events
+                .iter()
+                .any(|event| event["kind"] == "カウンター")
+        );
+        let legal = engine.legal().unwrap();
+        assert_eq!(legal.len(), if existing { 2 } else { 1 });
+        let encoded = serde_json::to_string(&engine).unwrap();
+        let mut restored: Game = serde_json::from_str(&encoded).unwrap();
+        let observation = engine.projection(View::P1).unwrap();
+        let mut sampled = Game::from_observation(catalog, &observation, "P1", "restore").unwrap();
+        for instance in [&mut restored, &mut sampled] {
+            assert_eq!(instance.legal().unwrap(), legal);
+            let done = instance
+                .decide(&json!({"do":"resolve-choice","select":["new-1"]}), "select")
+                .unwrap();
+            assert_eq!(done.outcome, "resolved");
+            assert_eq!(
+                instance
+                    .query(View::P1, "P1.field.new-1.counters.スタックカウンター")
+                    .unwrap(),
+                Some(json!(3_i64))
+            );
+            assert_eq!(
+                instance.query(View::P1, "P2.field.b.hp").unwrap(),
+                Some(json!(2_i64))
+            );
+            if existing {
+                assert_eq!(
+                    instance
+                        .query(View::P1, "P1.field.a.counters.スタックカウンター")
+                        .unwrap(),
+                    Some(json!(4_i64))
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn stack_without_recipient_replaces_entry_count_and_obeys_capacity() {
+    for (amount, full) in [(3_i64, false), (0, false), (2, true)] {
+        let catalog = Arc::new(stack_catalog(&json!({"op":"stack","amount":amount})));
+        let mut initial = setup();
+        if full {
+            initial["players"]["P1"]["zones"]["field"] = json!(
+                (0_u32..5)
+                    .map(|n| json!({"id":format!("a{n}"),"card":"unit-follower"}))
+                    .collect::<Vec<_>>()
+            );
+        }
+        let mut engine = Game::new(catalog, &initial, &Value::Null, &Value::Null, "stack").unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, if full { "paused" } else { "resolved" });
+        if full {
+            let legal = engine.legal().unwrap();
+            assert_eq!(legal.len(), 1);
+            assert_eq!(legal[0]["select"], json!([]));
+            engine
+                .decide(&json!({"do":"resolve-choice","select":[]}), "no-space")
+                .unwrap();
+            assert_eq!(
+                engine.query(View::P1, "P1.field_count").unwrap(),
+                Some(json!(5_i64))
+            );
+        } else if amount == 0 {
+            assert_eq!(
+                engine.query(View::P1, "P1.field_count").unwrap(),
+                Some(json!(1_i64))
+            );
+            assert!(!step.events.iter().any(|event| event["kind"] == "場に出す"));
+        } else {
+            assert_eq!(
+                engine
+                    .query(View::P1, "P1.field.new-1.counters.スタックカウンター")
+                    .unwrap(),
+                Some(json!(amount))
+            );
+        }
+    }
+}

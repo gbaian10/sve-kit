@@ -689,7 +689,7 @@ impl Game {
                 } else {
                     "effect"
                 });
-                let event_id=self.emit(json!({"kind":"場に出す","object":id,"from":from,"to":format!("{owner}.field")}),&frame.cause,group);
+                let event_id=self.emit(json!({"kind":"場に出す","object":id,"card":previous.card,"from":from,"to":format!("{owner}.field")}),&frame.cause,group);
                 entered.push((self.object(id)?.clone(), json!({"event":event_id})));
             } else {
                 let mut event = json!({"kind":"移動","object":id,"from":from,"to":format!("{owner}.{destination}")});
@@ -746,8 +746,11 @@ impl Game {
         }
         self.release_links(&leaving, frame)?;
         self.enqueue(pending);
+        for (object, _) in &entered {
+            self.initialize_entry_counters(&object.id, frame)?;
+        }
         for (object, cause) in entered {
-            self.enter_triggers(&object, &cause, frame)?;
+            self.enter_triggers(&self.object(&object.id)?.clone(), &cause, frame)?;
         }
         Ok(())
     }

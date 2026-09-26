@@ -4,7 +4,6 @@
 )]
 use super::{EventOccurrence, Frame, Game, int, list, string};
 use crate::{Result, invalid};
-use core::slice::from_ref;
 use serde_json::{Value, json};
 
 #[expect(
@@ -296,7 +295,7 @@ impl Game {
         Ok(true)
     }
 
-    pub(super) fn resource_effect(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+    pub(super) fn resource_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         match string(&node["op"]) {
             "lesson" => {
                 let ids = self.select(&node["subjects"], frame)?;
@@ -330,31 +329,47 @@ impl Game {
                 let pending = self.collect_triggers(string(&node["op"]), &objects, &frame.cause)?;
                 self.enqueue(pending);
             }
-            "stack" => {
-                let ids = self.select(
-                    &json!({"side":"self","zone":"field","keyword":"stack"}),
-                    frame,
-                )?;
-                let chosen = if let Some(id) = ids.first() {
-                    if ids.len() > 1 {
-                        return Err(crate::EngineFailure::Unsupported(
-                            "stack recipient choice".into(),
-                        ));
-                    }
-                    id.clone()
-                } else {
-                    let id = self.new_named_object("大地の魔片", &frame.controller)?;
-                    self.move_objects(from_ref(&id), "field", None, None, frame)?;
-                    id
-                };
-                let old = int(&self.object(&chosen)?.state["counters"]["stack_counter"]);
-                let amount = self.number(&node["amount"], frame)?;
-                self.object_mut(&chosen)?.state["counters"]["stack_counter"] =
-                    json!(old.saturating_add(amount));
-                let group = self.group();
-                self.emit(json!({"kind":"カウンター","object":chosen,"name":self.catalog.keyword_name("stack_counter"),"delta":amount}),&frame.cause,group);
-            }
+            "stack" => self.increase_stack(node, frame)?,
             _ => return Err(invalid("unknown resource effect")),
+        }
+        Ok(())
+    }
+
+    fn increase_stack(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let amount = self.number(&node["amount"], frame)?;
+        if amount <= 0 {
+            frame.performed = 0;
+            return Ok(());
+        }
+        let selector = json!({"side":"self","zone":"field","keyword":"stack"});
+        if self.select(&selector, frame)?.is_empty() {
+            let id = self.new_named_object("大地の魔片", &frame.controller)?;
+            frame
+                .values
+                .insert("stack_entry_counts".into(), json!({&id:amount}));
+            Self::prepend(frame, vec![json!({"op":"move","subjects":id,"to":"field"})]);
+        } else {
+            Self::prepend(
+                frame,
+                vec![
+                    json!({"op":"select","select":selector,"min":1_i64,"max":1_i64,"bind":"stack-recipient"}),
+                    json!({"op":"counter","subjects":"stack-recipient","name":"stack_counter","amount":amount}),
+                ],
+            );
+        }
+        Ok(())
+    }
+
+    pub(super) fn initialize_entry_counters(&mut self, id: &str, frame: &Frame) -> Result<()> {
+        if self.keywords(id)?.contains("stack") {
+            let count = frame
+                .values
+                .get("stack_entry_counts")
+                .and_then(|counts| counts.get(id))
+                .map_or(1, int);
+            let old = int(&self.object(id)?.state["counters"]["stack_counter"]);
+            self.object_mut(id)?.state["counters"]["stack_counter"] =
+                json!(old.saturating_add(count));
         }
         Ok(())
     }
