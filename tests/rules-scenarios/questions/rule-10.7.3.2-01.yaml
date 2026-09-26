@@ -400,11 +400,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: a1
-                  line: 2
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, costs: decline}
         assert:
           P1.pp.current: 1
           P1.field:
@@ -560,11 +556,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: a2
-                  line: 2
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, costs: decline}
         assert:
           P1.field:
             - a1
@@ -699,20 +691,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: a1
-                  line: 1
-                event:
-                  left_field: a2
-            - do: choose-pending
-              pending:
-                ability:
-                  source: a1
-                  line: 1
-                event:
-                  left_field: a3
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}, targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a3}}, targets: {1: [b1]}}
         assert:
           P1.field:
             - a1

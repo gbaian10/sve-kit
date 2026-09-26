@@ -167,7 +167,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, card: BP19-051, line: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, card: BP19-051, line: 1}}, targets: {1: [P2.leader]}}
         assert:
           P1.field.a1: {evolved: true, evolved_with: a2, power: 2, hp: 2}
           P1.pp.current: 2

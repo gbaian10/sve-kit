@@ -468,11 +468,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: a1
-                  line: 3
+            - {do: choose-pending, pending: {ability: {source: a1, line: 3}}, targets: {1: [b1]}}
         assert:
           P1.field.a1:
             acted: true

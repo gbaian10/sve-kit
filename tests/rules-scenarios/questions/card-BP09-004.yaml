@@ -78,7 +78,10 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, card: BP09-005, face: 1, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, card: BP09-005, line: 2, face: 1}}, targets: {1: [a2, a3]}}
+            - {do: choose-pending, pending: {ability: {source: a1, card: BP09-005, line: 2, face: 1}}, targets: {1: [a2]}}
+            - {do: choose-pending, pending: {ability: {source: a1, card: BP09-005, line: 2, face: 1}}, targets: {1: [a3]}}
+            - {do: choose-pending, pending: {ability: {source: a1, card: BP09-005, line: 2, face: 1}}, targets: {1: []}}
         assert:
           P1.field.a1: {evolved: true, evolved_with: e1, power: 3, hp: 3}
           P1.evolution: [e1]
