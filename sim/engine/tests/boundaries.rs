@@ -7203,3 +7203,190 @@ fn advances_return_face_up_to_the_owner_before_the_effect_continues() {
         }
     }
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "Two synthetic evolution faces deliberately have distinct names and capabilities."
+)]
+fn dual_evolution_catalog() -> Arc<Catalog> {
+    let mut doc = document(&json!({"op":"seq","steps":[]}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{ "kind":"evolve","line":1_i64,"costs":[{"op":"pp","amount":1_i64}],"body":{"op":"evolve","subjects":"self","names":["bright","dark"]}}]);
+    doc["cards"]["unit-dual"] = json!({"status":"complete","review":"synthetic","abilities":[
+        {"kind":"static","face":0_i64,"line":1_i64,"body":{"op":"keyword","name":"guard"}},
+        {"kind":"static","face":1_i64,"line":1_i64,"body":{"op":"restrict","subjects":"self","action":"ignore_guard"}}
+    ]});
+    let bright = json!({"name":"bright","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"-","power":"4","hp":"6","traits":[],"text":null,"sections":[]});
+    let mut dark = bright.clone();
+    dark["name"] = json!("dark");
+    let printed = json!({"number":"unit-dual","faces":[bright,dark]});
+    Arc::new(
+        Catalog::from_documents(
+            &format!("{}\n{printed}", snapshot()),
+            &registry(),
+            &[("dual.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn evolved_information_uses_the_linked_visible_face_after_load_play_and_observation() {
+    for face in [0_i64, 1_i64] {
+        for pre_evolved in [false, true] {
+            let loaded = dual_evolution_catalog();
+            let mut position = setup();
+            position["players"]["P2"]["zones"]["field"][0]["state"] =
+                json!({"acted":true,"keywords":["guard"]});
+            let zone = if pre_evolved {
+                "evolution"
+            } else {
+                "evolve_deck"
+            };
+            position["players"]["P1"]["zones"][zone] =
+                json!([{"id":"e","card":"unit-dual","state":{"face":face}}]);
+            if pre_evolved {
+                position["players"]["P1"]["zones"]["field"][0]["state"] =
+                    json!({"evolved":true,"evolved_with":"e"});
+            }
+            let mut engine = Game::new(
+                Arc::clone(&loaded),
+                &position,
+                &Value::Null,
+                &Value::Null,
+                "dual",
+            )
+            .unwrap();
+            if !pre_evolved {
+                let choice = engine
+                    .legal()
+                    .unwrap()
+                    .into_iter()
+                    .find(|choice| {
+                        choice["do"] == "evolve" && choice["face"].as_i64().unwrap_or(0) == face
+                    })
+                    .unwrap();
+                assert_eq!(
+                    engine.decide(&choice, "evolve").unwrap().outcome,
+                    "resolved"
+                );
+            }
+            let packet = engine.projection(View::P1).unwrap();
+            assert_eq!(packet["objects"]["a"]["face"], face);
+            assert_eq!(
+                packet["objects"]["a"]["name"],
+                if face == 0 { "bright" } else { "dark" }
+            );
+            assert_eq!(
+                packet["objects"]["a"]["keywords"],
+                if face == 0 {
+                    json!(["守護"])
+                } else {
+                    json!([])
+                }
+            );
+            let saved: Game =
+                serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+            let sampled = Game::from_observation(loaded, &packet, "P1", "dual").unwrap();
+            for mut copy in [engine, saved, sampled] {
+                assert_eq!(
+                    copy.projection(View::P1).unwrap()["objects"]["a"]["name"],
+                    packet["objects"]["a"]["name"]
+                );
+                let result = copy
+                    .decide(
+                        &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                        "attack",
+                    )
+                    .unwrap();
+                assert_eq!(
+                    result.outcome,
+                    if face == 0 {
+                        "cannot-attack"
+                    } else {
+                        "resolved"
+                    }
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn ignoring_guard_still_checks_posture_target_legality_and_ability_loss() {
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["field"][0]["state"] =
+        json!({"evolved":true,"evolved_with":"e"});
+    position["players"]["P1"]["zones"]["evolution"] =
+        json!([{"id":"e","card":"unit-dual","state":{"face":1_i64}}]);
+    position["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"guard","card":"unit-follower","state":{"acted":true,"keywords":["guard"]}},
+        {"id":"standing","card":"unit-follower"},
+        {"id":"resting","card":"unit-follower","state":{"acted":true}}
+    ]);
+    for (target, allowed) in [
+        ("P2.leader", true),
+        ("guard", true),
+        ("resting", true),
+        ("standing", false),
+        ("P1.leader", false),
+    ] {
+        let mut engine = Game::new(
+            dual_evolution_catalog(),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "guard",
+        )
+        .unwrap();
+        let result = engine
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":target}),
+                "attack",
+            )
+            .unwrap();
+        assert_eq!(
+            result.outcome,
+            if allowed { "resolved" } else { "cannot-attack" }
+        );
+    }
+    position["players"]["P1"]["zones"]["field"][0]["state"]["acted"] = json!(true);
+    let mut acted = Game::new(
+        dual_evolution_catalog(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "acted",
+    )
+    .unwrap();
+    assert_eq!(
+        acted
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                "attack"
+            )
+            .unwrap()
+            .outcome,
+        "cannot-attack"
+    );
+    position["players"]["P1"]["zones"]["field"][0]["state"]["acted"] = json!(false);
+    position["players"]["P1"]["zones"]["field"][0]["state"]["silenced"] = json!(true);
+    let mut silenced = Game::new(
+        dual_evolution_catalog(),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "silenced",
+    )
+    .unwrap();
+    assert_eq!(
+        silenced
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                "attack"
+            )
+            .unwrap()
+            .outcome,
+        "cannot-attack"
+    );
+}

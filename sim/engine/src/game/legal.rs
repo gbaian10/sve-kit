@@ -332,6 +332,9 @@ impl Game {
                 return Ok(false);
             }
         }
+        if self.restricted(id, "ignore_guard")? {
+            return Ok(true);
+        }
         let guards = self
             .zone_ids(other(seat), "field")
             .into_iter()

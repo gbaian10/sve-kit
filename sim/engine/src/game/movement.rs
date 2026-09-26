@@ -162,7 +162,7 @@ impl Game {
     }
 
     pub(super) fn card_name(&self, id: &str) -> Result<String> {
-        let object = self.object(id)?;
+        let object = self.information_source(id)?;
         Ok(self
             .catalog
             .programs

@@ -72,11 +72,8 @@ impl Game {
         text: &str,
         operation: &str,
     ) -> Result<Value> {
-        let object = self.object(source)?;
-        let number = object.state["evolved_with"]
-            .as_str()
-            .and_then(|id| self.state.objects.get(id))
-            .map_or(object.card.as_str(), |evolved| evolved.card.as_str());
+        let object = self.information_source(source)?;
+        let number = object.card.as_str();
         let face = self.face(source)?;
         let text = normalized_text(text);
         let mut candidates = Vec::new();

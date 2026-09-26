@@ -296,8 +296,11 @@ impl Game {
                     if !matches!(owner, "P1" | "P2") {
                         return Err(invalid("object owner must be a player"));
                     }
-                    let face_index =
-                        usize::try_from(int(&item["state"]["face"])).map_err(invalid)?;
+                    let face_index = if item["state"]["evolved_with"].is_string() {
+                        0
+                    } else {
+                        usize::try_from(int(&item["state"]["face"])).map_err(invalid)?
+                    };
                     let face = catalog.face(&card, face_index)?;
                     let mut attrs = json!({"power":scalar(&face["power"]),"hp":scalar(&face["hp"]),"max_hp":scalar(&face["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face_index,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
                     if let Some(patch) = item["state"].as_object() {
@@ -567,15 +570,18 @@ impl Game {
             .map(|v| v.get("filler").map_or(1, int))
             .sum()
     }
-    fn face(&self, id: &str) -> Result<&Value> {
+    fn information_source(&self, id: &str) -> Result<&Object> {
         let object = self.object(id)?;
-        let number = object.state["evolved_with"]
+        Ok(object.state["evolved_with"]
             .as_str()
             .and_then(|evolved_id| self.state.objects.get(evolved_id))
-            .map_or(object.card.as_str(), |card| card.card.as_str());
+            .unwrap_or(object))
+    }
+    fn face(&self, id: &str) -> Result<&Value> {
+        let source = self.information_source(id)?;
         self.catalog.face(
-            number,
-            usize::try_from(int(&object.state["face"])).map_err(invalid)?,
+            &source.card,
+            usize::try_from(int(&source.state["face"])).map_err(invalid)?,
         )
     }
     fn object_type(&self, id: &str) -> Result<&str> {
@@ -589,16 +595,13 @@ impl Game {
         if object.state["silenced"] == true {
             return Ok(Vec::new());
         }
-        let number = object.state["evolved_with"]
-            .as_str()
-            .and_then(|evolved_id| self.state.objects.get(evolved_id))
-            .map_or(object.card.as_str(), |card| card.card.as_str());
-        Ok(list(&self.catalog.program(number)?["abilities"])
+        let source = self.information_source(id)?;
+        Ok(list(&self.catalog.program(&source.card)?["abilities"])
             .into_iter()
             .filter(|ability| {
                 ability
                     .get("face")
-                    .is_none_or(|face| int(face) == int(&object.state["face"]))
+                    .is_none_or(|face| int(face) == int(&source.state["face"]))
             })
             .flat_map(|ability| {
                 if ability["kind"] == "static" && ability["body"]["op"] == "seq" {
@@ -655,6 +658,7 @@ impl Game {
         }
         value["id"] = json!(id);
         value["name"] = json!(self.card_name(id)?);
+        value["face"] = self.information_source(id)?.state["face"].clone();
         value["zone"] = json!(object.zone);
         value["cost"] = json!(scalar(&self.face(id)?["cost"]));
         value["token"] = json!(string(&self.face(id)?["card_type"]).contains("トークン"));
@@ -698,7 +702,9 @@ impl Game {
                 })
                 .ok_or_else(|| invalid("granted ability is no longer present"));
         }
-        let number = reference["card"].as_str().unwrap_or(&self.object(id)?.card);
+        let number = reference["card"]
+            .as_str()
+            .unwrap_or(&self.information_source(id)?.card);
         list(&self.catalog.program(number)?["abilities"])
             .into_iter()
             .find(|a| {
@@ -706,9 +712,8 @@ impl Game {
                     && a.get("face").is_none_or(|face| {
                         *face
                             == reference.get("face").cloned().unwrap_or_else(|| {
-                                self.state
-                                    .objects
-                                    .get(id)
+                                self.information_source(id)
+                                    .ok()
                                     .map_or(Value::Null, |object| object.state["face"].clone())
                             })
                     })

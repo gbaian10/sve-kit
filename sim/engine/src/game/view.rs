@@ -65,6 +65,7 @@ impl Game {
                         card["id"] = json!(id);
                         card["card"] = json!(object.card);
                         card["name"] = json!(self.card_name(id)?);
+                        card["face"] = self.information_source(id)?.state["face"].clone();
                         card["generation"] = json!(object.generation);
                         card["damage"] =
                             json!(int(&card["max_hp"]).saturating_sub(int(&card["hp"])));
