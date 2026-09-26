@@ -227,7 +227,7 @@ cards:
             max: 1
   BP03-SL07:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 第三輪依 13.3.3.2 複核土の秘術：使用可選追加費用與 paid 條件；原稿誤寫為必要成本。完整卡文與其餘能力保持原義。
     abilities:
       - line: 1
         kind: trigger
@@ -247,20 +247,26 @@ cards:
       - line: 2
         kind: activated
         body:
-          op: adjust_cost
-          subjects:
-            side: self
-            zone: any
-            type: spell
-          amount: -4
-          until: end-of-turn
-          uses: 1
-          consume_on: spell_play
+          op: if
+          condition:
+            read: paid.earth
+          then:
+            op: adjust_cost
+            subjects:
+              side: self
+              zone: any
+              type: spell
+            amount: -4
+            until: end-of-turn
+            uses: 1
+            consume_on: spell_play
         quick: true
         limit: 1
-        costs:
-          - op: macro
-            name: earth_rite
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 1
   BP03-SL14:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
