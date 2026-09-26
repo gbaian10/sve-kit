@@ -104,6 +104,12 @@ impl Game {
             packet["legal"] = json!(self.legal()?);
         }
         packet["flow"] = self.state.flow.clone();
+        if self.state.flow["kind"] == "pregame"
+            && let Some(viewer) = seat
+            && let Some(selections) = packet["flow"]["selections"].as_object_mut()
+        {
+            selections.retain(|controller, _| controller == viewer);
+        }
         normalize_origins(&mut packet["flow"]);
         if let Some(frame) = &self.state.frame
             && seat.is_none_or(|seat| frame.controller == seat)

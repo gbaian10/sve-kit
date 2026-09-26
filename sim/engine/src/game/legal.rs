@@ -111,6 +111,9 @@ impl Game {
         if self.state.game["ended"] == true {
             return Ok(Vec::new());
         }
+        if self.state.flow["kind"] == "pregame" {
+            return self.opening_choices();
+        }
         if let Some(prompt) = &self.state.prompt {
             return Ok(prompt.choices.clone());
         }

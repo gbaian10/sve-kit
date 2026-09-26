@@ -81,6 +81,10 @@ impl Game {
                 operation,
                 "resolve-choice" | "place-acted" | "order-replacements"
             ),
+            "pregame" => matches!(
+                operation,
+                "choose-start-amulet" | "choose-first" | "mulligan"
+            ),
             "end" => operation == "guard-act",
             _ => false,
         };
@@ -88,6 +92,9 @@ impl Game {
             return Ok(Self::rejection(operation).into());
         }
         let accepted = match operation {
+            "choose-start-amulet" | "choose-first" | "mulligan" => {
+                self.opening_decision(decision)?
+            }
             "play" => self.play(decision)?,
             "activate" => self.activate(decision)?,
             "evolve" => self.evolve_decision(decision)?,
@@ -149,6 +156,9 @@ impl Game {
     pub(super) fn input_point(&self) -> Value {
         if self.state.game["ended"] == true {
             return Value::Null;
+        }
+        if self.state.flow["kind"] == "pregame" {
+            return self.opening_point();
         }
         if let Some(prompt) = &self.state.prompt {
             return json!({"by":prompt.by,"at":"resolve"});
@@ -651,7 +661,7 @@ impl Game {
         }
         let frame = Frame {
             controller: seat.clone(),
-            cause: json!({"rule":"7.2"}),
+            cause: json!({"rule":"7.2.4"}),
             ..Frame::default()
         };
         if !prevent_draw {

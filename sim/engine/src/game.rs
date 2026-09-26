@@ -12,6 +12,7 @@ mod extensions;
 mod legal;
 mod movement;
 mod nested;
+mod opening;
 mod payments;
 mod progression;
 mod resources;
@@ -225,10 +226,11 @@ impl Game {
         random: &Value,
         seed: &str,
     ) -> Result<Self> {
+        let position = Self::prepare_opening(setup);
         let mut players = BTreeMap::new();
         let mut objects = BTreeMap::new();
         for seat in ["P1", "P2"] {
-            let entry = &setup["players"][seat];
+            let entry = &position["players"][seat];
             let mut zones = BTreeMap::new();
             for zone in ZONES {
                 let mut ids = Vec::new();
@@ -297,14 +299,14 @@ impl Game {
         let mut state = State {
             players,
             objects,
-            turn: setup["turn"].clone(),
-            room: setup["room"].clone(),
+            turn: position["turn"].clone(),
+            room: position["room"].clone(),
             pending: Vec::new(),
             frame: None,
             prompt: None,
             flow: json!({"kind":"main"}),
             counters: BTreeMap::new(),
-            continuous: list(&setup["semantic_state"]["continuous_effects"]),
+            continuous: list(&position["semantic_state"]["continuous_effects"]),
             delayed: Vec::new(),
             used: BTreeMap::new(),
             knowledge: BTreeMap::new(),
@@ -337,7 +339,7 @@ impl Game {
                 state.counters.insert(format!("{seat}.{counter}"), 0);
             }
         }
-        if let Some(counters) = setup["semantic_state"]["counters_this_turn"].as_object() {
+        if let Some(counters) = position["semantic_state"]["counters_this_turn"].as_object() {
             for (key, value) in counters {
                 if let Some(entries) = value.as_object() {
                     for (name, count) in entries {
@@ -358,8 +360,8 @@ impl Game {
             emitted: Vec::new(),
             node: "opening".into(),
         };
-        game.initialize_evolved(setup)?;
-        game.initialize_history(setup)?;
+        game.initialize_evolved(&position)?;
+        game.initialize_history(&position)?;
         #[expect(
             clippy::needless_collect,
             reason = "The snapshot releases the immutable state borrow before learning mutates knowledge."
@@ -373,6 +375,9 @@ impl Game {
                     game.learn(seat, &object.id, true);
                 }
             }
+        }
+        if setup["pregame"] == true {
+            game.initialize_opening()?;
         }
         Ok(game)
     }
@@ -684,6 +689,11 @@ impl Game {
     fn emit(&mut self, mut event: Value, cause: &Value, group: u64) -> String {
         let id = format!("{}:e{}", self.node, self.state.next_event);
         self.state.next_event = self.state.next_event.saturating_add(1);
+        if event.get("by").is_none()
+            && let Some(rule) = cause["rule"].as_str()
+        {
+            event["by"] = json!(format!("rule-{rule}"));
+        }
         event["id"] = json!(id);
         event["cause"] = cause.clone();
         event["group"] = json!(group);

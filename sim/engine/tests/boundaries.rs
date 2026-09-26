@@ -1256,3 +1256,62 @@ fn nested_play_preserves_outer_continuation_across_inner_target_and_declaration(
         Some(json!(1_i64))
     );
 }
+
+#[test]
+fn pregame_facedown_choice_is_private_and_roundtrips_before_mulligan() {
+    let mut doc = document(&json!({"op":"seq","steps":[]}));
+    doc["cards"]["unit-follower"]["abilities"] =
+        json!([{ "kind":"static","line":1_i64,"body":{"op":"keyword","name":"start_amulet"}}]);
+    let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
+    keywords["keywords"]["start_amulet"] = json!({"ja":"スタートアミュレット","rule":"14.4.3","expansion":{"op":"keyword","name":"start_amulet"}});
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &keywords.to_string(),
+            &[("opening.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let position = json!({"pregame":true,"players":{
+        "P1":{"construction":"title","title":"カードファイト!! ヴァンガード","leader":{"class":"ニュートラル"},"deck_list":[{"id":"amulet","card":"unit-follower"},{"filler":40_i64}],"evolve_deck_list":[]},
+        "P2":{"construction":"class","leader":{"class":"ニュートラル"},"deck_list":[{"filler":40_i64}],"evolve_deck_list":[]}
+    }});
+    let random = json!({"first_chooser":"P2","shuffles":[{"player":"P1","zone":"deck","result":[{"filler":40_i64}]},{"player":"P2","zone":"deck","result":[{"filler":40_i64}]}]});
+    let mut engine = Game::new(catalog, &position, &Value::Null, &random, "opening").unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"choose-start-amulet","object":"amulet"}),
+                "choose"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    let private = engine.projection(View::P2).unwrap();
+    assert!(!private.to_string().contains("\"amulet\""));
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let first = restored
+        .decide(&json!({"do":"choose-first","first":"P1"}), "first")
+        .unwrap();
+    assert!(first.events.iter().all(|event| event["kind"] != "引く"));
+    restored
+        .decide(&json!({"do":"mulligan","redo":false}), "keep-first")
+        .unwrap();
+    restored
+        .decide(&json!({"do":"mulligan","redo":false}), "keep-second")
+        .unwrap();
+    assert_eq!(
+        restored.query(View::P2, "P1.field.amulet.face_up").unwrap(),
+        Some(json!(true))
+    );
+    assert_eq!(
+        restored.query(View::P2, "P2.ep").unwrap(),
+        Some(json!(3_i64))
+    );
+    assert_eq!(
+        restored.query(View::P1, "P1.pp.current").unwrap(),
+        Some(json!(1_i64))
+    );
+}
