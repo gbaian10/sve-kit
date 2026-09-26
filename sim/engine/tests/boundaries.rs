@@ -709,6 +709,84 @@ fn effect_victory_stops_resolution_before_rule_defeat_unless_prohibited() {
 }
 
 #[test]
+fn end_discard_rechecks_after_triggers_and_roundtrips_private_choices() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-spell"]["abilities"] = json!([
+        {"kind":"trigger","line":1_i64,"active_zones":["hand"],"event":"discard","subject":"self","body":{"op":"draw","count":1_i64}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("end.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    let mut hand = (0_u32..8)
+        .map(|index| json!({"id":format!("h{index}"),"card":"unit-follower"}))
+        .collect::<Vec<_>>();
+    hand.push(json!({"id":"s","card":"unit-spell"}));
+    position["players"]["P1"]["zones"]["hand"] = json!(hand);
+    position["players"]["P1"]["zones"]["deck"] = json!([{"id":"d1","card":"unit-follower"}]);
+    position["players"]["P2"]["zones"]["deck"] = json!([{"id":"d2","card":"unit-follower"}]);
+    let mut engine = Game::new(catalog, &position, &Value::Null, &Value::Null, "end").unwrap();
+    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    engine.decide(&json!({"do":"pass"}), "quick-pass").unwrap();
+    assert_eq!(engine.legal().unwrap().len(), 36);
+    assert_eq!(
+        engine.projection(View::P2).unwrap()["awaiting"],
+        json!({"by":"P1"})
+    );
+    let before = engine.digest().unwrap();
+    for selection in [json!(["s", "s"]), json!(["s"]), json!(["s", "b"])] {
+        assert_eq!(
+            engine
+                .decide(&json!({"do":"end-discard","select":selection}), "invalid")
+                .unwrap()
+                .outcome,
+            "cannot-play"
+        );
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    let discarded = engine
+        .decide(&json!({"do":"end-discard","select":["s","h7"]}), "discard")
+        .unwrap();
+    assert_eq!(discarded.outcome, "resolved");
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    restored
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"s","line":1_i64}}}),
+            "draw",
+        )
+        .unwrap();
+    assert_eq!(restored.legal().unwrap().len(), 8);
+    assert_eq!(
+        restored.query(View::P1, "turn.active").unwrap(),
+        Some(json!("P1"))
+    );
+    restored
+        .decide(
+            &json!({"do":"end-discard","select":["d1"]}),
+            "discard-again",
+        )
+        .unwrap();
+    assert_eq!(
+        restored.query(View::P1, "turn.active").unwrap(),
+        Some(json!("P2"))
+    );
+    assert_eq!(
+        restored.query(View::P2, "P2.hand").unwrap(),
+        Some(json!(["d2"]))
+    );
+    assert_eq!(
+        restored.query(View::P1, "P1.hand_count").unwrap(),
+        Some(json!(7_i64))
+    );
+}
+
+#[test]
 fn cost_free_pending_cannot_be_declined() {
     let mut doc = document(&json!({"op":"draw","count":0_i64}));
     doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"trigger","line":1_i64,"event":"attack","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}]);

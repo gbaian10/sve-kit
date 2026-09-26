@@ -13,6 +13,32 @@ use serde_json::{Value, json};
     reason = "Rule domains share one private state and are split into focused modules."
 )]
 impl Game {
+    pub(super) fn discard(&mut self, ids: &[String], frame: &Frame) -> Result<()> {
+        let discarded = ids
+            .iter()
+            .filter_map(|id| self.state.objects.get(id))
+            .filter(|object| object.zone == "hand")
+            .cloned()
+            .collect::<Vec<_>>();
+        let group = self.group();
+        for object in &discarded {
+            self.bump(&format!("{}.discarded", object.controller), 1);
+            self.emit(
+                json!({"kind":"捨てる","player":object.controller,"object":object.id}),
+                &frame.cause,
+                group,
+            );
+        }
+        let pending = self.collect_triggers("discard", &discarded, &frame.cause)?;
+        let actual = discarded
+            .iter()
+            .map(|object| object.id.clone())
+            .collect::<Vec<_>>();
+        self.move_objects(&actual, "cemetery", None, None, frame)?;
+        self.enqueue(pending);
+        Ok(())
+    }
+
     pub(super) fn moved_attributes(previous: &Object, printed: &Value, destination: &str) -> Value {
         if matches!(previous.zone.as_str(), "ex" | "resolution")
             && matches!(destination, "resolution" | "field")

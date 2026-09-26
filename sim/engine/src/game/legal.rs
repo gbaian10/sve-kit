@@ -94,6 +94,20 @@ pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {
     })
 }
 
+pub(super) fn unordered_selection_matches(candidate: &Value, decision: &Value) -> bool {
+    let Some(selected) = decision["select"].as_array() else {
+        return false;
+    };
+    let mut actual = selected.iter().map(Value::to_string).collect::<Vec<_>>();
+    let mut expected = list(&candidate["select"])
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>();
+    actual.sort_unstable();
+    expected.sort_unstable();
+    candidate["do"] == decision["do"] && actual == expected
+}
+
 #[expect(
     clippy::multiple_inherent_impl,
     reason = "Rule domains share one private state and are split into focused modules."
@@ -124,6 +138,15 @@ impl Game {
         let seat = string(&point["by"]);
         let quick = point["at"] == "quick";
         if point["at"] == "end" {
+            if self.state.flow["stage"] == "discard" {
+                let excess =
+                    usize::try_from(self.zone_count(seat, "hand").saturating_sub(7).max(0))
+                        .map_err(invalid)?;
+                return Ok(subsets(&self.zone_ids(seat, "hand"), excess, excess)
+                    .into_iter()
+                    .map(|select| json!({"do":"end-discard","select":select}))
+                    .collect());
+            }
             let ids = self
                 .zone_ids(seat, "field")
                 .into_iter()

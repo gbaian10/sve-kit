@@ -85,7 +85,7 @@ impl Game {
                 operation,
                 "choose-start-amulet" | "choose-first" | "mulligan"
             ),
-            "end" => operation == "guard-act",
+            "end" => matches!(operation, "guard-act" | "end-discard"),
             _ => false,
         };
         if !timing_matches {
@@ -118,6 +118,7 @@ impl Game {
                 true
             }
             "guard-act" => self.guard_act(decision)?,
+            "end-discard" => self.end_discard(decision)?,
             "pass" => {
                 self.pass()?;
                 true
@@ -169,7 +170,7 @@ impl Game {
         match string(&self.state.flow["kind"]) {
             "battle" => json!({"by":other(self.active()),"at":"quick"}),
             "end" => {
-                if self.state.flow["stage"] == "guard" {
+                if matches!(string(&self.state.flow["stage"]), "guard" | "discard") {
                     json!({"by":self.active(),"at":"end"})
                 } else {
                     json!({"by":other(self.active()),"at":"quick"})
@@ -592,7 +593,7 @@ impl Game {
                 frame.todo = vec![json!({"op":"_damage","hits":hits,"orders":{}})];
                 self.run_frame(frame)?;
             }
-            "end" => self.next_turn()?,
+            "end" => self.state.flow["stage"] = json!("discard"),
             _ => return Err(invalid("pass outside Quick")),
         }
         Ok(())
@@ -607,6 +608,14 @@ impl Game {
         Ok(())
     }
     fn guard_act(&mut self, decision: &Value) -> Result<bool> {
+        if self.state.flow["stage"] != "guard"
+            || !self
+                .legal()?
+                .iter()
+                .any(|choice| super::legal::unordered_selection_matches(choice, decision))
+        {
+            return Ok(false);
+        }
         for id in list(&decision["select"]) {
             let id = string(&id);
             if self.object(id)?.controller != self.active() || !self.keywords(id)?.contains("guard")
@@ -622,6 +631,28 @@ impl Game {
             );
         }
         self.state.flow["stage"] = json!("quick");
+        Ok(true)
+    }
+
+    fn end_discard(&mut self, decision: &Value) -> Result<bool> {
+        if self.state.flow["stage"] != "discard"
+            || !self
+                .legal()?
+                .iter()
+                .any(|choice| super::legal::unordered_selection_matches(choice, decision))
+        {
+            return Ok(false);
+        }
+        let selected = list(&decision["select"])
+            .iter()
+            .map(|id| string(id).to_owned())
+            .collect::<Vec<_>>();
+        let frame = Frame {
+            controller: self.active().into(),
+            cause: json!({"rule":"7.4.7"}),
+            ..Frame::default()
+        };
+        self.discard(&selected, &frame)?;
         Ok(true)
     }
     fn next_turn(&mut self) -> Result<()> {
@@ -756,6 +787,14 @@ impl Game {
             });
             self.state.flow["stage"] = json!(if guards { "guard" } else { "quick" });
         }
+        if self.state.pending.is_empty()
+            && self.state.flow["kind"] == "end"
+            && self.state.flow["stage"] == "discard"
+            && self.zone_count(self.active(), "hand") <= 7
+        {
+            self.next_turn()?;
+            return self.checks();
+        }
         Ok(())
     }
 
@@ -871,6 +910,7 @@ impl Game {
                         "damage" => "damaged",
                         "deal_damage" => "damage_source",
                         "leader_life_change" => "leader",
+                        "discard" => "discarded",
                         "evolve" => "evolved",
                         "attack" => "attacked",
                         _ => "",

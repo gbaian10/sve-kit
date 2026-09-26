@@ -531,19 +531,7 @@ impl Game {
                 }
                 self.move_objects(&ids, "banish", None, None, frame)?;
             }
-            "discard" => {
-                let group = self.group();
-                for id in &ids {
-                    let seat = self.object(id)?.controller.clone();
-                    self.bump(&format!("{seat}.discarded"), 1);
-                    self.emit(
-                        json!({"kind":"捨てる","player":seat,"object":id}),
-                        &frame.cause,
-                        group,
-                    );
-                }
-                self.move_objects(&ids, "cemetery", None, None, frame)?;
-            }
+            "discard" => self.discard(&ids, frame)?,
             _ => {
                 let zone = string(&node["to"]);
                 if ids.is_empty() {
