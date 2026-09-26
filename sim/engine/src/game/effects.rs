@@ -722,6 +722,12 @@ impl Game {
         }
         self.return_advances(&advances)?;
         self.release_links(&leaving, frame)?;
+        let ex_entered = plans
+            .iter()
+            .filter(|plan| plan.changed && plan.destination == "ex")
+            .map(|plan| self.object(&plan.previous.id).cloned())
+            .collect::<Result<Vec<_>>>()?;
+        pending.extend(self.collect_triggers("ex_enter", &ex_entered, &frame.cause)?);
         self.enqueue(pending);
         for (object, _) in &entered {
             self.initialize_entry_counters(&object.id, frame)?;

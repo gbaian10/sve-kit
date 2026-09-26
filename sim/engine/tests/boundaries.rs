@@ -7390,3 +7390,146 @@ fn ignoring_guard_still_checks_posture_target_legality_and_ability_loss() {
         "cannot-attack"
     );
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "Synthetic EX observers distinguish individual entry events from trigger limits."
+)]
+fn ex_observer_catalog(body: &Value, limited: bool) -> Arc<Catalog> {
+    let mut doc = document(body);
+    doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
+    let mut trigger = json!({"kind":"trigger","line":1_i64,"event":"ex_enter","subject":{"side":"self","zone":"ex"},"body":{"op":"modify","subjects":"self.leader","hp":1_i64}});
+    if limited {
+        trigger["limit"] = json!(1_i64);
+        trigger["limit_at"] = json!("trigger");
+    }
+    doc["cards"]["unit-follower"]["abilities"] = json!([trigger]);
+    doc["cards"]["unit-token"] = json!({"status":"complete","review":"synthetic","abilities":[]});
+    let token = json!({"number":"unit-token","faces":[{"name":"entry-token","card_class":"ニュートラル","card_type":"フォロワー・トークン","cost":"1","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]});
+    Arc::new(
+        Catalog::from_documents(
+            &format!("{}\n{token}", snapshot()),
+            &registry(),
+            &[("ex.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn simultaneous_ex_creation_produces_one_distinguishable_trigger_per_created_object() {
+    let loaded = ex_observer_catalog(
+        &json!({"op":"create","name":"entry-token","count":2_i64,"to":"ex"}),
+        false,
+    );
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "ex-batch",
+    )
+    .unwrap();
+    let result = engine
+        .decide(&json!({"do":"play","card":"s"}), "create")
+        .unwrap();
+    let pending = result
+        .events
+        .iter()
+        .filter(|event| event["kind"] == "待機")
+        .collect::<Vec<_>>();
+    assert_eq!(pending.len(), 2);
+    assert_eq!(pending[0]["event"]["entered_ex"], "new-1");
+    assert_eq!(pending[1]["event"]["entered_ex"], "new-2");
+    assert_eq!(pending[0]["group"], pending[1]["group"]);
+    assert_eq!(
+        engine.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(20_i64))
+    );
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled =
+        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "ex").unwrap();
+    for mut resumed in [saved, sampled] {
+        for object in ["new-2", "new-1"] {
+            resumed.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64},"event":{"entered_ex":object}}}),"trigger").unwrap();
+        }
+        assert_eq!(
+            resumed.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(22_i64))
+        );
+        assert_eq!(
+            resumed.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(20_i64))
+        );
+    }
+}
+
+#[test]
+fn sequential_ex_entries_obey_trigger_limits_and_wait_for_the_surrounding_effect() {
+    let move_one =
+        json!({"op":"move","subjects":{"side":"self","zone":"deck","top":1_i64},"to":"ex"});
+    let loaded = ex_observer_catalog(
+        &json!({"op":"seq","steps":[move_one,{"op":"optional","then":{"op":"seq","steps":[]}},move_one]}),
+        true,
+    );
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"first","card":"unit-follower"},{"id":"second","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "ex-sequence",
+    )
+    .unwrap();
+    assert_eq!(
+        engine
+            .decide(&json!({"do":"play","card":"s"}), "move")
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(packet["awaiting"]["at"], "resolve");
+    assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
+    assert_eq!(
+        packet["semantic_state"]["pending_triggers"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    assert_eq!(
+        packet["semantic_state"]["used_this_turn"][0]["count"],
+        1_i64
+    );
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(loaded, &packet, "P1", "ex").unwrap();
+    for mut resumed in [saved, sampled] {
+        let result = resumed
+            .decide(
+                &json!({"do":"resolve-choice","choice":"decline"}),
+                "continue",
+            )
+            .unwrap();
+        assert_eq!(result.outcome, "resolved");
+        assert!(result.events.iter().all(|event| event["kind"] != "待機"));
+        assert_eq!(
+            resumed.query(View::P1, "P1.ex_count").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(resumed.legal().unwrap().len(), 1);
+        resumed
+            .decide(
+                &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}),
+                "trigger",
+            )
+            .unwrap();
+        assert_eq!(
+            resumed.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(21_i64))
+        );
+    }
+}

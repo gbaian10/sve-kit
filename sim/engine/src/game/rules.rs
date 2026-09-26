@@ -957,6 +957,7 @@ impl Game {
         }
         let event_key = match event {
             "enter" => "entered_field",
+            "ex_enter" => "entered_ex",
             "leave" | "field_to_cemetery" => "left_field",
             "damage" => "damaged",
             "deal_damage" => "damage_source",
