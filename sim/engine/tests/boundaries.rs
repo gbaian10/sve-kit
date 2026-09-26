@@ -4339,3 +4339,265 @@ fn ep_has_no_gameplay_cap_and_batched_deltas_survive_resume() {
     ));
     assert_eq!(overflow.digest().unwrap(), before);
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    reason = "The setup fixture already constructs both player zone maps."
+)]
+fn turn_setup() -> Value {
+    let mut initial = setup();
+    for seat in ["P1", "P2"] {
+        initial["players"][seat]["zones"]["deck"] = json!(
+            (0_u32..4_u32)
+                .map(|n| json!({"id":format!("{seat}-d{n}"),"card":if n < 2 {"unit-follower"} else {"unit-spell"}}))
+                .collect::<Vec<_>>()
+        );
+    }
+    initial["room"] = json!({"open_decklists":true});
+    initial["players"]["P1"]["deck_list"] =
+        json!([{"card":"unit-follower","count":3_i64},{"card":"unit-spell","count":3_i64}]);
+    initial["players"]["P2"]["deck_list"] =
+        json!([{"card":"unit-follower","count":3_i64},{"card":"unit-spell","count":2_i64}]);
+    initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"acted":true});
+    initial
+}
+
+#[expect(
+    clippy::unwrap_used,
+    reason = "The fixture ends a turn with no pending abilities or guards."
+)]
+fn finish_turn(engine: &mut Game) -> Vec<Value> {
+    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    engine.decide(&json!({"do":"pass"}), "pass").unwrap().events
+}
+
+#[test]
+fn repeated_skip_costs_apply_to_separate_future_turns_and_roundtrip_publicly() {
+    let mut docs = document(&json!({"op":"draw","count":0_i64}));
+    docs["cards"]["unit-spell"]["abilities"][0]["costs"] = json!([{"op":"skip_turn","side":"self","count":1_i64},{"op":"skip_turn","side":"self","count":1_i64}]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("turns".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &turn_setup(),
+        &Value::Null,
+        &Value::Null,
+        "turns",
+    )
+    .unwrap();
+    let start = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(start.outcome, "resolved");
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["turn_schedule"]["skipped"],
+        json!([{"player":"P1","count":1_i64},{"player":"P1","count":1_i64}])
+    );
+    let mut sampled = Game::from_observation(loaded, &packet, "P1", "sample").unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    for instance in [&mut engine, &mut sampled, &mut restored] {
+        finish_turn(instance);
+        for expected_elapsed in [4_i64, 5_i64] {
+            let events = finish_turn(instance);
+            assert_eq!(
+                instance.query(View::P1, "turn.active").unwrap(),
+                Some(json!("P2"))
+            );
+            assert_eq!(
+                instance.query(View::P1, "turn.elapsed_turns.P1").unwrap(),
+                Some(json!(3_i64))
+            );
+            assert_eq!(
+                instance.query(View::P1, "turn.elapsed_turns.P2").unwrap(),
+                Some(json!(expected_elapsed))
+            );
+            assert_eq!(
+                instance.query(View::P1, "P1.pp.current").unwrap(),
+                Some(json!(1_i64))
+            );
+            assert_eq!(
+                instance.query(View::P1, "P1.field.a.acted").unwrap(),
+                Some(json!(true))
+            );
+            assert_eq!(
+                events
+                    .iter()
+                    .filter(|event| event["kind"] == "ターンスキップ")
+                    .count(),
+                1
+            );
+            assert!(
+                !events
+                    .iter()
+                    .any(|event| event["kind"] == "引く" && event["player"] == "P1")
+            );
+        }
+        finish_turn(instance);
+        assert_eq!(
+            instance.query(View::P1, "turn.active").unwrap(),
+            Some(json!("P1"))
+        );
+        assert_eq!(
+            instance.query(View::P1, "turn.elapsed_turns.P1").unwrap(),
+            Some(json!(4_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.field.a.acted").unwrap(),
+            Some(json!(false))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.hand_count").unwrap(),
+            Some(json!(1_i64))
+        );
+    }
+}
+
+#[test]
+fn extra_turns_run_latest_first_then_resume_the_original_normal_player() {
+    let body = json!({"op":"seq","steps":[{"op":"extra_turn","side":"self","count":1_i64},{"op":"extra_turn","side":"opponent","count":1_i64}]});
+    let loaded = Arc::new(catalog(&body));
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &turn_setup(),
+        &Value::Null,
+        &Value::Null,
+        "turns",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    finish_turn(&mut engine);
+    assert_eq!(
+        engine.query(View::P1, "turn.active").unwrap(),
+        Some(json!("P2"))
+    );
+    let packet = engine.projection(View::P2).unwrap();
+    assert_eq!(packet["semantic_state"]["turn_schedule"]["normal"], "P2");
+    let mut sampled = Game::from_observation(loaded, &packet, "P2", "sample").unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    for instance in [&mut engine, &mut sampled, &mut restored] {
+        for expected in ["P1", "P2", "P1"] {
+            finish_turn(instance);
+            assert_eq!(
+                instance.query(View::P1, "turn.active").unwrap(),
+                Some(json!(expected))
+            );
+        }
+    }
+}
+
+#[test]
+fn skipping_extra_turns_does_not_lose_the_suspended_normal_turn() {
+    for (count, expected) in [(1_i64, "P2"), (2_i64, "P1")] {
+        let body = json!({"op":"seq","steps":[{"op":"extra_turn","side":"opponent","count":1_i64},{"op":"skip_turn","side":"opponent","count":count}]});
+        let mut engine = Game::new(
+            Arc::new(catalog(&body)),
+            &turn_setup(),
+            &Value::Null,
+            &Value::Null,
+            "turns",
+        )
+        .unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let events = finish_turn(&mut engine);
+        assert_eq!(
+            engine.query(View::P1, "turn.active").unwrap(),
+            Some(json!(expected))
+        );
+        let skipped = events
+            .iter()
+            .filter(|event| event["kind"] == "ターンスキップ")
+            .collect::<Vec<_>>();
+        assert_eq!(i64::try_from(skipped.len()).unwrap(), count);
+        assert_eq!(skipped[0]["extra"], true);
+        assert_eq!(
+            events
+                .iter()
+                .filter(|event| event["kind"] == "引く")
+                .count(),
+            1
+        );
+        assert_eq!(
+            engine.query(View::P1, "turn.elapsed_turns.P2").unwrap(),
+            Some(json!(if count == 1 { 3_i64 } else { 2_i64 }))
+        );
+    }
+}
+
+#[test]
+fn turn_schedule_import_rejects_invalid_records_and_failed_resolutions_rollback_costs() {
+    let baseline_catalog = Arc::new(catalog(&json!({"op":"draw","count":0_i64})));
+    for schedule in [
+        json!({"skipped":[{"player":"P3","count":1_i64}]}),
+        json!({"extra":[{"player":"P1","count":0_i64}]}),
+        json!({"extra":[{"player":"P1","count":-1_i64}]}),
+        json!({"normal":"P3"}),
+        json!({"skipped":[{"player":"P1","count":10_001_i64}]}),
+    ] {
+        let mut initial = setup();
+        initial["semantic_state"] = json!({"turn_schedule":schedule});
+        Game::new(
+            Arc::clone(&baseline_catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "turns",
+        )
+        .unwrap_err();
+    }
+    let mut legacy = setup();
+    legacy["turn"]["extra_turns"] = json!(["P1"]);
+    assert!(matches!(
+        Game::new(
+            Arc::clone(&baseline_catalog),
+            &legacy,
+            &Value::Null,
+            &Value::Null,
+            "legacy"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    let mut docs =
+        document(&json!({"op":"unsupported","reason":"synthetic incomplete resolution"}));
+    docs["cards"]["unit-spell"]["abilities"][0]["costs"] =
+        json!([{"op":"skip_turn","side":"self","count":1_i64}]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("turns".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(loaded, &setup(), &Value::Null, &Value::Null, "turns").unwrap();
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+}

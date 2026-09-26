@@ -383,6 +383,11 @@ impl Game {
                         *face_up = cost["face"] == "up";
                     }
                 }
+                "skip_turn" => {
+                    if self.number(&cost["count"], &context)? < 0 {
+                        return Ok(false);
+                    }
+                }
                 "move" | "discard" | "banish" | "lesson" | "eat" | "reveal" | "_drive_point"
                 | "_earth_payment" => {}
                 unknown => {

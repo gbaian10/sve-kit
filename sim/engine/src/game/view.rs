@@ -136,6 +136,7 @@ impl Game {
         }).collect::<Vec<_>>();
         let mut semantic =
             json!({"pending_triggers":pending,"counters_this_turn":self.state.counters});
+        semantic["turn_schedule"] = json!(self.state.schedule);
         for (key, count) in &self.state.counters {
             if let Some((controller, name)) = key.split_once('.')
                 && matches!(controller, "P1" | "P2")

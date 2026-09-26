@@ -406,7 +406,8 @@ impl Game {
                     frame.todo.insert(0, json!({"op":"_drive"}));
                 }
             }
-            "_earth_payment" | "extra_turn" => self.payment_effect(node, frame)?,
+            "_earth_payment" => self.payment_effect(node, frame)?,
+            "skip_turn" | "extra_turn" => self.schedule_turns(node, frame)?,
             "win" => self.win_by_effect(node, frame)?,
             "_drive" => self.drive(frame)?,
             "_drive_trigger" => {

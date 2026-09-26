@@ -285,15 +285,6 @@ impl Game {
                     self.move_objects(&[id.into()], "cemetery", None, None, frame)?;
                 }
             }
-            "extra_turn" => {
-                for seat in self.seats(string(&node["side"]), frame) {
-                    let mut turns = list(&self.state.turn["extra_turns"]);
-                    for _ in 0..self.number(&node["count"], frame)?.max(0) {
-                        turns.push(json!(seat));
-                    }
-                    self.state.turn["extra_turns"] = json!(turns);
-                }
-            }
             _ => return Err(crate::invalid("unknown payment continuation")),
         }
         Ok(())

@@ -25,6 +25,7 @@ mod rules;
 mod selections;
 mod temporal;
 mod tokens;
+mod turns;
 mod view;
 
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -180,6 +181,7 @@ struct State {
     random_index: usize,
     #[serde(default)]
     random_cursors: BTreeMap<String, usize>,
+    schedule: turns::TurnSchedule,
     rng: u64,
     next_object: u64,
     next_event: u64,
@@ -261,6 +263,11 @@ impl Game {
         let mut position = Self::prepare_opening(setup);
         if position["history"] == "none" {
             position["semantic_state"] = json!({});
+        }
+        if !list(&position["turn"]["extra_turns"]).is_empty() {
+            return Err(EngineFailure::Unsupported(
+                "legacy extra-turn state does not record the suspended normal turn".into(),
+            ));
         }
         let mut players = BTreeMap::new();
         let mut objects = BTreeMap::new();
@@ -351,6 +358,7 @@ impl Game {
             random: random.clone(),
             random_index: 0,
             random_cursors: BTreeMap::new(),
+            schedule: turns::TurnSchedule::load(&position["semantic_state"]["turn_schedule"])?,
             rng: seed.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |s, b| {
                 (s ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
             }),

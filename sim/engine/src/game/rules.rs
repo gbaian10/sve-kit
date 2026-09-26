@@ -673,13 +673,7 @@ impl Game {
     }
     fn next_turn(&mut self) -> Result<()> {
         self.expire_effects()?;
-        let mut extra_turns = list(&self.state.turn["extra_turns"]);
-        let seat = if extra_turns.is_empty() {
-            other(self.active()).to_owned()
-        } else {
-            string(&extra_turns.remove(0)).to_owned()
-        };
-        self.state.turn["extra_turns"] = json!(extra_turns);
+        let seat = self.next_scheduled_player()?;
         self.state.turn["active"] = json!(seat);
         self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
