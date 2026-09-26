@@ -2,8 +2,8 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use alloc::collections::BTreeSet;
 
+use alloc::collections::BTreeSet;
 use serde_json::{Value, json};
 
 use super::{Frame, Game, int, list, other, scalar, string};
@@ -549,51 +549,6 @@ impl Game {
         }))
     }
 
-    pub(super) fn keywords(&self, id: &str) -> Result<BTreeSet<String>> {
-        let object = self.object(id)?;
-        let mut result: BTreeSet<String> = list(&object.state["keywords"])
-            .iter()
-            .filter_map(Value::as_str)
-            .map(str::to_owned)
-            .collect();
-        if !list(&object.state["links"]["出走"]).is_empty() {
-            result.insert("rush".into());
-        }
-        if !list(&object.state["links"]["ドライブ"]).is_empty()
-            || !list(&object.state["links"]["憑依"]).is_empty()
-        {
-            result.insert("rush".into());
-            result.insert("single_drive".into());
-        }
-        for ability in self.abilities(id)? {
-            if ability["body"]["op"] == "drive" {
-                result.insert(string(&ability["keyword"]).into());
-            }
-            if ability["kind"] == "static" && ability["body"]["op"] == "keyword" {
-                result.insert(string(&ability["body"]["name"]).into());
-            }
-        }
-        for source in self.field_ids() {
-            for ability in self.abilities(&source)? {
-                let body = &ability["body"];
-                if ability["kind"] != "static" || body["op"] != "aura" {
-                    continue;
-                }
-                let frame = self.frame_for(&source)?;
-                if let Some(condition) = body.get("condition")
-                    && !self.truth(condition, &frame)?
-                {
-                    continue;
-                }
-                if self.matches(id, &body["subjects"], &frame)? {
-                    for keyword in list(&body["keywords"]) {
-                        result.insert(string(&keyword).into());
-                    }
-                }
-            }
-        }
-        Ok(result)
-    }
     pub(super) fn field_ids(&self) -> Vec<String> {
         ["P1", "P2"]
             .iter()

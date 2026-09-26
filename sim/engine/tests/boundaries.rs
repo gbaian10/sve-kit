@@ -13,7 +13,7 @@ fn snapshot() -> String {
     [("unit-follower","フォロワー"),("unit-spell","スペル")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n")
 }
 fn registry() -> String {
-    json!({"version":"astra/1","keywords":{"guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}}}}).to_string()
+    json!({"version":"astra/1","keywords":{"guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},"drain":{"ja":"ドレイン","rule":"12.13","expansion":{"op":"keyword","name":"drain"}}}}).to_string()
 }
 fn document(body: &Value) -> Value {
     json!({"version":"astra/1","cards":{"unit-follower":{"status":"complete","review":"synthetic","abilities":[]},"unit-spell":{"status":"complete","review":"synthetic","abilities":[{"kind":"spell","line":1,"targets":[{"key":"1","select":{"zone":"field","side":"opponent","type":"follower"},"min":1,"max":1}],"body":body}]}}})
@@ -400,6 +400,155 @@ fn next_spell_discount_tracks_future_cards_and_consumes_only_on_success() {
         engine.query(View::P1, "P2.field.b.hp").unwrap(),
         Some(json!(2_i64))
     );
+}
+
+#[test]
+fn drain_captures_actual_attack_damage_and_survives_its_sources_death() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"kind":"static","line":1_i64,"body":{"op":"keyword","name":"drain"}},
+        {"kind":"static","line":2_i64,"body":{"op":"keyword","name":"drain"}},
+        {"kind":"static","line":3_i64,"body":{"op":"replace_damage","subjects":"self","amount":-1_i64}},
+        {"kind":"activated","line":4_i64,"body":{"op":"damage","subjects":"opponent.leader","amount":2_i64}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("drain.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    for power in [1_i64, 2_i64] {
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"hp":1_i64,"power":power});
+        initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+        let mut engine = Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "drain",
+        )
+        .unwrap();
+        let effect = engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":4_i64}}),
+                "effect",
+            )
+            .unwrap();
+        assert!(effect.events.iter().all(|event| event["kind"] != "待機"));
+        engine
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"b"}),
+                "attack",
+            )
+            .unwrap();
+        let damage = engine.decide(&json!({"do":"pass"}), "damage").unwrap();
+        assert_eq!(
+            engine.query(View::P1, "P1.cemetery").unwrap(),
+            Some(json!(["a"]))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(20_i64))
+        );
+        assert_eq!(
+            damage
+                .events
+                .iter()
+                .filter(|event| event["kind"] == "待機")
+                .count(),
+            usize::try_from(power - 1_i64).unwrap()
+        );
+        if power == 1 {
+            continue;
+        }
+        let choice = engine.legal().unwrap().into_iter().next().unwrap();
+        assert_eq!(
+            choice["pending"]["ability"],
+            json!({"source":"a","line":1_i64,"keyword":"ドレイン","rule":"12.13.2"})
+        );
+        let restored: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        let rebuilt = Game::from_observation(
+            Arc::clone(&catalog),
+            &engine.projection(View::P1).unwrap(),
+            "P1",
+            "drain-world",
+        )
+        .unwrap();
+        for mut candidate in [engine, restored, rebuilt] {
+            assert_eq!(
+                candidate.decide(&choice, "heal").unwrap().outcome,
+                "resolved"
+            );
+            assert_eq!(
+                candidate.query(View::P1, "P1.leader.life").unwrap(),
+                Some(json!(21_i64))
+            );
+            assert_eq!(
+                candidate.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(18_i64))
+            );
+        }
+    }
+}
+
+#[test]
+fn granted_drain_keeps_the_provider_text_and_recipient_controller() {
+    for aura in [false, true] {
+        let mut doc = document(
+            &json!({"op":"modify","subjects":{"zone":"field","side":"self"},"keywords":["drain"]}),
+        );
+        let mut initial = setup();
+        if aura {
+            doc["cards"]["unit-spell"]["abilities"] = json!([{"kind":"static","line":1_i64,"body":{"op":"aura","subjects":{"zone":"field","side":"self","type":"follower"},"keywords":["drain"]}}]);
+            initial["players"]["P1"]["zones"]["field"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"id":"provider","card":"unit-spell"}));
+        }
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("grants.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut engine =
+            Game::new(catalog, &initial, &Value::Null, &Value::Null, "grants").unwrap();
+        if !aura {
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "grant",
+                )
+                .unwrap();
+        }
+        engine
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                "attack",
+            )
+            .unwrap();
+        engine.decide(&json!({"do":"pass"}), "damage").unwrap();
+        let choice = engine.legal().unwrap().into_iter().next().unwrap();
+        assert_eq!(
+            choice["pending"]["ability"],
+            json!({"source":"a","card":"unit-spell","line":1_i64,"keyword":"ドレイン","rule":"12.13.2"})
+        );
+        assert_eq!(engine.decide(&choice, "heal").unwrap().outcome, "resolved");
+        assert_eq!(
+            engine.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(22_i64))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(18_i64))
+        );
+    }
 }
 
 #[test]

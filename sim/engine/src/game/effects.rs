@@ -844,7 +844,12 @@ impl Game {
                 all.extend(keywords.iter().cloned());
                 self.object_mut(&id)?.state["keywords"] = json!(all);
             }
-            self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))}));
+            let reference = if node["keywords"].is_array() {
+                self.granted_reference(&id, &frame.reference)?
+            } else {
+                frame.reference.clone()
+            };
+            self.state.continuous.push(json!({"source":frame.source,"reference":reference,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))}));
         }
         self.life_change_triggers(&life_changes, &frame.cause)?;
         Ok(())
@@ -1039,7 +1044,7 @@ impl Game {
             }
             if amount > 0 {
                 actual.push(
-                    json!({"source":source,"target":id,"amount":amount,"battle":hit["battle"]}),
+                    json!({"source":source,"target":id,"amount":amount,"battle":hit["battle"],"attack":hit["attack"]}),
                 );
             }
         }
@@ -1048,6 +1053,7 @@ impl Game {
     }
 
     fn apply_damage(&mut self, actual: &[Value], frame: &Frame) -> Result<()> {
+        let mut pending = self.drain_triggers(actual, &frame.cause)?;
         let group = self.group();
         let mut damaged = Vec::new();
         let mut life_changes = Vec::new();
@@ -1076,12 +1082,12 @@ impl Game {
                 group,
             );
         }
-        let mut pending = self.collect_subject_event(
+        pending.extend(self.collect_subject_event(
             "damage",
             &damaged,
             &frame.cause,
             &json!({"effect_damage": !actual.iter().any(|hit|hit["battle"] == true)}),
-        )?;
+        )?);
         for hit in actual {
             let source = string(&hit["source"]);
             let subject = self.event_subject(source)?;

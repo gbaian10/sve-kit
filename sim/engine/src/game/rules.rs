@@ -580,7 +580,7 @@ impl Game {
                 let mut frame = self.start_frame(source, Value::Null, &flow["decision"])?;
                 frame.cause = flow["cause"].clone();
                 let mut hits = vec![
-                    json!({"source":source,"target":target,"amount":self.object(source)?.state["power"],"battle":true}),
+                    json!({"source":source,"target":target,"amount":self.object(source)?.state["power"],"battle":true,"attack":true}),
                 ];
                 if !target.ends_with(".leader") {
                     hits.push(json!({"source":target,"target":source,"amount":self.object(target)?.state["power"],"battle":true}));

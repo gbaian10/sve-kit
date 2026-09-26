@@ -10,6 +10,7 @@ mod costs;
 mod effects;
 mod expr;
 mod extensions;
+mod keywords;
 mod legal;
 mod movement;
 mod nested;
