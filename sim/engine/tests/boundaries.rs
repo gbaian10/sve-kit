@@ -5215,3 +5215,165 @@ fn evolution_collects_stat_triggers_from_the_new_face() {
         Some(json!(21_i64))
     );
 }
+
+#[test]
+fn empty_stack_waits_for_resolution_and_can_be_refilled_before_check_timing() {
+    for refill in [false, true] {
+        let loaded = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
+            {"op":"move","subjects":{"side":"self","zone":"field","type":"amulet"},"to":"cemetery"},
+            {"op":"optional","then":{"op":"seq","steps":[
+                {"op":"counter","subjects":{"side":"self","zone":"field","type":"amulet"},"name":"stack_counter","amount":i64::from(refill)},
+                {"op":"damage","subjects":"target.1","amount":1_i64}
+            ]}}
+        ]})));
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().push(json!({"id":"soil","card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}));
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "stack-check",
+        )
+        .unwrap();
+        assert_eq!(
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "cast"
+                )
+                .unwrap()
+                .outcome,
+            "paused"
+        );
+        assert_eq!(
+            engine
+                .query(View::P1, "P1.field.soil.counters.スタックカウンター")
+                .unwrap(),
+            Some(json!(0_i64))
+        );
+        let mut saved: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        let mut sampled = Game::from_observation(
+            loaded,
+            &engine.projection(View::P1).unwrap(),
+            "P1",
+            "stack-check",
+        )
+        .unwrap();
+        for instance in [&mut engine, &mut saved, &mut sampled] {
+            let step = instance
+                .decide(&json!({"do":"resolve-choice","choice":"execute"}), "finish")
+                .unwrap();
+            assert_eq!(step.outcome, "resolved");
+            assert_eq!(
+                instance.query(View::P1, "P1.field").unwrap(),
+                Some(if refill {
+                    json!(["a", "soil"])
+                } else {
+                    json!(["a"])
+                })
+            );
+            assert!(
+                !step
+                    .events
+                    .iter()
+                    .any(|event| event["kind"] == "破壊" && event["object"] == "soil")
+            );
+            let cleanup = step.events.iter().position(|event| {
+                event["kind"] == "移動" && event["object"] == "soil" && event["by"] == "rule-11.7.1"
+            });
+            assert_eq!(cleanup.is_some(), !refill);
+            if let Some(index) = cleanup {
+                let damage = step
+                    .events
+                    .iter()
+                    .position(|event| event["kind"] == "ダメージ")
+                    .unwrap();
+                let erased = step
+                    .events
+                    .iter()
+                    .position(|event| event["kind"] == "消去" && event["object"] == "soil")
+                    .unwrap();
+                assert!(damage < index && index < erased);
+            }
+        }
+    }
+}
+
+#[test]
+fn empty_stacks_and_lethal_followers_leave_in_one_state_based_batch() {
+    let loaded = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
+        {"op":"counter","subjects":{"side":"self","zone":"field","type":"amulet"},"name":"stack_counter","amount":-1_i64},
+        {"op":"damage","subjects":"target.1","amount":3_i64}
+    ]})));
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"].as_array_mut().unwrap().extend([
+        json!({"id":"soil-1","card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}),
+        json!({"id":"soil-2","card":"unit-soil","state":{"counters":{"stack_counter":1_i64}}}),
+        json!({"id":"silenced","card":"unit-soil","state":{"silenced":true,"counters":{"stack_counter":1_i64}}})
+    ]);
+    let mut engine =
+        Game::new(loaded, &initial, &Value::Null, &Value::Null, "stack-check").unwrap();
+    let step = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let movements = step
+        .events
+        .iter()
+        .filter(|event| {
+            event["kind"] == "移動"
+                && ["soil-1", "soil-2", "b"]
+                    .iter()
+                    .any(|id| event["object"] == *id)
+        })
+        .collect::<Vec<_>>();
+    assert_eq!(movements.len(), 3);
+    assert!(
+        movements
+            .iter()
+            .all(|event| event["group"] == movements[0]["group"])
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.field").unwrap(),
+        Some(json!(["a", "silenced"]))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P2.cemetery").unwrap(),
+        Some(json!(["b"]))
+    );
+    assert_eq!(
+        step.events
+            .iter()
+            .filter(|event| event["kind"] == "破壊")
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn nonprogressing_rule_movement_fails_closed_instead_of_recursing_forever() {
+    let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":3_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"static","line":1_i64,"body":{"op":"replace_move","subjects":"self","from":"field","to":"cemetery","replacement":"field"}}]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("rule-loop".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(loaded, &setup(), &Value::Null, &Value::Null, "rule-loop").unwrap();
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+}

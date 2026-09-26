@@ -778,26 +778,7 @@ impl Game {
             }
             return Ok(());
         }
-        let dead =
-            self.field_ids()
-                .into_iter()
-                .filter(|id| {
-                    self.state.objects.get(id).is_some_and(|o| {
-                        int(&o.state["hp"]) <= 0 || o.state["bane_damaged"] == true
-                    }) && self
-                        .object_type(id)
-                        .is_ok_and(|typ| typ.contains("フォロワー"))
-                })
-                .collect::<Vec<_>>();
-        if !dead.is_empty() {
-            self.destroy(&dead, None)?;
-            for id in &dead {
-                self.object_mut(id)?
-                    .state
-                    .as_object_mut()
-                    .ok_or_else(|| invalid("object state map"))?
-                    .remove("bane_damaged");
-            }
+        if self.clean_field_rules()? {
             return self.checks();
         }
         if self.state.pending.is_empty()

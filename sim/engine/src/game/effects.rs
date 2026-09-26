@@ -470,7 +470,7 @@ impl Game {
             vec![json!({"op":"_movement_receipt","before":before,"bind":node["bind"]})],
         );
         match string(&node["op"]) {
-            "destroy" => self.destroy(&ids, Some(frame))?,
+            "destroy" => self.destroy(&ids, frame)?,
             "banish" => self.banish_objects(&ids, frame)?,
             "discard" => self.discard(&ids, frame)?,
             _ => {
@@ -715,37 +715,22 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn destroy(&mut self, ids: &[String], frame: Option<&Frame>) -> Result<()> {
+    pub(super) fn destroy(&mut self, ids: &[String], frame: &Frame) -> Result<()> {
         let mut actual = Vec::new();
-        let mut rules = json!({});
         for id in ids {
-            if self.object(id)?.zone != "field" {
-                continue;
+            if self.object(id)?.zone == "field" && !self.restricted(id, "ability_destroy")? {
+                actual.push(id.clone());
             }
-            let life_depleted = int(&self.object(id)?.state["hp"]) <= 0;
-            if (frame.is_some() || !life_depleted) && self.restricted(id, "ability_destroy")? {
-                continue;
-            }
-            actual.push(id.clone());
-            rules[id] = json!(if life_depleted { "11.3.1" } else { "11.3.2" });
         }
-        let cause = frame.map_or_else(|| json!({"rule":"11.3"}), |f| f.cause.clone());
         let group = self.group();
         for id in &actual {
-            let mut event = json!({"kind":"破壊","object":id});
-            if let Some(f) = frame {
-                event["source"] = json!(f.source);
-                self.emit(event, &cause, group);
-            } else {
-                self.emit(event, &json!({"rule":rules[id]}), group);
-            }
+            self.emit(
+                json!({"kind":"破壊","object":id,"source":frame.source}),
+                &frame.cause,
+                group,
+            );
         }
-        let mut default = Frame {
-            cause,
-            ..Frame::default()
-        };
-        default.values.insert("movement_rules".into(), rules);
-        self.move_objects(&actual, "cemetery", None, None, frame.unwrap_or(&default))?;
+        self.move_objects(&actual, "cemetery", None, None, frame)?;
         Ok(())
     }
 

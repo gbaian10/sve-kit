@@ -44,7 +44,13 @@ impl Game {
             .values
             .get("movement_rules")
             .and_then(|rules| rules.get(id))
-            .map_or_else(|| frame.cause.clone(), |rule| json!({"rule":rule}));
+            .map_or_else(
+                || frame.cause.clone(),
+                |rule| {
+                    event["by"] = json!(format!("rule-{}", string(rule)));
+                    json!({"rule":rule})
+                },
+            );
         self.emit(event, &cause, group);
         Ok(())
     }
