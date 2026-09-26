@@ -124,7 +124,6 @@ impl Game {
     }
 
     fn semantic_projection(&self, view: View) -> Value {
-        let seat = view.player();
         let pending=self.state.pending.iter().map(|pending|{
             let mut value=json!({"controller":pending.controller,"ability":pending.reference,"event":pending.event});
             if let Some(id)=&pending.id {value["id"]=json!(id);}
@@ -158,15 +157,19 @@ impl Game {
                 .filter(|entry| self.visible_references(entry, view))
                 .collect::<Vec<_>>()
         );
-        semantic["used_this_turn"] = json!({});
-        for (key, count) in &self.state.used {
-            if seat.is_none()
-                || serde_json::from_str::<Value>(key)
-                    .is_ok_and(|entry| self.visible_references(&entry, view))
-            {
-                semantic["used_this_turn"][key] = json!(count);
-            }
-        }
+        semantic["used_this_turn"] = json!(
+            self.state
+                .used
+                .values()
+                .filter(|entry| {
+                    self.state
+                        .objects
+                        .get(string(&entry.ability["source"]))
+                        .is_some_and(|object| object.generation == entry.generation)
+                        && self.visible_references(&entry.ability, view)
+                })
+                .collect::<Vec<_>>()
+        );
         semantic
     }
 

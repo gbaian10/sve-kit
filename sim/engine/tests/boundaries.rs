@@ -493,13 +493,92 @@ fn activated_limits_and_x_domains_survive_observation_sampling() {
     let packet = engine.projection(View::P1).unwrap();
     assert_eq!(
         packet["semantic_state"]["used_this_turn"]
-            .as_object()
+            .as_array()
             .unwrap()
             .len(),
         1
     );
     let sampled = Game::from_observation(catalog, &packet, "P1", "sample").unwrap();
     assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
+}
+
+#[test]
+fn imported_usage_tracks_object_generations_and_round_trips() {
+    let mut doc = document(&json!({"op":"seq","steps":[
+        {"op":"move","subjects":{"zone":"field","side":"self"},"to":"ex"},
+        {"op":"move","subjects":{"zone":"ex","side":"self"},"to":"field"}
+    ]}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"activated","line":1_i64,"limit":1_i64,
+        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
+    }]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("usage.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    let entry = json!({"ability":{"source":"a","line":1_i64},"count":1_i64});
+    position["semantic_state"] = json!({"used_this_turn":[entry]});
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "usage",
+    )
+    .unwrap();
+    let activation = json!({"do":"activate","ability":{"source":"a","line":1_i64}});
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine.decide(&activation, "already-used").unwrap().outcome,
+        "cannot-activate"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "return",
+        )
+        .unwrap();
+    assert!(engine.legal().unwrap().contains(&activation));
+    engine.decide(&activation, "new-object").unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(19_i64))
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["used_this_turn"],
+        json!([
+            {"ability":{"source":"a","line":1_i64},"generation":2_i64,"count":1_i64}
+        ])
+    );
+    let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(Arc::clone(&catalog), &packet, "P1", "sample").unwrap();
+    assert_eq!(restored.legal().unwrap(), engine.legal().unwrap());
+    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
+    assert!(
+        sampled
+            .legal()
+            .unwrap()
+            .iter()
+            .all(|choice| choice["do"] != "activate")
+    );
+    position["semantic_state"]["used_this_turn"] = json!([entry, entry]);
+    Game::new(
+        Arc::clone(&catalog),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "duplicate",
+    )
+    .unwrap_err();
+    position["semantic_state"]["used_this_turn"][0]["count"] = json!(-1_i64);
+    Game::new(catalog, &position, &Value::Null, &Value::Null, "negative").unwrap_err();
 }
 
 #[test]

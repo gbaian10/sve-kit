@@ -130,6 +130,14 @@ struct Prompt {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+struct AbilityUse {
+    ability: Value,
+    #[serde(default)]
+    generation: u64,
+    count: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct State {
     players: BTreeMap<String, Player>,
     objects: BTreeMap<String, Object>,
@@ -142,7 +150,7 @@ struct State {
     counters: BTreeMap<String, i64>,
     continuous: Vec<Value>,
     delayed: Vec<Value>,
-    used: BTreeMap<String, u64>,
+    used: BTreeMap<String, AbilityUse>,
     knowledge: BTreeMap<String, Knowledge>,
     facts: Value,
     game: Value,
@@ -414,7 +422,16 @@ impl Game {
 
     fn initialize_history(&mut self, setup: &Value) -> Result<()> {
         if let Some(used) = setup["semantic_state"].get("used_this_turn") {
-            self.state.used = serde_json::from_value(used.clone()).map_err(invalid)?;
+            let entries: Vec<AbilityUse> = serde_json::from_value(used.clone()).map_err(invalid)?;
+            for mut entry in entries {
+                let source = string(&entry.ability["source"]);
+                let code = self.ability(source, &entry.ability)?;
+                let key = Self::usage_key(source, entry.generation, &code);
+                entry.ability = self.reference(source, &code);
+                if self.state.used.insert(key, entry).is_some() {
+                    return Err(invalid("duplicate ability usage in history"));
+                }
+            }
         }
         for pending in list(&setup["semantic_state"]["pending_triggers"]) {
             let reference = &pending["ability"];

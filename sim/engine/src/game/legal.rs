@@ -6,7 +6,7 @@ use alloc::collections::BTreeSet;
 
 use serde_json::{Value, json};
 
-use super::{Frame, Game, int, list, other, scalar, string};
+use super::{AbilityUse, Frame, Game, int, list, other, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
 pub(super) fn subsets(items: &[String], min: usize, max: usize) -> Vec<Vec<String>> {
@@ -665,8 +665,8 @@ impl Game {
         ))
     }
 
-    fn usage_key(&self, id: &str, code: &Value) -> Result<String> {
-        Ok(json!({"source":id,"generation":self.object(id)?.generation,"line":code["line"],"section":code["section"],"face":code["face"],"keyword":code["keyword"]}).to_string())
+    pub(super) fn usage_key(id: &str, generation: u64, code: &Value) -> String {
+        json!({"source":id,"generation":generation,"line":code["line"],"section":code["section"],"face":code["face"],"keyword":code["keyword"]}).to_string()
     }
 
     pub(super) fn can_use(&self, id: &str, code: &Value) -> Result<bool> {
@@ -676,17 +676,22 @@ impl Game {
         Ok(self
             .state
             .used
-            .get(&self.usage_key(id, code)?)
-            .copied()
-            .unwrap_or_default()
+            .get(&Self::usage_key(id, self.object(id)?.generation, code))
+            .map_or(0, |entry| entry.count)
             < limit)
     }
 
     pub(super) fn mark_use(&mut self, id: &str, code: &Value) -> Result<()> {
         if code.get("limit").is_some() {
-            let key = self.usage_key(id, code)?;
-            let count = self.state.used.entry(key).or_default();
-            *count = count.saturating_add(1);
+            let generation = self.object(id)?.generation;
+            let key = Self::usage_key(id, generation, code);
+            let ability = self.reference(id, code);
+            let entry = self.state.used.entry(key).or_insert(AbilityUse {
+                ability,
+                generation,
+                count: 0,
+            });
+            entry.count = entry.count.saturating_add(1);
         }
         Ok(())
     }
