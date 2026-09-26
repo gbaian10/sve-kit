@@ -33,14 +33,16 @@ use sve_scenario_runner::arch::{
     ArchFixtures, ArchOptions, AssistEngine, ReplayEngine, check_assist, check_replay,
     load_fixtures,
 };
-use sve_scenario_runner::{Fixture, View, load_dir, load_selection, score_g1, summary};
+use sve_scenario_runner::{
+    Fixture, RunOptions, View, load_dir, load_selection, run, score_g1, summary,
+};
 
 type Result<T> = result::Result<T, Box<dyn Error>>;
 
 fn main() -> Result<()> {
     let mut arguments = args().skip(1);
     let snapshot = PathBuf::from(arguments.next().ok_or(
-        "usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist|validate] [OUTPUT]",
+        "usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist|validate|rules] [OUTPUT] [SELECTION]",
     )?);
     let root = PathBuf::from(arguments.next().unwrap_or_else(|| ".".into()));
     let mode = arguments.next().unwrap_or_else(|| "all".into());
@@ -51,6 +53,14 @@ fn main() -> Result<()> {
     );
     create_dir_all(&output)?;
     let catalog = Arc::new(Catalog::load(&snapshot, &root.join("authored"))?);
+    if mode == "rules" {
+        return rules(
+            &catalog,
+            &root,
+            &output,
+            arguments.next().map(PathBuf::from).as_deref(),
+        );
+    }
     if mode == "validate" {
         println!(
             "Schema-validated authored programs: {}",
@@ -80,6 +90,30 @@ fn main() -> Result<()> {
     if !matches!(mode.as_str(), "all" | "g1" | "replay" | "assist" | "ai") {
         return Err("unknown report mode".into());
     }
+    Ok(())
+}
+
+fn rules(
+    catalog: &Arc<Catalog>,
+    root: &Path,
+    output: &Path,
+    selection: Option<&Path>,
+) -> Result<()> {
+    let questions = load_dir(&root.join("tests/rules-scenarios/questions"))?;
+    let selection = selection.map(load_selection).transpose()?;
+    let reports = run(
+        &mut Adapter::new(Arc::clone(catalog)),
+        &questions,
+        selection.as_ref(),
+        RunOptions {
+            require_verified: true,
+        },
+    )?;
+    retain(&output.join("rules.txt"), &reports)?;
+    let mut bytes = to_vec_pretty(&reports)?;
+    bytes.push(b'\n');
+    write(output.join("rules.json"), bytes)?;
+    println!("Rules {:?}", summary(&reports));
     Ok(())
 }
 
