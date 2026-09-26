@@ -234,6 +234,27 @@ impl Game {
         Ok(frame)
     }
 
+    pub(super) fn pending_frame(&self, pending: &Pending, decision: &Value) -> Result<Frame> {
+        let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
+        frame.controller.clone_from(&pending.controller);
+        if let Some(context) = &pending.context {
+            frame.bindings.clone_from(&context.bindings);
+            for (id, attributes) in &context.captured {
+                if id == &context.source {
+                    frame.captured.insert(id.clone(), attributes.clone());
+                    continue;
+                }
+                frame
+                    .captured
+                    .entry(id.clone())
+                    .or_insert_with(|| attributes.clone());
+            }
+            frame.event.clone_from(&context.event);
+            frame.values.clone_from(&context.values);
+        }
+        Ok(frame)
+    }
+
     fn play(&mut self, decision: &Value) -> Result<bool> {
         let Some(frame) = self.prepare_card_play(decision, None)? else {
             return Ok(false);
@@ -386,38 +407,29 @@ impl Game {
         }) {
             return Err(invalid(format!("pending ability is ambiguous: {choice}")));
         }
-        let pending = self.state.pending.remove(index);
+        let pending = first.clone();
         if pending.controller != string(&decision["by"]) {
             return Err(invalid("wrong pending controller"));
         }
         if decision["costs"] == "decline" && list(&pending.code["costs"]).is_empty() {
             return Err(invalid("a cost-free pending ability cannot be declined"));
         }
-        let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
-        if let Some(context) = &pending.context {
-            frame.bindings.clone_from(&context.bindings);
-            for (id, attributes) in &context.captured {
-                if id == &context.source {
-                    frame.captured.insert(id.clone(), attributes.clone());
-                    continue;
-                }
-                frame
-                    .captured
-                    .entry(id.clone())
-                    .or_insert_with(|| attributes.clone());
-            }
-            frame.event.clone_from(&context.event);
-            frame.values.clone_from(&context.values);
-            frame.controller.clone_from(&context.controller);
-        }
+        let mut frame = self.pending_frame(&pending, decision)?;
         self.freeze(&pending.code, "play-start", &mut frame)?;
-        if !self.prepare_additional(&pending.code, &mut frame)? {
-            return Ok("cannot-play".into());
+        let valid = decision["costs"] != "decline"
+            && self.prepare_additional(&pending.code, &mut frame)?
+            && self.valid_parameters(&pending.code, &frame)?
+            && self.can_pay(&Self::payment_nodes(&pending.code, &frame), &frame)?;
+        let cancelled = decision["costs"] == "decline" || !valid;
+        if cancelled && decision["costs"] != "decline" {
+            let base = Self::pending_choice(&pending);
+            let initial = self.pending_frame(&pending, &base)?;
+            if !self.parameterize(base, &pending.code, &initial)?.is_empty() {
+                return Ok("cannot-play".into());
+            }
         }
-        if decision["costs"] == "decline"
-            || !self.valid_parameters(&pending.code, &frame)?
-            || !self.can_pay(&Self::payment_nodes(&pending.code, &frame), &frame)?
-        {
+        self.state.pending.remove(index);
+        if cancelled {
             let group = self.group();
             self.emit(
                 json!({"kind":"待機取消","ability":pending.reference,"event":pending.event}),

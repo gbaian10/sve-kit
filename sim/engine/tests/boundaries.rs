@@ -2973,3 +2973,139 @@ fn posture_events_and_triggers_follow_actual_batched_changes() {
     );
     assert!(attack.events.iter().any(|event| event["kind"] == "攻撃"));
 }
+
+#[test]
+fn invalid_pending_targets_and_distributions_preserve_the_trigger_for_retry() {
+    let mut docs = document(&json!({"op":"draw","count":0_i64}));
+    docs["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"trigger","line":1_i64,"event":"attack","subject":"self",
+        "targets":[{"key":"1","select":{"side":"opponent","zone":"field"},"min":1_i64,"max":2_i64,"distribute":2_i64}],
+        "body":{"op":"damage","subjects":"target.1","amount":2_i64,"split":"1"}
+    }]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("unit.yaml".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"c","card":"unit-follower"}));
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "retry",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+            "attack",
+        )
+        .unwrap();
+    let restored = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "retry-world",
+    )
+    .unwrap();
+    for mut instance in [engine, restored] {
+        let before = instance.digest().unwrap();
+        for (targets, amounts) in [
+            (json!(["a"]), json!({"a":2_i64})),
+            (json!(["b", "c"]), json!({"b":2_i64,"c":0_i64})),
+            (json!(["b", "b"]), json!({"b":2_i64})),
+        ] {
+            let step = instance.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}},"targets":{"1":targets},"distribute":{"1":amounts}}), "invalid").unwrap();
+            assert_eq!(step.outcome, "cannot-play");
+            assert!(step.events.is_empty());
+            assert_eq!(instance.digest().unwrap(), before);
+        }
+        let choice = instance
+            .legal()
+            .unwrap()
+            .into_iter()
+            .find(|choice| choice["targets"]["1"] == json!(["b", "c"]))
+            .unwrap();
+        assert_eq!(
+            instance.decide(&choice, "retry").unwrap().outcome,
+            "resolved"
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.field.c.hp").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.field.a.acted").unwrap(),
+            Some(json!(true))
+        );
+    }
+}
+
+#[test]
+fn unplayable_pending_and_explicit_unpaid_costs_cancel_once() {
+    for cost in [0_i64, 1_i64, 3_i64] {
+        let mut docs = document(&json!({"op":"draw","count":0_i64}));
+        let mut trigger = json!({"kind":"trigger","line":1_i64,"event":"attack","subject":"self",
+            "targets":[{"key":"1","select":{"side":"opponent","zone":"field"},"min":1_i64,"max":1_i64}],
+            "body":{"op":"damage","subjects":"target.1","amount":1_i64}});
+        if cost > 0 {
+            trigger["costs"] = json!([{"op":"pp","amount":cost}]);
+        }
+        docs["cards"]["unit-follower"]["abilities"] = json!([trigger]);
+        let loaded = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("unit.yaml".into(), docs.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut initial = setup();
+        if cost == 0 {
+            initial["players"]["P2"]["zones"]["field"] = json!([]);
+        }
+        let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "cancel").unwrap();
+        engine
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                "attack",
+            )
+            .unwrap();
+        let mut request =
+            json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}});
+        if cost == 1 {
+            request["costs"] = json!("decline");
+        }
+        let step = engine.decide(&request, "unplayable").unwrap();
+        assert_eq!(step.outcome, "pending-cancelled");
+        assert_eq!(
+            step.events
+                .iter()
+                .filter(|event| event["kind"] == "待機取消")
+                .count(),
+            1
+        );
+        assert_eq!(
+            engine.query(View::P1, "P1.pp.current").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            engine
+                .query(View::P1, "semantic_state.pending_triggers")
+                .unwrap(),
+            Some(json!([]))
+        );
+    }
+}

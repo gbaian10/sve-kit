@@ -262,10 +262,7 @@ impl Game {
         let mut out = Vec::new();
         for pending in self.state.pending.iter().filter(|p| p.controller == seat) {
             let base = Self::pending_choice(pending);
-            let frame = pending
-                .context
-                .clone()
-                .map_or_else(|| self.frame_for(&pending.source), Ok)?;
+            let frame = self.pending_frame(pending, &base)?;
             let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
             if choices.is_empty() {
                 let mut cancellation = base;
