@@ -75,7 +75,7 @@ scenarios:
           by: P1
           choices:
             - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
       - at: after-decision-3
         view: omniscient
         outcome: resolved

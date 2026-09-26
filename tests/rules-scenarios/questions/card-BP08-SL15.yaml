@@ -566,6 +566,7 @@ scenarios:
           ability:
             source: d1
             line: 2
+        costs: decline
     random: {}
     expected:
       - at: after-decision-3
@@ -586,34 +587,10 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: d1
-                  line: 2
-            - do: choose-pending
-              pending:
-                ability:
-                  source: d1
-                  line: 3
-            - do: choose-pending
-              pending:
-                ability:
-                  source: d2
-                  line: 1
-                  keyword: ファンファーレ
-              targets:
-                1:
-                  - b1
-            - do: choose-pending
-              pending:
-                ability:
-                  source: d2
-                  line: 1
-                  keyword: ラストワード
-              targets:
-                1:
-                  - b1
+            - {do: choose-pending, pending: {ability: {source: d1, line: 2}}, costs: decline}
+            - {do: choose-pending, pending: {ability: {source: d1, line: 3}}}
+            - {do: choose-pending, pending: {ability: {source: d2, keyword: ファンファーレ, line: 1}}, targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: d2, keyword: ラストワード, line: 1}}, targets: {1: [b1]}}
         assert:
           P1.field:
             - a1

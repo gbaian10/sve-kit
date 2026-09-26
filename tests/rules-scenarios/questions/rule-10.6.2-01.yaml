@@ -134,6 +134,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, costs: decline}
             - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, costs: {1: [a2, a3]}, options: [2]}
             - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, costs: {1: [a2, a3]}, options: [3]}
             - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, costs: {1: [a2, a3]}, options: [2, 3]}

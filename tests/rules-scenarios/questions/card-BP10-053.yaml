@@ -88,9 +88,9 @@ scenarios:
           - {kind: カウンター, object: s1, name: スタックカウンター, delta: -2}
           - {kind: 移動, object: s1, from: P1.field, to: P1.cemetery}
           - {kind: 消去, object: s1, by: rule-9.1.4.4}
-          - {kind: 解決, object: h1}
           - {kind: ダメージ, source: h1, target: b1, amount: 4}
           - {kind: 引く, player: P1, object: d1}
+          - {kind: 解決, object: h1}
 
   - name: B 兩個魔片各 1 個 → 跨護符取 2 個是非法決定 → cannot-play；拒付則 2 傷害
     inherit: A 一個魔片有 2 個計數器 → 付土の秘術_2 → 4 傷害，魔片歸 0 放墓場並消去

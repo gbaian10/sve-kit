@@ -131,8 +131,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, rule: 14.4.7.3.2, keyword: シングルドライブ}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: 攻撃時}}}
+            - {do: choose-pending, pending: {ability: {source: a1, keyword: シングルドライブ, rule: 14.4.7.3.2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, keyword: 攻撃時, line: 2}}, targets: {1: [b1]}}
             - {do: choose-pending, pending: {ability: {source: a2, line: 2}}}
         assert:
           P1.field.a1: {acted: true}

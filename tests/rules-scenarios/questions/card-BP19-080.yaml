@@ -202,7 +202,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}, targets: {1: [c1]}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}, targets: {1: [c2]}}
       - at: after-decision-3
         view: omniscient
         outcome: resolved

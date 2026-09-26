@@ -254,16 +254,10 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: b1
-                  line: 3
-            - do: choose-pending
-              pending:
-                ability:
-                  source: b2
-                  line: 3
+            - {do: choose-pending, pending: {ability: {source: b1, line: 3}}, targets: {1: [a3]}}
+            - {do: choose-pending, pending: {ability: {source: b1, line: 3}}, targets: {1: [a4]}}
+            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}, targets: {1: [a3]}}
+            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}, targets: {1: [a4]}}
         events:
           - kind: プレイ
             ability:
@@ -334,11 +328,7 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: b2
-                  line: 3
+            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}, targets: {1: [a4]}}
         events:
           - kind: プレイ
             ability:
@@ -460,17 +450,9 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: b1
-                  line: 1
-                  keyword: ラストワード
-            - do: choose-pending
-              pending:
-                ability:
-                  source: b2
-                  line: 3
+            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a1]}}
+            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a2]}}
+            - {do: choose-pending, pending: {ability: {source: b2, line: 3}}}
         assert:
           P1.pp.current: 5
           P1.cemetery:
@@ -624,12 +606,8 @@ scenarios:
         awaiting:
           by: P2
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: b1
-                  line: 1
-                  keyword: ラストワード
+            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a1]}}
+            - {do: choose-pending, pending: {ability: {source: b1, keyword: ラストワード, line: 1}}, targets: {1: [a2]}}
         assert:
           P2.leader.life: 2
           P1.field:

@@ -92,7 +92,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a4, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a4, line: 2}}, targets: {1: [c1]}}
       - at: after-decision-3
         view: omniscient
         outcome: resolved
@@ -118,7 +118,8 @@ scenarios:
           choices:
             - {do: choose-pending, pending: {ability: {source: c1, card: BP19-087, line: 1}}}
             - {do: choose-pending, pending: {ability: {source: a2, line: 2}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b2]}}
       - at: after-decision-8
         view: omniscient
         outcome: resolved

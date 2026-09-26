@@ -97,6 +97,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, costs: decline}
             - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
         assert:
           P1.pp.current: 3
@@ -111,6 +112,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, costs: decline}
             - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
         assert:
           P1.field.a2: {acted: false}
@@ -136,7 +138,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}, costs: decline}
         assert:
           P1.pp.current: 1
           P1.field: [a2, a1, a3]
@@ -151,7 +153,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 2}}, costs: decline}
         assert:
           P1.field.a2: {acted: false}
           P2.leader.life: 20

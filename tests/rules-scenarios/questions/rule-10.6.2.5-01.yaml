@@ -190,7 +190,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, card: CP04-104, line: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, card: CP04-104, line: 1}}, costs: decline}
+            - {do: choose-pending, pending: {ability: {source: a1, card: CP04-104, line: 1}}, targets: {1: []}, costs: {1: []}, x: 0}
         assert:
           P1.pp.current: 3
           P1.ep: 1

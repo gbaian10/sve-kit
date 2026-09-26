@@ -462,11 +462,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - do: choose-pending
-              pending:
-                ability:
-                  source: a1
-                  line: 2
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, costs: decline}
         assert:
           P1.pp.current: 0
           P1.field:

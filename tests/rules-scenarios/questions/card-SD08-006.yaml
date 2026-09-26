@@ -76,7 +76,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
             - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - at: after-decision-2
         view: omniscient
