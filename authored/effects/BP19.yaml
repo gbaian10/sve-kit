@@ -389,27 +389,29 @@ cards:
             max: 1
   BP19-080:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 依 Q2595／Q2596／Q2621 與卡文複核；入場即誘發、解決時檢查保存的來源區域，同句兩組對象合為單一集合。
     abilities:
       - line: 1
         kind: trigger
         body:
-          op: damage
-          subjects:
-            side: opponent
-            zone: field
-            type: follower
-          amount: 1
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: event.subject.entered_from
+              - cemetery
+          then:
+            op: damage
+            subjects:
+              side: opponent
+              zone: field
+              type: follower
+            amount: 1
         event: enter
         subject:
           side: self
           zone: field
           type: follower
-        trigger_if:
-          fn: eq
-          args:
-            - read: event.from
-            - cemetery
       - line: 2
         kind: trigger
         body:
@@ -432,10 +434,7 @@ cards:
         kind: activated
         body:
           op: move
-          subjects:
-            union:
-              - target.1
-              - target.2
+          subjects: target.1
           to: field
         targets:
           - key: '1'
@@ -450,22 +449,18 @@ cards:
                   - read: item.cost
                   - 5
             min: 0
-            max: 1
-          - key: '2'
-            select:
-              side: self
-              zone: cemetery
-              type: follower
-              trait: 八獄
-              where:
-                fn: le
-                args:
-                  - read: item.cost
-                  - 3
-            min: 0
-            max: 1
-            different_from:
-              - '1'
+            max: 2
+            constraint:
+              fn: le
+              args:
+                - count:
+                    from: target.1
+                    where:
+                      fn: gt
+                      args:
+                        - read: item.cost
+                        - 3
+                - 1
         costs:
           - op: act
             subjects: self
