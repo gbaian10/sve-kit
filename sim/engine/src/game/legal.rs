@@ -103,6 +103,10 @@ impl Game {
     ///
     /// # Errors
     /// A live card uses semantics the prototype cannot enumerate.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "The legal decision union enumerates each distinct input kind once."
+    )]
     pub fn legal(&self) -> Result<Vec<Value>> {
         if self.state.game["ended"] == true {
             return Ok(Vec::new());
@@ -147,8 +151,9 @@ impl Game {
             .zone_ids(seat, "hand")
             .into_iter()
             .chain(self.zone_ids(seat, "ex"))
+            .chain(self.zone_ids(seat, "cemetery"))
         {
-            if self.play_cost(&id)? > int(&self.player(seat)?.pp["current"]) {
+            if !self.playable_zone(&id)? {
                 continue;
             }
             if quick && !self.keywords(&id)?.contains("quick") {
@@ -170,12 +175,20 @@ impl Game {
             for option in options {
                 let mut payment = frame.clone();
                 payment.decision = option.clone();
-                let mut costs = vec![json!({"op":"pp","amount":self.play_cost(&id)?})];
+                for code in self
+                    .abilities(&id)?
+                    .iter()
+                    .filter(|code| code["kind"] == "spell")
+                {
+                    self.prepare_additional(code, &mut payment)?;
+                }
+                let mut costs =
+                    vec![json!({"op":"pp","amount":self.play_cost_context(&id,&payment)?})];
                 costs.extend(
                     self.abilities(&id)?
                         .iter()
                         .filter(|code| code["kind"] == "spell")
-                        .flat_map(|code| list(&code["costs"])),
+                        .flat_map(|code| Self::payment_nodes(code, &payment)),
                 );
                 if self.can_pay(&costs, &payment)? {
                     out.push(option);
@@ -186,12 +199,15 @@ impl Game {
             .into_iter()
             .flat_map(|zone| self.zone_ids(seat, zone))
         {
-            for code in self
-                .abilities(&id)?
-                .iter()
-                .filter(|a| a["kind"] == "activated" && (!quick || a["quick"] == true))
-            {
+            for code in self.abilities(&id)?.iter().filter(|a| {
+                matches!(string(&a["kind"]), "activated" | "meal" | "ride")
+                    && (!quick || a["quick"] == true)
+            }) {
                 if !self.ability_zone(&id, code)? || !self.can_use(&id, code)? {
+                    continue;
+                }
+                if (matches!(string(&code["kind"]), "meal" | "ride") || code["advance"] == true) {
+                    out.extend(self.resource_options(&id, code)?);
                     continue;
                 }
                 let reference = self.reference(&id, code);
@@ -285,7 +301,7 @@ impl Game {
         Ok(guards.is_empty() || guards.iter().any(|guard_id| guard_id == target))
     }
 
-    pub(super) fn play_cost(&self, id: &str) -> Result<i64> {
+    pub(super) fn play_cost_context(&self, id: &str, context: &Frame) -> Result<i64> {
         let mut cost = scalar(&self.face(id)?["cost"]);
         let mut sources = self.field_ids();
         if !sources.iter().any(|source| source == id) {
@@ -297,7 +313,9 @@ impl Game {
                 if code["kind"] != "static" || body["op"] != "adjust_cost" {
                     continue;
                 }
-                let frame = self.frame_for(&source)?;
+                let mut frame = self.frame_for(&source)?;
+                frame.values = context.values.clone();
+                frame.decision = context.decision.clone();
                 if !self.matches(id, &body["subjects"], &frame)? {
                     continue;
                 }
@@ -331,23 +349,31 @@ impl Game {
             }
             cost = cost.saturating_add(self.number(&effect["amount"], &frame)?);
         }
-        Ok(cost.max(0))
+        Ok(cost
+            .saturating_add(int(context
+                .values
+                .get("additional_pp")
+                .unwrap_or(&Value::Null)))
+            .max(0))
     }
 
     pub(super) fn can_pay(&self, costs: &[Value], frame: &Frame) -> Result<bool> {
         let mut pp = 0_i64;
         let mut acted = BTreeSet::new();
-        for cost in costs {
+        let mut atoms = Vec::new();
+        self.cost_atoms(costs, frame, &mut atoms)?;
+        for (cost, context) in atoms {
             match string(&cost["op"]) {
-                "pp" => pp = pp.saturating_add(self.number(&cost["amount"], frame)?.max(0)),
+                "pp" => pp = pp.saturating_add(self.number(&cost["amount"], &context)?.max(0)),
                 "act" => {
-                    for id in self.select(&cost["subjects"], frame)? {
+                    for id in self.select(&cost["subjects"], &context)? {
                         if self.object(&id)?.state["acted"] == true || !acted.insert(id) {
                             return Ok(false);
                         }
                     }
                 }
-                "move" | "discard" | "banish" => {}
+                "move" | "discard" | "banish" | "lesson" | "eat" | "_drive_point"
+                | "_earth_payment" => {}
                 unknown => {
                     return Err(EngineFailure::Unsupported(format!(
                         "cost opcode: {unknown}"
@@ -448,10 +474,8 @@ impl Game {
     }
 
     fn valid_play_conditions(&self, code: &Value, frame: &Frame) -> Result<bool> {
-        if code.get("additional_costs").is_some() || code.get("advance").is_some() {
-            return Err(EngineFailure::Unsupported(
-                "additional play costs or advance choice".into(),
-            ));
+        if !self.prepare_additional(code, &mut frame.clone())? {
+            return Ok(false);
         }
         if let Some(condition) = code.get("play_if")
             && !self.truth(condition, frame)?
@@ -471,7 +495,7 @@ impl Game {
         Ok(true)
     }
 
-    fn mode_applies(spec: &Value, frame: &Frame) -> bool {
+    pub(super) fn mode_applies(spec: &Value, frame: &Frame) -> bool {
         spec.get("modes").is_none_or(|modes| {
             list(modes)
                 .iter()
@@ -504,6 +528,10 @@ impl Game {
         self.parameterize_fixed(base, code, initial)
     }
 
+    #[expect(
+        clippy::too_many_lines,
+        reason = "Parameter expansion preserves the ordered Cartesian product of every independent choice."
+    )]
     fn parameterize_fixed(&self, base: Value, code: &Value, initial: &Frame) -> Result<Vec<Value>> {
         let mut frame = initial.clone();
         frame.decision = base.clone();
@@ -577,18 +605,31 @@ impl Game {
                 options = expanded;
             }
         }
-        options
+        let mut with_additional = Vec::new();
+        for option in options {
+            with_additional.extend(self.additional_choices(option, code, &frame)?);
+        }
+        with_additional
             .into_iter()
             .filter_map(|option| {
                 let mut context = frame.clone();
                 context.decision = option.clone();
-                match self.valid_parameters(code, &context).and_then(|valid| {
-                    if valid {
-                        self.can_pay(&list(&code["costs"]), &context)
-                    } else {
-                        Ok(false)
-                    }
-                }) {
+                match self
+                    .prepare_additional(code, &mut context)
+                    .and_then(|ready| {
+                        if ready {
+                            self.valid_parameters(code, &context)
+                        } else {
+                            Ok(false)
+                        }
+                    })
+                    .and_then(|valid| {
+                        if valid {
+                            self.can_pay(&Self::payment_nodes(code, &context), &context)
+                        } else {
+                            Ok(false)
+                        }
+                    }) {
                     Ok(true) => Some(Ok(option)),
                     Ok(false) => None,
                     Err(e) => Some(Err(e)),

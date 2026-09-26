@@ -1200,3 +1200,59 @@ fn movement_prohibition_beats_replacement_and_delayed_events_use_actual_destinat
         }
     }
 }
+
+#[test]
+fn nested_play_preserves_outer_continuation_across_inner_target_and_declaration() {
+    let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":1_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"line":1_i64,"kind":"activated","body":{"op":"seq","steps":[{"op":"play_ability","subjects":"self","event":"evolve"},{"op":"modify","subjects":"self.leader","hp":2_i64}]}},
+        {"line":2_i64,"kind":"trigger","event":"evolve","subject":"self","targets":[{"key":"1","select":{"side":"opponent","zone":"field"},"min":1_i64,"max":1_i64}],"costs":[{"op":"pp","amount":1_i64}],"body":{"op":"seq","steps":[{"op":"declare_number","bind":"declared"},{"op":"damage","subjects":"target.1","amount":{"read":"declared"}}]}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("nested.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(catalog, &setup(), &Value::Null, &Value::Null, "nested").unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "outer"
+            )
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let choose = json!({"do":"resolve-choice","targets":{"1":["b"]}});
+    assert_eq!(
+        restored.decide(&choose, "target").unwrap().outcome,
+        "paused"
+    );
+    let mut resumed: Game =
+        serde_json::from_str(&serde_json::to_string(&restored).unwrap()).unwrap();
+    assert_eq!(
+        resumed
+            .decide(&json!({"do":"resolve-choice","declare":2_i64}), "number")
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    assert_eq!(
+        resumed.query(View::Referee, "P2.field.b.hp").unwrap(),
+        Some(json!(1_i64))
+    );
+    assert_eq!(
+        resumed.query(View::Referee, "P1.leader.life").unwrap(),
+        Some(json!(22_i64))
+    );
+    assert_eq!(
+        resumed.query(View::Referee, "P1.pp.current").unwrap(),
+        Some(json!(1_i64))
+    );
+}

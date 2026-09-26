@@ -62,16 +62,22 @@ cards:
           modes:
             - op: stack
               amount: 1
-            - op: pay
-              costs:
-                - op: earth_rite
-                  count: 1
+            - op: if
+              condition:
+                read: paid.earth
               then:
                 op: damage
                 subjects: opponent.leader
                 amount: 2
         event: enter
         subject: self
+        additional_costs:
+          - key: earth
+            modes:
+              - 2
+            costs:
+              - op: earth_rite
+                count: 1
   BP10-053:
     status: complete
     review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
@@ -79,10 +85,9 @@ cards:
       - line: 1
         kind: spell
         body:
-          op: pay
-          costs:
-            - op: earth_rite
-              count: 2
+          op: if
+          condition:
+            read: paid.earth
           then:
             op: seq
             steps:
@@ -103,6 +108,11 @@ cards:
               type: follower
             min: 1
             max: 1
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 2
   BP10-076:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

@@ -224,19 +224,33 @@ impl Game {
     }
 
     fn play(&mut self, decision: &Value) -> Result<bool> {
+        let Some(frame) = self.prepare_card_play(decision, None)? else {
+            return Ok(false);
+        };
+        self.run_frame(frame)?;
+        Ok(true)
+    }
+
+    pub(super) fn prepare_card_play(
+        &mut self,
+        decision: &Value,
+        forced_cost: Option<i64>,
+    ) -> Result<Option<Frame>> {
         let source = string(&decision["card"]);
         let object = self.object(source)?.clone();
         let controller = string(&decision["by"]);
-        if object.controller != controller || !matches!(object.zone.as_str(), "hand" | "ex") {
-            return Ok(false);
+        if object.controller != controller
+            || (forced_cost.is_none() && !self.playable_zone(source)?)
+        {
+            return Ok(None);
         }
         if decision["at"] == "quick" && !self.keywords(source)?.contains("quick") {
-            return Ok(false);
+            return Ok(None);
         }
         let face = self.face(source)?.clone();
         let is_spell = string(&face["card_type"]).contains("スペル");
         if !is_spell && self.zone_count(controller, "field") >= 5 {
-            return Ok(false);
+            return Ok(None);
         }
         let abilities = self.abilities(source)?;
         let spells = abilities
@@ -246,23 +260,26 @@ impl Game {
             .collect::<Vec<_>>();
         let mut frame = self.start_frame(source, Value::Null, decision)?;
         for ability in &spells {
+            if !self.prepare_additional(ability, &mut frame)? {
+                return Ok(None);
+            }
             self.freeze(ability, "play-start", &mut frame)?;
             if !self.valid_parameters(ability, &frame)? {
-                return Ok(false);
+                return Ok(None);
             }
         }
-        let cost = self.play_cost(source)?;
+        let cost = forced_cost.map_or_else(|| self.play_cost_context(source, &frame), Ok)?;
         if int(&self.player(controller)?.pp["current"]) < cost {
-            return Ok(false);
+            return Ok(None);
         }
         self.player_mut(controller)?.pp["current"] =
             json!(int(&self.player(controller)?.pp["current"]).saturating_sub(cost));
         let mandatory = spells
             .iter()
-            .flat_map(|code| list(&code["costs"]))
+            .flat_map(|code| Self::payment_nodes(code, &frame))
             .collect::<Vec<_>>();
         if !self.can_pay(&mandatory, &frame)? {
-            return Ok(false);
+            return Ok(None);
         }
         for code in &spells {
             self.pay_costs(code, &mut frame)?;
@@ -280,6 +297,12 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":cause});
+        let resolve_group = self.group();
+        self.emit(
+            json!({"kind":"解決","object":source}),
+            &frame.cause,
+            resolve_group,
+        );
         if is_spell {
             for ability in &spells {
                 self.freeze(ability, "resolution-start", &mut frame)?;
@@ -299,14 +322,16 @@ impl Game {
                 .push(json!({"op":"move","subjects":"self","to":"field"}));
         }
         frame.todo.push(json!({"op":"_finish_card"}));
-        self.run_frame(frame)?;
-        Ok(true)
+        Ok(Some(frame))
     }
 
     fn activate(&mut self, decision: &Value) -> Result<bool> {
         let reference = &decision["ability"];
         let source = string(&reference["source"]);
         let code = self.ability(source, reference)?;
+        if (matches!(string(&code["kind"]), "meal" | "ride") || code["advance"] == true) {
+            return self.resource_activation(decision, &code);
+        }
         if code["kind"] != "activated"
             || !self.ability_zone(source, &code)?
             || !self.can_use(source, &code)?
@@ -321,6 +346,9 @@ impl Game {
         }
         let mut frame = self.start_frame(source, reference.clone(), decision)?;
         self.freeze(&code, "play-start", &mut frame)?;
+        if !self.prepare_additional(&code, &mut frame)? {
+            return Ok(false);
+        }
         if !self.valid_parameters(&code, &frame)? || !self.can_pay(&list(&code["costs"]), &frame)? {
             return Ok(false);
         }
@@ -376,9 +404,12 @@ impl Game {
             frame.controller.clone_from(&context.controller);
         }
         self.freeze(&pending.code, "play-start", &mut frame)?;
+        if !self.prepare_additional(&pending.code, &mut frame)? {
+            return Ok("cannot-play".into());
+        }
         if decision["costs"] == "decline"
             || !self.valid_parameters(&pending.code, &frame)?
-            || !self.can_pay(&list(&pending.code["costs"]), &frame)?
+            || !self.can_pay(&Self::payment_nodes(&pending.code, &frame), &frame)?
         {
             let group = self.group();
             self.emit(
@@ -426,7 +457,12 @@ impl Game {
         Ok(())
     }
 
-    fn begin_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
+    pub(super) fn begin_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
+        self.prepare_ability(frame, code)?;
+        self.run_frame(frame.clone())
+    }
+
+    pub(super) fn prepare_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
         self.notify_ability_start(frame, code)?;
         self.freeze(code, "resolution-start", frame)?;
         let group = self.group();
@@ -437,11 +473,11 @@ impl Game {
         );
         frame.cause = json!({"event":id});
         frame.todo = vec![code["body"].clone(), json!({"op":"_finish_ability"})];
-        self.run_frame(frame.clone())
+        Ok(())
     }
 
     pub(super) fn pay_costs(&mut self, code: &Value, frame: &mut Frame) -> Result<()> {
-        let costs = list(&code["costs"]);
+        let costs = Self::payment_nodes(code, frame);
         if costs.is_empty() {
             return Ok(());
         }
@@ -577,7 +613,13 @@ impl Game {
     }
     fn next_turn(&mut self) -> Result<()> {
         self.expire_silence()?;
-        let seat = other(self.active()).to_owned();
+        let mut extra_turns = list(&self.state.turn["extra_turns"]);
+        let seat = if extra_turns.is_empty() {
+            other(self.active()).to_owned()
+        } else {
+            string(&extra_turns.remove(0)).to_owned()
+        };
+        self.state.turn["extra_turns"] = json!(extra_turns);
         self.state.turn["active"] = json!(seat);
         self.state.turn["phase"] = json!("main");
         self.state.flow = json!({"kind":"main"});
@@ -590,8 +632,16 @@ impl Game {
         for object in self.state.objects.values_mut() {
             object.state["stats_increased_this_turn"] = json!(false);
         }
+        let prevent_gain = self.restricted(&format!("{seat}.leader"), "normal_max_pp_gain")?;
+        let prevent_draw = self.restricted(&format!("{seat}.leader"), "normal_draw")?;
+        self.state.continuous.retain(|entry| {
+            !(entry["during"] == "next-opponent-start"
+                && list(&entry["applies_to"]).contains(&json!(format!("{seat}.leader"))))
+        });
         let player = self.player_mut(&seat)?;
-        let max = int(&player.pp["max"]).saturating_add(1).min(10);
+        let max = int(&player.pp["max"])
+            .saturating_add(i64::from(!prevent_gain))
+            .min(10);
         player.pp = json!({"current":max,"max":max});
         for id in self.zone_ids(&seat, "field") {
             if !self.restricted(&id, "normal_stand")? {
@@ -604,7 +654,9 @@ impl Game {
             cause: json!({"rule":"7.2"}),
             ..Frame::default()
         };
-        self.draw(&seat, &frame)?;
+        if !prevent_draw {
+            self.draw(&seat, &frame)?;
+        }
         let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
         self.enqueue(pending);
         Ok(())

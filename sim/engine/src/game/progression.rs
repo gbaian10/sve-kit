@@ -89,13 +89,14 @@ impl Game {
             || next.zone != "evolve_deck"
             || next.state["face_up"] == true
             || object.controller != next.controller
-            || self
-                .state
-                .counters
-                .get(&format!("{}.evolve_played", object.controller))
-                .copied()
-                .unwrap_or_default()
-                > 0
+            || (!self.unlimited_evolution(&object.controller)?
+                && self
+                    .state
+                    .counters
+                    .get(&format!("{}.evolve_played", object.controller))
+                    .copied()
+                    .unwrap_or_default()
+                    > 0)
             || code["kind"] != "evolve"
         {
             return Ok(false);

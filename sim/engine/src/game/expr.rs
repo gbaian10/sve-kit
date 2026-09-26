@@ -218,7 +218,7 @@ impl Game {
             return Ok(false);
         }
         if let Some(name) = selector["name"].as_str()
-            && string(&face["name"]) != name
+            && self.card_name(id)? != name
         {
             return Ok(false);
         }
@@ -553,11 +553,16 @@ impl Game {
         if !list(&object.state["links"]["出走"]).is_empty() {
             result.insert("rush".into());
         }
-        if !list(&object.state["links"]["ドライブ"]).is_empty() {
+        if !list(&object.state["links"]["ドライブ"]).is_empty()
+            || !list(&object.state["links"]["憑依"]).is_empty()
+        {
             result.insert("rush".into());
             result.insert("single_drive".into());
         }
         for ability in self.abilities(id)? {
+            if ability["body"]["op"] == "drive" {
+                result.insert(string(&ability["keyword"]).into());
+            }
             if ability["kind"] == "static" && ability["body"]["op"] == "keyword" {
                 result.insert(string(&ability["body"]["name"]).into());
             }

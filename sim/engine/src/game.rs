@@ -11,7 +11,10 @@ mod expr;
 mod extensions;
 mod legal;
 mod movement;
+mod nested;
+mod payments;
 mod progression;
+mod resources;
 mod rules;
 mod temporal;
 mod view;
@@ -250,6 +253,9 @@ impl Game {
                         attrs["hp"] =
                             json!(int(&attrs["hp"]).saturating_sub(int(&attrs["damage"])));
                     }
+                    if zone == "evolve_deck" {
+                        attrs["face_up"] = json!(false);
+                    }
                     if let Some(face_up) = item.get("face_up") {
                         attrs["face_up"] = face_up.clone();
                     }
@@ -333,7 +339,17 @@ impl Game {
         }
         if let Some(counters) = setup["semantic_state"]["counters_this_turn"].as_object() {
             for (key, value) in counters {
-                state.counters.insert(key.clone(), int(value));
+                if let Some(entries) = value.as_object() {
+                    for (name, count) in entries {
+                        if let Some(count) = count.as_i64() {
+                            state.counters.insert(format!("{key}.{name}"), count);
+                        }
+                    }
+                } else if let Some(count) = value.as_i64() {
+                    state.counters.insert(key.clone(), count);
+                } else {
+                    return Err(invalid("turn counter must be an integer or player map"));
+                }
             }
         }
         let mut game = Self {
@@ -502,6 +518,7 @@ impl Game {
                     .get("face")
                     .is_none_or(|face| int(face) == int(&object.state["face"]))
             })
+            .map(Self::resource_code)
             .flat_map(|ability| {
                 if ability["kind"] == "static" && ability["body"]["op"] == "seq" {
                     list(&ability["body"]["steps"])

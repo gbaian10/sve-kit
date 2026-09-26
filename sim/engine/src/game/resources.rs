@@ -1,0 +1,287 @@
+#![expect(
+    clippy::indexing_slicing,
+    reason = "Validated JSON has total read indexing and constructed write maps."
+)]
+use super::{Frame, Game, int, list, string};
+use crate::{Result, invalid};
+use core::slice::from_ref;
+use serde_json::{Value, json};
+
+#[expect(
+    clippy::multiple_inherent_impl,
+    reason = "Resource rules share the authoritative game state."
+)]
+impl Game {
+    pub(super) fn resource_code(mut code: Value) -> Value {
+        let keyword = string(&code["body"]["name"]).to_owned();
+        if code["body"]["op"] == "keyword"
+            && matches!(keyword.as_str(), "single_drive" | "twin_drive")
+        {
+            code["kind"] = json!("trigger");
+            code["event"] = json!("attack");
+            code["subject"] = json!("self");
+            code["keyword"] = json!(keyword);
+            code["rule"] = json!(if keyword == "twin_drive" {
+                "14.4.6.3"
+            } else {
+                "14.4.6.2"
+            });
+            code["body"] =
+                json!({"op":"drive","count":if keyword == "twin_drive" {2_i64} else {1_i64}});
+        }
+        let mut costs = list(&code["costs"]);
+        if code["kind"] == "ride" {
+            costs.push(json!({"op":"_drive_point"}));
+        }
+        let mut specs = list(&code["cost_selections"]);
+        for cost in &mut costs {
+            let resource = match string(&cost["op"]) {
+                "lesson" => Some(("ex", "魔法のアイテム")),
+                "eat" => Some(("evolve_deck", "にんじん")),
+                "_drive_point" => Some(("evolve_deck", "ドライブポイント")),
+                _ => None,
+            };
+            if let Some((zone, name)) = resource {
+                let key = specs.len().saturating_add(1).to_string();
+                let count = cost.get("count").cloned().unwrap_or_else(|| json!(1_i64));
+                let mut selector = json!({"side":"self","zone":zone,"name":name});
+                if zone == "evolve_deck" {
+                    selector["where"] = json!({"fn":"ne","args":[{"read":"item.face_up"},true]});
+                }
+                specs.push(json!({"key":key,"select":selector,"min":count,"max":count}));
+                cost["subjects"] = json!(format!("cost.{key}"));
+            }
+        }
+        if !specs.is_empty() {
+            code["cost_selections"] = json!(specs);
+        }
+        if !costs.is_empty() {
+            code["costs"] = json!(costs);
+        }
+        code
+    }
+
+    pub(super) fn cost_atoms(
+        &self,
+        costs: &[Value],
+        frame: &Frame,
+        out: &mut Vec<(Value, Frame)>,
+    ) -> Result<()> {
+        for cost in costs {
+            match string(&cost["op"]) {
+                "seq" => self.cost_atoms(&list(&cost["steps"]), frame, out)?,
+                "if" => {
+                    let branch = if self.truth(&cost["condition"], frame)? {
+                        "then"
+                    } else {
+                        "else"
+                    };
+                    if !cost[branch].is_null() {
+                        self.cost_atoms(&[cost[branch].clone()], frame, out)?;
+                    }
+                }
+                "for_each" => {
+                    for id in self.select(&cost["select"], frame)? {
+                        let mut context = frame.clone();
+                        context
+                            .bindings
+                            .insert(string(&cost["bind"]).into(), vec![id]);
+                        self.cost_atoms(&[cost["body"].clone()], &context, out)?;
+                    }
+                }
+                _ => out.push((cost.clone(), frame.clone())),
+            }
+        }
+        Ok(())
+    }
+
+    pub(super) fn playable_zone(&self, id: &str) -> Result<bool> {
+        let zone = &self.object(id)?.zone;
+        if matches!(zone.as_str(), "hand" | "ex") {
+            return Ok(true);
+        }
+        for code in self.abilities(id)? {
+            let node = &code["body"];
+            if code["kind"] == "static"
+                && node["op"] == "play_permission"
+                && list(&node["from"]).contains(&json!(zone))
+                && node.get("condition").map_or(Ok(true), |condition| {
+                    self.truth(condition, &self.frame_for(id)?)
+                })?
+            {
+                return Ok(true);
+            }
+        }
+        Ok(false)
+    }
+
+    pub(super) fn unlimited_evolution(&self, seat: &str) -> Result<bool> {
+        for id in self.zone_ids(seat, "field") {
+            for code in self.abilities(&id)? {
+                if code["kind"] == "static"
+                    && code["body"]["op"] == "rule_override"
+                    && code["body"]["rule"] == "evolve_per_turn"
+                    && code["body"]["value"] == "unlimited"
+                {
+                    return Ok(true);
+                }
+            }
+        }
+        Ok(false)
+    }
+
+    pub(super) fn resource_options(&self, id: &str, code: &Value) -> Result<Vec<Value>> {
+        let frame = self.frame_for(id)?;
+        let amount = list(&code["costs"])
+            .iter()
+            .filter(|cost| cost["op"] == "pp")
+            .map(|cost| self.number(&cost["amount"], &frame))
+            .collect::<Result<Vec<_>>>()?
+            .iter()
+            .sum::<i64>();
+        let mut result = Vec::new();
+        for ep in 0..=self.player(&frame.controller)?.ep.min(1).min(amount) {
+            let pp = amount.saturating_sub(ep);
+            let mut candidate = code.clone();
+            let mut costs = list(&code["costs"])
+                .into_iter()
+                .filter(|cost| cost["op"] != "pp")
+                .collect::<Vec<_>>();
+            costs.push(json!({"op":"pp","amount":pp}));
+            candidate["costs"] = json!(costs);
+            for option in self.parameterize(
+                json!({"do":"activate","ability":self.reference(id,code),"pay":{"pp":pp,"ep":ep}}),
+                &candidate,
+                &frame,
+            )? {
+                let mut check = option.clone();
+                check["by"] = json!(frame.controller);
+                check["at"] = json!("main");
+                if self.clone().resource_activation(&check, code)? {
+                    result.push(option);
+                }
+            }
+        }
+        Ok(result)
+    }
+
+    pub(super) fn resource_activation(&mut self, decision: &Value, code: &Value) -> Result<bool> {
+        let source = string(&decision["ability"]["source"]);
+        let seat = self.object(source)?.controller.clone();
+        if seat != decision["by"]
+            || !self.ability_zone(source, code)?
+            || decision["at"] != "main"
+            || self
+                .state
+                .counters
+                .get(&format!("{seat}.evolve_played"))
+                .copied()
+                .unwrap_or_default()
+                > 0
+            || (code["kind"] == "ride" && self.object(source)?.state["ride_used"] == true)
+            || (code["kind"] == "meal"
+                && !list(&self.object(source)?.state["links"]["出走"]).is_empty())
+        {
+            return Ok(false);
+        }
+        let mut frame = self.start_frame(source, self.reference(source, code), decision)?;
+        let amount = list(&code["costs"])
+            .iter()
+            .filter(|cost| cost["op"] == "pp")
+            .map(|cost| self.number(&cost["amount"], &frame))
+            .collect::<Result<Vec<_>>>()?
+            .iter()
+            .sum::<i64>();
+        let ep = int(&decision["pay"]["ep"]);
+        let pp = decision["pay"].get("pp").map_or(amount, int);
+        if !(0..=1).contains(&ep)
+            || pp < 0
+            || pp.saturating_add(ep) != amount
+            || self.player(&seat)?.ep < ep
+        {
+            return Ok(false);
+        }
+        let mut paid_code = code.clone();
+        let mut costs = list(&code["costs"])
+            .into_iter()
+            .filter(|cost| cost["op"] != "pp")
+            .collect::<Vec<_>>();
+        costs.push(json!({"op":"pp","amount":pp}));
+        paid_code["costs"] = json!(costs);
+        if !self.valid_parameters(&paid_code, &frame)?
+            || !self.can_pay(&list(&paid_code["costs"]), &frame)?
+        {
+            return Ok(false);
+        }
+        self.player_mut(&seat)?.ep = self.player(&seat)?.ep.saturating_sub(ep);
+        self.pay_costs(&paid_code, &mut frame)?;
+        self.bump(&format!("{seat}.evolve_played"), 1);
+        if code["kind"] == "ride" {
+            self.object_mut(source)?.state["ride_used"] = json!(true);
+        }
+        self.begin_ability(&mut frame, code)?;
+        Ok(true)
+    }
+
+    pub(super) fn resource_effect(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        match string(&node["op"]) {
+            "lesson" => {
+                let ids = self.select(&node["subjects"], frame)?;
+                let group = self.group();
+                for id in &ids {
+                    self.emit(
+                        json!({"kind":"消滅","object":id,"source":frame.source}),
+                        &frame.cause,
+                        group,
+                    );
+                }
+                self.move_objects(&ids, "banish", None, None, frame)?;
+            }
+            "eat" | "_drive_point" => {
+                let ids = self.select(&node["subjects"], frame)?;
+                let (zone, link) = if node["op"] == "eat" {
+                    ("race", "出走")
+                } else {
+                    ("drive", "憑依")
+                };
+                self.move_objects(&ids, zone, None, None, frame)?;
+                self.object_mut(&frame.source)?.state["links"][link] = json!(ids);
+            }
+            "race" | "gain_drive" => {
+                let ids = self.select(&node["subjects"], frame)?;
+                let objects = ids
+                    .iter()
+                    .map(|id| self.object(id).cloned())
+                    .collect::<Result<Vec<_>>>()?;
+                let pending = self.collect_triggers(string(&node["op"]), &objects, &frame.cause)?;
+                self.enqueue(pending);
+            }
+            "stack" => {
+                let ids = self.select(
+                    &json!({"side":"self","zone":"field","keyword":"stack"}),
+                    frame,
+                )?;
+                let chosen = if let Some(id) = ids.first() {
+                    if ids.len() > 1 {
+                        return Err(crate::EngineFailure::Unsupported(
+                            "stack recipient choice".into(),
+                        ));
+                    }
+                    id.clone()
+                } else {
+                    let id = self.new_named_object("大地の魔片", &frame.controller)?;
+                    self.move_objects(from_ref(&id), "field", None, None, frame)?;
+                    id
+                };
+                let old = int(&self.object(&chosen)?.state["counters"]["stack_counter"]);
+                let amount = self.number(&node["amount"], frame)?;
+                self.object_mut(&chosen)?.state["counters"]["stack_counter"] =
+                    json!(old.saturating_add(amount));
+                let group = self.group();
+                self.emit(json!({"kind":"カウンター","object":chosen,"name":self.catalog.keyword_name("stack_counter"),"delta":amount}),&frame.cause,group);
+            }
+            _ => return Err(invalid("unknown resource effect")),
+        }
+        Ok(())
+    }
+}

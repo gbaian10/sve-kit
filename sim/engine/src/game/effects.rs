@@ -164,16 +164,18 @@ impl Game {
                     steps.push(match string(&task["icon"]) {
                         "draw" => json!({"op":"draw","count":1_i64}),
                         "heal" => json!({"op":"modify","subjects":"self.leader","hp":3_i64}),
-                        _ => {
-                            return Err(EngineFailure::Unsupported(
-                                "critical/stand drive target choice".into(),
-                            ));
-                        }
+                        "stand" => {frame.bindings.insert("drive-target".into(),list(&decision["select"]).iter().map(|chosen|string(chosen).into()).collect());json!({"op":"seq","steps":[{"op":"stand","subjects":"drive-target"},{"op":"restrict","subjects":"drive-target","action":"attack_leader","until":"end-of-turn"}]})},
+                        "critical" => {frame.bindings.insert("drive-target".into(),list(&decision["select"]).iter().map(|chosen|string(chosen).into()).collect());json!({"op":"modify","subjects":"drive-target","power":2_i64,"hp":2_i64})},
+                        _ => return Err(invalid("unknown verified trigger icon"))
                     });
                 }
                 steps.push(json!({"op":"move","subjects":id,"to":if execute { "cemetery" } else { "deck" },"position":"bottom"}));
+                if execute {
+                    steps.push(json!({"op":"_drive_trigger"}));
+                }
                 Self::prepend(&mut frame, steps);
             }
+            "nested" => self.start_nested(&task["node"], decision, &mut frame)?,
             "replacements" => {
                 let key = string(&task["target"]).to_owned();
                 let mut task = task["task"].clone();
@@ -449,17 +451,23 @@ impl Game {
                     );
                 }
             }
+            "lesson" | "eat" | "_drive_point" | "race" | "gain_drive" | "stack" => {
+                self.resource_effect(node, frame)?;
+            }
             "drive" => {
                 for _ in 0..self.number(&node["count"], frame)?.max(0) {
                     frame.todo.insert(0, json!({"op":"_drive"}));
                 }
             }
+            "_earth_payment" | "extra_turn" => self.payment_effect(node, frame)?,
             "_drive" => self.drive(frame)?,
+            "_drive_trigger" => {
+                let pending = self.collect_triggers("drive_trigger", &[], &frame.cause)?;
+                self.enqueue(pending);
+            }
             "delay" => self.register_delay(node, frame)?,
             "_finish_card" => {
                 let source = frame.source.clone();
-                let group = self.group();
-                self.emit(json!({"kind":"解決","object":source}), &frame.cause, group);
                 if self.object(&source)?.zone == "resolution" {
                     self.move_objects(&[source], "cemetery", None, None, frame)?;
                 }
@@ -476,6 +484,9 @@ impl Game {
             | "replace_damage" | "reveal_until" | "box" | "equip" | "pilot" | "become_type" => {
                 self.extended_effect(node, frame)?;
             }
+            "play_card" | "play_ability" => self.nested_play(node, frame)?,
+            "_nested_prepare" => self.prepare_nested(node, frame)?,
+            "_restore_frame" => Self::restore_frame(node, frame)?,
             "unsupported" => {
                 return Err(EngineFailure::Unsupported(string(&node["reason"]).into()));
             }
@@ -893,12 +904,21 @@ impl Game {
         if self.player(&frame.controller)?.construction == "title"
             && matches!(string(&icon), "draw" | "heal" | "critical" | "stand")
         {
+            let mut choices = if matches!(string(&icon), "stand" | "critical") {
+                self.select(
+                    &json!({"side":"self","zone":"field","type":"follower"}),
+                    frame,
+                )?
+                .into_iter()
+                .map(|target| json!({"do":"resolve-choice","choice":"execute","select":[target]}))
+                .collect::<Vec<_>>()
+            } else {
+                vec![json!({"do":"resolve-choice","choice":"execute"})]
+            };
+            choices.push(json!({"do":"resolve-choice","choice":"decline"}));
             self.prompt(
                 frame,
-                vec![
-                    json!({"do":"resolve-choice","choice":"execute"}),
-                    json!({"do":"resolve-choice","choice":"decline"}),
-                ],
+                choices,
                 json!({"resume":"drive","object":id,"icon":icon}),
             );
         } else {

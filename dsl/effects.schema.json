@@ -2296,6 +2296,13 @@
                 "items": {
                   "$ref": "#/$defs/selection"
                 }
+              },
+              "modes": {
+                "type": "array",
+                "items": {
+                  "type": "integer",
+                  "minimum": 1
+                }
               }
             },
             "required": [
