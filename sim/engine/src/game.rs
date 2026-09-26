@@ -480,6 +480,12 @@ impl Game {
             usize::try_from(int(&object.state["face"])).map_err(invalid)?,
         )
     }
+    fn object_type(&self, id: &str) -> Result<&str> {
+        let object = self.object(id)?;
+        Ok(object.state["card_type"]
+            .as_str()
+            .unwrap_or(string(&self.face(id)?["card_type"])))
+    }
     fn printed_abilities(&self, id: &str) -> Result<Vec<Value>> {
         let object = self.object(id)?;
         if object.state["silenced"] == true {

@@ -239,7 +239,7 @@ impl Game {
         if object.zone != "field"
             || object.state["acted"] == true
             || seat != self.active()
-            || !string(&self.face(id)?["card_type"]).contains("フォロワー")
+            || !self.object_type(id)?.contains("フォロワー")
         {
             return Ok(false);
         }
@@ -263,7 +263,7 @@ impl Game {
             let target_object = self.object(target)?;
             if target_object.controller == *seat
                 || target_object.zone != "field"
-                || !string(&self.face(target)?["card_type"]).contains("フォロワー")
+                || !self.object_type(target)?.contains("フォロワー")
                 || self.keywords(target)?.contains("intimidate")
             {
                 return Ok(false);

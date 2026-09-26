@@ -141,18 +141,37 @@ impl Game {
         let mut active = Vec::new();
         let mut expired = Vec::new();
         for entry in take(&mut self.state.continuous) {
-            if entry["until"] == "end-of-turn" && entry["effect"]["remove_abilities"] == true {
+            let should_expire = entry["until"] == "end-of-turn"
+                || (entry["until"] == "next-controller-end"
+                    && entry["duration_controller"] == self.active()
+                    && int(&self.state.turn["elapsed_turns"][self.active()])
+                        >= int(&entry["expires_turn"]));
+            if should_expire {
                 expired.push(entry);
                 continue;
             }
-            if entry["until"] != "end-of-turn" {
-                active.push(entry);
-            }
+            active.push(entry);
         }
         for entry in expired.into_iter().rev() {
             for id in list(&entry["applies_to"]) {
                 let id = string(&id);
                 if Some(self.object(id)?.generation) != entry["generation"].as_u64() {
+                    continue;
+                }
+                if entry["effect"]["op"] == "pilot" {
+                    for field in ["card_type", "power", "hp", "max_hp"] {
+                        if let Some(prior) = entry["prior"].get(field) {
+                            self.object_mut(id)?.state[field] = prior.clone();
+                        } else {
+                            self.object_mut(id)?
+                                .state
+                                .as_object_mut()
+                                .ok_or_else(|| invalid("object attributes must be a map"))?
+                                .remove(field);
+                        }
+                    }
+                }
+                if entry["effect"]["remove_abilities"] != true {
                     continue;
                 }
                 if active.iter().any(|other| {

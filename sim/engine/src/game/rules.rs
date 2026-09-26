@@ -267,6 +267,9 @@ impl Game {
         for code in &spells {
             self.pay_costs(code, &mut frame)?;
         }
+        for code in &spells {
+            self.notify_ability_start(&frame, code)?;
+        }
         self.move_objects(&[source.into()], "resolution", None, None, &frame)?;
         self.object_mut(source)?.state["entered_from"] = json!(object.zone);
         self.bump(&format!("{controller}.cards_played"), 1);
@@ -387,9 +390,6 @@ impl Game {
             return Ok("pending-cancelled".into());
         }
         self.pay_costs(&pending.code, &mut frame)?;
-        if pending.code["ub"] == true {
-            self.bump(&format!("{}.ub_activated", pending.controller), 1);
-        }
         self.begin_ability(&mut frame, &pending.code)?;
         self.checks()?;
         Ok(if self.state.game["ended"] == true {
@@ -402,7 +402,32 @@ impl Game {
         .into())
     }
 
+    fn notify_ability_start(&mut self, frame: &Frame, code: &Value) -> Result<()> {
+        let mut targets = Vec::new();
+        if let Some(selections) = frame.decision["targets"].as_object() {
+            for selected in selections.values() {
+                for id in list(selected) {
+                    if let Some(object) = self.state.objects.get(string(&id))
+                        && !targets.iter().any(|target: &Object| target.id == object.id)
+                    {
+                        targets.push(object.clone());
+                    }
+                }
+            }
+        }
+        let pending = self.collect_triggers("targeted", &targets, &frame.cause)?;
+        self.enqueue(pending);
+        if code["ub"] == true {
+            self.bump(&format!("{}.ub_activated", frame.controller), 1);
+            let affected = [self.object(&frame.source)?.clone()];
+            let pending_ub = self.collect_triggers("ub_activated", &affected, &frame.cause)?;
+            self.enqueue(pending_ub);
+        }
+        Ok(())
+    }
+
     fn begin_ability(&mut self, frame: &mut Frame, code: &Value) -> Result<()> {
+        self.notify_ability_start(frame, code)?;
         self.freeze(code, "resolution-start", frame)?;
         let group = self.group();
         let id = self.emit(
@@ -628,8 +653,8 @@ impl Game {
                     self.state.objects.get(id).is_some_and(|o| {
                         int(&o.state["hp"]) <= 0 || o.state["bane_damaged"] == true
                     }) && self
-                        .face(id)
-                        .is_ok_and(|f| string(&f["card_type"]).contains("フォロワー"))
+                        .object_type(id)
+                        .is_ok_and(|typ| typ.contains("フォロワー"))
                 })
                 .collect::<Vec<_>>();
         if !dead.is_empty() {

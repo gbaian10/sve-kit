@@ -203,7 +203,7 @@ impl Game {
             return Ok(false);
         }
         let face = self.face(id)?;
-        let card_type = string(&face["card_type"]);
+        let card_type = self.object_type(id)?;
         let typ = match string(&selector["type"]) {
             "follower" | "evolved_follower" => "フォロワー",
             "amulet" => "アミュレット",

@@ -104,6 +104,9 @@ impl Game {
 
     pub(super) fn extended_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         match string(&node["op"]) {
+            "box" => self.apply_box(node, frame)?,
+            "equip" => self.equip_tokens(node, frame)?,
+            "pilot" | "become_type" => self.change_type(node, frame)?,
             "flip" => {
                 for id in self.select(&node["subjects"], frame)? {
                     self.object_mut(&id)?.state["face_up"] = json!(node["face"] == "up");
@@ -133,6 +136,58 @@ impl Game {
             }
             "reveal_until" => self.reveal_until(node, frame)?,
             unknown => return Err(invalid(format!("unknown extension: {unknown}"))),
+        }
+        Ok(())
+    }
+
+    fn apply_box(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        self.modify(&json!({"op":"modify","subjects":node["subjects"],"remove_abilities":true,"until":"next-controller-end"}),frame)?;
+        for id in self.select(&node["subjects"], frame)? {
+            self.register_continuous(&json!({"op":"restrict","subjects":id,"action":"normal_stand","until":"next-controller-end"}),frame)?;
+        }
+        Ok(())
+    }
+
+    fn equip_tokens(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        let count = self.number(&node["count"], frame)?.max(0);
+        if count > 1000 {
+            return Err(EngineFailure::Unsupported(
+                "equipment batch exceeds prototype limit".into(),
+            ));
+        }
+        for subject in self.select(&node["subjects"], frame)? {
+            if self.object(&subject)?.zone != "field" {
+                continue;
+            }
+            let controller = self.object(&subject)?.controller.clone();
+            for _ in 0..count {
+                let id = self.new_named_object(string(&node["name"]), &controller)?;
+                self.move_objects(from_ref(&id), "equipment", None, None, frame)?;
+                self.object_mut(&id)?.state["equipped_to"] = json!(subject);
+            }
+        }
+        Ok(())
+    }
+
+    fn change_type(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        for id in self.select(&node["subjects"], frame)? {
+            let prior = self.object(&id)?.state.clone();
+            let typ = if node["op"] == "pilot" || node["type"] == "follower" {
+                "フォロワー"
+            } else {
+                "アミュレット"
+            };
+            self.object_mut(&id)?.state["card_type"] = json!(typ);
+            if node["op"] == "pilot" {
+                for field in ["power", "hp"] {
+                    let printed = scalar(&self.face(&id)?[field]);
+                    self.object_mut(&id)?.state[field] = json!(printed);
+                    if field == "hp" {
+                        self.object_mut(&id)?.state["max_hp"] = json!(printed);
+                    }
+                }
+                self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":"end-of-turn","prior":prior}));
+            }
         }
         Ok(())
     }
@@ -246,7 +301,7 @@ impl Game {
         let subjects = self.select(&node["subjects"], frame)?;
         for id in subjects {
             let generation = self.state.objects.get(&id).map(|object| object.generation);
-            self.state.continuous.push(json!({"source":frame.source,"controller":frame.controller,"applies_to":[id],"generation":generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"during":node["during"],"order":self.state.next_event,"context":frame}));
+            self.state.continuous.push(json!({"source":frame.source,"controller":frame.controller,"applies_to":[id],"generation":generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"during":node["during"],"duration_controller":self.state.objects.get(&id).map(|object|object.controller.clone()),"expires_turn":self.state.objects.get(&id).map_or(0,|object|int(&self.state.turn["elapsed_turns"][&object.controller]).saturating_add(i64::from(self.active()!=object.controller))),"order":self.state.next_event,"context":frame}));
         }
         Ok(())
     }

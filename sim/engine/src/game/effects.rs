@@ -473,7 +473,9 @@ impl Game {
                 );
             }
             "flip" | "control" | "create" | "counter" | "adjust_cost" | "restrict"
-            | "replace_damage" | "reveal_until" => self.extended_effect(node, frame)?,
+            | "replace_damage" | "reveal_until" | "box" | "equip" | "pilot" | "become_type" => {
+                self.extended_effect(node, frame)?;
+            }
             "unsupported" => {
                 return Err(EngineFailure::Unsupported(string(&node["reason"]).into()));
             }
@@ -730,7 +732,7 @@ impl Game {
                 self.bump(&format!("{}.magic_item_banished", previous.controller), 1);
             }
             let token = string(&printed["card_type"]).contains("トークン");
-            if token && !matches!(destination, "field" | "ex" | "resolution") {
+            if token && !matches!(destination, "field" | "ex" | "resolution" | "equipment") {
                 erased.push(id.clone());
             }
         }
@@ -789,10 +791,8 @@ impl Game {
         Ok(())
     }
 
-    fn modify(&mut self, node: &Value, frame: &Frame) -> Result<()> {
-        if node.get("until").is_some()
-            && (node["until"] != "end-of-turn" || node["remove_abilities"] != true)
-        {
+    pub(super) fn modify(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        if node.get("until").is_some() && node["remove_abilities"] != true {
             return Err(EngineFailure::Unsupported(
                 "temporary numeric and cross-turn modification layers".into(),
             ));
@@ -851,7 +851,7 @@ impl Game {
                 all.extend(keywords.iter().cloned());
                 self.object_mut(&id)?.state["keywords"] = json!(all);
             }
-            self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"]}));
+            self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))}));
         }
         Ok(())
     }
@@ -1094,10 +1094,13 @@ impl Game {
 
     fn damage_replacements(&self, hit: &Value) -> Result<Vec<Value>> {
         let mut result = Vec::new();
-        for source in self.field_ids() {
+        for source in self.ability_sources() {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];
-                if ability["kind"] != "static" || body["op"] != "replace_damage" {
+                if ability["kind"] != "static"
+                    || body["op"] != "replace_damage"
+                    || !self.ability_zone(&source, &ability)?
+                {
                     continue;
                 }
                 let frame = self.frame_for(&source)?;
