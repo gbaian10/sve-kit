@@ -8170,3 +8170,155 @@ fn zero_counter_cost_is_paid_but_partial_counter_effects_report_only_the_actual_
         );
     }
 }
+
+#[expect(
+    clippy::unwrap_used,
+    clippy::indexing_slicing,
+    reason = "A synthetic hand activation tests capacity independently of fusion card text."
+)]
+fn movement_payment_catalog() -> Arc<Catalog> {
+    let mut doc = document(&json!({"op":"seq","steps":[]}));
+    doc["cards"]["unit-spell"]["abilities"] = json!([{
+        "kind":"activated","line":1_i64,"active_zones":["hand"],
+        "cost_selections":[{"key":"1","select":{"union":[{"side":"self","zone":"hand","other":true},{"side":"self","zone":"ex"}]},"min":1_i64,"max":1_i64}],
+        "costs":[{"op":"pp","amount":1_i64},{"op":"move","subjects":"cost.1","to":"cemetery"},{"op":"move","subjects":"self","to":"ex"}],
+        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
+    }]);
+    Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("movement-cost.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn movement_costs_consider_prior_departures_and_never_expose_partial_payment() {
+    let loaded = movement_payment_catalog();
+    for material_in_ex in [true, false] {
+        let mut position = setup();
+        let mut ex = (0_u8..5)
+            .map(|n| json!({"id":format!("x{n}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>();
+        if material_in_ex {
+            ex[0]["id"] = json!("m");
+        } else {
+            position["players"]["P1"]["zones"]["hand"]
+                .as_array_mut()
+                .unwrap()
+                .push(json!({"id":"m","card":"unit-follower"}));
+        }
+        position["players"]["P1"]["zones"]["ex"] = json!(ex);
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "capacity",
+        )
+        .unwrap();
+        let action =
+            json!({"do":"activate","ability":{"source":"s","line":1_i64},"costs":{"1":["m"]}});
+        let before = engine.digest().unwrap();
+        assert_eq!(engine.legal().unwrap().contains(&action), material_in_ex);
+        assert_eq!(engine.digest().unwrap(), before);
+        let result = engine.decide(&action, "activate").unwrap();
+        if material_in_ex {
+            assert_eq!(result.outcome, "resolved");
+            assert_eq!(
+                engine.query(View::P1, "P1.ex_count").unwrap(),
+                Some(json!(5_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P1.cemetery").unwrap(),
+                Some(json!(["m"]))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P1.pp.current").unwrap(),
+                Some(json!(1_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(19_i64))
+            );
+        } else {
+            assert_eq!(result.outcome, "cannot-activate");
+            assert!(result.events.is_empty());
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+    }
+}
+
+#[test]
+fn fixed_cardinality_costs_recheck_each_step_after_earlier_cards_have_left() {
+    let cost = json!({"op":"banish","subjects":{"side":"self","zone":"deck","top":2_i64}});
+    let loaded = counter_payment_catalog(
+        &json!([cost, cost]),
+        &json!({"op":"damage","subjects":"opponent.leader","amount":1_i64}),
+    );
+    for count in [3_u8, 4_u8] {
+        let mut position = setup();
+        position["players"]["P1"]["zones"]["deck"] = json!(
+            (0..count)
+                .map(|n| json!({"id":format!("d{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "fixed",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        let result = engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "activate",
+            )
+            .unwrap();
+        if count == 3 {
+            assert_eq!(result.outcome, "cannot-activate");
+            assert!(result.events.is_empty());
+            assert_eq!(engine.digest().unwrap(), before);
+        } else {
+            assert_eq!(result.outcome, "resolved");
+            assert_eq!(
+                engine.query(View::P1, "P1.deck_count").unwrap(),
+                Some(json!(0_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P1.banish_count").unwrap(),
+                Some(json!(4_i64))
+            );
+        }
+    }
+}
+
+#[test]
+fn movement_payment_preview_revalidates_counters_after_a_change_of_identity() {
+    let loaded = counter_payment_catalog(
+        &json!([
+            {"op":"move","subjects":"self","to":"ex"},
+            {"op":"counter","subjects":"self","name":"fusion_counter","amount":-1_i64}
+        ]),
+        &json!({"op":"damage","subjects":"opponent.leader","amount":1_i64}),
+    );
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["field"][0]["state"]["counters"] =
+        json!({"融合カウンター":1_i64});
+    let mut engine = Game::new(loaded, &position, &Value::Null, &Value::Null, "reset").unwrap();
+    let before = engine.digest().unwrap();
+    let result = engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+            "activate",
+        )
+        .unwrap();
+    assert_eq!(result.outcome, "cannot-activate");
+    assert!(result.events.is_empty());
+    assert_eq!(engine.digest().unwrap(), before);
+}

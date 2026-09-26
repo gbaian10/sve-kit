@@ -269,7 +269,7 @@ cards:
                 count: 1
   BP03-SL14:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 依 10.4.7.3、Q492／Q493，ラストワード的消滅費用於結算時可選支付；出場與捨牌同屬支付後效果，無手牌時不執行捨牌。
     abilities:
       - line: 1
         kind: static
@@ -296,28 +296,39 @@ cards:
       - line: 3
         kind: trigger
         body:
-          op: seq
-          steps:
-            - op: move
-              subjects: self
-              to: field
-            - op: seq
-              steps:
-                - op: select
-                  select:
-                    side: self
-                    zone: hand
-                  by: self
-                  min: 1
-                  max: 1
-                  bind: discarded
-                - op: discard
-                  subjects: discarded
+          op: pay
+          costs:
+            - op: banish
+              subjects:
+                side: self
+                zone: deck
+                top: 10
+          then:
+            op: seq
+            steps:
+              - op: move
+                subjects: self
+                to: field
+              - op: if
+                condition:
+                  fn: gt
+                  args:
+                    - count:
+                        side: self
+                        zone: hand
+                    - 0
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: self
+                        zone: hand
+                      by: self
+                      min: 1
+                      max: 1
+                      bind: discarded
+                    - op: discard
+                      subjects: discarded
         event: field_to_cemetery
         subject: self
-        costs:
-          - op: banish
-            subjects:
-              side: self
-              zone: deck
-              top: 10

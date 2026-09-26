@@ -4,6 +4,7 @@
 )]
 use super::{Frame, Game, int, list, string};
 use crate::{EngineFailure, Result};
+use core::slice::from_ref;
 use serde_json::{Value, json};
 
 #[expect(
@@ -11,6 +12,49 @@ use serde_json::{Value, json};
     reason = "Payment preparation and execution share game state."
 )]
 impl Game {
+    pub(super) fn movement_payment_possible(&self, costs: &[Value], frame: &Frame) -> Result<bool> {
+        // Replay costs in an isolated state so earlier departures and replacements affect capacity.
+        let mut preview = self.clone();
+        preview.state.prompt = None;
+        preview.state.frame = None;
+        preview.emitted.clear();
+        let mut context = frame.clone();
+        context.todo = costs.to_vec();
+        context.values.insert("paying_cost".into(), json!(true));
+        let mut fuel = 20_000_u32;
+        while !context.todo.is_empty() {
+            fuel = fuel.checked_sub(1).ok_or_else(|| {
+                EngineFailure::Unsupported("cost preview exhausted its execution budget".into())
+            })?;
+            let node = context.todo.remove(0);
+            if matches!(string(&node["op"]), "move" | "banish" | "discard")
+                && let Some(top) = node["subjects"].get("top")
+            {
+                let required = preview.number(top, &context)?.max(0);
+                let available = i64::try_from(preview.select(&node["subjects"], &context)?.len())
+                    .unwrap_or(i64::MAX);
+                if available < required {
+                    return Ok(false);
+                }
+            }
+            if matches!(string(&node["op"]), "pp" | "counter" | "act" | "flip")
+                && !preview.can_pay(from_ref(&node), &context)?
+            {
+                return Ok(false);
+            }
+            preview.execute(&node, &mut context)?;
+            if let Some(prompt) = &preview.state.prompt {
+                if prompt.resume["resume"] == "move-capacity" {
+                    return Ok(false);
+                }
+                return Err(EngineFailure::Unsupported(
+                    "cost preview requires an unplanned input".into(),
+                ));
+            }
+        }
+        Ok(true)
+    }
+
     fn payment_selection(node: &Value, frame: &Frame) -> Result<Option<Value>> {
         let selections = list(&node["cost_selections"])
             .into_iter()

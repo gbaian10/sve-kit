@@ -363,6 +363,9 @@ impl Game {
         let mut counters = BTreeMap::new();
         let mut atoms = Vec::new();
         self.cost_atoms(costs, frame, &mut atoms)?;
+        let has_movement = atoms
+            .iter()
+            .any(|(cost, _)| matches!(string(&cost["op"]), "move" | "discard" | "banish"));
         for (cost, context) in atoms {
             match string(&cost["op"]) {
                 "pp" => pp = pp.saturating_add(self.number(&cost["amount"], &context)?.max(0)),
@@ -431,7 +434,13 @@ impl Game {
                 }
             }
         }
-        Ok(int(&self.player(&frame.controller)?.pp["current"]) >= pp)
+        if int(&self.player(&frame.controller)?.pp["current"]) < pp {
+            return Ok(false);
+        }
+        if has_movement {
+            return self.movement_payment_possible(costs, frame);
+        }
+        Ok(true)
     }
 
     pub(super) fn valid_parameters(&self, code: &Value, frame: &Frame) -> Result<bool> {
