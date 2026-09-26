@@ -99,6 +99,7 @@ cards:
               - op: move
                 subjects: chosen
                 to: field
+                bind: placed
         active_zones:
           - cemetery
         cost_selections:
@@ -125,7 +126,7 @@ cards:
         kind: spell
         body:
           op: choice
-          min: 0
+          min: 1
           max: 2
           modes:
             - op: if

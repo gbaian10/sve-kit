@@ -29,7 +29,7 @@ cards:
                     - 2
                 then:
                   op: destroy
-                  subjects: &id003
+                  subjects: &id006
                     side: opponent
                     zone: field
                     type: follower
@@ -74,50 +74,60 @@ cards:
       - line: 3
         kind: trigger
         body:
-          op: seq
-          steps:
-            - op: seq
-              steps:
-                - op: select
-                  select:
-                    side: self
-                    zone: hand
-                  by: self
-                  min: &id001
-                    fn: max
-                    args:
-                      - 0
-                      - fn: sub
-                        args:
-                          - count:
-                              side: self
-                              zone: hand
-                          - 2
-                  max: *id001
-                  bind: discarded
-                - op: discard
-                  subjects: discarded
-            - op: seq
-              steps:
-                - op: select
-                  select:
-                    side: opponent
-                    zone: hand
-                  by: opponent
-                  min: &id002
-                    fn: max
-                    args:
-                      - 0
-                      - fn: sub
-                        args:
-                          - count:
-                              side: opponent
-                              zone: hand
-                          - 2
-                  max: *id002
-                  bind: discarded
-                - op: discard
-                  subjects: discarded
+          op: if
+          condition:
+            read: self.is_active
+          then:
+            op: seq
+            steps:
+              - &id004
+                op: select
+                select:
+                  side: self
+                  zone: hand
+                by: self
+                min: &id001
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: self
+                            zone: hand
+                        - 2
+                max: *id001
+                bind: discard_self
+              - &id003
+                op: select
+                select:
+                  side: opponent
+                  zone: hand
+                by: opponent
+                min: &id002
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: opponent
+                            zone: hand
+                        - 2
+                max: *id002
+                bind: discard_other
+              - &id005
+                op: discard
+                subjects:
+                  union:
+                    - discard_self
+                    - discard_other
+          else:
+            op: seq
+            steps:
+              - *id003
+              - *id004
+              - *id005
         event: enter
         subject: self
   BP10-122:
@@ -160,7 +170,7 @@ cards:
                     - 2
                 then:
                   op: destroy
-                  subjects: *id003
+                  subjects: *id006
                 else:
                   op: if
                   condition:

@@ -634,3 +634,142 @@ fn spell_cost_enumeration_and_payment_include_the_printed_cost() {
         );
     }
 }
+
+#[test]
+fn life_decreases_are_distinct_from_damage_and_stat_changes_are_per_object() {
+    let mut engine = game(&json!({"op":"seq","steps":[
+        {"op":"modify","subjects":"self.leader","hp":-3_i64},
+        {"op":"modify","subjects":"self.leader","hp":2_i64},
+        {"op":"modify","subjects":"self.leader","set_hp":15_i64},
+        {"op":"damage","subjects":"opponent.leader","amount":{"read":"self.turn.leader_hp_decreased"}},
+        {"op":"modify","subjects":"target.1","power":1_i64,"hp":1_i64}
+    ]}));
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(packet["P1"]["leader"]["life"], 15_i64);
+    assert_eq!(packet["P2"]["leader"]["life"], 18_i64);
+    assert_eq!(
+        packet["semantic_state"]["counters_this_turn"]["P1.leader_hp_decreased"],
+        2_i64
+    );
+    assert_eq!(
+        packet["semantic_state"]["counters_this_turn"]["P1.leader_hp_increased"],
+        2_i64
+    );
+    assert_eq!(
+        packet["semantic_state"]["counters_this_turn"]["P1.leader_damaged"],
+        0_i64
+    );
+    assert_eq!(packet["objects"]["b"]["stats_increased_this_turn"], true);
+    assert_eq!(packet["objects"]["a"]["stats_increased_this_turn"], false);
+    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    engine.decide(&json!({"do":"pass"}), "pass").unwrap();
+    assert_eq!(
+        engine.projection(View::P1).unwrap()["objects"]["b"]["stats_increased_this_turn"],
+        false
+    );
+}
+
+#[test]
+fn localized_keyword_and_counter_packets_restore_stable_identifiers() {
+    let mut registry: Value = serde_json::from_str(&registry()).unwrap();
+    registry["keywords"]["stack_counter"] = json!({"ja":"スタックカウンター","role":"counter"});
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry.to_string(),
+            &[(
+                "stable.yaml".into(),
+                document(&json!({"op":"draw","count":0_i64})).to_string(),
+            )],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["field"][0]["state"] =
+        json!({"keywords":["守護"],"counters":{"スタックカウンター":2_i64}});
+    let engine = Game::new(
+        Arc::clone(&catalog),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "stable",
+    )
+    .unwrap();
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(packet["objects"]["a"]["keywords"], json!(["守護"]));
+    assert_eq!(
+        packet["objects"]["a"]["counters"]["スタックカウンター"],
+        2_i64
+    );
+    let sampled = Game::from_observation(catalog, &packet, "P1", "sample").unwrap();
+    assert_eq!(
+        sampled.projection(View::P1).unwrap()["objects"],
+        packet["objects"]
+    );
+    let serialized = serde_json::to_value(sampled).unwrap();
+    assert_eq!(
+        serialized["state"]["objects"]["a"]["state"]["keywords"],
+        json!(["guard"])
+    );
+    assert_eq!(
+        serialized["state"]["objects"]["a"]["state"]["counters"]["stack_counter"],
+        2_i64
+    );
+}
+
+#[test]
+fn last_words_trigger_once_for_destroy_and_for_payment_movement() {
+    for payment in [false, true] {
+        let body = if payment {
+            json!({"op":"seq","steps":[]})
+        } else {
+            json!({"op":"destroy","subjects":"target.1"})
+        };
+        let mut doc = document(&body);
+        doc["cards"]["unit-follower"]["abilities"] = json!([{
+            "kind":"trigger","line":1_i64,"event":"field_to_cemetery","subject":"self",
+            "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
+        }]);
+        if payment {
+            doc["cards"]["unit-spell"]["abilities"][0]["costs"] =
+                json!([{"op":"move","subjects":"target.1","to":"cemetery"}]);
+        }
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("last-words.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut engine =
+            Game::new(catalog, &setup(), &Value::Null, &Value::Null, "last-words").unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let pending = engine.legal().unwrap();
+        assert_eq!(pending.len(), 1);
+        assert_eq!(pending[0]["do"], "choose-pending");
+        engine.decide(&pending[0], "last-words").unwrap();
+        assert_eq!(
+            engine.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(19_i64))
+        );
+        assert!(
+            engine
+                .legal()
+                .unwrap()
+                .iter()
+                .all(|action| action["do"] != "choose-pending")
+        );
+    }
+}

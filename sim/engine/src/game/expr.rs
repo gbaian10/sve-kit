@@ -451,6 +451,16 @@ impl Game {
             return Ok(value.clone());
         }
         let object = self.object(id)?;
+        if field == "entered_by_play" || field == "entered_by_effect" {
+            return Ok(json!(
+                object.state["entered_by"]
+                    == if field == "entered_by_play" {
+                        "play"
+                    } else {
+                        "effect"
+                    }
+            ));
+        }
         if field == "zone" {
             return Ok(json!(object.zone));
         }
@@ -461,7 +471,10 @@ impl Game {
             return Ok(json!(scalar(&self.face(id)?["cost"])));
         }
         if field == "current_cost" {
-            return self.play_cost(id).map(|cost| json!(cost));
+            return Ok(json!(object.state.get("cost").map_or_else(
+                || self.face(id).map_or(0, |face| scalar(&face["cost"])),
+                int
+            )));
         }
         if field == "id" {
             return Ok(json!(id));

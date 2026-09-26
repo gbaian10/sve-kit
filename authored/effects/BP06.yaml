@@ -103,7 +103,7 @@ cards:
           min: 0
           max: 1
           to: hand
-        event: destroy
+        event: field_to_cemetery
         subject: self
   BP06-072:
     status: complete

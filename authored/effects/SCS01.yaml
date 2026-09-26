@@ -29,7 +29,7 @@ cards:
                 - read: event.before_life
             - fn: ge
               args:
-                - read: self.turn.leader_damaged
+                - read: self.turn.leader_hp_decreased
                 - 4
       - line: 3
         kind: trigger

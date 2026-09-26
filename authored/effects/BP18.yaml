@@ -245,23 +245,24 @@ cards:
                 - op: move
                   subjects: chosen
                   to: ex
+                  bind: placed
                 - op: seq
                   steps:
                     - op: select
                       select:
                         difference:
                           - seen
-                          - chosen
+                          - placed
                       min:
                         count:
                           difference:
                             - seen
-                            - chosen
+                            - placed
                       max:
                         count:
                           difference:
                             - seen
-                            - chosen
+                            - placed
                       bind: ordered
                       order: true
                     - op: move
@@ -269,7 +270,7 @@ cards:
                       to: deck
                       position: bottom
             - op: adjust_cost
-              subjects: chosen
+              subjects: placed
               amount: -3
               until: end-of-turn
         event: evolve

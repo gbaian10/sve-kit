@@ -233,12 +233,13 @@ impl Game {
                     let face_index =
                         usize::try_from(int(&item["state"]["face"])).map_err(invalid)?;
                     let face = catalog.face(&card, face_index)?;
-                    let mut attrs = json!({"power":scalar(&face["power"]),"hp":scalar(&face["hp"]),"max_hp":scalar(&face["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face_index,"damage":0_i64,"counters":{},"keywords":[],"silenced":false});
+                    let mut attrs = json!({"power":scalar(&face["power"]),"hp":scalar(&face["hp"]),"max_hp":scalar(&face["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face_index,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
                     if let Some(patch) = item["state"].as_object() {
                         for (key, value) in patch {
                             attrs[key] = value.clone();
                         }
                     }
+                    catalog.import_attributes(&mut attrs);
                     if item["state"].get("damage").is_some() && item["state"].get("hp").is_none() {
                         attrs["hp"] =
                             json!(int(&attrs["hp"]).saturating_sub(int(&attrs["damage"])));
@@ -315,6 +316,8 @@ impl Game {
                 "evolve_played",
                 "evolutions",
                 "leader_damaged",
+                "leader_hp_decreased",
+                "leader_hp_increased",
                 "ub_activated",
                 "discarded",
                 "attacks",
@@ -485,6 +488,15 @@ impl Game {
             .into_iter()
             .find(|a| {
                 a["line"] == reference["line"]
+                    && a.get("face").is_none_or(|face| {
+                        *face
+                            == reference.get("face").cloned().unwrap_or_else(|| {
+                                self.state
+                                    .objects
+                                    .get(id)
+                                    .map_or(Value::Null, |object| object.state["face"].clone())
+                            })
+                    })
                     && (reference["section"].is_null() || a["section"] == reference["section"])
                     && (reference["keyword"].is_null()
                         || a["keyword"] == reference["keyword"]
@@ -502,7 +514,7 @@ impl Game {
         {
             value["card"] = json!(evolved.card);
         }
-        for key in ["section", "rule"] {
+        for key in ["section", "rule", "face"] {
             if let Some(v) = ability.get(key) {
                 value[key] = v.clone();
             }

@@ -2199,7 +2199,10 @@
                 "type": "string"
               },
               "role": {
-                "const": "ability-label"
+                "enum": [
+                  "ability-label",
+                  "counter"
+                ]
               },
               "expansion": {
                 "$ref": "#/$defs/node"

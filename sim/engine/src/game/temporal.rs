@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use super::{Frame, Game, Pending, list, string};
+use super::{Frame, Game, Pending, int, list, string};
 use crate::{EngineFailure, Result, invalid};
 use core::mem::take;
 use serde_json::{Value, json};
@@ -12,6 +12,21 @@ use serde_json::{Value, json};
     reason = "Rule domains share one private state and are split into focused modules."
 )]
 impl Game {
+    pub(super) fn change_life(&mut self, seat: &str, life: i64) -> Result<()> {
+        let previous = int(&self.player(seat)?.leader["life"]);
+        self.player_mut(seat)?.leader["life"] = json!(life);
+        if life < previous {
+            self.bump(&format!("{seat}.leader_hp_decreased"), 1);
+        }
+        if life > previous {
+            self.bump(
+                &format!("{seat}.leader_hp_increased"),
+                life.saturating_sub(previous),
+            );
+        }
+        Ok(())
+    }
+
     pub(super) fn check_execution_parameters(node: &Value) -> Result<()> {
         let denied: &[&str] = match string(&node["op"]) {
             "modify" => &["type", "abilities", "during", "traits", "cost", "set_cost"],

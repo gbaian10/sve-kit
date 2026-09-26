@@ -8,8 +8,9 @@ cards:
         kind: spell
         body:
           op: choice
-          min:
-            if: &id001
+          min: 1
+          max:
+            if:
               fn: ge
               args:
                 - at: play-start
@@ -18,10 +19,6 @@ cards:
                       side: self
                       zone: cemetery
                 - 10
-            then: 0
-            else: 1
-          max:
-            if: *id001
             then: 2
             else: 1
           modes:

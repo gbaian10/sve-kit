@@ -100,7 +100,7 @@ cards:
             to: cemetery
   BP05-070:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 全段已表達；NC 不足時仍在打出時選擇目標，解決時不執行破壞。此選擇時点的解讀留待獨立覆核。
     abilities:
       - line: 1
         kind: evolve
@@ -286,7 +286,7 @@ cards:
               subjects:
                 side: self
                 zone: deck
-        event: destroy
+        event: field_to_cemetery
         subject: self
         targets:
           - key: '1'
@@ -317,7 +317,7 @@ cards:
               - read: self.is_active
               - fn: gt
                 args:
-                  - read: self.turn.leader_damaged
+                  - read: self.turn.leader_hp_decreased
                   - 0
       - line: 2
         kind: trigger
@@ -327,7 +327,7 @@ cards:
             - op: damage
               subjects: opponent.leader
               amount:
-                read: self.turn.leader_damaged
+                read: self.turn.leader_hp_decreased
             - op: if
               condition:
                 fn: eq
@@ -343,7 +343,7 @@ cards:
         subject: self
   BP05-SL14:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 全段已表達；NC 不足時仍在打出時選擇目標，解決時不執行破壞。此選擇時点的解讀留待獨立覆核。
     abilities:
       - line: 1
         kind: evolve

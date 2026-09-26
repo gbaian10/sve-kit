@@ -17,10 +17,13 @@ cards:
         body:
           op: if
           condition:
-            fn: eq
+            fn: and
             args:
-              - read: self.entered_from
-              - ex
+              - read: self.entered_by_play
+              - fn: eq
+                args:
+                  - read: self.entered_from
+                  - ex
           then:
             op: evolve
             subjects: self
@@ -71,7 +74,7 @@ cards:
           subjects: target.1
           action: normal_stand
           during: next-controller-start
-        event: destroy
+        event: field_to_cemetery
         subject: self
         section: 0
         targets:
@@ -126,7 +129,7 @@ cards:
           op: damage
           subjects: opponent.leader
           amount: 1
-        event: destroy
+        event: field_to_cemetery
         subject: self
   CP04-103:
     status: complete
@@ -289,7 +292,7 @@ cards:
           op: damage
           subjects: opponent.leader
           amount: 1
-        event: destroy
+        event: field_to_cemetery
         subject: self
   CP04-PR16:
     status: complete

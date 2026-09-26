@@ -536,6 +536,9 @@ impl Game {
             *value = 0;
         }
         self.state.used.clear();
+        for object in self.state.objects.values_mut() {
+            object.state["stats_increased_this_turn"] = json!(false);
+        }
         let player = self.player_mut(&seat)?;
         let max = int(&player.pp["max"]).saturating_add(1).min(10);
         player.pp = json!({"current":max,"max":max});
@@ -653,7 +656,7 @@ impl Game {
                 for object in matches {
                     let event_key = match event {
                         "enter" => "entered_field",
-                        "leave" | "destroy" => "left_field",
+                        "leave" | "field_to_cemetery" => "left_field",
                         "damage" => "damaged",
                         "evolve" => "evolved",
                         "attack" => "attacked",

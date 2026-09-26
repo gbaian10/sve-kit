@@ -347,7 +347,7 @@ cards:
                   bind: discarded
                 - op: discard
                   subjects: discarded
-        event: destroy
+        event: field_to_cemetery
         subject: self
   BP15-PR10:
     status: complete
@@ -357,16 +357,7 @@ cards:
         kind: spell
         body:
           op: choice
-          min:
-            if:
-              fn: ge
-              args:
-                - count:
-                    side: opponent
-                    zone: cemetery
-                - 10
-            then: 0
-            else: 1
+          min: 1
           max:
             if:
               fn: ge
@@ -676,7 +667,7 @@ cards:
               side: self
               zone: cemetery
               type: follower
-              ability_event: destroy
+              ability_event: field_to_cemetery
               where:
                 fn: and
                 args:

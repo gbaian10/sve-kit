@@ -538,15 +538,15 @@ impl Game {
             if object.zone == "field"
                 && zone != "field"
                 && self.keywords(id)?.contains("stack")
-                && int(&object.state["counters"]["スタックカウンター"]) > 0
+                && int(&object.state["counters"]["stack_counter"]) > 0
             {
-                let count = int(&object.state["counters"]["スタックカウンター"]);
-                self.object_mut(id)?.state["counters"]["スタックカウンター"] =
+                let count = int(&object.state["counters"]["stack_counter"]);
+                self.object_mut(id)?.state["counters"]["stack_counter"] =
                     json!(count.saturating_sub(1));
                 let group = self.group();
                 self.emit(json!({"kind":"取代","object":id,"original":"場を離れる（墓場に置く）","replacement":"スタックカウンターを1個取り除き、場に残る"}),&frame.cause,group);
                 self.emit(
-                    json!({"kind":"カウンター","object":id,"name":"スタックカウンター","delta":-1_i64}),
+                    json!({"kind":"カウンター","object":id,"name":self.catalog.keyword_name("stack_counter"),"delta":-1_i64}),
                     &frame.cause,
                     group,
                 );
@@ -560,7 +560,10 @@ impl Game {
             .filter(|o| o.zone == "field" && zone != "field")
             .cloned()
             .collect::<Vec<_>>();
-        let pending = self.collect_triggers("leave", &leaving, &frame.cause)?;
+        let mut pending = self.collect_triggers("leave", &leaving, &frame.cause)?;
+        if zone == "cemetery" {
+            pending.extend(self.collect_triggers("field_to_cemetery", &leaving, &frame.cause)?);
+        }
         let group = self.group();
         let mut entered = Vec::new();
         let mut erased = Vec::new();
@@ -601,7 +604,7 @@ impl Game {
             object.generation = object.generation.saturating_add(1);
             if !matches!(previous.zone.as_str(), "ex" | "resolution") {
                 let acted = object.state["acted"].clone();
-                object.state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false});
+                object.state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":acted,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
             }
             let from = format!("{}.{}", previous.controller, previous.zone);
             if zone == "field" {
@@ -683,11 +686,6 @@ impl Game {
             actual.push(id.clone());
         }
         let cause = frame.map_or_else(|| json!({"rule":"11.3.1"}), |f| f.cause.clone());
-        let snapshots = actual
-            .iter()
-            .map(|id| self.object(id).cloned())
-            .collect::<Result<Vec<_>>>()?;
-        let pending = self.collect_triggers("destroy", &snapshots, &cause)?;
         let group = self.group();
         for id in &actual {
             let mut event = json!({"kind":"破壊","object":id});
@@ -703,7 +701,6 @@ impl Game {
             ..Frame::default()
         };
         self.move_objects(&actual, "cemetery", None, None, frame.unwrap_or(&default))?;
-        self.enqueue(pending);
         Ok(())
     }
 
@@ -720,12 +717,11 @@ impl Game {
         for id in subjects {
             if let Some(seat) = id.strip_suffix(".leader") {
                 let amount = self.number(&node["hp"], frame)?;
-                let player = self.player_mut(seat)?;
-                player.leader["life"] = json!(int(&player.leader["life"]).saturating_add(amount));
-                if let Some(value) = node.get("set_hp") {
-                    let life = self.number(value, frame)?;
-                    self.player_mut(seat)?.leader["life"] = json!(life);
-                }
+                let base = node.get("set_hp").map_or_else(
+                    || Ok(int(&self.player(seat)?.leader["life"])),
+                    |value| self.number(value, frame),
+                )?;
+                self.change_life(seat, base.saturating_add(amount))?;
                 if amount > 0 {
                     self.emit(
                         json!({"kind":"体力増加","target":id,"amount":amount}),
@@ -754,6 +750,12 @@ impl Game {
                             json!(int(&object.state["max_hp"]).saturating_add(amount));
                     }
                 }
+            }
+            if ["power", "hp"]
+                .iter()
+                .any(|field| int(&self.state.objects[&id].state[*field]) > int(&prior[*field]))
+            {
+                self.object_mut(&id)?.state["stats_increased_this_turn"] = json!(true);
             }
             if node["remove_abilities"] == true {
                 self.object_mut(&id)?.state["silenced"] = json!(true);
@@ -959,8 +961,8 @@ impl Game {
             let source = string(&hit["source"]);
             let amount = int(&hit["amount"]);
             if let Some(seat) = id.strip_suffix(".leader") {
-                let player = self.player_mut(seat)?;
-                player.leader["life"] = json!(int(&player.leader["life"]).saturating_sub(amount));
+                let life = int(&self.player(seat)?.leader["life"]).saturating_sub(amount);
+                self.change_life(seat, life)?;
                 self.bump(&format!("{seat}.leader_damaged"), 1);
             } else {
                 let object = self.object_mut(id)?;

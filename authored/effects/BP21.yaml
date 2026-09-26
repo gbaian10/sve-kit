@@ -258,17 +258,7 @@ cards:
         kind: trigger
         body:
           op: choice
-          min:
-            if:
-              fn: ge
-              args:
-                - count:
-                    side: self
-                    zone: cemetery
-                    trait: レヴィオン
-                - 5
-            then: 0
-            else: 1
+          min: 1
           max:
             if:
               fn: ge

@@ -229,6 +229,9 @@ impl Game {
                 .saturating_sub(scalar(&old[field]))
                 .saturating_add(sep);
             attrs[field] = json!(int(&attrs[field]).saturating_add(delta));
+            if delta > 0 {
+                attrs["stats_increased_this_turn"] = json!(true);
+            }
             if field == "hp" {
                 attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(delta));
             }

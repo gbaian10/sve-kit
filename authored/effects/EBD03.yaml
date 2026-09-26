@@ -104,7 +104,7 @@ cards:
                 zone: deck
                 top: 1
               to: cemetery
-        event: destroy
+        event: field_to_cemetery
         subject: self
   EBD03-008:
     status: complete
@@ -260,7 +260,7 @@ cards:
                 zone: deck
                 top: 2
               to: cemetery
-        event: destroy
+        event: field_to_cemetery
         subject: self
   EBD03-013:
     status: complete
@@ -299,7 +299,7 @@ cards:
                 zone: deck
                 top: 2
               to: cemetery
-        event: destroy
+        event: field_to_cemetery
         subject: self
   EBD03-014:
     status: complete

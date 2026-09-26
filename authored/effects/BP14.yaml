@@ -34,7 +34,7 @@ cards:
         body:
           op: draw
           count: 1
-        event: destroy
+        event: field_to_cemetery
         subject: self
         keyword: last_words
   BP14-027:
@@ -141,23 +141,24 @@ cards:
             - op: move
               subjects: chosen
               to: ex
+              bind: placed
             - op: seq
               steps:
                 - op: select
                   select:
                     difference:
                       - seen
-                      - chosen
+                      - placed
                   min:
                     count:
                       difference:
                         - seen
-                        - chosen
+                        - placed
                   max:
                     count:
                       difference:
                         - seen
-                        - chosen
+                        - placed
                   bind: ordered
                   order: true
                 - op: move
@@ -175,7 +176,7 @@ cards:
         body:
           op: banish
           subjects: self
-        event: destroy
+        event: field_to_cemetery
         subject: self
       - line: 2
         kind: activated

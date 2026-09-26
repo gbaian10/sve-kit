@@ -82,7 +82,7 @@ cards:
           op: damage
           subjects: opponent.leader
           amount: 3
-        event: destroy
+        event: field_to_cemetery
         subject: self
         keyword: last_words
       - line: 3
@@ -253,14 +253,14 @@ cards:
         costs:
           - op: counter
             subjects: self
-            name: fusion
+            name: fusion_counter
             amount: -1
       - line: 3
         kind: activated
         body:
           op: counter
           subjects: self
-          name: fusion
+          name: fusion_counter
           amount: 1
         active_zones:
           - hand
@@ -372,7 +372,7 @@ cards:
           op: damage
           subjects: target.1
           amount: 3
-        event: destroy
+        event: field_to_cemetery
         subject: self
         targets:
           - key: '1'
@@ -509,7 +509,7 @@ cards:
             zone: deck
             top: 1
           to: cemetery
-        event: destroy
+        event: field_to_cemetery
         subject: self
   BP19-086:
     status: complete
@@ -565,7 +565,7 @@ cards:
         kind: spell
         body:
           op: choice
-          min: 0
+          min: 1
           max: 2
           modes:
             - op: pay
@@ -643,7 +643,7 @@ cards:
           op: modify
           subjects: self.leader
           hp: 1
-        event: destroy
+        event: field_to_cemetery
         subject: self
   BP19-P21:
     status: complete
@@ -769,7 +769,7 @@ cards:
                 zone: deck
                 top: 1
               to: cemetery
-        event: destroy
+        event: field_to_cemetery
         subject: self
         targets:
           - key: '1'
@@ -860,6 +860,7 @@ cards:
                         - op: move
                           subjects: chosen
                           to: field
+                          bind: placed
         event: enter
         subject: self
   BP19-P32:
@@ -907,7 +908,7 @@ cards:
         costs:
           - op: counter
             subjects: self
-            name: fusion
+            name: fusion_counter
             amount: -1
       - line: 3
         kind: activated
@@ -916,7 +917,7 @@ cards:
           steps:
             - op: counter
               subjects: self
-              name: fusion
+              name: fusion_counter
               amount: 1
             - op: if
               condition:
@@ -984,18 +985,7 @@ cards:
         kind: trigger
         body:
           op: choice
-          min:
-            if:
-              fn: ge
-              args:
-                - count:
-                    side: self
-                    zone: cemetery
-                    type: follower
-                    trait: 八獄
-                - 10
-            then: 0
-            else: 1
+          min: 1
           max:
             if:
               fn: ge
@@ -1025,7 +1015,7 @@ cards:
             max: 1
             modes:
               - 1
-      - line: 2
+      - line: 3
         kind: trigger
         body:
           op: modify
@@ -1144,5 +1134,5 @@ cards:
         body:
           op: draw
           count: 1
-        event: destroy
+        event: field_to_cemetery
         subject: self

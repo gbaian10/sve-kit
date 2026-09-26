@@ -75,6 +75,7 @@ impl Game {
                                     .collect::<Vec<_>>()
                             );
                         }
+                        self.catalog.export_counters(&mut card);
                         packet["objects"][id] = card;
                         visible.push(json!(id));
                     } else {

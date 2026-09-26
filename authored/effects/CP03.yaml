@@ -166,6 +166,7 @@ cards:
             - op: move
               subjects: chosen
               to: field
+              bind: placed
         event: evolve
         subject: self
   CP03-009:

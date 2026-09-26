@@ -203,7 +203,7 @@ cards:
                   bind: discarded
                 - op: discard
                   subjects: discarded
-        event: destroy
+        event: field_to_cemetery
         subject: self
         costs:
           - op: banish

@@ -351,7 +351,7 @@ cards:
                     amount: -1
                   active_zones:
                     - ex
-        event: destroy
+        event: field_to_cemetery
         subject: self
         cost_selections:
           - key: '1'
@@ -408,7 +408,7 @@ cards:
         kind: spell
         body:
           op: choice
-          min: 0
+          min: 1
           max: 2
           modes:
             - op: destroy
@@ -505,7 +505,7 @@ cards:
           op: modify
           subjects: self.leader
           hp: 4
-        event: destroy
+        event: field_to_cemetery
         subject: self
   BP17-T15:
     status: complete
@@ -522,7 +522,7 @@ cards:
           op: damage
           subjects: target.1
           amount: 4
-        event: destroy
+        event: field_to_cemetery
         subject: self
         targets:
           - key: '1'

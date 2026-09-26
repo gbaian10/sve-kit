@@ -223,7 +223,7 @@ cards:
                 - read: self.is_active
                 - fn: gt
                   args:
-                    - read: self.turn.leader_damaged
+                    - read: self.turn.leader_hp_decreased
                     - 0
             then: 8
             else: 4
@@ -265,7 +265,7 @@ cards:
           op: modify
           subjects: self.leader
           hp: 1
-        event: destroy
+        event: field_to_cemetery
         subject: self
         keyword: last_words
   BP04-115:
@@ -327,7 +327,7 @@ cards:
                 - read: self.is_active
                 - fn: gt
                   args:
-                    - read: self.turn.leader_damaged
+                    - read: self.turn.leader_hp_decreased
                     - 0
             then: 8
             else: 4

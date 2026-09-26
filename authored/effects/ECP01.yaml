@@ -31,8 +31,8 @@ cards:
           subjects: opponent.leader
           action: trigger
           events:
-            - enter
-            - evolve
+            - fanfare
+            - on_evolve
   ECP01-011:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -44,8 +44,8 @@ cards:
           subjects: opponent.leader
           action: trigger
           events:
-            - enter
-            - evolve
+            - fanfare
+            - on_evolve
       - line: 2
         kind: trigger
         body:
@@ -128,23 +128,24 @@ cards:
                 - op: move
                   subjects: chosen
                   to: field
+                  bind: placed
                 - op: seq
                   steps:
                     - op: select
                       select:
                         difference:
                           - seen
-                          - chosen
+                          - placed
                       min:
                         count:
                           difference:
                             - seen
-                            - chosen
+                            - placed
                       max:
                         count:
                           difference:
                             - seen
-                            - chosen
+                            - placed
                       bind: ordered
                       order: true
                     - op: move

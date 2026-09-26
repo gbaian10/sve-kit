@@ -148,6 +148,52 @@ impl Catalog {
             .and_then(|entry| entry["ja"].as_str())
             .unwrap_or("")
     }
+
+    pub(crate) fn import_attributes(&self, attrs: &mut Value) {
+        if let Some(keys) = attrs["keywords"].as_array() {
+            attrs["keywords"] = json!(
+                keys.iter()
+                    .map(|key| self.keyword_id(key.as_str().unwrap_or_default()))
+                    .collect::<Vec<_>>()
+            );
+        }
+        if let Some(counters) = attrs["counters"].as_object() {
+            attrs["counters"] = json!(
+                counters
+                    .iter()
+                    .map(|(key, value)| (self.keyword_id(key), value.clone()))
+                    .collect::<BTreeMap<_, _>>()
+            );
+        }
+    }
+
+    pub(crate) fn export_counters(&self, attrs: &mut Value) {
+        if let Some(counters) = attrs["counters"].as_object() {
+            attrs["counters"] = json!(
+                counters
+                    .iter()
+                    .map(|(key, value)| {
+                        let translated = self.keyword_name(key);
+                        (
+                            if translated.is_empty() {
+                                key.as_str()
+                            } else {
+                                translated
+                            },
+                            value.clone(),
+                        )
+                    })
+                    .collect::<BTreeMap<_, _>>()
+            );
+        }
+    }
+
+    fn keyword_id(&self, name: &str) -> String {
+        self.keywords
+            .iter()
+            .find(|(_, value)| value["ja"] == name)
+            .map_or_else(|| name.to_owned(), |(key, _)| key.clone())
+    }
 }
 
 pub(crate) fn yaml<'de, T>(text: &'de str) -> Result<T>

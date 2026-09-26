@@ -56,11 +56,7 @@ cards:
         kind: spell
         body:
           op: choice
-          min:
-            if:
-              read: self.turn.evolved
-            then: 0
-            else: 1
+          min: 1
           max:
             if:
               read: self.turn.evolved
@@ -192,7 +188,7 @@ cards:
         kind: trigger
         body:
           op: choice
-          min: 0
+          min: 1
           max:
             if:
               fn: gt

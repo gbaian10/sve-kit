@@ -431,13 +431,13 @@ cards:
           steps:
             - op: counter
               subjects: self
-              name: refund
+              name: refund_counter
               amount: 1
             - op: if
               condition:
                 fn: ge
                 args:
-                  - read: self.counter.refund
+                  - read: self.counter.refund_counter
                   - 8
               then:
                 op: seq
