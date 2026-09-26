@@ -148,7 +148,15 @@ pub fn think(
             let mut action = candidate.clone();
             let mut parent = None;
             for depth in 0..128_u32 {
-                if u64::try_from(log.entries.len()).map_err(invalid)? >= budget {
+                let reserve = if sample == 0 && depth > 0 {
+                    u64::try_from(candidates.len().saturating_sub(index.saturating_add(1)))
+                        .map_err(invalid)?
+                } else {
+                    0
+                };
+                if u64::try_from(log.entries.len()).map_err(invalid)?
+                    >= budget.saturating_sub(reserve)
+                {
                     frontiers = frontiers.saturating_add(1);
                     break;
                 }

@@ -9,6 +9,7 @@ mod belief;
 mod effects;
 mod expr;
 mod legal;
+mod progression;
 mod rules;
 mod view;
 
@@ -370,6 +371,9 @@ impl Game {
     }
 
     fn initialize_history(&mut self, setup: &Value) -> Result<()> {
+        if let Some(used) = setup["semantic_state"].get("used_this_turn") {
+            self.state.used = serde_json::from_value(used.clone()).map_err(invalid)?;
+        }
         for pending in list(&setup["semantic_state"]["pending_triggers"]) {
             let reference = &pending["ability"];
             let source = string(&reference["source"]).to_owned();
@@ -458,7 +462,14 @@ impl Game {
             .as_str()
             .and_then(|evolved_id| self.state.objects.get(evolved_id))
             .map_or(object.card.as_str(), |card| card.card.as_str());
-        Ok(list(&self.catalog.program(number)?["abilities"]))
+        Ok(list(&self.catalog.program(number)?["abilities"])
+            .into_iter()
+            .filter(|ability| {
+                ability
+                    .get("face")
+                    .is_none_or(|face| int(face) == int(&object.state["face"]))
+            })
+            .collect())
     }
     fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
         let number = reference["card"].as_str().unwrap_or(&self.object(id)?.card);

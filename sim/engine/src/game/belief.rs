@@ -25,6 +25,7 @@ impl Game {
     ) -> Result<Self> {
         let mut random = Random::new(seed);
         let mut setup = json!({"turn":packet["turn"],"room":packet["room"],"semantic_state":packet["semantic_state"],"players":{}});
+        setup["semantic_state"]["delayed_triggers"] = json!([]);
         for owner in ["P1", "P2"] {
             let mut player = packet[owner].clone();
             player["zones"] = json!({});
@@ -57,6 +58,7 @@ impl Game {
             setup["players"][owner] = player;
         }
         let mut game = Self::new(catalog, &setup, &Value::Null, &Value::Null, seed)?;
+        game.state.delayed = list(&packet["semantic_state"]["delayed_triggers"]);
         for (id, object) in &mut game.state.objects {
             if let Some(visible) = packet["objects"].get(id) {
                 object.state = visible.clone();

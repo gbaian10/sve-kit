@@ -185,6 +185,14 @@ cards:
         costs:
           - op: act
             subjects: cost.1
+        variables:
+          x:
+            min: 0
+            max:
+              count:
+                side: self
+                zone: field
+                type: amulet
   CP04-P18:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

@@ -337,3 +337,190 @@ fn targeting_protection_and_zero_damage_bane_follow_distinct_rules() {
         }
     }
 }
+
+#[test]
+fn evolution_enumerates_resources_and_preserves_existing_damage() {
+    let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":2_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"evolve","line":1_i64,"costs":[{"op":"pp","amount":1_i64}],"body":{"op":"evolve","subjects":"self"}}]);
+    doc["cards"]["unit-evolved"] = json!({"status":"complete","review":"synthetic","abilities":[]});
+    let evolved = json!({"number":"unit-evolved","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"1","power":"3","hp":"5","traits":[],"text":null,"sections":[]}]});
+    let facts = format!("{}\n{}", snapshot(), evolved);
+    let catalog = Catalog::from_documents(
+        &facts,
+        &registry(),
+        &[("unit.yaml".into(), doc.to_string())],
+    )
+    .unwrap();
+    let mut position = setup();
+    position["turn"]["elapsed_turns"]["P1"] = json!(7_i64);
+    position["players"]["P1"]["ep"] = json!(1_i64);
+    position["players"]["P1"]["sep"] = json!(1_i64);
+    position["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"e","card":"unit-evolved"}]);
+    position["players"]["P1"]["zones"]["field"][0]["state"] =
+        json!({"hp":1_i64,"max_hp":3_i64,"damage":2_i64});
+    let engine = Game::new(
+        Arc::new(catalog.clone()),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "evolution",
+    )
+    .unwrap();
+    let choices = engine
+        .legal()
+        .unwrap()
+        .into_iter()
+        .filter(|choice| choice["do"] == "evolve")
+        .collect::<Vec<_>>();
+    assert_eq!(choices.len(), 4);
+    for choice in &choices {
+        let mut copy = engine.clone();
+        let result = copy.decide(choice, "evolve").unwrap();
+        assert_eq!(result.outcome, "resolved");
+        let extra = choice["pay"]["sep"].as_i64().unwrap();
+        assert_eq!(
+            copy.query(View::P1, "P1.field.a.hp").unwrap(),
+            Some(json!(3_i64.saturating_add(extra)))
+        );
+        assert_eq!(
+            copy.query(View::P1, "P1.field.a.max_hp").unwrap(),
+            Some(json!(5_i64.saturating_add(extra)))
+        );
+        assert!(
+            !copy
+                .legal()
+                .unwrap()
+                .iter()
+                .any(|candidate| candidate["do"] == "evolve")
+        );
+    }
+    position["turn"]["elapsed_turns"]["P1"] = json!(6_i64);
+    let mut early = Game::new(
+        Arc::new(catalog),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "early",
+    )
+    .unwrap();
+    assert_eq!(
+        early
+            .legal()
+            .unwrap()
+            .iter()
+            .filter(|choice| choice["do"] == "evolve")
+            .count(),
+        2
+    );
+    let before = early.digest().unwrap();
+    let premature = choices
+        .iter()
+        .find(|choice| choice["pay"]["sep"] == 1_i64)
+        .unwrap();
+    assert_eq!(
+        early.decide(premature, "too-early").unwrap().outcome,
+        "cannot-evolve"
+    );
+    assert_eq!(early.digest().unwrap(), before);
+}
+
+#[test]
+fn activated_limits_and_x_domains_survive_observation_sampling() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"activated","line":1_i64,"limit":1_i64,
+        "variables":{"x":{"min":0_i64,"max":2_i64}},
+        "costs":[{"op":"pp","amount":{"read":"x"}}],
+        "body":{"op":"damage","subjects":"opponent.leader","amount":{"read":"x"}}
+    }]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("limits.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "limit",
+    )
+    .unwrap();
+    let options = engine.legal().unwrap();
+    assert_eq!(
+        options
+            .iter()
+            .filter(|choice| choice["do"] == "activate")
+            .count(),
+        3
+    );
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64},"x":3_i64}),
+                "bad-x"
+            )
+            .unwrap()
+            .outcome,
+        "cannot-activate"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":1_i64},"x":2_i64}),
+            "valid-x",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(18_i64))
+    );
+    assert!(
+        engine
+            .legal()
+            .unwrap()
+            .iter()
+            .all(|choice| choice["do"] != "activate")
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["used_this_turn"]
+            .as_object()
+            .unwrap()
+            .len(),
+        1
+    );
+    let sampled = Game::from_observation(catalog, &packet, "P1", "sample").unwrap();
+    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
+}
+
+#[test]
+fn cost_free_pending_cannot_be_declined() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"trigger","line":1_i64,"event":"attack","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("pending.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(catalog, &setup(), &Value::Null, &Value::Null, "pending").unwrap();
+    engine
+        .decide(
+            &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+            "attack",
+        )
+        .unwrap();
+    let mut decision = engine.legal().unwrap().into_iter().next().unwrap();
+    assert_eq!(decision["do"], "choose-pending");
+    let before = engine.digest().unwrap();
+    decision["costs"] = json!("decline");
+    engine.decide(&decision, "decline").unwrap_err();
+    assert_eq!(engine.digest().unwrap(), before);
+}

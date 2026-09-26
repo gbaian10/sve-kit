@@ -2066,6 +2066,31 @@
             "opponent",
             "both"
           ]
+        },
+        "variables": {
+          "type": "object",
+          "properties": {
+            "x": {
+              "type": "object",
+              "properties": {
+                "min": {
+                  "$ref": "#/$defs/expr"
+                },
+                "max": {
+                  "$ref": "#/$defs/expr"
+                }
+              },
+              "required": [
+                "min",
+                "max"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "required": [
+            "x"
+          ],
+          "additionalProperties": false
         }
       },
       "required": [

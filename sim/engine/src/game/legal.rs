@@ -7,7 +7,7 @@ use alloc::collections::BTreeSet;
 use serde_json::{Value, json};
 
 use super::{Frame, Game, int, list, other, scalar, string};
-use crate::{Result, invalid};
+use crate::{EngineFailure, Result, invalid};
 
 pub(super) fn subsets(items: &[String], min: usize, max: usize) -> Vec<Vec<String>> {
     fn visit(
@@ -111,18 +111,7 @@ impl Game {
             return Ok(prompt.choices.clone());
         }
         if let Some(seat) = self.pending_player() {
-            let mut out = Vec::new();
-            for pending in self.state.pending.iter().filter(|p| p.controller == seat) {
-                let base = Self::pending_choice(pending);
-                let frame = self.frame_for(&pending.source)?;
-                let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
-                if choices.is_empty() {
-                    out.push(base);
-                } else {
-                    out.extend(choices);
-                }
-            }
-            return Ok(out);
+            return self.pending_actions(seat);
         }
         let point = self.input_point();
         let seat = string(&point["by"]);
@@ -143,6 +132,7 @@ impl Game {
         }
         let mut out = vec![json!({"do":if quick {"pass"} else {"end-phase"}})];
         if !quick {
+            out.extend(self.evolution_actions(seat)?);
             let mut targets = vec![format!("{}.leader", other(seat))];
             targets.extend(self.zone_ids(other(seat), "field"));
             for attacker in self.zone_ids(seat, "field") {
@@ -179,12 +169,18 @@ impl Game {
             }
             out.extend(options);
         }
-        for id in self.zone_ids(seat, "field") {
+        for id in ["field", "hand", "ex", "cemetery"]
+            .into_iter()
+            .flat_map(|zone| self.zone_ids(seat, zone))
+        {
             for code in self
                 .abilities(&id)?
                 .iter()
                 .filter(|a| a["kind"] == "activated" && (!quick || a["quick"] == true))
             {
+                if !self.ability_zone(&id, code)? || !self.can_use(&id, code)? {
+                    continue;
+                }
                 let reference = self.reference(&id, code);
                 let frame = self.frame_for(&id)?;
                 out.extend(self.parameterize(
@@ -192,6 +188,26 @@ impl Game {
                     code,
                     &frame,
                 )?);
+            }
+        }
+        Ok(out)
+    }
+
+    fn pending_actions(&self, seat: &str) -> Result<Vec<Value>> {
+        let mut out = Vec::new();
+        for pending in self.state.pending.iter().filter(|p| p.controller == seat) {
+            let base = Self::pending_choice(pending);
+            let frame = self.frame_for(&pending.source)?;
+            let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
+            if choices.is_empty() {
+                out.push(base);
+            } else {
+                out.extend(choices);
+                if !list(&pending.code["costs"]).is_empty() {
+                    let mut decline = base;
+                    decline["costs"] = json!("decline");
+                    out.push(decline);
+                }
             }
         }
         Ok(out)
@@ -299,6 +315,21 @@ impl Game {
     }
 
     pub(super) fn valid_parameters(&self, code: &Value, frame: &Frame) -> Result<bool> {
+        if let Some(condition) = code.get("play_if")
+            && !self.truth(condition, frame)?
+        {
+            return Ok(false);
+        }
+        if let Some(domain) = code["variables"].get("x") {
+            let Some(x) = frame.decision["x"].as_i64() else {
+                return Ok(false);
+            };
+            if x < self.number(&domain["min"], frame)?.max(0)
+                || x > self.number(&domain["max"], frame)?
+            {
+                return Ok(false);
+            }
+        }
         for (field, specs) in [
             ("targets", list(&code["targets"])),
             ("costs", list(&code["cost_selections"])),
@@ -384,7 +415,32 @@ impl Game {
         })
     }
 
-    fn parameterize(&self, base: Value, code: &Value, initial: &Frame) -> Result<Vec<Value>> {
+    pub(super) fn parameterize(
+        &self,
+        base: Value,
+        code: &Value,
+        initial: &Frame,
+    ) -> Result<Vec<Value>> {
+        if let Some(domain) = code["variables"].get("x") {
+            let min = self.number(&domain["min"], initial)?.max(0);
+            let max = self.number(&domain["max"], initial)?;
+            if max.saturating_sub(min) > 10_000 {
+                return Err(EngineFailure::Unsupported(
+                    "X domain exceeds exhaustive prototype limit".into(),
+                ));
+            }
+            let mut result = Vec::new();
+            for x in min..=max {
+                let mut choice = base.clone();
+                choice["x"] = json!(x);
+                result.extend(self.parameterize_fixed(choice, code, initial)?);
+            }
+            return Ok(result);
+        }
+        self.parameterize_fixed(base, code, initial)
+    }
+
+    fn parameterize_fixed(&self, base: Value, code: &Value, initial: &Frame) -> Result<Vec<Value>> {
         let mut frame = initial.clone();
         frame.decision = base.clone();
         self.freeze(code, "play-start", &mut frame)?;
@@ -462,7 +518,13 @@ impl Game {
             .filter_map(|option| {
                 let mut context = frame.clone();
                 context.decision = option.clone();
-                match self.can_pay(&list(&code["costs"]), &context) {
+                match self.valid_parameters(code, &context).and_then(|valid| {
+                    if valid {
+                        self.can_pay(&list(&code["costs"]), &context)
+                    } else {
+                        Ok(false)
+                    }
+                }) {
                     Ok(true) => Some(Ok(option)),
                     Ok(false) => None,
                     Err(e) => Some(Err(e)),
@@ -479,5 +541,45 @@ impl Game {
             return self.keywords(id).map(|keywords| !keywords.contains("aura"));
         }
         Ok(true)
+    }
+
+    pub(super) fn ability_zone(&self, id: &str, code: &Value) -> Result<bool> {
+        let object = self.object(id)?;
+        let player = self.player(&object.controller)?;
+        if code["ub"] == true
+            && (player.construction != "title" || player.title != "プリンセスコネクト！Re:Dive")
+        {
+            return Ok(false);
+        }
+        Ok(code.get("active_zones").map_or_else(
+            || object.zone == "field",
+            |zones| list(zones).contains(&json!(object.zone)),
+        ))
+    }
+
+    fn usage_key(&self, id: &str, code: &Value) -> Result<String> {
+        Ok(json!({"source":id,"generation":self.object(id)?.generation,"line":code["line"],"section":code["section"],"face":code["face"],"keyword":code["keyword"]}).to_string())
+    }
+
+    pub(super) fn can_use(&self, id: &str, code: &Value) -> Result<bool> {
+        let Some(limit) = code["limit"].as_u64() else {
+            return Ok(true);
+        };
+        Ok(self
+            .state
+            .used
+            .get(&self.usage_key(id, code)?)
+            .copied()
+            .unwrap_or_default()
+            < limit)
+    }
+
+    pub(super) fn mark_use(&mut self, id: &str, code: &Value) -> Result<()> {
+        if code.get("limit").is_some() {
+            let key = self.usage_key(id, code)?;
+            let count = self.state.used.entry(key).or_default();
+            *count = count.saturating_add(1);
+        }
+        Ok(())
     }
 }

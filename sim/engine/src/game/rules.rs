@@ -5,7 +5,7 @@
 use core::mem::take;
 use serde_json::{Value, json};
 
-use super::{Frame, Game, Object, Pending, Step, int, list, other, scalar, string};
+use super::{Frame, Game, Object, Pending, Step, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -190,7 +190,12 @@ impl Game {
         choice
     }
 
-    fn start_frame(&self, source: &str, reference: Value, decision: &Value) -> Result<Frame> {
+    pub(super) fn start_frame(
+        &self,
+        source: &str,
+        reference: Value,
+        decision: &Value,
+    ) -> Result<Frame> {
         let mut frame = self.frame_for(source)?;
         frame.reference = reference;
         frame.decision = decision.clone();
@@ -282,7 +287,10 @@ impl Game {
         let reference = &decision["ability"];
         let source = string(&reference["source"]);
         let code = self.ability(source, reference)?;
-        if code["kind"] != "activated" || self.object(source)?.zone != "field" {
+        if code["kind"] != "activated"
+            || !self.ability_zone(source, &code)?
+            || !self.can_use(source, &code)?
+        {
             return Ok(false);
         }
         if self.object(source)?.controller != string(&decision["by"]) {
@@ -296,6 +304,7 @@ impl Game {
         if !self.valid_parameters(&code, &frame)? || !self.can_pay(&list(&code["costs"]), &frame)? {
             return Ok(false);
         }
+        self.mark_use(source, &code)?;
         self.pay_costs(&code, &mut frame)?;
         self.begin_ability(&mut frame, &code)?;
         Ok(true)
@@ -318,6 +327,9 @@ impl Game {
         let pending = self.state.pending.remove(index);
         if pending.controller != string(&decision["by"]) {
             return Err(invalid("wrong pending controller"));
+        }
+        if decision["costs"] == "decline" && list(&pending.code["costs"]).is_empty() {
+            return Err(invalid("a cost-free pending ability cannot be declined"));
         }
         let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
         self.freeze(&pending.code, "play-start", &mut frame)?;
@@ -363,7 +375,7 @@ impl Game {
         self.run_frame(frame.clone())
     }
 
-    fn pay_costs(&mut self, code: &Value, frame: &mut Frame) -> Result<()> {
+    pub(super) fn pay_costs(&mut self, code: &Value, frame: &mut Frame) -> Result<()> {
         let costs = list(&code["costs"]);
         if costs.is_empty() {
             return Ok(());
@@ -401,88 +413,7 @@ impl Game {
     }
 
     fn evolve_decision(&mut self, decision: &Value) -> Result<bool> {
-        let id = string(&decision["source"]);
-        let evolve = string(&decision["evolve_card"]);
-        let object = self.object(id)?.clone();
-        let next = self.object(evolve)?.clone();
-        if object.zone != "field"
-            || object.state["evolved"] == true
-            || next.zone != "evolve_deck"
-            || object.controller != next.controller
-        {
-            return Ok(false);
-        }
-        let code = self
-            .abilities(id)?
-            .into_iter()
-            .find(|a| a["kind"] == "evolve");
-        let Some(code) = code else {
-            return Ok(false);
-        };
-        let mut frame = self.start_frame(id, self.reference(id, &code), decision)?;
-        let cost = list(&code["costs"])
-            .iter()
-            .map(|c| self.number(&c["amount"], &frame))
-            .collect::<Result<Vec<_>>>()?
-            .iter()
-            .sum::<i64>();
-        let pp = int(&decision["pay"]["pp"]);
-        let ep = int(&decision["pay"]["ep"]);
-        let sep = int(&decision["pay"]["sep"]);
-        let player = self.player(&object.controller)?;
-        if pp < 0
-            || !(0..=1).contains(&ep)
-            || !(0..=1).contains(&sep)
-            || pp.saturating_add(ep) != cost
-            || int(&player.pp["current"]) < pp
-            || player.ep < ep
-            || player.sep < sep
-        {
-            return Ok(false);
-        }
-        let expected_name = code["body"]["name"]
-            .as_str()
-            .unwrap_or(string(&self.face(id)?["name"]));
-        if string(&self.face(evolve)?["name"]) != expected_name
-            || self
-                .state
-                .counters
-                .get(&format!("{}.evolve_played", object.controller))
-                .copied()
-                .unwrap_or_default()
-                > 0
-        {
-            return Ok(false);
-        }
-        let old = self.face(id)?.clone();
-        let new = self.face(evolve)?.clone();
-        let resources = self.player_mut(&object.controller)?;
-        resources.pp["current"] = json!(int(&resources.pp["current"]).saturating_sub(pp));
-        resources.ep = resources.ep.saturating_sub(ep);
-        resources.sep = resources.sep.saturating_sub(sep);
-        self.move_objects(&[evolve.into()], "evolution", None, None, &frame)?;
-        let attrs = &mut self.object_mut(id)?.state;
-        attrs["evolved"] = json!(true);
-        attrs["evolved_with"] = json!(evolve);
-        for key in ["power", "hp"] {
-            attrs[key] = json!(
-                int(&attrs[key])
-                    .saturating_add(scalar(&new[key]).saturating_sub(scalar(&old[key])))
-            );
-        }
-        attrs["max_hp"] = json!(int(&attrs["hp"]));
-        self.bump(&format!("{}.evolve_played", object.controller), 1);
-        self.bump(&format!("{}.evolutions", object.controller), 1);
-        let group = self.group();
-        let event = self.emit(
-            json!({"kind":"進化","object":id,"with":evolve}),
-            &frame.cause,
-            group,
-        );
-        frame.cause = json!({"event":event});
-        let pending = self.collect_triggers("evolve", &[self.object(id)?.clone()], &frame.cause)?;
-        self.enqueue(pending);
-        Ok(true)
+        self.evolve_action(decision)
     }
 
     fn attack(&mut self, decision: &Value) -> Result<bool> {

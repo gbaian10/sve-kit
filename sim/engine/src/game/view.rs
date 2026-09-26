@@ -86,17 +86,7 @@ impl Game {
             }
             packet[player] = value;
         }
-        let pending=self.state.pending.iter().map(|pending|{
-            let mut value=json!({"controller":pending.controller,"ability":pending.reference,"event":pending.event});
-            if let Some(id)=&pending.id {value["id"]=json!(id);}value
-        }).collect::<Vec<_>>();
-        packet["semantic_state"] =
-            json!({"pending_triggers":pending,"counters_this_turn":self.state.counters});
-        if seat.is_none() {
-            packet["semantic_state"]["continuous_effects"] = json!(self.state.continuous);
-            packet["semantic_state"]["delayed_triggers"] = json!(self.state.delayed);
-            packet["semantic_state"]["used_this_turn"] = json!(self.state.used);
-        }
+        packet["semantic_state"] = self.semantic_projection(view);
         let knowledge = seat.and_then(|seat| self.state.knowledge.get(seat));
         packet["knowledge"] = knowledge.map_or_else(||json!({"identifiable":self.state.objects.keys().collect::<Vec<_>>(),"carried":[]}),|knowledge|json!({"identifiable":knowledge.seen.keys().collect::<Vec<_>>(),"located":knowledge.located,"carried":knowledge.carried}));
         packet["known_cards"] = knowledge.map_or_else(||json!([]),|knowledge| {
@@ -124,6 +114,40 @@ impl Game {
             }
         }
         Ok(packet)
+    }
+
+    fn semantic_projection(&self, view: View) -> Value {
+        let seat = view.player();
+        let pending=self.state.pending.iter().map(|pending|{
+            let mut value=json!({"controller":pending.controller,"ability":pending.reference,"event":pending.event});
+            if let Some(id)=&pending.id {value["id"]=json!(id);}value
+        }).collect::<Vec<_>>();
+        let mut semantic =
+            json!({"pending_triggers":pending,"counters_this_turn":self.state.counters});
+        semantic["continuous_effects"] = json!(
+            self.state
+                .continuous
+                .iter()
+                .filter(|entry| self.visible_references(entry, view))
+                .collect::<Vec<_>>()
+        );
+        semantic["delayed_triggers"] = json!(
+            self.state
+                .delayed
+                .iter()
+                .filter(|entry| self.visible_references(entry, view))
+                .collect::<Vec<_>>()
+        );
+        semantic["used_this_turn"] = json!({});
+        for (key, count) in &self.state.used {
+            if seat.is_none()
+                || serde_json::from_str::<Value>(key)
+                    .is_ok_and(|entry| self.visible_references(&entry, view))
+            {
+                semantic["used_this_turn"][key] = json!(count);
+            }
+        }
+        semantic
     }
 
     fn visible_references(&self, value: &Value, view: View) -> bool {
