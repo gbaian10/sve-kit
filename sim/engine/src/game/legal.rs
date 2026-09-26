@@ -197,7 +197,10 @@ impl Game {
         let mut out = Vec::new();
         for pending in self.state.pending.iter().filter(|p| p.controller == seat) {
             let base = Self::pending_choice(pending);
-            let frame = self.frame_for(&pending.source)?;
+            let frame = pending
+                .context
+                .clone()
+                .map_or_else(|| self.frame_for(&pending.source), Ok)?;
             let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
             if choices.is_empty() {
                 out.push(base);
@@ -274,16 +277,22 @@ impl Game {
         for source in sources {
             for code in self.abilities(&source)? {
                 let body = &code["body"];
-                if body["op"] != "adjust_cost" {
+                if code["kind"] != "static" || body["op"] != "adjust_cost" {
                     continue;
                 }
                 let frame = self.frame_for(&source)?;
-                if !self.matches(id, &body["subjects"], &frame)?
-                    || body
-                        .get("condition")
-                        .is_some_and(|c| !self.truth(c, &frame).unwrap_or(false))
+                if !self.matches(id, &body["subjects"], &frame)? {
+                    continue;
+                }
+                if let Some(condition) = body.get("condition")
+                    && !self.truth(condition, &frame)?
                 {
                     continue;
+                }
+                if body.get("uses").is_some() || body.get("until").is_some() {
+                    return Err(EngineFailure::Unsupported(
+                        "limited-use static cost adjustment".into(),
+                    ));
                 }
                 if let Some(set) = body.get("set") {
                     cost = self.number(set, &frame)?;
@@ -308,33 +317,33 @@ impl Game {
                     }
                 }
                 "move" | "discard" | "banish" => {}
-                _ => return Ok(false),
+                unknown => {
+                    return Err(EngineFailure::Unsupported(format!(
+                        "cost opcode: {unknown}"
+                    )));
+                }
             }
         }
         Ok(int(&self.player(&frame.controller)?.pp["current"]) >= pp)
     }
 
     pub(super) fn valid_parameters(&self, code: &Value, frame: &Frame) -> Result<bool> {
-        if let Some(condition) = code.get("play_if")
-            && !self.truth(condition, frame)?
-        {
+        if !self.valid_play_conditions(code, frame)? {
             return Ok(false);
-        }
-        if let Some(domain) = code["variables"].get("x") {
-            let Some(x) = frame.decision["x"].as_i64() else {
-                return Ok(false);
-            };
-            if x < self.number(&domain["min"], frame)?.max(0)
-                || x > self.number(&domain["max"], frame)?
-            {
-                return Ok(false);
-            }
         }
         for (field, specs) in [
             ("targets", list(&code["targets"])),
             ("costs", list(&code["cost_selections"])),
         ] {
             for spec in specs {
+                if ["order", "distinct_by", "different_from"]
+                    .iter()
+                    .any(|key| spec.get(*key).is_some())
+                {
+                    return Err(EngineFailure::Unsupported(
+                        "ordered or mutually constrained play selections".into(),
+                    ));
+                }
                 if !Self::mode_applies(&spec, frame) {
                     continue;
                 }
@@ -401,6 +410,30 @@ impl Game {
                 int(option) < 1
                     || usize::try_from(int(option)).is_ok_and(|n| n > list(&body["modes"]).len())
             }) {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
+    fn valid_play_conditions(&self, code: &Value, frame: &Frame) -> Result<bool> {
+        if code.get("additional_costs").is_some() || code.get("advance").is_some() {
+            return Err(EngineFailure::Unsupported(
+                "additional play costs or advance choice".into(),
+            ));
+        }
+        if let Some(condition) = code.get("play_if")
+            && !self.truth(condition, frame)?
+        {
+            return Ok(false);
+        }
+        if let Some(domain) = code["variables"].get("x") {
+            let Some(x) = frame.decision["x"].as_i64() else {
+                return Ok(false);
+            };
+            if x < self.number(&domain["min"], frame)?.max(0)
+                || x > self.number(&domain["max"], frame)?
+            {
                 return Ok(false);
             }
         }

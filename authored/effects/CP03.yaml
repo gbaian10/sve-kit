@@ -25,7 +25,7 @@ cards:
           count: 2
         event: attack
         subject: self
-        keyword: ツインドライブ
+        keyword: twin_drive
         rule: 14.4.6.3
       - line: 3
         kind: trigger
@@ -42,7 +42,7 @@ cards:
             name: 蒼嵐覇竜 グローリー・メイルストローム
         event: attack
         subject: self
-        keyword: 攻撃時
+        keyword: on_attack
   CP03-002:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -59,7 +59,7 @@ cards:
           count: 2
         event: attack
         subject: self
-        keyword: ツインドライブ
+        keyword: twin_drive
       - line: 2
         kind: trigger
         body:
@@ -126,7 +126,7 @@ cards:
           count: 2
         event: attack
         subject: self
-        keyword: ツインドライブ
+        keyword: twin_drive
       - line: 2
         kind: trigger
         body:

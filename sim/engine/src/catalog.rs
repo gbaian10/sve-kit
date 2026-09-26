@@ -84,12 +84,12 @@ impl Catalog {
             return Err(invalid("unknown keyword registry version"));
         }
         catalog.keywords = serde_json::from_value(registry["keywords"].clone()).map_err(invalid)?;
-        for entry in catalog.keywords.values() {
-            if entry["ja"].as_str().is_none_or(str::is_empty) || entry.get("expansion").is_none() {
-                return Err(invalid("keyword needs a display name and an expansion"));
-            }
-        }
         let schema: Value = serde_json::from_str(include_str!("../../../dsl/effects.schema.json"))
+            .map_err(invalid)?;
+        let registry_schema = json!({"$ref":"#/$defs/keywordRegistry","$defs":schema["$defs"]});
+        validator_for(&registry_schema)
+            .map_err(invalid)?
+            .validate(&registry)
             .map_err(invalid)?;
         let validator = validator_for(&schema).map_err(invalid)?;
         for (name, text) in documents {
@@ -167,7 +167,10 @@ fn expand(value: &Value, registry: &BTreeMap<String, Value>, depth: usize) -> Re
         let entry = registry
             .get(name)
             .ok_or_else(|| invalid(format!("unknown macro: {name}")))?;
-        return expand(&entry["expansion"], registry, depth.saturating_add(1));
+        let expansion = entry
+            .get("expansion")
+            .ok_or_else(|| invalid(format!("ability label has no macro expansion: {name}")))?;
+        return expand(expansion, registry, depth.saturating_add(1));
     }
     if value["op"] == "keyword"
         && !registry.contains_key(value["name"].as_str().unwrap_or_default())

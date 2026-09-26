@@ -332,6 +332,11 @@ impl Game {
             return Err(invalid("a cost-free pending ability cannot be declined"));
         }
         let mut frame = self.start_frame(&pending.source, pending.reference.clone(), decision)?;
+        if let Some(context) = &pending.context {
+            frame.bindings.clone_from(&context.bindings);
+            frame.captured.clone_from(&context.captured);
+            frame.controller.clone_from(&context.controller);
+        }
         self.freeze(&pending.code, "play-start", &mut frame)?;
         if decision["costs"] == "decline"
             || !self.valid_parameters(&pending.code, &frame)?
@@ -488,6 +493,7 @@ impl Game {
         self.state.flow = json!({"kind":"end","stage":"triggers"});
         let pending = self.collect_triggers("end", &[], &json!({"decision":self.node}))?;
         self.enqueue(pending);
+        self.enqueue_delayed_end()?;
         Ok(())
     }
     fn guard_act(&mut self, decision: &Value) -> Result<bool> {
@@ -509,6 +515,7 @@ impl Game {
         Ok(true)
     }
     fn next_turn(&mut self) -> Result<()> {
+        self.expire_silence()?;
         let seat = other(self.active()).to_owned();
         self.state.turn["active"] = json!(seat);
         self.state.turn["phase"] = json!("main");
@@ -652,6 +659,7 @@ impl Game {
                         cause: cause.clone(),
                         retained: code["retain_event"] == true,
                         id: None,
+                        context: None,
                     });
                 }
             }
@@ -674,15 +682,17 @@ impl Game {
         for source in self.field_ids() {
             for code in self.abilities(&source)? {
                 let body = &code["body"];
-                if body["op"] != "restrict" || body["action"] != action {
+                if code["kind"] != "static" || body["op"] != "restrict" || body["action"] != action
+                {
                     continue;
                 }
                 let frame = self.frame_for(&source)?;
-                if self.matches(id, &body["subjects"], &frame)?
-                    && body
-                        .get("condition")
-                        .is_none_or(|c| self.truth(c, &frame).unwrap_or(false))
+                if let Some(condition) = body.get("condition")
+                    && !self.truth(condition, &frame)?
                 {
+                    continue;
+                }
+                if self.matches(id, &body["subjects"], &frame)? {
                     return Ok(true);
                 }
             }

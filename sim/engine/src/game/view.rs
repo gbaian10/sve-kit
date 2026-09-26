@@ -120,7 +120,12 @@ impl Game {
         let seat = view.player();
         let pending=self.state.pending.iter().map(|pending|{
             let mut value=json!({"controller":pending.controller,"ability":pending.reference,"event":pending.event});
-            if let Some(id)=&pending.id {value["id"]=json!(id);}value
+            if let Some(id)=&pending.id {value["id"]=json!(id);}
+            if let Some(context)=&pending.context {
+                let context=json!(context);
+                if self.visible_references(&context,view) {value["program"]=pending.code.clone();value["context"]=context;}
+            }
+            value
         }).collect::<Vec<_>>();
         let mut semantic =
             json!({"pending_triggers":pending,"counters_this_turn":self.state.counters});

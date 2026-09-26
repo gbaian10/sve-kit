@@ -11,6 +11,7 @@ mod expr;
 mod legal;
 mod progression;
 mod rules;
+mod temporal;
 mod view;
 
 use alloc::collections::{BTreeMap, BTreeSet};
@@ -92,6 +93,7 @@ struct Pending {
     cause: Value,
     retained: bool,
     id: Option<String>,
+    context: Option<Frame>,
 }
 
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
@@ -377,7 +379,9 @@ impl Game {
         for pending in list(&setup["semantic_state"]["pending_triggers"]) {
             let reference = &pending["ability"];
             let source = string(&reference["source"]).to_owned();
-            let code = self.ability(&source, reference)?;
+            let code = pending
+                .get("program")
+                .map_or_else(|| self.ability(&source, reference), |code| Ok(code.clone()))?;
             self.state.pending.push(Pending {
                 controller: string(&pending["controller"]).into(),
                 reference: reference.clone(),
@@ -387,6 +391,10 @@ impl Game {
                 cause: json!({"rule":"fixture"}),
                 retained: true,
                 id: pending["id"].as_str().map(str::to_owned),
+                context: pending
+                    .get("context")
+                    .map(|value| serde_json::from_value(value.clone()).map_err(invalid))
+                    .transpose()?,
             });
         }
         if !list(&setup["semantic_state"]["delayed_triggers"]).is_empty() {
@@ -478,7 +486,10 @@ impl Game {
             .find(|a| {
                 a["line"] == reference["line"]
                     && (reference["section"].is_null() || a["section"] == reference["section"])
-                    && (reference["keyword"].is_null() || a["keyword"] == reference["keyword"])
+                    && (reference["keyword"].is_null()
+                        || a["keyword"] == reference["keyword"]
+                        || self.catalog.keyword_name(string(&a["keyword"]))
+                            == string(&reference["keyword"]))
             })
             .ok_or_else(|| EngineFailure::Unsupported(format!("ability not authored: {reference}")))
     }
@@ -491,10 +502,13 @@ impl Game {
         {
             value["card"] = json!(evolved.card);
         }
-        for key in ["keyword", "section", "rule"] {
+        for key in ["section", "rule"] {
             if let Some(v) = ability.get(key) {
                 value[key] = v.clone();
             }
+        }
+        if let Some(keyword) = ability["keyword"].as_str() {
+            value["keyword"] = json!(self.catalog.keyword_name(keyword));
         }
         value
     }

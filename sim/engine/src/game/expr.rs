@@ -488,20 +488,19 @@ impl Game {
             .map(str::to_owned)
             .collect();
         for ability in self.abilities(id)? {
-            if ability["body"]["op"] == "keyword" {
+            if ability["kind"] == "static" && ability["body"]["op"] == "keyword" {
                 result.insert(string(&ability["body"]["name"]).into());
             }
         }
         for source in self.field_ids() {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];
-                if body["op"] != "aura" {
+                if ability["kind"] != "static" || body["op"] != "aura" {
                     continue;
                 }
                 let frame = self.frame_for(&source)?;
-                if body
-                    .get("condition")
-                    .is_some_and(|c| !self.truth(c, &frame).unwrap_or(false))
+                if let Some(condition) = body.get("condition")
+                    && !self.truth(condition, &frame)?
                 {
                     continue;
                 }

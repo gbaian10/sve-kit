@@ -1954,7 +1954,8 @@
           "type": "integer"
         },
         "keyword": {
-          "type": "string"
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]*$"
         },
         "rule": {
           "type": "string"
@@ -2144,6 +2145,59 @@
         "max"
       ],
       "additionalProperties": false
+    },
+    "keywordRegistry": {
+      "type": "object",
+      "required": [
+        "version",
+        "keywords"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": "astra/1"
+        },
+        "keywords": {
+          "type": "object",
+          "propertyNames": {
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "additionalProperties": {
+            "type": "object",
+            "required": [
+              "ja"
+            ],
+            "additionalProperties": false,
+            "properties": {
+              "ja": {
+                "type": "string",
+                "minLength": 1
+              },
+              "rule": {
+                "type": "string"
+              },
+              "role": {
+                "const": "ability-label"
+              },
+              "expansion": {
+                "$ref": "#/$defs/node"
+              }
+            },
+            "anyOf": [
+              {
+                "required": [
+                  "expansion"
+                ]
+              },
+              {
+                "required": [
+                  "role"
+                ]
+              }
+            ]
+          }
+        }
+      }
     }
   }
 }

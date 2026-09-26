@@ -245,6 +245,13 @@ fn supported_prior(value: &Value) -> bool {
     match value {
         Value::Array(items) => items.iter().all(supported_prior),
         Value::Object(fields) => {
+            if Game::check_execution_parameters(value).is_err()
+                || ["additional_costs", "advance", "limit_at", "active_zones"]
+                    .iter()
+                    .any(|key| fields.contains_key(*key))
+            {
+                return false;
+            }
             if let Some(op) = fields.get("op").and_then(Value::as_str)
                 && !matches!(
                     op,

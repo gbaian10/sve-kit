@@ -75,7 +75,7 @@ cards:
           amount: 3
         event: enter
         subject: self
-        keyword: ファンファーレ
+        keyword: fanfare
       - line: 2
         kind: trigger
         body:
@@ -84,7 +84,7 @@ cards:
           amount: 3
         event: destroy
         subject: self
-        keyword: ラストワード
+        keyword: last_words
       - line: 3
         kind: activated
         body:
@@ -264,7 +264,7 @@ cards:
           amount: 1
         active_zones:
           - hand
-        keyword: 融合
+        keyword: fusion
         cost_selections:
           - key: '1'
             select:
@@ -932,7 +932,7 @@ cards:
                 count: 1
         active_zones:
           - hand
-        keyword: 融合
+        keyword: fusion
         cost_selections:
           - key: '1'
             select:

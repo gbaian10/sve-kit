@@ -102,7 +102,7 @@ impl Game {
                 Self::prepend(
                     &mut frame,
                     vec![
-                        json!({"op":"move","subjects":"search-result","to":task["to"]}),
+                        json!({"op":"move","subjects":"search-result","to":task["to"],"bind":task["bind"]}),
                         json!({"op":"shuffle","subjects":{"zone":"deck","side":"self"}}),
                     ],
                 );
@@ -142,137 +142,305 @@ impl Game {
         reason = "This is the single auditable dispatch table for schema atoms and combinators."
     )]
     fn execute(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        Self::check_execution_parameters(node)?;
         match string(&node["op"]) {
-            "seq"=>Self::prepend(frame,list(&node["steps"])),
-            "if"=>{
-                let branch=if self.truth(&node["condition"],frame)? { &node["then"] } else { &node["else"] };
-                if !branch.is_null() { Self::prepend(frame,vec![branch.clone()]); }
+            "seq" => Self::prepend(frame, list(&node["steps"])),
+            "if" => {
+                let branch = if self.truth(&node["condition"], frame)? {
+                    &node["then"]
+                } else {
+                    &node["else"]
+                };
+                if !branch.is_null() {
+                    Self::prepend(frame, vec![branch.clone()]);
+                }
             }
-            "per"=>{
-                let count=usize::try_from(self.number(&node["count"],frame)?.max(0)).map_err(invalid)?;
-                if count>10_000 { return Err(EngineFailure::Unsupported("repeat count exceeds prototype fuel".into())); }
-                Self::prepend(frame,vec![node["body"].clone();count]);
+            "per" => {
+                let count =
+                    usize::try_from(self.number(&node["count"], frame)?.max(0)).map_err(invalid)?;
+                if count > 10_000 {
+                    return Err(EngineFailure::Unsupported(
+                        "repeat count exceeds prototype fuel".into(),
+                    ));
+                }
+                Self::prepend(frame, vec![node["body"].clone(); count]);
             }
-            "repeat"=>Self::prepend(frame,vec![node["body"].clone(),json!({"op":"_repeat","body":node["body"],"until":node["until"]})]),
-            "_repeat"=>if !self.truth(&node["until"],frame)? { Self::prepend(frame,vec![node["body"].clone(),node.clone()]); },
-            "for_each"=>{
-                let mut steps=Vec::new();
-                for id in self.select(&node["select"],frame)? { steps.push(json!({"op":"_bind","bind":node["bind"],"object":id}));steps.push(node["body"].clone()); }
-                Self::prepend(frame,steps);
+            "repeat" => Self::prepend(
+                frame,
+                vec![
+                    node["body"].clone(),
+                    json!({"op":"_repeat","body":node["body"],"until":node["until"]}),
+                ],
+            ),
+            "_repeat" => {
+                if !self.truth(&node["until"], frame)? {
+                    Self::prepend(frame, vec![node["body"].clone(), node.clone()]);
+                }
             }
-            "_bind"=>{frame.bindings.insert(string(&node["bind"]).into(),vec![string(&node["object"]).into()]);}
-            "choice"=>{
-                let modes=list(&node["modes"]);
-                let mut indexes=list(&frame.decision["options"]).iter().filter_map(Value::as_u64).collect::<Vec<_>>();indexes.sort_unstable();
-                let steps=indexes.into_iter().filter_map(|n|{
-                    let i = usize::try_from(n.saturating_sub(1)).ok()?;
-                    modes.get(i).cloned()
-                }).collect();
-                Self::prepend(frame,steps);
+            "for_each" => {
+                let mut steps = Vec::new();
+                for id in self.select(&node["select"], frame)? {
+                    steps.push(json!({"op":"_bind","bind":node["bind"],"object":id}));
+                    steps.push(node["body"].clone());
+                }
+                Self::prepend(frame, steps);
             }
-            "optional"=>self.prompt(frame,vec![json!({"do":"resolve-choice","choice":"execute"}),json!({"do":"resolve-choice","choice":"decline"})],json!({"resume":"optional","then":node["then"]})),
-            "pay"=>{
-                let mut choices=vec![json!({"do":"resolve-choice","choice":"decline"})];
-                if self.can_pay(&list(&node["costs"]),frame)? { choices.insert(0,json!({"do":"resolve-choice","choice":"execute"})); }
+            "_bind" => {
+                frame.bindings.insert(
+                    string(&node["bind"]).into(),
+                    vec![string(&node["object"]).into()],
+                );
+            }
+            "choice" => {
+                let modes = list(&node["modes"]);
+                let mut indexes = list(&frame.decision["options"])
+                    .iter()
+                    .filter_map(Value::as_u64)
+                    .collect::<Vec<_>>();
+                indexes.sort_unstable();
+                let steps = indexes
+                    .into_iter()
+                    .filter_map(|n| {
+                        let i = usize::try_from(n.saturating_sub(1)).ok()?;
+                        modes.get(i).cloned()
+                    })
+                    .collect();
+                Self::prepend(frame, steps);
+            }
+            "optional" => self.prompt(
+                frame,
+                vec![
+                    json!({"do":"resolve-choice","choice":"execute"}),
+                    json!({"do":"resolve-choice","choice":"decline"}),
+                ],
+                json!({"resume":"optional","then":node["then"]}),
+            ),
+            "pay" => {
+                let mut choices = vec![json!({"do":"resolve-choice","choice":"decline"})];
+                if self.can_pay(&list(&node["costs"]), frame)? {
+                    choices.insert(0, json!({"do":"resolve-choice","choice":"execute"}));
+                }
                 self.prompt(frame,choices,json!({"resume":"pay","costs":node["costs"],"then":node["then"],"else":node["else"]}));
             }
-            "if_done"=>Self::prepend(frame,vec![node["attempt"].clone(),json!({"op":"_if_done","then":node["then"]})]),
-            "_if_done"=>if frame.performed>0 { Self::prepend(frame,vec![node["then"].clone()]); },
-            "select"=>{
-                let mut ids=self.select(&node["select"],frame)?;ids.sort();
-                let max=usize::try_from(self.number(&node["max"],frame)?.max(0)).map_err(invalid)?.min(ids.len());
-                let min=usize::try_from(self.number(&node["min"],frame)?.max(0)).map_err(invalid)?.min(max);
-                let choices=subsets(&ids,min,max).into_iter().map(|ids|json!({"do":"resolve-choice","select":ids})).collect();
-                self.prompt(frame,choices,json!({"resume":"select","bind":node["bind"]}));
-            }
-            "damage"=>{
-                let amount=self.number(&node["amount"],frame)?;
-                let split=node["split"].as_str();
-                let hits=self.select(&node["subjects"],frame)?.iter().map(|id|json!({"source":frame.source,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
-                Self::prepend(frame,vec![json!({"op":"_damage","hits":hits,"orders":{},"bind":node["bind"]})]);
-            }
-            "_damage"=>self.damage_batch(node,frame)?,
-            "_movement_receipt"=>{
-                let mut moved=Vec::new();
-                for previous in list(&node["before"]) {
-                    let id=string(&previous["id"]);
-                    if self.object(id)?.generation!=previous["generation"].as_u64().unwrap_or_default() {moved.push(id.to_owned());}
+            "if_done" => Self::prepend(
+                frame,
+                vec![
+                    node["attempt"].clone(),
+                    json!({"op":"_if_done","then":node["then"]}),
+                ],
+            ),
+            "_if_done" => {
+                if frame.performed > 0 {
+                    Self::prepend(frame, vec![node["then"].clone()]);
                 }
-                frame.performed=i64::try_from(moved.len()).unwrap_or(i64::MAX);
-                if let Some(name)=node["bind"].as_str() {frame.bindings.insert(name.into(),moved);}
             }
-            "destroy"|"banish"|"discard"|"move"=>self.zone_action(node,frame)?,
-            "act"|"stand"=>{
-                frame.performed=0;let group=self.group();let mut changed=Vec::new();
-                for id in self.select(&node["subjects"],frame)? {
-                    let acted=node["op"]=="act";
-                    if self.object(&id)?.state["acted"]!=acted {
-                        self.object_mut(&id)?.state["acted"]=json!(acted);frame.performed=frame.performed.saturating_add(1);
-                        changed.push(id.clone());
-                        self.emit(json!({"kind":if acted { "アクト" } else { "スタンド" },"object":id}),&frame.cause,group);
+            "select" => {
+                let mut ids = self.select(&node["select"], frame)?;
+                ids.sort();
+                let max = usize::try_from(self.number(&node["max"], frame)?.max(0))
+                    .map_err(invalid)?
+                    .min(ids.len());
+                let min = usize::try_from(self.number(&node["min"], frame)?.max(0))
+                    .map_err(invalid)?
+                    .min(max);
+                let choices = subsets(&ids, min, max)
+                    .into_iter()
+                    .map(|ids| json!({"do":"resolve-choice","select":ids}))
+                    .collect();
+                self.prompt(
+                    frame,
+                    choices,
+                    json!({"resume":"select","bind":node["bind"]}),
+                );
+            }
+            "damage" => {
+                let amount = self.number(&node["amount"], frame)?;
+                let split = node["split"].as_str();
+                let hits=self.select(&node["subjects"],frame)?.iter().map(|id|json!({"source":frame.source,"target":id,"amount":split.map_or(amount,|key|int(&frame.decision["distribute"][key][id])),"battle":false})).collect::<Vec<_>>();
+                Self::prepend(
+                    frame,
+                    vec![json!({"op":"_damage","hits":hits,"orders":{},"bind":node["bind"]})],
+                );
+            }
+            "_damage" => self.damage_batch(node, frame)?,
+            "_movement_receipt" => {
+                let mut moved = Vec::new();
+                for previous in list(&node["before"]) {
+                    let id = string(&previous["id"]);
+                    if self.object(id)?.generation
+                        != previous["generation"].as_u64().unwrap_or_default()
+                    {
+                        moved.push(id.to_owned());
                     }
                 }
-                if let Some(name)=node["bind"].as_str() {frame.bindings.insert(name.into(),changed);}
-            }
-            "draw"=>{
-                frame.performed=0;let mut drawn=Vec::new();
-                for seat in self.seats(string(&node["side"]),frame) {
-                    let before=self.zone_ids(&seat,"hand");let count=self.zone_count(&seat,"hand");
-                    for _ in 0..self.number(&node["count"],frame)?.max(0) { self.draw(&seat,frame)?; }
-                    frame.performed=frame.performed.saturating_add(self.zone_count(&seat,"hand").saturating_sub(count));
-                    drawn.extend(self.zone_ids(&seat,"hand").into_iter().filter(|id|!before.contains(id)));
+                frame.performed = i64::try_from(moved.len()).unwrap_or(i64::MAX);
+                if let Some(name) = node["bind"].as_str() {
+                    frame.bindings.insert(name.into(), moved);
                 }
-                if let Some(name)=node["bind"].as_str() {frame.bindings.insert(name.into(),drawn);}
             }
-            "look"=>{
-                let seat=self.seats(string(&node["side"]),frame).into_iter().next().unwrap_or_default();
-                let count=usize::try_from(self.number(&node["count"],frame)?.max(0)).map_err(invalid)?;
-                let ids=self.zone_ids(&seat,"deck").into_iter().take(count).collect::<Vec<_>>();
-                for id in &ids { self.learn(&frame.controller,id,true); }
-                frame.bindings.insert(string(&node["bind"]).into(),ids);
+            "destroy" | "banish" | "discard" | "move" => self.zone_action(node, frame)?,
+            "act" | "stand" => {
+                frame.performed = 0;
+                let group = self.group();
+                let mut changed = Vec::new();
+                for id in self.select(&node["subjects"], frame)? {
+                    let acted = node["op"] == "act";
+                    if self.object(&id)?.state["acted"] != acted {
+                        self.object_mut(&id)?.state["acted"] = json!(acted);
+                        frame.performed = frame.performed.saturating_add(1);
+                        changed.push(id.clone());
+                        self.emit(
+                            json!({"kind":if acted { "アクト" } else { "スタンド" },"object":id}),
+                            &frame.cause,
+                            group,
+                        );
+                    }
+                }
+                if let Some(name) = node["bind"].as_str() {
+                    frame.bindings.insert(name.into(), changed);
+                }
             }
-            "search"=>{
-                for id in self.zone_ids(&frame.controller,"deck") { self.learn(&frame.controller,&id,false); }
-                let mut ids=self.select(&node["select"],frame)?;ids.sort();
-                let max=usize::try_from(self.number(&node["max"],frame)?.max(0)).map_err(invalid)?;
-                let min=usize::try_from(self.number(&node["min"],frame)?.max(0)).map_err(invalid)?;
-                let choices=subsets(&ids,min,max).into_iter().map(|ids|json!({"do":"resolve-choice","select":ids})).collect();
-                self.prompt(frame,choices,json!({"resume":"search","to":node["to"]}));
+            "draw" => {
+                frame.performed = 0;
+                let mut drawn = Vec::new();
+                for seat in self.seats(string(&node["side"]), frame) {
+                    let before = self.zone_ids(&seat, "hand");
+                    let count = self.zone_count(&seat, "hand");
+                    for _ in 0..self.number(&node["count"], frame)?.max(0) {
+                        self.draw(&seat, frame)?;
+                    }
+                    frame.performed = frame
+                        .performed
+                        .saturating_add(self.zone_count(&seat, "hand").saturating_sub(count));
+                    drawn.extend(
+                        self.zone_ids(&seat, "hand")
+                            .into_iter()
+                            .filter(|id| !before.contains(id)),
+                    );
+                }
+                if let Some(name) = node["bind"].as_str() {
+                    frame.bindings.insert(name.into(), drawn);
+                }
             }
-            "shuffle"=>{
-                let ids=self.select(&node["subjects"],frame)?;
-                self.shuffle(&frame.controller,&ids)?;
-                let shuffled=self.zone_ids(&frame.controller,"deck").into_iter().filter(|id| ids.contains(id)).collect::<Vec<_>>();
+            "look" => {
+                let seat = self
+                    .seats(string(&node["side"]), frame)
+                    .into_iter()
+                    .next()
+                    .unwrap_or_default();
+                let count =
+                    usize::try_from(self.number(&node["count"], frame)?.max(0)).map_err(invalid)?;
+                let ids = self
+                    .zone_ids(&seat, "deck")
+                    .into_iter()
+                    .take(count)
+                    .collect::<Vec<_>>();
+                for id in &ids {
+                    self.learn(&frame.controller, id, true);
+                }
+                frame.bindings.insert(string(&node["bind"]).into(), ids);
+            }
+            "search" => {
+                for id in self.zone_ids(&frame.controller, "deck") {
+                    self.learn(&frame.controller, &id, false);
+                }
+                let mut ids = self.select(&node["select"], frame)?;
+                ids.sort();
+                let max =
+                    usize::try_from(self.number(&node["max"], frame)?.max(0)).map_err(invalid)?;
+                let min =
+                    usize::try_from(self.number(&node["min"], frame)?.max(0)).map_err(invalid)?;
+                let choices = subsets(&ids, min, max)
+                    .into_iter()
+                    .map(|ids| json!({"do":"resolve-choice","select":ids}))
+                    .collect();
+                self.prompt(
+                    frame,
+                    choices,
+                    json!({"resume":"search","to":node["to"],"bind":node["bind"]}),
+                );
+            }
+            "shuffle" => {
+                let ids = self.select(&node["subjects"], frame)?;
+                self.shuffle(&frame.controller, &ids)?;
+                let shuffled = self
+                    .zone_ids(&frame.controller, "deck")
+                    .into_iter()
+                    .filter(|id| ids.contains(id))
+                    .collect::<Vec<_>>();
                 for binding in frame.bindings.values_mut() {
-                    let mut order=shuffled.iter().filter(|id|binding.contains(id)).cloned().collect::<Vec<_>>().into_iter();
-                    for id in binding {if ids.contains(id)&& let Some(next)=order.next() {*id=next;}}
+                    let mut order = shuffled
+                        .iter()
+                        .filter(|id| binding.contains(id))
+                        .cloned()
+                        .collect::<Vec<_>>()
+                        .into_iter();
+                    for id in binding {
+                        if ids.contains(id)
+                            && let Some(next) = order.next()
+                        {
+                            *id = next;
+                        }
+                    }
                 }
             }
-            "reveal"=>{let ids=self.select(&node["subjects"],frame)?;self.reveal(&ids,string(&node["to"]),frame,true);}
-            "modify"=>self.modify(node,frame)?,
-            "pp"=>{
-                let amount=self.number(&node["amount"],frame)?.max(0);
-                let player=self.player_mut(&frame.controller)?;player.pp["current"]=json!(int(&player.pp["current"]).saturating_sub(amount));frame.performed=amount;
+            "reveal" => {
+                let ids = self.select(&node["subjects"], frame)?;
+                self.reveal(&ids, string(&node["to"]), frame, true);
             }
-            "recover_pp"=>{
-                for seat in self.seats(string(&node["side"]),frame) {
-                    let amount=self.number(&node["amount"],frame)?.max(0);let player=self.player_mut(&seat)?;
-                    let old=int(&player.pp["current"]);let new=old.saturating_add(amount).min(int(&player.pp["max"]));player.pp["current"]=json!(new);
-                    let group=self.group();self.emit(json!({"kind":"回復","player":seat,"amount":new.saturating_sub(old)}),&frame.cause,group);
+            "modify" => self.modify(node, frame)?,
+            "pp" => {
+                let amount = self.number(&node["amount"], frame)?.max(0);
+                let player = self.player_mut(&frame.controller)?;
+                player.pp["current"] = json!(int(&player.pp["current"]).saturating_sub(amount));
+                frame.performed = amount;
+            }
+            "recover_pp" => {
+                for seat in self.seats(string(&node["side"]), frame) {
+                    let amount = self.number(&node["amount"], frame)?.max(0);
+                    let player = self.player_mut(&seat)?;
+                    let old = int(&player.pp["current"]);
+                    let new = old.saturating_add(amount).min(int(&player.pp["max"]));
+                    player.pp["current"] = json!(new);
+                    let group = self.group();
+                    self.emit(
+                        json!({"kind":"回復","player":seat,"amount":new.saturating_sub(old)}),
+                        &frame.cause,
+                        group,
+                    );
                 }
             }
-            "drive"=>{
-                for _ in 0..self.number(&node["count"],frame)?.max(0) { frame.todo.insert(0,json!({"op":"_drive"})); }
+            "drive" => {
+                for _ in 0..self.number(&node["count"], frame)?.max(0) {
+                    frame.todo.insert(0, json!({"op":"_drive"}));
+                }
             }
-            "_drive"=>self.drive(frame)?,
-            "delay"=>self.state.delayed.push(json!({"source":frame.source,"controller":frame.controller,"reference":frame.reference,"event":node["event"],"body":node["body"],"once":node["once"]})),
-            "_finish_card"=>{
-                let source=frame.source.clone();let group=self.group();self.emit(json!({"kind":"解決","object":source}),&frame.cause,group);
-                if self.object(&source)?.zone=="resolution" { self.move_objects(&[source],"cemetery",None,None,frame)?; }
+            "_drive" => self.drive(frame)?,
+            "delay" => self.register_delay(node, frame)?,
+            "_finish_card" => {
+                let source = frame.source.clone();
+                let group = self.group();
+                self.emit(json!({"kind":"解決","object":source}), &frame.cause, group);
+                if self.object(&source)?.zone == "resolution" {
+                    self.move_objects(&[source], "cemetery", None, None, frame)?;
+                }
             }
-            "_finish_ability"=>{let group=self.group();self.emit(json!({"kind":"解決","ability":frame.reference}),&frame.cause,group);}
-            "unsupported"=>return Err(EngineFailure::Unsupported(string(&node["reason"]).into())),
-            unknown=>return Err(EngineFailure::Unsupported(format!("opcode not executable yet: {unknown}"))),
+            "_finish_ability" => {
+                let group = self.group();
+                self.emit(
+                    json!({"kind":"解決","ability":frame.reference}),
+                    &frame.cause,
+                    group,
+                );
+            }
+            "unsupported" => {
+                return Err(EngineFailure::Unsupported(string(&node["reason"]).into()));
+            }
+            unknown => {
+                return Err(EngineFailure::Unsupported(format!(
+                    "opcode not executable yet: {unknown}"
+                )));
+            }
         }
         Ok(())
     }
@@ -540,13 +708,24 @@ impl Game {
     }
 
     fn modify(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        if node.get("until").is_some()
+            && (node["until"] != "end-of-turn" || node["remove_abilities"] != true)
+        {
+            return Err(EngineFailure::Unsupported(
+                "temporary numeric and cross-turn modification layers".into(),
+            ));
+        }
         let subjects = self.select(&node["subjects"], frame)?;
         let group = self.group();
         for id in subjects {
             if let Some(seat) = id.strip_suffix(".leader") {
-                let amount = self.number(&node["hp"], frame)?.max(0);
+                let amount = self.number(&node["hp"], frame)?;
                 let player = self.player_mut(seat)?;
                 player.leader["life"] = json!(int(&player.leader["life"]).saturating_add(amount));
+                if let Some(value) = node.get("set_hp") {
+                    let life = self.number(value, frame)?;
+                    self.player_mut(seat)?.leader["life"] = json!(life);
+                }
                 if amount > 0 {
                     self.emit(
                         json!({"kind":"体力増加","target":id,"amount":amount}),
@@ -556,6 +735,7 @@ impl Game {
                 }
                 continue;
             }
+            let prior = self.object(&id)?.state.clone();
             for field in ["power", "hp"] {
                 let set_key = format!("set_{field}");
                 if let Some(expr) = node.get(&set_key) {
@@ -584,7 +764,7 @@ impl Game {
                 all.extend(keywords.iter().cloned());
                 self.object_mut(&id)?.state["keywords"] = json!(all);
             }
-            self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event}));
+            self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"]}));
         }
         Ok(())
     }
@@ -823,7 +1003,7 @@ impl Game {
         for source in self.field_ids() {
             for ability in self.abilities(&source)? {
                 let body = &ability["body"];
-                if body["op"] != "replace_damage" {
+                if ability["kind"] != "static" || body["op"] != "replace_damage" {
                     continue;
                 }
                 let frame = self.frame_for(&source)?;
@@ -843,6 +1023,21 @@ impl Game {
                     && !self.matches(string(&hit["source"]), sources, &frame)?
                 {
                     continue;
+                }
+                if body.get("uses").is_some() || body.get("until").is_some() {
+                    return Err(EngineFailure::Unsupported(
+                        "limited-use static damage replacement".into(),
+                    ));
+                }
+                if let Some(condition) = body.get("condition")
+                    && !self.truth(condition, &frame)?
+                {
+                    continue;
+                }
+                if body.get("set").is_some() {
+                    return Err(EngineFailure::Unsupported(
+                        "damage replacement setting a value".into(),
+                    ));
                 }
                 result.push(json!({"reference":self.reference(&source,&ability),"amount":self.number(&body["amount"],&frame)?,"prevent":body["prevent"]}));
             }

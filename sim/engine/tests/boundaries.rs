@@ -524,3 +524,68 @@ fn cost_free_pending_cannot_be_declined() {
     engine.decide(&decision, "decline").unwrap_err();
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"modify","subjects":"target.1","remove_abilities":true,"until":"end-of-turn"},
+        {"op":"delay","event":"end","once":true,"body":{"op":"damage","subjects":"opponent.leader","amount":3_i64}}
+    ]});
+    let catalog = Arc::new(catalog(&body));
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "temporal",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.silenced").unwrap(),
+        Some(json!(true))
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    let mut sampled =
+        Game::from_observation(Arc::clone(&catalog), &packet, "P1", "sample").unwrap();
+    sampled.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
+    let pending = engine.projection(View::P1).unwrap();
+    sampled = Game::from_observation(catalog, &pending, "P1", "pending-sample").unwrap();
+    let decision = sampled.legal().unwrap().into_iter().next().unwrap();
+    assert_eq!(decision["do"], "choose-pending");
+    sampled.decide(&decision, "resolve").unwrap();
+    assert_eq!(
+        sampled.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(17_i64))
+    );
+    sampled.decide(&json!({"do":"pass"}), "pass").unwrap();
+    assert_eq!(
+        sampled.query(View::P1, "P2.field.b.silenced").unwrap(),
+        Some(json!(false))
+    );
+    assert_eq!(
+        sampled.projection(View::P1).unwrap()["semantic_state"]["delayed_triggers"],
+        json!([])
+    );
+}
+
+#[test]
+fn unsupported_modifier_parameters_cannot_succeed_silently() {
+    let mut engine = game(&json!({"op":"modify","subjects":"target.1","type":"amulet"}));
+    let before = engine.digest().unwrap();
+    let error = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "unsupported",
+        )
+        .unwrap_err();
+    assert!(matches!(error, EngineFailure::Unsupported(_)));
+    assert_eq!(engine.digest().unwrap(), before);
+}
