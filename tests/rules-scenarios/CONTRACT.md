@@ -509,3 +509,10 @@ decisions:
 13. **同一筆費用裡的多個動作**（10.6.2.5「すべてのコストを支払います」，例：アクト自己＋アクト其他卡、兩次食事的にんじん）事件用同一個 `group`
 14. **`view: P1／P2` 的 `awaiting`**：等的是**另一位玩家**的決定時，只寫 `by`，**不寫 `choices`**（選項可能是對方的私有資訊，例：對方私下看過的牌）。
     `choices` 寫在 `view: omniscient` 或做決定那位玩家的 view。runner 會掃描該 view 的完整投影，`knowledge.does_not_know` 的物件出現在任何地方都算洩漏
+15. **結算中宣告數字或名稱**（例：「好きな数を1つ指定する」）：在該輸入點用 `resolve-choice` 的 `declare: <值>`。
+    `awaiting.choices` 無法列盡任意值時，只寫 `by` 並在 `assert` 或事件驗證宣告後的結果；打出時就宣告的（10.6.2）寫在 `play` 的 `declare`
+16. **效果中打出另一張卡或另一個能力**（例：「それのコストを0にしてプレイする」「【進化時】能力1つをプレイする」）：內層打出所需的選擇
+    （`targets`、`costs`、`optional_costs`、`x`、`options`、`distribute`、`declare`）寫在內層的輸入點，用 `resolve-choice`，`of` 指向外層的決定；
+    內層沒有任何選擇時不產生輸入點
+17. **同一能力、同一誘發事件同時待機多次**（例：「追加で1回誘發する」）：`awaiting.choices` 把相同的 `choose-pending` **重複列出**（多重集合比對），
+    決定照樣寫該指稱，引擎處理其中任一個；不另加識別欄位
