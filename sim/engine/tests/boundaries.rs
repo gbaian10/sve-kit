@@ -3322,3 +3322,243 @@ fn a_single_flat_target_list_can_require_different_counts_from_two_groups() {
         Some(json!(4_i64))
     );
 }
+
+#[test]
+fn resolution_flip_payment_requires_all_materials_and_groups_the_costs() {
+    let body = json!({"op":"pay","cost_selections":[{"key":"1","select":{"side":"self","zone":"evolve_deck"},"min":2_i64,"max":2_i64}],
+        "costs":[{"op":"flip","subjects":"cost.1","face":"down"}],
+        "then":{"op":"damage","subjects":"target.1","amount":1_i64}});
+    let loaded = Arc::new(catalog(&body));
+    for count in 0..=3_u32 {
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["evolve_deck"] = json!(
+            (0..count)
+                .map(|n| json!({"id":format!("e{n}"),"card":"unit-follower","face_up":true}))
+                .collect::<Vec<_>>()
+        );
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "payment",
+        )
+        .unwrap();
+        assert_eq!(
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "cast"
+                )
+                .unwrap()
+                .outcome,
+            "paused"
+        );
+        let choices = engine.legal().unwrap();
+        if count < 2 {
+            assert_eq!(
+                choices,
+                vec![json!({"do":"resolve-choice","choice":"decline"})]
+            );
+            engine.decide(&choices[0], "decline").unwrap();
+            assert_eq!(
+                engine.query(View::P1, "P2.field.b.hp").unwrap(),
+                Some(json!(3_i64))
+            );
+            continue;
+        }
+        assert_eq!(choices.len(), if count == 2 { 2 } else { 4 });
+        let before = engine.digest().unwrap();
+        for selected in [json!(["e0"]), json!(["e0", "e0"])] {
+            assert_eq!(
+                engine
+                    .decide(
+                        &json!({"do":"resolve-choice","choice":"execute","select":selected}),
+                        "bad-cost"
+                    )
+                    .unwrap()
+                    .outcome,
+                "cannot-play"
+            );
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+        let mut restored = Game::from_observation(
+            Arc::clone(&loaded),
+            &engine.projection(View::P1).unwrap(),
+            "P1",
+            "restore-payment",
+        )
+        .unwrap();
+        let paid = restored
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute","select":["e1","e0"]}),
+                "pay",
+            )
+            .unwrap();
+        assert_eq!(paid.outcome, "resolved");
+        let flips = paid
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "表向き／裏向き")
+            .collect::<Vec<_>>();
+        assert_eq!(flips.len(), 2);
+        assert_eq!(flips[0]["group"], flips[1]["group"]);
+        assert_eq!(
+            restored
+                .query(View::P1, "P1.evolve_deck.e0.face_up")
+                .unwrap(),
+            Some(json!(false))
+        );
+        assert_eq!(
+            restored
+                .query(View::P1, "P1.evolve_deck.e1.face_up")
+                .unwrap(),
+            Some(json!(false))
+        );
+        assert_eq!(
+            restored.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(2_i64))
+        );
+    }
+}
+
+#[test]
+fn payment_bindings_restore_after_a_paused_body_without_repaying_additional_costs() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"pay","cost_selections":[{"key":"1","select":{"side":"self","zone":"evolve_deck"},"min":1_i64,"max":1_i64}],
+            "costs":[{"op":"flip","subjects":"cost.1","face":"down"},{"op":"pp","amount":1_i64}],
+            "then":{"op":"optional","then":{"op":"modify","subjects":"cost.1","power":1_i64}}},
+        {"op":"modify","subjects":"cost.1","power":2_i64}
+    ]});
+    let mut program = document(&body);
+    let ability = &mut program["cards"]["unit-spell"]["abilities"][0];
+    ability["cost_selections"] =
+        json!([{"key":"1","select":{"side":"self","zone":"field"},"min":1_i64,"max":1_i64}]);
+    ability["costs"] = json!([{"op":"reveal","subjects":"cost.1","to":"all"}]);
+    ability["additional_costs"] = json!([{"key":"extra","costs":[{"op":"pp","amount":1_i64}]}]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("scope.yaml".into(), program.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["pp"] = json!({"current":4_i64,"max":4_i64});
+    initial["players"]["P1"]["zones"]["evolve_deck"] =
+        json!([{"id":"e0","card":"unit-follower","face_up":true}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "scope",
+    )
+    .unwrap();
+    engine.decide(&json!({"do":"play","card":"s","targets":{"1":["b"]},"costs":{"1":["a"]},"optional_costs":{"additional":{"pp":1_i64}}}), "cast").unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.pp.current").unwrap(),
+        Some(json!(2_i64))
+    );
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute","select":["e0"]}),
+                "pay"
+            )
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.pp.current").unwrap(),
+        Some(json!(1_i64))
+    );
+    let restored = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "restore-scope",
+    )
+    .unwrap();
+    for mut instance in [engine, restored] {
+        assert_eq!(
+            instance
+                .decide(&json!({"do":"resolve-choice","choice":"execute"}), "then")
+                .unwrap()
+                .outcome,
+            "resolved"
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.field.a.power").unwrap(),
+            Some(json!(4_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.evolve_deck.e0.power").unwrap(),
+            Some(json!(3_i64))
+        );
+    }
+}
+
+#[test]
+fn private_payment_selections_stay_hidden_and_unsupported_costs_rollback() {
+    let body = json!({"op":"pay","cost_selections":[{"key":"1","select":{"side":"self","zone":"hand"},"min":1_i64,"max":1_i64}],
+        "costs":[{"op":"discard","subjects":"cost.1"}],
+        "then":{"op":"damage","subjects":"target.1","amount":1_i64}});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["hand"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"private-material","card":"unit-follower"}));
+    let mut engine = Game::new(
+        loaded,
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "private-payment",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert!(
+        !engine
+            .projection(View::P2)
+            .unwrap()
+            .to_string()
+            .contains("private-material")
+    );
+    assert!(engine.legal().unwrap().contains(
+        &json!({"do":"resolve-choice","choice":"execute","select":["private-material"]})
+    ));
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","choice":"execute","select":["private-material"]}),
+            "discard",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.cemetery").unwrap(),
+        Some(json!(["private-material", "s"]))
+    );
+    let mut unsupported = body;
+    unsupported["cost_selections"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"key":"2","select":{"side":"self","zone":"field"},"min":1_i64,"max":1_i64}));
+    let mut denied = game(&unsupported);
+    let before = denied.digest().unwrap();
+    assert!(matches!(
+        denied.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "unsupported"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(denied.digest().unwrap(), before);
+}

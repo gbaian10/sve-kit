@@ -11,6 +11,115 @@ use serde_json::{Value, json};
     reason = "Payment preparation and execution share game state."
 )]
 impl Game {
+    fn payment_selection(node: &Value, frame: &Frame) -> Result<Option<Value>> {
+        let selections = list(&node["cost_selections"])
+            .into_iter()
+            .filter(|spec| Self::mode_applies(spec, frame))
+            .collect::<Vec<_>>();
+        if selections.len() > 1
+            || selections
+                .iter()
+                .any(|spec| spec.get("distribute").is_some())
+        {
+            return Err(EngineFailure::Unsupported(
+                "resolution payment needs one flat material selection without distribution".into(),
+            ));
+        }
+        Ok(selections.into_iter().next())
+    }
+
+    fn resolution_payment_context(frame: &Frame) -> Frame {
+        let mut context = frame.clone();
+        context.values.remove("additional_nodes");
+        context.values.remove("additional_pp");
+        context.decision["do"] = json!("resolve-choice");
+        context
+    }
+
+    pub(super) fn resolution_payment(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let selection = Self::payment_selection(node, frame)?;
+        let mut context = Self::resolution_payment_context(frame);
+        if selection.is_some() {
+            context.decision["costs"] = json!({});
+        }
+        let mut choices = Vec::new();
+        for option in self.parameterize(context.decision.clone(), node, &context)? {
+            let mut choice = json!({"do":"resolve-choice","choice":"execute"});
+            if let Some(spec) = &selection {
+                let field = if spec["order"] == true {
+                    "order"
+                } else {
+                    "select"
+                };
+                choice[field] = option["costs"][string(&spec["key"])].clone();
+            }
+            choices.push(choice);
+        }
+        choices.push(json!({"do":"resolve-choice","choice":"decline"}));
+        self.prompt(frame, choices, json!({"resume":"pay","node":node}));
+        Ok(())
+    }
+
+    pub(super) fn resume_payment(
+        &mut self,
+        node: &Value,
+        decision: &Value,
+        frame: &mut Frame,
+    ) -> Result<()> {
+        if decision["choice"] != "execute" {
+            if !node["else"].is_null() {
+                Self::prepend(frame, vec![node["else"].clone()]);
+            }
+            return Ok(());
+        }
+        let mut restore = json!({"op":"_restore_payment_selection","costs":frame.decision.get("costs"),"captured":{}});
+        if let Some(spec) = Self::payment_selection(node, frame)? {
+            let field = if spec["order"] == true {
+                "order"
+            } else {
+                "select"
+            };
+            frame.decision["costs"] = json!({string(&spec["key"]):decision[field]});
+            for id in list(&decision[field]) {
+                let id = string(&id);
+                restore["captured"][id] = frame.captured.get(id).cloned().unwrap_or_default();
+                frame
+                    .captured
+                    .insert(id.into(), self.object_attributes(id)?);
+            }
+        }
+        let mut context = Self::resolution_payment_context(frame);
+        if !self.valid_parameters(node, &context)?
+            || !self.can_pay(&list(&node["costs"]), &context)?
+        {
+            return Err(crate::invalid("resolution payment is no longer payable"));
+        }
+        self.pay_costs(node, &mut context)?;
+        frame.paid = true;
+        Self::prepend(frame, vec![node["then"].clone(), restore]);
+        Ok(())
+    }
+
+    pub(super) fn restore_payment_selection(node: &Value, frame: &mut Frame) {
+        if node["costs"].is_null() {
+            frame
+                .decision
+                .as_object_mut()
+                .map(|map| map.remove("costs"));
+        } else {
+            frame.decision["costs"] = node["costs"].clone();
+        }
+        if let Some(captured) = node["captured"].as_object() {
+            for (id, attributes) in captured {
+                if attributes.is_null() {
+                    frame.captured.remove(id);
+                } else {
+                    frame.captured.insert(id.clone(), attributes.clone());
+                }
+            }
+        }
+    }
+
     pub(super) fn additional_choices(
         &self,
         base: Value,

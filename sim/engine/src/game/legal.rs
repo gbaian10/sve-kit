@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use alloc::collections::BTreeSet;
+use alloc::collections::{BTreeMap, BTreeSet};
 
 use serde_json::{Value, json};
 
@@ -342,6 +342,7 @@ impl Game {
     pub(super) fn can_pay(&self, costs: &[Value], frame: &Frame) -> Result<bool> {
         let mut pp = 0_i64;
         let mut acted = BTreeSet::new();
+        let mut flipped = BTreeMap::new();
         let mut atoms = Vec::new();
         self.cost_atoms(costs, frame, &mut atoms)?;
         for (cost, context) in atoms {
@@ -371,7 +372,18 @@ impl Game {
                         }
                     }
                 }
-                "move" | "discard" | "banish" | "lesson" | "eat" | "_drive_point"
+                "flip" => {
+                    for id in self.select(&cost["subjects"], &context)? {
+                        let face_up = flipped
+                            .entry(id.clone())
+                            .or_insert(self.object(&id)?.state["face_up"] == true);
+                        if *face_up == (cost["face"] == "up") {
+                            return Ok(false);
+                        }
+                        *face_up = cost["face"] == "up";
+                    }
+                }
+                "move" | "discard" | "banish" | "lesson" | "eat" | "reveal" | "_drive_point"
                 | "_earth_payment" => {}
                 unknown => {
                     return Err(EngineFailure::Unsupported(format!(

@@ -521,6 +521,11 @@ impl Game {
         cost_frame.todo.clone_from(&costs);
         cost_frame.values.insert("paying_cost".into(), json!(true));
         self.run_frame(cost_frame)?;
+        if self.state.prompt.is_some() {
+            return Err(EngineFailure::Unsupported(
+                "cost execution requires an unplanned input".into(),
+            ));
+        }
         for event in self.emitted.iter_mut().skip(start) {
             event["group"] = json!(group);
         }

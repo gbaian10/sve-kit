@@ -90,18 +90,7 @@ impl Game {
                     Self::prepend(&mut frame, vec![task["then"].clone()]);
                 }
             }
-            "pay" => {
-                if decision["choice"] == "execute" {
-                    for cost in list(&task["costs"]) {
-                        self.execute(&cost, &mut frame)?;
-                    }
-                    frame.paid = true;
-                    Self::prepend(&mut frame, vec![task["then"].clone()]);
-                }
-                if decision["choice"] != "execute" && !task["else"].is_null() {
-                    Self::prepend(&mut frame, vec![task["else"].clone()]);
-                }
-            }
+            "pay" => self.resume_payment(&task["node"], decision, &mut frame)?,
             "place" => {
                 let id = string(&task["object"]);
                 self.object_mut(id)?.state["acted"] = decision["acted"].clone();
@@ -263,13 +252,8 @@ impl Game {
                 ],
                 json!({"resume":"optional","then":node["then"]}),
             ),
-            "pay" => {
-                let mut choices = vec![json!({"do":"resolve-choice","choice":"decline"})];
-                if self.can_pay(&list(&node["costs"]), frame)? {
-                    choices.insert(0, json!({"do":"resolve-choice","choice":"execute"}));
-                }
-                self.prompt(frame,choices,json!({"resume":"pay","costs":node["costs"],"then":node["then"],"else":node["else"]}));
-            }
+            "pay" => self.resolution_payment(node, frame)?,
+            "_restore_payment_selection" => Self::restore_payment_selection(node, frame),
             "if_done" => Self::prepend(
                 frame,
                 vec![
