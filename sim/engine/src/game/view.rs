@@ -150,6 +150,13 @@ impl Game {
                 .filter(|entry| self.visible_references(entry, view))
                 .collect::<Vec<_>>()
         );
+        semantic["event_occurrences"] = json!(
+            self.state
+                .event_occurrences
+                .values()
+                .filter(|entry| self.visible_references(&json!(entry.subject), view))
+                .collect::<Vec<_>>()
+        );
         semantic["delayed_triggers"] = json!(
             self.state
                 .delayed

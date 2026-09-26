@@ -146,6 +146,13 @@ struct AbilityUse {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
+struct EventOccurrence {
+    event: String,
+    subject: String,
+    count: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 struct State {
     players: BTreeMap<String, Player>,
     objects: BTreeMap<String, Object>,
@@ -159,6 +166,8 @@ struct State {
     continuous: Vec<Value>,
     delayed: Vec<Value>,
     used: BTreeMap<String, AbilityUse>,
+    #[serde(default)]
+    event_occurrences: BTreeMap<String, EventOccurrence>,
     knowledge: BTreeMap<String, Knowledge>,
     facts: Value,
     game: Value,
@@ -328,6 +337,7 @@ impl Game {
             continuous: list(&position["semantic_state"]["continuous_effects"]),
             delayed: Vec::new(),
             used: BTreeMap::new(),
+            event_occurrences: BTreeMap::new(),
             knowledge: BTreeMap::new(),
             facts: facts.clone(),
             game: json!({"ended":false}),
@@ -433,6 +443,7 @@ impl Game {
 
     fn initialize_history(&mut self, setup: &Value) -> Result<()> {
         self.import_cost_history()?;
+        self.import_event_occurrences(&setup["semantic_state"])?;
         if let Some(used) = setup["semantic_state"].get("used_this_turn") {
             let entries: Vec<AbilityUse> = serde_json::from_value(used.clone()).map_err(invalid)?;
             for mut entry in entries {

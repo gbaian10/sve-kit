@@ -905,18 +905,7 @@ impl Game {
                     {
                         continue;
                     }
-                    let event_key = match event {
-                        "enter" => "entered_field",
-                        "leave" | "field_to_cemetery" => "left_field",
-                        "damage" => "damaged",
-                        "deal_damage" => "damage_source",
-                        "leader_life_change" => "leader",
-                        "discard" => "discarded",
-                        "evolve" => "evolved",
-                        "attack" => "attacked",
-                        _ => "",
-                    };
-                    let detail = object.map_or(Value::Null, |object| json!({event_key:object.id}));
+                    let detail = Self::trigger_event(event, object, metadata);
                     let copies = self.trigger_copies(event, &frame.controller)?;
                     for _ in 0..copies {
                         result.push(Pending {
@@ -935,6 +924,28 @@ impl Game {
             }
         }
         Ok(result)
+    }
+
+    fn trigger_event(event: &str, object: Option<&EventSubject>, metadata: &Value) -> Value {
+        let event_key = match event {
+            "enter" => "entered_field",
+            "leave" | "field_to_cemetery" => "left_field",
+            "damage" => "damaged",
+            "deal_damage" => "damage_source",
+            "leader_life_change" => "leader",
+            "discard" => "discarded",
+            "evolve" => "evolved",
+            "attack" => "attacked",
+            "race" => "raced",
+            _ => "",
+        };
+        let mut detail = object.map_or(Value::Null, |object| json!({event_key:object.id}));
+        if !detail.is_null()
+            && let Some(n) = metadata.get("n")
+        {
+            detail["n"] = n.clone();
+        }
+        detail
     }
 
     fn trigger_suppressed(&self, controller: &str, event: &str) -> Result<bool> {

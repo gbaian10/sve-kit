@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON has total read indexing and constructed write maps."
 )]
-use super::{Frame, Game, int, list, string};
+use super::{EventOccurrence, Frame, Game, int, list, string};
 use crate::{Result, invalid};
 use core::slice::from_ref;
 use serde_json::{Value, json};
@@ -12,6 +12,57 @@ use serde_json::{Value, json};
     reason = "Resource rules share the authoritative game state."
 )]
 impl Game {
+    pub(super) fn import_event_occurrences(&mut self, semantic: &Value) -> Result<()> {
+        for value in list(&semantic["event_occurrences"]) {
+            let entry: EventOccurrence = serde_json::from_value(value).map_err(invalid)?;
+            self.object(&entry.subject)?;
+            let key = json!([entry.event, entry.subject]).to_string();
+            if entry.count == 0 || self.state.event_occurrences.insert(key, entry).is_some() {
+                return Err(invalid("event occurrences must be unique positive records"));
+            }
+        }
+        Ok(())
+    }
+
+    fn next_occurrence(&mut self, event: &str, subject: &str) -> u64 {
+        let key = json!([event, subject]).to_string();
+        let entry = self
+            .state
+            .event_occurrences
+            .entry(key)
+            .or_insert_with(|| EventOccurrence {
+                event: event.into(),
+                subject: subject.into(),
+                count: 0,
+            });
+        entry.count = entry.count.saturating_add(1);
+        entry.count
+    }
+
+    fn race(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        let count = self.number(&node["count"], frame)?.max(0);
+        if count > 10_000 {
+            return Err(crate::EngineFailure::Unsupported(
+                "resource event count exceeds prototype fuel".into(),
+            ));
+        }
+        let ids = self.select(&node["subjects"], frame)?;
+        let mut pending = Vec::new();
+        for _ in 0..count {
+            for id in &ids {
+                let n = self.next_occurrence("race", id);
+                pending.extend(self.collect_event(
+                    "race",
+                    &[self.object(id)?.clone()],
+                    &frame.cause,
+                    &json!({"n":n}),
+                )?);
+            }
+        }
+        self.enqueue(pending);
+        Ok(())
+    }
+
     pub(super) fn recover_pp(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         frame.performed = 0;
         for seat in self.seats(string(&node["side"]), frame) {
@@ -269,7 +320,8 @@ impl Game {
                 self.move_objects(&ids, zone, None, None, frame)?;
                 self.object_mut(&frame.source)?.state["links"][link] = json!(ids);
             }
-            "race" | "gain_drive" => {
+            "race" => self.race(node, frame)?,
+            "gain_drive" => {
                 let ids = self.select(&node["subjects"], frame)?;
                 let objects = ids
                     .iter()

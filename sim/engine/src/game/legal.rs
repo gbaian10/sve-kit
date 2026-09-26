@@ -88,6 +88,16 @@ pub(super) fn reference_matches(query: &Value, actual: &Value) -> bool {
     })
 }
 pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {
+    if candidate["do"] == "resolve-choice"
+        && candidate["select"].as_array().is_some_and(Vec::is_empty)
+        && decision["choice"] == "decline"
+        && decision.get("select").is_none()
+        && decision.get("order").is_none()
+    {
+        let mut normalized = decision.clone();
+        normalized["select"] = json!([]);
+        return decision_matches(candidate, &normalized);
+    }
     candidate.as_object().is_some_and(|map| {
         map.iter()
             .all(|(key, value)| decision.get(key) == Some(value))

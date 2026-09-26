@@ -552,6 +552,176 @@ fn granted_drain_keeps_the_provider_text_and_recipient_controller() {
 }
 
 #[test]
+fn repeated_race_events_remain_distinct_across_restore_and_turns() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"kind":"activated","line":1_i64,"body":{"op":"race","subjects":"self","count":2_i64}},
+        {"kind":"trigger","line":2_i64,"event":"race","subject":"self","body":{"op":"modify","subjects":"self","power":1_i64}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("race.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"d","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"e","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "race",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+            "race-twice",
+        )
+        .unwrap();
+    let choices = engine.legal().unwrap();
+    assert_eq!(choices.len(), 2);
+    assert_eq!(
+        choices[0]["pending"]["event"],
+        json!({"raced":"a","n":1_i64})
+    );
+    assert_eq!(
+        choices[1]["pending"]["event"],
+        json!({"raced":"a","n":2_i64})
+    );
+    engine.decide(&choices[1], "second-first").unwrap();
+    let restored: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let rebuilt = Game::from_observation(
+        catalog,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "race-world",
+    )
+    .unwrap();
+    for mut candidate in [engine, restored, rebuilt] {
+        assert_eq!(candidate.legal().unwrap(), vec![choices[0].clone()]);
+        candidate.decide(&choices[0], "first-last").unwrap();
+        assert_eq!(
+            candidate.query(View::P1, "P1.field.a.power").unwrap(),
+            Some(json!(4_i64))
+        );
+        for (decision, node) in [
+            (json!({"do":"end-phase"}), "end-first"),
+            (json!({"do":"pass"}), "start-second"),
+            (json!({"do":"end-phase"}), "end-second"),
+            (json!({"do":"pass"}), "start-first"),
+        ] {
+            candidate.decide(&decision, node).unwrap();
+        }
+        candidate
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "race-again",
+            )
+            .unwrap();
+        let later = candidate.legal().unwrap();
+        assert_eq!(later[0]["pending"]["event"], json!({"raced":"a","n":3_i64}));
+        assert_eq!(later[1]["pending"]["event"], json!({"raced":"a","n":4_i64}));
+        assert_eq!(
+            candidate
+                .query(View::P1, "semantic_state.counters_this_turn.P1.evolutions")
+                .unwrap(),
+            Some(json!(0_i64))
+        );
+    }
+}
+
+#[test]
+fn event_occurrence_history_is_validated_and_hidden_with_its_subject() {
+    let catalog = Arc::new(catalog(&json!({"op":"draw","count":0_i64})));
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["hand"] = json!([{"id":"secret","card":"unit-follower"}]);
+    let entry = json!({"event":"race","subject":"secret","count":7_u64});
+    initial["semantic_state"]["event_occurrences"] = json!([entry]);
+    let engine = Game::new(
+        Arc::clone(&catalog),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "history",
+    )
+    .unwrap();
+    assert_eq!(
+        engine
+            .query(View::P1, "semantic_state.event_occurrences")
+            .unwrap(),
+        Some(json!([]))
+    );
+    assert_eq!(
+        engine
+            .query(View::P2, "semantic_state.event_occurrences")
+            .unwrap(),
+        Some(json!([entry]))
+    );
+    for entries in [
+        json!([entry, entry]),
+        json!([{"event":"race","subject":"secret","count":0_i64}]),
+        json!([{"event":"race","subject":"secret","count":-1_i64}]),
+    ] {
+        initial["semantic_state"]["event_occurrences"] = entries;
+        Game::new(
+            Arc::clone(&catalog),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "invalid",
+        )
+        .unwrap_err();
+    }
+}
+
+#[test]
+fn decline_alias_requires_a_legal_empty_selection() {
+    for min in [0_i64, 1_i64] {
+        let mut engine = game(&json!({"op":"seq","steps":[
+            {"op":"select","select":{"side":"opponent","zone":"field"},"min":min,"max":1_i64,"bind":"chosen"},
+            {"op":"damage","subjects":"chosen","amount":1_i64}
+        ]}));
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let before = engine.digest().unwrap();
+        let legal = engine.legal().unwrap();
+        assert_eq!(
+            legal
+                .iter()
+                .any(|choice| *choice == json!({"do":"resolve-choice","select":[]})),
+            min == 0
+        );
+        assert!(legal.iter().all(|choice| choice["choice"].is_null()));
+        let step = engine
+            .decide(
+                &json!({"do":"resolve-choice","choice":"decline"}),
+                "decline",
+            )
+            .unwrap();
+        assert_eq!(
+            step.outcome,
+            if min == 0 { "resolved" } else { "cannot-play" }
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(3_i64))
+        );
+        if min == 1 {
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+    }
+}
+
+#[test]
 fn a_card_returning_to_the_field_is_not_the_original_target() {
     let mut engine = game(&json!({"op":"seq","steps":[
         {"op":"move","subjects":"target.1","to":"cemetery","bind":"left"},
