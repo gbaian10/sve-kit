@@ -12,8 +12,10 @@ from sve_carddb.config import Settings
 from sve_carddb.fetch.throttle import Throttle
 from sve_carddb.manifest import ExclusiveLock, Manifest
 from sve_carddb.sources import official_jp as jp
+from sve_carddb.sources import official_sv1 as sv1
 
 from .conftest import FakeClock
+from .fakeportal import FakePortal, card_id
 from .fakesite import IMG, FakeSite
 
 if TYPE_CHECKING:
@@ -282,3 +284,78 @@ def test_p5_dry_run_lists_missing_images(site: FakeSite) -> None:
     assert result.exit_code == 0, result.output
     assert len(site.calls) == calls
     assert "3 of 3 URLs would be requested" in result.output
+
+
+@pytest.fixture
+def portal(
+    monkeypatch: pytest.MonkeyPatch, data_dir: Path, clock: FakeClock
+) -> FakePortal:
+    del data_dir, clock  # requested for their side effects
+    fake = FakePortal()
+
+    def factory(settings: Settings) -> httpx.AsyncClient:
+        return httpx.AsyncClient(
+            transport=httpx.MockTransport(fake),
+            headers={"User-Agent": settings.user_agent},
+        )
+
+    monkeypatch.setattr(cli, "http_factory", factory)
+    return fake
+
+
+def test_sv1_cards_then_images(portal: FakePortal, data_dir: Path) -> None:
+    cards = invoke("crawl", "sv1-cards")
+    assert cards.exit_code == 0, cards.output
+    assert " zh-tw: 1000 cards" in cards.output
+    for lang in sv1.LANGUAGES:
+        assert (data_dir / sv1.api_path(lang)).is_file()
+    images = invoke("crawl", "sv1-images", "--limit", "3")
+    assert images.exit_code == 0, images.output
+    assert "1500 images, 3 to fetch" in images.output
+    assert portal.calls[3:] == [
+        sv1.image_url(card_id(0), sv1.Face.BASE),
+        sv1.image_url(card_id(0), sv1.Face.EVOLVED),
+        sv1.image_url(card_id(1), sv1.Face.BASE),
+    ]
+    dry = invoke("crawl", "sv1-images", "--dry-run")
+    assert "1497 of 1500 URLs would be requested" in dry.output
+    with manifest_at(data_dir) as manifest:
+        resource = manifest.resources.get(portal.calls[3])
+        assert resource is not None
+        assert (data_dir / resource.path).read_bytes().startswith(b"\x89PNG")
+
+
+def test_sv1_images_reports_a_missing_image_and_goes_on(portal: FakePortal) -> None:
+    assert invoke("crawl", "sv1-cards").exit_code == 0
+    for number in (card_id(1), card_id(3)):
+        portal.missing.add(f"/image/card/phase2/common/C/C_{number}.png")
+    portal.no_page.add(card_id(1))
+    result = invoke("crawl", "sv1-images", "--limit", "10")
+    assert f"{card_id(1)} base: no image on the site" in result.output
+    assert f"{card_id(3)} base:" in result.output
+    assert "yet the card page links it" in result.output
+    assert sv1.image_url(card_id(4), sv1.Face.EVOLVED) in portal.calls
+
+
+def test_sv1_cards_reports_a_failed_language(portal: FakePortal) -> None:
+    portal.gone.add("/api/v1/cards")
+    result = invoke("crawl", "sv1-cards")
+    assert result.exit_code == 1
+    assert "zh-tw:" in result.output
+    assert "3 failed" in result.output
+
+
+def test_sv1_images_before_sv1_cards_says_what_to_run(portal: FakePortal) -> None:
+    result = invoke("crawl", "sv1-images")
+    assert result.exit_code == 1
+    assert "run `crawl sv1-cards` first" in result.output
+    assert portal.calls == []
+    dry = invoke("crawl", "sv1-images", "--dry-run")
+    assert "run `crawl sv1-cards` first" in dry.output
+
+
+def test_sv1_cards_dry_run_sends_nothing(portal: FakePortal) -> None:
+    result = invoke("crawl", "sv1-cards", "--dry-run")
+    assert result.exit_code == 0, result.output
+    assert "3 of 3 URLs would be requested" in result.output
+    assert portal.calls == []

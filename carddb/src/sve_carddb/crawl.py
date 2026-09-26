@@ -19,7 +19,7 @@ from sve_carddb.fetch.client import FetchError, Request
 from sve_carddb.fetch.validate import ValidationError, check_image, require_media_type
 from sve_carddb.fetch.writer import Fetched, LocalState, sha256
 from sve_carddb.html import MissingElementError
-from sve_carddb.manifest import Kind, Link, Outcome, RequestResult
+from sve_carddb.manifest import Kind, Link, Outcome, Region, RequestResult
 from sve_carddb.sources import official_jp as jp
 
 if TYPE_CHECKING:
@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 SETS_ROOT = f"{jp.REGION.value}:sets"
 _OK = 200
 _NOT_MODIFIED = 304
+_NOT_FOUND = 404
 _PAGE_ERRORS = (ValidationError, MissingElementError)
 # The largest card image seen is about 2 MB; anything far above is not a card image.
 IMAGE_MAX_BYTES = 20 * 1024 * 1024
@@ -43,6 +44,18 @@ class Mode(StrEnum):
     RESUME = "resume"
     REFRESH = "refresh"
     REPAIR = "repair"
+
+
+@dataclass(frozen=True, slots=True)
+class Site:
+    """What the crawler needs to know about one source site."""
+
+    region: Region
+    allowed: Callable[[str], bool]
+    image_path: Callable[[str], PurePosixPath]
+
+
+JP_SITE = Site(jp.REGION, jp.allowed, jp.image_path)
 
 
 class LimitReachedError(RuntimeError):
@@ -116,6 +129,7 @@ class Crawler:
     breaker: CircuitBreaker
     mode: Mode = Mode.RESUME
     limit: int | None = None
+    site: Site = JP_SITE
     fetched: int = field(default=0, init=False)
 
     async def page[T](
@@ -126,11 +140,13 @@ class Crawler:
         path: PurePosixPath,
         parse: Callable[[bytes], T],
         bypass_resume: bool = False,
+        media_type: str = "text/html",
     ) -> Page[T]:
         """Return the parsed page, fetching it only when the mode requires.
 
         resume skips trusted copies (unless `bypass_resume`); refresh
         re-checks them; repair only fetches copies that are not trusted.
+        The copy is compressed when `path` ends in `.zst`.
         """
         state = self.writer.local_state(url)
         skip = self.mode is Mode.REPAIR or (
@@ -146,21 +162,21 @@ class Crawler:
             body = self.writer.read(url)
             return Page(parse(body), sha256(body))
         try:
-            require_media_type(response.content_type, "text/html")
+            require_media_type(response.content_type, media_type)
             value = parse(response.body)
         except _PAGE_ERRORS as exc:
             self._fail(response, str(exc))
         self.writer.write(
             Fetched(
                 url=url,
-                region=jp.REGION,
+                region=self.site.region,
                 kind=kind,
                 path=path,
                 body=response.body,
                 content_type=response.content_type or "",
                 etag=response.etag,
                 last_modified=response.last_modified,
-                compressed=True,
+                compressed=path.suffix == ".zst",
             ),
             request_id=response.request_id,
             rewrite=self.mode is Mode.REPAIR,
@@ -169,8 +185,14 @@ class Crawler:
         return Page(value, sha256(response.body))
 
     async def _fetch(
-        self, url: str, path: PurePosixPath, *, conditional: bool
+        self,
+        url: str,
+        path: PurePosixPath,
+        *,
+        conditional: bool,
+        missing_ok: bool = False,
     ) -> Response:
+        """Send one logical request; a missing resource is returned only when `missing_ok`."""
         if self.limit is not None and self.fetched >= self.limit:
             msg = f"--limit of {self.limit} URLs reached"
             raise LimitReachedError(msg)
@@ -179,8 +201,20 @@ class Crawler:
         resource = self.manifest.resources.get(url) if conditional else None
         etag = resource.etag if resource is not None else None
         response = await self.client.get(
-            Request(url=url, allowed=jp.allowed, if_none_match=etag)
+            Request(url=url, allowed=self.site.allowed, if_none_match=etag)
         )
+        if missing_ok and _missing(response):
+            with self.manifest.transaction():
+                self.manifest.requests.finish(
+                    response.request_id,
+                    RequestResult(
+                        outcome=Outcome.FAILED,
+                        final_url=response.url,
+                        status=response.status,
+                        error_class="not_found",
+                    ),
+                )
+            return response
         if response.status == _NOT_MODIFIED and etag is None:
             self._fail(response, "304 without a conditional request")
         if response.status not in {_OK, _NOT_MODIFIED}:
@@ -314,21 +348,27 @@ class Crawler:
 
     # --- P2 ---------------------------------------------------------------
 
-    async def image(self, url: str) -> None:
+    async def image(self, url: str, *, missing_ok: bool = False) -> bool:
         """Fetch one card image unless the mode lets a trusted copy stand.
 
         Images are stored as downloaded (PNG and JPEG are compressed already)
         and only structurally checked; decoding is left to thumbnail generation.
+        Returns False only for a missing image with `missing_ok`; the caller
+        decides whether that counts as a failure.
         """
         state = self.writer.local_state(url)
         if state is LocalState.TRUSTED and self.mode is not Mode.REFRESH:
-            return
-        path = jp.image_path(url)
-        response = await self._fetch(url, path, conditional=state is LocalState.TRUSTED)
+            return True
+        path = self.site.image_path(url)
+        response = await self._fetch(
+            url, path, conditional=state is LocalState.TRUSTED, missing_ok=missing_ok
+        )
+        if missing_ok and _missing(response):
+            return False
         if response.status == _NOT_MODIFIED:
             self.writer.mark_not_modified(url, request_id=response.request_id)
             self.breaker.record_success()
-            return
+            return True
         try:
             require_media_type(response.content_type, "image/")
             check_image(response.body, max_bytes=IMAGE_MAX_BYTES)
@@ -337,7 +377,7 @@ class Crawler:
         self.writer.write(
             Fetched(
                 url=url,
-                region=jp.REGION,
+                region=self.site.region,
                 kind=Kind.IMAGE,
                 path=path,
                 body=response.body,
@@ -350,6 +390,7 @@ class Crawler:
             rewrite=self.mode is Mode.REPAIR,
         )
         self.breaker.record_success()
+        return True
 
     def card_numbers(self, set_codes: list[str] | None = None) -> list[str]:
         """Card numbers from validated list generations, deduplicated, in list order."""
@@ -374,6 +415,14 @@ class Crawler:
         with self.manifest.transaction():
             self.manifest.links.replace(url, page.sha256, links)
         return card
+
+
+def _missing(response: Response) -> bool:
+    # shadowverse-portal.com answers a missing image with a redirect to an HTML page.
+    media = (response.content_type or "").split(";", 1)[0].strip().lower()
+    return response.status == _NOT_FOUND or (
+        response.status == _OK and media == "text/html"
+    )
 
 
 def _summary(set_code: str, page: jp.ListPage) -> ListSummary:

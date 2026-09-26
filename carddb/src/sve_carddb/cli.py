@@ -6,6 +6,7 @@ import uuid
 from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
 from enum import StrEnum
+from itertools import starmap
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- typer reads annotations at runtime
 from typing import TYPE_CHECKING, Annotated
 
@@ -16,6 +17,7 @@ from rich.console import Console
 
 from sve_carddb.config import Settings
 from sve_carddb.crawl import (
+    JP_SITE,
     Crawler,
     LimitReachedError,
     ListInconsistentError,
@@ -23,6 +25,14 @@ from sve_carddb.crawl import (
     card_numbers,
     current_sets,
     image_urls,
+)
+from sve_carddb.crawl_sv1 import (
+    SV1_SITE,
+    ImageResult,
+    Sv1Crawler,
+    image_jobs,
+    stored_cards,
+    stored_image,
 )
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.client import (
@@ -36,6 +46,7 @@ from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
 from sve_carddb.fetch.writer import DiskFullError, LocalState, Writer, remove_temp_files
 from sve_carddb.manifest import AlreadyRunningError, ExclusiveLock, Manifest
 from sve_carddb.sources import official_jp as jp
+from sve_carddb.sources import official_sv1 as sv1
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -68,6 +79,11 @@ class Stage(StrEnum):
     P1 = "p1"
     P2 = "p2"
     P5 = "p5"
+    SV1_CARDS = "sv1-cards"
+    SV1_IMAGES = "sv1-images"
+
+
+_SV1_STAGES = frozenset({Stage.SV1_CARDS, Stage.SV1_IMAGES})
 
 
 @dataclass(frozen=True, slots=True)
@@ -159,6 +175,24 @@ def crawl_p5(
 ) -> None:
     """Fetch the card images linked from the stored card pages."""
     _run(Job(Stage.P5, mode, sets, limit, max_requests, dry_run))
+
+
+@crawl_app.command("sv1-cards")
+def crawl_sv1_cards(
+    max_requests: BudgetOption = None, dry_run: DryRunOption = False
+) -> None:
+    """Fetch the shadowverse-portal.com card API in ja, en and zh-tw."""
+    _run(Job(Stage.SV1_CARDS, max_requests=max_requests, dry_run=dry_run))
+
+
+@crawl_app.command("sv1-images")
+def crawl_sv1_images(
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """Fetch the shadowverse-portal.com card images not stored yet."""
+    _run(Job(Stage.SV1_IMAGES, limit=limit, max_requests=max_requests, dry_run=dry_run))
 
 
 @manifest_app.command("check")
@@ -279,7 +313,9 @@ async def _crawl(
             breaker=CircuitBreaker(settings.breaker_threshold),
             mode=job.mode,
             limit=job.limit,
+            site=SV1_SITE if job.stage in _SV1_STAGES else JP_SITE,
         )
+        sv1_crawler = Sv1Crawler(crawler, CircuitBreaker(settings.breaker_threshold))
         try:
             match job.stage:
                 case Stage.P0:
@@ -290,6 +326,10 @@ async def _crawl(
                     return await _p2(crawler, job.sets)
                 case Stage.P5:
                     return await _p5(crawler, job, settings, writer)
+                case Stage.SV1_CARDS:
+                    return await _sv1_cards(sv1_crawler)
+                case Stage.SV1_IMAGES:
+                    return await _sv1_images(sv1_crawler, job, settings)
         finally:
             console.print(f"HTTP requests sent: {client.requests_sent}")
 
@@ -355,16 +395,7 @@ async def _p5(crawler: Crawler, job: Job, settings: Settings, writer: Writer) ->
         console.print("[red]no stored card pages; run `crawl p2` first[/red]")
         return 1
     pending = sum(_would_fetch(job, u, writer.local_state(u)) for u in urls)
-    if job.limit is not None:
-        pending = min(pending, job.limit)
-    free = shutil.disk_usage(settings.data_dir).free
-    if free < pending * _IMAGE_RESERVE_BYTES:
-        msg = (
-            f"{pending} images to fetch need about {pending * _IMAGE_RESERVE_BYTES >> 20} MiB,"
-            f" only {free >> 20} MiB free"
-        )
-        raise DiskFullError(msg)
-    console.print(f"{len(urls)} images, {pending} to fetch; {free >> 30} GiB free")
+    _check_space(settings, job, len(urls), pending)
     failures = 0
     for index, url in enumerate(urls, start=1):
         try:
@@ -377,7 +408,62 @@ async def _p5(crawler: Crawler, job: Job, settings: Settings, writer: Writer) ->
     return failures
 
 
+def _check_space(settings: Settings, job: Job, total: int, pending: int) -> None:
+    if job.limit is not None:
+        pending = min(pending, job.limit)
+    free = shutil.disk_usage(settings.data_dir).free
+    if free < pending * _IMAGE_RESERVE_BYTES:
+        msg = (
+            f"{pending} images to fetch need about {pending * _IMAGE_RESERVE_BYTES >> 20} MiB,"
+            f" only {free >> 20} MiB free"
+        )
+        raise DiskFullError(msg)
+    console.print(f"{total} images, {pending} to fetch; {free >> 30} GiB free")
+
+
+async def _sv1_cards(crawler: Sv1Crawler) -> int:
+    failures = 0
+    for lang in sv1.LANGUAGES:
+        try:
+            count = await crawler.cards(lang)
+        except FetchError as exc:
+            failures += 1
+            console.print(f"[red]{lang}:[/red] {exc}")
+            continue
+        console.print(f"{lang:>6}: {count} cards")
+    return failures
+
+
+async def _sv1_images(crawler: Sv1Crawler, job: Job, settings: Settings) -> int:
+    manifest, writer = crawler.crawler.manifest, crawler.crawler.writer
+    cards = stored_cards(writer)
+    if cards is None:
+        console.print("[red]no stored card API; run `crawl sv1-cards` first[/red]")
+        return 1
+    jobs = image_jobs(cards)
+    pending = sum(not stored_image(manifest, writer, i, f) for i, f in jobs)
+    _check_space(settings, job, len(jobs), pending)
+    failures = no_image = 0
+    for index, (card_id, face) in enumerate(jobs, start=1):
+        try:
+            result = await crawler.image(card_id, face)
+        except FetchError as exc:
+            failures += 1
+            console.print(f"[red]{card_id} {face.name.lower()}:[/red] {exc}")
+        else:
+            if result is ImageResult.NO_IMAGE:
+                no_image += 1
+                console.print(f"{card_id} {face.name.lower()}: no image on the site")
+        if index % 200 == 0:
+            console.print(f"{index}/{len(jobs)} images")
+    console.print(f"{no_image} images do not exist on the site")
+    return failures
+
+
 def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
+    if job.stage in _SV1_STAGES:
+        _dry_run_sv1(job, writer, manifest)
+        return
     known = current_sets(manifest)
     urls: list[str] = []
     match job.stage:
@@ -390,9 +476,31 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
                 urls += _list_urls(code, writer)
         case Stage.P2:
             urls = [jp.card_url(n) for n in card_numbers(manifest, job.sets)]
-        case Stage.P5:
+        case _:
             urls = image_urls(manifest, job.sets)
     fetch = [u for u in urls if _would_fetch(job, u, writer.local_state(u))]
+    for url in fetch:
+        console.print(url)
+    console.print(f"{len(fetch)} of {len(urls)} URLs would be requested")
+
+
+def _dry_run_sv1(job: Job, writer: Writer, manifest: Manifest) -> None:
+    if job.stage is Stage.SV1_CARDS:
+        # The API is always re-checked, with the stored ETag when there is one.
+        urls = [sv1.api_url(lang) for lang in sv1.LANGUAGES]
+        fetch = urls
+    else:
+        cards = stored_cards(writer)
+        if cards is None:
+            console.print("no stored card API; run `crawl sv1-cards` first")
+            return
+        jobs = image_jobs(cards)
+        urls = list(starmap(sv1.image_url, jobs))
+        fetch = [
+            sv1.image_url(i, f)
+            for i, f in jobs
+            if not stored_image(manifest, writer, i, f)
+        ]
     for url in fetch:
         console.print(url)
     console.print(f"{len(fetch)} of {len(urls)} URLs would be requested")
