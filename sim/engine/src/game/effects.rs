@@ -310,22 +310,9 @@ impl Game {
             }
             "destroy" | "banish" | "discard" | "move" => self.zone_action(node, frame)?,
             "act" | "stand" => {
-                frame.performed = 0;
-                let group = self.group();
-                let mut changed = Vec::new();
-                for id in self.select(&node["subjects"], frame)? {
-                    let acted = node["op"] == "act";
-                    if self.object(&id)?.state["acted"] != acted {
-                        self.object_mut(&id)?.state["acted"] = json!(acted);
-                        frame.performed = frame.performed.saturating_add(1);
-                        changed.push(id.clone());
-                        self.emit(
-                            json!({"kind":if acted { "アクト" } else { "スタンド" },"object":id}),
-                            &frame.cause,
-                            group,
-                        );
-                    }
-                }
+                let subjects = self.select(&node["subjects"], frame)?;
+                let changed = self.change_posture(&subjects, node["op"] == "act", &frame.cause)?;
+                frame.performed = i64::try_from(changed.len()).unwrap_or(i64::MAX);
                 if let Some(name) = node["bind"].as_str() {
                     frame.bindings.insert(name.into(), changed);
                 }
@@ -678,21 +665,7 @@ impl Game {
                 let event_id=self.emit(json!({"kind":"場に出す","object":id,"card":previous.card,"from":from,"to":format!("{owner}.field")}),&frame.cause,group);
                 entered.push((self.object(id)?.clone(), json!({"event":event_id})));
             } else {
-                let mut event = json!({"kind":"移動","object":id,"from":from,"to":format!("{owner}.{destination}")});
-                if let Some(pos) = position
-                    && destination == "deck"
-                {
-                    event["position"] = json!(pos);
-                }
-                if let Some(rule) = frame.values.get("movement_rule") {
-                    event["by"] = rule.clone();
-                }
-                let cause = frame
-                    .values
-                    .get("movement_rules")
-                    .and_then(|rules| rules.get(id))
-                    .map_or_else(|| frame.cause.clone(), |rule| json!({"rule":rule}));
-                self.emit(event, &cause, group);
+                self.emit_zone_movement(&previous, destination, position, frame, group)?;
             }
             for viewer in ["P1", "P2"] {
                 let was_known = self

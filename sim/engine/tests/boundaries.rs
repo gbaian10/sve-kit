@@ -2883,3 +2883,93 @@ fn conditional_restrictions_and_unsupported_periods_do_not_silently_block_play()
         }
     }
 }
+
+#[test]
+fn posture_events_and_triggers_follow_actual_batched_changes() {
+    let mut docs = document(&json!({"op":"seq","steps":[
+        {"op":"act","subjects":{"side":"both","zone":"field"}},
+        {"op":"act","subjects":{"side":"both","zone":"field"}}
+    ]}));
+    docs["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"trigger","event":"act","subject":"self","line":1_i64,
+        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
+    }]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("unit.yaml".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "posture",
+    )
+    .unwrap();
+    let cast = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let acted = cast
+        .events
+        .iter()
+        .filter(|event| event["kind"] == "アクト")
+        .collect::<Vec<_>>();
+    assert_eq!(acted.len(), 2);
+    assert_eq!(acted[0]["group"], acted[1]["group"]);
+    let pending = cast
+        .events
+        .iter()
+        .filter(|event| event["kind"] == "待機")
+        .collect::<Vec<_>>();
+    assert_eq!(pending.len(), 2);
+    assert_eq!(pending[0]["controller"], "P1");
+    assert_eq!(pending[0]["event"], json!({"acted":"a"}));
+    assert_eq!(pending[1]["controller"], "P2");
+    engine
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}),
+            "first",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"b","line":1_i64}}}),
+            "second",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(19_i64))
+    );
+    let mut battle = Game::new(
+        loaded,
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "attack-posture",
+    )
+    .unwrap();
+    let attack = battle
+        .decide(
+            &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+            "attack",
+        )
+        .unwrap();
+    assert_eq!(attack.events[0]["kind"], "アクト");
+    assert_eq!(
+        attack
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "待機")
+            .count(),
+        1
+    );
+    assert!(attack.events.iter().any(|event| event["kind"] == "攻撃"));
+}

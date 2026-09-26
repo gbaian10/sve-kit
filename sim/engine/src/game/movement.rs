@@ -13,6 +13,66 @@ use serde_json::{Value, json};
     reason = "Rule domains share one private state and are split into focused modules."
 )]
 impl Game {
+    pub(super) fn emit_zone_movement(
+        &mut self,
+        previous: &Object,
+        destination: &str,
+        position: Option<&Value>,
+        frame: &Frame,
+        group: u64,
+    ) -> Result<()> {
+        let id = &previous.id;
+        let owner = &self.object(id)?.controller;
+        let from = format!("{}.{}", previous.controller, previous.zone);
+        let mut event =
+            json!({"kind":"移動","object":id,"from":from,"to":format!("{owner}.{destination}")});
+        if previous.zone == "void"
+            && matches!(destination, "ex" | "equipment" | "cemetery" | "banish")
+        {
+            event["card"] = json!(previous.card);
+        }
+        if let Some(pos) = position
+            && destination == "deck"
+        {
+            event["position"] = json!(pos);
+        }
+        if let Some(rule) = frame.values.get("movement_rule") {
+            event["by"] = rule.clone();
+        }
+        let cause = frame
+            .values
+            .get("movement_rules")
+            .and_then(|rules| rules.get(id))
+            .map_or_else(|| frame.cause.clone(), |rule| json!({"rule":rule}));
+        self.emit(event, &cause, group);
+        Ok(())
+    }
+
+    pub(super) fn change_posture(
+        &mut self,
+        ids: &[String],
+        acted: bool,
+        cause: &Value,
+    ) -> Result<Vec<String>> {
+        let group = self.group();
+        let mut changed = Vec::new();
+        for id in ids {
+            if self.object(id)?.state["acted"] != acted {
+                self.object_mut(id)?.state["acted"] = json!(acted);
+                changed.push(self.object(id)?.clone());
+                self.emit(
+                    json!({"kind":if acted {"アクト"} else {"スタンド"},"object":id}),
+                    cause,
+                    group,
+                );
+            }
+        }
+        let pending =
+            self.collect_triggers(if acted { "act" } else { "stand" }, &changed, cause)?;
+        self.enqueue(pending);
+        Ok(changed.into_iter().map(|object| object.id).collect())
+    }
+
     pub(super) fn discard(&mut self, ids: &[String], frame: &Frame) -> Result<()> {
         let discarded = ids
             .iter()

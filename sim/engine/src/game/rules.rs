@@ -540,7 +540,8 @@ impl Game {
         if !self.can_attack(id, target)? {
             return Ok(false);
         }
-        self.object_mut(id)?.state["acted"] = json!(true);
+        let cause = json!({"decision":self.node});
+        self.change_posture(&[id.into()], true, &cause)?;
         self.bump(&format!("{}.attacks", self.active()), 1);
         self.bump(&format!("{id}.attacks"), 1);
         for trait_name in list(&self.face(id)?["traits"]) {
@@ -549,7 +550,6 @@ impl Game {
                 1,
             );
         }
-        let cause = json!({"decision":self.node});
         let group = self.group();
         let event = self.emit(
             json!({"kind":"攻撃","attacker":id,"target":target}),
@@ -618,20 +618,17 @@ impl Game {
         {
             return Ok(false);
         }
-        for id in list(&decision["select"]) {
-            let id = string(&id);
+        let selected = list(&decision["select"])
+            .iter()
+            .map(|id| string(id).to_owned())
+            .collect::<Vec<_>>();
+        for id in &selected {
             if self.object(id)?.controller != self.active() || !self.keywords(id)?.contains("guard")
             {
                 return Ok(false);
             }
-            self.object_mut(id)?.state["acted"] = json!(true);
-            let group = self.group();
-            self.emit(
-                json!({"kind":"アクト","object":id}),
-                &json!({"decision":self.node}),
-                group,
-            );
         }
+        self.change_posture(&selected, true, &json!({"decision":self.node}))?;
         self.state.flow["stage"] = json!("quick");
         Ok(true)
     }
@@ -685,12 +682,14 @@ impl Game {
             .saturating_add(i64::from(!prevent_gain))
             .min(10);
         player.pp = json!({"current":max,"max":max});
+        let mut standing = Vec::new();
         for id in self.zone_ids(&seat, "field") {
             if !self.restricted(&id, "normal_stand")? {
-                self.object_mut(&id)?.state["acted"] = json!(false);
+                standing.push(id.clone());
             }
             self.object_mut(&id)?.state["entered_this_turn"] = json!(false);
         }
+        self.change_posture(&standing, false, &json!({"rule":"7.2.3"}))?;
         let frame = Frame {
             controller: seat.clone(),
             cause: json!({"rule":"7.2.4"}),
@@ -947,6 +946,8 @@ impl Game {
             "discard" => "discarded",
             "evolve" => "evolved",
             "attack" => "attacked",
+            "act" => "acted",
+            "stand" => "stood",
             "race" => "raced",
             _ => "",
         };
@@ -1006,7 +1007,8 @@ impl Game {
     pub(super) fn enqueue(&mut self, batch: Vec<Pending>) {
         let group = self.group();
         for pending in batch {
-            let mut event = json!({"kind":"待機","ability":pending.reference});
+            let mut event =
+                json!({"kind":"待機","ability":pending.reference,"controller":pending.controller});
             if !pending.event.is_null() {
                 event["event"] = pending.event.clone();
             }
