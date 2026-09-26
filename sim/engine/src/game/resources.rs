@@ -12,6 +12,28 @@ use serde_json::{Value, json};
     reason = "Resource rules share the authoritative game state."
 )]
 impl Game {
+    pub(super) fn recover_pp(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        frame.performed = 0;
+        for seat in self.seats(string(&node["side"]), frame) {
+            let amount = self.number(&node["amount"], frame)?.max(0);
+            let player = self.player_mut(&seat)?;
+            let old = int(&player.pp["current"]);
+            let recovered = amount.min(int(&player.pp["max"]).saturating_sub(old).max(0));
+            if recovered == 0 {
+                continue;
+            }
+            player.pp["current"] = json!(old.saturating_add(recovered));
+            frame.performed = frame.performed.saturating_add(recovered);
+            let group = self.group();
+            self.emit(
+                json!({"kind":"回復","player":seat,"amount":recovered}),
+                &frame.cause,
+                group,
+            );
+        }
+        Ok(())
+    }
+
     pub(super) fn resource_code(mut code: Value) -> Value {
         let keyword = string(&code["body"]["name"]).to_owned();
         if code["body"]["op"] == "keyword"

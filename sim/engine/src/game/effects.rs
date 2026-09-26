@@ -439,21 +439,7 @@ impl Game {
                 player.pp["current"] = json!(int(&player.pp["current"]).saturating_sub(amount));
                 frame.performed = amount;
             }
-            "recover_pp" => {
-                for seat in self.seats(string(&node["side"]), frame) {
-                    let amount = self.number(&node["amount"], frame)?.max(0);
-                    let player = self.player_mut(&seat)?;
-                    let old = int(&player.pp["current"]);
-                    let new = old.saturating_add(amount).min(int(&player.pp["max"]));
-                    player.pp["current"] = json!(new);
-                    let group = self.group();
-                    self.emit(
-                        json!({"kind":"回復","player":seat,"amount":new.saturating_sub(old)}),
-                        &frame.cause,
-                        group,
-                    );
-                }
-            }
+            "recover_pp" => self.recover_pp(node, frame)?,
             "lesson" | "eat" | "_drive_point" | "race" | "gain_drive" | "stack" => {
                 self.resource_effect(node, frame)?;
             }

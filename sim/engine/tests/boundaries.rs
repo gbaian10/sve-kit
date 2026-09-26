@@ -254,6 +254,53 @@ fn movement_receipts_count_changes_and_bind_the_actual_results() {
 }
 
 #[test]
+fn pp_recovery_receipts_use_the_actual_increase_after_capping() {
+    for (amount, spend, recovered) in [(0_i64, 1_i64, 0_i64), (-1, 1, 0), (3, 0, 0), (3, 1, 1)] {
+        let body = json!({"op":"seq","steps":[
+            {"op":"pp","amount":spend},
+            {"op":"if_done","attempt":{"op":"recover_pp","amount":amount},"then":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}
+        ]});
+        let mut doc = document(&body);
+        doc["cards"]["unit-follower"]["abilities"] =
+            json!([{"kind":"activated","line":1_i64,"body":body}]);
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("recovery.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut engine =
+            Game::new(catalog, &setup(), &Value::Null, &Value::Null, "recovery").unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "recover",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, "resolved");
+        assert_eq!(
+            engine.query(View::P1, "P1.pp.current").unwrap(),
+            Some(json!(2_i64 - spend + recovered))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(20_i64 - recovered))
+        );
+        let events = step
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "回復")
+            .collect::<Vec<_>>();
+        assert_eq!(events.len(), usize::try_from(recovered).unwrap());
+        for event in events {
+            assert_eq!(event["amount"], recovered);
+        }
+    }
+}
+
+#[test]
 fn a_card_returning_to_the_field_is_not_the_original_target() {
     let mut engine = game(&json!({"op":"seq","steps":[
         {"op":"move","subjects":"target.1","to":"cemetery","bind":"left"},
