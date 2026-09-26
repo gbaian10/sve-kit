@@ -5,6 +5,7 @@
 
 use serde_json::{Value, json};
 
+use super::costs::CostKind;
 use super::{Frame, Game, int, list, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
@@ -217,13 +218,15 @@ impl Game {
     }
 
     fn evolution_pp(&self, code: &Value, frame: &Frame) -> Result<i64> {
-        list(&code["costs"])
+        let base = list(&code["costs"])
             .iter()
             .filter(|cost| cost["op"] == "pp")
             .try_fold(0_i64, |sum, cost| {
                 self.number(&cost["amount"], frame)
                     .map(|amount| sum.saturating_add(amount.max(0)))
-            })
+            })?;
+        self.adjusted_pp_cost(&frame.source, base, frame, CostKind::Evolve)
+            .map(|cost| cost.max(0))
     }
 
     fn can_super_evolve(&self, seat: &str) -> bool {
@@ -285,6 +288,7 @@ impl Game {
         if !self.can_pay(&list(&non_pp["costs"]), &frame)? {
             return Ok(false);
         }
+        self.consume_cost_adjustments(source, CostKind::Evolve)?;
         self.pay_costs(&non_pp, &mut frame)?;
         if self.object(source)?.zone != "field" {
             return Err(EngineFailure::Unsupported(

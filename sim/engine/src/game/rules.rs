@@ -5,6 +5,7 @@
 use core::mem::take;
 use serde_json::{Value, json};
 
+use super::costs::CostKind;
 use super::{EventSubject, Frame, Game, Object, Pending, Step, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
@@ -314,7 +315,7 @@ impl Game {
         if !self.can_pay(&mandatory, &frame)? {
             return Ok(None);
         }
-        self.consume_cost_adjustments(source)?;
+        self.consume_cost_adjustments(source, CostKind::Play)?;
         for code in &spells {
             self.pay_costs(code, &mut frame)?;
         }

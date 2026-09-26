@@ -8,6 +8,18 @@ use serde_json::{Value, json};
 use super::{Frame, Game, int, list, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(super) enum CostKind {
+    Play,
+    Evolve,
+}
+
+impl CostKind {
+    fn matches(self, effect: &Value) -> bool {
+        (effect["kind"] == "evolve") == (self == Self::Evolve)
+    }
+}
+
 fn cost_nodes(node: &Value, result: &mut Vec<Value>) {
     if node["op"] == "adjust_cost" {
         result.push(node.clone());
@@ -109,10 +121,10 @@ impl Game {
         Ok(candidates.remove(0))
     }
 
-    fn cost_effect_applies(&self, entry: &Value, id: &str) -> Result<bool> {
+    fn cost_effect_applies(&self, entry: &Value, id: &str, kind: CostKind) -> Result<bool> {
         let effect = &entry["effect"];
         if effect["op"] != "adjust_cost"
-            || effect["kind"] == "evolve"
+            || !kind.matches(effect)
             || effect.get("uses").is_some_and(|uses| int(uses) <= 0)
         {
             return Ok(false);
@@ -132,10 +144,10 @@ impl Game {
         Ok(self.continuous_applies(entry, id))
     }
 
-    pub(super) fn consume_cost_adjustments(&mut self, id: &str) -> Result<()> {
+    pub(super) fn consume_cost_adjustments(&mut self, id: &str, kind: CostKind) -> Result<()> {
         let mut consumed = Vec::new();
         for (index, entry) in self.state.continuous.iter().enumerate() {
-            if entry["effect"].get("uses").is_some() && self.cost_effect_applies(entry, id)? {
+            if entry["effect"].get("uses").is_some() && self.cost_effect_applies(entry, id, kind)? {
                 consumed.push(index);
             }
         }
@@ -151,7 +163,23 @@ impl Game {
     }
 
     pub(super) fn play_cost_context(&self, id: &str, context: &Frame) -> Result<i64> {
-        let mut base = scalar(&self.face(id)?["cost"]);
+        let base = scalar(&self.face(id)?["cost"]);
+        let adjusted = self.adjusted_pp_cost(id, base, context, CostKind::Play)?;
+        Ok(adjusted
+            .saturating_add(int(context
+                .values
+                .get("additional_pp")
+                .unwrap_or(&Value::Null)))
+            .max(0))
+    }
+
+    pub(super) fn adjusted_pp_cost(
+        &self,
+        id: &str,
+        mut base: i64,
+        context: &Frame,
+        kind: CostKind,
+    ) -> Result<i64> {
         let mut adjustment = 0_i64;
         let mut sources = self.field_ids();
         if !sources.iter().any(|source| source == id) {
@@ -160,10 +188,7 @@ impl Game {
         for source in sources {
             for code in self.abilities(&source)? {
                 let body = &code["body"];
-                if code["kind"] != "static"
-                    || body["op"] != "adjust_cost"
-                    || body["kind"] == "evolve"
-                {
+                if code["kind"] != "static" || body["op"] != "adjust_cost" || !kind.matches(body) {
                     continue;
                 }
                 let mut frame = self.frame_for(&source)?;
@@ -189,7 +214,7 @@ impl Game {
             }
         }
         for entry in &self.state.continuous {
-            if !self.cost_effect_applies(entry, id)? {
+            if !self.cost_effect_applies(entry, id, kind)? {
                 continue;
             }
             let frame: Frame = serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
@@ -199,12 +224,6 @@ impl Game {
             adjustment =
                 adjustment.saturating_add(self.number(&entry["effect"]["amount"], &frame)?);
         }
-        Ok(base
-            .saturating_add(adjustment)
-            .saturating_add(int(context
-                .values
-                .get("additional_pp")
-                .unwrap_or(&Value::Null)))
-            .max(0))
+        Ok(base.saturating_add(adjustment))
     }
 }

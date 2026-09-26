@@ -4825,3 +4825,121 @@ fn already_evolved_cards_ignore_effect_evolution_and_simultaneous_batches_fail_c
     ));
     assert_eq!(unsupported.digest().unwrap(), before);
 }
+
+#[test]
+fn evolution_cost_layers_are_shared_by_legal_actions_and_payment() {
+    let loaded = Arc::new(effect_evolution_catalog(&json!({"op":"seq","steps":[
+        {"op":"adjust_cost","subjects":"self","kind":"evolve","amount":2_i64},
+        {"op":"adjust_cost","subjects":"self","kind":"evolve","set":0_i64},
+        {"op":"adjust_cost","subjects":"self","kind":"play","amount":100_i64}
+    ]})));
+    let mut initial = setup();
+    initial["players"]["P1"]["ep"] = json!(1_i64);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"e","card":"unit-evolved"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "cost",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+            "adjust",
+        )
+        .unwrap();
+    let options = engine
+        .legal()
+        .unwrap()
+        .into_iter()
+        .filter(|choice| choice["do"] == "evolve")
+        .collect::<Vec<_>>();
+    assert_eq!(options.len(), 2);
+    for choice in options {
+        assert_eq!(
+            choice["pay"]["pp"].as_i64().unwrap() + choice["pay"]["ep"].as_i64().unwrap(),
+            2
+        );
+    }
+    let before = engine.digest().unwrap();
+    assert_eq!(engine.decide(&json!({"do":"evolve","source":"a","evolve_card":"e","pay":{"pp":0_i64,"ep":0_i64}}), "wrong").unwrap().outcome, "cannot-evolve");
+    assert_eq!(engine.digest().unwrap(), before);
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled =
+        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "cost")
+            .unwrap();
+    for instance in [&mut engine, &mut saved, &mut sampled] {
+        assert_eq!(instance.decide(&json!({"do":"evolve","source":"a","evolve_card":"e","pay":{"pp":1_i64,"ep":1_i64}}), "evolve").unwrap().outcome, "resolved");
+        assert_eq!(
+            instance.query(View::P1, "P1.pp.current").unwrap(),
+            Some(json!(1_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.ep").unwrap(),
+            Some(json!(0_i64))
+        );
+    }
+}
+
+#[test]
+fn evolution_discounts_only_consume_the_matching_paid_ability() {
+    let loaded = Arc::new(effect_evolution_catalog(&json!({"op":"seq","steps":[
+        {"op":"adjust_cost","subjects":{"side":"self","zone":"any"},"kind":"evolve","amount":-1_i64,"uses":1_i64},
+        {"op":"adjust_cost","subjects":{"side":"self","zone":"any"},"kind":"play","amount":-1_i64,"uses":1_i64},
+        {"op":"evolve","subjects":"self"}
+    ]})));
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"] =
+        json!([{"id":"a","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] =
+        json!([{"id":"e1","card":"unit-evolved"},{"id":"e2","card":"unit-evolved"}]);
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "cost").unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+            "adjust",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","select":["e1"]}),
+            "effect-evolution",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"]
+            .as_array()
+            .unwrap()
+            .len(),
+        2
+    );
+    engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}}), "first-trigger").unwrap();
+    assert_eq!(engine.decide(&json!({"do":"evolve","source":"c","evolve_card":"e2","pay":{"pp":0_i64,"ep":0_i64}}), "ordinary-evolution").unwrap().outcome, "resolved");
+    let remaining =
+        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"].clone();
+    assert_eq!(remaining.as_array().unwrap().len(), 1);
+    assert_eq!(remaining[0]["effect"]["kind"], "play");
+    engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"c","card":"unit-evolved","line":1_i64}}}), "second-trigger").unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "spell"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.pp.current").unwrap(),
+        Some(json!(2_i64))
+    );
+    assert!(
+        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"]
+            .as_array()
+            .unwrap()
+            .is_empty()
+    );
+}
