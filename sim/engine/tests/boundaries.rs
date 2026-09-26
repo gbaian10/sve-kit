@@ -4203,3 +4203,139 @@ fn unsupported_mixed_origin_transformations_roll_back_payment_and_every_object()
     ));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn pp_maximum_changes_clamp_both_values_and_report_only_actual_changes() {
+    for (maximum, amount, expected_maximum, expected_current, changes) in [
+        (9_i64, 3_i64, 10_i64, 8_i64, true),
+        (10, 2, 10, 8, false),
+        (9, -6, 3, 3, true),
+        (9, -20, 0, 0, true),
+        (9, 0, 9, 8, false),
+    ] {
+        let body = json!({"op":"if_done","attempt":{"op":"max_pp","amount":amount},"then":{"op":"damage","subjects":"opponent.leader","amount":1_i64}});
+        let mut initial = setup();
+        initial["players"]["P1"]["pp"] = json!({"current":9_i64,"max":maximum});
+        let mut engine = Game::new(
+            Arc::new(catalog(&body)),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "resource",
+        )
+        .unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, "resolved");
+        assert_eq!(
+            engine.query(View::P1, "P1.pp.max").unwrap(),
+            Some(json!(expected_maximum))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P1.pp.current").unwrap(),
+            Some(json!(expected_current))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(if changes { 19_i64 } else { 20_i64 }))
+        );
+        let events = step
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "PP最大値変化")
+            .collect::<Vec<_>>();
+        assert_eq!(events.len(), usize::from(changes));
+        if changes {
+            assert_eq!(events[0]["delta"], expected_maximum.saturating_sub(maximum));
+        }
+    }
+}
+
+#[test]
+fn ep_has_no_gameplay_cap_and_batched_deltas_survive_resume() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"ep","side":"both","amount":4_i64},
+        {"op":"optional","then":{"op":"ep","side":"opponent","amount":-20_i64}},
+        {"op":"if_done","attempt":{"op":"ep","side":"opponent","amount":-1_i64},"then":{"op":"damage","subjects":"opponent.leader","amount":5_i64}}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P1"]["ep"] = json!(3_i64);
+    initial["players"]["P2"]["ep"] = json!(12_i64);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "resource",
+    )
+    .unwrap();
+    let step = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(step.outcome, "paused");
+    assert_eq!(engine.query(View::P1, "P1.ep").unwrap(), Some(json!(7_i64)));
+    assert_eq!(
+        engine.query(View::P1, "P2.ep").unwrap(),
+        Some(json!(16_i64))
+    );
+    let changes = step
+        .events
+        .iter()
+        .filter(|event| event["kind"] == "EP変化")
+        .collect::<Vec<_>>();
+    assert_eq!(changes.len(), 2);
+    assert_eq!(changes[0]["group"], changes[1]["group"]);
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "sample",
+    )
+    .unwrap();
+    for instance in [&mut engine, &mut restored, &mut sampled] {
+        let done = instance
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute"}),
+                "decrease",
+            )
+            .unwrap();
+        assert_eq!(done.outcome, "resolved");
+        assert_eq!(
+            instance.query(View::P1, "P2.ep").unwrap(),
+            Some(json!(0_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(20_i64))
+        );
+        let decreased = done
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "EP変化")
+            .collect::<Vec<_>>();
+        assert_eq!(decreased.len(), 1);
+        assert_eq!(decreased[0]["delta"], -16_i64);
+    }
+    let mut overflow = game(
+        &json!({"op":"seq","steps":[{"op":"ep","side":"self","amount":i64::MAX},{"op":"ep","side":"self","amount":1_i64}]}),
+    );
+    let before = overflow.digest().unwrap();
+    assert!(matches!(
+        overflow.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "overflow"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(overflow.digest().unwrap(), before);
+}

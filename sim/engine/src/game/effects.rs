@@ -397,6 +397,7 @@ impl Game {
                 frame.performed = amount;
             }
             "recover_pp" => self.recover_pp(node, frame)?,
+            "max_pp" | "ep" => self.change_player_resource(node, frame)?,
             "lesson" | "eat" | "_drive_point" | "race" | "gain_drive" | "stack" => {
                 self.resource_effect(node, frame)?;
             }

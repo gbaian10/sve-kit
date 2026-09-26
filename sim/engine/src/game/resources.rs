@@ -84,6 +84,45 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn change_player_resource(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let amount = self.number(&node["amount"], frame)?;
+        let maximum = node["op"] == "max_pp";
+        let group = self.group();
+        frame.performed = 0;
+        for seat in self.seats(string(&node["side"]), frame) {
+            let player = self.player_mut(&seat)?;
+            let before = if maximum {
+                int(&player.pp["max"])
+            } else {
+                player.ep
+            };
+            let after = if maximum {
+                before.saturating_add(amount).clamp(0, 10)
+            } else {
+                before
+                    .checked_add(amount)
+                    .ok_or_else(|| {
+                        crate::EngineFailure::Unsupported(
+                            "EP value exceeds the integer representation".into(),
+                        )
+                    })?
+                    .max(0)
+            };
+            if maximum {
+                player.pp["max"] = json!(after);
+                player.pp["current"] = json!(int(&player.pp["current"]).clamp(0, after));
+            } else {
+                player.ep = after;
+            }
+            let delta = after.saturating_sub(before);
+            if delta != 0 {
+                frame.performed = frame.performed.saturating_add(delta.saturating_abs());
+                self.emit(json!({"kind":if maximum {"PP最大値変化"} else {"EP変化"},"player":seat,"source":frame.source,"delta":delta,"before":before,"after":after}), &frame.cause, group);
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn resource_code(mut code: Value) -> Value {
         let keyword = string(&code["body"]["name"]).to_owned();
         if code["body"]["op"] == "keyword"
