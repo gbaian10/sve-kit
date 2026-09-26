@@ -736,7 +736,11 @@ impl Game {
     }
 
     pub(super) fn modify(&mut self, node: &Value, frame: &Frame) -> Result<()> {
-        if node.get("until").is_some() && node["remove_abilities"] != true {
+        Self::check_granted_abilities(node)?;
+        if node.get("until").is_some()
+            && node["remove_abilities"] != true
+            && node.get("abilities").is_none()
+        {
             return Err(EngineFailure::Unsupported(
                 "temporary numeric and cross-turn modification layers".into(),
             ));
@@ -793,7 +797,7 @@ impl Game {
                 all.extend(keywords.iter().cloned());
                 self.object_mut(&id)?.state["keywords"] = json!(all);
             }
-            let reference = if node["keywords"].is_array() {
+            let reference = if node["keywords"].is_array() || node["abilities"].is_array() {
                 self.granted_reference(&id, &frame.reference)?
             } else {
                 frame.reference.clone()

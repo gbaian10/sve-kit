@@ -332,6 +332,9 @@ impl Game {
             .filter(|guard| {
                 self.object(guard).is_ok_and(|o| o.state["acted"] == true)
                     && self
+                        .object_type(guard)
+                        .is_ok_and(|kind| kind.contains("フォロワー"))
+                    && self
                         .keywords(guard)
                         .is_ok_and(|guard_keys| guard_keys.contains("guard"))
             })

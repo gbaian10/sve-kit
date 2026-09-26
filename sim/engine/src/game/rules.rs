@@ -357,7 +357,9 @@ impl Game {
     fn activate(&mut self, decision: &Value) -> Result<bool> {
         let reference = &decision["ability"];
         let source = string(&reference["source"]);
-        let code = self.ability(source, reference)?;
+        let Some(code) = self.current_activated_ability(source, reference)? else {
+            return Ok(false);
+        };
         if (matches!(string(&code["kind"]), "meal" | "ride") || code["advance"] == true) {
             return self.resource_activation(decision, &code);
         }

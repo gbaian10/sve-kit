@@ -51,7 +51,7 @@ impl Game {
 
     pub(super) fn check_execution_parameters(node: &Value) -> Result<()> {
         let denied: &[&str] = match string(&node["op"]) {
-            "modify" => &["type", "abilities", "during", "traits", "cost", "set_cost"],
+            "modify" => &["type", "during", "traits", "cost", "set_cost"],
             "draw" | "look" => &["up_to"],
             _ => &[],
         };

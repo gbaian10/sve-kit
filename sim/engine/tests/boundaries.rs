@@ -1482,7 +1482,7 @@ fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
 
 #[test]
 fn unsupported_modifier_parameters_cannot_succeed_silently() {
-    let mut engine = game(&json!({"op":"modify","subjects":"target.1","abilities":[]}));
+    let mut engine = game(&json!({"op":"modify","subjects":"target.1","traits":["unmodeled"]}));
     let before = engine.digest().unwrap();
     let error = engine
         .decide(
@@ -5723,4 +5723,197 @@ fn control_batches_select_capacity_preserve_state_and_share_a_movement_group() {
                 .any(|card| card["id"] == "b2" && card["owner"] == "P2")
         );
     }
+}
+
+#[test]
+fn granted_trigger_and_activation_use_the_recipient_and_saved_provider_after_source_leaves() {
+    let body = json!({"op":"modify","subjects":"target.1","abilities":[
+        {"line":1_i64,"kind":"trigger","event":"main_start","body":{"op":"damage","subjects":"self.leader","amount":2_i64}},
+        {"line":1_i64,"kind":"activated","costs":[{"op":"pp","amount":1_i64}],"body":{"op":"move","subjects":"self","to":"cemetery"}}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"d","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "grant",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.cemetery").unwrap(),
+        Some(json!(["s"]))
+    );
+    finish_turn(&mut engine);
+    let reference = json!({"source":"b","card":"unit-spell","line":1_i64});
+    assert_eq!(
+        engine.projection(View::P2).unwrap()["awaiting"]["choices"],
+        json!([{"do":"choose-pending","pending":{"ability":reference}}])
+    );
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled =
+        Game::from_observation(loaded, &engine.projection(View::P2).unwrap(), "P2", "grant")
+            .unwrap();
+    for instance in [&mut engine, &mut saved, &mut sampled] {
+        instance
+            .decide(
+                &json!({"do":"choose-pending","pending":{"ability":reference}}),
+                "trigger",
+            )
+            .unwrap();
+        assert_eq!(
+            instance.query(View::P2, "P2.leader.life").unwrap(),
+            Some(json!(18_i64))
+        );
+        assert!(
+            instance
+                .legal()
+                .unwrap()
+                .contains(&json!({"do":"activate","ability":reference}))
+        );
+        instance
+            .decide(&json!({"do":"activate","ability":reference}), "activate")
+            .unwrap();
+        for (path, value) in [
+            ("P2.cemetery", json!(["b"])),
+            ("P2.pp.current", json!(2_i64)),
+            ("P1.pp.current", json!(1_i64)),
+        ] {
+            assert_eq!(instance.query(View::P2, path).unwrap(), Some(value));
+        }
+        assert_eq!(
+            instance
+                .decide(&json!({"do":"activate","ability":reference}), "lost")
+                .unwrap()
+                .outcome,
+            "cannot-activate"
+        );
+    }
+}
+
+#[test]
+fn losing_abilities_erases_prior_grants_but_allows_later_grants_and_expiry_restores_them() {
+    let early = json!({"line":1_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}});
+    let late = json!({"line":2_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":3_i64}});
+    let body = json!({"op":"seq","steps":[
+        {"op":"modify","subjects":"a","abilities":[early]},
+        {"op":"modify","subjects":"a","remove_abilities":true,"until":"end-of-turn"},
+        {"op":"modify","subjects":"a","abilities":[late]}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut engine = Game::new(loaded, &turn_setup(), &Value::Null, &Value::Null, "grant").unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let early_action =
+        json!({"do":"activate","ability":{"source":"a","card":"unit-spell","line":1_i64}});
+    let late_action =
+        json!({"do":"activate","ability":{"source":"a","card":"unit-spell","line":2_i64}});
+    assert!(!engine.legal().unwrap().contains(&early_action));
+    assert!(engine.legal().unwrap().contains(&late_action));
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine.decide(&early_action, "erased").unwrap().outcome,
+        "cannot-activate"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    engine.decide(&late_action, "late").unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(17_i64))
+    );
+    finish_turn(&mut engine);
+    finish_turn(&mut engine);
+    for action in [&early_action, &late_action] {
+        assert!(engine.legal().unwrap().contains(action));
+    }
+    engine.decide(&early_action, "restored").unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(16_i64))
+    );
+}
+
+#[test]
+fn temporary_grants_expire_and_amulet_guard_does_not_restrict_attack_targets() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"become_type","subjects":"target.1","type":"amulet"},
+        {"op":"modify","subjects":"target.1","abilities":[{"line":1_i64,"kind":"static","body":{"op":"keyword","name":"guard"}}],"until":"end-of-turn"}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = turn_setup();
+    initial["players"]["P1"]["zones"]["field"][0]["state"] = json!({"acted":false});
+    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "grant").unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.keywords").unwrap(),
+        Some(json!(["守護"]))
+    );
+    assert!(
+        engine
+            .legal()
+            .unwrap()
+            .contains(&json!({"do":"attack","attacker":"a","target":"P2.leader"}))
+    );
+    finish_turn(&mut engine);
+    assert_eq!(
+        engine.query(View::P2, "P2.field.b.keywords").unwrap(),
+        Some(json!([]))
+    );
+}
+
+#[test]
+fn ambiguous_or_unsupported_grants_fail_closed_without_partial_payment() {
+    for grant in [
+        json!({"op":"modify","subjects":"a","abilities":[{"line":1_i64,"kind":"activated","limit":1_i64,"body":{"op":"draw","count":1_i64}}]}),
+        json!({"op":"modify","subjects":"a","until":"end-of-turn","power":1_i64,"abilities":[]}),
+        json!({"op":"modify","subjects":"a","abilities":[{"line":1_i64,"kind":"activated","active_zones":["hand"],"body":{"op":"draw","count":1_i64}}]}),
+    ] {
+        let mut engine = game(&grant);
+        let before = engine.digest().unwrap();
+        assert!(matches!(
+            engine.decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "unsupported"
+            ),
+            Err(EngineFailure::Unsupported(_))
+        ));
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    let mut engine = game(&json!({"op":"modify","subjects":"a","abilities":[
+        {"line":1_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}},
+        {"line":1_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":2_i64}}
+    ]}));
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine.decide(
+            &json!({"do":"activate","ability":{"source":"a","card":"unit-spell","line":1_i64}}),
+            "ambiguous"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
 }

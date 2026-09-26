@@ -11,6 +11,7 @@ mod damage;
 mod effects;
 mod expr;
 mod extensions;
+mod grants;
 mod keywords;
 mod legal;
 mod movement;
@@ -602,10 +603,10 @@ impl Game {
             .collect())
     }
     fn abilities(&self, id: &str) -> Result<Vec<Value>> {
-        let mut abilities = self.printed_abilities(id)?;
+        let mut abilities = self.local_abilities(id)?;
         if self.object(id)?.zone == "field" {
             for source in self.field_ids() {
-                for ability in self.printed_abilities(&source)? {
+                for ability in self.local_abilities(&source)? {
                     let body = &ability["body"];
                     if body["op"] != "aura" || body.get("abilities").is_none() {
                         continue;
@@ -701,6 +702,11 @@ impl Game {
             .ok_or_else(|| EngineFailure::Unsupported(format!("ability not authored: {reference}")))
     }
     fn reference(&self, id: &str, ability: &Value) -> Value {
+        if ability["granted_reference"].is_object() {
+            let mut reference = ability["granted_reference"].clone();
+            reference["source"] = json!(id);
+            return reference;
+        }
         let mut value = json!({"source":id,"line":ability["line"]});
         if let Some(object) = self.state.objects.get(id)
             && let Some(evolved) = object.state["evolved_with"]
