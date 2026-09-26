@@ -16,9 +16,18 @@ Run all four shared evaluations with the sealed common input:
 cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards.jsonl . all target/prototype
 ```
 
-Modes are `all`, `g1`, `ai`, `replay`, `assist` and `validate`. Evaluation output
+Modes are `all`, `g1`, `ai`, `replay`, `assist`, `validate` and `rules`. Evaluation output
 contains unchanged runner reports, a Q4 audit and two core-written search forests.
 Forest identities are hypothetical and do not reuse unseen match IDs.
+
+`all` runs G1 and the three architecture/AI suites. Use `rules` without a selection
+to run all 706 public scenarios, or supply the new selection as the final argument:
+
+```bash
+cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards.jsonl . rules target/prototype/new docs/evaluation/seal-2/new-selection.yaml
+```
+
+Successful CLI exit means reports were written; inspect their statuses for failures.
 
 Tests use synthetic cards for boundaries and the immutable original snapshot for
 the shared suites. Supply it explicitly instead of maintaining another card table:
@@ -29,9 +38,11 @@ cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo llvm-cov --locked --workspace --fail-under-lines 90
 ```
 
-The G1 regression test permits the documented event-order difference in one public
-scenario. The raw evaluator still reports that scenario as a failure. Results and
-reproduction commands are in [EVALUATION.md](../../docs/evaluation/EVALUATION.md).
+The G1 regression test checks eight documented differences in the shape of pending
+choices, while requiring matching state, events, controller and pending references.
+The raw evaluator still reports 33 passes and eight failures. The new 139-scenario
+regression requires every scenario to pass without exceptions. Current results and
+reproduction commands are in [RESULTS.md](../../docs/evaluation/seal-2/RESULTS.md).
 
 `Catalog::from_documents` accepts snapshot and YAML strings without filesystem
 access. The default `runner` feature enables evaluation adapters and the CLI. The
