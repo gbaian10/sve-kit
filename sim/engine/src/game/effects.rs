@@ -92,6 +92,7 @@ impl Game {
             }
             "pay" => self.resume_payment(&task["node"], decision, &mut frame)?,
             "reroll" => self.resume_reroll(&task, decision, &mut frame)?,
+            "create" => self.resume_creation(&task, decision, &mut frame)?,
             "place" => {
                 let id = string(&task["object"]);
                 self.object_mut(id)?.state["acted"] = decision["acted"].clone();
@@ -414,7 +415,11 @@ impl Game {
             "_finish_card" => {
                 let source = frame.source.clone();
                 if self.object(&source)?.zone == "resolution" {
-                    self.move_objects(from_ref(&source), "cemetery", None, None, frame)?;
+                    let mut cleanup = frame.clone();
+                    cleanup
+                        .values
+                        .insert("movement_rule".into(), json!("rule-10.6.2.8.3"));
+                    self.move_objects(from_ref(&source), "cemetery", None, None, &cleanup)?;
                 }
                 let group = self.group();
                 self.emit(json!({"kind":"解決","object":source}), &frame.cause, group);

@@ -113,6 +113,7 @@ impl Catalog {
                 }
             }
         }
+        catalog.validate_token_templates()?;
         Ok(catalog)
     }
 
@@ -147,6 +148,64 @@ impl Catalog {
             .get(id)
             .and_then(|entry| entry["ja"].as_str())
             .unwrap_or("")
+    }
+
+    fn validate_token_templates(&self) -> Result<()> {
+        let mut names: BTreeMap<String, Vec<&Value>> = BTreeMap::new();
+        for (number, program) in &self.programs {
+            let face = self.face(number, 0)?;
+            let token = face["card_type"]
+                .as_str()
+                .is_some_and(|kind| kind.contains("トークン"));
+            if program["token_template"] == true && (!token || program["status"] != "complete") {
+                return Err(invalid("token template requires a complete token program"));
+            }
+            if token {
+                let name = program["rules_name"]
+                    .as_str()
+                    .or_else(|| face["name"].as_str())
+                    .ok_or_else(|| invalid("token requires a rules name"))?;
+                names.entry(name.into()).or_default().push(program);
+            }
+        }
+        for (name, programs) in names {
+            if programs.len() > 1
+                && programs
+                    .iter()
+                    .filter(|program| program["token_template"] == true)
+                    .count()
+                    != 1
+            {
+                return Err(invalid(format!(
+                    "ambiguous token requires one explicit template: {name}"
+                )));
+            }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn token_print(&self, name: &str) -> Result<String> {
+        let mut candidates = Vec::new();
+        for (number, program) in &self.programs {
+            let face = self.face(number, 0)?;
+            if face["card_type"]
+                .as_str()
+                .is_some_and(|kind| kind.contains("トークン"))
+                && (face["name"] == name || program["rules_name"] == name)
+            {
+                candidates.push((number, program));
+            }
+        }
+        let selected = if candidates.len() == 1 {
+            candidates.first()
+        } else {
+            candidates
+                .iter()
+                .find(|(_, program)| program["token_template"] == true)
+        }
+        .ok_or_else(|| EngineFailure::Unsupported(format!("no authored token template: {name}")))?;
+        self.program(selected.0)?;
+        Ok(selected.0.clone())
     }
 
     pub(crate) fn import_attributes(&self, attrs: &mut Value) {

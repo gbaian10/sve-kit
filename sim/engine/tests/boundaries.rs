@@ -3850,3 +3850,179 @@ fn invalid_dice_scripts_rollback_and_unscripted_rolls_stay_in_range() {
         );
     }
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    reason = "The fixture constructs the cards map before adding synthetic token prints."
+)]
+fn token_fixture(body: &Value) -> (String, Value) {
+    let mut facts = snapshot();
+    let mut docs = document(body);
+    for (number, name, preferred) in [
+        ("token-a", "shared-token", false),
+        ("token-z", "shared-token", true),
+        ("token-b", "other-token", false),
+    ] {
+        facts.push('\n');
+        facts.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー・トークン","cost":"1","power":"1","hp":"2","traits":[],"text":null,"sections":[]}]}).to_string());
+        docs["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[],"token_template":preferred});
+    }
+    (facts, docs)
+}
+
+#[test]
+fn token_templates_require_one_complete_representative_for_ambiguous_names() {
+    let (facts, docs) = token_fixture(&json!({"op":"draw","count":0_i64}));
+    for change in ["missing", "duplicate", "not-token", "partial"] {
+        let mut invalid = docs.clone();
+        match change {
+            "missing" => invalid["cards"]["token-z"]["token_template"] = json!(false),
+            "duplicate" => invalid["cards"]["token-a"]["token_template"] = json!(true),
+            "not-token" => invalid["cards"]["unit-follower"]["token_template"] = json!(true),
+            _ => invalid["cards"]["token-z"]["status"] = json!("partial"),
+        }
+        Catalog::from_documents(
+            &facts,
+            &registry(),
+            &[("tokens".into(), invalid.to_string())],
+        )
+        .unwrap_err();
+    }
+    Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())]).unwrap();
+}
+
+#[test]
+fn token_capacity_selects_print_multisets_before_allocating_and_restores_text_order() {
+    let body = json!({"op":"seq","steps":[{"op":"create","tokens":[{"name":"shared-token","count":1_i64},{"name":"other-token","count":1_i64},{"name":"shared-token","count":1_i64}],"to":"field","bind":"made"},{"op":"modify","subjects":"made","power":1_i64}]});
+    let (facts, docs) = token_fixture(&body);
+    let loaded = Arc::new(
+        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
+            .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"] = json!([{"id":"a","card":"unit-follower"},{"id":"c","card":"unit-follower"},{"id":"d","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "tokens",
+    )
+    .unwrap();
+    let start = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(start.outcome, "paused");
+    let state = serde_json::to_value(&engine).unwrap();
+    assert_eq!(state["state"]["next_object"], 1_i64);
+    assert!(state["state"]["objects"].get("new-1").is_none());
+    let choices = engine.legal().unwrap();
+    assert_eq!(choices.len(), 2);
+    assert!(choices.contains(&json!({"do":"resolve-choice","select":["token-z","token-z"]})));
+    assert!(choices.contains(&json!({"do":"resolve-choice","select":["token-z","token-b"]})));
+    let saved = engine.digest().unwrap();
+    let rejected = engine
+        .decide(
+            &json!({"do":"resolve-choice","select":["token-z","token-z","token-z"]}),
+            "invalid",
+        )
+        .unwrap();
+    assert_eq!(rejected.outcome, "cannot-play");
+    assert_eq!(engine.digest().unwrap(), saved);
+    let mut restored: Game = serde_json::from_value(state).unwrap();
+    let mut sampled = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "sample",
+    )
+    .unwrap();
+    for instance in [&mut engine, &mut restored, &mut sampled] {
+        assert_eq!(instance.legal().unwrap(), choices);
+        let done = instance
+            .decide(
+                &json!({"do":"resolve-choice","select":["token-b","token-z"]}),
+                "choose",
+            )
+            .unwrap();
+        assert_eq!(done.outcome, "resolved");
+        let entered = done
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "場に出す")
+            .collect::<Vec<_>>();
+        assert_eq!(entered.len(), 2);
+        assert_eq!(entered[0]["object"], "new-1");
+        assert_eq!(entered[0]["card"], "token-z");
+        assert_eq!(entered[1]["object"], "new-2");
+        assert_eq!(entered[1]["card"], "token-b");
+        assert_eq!(entered[0]["group"], entered[1]["group"]);
+        assert!(done.events.iter().any(|event| event["object"] == "s"
+            && event["to"] == "P1.cemetery"
+            && event["by"] == "rule-10.6.2.8.3"));
+        assert_eq!(
+            instance.query(View::P1, "P1.field.new-1.power").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.field.new-2.power").unwrap(),
+            Some(json!(2_i64))
+        );
+    }
+}
+
+#[test]
+fn token_capacity_keeps_single_and_empty_choices_without_allocating_rejected_tokens() {
+    let body = json!({"op":"seq","steps":[{"op":"create","name":"shared-token","count":2_i64,"to":"field"},{"op":"create","name":"other-token","count":1_i64,"to":"ex"},{"op":"create","name":"unknown-zero-token","count":0_i64,"to":"field"}]});
+    let (facts, docs) = token_fixture(&body);
+    let loaded = Arc::new(
+        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
+            .unwrap(),
+    );
+    for available in [0_u32, 1_u32] {
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["field"] = json!(
+            (available..5_u32)
+                .map(|n| json!({"id":format!("f{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "tokens",
+        )
+        .unwrap();
+        assert_eq!(
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                    "cast"
+                )
+                .unwrap()
+                .outcome,
+            "paused"
+        );
+        let selected = if available == 0 {
+            Vec::new()
+        } else {
+            vec!["token-z"]
+        };
+        let choice = json!({"do":"resolve-choice","select":selected});
+        assert_eq!(engine.legal().unwrap(), vec![choice.clone()]);
+        assert_eq!(
+            engine.decide(&choice, "choose").unwrap().outcome,
+            "resolved"
+        );
+        let state = serde_json::to_value(&engine).unwrap();
+        assert_eq!(state["state"]["next_object"], available.saturating_add(2));
+        assert_eq!(
+            engine.query(View::P1, "P1.ex").unwrap(),
+            Some(json!([format!("new-{}", available.saturating_add(1))]))
+        );
+    }
+}
