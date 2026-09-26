@@ -184,8 +184,6 @@ scenarios:
           ability:
             source: a1
             line: 1
-          event:
-            left_field: a1
       - n: 2
         by: P1
         at: check-timing
@@ -194,8 +192,6 @@ scenarios:
           ability:
             source: a2
             line: 1
-          event:
-            left_field: a2
       - n: 3
         by: P2
         at: check-timing
@@ -207,8 +203,6 @@ scenarios:
           ability:
             source: b1
             line: 3
-          event:
-            left_field: b1
       - n: 4
         by: P1
         at: check-timing
@@ -217,8 +211,6 @@ scenarios:
           ability:
             source: a3
             line: 1
-          event:
-            left_field: a3
       - n: 5
         by: P2
         at: check-timing
@@ -230,8 +222,6 @@ scenarios:
           ability:
             source: b2
             line: 3
-          event:
-            left_field: b2
     random: {}
     expected:
       - at: after-decision-1
@@ -462,7 +452,6 @@ scenarios:
           ability:
             source: a2
             line: 2
-            keyword: ラストワード
     random: {}
     expected:
       - at: after-decision-1
@@ -482,7 +471,6 @@ scenarios:
                 ability:
                   source: b2
                   line: 3
-                  keyword: ラストワード
         assert:
           P1.pp.current: 5
           P1.cemetery:
@@ -520,7 +508,6 @@ scenarios:
             ability:
               source: b2
               line: 3
-              keyword: ラストワード
             group: 3
       - at: after-decision-2
         view: omniscient
@@ -533,7 +520,6 @@ scenarios:
                 ability:
                   source: a2
                   line: 2
-                  keyword: ラストワード
         assert:
           P2.leader.life: 2
           P1.field:
@@ -561,7 +547,6 @@ scenarios:
             ability:
               source: a2
               line: 2
-              keyword: ラストワード
       - at: after-decision-3
         view: omniscient
         outcome: game-end
@@ -580,7 +565,6 @@ scenarios:
             ability:
               source: a2
               line: 2
-              keyword: ラストワード
           - kind: ダメージ
             source: a2
             target: P2.leader
@@ -595,7 +579,6 @@ scenarios:
             ability:
               source: b2
               line: 3
-              keyword: ラストワード
           - kind: 体力増加
   - name: '[fable] B P2 先結算デモンビーター → 再サロメ → P1 的新待機 → P2 以體力 1 存活'
     inherit: '[fable] A P2 先結算サロメ → 打死アウトローガンナー → 回合玩家 P1 的新待機先處理 → P2 敗北，デモンビーター來不及'
@@ -613,7 +596,6 @@ scenarios:
           ability:
             source: b2
             line: 3
-            keyword: ラストワード
       - n: 3
         by: P2
         at: check-timing
@@ -634,7 +616,6 @@ scenarios:
           ability:
             source: a2
             line: 2
-            keyword: ラストワード
     random: {}
     expected:
       - at: after-decision-2
@@ -680,6 +661,5 @@ scenarios:
             ability:
               source: a2
               line: 2
-              keyword: ラストワード
         events_exact:
           - プレイ

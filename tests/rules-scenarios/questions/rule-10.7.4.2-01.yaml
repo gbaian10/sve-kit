@@ -108,8 +108,6 @@ scenarios:
           ability:
             source: b1
             line: 1
-          event:
-            left_field: b2
       - n: 4
         by: P2
         at: check-timing
@@ -121,8 +119,6 @@ scenarios:
           ability:
             source: b2
             line: 1
-          event:
-            left_field: b1
     random: {}
     expected:
       - at: after-decision-2

@@ -116,7 +116,6 @@ scenarios:
           - {kind: ダメージ, source: b1, target: a2, amount: 3, group: 1}
           - {kind: 破壊, object: a2, by: rule-11.3.1}
           - {kind: 消去, object: a2}
-          - {kind: 待機, ability: {source: a1, card: BP06-074, line: 3}, event: {left_field: a2}}
       - at: after-decision-4
         view: omniscient
         outcome: resolved

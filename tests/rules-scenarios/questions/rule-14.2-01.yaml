@@ -161,7 +161,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}}}
         assert:
           P1.pp.current: 2
           P1.race: [n1]
@@ -172,7 +172,7 @@ scenarios:
     inherit: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
     decisions:
       - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}}}
       - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3]}
       - {n: 5, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
@@ -212,7 +212,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 4}}}
         assert:
           P1.pp.current: 3
           P1.ep: 1

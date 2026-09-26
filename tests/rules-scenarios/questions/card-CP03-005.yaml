@@ -62,14 +62,14 @@ scenarios:
               - {filler: 20}
     decisions:
       - {n: 1, by: P1, at: main, do: attack, attacker: a2, target: P2.leader}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {attacked: a2}}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - {n: 3, by: P2, at: quick, do: play, card: q1, targets: {1: [a2]}}
       - {n: 4, by: P2, at: quick, do: pass}
       - {n: 5, by: P1, at: main, do: attack, attacker: a3, target: P2.leader}
-      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {attacked: a3}}}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - {n: 7, by: P2, at: quick, do: pass}
       - {n: 8, by: P1, at: main, do: attack, attacker: a4, target: P2.leader}
-      - {n: 9, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {attacked: a4}}}
+      - {n: 9, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - {n: 10, by: P2, at: quick, do: pass}
     random: {}
     expected:
@@ -83,7 +83,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {attacked: a2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - at: after-decision-4
         view: omniscient
         outcome: resolved

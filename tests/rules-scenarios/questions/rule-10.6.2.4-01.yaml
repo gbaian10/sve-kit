@@ -179,8 +179,6 @@ scenarios:
           ability:
             source: a
             line: 1
-          event:
-            entered_field: a
         targets:
           1:
             - b
@@ -195,8 +193,6 @@ scenarios:
           ability:
             source: a
             line: 1
-          event:
-            entered_field: a
         targets:
           1: []
     random: {}
@@ -434,8 +430,6 @@ scenarios:
           ability:
             source: a
             line: 1
-          event:
-            entered_field: a
         targets:
           1:
             - b
@@ -452,8 +446,6 @@ scenarios:
           ability:
             source: a
             line: 1
-          event:
-            entered_field: a
         targets:
           1:
             - b

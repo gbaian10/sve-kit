@@ -79,10 +79,10 @@ scenarios:
       - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h3, card: BP19-010, line: 1}}}
       - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, select: []}
       - {n: 6, by: P1, at: resolve, of: {decision: 4, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3, d4]}
-      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {evolved: h3}}, targets: {1: [b1]}}
+      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
       - {n: 8, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 1}, evolve_card: e2, pay: {pp: 1, ep: 0}}
       - {n: 9, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: BP19-002, line: 2}}, targets: {1: [b1]}}
-      - {n: 10, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {evolved: a2}}, targets: {1: [b2]}}
+      - {n: 10, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b2]}}
       - {n: 11, by: P1, at: main, do: evolve, source: a3, ability: {source: a3, line: 1}, evolve_card: e3, pay: {pp: 1, ep: 0}}
     random: {}
     expected:
@@ -108,7 +108,7 @@ scenarios:
           by: P1
           choices:
             - {do: choose-pending, pending: {ability: {source: h3, card: BP19-010, line: 1}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {evolved: h3}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
       - at: after-decision-7
         view: omniscient
         outcome: resolved
