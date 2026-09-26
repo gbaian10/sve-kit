@@ -91,6 +91,7 @@ impl Game {
                 }
             }
             "pay" => self.resume_payment(&task["node"], decision, &mut frame)?,
+            "reroll" => self.resume_reroll(&task, decision, &mut frame)?,
             "place" => {
                 let id = string(&task["object"]);
                 self.object_mut(id)?.state["acted"] = decision["acted"].clone();
@@ -323,6 +324,8 @@ impl Game {
                     frame.bindings.insert(name.into(), drawn);
                 }
             }
+            "random" => self.random_selection(node, frame)?,
+            "dice" => self.roll_effect(node, frame)?,
             "look" => {
                 let seat = self
                     .seats(string(&node["side"]), frame)

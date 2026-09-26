@@ -18,6 +18,7 @@ mod nested;
 mod opening;
 mod payments;
 mod progression;
+mod randomness;
 mod resources;
 mod restrictions;
 mod rules;
@@ -176,6 +177,8 @@ struct State {
     game: Value,
     random: Value,
     random_index: usize,
+    #[serde(default)]
+    random_cursors: BTreeMap<String, usize>,
     rng: u64,
     next_object: u64,
     next_event: u64,
@@ -346,6 +349,7 @@ impl Game {
             game: json!({"ended":false}),
             random: random.clone(),
             random_index: 0,
+            random_cursors: BTreeMap::new(),
             rng: seed.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |s, b| {
                 (s ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
             }),

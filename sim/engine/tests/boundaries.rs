@@ -3562,3 +3562,291 @@ fn private_payment_selections_stay_hidden_and_unsupported_costs_rollback() {
     ));
     assert_eq!(denied.digest().unwrap(), before);
 }
+
+#[test]
+fn random_materials_remain_private_and_scripts_restore_without_partial_consumption() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"random","select":{"side":"opponent","zone":"hand"},"count":2_i64,"bind":"picked"},
+        {"op":"optional","then":{"op":"discard","subjects":"picked"}},
+        {"op":"random","select":{"side":"opponent","zone":"hand"},"count":2_i64,"bind":"last"},
+        {"op":"discard","subjects":"last"}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["hand"] = json!(
+        (0..3_u32)
+            .map(|n| json!({"id":format!("private-{n}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    for script in [
+        json!({"n":1_i64,"from":"P1.hand","result":["private-0","private-1"]}),
+        json!({"n":2_i64,"from":"P2.hand","result":["private-0","private-1"]}),
+        json!({"n":1_i64,"from":"P2.hand","result":["private-0","private-0"]}),
+        json!({"n":1_i64,"from":"P2.hand","result":["private-0","b"]}),
+    ] {
+        let mut invalid = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &json!({"random_selections":[script]}),
+            "invalid-random",
+        )
+        .unwrap();
+        let before = invalid.digest().unwrap();
+        invalid
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "bad-script",
+            )
+            .unwrap_err();
+        assert_eq!(invalid.digest().unwrap(), before);
+    }
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &json!({"random_selections":[
+            {"n":1_i64,"from":"P2.hand","result":["private-1","private-0"]},
+            {"n":2_i64,"from":"P2.hand","result":["private-2"]}
+        ]}),
+        "private-random",
+    )
+    .unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast"
+            )
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    assert!(!packet.to_string().contains("private-"));
+    assert!(packet.get("continuation").is_none());
+    assert!(matches!(
+        Game::from_observation(loaded, &packet, "P1", "sample"),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    assert_eq!(
+        restored
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute"}),
+                "discard"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    assert_eq!(
+        restored.query(View::P1, "P2.hand_count").unwrap(),
+        Some(json!(0_i64))
+    );
+    assert_eq!(
+        restored.query(View::P1, "P2.cemetery").unwrap(),
+        Some(json!(["private-1", "private-0", "private-2"]))
+    );
+}
+
+#[test]
+fn unscripted_random_selection_is_reproducible_and_never_ignores_anonymous_cards() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"random","select":{"side":"opponent","zone":"hand"},"count":2_i64,"bind":"picked"},
+        {"op":"discard","subjects":"picked"}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["hand"] = json!(
+        (0..4_u32)
+            .map(|n| json!({"id":format!("h{n}"),"card":"unit-follower"}))
+            .collect::<Vec<_>>()
+    );
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "sample-selection",
+    )
+    .unwrap();
+    let mut identical = engine.clone();
+    for instance in [&mut engine, &mut identical] {
+        instance
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P2.hand_count").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.cemetery_count").unwrap(),
+            Some(json!(2_i64))
+        );
+    }
+    assert_eq!(engine.digest().unwrap(), identical.digest().unwrap());
+    initial["players"]["P2"]["zones"]["hand"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"filler":1_i64}));
+    let mut opaque = Game::new(loaded, &initial, &Value::Null, &Value::Null, "opaque").unwrap();
+    let before = opaque.digest().unwrap();
+    assert!(matches!(
+        opaque.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(opaque.digest().unwrap(), before);
+}
+
+#[test]
+fn rerolls_replace_the_result_and_permissions_reset_for_each_new_roll() {
+    let body = json!({"op":"per","count":2_i64,"body":{"op":"seq","steps":[
+        {"op":"dice","count":1_i64,"bind":"die"},
+        {"op":"damage","subjects":"opponent.leader","amount":{"read":"die"}}
+    ]}});
+    let mut program = document(&body);
+    program["cards"]["unit-follower"]["abilities"] = json!([{"kind":"static","line":1_i64,"body":{"op":"allow_reroll","side":"self","count":1_i64}}]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("reroll.yaml".into(), program.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"second","card":"unit-follower"}));
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &json!({"dice":[1_i64,2_i64,3_i64,4_i64]}),
+        "dice",
+    )
+    .unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast"
+            )
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(packet["continuation"]["frame"]["values"]["die"], 1_i64);
+    for key in ["random", "random_cursors", "rng"] {
+        assert!(packet.get(key).is_none());
+        assert!(!packet.to_string().contains(&format!("\"{key}\":")));
+    }
+    let sampled = Game::from_observation(loaded, &packet, "P1", "dice-sample").unwrap();
+    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute"}),
+                "reroll-one"
+            )
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    assert_eq!(
+        restored
+            .decide(
+                &json!({"do":"resolve-choice","choice":"execute"}),
+                "reroll-two"
+            )
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    assert_eq!(
+        restored.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(17_i64))
+    );
+    assert_eq!(
+        restored.projection(View::P1).unwrap()["continuation"]["frame"]["values"]["die"],
+        4_i64
+    );
+    assert_eq!(
+        restored
+            .decide(
+                &json!({"do":"resolve-choice","choice":"decline"}),
+                "keep-second-roll"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    assert_eq!(
+        restored.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(13_i64))
+    );
+}
+
+#[test]
+fn invalid_dice_scripts_rollback_and_unscripted_rolls_stay_in_range() {
+    let body = json!({"op":"seq","steps":[{"op":"dice","count":1_i64,"bind":"die"},{"op":"damage","subjects":"opponent.leader","amount":{"read":"die"}}]});
+    let loaded = Arc::new(catalog(&body));
+    for script in [json!([]), json!([0_i64]), json!([7_i64]), json!([1.5_f64])] {
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &setup(),
+            &Value::Null,
+            &json!({"dice":script}),
+            "invalid-die",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap_err();
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    for n in 0..8_u32 {
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &setup(),
+            &Value::Null,
+            &Value::Null,
+            &format!("die-{n}"),
+        )
+        .unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let rolled = step
+            .events
+            .iter()
+            .find(|event| event["kind"] == "サイコロ")
+            .unwrap()["result"]
+            .as_i64()
+            .unwrap();
+        assert!((1..=6).contains(&rolled));
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(20_i64 - rolled))
+        );
+    }
+}
