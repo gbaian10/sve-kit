@@ -252,6 +252,7 @@ impl Game {
         let controller = string(&decision["by"]);
         if object.controller != controller
             || (forced_cost.is_none() && !self.playable_zone(source)?)
+            || self.card_play_prohibited(source)?
         {
             return Ok(None);
         }
@@ -666,7 +667,7 @@ impl Game {
         };
         self.state.turn["extra_turns"] = json!(extra_turns);
         self.state.turn["active"] = json!(seat);
-        self.state.turn["phase"] = json!("main");
+        self.state.turn["phase"] = json!("start");
         self.state.flow = json!({"kind":"main"});
         self.state.turn["elapsed_turns"][&seat] =
             json!(int(&self.state.turn["elapsed_turns"][&seat]).saturating_add(1));
@@ -679,10 +680,6 @@ impl Game {
         }
         let prevent_gain = self.restricted(&format!("{seat}.leader"), "normal_max_pp_gain")?;
         let prevent_draw = self.restricted(&format!("{seat}.leader"), "normal_draw")?;
-        self.state.continuous.retain(|entry| {
-            !(entry["during"] == "next-opponent-start"
-                && list(&entry["applies_to"]).contains(&json!(format!("{seat}.leader"))))
-        });
         let player = self.player_mut(&seat)?;
         let max = int(&player.pp["max"])
             .saturating_add(i64::from(!prevent_gain))
@@ -702,6 +699,13 @@ impl Game {
         if !prevent_draw {
             self.draw(&seat, &frame)?;
         }
+        let elapsed = int(&self.state.turn["elapsed_turns"][&seat]);
+        self.state.continuous.retain(|entry| {
+            !(entry["window_phase"] == "start"
+                && entry["window_player"] == seat
+                && int(&entry["window_turn"]) <= elapsed)
+        });
+        self.state.turn["phase"] = json!("main");
         let pending = self.collect_triggers("main_start", &[], &json!({"rule":"7.3"}))?;
         self.enqueue(pending);
         Ok(())
@@ -1024,36 +1028,6 @@ impl Game {
             }
         }
         self.state.pending.push(pending);
-    }
-
-    pub(super) fn restricted(&self, id: &str, action: &str) -> Result<bool> {
-        for entry in &self.state.continuous {
-            if entry["effect"]["op"] == "restrict"
-                && entry["effect"]["action"] == action
-                && self.continuous_applies(entry, id)
-            {
-                return Ok(true);
-            }
-        }
-        for source in self.field_ids() {
-            for code in self.abilities(&source)? {
-                let body = &code["body"];
-                if code["kind"] != "static" || body["op"] != "restrict" || body["action"] != action
-                {
-                    continue;
-                }
-                let frame = self.frame_for(&source)?;
-                if let Some(condition) = body.get("condition")
-                    && !self.truth(condition, &frame)?
-                {
-                    continue;
-                }
-                if self.matches(id, &body["subjects"], &frame)? {
-                    return Ok(true);
-                }
-            }
-        }
-        Ok(false)
     }
 }
 

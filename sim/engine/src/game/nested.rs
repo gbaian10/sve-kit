@@ -27,6 +27,9 @@ impl Game {
 
     pub(super) fn prepare_nested(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let source = string(&node["object"]);
+        if node["kind"] == "play_card" && self.card_play_prohibited(source)? {
+            return Ok(());
+        }
         let codes = self
             .abilities(source)?
             .into_iter()

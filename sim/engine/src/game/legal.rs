@@ -189,7 +189,7 @@ impl Game {
             .chain(self.zone_ids(seat, "ex"))
             .chain(self.zone_ids(seat, "cemetery"))
         {
-            if !self.playable_zone(&id)? {
+            if !self.playable_zone(&id)? || self.card_play_prohibited(&id)? {
                 continue;
             }
             if quick && !self.keywords(&id)?.contains("quick") {

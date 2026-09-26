@@ -2,7 +2,7 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use super::{Frame, Game, Object, Pending, int, list, string};
+use super::{Frame, Game, Object, Pending, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 use core::mem::take;
 use serde_json::{Value, json};
@@ -157,6 +157,43 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn capture_restriction_period(
+        &self,
+        entry: &mut Value,
+        id: &str,
+        frame: &Frame,
+    ) -> Result<()> {
+        if entry["effect"]["op"] != "restrict" || entry["during"].is_null() {
+            return Ok(());
+        }
+        let during = string(&entry["during"]);
+        let (seat, phase) = if let Some(phase) = during.strip_prefix("next-opponent-") {
+            (other(&frame.controller), phase)
+        } else if let Some(phase) = during.strip_prefix("next-controller-") {
+            let seat = if let Some(seat) = id.strip_suffix(".leader") {
+                seat
+            } else {
+                &self.object(id)?.controller
+            };
+            (seat, phase)
+        } else {
+            return Err(EngineFailure::Unsupported(format!(
+                "restriction period: {during}"
+            )));
+        };
+        if !matches!(phase, "start" | "main" | "turn") {
+            return Err(EngineFailure::Unsupported(format!(
+                "restriction phase: {phase}"
+            )));
+        }
+        let phase = phase.to_owned();
+        entry["window_player"] = json!(seat);
+        entry["window_turn"] =
+            json!(int(&self.state.turn["elapsed_turns"][seat]).saturating_add(1));
+        entry["window_phase"] = json!(phase);
+        Ok(())
+    }
+
     pub(super) fn expire_effects(&mut self) -> Result<()> {
         self.state
             .delayed
@@ -165,6 +202,9 @@ impl Game {
         let mut expired = Vec::new();
         for entry in take(&mut self.state.continuous) {
             let should_expire = entry["until"] == "end-of-turn"
+                || (entry["window_player"] == self.active()
+                    && int(&self.state.turn["elapsed_turns"][self.active()])
+                        >= int(&entry["window_turn"]))
                 || (entry["until"] == "next-controller-end"
                     && entry["duration_controller"] == self.active()
                     && int(&self.state.turn["elapsed_turns"][self.active()])

@@ -19,6 +19,7 @@ mod opening;
 mod payments;
 mod progression;
 mod resources;
+mod restrictions;
 mod rules;
 mod temporal;
 mod view;

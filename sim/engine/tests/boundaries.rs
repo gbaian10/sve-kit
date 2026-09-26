@@ -2668,3 +2668,218 @@ fn related_player_counts_distinguish_controller_owner_and_hidden_cardinality() {
         assert_eq!(rejected.digest().unwrap(), before);
     }
 }
+
+#[test]
+fn intrinsic_play_prohibitions_apply_to_normal_and_nested_plays() {
+    let mut docs = document(&json!({"op":"damage","subjects":"target.1","amount":1_i64}));
+    docs["cards"]["unit-spell"]["abilities"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({
+            "kind":"static","line":2_i64,"body":{"op":"restrict","subjects":"self","action":"play",
+            "condition":{"fn":"eq","args":[{"read":"self.zone"},"ex"]}}
+        }));
+    docs["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"activated","line":1_i64,"body":{"op":"seq","steps":[
+            {"op":"play_card","subjects":{"zone":"ex","side":"self"},"set_cost":0_i64},
+            {"op":"damage","subjects":"opponent.leader","amount":1_i64}
+        ]}
+    }]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("unit.yaml".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    for zone in ["hand", "ex"] {
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["hand"] = json!([]);
+        initial["players"]["P1"]["zones"][zone] = json!([{"id":"s","card":"unit-spell"}]);
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "prohibit",
+        )
+        .unwrap();
+        let legal = engine.legal().unwrap();
+        assert_eq!(
+            legal.iter().any(|choice| choice["card"] == "s"),
+            zone == "hand"
+        );
+        let before = engine.digest().unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(
+            step.outcome,
+            if zone == "hand" {
+                "resolved"
+            } else {
+                "cannot-play"
+            }
+        );
+        if zone == "ex" {
+            assert_eq!(engine.digest().unwrap(), before);
+            let nested = engine
+                .decide(
+                    &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                    "nested",
+                )
+                .unwrap();
+            assert_eq!(nested.outcome, "resolved");
+            assert!(
+                !nested
+                    .events
+                    .iter()
+                    .any(|event| event["kind"] == "プレイ" && event["object"] == "s")
+            );
+            assert_eq!(engine.query(View::P1, "P1.ex").unwrap(), Some(json!(["s"])));
+            assert_eq!(
+                engine.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(19_i64))
+            );
+        }
+    }
+}
+
+#[test]
+fn future_restrictions_gate_only_the_named_phase_and_expire_after_use() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"restrict","subjects":"opponent.leader","action":"play_follower","during":"next-opponent-main"},
+        {"op":"restrict","subjects":"target.1","action":"normal_stand","during":"next-controller-start"}
+    ]});
+    let mut docs = document(&body);
+    docs["cards"]["unit-follower"]["abilities"] =
+        json!([{"kind":"static","line":1_i64,"body":{"op":"macro","name":"quick"}}]);
+    let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
+    keywords["keywords"]["quick"] =
+        json!({"ja":"クイック","rule":"12.6","expansion":{"op":"keyword","name":"quick"}});
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &keywords.to_string(),
+            &[("unit.yaml".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"][0]["state"] = json!({"acted":true});
+    initial["players"]["P2"]["zones"]["hand"] =
+        json!([{"id":"c","card":"unit-follower"},{"id":"t","card":"unit-spell"}]);
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"d1","card":"unit-follower"}]);
+    initial["players"]["P2"]["zones"]["deck"] =
+        json!([{"id":"d2","card":"unit-follower"},{"id":"d3","card":"unit-follower"}]);
+    initial["players"]["P2"]["pp"] = json!({"current":2_i64,"max":2_i64});
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "period",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(
+        loaded,
+        &engine.projection(View::P2).unwrap(),
+        "P2",
+        "restore-period",
+    )
+    .unwrap();
+    for mut instance in [engine, saved, sampled] {
+        instance.decide(&json!({"do":"end-phase"}), "end").unwrap();
+        let before_window = instance.legal().unwrap();
+        assert!(before_window.iter().any(|choice| choice["card"] == "c"));
+        instance
+            .decide(&json!({"do":"pass"}), "begin-affected-turn")
+            .unwrap();
+        let options = instance.legal().unwrap();
+        assert!(!options.iter().any(|choice| choice["card"] == "c"));
+        assert!(options.iter().any(|choice| choice["card"] == "t"));
+        assert_eq!(
+            instance.query(View::P2, "P2.field.b.acted").unwrap(),
+            Some(json!(true))
+        );
+        let before = instance.digest().unwrap();
+        assert_eq!(
+            instance
+                .decide(&json!({"do":"play","card":"c"}), "forbidden")
+                .unwrap()
+                .outcome,
+            "cannot-play"
+        );
+        assert_eq!(instance.digest().unwrap(), before);
+        for (decision, node) in [
+            (json!({"do":"end-phase"}), "end-affected"),
+            (json!({"do":"pass"}), "begin-other"),
+            (json!({"do":"end-phase"}), "end-other"),
+        ] {
+            instance.decide(&decision, node).unwrap();
+        }
+        let later_quick = instance.legal().unwrap();
+        assert!(later_quick.iter().any(|choice| choice["card"] == "c"));
+        instance
+            .decide(&json!({"do":"pass"}), "begin-later-turn")
+            .unwrap();
+        let later_main = instance.legal().unwrap();
+        assert!(later_main.iter().any(|choice| choice["card"] == "c"));
+        assert_eq!(
+            instance.query(View::P2, "P2.field.b.acted").unwrap(),
+            Some(json!(false))
+        );
+    }
+}
+
+#[test]
+fn conditional_restrictions_and_unsupported_periods_do_not_silently_block_play() {
+    for period in [Value::Null, json!("unknown-period")] {
+        let mut body =
+            json!({"op":"restrict","subjects":"self.leader","action":"play","condition":false});
+        if !period.is_null() {
+            body["during"] = period.clone();
+        }
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["hand"] = json!([
+            {"id":"s","card":"unit-spell"},{"id":"c","card":"unit-follower"}
+        ]);
+        let mut engine = Game::new(
+            Arc::new(catalog(&body)),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "condition",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        let result = engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        );
+        if period.is_null() {
+            assert_eq!(result.unwrap().outcome, "resolved");
+            assert!(
+                engine
+                    .legal()
+                    .unwrap()
+                    .iter()
+                    .any(|option| option["card"] == "c")
+            );
+        } else {
+            assert!(matches!(result.unwrap_err(), EngineFailure::Unsupported(_)));
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+    }
+}
