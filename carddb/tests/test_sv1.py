@@ -339,6 +339,9 @@ def test_is_template_matches_any_card_but_not_other_shapes() -> None:
     )
     v2 = f"{sv1.BASE}/image/card/phase2/common/C/C_{SPELL}_v2.png"
     assert not sv1.is_template(v2, sv1.Face.BASE)
+    rotation = f"{sv1.BASE}/image/card/phase2/common/C/ts_rotation/C_125541010.png"
+    assert sv1.is_template(rotation, sv1.Face.BASE)
+    assert not sv1.is_template(rotation, sv1.Face.EVOLVED)
 
 
 async def test_a_404_template_also_falls_back(

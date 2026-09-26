@@ -103,10 +103,19 @@ def image_url(card_id: int, face: Face) -> str:
 
 
 def is_template(url: str, face: Face) -> bool:
-    """Whether `url` is the template image of some card, not necessarily this one."""
-    prefix = image_url(0, face).removesuffix("0.png")
-    card = url.removeprefix(prefix).removesuffix(".png")
-    return url.startswith(prefix) and len(card) == _CARD_ID_DIGITS and card.isdigit()
+    """Whether `url` is the template image of some card, not necessarily this one.
+
+    Rotation-format art sits in a `ts_rotation/` folder with the same file name.
+    """
+    prefix = image_url(0, face).removesuffix(f"{face.value}_0.png")
+    name = url.removeprefix(prefix).removeprefix("ts_rotation/")
+    card = name.removeprefix(f"{face.value}_").removesuffix(".png")
+    return (
+        url.startswith(prefix)
+        and name.startswith(f"{face.value}_")
+        and len(card) == _CARD_ID_DIGITS
+        and card.isdigit()
+    )
 
 
 def resolve_image(src: str) -> str:
