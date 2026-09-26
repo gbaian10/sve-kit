@@ -7803,3 +7803,247 @@ fn indistinguishable_limited_replacement_instances_fail_closed_without_spending(
     assert!(matches!(error, EngineFailure::Unsupported(_)));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn optional_selection_is_one_input_and_decline_clears_the_binding() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"select","select":"target.1","min":1_i64,"max":1_i64,"bind":"chosen"},
+        {"op":"optional","selection":{"select":{"side":"opponent","zone":"field"},"min":1_i64,"max":1_i64,"bind":"chosen"},"then":{"op":"modify","subjects":"chosen","power":3_i64}},
+        {"op":"damage","subjects":"opponent.leader","amount":{"count":"chosen"}}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    let mut position = setup();
+    position["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"b","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "optional",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","select":["b"]}),
+            "previous-binding",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.legal().unwrap(),
+        vec![
+            json!({"do":"resolve-choice","choice":"execute","select":["b"]}),
+            json!({"do":"resolve-choice","choice":"execute","select":["c"]}),
+            json!({"do":"resolve-choice","choice":"decline"})
+        ]
+    );
+    for decision in [
+        json!({"do":"resolve-choice","select":[]}),
+        json!({"do":"resolve-choice","choice":"execute"}),
+        json!({"do":"resolve-choice","choice":"decline","select":["b"]}),
+    ] {
+        let before = engine.digest().unwrap();
+        assert_eq!(
+            engine.decide(&decision, "invalid").unwrap().outcome,
+            "cannot-play"
+        );
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    let packet = engine.projection(View::P1).unwrap();
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(loaded, &packet, "P1", "optional").unwrap();
+    for resumed in [saved, sampled] {
+        for execute in [true, false] {
+            let mut branch = resumed.clone();
+            let choice = if execute {
+                json!({"do":"resolve-choice","choice":"execute","select":["c"]})
+            } else {
+                json!({"do":"resolve-choice","choice":"decline"})
+            };
+            assert_eq!(
+                branch.decide(&choice, "choose").unwrap().outcome,
+                "resolved"
+            );
+            assert_eq!(
+                branch.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(if execute { 19_i64 } else { 20_i64 }))
+            );
+            assert_eq!(
+                branch.query(View::P1, "P2.field.c.power").unwrap(),
+                Some(json!(if execute { 5_i64 } else { 2_i64 }))
+            );
+            assert_eq!(
+                branch.query(View::P1, "P2.field.b.power").unwrap(),
+                Some(json!(2_i64))
+            );
+        }
+    }
+}
+
+#[test]
+fn optional_selection_without_a_complete_candidate_distinguishes_decline_from_zero() {
+    for minimum in [0_i64, 1_i64] {
+        let mut engine = game(
+            &json!({"op":"optional","selection":{"select":{"side":"self","zone":"hand"},"min":minimum,"max":1_i64,"bind":"chosen"},"then":{"op":"damage","subjects":"opponent.leader","amount":5_i64}}),
+        );
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        let decline = json!({"do":"resolve-choice","choice":"decline"});
+        let execute = json!({"do":"resolve-choice","choice":"execute","select":[]});
+        let mut choices = Vec::new();
+        if minimum == 0 {
+            choices.push(execute.clone());
+            let mut branch = engine.clone();
+            branch.decide(&execute, "execute-zero").unwrap();
+            assert_eq!(
+                branch.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(15_i64))
+            );
+        }
+        choices.push(decline.clone());
+        assert_eq!(engine.legal().unwrap(), choices);
+        engine.decide(&decline, "skip").unwrap();
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(20_i64))
+        );
+    }
+}
+
+#[test]
+fn compound_selection_and_position_use_the_post_draw_state_in_one_input() {
+    let choice = json!({"op":"choice","timing":"resolve","min":1_i64,"max":1_i64,
+        "selection":{"select":{"side":"self","zone":"hand"},"min":1_i64,"max":1_i64,"bind":"chosen"},
+        "labels":[{"position":"top"},{"position":"bottom"}],
+        "modes":[{"op":"move","subjects":"chosen","to":"deck","position":"top"},{"op":"move","subjects":"chosen","to":"deck","position":"bottom"}]
+    });
+    let loaded = Arc::new(catalog(
+        &json!({"op":"seq","steps":[{"op":"draw","count":1_i64},choice]}),
+    ));
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["hand"] =
+        json!([{"id":"s","card":"unit-spell"},{"id":"h","card":"unit-follower"}]);
+    position["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"d","card":"unit-follower"},{"id":"e","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "compound",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let choices = engine.legal().unwrap();
+    assert_eq!(choices.len(), 4);
+    for card in ["d", "h"] {
+        for destination in ["top", "bottom"] {
+            assert!(
+                choices.contains(
+                    &json!({"do":"resolve-choice","select":[card],"position":destination})
+                )
+            );
+        }
+    }
+    assert_eq!(
+        engine
+            .decide(&json!({"do":"resolve-choice","select":["h"]}), "incomplete")
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "compound",
+    )
+    .unwrap();
+    for resumed in [saved, sampled] {
+        for destination in ["top", "bottom"] {
+            let mut branch = resumed.clone();
+            assert_eq!(
+                branch
+                    .decide(
+                        &json!({"do":"resolve-choice","select":["d"],"position":destination}),
+                        "choose"
+                    )
+                    .unwrap()
+                    .outcome,
+                "resolved"
+            );
+            let omniscient = branch.projection(View::Referee).unwrap();
+            let deck = omniscient["P1"]["deck"].as_array().unwrap();
+            assert_eq!(
+                if destination == "top" {
+                    deck.first()
+                } else {
+                    deck.last()
+                },
+                Some(&json!("d"))
+            );
+            assert_eq!(
+                branch.query(View::P1, "P1.hand").unwrap(),
+                Some(json!(["h"]))
+            );
+        }
+    }
+}
+
+#[test]
+fn compound_order_preserves_the_choosing_players_private_deck_order() {
+    let loaded = Arc::new(catalog(
+        &json!({"op":"choice","timing":"resolve","by":"opponent","min":1_i64,"max":1_i64,
+            "selection":{"select":{"side":"opponent","zone":"field"},"min":2_i64,"max":2_i64,"order":true,"bind":"chosen"},
+            "labels":[{"position":"top"},{"position":"bottom"}],
+            "modes":[{"op":"move","subjects":"chosen","to":"deck","position":"top"},{"op":"move","subjects":"chosen","to":"deck","position":"bottom"}]
+        }),
+    ));
+    let mut position = setup();
+    position["players"]["P2"]["zones"]["field"] =
+        json!([{"id":"b","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
+    let mut engine = Game::new(loaded, &position, &Value::Null, &Value::Null, "order").unwrap();
+
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(engine.projection(View::P2).unwrap()["awaiting"]["by"], "P2");
+    assert_eq!(engine.legal().unwrap().len(), 4);
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","order":["b","c"],"position":"bottom"}),
+            "order",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P2, "P2.deck").unwrap(),
+        Some(json!(["b", "c"]))
+    );
+    let hidden = engine.projection(View::P1).unwrap();
+    assert!(
+        !hidden["knowledge"]["located"]
+            .as_array()
+            .unwrap()
+            .contains(&json!("b"))
+    );
+    assert!(hidden["objects"].get("b").is_none());
+}

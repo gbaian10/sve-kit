@@ -10,6 +10,88 @@ use crate::{EngineFailure, Result, invalid};
     reason = "Play and resolution selections share their set and ordering constraints."
 )]
 impl Game {
+    pub(super) fn resolution_optional(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let mut choices = self.combine_selection_choices(
+            &node["selection"],
+            frame,
+            vec![json!({"do":"resolve-choice","choice":"execute"})],
+            true,
+        )?;
+        choices.push(json!({"do":"resolve-choice","choice":"decline"}));
+        self.prompt(
+            frame,
+            choices,
+            json!({"resume":"optional","then":node["then"],"selection":node["selection"]}),
+        );
+        self.set_prompt_side(node, frame);
+        Ok(())
+    }
+
+    pub(super) fn combine_selection_choices(
+        &self,
+        spec: &Value,
+        frame: &Frame,
+        choices: Vec<Value>,
+        require_minimum: bool,
+    ) -> Result<Vec<Value>> {
+        if spec.is_null() {
+            return Ok(choices);
+        }
+        let min = if require_minimum {
+            usize::try_from(self.number(&spec["min"], frame)?.max(0)).map_err(invalid)?
+        } else {
+            0
+        };
+        let subsets = self.resolution_subsets(spec, frame)?;
+        let key = if spec["order"] == true {
+            "order"
+        } else {
+            "select"
+        };
+        let mut combined = Vec::new();
+        for choice in choices {
+            for selected in subsets.iter().filter(|selected| selected.len() >= min) {
+                let mut parameterized = choice.clone();
+                parameterized[key] = json!(selected);
+                combined.push(parameterized);
+            }
+        }
+        Ok(combined)
+    }
+
+    pub(super) fn bind_resolution_selection(
+        spec: &Value,
+        decision: &Value,
+        by: &str,
+        frame: &mut Frame,
+    ) {
+        if spec.is_null() {
+            return;
+        }
+        let declined = decision["choice"] == "decline";
+        let key = if spec["order"] == true {
+            "order"
+        } else {
+            "select"
+        };
+        let selected = if declined {
+            Vec::new()
+        } else {
+            list(&decision[key])
+                .iter()
+                .filter_map(Value::as_str)
+                .map(str::to_owned)
+                .collect()
+        };
+        let name = string(&spec["bind"]);
+        frame.bindings.insert(name.into(), selected);
+        if !declined && spec["order"] == true {
+            frame.ordering.insert(name.into(), by.into());
+        } else {
+            frame.ordering.remove(name);
+        }
+    }
+
     pub(super) fn selection_constraints(
         &self,
         spec: &Value,

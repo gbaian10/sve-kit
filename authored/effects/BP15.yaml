@@ -605,7 +605,7 @@ cards:
         subject: self
   BP15-PR10:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 逐項對照日文 text 與全部 sections；可選取牌以同一輸入的 execute 加 selection 或 decline 表達，拒絕後仍另問剩餘牌排序。
     abilities:
       - line: 1
         kind: spell
@@ -640,19 +640,23 @@ cards:
                 - op: look
                   count: 3
                   bind: seen
-                - op: select
-                  select:
-                    from: seen
-                    trait: 盗賊
-                  min: 0
-                  max: 1
-                  bind: chosen
-                - op: reveal
-                  subjects: chosen
-                  to: all
-                - op: move
-                  subjects: chosen
-                  to: hand
+                - op: optional
+                  selection:
+                    select:
+                      from: seen
+                      trait: 盗賊
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  then:
+                    op: seq
+                    steps:
+                      - op: reveal
+                        subjects: chosen
+                        to: all
+                      - op: move
+                        subjects: chosen
+                        to: hand
                 - op: seq
                   steps:
                     - op: select

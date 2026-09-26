@@ -11,3 +11,8 @@ this schema and Rust types are not generated from it.
 See [DESIGN.md](../DESIGN.md) for semantics and [KNOWN_LIMITS.md](../KNOWN_LIMITS.md)
 for the executable subset. Schema validation does not establish card-text
 correctness or runtime support.
+
+`optional.selection` and resolution-time `choice.selection` explicitly combine
+one selection with the execution or mode decision. Separate `select` nodes
+remain separate input points. Declining clears the selection binding; an
+explicit zero-card execution is a distinct option when `min` permits it.

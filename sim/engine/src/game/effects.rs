@@ -66,32 +66,33 @@ impl Game {
         let task = prompt.resume;
         match string(&task["resume"]) {
             "select" => {
-                let selected = list(if task["order"] == true {
-                    &decision["order"]
-                } else {
-                    &decision["select"]
-                })
-                .iter()
-                .filter_map(Value::as_str)
-                .map(str::to_owned)
-                .collect::<Vec<_>>();
-                let name = string(&task["bind"]);
-                frame.bindings.insert(name.into(), selected);
-                if task["order"] == true {
-                    frame.ordering.insert(name.into(), prompt.by);
-                } else {
-                    frame.ordering.remove(name);
-                }
+                Self::bind_resolution_selection(&task, decision, &prompt.by, &mut frame);
             }
             "declare" => {
                 frame
                     .values
                     .insert(string(&task["bind"]).into(), decision["declare"].clone());
             }
-            "choice" => Self::resume_choice(&task, decision, &mut frame)?,
+            "choice" => {
+                Self::bind_resolution_selection(
+                    &task["selection"],
+                    decision,
+                    &prompt.by,
+                    &mut frame,
+                );
+                Self::resume_choice(&task, decision, &mut frame)?;
+            }
             "optional" => {
+                Self::bind_resolution_selection(
+                    &task["selection"],
+                    decision,
+                    &prompt.by,
+                    &mut frame,
+                );
                 if decision["choice"] == "execute" {
                     Self::prepend(&mut frame, vec![task["then"].clone()]);
+                } else {
+                    frame.performed = 0;
                 }
             }
             "pay" => self.resume_payment(&task["node"], decision, &mut frame)?,
@@ -255,14 +256,7 @@ impl Game {
                     .collect();
                 Self::prepend(frame, steps);
             }
-            "optional" => self.prompt(
-                frame,
-                vec![
-                    json!({"do":"resolve-choice","choice":"execute"}),
-                    json!({"do":"resolve-choice","choice":"decline"}),
-                ],
-                json!({"resume":"optional","then":node["then"]}),
-            ),
+            "optional" => self.resolution_optional(node, frame)?,
             "pay" => self.resolution_payment(node, frame)?,
             "_restore_payment_selection" => Self::restore_payment_selection(node, frame),
             "if_done" => Self::prepend(

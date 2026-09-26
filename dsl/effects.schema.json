@@ -457,6 +457,15 @@
             },
             "then": {
               "$ref": "#/$defs/node"
+            },
+            "selection": {
+              "$ref": "#/$defs/resolutionSelection"
+            },
+            "by": {
+              "enum": [
+                "self",
+                "opponent"
+              ]
             }
           },
           "required": [
@@ -583,6 +592,9 @@
                 "play",
                 "resolve"
               ]
+            },
+            "selection": {
+              "$ref": "#/$defs/resolutionSelection"
             }
           },
           "required": [
@@ -612,7 +624,26 @@
               "timing"
             ]
           },
-          "additionalProperties": false
+          "additionalProperties": false,
+          "allOf": [
+            {
+              "if": {
+                "required": [
+                  "selection"
+                ]
+              },
+              "then": {
+                "properties": {
+                  "timing": {
+                    "const": "resolve"
+                  }
+                },
+                "required": [
+                  "timing"
+                ]
+              }
+            }
+          ]
         },
         {
           "type": "object",
@@ -2530,6 +2561,39 @@
           }
         }
       }
+    },
+    "resolutionSelection": {
+      "type": "object",
+      "properties": {
+        "select": {
+          "$ref": "#/$defs/select"
+        },
+        "min": {
+          "$ref": "#/$defs/expr"
+        },
+        "max": {
+          "$ref": "#/$defs/expr"
+        },
+        "bind": {
+          "type": "string"
+        },
+        "order": {
+          "type": "boolean"
+        },
+        "distinct_by": {
+          "type": "string"
+        },
+        "constraint": {
+          "$ref": "#/$defs/expr"
+        }
+      },
+      "required": [
+        "select",
+        "min",
+        "max",
+        "bind"
+      ],
+      "additionalProperties": false
     }
   }
 }

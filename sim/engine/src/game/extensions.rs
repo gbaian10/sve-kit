@@ -58,7 +58,7 @@ impl Game {
         Ok(())
     }
 
-    fn set_prompt_side(&mut self, node: &Value, frame: &Frame) {
+    pub(super) fn set_prompt_side(&mut self, node: &Value, frame: &Frame) {
         let by = self.seats(string(&node["by"]), frame).into_iter().next();
         if let Some(prompt) = self.state.prompt.as_mut()
             && let Some(by) = by
@@ -91,10 +91,11 @@ impl Game {
                 })
                 .collect()
         };
+        let choices = self.combine_selection_choices(&node["selection"], frame, choices, false)?;
         self.prompt(
             frame,
             choices,
-            json!({"resume":"choice","modes":node["modes"],"labels":labels}),
+            json!({"resume":"choice","modes":node["modes"],"labels":labels,"selection":node["selection"]}),
         );
         self.set_prompt_side(node, frame);
         Ok(())

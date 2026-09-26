@@ -88,6 +88,11 @@ pub(super) fn reference_matches(query: &Value, actual: &Value) -> bool {
     })
 }
 pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {
+    if candidate["choice"] == "decline"
+        && (decision.get("select").is_some() || decision.get("order").is_some())
+    {
+        return false;
+    }
     if candidate["do"] == "resolve-choice"
         && candidate["select"].as_array().is_some_and(Vec::is_empty)
         && decision["choice"] == "decline"
