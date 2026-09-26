@@ -292,7 +292,7 @@ impl Game {
                             attrs[key] = value.clone();
                         }
                     }
-                    catalog.import_attributes(&mut attrs);
+                    catalog.import_attributes(&mut attrs)?;
                     if item["state"].get("damage").is_some() && item["state"].get("hp").is_none() {
                         attrs["hp"] =
                             json!(int(&attrs["hp"]).saturating_sub(int(&attrs["damage"])));

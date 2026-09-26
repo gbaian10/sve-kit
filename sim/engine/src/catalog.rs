@@ -6,6 +6,7 @@
 )]
 
 use alloc::collections::{BTreeMap, BTreeSet};
+use core::iter::once;
 use jsonschema::validator_for;
 use std::fs::{read_dir, read_to_string};
 use std::path::Path;
@@ -91,6 +92,7 @@ impl Catalog {
             .map_err(invalid)?
             .validate(&registry)
             .map_err(invalid)?;
+        catalog.validate_keyword_names()?;
         let validator = validator_for(&schema).map_err(invalid)?;
         for (name, text) in documents {
             let document: Value = yaml(text)?;
@@ -208,7 +210,24 @@ impl Catalog {
         Ok(selected.0.clone())
     }
 
-    pub(crate) fn import_attributes(&self, attrs: &mut Value) {
+    fn validate_keyword_names(&self) -> Result<()> {
+        let mut owners = BTreeMap::new();
+        for (id, entry) in &self.keywords {
+            let aliases = entry["aliases"]
+                .as_array()
+                .into_iter()
+                .flatten()
+                .filter_map(Value::as_str);
+            for name in once(id.as_str()).chain(entry["ja"].as_str()).chain(aliases) {
+                if owners.insert(name, id).is_some_and(|other| other != id) {
+                    return Err(invalid(format!("ambiguous keyword name: {name}")));
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub(crate) fn import_attributes(&self, attrs: &mut Value) -> Result<()> {
         if let Some(keys) = attrs["keywords"].as_array() {
             attrs["keywords"] = json!(
                 keys.iter()
@@ -217,13 +236,18 @@ impl Catalog {
             );
         }
         if let Some(counters) = attrs["counters"].as_object() {
-            attrs["counters"] = json!(
-                counters
-                    .iter()
-                    .map(|(key, value)| (self.keyword_id(key), value.clone()))
-                    .collect::<BTreeMap<_, _>>()
-            );
+            let mut normalized = BTreeMap::new();
+            for (key, value) in counters {
+                if normalized
+                    .insert(self.keyword_id(key), value.clone())
+                    .is_some()
+                {
+                    return Err(invalid("multiple names supplied for the same counter"));
+                }
+            }
+            attrs["counters"] = json!(normalized);
         }
+        Ok(())
     }
 
     pub(crate) fn export_counters(&self, attrs: &mut Value) {
@@ -250,7 +274,12 @@ impl Catalog {
     fn keyword_id(&self, name: &str) -> String {
         self.keywords
             .iter()
-            .find(|(_, value)| value["ja"] == name)
+            .find(|(_, value)| {
+                value["ja"] == name
+                    || value["aliases"]
+                        .as_array()
+                        .is_some_and(|aliases| aliases.iter().any(|alias| alias == name))
+            })
             .map_or_else(|| name.to_owned(), |(key, _)| key.clone())
     }
 }

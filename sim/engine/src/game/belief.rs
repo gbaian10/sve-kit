@@ -62,7 +62,7 @@ impl Game {
         for (id, object) in &mut game.state.objects {
             if let Some(visible) = packet["objects"].get(id) {
                 object.state = visible.clone();
-                game.catalog.import_attributes(&mut object.state);
+                game.catalog.import_attributes(&mut object.state)?;
                 object.generation = visible["generation"].as_u64().unwrap_or_default();
             }
         }

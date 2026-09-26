@@ -544,7 +544,7 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - read: self.counter.refund_counter
+                  - read: self.counters.refund_counter
                   - 8
               then:
                 op: seq
@@ -575,7 +575,7 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - read: self.counter.refund_counter
+                  - read: self.counters.refund_counter
                   - 8
               then:
                 op: seq
@@ -608,7 +608,7 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - read: self.counter.refund_counter
+                  - read: self.counters.refund_counter
                   - 8
               then:
                 op: seq

@@ -4943,3 +4943,109 @@ fn evolution_discounts_only_consume_the_matching_paid_ability() {
             .is_empty()
     );
 }
+
+#[test]
+fn counter_aliases_import_to_one_identity_and_roundtrip_through_observations() {
+    let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
+    definitions["keywords"]["charge"] =
+        json!({"ja":"蓄積","aliases":["蓄積カウンター"],"role":"counter"});
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"activated","line":1_i64,"body":{"op":"seq","steps":[
+        {"op":"counter","subjects":"self","name":"charge","amount":1_i64},
+        {"op":"if","condition":{"fn":"ge","args":[{"read":"self.counters.charge"},8_i64]},"then":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}
+    ]}}]);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &definitions.to_string(),
+            &[("aliases".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    for name in ["charge", "蓄積", "蓄積カウンター"] {
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["field"][0]["state"]["counters"][name] = json!(7_i64);
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &initial,
+            &Value::Null,
+            &Value::Null,
+            "aliases",
+        )
+        .unwrap();
+        let first = engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "tick",
+            )
+            .unwrap();
+        assert!(
+            first
+                .events
+                .iter()
+                .any(|event| event["kind"] == "カウンター"
+                    && event["name"] == "蓄積"
+                    && event["delta"] == 1_i64)
+        );
+        assert_eq!(
+            engine.query(View::P1, "P1.field.a.counters").unwrap(),
+            Some(json!({"蓄積":8_i64}))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(19_i64))
+        );
+        let mut saved: Game =
+            serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+        let mut sampled = Game::from_observation(
+            Arc::clone(&loaded),
+            &engine.projection(View::P1).unwrap(),
+            "P1",
+            "aliases",
+        )
+        .unwrap();
+        for instance in [&mut engine, &mut saved, &mut sampled] {
+            instance
+                .decide(
+                    &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                    "tick-again",
+                )
+                .unwrap();
+            assert_eq!(
+                instance.query(View::P1, "P1.field.a.counters").unwrap(),
+                Some(json!({"蓄積":9_i64}))
+            );
+            assert_eq!(
+                instance.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(18_i64))
+            );
+        }
+    }
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"][0]["state"]["counters"] =
+        json!({"charge":7_i64,"蓄積":7_i64});
+    assert!(matches!(
+        Game::new(loaded, &initial, &Value::Null, &Value::Null, "duplicate"),
+        Err(EngineFailure::Invalid(_))
+    ));
+}
+
+#[test]
+fn keyword_aliases_reject_ambiguous_ids_labels_and_malformed_lists() {
+    for aliases in [
+        json!(["guard"]),
+        json!(["守護"]),
+        json!(["蓄積", "蓄積"]),
+        json!([1_i64]),
+        json!([""]),
+        json!("蓄積"),
+    ] {
+        let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
+        definitions["keywords"]["charge"] = json!({"ja":"蓄積","aliases":aliases,"role":"counter"});
+        Catalog::from_documents(&snapshot(), &definitions.to_string(), &[]).unwrap_err();
+    }
+    let mut definitions: Value = serde_json::from_str(&registry()).unwrap();
+    definitions["keywords"]["charge"] = json!({"ja":"蓄積","aliases":["共通"],"role":"counter"});
+    definitions["keywords"]["different"] = json!({"ja":"別物","aliases":["共通"],"role":"counter"});
+    Catalog::from_documents(&snapshot(), &definitions.to_string(), &[]).unwrap_err();
+}
