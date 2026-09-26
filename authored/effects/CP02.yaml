@@ -181,7 +181,7 @@ cards:
         limit: 1
   CP02-SL16:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 第三輪複核完整卡文：生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體；其餘能力保持原義。
     abilities:
       - line: 1
         kind: static
@@ -191,19 +191,21 @@ cards:
       - line: 2
         kind: trigger
         body:
-          op: seq
-          steps:
-            - op: modify
-              subjects: self.leader
-              hp: 5
-            - op: draw
-              count: 1
+          op: if
+          condition:
+            fn: le
+            args:
+              - read: self.leader.life
+              - 5
+          then:
+            op: seq
+            steps:
+              - op: modify
+                subjects: self.leader
+                hp: 5
+              - op: draw
+                count: 1
         event: end
-        trigger_if:
-          fn: le
-          args:
-            - read: self.leader.life
-            - 5
       - line: 3
         kind: trigger
         body:
