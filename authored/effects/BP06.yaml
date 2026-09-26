@@ -1,5 +1,38 @@
 version: astra/1
 cards:
+  BP06-022:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 3
+        kind: static
+        body:
+          op: seq
+          steps:
+            - op: restrict
+              subjects: self
+              action: ability_destroy
+            - op: restrict
+              subjects: self
+              action: banish
   BP06-035:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -196,7 +229,7 @@ cards:
           op: seq
           steps:
             - op: select
-              select: &id001
+              select:
                 side: opponent
                 zone: field
                 type: follower
@@ -249,7 +282,10 @@ cards:
           - hand
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         costs:
@@ -286,7 +322,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:

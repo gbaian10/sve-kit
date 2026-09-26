@@ -33,7 +33,7 @@ cards:
             count: cost.1
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -52,6 +52,81 @@ cards:
             subjects: self
           - op: act
             subjects: cost.1
+  BP07-035:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: リペアモード
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP07-072:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            trait: 機械
+            type: follower
+            where:
+              fn: le
+              args:
+                - read: item.cost
+                - 3
+          min: 0
+          max: 1
+          to: field
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: field_to_cemetery
+        subject: self
+  BP07-076:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: move
+          subjects:
+            zone: deck
+            side: self
+            top: 2
+          to: cemetery
+        event: enter
+        subject: self
   BP07-P06:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -87,7 +162,10 @@ cards:
         section: 0
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         additional_costs:
@@ -164,7 +242,10 @@ cards:
         section: 0
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP07-P33:
@@ -190,7 +271,10 @@ cards:
                   type: follower
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP07-SL05:
@@ -272,3 +356,108 @@ cards:
         costs:
           - op: banish
             subjects: cost.1
+  BP07-SL09:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects:
+            zone: field
+            side: self
+            type: follower
+            trait: 機械
+            other: true
+          power: 1
+          hp: 1
+        event: end
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 5
+              bind: looked
+            - op: select
+              select:
+                from: looked
+                type: follower
+                trait: 機械
+              min: 0
+              max: 5
+              bind: chosen
+              constraint:
+                fn: le
+                args:
+                  - fn: sum
+                    args:
+                      - values: chosen
+                        field: cost
+                  - 6
+            - op: move
+              subjects: chosen
+              to: field
+            - op: select
+              select:
+                difference:
+                  - looked
+                  - chosen
+              min:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              max:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              bind: ordered
+              order: true
+            - op: move
+              subjects: ordered
+              to: deck
+              position: bottom
+        event: enter
+        subject: self
+  BP07-T03:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    zone: hand
+                    side: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: leave
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: move
+          subjects: self
+          to: cemetery
+        costs:
+          - op: pp
+            amount: 1

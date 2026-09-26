@@ -33,6 +33,71 @@ cards:
         costs:
           - op: act
             subjects: self
+  BP01-013:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 3
+            - op: draw
+              count: 1
+        limit: 1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: ex
+              side: self
+              type: follower
+              trait: 妖精
+            min: 1
+            max: 1
+        costs:
+          - op: banish
+            subjects: cost.1
+  BP01-015:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: hand
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+            min: 1
+            max: 1
+  BP01-037:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects:
+            zone: field
+            side: self
+            type: follower
+            other: true
+          power: 1
+          hp: 1
+        event: enter
+        subject: self
   BP01-042:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -83,6 +148,34 @@ cards:
                   side: self
                   zone: ex
               once: true
+  BP01-065:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 2
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: cemetery
+                      side: self
+                      type: spell
+                  - 10
+              then:
+                op: recover_pp
+                amount: 1
   BP01-073:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -116,7 +209,7 @@ cards:
                 amount: 3
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -139,7 +232,7 @@ cards:
         kind: spell
         body:
           op: damage
-          subjects: &id002
+          subjects:
             side: both
             zone: field
             type: follower
@@ -169,6 +262,18 @@ cards:
         body:
           op: macro
           name: bane
+  BP01-110:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
   BP01-115:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -221,9 +326,11 @@ cards:
               amount: 3
         targets:
           - key: '1'
-            select: &id003
+            select:
               union:
-                - *id001
+                - side: opponent
+                  zone: field
+                  type: follower
                 - opponent.leader
             min: 1
             max: 1
@@ -235,7 +342,37 @@ cards:
         kind: spell
         body:
           op: destroy
-          subjects: *id002
+          subjects:
+            side: both
+            zone: field
+            type: follower
+  BP01-139:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: banish
+          subjects: target.1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.hp
+                  - 3
+            min: 1
+            max: 1
   BP01-144:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -253,6 +390,51 @@ cards:
         body:
           op: macro
           name: aura
+  BP01-149:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - guard
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          power: 2
+          hp: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              keyword: guard
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 2
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
   BP01-152:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -307,7 +489,33 @@ cards:
           amount: 3
         targets:
           - key: '1'
-            select: *id003
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - opponent.leader
+            min: 1
+            max: 1
+  BP01-169:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: destroy
+          subjects: target.1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
             min: 1
             max: 1
   BP01-170:
@@ -348,6 +556,22 @@ cards:
   BP01-173:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities: []
+  BP01-174:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+  BP01-175:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities: []
   BP01-176:
     status: complete
@@ -395,7 +619,10 @@ cards:
           amount: 2
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP01-180:
@@ -411,7 +638,10 @@ cards:
         kind: spell
         body:
           op: damage
-          subjects: *id001
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
           amount: 1
   BP01-P10:
     status: complete
@@ -422,6 +652,34 @@ cards:
         body:
           op: macro
           name: storm
+  BP01-P23:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: self.leader
+              amount: 2
+            - op: reveal
+              subjects:
+                zone: hand
+                side: opponent
+              to: all
+            - op: select
+              select:
+                zone: hand
+                side: opponent
+              min: 1
+              max: 1
+              bind: chosen
+            - op: discard
+              subjects: chosen
+        event: evolve
+        subject: self
   BP01-P25:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -437,4 +695,8 @@ cards:
   BP01-T03:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities: []
+  BP01-T15:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
     abilities: []

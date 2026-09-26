@@ -75,7 +75,7 @@ cards:
           read: event.to_opposing_leader
         targets:
           - key: '1'
-            select: &id002
+            select:
               side: opponent
               zone: field
               type: follower
@@ -110,7 +110,7 @@ cards:
           zone: field
           type: follower
           trait: アクアフォース
-        trigger_if: &id001
+        trigger_if:
           fn: eq
           args:
             - read: self.turn.trait_attacks.アクアフォース
@@ -143,7 +143,11 @@ cards:
           zone: field
           type: follower
           trait: アクアフォース
-        trigger_if: *id001
+        trigger_if:
+          fn: eq
+          args:
+            - read: self.turn.trait_attacks.アクアフォース
+            - 3
       - line: 3
         kind: trigger
         body:
@@ -201,7 +205,11 @@ cards:
               kind: trigger
               body:
                 op: if
-                condition: *id001
+                condition:
+                  fn: eq
+                  args:
+                    - read: self.turn.trait_attacks.アクアフォース
+                    - 3
                 then:
                   op: damage
                   subjects: target.1
@@ -210,7 +218,10 @@ cards:
               subject: self
               targets:
                 - key: '1'
-                  select: *id002
+                  select:
+                    side: opponent
+                    zone: field
+                    type: follower
                   min: 1
                   max: 1
         event: gain_drive
@@ -229,6 +240,41 @@ cards:
             zone: any
           prevent: true
           kind: effect
+  CP03-011:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  zone: field
+                  side: self
+                  type: follower
+                  trait: アクアフォース
+                  other: true
+              - 0
+          then:
+            op: modify
+            subjects: self
+            keywords:
+              - rush
+              - assail
+        event: enter
+        subject: self
+  CP03-015:
+    status: complete
+    review: section 只重述 critical ドライブトリガー共通規則；圖示由共同 card facts 提供，不加第二次能力。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
   CP03-016:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -240,6 +286,37 @@ cards:
           count: 1
         event: enter
         subject: self
+  CP03-017:
+    status: complete
+    review: 本文保留完整動作選擇；section 只重述 stand トリガー共通規則，由 card facts 圖示驅動。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: choice
+          timing: resolve
+          min: 1
+          max: 1
+          modes:
+            - op: act
+              subjects: target.1
+            - op: stand
+              subjects: target.1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 0
+            max: 1
   CP03-018:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -297,6 +374,31 @@ cards:
           - op: move
             subjects: self
             to: cemetery
+  CP03-110:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: twin_drive
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: drive_trigger
+        side: self
+        trigger_if:
+          read: self.is_active
+        limit: 1
+        limit_at: trigger
   CP03-112:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -329,7 +431,10 @@ cards:
         event: drive_trigger
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 3
@@ -457,3 +562,36 @@ cards:
           name: ドライブポイント
           limit: 10
           zone: evolve_deck
+  CP03-P72:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: single_drive
+      - line: 3
+        kind: trigger
+        body:
+          op: move
+          subjects: target.1
+          to: deck
+          position: 3
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+            min: 0
+            max: 1

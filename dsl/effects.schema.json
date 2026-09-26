@@ -582,6 +582,9 @@
             },
             "distinct_by": {
               "type": "string"
+            },
+            "constraint": {
+              "$ref": "#/$defs/expr"
             }
           },
           "required": [
@@ -635,13 +638,24 @@
               "type": "string"
             },
             "position": {
-              "enum": [
-                "top",
-                "bottom"
+              "oneOf": [
+                {
+                  "enum": [
+                    "top",
+                    "bottom"
+                  ]
+                },
+                {
+                  "type": "integer",
+                  "minimum": 1
+                }
               ]
             },
             "bind": {
               "type": "string"
+            },
+            "suppress_fanfare": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -839,6 +853,15 @@
             },
             "bind": {
               "type": "string"
+            },
+            "groups": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/selection"
+              }
+            },
+            "suppress_fanfare": {
+              "type": "boolean"
             }
           },
           "required": [
@@ -1345,6 +1368,12 @@
                 "opponent",
                 "both"
               ]
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "until": {
+              "type": "string"
             }
           },
           "required": [
@@ -1531,7 +1560,8 @@
                 "draw",
                 "ignore_guard",
                 "normal_stand",
-                "trigger"
+                "trigger",
+                "banish"
               ]
             },
             "subjects": {
@@ -1959,6 +1989,204 @@
               ]
             }
           }
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "declare_number"
+            },
+            "bind": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "bind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "play_card"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "set_cost": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "subjects"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "play_ability"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "event": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "event"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "play_permission"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "from": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
+            },
+            "condition": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "from",
+            "condition"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "rule_override"
+            },
+            "side": {
+              "enum": [
+                "self",
+                "opponent",
+                "both"
+              ]
+            },
+            "rule": {
+              "enum": [
+                "evolve_per_turn"
+              ]
+            },
+            "value": {
+              "const": "unlimited"
+            }
+          },
+          "required": [
+            "op",
+            "side",
+            "rule",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "replace_move"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "from": {
+              "type": "string"
+            },
+            "to": {
+              "type": "string"
+            },
+            "replacement": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "from",
+            "to",
+            "replacement"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "repeat_triggers"
+            },
+            "side": {
+              "enum": [
+                "self",
+                "opponent",
+                "both"
+              ]
+            },
+            "event": {
+              "type": "string"
+            },
+            "additional": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "side",
+            "event",
+            "additional"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "reveal_until"
+            },
+            "side": {
+              "enum": [
+                "self",
+                "opponent"
+              ]
+            },
+            "qualifies": {
+              "$ref": "#/$defs/select"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            },
+            "bind": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "qualifies",
+            "count",
+            "bind"
+          ],
+          "additionalProperties": false
         }
       ]
     },

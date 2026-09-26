@@ -30,7 +30,7 @@ cards:
                 count: 1
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -112,9 +112,100 @@ cards:
                 remove_abilities: true
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
+  BP16-055:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: pay
+          costs:
+            - op: earth_rite
+              count: 1
+          then:
+            op: create
+            name: ガーディアンゴーレム
+            count: 1
+            to: field
+  BP16-076:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
+        costs:
+          - op: modify
+            subjects: self.leader
+            hp: -2
+  BP16-077:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            at: play-start
+            value:
+              if:
+                fn: le
+                args:
+                  - read: self.leader.life
+                  - 10
+              then: 10
+              else: 5
+          split: '1'
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 0
+            max: 3
+            distribute:
+              at: play-start
+              value:
+                if:
+                  fn: le
+                  args:
+                    - read: self.leader.life
+                    - 10
+                then: 10
+                else: 5
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          keywords:
+            - storm
+        event: super_evolve
+        subject: self
   BP16-082:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -241,7 +332,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:

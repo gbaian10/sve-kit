@@ -1,5 +1,53 @@
 version: astra/1
 cards:
+  ECP01-001:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount:
+            fn: sub
+            args:
+              - 0
+              - count:
+                  zone: field
+                  side: self
+                  trait: ウマ娘
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+  ECP01-002:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: evolve
+        subject: self
   ECP01-010:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -189,11 +237,98 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
             min: 0
+            max: 1
+  ECP01-016:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            trait: ウマ娘
+            type: follower
+            where:
+              fn: eq
+              args:
+                - read: item.cost
+                - 1
+          min: 0
+          max: 1
+          to: field
+        event: enter
+        subject: self
+  ECP01-019:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  zone: cemetery
+                  side: self
+                  trait: ウマ娘
+              - 10
+          then:
+            op: flip
+            subjects: target.1
+            face: down
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: evolve_deck
+              side: self
+              name: にんじん
+              where:
+                read: item.face_up
+            min: 1
             max: 1
   ECP01-023:
     status: complete
@@ -233,7 +368,10 @@ cards:
               name: ヴィブロス
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 4
@@ -262,6 +400,136 @@ cards:
         costs:
           - op: discard
             subjects: cost.1
+  ECP01-025:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            if:
+              fn: gt
+              args:
+                - count:
+                    zone: field
+                    side: self
+                    trait: ウマ娘
+                    where:
+                      fn: ge
+                      args:
+                        - read: item.cost
+                        - 4
+                - 0
+            then: 3
+            else: 1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  ECP01-049:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count:
+            if:
+              fn: ge
+              args:
+                - read: cost.1.cost
+                - 7
+            then: 2
+            else: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              zone: hand
+              side: self
+              trait: ウマ娘
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 3
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: field
+                      side: self
+                      trait: ウマ娘
+                  - 3
+              then:
+                op: damage
+                subjects: target.1
+                amount: 2
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - count:
+                      zone: field
+                      side: self
+                      trait: ウマ娘
+                  - 5
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
   ECP01-053:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

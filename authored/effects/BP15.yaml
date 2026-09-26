@@ -21,7 +21,7 @@ cards:
               subjects: opponent.leader
               amount: 1
             - op: damage
-              subjects: &id001
+              subjects:
                 side: opponent
                 zone: field
                 type: follower
@@ -30,7 +30,7 @@ cards:
               subjects: self.leader
               hp: 1
         event: evolve
-        subject: &id002
+        subject:
           side: self
           zone: field
           type: follower
@@ -41,7 +41,7 @@ cards:
           condition:
             fn: ge
             args:
-              - count: &id003
+              - count:
                   side: self
                   zone: evolve_deck
                   type: follower
@@ -51,6 +51,112 @@ cards:
           then:
             op: evolve
             subjects: self
+        event: enter
+        subject: self
+  BP15-008:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -1
+          condition:
+            fn: gt
+            args:
+              - count:
+                  zone: field
+                  side: self
+                  type: follower
+                  name_contains: エズディア
+              - 0
+      - line: 3
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 1
+            - op: delay
+              subjects: target.1
+              event: field_to_cemetery
+              until: end-of-turn
+              once: true
+              body:
+                op: draw
+                count: 1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP15-026:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 2
+            - op: create
+              name: 黄金の杯
+              count: 1
+              to: ex
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP15-042:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          prevent: true
+          kind: effect
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            union:
+              - opponent.leader
+              - zone: field
+                side: opponent
+                type: follower
+          amount: 5
         event: enter
         subject: self
   BP15-056:
@@ -85,9 +191,70 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 0
             max: 2
+  BP15-057:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: seq
+              steps:
+                - op: look
+                  count: 2
+                  bind: looked
+                - op: select
+                  select:
+                    from: looked
+                  min: 0
+                  max: 1
+                  bind: chosen
+                - op: move
+                  subjects: chosen
+                  to: ex
+                - op: move
+                  subjects:
+                    difference:
+                      - looked
+                      - chosen
+                  to: cemetery
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      from: chosen
+                      trait: 絶傑
+                  - 0
+              then:
+                op: adjust_cost
+                subjects: chosen
+                amount: -3
+                until: end-of-turn
+        event: damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - read: event.effect_damage
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 烈絶の滅牙
+          count: 1
+          to: ex
+        event: enter
+        subject: self
   BP15-064:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -107,7 +274,10 @@ cards:
               count: 1
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: self
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP15-066:
@@ -137,7 +307,10 @@ cards:
             - read: event.effect_damage
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 3
@@ -157,7 +330,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: self
+              zone: field
+              type: follower
             min: 0
             max: 2
   BP15-079:
@@ -183,7 +359,10 @@ cards:
         retain_event: true
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 2
@@ -248,7 +427,10 @@ cards:
         section: 0
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         cost_selections:
@@ -263,6 +445,33 @@ cards:
           - op: move
             subjects: cost.1
             to: cemetery
+  BP15-108:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            zone: field
+            side: opponent
+            type: follower
+          amount:
+            read: self.power
+        event: main_start
+        side: opponent
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 2
+        event: enter
+        subject: self
+        costs:
+          - op: pp
+            amount: 2
   BP15-113:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -302,7 +511,12 @@ cards:
                 if:
                   fn: ge
                   args:
-                    - count: *id003
+                    - count:
+                        side: self
+                        zone: evolve_deck
+                        type: follower
+                        where:
+                          read: item.face_up
                     - 3
                 then: 4
                 else: 2
@@ -310,7 +524,12 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - count: *id003
+                  - count:
+                      side: self
+                      zone: evolve_deck
+                      type: follower
+                      where:
+                        read: item.face_up
                   - 5
               then:
                 op: seq
@@ -321,7 +540,10 @@ cards:
                     amount: 1
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP15-P33:
@@ -424,7 +646,10 @@ cards:
                       position: bottom
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:
@@ -561,7 +786,9 @@ cards:
           subjects:
             union:
               - opponent.leader
-              - *id001
+              - side: opponent
+                zone: field
+                type: follower
           amount: 5
         event: enter
         subject: self
@@ -588,7 +815,10 @@ cards:
         retain_event: true
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 2
@@ -622,6 +852,25 @@ cards:
         costs:
           - op: pp
             amount: 2
+  BP15-T02:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: modify
+          subjects: self.leader
+          hp:
+            if:
+              fn: ge
+              args:
+                - count:
+                    zone: cemetery
+                    side: opponent
+                - 10
+            then: 2
+            else: 1
   BP15-T06:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

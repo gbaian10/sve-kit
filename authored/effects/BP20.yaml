@@ -1,5 +1,98 @@
 version: astra/1
 cards:
+  BP20-020:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - read: self.counters.fusion_counter
+              - 0
+          then:
+            op: draw
+            count: 1
+          else:
+            op: create
+            name: 黄金の小剣
+            count: 1
+            to: ex
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: counter
+          subjects: self
+          name: fusion_counter
+          amount:
+            read: x
+        active_zones:
+          - hand
+        keyword: fusion
+        variables:
+          x:
+            min: 0
+            max: 2
+        cost_selections:
+          - key: '1'
+            select:
+              union:
+                - zone: hand
+                  side: self
+                  other: true
+                  trait: 財宝
+                  where:
+                    fn: ge
+                    args:
+                      - read: item.cost
+                      - 1
+                - zone: ex
+                  side: self
+                  other: true
+                  trait: 財宝
+                  where:
+                    fn: ge
+                    args:
+                      - read: item.cost
+                      - 1
+            min:
+              read: x
+            max:
+              read: x
+        costs:
+          - op: for_each
+            select: cost.1
+            bind: material
+            body:
+              op: if
+              condition:
+                fn: eq
+                args:
+                  - read: material.zone
+                  - hand
+              then:
+                op: discard
+                subjects: material
+              else:
+                op: move
+                subjects: material
+                to: cemetery
+          - op: move
+            subjects: self
+            to: ex
   BP20-036:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -20,7 +113,7 @@ cards:
               until: end-of-turn
         targets:
           - key: '1'
-            select: &id002
+            select:
               side: self
               zone: field
               type: follower
@@ -55,7 +148,7 @@ cards:
                 amount: 3
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -116,7 +209,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP20-P12:
@@ -143,7 +239,10 @@ cards:
             amount: 3
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         additional_costs:
@@ -286,7 +385,7 @@ cards:
               - 7
           then:
             op: damage
-            subjects: &id005
+            subjects:
               side: both
               zone: field
               type: follower
@@ -305,7 +404,10 @@ cards:
           amount: 1
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: self
+              zone: field
+              type: follower
             min: 1
             max: 1
         costs:
@@ -413,7 +515,10 @@ cards:
           - ex
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         costs:
@@ -426,7 +531,7 @@ cards:
     abilities:
       - line: 1
         kind: trigger
-        body: &id003
+        body:
           op: seq
           steps:
             - op: counter
@@ -457,7 +562,32 @@ cards:
           - ex
       - line: 1
         kind: trigger
-        body: *id003
+        body:
+          op: seq
+          steps:
+            - op: counter
+              subjects: self
+              name: refund_counter
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.counter.refund_counter
+                  - 8
+              then:
+                op: seq
+                steps:
+                  - op: banish
+                    subjects: self
+                  - op: search
+                    select:
+                      side: self
+                      zone: deck
+                      trait: 盗賊
+                    min: 0
+                    max: 1
+                    to: hand
         event: fusion
         active_zones:
           - ex
@@ -465,7 +595,32 @@ cards:
           read: event.fused_trait.財宝
       - line: 1
         kind: trigger
-        body: *id003
+        body:
+          op: seq
+          steps:
+            - op: counter
+              subjects: self
+              name: refund_counter
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.counter.refund_counter
+                  - 8
+              then:
+                op: seq
+                steps:
+                  - op: banish
+                    subjects: self
+                  - op: search
+                    select:
+                      side: self
+                      zone: deck
+                      trait: 盗賊
+                    min: 0
+                    max: 1
+                    to: hand
         event: card_play
         active_zones:
           - ex
@@ -530,8 +685,7 @@ cards:
             if:
               fn: eq
               args:
-                - &id004
-                  count:
+                - count:
                     side: self
                     zone: ex
                     type: crest
@@ -541,7 +695,10 @@ cards:
               if:
                 fn: ge
                 args:
-                  - *id004
+                  - count:
+                      side: self
+                      zone: ex
+                      type: crest
                   - 3
               then: 2
               else: 1
@@ -552,7 +709,9 @@ cards:
           - key: '1'
             select:
               union:
-                - *id001
+                - side: opponent
+                  zone: field
+                  type: follower
                 - opponent.leader
             min: 1
             max: 1
@@ -567,7 +726,10 @@ cards:
           condition:
             fn: ge
             args:
-              - *id004
+              - count:
+                  side: self
+                  zone: ex
+                  type: crest
               - 3
           then:
             op: modify
@@ -689,7 +851,10 @@ cards:
                   - 0
               then:
                 op: damage
-                subjects: *id001
+                subjects:
+                  side: opponent
+                  zone: field
+                  type: follower
                 amount: 3
         event: end
         trigger_if:
@@ -720,7 +885,10 @@ cards:
         kind: trigger
         body:
           op: damage
-          subjects: *id001
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
           amount: 1
         event: damage
         subject: self
@@ -749,7 +917,10 @@ cards:
               - 0
           then:
             op: damage
-            subjects: *id005
+            subjects:
+              side: both
+              zone: field
+              type: follower
             amount: 1
         event: enter
         subject: self

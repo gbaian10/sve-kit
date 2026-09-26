@@ -1,5 +1,50 @@
 version: astra/1
 cards:
+  ECP02-001:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                zone: hand
+                side: self
+                trait: デレマス
+                type: follower
+                where:
+                  fn: le
+                  args:
+                    - read: item.cost
+                    - 2
+              min: 0
+              max: 1
+              bind: chosen
+            - op: move
+              subjects: chosen
+              to: ex
+            - op: adjust_cost
+              subjects: chosen
+              amount: -2
+              until: end-of-turn
+        event: enter
+        subject: self
+        costs:
+          - op: pp
+            amount: 1
+          - op: lesson
+            count: 1
   ECP02-008:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -139,7 +184,7 @@ cards:
                           - read: item.power
                           - fn: max
                             args:
-                              - values: &id001
+                              - values:
                                   side: opponent
                                   zone: field
                                   type: follower
@@ -176,7 +221,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         costs:
@@ -249,6 +297,51 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
+  ECP02-SL33:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -5
+          condition:
+            fn: ge
+            args:
+              - count:
+                  zone: cemetery
+                  side: self
+                  trait: デレマス
+              - 10
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects:
+                difference:
+                  - zone: field
+                    side: both
+                    type: follower
+                  - zone: field
+                    side: both
+                    type: follower
+                    trait: デレマス
+            - op: create
+              name: 魔法のアイテム
+              count: 2
+              to: ex
+            - op: modify
+              subjects: self.leader
+              hp: 4
+            - op: draw
+              count: 2

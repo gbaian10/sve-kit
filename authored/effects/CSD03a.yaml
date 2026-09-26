@@ -1,5 +1,59 @@
 version: astra/1
 cards:
+  CSD03a-003:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: single_drive
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            read: self.entered_by_effect
+          then:
+            op: evolve
+            subjects: self
+        event: enter
+        subject: self
+  CSD03a-006:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: ride
+        body:
+          op: gain_drive
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: assail
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 2
+          hp: 2
+        event: gain_drive
+        subject: self
   CSD03a-016:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

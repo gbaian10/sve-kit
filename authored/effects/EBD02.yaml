@@ -1,5 +1,55 @@
 version: astra/1
 cards:
+  EBD02-004:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            type: spell
+          min: 0
+          max: 1
+          to: hand
+        event: enter
+        subject: self
+  EBD02-005:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: play_card
+          subjects: target.1
+          set_cost: 0
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+              type: spell
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 3
+            min: 1
+            max: 1
   EBD02-007:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

@@ -1,5 +1,132 @@
 version: astra/1
 cards:
+  CP02-001:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 3
+              bind: looked
+            - op: select
+              select:
+                from: looked
+                trait: パッション
+              min: 0
+              max: 1
+              bind: chosen
+            - op: reveal
+              subjects: chosen
+              to: all
+            - op: move
+              subjects: chosen
+              to: hand
+            - op: select
+              select:
+                difference:
+                  - looked
+                  - chosen
+              min:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              max:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              bind: ordered
+              order: true
+            - op: move
+              subjects: ordered
+              to: deck
+              position: bottom
+        event: enter
+        subject: self
+  CP02-003:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 2
+        event: attack
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: self
+          keywords:
+            - storm
+        costs:
+          - op: pp
+            amount: 1
+          - op: lesson
+            count: 1
+  CP02-007:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - read: self.turn.magic_item_banished
+              - 0
+          then:
+            op: draw
+            count: 1
+        event: leave
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          power: 1
+          hp: 1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
   CP02-068:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -40,7 +167,7 @@ cards:
           amount: 3
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -86,7 +213,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 4
@@ -101,3 +231,18 @@ cards:
             amount: 1
           - op: lesson
             count: 1
+  CP02-T01:
+    status: complete
+    review: 本文是同名規則卡「魔法のアイテム」的外觀版本；section 的開局 5 枚配置由標題構築共通規則執行，不重複建立觸發。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 1
+            - op: draw
+              count: 1
+    rules_name: 魔法のアイテム

@@ -19,7 +19,7 @@ cards:
             else: 3
         targets:
           - key: '1'
-            select: &id002
+            select:
               side: opponent
               zone: field
               type: follower
@@ -87,8 +87,7 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - &id001
-                    fn: distinct
+                  - fn: distinct
                     args:
                       - read: self.cemetery.cost
                   - 3
@@ -100,7 +99,9 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - *id001
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
                   - 6
               then:
                 op: draw
@@ -109,17 +110,24 @@ cards:
               condition:
                 fn: ge
                 args:
-                  - *id001
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
                   - 9
               then:
                 op: damage
-                subjects: *id002
+                subjects:
+                  side: opponent
+                  zone: field
+                  type: follower
                 amount: 9
             - op: if
               condition:
                 fn: ge
                 args:
-                  - *id001
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
                   - 12
               then:
                 op: damage
@@ -154,7 +162,10 @@ cards:
                 hp: 2
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP11-042:
@@ -252,7 +263,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         cost_selections:
@@ -267,6 +281,126 @@ cards:
           - op: move
             subjects: cost.1
             to: cemetery
+  BP11-075:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: act
+          subjects: target.1
+        active_zones:
+          - cemetery
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+              name: カオスルーラー・アイシィレンドリング
+            min: 1
+            max: 1
+        costs:
+          - op: banish
+            subjects:
+              union:
+                - self
+                - cost.1
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+        section: 0
+      - line: 2
+        kind: spell
+        body:
+          op: modify
+          subjects: target.1
+          power: -2
+          hp: -2
+        section: 0
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP11-P29:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: pilot
+          subjects: self
+          by: cost.1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              name: ファントムデュオ・バニー＆バロン
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: cost.1
+      - line: 2
+        kind: activated
+        body:
+          op: pilot
+          subjects: self
+          by: cost.1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+            min: 2
+            max: 2
+        costs:
+          - op: pp
+            amount: 1
+          - op: act
+            subjects: cost.1
+      - line: 3
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 4
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  zone: field
+                  side: self
+                  type: follower
+                  trait: 荒野
+                  other: true
+              - 0
+          then:
+            op: draw
+            count: 1
+        event: attack
+        subject: self
   BP11-P30:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -287,7 +421,7 @@ cards:
             - 5
         cost_selections:
           - key: '1'
-            select: &id003
+            select:
               side: self
               zone: field
               type: follower
@@ -347,7 +481,10 @@ cards:
             hp: 1
         targets:
           - key: '1'
-            select: *id003
+            select:
+              side: self
+              zone: field
+              type: follower
             min: 1
             max: 1
         costs:

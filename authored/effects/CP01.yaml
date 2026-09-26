@@ -1,5 +1,78 @@
 version: astra/1
 cards:
+  CP01-013:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: replace_damage
+              subjects: self
+              prevent: true
+              until: end-of-turn
+        event: race
+        subject: self
+  CP01-019:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: stand
+              subjects: target.1
+            - op: restrict
+              subjects: target.1
+              action: attack
+              until: end-of-turn
+        event: race
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              other: true
+            min: 0
+            max: 1
   CP01-085:
     status: complete
     review: 本文是食事／出走共通流程的說明，依 14.2 與 Q407 不另增一次出走誘發；附帶條款放寬同名張數至 10。

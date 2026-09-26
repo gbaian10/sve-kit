@@ -81,7 +81,7 @@ cards:
         limit_at: trigger
         targets:
           - key: '1'
-            select: &id002
+            select:
               side: opponent
               zone: field
               type: follower
@@ -173,8 +173,7 @@ cards:
           condition:
             fn: ge
             args:
-              - &id001
-                count:
+              - count:
                   side: self
                   zone: field
                   type: follower
@@ -187,7 +186,11 @@ cards:
               if:
                 fn: eq
                 args:
-                  - *id001
+                  - count:
+                      side: self
+                      zone: field
+                      type: follower
+                      keyword: guard
                   - 5
               then: 2
               else: 1
@@ -195,7 +198,11 @@ cards:
               if:
                 fn: eq
                 args:
-                  - *id001
+                  - count:
+                      side: self
+                      zone: field
+                      type: follower
+                      keyword: guard
                   - 5
               then: 2
               else: 1
@@ -208,6 +215,55 @@ cards:
               zone: field
               type: follower
               keyword: guard
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0
+        limit: 1
+  BP21-PR04:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            where:
+              fn: and
+              args:
+                - fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+                - fn: eq
+                  args:
+                    - read: item.class
+                    - ロイヤル
+          min: 0
+          max: 1
+          to: ex
+        event: enter
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: act
+              subjects: target.1
+            - op: box
+              subjects: target.1
+              until: next-controller-end
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
             min: 1
             max: 1
         costs:
@@ -247,9 +303,43 @@ cards:
         event: end
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
+  BP21-PR11:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 4
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 3
+        kind: trigger
+        body:
+          op: adjust_cost
+          subjects:
+            zone: any
+            side: self
+            trait: 武闘竜人
+          amount: -3
+          until: end-of-turn
+          uses: 1
+          consume_on: play
+        event: enter
+        subject: self
   BP21-SL08:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -296,7 +386,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id002
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:

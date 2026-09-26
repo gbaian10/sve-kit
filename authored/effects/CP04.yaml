@@ -44,7 +44,7 @@ cards:
               kind: static
               body:
                 op: require_attack
-                subjects: &id001
+                subjects:
                   side: opponent
                   zone: field
                   type: follower
@@ -79,9 +79,51 @@ cards:
         section: 0
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
+  CP04-017:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+        ub: true
+        costs:
+          - op: act
+            subjects: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                zone: hand
+                side: self
+              min: 1
+              max: 1
+              bind: discarded
+            - op: discard
+              subjects: discarded
+        event: enter
+        subject: self
+        section: 0
   CP04-019:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -111,6 +153,62 @@ cards:
         costs:
           - op: pp
             amount: 2
+  CP04-059:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 2
+        event: ub_activated
+        subject:
+          zone: field
+          side: self
+          type: follower
+          other: true
+      - line: 4
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - read: self.pp.max
+                  - 10
+              then:
+                op: evolve
+                subjects: self
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
   CP04-072:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -131,6 +229,119 @@ cards:
           amount: 1
         event: field_to_cemetery
         subject: self
+  CP04-085:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+        event: attack
+        subject: self
+        ub: true
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+        section: 0
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: self.leader
+          amount: 2
+        event: enter
+        subject: self
+        section: 0
+  CP04-088:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                zone: field
+                side: opponent
+                type: follower
+              min: 1
+              max: 1
+              bind: chosen
+              by: opponent
+            - op: move
+              subjects: chosen
+              to: cemetery
+        costs:
+          - op: pp
+            amount: 1
+        ub: true
+        limit: 1
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            trait: ルーセント学院
+            type: follower
+            where:
+              fn: le
+              args:
+                - read: item.cost
+                - 3
+          min: 0
+          max: 2
+          to: field
+          groups:
+            - key: '1'
+              select:
+                zone: deck
+                side: self
+                trait: ルーセント学院
+                type: follower
+                where:
+                  fn: le
+                  args:
+                    - read: item.cost
+                    - 3
+              min: 0
+              max: 1
+            - key: '1'
+              select:
+                zone: deck
+                side: self
+                trait: ルーセント学院
+                type: follower
+                where:
+                  fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+              min: 0
+              max: 1
+          suppress_fanfare: true
+        event: enter
+        subject: self
+        section: 0
   CP04-103:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -171,7 +382,10 @@ cards:
         ub: true
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 0
             max:
               read: x
@@ -214,7 +428,10 @@ cards:
             subjects: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 1
@@ -346,7 +563,10 @@ cards:
             subjects: cost.1
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 1
@@ -385,7 +605,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 2

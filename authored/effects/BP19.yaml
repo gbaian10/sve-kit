@@ -38,7 +38,7 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -212,7 +212,10 @@ cards:
           trait: 八獄
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
       - line: 2
@@ -336,7 +339,9 @@ cards:
           - key: '1'
             select:
               union:
-                - *id001
+                - side: opponent
+                  zone: field
+                  type: follower
                 - opponent.leader
             min: 1
             max: 1
@@ -376,7 +381,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
   BP19-080:
@@ -387,10 +395,13 @@ cards:
         kind: trigger
         body:
           op: damage
-          subjects: *id001
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
           amount: 1
         event: enter
-        subject: &id002
+        subject:
           side: self
           zone: field
           type: follower
@@ -468,7 +479,10 @@ cards:
           op: seq
           steps:
             - op: modify
-              subjects: *id001
+              subjects:
+                side: opponent
+                zone: field
+                type: follower
               power: -3
               hp: -3
             - op: damage
@@ -595,7 +609,10 @@ cards:
                     count: 1
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:
@@ -653,10 +670,16 @@ cards:
         kind: trigger
         body:
           op: damage
-          subjects: *id001
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
           amount: 1
         event: enter
-        subject: *id002
+        subject:
+          side: self
+          zone: field
+          type: follower
         trigger_if:
           fn: eq
           args:
@@ -731,7 +754,10 @@ cards:
           op: seq
           steps:
             - op: modify
-              subjects: *id001
+              subjects:
+                side: opponent
+                zone: field
+                type: follower
               power: -3
               hp: -3
             - op: damage
@@ -773,7 +799,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:
@@ -790,7 +819,10 @@ cards:
           amount: 1
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         cost_selections:
@@ -881,7 +913,10 @@ cards:
         kind: trigger
         body:
           op: destroy
-          subjects: *id001
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
         event: enter
         subject: self
   BP19-SL10:
@@ -1010,7 +1045,10 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
             modes:
@@ -1036,6 +1074,59 @@ cards:
                   name: 多頭の実験体
             min: 0
             max: 2
+  BP19-SL22:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: repeat_triggers
+          side: self
+          event: end
+          additional: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max:
+            if:
+              fn: gt
+              args:
+                - count:
+                    zone: field
+                    side: self
+                    type: follower
+                    trait: 八獄
+                    other: true
+                - 0
+            then: 2
+            else: 1
+          modes:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: seq
+              steps:
+                - op: modify
+                  subjects: self.leader
+                  hp: 1
+                - op: stand
+                  subjects: self
+            - op: draw
+              count: 1
+        event: end
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
   BP19-SL26:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

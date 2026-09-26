@@ -29,7 +29,7 @@ cards:
                     - 2
                 then:
                   op: destroy
-                  subjects: &id006
+                  subjects:
                     side: opponent
                     zone: field
                     type: follower
@@ -49,6 +49,60 @@ cards:
                     subjects: self.leader
                     amount: 7
         event: end
+  BP10-050:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: stack
+              amount: 1
+            - op: pay
+              costs:
+                - op: earth_rite
+                  count: 1
+              then:
+                op: damage
+                subjects: opponent.leader
+                amount: 2
+        event: enter
+        subject: self
+  BP10-053:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: pay
+          costs:
+            - op: earth_rite
+              count: 2
+          then:
+            op: seq
+            steps:
+              - op: damage
+                subjects: target.1
+                amount: 4
+              - op: draw
+                count: 1
+          else:
+            op: damage
+            subjects: target.1
+            amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
   BP10-076:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -80,13 +134,12 @@ cards:
           then:
             op: seq
             steps:
-              - &id004
-                op: select
+              - op: select
                 select:
                   side: self
                   zone: hand
                 by: self
-                min: &id001
+                min:
                   fn: max
                   args:
                     - 0
@@ -96,15 +149,23 @@ cards:
                             side: self
                             zone: hand
                         - 2
-                max: *id001
+                max:
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: self
+                            zone: hand
+                        - 2
                 bind: discard_self
-              - &id003
-                op: select
+              - op: select
                 select:
                   side: opponent
                   zone: hand
                 by: opponent
-                min: &id002
+                min:
                   fn: max
                   args:
                     - 0
@@ -114,10 +175,18 @@ cards:
                             side: opponent
                             zone: hand
                         - 2
-                max: *id002
+                max:
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: opponent
+                            zone: hand
+                        - 2
                 bind: discard_other
-              - &id005
-                op: discard
+              - op: discard
                 subjects:
                   union:
                     - discard_self
@@ -125,9 +194,63 @@ cards:
           else:
             op: seq
             steps:
-              - *id003
-              - *id004
-              - *id005
+              - op: select
+                select:
+                  side: opponent
+                  zone: hand
+                by: opponent
+                min:
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: opponent
+                            zone: hand
+                        - 2
+                max:
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: opponent
+                            zone: hand
+                        - 2
+                bind: discard_other
+              - op: select
+                select:
+                  side: self
+                  zone: hand
+                by: self
+                min:
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: self
+                            zone: hand
+                        - 2
+                max:
+                  fn: max
+                  args:
+                    - 0
+                    - fn: sub
+                      args:
+                        - count:
+                            side: self
+                            zone: hand
+                        - 2
+                bind: discard_self
+              - op: discard
+                subjects:
+                  union:
+                    - discard_self
+                    - discard_other
         event: enter
         subject: self
   BP10-122:
@@ -170,7 +293,10 @@ cards:
                     - 2
                 then:
                   op: destroy
-                  subjects: *id006
+                  subjects:
+                    side: opponent
+                    zone: field
+                    type: follower
                 else:
                   op: if
                   condition:

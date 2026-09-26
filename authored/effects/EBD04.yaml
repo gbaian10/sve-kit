@@ -1,5 +1,49 @@
 version: astra/1
 cards:
+  EBD04-004:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 3
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: main_start
+        side: opponent
+      - line: 4
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  zone: field
+                  side: opponent
+                  type: follower
+              - 3
+          then:
+            op: create
+            name: 絶望の奔流
+            count: 1
+            to: ex
+        event: enter
+        subject: self
   EBD04-011:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -12,6 +56,43 @@ cards:
             side: both
             zone: field
             type: follower
+  EBD04-012:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: optional
+          then:
+            op: if_done
+            attempt:
+              op: move
+              subjects: self
+              to: ex
+            then:
+              op: modify
+              subjects: self.leader
+              hp: 1
+        event: enter
+        subject:
+          zone: field
+          side: self
+          type: follower
+          name_contains: マーウィン
+        active_zones:
+          - cemetery
+      - line: 2
+        kind: activated
+        body:
+          op: draw
+          count: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
   EBD04-014:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
