@@ -385,14 +385,14 @@ impl Game {
             let code = pending
                 .get("program")
                 .map_or_else(|| self.ability(&source, reference), |code| Ok(code.clone()))?;
-            self.state.pending.push(Pending {
+            self.push_pending(Pending {
                 controller: string(&pending["controller"]).into(),
                 reference: reference.clone(),
                 event: pending["event"].clone(),
                 code,
                 source,
                 cause: json!({"rule":"fixture"}),
-                retained: true,
+                retained: pending["event_discriminator"] == true,
                 id: pending["id"].as_str().map(str::to_owned),
                 context: pending
                     .get("context")
@@ -519,7 +519,16 @@ impl Game {
                 value[key] = v.clone();
             }
         }
-        if let Some(keyword) = ability["keyword"].as_str() {
+        let shared_line = self.abilities(id).is_ok_and(|abilities| {
+            abilities
+                .iter()
+                .filter(|other| {
+                    other["line"] == ability["line"] && other["section"] == ability["section"]
+                })
+                .nth(1)
+                .is_some()
+        });
+        if shared_line && let Some(keyword) = ability["keyword"].as_str() {
             value["keyword"] = json!(self.catalog.keyword_name(keyword));
         }
         value

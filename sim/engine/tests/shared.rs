@@ -49,16 +49,7 @@ fn representative_rules_preserve_all_supported_expectations() {
     let reports = score_g1(&mut Adapter::new(catalog()), &questions, &selection, 41).unwrap();
     assert_eq!(reports.len(), 41);
     for report in reports {
-        if let Verdict::Fail { failures } = &report.verdict {
-            assert_eq!(report.question, "rule-10.7.3.2-01", "{report:?}");
-            assert!(report.scenario.starts_with("[fable] B"), "{report:?}");
-            assert!(
-                failures.iter().all(|failure| failure.what == "events"),
-                "{report:?}"
-            );
-        } else {
-            assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
-        }
+        assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
     }
 }
 

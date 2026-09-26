@@ -526,6 +526,153 @@ fn cost_free_pending_cannot_be_declined() {
 }
 
 #[test]
+fn printed_line_discriminators_select_the_intended_pending_ability() {
+    for shared_line in [false, true] {
+        let second_line = if shared_line { 1_i64 } else { 2_i64 };
+        let mut doc = document(&json!({"op":"draw","count":0_i64}));
+        doc["cards"]["unit-follower"]["abilities"] = json!([
+            {"kind":"trigger","line":1_i64,"keyword":"first","event":"attack","subject":"self",
+             "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}},
+            {"kind":"trigger","line":second_line,"keyword":"second","event":"attack","subject":"self",
+             "body":{"op":"damage","subjects":"opponent.leader","amount":2_i64}}
+        ]);
+        let words = json!({"version":"astra/1","keywords":{
+            "first":{"ja":"First","role":"ability-label"},
+            "second":{"ja":"Second","role":"ability-label"}
+        }});
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &words.to_string(),
+                &[("discriminators.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut engine = Game::new(
+            catalog,
+            &setup(),
+            &Value::Null,
+            &Value::Null,
+            "discriminators",
+        )
+        .unwrap();
+        engine
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                "attack",
+            )
+            .unwrap();
+        let choices = engine.legal().unwrap();
+        assert_eq!(choices.len(), 2);
+        for (choice, (line, label)) in choices
+            .iter()
+            .zip([(1_i64, "First"), (second_line, "Second")])
+        {
+            let mut reference = json!({"source":"a","line":line});
+            if shared_line {
+                reference["keyword"] = json!(label);
+            }
+            assert_eq!(
+                *choice,
+                json!({"do":"choose-pending","pending":{"ability":reference}})
+            );
+        }
+        if shared_line {
+            let before = engine.digest().unwrap();
+            engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}), "ambiguous").unwrap_err();
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+        engine.decide(&choices[1], "second").unwrap();
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(18_i64))
+        );
+        assert_eq!(engine.legal().unwrap(), vec![choices[0].clone()]);
+        engine.decide(&choices[0], "first").unwrap();
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(17_i64))
+        );
+    }
+}
+
+#[test]
+fn pending_events_preserve_instance_identity_until_resolution() {
+    let mut doc = document(&json!({"op":"destroy","subjects":"target.1"}));
+    doc["cards"]["unit-spell"]["abilities"][0]["targets"][0]["min"] = json!(2_i64);
+    doc["cards"]["unit-spell"]["abilities"][0]["targets"][0]["max"] = json!(2_i64);
+    doc["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"trigger","line":1_i64,"event":"leave",
+        "subject":{"zone":"field","side":"opponent","type":"follower"},
+        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
+    }]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("repeated.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"b","card":"unit-follower"}, {"id":"c","card":"unit-follower"}
+    ]);
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "repeated",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b","c"]}}),
+            "cast",
+        )
+        .unwrap();
+    let choices = engine.legal().unwrap();
+    assert_eq!(choices.len(), 2);
+    for (choice, object) in choices.iter().zip(["b", "c"]) {
+        assert_eq!(
+            *choice,
+            json!({"do":"choose-pending","pending":{
+                "ability":{"source":"a","line":1_i64},"event":{"left_field":object}
+            }})
+        );
+    }
+    assert_eq!(
+        engine.projection(View::P1).unwrap()["awaiting"]["choices"],
+        json!(choices)
+    );
+    let ambiguous =
+        json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}});
+    let before = engine.digest().unwrap();
+    engine.decide(&ambiguous, "ambiguous").unwrap_err();
+    assert_eq!(engine.digest().unwrap(), before);
+    engine.decide(&choices[1], "second-instance").unwrap();
+    let singleton = &choices[0];
+    assert_eq!(engine.legal().unwrap(), vec![singleton.clone()]);
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(packet["awaiting"]["choices"], json!([singleton]));
+    assert_eq!(
+        packet["semantic_state"]["pending_triggers"][0]["event"],
+        json!({"left_field":"b"})
+    );
+    let mut sampled = Game::from_observation(catalog, &packet, "P1", "pending-sample").unwrap();
+    assert_eq!(sampled.legal().unwrap(), engine.legal().unwrap());
+    sampled.decide(singleton, "sampled-instance").unwrap();
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    restored.decide(singleton, "last-instance").unwrap();
+    assert_eq!(
+        restored.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(18_i64))
+    );
+}
+
+#[test]
 fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
     let body = json!({"op":"seq","steps":[
         {"op":"modify","subjects":"target.1","remove_abilities":true,"until":"end-of-turn"},

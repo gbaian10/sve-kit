@@ -122,6 +122,7 @@ impl Game {
         let pending=self.state.pending.iter().map(|pending|{
             let mut value=json!({"controller":pending.controller,"ability":pending.reference,"event":pending.event});
             if let Some(id)=&pending.id {value["id"]=json!(id);}
+            if pending.retained {value["event_discriminator"]=json!(true);}
             if let Some(context)=&pending.context {
                 let context=json!(context);
                 if self.visible_references(&context,view) {value["program"]=pending.code.clone();value["context"]=context;}

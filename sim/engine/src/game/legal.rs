@@ -82,9 +82,9 @@ fn distributions(ids: &[String], total: i64) -> Vec<Value> {
 
 pub(super) fn reference_matches(query: &Value, actual: &Value) -> bool {
     query.as_object().is_some_and(|fields| {
-        fields
-            .iter()
-            .all(|(key, value)| key == "keyword" || actual.get(key) == Some(value))
+        fields.iter().all(|(key, value)| {
+            (key == "keyword" && actual.get(key).is_none()) || actual.get(key) == Some(value)
+        })
     })
 }
 pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {

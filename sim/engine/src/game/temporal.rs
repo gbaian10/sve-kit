@@ -84,7 +84,7 @@ impl Game {
                 code: json!({"kind":"trigger","line":0_i64,"event":"end","body":entry["body"]}),
                 source,
                 cause: json!({"decision":self.node}),
-                retained: true,
+                retained: false,
                 id: None,
                 context: Some(context),
             });

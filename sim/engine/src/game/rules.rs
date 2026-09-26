@@ -322,18 +322,19 @@ impl Game {
 
     fn choose_pending(&mut self, decision: &Value) -> Result<String> {
         let choice = &decision["pending"];
-        let index = self
-            .state
-            .pending
-            .iter()
-            .position(|p| {
-                if choice.is_string() {
-                    return p.id.as_deref() == choice.as_str();
-                }
-                super::legal::reference_matches(&choice["ability"], &p.reference)
-                    && (choice["event"].is_null() || choice["event"] == p.event)
-            })
+        let mut matches = self.state.pending.iter().enumerate().filter(|(_, p)| {
+            if choice.is_string() {
+                return p.id.as_deref() == choice.as_str();
+            }
+            super::legal::reference_matches(&choice["ability"], &p.reference)
+                && (choice["event"].is_null() || choice["event"] == p.event)
+        });
+        let (index, _) = matches
+            .next()
             .ok_or_else(|| invalid(format!("pending ability not present: {choice}")))?;
+        if matches.next().is_some() {
+            return Err(invalid(format!("pending ability is ambiguous: {choice}")));
+        }
         let pending = self.state.pending.remove(index);
         if pending.controller != string(&decision["by"]) {
             return Err(invalid("wrong pending controller"));
@@ -670,7 +671,7 @@ impl Game {
                         code: code.clone(),
                         source: source.clone(),
                         cause: cause.clone(),
-                        retained: code["retain_event"] == true,
+                        retained: false,
                         id: None,
                         context: None,
                     });
@@ -687,8 +688,22 @@ impl Game {
                 event["event"] = pending.event.clone();
             }
             self.emit(event, &pending.cause, group);
-            self.state.pending.push(pending);
+            self.push_pending(pending);
         }
+    }
+    pub(super) fn push_pending(&mut self, mut pending: Pending) {
+        if pending.id.is_none() {
+            for other in self.state.pending.iter_mut().filter(|other| {
+                other.id.is_none()
+                    && other.controller == pending.controller
+                    && other.reference == pending.reference
+            }) {
+                // An instance keeps its discriminator after its siblings resolve.
+                other.retained = true;
+                pending.retained = true;
+            }
+        }
+        self.state.pending.push(pending);
     }
 
     pub(super) fn restricted(&self, id: &str, action: &str) -> Result<bool> {
