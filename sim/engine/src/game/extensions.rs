@@ -6,7 +6,7 @@ use alloc::collections::BTreeSet;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
-use super::legal::{permutations, subsets};
+use super::legal::subsets;
 use super::{Frame, Game, Object, int, list, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
@@ -40,34 +40,16 @@ impl Game {
     }
 
     pub(super) fn resolution_select(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
-        let mut ids = self.select(&node["select"], frame)?;
-        ids.sort();
-        let max = usize::try_from(self.number(&node["max"], frame)?.max(0))
-            .map_err(invalid)?
-            .min(ids.len());
-        let min = usize::try_from(self.number(&node["min"], frame)?.max(0))
-            .map_err(invalid)?
-            .min(max);
-        let mut choices = Vec::new();
-        for selected in subsets(&ids, min, max) {
-            let mut context = frame.clone();
-            context
-                .bindings
-                .insert(string(&node["bind"]).into(), selected.clone());
-            if let Some(constraint) = node.get("constraint")
-                && !self.truth(constraint, &context)?
-            {
-                continue;
-            }
-            if node["order"] == true {
-                for order in permutations(&selected.iter().map(|id| json!(id)).collect::<Vec<_>>())
-                {
-                    choices.push(json!({"do":"resolve-choice","order":order}));
-                }
-            } else {
-                choices.push(json!({"do":"resolve-choice","select":selected}));
-            }
-        }
+        let key = if node["order"] == true {
+            "order"
+        } else {
+            "select"
+        };
+        let choices = self
+            .resolution_subsets(node, frame)?
+            .into_iter()
+            .map(|selected| json!({"do":"resolve-choice",key:selected}))
+            .collect();
         self.prompt(
             frame,
             choices,

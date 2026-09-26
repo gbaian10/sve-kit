@@ -99,8 +99,13 @@ pub(super) fn decision_matches(candidate: &Value, decision: &Value) -> bool {
         return decision_matches(candidate, &normalized);
     }
     candidate.as_object().is_some_and(|map| {
-        map.iter()
-            .all(|(key, value)| decision.get(key) == Some(value))
+        map.iter().all(|(key, value)| {
+            if key == "select" && candidate["do"] == "resolve-choice" {
+                unordered_selection_matches(candidate, decision)
+            } else {
+                decision.get(key) == Some(value)
+            }
+        })
     })
 }
 
@@ -387,14 +392,6 @@ impl Game {
             ("costs", list(&code["cost_selections"])),
         ] {
             for spec in specs {
-                if ["order", "distinct_by", "different_from"]
-                    .iter()
-                    .any(|key| spec.get(*key).is_some())
-                {
-                    return Err(EngineFailure::Unsupported(
-                        "ordered or mutually constrained play selections".into(),
-                    ));
-                }
                 if !Self::mode_applies(&spec, frame) {
                     continue;
                 }
@@ -420,6 +417,13 @@ impl Game {
                     if field == "targets" && !self.targetable(string(target), frame)? {
                         return Ok(false);
                     }
+                }
+                let selected = chosen
+                    .iter()
+                    .map(|id| string(id).to_owned())
+                    .collect::<Vec<_>>();
+                if !self.selection_constraints(&spec, &selected, &frame.decision[field])? {
+                    return Ok(false);
                 }
                 if let Some(total) = spec.get("distribute") {
                     if chosen.is_empty() {
@@ -578,7 +582,7 @@ impl Game {
                         .map_err(invalid)?;
                     let max = usize::try_from(self.number(&spec["max"], &context)?.max(0))
                         .map_err(invalid)?;
-                    for subset in subsets(&ids, min, max) {
+                    for subset in self.selection_subsets(&ids, min, max, &spec, &option[field])? {
                         let mut option = option.clone();
                         option[field][string(&spec["key"])] = json!(subset);
                         if let Some(total) = spec.get("distribute")

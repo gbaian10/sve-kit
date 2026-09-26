@@ -361,13 +361,8 @@ impl Game {
                 for id in self.zone_ids(&frame.controller, "deck") {
                     self.learn(&frame.controller, &id, false);
                 }
-                let mut ids = self.select(&node["select"], frame)?;
-                ids.sort();
-                let max =
-                    usize::try_from(self.number(&node["max"], frame)?.max(0)).map_err(invalid)?;
-                let min =
-                    usize::try_from(self.number(&node["min"], frame)?.max(0)).map_err(invalid)?;
-                let choices = subsets(&ids, min, max)
+                let choices = self
+                    .resolution_subsets(node, frame)?
                     .into_iter()
                     .map(|ids| json!({"do":"resolve-choice","select":ids}))
                     .collect();

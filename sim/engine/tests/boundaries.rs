@@ -3109,3 +3109,159 @@ fn unplayable_pending_and_explicit_unpaid_costs_cancel_once() {
         );
     }
 }
+
+#[expect(
+    clippy::unwrap_used,
+    clippy::indexing_slicing,
+    reason = "Synthetic selection fixtures must fail on malformed construction."
+)]
+fn selection_fixture(specs: &Value, body: &Value) -> (Arc<Catalog>, Value) {
+    let mut docs = document(body);
+    docs["cards"]["unit-spell"]["abilities"][0]["targets"] = specs.clone();
+    docs["cards"]["twin"] = docs["cards"]["unit-follower"].clone();
+    docs["cards"]["other"] = docs["cards"]["unit-follower"].clone();
+    let faces = [("twin","unit-follower"),("other","another-name")].iter().map(|(number,name)|
+        json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":"フォロワー","cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()
+    ).collect::<Vec<_>>().join("\n");
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &format!("{}\n{faces}", snapshot()),
+            &registry(),
+            &[("unit.yaml".into(), docs.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P2"]["zones"]["field"] = json!([
+        {"id":"b","card":"unit-follower"},{"id":"c","card":"twin"},{"id":"d","card":"other"}
+    ]);
+    (loaded, initial)
+}
+
+#[test]
+fn play_selections_enumerate_order_without_repeating_names_or_sibling_targets() {
+    let first = json!({"key":"1","select":{"side":"opponent","zone":"field"},"min":2_i64,"max":2_i64,"distinct_by":"name","order":true});
+    let second = json!({"key":"2","select":{"side":"opponent","zone":"field"},"min":1_i64,"max":1_i64,"different_from":["1"]});
+    let (loaded, initial) = selection_fixture(
+        &json!([first, second]),
+        &json!({"op":"damage","subjects":"target.1","amount":1_i64}),
+    );
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "selection").unwrap();
+    let choices = engine
+        .legal()
+        .unwrap()
+        .into_iter()
+        .filter(|choice| choice["do"] == "play")
+        .collect::<Vec<_>>();
+    assert_eq!(choices.len(), 4);
+    assert!(
+        choices
+            .iter()
+            .any(|choice| choice["targets"] == json!({"1":["d","b"],"2":["c"]}))
+    );
+    let before = engine.digest().unwrap();
+    for targets in [
+        json!({"1":["b","c"],"2":["d"]}),
+        json!({"1":["b","d"],"2":["b"]}),
+    ] {
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":targets}),
+                "invalid",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, "cannot-play");
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    assert_eq!(
+        engine.decide(&choices[0], "valid").unwrap().outcome,
+        "resolved"
+    );
+}
+
+#[test]
+fn resolution_selection_chooses_as_many_distinct_names_as_possible_and_restores() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"select","select":{"side":"opponent","zone":"field"},"min":3_i64,"max":3_i64,"distinct_by":"name","bind":"selected"},
+        {"op":"damage","subjects":"selected","amount":1_i64}
+    ]});
+    let (loaded, initial) = selection_fixture(&json!([]), &body);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "distinct",
+    )
+    .unwrap();
+    assert_eq!(
+        engine
+            .decide(&json!({"do":"play","card":"s"}), "cast")
+            .unwrap()
+            .outcome,
+        "paused"
+    );
+    assert_eq!(
+        engine.legal().unwrap(),
+        vec![
+            json!({"do":"resolve-choice","select":["b","d"]}),
+            json!({"do":"resolve-choice","select":["c","d"]})
+        ]
+    );
+    let restored = Game::from_observation(
+        loaded,
+        &engine.projection(View::P1).unwrap(),
+        "P1",
+        "restore-distinct",
+    )
+    .unwrap();
+    for mut instance in [engine, restored] {
+        let before = instance.digest().unwrap();
+        assert_eq!(
+            instance
+                .decide(
+                    &json!({"do":"resolve-choice","select":["d","d"]}),
+                    "duplicates"
+                )
+                .unwrap()
+                .outcome,
+            "cannot-play"
+        );
+        assert_eq!(instance.digest().unwrap(), before);
+        assert_eq!(
+            instance
+                .decide(
+                    &json!({"do":"resolve-choice","select":["d","b"]}),
+                    "reverse-set"
+                )
+                .unwrap()
+                .outcome,
+            "resolved"
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.hp").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.field.c.hp").unwrap(),
+            Some(json!(3_i64))
+        );
+    }
+}
+
+#[test]
+fn unknown_distinct_properties_fail_without_creating_an_empty_prompt() {
+    let body = json!({"op":"select","select":{"side":"opponent","zone":"field"},"min":0_i64,"max":2_i64,"distinct_by":"unknown-property","bind":"selected"});
+    let mut engine = game(&body);
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "unsupported"
+            )
+            .unwrap_err(),
+        EngineFailure::Unsupported(_)
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+}

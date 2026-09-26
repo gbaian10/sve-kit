@@ -21,6 +21,7 @@ mod progression;
 mod resources;
 mod restrictions;
 mod rules;
+mod selections;
 mod temporal;
 mod view;
 
