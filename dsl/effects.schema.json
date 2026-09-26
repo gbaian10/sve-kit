@@ -243,6 +243,9 @@
             },
             "where": {
               "$ref": "#/$defs/expr"
+            },
+            "ability_event": {
+              "type": "string"
             }
           },
           "required": [
@@ -320,6 +323,9 @@
             },
             "from": {
               "$ref": "#/$defs/select"
+            },
+            "ability_event": {
+              "type": "string"
             }
           },
           "required": [
@@ -470,6 +476,12 @@
             },
             "else": {
               "$ref": "#/$defs/node"
+            },
+            "cost_selections": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/selection"
+              }
             }
           },
           "required": [
@@ -739,6 +751,9 @@
             },
             "subjects": {
               "$ref": "#/$defs/select"
+            },
+            "until": {
+              "type": "string"
             }
           },
           "required": [
@@ -817,6 +832,9 @@
               "type": "string"
             },
             "distinct_by": {
+              "type": "string"
+            },
+            "bind": {
               "type": "string"
             }
           },
@@ -943,15 +961,46 @@
             },
             "bind": {
               "type": "string"
+            },
+            "tokens": {
+              "type": "array",
+              "minItems": 1,
+              "items": {
+                "type": "object",
+                "properties": {
+                  "name": {
+                    "$ref": "#/$defs/expr"
+                  },
+                  "count": {
+                    "$ref": "#/$defs/expr"
+                  }
+                },
+                "required": [
+                  "name",
+                  "count"
+                ],
+                "additionalProperties": false
+              }
             }
           },
           "required": [
             "op",
-            "name",
-            "count",
             "to"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "required": [
+                "name",
+                "count"
+              ]
+            },
+            {
+              "required": [
+                "tokens"
+              ]
+            }
+          ]
         },
         {
           "type": "object",
@@ -1399,6 +1448,10 @@
             },
             "until": {
               "type": "string"
+            },
+            "uses": {
+              "type": "integer",
+              "minimum": 1
             }
           },
           "required": [
@@ -1467,7 +1520,8 @@
                 "normal_max_pp_gain",
                 "play_follower",
                 "draw",
-                "ignore_guard"
+                "ignore_guard",
+                "normal_stand"
               ]
             },
             "subjects": {
@@ -1634,7 +1688,8 @@
             "static",
             "activated",
             "evolve",
-            "construction"
+            "construction",
+            "play"
           ]
         },
         "event": {
@@ -1721,6 +1776,16 @@
         },
         "play_if": {
           "$ref": "#/$defs/expr"
+        },
+        "advance": {
+          "type": "boolean"
+        },
+        "side": {
+          "enum": [
+            "self",
+            "opponent",
+            "both"
+          ]
         }
       },
       "required": [
@@ -1759,6 +1824,12 @@
         },
         "order": {
           "type": "boolean"
+        },
+        "different_from": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
         }
       },
       "required": [

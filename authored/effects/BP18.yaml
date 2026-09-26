@@ -1,11 +1,52 @@
 version: astra/1
 cards:
   BP18-026:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: assail
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: target.1.controller.field_count
+              - 3
+          then:
+            op: seq
+            steps:
+              - op: destroy
+                subjects: target.1
+              - op: modify
+                subjects: self
+                keywords:
+                  - aura
+              - op: replace_damage
+                subjects: self
+                prevent: true
+                kind: any
+                until: end-of-turn
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: &id001
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
   BP18-073:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -57,44 +98,234 @@ cards:
         event: enter
         subject: self
   BP18-075:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          kind: effect
+          prevent: true
   BP18-P32:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 5
+      - line: 2
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 4
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              where:
+                fn: eq
+                args:
+                  - read: item.cost
+                  - 2
+            min: 2
+            max: 2
+        costs:
+          - op: act
+            subjects: self
+          - op: reveal
+            subjects: cost.1
+            to: all
   BP18-P35:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              where:
+                fn: eq
+                args:
+                  - read: item.cost
+                  - 2
+            min: 2
+            max: 2
+        costs:
+          - op: reveal
+            subjects: cost.1
+            to: all
   BP18-P54:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: move
+          subjects: target.1
+          to: hand
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              trait: 透京
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 2
+            min: 0
+            max: 3
+            distinct_by: name
   BP18-SL13:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
   BP18-SL14:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: seq
+              steps:
+                - op: look
+                  count: 3
+                  bind: seen
+                - op: select
+                  select:
+                    from: seen
+                    trait: 武闘竜人
+                  min: 0
+                  max: 1
+                  bind: chosen
+                - op: move
+                  subjects: chosen
+                  to: ex
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - chosen
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - chosen
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - chosen
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+            - op: adjust_cost
+              subjects: chosen
+              amount: -3
+              until: end-of-turn
+        event: evolve
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 青春の一撃
+          count: 1
+          to: ex
+        event: super_evolve
+        subject: self
   BP18-SP01:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            side: self
+            zone: deck
+            where:
+              fn: and
+              args:
+                - fn: eq
+                  args:
+                    - read: item.class
+                    - ロイヤル
+                - fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+          min: 0
+          max: 1
+          to: ex
+        event: enter
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: act
+              subjects: target.1
+            - op: box
+              subjects: target.1
+              until: next-controller-turn-end
+        limit: 1
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0

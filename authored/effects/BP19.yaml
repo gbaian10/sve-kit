@@ -1,47 +1,313 @@
 version: astra/1
 cards:
   BP19-001:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
   BP19-002:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.combo
+              - 3
+          then:
+            op: damage
+            subjects: target.1
+            amount: 4
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select: &id001
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects:
+            side: self
+            zone: field
+            type: follower
+            trait: 八獄
+            other: true
+          keywords:
+            - storm
+        event: super_evolve
+        subject: self
   BP19-007:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 3
+        event: enter
+        subject: self
+        keyword: ファンファーレ
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 3
+        event: destroy
+        subject: self
+        keyword: ラストワード
+      - line: 3
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: damage
+              subjects: opponent.leader
+              amount: 1
+            - op: draw
+              count: 1
+        active_zones:
+          - hand
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 八獄
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: self
   BP19-009:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.combo
+              - 3
+          then:
+            op: evolve
+            subjects: self
+        event: enter
+        subject: self
   BP19-010:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 4
+              bind: seen
+            - op: select
+              select:
+                from: seen
+                trait: 八獄
+              min: 0
+              max: 1
+              bind: chosen
+            - op: reveal
+              subjects: chosen
+              to: all
+            - op: move
+              subjects: chosen
+              to: hand
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - chosen
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        event: evolve
+        subject: self
   BP19-011:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.combo
+              - 3
+          then:
+            op: damage
+            subjects: target.1
+            amount: 3
+        event: evolve
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: 八獄
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: adjust_cost
+          subjects:
+            side: self
+            zone: any
+            trait: 八獄
+          amount: -1
+          uses: 1
+          consume_on: card_play
+          until: end-of-turn
+        event: enter
+        subject: self
   BP19-042:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 多頭の実験体
+          count: 1
+          to: field
+        event: enter
+        subject: self
+        costs:
+          - op: counter
+            subjects: self
+            name: fusion
+            amount: -1
+      - line: 3
+        kind: activated
+        body:
+          op: counter
+          subjects: self
+          name: fusion
+          amount: 1
+        active_zones:
+          - hand
+        keyword: 融合
+        cost_selections:
+          - key: '1'
+            select:
+              union:
+                - side: self
+                  zone: hand
+                  type: follower
+                  other: true
+                  where:
+                    fn: not
+                    args:
+                      - read: item.token
+                - side: self
+                  zone: ex
+                  type: follower
+                  other: true
+                  where:
+                    fn: not
+                    args:
+                      - read: item.token
+            min: 1
+            max: 1
+        costs:
+          - op: for_each
+            select: cost.1
+            bind: material
+            body:
+              op: if
+              condition:
+                fn: eq
+                args:
+                  - read: material.zone
+                  - hand
+              then:
+                op: discard
+                subjects: material
+              else:
+                op: move
+                subjects: material
+                to: cemetery
+          - op: move
+            subjects: self
+            to: ex
   BP19-050:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -70,10 +336,7 @@ cards:
           - key: '1'
             select:
               union:
-                - &id001
-                  side: opponent
-                  zone: field
-                  type: follower
+                - *id001
                 - opponent.leader
             min: 1
             max: 1
@@ -117,35 +380,183 @@ cards:
             min: 1
             max: 1
   BP19-080:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: *id001
+          amount: 1
+        event: enter
+        subject: &id002
+          side: self
+          zone: field
+          type: follower
+        trigger_if:
+          fn: eq
+          args:
+            - read: event.from
+            - cemetery
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              trait: 八獄
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 3
+        kind: activated
+        body:
+          op: move
+          subjects:
+            union:
+              - target.1
+              - target.2
+          to: field
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 八獄
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 5
+            min: 0
+            max: 1
+          - key: '2'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 八獄
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 3
+            min: 0
+            max: 1
+            different_from:
+              - '1'
+        costs:
+          - op: act
+            subjects: self
   BP19-081:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: *id001
+              power: -3
+              hp: -3
+            - op: damage
+              subjects: opponent.leader
+              amount: 3
+        event: end
   BP19-082:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 0
+        play_if:
+          fn: eq
+          args:
+            - read: self.entered_from
+            - cemetery
+      - line: 3
+        kind: trigger
+        body:
+          op: move
+          subjects:
+            side: self
+            zone: deck
+            top: 1
+          to: cemetery
+        event: destroy
+        subject: self
   BP19-086:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: self.leader
+              amount: 1
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      side: self
+                      zone: field
+                      name: 羅刹の咎人・ガロダート
+                  - 0
+              then:
+                op: evolve
+                subjects: self
+        event: enter
+        subject: self
   BP19-087:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: both.leaders
+          amount: 1
+        event: evolve
+        subject: self
   BP19-090:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -190,35 +601,183 @@ cards:
             modes:
               - 1
   BP19-095:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: search
+              select:
+                side: self
+                zone: deck
+                type: follower
+                trait: 信仰
+                where:
+                  fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+              min: 0
+              max: 1
+              to: hand
+            - op: modify
+              subjects: self.leader
+              hp: 4
+        event: enter
+        subject: self
   BP19-108:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: destroy
+        subject: self
   BP19-P21:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: *id001
+          amount: 1
+        event: enter
+        subject: *id002
+        trigger_if:
+          fn: eq
+          args:
+            - read: event.from
+            - cemetery
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              trait: 八獄
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 3
+        kind: activated
+        body:
+          op: move
+          subjects:
+            union:
+              - target.1
+              - target.2
+          to: field
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 八獄
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 5
+            min: 0
+            max: 1
+          - key: '2'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 八獄
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 3
+            min: 0
+            max: 1
+            different_from:
+              - '1'
+        costs:
+          - op: act
+            subjects: self
   BP19-P22:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: *id001
+              power: -3
+              hp: -3
+            - op: damage
+              subjects: opponent.leader
+              amount: 3
+        event: end
   BP19-P25:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - at: resolution-start
+                    value:
+                      count:
+                        side: self
+                        zone: cemetery
+                  - 10
+              then:
+                op: damage
+                subjects: target.1
+                amount: 2
+            - op: move
+              subjects:
+                side: self
+                zone: deck
+                top: 1
+              to: cemetery
+        event: destroy
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+            modes:
+              - 1
   BP19-P30:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -251,29 +810,242 @@ cards:
             subjects: cost.1
             to: cemetery
   BP19-P31:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 9
+              bind: seen
+            - op: reveal
+              subjects: seen
+              to: all
+            - op: shuffle
+              subjects: seen
+            - op: move
+              subjects: seen
+              to: deck
+              position: bottom
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - fn: distinct
+                    args:
+                      - values: seen
+                        field: name
+                  - 9
+              then:
+                op: seq
+                steps:
+                  - op: move
+                    subjects: self
+                    to: cemetery
+                  - op: optional
+                    then:
+                      op: seq
+                      steps:
+                        - op: select
+                          select:
+                            side: self
+                            zone: evolve_deck
+                            name: 流転の統治者・ゼラエル
+                          min: 1
+                          max: 1
+                          bind: chosen
+                        - op: move
+                          subjects: chosen
+                          to: field
+        event: enter
+        subject: self
   BP19-P32:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 2
+        kind: trigger
+        body:
+          op: destroy
+          subjects: *id001
+        event: enter
+        subject: self
   BP19-SL10:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 多頭の実験体
+          count: 1
+          to: field
+        event: enter
+        subject: self
+        costs:
+          - op: counter
+            subjects: self
+            name: fusion
+            amount: -1
+      - line: 3
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: counter
+              subjects: self
+              name: fusion
+              amount: 1
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      from: cost.1
+                      type: follower
+                      trait: 八獄
+                  - 0
+              then:
+                op: draw
+                count: 1
+        active_zones:
+          - hand
+        keyword: 融合
+        cost_selections:
+          - key: '1'
+            select:
+              union:
+                - side: self
+                  zone: hand
+                  type: follower
+                  other: true
+                  where:
+                    fn: not
+                    args:
+                      - read: item.token
+                - side: self
+                  zone: ex
+                  type: follower
+                  other: true
+                  where:
+                    fn: not
+                    args:
+                      - read: item.token
+            min: 1
+            max: 1
+        costs:
+          - op: for_each
+            select: cost.1
+            bind: material
+            body:
+              op: if
+              condition:
+                fn: eq
+                args:
+                  - read: material.zone
+                  - hand
+              then:
+                op: discard
+                subjects: material
+              else:
+                op: move
+                subjects: material
+                to: cemetery
+          - op: move
+            subjects: self
+            to: ex
   BP19-SL11:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min:
+            if:
+              fn: ge
+              args:
+                - count:
+                    side: self
+                    zone: cemetery
+                    type: follower
+                    trait: 八獄
+                - 10
+            then: 0
+            else: 1
+          max:
+            if:
+              fn: ge
+              args:
+                - count:
+                    side: self
+                    zone: cemetery
+                    type: follower
+                    trait: 八獄
+                - 10
+            then: 2
+            else: 1
+          modes:
+            - op: damage
+              subjects: target.1
+              amount: 5
+            - op: create
+              name: 多頭の実験体
+              count: 1
+              to: field
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+            modes:
+              - 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - storm
+        event: super_evolve
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: self
+                  zone: field
+                  name: 没頭の実験体
+                - side: self
+                  zone: field
+                  name: 多頭の実験体
+            min: 0
+            max: 2
   BP19-SL26:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -324,8 +1096,53 @@ cards:
           otherwise: 1
         section: 0
   BP19-T02:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: cemetery
+                  type: follower
+                  trait: 八獄
+              - 5
+          then:
+            op: seq
+            steps:
+              - op: modify
+                subjects: self
+                power: 2
+                hp: 2
+                keywords:
+                  - rush
+              - op: if
+                condition:
+                  fn: ge
+                  args:
+                    - count:
+                        side: self
+                        zone: cemetery
+                        type: follower
+                        trait: 八獄
+                    - 10
+                then:
+                  op: modify
+                  subjects: self
+                  keywords:
+                    - assail
+                    - bane
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: destroy
+        subject: self

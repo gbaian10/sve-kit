@@ -1,11 +1,31 @@
 version: astra/1
 cards:
   BP20-036:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: target.1
+              keywords:
+                - assail
+            - op: replace_damage
+              subjects: target.1
+              prevent: true
+              kind: any
+              until: end-of-turn
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
   BP20-073:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -42,17 +62,41 @@ cards:
             min: 1
             max: 1
   BP20-099:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: replace_damage
+          subjects: self.leader
+          prevent: true
+          kind: any
+          uses: 1
+          until: end-of-turn
+        event: main_start
+        side: opponent
   BP20-111:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: discard
+          subjects:
+            side: self
+            zone: hand
+        event: enter
+        subject: self
   BP20-P11:
     status: partial
     review: 未完成表達審查。
