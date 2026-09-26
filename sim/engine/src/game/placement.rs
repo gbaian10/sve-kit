@@ -5,8 +5,9 @@
 use alloc::collections::BTreeMap;
 use serde_json::{Value, json};
 
-use super::{Frame, Game, Object, other};
-use crate::{EngineFailure, Result};
+use super::legal::subsets;
+use super::{Frame, Game, Object, other, string};
+use crate::{EngineFailure, Result, invalid};
 
 pub(super) struct Placement {
     pub(super) previous: Object,
@@ -62,6 +63,96 @@ fn insert_at(items: &mut Vec<Value>, id: &str, offset: u64) {
     reason = "Ordered zone placement shares the authoritative object and zone state."
 )]
 impl Game {
+    pub(super) fn placement_controller(
+        &self,
+        object: &Object,
+        destination: &str,
+        side: Option<&str>,
+        frame: &Frame,
+    ) -> Result<String> {
+        if !matches!(destination, "field" | "ex") {
+            return Ok(object.owner.clone());
+        }
+        let controller = if let Some(side) = side {
+            let seats = self.seats(side, frame);
+            if seats.len() != 1 {
+                return Err(EngineFailure::Unsupported(
+                    "one movement needs one destination per object".into(),
+                ));
+            }
+            seats.into_iter().next().unwrap_or_default()
+        } else {
+            object.controller.clone()
+        };
+        if object.zone == destination && controller != object.controller {
+            return Err(EngineFailure::Unsupported(
+                "cross-player movement within one zone needs dedicated identity rules".into(),
+            ));
+        }
+        Ok(controller)
+    }
+
+    pub(super) fn movement_capacity_choices(
+        &self,
+        node: &Value,
+        ids: &[String],
+        frame: &Frame,
+    ) -> Result<Option<Vec<Value>>> {
+        let zone = string(&node["to"]);
+        if !matches!(zone, "field" | "ex") || node["capacity_checked"] == true {
+            return Ok(None);
+        }
+        let mut groups = BTreeMap::<String, Vec<String>>::new();
+        for id in ids {
+            let object = self.object(id)?;
+            let controller =
+                self.placement_controller(object, zone, node["side"].as_str(), frame)?;
+            if object.zone != zone {
+                groups.entry(controller).or_default().push(id.clone());
+            }
+        }
+        let mut overflow = false;
+        let mut combined = vec![Vec::new()];
+        for (controller, arrivals) in groups {
+            let available = usize::try_from(
+                5_i64
+                    .saturating_sub(self.zone_count(&controller, zone))
+                    .max(0),
+            )
+            .map_err(invalid)?;
+            overflow |= arrivals.len() > available;
+            let count = available.min(arrivals.len());
+            let subsets = subsets(&arrivals, count, count);
+            if combined.len().saturating_mul(subsets.len()) > 10_000 {
+                return Err(EngineFailure::Unsupported(
+                    "movement capacity choices exceed prototype limit".into(),
+                ));
+            }
+            combined = combined
+                .into_iter()
+                .flat_map(|prefix| {
+                    subsets.iter().map(move |selected| {
+                        let mut joined = prefix.clone();
+                        joined.extend(selected.clone());
+                        joined
+                    })
+                })
+                .collect();
+        }
+        Ok(overflow.then(|| {
+            combined
+                .into_iter()
+                .map(|selected| {
+                    let ordered = ids
+                        .iter()
+                        .filter(|id| selected.contains(id))
+                        .collect::<Vec<_>>();
+                    json!({"do":"resolve-choice","select":ordered})
+                })
+                .collect()
+        }))
+    }
+
     pub(super) fn conceal_placement_order(&mut self, plans: &[Placement], frame: &Frame) {
         for owner in ["P1", "P2"] {
             let hidden = plans
@@ -109,22 +200,10 @@ impl Game {
                     "ordered placement outside the deck".into(),
                 ));
             }
+            let controller = self.placement_controller(&previous, &destination, side, frame)?;
             if previous.zone == destination && position.is_none() {
                 continue;
             }
-            let controller = if matches!(destination.as_str(), "field" | "ex") {
-                side.map_or_else(
-                    || previous.controller.clone(),
-                    |side| {
-                        self.seats(side, frame)
-                            .into_iter()
-                            .next()
-                            .unwrap_or_default()
-                    },
-                )
-            } else {
-                previous.owner.clone()
-            };
             plans.push(Placement {
                 position: self.object_position(id)?,
                 previous,

@@ -2,7 +2,6 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use crate::game::legal::subsets;
 use core::slice::from_ref;
 use serde_json::{Value, json};
 
@@ -490,29 +489,18 @@ impl Game {
                 if ids.is_empty() {
                     return Ok(());
                 }
-                if matches!(zone, "field" | "ex") && node["capacity_checked"] != true {
-                    let available = usize::try_from(
-                        5_i64
-                            .saturating_sub(self.zone_count(&frame.controller, zone))
-                            .max(0),
-                    )
-                    .map_err(invalid)?;
-                    if ids.len() > available {
-                        let choices = subsets(&ids, available, available)
-                            .iter()
-                            .map(|chosen| json!({"do":"resolve-choice","select":chosen}))
-                            .collect();
-                        self.prompt(
-                            frame,
-                            choices,
-                            json!({"resume":"move-capacity","node":node}),
-                        );
-                        return Ok(());
-                    }
+                if let Some(choices) = self.movement_capacity_choices(node, &ids, frame)? {
+                    self.prompt(
+                        frame,
+                        choices,
+                        json!({"resume":"move-capacity","node":node}),
+                    );
+                    return Ok(());
                 }
                 if zone == "field" {
                     for id in &ids {
-                        if self.keywords(id)?.contains("guard")
+                        if self.object(id)?.zone != "field"
+                            && self.keywords(id)?.contains("guard")
                             && !list(&node["placed"]).contains(&json!(id))
                         {
                             self.prompt(
@@ -523,13 +511,14 @@ impl Game {
                                 ],
                                 json!({"resume":"place-batch","node":node}),
                             );
-                            if let Some(side) = node["side"].as_str() {
-                                let by = self.seats(side, frame).into_iter().next();
-                                if let Some(prompt) = self.state.prompt.as_mut()
-                                    && let Some(by) = by
-                                {
-                                    prompt.by = by;
-                                }
+                            let by = self.placement_controller(
+                                self.object(id)?,
+                                zone,
+                                node["side"].as_str(),
+                                frame,
+                            )?;
+                            if let Some(prompt) = self.state.prompt.as_mut() {
+                                prompt.by = by;
                             }
                             return Ok(());
                         }

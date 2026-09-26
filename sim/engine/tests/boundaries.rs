@@ -8322,3 +8322,241 @@ fn movement_payment_preview_revalidates_counters_after_a_change_of_identity() {
     assert!(result.events.is_empty());
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn movement_capacity_uses_each_destination_and_keeps_an_empty_selection_when_full() {
+    let body = json!({"op":"seq","steps":[
+        {"op":"move","subjects":"target.1","to":"ex","bind":"moved"},
+        {"op":"modify","subjects":"self.leader","hp":{"count":"moved"}}
+    ]});
+    let loaded = Arc::new(catalog(&body));
+    for full in ["P1", "P2"] {
+        let mut position = setup();
+        position["room"] = json!({"open_decklists":true});
+        for seat in ["P1", "P2"] {
+            let mut cards =
+                vec![json!({"card":"unit-follower","count":if seat == full {6_i64} else {1_i64}})];
+            if seat == "P1" {
+                cards.push(json!({"card":"unit-spell","count":1_i64}));
+            }
+            position["players"][seat]["deck_list"] = json!(cards);
+        }
+        position["players"][full]["zones"]["ex"] = json!(
+            (0_u8..5)
+                .map(|n| json!({"id":format!("x{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+        position["players"]["P2"]["zones"]["field"][0]["state"] = json!({"hp":1_i64,"power":4_i64});
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "recipient",
+        )
+        .unwrap();
+        let result = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        if full == "P2" {
+            assert_eq!(result.outcome, "paused");
+            assert_eq!(
+                engine.legal().unwrap(),
+                vec![json!({"do":"resolve-choice","select":[]})]
+            );
+            assert!(result.events.iter().all(|event| event["object"] != "b"));
+            let packet = engine.projection(View::P1).unwrap();
+            let saved: Game =
+                serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+            let sampled =
+                Game::from_observation(Arc::clone(&loaded), &packet, "P1", "recipient").unwrap();
+            for mut resumed in [saved, sampled] {
+                assert_eq!(
+                    resumed
+                        .decide(&json!({"do":"resolve-choice","select":[]}), "none")
+                        .unwrap()
+                        .outcome,
+                    "resolved"
+                );
+                assert_eq!(
+                    resumed.query(View::P1, "P2.field.b.hp").unwrap(),
+                    Some(json!(1_i64))
+                );
+                assert_eq!(
+                    resumed.query(View::P1, "P2.field.b.generation").unwrap(),
+                    Some(json!(0_i64))
+                );
+                assert_eq!(
+                    resumed.query(View::P1, "P2.ex_count").unwrap(),
+                    Some(json!(5_i64))
+                );
+                assert_eq!(
+                    resumed.query(View::P1, "P1.leader.life").unwrap(),
+                    Some(json!(20_i64))
+                );
+            }
+        } else {
+            assert_eq!(result.outcome, "resolved");
+            assert_eq!(
+                engine.query(View::P1, "P2.ex.b.hp").unwrap(),
+                Some(json!(3_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P2.ex.b.power").unwrap(),
+                Some(json!(2_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P1.ex_count").unwrap(),
+                Some(json!(5_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P1.leader.life").unwrap(),
+                Some(json!(21_i64))
+            );
+        }
+    }
+}
+
+#[test]
+fn a_batch_moving_to_both_players_respects_both_capacities() {
+    let body = json!({"op":"move","subjects":{"side":"both","zone":"field"},"to":"ex"});
+    let mut position = setup();
+    for (seat, count) in [("P1", 5_u8), ("P2", 4_u8)] {
+        position["players"][seat]["zones"]["ex"] = json!(
+            (0..count)
+                .map(|n| json!({"id":format!("{seat}-x{n}"),"card":"unit-follower"}))
+                .collect::<Vec<_>>()
+        );
+    }
+    let mut engine = Game::new(
+        Arc::new(catalog(&body)),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "both",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.legal().unwrap(),
+        vec![json!({"do":"resolve-choice","select":["b"]})]
+    );
+    engine
+        .decide(&json!({"do":"resolve-choice","select":["b"]}), "select")
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.field").unwrap(),
+        Some(json!(["a"]))
+    );
+    assert_eq!(engine.query(View::P1, "P2.field").unwrap(), Some(json!([])));
+    for seat in ["P1", "P2"] {
+        assert_eq!(
+            engine.query(View::P1, &format!("{seat}.ex_count")).unwrap(),
+            Some(json!(5_i64))
+        );
+    }
+}
+
+#[test]
+fn guard_placement_belongs_to_the_recipient_and_same_field_moves_are_not_entries() {
+    for subject in ["b", "c"] {
+        let mut doc = document(&json!({"op":"move","subjects":subject,"to":"field"}));
+        doc["cards"]["unit-follower"]["abilities"] =
+            json!([{"kind":"static","line":1_i64,"body":{"op":"macro","name":"guard"}}]);
+        let loaded = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("recipient.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut position = setup();
+        position["players"]["P2"]["zones"]["cemetery"] = json!([{"id":"c","card":"unit-follower"}]);
+        let mut engine = Game::new(loaded, &position, &Value::Null, &Value::Null, "guard").unwrap();
+        let result = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        if subject == "b" {
+            assert_eq!(result.outcome, "resolved");
+            assert!(result.events.iter().all(|event| event["object"] != "b"));
+            assert_eq!(
+                engine.query(View::P1, "P2.field.b.generation").unwrap(),
+                Some(json!(0_i64))
+            );
+        } else {
+            assert_eq!(result.outcome, "paused");
+            assert_eq!(
+                engine.projection(View::P1).unwrap()["awaiting"],
+                json!({"by":"P2"})
+            );
+            engine
+                .decide(
+                    &json!({"do":"place-acted","object":"c","acted":true}),
+                    "place",
+                )
+                .unwrap();
+            assert_eq!(
+                engine.query(View::P1, "P2.field.c.acted").unwrap(),
+                Some(json!(true))
+            );
+        }
+    }
+}
+
+#[test]
+fn explicit_recipient_moves_keep_the_owner_and_reject_undefined_same_zone_transfers() {
+    let loaded = counter_payment_catalog(
+        &json!([]),
+        &json!({"op":"move","subjects":"b","to":"ex","side":"self"}),
+    );
+    for origin in ["field", "ex"] {
+        let mut position = setup();
+        if origin == "ex" {
+            position["players"]["P2"]["zones"]["field"] = json!([]);
+            position["players"]["P2"]["zones"]["ex"] = json!([{"id":"b","card":"unit-follower"}]);
+        }
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "explicit",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        let result = engine.decide(
+            &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+            "move",
+        );
+        if origin == "field" {
+            assert_eq!(result.unwrap().outcome, "resolved");
+            let packet = engine.projection(View::P1).unwrap();
+            assert_eq!(packet["P1"]["ex"], json!(["b"]));
+            assert!(
+                packet["known_cards"]
+                    .as_array()
+                    .unwrap()
+                    .iter()
+                    .any(|known| known["id"] == "b" && known["owner"] == "P2")
+            );
+            let saved = serde_json::to_value(&engine).unwrap();
+            assert_eq!(saved["state"]["objects"]["b"]["owner"], "P2");
+            assert_eq!(saved["state"]["objects"]["b"]["controller"], "P1");
+        } else {
+            assert!(matches!(result.unwrap_err(), EngineFailure::Unsupported(_)));
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+    }
+}
