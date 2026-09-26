@@ -312,6 +312,7 @@ impl Game {
         sep: i64,
         frame: &mut Frame,
     ) -> Result<()> {
+        let previous = self.object(source)?.clone();
         let old = self.face(source)?.clone();
         let new = self.catalog.face(&self.object(evolve)?.card, face)?.clone();
         self.move_objects(&[evolve.into()], "evolution", None, None, frame)?;
@@ -325,9 +326,6 @@ impl Game {
                 .saturating_sub(scalar(&old[field]))
                 .saturating_add(sep);
             attrs[field] = json!(int(&attrs[field]).saturating_add(delta));
-            if delta > 0 {
-                attrs["stats_increased_this_turn"] = json!(true);
-            }
             if field == "hp" {
                 attrs["max_hp"] = json!(int(&attrs["max_hp"]).saturating_add(delta));
             }
@@ -344,7 +342,8 @@ impl Game {
         );
         frame.cause = json!({"event":event});
         let affected = [self.object(source)?.clone()];
-        let pending = self.collect_triggers("evolve", &affected, &frame.cause)?;
+        let mut pending = self.stat_change_triggers(&[previous], &frame.cause)?;
+        pending.extend(self.collect_triggers("evolve", &affected, &frame.cause)?);
         self.enqueue(pending);
         if sep > 0 {
             let super_group = self.group();

@@ -23,6 +23,7 @@ mod resources;
 mod restrictions;
 mod rules;
 mod selections;
+mod statistics;
 mod temporal;
 mod tokens;
 mod turns;

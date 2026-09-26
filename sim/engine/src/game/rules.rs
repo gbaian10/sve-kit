@@ -949,6 +949,12 @@ impl Game {
     }
 
     fn trigger_event(event: &str, object: Option<&EventSubject>, metadata: &Value) -> Value {
+        if matches!(
+            event,
+            "hp_increase" | "power_increase" | "hp_decrease" | "power_decrease"
+        ) {
+            return Value::Null;
+        }
         let event_key = match event {
             "enter" => "entered_field",
             "leave" | "field_to_cemetery" => "left_field",
@@ -1029,6 +1035,7 @@ impl Game {
         }
     }
     pub(super) fn push_pending(&mut self, mut pending: Pending) {
+        self.disambiguate_unkeyed_pending(&mut pending);
         if pending.id.is_none() {
             for other in self.state.pending.iter_mut().filter(|other| {
                 other.id.is_none()

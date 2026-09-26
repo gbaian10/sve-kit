@@ -5049,3 +5049,169 @@ fn keyword_aliases_reject_ambiguous_ids_labels_and_malformed_lists() {
     definitions["keywords"]["different"] = json!({"ja":"別物","aliases":["共通"],"role":"counter"});
     Catalog::from_documents(&snapshot(), &definitions.to_string(), &[]).unwrap_err();
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    reason = "The fixture builds known synthetic card and ability maps."
+)]
+fn stat_event_document(body: &Value) -> Value {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"kind":"trigger","line":1_i64,"event":"hp_increase","subject":"self","body":{"op":"modify","subjects":"self.leader","hp":{"fn":"sub","args":[{"read":"event.after"},{"read":"event.before"}]}}},
+        {"kind":"activated","line":2_i64,"body":body}
+    ]);
+    doc
+}
+
+#[test]
+fn stat_increase_triggers_compare_actual_values_and_collect_after_the_whole_batch() {
+    for (change, expected) in [
+        (json!({"hp":2_i64}), true),
+        (json!({"set_hp":5_i64}), true),
+        (json!({"hp":0_i64}), false),
+        (json!({"set_hp":3_i64}), false),
+        (json!({"hp":-1_i64}), false),
+    ] {
+        let mut body = json!({"op":"modify","subjects":{"side":"self","zone":"field"}});
+        body.as_object_mut()
+            .unwrap()
+            .extend(change.as_object().unwrap().clone());
+        let mut doc = stat_event_document(&body);
+        doc["cards"]["unit-follower"]["abilities"][0]["trigger_if"] = json!({"fn":"eq","args":[{"count":{"side":"self","zone":"field","where":{"fn":"ge","args":[{"read":"item.hp"},5_i64]}}},2_i64]});
+        let loaded = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("stats".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut initial = setup();
+        initial["players"]["P1"]["zones"]["field"] =
+            json!([{"id":"a","card":"unit-follower"},{"id":"c","card":"unit-follower"}]);
+        let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "stats").unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+                "modify",
+            )
+            .unwrap();
+        let waiting = step
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "待機")
+            .collect::<Vec<_>>();
+        assert_eq!(waiting.len(), if expected { 2 } else { 0 });
+        if expected {
+            assert_eq!(waiting[0]["group"], waiting[1]["group"]);
+            for source in ["a", "c"] {
+                engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":source,"line":1_i64}}}), source).unwrap();
+            }
+        }
+        assert_eq!(
+            engine.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(if expected { 24_i64 } else { 20_i64 }))
+        );
+        assert_eq!(
+            engine
+                .query(View::P1, "P1.field.a.stats_increased_this_turn")
+                .unwrap(),
+            Some(json!(expected))
+        );
+    }
+}
+
+#[test]
+fn repeated_stat_events_keep_distinct_contexts_and_identical_trigger_copies() {
+    let mut doc = stat_event_document(&json!({"op":"seq","steps":[
+        {"op":"modify","subjects":"self","hp":1_i64},
+        {"op":"modify","subjects":"self","set_hp":8_i64}
+    ]}));
+    doc["cards"]["unit-follower"]["abilities"].as_array_mut().unwrap().push(json!({"kind":"static","line":3_i64,"body":{"op":"repeat_triggers","side":"self","event":"hp_increase","additional":1_i64}}));
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("stats".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "stats",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+            "modify",
+        )
+        .unwrap();
+    let pending =
+        engine.projection(View::P1).unwrap()["semantic_state"]["pending_triggers"].clone();
+    assert_eq!(pending.as_array().unwrap().len(), 4);
+    assert_eq!(pending[0]["id"], pending[1]["id"]);
+    assert_eq!(pending[2]["id"], pending[3]["id"]);
+    assert_ne!(pending[0]["id"], pending[2]["id"]);
+    let legal = engine.legal().unwrap();
+    assert_eq!(legal.len(), 4);
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine.decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1_i64}}}),
+            "ambiguous"
+        ),
+        Err(EngineFailure::Invalid(_))
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled =
+        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "stats")
+            .unwrap();
+    for instance in [&mut engine, &mut saved, &mut sampled] {
+        for (index, life) in [(2, 24_i64), (3, 28_i64), (0, 29_i64), (1, 30_i64)] {
+            instance.decide(&legal[index], "trigger").unwrap();
+            assert_eq!(
+                instance.query(View::P1, "P1.leader.life").unwrap(),
+                Some(json!(life))
+            );
+        }
+    }
+}
+
+#[test]
+fn evolution_collects_stat_triggers_from_the_new_face() {
+    let mut doc = stat_event_document(&json!({"op":"evolve","subjects":"self"}));
+    doc["cards"]["unit-evolved"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"trigger","line":1_i64,"event":"hp_increase","subject":"self","body":{"op":"modify","subjects":"self.leader","hp":1_i64}}]});
+    let evolved = json!({"number":"unit-evolved","faces":[{"name":"unit-follower","card_class":"ニュートラル","card_type":"フォロワー・エボルヴ","cost":"1","power":"4","hp":"5","traits":[],"text":null,"sections":[]}]});
+    let facts = format!("{}\n{evolved}", snapshot());
+    let loaded = Arc::new(
+        Catalog::from_documents(&facts, &registry(), &[("stats".into(), doc.to_string())]).unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"e","card":"unit-evolved"}]);
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "stats").unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+            "activate",
+        )
+        .unwrap();
+    engine
+        .decide(&json!({"do":"resolve-choice","select":["e"]}), "evolve")
+        .unwrap();
+    assert_eq!(
+        engine.legal().unwrap(),
+        vec![
+            json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}})
+        ]
+    );
+    engine.decide(&json!({"do":"choose-pending","pending":{"ability":{"source":"a","card":"unit-evolved","line":1_i64}}}),"trigger").unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(21_i64))
+    );
+}

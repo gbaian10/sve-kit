@@ -758,6 +758,7 @@ impl Game {
         let subjects = self.select(&node["subjects"], frame)?;
         let group = self.group();
         let mut life_changes = Vec::new();
+        let mut previous = Vec::new();
         for id in subjects {
             if let Some(seat) = id.strip_suffix(".leader") {
                 let amount = self.number(&node["hp"], frame)?;
@@ -776,7 +777,8 @@ impl Game {
                 }
                 continue;
             }
-            let prior = self.object(&id)?.state.clone();
+            let before = self.object(&id)?.clone();
+            let prior = &before.state;
             for field in ["power", "hp"] {
                 let set_key = format!("set_{field}");
                 if let Some(expr) = node.get(&set_key) {
@@ -796,12 +798,6 @@ impl Game {
                     }
                 }
             }
-            if ["power", "hp"]
-                .iter()
-                .any(|field| int(&self.state.objects[&id].state[*field]) > int(&prior[*field]))
-            {
-                self.object_mut(&id)?.state["stats_increased_this_turn"] = json!(true);
-            }
             if node["remove_abilities"] == true {
                 self.object_mut(&id)?.state["silenced"] = json!(true);
                 self.object_mut(&id)?.state["keywords"] = json!([]);
@@ -817,7 +813,10 @@ impl Game {
                 frame.reference.clone()
             };
             self.state.continuous.push(json!({"source":frame.source,"reference":reference,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))}));
+            previous.push(before);
         }
+        let pending = self.stat_change_triggers(&previous, &frame.cause)?;
+        self.enqueue(pending);
         self.life_change_triggers(&life_changes, &frame.cause)?;
         Ok(())
     }
