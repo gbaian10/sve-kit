@@ -460,29 +460,31 @@ cards:
         subject: self
   BP20-P59:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 第三輪依封存卡文及 Q2702／Q2685 複核；捨牌即誘發，場上マゼルベイン的存在於結算時判定；全部 sections 另列能力。
     abilities:
       - line: 1
         kind: trigger
         body:
-          op: optional
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  type: follower
+                  name_contains: マゼルベイン
+              - 0
           then:
-            op: move
-            subjects: self
-            to: ex
+            op: optional
+            then:
+              op: move
+              subjects: self
+              to: ex
         event: discard
         subject: self
         active_zones:
           - hand
-        trigger_if:
-          fn: gt
-          args:
-            - count:
-                side: self
-                zone: field
-                type: follower
-                name_contains: マゼルベイン
-            - 0
       - line: 1
         kind: static
         body:
