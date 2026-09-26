@@ -383,10 +383,11 @@ scenarios:
           P1.ex:
             - new-1
           P1.ex_count: 1
+          P1.ex.new-1:
+            name: クレスト 安息の団結者
         events:
           - kind: 移動
             object: new-1
-            card: BP20-P68
             to: P1.ex
             source: a
         forbidden_events:

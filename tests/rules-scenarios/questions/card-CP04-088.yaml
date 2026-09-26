@@ -121,8 +121,8 @@ scenarios:
           - {kind: 公開, object: s2, to: P2}
           - {kind: 場に出す, object: s1, from: P1.deck, group: 1}
           - {kind: 場に出す, object: s2, from: P1.deck, group: 1}
-          - {kind: 抑制, ability: {source: s1, section: 0, line: 1}, reason: 'それの{ファンファーレ}能力は誘発しない'}
-          - {kind: 抑制, ability: {source: s2, section: 0, line: 2}, reason: 'それの{ファンファーレ}能力は誘発しない'}
+          - {kind: 抑制, ability: {source: s1, section: 0, line: 1}, reason: 'それの{ファンファーレ}能力は誘発しない。'}
+          - {kind: 抑制, ability: {source: s2, section: 0, line: 2}, reason: 'それの{ファンファーレ}能力は誘発しない。'}
         forbidden_events:
           - {kind: 待機}
           - {kind: 捨てる}

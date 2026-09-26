@@ -78,7 +78,7 @@ scenarios:
                 card: EBD02-T01
                 state:
                   counters:
-                    スタック: 2
+                    スタックカウンター: 2
         P2:
           construction: class
           leader:
@@ -117,7 +117,7 @@ scenarios:
           P1.cemetery: []
           P1.field.b:
             counters:
-              スタック: 1
+              スタックカウンター: 1
         events:
           - kind: 費用成立
             ability:
@@ -157,7 +157,7 @@ scenarios:
                 card: EBD02-T01
                 state:
                   counters:
-                    スタック: 1
+                    スタックカウンター: 1
         P2:
           construction: class
           leader:
@@ -232,7 +232,7 @@ scenarios:
                 card: EBD02-T01
                 state:
                   counters:
-                    スタック: 2
+                    スタックカウンター: 2
         P2:
           construction: class
           leader:
@@ -271,4 +271,4 @@ scenarios:
           P1.cemetery: []
           P1.field.b:
             counters:
-              スタック: 2
+              スタックカウンター: 2

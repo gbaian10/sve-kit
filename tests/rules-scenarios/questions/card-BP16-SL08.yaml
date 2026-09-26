@@ -18,7 +18,6 @@ cards:
   - BP01-176
   - BP14-027
   - BP16-SL08
-  - BP16-T15
 why: "[astra] 選項 3 同時生成兩枚金幣，芸者依兩張各待機一次；EX 已滿則零生成零待機。用精確待機事件數避免為新 token 擅造 id。\n[fable] 艶やかなる太夫・ギンネ【2】「1枚引く。自分の手札1枚をデッキの上か下に置く」：抽完才選要放哪張（結算時的選擇，可以是剛抽的那張）與放頂或放底 （契約 9.12 的 resolve-choice.position；同一句 → 同一個輸入點，9.8）。A 把剛抽的卡放回牌庫頂；B 把原本的手牌放到牌庫底。"
 discriminates: "[astra] 把同時進 EX 合成一事件會只待機一次；滿 EX 仍觸發也會違反禁止事件。\n[fable] 在抽牌前就要求選卡的引擎 awaiting 只會列 h1；沒有「頂／底」選項或固定放底的引擎 A 的牌庫順序不同；把「放頂」做成放底的引擎 A 的牌庫尾端多一張。"
 refs:
@@ -167,19 +166,17 @@ scenarios:
             - new-1
             - new-2
           P1.ex.new-1:
-            card: BP16-T15
+            name: 輝く金貨
           P1.ex.new-2:
-            card: BP16-T15
+            name: 輝く金貨
         events:
           - kind: 移動
             object: new-1
-            card: BP16-T15
             to: P1.ex
             source: g
             group: create-coins
           - kind: 移動
             object: new-2
-            card: BP16-T15
             to: P1.ex
             source: g
             group: create-coins
@@ -329,19 +326,17 @@ scenarios:
             - new-1
             - new-2
           P1.ex.new-1:
-            card: BP16-T15
+            name: 輝く金貨
           P1.ex.new-2:
-            card: BP16-T15
+            name: 輝く金貨
         events:
           - kind: 移動
             object: new-1
-            card: BP16-T15
             to: P1.ex
             source: g
             group: create-coins
           - kind: 移動
             object: new-2
-            card: BP16-T15
             to: P1.ex
             source: g
             group: create-coins

@@ -104,7 +104,7 @@ evidence:
     quote: 各プレイヤーは自分のデッキの一番上から4枚のカードを自分の手札に移動します。
     derivation:
       - 開局發牌與 6.2.1.8 換牌均為移動；先攻第一回合依 7.2.4.1 不抽牌。
-      - 每次整批移動共用 group；事件依前一個不同比對點切分，偶像局面的發牌事件只放在 after-decision-1。
+      - 換牌的每次整批移動共用 group；開局發牌的 group 與玩家間先後不比對（契約第 10 節第 30 條），改以手牌與牌庫區域驗證。
   - ref: cr 6.2.1.8
     quote: 先攻プレイヤーから順に各プレイヤーは、望むのであれば自分の手札のカードを任意の順で自分のメインデッキの一番下に移動し、自分のデッキの一番上から 4 枚のカードを自分の手札に移動することができます。これは各プレイヤーが 1 回ずつのみ実行できます。
     derivation:
@@ -275,54 +275,6 @@ scenarios:
           P2.field: []
         events:
           - kind: 移動
-            object: a0
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a1
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a2
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a3
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b0
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b1
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b2
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b3
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
             object: a3
             from: P1.hand
             to: P1.deck
@@ -485,55 +437,17 @@ scenarios:
             - new-5
           P1.ex_count: 5
           P2.ex: []
-        events:
-          - kind: 移動
-            object: a0
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a1
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a2
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a3
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b0
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b1
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b2
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b3
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
+          # 6.2.1.7 發牌以手牌驗證；發牌事件的 group 與玩家間先後不比對（契約第 10 節第 30 條）
+          P1.hand:
+            - a0
+            - a1
+            - a2
+            - a3
+          P2.hand:
+            - b0
+            - b1
+            - b2
+            - b3
         forbidden_events:
           - kind: 引く
       - at: after-decision-3
@@ -820,54 +734,6 @@ scenarios:
           P2.field.b-start:
             acted: false
         events:
-          - kind: 移動
-            object: a0
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a1
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a2
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: a3
-            from: P1.deck
-            to: P1.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b0
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b1
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b2
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
-          - kind: 移動
-            object: b3
-            from: P2.deck
-            to: P2.hand
-            by: rule-6.2.1.7
-            group: opening-hand
           - kind: 移動
             object: a3
             from: P1.hand

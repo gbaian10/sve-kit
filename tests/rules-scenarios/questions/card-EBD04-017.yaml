@@ -211,7 +211,7 @@ scenarios:
                 card: EBD02-T01
                 state:
                   counters:
-                    スタック: 2
+                    スタックカウンター: 2
         P2:
           construction: class
           leader:
@@ -249,4 +249,4 @@ scenarios:
             - a
           P1.field.b:
             counters:
-              スタック: 1
+              スタックカウンター: 1
