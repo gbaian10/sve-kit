@@ -31,6 +31,8 @@ class ImageResult(StrEnum):
     FETCHED = "fetched"
     NO_IMAGE = "no_image"
     """Neither the template nor the card page has this image."""
+    SHARED = "shared"
+    """The card page shows another card's image that is already stored."""
 
 
 def stored_cards(writer: Writer) -> list[sv1.ApiCard] | None:
@@ -112,6 +114,11 @@ class Sv1Crawler:
         if found == url:
             msg = f"{url}: missing, yet the card page links it"
             raise FetchError(msg)
+        if crawler.writer.local_state(found) is LocalState.TRUSTED:
+            # Reprints such as 810xxxxxx reuse another card's art that is already
+            # stored; a changed template would point at images we do not have.
+            self.misses.record_success()
+            return ImageResult.SHARED
         self.misses.record_failure(f"{url}: missing, card page shows {found}")
         await crawler.image(found)
         return ImageResult.FETCHED

@@ -449,7 +449,7 @@ async def _sv1_images(crawler: Sv1Crawler, job: Job, settings: Settings) -> int:
     jobs = image_jobs(cards)
     pending = sum(not stored_image(manifest, writer, i, f) for i, f in jobs)
     _check_space(settings, job, len(jobs), pending, sv1.IMAGE_RESERVE_BYTES)
-    failures = no_image = 0
+    failures = no_image = shared = 0
     for index, (card_id, face) in enumerate(jobs, start=1):
         try:
             result = await crawler.image(card_id, face)
@@ -460,9 +460,12 @@ async def _sv1_images(crawler: Sv1Crawler, job: Job, settings: Settings) -> int:
             if result is ImageResult.NO_IMAGE:
                 no_image += 1
                 console.print(f"{card_id} {face.name.lower()}: no image on the site")
+            elif result is ImageResult.SHARED:
+                shared += 1
         if index % 200 == 0:
             console.print(f"{index}/{len(jobs)} images")
     console.print(f"{no_image} images do not exist on the site")
+    console.print(f"{shared} images reuse another card's stored image")
     return failures
 
 

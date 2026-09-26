@@ -263,6 +263,26 @@ async def test_missing_template_falls_back_to_the_card_page(
     assert len(portal.calls) == calls
 
 
+async def test_card_page_showing_a_stored_image_is_shared_not_a_miss(
+    manifest: Manifest, root: Path, clock: FakeClock
+) -> None:
+    portal = FakePortal()
+    shared = sv1.image_url(FOLLOWER, sv1.Face.BASE)
+    reprints = [card_id(i) for i in range(1, 9, 2)]
+    for reprint in reprints:
+        portal.missing.add(f"/image/card/phase2/common/C/C_{reprint}.png")
+        portal.page_images[reprint] = [shared]
+    crawler = make_sv1(manifest, root, clock, portal)
+    assert await crawler.image(FOLLOWER, sv1.Face.BASE) is ImageResult.FETCHED
+    fetched = portal.calls.count(shared)
+
+    # make_sv1 trips `misses` after 3 in a row; four reprints must not trip it.
+    for reprint in reprints:
+        assert await crawler.image(reprint, sv1.Face.BASE) is ImageResult.SHARED
+    assert portal.calls.count(shared) == fetched
+    assert await crawler.image(reprints[0], sv1.Face.BASE) is ImageResult.STORED
+
+
 async def test_a_404_template_also_falls_back(
     manifest: Manifest, root: Path, clock: FakeClock
 ) -> None:
