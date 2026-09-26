@@ -120,20 +120,24 @@ cards:
             max: 1
   BP16-055:
     status: complete
-    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    review: 第二輪複核完整 text／sections；土の秘術為打出時的可選追加費用，效果只讀 paid，不在解算中再次付費。
     abilities:
       - line: 1
         kind: spell
         body:
-          op: pay
-          costs:
-            - op: earth_rite
-              count: 1
+          op: if
+          condition:
+            read: paid.earth
           then:
             op: create
             name: ガーディアンゴーレム
             count: 1
             to: field
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 1
   BP16-076:
     status: complete
     review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。

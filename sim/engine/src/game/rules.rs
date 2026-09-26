@@ -491,6 +491,21 @@ impl Game {
         if costs.is_empty() {
             return Ok(());
         }
+        let mut atoms = Vec::new();
+        self.cost_atoms(&costs, frame, &mut atoms)?;
+        let zero = atoms
+            .iter()
+            .all(|(cost, context)| match string(&cost["op"]) {
+                "pp" => self
+                    .number(&cost["amount"], context)
+                    .is_ok_and(|amount| amount == 0),
+                "_earth_payment" => self
+                    .number(&cost["count"], context)
+                    .is_ok_and(|count| count == 0),
+                _ => self
+                    .select(&cost["subjects"], context)
+                    .is_ok_and(|ids| ids.is_empty()),
+            });
         let start = self.emitted.len();
         let group = self.group();
         let mut cost_frame = frame.clone();
@@ -500,12 +515,6 @@ impl Game {
         for event in self.emitted.iter_mut().skip(start) {
             event["group"] = json!(group);
         }
-        let zero = costs.iter().all(|cost| match string(&cost["op"]) {
-            "pp" => self.number(&cost["amount"], frame).unwrap_or(1) == 0,
-            _ => self
-                .select(&cost["subjects"], frame)
-                .is_ok_and(|ids| ids.is_empty()),
-        });
         let replaced = self
             .emitted
             .iter()

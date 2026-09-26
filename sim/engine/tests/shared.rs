@@ -4,12 +4,13 @@
 
 extern crate alloc;
 
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 use alloc::sync::Arc;
 use std::env::var_os;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
+use serde_json::{Value, json};
 use sve_engine::adapter::{Adapter, AiAdapter, AssistAdapter, ReplayAdapter};
 use sve_engine::ai::Profile;
 use sve_engine::catalog::Catalog;
@@ -17,7 +18,7 @@ use sve_scenario_runner::ai::{AiEngine, AiOutcome, check_ai, load_positions};
 use sve_scenario_runner::arch::{
     ArchOptions, AssistEngine, Outcome, ReplayEngine, check_assist, check_replay, load_fixtures,
 };
-use sve_scenario_runner::{Verdict, load_dir, load_selection, score_g1};
+use sve_scenario_runner::{RunOptions, Verdict, load_dir, load_selection, run, score_g1};
 
 fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -42,12 +43,71 @@ fn catalog() -> Arc<Catalog> {
 }
 
 #[test]
-fn representative_rules_preserve_all_supported_expectations() {
+fn representative_rules_preserve_states_and_expose_legacy_pending_shape() {
     let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
     let selection =
         load_selection(&root().join("tests/rules-scenarios/g1-selection.yaml")).unwrap();
     let reports = score_g1(&mut Adapter::new(catalog()), &questions, &selection, 41).unwrap();
     assert_eq!(reports.len(), 41);
+    let mut mismatched = 0_usize;
+    for report in reports {
+        match report.verdict {
+            Verdict::Pass => {}
+            Verdict::Fail { failures } => {
+                mismatched = mismatched.saturating_add(1);
+                for failure in failures {
+                    assert_eq!(failure.what, "awaiting", "{failure:?}");
+                    assert_eq!(failure.actual["by"], failure.expected["by"], "{failure:?}");
+                    let legacy = failure.expected["choices"].as_array().unwrap();
+                    assert!(
+                        legacy.iter().all(|choice| choice
+                            .as_object()
+                            .unwrap()
+                            .keys()
+                            .all(|key| key == "do" || key == "pending")),
+                        "{failure:?}"
+                    );
+                    let identities = |choices: &[Value]| {
+                        choices
+                            .iter()
+                            .map(|choice| {
+                                json!({"do":choice["do"],"pending":choice["pending"]}).to_string()
+                            })
+                            .collect::<BTreeSet<_>>()
+                    };
+                    assert_eq!(
+                        identities(failure.actual["choices"].as_array().unwrap()),
+                        identities(legacy),
+                        "{failure:?}"
+                    );
+                }
+            }
+            other @ (Verdict::Unsupported { .. }
+            | Verdict::AdapterError { .. }
+            | Verdict::Ineligible { .. }) => panic!("unexpected G1 outcome: {other:?}"),
+        }
+    }
+    assert_eq!(
+        mismatched, 8,
+        "The public G1 report must continue exposing every unresolved contract mismatch."
+    );
+}
+
+#[test]
+fn second_exam_passes_every_new_scenario_without_contract_exceptions() {
+    let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
+    let selection =
+        load_selection(&root().join("docs/evaluation/seal-2/new-selection.yaml")).unwrap();
+    let reports = run(
+        &mut Adapter::new(catalog()),
+        &questions,
+        Some(&selection),
+        RunOptions {
+            require_verified: true,
+        },
+    )
+    .unwrap();
+    assert_eq!(reports.len(), 139);
     for report in reports {
         assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
     }
