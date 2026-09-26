@@ -283,6 +283,33 @@ async def test_card_page_showing_a_stored_image_is_shared_not_a_miss(
     assert await crawler.image(reprints[0], sv1.Face.BASE) is ImageResult.STORED
 
 
+async def test_card_page_showing_a_later_cards_template_is_shared(
+    manifest: Manifest, root: Path, clock: FakeClock
+) -> None:
+    portal = FakePortal()
+    later = sv1.image_url(FOLLOWER, sv1.Face.BASE)
+    reprints = [card_id(i) for i in range(1, 9, 2)]
+    for reprint in reprints:
+        portal.missing.add(f"/image/card/phase2/common/C/C_{reprint}.png")
+        portal.page_images[reprint] = [later]
+    crawler = make_sv1(manifest, root, clock, portal)
+
+    # The first reprint fetches the art before its own card; none may trip `misses`.
+    for reprint in reprints:
+        assert await crawler.image(reprint, sv1.Face.BASE) is ImageResult.SHARED
+    assert portal.calls.count(later) == 1
+    assert await crawler.image(FOLLOWER, sv1.Face.BASE) is ImageResult.STORED
+
+
+def test_is_template_matches_any_card_but_not_other_shapes() -> None:
+    assert sv1.is_template(sv1.image_url(900344080, sv1.Face.BASE), sv1.Face.BASE)
+    assert not sv1.is_template(
+        sv1.image_url(900344080, sv1.Face.BASE), sv1.Face.EVOLVED
+    )
+    v2 = f"{sv1.BASE}/image/card/phase2/common/C/C_{SPELL}_v2.png"
+    assert not sv1.is_template(v2, sv1.Face.BASE)
+
+
 async def test_a_404_template_also_falls_back(
     manifest: Manifest, root: Path, clock: FakeClock
 ) -> None:

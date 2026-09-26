@@ -102,6 +102,13 @@ def image_url(card_id: int, face: Face) -> str:
     )
 
 
+def is_template(url: str, face: Face) -> bool:
+    """Whether `url` is the template image of some card, not necessarily this one."""
+    prefix = image_url(0, face).removesuffix("0.png")
+    card = url.removeprefix(prefix).removesuffix(".png")
+    return url.startswith(prefix) and len(card) == _CARD_ID_DIGITS and card.isdigit()
+
+
 def resolve_image(src: str) -> str:
     """Resolve an `<img src>`; the query is a cache buster, so it is dropped."""
     parts = urlsplit(urljoin(f"{BASE}/card/", src))
