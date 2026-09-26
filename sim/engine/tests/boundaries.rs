@@ -3,6 +3,7 @@
 extern crate alloc;
 
 use alloc::sync::Arc;
+use core::slice::from_ref;
 
 use serde_json::{Value, json};
 use sve_engine::EngineFailure;
@@ -6105,4 +6106,115 @@ fn unknown_future_grant_periods_and_mixed_numeric_windows_rollback() {
         ));
         assert_eq!(engine.digest().unwrap(), before);
     }
+}
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The resource fixture constructs its authored programs and complete player zones."
+)]
+fn ride_fixture(extra_costs: &[Value]) -> (Arc<Catalog>, Value) {
+    let resource = json!({"number":"unit-resource","faces":[{"name":"ドライブポイント","card_class":"ニュートラル","card_type":"スペル・エボルヴ","cost":"0","power":"-","hp":"-","traits":[],"text":null,"sections":[]}]});
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    let mut costs = vec![json!({"op":"pp","amount":1_i64})];
+    costs.extend_from_slice(extra_costs);
+    doc["cards"]["unit-follower"]["abilities"] = json!([{"line":1_i64,"kind":"ride","costs":costs,"body":{"op":"gain_drive","subjects":"self"}}]);
+    doc["cards"]["unit-resource"] =
+        json!({"status":"complete","review":"synthetic","abilities":[]});
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &format!("{}\n{resource}", snapshot()),
+            &registry(),
+            &[("ride".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["ep"] = json!(1_i64);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([
+        {"id":"r1","card":"unit-resource"},
+        {"id":"r2","card":"unit-resource"},
+        {"id":"used","card":"unit-resource","face_up":true}
+    ]);
+    (loaded, initial)
+}
+
+#[test]
+fn explicit_and_implicit_ride_costs_choose_and_pay_exactly_one_resource() {
+    let link = json!({"op":"link_resource","subjects":"self","name":"ドライブポイント","count":1_i64,"from_zone":"evolve_deck","to":"drive"});
+    for explicit in [false, true] {
+        for ep in [0_i64, 1_i64] {
+            let (loaded, initial) = ride_fixture(if explicit { from_ref(&link) } else { &[] });
+            let mut engine = Game::new(
+                Arc::clone(&loaded),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "ride",
+            )
+            .unwrap();
+            let choices = engine
+                .legal()
+                .unwrap()
+                .into_iter()
+                .filter(|action| action["do"] == "activate")
+                .collect::<Vec<_>>();
+            assert_eq!(choices.len(), 4);
+            assert!(
+                choices
+                    .iter()
+                    .all(|action| action["costs"].as_object().unwrap().len() == 1
+                        && action["costs"]["1"].as_array().unwrap().len() == 1)
+            );
+            let mut saved: Game =
+                serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+            let mut sampled =
+                Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "ride")
+                    .unwrap();
+            for instance in [&mut engine, &mut saved, &mut sampled] {
+                let before = instance.digest().unwrap();
+                for material in [json!([]), json!(["used"]), json!(["r1", "r2"])] {
+                    assert_eq!(instance.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"costs":{"1":material},"pay":{"pp":1_i64-ep,"ep":ep}}),"bad-resource").unwrap().outcome,"cannot-activate");
+                    assert_eq!(instance.digest().unwrap(), before);
+                }
+                instance.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"costs":{"1":["r2"]},"pay":{"pp":1_i64-ep,"ep":ep}}),"ride").unwrap();
+                for (path, value) in [
+                    ("P1.drive", json!(["r2"])),
+                    ("P1.evolve_deck", json!(["r1", "used"])),
+                    ("P1.field.a.links.憑依", json!(["r2"])),
+                    ("P1.pp.current", json!(1_i64 + ep)),
+                    ("P1.ep", json!(1_i64 - ep)),
+                ] {
+                    assert_eq!(instance.query(View::P1, path).unwrap(), Some(value));
+                }
+                assert!(
+                    !instance
+                        .legal()
+                        .unwrap()
+                        .iter()
+                        .any(|action| action["do"] == "activate")
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn ride_payment_rejects_ambiguous_declarations_and_missing_unique_materials() {
+    let link = json!({"op":"link_resource","subjects":"self","name":"ドライブポイント","count":1_i64,"from_zone":"evolve_deck","to":"drive"});
+    let mut doubled = link.clone();
+    doubled["count"] = json!(2_i64);
+    for costs in [vec![link.clone(), link.clone()], vec![doubled]] {
+        let (loaded, initial) = ride_fixture(&costs);
+        let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "ride").unwrap();
+        let before = engine.digest().unwrap();
+        assert!(matches!(engine.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"pay":{"pp":1_i64,"ep":0_i64}}),"unknown-cost"),Err(EngineFailure::Unsupported(_))));
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    let (loaded, mut initial) = ride_fixture(&[link]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([{"id":"r1","card":"unit-resource"}]);
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "ride").unwrap();
+    let before = engine.digest().unwrap();
+    assert_eq!(engine.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"pay":{"pp":1_i64,"ep":0_i64}}),"missing").unwrap().outcome,"cannot-activate");
+    assert_eq!(engine.digest().unwrap(), before);
 }

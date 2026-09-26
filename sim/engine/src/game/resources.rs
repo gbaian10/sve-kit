@@ -142,7 +142,7 @@ impl Game {
         }
         let mut costs = list(&code["costs"]);
         if code["kind"] == "ride" {
-            costs.push(json!({"op":"_drive_point"}));
+            Self::expand_ride_payment(&mut costs);
         }
         let mut specs = list(&code["cost_selections"]);
         for cost in &mut costs {
@@ -170,6 +170,31 @@ impl Game {
             code["costs"] = json!(costs);
         }
         code
+    }
+
+    fn expand_ride_payment(costs: &mut Vec<Value>) {
+        let explicit = costs
+            .iter()
+            .filter(|cost| cost["op"] == "link_resource")
+            .count();
+        if explicit == 0 {
+            costs.push(json!({"op":"_drive_point"}));
+            return;
+        }
+        if explicit != 1 {
+            return;
+        }
+        for cost in costs {
+            if cost["op"] == "link_resource"
+                && cost["subjects"] == "self"
+                && cost["name"] == "ドライブポイント"
+                && cost["count"] == 1_i64
+                && cost["from_zone"] == "evolve_deck"
+                && cost["to"] == "drive"
+            {
+                *cost = json!({"op":"_drive_point"});
+            }
+        }
     }
 
     pub(super) fn cost_atoms(
