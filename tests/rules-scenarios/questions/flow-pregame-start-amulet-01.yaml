@@ -1,0 +1,170 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: flow-pregame-start-amulet-01
+kind: flow
+must_pass: true
+mechanisms: [開局程序, Vanguard：起始護符, 14.4.3.1, 14.4.3.2, 6.2.1.13, 起始護符第 1 回合可起動, 10.4.6.1, 8.4.2.1, 12.9.2, 先攻第 1 回合不抽牌, 7.2.4.1]
+cards: [CP03-021, CP03-011, CP03-010, CP03-015, BP01-173, BP01-176]
+why: >-
+  Vanguard タイトル構築：開局前從牌組選 1 張【スタートアミュレット】裏向き上場（14.4.3.1），換牌後翻成表向き（14.4.3.2）；
+  它是**遊戲開始時就在場上、スタンド狀態**的護符，先攻第 1 回合就能用「これをアクト墓場に置く」的起動（10.4.6.1）。
+  士官候補生 エリック 的起動「元のコスト1の自分の場のアクアフォース・フォロワー1体を選ぶ。それは【疾走】を持つ」→ 第 1 回合打出的 1 費テオ 得到【疾走】後可以攻擊リーダー（12.9.2）；
+  沒有疾走時本回合進場的從者不能攻擊（8.4.2.1）。テオ 的ファンファーレ 條件「他のアクアフォース・フォロワー」：エリック 是護符，不算。
+discriminates: >-
+  A：沒把起始護符翻成表向き（能力無效、不能起動）的引擎會 cannot-activate；ファンファーレ 把護符算進「フォロワー」的引擎會給テオ 突進（可攻擊從者，本題不測）。
+  B：允許本回合進場、沒有疾走的從者攻擊的引擎會 resolved 並扣血。先攻第 1 回合多抽 1 張的引擎 P1.hand 是 5 張。
+refs:
+  rules: [14.4.3.1, 14.4.3.2, 6.2.1.4, 6.2.1.6, 6.2.1.8, 6.2.1.13, 7.2.4.1, 10.4.6, 10.4.6.1, 8.4.2.1, 8.4.3.1, 12.9.2, 12.4.3]
+  qa: []
+evidence:
+  - ref: cr 14.4.3.1
+    quote: このタイトルを基準としてデッキを構築する場合、ゲーム前の手順（6.2）において、自身のメインデッキをデッキ置き場に置く（6.2.1.4）直前に、各プレイヤーは自身のデッキから【スタートアミュレット】能力を持つカードを 1 枚裏向きで場に出す必要があります。
+    derivation:
+      - a7 在洗牌前離開牌組 → 牌庫剩 39 張，開局手牌從剩下的牌抽
+  - ref: cr 14.4.3.2
+    quote: ゲーム開始時点、引き直しの実行後に、自身の場に【スタートアミュレット】能力を持つ裏向きのカードがある場合、それを表向きにします。
+    derivation:
+      - 表向き後是普通的場上護符，起動能力有效（10.3.5）
+  - ref: cr 10.4.6.1
+    quote: このコストは、このコストをもつカードが場に出たターンであっても実行する事が可能です。
+    derivation:
+      - 就算把開局上場算成「這回合進場」，アクト費用也照樣能付
+  - ref: cr 8.4.2.1
+    quote: 攻撃フォロワーとして選択できるのは、以下のいずれかです。* このターンの最初から連続して自分がマスターであるフォロワー（このターンに進化したものを含む）* このターンに進化したフォロワー
+    derivation:
+      - 第 1 回合打出的テオ 不符合 → 只有靠【疾走】（12.9.2）才能當攻擊從者
+  - ref: cr 7.2.4.1
+    quote: 先攻プレイヤーは、自身の最初のターンではカードを引きません。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A 起始護符 → 先攻第 1 回合打出テオ → 起動エリック 給疾走 → 攻擊リーダー 2 傷害
+    setup:
+      pregame: true
+      players:
+        P1:
+          construction: title
+          title: カードファイト!! ヴァンガード
+          leader: {class: エルフ}
+          deck_list:
+            - {id: a1, card: CP03-011}      # ティアーナイト テオ 1 費 2/1
+            - {id: a2, card: CP03-010}
+            - {id: a3, card: CP03-010}
+            - {id: a4, card: CP03-015}
+            - {id: a5, card: CP03-010}
+            - {id: a6, card: CP03-011}
+            - {id: a7, card: CP03-021}      # 士官候補生 エリック（スタートアミュレット）
+            - {id: a8, card: CP03-010}
+            - {filler: 32}
+          evolve_deck_list: []
+        P2:
+          construction: class
+          leader: {class: ロイヤル}
+          deck_list:
+            - {id: b1, card: BP01-173}
+            - {id: b2, card: BP01-176}
+            - {id: b3, card: BP01-173}
+            - {id: b4, card: BP01-176}
+            - {id: b5, card: BP01-173}
+            - {id: b6, card: BP01-176}
+            - {id: b7, card: BP01-173}
+            - {id: b8, card: BP01-176}
+            - {filler: 32}
+          evolve_deck_list: []
+    decisions:
+      - {n: 1, by: P1, at: pregame, do: choose-start-amulet, object: a7}
+      - {n: 2, by: P1, at: pregame, do: choose-first, first: P1}
+      - {n: 3, by: P1, at: pregame, do: mulligan, redo: false}
+      - {n: 4, by: P2, at: pregame, do: mulligan, redo: false}
+      - {n: 5, by: P1, at: main, do: play, card: a1}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - {n: 7, by: P1, at: main, do: activate, ability: {source: a7, line: 2}, targets: {1: [a1]}}
+      - {n: 8, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+      - {n: 9, by: P2, at: quick, do: pass}
+    random:
+      first_chooser: P1
+      shuffles:
+        - {player: P1, zone: deck, result: [a1, a2, a3, a4, a5, a6, a8, filler: 32]}
+        - {player: P2, zone: deck, result: [b1, b2, b3, b4, b5, b6, b7, b8, filler: 32]}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn: {active: P1, first_player: P1, phase: main}
+          P1.pp: {current: 1, max: 1}
+          P1.field: [a7]
+          P1.field.a7: {acted: false}
+          P1.hand: [a1, a2, a3, a4]
+          P1.deck: [a5, a6, a8, filler: 32]
+          P1.deck_count: 35
+          P2.hand: [b1, b2, b3, b4]
+        forbidden_events:
+          - {kind: 引く}
+      - at: after-decision-4
+        view: P2
+        outcome: resolved
+        assert:
+          knowledge: {knows: [a7]}
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 0
+          P1.field: [a7, a1]
+          P1.field.a1: {entered_from: hand, entered_by: play}
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [a1]
+          P1.cemetery: [a7]
+          P1.pp.current: 0
+        events:
+          - {kind: アクト, object: a7, group: 1}
+          - {kind: 移動, object: a7, from: P1.field, to: P1.cemetery, group: 1}
+      - at: after-decision-9
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.leader.life: 18
+          P1.field.a1: {acted: true}
+        events:
+          - {kind: 攻撃, attacker: a1, target: P2.leader}
+          - {kind: ダメージ, source: a1, target: P2.leader, amount: 2}
+
+  - name: B 不起動エリック → 本回合進場的テオ 沒有疾走 → 不能攻擊
+    inherit: A 起始護符 → 先攻第 1 回合打出テオ → 起動エリック 給疾走 → 攻擊リーダー 2 傷害
+    decisions:
+      - {n: 1, by: P1, at: pregame, do: choose-start-amulet, object: a7}
+      - {n: 2, by: P1, at: pregame, do: choose-first, first: P1}
+      - {n: 3, by: P1, at: pregame, do: mulligan, redo: false}
+      - {n: 4, by: P2, at: pregame, do: mulligan, redo: false}
+      - {n: 5, by: P1, at: main, do: play, card: a1}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      - {n: 7, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
+    random:
+      first_chooser: P1
+      shuffles:
+        - {player: P1, zone: deck, result: [a1, a2, a3, a4, a5, a6, a8, filler: 32]}
+        - {player: P2, zone: deck, result: [b1, b2, b3, b4, b5, b6, b7, b8, filler: 32]}
+    expected:
+      - at: after-decision-7
+        view: omniscient
+        outcome: cannot-attack
+        assert:
+          P2.leader.life: 20
+          P1.field.a1: {acted: false}
+          P1.field: [a7, a1]
+        forbidden_events:
+          - {kind: 攻撃}

@@ -1,0 +1,152 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-CP04-088
+kind: card
+must_pass: true
+mechanisms: [效果使卡上場時該卡的ファンファーレ不誘發, 抑制事件, 12.4.3, 5.8.1.2, 一個「探す」含多組條件, sections 裡的能力指稱, 5.8.2 洗牌]
+cards: [CP04-088, CP04-017, CP04-085, BP01-173]
+why: >-
+  イオ 的{ファンファーレ}（在 sections[0]，不帶 UB；UB 只在主文字的起動能力上）「自分のデッキから元のコスト3以下のルーセント学院・フォロワー1枚と元のコスト1のルーセント学院・フォロワー1枚を探し、場に出す。それの{ファンファーレ}能力は誘発しない」。
+  被找出來上場的スズナ（ファンファーレ：捨 1 張）與ミサキ（ファンファーレ：自己リーダー 2 傷害）的誘發條件成立（12.4.3 場以外→場），但被明文阻止 → 依契約 9.11 產生 抑制 事件、不待機（Q2465）。
+  一個「探す」含兩組條件 → 平坦列表 select [s1, s2]（契約 10.6）；找到後向對手公開（5.8.1.2）、洗牌（5.8.2）。
+  B：可以一張都不找（select []）。
+discriminates: >-
+  A：讓被找出的從者ファンファーレ 待機並結算的引擎會多出 待機 事件、P1 手牌少 1、リーダー體力少 2；沒有 抑制 事件的引擎違反 events。
+  B：把「探す」當成必須找到的引擎不接受 select []。
+refs:
+  rules: [12.4.3, 5.8.1, 5.8.1.2, 5.8.2, 10.7.2, 4.4.4.2, 5.5.3]
+  qa: [Q2465]
+evidence:
+  - ref: Q2465
+    quote: いいえ。『イオ』の《ファンファーレ》能力によって、《ファンファーレ》能力を持つフォロワーを場に出した場合、そのフォロワーの《ファンファーレ》能力は、誘発条件を満たしたとしても誘発しないため、プレイすることができません。
+  - ref: cr 12.4.3
+    quote: ‘ファンファーレ （テキスト）’は、‘このカードを場以外から場に置いたとき、（テキスト）’を意味します。
+    derivation:
+      - 誘發條件成立 → 但被「誘発しない」阻止 → 契約 9.11 的 抑制 事件
+  - ref: cr 5.8.1.2
+    quote: 特定条件に枚数以外の条件がある場合、それを見つけた後に、そのカードが条件を満たすことを相手に示します。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A 找出スズナ 與ミサキ 上場 → 兩者的ファンファーレ 被抑制、不待機
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: プリンセスコネクト！Re:Dive
+          leader: {class: ナイトメア, life: 20}
+          pp: {current: 5, max: 5}
+          zones:
+            hand:
+              - {id: h1, card: CP04-088}
+              - {filler: 2}
+            deck:
+              - {id: s1, card: CP04-017}          # スズナ 3 費（ファンファーレ 捨 1）
+              - {id: s2, card: CP04-085}          # ミサキ 1 費（ファンファーレ 自傷 2）
+              - {id: f1, card: BP01-173}
+              - {id: f2, card: BP01-173}
+              - {id: f3, card: BP01-173}
+              - {id: f4, card: BP01-173}
+              - {id: f5, card: BP01-173}
+              - {id: f6, card: BP01-173}
+              - {id: f7, card: BP01-173}
+              - {id: f8, card: BP01-173}
+              - {id: f9, card: BP01-173}
+              - {id: f10, card: BP01-173}
+              - {id: f11, card: BP01-173}
+              - {id: f12, card: BP01-173}
+              - {id: f13, card: BP01-173}
+              - {id: f14, card: BP01-173}
+              - {id: f15, card: BP01-173}
+              - {id: f16, card: BP01-173}
+              - {id: f17, card: BP01-173}
+              - {id: f18, card: BP01-173}                          # 其餘用真實非學院卡（搜尋會觀察整副牌）
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 5}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, section: 0, line: 1}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [s1, s2]}
+    random:
+      shuffles:
+        - {player: P1, zone: deck, result: [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18]}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: [s1, s2]}
+            - {do: resolve-choice, select: [s1]}
+            - {do: resolve-choice, select: [s2]}
+            - {do: resolve-choice, select: []}
+        assert:
+          P1.pp.current: 0
+          P1.field: [h1]
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [h1, s1, s2]
+          P1.field.s1: {entered_from: deck, entered_by: effect}
+          P1.field.s2: {entered_from: deck, entered_by: effect}
+          P1.hand: [filler: 2]
+          P1.leader.life: 20
+          P1.deck: [f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18]
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 公開, object: s1, to: P2}
+          - {kind: 公開, object: s2, to: P2}
+          - {kind: 場に出す, object: s1, from: P1.deck, group: 1}
+          - {kind: 場に出す, object: s2, from: P1.deck, group: 1}
+          - {kind: 抑制, ability: {source: s1, section: 0, line: 1}, reason: 'それの{ファンファーレ}能力は誘発しない'}
+          - {kind: 抑制, ability: {source: s2, section: 0, line: 2}, reason: 'それの{ファンファーレ}能力は誘発しない'}
+        forbidden_events:
+          - {kind: 待機}
+          - {kind: 捨てる}
+          - {kind: ダメージ}
+
+  - name: B 一張都不找
+    inherit: A 找出スズナ 與ミサキ 上場 → 兩者的ファンファーレ 被抑制、不待機
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, section: 0, line: 1}}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+    random:
+      shuffles:
+        - {player: P1, zone: deck, result: [s2, s1, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18]}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [h1]
+          P1.deck: [s2, s1, f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15, f16, f17, f18]
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - {kind: 場に出す, object: s1}
+          - {kind: 場に出す, object: s2}
+          - {kind: 公開, object: s1}
+          - {kind: 公開, object: s2}

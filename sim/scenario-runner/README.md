@@ -72,9 +72,9 @@ Where the contract is silent, the runner uses the following:
 
 ## Tests
 
-`cargo test -p sve-scenario-runner` runs the runner against all 184 questions with two fake engines:
+`cargo test -p sve-scenario-runner` runs the runner against all 237 questions with two fake engines:
 
-- **`Oracle`**: plays back each scenario's expected results. It must pass all 567 scenarios
+- **`Oracle`**: plays back each scenario's expected results. It must pass all 706 scenarios
 - **`Mutant`**: breaks exactly one thing. It must fail every scenario the mutation applies to. The 12 mutations:
   - outcome
   - a dropped event

@@ -1,0 +1,222 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP11-074
+kind: card
+must_pass: true
+mechanisms:
+  - C10
+  - 同名 token
+  - 跨來源各自每回合一次
+cards:
+  - BP01-179
+  - BP01-T15
+  - BP03-078
+  - BP11-074
+why: 兩隻骸各自記住離場 token 的名稱；非 token 即使也叫ゴースト仍不誘發。
+discriminates: 全場共用一次上限只生一隻；錯用來源名稱會生錯 token；把追加卡名視作 token 會多待機。
+refs:
+  rules:
+    - 9.1.4.4
+    - 10.7.4
+  qa:
+    - Q1553
+    - Q1552
+    - Q1551
+evidence:
+  - ref: Q1553
+    quote: "Q: このフォロワーが自分の場に2体いる状況で、自分の元のコスト1のトークン・カードが場を離れた場合、このフォロワーの「ターンごとに1回、元のコスト1の自分のトークン・カードが場を離れたとき、～」という能力はそれぞれ誘発しますか？\nA: はい。それぞれターンごとに1回誘発します。"
+    derivation:
+      - 兩隻骸各自記住離場 token 的名稱；非 token 即使也叫ゴースト仍不誘發。
+  - ref: Q1552
+    quote: "Q: 相手のターン中に自分の元のコスト1のトークン・カードが場を離れた場合、このフォロワーの「ターンごとに1回、元のコスト1の自分のトークン・カードが場を離れたとき、～」という能力は誘発しますか？\nA: はい。相手のターン中であっても誘発します。"
+    derivation:
+      - 兩隻骸各自記住離場 token 的名稱；非 token 即使也叫ゴースト仍不誘發。
+  - ref: Q1551
+    quote: "Q: 自分の場の『プチゴースト・バケルス』が場を離れた場合、『大ツルハシの骸』の「ターンごとに1回、元のコスト1の自分のトークン・カードが場を離れたとき、それと同名のトークン・カード1枚を場に出す。」という能力によって、『ゴースト』を場に出すことができますか？\nA: いいえ。『ゴースト』を出すことができません。\n『プチゴースト・バケルス』は追加のカード名として『ゴースト』を持ちますが、トークン・カードではないので場を離れたときに『大ツルハシの骸』の能力が誘発しません。"
+    derivation:
+      - 兩隻骸各自記住離場 token 的名稱；非 token 即使也叫ゴースト仍不誘發。
+  - ref: cr 9.1.4.4
+    quote: あるトークンが存在できる領域以外の領域 に移動した場合、その移動を行った直後に、そ の領域で消去されます。この処理はチェックタ イミングを待たず、なんらかの効果の途中で移 動を行った場合は、その移動の続きを行うより も前に実行されます。
+    derivation:
+      - 兩隻骸各自記住離場 token 的名稱；非 token 即使也叫ゴースト仍不誘發。
+  - ref: cr 10.7.4
+    quote: あるカードが領域を移動することを誘発条件とす る自動能力が存在します。これを領域移動誘発と呼 びます。
+    derivation:
+      - 兩隻骸各自記住離場 token 的名稱；非 token 即使也叫ゴースト仍不誘發。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 真正 token
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP11-074
+              - id: b
+                card: BP11-074
+              - id: t
+                card: BP01-T15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP01-179
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - t
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 1
+      - n: 3
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: b
+            line: 1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery: []
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - a
+            - b
+            - new-1
+            - new-2
+          P1.cemetery: []
+        events:
+          - kind: 場に出す
+            object: new-1
+            to: P1.field
+          - kind: 場に出す
+            object: new-2
+            to: P1.field
+  - name: 同名追加但不是真正 token
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP11-074
+              - id: b
+                card: BP11-074
+              - id: t
+                card: BP03-078
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            hand:
+              - id: s
+                card: BP01-179
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - t
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery:
+            - t
+          P1.field:
+            - a
+            - b
+        forbidden_events:
+          - kind: 待機

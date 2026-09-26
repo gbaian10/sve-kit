@@ -57,6 +57,7 @@ AT_VALUES = {"main", "check-timing", "quick", "resolve", "start", "end", "pregam
 DOS = {
     "play": {
         "card",
+        "declare",
         "targets",
         "costs",
         "optional_costs",
@@ -94,6 +95,12 @@ DOS = {
         "keyword",
         "position",
         "options",
+        # contract 10.15-16: declared values and inner plays' choices
+        "declare",
+        "targets",
+        "costs",
+        "optional_costs",
+        "x",
     },
     "pass": set(),
     "end-phase": set(),

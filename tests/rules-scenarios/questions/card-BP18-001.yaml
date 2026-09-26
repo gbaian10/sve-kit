@@ -1,0 +1,169 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP18-001
+kind: card
+must_pass: true
+mechanisms: [改寫規則的持續效果, 8.3.2.1, 8.3.2.2, 「1ターンに何回でも使える」只放寬進化能力, 12.2.3, 食事仍受每回合一次限制, 14.2.2.5, 進化每回合一次]
+cards: [BP18-001, ECP01-001, ECP01-002, CP01-085, BP01-173, BP01-176]
+why: >-
+  浄樹の六銘伝・ロロ・ロニエ「これが場にいる限り、自分は{進化}能力を1ターンに何回でも使える」→ 8.3.2.2：對進化能力不套用 8.3.2.1 的每回合一次；每次進化都可以各用 1 點 EP（Q2301）。
+  但放寬的只有**進化能力**：進化之後再食事仍被 8.3.2.1 擋下（Q2297）；反過來先食事再進化可以（Q2298，因為指定的是進化能力）。
+  B：ロロ 不在場 → 第二次進化 cannot-evolve。
+discriminates: >-
+  A：仍套用每回合一次的引擎第二次進化 cannot-evolve；只允許第一次用 EP 的引擎 ep 不同。C：把「何回でも」擴大到所有進化相当能力的引擎會讓食事 resolved。
+  D：把「已用過進化相当（食事）」也拿來擋進化能力的引擎會 cannot-evolve。
+refs:
+  rules: [8.3.2, 8.3.2.1, 8.3.2.2, 12.2.3, 14.2.2.5, 14.2.1.1, 10.3.5]
+  qa: [Q2301, Q2297, Q2298, Q2296]
+evidence:
+  - ref: cr 8.3.2.2
+    quote: ある進化能力または進化相当能力に‘1 ターンに何回でも使える’効果が適用されている場合、その進化能力または進化相当能力に対しては、8.3.2.1 は適用されません。
+    derivation:
+      - ロロ 的效果只寫「{進化}能力」→ 只有進化能力免除 8.3.2.1；食事能力（14.2.2.5 進化相当）仍受限
+  - ref: Q2301
+    quote: はい。同一ターン中に複数回《進化》能力をプレイする場合、《進化》能力のプレイ1回につき、EPをそれぞれ1つずつ使用することができます。
+  - ref: Q2297
+    quote: いいえ。この場合、《食事》能力をプレイすることができません。《食事》能力や《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。
+  - ref: Q2298
+    quote: はい。自分は《進化》能力をプレイすることができます。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A ロロ 在場 → 同回合進化兩隻，各用 1 EP
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: エルフ, life: 20}
+          pp: {current: 6, max: 6}
+          ep: 3
+          zones:
+            field:
+              - {id: a1, card: BP18-001}          # ロロ・ロニエ 3/3
+              - {id: a2, card: ECP01-001}         # ホッコータルマエ 2/2（進化 コスト1、食事 コスト1）
+              - {id: a3, card: ECP01-001}
+            evolve_deck:
+              - {id: e2, card: ECP01-002}
+              - {id: e3, card: ECP01-002}
+              - {id: n1, card: CP01-085}
+            hand:
+              - {filler: 1}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {id: d2, card: BP01-176}
+              - {filler: 18}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e2, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: ECP01-002, line: 1}}}
+      - {n: 3, by: P1, at: main, do: evolve, source: a3, ability: {source: a3, line: 2}, evolve_card: e3, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, card: ECP01-002, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ep: 2
+          P1.pp.current: 6
+          P1.field.a2: {evolved: true, evolved_with: e2, power: 3, hp: 3}
+          P1.hand: [d1, filler: 1]
+          semantic_state.counters_this_turn: {P1.evolve_played: 1, P1.evolutions: 1}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ep: 1
+          P1.pp.current: 6
+          P1.field.a3: {evolved: true, evolved_with: e3, power: 3, hp: 3}
+          P1.evolve_deck: [n1]
+          P1.hand: [d1, d2, filler: 1]
+          semantic_state.counters_this_turn: {P1.evolve_played: 2, P1.evolutions: 2}
+        events:
+          - {kind: 進化, object: a3, with: e3}
+
+  - name: B ロロ 不在場 → 第二次進化不行
+    inherit: A ロロ 在場 → 同回合進化兩隻，各用 1 EP
+    setup:
+      players:
+        P1:
+          zones:
+            field:
+              - {id: a2, card: ECP01-001}
+              - {id: a3, card: ECP01-001}
+    decisions:
+      - {n: 1, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e2, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: ECP01-002, line: 1}}}
+      - {n: 3, by: P1, at: main, do: evolve, source: a3, ability: {source: a3, line: 2}, evolve_card: e3, pay: {pp: 0, ep: 1, sep: 0}}
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: cannot-evolve
+        assert:
+          P1.ep: 2
+          P1.field.a3: {evolved: false}
+          P1.evolve_deck: [e3, n1]
+
+  - name: C ロロ 在場、先進化 → 再食事另一隻仍不行（食事不在放寬範圍）
+    inherit: A ロロ 在場 → 同回合進化兩隻，各用 1 EP
+    decisions:
+      - {n: 1, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e2, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: ECP01-002, line: 1}}}
+      - {n: 3, by: P1, at: main, do: activate, ability: {source: a3, line: 3}, pay: {pp: 1, ep: 0}}
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.pp.current: 6
+          P1.race: []
+          P1.evolve_deck: [e3, n1]
+
+  - name: D ロロ 在場、先食事 → 再進化可以
+    inherit: A ロロ 在場 → 同回合進化兩隻，各用 1 EP
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a3, line: 3}, costs: {1: [n1]}, pay: {pp: 1, ep: 0}}
+      - {n: 2, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 2}, evolve_card: e2, pay: {pp: 0, ep: 1, sep: 0}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, card: ECP01-002, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 5
+          P1.race: [n1]
+          P1.field.a3: {links: {出走: [n1]}}
+          semantic_state.counters_this_turn: {P1.evolve_played: 1}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ep: 2
+          P1.field.a2: {evolved: true, evolved_with: e2}
+          P1.hand: [d1, filler: 1]
+          semantic_state.counters_this_turn: {P1.evolve_played: 2, P1.evolutions: 1}

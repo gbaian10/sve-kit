@@ -1,0 +1,240 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-advance-decline-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - A アドバンス
+  - 集合聯集計數
+cards:
+  - BP01-174
+  - BP01-175
+  - BP06-042
+  - BP15-042
+  - BP15-SL13
+why: 陰陽師且是スペル的卡只能算一張；合法打出アドバンス後即使拒絕放上貴人，也花費 EP/PP 並使用共用額度。
+discriminates: 雙計數會接受四張反例；只在成功放上場才記額度則正例能再進化。
+refs:
+  rules:
+    - 12.16.3
+    - 8.3.2.1
+  qa:
+    - Q2001
+    - Q2000
+evidence:
+  - ref: Q2001
+    quote: "Q: タイプに陰陽師を持ち、スペルでもある『式神の使役』は、「自分の墓場の陰陽師・カードやスペルが7枚以上なら、」によって参照する際に、2枚分数えますか？\nA: いいえ。『式神の使役』は1枚分として数えます。\n「自分の墓場の陰陽師・カードやスペルが7枚以上なら」とは、自分の墓場の、タイプに陰陽師を持つカードやスペルの片方もしくは両方に該当するカードの合計枚数を参照します。"
+    derivation:
+      - 陰陽師且是スペル的卡只能算一張；合法打出アドバンス後即使拒絕放上貴人，也花費 EP/PP 並使用共用額度。
+  - ref: Q2000
+    quote: "Q: このフォロワーの《アドバンス起動》能力をプレイした場合、そのターン中に自分の場の『ゴブリン』を進化させることができますか。\nA: いいえ。《アドバンス起動》能力や《進化》能力（進化することができる起動能力・「丸E」のアイコン）は1ターンに1回のみ使用することができます。"
+    derivation:
+      - 陰陽師且是スペル的卡只能算一張；合法打出アドバンス後即使拒絕放上貴人，也花費 EP/PP 並使用共用額度。
+  - ref: cr 12.16.3
+    quote: ‘ （効果）’は、‘ （効果） これをプレイする 際、そのコストに含まれる PP のうち 1 点を、PP で はなく 1 点の EP で支払うことができる。これは進化 相当能力である。’（8.3.2）を意味します。
+    derivation:
+      - 陰陽師且是スペル的卡只能算一張；合法打出アドバンス後即使拒絕放上貴人，也花費 EP/PP 並使用共用額度。
+  - ref: cr 8.3.2.1
+    quote: 起動能力を指定する際、それが進化能力ま たは進化相当能力である場合、このターンに ターンプレイヤーがいずれかの進化能力や進 化相当能力をすでにプレイ済みである場合、 その起動能力は指定できません。
+    derivation:
+      - 陰陽師且是スペル的卡只能算一張；合法打出アドバンス後即使拒絕放上貴人，也花費 EP/PP 並使用共用額度。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 七張拒絕出場仍耗額度
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 1
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP15-SL13
+              - id: g
+                card: BP01-174
+            evolve_deck:
+              - id: e
+                card: BP15-042
+              - id: ge
+                card: BP01-175
+            cemetery:
+              - id: c0
+                card: BP06-042
+              - id: c1
+                card: BP06-042
+              - id: c2
+                card: BP06-042
+              - id: c3
+                card: BP06-042
+              - id: c4
+                card: BP06-042
+              - id: c5
+                card: BP06-042
+              - id: c6
+                card: BP06-042
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        pay:
+          pp: 3
+          ep: 1
+      - n: 2
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 1
+          occurrence: 1
+        choice: decline
+      - n: 3
+        by: P1
+        at: main
+        do: evolve
+        source: g
+        evolve_card: ge
+        pay:
+          pp: 2
+          ep: 0
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: cannot-evolve
+        assert:
+          P1.pp.current: 2
+          P1.ep: 0
+          P1.field:
+            - a
+            - g
+          P1.evolve_deck:
+            - e
+            - ge
+          semantic_state.counters_this_turn.P1.evolve_played: 1
+          semantic_state.counters_this_turn.P1.evolutions: 0
+  - name: 四張雙屬性不能算八張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 1
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP15-SL13
+              - id: g
+                card: BP01-174
+            evolve_deck:
+              - id: e
+                card: BP15-042
+              - id: ge
+                card: BP01-175
+            cemetery:
+              - id: c0
+                card: BP06-042
+              - id: c1
+                card: BP06-042
+              - id: c2
+                card: BP06-042
+              - id: c3
+                card: BP06-042
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        pay:
+          pp: 3
+          ep: 1
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.pp.current: 5
+          P1.ep: 1
+          P1.field:
+            - a
+            - g
+          P1.evolve_deck:
+            - e
+            - ge
+          semantic_state.counters_this_turn.P1.evolve_played: 0

@@ -1,0 +1,206 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-attack-reference-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - C15
+  - 攻擊對象參照
+cards:
+  - BP01-173
+  - BP03-011
+  - DSD01b-004
+  - DSD01b-005
+why: 茨の森賦予的能力參照既有攻擊對象，不重新選擇，因此オーラ不阻止；攻擊主戰者不造成能力傷害。
+discriminates: 錯把參照當選擇目標會取消待機；漏判フォロワー條件會提前傷害主戰者。
+refs:
+  rules:
+    - 10.6.2.3
+  qa:
+    - Q450
+evidence:
+  - ref: Q450
+    quote: "Q: 「【攻撃時】フォロワーへ攻撃したなら、それに2ダメージ」を持った自分のフォロワーは【オーラ】を持つ相手のフォロワーに2ダメージ与えますか？\nA: はい。2ダメージ与えます。"
+    derivation:
+      - 茨の森賦予的能力參照既有攻擊對象，不重新選擇，因此オーラ不阻止；攻擊主戰者不造成能力傷害。
+  - ref: cr 10.6.2.3
+    quote: そのカードや能力が非公開領域のカード 以外のなんらかの事物を‘選ぶ’場合、それ （以下‘目標’）を選びます。
+    derivation:
+      - 茨の森賦予的能力參照既有攻擊對象，不重新選擇，因此オーラ不阻止；攻擊主戰者不造成能力傷害。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 攻擊有オーラ的從者
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-173
+              - id: m
+                card: BP03-011
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: DSD01b-004
+                state:
+                  evolved: true
+                  evolved_with: be
+                  acted: true
+                  power: 7
+                  hp: 3
+            evolution:
+              - id: be
+                card: DSD01b-005
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: b
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+            card: BP03-011
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            hp: 1
+          P2.leader.life: 20
+        events:
+          - kind: ダメージ
+            source: a
+            target: b
+            amount: 2
+  - name: 攻擊主戰者條件不成立
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP01-173
+              - id: m
+                card: BP03-011
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: DSD01b-004
+                state:
+                  evolved: true
+                  evolved_with: be
+                  acted: true
+                  power: 7
+                  hp: 3
+            evolution:
+              - id: be
+                card: DSD01b-005
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: attack
+        attacker: a
+        target: P2.leader
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: a
+            line: 2
+            card: BP03-011
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.b:
+            hp: 3
+          P2.leader.life: 20
+        forbidden_events:
+          - kind: ダメージ

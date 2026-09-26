@@ -1,0 +1,181 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-BP19-SL22
+kind: card
+must_pass: true
+mechanisms: [誘發能力追加誘發一次, 契約 10.17 多重集合待機, 改寫誘發次數的永續能力, 10.7.2.1, 7.4.1, 兩張疊加成 3 次, Q2602, チョイス, 5.18.3.1, 同一能力同時待機多次]
+cards: [BP19-SL22, BP01-176, BP01-173]
+why: >-
+  結盟の咎人・エルラーデ「これが場にいる限り、エンドフェイズが来たときに誘発する自分の能力は追加で1回誘発する」＋「自分のエンドフェイズが来たとき、下記から1つチョイスする。自分の場に他の八獄・フォロワーがいるなら、代わりに2つまで」。
+  A：自己一張 → 結束階段（7.4.1）自己的エンドフェイズ 能力待機 2 次（10.7.2.1），各自獨立決定チョイス。B：兩張エルラーデ → 兩個永續各加 1 次 → 每個能力誘發 3 次（Q2602），
+  兩張共 6 次；且互為「他の八獄」→ 每次可以チョイス 2 個。全部選【3】抽牌 → 抽 6 張。
+discriminates: >-
+  A：只誘發 1 次的引擎在 after-decision-2 就沒有待機、也不會抽牌；把「追加で1回」做成把同一次的效果做兩遍的引擎不會有第二個獨立的チョイス。
+  B：兩張只加成 2 次（4 待機）或不疊加（2 待機）的引擎抽牌數不同。
+refs:
+  rules: [10.7.2.1, 7.4.1, 7.4.2, 10.5.2.2, 10.7.3.1, 5.18.3.1, 5.18.2.1, 10.3.5]
+  qa: [Q2602, Q2604, Q2603]
+evidence:
+  - ref: Q2602
+    quote: 3回誘発します。
+  - ref: Q2604
+    quote: 2回誘発します。
+    derivation:
+      - 「追加で1回誘発する」＝誘發次數 +1（同一事件下待機 2 次，10.7.2.1）；每個永續各自 +1 → 兩張時 1＋2＝3
+  - ref: cr 10.7.2.1
+    quote: 自動能力の誘発条件が複数回満たされた場合、その自動能力はその回数分待機状態になります。
+  - ref: cr 5.18.3.1
+    quote: チョイスする行動で採用する選択肢の数を決定するために何らかの情報を参照する場合、その能力のプレイの開始時点で参照します。
+    derivation:
+      - 每次打出時各自判定「他の八獄・フォロワー」是否存在 → B 中每次都可以 2 個
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 7, P2: 6}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: class
+          leader: {class: ビショップ, life: 18}
+          pp: {current: 0, max: 7}
+          zones:
+            field:
+              - {id: a1, card: BP19-SL22}                    # 結盟の咎人・エルラーデ 5/5
+            hand:
+              - {filler: 1}
+            deck:
+              - {id: d1, card: BP01-173}
+              - {id: d2, card: BP01-173}
+              - {id: d3, card: BP01-173}
+              - {id: d4, card: BP01-173}
+              - {id: d5, card: BP01-173}
+              - {id: d6, card: BP01-173}
+              - {filler: 14}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 7}
+          zones:
+            field:
+              - {id: b1, card: BP01-176}                    # 天剣の乙女 4/6
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: end-phase}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [1], targets: {1: [b1]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          # 契約 10.17：同一能力同一事件待機 2 次 → 相同選項重複列出（多重集合）
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [1], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [2]}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [1], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [2]}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+        assert:
+          turn: {active: P1, phase: end}
+        events:
+          - {kind: 待機, ability: {source: a1, line: 2}}
+          - {kind: 待機, ability: {source: a1, line: 2}}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [1], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [2]}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+        assert:
+          P2.field.b1: {hp: 2}
+        events:
+          - {kind: ダメージ, source: a1, target: b1, amount: 4}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+        assert:
+          P1.hand: [d1, filler: 1]
+          P2.field.b1: {hp: 2}
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 引く, player: P1, object: d1}
+
+  - name: B 兩張エルラーデ → 每個能力誘發 3 次、每次可選 2 個 → 全選【3】共抽 6 張
+    inherit: A 一張エルラーデ → 結束階段的能力待機 2 次 → 一次選【1】4 傷害、一次選【3】抽 1
+    setup:
+      players:
+        P1:
+          zones:
+            field:
+              - {id: a1, card: BP19-SL22}
+              - {id: a2, card: BP19-SL22}
+    decisions:
+      - {n: 1, by: P1, at: main, do: end-phase}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, options: [3]}
+      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [3]}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [3]}
+      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [3]}
+    random: {}
+    expected:
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          # 契約 10.17：a2 的能力還待機 3 次 → 6 種選項各重複 3 次
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [2]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [3]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1, 2], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1, 3], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [2, 3]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [2]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [3]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1, 2], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1, 3], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [2, 3]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [2]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [3]}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1, 2], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [1, 3], targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, options: [2, 3]}
+        assert:
+          P1.hand: [d1, d2, d3, filler: 1]
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P2
+        assert:
+          P1.hand: [d1, d2, d3, d4, d5, d6, filler: 1]
+          P1.hand_count: 7
+          P1.deck: [filler: 14]
+          semantic_state.pending_triggers: []

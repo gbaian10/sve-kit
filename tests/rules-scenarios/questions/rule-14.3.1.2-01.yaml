@@ -1,0 +1,196 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: rule-14.3.1.2-01
+kind: rule
+must_pass: true
+mechanisms: [開局程序, 6.1.1.5, 6.2.1.3, 14.3.1.2, 14.4.3.1, 構築基準（クラス／タイトル）決定作品開局處理, 偶像大師：魔法のアイテム, Vanguard：起始護符]
+cards: [CP02-003, CP02-001, CP03-011, CP03-010, CP03-021, BP01-173, BP01-176]
+why: >-
+  作品的開局處理以**構築基準**為條件，不是看牌組裡有沒有作品卡：14.3.1.2「自身のデッキが‘アイドルマスター シンデレラガールズ’のタイトルを基準としたデッキ（6.1.1.5.2）であるプレイヤー」才在決定先後之前放 5 個『魔法のアイテム』；
+  14.4.3.1「このタイトルを基準としてデッキを構築する場合」才在放牌庫之前選【スタートアミュレット】裏向き上場。
+  A：クラス基準的牌組裡全是デレマス卡 → 不放アイテム。B：クラス基準的牌組裡有【スタートアミュレット】卡 → 沒有選起始護符的步驟，那張卡留在牌庫、照常洗入。
+  C：雙方都是偶像大師タイトル基準 → 兩邊各 5 個，且在 choose-first 之前就已放好。
+discriminates: >-
+  用卡片的タイトル欄位或牌組內容判斷的引擎：A 會給 P1 放 5 個アイテム、B 會要求 P1 先做 choose-start-amulet（決定序列對不上）。
+  C：只給其中一方放的引擎 ex_count 不同（第一個比對點在 choose-first 之後，只能證明此時已放好，無法單獨證明「在決定先後之前」）。
+refs:
+  rules: [6.1.1.5, 6.1.1.5.1, 6.1.1.5.2, 6.2.1.3, 6.2.1.4, 6.2.1.6, 6.2.1.7, 14.3.1.2, 14.4.3.1]
+  qa: [Q2216]
+evidence:
+  - ref: cr 14.3.1.2
+    quote: ゲームの準備中、自身のデッキが‘アイドルマスター シンデレラガールズ’のタイトルを基準としたデッキ（6.1.1.5.2）であるプレイヤーは、先攻プレイヤーの決定（6.2.1.6）の直前に、自身の EX エリアに『魔法のアイテム』トークンを 5 つ置きます。
+    derivation:
+      - 條件是「タイトルを基準としたデッキ」（6.1.1.5.2），クラス基準（6.1.1.5.1）的牌組即使全是デレマス卡也不符合
+      - 放置時點在 6.2.1.6 之前 → 第一個 pregame 決定（choose-first）之後就看得到
+  - ref: cr 14.4.3.1
+    quote: このタイトルを基準としてデッキを構築する場合、ゲーム前の手順（6.2）において、自身のメインデッキをデッキ置き場に置く（6.2.1.4）直前に、各プレイヤーは自身のデッキから【スタートアミュレット】能力を持つカードを 1 枚裏向きで場に出す必要があります。
+    derivation:
+      - 同樣以「このタイトルを基準として」為條件；クラス基準的牌組不執行，該卡照 6.2.1.4 一起洗入牌庫
+  - ref: Q2216
+    quote: 自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、『魔法のアイテム』をEXエリアに5枚置いた状態でバトルを開始するルールです。このルールは任意ではなく、自分の使用するデッキ構築が「アイドルマスター シンデレラガールズ」タイトル構築である場合、必ず適用されます。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A クラス基準的牌組全是デレマス卡 → 不放アイテム；對手タイトル基準 → 放 5 個
+    setup:
+      pregame: true
+      players:
+        P1:
+          construction: class
+          leader: {class: エルフ}
+          deck_list:
+            - {id: a1, card: CP02-003}
+            - {id: a2, card: CP02-003}
+            - {id: a3, card: CP02-003}
+            - {id: a4, card: CP02-003}
+            - {id: a5, card: CP02-001}
+            - {id: a6, card: CP02-001}
+            - {id: a7, card: CP02-001}
+            - {id: a8, card: CP02-001}
+            - {filler: 32}
+          evolve_deck_list: []
+        P2:
+          construction: title
+          title: アイドルマスター シンデレラガールズ
+          leader: {class: エルフ}
+          deck_list:
+            - {id: b1, card: CP02-003}
+            - {id: b2, card: CP02-003}
+            - {id: b3, card: CP02-003}
+            - {id: b4, card: CP02-003}
+            - {id: b5, card: CP02-001}
+            - {id: b6, card: CP02-001}
+            - {id: b7, card: CP02-001}
+            - {id: b8, card: CP02-001}
+            - {filler: 32}
+          evolve_deck_list: []
+    decisions:
+      - {n: 1, by: P1, at: pregame, do: choose-first, first: P1}
+      - {n: 2, by: P1, at: pregame, do: mulligan, redo: false}
+      - {n: 3, by: P2, at: pregame, do: mulligan, redo: false}
+    random:
+      first_chooser: P1
+      shuffles:
+        - {player: P1, zone: deck, result: [a1, a2, a3, a4, a5, a6, a7, a8, filler: 32]}
+        - {player: P2, zone: deck, result: [b1, b2, b3, b4, b5, b6, b7, b8, filler: 32]}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: []
+          P1.ex_count: 0
+          P2.ex: [new-1, new-2, new-3, new-4, new-5]
+          P2.ex_count: 5
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn: {active: P1, first_player: P1, phase: main}
+          P1.ex: []
+          P1.ex_count: 0
+          P2.ex_count: 5
+          P1.hand: [a1, a2, a3, a4]
+          P2.hand: [b1, b2, b3, b4]
+          P1.pp: {current: 1, max: 1}
+          P2.ep: 3
+
+  - name: B クラス基準的牌組含【スタートアミュレット】卡 → 沒有選起始護符的步驟，那張卡留在牌庫
+    setup:
+      pregame: true
+      players:
+        P1:
+          construction: class
+          leader: {class: エルフ}
+          deck_list:
+            - {id: a1, card: CP03-011}
+            - {id: a2, card: CP03-010}
+            - {id: a3, card: CP03-010}
+            - {id: a4, card: CP03-010}
+            - {id: a5, card: CP03-011}
+            - {id: a6, card: CP03-011}
+            - {id: a7, card: CP03-021}
+            - {id: a8, card: CP03-010}
+            - {filler: 32}
+          evolve_deck_list: []
+        P2:
+          construction: class
+          leader: {class: ロイヤル}
+          deck_list:
+            - {id: b1, card: BP01-173}
+            - {id: b2, card: BP01-176}
+            - {id: b3, card: BP01-173}
+            - {id: b4, card: BP01-176}
+            - {id: b5, card: BP01-173}
+            - {id: b6, card: BP01-176}
+            - {id: b7, card: BP01-173}
+            - {id: b8, card: BP01-176}
+            - {filler: 32}
+          evolve_deck_list: []
+    decisions:
+      - {n: 1, by: P2, at: pregame, do: choose-first, first: P1}
+      - {n: 2, by: P1, at: pregame, do: mulligan, redo: false}
+      - {n: 3, by: P2, at: pregame, do: mulligan, redo: false}
+    random:
+      first_chooser: P2
+      shuffles:
+        - {player: P1, zone: deck, result: [a1, a2, a3, a4, a5, a6, a7, a8, filler: 32]}
+        - {player: P2, zone: deck, result: [b1, b2, b3, b4, b5, b6, b7, b8, filler: 32]}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn: {active: P1, first_player: P1, phase: main}
+          P1.field: []
+          P1.field_count: 0
+          P1.hand: [a1, a2, a3, a4]
+          P1.deck: [a5, a6, a7, a8, filler: 32]
+          P1.ex: []
+          P2.field: []
+        forbidden_events:
+          - {kind: 場に出す}
+
+  - name: C 雙方都是偶像大師タイトル基準 → 決定先後之前兩邊各 5 個
+    inherit: A クラス基準的牌組全是デレマス卡 → 不放アイテム；對手タイトル基準 → 放 5 個
+    setup:
+      players:
+        P1:
+          construction: title
+          title: アイドルマスター シンデレラガールズ
+    decisions:
+      - {n: 1, by: P1, at: pregame, do: choose-first, first: P2}
+      - {n: 2, by: P2, at: pregame, do: mulligan, redo: false}
+      - {n: 3, by: P1, at: pregame, do: mulligan, redo: false}
+    random:
+      first_chooser: P1
+      shuffles:
+        - {player: P1, zone: deck, result: [a1, a2, a3, a4, a5, a6, a7, a8, filler: 32]}
+        - {player: P2, zone: deck, result: [b1, b2, b3, b4, b5, b6, b7, b8, filler: 32]}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex_count: 5
+          P2.ex_count: 5
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn: {active: P2, first_player: P2, phase: main}
+          P1.ex_count: 5
+          P2.ex_count: 5
+          P2.pp: {current: 1, max: 1}
+          P1.ep: 3
+          P2.ep: 0

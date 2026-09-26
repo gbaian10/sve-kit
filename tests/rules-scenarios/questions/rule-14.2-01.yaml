@@ -80,7 +80,7 @@ scenarios:
             deck:
               - {filler: 20}
     decisions:
-      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, pay: {pp: 2, ep: 0}}
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, costs: {1: [n1, n2]}, pay: {pp: 2, ep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
       - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d1]}
       # 9.8：「残りを好きな順にデッキの下に置く」是另一句 → 另一個輸入點；列表由前到後＝放完後由上到下
@@ -146,7 +146,7 @@ scenarios:
               - {id: g1, card: ECP01-011}
     decisions:
       - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, pay: {pp: 2, ep: 0}}
-      - {n: 2, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
+      - {n: 2, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, costs: {1: [n1]}, pay: {pp: 1, ep: 0}}
     random: {}
     expected:
       - at: after-decision-1
@@ -171,7 +171,7 @@ scenarios:
   - name: C 出走後：再食事不行（已關聯にんじん）；同回合進化另一隻也不行（食事是進化相当）
     inherit: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
     decisions:
-      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, costs: {1: [n1]}, pay: {pp: 1, ep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}}}
       - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3]}
@@ -203,7 +203,7 @@ scenarios:
   - name: D 食事的 PP 1 改用 EP 支付（14.2.2.4）
     inherit: A 2 回食事 → 2 回出走 → 出走時誘發 2 次，各看 3 張
     decisions:
-      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 0, ep: 1}}
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, costs: {1: [n1]}, pay: {pp: 0, ep: 1}}
     random: {}
     expected:
       - at: after-decision-1

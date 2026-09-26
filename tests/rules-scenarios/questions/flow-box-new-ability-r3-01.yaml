@@ -1,0 +1,265 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-box-new-ability-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - A 箱詰め
+  - 能力取得順序
+cards:
+  - BP01-149
+  - BP01-173
+  - BP21-PR04
+why: 封箱失去既有能力，但之後新取得的守護有效；以守護限定目標及阻擋攻擊觀察。
+discriminates: 持續刪除所有新能力會導致陽光起動失敗；完全不刪舊能力則第二分支不能攻擊主戰者。
+refs:
+  rules:
+    - 5.31.2
+    - 5.31.2.1
+  qa:
+    - Q1499
+    - Q1717
+evidence:
+  - ref: Q1499
+    quote: "Q: 【箱詰め】状態のフォロワーに『守護の陽光』の《ファンファーレ》能力で【守護】を付与することはできますか？\nA: はい。【箱詰め】状態のフォロワーに対して【守護】などの能力を付与することができます。"
+    derivation:
+      - 封箱失去既有能力，但之後新取得的守護有效；以守護限定目標及阻擋攻擊觀察。
+  - ref: Q1717
+    quote: "Q: 『死の祝福』によって、【守護】を持った相手の場のフォロワーを【箱詰め】状態にしました。その後、相手のターンが終了し【箱詰め】状態が解除された場合、『死の祝福』によって持った【守護】はどうなりますか？\nA: 【箱詰め】状態の間は【守護】を失いますが、【箱詰め】状態が解除された場合、持っていた【守護】などの能力は元に戻り有効となります。"
+    derivation:
+      - 封箱失去既有能力，但之後新取得的守護有效；以守護限定目標及阻擋攻擊觀察。
+  - ref: cr 5.31.2
+    quote: 【箱詰め】状態になったカードは、【箱詰め】状態で ある間、そのカードが持つ能力、および【箱詰め】状 態になった時点でそのカードが得ていたすべての能 力を失います。
+    derivation:
+      - 封箱失去既有能力，但之後新取得的守護有效；以守護限定目標及阻擋攻擊觀察。
+  - ref: cr 5.31.2.1
+    quote: 【箱詰め】状態になったカードが後に能力を 得る場合、その能力は得ます。
+    derivation:
+      - 封箱失去既有能力，但之後新取得的守護有效；以守護限定目標及阻擋攻擊觀察。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 封箱後新給守護仍可被守護限定能力選取
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+            hand:
+              - id: sun
+                card: BP01-149
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: q
+                card: BP21-PR04
+              - id: att
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: activate
+        ability:
+          source: q
+          line: 2
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P2
+        at: main
+        do: end-phase
+      - n: 3
+        by: P1
+        at: quick
+        do: pass
+      - n: 4
+        by: P1
+        at: main
+        do: play
+        card: sun
+      - n: 5
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: sun
+            line: 1
+        targets:
+          1:
+            - b
+      - n: 6
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: sun
+          line: 2
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-6
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.b:
+            power: 4
+            hp: 5
+            acted: true
+          P1.cemetery:
+            - sun
+          P1.pp.current: 7
+  - name: 封箱前給的守護失去，主戰者可以被攻擊
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+            hand:
+              - id: sun
+                card: BP01-149
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: bd
+                card: BP01-173
+              - filler: 20
+            field:
+              - id: q
+                card: BP21-PR04
+              - id: att
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: sun
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: sun
+            line: 1
+        targets:
+          1:
+            - b
+      - n: 3
+        by: P1
+        at: main
+        do: end-phase
+      - n: 4
+        by: P1
+        at: end
+        do: guard-act
+        select:
+          - b
+      - n: 5
+        by: P2
+        at: quick
+        do: pass
+      - n: 6
+        by: P2
+        at: main
+        do: activate
+        ability:
+          source: q
+          line: 2
+        targets:
+          1:
+            - b
+      - n: 7
+        by: P2
+        at: main
+        do: attack
+        attacker: att
+        target: P1.leader
+    random: {}
+    expected:
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P2.field.att:
+            acted: true

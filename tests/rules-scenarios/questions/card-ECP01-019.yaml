@@ -1,0 +1,217 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-ECP01-019
+kind: card
+must_pass: true
+mechanisms: [賽馬娘：食事、出走, 14.2.1.1, 14.2.1.3, 11.8.1, 4.6.3, 10.6.2.3.3, 10.7.3.2, にんじん 表向き回エボルヴデッキ, 出走關聯解除]
+cards: [ECP01-019, CP01-013, CP01-085, ECP01-014, ECP01-025, ECP01-016, BP01-173]
+why: >-
+  シュヴァルグラン{ファンファーレ}「自分のエボルヴデッキの表向きの『にんじん』1枚を選ぶ。自分の墓場のウマ娘・カードが10枚以上なら、それを裏向きにする」。
+  A：目標只能是**エボルヴデッキ裡表向き**的にんじん；已關聯在出走領域的にんじん不在エボルヴデッキ（Q1839），不是合法目標。翻回裏向き後可再被食事使用（14.2.1.1）；
+  出走中的從者離場 → 關聯解除（14.2.1.3）→ 出走領域的にんじん 沒有關聯 → 規則處理 11.8.1 表向き放回エボルヴデッキ。
+  B：エボルヴデッキ沒有表向きにんじん（只有出走領域裡關聯中的）→ 選不到目標 → ファンファーレ 無法打出（Q404 同構）→ 待機取消。
+  C：墓場ウマ娘 9 張 → 選了目標但不翻面。
+discriminates: >-
+  A：把出走領域的關聯にんじん當成「エボルヴデッキの表向きのにんじん」的引擎，after-decision-1 的合法選項會多出 n1；
+  沒做 14.2.1.3＋11.8.1 的引擎，a2 被破壞後 n2 仍留在出走領域、或回エボルヴデッキ時不是表向き。
+  B：允許選 n1 的引擎會 resolved 而不是 pending-cancelled。C：不看墓場張數就翻面的引擎 n2 會變裏向き。
+refs:
+  rules: [14.2.1.1, 14.2.1.3, 14.2.3.1, 14.2.4.2, 11.8.1, 4.6.3, 10.6.2.3.1, 10.6.2.3.3, 10.7.3.2, 10.5.2.1, 11.3.1]
+  qa: [Q1839, Q404, Q1974]
+evidence:
+  - ref: Q1839
+    quote: いいえ。場のフォロワーに関連付けられている『にんじん』はエボルヴデッキに表向きで置かれていないので数えることができません。
+  - ref: Q404
+    quote: いいえ。選ぶことができないのでこの能力をプレイすることはできず、１枚引くことはできません。
+    derivation:
+      - 桐生院葵 的ファンファーレ 同樣是「表向きのにんじん 1 枚を選ぶ」；選不到目標時整個能力不能打出（10.6.2.3.3）。自動能力無法打出 → 10.7.3.2 待機取消
+  - ref: cr 14.2.1.3
+    quote: 場のカードが場以外に移動する場合、その移動直後にそのカードに関連付けられている出走領域とのカードとの関連付けを失います。
+    derivation:
+      - a2 被破壞移到墓場 → n2 失去關聯
+      - 11.8.1「出走領域のカードが場のいずれのカードとも関連付けされていない場合、そのカードをエボルヴデッキ置き場に表向きで移動します」→ 下一輪規則處理（10.5.2.1 反覆）把 n2 表向き放回エボルヴデッキ
+  - ref: cr 14.2.1.1
+    quote: そのカードのマスターは自身のエボルヴデッキの『にんじん』を指定回数に等しい枚数自身の出走領域に置き、その『にんじん』をそのカードに関連付けます。
+    derivation:
+      - 翻回裏向き的 n2 仍是エボルヴデッキ的にんじん，可以當 a2 食事的費用
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A 選表向きの n2 翻回裏向き → 用它食事 a2 → a2 出走時自傷致死 → n2 表向き回エボルヴデッキ
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 5, P2: 4}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: ウマ娘 プリティーダービー
+          leader: {class: ウィッチ, life: 20}
+          pp: {current: 5, max: 5}
+          zones:
+            field:
+              - {id: a1, card: CP01-013, state: {power: 3, hp: 3, links: {出走: [n1]}}}   # ハルウララ，之前出走過
+              - {id: a2, card: ECP01-014}                                                # アストンマーチャン 1/1，未出走
+            race:
+              - {id: n1, card: CP01-085}
+            evolve_deck:
+              - {id: n2, card: CP01-085, face_up: true}
+              - {id: n3, card: CP01-085}
+            hand:
+              - {id: h1, card: ECP01-019}
+              - {filler: 1}
+            deck:
+              - {filler: 20}
+            cemetery:
+              - {id: c1, card: ECP01-014}
+              - {id: c2, card: ECP01-014}
+              - {id: c3, card: ECP01-014}
+              - {id: c4, card: ECP01-014}
+              - {id: c5, card: ECP01-025}
+              - {id: c6, card: ECP01-025}
+              - {id: c7, card: ECP01-025}
+              - {id: c8, card: ECP01-016}
+              - {id: c9, card: ECP01-016}
+              - {id: c10, card: ECP01-016}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 5}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 3}}, targets: {1: [n2]}}
+      - {n: 3, by: P1, at: main, do: activate, ability: {source: a2, line: 1}, costs: {1: [n2]}, pay: {pp: 1, ep: 0}}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}, targets: {1: [b1]}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: h1, line: 3}}, targets: {1: [n2]}}
+        assert:
+          P1.pp.current: 3
+          P1.field: [a1, a2, h1]
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.evolve_deck: [n2, n3]
+          P1.evolve_deck.n2: {face_up: false}
+          P1.race: [n1]
+          P1.field.a1: {links: {出走: [n1]}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, targets: {1: [b1]}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}, targets: {1: []}}
+        assert:
+          P1.pp.current: 2
+          P1.race: [n1, n2]
+          P1.evolve_deck: [n3]
+          P1.field.a2: {links: {出走: [n2]}}
+          semantic_state.counters_this_turn: {P1.evolve_played: 1}
+        events:
+          - {kind: 移動, object: n2, from: P1.evolve_deck, to: P1.race}
+          - {kind: 待機, ability: {source: a2, line: 2}}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: [a1, h1]
+          P1.cemetery: [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, a2]
+          P1.race: [n1]
+          P1.evolve_deck: [n2, n3]
+          P1.evolve_deck.n2: {face_up: true}
+          P1.evolve_deck.n3: {face_up: false}
+          P1.field.a1: {links: {出走: [n1]}}
+          P2.field: []
+          P2.cemetery: [b1]
+        events:
+          - {kind: ダメージ, source: a2, target: b1, amount: 4}
+          - {kind: ダメージ, source: a2, target: a2, amount: 2}
+          - {kind: 破壊, object: a2, by: rule-11.3.1, group: 1}
+          - {kind: 破壊, object: b1, by: rule-11.3.1, group: 1}
+          - {kind: 移動, object: n2, from: P1.race, to: P1.evolve_deck, by: rule-11.8.1}
+
+  - name: B エボルヴデッキ沒有表向きにんじん；出走領域的 n1 不算 → 待機取消
+    inherit: A 選表向きの n2 翻回裏向き → 用它食事 a2 → a2 出走時自傷致死 → n2 表向き回エボルヴデッキ
+    setup:
+      players:
+        P1:
+          zones:
+            evolve_deck:
+              - {id: n3, card: CP01-085}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 3}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: h1, line: 3}}}
+      - at: after-decision-2
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.race: [n1]
+          P1.evolve_deck: [n3]
+          P1.evolve_deck.n3: {face_up: false}
+          P1.field.a1: {links: {出走: [n1]}}
+          semantic_state.pending_triggers: []
+        events:
+          - {kind: 待機取消, ability: {source: h1, line: 3}}
+
+  - name: C 墓場ウマ娘只有 9 張 → 選了 n2 但不翻面
+    inherit: A 選表向きの n2 翻回裏向き → 用它食事 a2 → a2 出走時自傷致死 → n2 表向き回エボルヴデッキ
+    setup:
+      players:
+        P1:
+          zones:
+            cemetery:
+              - {id: c1, card: ECP01-014}
+              - {id: c2, card: ECP01-014}
+              - {id: c3, card: ECP01-014}
+              - {id: c4, card: ECP01-014}
+              - {id: c5, card: ECP01-025}
+              - {id: c6, card: ECP01-025}
+              - {id: c7, card: ECP01-025}
+              - {id: c8, card: ECP01-016}
+              - {id: c9, card: ECP01-016}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 3}}, targets: {1: [n2]}}
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.evolve_deck: [n2, n3]
+          P1.evolve_deck.n2: {face_up: true}
+          P1.race: [n1]

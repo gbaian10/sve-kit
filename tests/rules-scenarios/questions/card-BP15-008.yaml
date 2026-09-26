@@ -1,0 +1,705 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-BP15-008
+kind: card
+must_pass: true
+mechanisms:
+  - S6
+  - 時限誘発
+  - 目標物件綁定
+  - 本回合期限
+cards:
+  - BP01-015
+  - BP01-139
+  - BP01-169
+  - BP01-171
+  - BP01-173
+  - BP01-179
+  - BP15-008
+why: 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+discriminates: 把延遲能力放在已離場來源上、同目標只留一份、依卡名或實體 id 綁定、到下回合未到期、把消滅也當死亡，分別造成零抽、一抽、錯誤抽牌或隔回合多抽。
+refs:
+  rules:
+    - 10.7.5
+    - 10.7.4.1.2
+    - 10.5.1.1
+    - 11.3.1
+    - 7.4.8
+    - 4.1.4
+  qa:
+    - Q1976
+evidence:
+  - ref: Q1976
+    quote: "Q: 相手の場のフォロワー1体を目標に『腐食の絶命』を2枚プレイし、そのフォロワーが墓場に置かれた場合、「このターン、それが場から墓場に置かれたとき、～」という能力は2回誘発しますか？\nA: はい。2回誘発します。"
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+  - ref: cr 10.7.5
+    quote: なんらかの効果により、以降の特定の時点で誘発 条件が発生する自動能力が作成されることがありま す。これを時限誘発と呼びます。
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+  - ref: cr 10.7.4.1.2
+    quote: カードが場からそれ以外の領域に移 動することによって誘発する自動能力が カードの情報を求める場合、そのカードが 場にある時点での情報を用います。
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+  - ref: cr 10.5.1.1
+    quote: チェックタイミングにおいては、まずルール 処理がすべて解決され、解決するべきルール 処理がなくなってから、誘発条件を満たした自 動能力のプレイと解決を行います。詳しくは
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+  - ref: cr 11.3.1
+    quote: あるフォロワーの体力が 0 以下である場合、その フォロワーは破壊されます。
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+  - ref: cr 7.4.8
+    quote: すべての‘ターンの終わりまで’を期限とする効果や ‘そのターン中’期限とする効果が取り除かれます。
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+  - ref: cr 4.1.4
+    quote: カードが領域間の移動を行う場合、特に指示がな いかぎり、それは新しい領域における新しいカードで あるとみなされます。特に指定がないかぎり、前の 領域で適用されていた効果がそのまま適用されるこ とはありません。
+    derivation:
+      - 延遲抽牌由每次法術解決各自建立，來源進墓場仍有效；只觀察被選從者本回合的場到墓場，包含同次解決傷害後的規則破壞。同一實體卡換區再上場已是新物件，不延續舊綁定。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 兩張法術各建立一次延遲誘發，來源已進墓場仍各抽一張
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d1
+                card: BP01-171
+              - id: d2
+                card: BP01-173
+            hand:
+              - id: s1
+                card: BP15-008
+              - id: s2
+                card: BP15-008
+              - id: kill
+                card: BP01-179
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s1
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: s2
+        targets:
+          1:
+            - b
+      - n: 3
+        by: P1
+        at: main
+        do: play
+        card: kill
+        targets:
+          1:
+            - b
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: s1
+            line: 3
+            delayed: true
+      - n: 5
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: s2
+            line: 3
+            delayed: true
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.cemetery:
+            - s1
+            - s2
+            - kill
+          P1.hand: []
+          P2.cemetery:
+            - b
+        events:
+          - kind: 待機
+            ability:
+              source: s1
+              line: 3
+              delayed: true
+            group: death-b
+          - kind: 待機
+            ability:
+              source: s2
+              line: 3
+              delayed: true
+            group: death-b
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d1
+            - d2
+          P1.deck: []
+          semantic_state.pending_triggers: []
+        events:
+          - kind: 引く
+            player: P1
+            object: d1
+          - kind: 引く
+            player: P1
+            object: d2
+        events_exact:
+          - 引く
+  - name: 同名的另一張先死不誘發，原目標後死才抽牌
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-171
+            hand:
+              - id: s
+                card: BP15-008
+              - id: kill-other
+                card: BP01-169
+              - id: kill-bound
+                card: BP01-179
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: bound
+                card: BP01-173
+              - id: other
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - bound
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: kill-other
+        targets:
+          1:
+            - other
+      - n: 3
+        by: P1
+        at: main
+        do: play
+        card: kill-bound
+        targets:
+          1:
+            - bound
+      - n: 4
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: s
+            line: 3
+            delayed: true
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - kill-bound
+          P1.deck:
+            - d
+          P2.cemetery:
+            - other
+          P2.field.bound:
+            hp: 2
+        forbidden_events:
+          - kind: 待機
+          - kind: 引く
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d
+          P1.deck: []
+          P2.cemetery:
+            - other
+            - bound
+  - name: 一傷已致命，規則破壞時延遲能力已建立
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-171
+            hand:
+              - id: s
+                card: BP15-008
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+                state:
+                  hp: 1
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: s
+            line: 3
+            delayed: true
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand:
+            - d
+          P1.deck: []
+          P2.cemetery:
+            - b
+        events:
+          - kind: 引く
+            player: P1
+            object: d
+  - name: 跨過本回合後，在對手結束階段 Quick 擊殺不再抽牌
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-171
+            hand:
+              - id: s
+                card: BP15-008
+              - id: kill
+                card: BP01-179
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: p2draw
+                card: BP01-171
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: end-phase
+      - n: 3
+        by: P2
+        at: quick
+        do: pass
+      - n: 4
+        by: P2
+        at: main
+        do: end-phase
+      - n: 5
+        by: P1
+        at: quick
+        do: play
+        card: kill
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          turn.active: P2
+          turn.phase: main
+          P2.hand:
+            - p2draw
+          P1.hand:
+            - kill
+          P1.deck:
+            - d
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: []
+          P1.deck:
+            - d
+          P2.cemetery:
+            - b
+          semantic_state.pending_triggers: []
+        forbidden_events:
+          - kind: 待機
+          - kind: 引く
+  - name: 消滅不是場到墓場，不抽牌
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-171
+            hand:
+              - id: s
+                card: BP15-008
+              - id: banish
+                card: BP01-139
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-173
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 2
+        by: P1
+        at: main
+        do: play
+        card: banish
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: []
+          P1.deck:
+            - d
+          P2.cemetery: []
+          P2.banish:
+            - b
+        forbidden_events:
+          - kind: 待機
+          - kind: 引く
+  - name: 同一實體卡本回合回手再出場，已是新物件而不延續綁定
+    setup:
+      turn:
+        active: P2
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-171
+            hand:
+              - id: s
+                card: BP15-008
+              - id: kill
+                card: BP01-169
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: p2draw
+                card: BP01-171
+            field:
+              - id: b
+                card: BP01-173
+            hand:
+              - id: bounce
+                card: BP01-015
+    decisions:
+      - n: 1
+        by: P2
+        at: main
+        do: attack
+        attacker: b
+        target: P1.leader
+      - n: 2
+        by: P1
+        at: quick
+        do: play
+        card: s
+        targets:
+          1:
+            - b
+      - n: 3
+        by: P1
+        at: quick
+        do: pass
+      - n: 4
+        by: P2
+        at: main
+        do: play
+        card: bounce
+        targets:
+          1:
+            - b
+      - n: 5
+        by: P2
+        at: main
+        do: play
+        card: b
+      - n: 6
+        by: P2
+        at: main
+        do: end-phase
+      - n: 7
+        by: P1
+        at: quick
+        do: play
+        card: kill
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-5
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.leader.life: 18
+          P1.hand:
+            - kill
+          P1.deck:
+            - d
+          P2.field.b:
+            hp: 3
+            acted: false
+            entered_this_turn: true
+          P2.hand:
+            - p2draw
+      - at: after-decision-7
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: []
+          P1.deck:
+            - d
+          P2.field: []
+          P2.cemetery:
+            - bounce
+            - b
+        forbidden_events:
+          - kind: 待機
+          - kind: 引く

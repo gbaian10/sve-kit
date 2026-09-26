@@ -1,0 +1,146 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-CP02-007
+kind: card
+must_pass: true
+mechanisms: [偶像大師：魔法のアイテム, 從 EX 打出 token 法術, 9.1.4.4, 「消滅していたなら」的本回合歷史, 14.3.2.1, 起動費用「これをアクト墓場に置く」, 領域移動誘發 10.7.4.2]
+cards: [CP02-007, CP02-T01, CP02-003, BP01-173]
+why: >-
+  ブランニュー・ビート「これが場を離れたとき、このターン、自分のEXエリアの『魔法のアイテム』が消滅していたなら、1枚引く」。
+  A：把 EX 的『魔法のアイテム』當法術付 4 PP 打出（Q899）→ 解決後移到墓場、因為是 token 立即消去（9.1.4.4）→ 這**不是消滅**（Q918）→ ビート 離場時條件不成立、不抽。
+  B：用前川みく 的【レッスン_1】起動消滅アイテム → 條件成立 → ビート 因自己起動的費用離場時抽 1（自己離場的移動誘發，10.7.4.2）。
+discriminates: >-
+  A：把「移到墓場後消去」或「打出」當成消滅的引擎會抽 1 張；B：把費用造成的離場不當成「場を離れた」的引擎不會誘發、不抽。
+  兩局面都會檢查 token 法術解決後不留在墓場（P1.cemetery 只有 ビート）。
+refs:
+  rules: [9.1.4.4, 9.1.4.3, 5.7.1, 14.3.2.1, 10.7.4.2, 10.4.6, 10.6.2.8.3, 8.2.1]
+  qa: [Q918, Q899, Q897]
+evidence:
+  - ref: Q918
+    quote: いいえ。自分のEXエリアの『魔法のアイテム』が消滅していないので、その条件を満たすことができません。EXエリアにあるトークン・スペルをプレイした場合、解決後、墓場に移動します。その際、『魔法のアイテム』はトークンなので、墓場に移動した直後に消去されます。（墓場から取り除きます。墓場に置かれたままになりません。）
+  - ref: Q899
+    quote: はい。スペルとしてプレイすることができます。4PP支払うことでプレイすることができ、自分のリーダーの《体力》を+1し、1枚引きます。スペルの解決後、このカードを墓場に置きますが、トークンなので墓場に置いた直後に墓場から消去します。
+  - ref: cr 14.3.2.1
+    quote: 【レッスン （数値）】は、EX エリアの『魔法のアイテム』を（数値）枚消滅させることを意味する特定表記です。
+    derivation:
+      - B：前川みく 的起動費用「{コスト1}【レッスン_1】」消滅 i1 → 本回合「EX のアイテムが消滅していた」成立
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A アイテム 當法術打出（不是消滅）→ ビート 離場不抽
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 6, P2: 5}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: アイドルマスター シンデレラガールズ
+          leader: {class: エルフ, life: 18}
+          pp: {current: 6, max: 6}
+          zones:
+            field:
+              - {id: a1, card: CP02-007}                # ブランニュー・ビート
+              - {id: a2, card: CP02-003}                # 前川みく 3/1
+            ex:
+              - {id: i1, card: CP02-T01}
+            hand:
+              - {filler: 1}
+            deck:
+              - {id: d1, card: CP02-003}
+              - {id: d2, card: CP02-003}
+              - {filler: 18}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 6}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    card_facts:
+      CP02-T01: {rules_name: 魔法のアイテム, source: Q897（CP02-T01 卡片頁的官方 Q&A）, verified: true}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: i1}
+      - {n: 2, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, targets: {1: [a2]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 2
+          P1.leader.life: 19
+          P1.hand: [d1, filler: 1]
+          P1.ex: []
+          P1.cemetery: []
+          P1.banish: []
+        events:
+          - {kind: プレイ, object: i1}
+          - {kind: 引く, player: P1, object: d1}
+          - {kind: 消去, object: i1, by: rule-9.1.4.4}
+        forbidden_events:
+          - {kind: 消滅}
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+        assert:
+          P1.field: [a2]
+          P1.field.a2: {power: 4, hp: 2}
+          P1.cemetery: [a1]
+        events:
+          - {kind: 待機, ability: {source: a1, line: 1}}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: [d1, filler: 1]
+          P1.deck: [d2, filler: 18]
+        forbidden_events:
+          - {kind: 引く}
+
+  - name: B 用前川みく 的レッスン 消滅アイテム → ビート 離場抽 1
+    inherit: A アイテム 當法術打出（不是消滅）→ ビート 離場不抽
+    decisions:
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a2, line: 2}, costs: {1: [i1]}}
+      - {n: 2, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, targets: {1: [a2]}}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 5
+          P1.ex: []
+          P1.banish: []
+        events:
+          - {kind: 消滅, object: i1}
+          - {kind: 消去, object: i1, by: rule-9.1.4.4}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.hand: [d1, filler: 1]
+          P1.deck: [d2, filler: 18]
+          P1.field: [a2]
+          P1.cemetery: [a1]
+        events:
+          - {kind: 引く, player: P1, object: d1}

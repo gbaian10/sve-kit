@@ -1,0 +1,190 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a9
+id: card-ECP02-001
+kind: card
+must_pass: true
+mechanisms: [偶像大師：課程, 14.3.2.1, 自動能力的費用在打出時支付, 10.1.1.2.2, 10.4.2.2, 費用釋出 EX 空位, 4.8.3.2, 9.1.4.4, EX 減費, 10.4.4.1]
+cards: [ECP02-001, CP02-T01, CP02-003, CP02-001, BP01-173]
+why: >-
+  アナスタシア「{ファンファーレ}{コスト1}【レッスン_1】：自分の手札の元のコスト2以下のデレマス・フォロワー1枚をEXエリアに置いてよい。このターン、それをプレイする際、コストを-2する」。
+  「とき、（コスト）：（効果）」型自動能力的費用在**打出時**支付（10.1.1.2.2、10.6.2.5）；レッスン_1＝消滅 EX 的『魔法のアイテム』1 枚（14.3.2.1），token 移到消滅領域後立即消去（9.1.4.4）。
+  A：EX 滿 5 張（含 1 個アイテム）→ 先付費用，EX 空出 1 格 → 手牌的前川みく 可以放到 EX（Q2151）；同回合從 EX 打出時費用 2−2＝0。
+  B：EX 沒有アイテム → 費用付不出 → 拒付 → 待機取消。C：PP 不足 1 → 整個費用都不能付（10.4.2.2），アイテム 也不消滅。
+discriminates: >-
+  A：在打出前檢查 EX 是否有空位、或把費用延到結算時才付的引擎會 pending-cancelled 或放不進 EX；沒套用 −2 的引擎 after-decision-4 的 PP 不是 1。
+  B／C：只付得出部分費用就扣的引擎（先消滅アイテム再發現 PP 不夠）會讓 EX 少一張。
+refs:
+  rules: [10.1.1.2.2, 10.6.2.5, 10.6.2.5.4, 10.4.2.2, 14.3.2.1, 9.1.4.4, 4.8.3.2, 10.4.4.1, 10.7.3.2]
+  qa: [Q2151, Q897]
+evidence:
+  - ref: Q2151
+    quote: はい。プレイすることができます。
+    derivation:
+      - 問題前提「自分のEXエリアが『魔法のアイテム』1枚を含めて上限枚数」；費用支付（消滅アイテム）在效果解決之前完成，所以放 EX 時已有空位
+  - ref: cr 10.1.1.2.2
+    quote: 自動能力の一部は、「（条件）とき、（コスト）：（効果）」と表記されています。この場合、この自動能力をプレイするためには（コスト）で示されたコストの支払いが必要です。
+  - ref: cr 10.4.2.2
+    quote: コストのうち一部または全部を支払うことが不可能である場合、このコストはまったく支払うことはできません。
+  - ref: cr 14.3.2.1
+    quote: 【レッスン （数値）】は、EX エリアの『魔法のアイテム』を（数値）枚消滅させることを意味する特定表記です。
+status: verified
+author: fable
+verified_by:
+  - by: astra
+    method: independent-derivation
+    note: 第三輪交叉驗證 astra-r3/xverify-1、xverify-2（審 fable-r3），fable-r3/fix-1～fix-3 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；F1、F2 與禁止 vs 置換仲裁已依核對結果修正
+
+scenarios:
+  - name: A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出
+    setup:
+      turn: {active: P1, first_player: P1, elapsed_turns: {P1: 4, P2: 3}, phase: main}
+      history: none
+      players:
+        P1:
+          construction: title
+          title: アイドルマスター シンデレラガールズ
+          leader: {class: エルフ, life: 20}
+          pp: {current: 4, max: 4}
+          zones:
+            ex:
+              - {id: i1, card: CP02-T01}
+              - {id: e1, card: CP02-001}
+              - {id: e2, card: CP02-001}
+              - {id: e3, card: CP02-001}
+              - {id: e4, card: CP02-001}
+            hand:
+              - {id: h1, card: ECP02-001}
+              - {id: h2, card: CP02-003}
+              - {id: x9, card: BP01-173}               # 非デレマス，不是合法候選
+            deck:
+              - {filler: 20}
+        P2:
+          construction: class
+          leader: {class: ロイヤル, life: 20}
+          pp: {current: 0, max: 4}
+          zones:
+            field:
+              - {id: b1, card: BP01-173}
+            hand:
+              - {filler: 3}
+            deck:
+              - {filler: 20}
+    card_facts:
+      CP02-T01: {rules_name: 魔法のアイテム, source: Q897（CP02-T01 卡片頁的官方 Q&A）, verified: true}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: {1: [i1]}}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [h2]}
+      - {n: 4, by: P1, at: main, do: play, card: h2}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: {1: [i1]}}
+            - {do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: decline}
+        assert:
+          P1.pp.current: 2
+          P1.ex_count: 5
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: [h2]}
+            - {do: resolve-choice, select: []}
+        assert:
+          P1.pp.current: 1
+          P1.ex: [e1, e2, e3, e4]
+          P1.banish: []
+        events:
+          - {kind: 消滅, object: i1}
+          - {kind: 消去, object: i1, by: rule-9.1.4.4}
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex: [e1, e2, e3, e4, h2]
+          P1.hand: [x9]
+        events:
+          - {kind: 移動, object: h2, from: P1.hand, to: P1.ex}
+      - at: after-decision-4
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.pp.current: 1
+          P1.field: [h1, h2]
+          P1.field.h2: {entered_from: ex, entered_by: play}
+          P1.ex: [e1, e2, e3, e4]
+
+  - name: B EX 沒有アイテム → 費用付不出 → 拒付 → 待機取消
+    inherit: A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出
+    setup:
+      players:
+        P1:
+          zones:
+            ex:
+              - {id: e1, card: CP02-001}
+              - {id: e2, card: CP02-001}
+              - {id: e3, card: CP02-001}
+              - {id: e4, card: CP02-001}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: decline}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: decline}
+      - at: after-decision-2
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.pp.current: 2
+          P1.ex: [e1, e2, e3, e4]
+          P1.hand: [h2, x9]
+          semantic_state.pending_triggers: []
+
+  - name: C PP 只剩 0 → 整個費用不能付，アイテム 也不消滅
+    inherit: A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出
+    setup:
+      players:
+        P1:
+          pp: {current: 2, max: 4}
+    decisions:
+      - {n: 1, by: P1, at: main, do: play, card: h1}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: decline}
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: decline}
+        assert:
+          P1.pp.current: 0
+      - at: after-decision-2
+        view: omniscient
+        outcome: pending-cancelled
+        assert:
+          P1.pp.current: 0
+          P1.ex: [i1, e1, e2, e3, e4]
+          P1.banish: []
+          P1.hand: [h2, x9]
+        forbidden_events:
+          - {kind: 消滅}

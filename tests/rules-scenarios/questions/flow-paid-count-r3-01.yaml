@@ -1,0 +1,313 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-paid-count-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - D 實際支付數量
+  - C15 裝備者造成能力傷害
+cards:
+  - BP01-174
+  - BP07-030
+  - BP07-T03
+  - CP04-PR16
+why: 傷害只數本次付費橫置的一棵樹，不數原本已橫置的另一棵；劍把一傷變三傷；不能把已橫置樹列入費用後部分支付。
+discriminates: 數當下全部橫置樹會多一傷；不對能力傷害套用劍會少二傷；部分付費會使反例錯誤橫置來源。
+refs:
+  rules:
+    - 10.4.2.2
+    - 10.4.5
+  qa:
+    - Q989
+    - Q2494
+evidence:
+  - ref: Q989
+    quote: "Q: 『ハルバードウルフ』の《起動》能力によって与えるダメージは、《起動》能力のコストとしてアクトした『ナテラの大樹』の枚数と同じダメージですか？\nA: はい。《起動》能力のコストとしてアクトした『ナテラの大樹』の枚数と同じダメージです。"
+    derivation:
+      - 傷害只數本次付費橫置的一棵樹，不數原本已橫置的另一棵；劍把一傷變三傷；不能把已橫置樹列入費用後部分支付。
+  - ref: Q2494
+    quote: "Q: 「これを装備しているフォロワーが与えるダメージを+2する。」とは、能力によるダメージも+2しますか？\nA: はい。能力によって与えるダメージも+2します。"
+    derivation:
+      - 傷害只數本次付費橫置的一棵樹，不數原本已橫置的另一棵；劍把一傷變三傷；不能把已橫置樹列入費用後部分支付。
+  - ref: cr 10.4.2.2
+    quote: コストのうち一部または全部を支払うことが 不可能である場合、このコストはまったく支払 うことはできません。
+    derivation:
+      - 傷害只數本次付費橫置的一棵樹，不數原本已橫置的另一棵；劍把一傷變三傷；不能把已橫置樹列入費用後部分支付。
+  - ref: cr 10.4.5
+    quote: コストのうち、カードのコスト以外のある数値を指 定の値増加または減少させるものは、その指定の 値以上あるその数値を指定の値増加または減少さ せることを意味します。
+    derivation:
+      - 傷害只數本次付費橫置的一棵樹，不數原本已橫置的另一棵；劍把一傷變三傷；不能把已橫置樹列入費用後部分支付。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 裝備=False 嘗試支付已橫置樹=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP07-030
+              - id: t1
+                card: BP07-T03
+                state:
+                  acted: true
+              - id: t2
+                card: BP07-T03
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-174
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        costs:
+          1:
+            - t2
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+          P1.field.t1:
+            acted: true
+          P1.field.t2:
+            acted: true
+          P2.field.b:
+            hp: 3
+        events:
+          - kind: アクト
+            object: a
+            group: cost-1
+          - kind: アクト
+            object: t2
+            group: cost-1
+          - kind: ダメージ
+            source: a
+            target: b
+            amount: 1
+  - name: 裝備=True 嘗試支付已橫置樹=False
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP07-030
+              - id: t1
+                card: BP07-T03
+                state:
+                  acted: true
+              - id: t2
+                card: BP07-T03
+            equipment:
+              - id: w
+                card: CP04-PR16
+                state:
+                  equipped_to: a
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-174
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        costs:
+          1:
+            - t2
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field.a:
+            acted: true
+          P1.field.t1:
+            acted: true
+          P1.field.t2:
+            acted: true
+          P2.field.b:
+            hp: 1
+        events:
+          - kind: アクト
+            object: a
+            group: cost-1
+          - kind: アクト
+            object: t2
+            group: cost-1
+          - kind: ダメージ
+            source: a
+            target: b
+            amount: 3
+  - name: 裝備=False 嘗試支付已橫置樹=True
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: a
+                card: BP07-030
+              - id: t1
+                card: BP07-T03
+                state:
+                  acted: true
+              - id: t2
+                card: BP07-T03
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 10
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+            field:
+              - id: b
+                card: BP01-174
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 2
+        costs:
+          1:
+            - t1
+            - t2
+        targets:
+          1:
+            - b
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.field.a:
+            acted: false
+          P1.field.t1:
+            acted: true
+          P1.field.t2:
+            acted: false
+          P2.field.b:
+            hp: 4
+        forbidden_events:
+          - kind: アクト
+          - kind: ダメージ

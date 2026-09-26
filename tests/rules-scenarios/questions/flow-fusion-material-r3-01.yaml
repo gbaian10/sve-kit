@@ -1,0 +1,262 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: flow-fusion-material-r3-01
+kind: flow
+must_pass: true
+mechanisms:
+  - A 融合
+  - C13
+cards:
+  - BP01-173
+  - BP01-T15
+  - BP19-078
+  - BP19-SL10
+why: 融合讀取實際 EX 素材的八獄資訊，EX 送墓不是捨棄；不能用 token 支付。
+discriminates: 若只看融合來源本身八獄，普通素材會錯抽；若只接受手牌則 EX 八獄不會抽；若忽略非 token 限制則反例成功。
+refs:
+  rules:
+    - 12.18.2
+    - 12.18.4.1
+  qa:
+    - Q2571
+evidence:
+  - ref: Q2571
+    quote: "Q: 「《起動》【融合】トークンでないフォロワー1枚：これに融合カウンター1個を置く。八獄・フォロワーを融合したなら、1枚引く。」という能力は、『耽溺の咎人・セフィー』が手札にある場合に有効となる能力ですか？\nA: はい。『耽溺の咎人・セフィー』が手札にある場合に有効となる能力です。"
+    derivation:
+      - 融合讀取實際 EX 素材的八獄資訊，EX 送墓不是捨棄；不能用 token 支付。
+  - ref: cr 12.18.2
+    quote: ‘《起動》 【融合】 （条件）：（効果）’は‘《起動》 （条件）を満たす他のカードを、手札から捨てるか EX エリアから墓場に置く。手札にあるこのカードを EX エリアに置く。：（効果）’を意味します。
+    derivation:
+      - 融合讀取實際 EX 素材的八獄資訊，EX 送墓不是捨棄；不能用 token 支付。
+  - ref: cr 12.18.4.1
+    quote: あるカードが‘融合した’条件を満たした 際、その融合を行うために手札から捨てたり EX エリアから墓場に置いたりしたカードがな んらかの情報を持つ場合、‘（その情報の） カードを融合した’条件を満たします。 13. クラス別の情報やキーワード
+    derivation:
+      - 融合讀取實際 EX 素材的八獄資訊，EX 送墓不是捨棄；不能用 token 支付。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: BP19-078 作為 EX 素材
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP19-SL10
+            ex:
+              - id: m
+                card: BP19-078
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        costs:
+          1:
+            - m
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.hand:
+            - d
+          P1.deck: []
+          P1.cemetery:
+            - m
+          P1.ex.a:
+            counters:
+              融合カウンター: 1
+        forbidden_events:
+          - kind: 捨てる
+  - name: BP01-173 作為 EX 素材
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP19-SL10
+            ex:
+              - id: m
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        costs:
+          1:
+            - m
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.ex:
+            - a
+          P1.hand: []
+          P1.deck:
+            - d
+          P1.cemetery:
+            - m
+          P1.ex.a:
+            counters:
+              融合カウンター: 1
+        forbidden_events:
+          - kind: 捨てる
+  - name: BP01-T15 作為 EX 素材
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: d
+                card: BP01-173
+            hand:
+              - id: a
+                card: BP19-SL10
+            ex:
+              - id: m
+                card: BP01-T15
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 0
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: activate
+        ability:
+          source: a
+          line: 3
+        costs:
+          1:
+            - m
+    random: {}
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: cannot-activate
+        assert:
+          P1.ex:
+            - m
+          P1.hand:
+            - a
+          P1.deck:
+            - d
+          P1.cemetery: []
+        forbidden_events:
+          - kind: 捨てる

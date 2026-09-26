@@ -1,0 +1,619 @@
+schema: sve-exam/2.1
+sources:
+  rules: cr-1.27.0
+  cards_jsonl_sha256: 4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632
+id: card-SCS01-006
+kind: card
+must_pass: true
+mechanisms:
+  - S7
+  - 不定張數公開
+  - 場容量
+  - 公開資訊
+  - 部分洗牌
+cards:
+  - BP01-037
+  - BP01-169
+  - BP01-171
+  - BP01-173
+  - BP01-179
+  - SCS01-006
+why: ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。random.shuffles[].result 僅記錄此次受洗牌指示影響的子集合之排列；未公開的 tail 不參與洗牌，結算後的完整牌庫順序另由 expected 的 P1.deck 比對。
+discriminates: 固定翻兩張、依空位提早停、必須湊齊兩張才上場、無合格牌就敗北、全牌庫一起洗或只讓主人看牌，都會違反指定牌序、場、公開事件或 P2 knowledge。
+refs:
+  rules:
+    - 1.3.2
+    - 4.4.4.2
+    - 5.21.1
+    - 5.21.1.1
+    - 4.5.2
+    - 11.2.2
+  qa:
+    - Q1324
+    - Q1323
+    - Q1322
+evidence:
+  - ref: Q1324
+    quote: "Q: 自分の場のフォロワーが4体の状況で、『《恋人》・ミルティオ』の《ファンファーレ》能力をプレイした場合、どのように処理を行いますか？\nA: 場のカードの数に関わらず、自分のデッキの上を元のコスト3以下のフォロワーが2枚公開されるまで、公開します。元のコスト3以下のフォロワーが2枚公開された場合、その中から1枚を選択して場に出します。その後、場に出さなかった元のコスト3以下のフォロワーを含めた公開したカードすべてをシャッフルし、デッキの下に置きます。"
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: Q1323
+    quote: "Q: このフォロワーの《ファンファーレ》能力を処理する際、デッキの上からすべての枚数のカードを公開しても元のコスト3以下のフォロワーを1枚しか公開できなかった場合、その1枚を場に出すことはできますか？\nA: はい。公開した元のコスト3以下のフォロワー1枚を場に出すことができます。"
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: Q1322
+    quote: "Q: このフォロワーの《ファンファーレ》能力を処理する際、デッキの上からすべての枚数のカードを公開しても元のコスト3以下のフォロワーを公開することが出来なかった場合、その後はどのように処理を行いますか？\nA: 元のコスト3以下のフォロワーは無かったため、何も場に出さずに、公開したカードすべてをシャッフルし、デッキ置き場に置きます。"
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: cr 1.3.2
+    quote: なんらかの理由によりプレイヤーが実行不可能なこ とを行うように求められた場合、それは単に行われ ません。同様に、効果により一定の量の行動を行う よう求められた場合、その一部のみ実行不可能な 場合、可能な限りその行動を行います。
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: cr 4.4.4.2
+    quote: 場にカードを移動または作成する処理にお いて、その結果場のカードの枚数が上限を超 える場合、その移動または作成するカードの 中から、その場の上限からその場にあるカー ドの枚数を引いた数のカードを選択し、それら のカードのみを移動または作成します。それ 以外のカードは移動せず作成されません。
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: cr 5.21.1
+    quote: カードを‘公開する’指示がある場合、そのカードを 現在の領域にある状態で、その情報をすべてのプレ イヤーに見えるようにします。
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: cr 5.21.1.1
+    quote: これにより公開されたカードが非公開領域 にある場合、そのカードが他の非公開領域ま たは同じ非公開領域の他の位置に移動する か、そのカードを公開させた処理を含む効果 の解決が終了した時点で、そのカードは非公 開に戻ります。
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: cr 4.5.2
+    quote: デッキ置き場は非公開領域で、カードの順番が管 理されます。プレイヤーは効果やルールによる指示 がある場合にのみ、デッキ置き場のカードの順番を 変更したり、そのカードの情報を知ったりすることが できます。
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+  - ref: cr 11.2.2
+    quote: 直前のルール処理より後にいずれかのプレイヤー がカードを引くことを求められ、その際にデッキ置き 場にカードがなかった場合、そのプレイヤーはこの ゲームに敗北します。
+    derivation:
+      - ミルティオ付棄牌費用後，逐張公開至兩張元費用三以下從者；場容量不改停止條件，牌庫不足則做得到多少做多少。只有未上場的公開牌洗到底，未公開尾牌保留相對位置。
+status: verified
+author: astra
+verified_by:
+  - by: fable
+    method: independent-derivation
+    note: 第三輪交叉驗證 fable-r3/xverify-1、xverify-2（審 astra-r3），astra-r3/fix-1 處理後同意
+  - by: sol
+    method: independent-derivation
+    note: 第三輪最後核對（139 局面逐一推導）；部分洗牌的寫法依 CONTRACT 10.18
+scenarios:
+  - name: 遇到第二張合格牌立即停止，未公開尾牌留在頂端
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: n1
+                card: BP01-179
+              - id: a
+                card: BP01-171
+              - id: large
+                card: BP01-037
+              - id: n2
+                card: BP01-169
+              - id: b
+                card: BP01-173
+              - id: tail
+                card: BP01-171
+            hand:
+              - id: m
+                card: SCS01-006
+              - id: cost
+                card: BP01-171
+            field: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 2
+        costs:
+          1:
+            - cost
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - n2
+            - large
+            - n1
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+            - a
+            - b
+          P1.deck:
+            - tail
+            - n2
+            - large
+            - n1
+          P1.hand: []
+          P1.cemetery:
+            - cost
+          P1.pp.current: 0
+          game:
+            ended: false
+        forbidden_events:
+          - kind: 引く
+          - kind: 敗北
+        events:
+          - kind: 公開
+            object: n1
+            to: all
+            source: m
+          - kind: 公開
+            object: a
+            to: all
+            source: m
+          - kind: 公開
+            object: large
+            to: all
+            source: m
+          - kind: 公開
+            object: n2
+            to: all
+            source: m
+          - kind: 公開
+            object: b
+            to: all
+            source: m
+        events_exact:
+          - 公開
+  - name: 場只剩一格仍翻到兩張，兩位玩家都看得到公開牌
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: n1
+                card: BP01-179
+              - id: a
+                card: BP01-171
+              - id: large
+                card: BP01-037
+              - id: n2
+                card: BP01-169
+              - id: b
+                card: BP01-173
+              - id: tail
+                card: BP01-171
+            hand:
+              - id: m
+                card: SCS01-006
+              - id: cost
+                card: BP01-171
+            field:
+              - id: f0
+                card: BP01-173
+              - id: f1
+                card: BP01-173
+              - id: f2
+                card: BP01-173
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 2
+        costs:
+          1:
+            - cost
+      - n: 3
+        by: P1
+        at: resolve
+        do: resolve-choice
+        of:
+          decision: 2
+          occurrence: 1
+        select:
+          - a
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result:
+            - n2
+            - b
+            - large
+            - n1
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field: &id001
+            - f0
+            - f1
+            - f2
+            - m
+      - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P1.field: *id001
+        awaiting:
+          by: P1
+          choices:
+            - do: resolve-choice
+              select:
+                - a
+            - do: resolve-choice
+              select:
+                - b
+        events:
+          - kind: 公開
+            object: n1
+            to: all
+            source: m
+          - kind: 公開
+            object: a
+            to: all
+            source: m
+          - kind: 公開
+            object: large
+            to: all
+            source: m
+          - kind: 公開
+            object: n2
+            to: all
+            source: m
+          - kind: 公開
+            object: b
+            to: all
+            source: m
+        events_exact:
+          - 公開
+      - at: after-decision-2
+        view: P2
+        outcome: paused
+        awaiting:
+          by: P1
+        assert:
+          P1.deck_count: 6
+        knowledge:
+          knows:
+            - n1
+            - a
+            - large
+            - n2
+            - b
+          does_not_know:
+            - tail
+      - at: after-decision-3
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - f0
+            - f1
+            - f2
+            - m
+            - a
+          P1.deck:
+            - tail
+            - n2
+            - b
+            - large
+            - n1
+          P1.hand: []
+          P1.cemetery:
+            - cost
+          P1.pp.current: 0
+          game:
+            ended: false
+        forbidden_events:
+          - kind: 引く
+          - kind: 敗北
+          - kind: 公開
+            object: tail
+  - name: 全牌庫只有一張合格牌，仍將它上場
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: n1
+                card: BP01-179
+              - id: a
+                card: BP01-171
+              - id: large
+                card: BP01-037
+              - id: n2
+                card: BP01-169
+            hand:
+              - id: m
+                card: SCS01-006
+              - id: cost
+                card: BP01-171
+            field: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 2
+        costs:
+          1:
+            - cost
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result: &id002
+            - n2
+            - large
+            - n1
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+            - a
+          P1.deck: *id002
+          P1.hand: []
+          P1.cemetery:
+            - cost
+          P1.pp.current: 0
+          game:
+            ended: false
+        forbidden_events:
+          - kind: 引く
+          - kind: 敗北
+        events:
+          - kind: 公開
+            object: n1
+            to: all
+            source: m
+          - kind: 公開
+            object: a
+            to: all
+            source: m
+          - kind: 公開
+            object: large
+            to: all
+            source: m
+          - kind: 公開
+            object: n2
+            to: all
+            source: m
+        events_exact:
+          - 公開
+  - name: 全牌庫無合格牌，全數洗回且不敗北
+    setup:
+      turn:
+        active: P1
+        first_player: P1
+        elapsed_turns:
+          P1: 8
+          P2: 7
+        phase: main
+      history: none
+      players:
+        P1:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - id: n1
+                card: BP01-179
+              - id: n2
+                card: BP01-169
+            hand:
+              - id: m
+                card: SCS01-006
+              - id: cost
+                card: BP01-171
+            field: []
+        P2:
+          construction: class
+          leader:
+            class: ニュートラル
+            life: 20
+          pp:
+            current: 5
+            max: 10
+          ep: 0
+          sep: 0
+          zones:
+            deck:
+              - filler: 20
+    decisions:
+      - n: 1
+        by: P1
+        at: main
+        do: play
+        card: m
+      - n: 2
+        by: P1
+        at: check-timing
+        do: choose-pending
+        pending:
+          ability:
+            source: m
+            line: 2
+        costs:
+          1:
+            - cost
+    random:
+      shuffles:
+        - player: P1
+          zone: deck
+          result: &id003
+            - n2
+            - n1
+    expected:
+      - at: after-decision-1
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+      - at: after-decision-2
+        view: omniscient
+        outcome: resolved
+        assert:
+          P1.field:
+            - m
+          P1.deck: *id003
+          P1.hand: []
+          P1.cemetery:
+            - cost
+          P1.pp.current: 0
+          game:
+            ended: false
+        forbidden_events:
+          - kind: 引く
+          - kind: 敗北
+        events:
+          - kind: 公開
+            object: n1
+            to: all
+            source: m
+          - kind: 公開
+            object: n2
+            to: all
+            source: m
+        events_exact:
+          - 公開
