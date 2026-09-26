@@ -34,6 +34,8 @@ FOLLOWER = 1
 # About 5,900 cards in 2026; far fewer means a truncated or error response.
 MIN_CARDS = 1000
 MIN_PAGE_BYTES = 1000
+# Portal card images run to about 0.7 MB; the SVE-site reserve would overstate need 4x.
+IMAGE_RESERVE_BYTES = 3 * 1024 * 1024 // 2
 _CARD_ID_DIGITS = 9
 _IMAGE_PREFIX = "/image/card/"
 

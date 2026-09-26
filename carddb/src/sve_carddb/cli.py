@@ -408,13 +408,19 @@ async def _p5(crawler: Crawler, job: Job, settings: Settings, writer: Writer) ->
     return failures
 
 
-def _check_space(settings: Settings, job: Job, total: int, pending: int) -> None:
+def _check_space(
+    settings: Settings,
+    job: Job,
+    total: int,
+    pending: int,
+    reserve: int = _IMAGE_RESERVE_BYTES,
+) -> None:
     if job.limit is not None:
         pending = min(pending, job.limit)
     free = shutil.disk_usage(settings.data_dir).free
-    if free < pending * _IMAGE_RESERVE_BYTES:
+    if free < pending * reserve:
         msg = (
-            f"{pending} images to fetch need about {pending * _IMAGE_RESERVE_BYTES >> 20} MiB,"
+            f"{pending} images to fetch need about {pending * reserve >> 20} MiB,"
             f" only {free >> 20} MiB free"
         )
         raise DiskFullError(msg)
@@ -442,7 +448,7 @@ async def _sv1_images(crawler: Sv1Crawler, job: Job, settings: Settings) -> int:
         return 1
     jobs = image_jobs(cards)
     pending = sum(not stored_image(manifest, writer, i, f) for i, f in jobs)
-    _check_space(settings, job, len(jobs), pending)
+    _check_space(settings, job, len(jobs), pending, sv1.IMAGE_RESERVE_BYTES)
     failures = no_image = 0
     for index, (card_id, face) in enumerate(jobs, start=1):
         try:
