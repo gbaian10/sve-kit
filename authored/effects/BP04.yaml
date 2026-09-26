@@ -1,47 +1,204 @@
 version: astra/1
 cards:
   BP04-001:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: &id001
+            fn: add
+            args:
+              - count:
+                  side: self
+                  zone: hand
+              - count:
+                  side: self
+                  zone: ex
+          split: '1'
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: &id003
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 5
+            distribute: *id001
   BP04-003:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: win
+          side: self
+        event: deal_damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: event.battle
+            - read: event.to_opposing_leader
   BP04-007:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: choice
+          min: &id002
+            if:
+              fn: ge
+              args:
+                - read: self.combo
+                - 3
+            then: 1
+            else: 0
+          max: *id002
+          modes:
+            - op: modify
+              subjects: target.1
+              power: 2
+              hp: 2
+            - op: modify
+              subjects: target.2
+              power: -2
+              hp: -2
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              other: true
+            min: 1
+            max: 1
+            modes:
+              - 1
+          - key: '2'
+            select: *id003
+            min: 1
+            max: 1
+            modes:
+              - 2
+        costs:
+          - op: act
+            subjects: self
   BP04-010:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
   BP04-011:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.combo
+              - 3
+          then:
+            op: modify
+            subjects: self
+            power:
+              if:
+                fn: ge
+                args:
+                  - read: self.combo
+                  - 5
+              then: 3
+              else: 1
+            hp:
+              if:
+                fn: ge
+                args:
+                  - read: self.combo
+                  - 5
+              then: 3
+              else: 1
+        event: evolve
+        subject: self
   BP04-066:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 3
+        kind: spell
+        body:
+          op: if
+          condition:
+            read: paid.boost
+          then:
+            op: banish
+            subjects: *id003
+          else:
+            op: banish
+            subjects: target.1
+        targets:
+          - key: '1'
+            select: *id003
+            min: 1
+            max: 1
+        additional_costs:
+          - key: boost
+            costs:
+              - op: pp
+                amount: 5
   BP04-075:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 4
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
   BP04-080:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -71,10 +228,7 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select:
-              side: opponent
-              zone: field
-              type: follower
+            select: *id003
             min: 1
             max: 1
   BP04-092:
@@ -112,20 +266,72 @@ cards:
         subject: self
         keyword: ラストワード
   BP04-115:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: enter
+        subject:
+          side: self
+          zone: field
+          type: amulet
+          other: true
+        limit: 1
+        limit_at: trigger
   BP04-P07:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: bane
   BP04-SL16:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 3
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            if:
+              fn: and
+              args:
+                - read: self.is_active
+                - fn: gt
+                  args:
+                    - read: self.turn.leader_damaged
+                    - 0
+            then: 8
+            else: 4
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: *id003
+            min: 1
+            max: 1

@@ -1,17 +1,79 @@
 version: astra/1
 cards:
   BP03-011:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: destroy
+          subjects: self
+        event: main_start
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects:
+            side: self
+            zone: field
+            type: follower
+          abilities:
+            - line: 2
+              kind: trigger
+              body:
+                op: damage
+                subjects: event.target
+                amount: 2
+              event: attack
+              subject: self
+              trigger_if:
+                read: event.target_is_follower
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: フェアリー
+              count: 1
+              to: field
+              bind: created
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.combo
+                  - 3
+              then:
+                op: modify
+                subjects: created
+                keywords:
+                  - rush
+        event: enter
+        subject: self
   BP03-016:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: hand
+            - op: modify
+              subjects: self.leader
+              hp: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+            min: 1
+            max: 1
   BP03-033:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -22,26 +84,128 @@ cards:
           op: macro
           name: bane
   BP03-115:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 0
   BP03-116:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects:
+                side: both
+                zone: field
+                type: follower
+              amount: 5
+            - op: damage
+              subjects: opponent.leader
+              amount: 3
+            - op: discard
+              subjects:
+                side: self
+                zone: hand
+        event: evolve
+        subject: self
   BP03-SL07:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 大地の魔片
+              count: 1
+              to: field
+            - op: stack
+              amount: 1
+            - op: draw
+              count: 1
+        event: enter
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: adjust_cost
+          subjects:
+            side: self
+            zone: any
+            type: spell
+          amount: -4
+          until: end-of-turn
+          uses: 1
+          consume_on: spell_play
+        quick: true
+        limit: 1
+        costs:
+          - op: macro
+            name: earth_rite
   BP03-SL14:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                side: opponent
+                zone: hand
+              by: opponent
+              min: 1
+              max: 1
+              bind: discarded
+            - op: discard
+              subjects: discarded
+        event: attack
+        subject: self
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: self
+              to: field
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: self
+                    zone: hand
+                  by: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: destroy
+        subject: self
+        costs:
+          - op: banish
+            subjects:
+              side: self
+              zone: deck
+              top: 10

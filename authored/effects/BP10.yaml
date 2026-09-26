@@ -1,17 +1,125 @@
 version: astra/1
 cards:
   BP10-020:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: attack
+      - line: 2
+        kind: trigger
+        body:
+          op: per
+          count: 2
+          body:
+            op: seq
+            steps:
+              - op: dice
+                count: 1
+                bind: die
+              - op: if
+                condition:
+                  fn: le
+                  args:
+                    - read: die
+                    - 2
+                then:
+                  op: destroy
+                  subjects: &id003
+                    side: opponent
+                    zone: field
+                    type: follower
+                else:
+                  op: if
+                  condition:
+                    fn: le
+                    args:
+                      - read: die
+                      - 4
+                  then:
+                    op: damage
+                    subjects: opponent.leader
+                    amount: 7
+                  else:
+                    op: damage
+                    subjects: self.leader
+                    amount: 7
+        event: end
   BP10-076:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self.leader
+          amount: -1
+          kind: any
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: draw
+          condition:
+            fn: ne
+            args:
+              - read: turn.phase
+              - start
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: self
+                    zone: hand
+                  by: self
+                  min: &id001
+                    fn: max
+                    args:
+                      - 0
+                      - fn: sub
+                        args:
+                          - count:
+                              side: self
+                              zone: hand
+                          - 2
+                  max: *id001
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: opponent
+                    zone: hand
+                  by: opponent
+                  min: &id002
+                    fn: max
+                    args:
+                      - 0
+                      - fn: sub
+                        args:
+                          - count:
+                              side: opponent
+                              zone: hand
+                          - 2
+                  max: *id002
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: enter
+        subject: self
   BP10-122:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -24,8 +132,48 @@ cards:
         event: attack
         subject: self
   BP10-SL06:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: attack
+      - line: 2
+        kind: trigger
+        body:
+          op: per
+          count: 2
+          body:
+            op: seq
+            steps:
+              - op: dice
+                count: 1
+                bind: die
+              - op: if
+                condition:
+                  fn: le
+                  args:
+                    - read: die
+                    - 2
+                then:
+                  op: destroy
+                  subjects: *id003
+                else:
+                  op: if
+                  condition:
+                    fn: le
+                    args:
+                      - read: die
+                      - 4
+                  then:
+                    op: damage
+                    subjects: opponent.leader
+                    amount: 7
+                  else:
+                    op: damage
+                    subjects: self.leader
+                    amount: 7
+        event: end

@@ -26,143 +26,7 @@
           "abilities": {
             "type": "array",
             "items": {
-              "type": "object",
-              "properties": {
-                "line": {
-                  "type": "integer",
-                  "minimum": 1
-                },
-                "section": {
-                  "type": "integer"
-                },
-                "face": {
-                  "type": "integer"
-                },
-                "keyword": {
-                  "type": "string"
-                },
-                "rule": {
-                  "type": "string"
-                },
-                "kind": {
-                  "enum": [
-                    "spell",
-                    "trigger",
-                    "static",
-                    "activated",
-                    "evolve",
-                    "construction"
-                  ]
-                },
-                "event": {
-                  "type": "string"
-                },
-                "subject": {
-                  "$ref": "#/$defs/select"
-                },
-                "trigger_if": {
-                  "$ref": "#/$defs/expr"
-                },
-                "targets": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "key": {
-                        "type": "string"
-                      },
-                      "select": {
-                        "$ref": "#/$defs/select"
-                      },
-                      "min": {
-                        "$ref": "#/$defs/expr"
-                      },
-                      "max": {
-                        "$ref": "#/$defs/expr"
-                      },
-                      "distribute": {
-                        "$ref": "#/$defs/expr"
-                      },
-                      "modes": {
-                        "type": "array",
-                        "items": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "required": [
-                      "key",
-                      "select",
-                      "min",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  }
-                },
-                "cost_selections": {
-                  "type": "array",
-                  "items": {
-                    "type": "object",
-                    "properties": {
-                      "key": {
-                        "type": "string"
-                      },
-                      "select": {
-                        "$ref": "#/$defs/select"
-                      },
-                      "min": {
-                        "$ref": "#/$defs/expr"
-                      },
-                      "max": {
-                        "$ref": "#/$defs/expr"
-                      },
-                      "distribute": {
-                        "$ref": "#/$defs/expr"
-                      },
-                      "modes": {
-                        "type": "array",
-                        "items": {
-                          "type": "integer"
-                        }
-                      }
-                    },
-                    "required": [
-                      "key",
-                      "select",
-                      "min",
-                      "max"
-                    ],
-                    "additionalProperties": false
-                  }
-                },
-                "costs": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/$defs/node"
-                  }
-                },
-                "body": {
-                  "$ref": "#/$defs/node"
-                },
-                "quick": {
-                  "type": "boolean"
-                },
-                "limit": {
-                  "type": "integer"
-                },
-                "retain_event": {
-                  "type": "boolean"
-                },
-                "ub": {
-                  "type": "boolean"
-                }
-              },
-              "required": [
-                "line",
-                "kind",
-                "body"
-              ],
-              "additionalProperties": false
+              "$ref": "#/$defs/ability"
             }
           },
           "unresolved": {
@@ -244,7 +108,8 @@
                 "not",
                 "in",
                 "distinct",
-                "half_up"
+                "half_up",
+                "sum"
               ]
             },
             "args": {
@@ -277,6 +142,41 @@
             "if",
             "then",
             "else"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "at": {
+              "enum": [
+                "play-start",
+                "resolution-start"
+              ]
+            },
+            "value": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "at",
+            "value"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "values": {
+              "$ref": "#/$defs/select"
+            },
+            "field": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "values",
+            "field"
           ],
           "additionalProperties": false
         }
@@ -377,6 +277,53 @@
           },
           "required": [
             "difference"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "side": {
+              "enum": [
+                "self",
+                "opponent",
+                "both",
+                "active"
+              ]
+            },
+            "type": {
+              "type": "string"
+            },
+            "trait": {
+              "type": "string"
+            },
+            "name": {
+              "type": "string"
+            },
+            "name_contains": {
+              "type": "string"
+            },
+            "not_name": {
+              "type": "string"
+            },
+            "other": {
+              "type": "boolean"
+            },
+            "top": {
+              "$ref": "#/$defs/expr"
+            },
+            "keyword": {
+              "type": "string"
+            },
+            "where": {
+              "$ref": "#/$defs/expr"
+            },
+            "from": {
+              "$ref": "#/$defs/select"
+            }
+          },
+          "required": [
+            "from"
           ],
           "additionalProperties": false
         }
@@ -569,6 +516,18 @@
               "items": {
                 "$ref": "#/$defs/node"
               }
+            },
+            "by": {
+              "enum": [
+                "self",
+                "opponent"
+              ]
+            },
+            "timing": {
+              "enum": [
+                "play",
+                "resolve"
+              ]
             }
           },
           "required": [
@@ -599,6 +558,15 @@
             },
             "order": {
               "type": "boolean"
+            },
+            "by": {
+              "enum": [
+                "self",
+                "opponent"
+              ]
+            },
+            "distinct_by": {
+              "type": "string"
             }
           },
           "required": [
@@ -623,6 +591,9 @@
               "$ref": "#/$defs/expr"
             },
             "split": {
+              "type": "string"
+            },
+            "bind": {
               "type": "string"
             }
           },
@@ -653,6 +624,9 @@
                 "top",
                 "bottom"
               ]
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -670,6 +644,9 @@
             },
             "subjects": {
               "$ref": "#/$defs/select"
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -686,6 +663,9 @@
             },
             "subjects": {
               "$ref": "#/$defs/select"
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -702,6 +682,9 @@
             },
             "subjects": {
               "$ref": "#/$defs/select"
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -718,6 +701,9 @@
             },
             "subjects": {
               "$ref": "#/$defs/select"
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -734,6 +720,9 @@
             },
             "subjects": {
               "$ref": "#/$defs/select"
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -772,6 +761,9 @@
             },
             "up_to": {
               "type": "boolean"
+            },
+            "bind": {
+              "type": "string"
             }
           },
           "required": [
@@ -822,6 +814,9 @@
               "$ref": "#/$defs/expr"
             },
             "to": {
+              "type": "string"
+            },
+            "distinct_by": {
               "type": "string"
             }
           },
@@ -917,6 +912,12 @@
             },
             "until": {
               "type": "string"
+            },
+            "abilities": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ability"
+              }
             }
           },
           "required": [
@@ -932,12 +933,15 @@
               "const": "create"
             },
             "name": {
-              "type": "string"
+              "$ref": "#/$defs/expr"
             },
             "count": {
               "$ref": "#/$defs/expr"
             },
             "to": {
+              "type": "string"
+            },
+            "bind": {
               "type": "string"
             }
           },
@@ -960,6 +964,12 @@
             },
             "name": {
               "type": "string"
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "required": [
@@ -1058,14 +1068,34 @@
             },
             "name": {
               "type": "string"
+            },
+            "bind": {
+              "type": "string"
+            },
+            "names": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              }
             }
           },
           "required": [
             "op",
-            "subjects",
-            "name"
+            "subjects"
           ],
-          "additionalProperties": false
+          "additionalProperties": false,
+          "oneOf": [
+            {
+              "required": [
+                "name"
+              ]
+            },
+            {
+              "required": [
+                "names"
+              ]
+            }
+          ]
         },
         {
           "type": "object",
@@ -1256,6 +1286,13 @@
             },
             "once": {
               "type": "boolean"
+            },
+            "side": {
+              "enum": [
+                "self",
+                "opponent",
+                "both"
+              ]
             }
           },
           "required": [
@@ -1320,6 +1357,12 @@
             },
             "condition": {
               "$ref": "#/$defs/expr"
+            },
+            "abilities": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/ability"
+              }
             }
           },
           "required": [
@@ -1353,6 +1396,9 @@
                 "battle",
                 "attack"
               ]
+            },
+            "until": {
+              "type": "string"
             }
           },
           "required": [
@@ -1377,6 +1423,21 @@
             },
             "condition": {
               "$ref": "#/$defs/expr"
+            },
+            "until": {
+              "type": "string"
+            },
+            "uses": {
+              "type": "integer"
+            },
+            "consume_on": {
+              "type": "string"
+            },
+            "kind": {
+              "enum": [
+                "play",
+                "evolve"
+              ]
             }
           },
           "required": [
@@ -1399,7 +1460,14 @@
                 "target",
                 "play",
                 "fanfare",
-                "evolve"
+                "evolve",
+                "lose",
+                "win",
+                "normal_draw",
+                "normal_max_pp_gain",
+                "play_follower",
+                "draw",
+                "ignore_guard"
               ]
             },
             "subjects": {
@@ -1409,6 +1477,9 @@
               "$ref": "#/$defs/expr"
             },
             "until": {
+              "type": "string"
+            },
+            "during": {
               "type": "string"
             }
           },
@@ -1455,8 +1526,248 @@
             "otherwise"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "earth_rite"
+            },
+            "count": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "count"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "stack"
+            },
+            "amount": {
+              "$ref": "#/$defs/expr"
+            }
+          },
+          "required": [
+            "op",
+            "amount"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "flip"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "face": {
+              "enum": [
+                "up",
+                "down"
+              ]
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "face"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "op": {
+              "const": "name_alias"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "name": {
+              "type": "string"
+            },
+            "while_zone": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "op",
+            "subjects",
+            "name",
+            "while_zone"
+          ],
+          "additionalProperties": false
         }
       ]
+    },
+    "ability": {
+      "type": "object",
+      "properties": {
+        "line": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "section": {
+          "type": "integer"
+        },
+        "face": {
+          "type": "integer"
+        },
+        "keyword": {
+          "type": "string"
+        },
+        "rule": {
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "spell",
+            "trigger",
+            "static",
+            "activated",
+            "evolve",
+            "construction"
+          ]
+        },
+        "event": {
+          "type": "string"
+        },
+        "subject": {
+          "$ref": "#/$defs/select"
+        },
+        "trigger_if": {
+          "$ref": "#/$defs/expr"
+        },
+        "targets": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/selection"
+          }
+        },
+        "cost_selections": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/selection"
+          }
+        },
+        "costs": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/node"
+          }
+        },
+        "body": {
+          "$ref": "#/$defs/node"
+        },
+        "quick": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer"
+        },
+        "retain_event": {
+          "type": "boolean"
+        },
+        "ub": {
+          "type": "boolean"
+        },
+        "active_zones": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "limit_at": {
+          "enum": [
+            "play",
+            "trigger"
+          ]
+        },
+        "additional_costs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "key": {
+                "type": "string"
+              },
+              "costs": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/node"
+                }
+              },
+              "cost_selections": {
+                "type": "array",
+                "items": {
+                  "$ref": "#/$defs/selection"
+                }
+              }
+            },
+            "required": [
+              "key",
+              "costs"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "play_if": {
+          "$ref": "#/$defs/expr"
+        }
+      },
+      "required": [
+        "line",
+        "kind",
+        "body"
+      ],
+      "additionalProperties": false
+    },
+    "selection": {
+      "type": "object",
+      "properties": {
+        "key": {
+          "type": "string"
+        },
+        "select": {
+          "$ref": "#/$defs/select"
+        },
+        "min": {
+          "$ref": "#/$defs/expr"
+        },
+        "max": {
+          "$ref": "#/$defs/expr"
+        },
+        "distribute": {
+          "$ref": "#/$defs/expr"
+        },
+        "modes": {
+          "type": "array",
+          "items": {
+            "type": "integer"
+          }
+        },
+        "distinct_by": {
+          "type": "string"
+        },
+        "order": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "key",
+        "select",
+        "min",
+        "max"
+      ],
+      "additionalProperties": false
     }
   }
 }

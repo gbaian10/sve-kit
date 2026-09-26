@@ -1,11 +1,26 @@
 version: astra/1
 cards:
   BP08-011:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: transform
+          subjects: target.1
+          names:
+            - ロイド
+            - ヴィクトリア
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: ex
+              name: 操り人形
+            min: 2
+            max: 2
+            order: true
   BP08-028:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -59,11 +74,26 @@ cards:
               then: 8
               else: 4
   BP08-034:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: modify
+          subjects: target.1
+          power: 3
+          hp: 2
+          keywords:
+            - rush
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
   BP08-078:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -107,50 +137,239 @@ cards:
             max: 1
         keyword: ラストワード
   BP08-080:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: move
+          subjects: target.1
+          to: field
+        event: destroy
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              where:
+                fn: and
+                args:
+                  - fn: eq
+                    args:
+                      - read: item.class
+                      - ナイトメア
+                  - fn: le
+                    args:
+                      - read: item.cost
+                      - 5
+            min: 1
+            max: 1
   BP08-089:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  type: amulet
+              - 3
+          then:
+            op: adjust_cost
+            subjects: self
+            kind: evolve
+            set: 0
+            until: end-of-turn
+        event: enter
+        subject: self
   BP08-090:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: banish
+          subjects: target.1
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 3
+        event: destroy
+        subject: self
   BP08-SL15:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 7
+              bind: seen
+            - op: select
+              select:
+                from: seen
+                type: follower
+                where:
+                  fn: and
+                  args:
+                    - fn: eq
+                      args:
+                        - read: item.class
+                        - ナイトメア
+                    - fn: le
+                      args:
+                        - read: item.cost
+                        - 6
+              min: 0
+              max: 4
+              bind: chosen
+              distinct_by: name
+            - op: move
+              subjects: chosen
+              to: field
+              bind: entered
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - chosen
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+            - op: destroy
+              subjects: entered
+        event: enter
+        subject: self
   BP08-T01:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: name_alias
+          subjects: self
+          name: 操り人形
+          while_zone: field
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 3
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: enter
+        subject: self
   BP08-T02:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: name_alias
+          subjects: self
+          name: 操り人形
+          while_zone: field
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: assail
+      - line: 3
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
   BP08-T04:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 3
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              union:
+                - *id001
+                - opponent.leader
+            min: 1
+            max: 1
   BP08-T09:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush

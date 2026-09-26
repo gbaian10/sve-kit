@@ -1,11 +1,64 @@
 version: astra/1
 cards:
   BP06-035:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount:
+            fn: sub
+            args:
+              - 0
+              - count:
+                  union:
+                    - side: self
+                      zone: cemetery
+                      trait: 陰陽師
+                    - side: self
+                      zone: cemetery
+                      type: spell
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  name: 天后
+              - 0
+          then:
+            op: create
+            name: 天后
+            count: 1
+            to: field
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - storm
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 式神
+            min: 0
+            max: 2
+        costs:
+          - op: act
+            subjects: self
   BP06-042:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -129,11 +182,81 @@ cards:
           type: follower
           trait: 妖怪
   BP06-079:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select: &id001
+                side: opponent
+                zone: field
+                type: follower
+              by: opponent
+              min:
+                if:
+                  fn: ge
+                  args:
+                    - at: resolution-start
+                      value:
+                        count:
+                          side: self
+                          zone: cemetery
+                    - 10
+                then: 2
+                else: 1
+              max:
+                if:
+                  fn: ge
+                  args:
+                    - at: resolution-start
+                      value:
+                        count:
+                          side: self
+                          zone: cemetery
+                    - 10
+                then: 2
+                else: 1
+              bind: offered
+            - op: move
+              subjects: offered
+              to: cemetery
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 5
+            - op: move
+              subjects:
+                side: self
+                zone: deck
+                top: 1
+              to: cemetery
+        active_zones:
+          - hand
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 3
+          - op: discard
+            subjects: self
   BP06-080:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -163,10 +286,7 @@ cards:
         subject: self
         targets:
           - key: '1'
-            select:
-              side: opponent
-              zone: field
-              type: follower
+            select: *id001
             min: 1
             max: 1
             modes:
@@ -183,8 +303,26 @@ cards:
             modes:
               - 2
   BP06-117:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: flip
+              subjects: target.1
+              face: down
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: evolve_deck
+              type: follower
+              where:
+                read: item.face_up
+            min: 1
+            max: 1

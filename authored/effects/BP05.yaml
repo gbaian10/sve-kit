@@ -1,17 +1,61 @@
 version: astra/1
 cards:
   BP05-006:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          by: opponent
+          timing: resolve
+          min: 1
+          max: 1
+          modes:
+            - op: restrict
+              subjects: opponent.leader
+              action: normal_draw
+              during: next-opponent-start
+            - op: restrict
+              subjects: opponent.leader
+              action: normal_max_pp_gain
+              during: next-opponent-start
+            - op: restrict
+              subjects: opponent.leader
+              action: play_follower
+              during: next-opponent-main
+        event: end
   BP05-007:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: if_done
+          attempt:
+            op: move
+            subjects: target.1
+            to: ex
+          then:
+            op: modify
+            subjects: self.leader
+            hp: 2
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 妖精
+            min: 0
+            max: 2
   BP05-057:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -55,23 +99,125 @@ cards:
             subjects: cost.1
             to: cemetery
   BP05-070:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: adjust_cost
+          subjects:
+            side: opponent
+            zone: any
+            type: spell
+          amount: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - at: resolution-start
+                value:
+                  count:
+                    side: self
+                    zone: cemetery
+              - 10
+          then:
+            op: destroy
+            subjects: target.1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 3
+            min: 1
+            max: 1
   BP05-071:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects:
+            side: opponent
+            zone: any
+            type: spell
+          amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: random
+              select:
+                side: opponent
+                zone: hand
+              count: 1
+              bind: random-discard
+            - op: discard
+              subjects: random-discard
+        event: evolve
+        subject: self
   BP05-092:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: self.leader
+          action: lose
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: win
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: self
+              to: cemetery
+            - op: modify
+              subjects: self.leader
+              set_hp: 1
+        event: leader_life_change
+        subject: self.leader
+        trigger_if:
+          fn: and
+          args:
+            - fn: gt
+              args:
+                - read: event.before_life
+                - 0
+            - fn: le
+              args:
+                - read: event.after_life
+                - 0
   BP05-108:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -94,26 +240,184 @@ cards:
           - op: act
             subjects: self
   BP05-SL12:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 2
+        kind: trigger
+        body:
+          op: repeat
+          body:
+            op: seq
+            steps:
+              - op: modify
+                subjects: self
+                power: 3
+              - op: move
+                subjects:
+                  side: self
+                  zone: deck
+                  top: 4
+                to: cemetery
+                bind: milled
+          until:
+            fn: eq
+            args:
+              - count:
+                  from: milled
+                  name: 魔導電磁サイ
+              - 0
+        event: enter
+        subject: self
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: move
+              subjects: target.1
+              to: deck
+            - op: shuffle
+              subjects:
+                side: self
+                zone: deck
+        event: destroy
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              name: 魔導電磁サイ
+            min: 0
+            max:
+              count:
+                side: self
+                zone: cemetery
+                name: 魔導電磁サイ
   BP05-SL13:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: aura
+          subjects: self
+          keywords:
+            - storm
+          condition:
+            fn: and
+            args:
+              - read: self.is_active
+              - fn: gt
+                args:
+                  - read: self.turn.leader_damaged
+                  - 0
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: opponent.leader
+              amount:
+                read: self.turn.leader_damaged
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - read: self.leader.life
+                  - 7
+              then:
+                op: modify
+                subjects: self
+                power: 2
+                hp: 2
+        event: attack
+        subject: self
   BP05-SL14:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: adjust_cost
+          subjects:
+            side: opponent
+            zone: any
+            type: spell
+          amount: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - at: resolution-start
+                value:
+                  count:
+                    side: self
+                    zone: cemetery
+              - 10
+          then:
+            op: destroy
+            subjects: target.1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 3
+            min: 1
+            max: 1
   BP05-SL15:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects:
+            side: opponent
+            zone: any
+            type: spell
+          amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: random
+              select:
+                side: opponent
+                zone: hand
+              count: 1
+              bind: random-discard
+            - op: discard
+              subjects: random-discard
+        event: evolve
+        subject: self
