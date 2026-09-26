@@ -13,7 +13,7 @@ why: >-
   被放進 EX 的從者失去所有傷害與效果（Q1620，4.1.4 新物件）；對手 EX 已滿 5 張時不移動、留在場上（Q1617）。
 discriminates: >-
   只把「直接放到場上」當作「手札以外から場に出た」、忽略「從 EX 打出」的引擎，B 不會把 b1 移到 EX；
-  沒清除 b1 傷害的引擎在 B 的 P2.ex 裡 b1 仍帶 hp 1（無法直接斷言，改斷言之後不再有 damage 狀態的 hp）；C 中 EX 滿還硬塞的引擎會違反 4.8.3.2。
+  沒清除 b1 傷害的引擎在 B 的 P2.ex 裡 b1 仍帶 hp 1（無法直接斷言，改斷言之後不再有 damage 狀態的 hp）；C 中 EX 滿還硬塞的引擎會違反 4.8.3.2；EX 滿時仍要停下問 P1 選 0 張（契約第 10 節第 11、33 條），直接跳過的引擎在 C 的 after-decision-2 不會是 paused。
 refs:
   rules: [5.5.3, 4.1.4, 4.8.3.2, 10.7.3.1, 12.4.3, 8.2.1]
   qa: [Q1616, Q1617, Q1620, Q2532]
@@ -129,10 +129,22 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: play, card: a1}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
-      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
+      # 4.8.3.2：對手 EX 已滿，可移動 0 張；契約第 10 節第 11、33 條：只剩 select: [] 仍是輸入點（同 card-BP17-030、card-BP05-007）
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
     random: {}
     expected:
       - at: after-decision-2
+        view: omniscient
+        outcome: paused
+        assert:
+          P2.field: [b1]
+          P2.ex: [e1, e2, e3, e4, e5]
+        awaiting:
+          by: P1
+          choices:
+            - {do: resolve-choice, select: []}
+      - at: after-decision-3
         view: omniscient
         outcome: resolved
         assert:

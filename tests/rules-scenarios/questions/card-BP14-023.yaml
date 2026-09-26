@@ -81,7 +81,7 @@ scenarios:
       - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, card: BP14-023, line: 3}}
       # 內層（進化時能力）的費用選擇：契約 10.16，寫在內層輸入點、of 指向外層決定
       - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, costs: {1: [g1, g2]}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: resolve-choice, select: [d1]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: resolve-choice, choice: execute, select: [d1]}
       - {n: 4, by: P1, at: resolve, of: {decision: 1, occurrence: 3}, do: resolve-choice, order: [d4, d2, d3, d5]}
       - {n: 5, by: P1, at: main, do: play, card: d1}
       - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: d1, line: 2}}}
@@ -109,10 +109,10 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [d1]}
-            - {do: resolve-choice, select: [d3]}
-            - {do: resolve-choice, select: [d5]}
-            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, choice: execute, select: [d1]}
+            - {do: resolve-choice, choice: execute, select: [d3]}
+            - {do: resolve-choice, choice: execute, select: [d5]}
+            - {do: resolve-choice, choice: decline}
         assert:
           P1.pp.current: 2
           P1.ex: [g3]
@@ -182,7 +182,7 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, card: BP14-023, line: 3}}
       - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: resolve-choice, costs: {1: [g1, g2]}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: resolve-choice, select: [d1]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 1, occurrence: 2}, do: resolve-choice, choice: execute, select: [d1]}
       - {n: 4, by: P1, at: resolve, of: {decision: 1, occurrence: 3}, do: resolve-choice, order: [d4, d2, d3, d5]}
     random: {}
     expected:
@@ -192,10 +192,10 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [d1]}
-            - {do: resolve-choice, select: [d3]}
-            - {do: resolve-choice, select: [d5]}
-            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, choice: execute, select: [d1]}
+            - {do: resolve-choice, choice: execute, select: [d3]}
+            - {do: resolve-choice, choice: execute, select: [d5]}
+            - {do: resolve-choice, choice: decline}
         forbidden_events:
           - {kind: 抑制}
       - at: after-decision-4

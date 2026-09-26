@@ -110,7 +110,7 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, face: 0, pay: {pp: 0, ep: 1, sep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: BP09-005, face: 0, line: 1}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d2]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute, select: [d2]}
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d5, d4, d3, d1]}
     random: {}
     expected:
@@ -130,8 +130,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [d2]}
-            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, choice: execute, select: [d2]}
+            - {do: resolve-choice, choice: decline}
       - at: after-decision-4
         view: omniscient
         outcome: resolved

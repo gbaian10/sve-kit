@@ -76,7 +76,7 @@ scenarios:
       - {n: 1, by: P1, at: main, do: play, card: a1, targets: {1: [c1]}}
       - {n: 2, by: P1, at: main, do: evolve, source: c1, ability: {source: c1, line: 2}, evolve_card: e1, pay: {pp: 1, ep: 0}}
       - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: c1, card: BP14-075, line: 1}}}
-      - {n: 4, by: P1, at: resolve, of: {decision: 3, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 4, by: P1, at: resolve, of: {decision: 3, occurrence: 1}, do: resolve-choice, choice: decline}
       - {n: 5, by: P1, at: resolve, of: {decision: 3, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3, d4]}
       - {n: 6, by: P1, at: main, do: attack, attacker: c1, target: P2.leader}
       - {n: 7, by: P2, at: quick, do: pass}
