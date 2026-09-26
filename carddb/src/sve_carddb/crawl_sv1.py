@@ -117,9 +117,10 @@ class Sv1Crawler:
         if crawler.writer.local_state(found) is LocalState.TRUSTED:
             self.misses.record_success()
             return ImageResult.SHARED
-        if sv1.is_template(found, face):
+        if any(sv1.is_template(found, f) for f in sv1.FACES):
             # Reprints such as 810xxxxxx reuse another card's art, sometimes a card
-            # later in the run; a changed template would not match the old shape.
+            # later in the run or the other face; a changed template would not match
+            # the old shape.
             self.misses.record_success()
             await crawler.image(found)
             return ImageResult.SHARED

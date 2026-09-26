@@ -301,6 +301,22 @@ async def test_card_page_showing_a_later_cards_template_is_shared(
     assert await crawler.image(FOLLOWER, sv1.Face.BASE) is ImageResult.STORED
 
 
+async def test_card_page_showing_the_other_faces_template_is_not_a_miss(
+    manifest: Manifest, root: Path, clock: FakeClock
+) -> None:
+    portal = FakePortal()
+    cards = [card_id(i) for i in range(1, 9, 2)]
+    for card in cards:
+        portal.missing.add(f"/image/card/phase2/common/C/C_{card}.png")
+        portal.page_images[card] = [sv1.image_url(card, sv1.Face.EVOLVED)]
+    crawler = make_sv1(manifest, root, clock, portal)
+
+    # make_sv1 trips `misses` after 3 in a row; a base face pointing at the evolved
+    # template (910xxxxxx cards) is not a changed template.
+    for card in cards:
+        assert await crawler.image(card, sv1.Face.BASE) is ImageResult.SHARED
+
+
 def test_is_template_matches_any_card_but_not_other_shapes() -> None:
     assert sv1.is_template(sv1.image_url(900344080, sv1.Face.BASE), sv1.Face.BASE)
     assert not sv1.is_template(
