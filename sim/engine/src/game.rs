@@ -13,6 +13,7 @@ mod effects;
 mod expr;
 mod extensions;
 mod grants;
+mod history;
 mod keywords;
 mod legal;
 mod movement;
@@ -477,6 +478,7 @@ impl Game {
             }
         }
         self.import_cost_history()?;
+        self.import_numeric_history(setup)?;
         self.import_event_occurrences(&setup["semantic_state"])?;
         if let Some(used) = setup["semantic_state"].get("used_this_turn") {
             let entries: Vec<AbilityUse> = serde_json::from_value(used.clone()).map_err(invalid)?;

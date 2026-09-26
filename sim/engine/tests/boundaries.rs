@@ -6528,3 +6528,154 @@ fn observed_ownership_constrains_each_public_deck_list_after_control_changes() {
     initial["players"]["P1"]["zones"]["field"][0]["owner"] = json!("unknown");
     Game::new(loaded, &initial, &Value::Null, &Value::Null, "bad-owner").unwrap_err();
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The history fixture provides literal printed fragments and matching authored nodes."
+)]
+fn numeric_history_fixture(buff: &Value, text: &str) -> (Arc<Catalog>, Value) {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    let mut lines = vec![snapshot()];
+    for (number, printed, body) in [
+        ("unit-buff", text, buff.clone()),
+        (
+            "unit-set",
+            "それの攻撃力と体力を1にする。",
+            json!({"op":"modify","subjects":"target.1","set_power":1_i64,"set_hp":1_i64}),
+        ),
+    ] {
+        lines.push(json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"スペル","cost":"0","power":"-","hp":"-","traits":[],"text":printed,"sections":[]}]}).to_string());
+        doc["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[{"line":1_i64,"kind":"spell","body":body}]});
+    }
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &lines.join("\n"),
+            &registry(),
+            &[("numeric-history".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["cemetery"] =
+        json!([{"id":"buff","card":"unit-buff"},{"id":"set","card":"unit-set"}]);
+    initial["semantic_state"]["continuous_effects"] = json!([
+        {"id":"later","source":"set","text":"これの攻撃力と体力を1にする。","applies_to":["a"],"until":"permanent","order":2_i64},
+        {"id":"earlier","source":"buff","text":text.replace("それは", "これは").replace(['{','}'],""),"applies_to":["a"],"until":"permanent","order":1_i64}
+    ]);
+    (loaded, initial)
+}
+
+#[test]
+fn literal_numeric_history_uses_timestamps_once_and_preserves_explicit_effective_values() {
+    for reverse in [false, true] {
+        for effective in [false, true] {
+            let (loaded, mut initial) = numeric_history_fixture(
+                &json!({"op":"modify","subjects":"target.1","power":2_i64}),
+                "それは{攻撃力}+2する。",
+            );
+            if reverse {
+                initial["semantic_state"]["continuous_effects"][0]["order"] = json!(1_i64);
+                initial["semantic_state"]["continuous_effects"][1]["order"] = json!(2_i64);
+            }
+            let power = if reverse { 3_i64 } else { 1_i64 };
+            if effective {
+                initial["players"]["P1"]["zones"]["field"][0]["state"] =
+                    json!({"power":power,"hp":1_i64});
+            }
+            let mut engine = Game::new(
+                Arc::clone(&loaded),
+                &initial,
+                &Value::Null,
+                &Value::Null,
+                "history",
+            )
+            .unwrap();
+            let mut saved: Game =
+                serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+            let mut sampled = Game::from_observation(
+                loaded,
+                &engine.projection(View::P1).unwrap(),
+                "P1",
+                "history",
+            )
+            .unwrap();
+            for instance in [&mut engine, &mut saved, &mut sampled] {
+                for (path, expected) in [
+                    ("P1.field.a.power", json!(power)),
+                    ("P1.field.a.hp", json!(1_i64)),
+                    ("P1.field.a.max_hp", json!(1_i64)),
+                    ("P1.field.a.stats_increased_this_turn", json!(false)),
+                    ("semantic_state.pending_triggers", json!([])),
+                ] {
+                    assert_eq!(instance.query(View::P1, path).unwrap(), Some(expected));
+                }
+                instance
+                    .decide(
+                        &json!({"do":"attack","attacker":"a","target":"P2.leader"}),
+                        "attack",
+                    )
+                    .unwrap();
+                instance.decide(&json!({"do":"pass"}), "combat").unwrap();
+                assert_eq!(
+                    instance.query(View::P1, "P2.leader.life").unwrap(),
+                    Some(json!(20_i64 - power))
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn historical_health_modifiers_reconstruct_maximum_health_without_double_counting_damage() {
+    for explicit in [json!({"damage":3_i64}), json!({"hp":2_i64})] {
+        let (loaded, mut initial) = numeric_history_fixture(
+            &json!({"op":"modify","subjects":"target.1","hp":2_i64}),
+            "それは{体力}+2する。",
+        );
+        let buff = initial["semantic_state"]["continuous_effects"][1].clone();
+        initial["semantic_state"]["continuous_effects"] = json!([buff]);
+        initial["players"]["P1"]["zones"]["field"][0]["state"] = explicit;
+        let engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "hp-history").unwrap();
+        for (field, expected) in [("hp", 2_i64), ("max_hp", 5_i64), ("damage", 3_i64)] {
+            assert_eq!(
+                engine
+                    .query(View::P1, &format!("P1.field.a.{field}"))
+                    .unwrap(),
+                Some(json!(expected))
+            );
+        }
+    }
+}
+
+#[test]
+fn unresolved_numeric_history_never_silently_uses_printed_defaults() {
+    for node in [
+        json!({"op":"modify","subjects":"target.1","power":{"read":"x"}}),
+        json!({"op":"modify","subjects":"target.1","power":2_i64,"keywords":["guard"]}),
+        json!({"op":"seq","steps":[{"op":"modify","subjects":"self","power":2_i64},{"op":"modify","subjects":"target.1","power":2_i64}]}),
+    ] {
+        let (loaded, initial) = numeric_history_fixture(&node, "それは{攻撃力}+2する。");
+        assert!(matches!(
+            Game::new(loaded, &initial, &Value::Null, &Value::Null, "bad-history"),
+            Err(EngineFailure::Unsupported(_))
+        ));
+    }
+    for (key, value) in [
+        ("until", json!("end-of-turn")),
+        ("order", Value::Null),
+        ("text", json!("")),
+        ("text", json!("別の能力")),
+        ("order", json!(2_i64)),
+    ] {
+        let (loaded, mut initial) = numeric_history_fixture(
+            &json!({"op":"modify","subjects":"target.1","power":2_i64}),
+            "それは{攻撃力}+2する。",
+        );
+        initial["semantic_state"]["continuous_effects"][1][key] = value;
+        assert!(matches!(
+            Game::new(loaded, &initial, &Value::Null, &Value::Null, "bad-history"),
+            Err(EngineFailure::Unsupported(_))
+        ));
+    }
+}

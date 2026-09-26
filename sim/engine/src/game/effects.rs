@@ -740,6 +740,29 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn modify_numbers(&mut self, id: &str, node: &Value, frame: &Frame) -> Result<()> {
+        for field in ["power", "hp"] {
+            let set_key = format!("set_{field}");
+            if let Some(expr) = node.get(&set_key) {
+                let amount = self.number(expr, frame)?;
+                self.object_mut(id)?.state[field] = json!(amount);
+                if field == "hp" {
+                    self.object_mut(id)?.state["max_hp"] = json!(amount);
+                }
+            }
+            if let Some(expr) = node.get(field) {
+                let amount = self.number(expr, frame)?;
+                let object = self.object_mut(id)?;
+                object.state[field] = json!(int(&object.state[field]).saturating_add(amount));
+                if field == "hp" {
+                    object.state["max_hp"] =
+                        json!(int(&object.state["max_hp"]).saturating_add(amount));
+                }
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn modify(&mut self, node: &Value, frame: &Frame) -> Result<()> {
         Self::check_granted_abilities(node)?;
         if node.get("until").is_some()
@@ -774,25 +797,7 @@ impl Game {
             }
             let before = self.object(&id)?.clone();
             let prior = &before.state;
-            for field in ["power", "hp"] {
-                let set_key = format!("set_{field}");
-                if let Some(expr) = node.get(&set_key) {
-                    let amount = self.number(expr, frame)?;
-                    self.object_mut(&id)?.state[field] = json!(amount);
-                    if field == "hp" {
-                        self.object_mut(&id)?.state["max_hp"] = json!(amount);
-                    }
-                }
-                if let Some(expr) = node.get(field) {
-                    let amount = self.number(expr, frame)?;
-                    let object = self.object_mut(&id)?;
-                    object.state[field] = json!(int(&object.state[field]).saturating_add(amount));
-                    if field == "hp" {
-                        object.state["max_hp"] =
-                            json!(int(&object.state["max_hp"]).saturating_add(amount));
-                    }
-                }
-            }
+            self.modify_numbers(&id, node, frame)?;
             if node["remove_abilities"] == true {
                 if self.keywords(&id)?.contains("drive") {
                     self.object_mut(&id)?.state["drive_gained"] = json!(true);
