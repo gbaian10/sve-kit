@@ -752,21 +752,23 @@ cards:
             max: 1
   BP20-P70:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
     abilities:
       - line: 1
         kind: trigger
         body:
-          op: draw
-          count: 1
+          op: if
+          condition:
+            fn: le
+            args:
+              - count:
+                  side: self
+                  zone: hand
+              - 1
+          then:
+            op: draw
+            count: 1
         event: end
-        trigger_if:
-          fn: le
-          args:
-            - count:
-                side: self
-                zone: hand
-            - 1
         active_zones:
           - ex
   BP20-R13:

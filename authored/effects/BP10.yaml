@@ -115,7 +115,7 @@ cards:
                 count: 2
   BP10-076:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E25 依 1.3.4，各玩家依序選擇並完成捨牌；不足三張時不執行捨牌選擇。
     abilities:
       - line: 1
         kind: static
@@ -144,123 +144,165 @@ cards:
           then:
             op: seq
             steps:
-              - op: select
-                select:
-                  side: self
-                  zone: hand
-                by: self
-                min:
-                  fn: max
+              - op: if
+                condition:
+                  fn: gt
                   args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: self
-                            zone: hand
-                        - 2
-                max:
-                  fn: max
+                    - count:
+                        side: self
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: self
+                        zone: hand
+                      by: self
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      bind: discard_self
+                    - op: discard
+                      subjects: discard_self
+              - op: if
+                condition:
+                  fn: gt
                   args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: self
-                            zone: hand
-                        - 2
-                bind: discard_self
-              - op: select
-                select:
-                  side: opponent
-                  zone: hand
-                by: opponent
-                min:
-                  fn: max
-                  args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: opponent
-                            zone: hand
-                        - 2
-                max:
-                  fn: max
-                  args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: opponent
-                            zone: hand
-                        - 2
-                bind: discard_other
-              - op: discard
-                subjects:
-                  union:
-                    - discard_self
-                    - discard_other
+                    - count:
+                        side: opponent
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: opponent
+                        zone: hand
+                      by: opponent
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      bind: discard_other
+                    - op: discard
+                      subjects: discard_other
           else:
             op: seq
             steps:
-              - op: select
-                select:
-                  side: opponent
-                  zone: hand
-                by: opponent
-                min:
-                  fn: max
+              - op: if
+                condition:
+                  fn: gt
                   args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: opponent
-                            zone: hand
-                        - 2
-                max:
-                  fn: max
+                    - count:
+                        side: opponent
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: opponent
+                        zone: hand
+                      by: opponent
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      bind: discard_other
+                    - op: discard
+                      subjects: discard_other
+              - op: if
+                condition:
+                  fn: gt
                   args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: opponent
-                            zone: hand
-                        - 2
-                bind: discard_other
-              - op: select
-                select:
-                  side: self
-                  zone: hand
-                by: self
-                min:
-                  fn: max
-                  args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: self
-                            zone: hand
-                        - 2
-                max:
-                  fn: max
-                  args:
-                    - 0
-                    - fn: sub
-                      args:
-                        - count:
-                            side: self
-                            zone: hand
-                        - 2
-                bind: discard_self
-              - op: discard
-                subjects:
-                  union:
-                    - discard_self
-                    - discard_other
+                    - count:
+                        side: self
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: self
+                        zone: hand
+                      by: self
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      bind: discard_self
+                    - op: discard
+                      subjects: discard_self
         event: enter
         subject: self
   BP10-122:

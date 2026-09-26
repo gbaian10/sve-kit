@@ -664,45 +664,49 @@ cards:
         subject: self
   BP19-P21:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。 E24 入場均先誘發，解決時依事件保存的入場來源判斷；依 10.4.7.3 將ファンファーレ費用放在解決中的 pay。
     abilities:
       - line: 1
         kind: trigger
         body:
-          op: damage
-          subjects:
-            side: opponent
-            zone: field
-            type: follower
-          amount: 1
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: event.subject.entered_from
+              - cemetery
+          then:
+            op: damage
+            subjects:
+              side: opponent
+              zone: field
+              type: follower
+            amount: 1
         event: enter
         subject:
           side: self
           zone: field
           type: follower
-        trigger_if:
-          fn: eq
-          args:
-            - read: event.from
-            - cemetery
       - line: 2
         kind: trigger
         body:
-          op: draw
-          count: 1
+          op: pay
+          cost_selections:
+            - key: '1'
+              select:
+                side: self
+                zone: hand
+                trait: 八獄
+              min: 1
+              max: 1
+          costs:
+            - op: discard
+              subjects: cost.1
+          then:
+            op: draw
+            count: 1
         event: enter
         subject: self
-        cost_selections:
-          - key: '1'
-            select:
-              side: self
-              zone: hand
-              trait: 八獄
-            min: 1
-            max: 1
-        costs:
-          - op: discard
-            subjects: cost.1
       - line: 3
         kind: activated
         body:
