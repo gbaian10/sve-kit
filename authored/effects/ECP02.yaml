@@ -1,38 +1,250 @@
 version: astra/1
 cards:
   ECP02-008:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 1
+        event: enter
+        subject: self
+        costs:
+          - op: lesson
+            count: 1
   ECP02-013:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: self
+                    zone: hand
+                  by: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: enter
+        subject: self
+        costs:
+          - op: lesson
+            count: 1
   ECP02-065:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: allow_reroll
+          side: self
+          count: 1
   ECP02-066:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: allow_reroll
+          side: self
+          count: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: dice
+              count: 1
+              bind: die
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - read: die
+                  - 1
+              then:
+                op: draw
+                count: 2
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - read: die
+                  - 2
+              then:
+                op: seq
+                steps:
+                  - op: damage
+                    subjects: opponent.leader
+                    amount: 3
+                  - op: modify
+                    subjects: self.leader
+                    hp: 3
+            - op: if
+              condition:
+                fn: eq
+                args:
+                  - read: die
+                  - 3
+              then:
+                op: seq
+                steps:
+                  - op: select
+                    select:
+                      side: opponent
+                      zone: field
+                      type: follower
+                      where:
+                        fn: eq
+                        args:
+                          - read: item.power
+                          - fn: max
+                            args:
+                              - values: &id001
+                                  side: opponent
+                                  zone: field
+                                  type: follower
+                                field: power
+                    by: opponent
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  - op: move
+                    subjects: chosen
+                    to: cemetery
+        event: evolve
+        subject: self
   ECP02-SL28:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          power: -1
+          hp: -1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+        costs:
+          - op: lesson
+            count: 1
   ECP02-SL29:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 2
+            - op: draw
+              count: 1
+        event: evolve
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              trait: デレマス
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: target.1
+          type: amulet
+          abilities:
+            - line: 2
+              kind: trigger
+              body:
+                op: damage
+                subjects: self.leader
+                amount: 2
+              event: main_start
+            - line: 2
+              kind: activated
+              body:
+                op: move
+                subjects: self
+                to: cemetery
+              cost_selections:
+                - key: '1'
+                  select:
+                    side: self
+                    zone: hand
+                  min: 2
+                  max: 2
+              costs:
+                - op: pp
+                  amount: 1
+                - op: discard
+                  subjects: cost.1
+        event: super_evolve
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1

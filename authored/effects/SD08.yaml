@@ -25,7 +25,7 @@ cards:
         event: end
         targets:
           - key: '1'
-            select:
+            select: &id001
               side: opponent
               zone: field
               type: follower
@@ -40,8 +40,73 @@ cards:
           to: field
         limit: 1
   SD08-006:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  type: follower
+                  other: true
+              - 0
+          then:
+            op: seq
+            steps:
+              - op: destroy
+                subjects: target.1
+              - op: draw
+                count: 1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: le
+            args:
+              - read: self.leader.life
+              - 10
+          then:
+            op: modify
+            subjects: self.leader
+            hp: 5
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: optional
+          then:
+            op: seq
+            steps:
+              - op: select
+                select:
+                  side: self
+                  zone: evolve_deck
+                  name: 大いなる《世界》・ゼルガネイア
+                min: 1
+                max: 1
+                bind: chosen
+              - op: move
+                subjects: chosen
+                to: ex
+        active_zones:
+          - cemetery
+        costs:
+          - op: pp
+            amount: 10
+          - op: banish
+            subjects: self

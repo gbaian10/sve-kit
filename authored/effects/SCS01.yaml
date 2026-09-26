@@ -1,8 +1,41 @@
 version: astra/1
 cards:
   SCS01-007:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 5
+      - line: 2
+        kind: trigger
+        body:
+          op: evolve
+          subjects: self
+        event: leader_life_change
+        subject: self.leader
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - fn: lt
+              args:
+                - read: event.after_life
+                - read: event.before_life
+            - fn: ge
+              args:
+                - read: self.turn.leader_damaged
+                - 4
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: self.leader
+          amount: 1
+        event: enter
+        subject: self

@@ -1,38 +1,299 @@
 version: astra/1
 cards:
   ECP01-010:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: trigger
+          events:
+            - enter
+            - evolve
   ECP01-011:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: trigger
+          events:
+            - enter
+            - evolve
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            side: both
+            zone: field
+            type: follower
+            other: true
+          amount: 7
+        event: evolve
+        subject: self
   ECP01-012:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 2
+        costs:
+          - op: eat
+            subjects: self
+            count: 2
+          - op: pp
+            amount: 2
+      - line: 3
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 3
+        costs:
+          - op: eat
+            subjects: self
+            count: 3
+          - op: pp
+            amount: 3
+      - line: 4
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: seq
+              steps:
+                - op: look
+                  count: 3
+                  bind: seen
+                - op: select
+                  select:
+                    from: seen
+                    type: follower
+                    trait: ウマ娘
+                    where:
+                      fn: le
+                      args:
+                        - read: item.cost
+                        - 3
+                  min: 0
+                  max: 1
+                  bind: chosen
+                - op: move
+                  subjects: chosen
+                  to: field
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - chosen
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - chosen
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - chosen
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+        event: race
+        subject: self
   ECP01-014:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: damage
+              subjects: self
+              amount: 2
+        event: race
+        subject: self
+        targets:
+          - key: '1'
+            select: &id001
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 1
   ECP01-023:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 2
+        event: enter
+        subject:
+          union:
+            - side: self
+              zone: field
+              name: シュヴァルグラン
+            - side: self
+              zone: field
+              name: ヴィブロス
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+      - line: 4
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: opponent.leader
+              amount: 2
+            - op: modify
+              subjects: self.leader
+              hp: 2
+            - op: draw
+              count: 2
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+              trait: ウマ娘
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
   ECP01-053:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: meal
+        body:
+          op: race
+          subjects: self
+          count: 1
+        costs:
+          - op: eat
+            subjects: self
+            count: 1
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 3
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: normal_stand
+      - line: 4
+        kind: trigger
+        body:
+          op: stand
+          subjects: self
+        event: main_start
+        costs:
+          - op: pp
+            amount: 1

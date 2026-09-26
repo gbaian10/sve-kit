@@ -1,24 +1,103 @@
 version: astra/1
 cards:
   CP02-068:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: draw
+          count: 3
   CP02-LD01:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
     abilities: []
   CP02-P59:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_damage
+          subjects:
+            union:
+              - self.leader
+              - side: self
+                zone: field
+                type: follower
+                other: true
+          prevent: true
+          kind: effect
+          condition:
+            read: self.is_active
+      - line: 2
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+        targets:
+          - key: '1'
+            select: &id001
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 1
+          - op: lesson
+            count: 1
+        limit: 1
   CP02-SL16:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 5
+            - op: draw
+              count: 1
+        event: end
+        trigger_if:
+          fn: le
+          args:
+            - read: self.leader.life
+            - 5
+      - line: 3
+        kind: trigger
+        body:
+          op: banish
+          subjects: target.1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+      - line: 4
+        kind: activated
+        body:
+          op: modify
+          subjects: self
+          keywords:
+            - aura
+        costs:
+          - op: pp
+            amount: 1
+          - op: lesson
+            count: 1

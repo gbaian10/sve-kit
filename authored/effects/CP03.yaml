@@ -44,29 +44,176 @@ cards:
         subject: self
         keyword: 攻撃時
   CP03-002:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 1
+        kind: trigger
+        body:
+          op: drive
+          count: 2
+        event: attack
+        subject: self
+        keyword: ツインドライブ
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: draw
+              count: 2
+        event: deal_damage
+        subject: self
+        trigger_if:
+          read: event.to_opposing_leader
+        targets:
+          - key: '1'
+            select: &id002
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
   CP03-005:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+          name: ネイブルゲイザー・ドラゴン
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 2
+            - op: draw
+              count: 1
+        event: attack
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: アクアフォース
+        trigger_if: &id001
+          fn: eq
+          args:
+            - read: self.turn.trait_attacks.アクアフォース
+            - 3
   CP03-006:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: drive
+          count: 2
+        event: attack
+        subject: self
+        keyword: ツインドライブ
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 2
+            - op: draw
+              count: 1
+        event: attack
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: アクアフォース
+        trigger_if: *id001
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                side: self
+                zone: hand
+                type: follower
+                trait: アクアフォース
+                where:
+                  fn: eq
+                  args:
+                    - read: item.cost
+                    - 1
+              min: 0
+              max: 1
+              bind: chosen
+            - op: move
+              subjects: chosen
+              to: field
+        event: evolve
+        subject: self
   CP03-009:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: ride
+        body:
+          op: gain_drive
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+          - op: link_resource
+            subjects: self
+            name: ドライブポイント
+            count: 1
+            from_zone: evolve_deck
+            to: drive
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 1
+          hp: 1
+          keywords:
+            - storm
+          abilities:
+            - line: 2
+              kind: trigger
+              body:
+                op: if
+                condition: *id001
+                then:
+                  op: damage
+                  subjects: target.1
+                  amount: 2
+              event: attack
+              subject: self
+              targets:
+                - key: '1'
+                  select: *id002
+                  min: 1
+                  max: 1
+        event: gain_drive
+        subject: self
   CP03-010:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
@@ -150,20 +297,162 @@ cards:
             subjects: self
             to: cemetery
   CP03-112:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: ride
+        body:
+          op: gain_drive
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+          - op: link_resource
+            subjects: self
+            name: ドライブポイント
+            count: 1
+            from_zone: evolve_deck
+            to: drive
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: modify
+              subjects: self.leader
+              hp: 2
+        event: drive_trigger
+        targets:
+          - key: '1'
+            select: *id002
+            min: 1
+            max: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: seq
+              steps:
+                - op: look
+                  count: 5
+                  bind: seen
+                - op: select
+                  select: seen
+                  min: 0
+                  max: 5
+                  bind: top
+                  order: true
+                - op: move
+                  subjects: top
+                  to: deck
+                  position: top
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - top
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - top
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - top
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+        event: gain_drive
+        subject: self
   CP03-124:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: start_amulet
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 3
+              bind: seen
+            - op: select
+              select: seen
+              min: 0
+              max: 3
+              bind: top
+              order: true
+            - op: move
+              subjects: top
+              to: deck
+              position: top
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - top
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - top
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - top
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
+        play_if:
+          fn: gt
+          args:
+            - count:
+                side: self
+                zone: field
+                type: follower
+                trait: オラクルシンクタンク
+            - 0
   CP03-127:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 本文的同名上限為 10；sections 括號只提示取得 drive 的共通規則 14.4.7，不重複給予能力。
+    abilities:
+      - line: 1
+        kind: construction
+        body:
+          op: deck_limit
+          name: ドライブポイント
+          limit: 10
+          zone: evolve_deck

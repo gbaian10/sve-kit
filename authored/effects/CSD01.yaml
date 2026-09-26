@@ -1,8 +1,14 @@
 version: astra/1
 cards:
   CSD01-032:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 食事／出走的本文是共通流程提示；附帶條款放寬エボルヴデッキ同名上限至 10。
+    abilities:
+      - line: 1
+        kind: construction
+        body:
+          op: deck_limit
+          name: にんじん
+          limit: 10
+          zone: evolve_deck
+        section: 0

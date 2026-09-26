@@ -1,17 +1,47 @@
 version: astra/1
 cards:
   CSD03a-016:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: start_amulet
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          power: 1
+          hp: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: ヴァンガード
+            min: 1
+            max: 1
   CSD03a-017:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 同名上限為 10；sections 括號提示 14.4.7 的 drive 共通規則，不重複給予能力。
+    abilities:
+      - line: 1
+        kind: construction
+        body:
+          op: deck_limit
+          name: ドライブポイント
+          limit: 10
+          zone: evolve_deck
   CSD03a-LD01:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

@@ -1,14 +1,34 @@
 version: astra/1
 cards:
   PR-005:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 3
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
   PR-155:
-    status: partial
-    review: 未完成表達審查。
-    abilities: []
-    unresolved:
-      - 尚未逐段轉寫；不得視為無能力卡。
+    status: complete
+    review: Q897：對戰名稱為魔法のアイテム；section 是 14.3.1 的開局提示，並非此卡額外建立五枚。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 1
+            - op: draw
+              count: 1
+    rules_name: 魔法のアイテム
