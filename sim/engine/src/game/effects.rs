@@ -840,6 +840,12 @@ impl Game {
 
     pub(super) fn shuffle(&mut self, seat: &str, ids: &[String]) -> Result<()> {
         let mut deck = self.zone(seat, "deck");
+        let indexes = deck
+            .iter()
+            .enumerate()
+            .filter(|(_, value)| value.as_str().is_some_and(|id| ids.iter().any(|s| s == id)))
+            .map(|(index, _)| index)
+            .collect::<Vec<_>>();
         let script = self.state.random["shuffles"]
             .as_array()
             .and_then(|s| s.get(self.state.random_index))
@@ -850,24 +856,20 @@ impl Game {
             }
             self.state.random_index = self.state.random_index.saturating_add(1);
             let result = list(&script["result"]);
-            let mut before = deck.iter().map(Value::to_string).collect::<Vec<_>>();
+            let mut before = indexes
+                .iter()
+                .map(|&index| deck[index].to_string())
+                .collect::<Vec<_>>();
             before.sort();
             let mut after = result.iter().map(Value::to_string).collect::<Vec<_>>();
             after.sort();
             if before != after {
                 return Err(invalid("scripted shuffle is not a permutation"));
             }
-            deck = result;
+            for (index, value) in indexes.iter().zip(result) {
+                deck[*index] = value;
+            }
         } else {
-            let indexes = deck
-                .iter()
-                .enumerate()
-                .filter(|(_, v)| {
-                    v.as_str()
-                        .is_some_and(|id| ids.iter().any(|known| known == id))
-                })
-                .map(|(i, _)| i)
-                .collect::<Vec<_>>();
             for i in (1..indexes.len()).rev() {
                 let bound = u64::try_from(i.saturating_add(1)).map_err(invalid)?;
                 let j = usize::try_from(

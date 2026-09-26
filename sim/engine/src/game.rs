@@ -96,7 +96,7 @@ struct Pending {
     context: Option<Frame>,
 }
 
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 struct Frame {
     source: String,
     controller: String,

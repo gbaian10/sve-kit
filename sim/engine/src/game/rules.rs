@@ -329,10 +329,16 @@ impl Game {
             super::legal::reference_matches(&choice["ability"], &p.reference)
                 && (choice["event"].is_null() || choice["event"] == p.event)
         });
-        let (index, _) = matches
+        let (index, first) = matches
             .next()
             .ok_or_else(|| invalid(format!("pending ability not present: {choice}")))?;
-        if matches.next().is_some() {
+        if matches.any(|(_, pending)| {
+            pending.reference != first.reference
+                || pending.event != first.event
+                || pending.code != first.code
+                || pending.controller != first.controller
+                || pending.context != first.context
+        }) {
             return Err(invalid(format!("pending ability is ambiguous: {choice}")));
         }
         let pending = self.state.pending.remove(index);
@@ -697,6 +703,7 @@ impl Game {
                 other.id.is_none()
                     && other.controller == pending.controller
                     && other.reference == pending.reference
+                    && other.event != pending.event
             }) {
                 // An instance keeps its discriminator after its siblings resolve.
                 other.retained = true;

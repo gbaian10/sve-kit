@@ -942,3 +942,89 @@ fn semantic_digest_preserves_selector_sources_in_suspended_programs() {
     let changed: Game = serde_json::from_value(state).unwrap();
     assert_ne!(changed.digest().unwrap(), engine.digest().unwrap());
 }
+
+#[test]
+fn identical_pending_copies_preserve_multiplicity_after_restore() {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([{
+        "kind":"trigger","line":1_i64,"event":"end",
+        "body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}
+    }]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("copies.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    let pending =
+        json!({"controller":"P1","ability":{"source":"a","line":1_i64},"event":{"end":"P1"}});
+    position["semantic_state"]["pending_triggers"] = json!([pending, pending, pending]);
+    let engine = Game::new(catalog, &position, &Value::Null, &Value::Null, "copies").unwrap();
+    let choices = engine.legal().unwrap();
+    assert_eq!(choices.len(), 3);
+    assert!(choices.iter().all(|choice| *choice == choices[0]));
+    assert!(choices[0]["pending"].get("event").is_none());
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    for remaining in (0..3).rev() {
+        restored.decide(&choices[0], "copy").unwrap();
+        assert_eq!(
+            restored
+                .legal()
+                .unwrap()
+                .iter()
+                .filter(|choice| choice["do"] == "choose-pending")
+                .count(),
+            remaining
+        );
+    }
+    assert_eq!(
+        restored.query(View::P1, "P2.leader.life").unwrap(),
+        Some(json!(17_i64))
+    );
+}
+
+#[test]
+fn partial_shuffle_preserves_other_cards_and_rejects_full_deck_scripts() {
+    let body = json!({"op":"shuffle","subjects":{"zone":"deck","side":"self","where":{"fn":"ge","args":[{"read":"item.power"},7_i64]}}});
+    let catalog = Arc::new(catalog(&body));
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["deck"] = json!([
+        {"id":"d1","card":"unit-follower"},
+        {"id":"d2","card":"unit-follower","state":{"power":7_i64}},
+        {"id":"d3","card":"unit-follower"},
+        {"id":"d4","card":"unit-follower","state":{"power":8_i64}}
+    ]);
+    for (result, accepted) in [
+        (json!(["d4", "d2"]), true),
+        (json!(["d1", "d4", "d3", "d2"]), false),
+        (json!(["d2", "d2"]), false),
+    ] {
+        let mut engine = Game::new(
+            Arc::clone(&catalog),
+            &position,
+            &Value::Null,
+            &json!({"shuffles":[{"player":"P1","result":result}]}),
+            "subset",
+        )
+        .unwrap();
+        let before = engine.digest().unwrap();
+        let step = engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "shuffle",
+        );
+        if accepted {
+            step.unwrap();
+            assert_eq!(
+                engine.query(View::Referee, "P1.deck").unwrap(),
+                Some(json!(["d1", "d4", "d3", "d2"]))
+            );
+        } else {
+            step.unwrap_err();
+            assert_eq!(engine.digest().unwrap(), before);
+        }
+    }
+}
