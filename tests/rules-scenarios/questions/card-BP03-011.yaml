@@ -6,7 +6,7 @@ id: card-BP03-011
 kind: card
 must_pass: true
 mechanisms: [回合特定時點, 7.3.1, 持續效果與禁止, 給予能力, 8.4.9, 攻撃時把目標打死後不交戰]
-cards: [BP03-011, SD02-002, BP01-173, BP16-T10]
+cards: [BP03-011, SD02-002, BP01-173]
 why: >-
   茨の森「自分のメインフェイズが来たとき、これを破壊する」（7.3.1 誘發，7.3.2 檢查時點結算）與「これがある限り、自分のフォロワーすべては「【攻撃時】フォロワーへ攻撃したなら、それに2ダメージ」を持つ」。
   A：對手回合結束 → 自己的主要階段來臨 → 誘發 → 自毀 → 之後攻擊沒有 2 傷害、正常交戰。B（Q449）：打出當回合攻擊體力 2 的從者 → 攻撃時 2 傷害 → 目標在 8.4.6 的檢查時點被破壞 → 8.4.9 不交戰、攻擊者保持アクト、體力不減。
@@ -138,9 +138,9 @@ scenarios:
         outcome: resolved
         assert:
           P1.field: [a2, a1, new-1]
-          P1.field.new-1: {entered_from: other, entered_by: effect}
+          P1.field.new-1: {name: フェアリー, entered_from: other, entered_by: effect}
         events:
-          - {kind: 場に出す, object: new-1, card: BP16-T10, to: P1.field}
+          - {kind: 場に出す, object: new-1, to: P1.field}
       - at: after-decision-4
         view: omniscient
         outcome: resolved

@@ -19,6 +19,7 @@ discriminates: >-
   B：沒記錄 entered_from（或把「墓場から」當成永遠成立）的引擎會對 b1 造成 2 傷害。
   C：只在自己回合檢查誘發的引擎，after-decision-3 之後不會有 P1 的 choose-pending，b1 體力停在 3。
   D：把「自分の場にフォロワーが出たとき」排除自身的引擎不會誘發，b1 體力 6 而非 5；沒套用「攻撃力と体力を1にする」的引擎 m1 會是 5/5。
+  D：FF 依 12.4.3 由效果放上場也會誘發；只在打出時才誘發 FF 的引擎會少一筆待機。
 refs:
   rules: [5.5.3, 10.7.2, 10.7.2.1, 10.7.4.2, 10.5.2.3, 12.4.3, 12.5.3, 8.4.9, 8.4.10, 11.3.1, 4.1.5]
   qa: [Q2595, Q2596, Q2621]
@@ -256,11 +257,19 @@ scenarios:
         awaiting:
           by: P1
           choices:
+            # 12.4.3：由效果從墓場放上場，第 2 行 {ファンファーレ} 也誘發；費用可用 h1（八獄）付或拒付（契約 10.20）
             - {do: choose-pending, pending: {ability: {source: m1, line: 1}}}
+            - {do: choose-pending, pending: {ability: {source: m1, line: 2}}, costs: {1: [h1]}}
+            - {do: choose-pending, pending: {ability: {source: m1, line: 2}}, costs: decline}
       - at: after-decision-2
         view: omniscient
         outcome: resolved
         assert:
           P2.field.b1: {hp: 5}
+        awaiting:
+          by: P1
+          choices:
+            - {do: choose-pending, pending: {ability: {source: m1, line: 2}}, costs: {1: [h1]}}
+            - {do: choose-pending, pending: {ability: {source: m1, line: 2}}, costs: decline}
         events:
           - {kind: ダメージ, source: m1, target: b1, amount: 1}

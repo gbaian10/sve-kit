@@ -6,7 +6,7 @@ id: card-BP08-011
 kind: card
 must_pass: true
 mechanisms: [奪取、交換、變身, '5.17', 9.1.2, 9.1.4.4, 10.6.2.3.3, 名稱包含比對]
-cards: [BP08-011, BP08-T09, BP08-T01, BP08-T02]
+cards: [BP08-011, BP08-T09]
 why: >-
   心無き決闘「自分のEXエリアの『操り人形』2枚を選ぶ。それはそれぞれ『ロイド』と『ヴィクトリア』に変身する」：変身＝消滅該卡並在同區域建立同數量的指定 token（5.17.1）；
   被消滅的 token 立即消去（Q1058）；「それぞれ」→ 一張變ロイド、一張變ヴィクトリア，不能兩張都變ロイド（Q1061）；只有 1 張『操り人形』時不能打出（Q1060）。
@@ -70,6 +70,8 @@ scenarios:
           P1.cemetery: [a1]
           P1.ex: [new-1, new-2]
           P1.ex_count: 2
+          P1.ex.new-1: {name: ロイド}
+          P1.ex.new-2: {name: ヴィクトリア}   # 不能兩張都變ロイド（Q1061）
         events:
           - {kind: 消滅, object: p1, group: 1}
           - {kind: 消滅, object: p2, group: 1}
@@ -77,12 +79,11 @@ scenarios:
           - {kind: 消去, object: p2, group: 2}
           # new-n 依效果文字順序：ロイド → ヴィクトリア；在 EX 建立，不是場に出る → 兩者的ファンファーレ都不誘發。
           # 契約 10.8：新建物件放到場以外的區域用 移動（不是 場に出す）；同一個指示建立 → 同時
-          - {kind: 移動, object: new-1, card: BP08-T01, to: P1.ex, group: 3}
-          - {kind: 移動, object: new-2, card: BP08-T02, to: P1.ex, group: 3}
+          - {kind: 移動, object: new-1, to: P1.ex, group: 3}
+          - {kind: 移動, object: new-2, to: P1.ex, group: 3}
         forbidden_events:
           - {kind: 待機}
           - {kind: 場に出す}
-          - {kind: 移動, object: new-2, card: BP08-T01}   # 不能兩張都變ロイド（Q1061）
           - {kind: 移動, object: new-3}
 
   - name: B 只有 1 張操り人形 → 不能打出

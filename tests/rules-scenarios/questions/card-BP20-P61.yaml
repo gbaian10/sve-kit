@@ -66,7 +66,7 @@ scenarios:
                 card: BP20-P61
                 state:
                   counters:
-                    返戻: 6
+                    返戻カウンター: 6
         P2:
           construction: class
           leader:
@@ -108,7 +108,7 @@ scenarios:
         events:
           - kind: カウンター
             object: c
-            name: 返戻
+            name: 返戻カウンター
             delta: 1
         forbidden_events:
           - kind: 消滅
@@ -143,7 +143,7 @@ scenarios:
                 card: BP20-P61
                 state:
                   counters:
-                    返戻: 7
+                    返戻カウンター: 7
         P2:
           construction: class
           leader:
@@ -197,7 +197,7 @@ scenarios:
         events:
           - kind: カウンター
             object: c
-            name: 返戻
+            name: 返戻カウンター
             delta: 1
           - kind: 消滅
             object: c

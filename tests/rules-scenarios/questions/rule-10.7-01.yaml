@@ -107,10 +107,10 @@ scenarios:
         assert:
           semantic_state.pending_triggers: []
           P1.field: [a1, new-1]
-          P1.field.new-1: {entered_from: other, entered_by: effect}
+          P1.field.new-1: {name: ゴースト, entered_from: other, entered_by: effect}
         events:
           - {kind: プレイ, ability: {source: a1, line: 1}}
-          - {kind: 場に出す, object: new-1, card: BP16-T18, to: P1.field}
+          - {kind: 場に出す, object: new-1, to: P1.field}
         events_exact: [場に出す]
       - at: after-decision-3
         view: omniscient

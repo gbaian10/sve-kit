@@ -12,7 +12,6 @@ cards:
   - BP01-001
   - BP01-173
   - BP01-T03
-  - BP08-T04
   - BP21-T11
 why: 變身消滅原 token 並立即消去，再同區新建相同數量薔薇；只能斷言消去與區域計數，生成 id 契約尚缺。
 discriminates: 把變身原物件改名、把原 token 留消滅區都違反消去事件。
@@ -189,14 +188,13 @@ scenarios:
           P1.ex:
             - new-1
           P1.ex.new-1:
-            card: BP08-T04
+            name: 薔薇の一撃
         events:
           - kind: 消去
             object: f0
             by: rule-9.1.4.4
           - kind: 移動
             object: new-1
-            card: BP08-T04
             to: P1.ex
             source: a
         forbidden_events:
@@ -282,9 +280,9 @@ scenarios:
             - new-1
             - new-2
           P1.ex.new-1:
-            card: BP08-T04
+            name: 薔薇の一撃
           P1.ex.new-2:
-            card: BP08-T04
+            name: 薔薇の一撃
         events:
           - kind: 消去
             object: f0
@@ -296,13 +294,11 @@ scenarios:
             group: erase-transformed-fairies
           - kind: 移動
             object: new-1
-            card: BP08-T04
             to: P1.ex
             source: a
             group: create-roses
           - kind: 移動
             object: new-2
-            card: BP08-T04
             to: P1.ex
             source: a
             group: create-roses
@@ -396,14 +392,13 @@ scenarios:
           P1.ex:
             - new-1
           P1.ex.new-1:
-            card: BP08-T04
+            name: 薔薇の一撃
         events:
           - kind: 消去
             object: f0
             by: rule-9.1.4.4
           - kind: 移動
             object: new-1
-            card: BP08-T04
             to: P1.ex
             source: a
         forbidden_events:

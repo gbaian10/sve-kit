@@ -172,12 +172,12 @@ scenarios:
           P1.pp.current: 0
           P1.field: [a1]
           P1.equipment: [new-1]
-          P1.equipment.new-1: {equipped_to: a1}
+          P1.equipment.new-1: {name: プリンセスソード, equipped_to: a1}
         events:
           - {kind: 費用成立, ability: {source: a1, line: 3}}
           - {kind: プレイ, ability: {source: a1, line: 3}}
           # 契約 10.8：新建物件放到場以外的區域用 移動
-          - {kind: 移動, object: new-1, card: CP04-T02, to: P1.equipment}
+          - {kind: 移動, object: new-1, to: P1.equipment}
 
   - name: C2 PP 只有 3 → 打出後 PP 0 → ファンファーレ費用付不出 → 待機取消
     inherit: C ペコリーヌ的ファンファーレ {コスト2}：付費裝備新的プリンセスソード；PP 不足則取消

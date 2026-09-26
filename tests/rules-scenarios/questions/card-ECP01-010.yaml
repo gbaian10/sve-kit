@@ -232,8 +232,6 @@ scenarios:
           P1.race: []
           P1.field.a:
             acted: false
-            links:
-              出走: []
           semantic_state.counters_this_turn:
             P1.evolve_played: 0
             P1.evolutions: 0
@@ -312,8 +310,6 @@ scenarios:
           P1.race: []
           P1.field.a:
             acted: false
-            links:
-              出走: []
           semantic_state.counters_this_turn:
             P1.evolve_played: 0
             P1.evolutions: 0

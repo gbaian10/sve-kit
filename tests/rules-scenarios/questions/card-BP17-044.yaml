@@ -98,9 +98,9 @@ scenarios:
             - {do: resolve-choice, select: []}
         assert:
           P1.field: [a1, a2, a3, a4, new-1]
-          P1.field.new-1: {acted: false}
+          P1.field.new-1: {name: 遮断の触手, acted: false}
         events:
-          - {kind: 場に出す, object: new-1, card: BP17-T14, to: P1.field}
+          - {kind: 場に出す, object: new-1, to: P1.field}
       - at: after-decision-4
         view: omniscient
         outcome: resolved
@@ -157,11 +157,12 @@ scenarios:
           P1.deck: [d3, d2]
           P1.field: [a1, a2, a3, new-1, new-2]
           P1.field_count: 5
-          P1.field.new-1: {acted: false}
+          P1.field.new-1: {name: 遮断の触手, acted: false}
+          P1.field.new-2: {name: 蹂躙の触手}
         events:
           # 「『遮断の触手』1体を場に出す。コストを+2したなら、『蹂躙の触手』1体を場に出す。」是兩句 → 先後而非同時
-          - {kind: 場に出す, object: new-1, card: BP17-T14, to: P1.field}
-          - {kind: 場に出す, object: new-2, card: BP17-T15, to: P1.field}
+          - {kind: 場に出す, object: new-1, to: P1.field}
+          - {kind: 場に出す, object: new-2, to: P1.field}
         events_exact: [場に出す]
 
   - name: C EX 機械卡只有 2 張 → 不能打出

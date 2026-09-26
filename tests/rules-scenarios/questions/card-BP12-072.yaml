@@ -6,7 +6,7 @@ id: card-BP12-072
 kind: card
 must_pass: true
 mechanisms: [卡片出處, 進化卡自身的能力, 5.16.1.1, 5.16.2.1, 8.3.2.1, 10.9.1.4, 持續效果與禁止]
-cards: [BP12-072, BP12-073, BP14-076, BP12-T10, BP19-050, BP19-051, BP01-173]
+cards: [BP12-072, BP12-073, BP14-076, BP19-050, BP19-051, BP01-173]
 why: >-
   モーターグレイブディガー「{ファンファーレ}これが能力によって場に出ていたなら、これは進化する」：由寒冷の死霊術師的起動能力從墓場放到場上（並設成 1/1）→ 條件成立 → 進化；
   不是進化能力引起的進化，要從エボルヴデッキ的裏向き卡中指定同名卡（5.16.1.1）；進化後依 Q1923 用差額算成 2/2（設 1/1 對 0/1 是 +1/0，套到 1/2）；
@@ -114,9 +114,9 @@ scenarios:
           P1.cemetery: [d1]
           P1.deck: [filler: 20]
           P1.field: [a1, a4, a2, new-1]
-          P1.field.new-1: {entered_from: other, entered_by: effect}
+          P1.field.new-1: {name: プロダクトマシーン, entered_from: other, entered_by: effect}
         events:
-          - {kind: 場に出す, object: new-1, card: BP12-T10, to: P1.field}
+          - {kind: 場に出す, object: new-1, to: P1.field}
           - {kind: 移動, object: d1, from: P1.deck, to: P1.cemetery}
       - at: after-decision-6
         view: omniscient

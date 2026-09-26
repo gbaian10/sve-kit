@@ -187,20 +187,22 @@ scenarios:
         assert:
           P1.pp.current: 0
           P1.ex: []
-          P1.banish: []
+          P1.banish: []   # 3 張金貨都已消去（9.1.4.4）；消去的相對順序不比對
           P1.leader.life: 21
           P1.hand:
             - filler: 2
             - d1
         events:
+          # 契約 10.13：3 張金貨是同一筆費用 → 同一個 group
           - kind: 消滅
             object: k1
-          - kind: 消去
-            object: k1
+            group: 1
           - kind: 消滅
             object: k2
-          - kind: 消去
-            object: k2
+            group: 1
+          - kind: 消滅
+            object: k3
+            group: 1
           - kind: 体力増加
             target: P1.leader
             amount: 1
