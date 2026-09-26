@@ -17,7 +17,10 @@ use crate::{EngineFailure, Result, invalid};
 impl Game {
     pub(super) fn run_frame(&mut self, mut frame: Frame) -> Result<()> {
         let mut fuel = 20_000_u32;
-        while self.state.prompt.is_none() && !frame.todo.is_empty() {
+        while self.state.prompt.is_none()
+            && !frame.todo.is_empty()
+            && self.state.game["ended"] != true
+        {
             fuel = fuel.checked_sub(1).ok_or_else(|| {
                 EngineFailure::Unsupported(
                     "resolution fuel exhausted; possible permanent loop".into(),
@@ -460,6 +463,7 @@ impl Game {
                 }
             }
             "_earth_payment" | "extra_turn" => self.payment_effect(node, frame)?,
+            "win" => self.win_by_effect(node, frame)?,
             "_drive" => self.drive(frame)?,
             "_drive_trigger" => {
                 let pending = self.collect_triggers("drive_trigger", &[], &frame.cause)?;
@@ -812,14 +816,16 @@ impl Game {
         }
         let subjects = self.select(&node["subjects"], frame)?;
         let group = self.group();
+        let mut life_changes = Vec::new();
         for id in subjects {
             if let Some(seat) = id.strip_suffix(".leader") {
                 let amount = self.number(&node["hp"], frame)?;
-                let base = node.get("set_hp").map_or_else(
-                    || Ok(int(&self.player(seat)?.leader["life"])),
-                    |value| self.number(value, frame),
-                )?;
+                let before = int(&self.player(seat)?.leader["life"]);
+                let base = node
+                    .get("set_hp")
+                    .map_or_else(|| Ok(before), |value| self.number(value, frame))?;
                 self.change_life(seat, base.saturating_add(amount))?;
+                life_changes.push((seat.to_owned(), before, base.saturating_add(amount)));
                 if amount > 0 {
                     self.emit(
                         json!({"kind":"体力増加","target":id,"amount":amount}),
@@ -866,6 +872,7 @@ impl Game {
             }
             self.state.continuous.push(json!({"source":frame.source,"applies_to":[id],"generation":self.object(&id)?.generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"prior_silenced":prior["silenced"],"prior_keywords":prior["keywords"],"duration_controller":self.object(&id)?.controller,"expires_turn":int(&self.state.turn["elapsed_turns"][&self.object(&id)?.controller]).saturating_add(i64::from(self.active()!=self.object(&id)?.controller))}));
         }
+        self.life_change_triggers(&life_changes, &frame.cause)?;
         Ok(())
     }
 
@@ -1062,16 +1069,23 @@ impl Game {
                 );
             }
         }
+        Self::damage_receipt(&actual, node["bind"].as_str(), frame);
+        self.apply_damage(&actual, frame)
+    }
+
+    fn apply_damage(&mut self, actual: &[Value], frame: &Frame) -> Result<()> {
         let group = self.group();
         let mut damaged = Vec::new();
-        Self::damage_receipt(&actual, node["bind"].as_str(), frame);
+        let mut life_changes = Vec::new();
         for hit in actual {
             let id = string(&hit["target"]);
             let source = string(&hit["source"]);
             let amount = int(&hit["amount"]);
             if let Some(seat) = id.strip_suffix(".leader") {
-                let life = int(&self.player(seat)?.leader["life"]).saturating_sub(amount);
+                let before = int(&self.player(seat)?.leader["life"]);
+                let life = before.saturating_sub(amount);
                 self.change_life(seat, life)?;
+                life_changes.push((seat.to_owned(), before, life));
                 self.bump(&format!("{seat}.leader_damaged"), 1);
             } else {
                 let object = self.object_mut(id)?;
@@ -1080,21 +1094,32 @@ impl Game {
                 if hit["battle"] == true && self.keywords(source)?.contains("bane") {
                     self.object_mut(id)?.state["bane_damaged"] = json!(true);
                 }
-                damaged.push(self.object(id)?.clone());
             }
+            damaged.push(self.event_subject(id)?);
             self.emit(
                 json!({"kind":"ダメージ","source":source,"target":id,"amount":amount}),
                 &frame.cause,
                 group,
             );
         }
-        let pending = self.collect_event(
+        let mut pending = self.collect_subject_event(
             "damage",
             &damaged,
             &frame.cause,
-            &json!({"effect_damage": !list(&node["hits"]).iter().any(|hit|hit["battle"] == true)}),
+            &json!({"effect_damage": !actual.iter().any(|hit|hit["battle"] == true)}),
         )?;
+        for hit in actual {
+            let source = string(&hit["source"]);
+            let subject = self.event_subject(source)?;
+            let target = string(&hit["target"]);
+            let to_opposing_leader = target.strip_suffix(".leader").is_some_and(|seat| {
+                self.object(source)
+                    .is_ok_and(|object| object.controller != seat)
+            });
+            pending.extend(self.collect_subject_event("deal_damage", &[subject], &frame.cause, &json!({"target":target,"amount":hit["amount"],"battle":hit["battle"],"to_opposing_leader":to_opposing_leader}))?);
+        }
         self.enqueue(pending);
+        self.life_change_triggers(&life_changes, &frame.cause)?;
         Ok(())
     }
 

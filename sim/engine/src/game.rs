@@ -70,6 +70,12 @@ struct Object {
     state: Value,
 }
 
+#[derive(Debug, Clone)]
+struct EventSubject {
+    id: String,
+    attributes: Value,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct Player {
     leader: Value,

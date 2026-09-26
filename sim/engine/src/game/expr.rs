@@ -184,7 +184,13 @@ impl Game {
                 .any(|candidate| candidate == id));
         }
         let Some(object) = self.state.objects.get(id) else {
-            return Ok(id.ends_with(".leader") && selector["zone"] == "leader");
+            return Ok(id.strip_suffix(".leader").is_some_and(|seat| {
+                selector["zone"] == "leader"
+                    && self
+                        .seats(string(&selector["side"]), frame)
+                        .iter()
+                        .any(|candidate| candidate == seat)
+            }));
         };
         if let Some(zone) = selector["zone"].as_str()
             && zone != "any"

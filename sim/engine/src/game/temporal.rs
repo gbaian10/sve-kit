@@ -12,6 +12,28 @@ use serde_json::{Value, json};
     reason = "Rule domains share one private state and are split into focused modules."
 )]
 impl Game {
+    pub(super) fn life_change_triggers(
+        &mut self,
+        changes: &[(String, i64, i64)],
+        cause: &Value,
+    ) -> Result<()> {
+        let mut pending = Vec::new();
+        for (seat, before, after) in changes {
+            if before == after {
+                continue;
+            }
+            let subject = self.event_subject(&format!("{seat}.leader"))?;
+            pending.extend(self.collect_subject_event(
+                "leader_life_change",
+                &[subject],
+                cause,
+                &json!({"before_life":before,"after_life":after}),
+            )?);
+        }
+        self.enqueue(pending);
+        Ok(())
+    }
+
     pub(super) fn change_life(&mut self, seat: &str, life: i64) -> Result<()> {
         let previous = int(&self.player(seat)?.leader["life"]);
         self.player_mut(seat)?.leader["life"] = json!(life);

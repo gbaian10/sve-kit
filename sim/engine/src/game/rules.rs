@@ -5,7 +5,7 @@
 use core::mem::take;
 use serde_json::{Value, json};
 
-use super::{Frame, Game, Object, Pending, Step, int, list, other, string};
+use super::{EventSubject, Frame, Game, Object, Pending, Step, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -675,34 +675,54 @@ impl Game {
         Ok(())
     }
 
+    pub(super) fn win_by_effect(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        let mut winners = Vec::new();
+        for seat in self.seats(string(&node["side"]), frame) {
+            if !self.restricted(&format!("{seat}.leader"), "win")? {
+                winners.push(seat);
+            }
+        }
+        if !winners.is_empty() {
+            self.state.game = json!({"ended":true,"winner":if winners.len()==1 {winners.first()} else {None},"by":"1.2.4"});
+            let group = self.group();
+            for seat in winners {
+                self.emit(
+                    json!({"kind":"勝利","player":seat,"ability":frame.reference}),
+                    &frame.cause,
+                    group,
+                );
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn checks(&mut self) -> Result<()> {
-        if self.state.frame.is_some() {
+        if self.state.frame.is_some() || self.state.game["ended"] == true {
             return Ok(());
         }
-        let losers = ["P1", "P2"]
-            .into_iter()
-            .filter(|seat| {
-                self.state
-                    .players
-                    .get(*seat)
-                    .is_some_and(|p| int(&p.leader["life"]) <= 0)
-                    || self.state.draws_failed.contains(*seat)
-            })
-            .collect::<Vec<_>>();
+        let mut losers = Vec::new();
+        for seat in ["P1", "P2"] {
+            if self.restricted(&format!("{seat}.leader"), "lose")? {
+                continue;
+            }
+            if int(&self.player(seat)?.leader["life"]) <= 0 {
+                losers.push((seat, "11.2.1"));
+                continue;
+            }
+            if self.state.draws_failed.contains(seat) {
+                losers.push((seat, "11.2.2"));
+            }
+        }
+        self.state.draws_failed.clear();
         if !losers.is_empty() {
-            let rule = if losers.len() == 2 {
+            let ending_rule = if losers.len() == 2 {
                 "1.2.2"
-            } else if losers
-                .first()
-                .is_some_and(|s| self.state.draws_failed.contains(*s))
-            {
-                "11.2.2"
             } else {
-                "11.2.1"
+                losers.first().map_or("11.2.1", |(_, rule)| *rule)
             };
-            self.state.game = json!({"ended":true,"winner":if losers.len()==2 {None} else {losers.first().map(|s|other(s))},"by":rule});
+            self.state.game = json!({"ended":true,"winner":if losers.len()==2 {None} else {losers.first().map(|(seat,_)|other(seat))},"by":ending_rule});
             let group = self.group();
-            for seat in losers {
+            for (seat, rule) in losers {
                 self.emit(
                     json!({"kind":"敗北","player":seat,"by":format!("rule-{rule}")}),
                     &json!({"rule":rule}),
@@ -755,6 +775,32 @@ impl Game {
         cause: &Value,
         metadata: &Value,
     ) -> Result<Vec<Pending>> {
+        let subjects = affected
+            .iter()
+            .map(|object| self.event_subject(&object.id))
+            .collect::<Result<Vec<_>>>()?;
+        self.collect_subject_event(event, &subjects, cause, metadata)
+    }
+
+    pub(super) fn event_subject(&self, id: &str) -> Result<EventSubject> {
+        let attributes = if let Some(seat) = id.strip_suffix(".leader") {
+            json!({"id":id,"controller":seat,"owner":seat,"zone":"leader","life":self.player(seat)?.leader["life"]})
+        } else {
+            self.object_attributes(id)?
+        };
+        Ok(EventSubject {
+            id: id.into(),
+            attributes,
+        })
+    }
+
+    pub(super) fn collect_subject_event(
+        &mut self,
+        event: &str,
+        affected: &[EventSubject],
+        cause: &Value,
+        metadata: &Value,
+    ) -> Result<Vec<Pending>> {
         let mut result = Vec::new();
         for source in self.ability_sources() {
             for code in self.abilities(&source)? {
@@ -795,7 +841,7 @@ impl Game {
                         json!({})
                     };
                     if let Some(object) = object {
-                        frame.event["subject"] = self.object_attributes(&object.id)?;
+                        frame.event["subject"] = object.attributes.clone();
                         frame.event["subject_id"] = json!(object.id);
                     }
                     if event == "attack" {
@@ -823,6 +869,8 @@ impl Game {
                         "enter" => "entered_field",
                         "leave" | "field_to_cemetery" => "left_field",
                         "damage" => "damaged",
+                        "deal_damage" => "damage_source",
+                        "leader_life_change" => "leader",
                         "evolve" => "evolved",
                         "attack" => "attacked",
                         _ => "",

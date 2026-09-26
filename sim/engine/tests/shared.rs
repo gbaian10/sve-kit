@@ -74,6 +74,26 @@ fn second_exam_passes_every_new_scenario_without_contract_exceptions() {
 }
 
 #[test]
+fn third_round_completed_mechanisms_remain_correct() {
+    let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
+    let selection =
+        load_selection(&root().join("docs/evaluation/seal-3/regression-selection.yaml")).unwrap();
+    let reports = run(
+        &mut Adapter::new(catalog()),
+        &questions,
+        Some(&selection),
+        RunOptions {
+            require_verified: true,
+        },
+    )
+    .unwrap();
+    assert_eq!(reports.len(), 12);
+    for report in reports {
+        assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
+    }
+}
+
+#[test]
 fn replay_and_assist_match_every_shared_assertion() {
     let catalog = catalog();
     let fixtures = load_fixtures(&root().join("tests/architecture-fixtures")).unwrap();

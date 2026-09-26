@@ -582,6 +582,133 @@ fn imported_usage_tracks_object_generations_and_round_trips() {
 }
 
 #[test]
+fn defeat_prohibition_preserves_life_triggers_and_expires_failed_draws() {
+    let mut doc = document(&json!({"op":"seq","steps":[
+        {"op":"damage","subjects":"self.leader","amount":2_i64},
+        {"op":"draw","count":1_i64}
+    ]}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"kind":"static","line":1_i64,"body":{"op":"restrict","subjects":{"zone":"leader","side":"self"},"action":"lose"}},
+        {"kind":"trigger","line":2_i64,"event":"leader_life_change","subject":"self.leader",
+         "trigger_if":{"fn":"and","args":[{"fn":"gt","args":[{"read":"event.before_life"},0_i64]},{"fn":"le","args":[{"read":"event.after_life"},0_i64]}]},
+         "body":{"op":"seq","steps":[{"op":"move","subjects":"self","to":"cemetery"},{"op":"modify","subjects":"self.leader","set_hp":1_i64}]}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("defeat.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    position["players"]["P1"]["leader"]["life"] = json!(2_i64);
+    position["players"]["P1"]["zones"]["hand"] = json!([
+        {"id":"s","card":"unit-spell"},{"id":"s2","card":"unit-spell"}
+    ]);
+    let mut engine = Game::new(catalog, &position, &Value::Null, &Value::Null, "defeat").unwrap();
+    let first = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "protected",
+        )
+        .unwrap();
+    assert_eq!(first.outcome, "resolved");
+    assert!(first.events.iter().all(|event| event["kind"] != "敗北"));
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["pending_triggers"]
+            .as_array()
+            .unwrap()
+            .len(),
+        1
+    );
+    let mut restored: Game =
+        serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let resolved = restored
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":2_i64}}}),
+            "recover",
+        )
+        .unwrap();
+    assert_eq!(resolved.outcome, "resolved");
+    assert_eq!(
+        restored.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(1_i64))
+    );
+    assert_eq!(
+        restored.query(View::P1, "P1.field").unwrap(),
+        Some(json!([]))
+    );
+    assert_eq!(
+        restored.query(View::P1, "game.ended").unwrap(),
+        Some(json!(false))
+    );
+    let lost = restored
+        .decide(
+            &json!({"do":"play","card":"s2","targets":{"1":["b"]}}),
+            "opponent-does-not-protect",
+        )
+        .unwrap();
+    assert_eq!(lost.outcome, "game-end");
+    assert!(
+        lost.events
+            .iter()
+            .any(|event| event["kind"] == "敗北" && event["by"] == "rule-11.2.1")
+    );
+}
+
+#[test]
+fn effect_victory_stops_resolution_before_rule_defeat_unless_prohibited() {
+    for prohibited in [false, true] {
+        let mut doc = document(&json!({"op":"seq","steps":[
+            {"op":"draw","count":1_i64},
+            {"op":"win","side":"self"},
+            {"op":"damage","subjects":"opponent.leader","amount":2_i64}
+        ]}));
+        if prohibited {
+            doc["cards"]["unit-follower"]["abilities"] = json!([
+                {"kind":"static","line":1_i64,"body":{"op":"restrict","subjects":"opponent.leader","action":"win"}}
+            ]);
+        }
+        let catalog = Arc::new(
+            Catalog::from_documents(
+                &snapshot(),
+                &registry(),
+                &[("victory.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut engine =
+            Game::new(catalog, &setup(), &Value::Null, &Value::Null, "victory").unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "victory",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, "game-end");
+        assert_eq!(
+            engine.query(View::P1, "game.winner").unwrap(),
+            Some(json!(if prohibited { "P2" } else { "P1" }))
+        );
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(if prohibited { 18_i64 } else { 20_i64 }))
+        );
+        assert_eq!(
+            step.events.iter().any(|event| event["kind"] == "敗北"),
+            prohibited
+        );
+        assert_eq!(
+            step.events.iter().any(|event| event["kind"] == "解決"),
+            prohibited
+        );
+        assert!(engine.legal().unwrap().is_empty());
+    }
+}
+
+#[test]
 fn cost_free_pending_cannot_be_declined() {
     let mut doc = document(&json!({"op":"draw","count":0_i64}));
     doc["cards"]["unit-follower"]["abilities"] = json!([{"kind":"trigger","line":1_i64,"event":"attack","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}]);
