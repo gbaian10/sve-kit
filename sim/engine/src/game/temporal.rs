@@ -130,11 +130,12 @@ impl Game {
                 continue;
             }
             let source = string(&entry["source"]).to_owned();
-            let reference = if entry["reference"].is_null() {
+            let mut reference = if entry["reference"].is_null() {
                 json!({"source":source,"line":0_i64,"rule":"10.8"})
             } else {
                 entry["reference"].clone()
             };
+            reference["delayed"] = json!(true);
             let context: Frame =
                 serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
             batch.push(Pending {

@@ -113,7 +113,7 @@ cards:
           name: guard
   BP01-056:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 第三輪依封存卡文及 Q189／Q190 複核；補 EX 的第二段與登錄下次結束延遲的第三段各保留印刷行號，延遲不依來源仍在場。
     abilities:
       - line: 1
         kind: static
@@ -123,31 +123,32 @@ cards:
       - line: 2
         kind: spell
         body:
-          op: seq
-          steps:
-            - op: repeat
-              body:
-                op: move
-                subjects:
-                  side: self
-                  zone: deck
-                  top: 1
-                to: ex
-              until:
-                fn: ge
-                args:
-                  - count:
-                      side: self
-                      zone: ex
-                  - 5
-            - op: delay
-              event: end
-              body:
-                op: banish
-                subjects:
+          op: repeat
+          body:
+            op: move
+            subjects:
+              side: self
+              zone: deck
+              top: 1
+            to: ex
+          until:
+            fn: ge
+            args:
+              - count:
                   side: self
                   zone: ex
-              once: true
+              - 5
+      - line: 3
+        kind: spell
+        body:
+          op: delay
+          event: end
+          body:
+            op: banish
+            subjects:
+              side: self
+              zone: ex
+          once: true
   BP01-065:
     status: complete
     review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。

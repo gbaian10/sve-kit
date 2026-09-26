@@ -995,6 +995,7 @@ fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
     sampled = Game::from_observation(catalog, &pending, "P1", "pending-sample").unwrap();
     let decision = sampled.legal().unwrap().into_iter().next().unwrap();
     assert_eq!(decision["do"], "choose-pending");
+    assert_eq!(decision["pending"]["ability"]["delayed"], true);
     sampled.decide(&decision, "resolve").unwrap();
     assert_eq!(
         sampled.query(View::P1, "P2.leader.life").unwrap(),
