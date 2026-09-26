@@ -43,6 +43,7 @@ impl Game {
                 request[field] = point[field].clone();
             }
         }
+        self.normalize_replacement_order(&mut request);
         match self.decide_inner(&request).and_then(|outcome| {
             self.validate_trigger_choices()?;
             Ok(outcome)

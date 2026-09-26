@@ -8801,3 +8801,58 @@ fn oversubscribed_limits_above_one_do_not_select_conditions_adaptively() {
     ));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn replacement_orders_accept_the_default_print_without_loosening_reference_identity() {
+    let mut engine = Game::new(
+        limited_replacement_catalog(false),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "references",
+    )
+    .unwrap();
+    for line in [1_i64, 2_i64, 3_i64] {
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":line}}),
+                "ability",
+            )
+            .unwrap();
+    }
+    let choices = engine.legal().unwrap();
+    let before = engine.digest().unwrap();
+    for first in [
+        json!({"source":"a","card":"unit-spell","line":1_i64}),
+        json!({"source":"a","card":"unit-follower","line":2_i64}),
+        json!({"source":"missing","card":"unit-follower","line":1_i64}),
+    ] {
+        let bad = json!({"do":"order-replacements","order":[first,{"source":"a","line":2_i64}]});
+        assert_eq!(
+            engine.decide(&bad, "invalid").unwrap().outcome,
+            "cannot-play"
+        );
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    for first in [1_i64, 2_i64] {
+        let mut explicit = engine.clone();
+        let mut implicit = engine.clone();
+        let order = json!({"do":"order-replacements","order":[{"source":"a","line":first},{"source":"a","line":3_i64.saturating_sub(first)}]});
+        let mut with_card = order.clone();
+        for reference in with_card["order"].as_array_mut().unwrap() {
+            reference["card"] = json!("unit-follower");
+        }
+        for node in ["first-order", "second-order"] {
+            let a = explicit.decide(&with_card, node).unwrap();
+            let b = implicit.decide(&order, node).unwrap();
+            assert_eq!(a.outcome, b.outcome);
+            assert_eq!(a.events, b.events);
+            assert_eq!(explicit.digest().unwrap(), implicit.digest().unwrap());
+        }
+        assert_eq!(
+            explicit.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(16_i64))
+        );
+    }
+    assert_eq!(engine.legal().unwrap(), choices);
+}

@@ -133,6 +133,46 @@ pub(super) fn unordered_selection_matches(candidate: &Value, decision: &Value) -
     reason = "Rule domains share one private state and are split into focused modules."
 )]
 impl Game {
+    pub(super) fn normalize_replacement_order(&self, decision: &mut Value) {
+        if decision["do"] != "order-replacements" {
+            return;
+        }
+        let Some(order) = decision["order"].as_array() else {
+            return;
+        };
+        let Some(prompt) = &self.state.prompt else {
+            return;
+        };
+        let normalized = order
+            .iter()
+            .map(|reference| self.without_default_card(reference))
+            .collect::<Vec<_>>();
+        for candidate in &prompt.choices {
+            if candidate["do"] == "order-replacements"
+                && candidate["order"].as_array().is_some_and(|items| {
+                    items
+                        .iter()
+                        .map(|reference| self.without_default_card(reference))
+                        .eq(normalized.iter().cloned())
+                })
+            {
+                decision["order"] = candidate["order"].clone();
+                return;
+            }
+        }
+    }
+
+    fn without_default_card(&self, reference: &Value) -> Value {
+        let mut normalized = reference.clone();
+        if let Some(object) = self.state.objects.get(string(&reference["source"]))
+            && reference["card"] == object.card
+            && let Some(fields) = normalized.as_object_mut()
+        {
+            fields.remove("card");
+        }
+        normalized
+    }
+
     /// Complete decision set, before search pruning. Parameterized actions are expanded.
     ///
     /// # Errors
