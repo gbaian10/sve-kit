@@ -515,6 +515,13 @@ impl Game {
                 "pp" => self
                     .number(&cost["amount"], context)
                     .is_ok_and(|amount| amount == 0),
+                "counter" => {
+                    self.number(&cost["amount"], context)
+                        .is_ok_and(|amount| amount == 0)
+                        || self
+                            .select(&cost["subjects"], context)
+                            .is_ok_and(|ids| ids.is_empty())
+                }
                 "_earth_payment" => self
                     .number(&cost["count"], context)
                     .is_ok_and(|count| count == 0),

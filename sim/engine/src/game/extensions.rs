@@ -154,17 +154,7 @@ impl Game {
             }
             "control" => self.change_controller(node, frame)?,
             "create" => self.create_tokens(node, frame)?,
-            "counter" => {
-                let amount = self.number(&node["amount"], frame)?;
-                let name = string(&node["name"]);
-                let group = self.group();
-                for id in self.select(&node["subjects"], frame)? {
-                    let count = int(&self.object(&id)?.state["counters"][name]);
-                    self.object_mut(&id)?.state["counters"][name] =
-                        json!(count.saturating_add(amount).max(0));
-                    self.emit(json!({"kind":"カウンター","object":id,"name":self.catalog.keyword_name(name),"delta":amount}),&frame.cause,group);
-                }
-            }
+            "counter" => self.change_counters(node, frame)?,
             "adjust_cost" | "restrict" | "replace_damage" => {
                 self.register_continuous(node, frame)?;
             }

@@ -11,6 +11,29 @@ use serde_json::{Value, json};
     reason = "Resource rules share the authoritative game state."
 )]
 impl Game {
+    pub(super) fn change_counters(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let amount = self.number(&node["amount"], frame)?;
+        let name = string(&node["name"]);
+        let group = self.group();
+        frame.performed = 0;
+        for id in self.select(&node["subjects"], frame)? {
+            let before = int(&self.object(&id)?.state["counters"][name]);
+            let after = before.saturating_add(amount).max(0);
+            let delta = after.saturating_sub(before);
+            if delta == 0 {
+                continue;
+            }
+            self.object_mut(&id)?.state["counters"][name] = json!(after);
+            frame.performed = frame.performed.saturating_add(delta.saturating_abs());
+            self.emit(
+                json!({"kind":"カウンター","object":id,"name":self.catalog.keyword_name(name),"delta":delta}),
+                &frame.cause,
+                group,
+            );
+        }
+        Ok(())
+    }
+
     pub(super) fn import_event_occurrences(&mut self, semantic: &Value) -> Result<()> {
         for value in list(&semantic["event_occurrences"]) {
             let entry: EventOccurrence = serde_json::from_value(value).map_err(invalid)?;

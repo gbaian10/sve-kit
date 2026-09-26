@@ -360,6 +360,7 @@ impl Game {
         let mut pp = 0_i64;
         let mut acted = BTreeSet::new();
         let mut flipped = BTreeMap::new();
+        let mut counters = BTreeMap::new();
         let mut atoms = Vec::new();
         self.cost_atoms(costs, frame, &mut atoms)?;
         for (cost, context) in atoms {
@@ -403,6 +404,22 @@ impl Game {
                 "skip_turn" => {
                     if self.number(&cost["count"], &context)? < 0 {
                         return Ok(false);
+                    }
+                }
+                "counter" => {
+                    let amount = self.number(&cost["amount"], &context)?;
+                    let name = string(&cost["name"]);
+                    for id in self.select(&cost["subjects"], &context)? {
+                        let count = counters
+                            .entry((id.clone(), name.to_owned()))
+                            .or_insert(int(&self.object(&id)?.state["counters"][name]));
+                        let after = count.checked_add(amount).ok_or_else(|| {
+                            EngineFailure::Unsupported("counter cost exceeds numeric range".into())
+                        })?;
+                        if after < 0 {
+                            return Ok(false);
+                        }
+                        *count = after;
                     }
                 }
                 "move" | "discard" | "banish" | "lesson" | "eat" | "reveal" | "_drive_point"

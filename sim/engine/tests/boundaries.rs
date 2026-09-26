@@ -8047,3 +8047,126 @@ fn compound_order_preserves_the_choosing_players_private_deck_order() {
     );
     assert!(hidden["objects"].get("b").is_none());
 }
+
+#[expect(
+    clippy::unwrap_used,
+    clippy::indexing_slicing,
+    reason = "Synthetic counters isolate aggregate payment from printed-card identities."
+)]
+fn counter_payment_catalog(costs: &Value, body: &Value) -> Arc<Catalog> {
+    let mut doc = document(&json!({"op":"seq","steps":[]}));
+    doc["cards"]["unit-follower"]["abilities"] =
+        json!([{"kind":"activated","line":1_i64,"costs":costs,"body":body}]);
+    let mut registry_doc: Value = serde_json::from_str(&registry()).unwrap();
+    registry_doc["keywords"]["fusion_counter"] = json!({"ja":"融合カウンター","role":"counter"});
+    Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry_doc.to_string(),
+            &[("counters.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn counter_costs_reserve_the_aggregate_and_reject_partial_payment_without_any_events() {
+    let loaded = counter_payment_catalog(
+        &json!([
+            {"op":"pp","amount":1_i64},
+            {"op":"counter","subjects":"self","name":"fusion_counter","amount":-2_i64},
+            {"op":"counter","subjects":"self","name":"fusion_counter","amount":-2_i64}
+        ]),
+        &json!({"op":"damage","subjects":"opponent.leader","amount":4_i64}),
+    );
+    for counters in [3_i64, 4_i64] {
+        let mut position = setup();
+        position["players"]["P1"]["zones"]["field"][0]["state"]["counters"] =
+            json!({"融合カウンター":counters});
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "payment",
+        )
+        .unwrap();
+        let action = json!({"do":"activate","ability":{"source":"a","line":1_i64}});
+        assert_eq!(engine.legal().unwrap().contains(&action), counters == 4);
+        let before = engine.digest().unwrap();
+        let result = engine.decide(&action, "activate").unwrap();
+        if counters == 3 {
+            assert_eq!(result.outcome, "cannot-activate");
+            assert!(result.events.is_empty());
+            assert_eq!(engine.digest().unwrap(), before);
+        } else {
+            assert_eq!(result.outcome, "resolved");
+            assert_eq!(
+                engine.query(View::P1, "P1.pp.current").unwrap(),
+                Some(json!(1_i64))
+            );
+            assert_eq!(
+                engine
+                    .query(View::P1, "P1.field.a.counters.融合カウンター")
+                    .unwrap(),
+                Some(json!(0_i64))
+            );
+            assert_eq!(
+                engine.query(View::P1, "P2.leader.life").unwrap(),
+                Some(json!(16_i64))
+            );
+            let payments = result
+                .events
+                .iter()
+                .filter(|event| event["kind"] == "カウンター")
+                .collect::<Vec<_>>();
+            assert_eq!(payments.len(), 2);
+            assert!(payments.iter().all(|event| event["delta"] == -2_i64));
+            assert_eq!(payments[0]["group"], payments[1]["group"]);
+            assert_eq!(
+                engine.decide(&action, "retry").unwrap().outcome,
+                "cannot-activate"
+            );
+        }
+    }
+}
+
+#[test]
+fn zero_counter_cost_is_paid_but_partial_counter_effects_report_only_the_actual_change() {
+    for (counters, amount) in [(0_i64, 0_i64), (2, -5), (0, -5)] {
+        let loaded = counter_payment_catalog(
+            &json!([{ "op":"counter","subjects":"self","name":"fusion_counter","amount":0_i64}]),
+            &json!({"op":"if_done","attempt":{"op":"counter","subjects":"self","name":"fusion_counter","amount":amount},"then":{"op":"damage","subjects":"opponent.leader","amount":1_i64}}),
+        );
+        let mut position = setup();
+        position["players"]["P1"]["zones"]["field"][0]["state"]["counters"] =
+            json!({"融合カウンター":counters});
+        let mut engine = Game::new(loaded, &position, &Value::Null, &Value::Null, "zero").unwrap();
+        let result = engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "activate",
+            )
+            .unwrap();
+        assert_eq!(result.outcome, "resolved");
+        assert!(
+            result
+                .events
+                .iter()
+                .any(|event| event["kind"] == "費用成立" && event["zero"] == true)
+        );
+        let changes = result
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "カウンター")
+            .collect::<Vec<_>>();
+        assert_eq!(changes.len(), usize::from(counters > 0));
+        if let Some(event) = changes.first() {
+            assert_eq!(event["delta"], -counters);
+        }
+        assert_eq!(
+            engine.query(View::P1, "P2.leader.life").unwrap(),
+            Some(json!(if counters > 0 { 19_i64 } else { 20_i64 }))
+        );
+    }
+}
