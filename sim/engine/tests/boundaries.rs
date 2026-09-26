@@ -7533,3 +7533,273 @@ fn sequential_ex_entries_obey_trigger_limits_and_wait_for_the_surrounding_effect
         );
     }
 }
+
+#[test]
+fn limited_damage_prevention_preserves_charges_for_zero_and_roundtrips_after_consumption() {
+    let pause = json!({"op":"optional","then":{"op":"seq","steps":[]}});
+    let loaded = Arc::new(catalog(&json!({"op":"seq","steps":[
+        {"op":"replace_damage","subjects":"self.leader","prevent":true,"uses":2_i64,"until":"end-of-turn"},
+        {"op":"damage","subjects":"self.leader","amount":0_i64},
+        pause,
+        {"op":"damage","subjects":"self.leader","amount":3_i64},
+        pause,
+        {"op":"damage","subjects":"self.leader","amount":4_i64},
+        {"op":"damage","subjects":"self.leader","amount":2_i64}
+    ]})));
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "charges",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"][0]["effect"]["uses"],
+        2_i64
+    );
+    engine
+        .decide(
+            &json!({"do":"resolve-choice","choice":"decline"}),
+            "first-hit",
+        )
+        .unwrap();
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["continuous_effects"][0]["effect"]["uses"],
+        1_i64
+    );
+    assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let sampled = Game::from_observation(loaded, &packet, "P1", "charges").unwrap();
+    for mut resumed in [saved, sampled] {
+        let result = resumed
+            .decide(
+                &json!({"do":"resolve-choice","choice":"decline"}),
+                "last-hits",
+            )
+            .unwrap();
+        assert_eq!(
+            resumed.query(View::P1, "P1.leader.life").unwrap(),
+            Some(json!(18_i64))
+        );
+        let hits = result
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "ダメージ")
+            .collect::<Vec<_>>();
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0]["amount"], 2_i64);
+        assert_eq!(
+            resumed.projection(View::P1).unwrap()["semantic_state"]["continuous_effects"][0]["effect"]
+                ["uses"],
+            0_i64
+        );
+    }
+}
+
+#[expect(
+    clippy::unwrap_used,
+    clippy::indexing_slicing,
+    reason = "Synthetic replacement abilities provide distinct references for ordering."
+)]
+fn limited_replacement_catalog(prevent: bool) -> Arc<Catalog> {
+    let mut doc = document(&json!({"op":"seq","steps":[]}));
+    let mut abilities = Vec::new();
+    for line in [1_i64, 2_i64] {
+        abilities.push(json!({"kind":"activated","line":line,"body":{"op":"replace_damage","subjects":"both.leaders","uses":1_i64,"prevent":prevent,"amount":-1_i64,"until":"end-of-turn"}}));
+    }
+    abilities.push(json!({"kind":"activated","line":3_i64,"body":{"op":"damage","subjects":"both.leaders","amount":6_i64}}));
+    doc["cards"]["unit-follower"]["abilities"] = json!(abilities);
+    Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("limited.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn simultaneous_damage_waits_for_every_order_before_charging_and_applying() {
+    let loaded = limited_replacement_catalog(false);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "batch",
+    )
+    .unwrap();
+    for line in [1_i64, 2_i64] {
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":line}}),
+                "shield",
+            )
+            .unwrap();
+    }
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
+            "hits",
+        )
+        .unwrap();
+    let order = json!({"do":"order-replacements","order":[{"source":"a","line":1_i64},{"source":"a","line":2_i64}]});
+    assert_eq!(
+        engine.decide(&order, "first-order").unwrap().outcome,
+        "paused"
+    );
+    let packet = engine.projection(View::P2).unwrap();
+    assert_eq!(packet["awaiting"]["by"], "P2");
+    assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
+    assert!(
+        packet["semantic_state"]["continuous_effects"]
+            .as_array()
+            .unwrap()
+            .iter()
+            .all(|entry| entry["effect"]["uses"] == 1_i64)
+    );
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine
+            .decide(&json!({"do":"order-replacements","order":[]}), "invalid")
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    assert!(matches!(
+        Game::from_observation(Arc::clone(&loaded), &packet, "P2", "batch").unwrap_err(),
+        EngineFailure::Unsupported(_)
+    ));
+    let sampled =
+        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "batch")
+            .unwrap();
+    for mut resumed in [saved, sampled] {
+        let result = resumed.decide(&order, "second-order").unwrap();
+        assert_eq!(result.outcome, "resolved");
+        let hits = result
+            .events
+            .iter()
+            .filter(|event| event["kind"] == "ダメージ")
+            .collect::<Vec<_>>();
+        assert_eq!(hits.len(), 2);
+        assert_eq!(hits[0]["group"], hits[1]["group"]);
+        assert!(hits.iter().all(|hit| hit["amount"] == 4_i64));
+        resumed
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
+                "unshielded",
+            )
+            .unwrap();
+        for seat in ["P1", "P2"] {
+            assert_eq!(
+                resumed
+                    .query(View::P1, &format!("{seat}.leader.life"))
+                    .unwrap(),
+                Some(json!(10_i64))
+            );
+        }
+    }
+}
+
+#[test]
+fn a_prevented_hit_does_not_consume_the_other_limited_replacement() {
+    let mut engine = Game::new(
+        limited_replacement_catalog(true),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "stack",
+    )
+    .unwrap();
+    for line in [1_i64, 2_i64] {
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":line}}),
+                "shield",
+            )
+            .unwrap();
+    }
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
+            "first",
+        )
+        .unwrap();
+    let order = json!({"do":"order-replacements","order":[{"source":"a","line":2_i64},{"source":"a","line":1_i64}]});
+    for _ in 0_u8..2 {
+        engine.decide(&order, "order").unwrap();
+    }
+    let packet = engine.projection(View::P1).unwrap();
+    for entry in packet["semantic_state"]["continuous_effects"]
+        .as_array()
+        .unwrap()
+    {
+        assert_eq!(
+            entry["effect"]["uses"],
+            i64::from(entry["context"]["reference"]["line"] == 1_i64)
+        );
+    }
+    let second = engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
+            "second",
+        )
+        .unwrap();
+    assert_eq!(second.outcome, "resolved");
+    assert!(
+        second
+            .events
+            .iter()
+            .all(|event| event["kind"] != "ダメージ")
+    );
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
+            "third",
+        )
+        .unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(14_i64))
+    );
+}
+
+#[test]
+fn indistinguishable_limited_replacement_instances_fail_closed_without_spending() {
+    let mut engine = Game::new(
+        limited_replacement_catalog(true),
+        &setup(),
+        &Value::Null,
+        &Value::Null,
+        "ambiguous",
+    )
+    .unwrap();
+    for _ in 0_u8..2 {
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "shield",
+            )
+            .unwrap();
+    }
+    let before = engine.digest().unwrap();
+    let error = engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":3_i64}}),
+            "damage",
+        )
+        .unwrap_err();
+    assert!(matches!(error, EngineFailure::Unsupported(_)));
+    assert_eq!(engine.digest().unwrap(), before);
+}

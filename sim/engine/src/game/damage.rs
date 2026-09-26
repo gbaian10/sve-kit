@@ -3,9 +3,20 @@
     reason = "Validated JSON uses total read indexing and constructed write maps."
 )]
 use super::legal::permutations;
-use super::{Frame, Game, int, list, string};
+use super::{BTreeMap, Frame, Game, int, list, string};
 use crate::{EngineFailure, Result, invalid};
 use serde_json::{Value, json};
+
+#[derive(Clone)]
+struct DamageReplacement {
+    reference: Value,
+    active: bool,
+    depends_on_amount: bool,
+    delta: i64,
+    set: Option<i64>,
+    prevent: bool,
+    consumption: Option<usize>,
+}
 
 #[expect(
     clippy::multiple_inherent_impl,
@@ -15,7 +26,9 @@ impl Game {
     pub(super) fn damage_batch(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let hits = list(&node["hits"]);
         let mut actual = Vec::new();
-        for hit in &hits {
+        let mut consumed = BTreeMap::<usize, i64>::new();
+        for (hit_index, hit) in hits.iter().enumerate() {
+            let order_key = hit_index.to_string();
             let id = string(&hit["target"]);
             let source = string(&hit["source"]);
             if int(&hit["amount"]) <= 0 {
@@ -24,12 +37,15 @@ impl Game {
             if !id.ends_with(".leader") && self.object(id)?.zone != "field" {
                 continue;
             }
-            let replacements = self.damage_replacements(hit)?;
+            let replacements = self.damage_replacements(hit, &consumed)?;
             let mut ordered = replacements.clone();
-            if replacements.len() > 1 && node["orders"][id].is_null() && int(&hit["amount"]) > 0 {
+            if replacements.len() > 1
+                && node["orders"][&order_key].is_null()
+                && int(&hit["amount"]) > 0
+            {
                 let references = replacements
                     .iter()
-                    .map(|r| r["reference"].clone())
+                    .map(|replacement| replacement.reference.clone())
                     .collect::<Vec<_>>();
                 let choices = permutations(&references)
                     .into_iter()
@@ -38,7 +54,7 @@ impl Game {
                 self.prompt(
                     frame,
                     choices,
-                    json!({"resume":"replacements","task":node,"target":id}),
+                    json!({"resume":"replacements","task":node,"target":order_key}),
                 );
                 let seat = if let Some(seat) = id.strip_suffix(".leader") {
                     seat.to_owned()
@@ -50,13 +66,13 @@ impl Game {
                 }
                 return Ok(());
             }
-            if let Some(order) = node["orders"][id].as_array() {
+            if let Some(order) = node["orders"][&order_key].as_array() {
                 ordered = order
                     .iter()
                     .filter_map(|reference| {
                         replacements
                             .iter()
-                            .find(|r| r["reference"] == *reference)
+                            .find(|replacement| replacement.reference == *reference)
                             .cloned()
                     })
                     .collect();
@@ -66,12 +82,16 @@ impl Game {
                 if amount <= 0 {
                     break;
                 }
-                if replacement["prevent"] == true {
+                if let Some(index) = replacement.consumption {
+                    let count = consumed.entry(index).or_default();
+                    *count = count.saturating_add(1);
+                }
+                if replacement.prevent {
                     amount = 0;
-                } else if let Some(value) = replacement["set"].as_i64() {
+                } else if let Some(value) = replacement.set {
                     amount = value;
                 } else {
-                    amount = amount.saturating_add(int(&replacement["amount"]));
+                    amount = amount.saturating_add(replacement.delta);
                 }
             }
             if amount > 0 {
@@ -79,6 +99,11 @@ impl Game {
                     json!({"source":source,"target":id,"amount":amount,"battle":hit["battle"],"attack":hit["attack"]}),
                 );
             }
+        }
+        // A later hit may still need input; commit charges only after the whole batch is planned.
+        for (index, count) in consumed {
+            let uses = &mut self.state.continuous[index]["effect"]["uses"];
+            *uses = json!(int(uses).saturating_sub(count));
         }
         Self::damage_receipt(&actual, node["bind"].as_str(), frame);
         self.apply_damage(&actual, frame)
@@ -148,7 +173,11 @@ impl Game {
         }
     }
 
-    fn damage_replacements(&self, hit: &Value) -> Result<Vec<Value>> {
+    fn damage_replacements(
+        &self,
+        hit: &Value,
+        consumed: &BTreeMap<usize, i64>,
+    ) -> Result<Vec<DamageReplacement>> {
         let mut result = Vec::new();
         for source in self.ability_sources() {
             for ability in self.abilities(&source)? {
@@ -176,37 +205,52 @@ impl Game {
                     frame,
                     &self.reference(&source, &ability),
                 )? {
+                    if replacement.active && body.get("uses").is_some() {
+                        return Err(EngineFailure::Unsupported(
+                            "limited-use static damage replacement".into(),
+                        ));
+                    }
                     result.push(replacement);
                 }
             }
         }
-        for entry in &self.state.continuous {
+        for (index, entry) in self.state.continuous.iter().enumerate() {
             if entry["effect"]["op"] != "replace_damage"
                 || !self.continuous_applies(entry, string(&hit["target"]))
             {
                 continue;
             }
+            let mut effect = entry["effect"].clone();
+            if let Some(uses) = effect.get_mut("uses") {
+                *uses = json!(int(uses).saturating_sub(*consumed.get(&index).unwrap_or(&0)));
+            }
             let frame: Frame = serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
             let reference = frame.reference.clone();
-            if let Some(replacement) =
-                self.prepare_damage_replacement(&entry["effect"], hit, frame, &reference)?
+            if let Some(mut replacement) =
+                self.prepare_damage_replacement(&effect, hit, frame, &reference)?
             {
+                replacement.consumption = effect.get("uses").map(|_| index);
                 result.push(replacement);
             }
         }
-        if result.len() > 1
-            && result
-                .iter()
-                .any(|entry| entry["depends_on_amount"] == true)
-        {
+        if result.len() > 1 && result.iter().any(|entry| entry.depends_on_amount) {
             return Err(EngineFailure::Unsupported(
                 "damage-dependent overlapping replacement order".into(),
             ));
         }
-        Ok(result
-            .into_iter()
-            .filter(|entry| entry["active"] == true)
-            .collect())
+        if result.iter().enumerate().any(|(index, entry)| {
+            entry.active
+                && result.iter().take(index).any(|prior| {
+                    prior.active
+                        && prior.reference == entry.reference
+                        && (prior.consumption.is_some() || entry.consumption.is_some())
+                })
+        }) {
+            return Err(EngineFailure::Unsupported(
+                "limited damage replacements need distinct occurrence references".into(),
+            ));
+        }
+        Ok(result.into_iter().filter(|entry| entry.active).collect())
     }
 
     fn prepare_damage_replacement(
@@ -215,7 +259,10 @@ impl Game {
         hit: &Value,
         mut frame: Frame,
         reference: &Value,
-    ) -> Result<Option<Value>> {
+    ) -> Result<Option<DamageReplacement>> {
+        if body.get("uses").is_some_and(|uses| int(uses) <= 0) {
+            return Ok(None);
+        }
         let kind = string(&body["kind"]);
         if (kind == "effect" && hit["battle"] == true)
             || (kind == "battle"
@@ -242,16 +289,6 @@ impl Game {
         let active = body
             .get("condition")
             .map_or(Ok(true), |condition| self.truth(condition, &frame))?;
-        if let Some(uses) = body.get("uses") {
-            if int(uses) <= 0 {
-                return Ok(None);
-            }
-            if active {
-                return Err(EngineFailure::Unsupported(
-                    "limited-use damage replacement".into(),
-                ));
-            }
-        }
         let set = body
             .get("set")
             .map(|expr| self.number(expr, &frame))
@@ -259,9 +296,15 @@ impl Game {
         let depends_on_amount = ["condition", "amount", "set"]
             .iter()
             .any(|key| reads_damage_amount(&body[*key]));
-        Ok(Some(
-            json!({"reference":reference,"active":active,"depends_on_amount":depends_on_amount,"amount":self.number(&body["amount"],&frame)?,"set":set,"prevent":body["prevent"]}),
-        ))
+        Ok(Some(DamageReplacement {
+            reference: reference.clone(),
+            active,
+            depends_on_amount,
+            delta: self.number(&body["amount"], &frame)?,
+            set,
+            prevent: body["prevent"] == true,
+            consumption: None,
+        }))
     }
 }
 
