@@ -928,9 +928,6 @@
                 "type": "string"
               }
             },
-            "type": {
-              "type": "string"
-            },
             "until": {
               "type": "string"
             },
@@ -1937,6 +1934,31 @@
             "amount"
           ],
           "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": [
+            "op",
+            "subjects",
+            "type"
+          ],
+          "additionalProperties": false,
+          "properties": {
+            "op": {
+              "const": "become_type"
+            },
+            "subjects": {
+              "$ref": "#/$defs/select"
+            },
+            "type": {
+              "enum": [
+                "follower",
+                "spell",
+                "amulet",
+                "crest"
+              ]
+            }
+          }
         }
       ]
     },

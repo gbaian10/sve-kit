@@ -39,11 +39,9 @@ type Result<T> = result::Result<T, Box<dyn Error>>;
 
 fn main() -> Result<()> {
     let mut arguments = args().skip(1);
-    let snapshot = PathBuf::from(
-        arguments
-            .next()
-            .ok_or("usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist] [OUTPUT]")?,
-    );
+    let snapshot = PathBuf::from(arguments.next().ok_or(
+        "usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist|validate] [OUTPUT]",
+    )?);
     let root = PathBuf::from(arguments.next().unwrap_or_else(|| ".".into()));
     let mode = arguments.next().unwrap_or_else(|| "all".into());
     let output = PathBuf::from(
@@ -53,6 +51,13 @@ fn main() -> Result<()> {
     );
     create_dir_all(&output)?;
     let catalog = Arc::new(Catalog::load(&snapshot, &root.join("authored"))?);
+    if mode == "validate" {
+        println!(
+            "Schema-validated authored programs: {}",
+            catalog.authored_count()
+        );
+        return Ok(());
+    }
     if mode == "all" || mode == "g1" {
         let questions = load_dir(&root.join("tests/rules-scenarios/questions"))?;
         let selection = load_selection(&root.join("tests/rules-scenarios/g1-selection.yaml"))?;

@@ -167,7 +167,20 @@ impl Game {
                 }
                 options = next;
             }
-            out.extend(options);
+            for option in options {
+                let mut payment = frame.clone();
+                payment.decision = option.clone();
+                let mut costs = vec![json!({"op":"pp","amount":self.play_cost(&id)?})];
+                costs.extend(
+                    self.abilities(&id)?
+                        .iter()
+                        .filter(|code| code["kind"] == "spell")
+                        .flat_map(|code| list(&code["costs"])),
+                );
+                if self.can_pay(&costs, &payment)? {
+                    out.push(option);
+                }
+            }
         }
         for id in ["field", "hand", "ex", "cemetery"]
             .into_iter()

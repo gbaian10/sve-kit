@@ -258,6 +258,16 @@ impl Game {
         }
         self.player_mut(controller)?.pp["current"] =
             json!(int(&self.player(controller)?.pp["current"]).saturating_sub(cost));
+        let mandatory = spells
+            .iter()
+            .flat_map(|code| list(&code["costs"]))
+            .collect::<Vec<_>>();
+        if !self.can_pay(&mandatory, &frame)? {
+            return Ok(false);
+        }
+        for code in &spells {
+            self.pay_costs(code, &mut frame)?;
+        }
         self.move_objects(&[source.into()], "resolution", None, None, &frame)?;
         self.object_mut(source)?.state["entered_from"] = json!(object.zone);
         self.bump(&format!("{controller}.cards_played"), 1);

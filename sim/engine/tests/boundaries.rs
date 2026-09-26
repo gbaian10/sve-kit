@@ -578,7 +578,7 @@ fn delayed_end_and_temporary_silence_survive_snapshot_and_observation() {
 
 #[test]
 fn unsupported_modifier_parameters_cannot_succeed_silently() {
-    let mut engine = game(&json!({"op":"modify","subjects":"target.1","type":"amulet"}));
+    let mut engine = game(&json!({"op":"modify","subjects":"target.1","abilities":[]}));
     let before = engine.digest().unwrap();
     let error = engine
         .decide(
@@ -588,4 +588,49 @@ fn unsupported_modifier_parameters_cannot_succeed_silently() {
         .unwrap_err();
     assert!(matches!(error, EngineFailure::Unsupported(_)));
     assert_eq!(engine.digest().unwrap(), before);
+}
+
+#[test]
+fn spell_cost_enumeration_and_payment_include_the_printed_cost() {
+    let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":1_i64}));
+    doc["cards"]["unit-spell"]["abilities"][0]["costs"] = json!([{"op":"pp","amount":2_i64}]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("spell-cost.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut position = setup();
+    for (available, legal) in [(2_i64, false), (3_i64, true)] {
+        position["players"]["P1"]["pp"]["current"] = json!(available);
+        let mut engine = Game::new(
+            Arc::clone(&catalog),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "payment",
+        )
+        .unwrap();
+        assert_eq!(
+            engine
+                .legal()
+                .unwrap()
+                .iter()
+                .any(|action| action["do"] == "play"),
+            legal
+        );
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, if legal { "resolved" } else { "cannot-play" });
+        assert_eq!(
+            engine.query(View::P1, "P1.pp.current").unwrap(),
+            Some(json!(if legal { 0 } else { available }))
+        );
+    }
 }
