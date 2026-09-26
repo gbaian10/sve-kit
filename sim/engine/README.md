@@ -40,9 +40,18 @@ cargo llvm-cov --locked --workspace --fail-under-lines 90
 
 The G1 regression requires all 41 scenarios to pass every checkpoint. The new
 139-scenario regression also requires every scenario to pass without exceptions.
+It currently fails one assertion in BP10-050 A2: the engine retains a singleton
+stack-recipient input that the fixture omits, following its interpretation of CR
+13.3.2.4 and contract 9.8. This difference awaits a common ruling. The standard
+coverage command consequently exits 101; no test is skipped or treated as passing.
+The complete `--ignore-run-fail`
+collection records 93.82% line coverage separately from this test failure.
 Pending choices include each legal parameter combination, and resolution events
 follow effect completion and removal from the resolution zone. Current results and
-reproduction commands are in [RESULTS.md](../../docs/evaluation/seal-2-addendum-1/RESULTS.md).
+reproduction commands are in [RESULTS.md](../../docs/evaluation/seal-3/RESULTS.md).
+The full public suite has 697 passes, eight failures and one adapter error across
+706 scenarios. The remaining input/event-format questions retain their original
+verdicts pending a common ruling; see [PROGRESS.md](../../PROGRESS.md).
 
 `Catalog::from_documents` accepts snapshot and YAML strings without filesystem
 access. The default `runner` feature enables evaluation adapters and the CLI. The
