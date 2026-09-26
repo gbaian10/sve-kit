@@ -108,6 +108,7 @@ impl Game {
             prints.extend(vec![card; count]);
         }
         let zone = string(&node["to"]);
+        let prints = self.unique_crest_creations(&prints, zone, &frame.controller)?;
         if matches!(zone, "field" | "ex") {
             let available = usize::try_from(
                 5_i64
@@ -159,6 +160,7 @@ impl Game {
         controller: &str,
         frame: &mut Frame,
     ) -> Result<()> {
+        let prints = self.unique_crest_creations(prints, string(&node["to"]), controller)?;
         let created = prints
             .iter()
             .map(|card| self.new_token_object(card, controller))
@@ -176,6 +178,34 @@ impl Game {
             ],
         );
         Ok(())
+    }
+
+    fn unique_crest_creations(
+        &self,
+        prints: &[String],
+        zone: &str,
+        controller: &str,
+    ) -> Result<Vec<String>> {
+        if zone != "ex" {
+            return Ok(prints.to_vec());
+        }
+        let mut names = BTreeSet::new();
+        for id in self.zone_ids(controller, zone) {
+            if self.object_type(&id)?.contains("クレスト") {
+                names.insert(self.card_name(&id)?);
+            }
+        }
+        let mut allowed = Vec::new();
+        for print in prints {
+            let face = self.catalog.face(print, 0)?;
+            let name = self.catalog.program(print)?["rules_name"]
+                .as_str()
+                .unwrap_or_else(|| string(&face["name"]));
+            if !string(&face["card_type"]).contains("クレスト") || names.insert(name.into()) {
+                allowed.push(print.clone());
+            }
+        }
+        Ok(allowed)
     }
 
     pub(super) fn transform(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {

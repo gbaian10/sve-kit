@@ -216,6 +216,24 @@ impl Game {
         Ok(destinations)
     }
 
+    pub(super) fn return_advances(&mut self, ids: &[String]) -> Result<()> {
+        if ids.is_empty() {
+            return Ok(());
+        }
+        let frame = Frame {
+            cause: json!({"rule":"9.2.2"}),
+            ..Frame::default()
+        };
+        self.move_objects(ids, "evolve_deck", None, None, &frame)?;
+        for id in ids {
+            self.object_mut(id)?.state["face_up"] = json!(true);
+            for seat in ["P1", "P2"] {
+                self.learn(seat, id, true);
+            }
+        }
+        Ok(())
+    }
+
     pub(super) fn release_links(&mut self, leaving: &[Object], frame: &Frame) -> Result<()> {
         let mut resources = BTreeSet::new();
         let mut equipment = BTreeSet::new();

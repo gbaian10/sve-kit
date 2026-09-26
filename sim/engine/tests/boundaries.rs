@@ -7018,3 +7018,188 @@ fn unknown_or_ambiguous_suppression_provenance_rolls_back_the_resolution() {
         assert_eq!(engine.digest().unwrap(), before);
     }
 }
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "Synthetic reprints isolate crest name uniqueness from printed identities."
+)]
+fn crest_catalog(body: &Value) -> Arc<Catalog> {
+    let mut doc = document(body);
+    doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
+    let mut printed = snapshot();
+    for (number, name, kind) in [
+        ("crest-first", "shared-crest", "クレスト・トークン"),
+        ("crest-reprint", "shared-crest", "クレスト・トークン"),
+        ("crest-other", "other-crest", "クレスト・トークン"),
+        ("ordinary-token", "ordinary", "フォロワー・トークン"),
+    ] {
+        printed.push('\n');
+        printed.push_str(&json!({"number":number,"faces":[{"name":name,"card_class":"ニュートラル","card_type":kind,"cost":"0","power":"1","hp":"1","traits":[],"text":null,"sections":[]}]}).to_string());
+        doc["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[]});
+    }
+    doc["cards"]["crest-first"]["token_template"] = json!(true);
+    Arc::new(
+        Catalog::from_documents(
+            &printed,
+            &registry(),
+            &[("crests.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    )
+}
+
+#[test]
+fn crest_reprints_and_simultaneous_copies_are_filtered_before_capacity_or_identity_allocation() {
+    let body = json!({"op":"if_done","attempt":{"op":"create","name":"shared-crest","count":2_i64,"to":"ex"},"then":{"op":"modify","subjects":"self.leader","hp":3_i64}});
+    let mut position = setup();
+    position["players"]["P1"]["zones"]["ex"] =
+        json!([{"id":"existing","card":"crest-reprint"},{"filler":4_i64}]);
+    let mut engine = Game::new(
+        crest_catalog(&body),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "full-crest",
+    )
+    .unwrap();
+    let result = engine
+        .decide(&json!({"do":"play","card":"s"}), "duplicate")
+        .unwrap();
+    assert_eq!(result.outcome, "resolved");
+    assert!(result.events.iter().all(|event| {
+        !event["object"]
+            .as_str()
+            .is_some_and(|id| id.starts_with("new-"))
+    }));
+    assert_eq!(
+        engine.query(View::P1, "P1.ex_count").unwrap(),
+        Some(json!(5_i64))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.leader.life").unwrap(),
+        Some(json!(20_i64))
+    );
+
+    let batch = json!({"op":"create","to":"ex","tokens":[
+        {"name":"shared-crest","count":2_i64},
+        {"name":"other-crest","count":2_i64},
+        {"name":"ordinary","count":2_i64}
+    ]});
+    let loaded = crest_catalog(&batch);
+    position["players"]["P1"]["zones"]["ex"] = json!([]);
+    let mut batch_engine = Game::new(
+        Arc::clone(&loaded),
+        &position,
+        &Value::Null,
+        &Value::Null,
+        "batch-crests",
+    )
+    .unwrap();
+    assert_eq!(
+        batch_engine
+            .decide(&json!({"do":"play","card":"s"}), "batch")
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    let packet = batch_engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["P1"]["ex"],
+        json!(["new-1", "new-2", "new-3", "new-4"])
+    );
+    assert_eq!(packet["objects"]["new-1"]["name"], "shared-crest");
+    assert_eq!(packet["objects"]["new-2"]["name"], "other-crest");
+    assert_eq!(packet["objects"]["new-3"]["name"], "ordinary");
+    assert_eq!(packet["objects"]["new-4"]["name"], "ordinary");
+    let rebuilt = Game::from_observation(loaded, &packet, "P1", "crests").unwrap();
+    assert_eq!(
+        rebuilt.projection(View::P1).unwrap()["P1"]["ex"],
+        packet["P1"]["ex"]
+    );
+}
+
+#[test]
+fn advances_return_face_up_to_the_owner_before_the_effect_continues() {
+    for (origin, destination) in [
+        ("field", "hand"),
+        ("ex", "deck"),
+        ("hand", "cemetery"),
+        ("field", "banish"),
+        ("field", "ex"),
+        ("ex", "field"),
+    ] {
+        let owner = if origin == "hand" { "P2" } else { "P1" };
+        let owner_side = if owner == "P1" { "self" } else { "opponent" };
+        let body = json!({"op":"seq","steps":[
+            {"op":"move","subjects":{"side":"opponent","zone":origin},"to":destination},
+            {"op":"modify","subjects":"self.leader","hp":{"count":{"side":owner_side,"zone":"evolve_deck"}}}
+        ]});
+        let mut doc = document(&body);
+        doc["cards"]["unit-spell"]["abilities"][0]["targets"] = json!([]);
+        doc["cards"]["unit-advance"] =
+            json!({"status":"complete","review":"synthetic","abilities":[]});
+        let printed = json!({"number":"unit-advance","faces":[{"name":"advance","card_class":"ニュートラル","card_type":"フォロワー・アドバンス","cost":"1","power":"3","hp":"3","traits":[],"text":null,"sections":[]}]});
+        let loaded = Arc::new(
+            Catalog::from_documents(
+                &format!("{}\n{printed}", snapshot()),
+                &registry(),
+                &[("advance.yaml".into(), doc.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut position = setup();
+        position["players"]["P2"]["zones"] = json!({origin:[{"id":"b","card":"unit-advance","owner":owner,"state":{"silenced":true,"power":9_i64}}]});
+        let mut engine = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "advance",
+        )
+        .unwrap();
+        let result = engine
+            .decide(&json!({"do":"play","card":"s"}), "move")
+            .unwrap();
+        assert_eq!(result.outcome, "resolved");
+        let returns = result
+            .events
+            .iter()
+            .filter(|event| event["by"] == "rule-9.2.2")
+            .collect::<Vec<_>>();
+        let should_return = !matches!(destination, "field" | "ex");
+        let packet = engine.projection(View::P1).unwrap();
+        if should_return {
+            assert_eq!(returns.len(), 1);
+            assert_eq!(returns[0]["from"], format!("{owner}.{destination}"));
+            assert_eq!(returns[0]["to"], format!("{owner}.evolve_deck"));
+            assert!(
+                !packet[owner][destination]
+                    .as_array()
+                    .unwrap()
+                    .contains(&json!("b"))
+            );
+            assert_eq!(packet[owner]["evolve_deck"], json!(["b"]));
+            assert_eq!(packet["objects"]["b"]["face_up"], true);
+            assert_eq!(packet["objects"]["b"]["generation"], 2_i64);
+            assert_eq!(packet["P1"]["leader"]["life"], 21_i64);
+            assert_eq!(
+                engine
+                    .query(View::P2, &format!("{owner}.evolve_deck.b.face_up"))
+                    .unwrap(),
+                Some(json!(true))
+            );
+            let rebuilt = Game::from_observation(loaded, &packet, "P1", "advance").unwrap();
+            assert_eq!(
+                rebuilt
+                    .query(View::P1, &format!("{owner}.evolve_deck.b.face_up"))
+                    .unwrap(),
+                Some(json!(true))
+            );
+        } else {
+            assert!(returns.is_empty());
+            assert_eq!(packet["P2"][destination], json!(["b"]));
+            assert_eq!(packet["P1"]["leader"]["life"], 20_i64);
+        }
+    }
+}

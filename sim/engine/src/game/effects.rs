@@ -623,6 +623,7 @@ impl Game {
         let group = self.group();
         let mut entered = Vec::new();
         let mut erased = Vec::new();
+        let mut advances = Vec::new();
         let plans = self.place_zone_batch(&movable, &destinations, side, position, frame)?;
         for plan in &plans {
             if !plan.changed {
@@ -695,6 +696,11 @@ impl Game {
             if token && !matches!(destination, "field" | "ex" | "resolution" | "equipment") {
                 erased.push(id.clone());
             }
+            if string(&printed["card_type"]).contains("アドバンス")
+                && !matches!(destination, "evolve_deck" | "field" | "ex" | "resolution")
+            {
+                advances.push(id.clone());
+            }
         }
         self.conceal_placement_order(&plans, frame);
         let erase_group = self.group();
@@ -714,6 +720,7 @@ impl Game {
                 erase_group,
             );
         }
+        self.return_advances(&advances)?;
         self.release_links(&leaving, frame)?;
         self.enqueue(pending);
         for (object, _) in &entered {
