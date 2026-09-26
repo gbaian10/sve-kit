@@ -6,6 +6,7 @@
 )]
 
 mod belief;
+mod costs;
 mod effects;
 mod expr;
 mod extensions;
@@ -240,7 +241,10 @@ impl Game {
         random: &Value,
         seed: &str,
     ) -> Result<Self> {
-        let position = Self::prepare_opening(setup);
+        let mut position = Self::prepare_opening(setup);
+        if position["history"] == "none" {
+            position["semantic_state"] = json!({});
+        }
         let mut players = BTreeMap::new();
         let mut objects = BTreeMap::new();
         for seat in ["P1", "P2"] {
@@ -427,6 +431,7 @@ impl Game {
     }
 
     fn initialize_history(&mut self, setup: &Value) -> Result<()> {
+        self.import_cost_history()?;
         if let Some(used) = setup["semantic_state"].get("used_this_turn") {
             let entries: Vec<AbilityUse> = serde_json::from_value(used.clone()).map_err(invalid)?;
             for mut entry in entries {

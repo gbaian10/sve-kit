@@ -298,6 +298,11 @@ impl Game {
     }
 
     fn register_continuous(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+        if node["op"] == "adjust_cost" && node["subjects"]["zone"] == "any" {
+            let players = self.seats(string(&node["subjects"]["side"]), frame);
+            self.state.continuous.push(json!({"source":frame.source,"controller":frame.controller,"applies_to":players,"dynamic":true,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"order":self.state.next_event,"context":frame}));
+            return Ok(());
+        }
         let subjects = self.select(&node["subjects"], frame)?;
         for id in subjects {
             let generation = self.state.objects.get(&id).map(|object| object.generation);
@@ -308,11 +313,12 @@ impl Game {
 
     pub(super) fn continuous_applies(&self, entry: &Value, id: &str) -> bool {
         list(&entry["applies_to"]).contains(&json!(id))
-            && self
-                .state
-                .objects
-                .get(id)
-                .is_none_or(|object| entry["generation"].as_u64() == Some(object.generation))
+            && self.state.objects.get(id).is_none_or(|object| {
+                entry["generations"][id]
+                    .as_u64()
+                    .or_else(|| entry["generation"].as_u64())
+                    == Some(object.generation)
+            })
     }
 
     fn reveal_until(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {

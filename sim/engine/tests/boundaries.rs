@@ -301,6 +301,108 @@ fn pp_recovery_receipts_use_the_actual_increase_after_capping() {
 }
 
 #[test]
+fn next_spell_discount_tracks_future_cards_and_consumes_only_on_success() {
+    let mut doc = document(&json!({"op":"damage","subjects":"target.1","amount":1_i64}));
+    doc["cards"]["unit-spell"]["abilities"].as_array_mut().unwrap().push(json!({"kind":"static","line":2_i64,"body":{"op":"adjust_cost","subjects":"self","set":3_i64}}));
+    doc["cards"]["unit-follower"]["abilities"] = json!([
+        {"kind":"activated","line":1_i64,"body":{"op":"adjust_cost","subjects":{"side":"self","zone":"any","type":"spell"},"amount":-2_i64,"uses":1_i64,"consume_on":"spell_play","until":"end-of-turn"}},
+        {"kind":"activated","line":2_i64,"body":{"op":"draw","count":1_i64}}
+    ]);
+    let catalog = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &registry(),
+            &[("costs.yaml".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["hand"]
+        .as_array_mut()
+        .unwrap()
+        .push(json!({"id":"f","card":"unit-follower"}));
+    initial["players"]["P1"]["zones"]["deck"] = json!([{"id":"d","card":"unit-spell"}]);
+    initial["players"]["P2"]["zones"]["deck"] = json!([{"id":"e","card":"unit-follower"}]);
+    let mut engine = Game::new(
+        Arc::clone(&catalog),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "discount",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+            "grant",
+        )
+        .unwrap();
+    let mut expired = engine.clone();
+    expired.decide(&json!({"do":"end-phase"}), "end").unwrap();
+    expired.decide(&json!({"do":"pass"}), "next").unwrap();
+    assert_eq!(
+        expired
+            .query(View::P1, "semantic_state.continuous_effects")
+            .unwrap(),
+        Some(json!([]))
+    );
+    engine
+        .decide(&json!({"do":"play","card":"f"}), "follower")
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":2_i64}}),
+            "draw",
+        )
+        .unwrap();
+    let saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    assert_eq!(saved.legal().unwrap(), engine.legal().unwrap());
+    let packet = engine.projection(View::P1).unwrap();
+    assert_eq!(
+        packet["semantic_state"]["continuous_effects"][0]["applies_to"],
+        json!(["P1"])
+    );
+    let rebuilt = Game::from_observation(catalog, &packet, "P1", "discount-world").unwrap();
+    assert_eq!(rebuilt.legal().unwrap(), engine.legal().unwrap());
+    let before = engine.digest().unwrap();
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"d","targets":{"1":["a"]}}),
+                "invalid"
+            )
+            .unwrap()
+            .outcome,
+        "cannot-play"
+    );
+    assert_eq!(engine.digest().unwrap(), before);
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"d","targets":{"1":["b"]}}),
+                "spell"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.pp.current").unwrap(),
+        Some(json!(0_i64))
+    );
+    assert_eq!(
+        engine
+            .query(View::P1, "semantic_state.continuous_effects")
+            .unwrap(),
+        Some(json!([]))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(2_i64))
+    );
+}
+
+#[test]
 fn a_card_returning_to_the_field_is_not_the_original_target() {
     let mut engine = game(&json!({"op":"seq","steps":[
         {"op":"move","subjects":"target.1","to":"cemetery","bind":"left"},

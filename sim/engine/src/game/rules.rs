@@ -292,6 +292,7 @@ impl Game {
         if !self.can_pay(&mandatory, &frame)? {
             return Ok(None);
         }
+        self.consume_cost_adjustments(source)?;
         for code in &spells {
             self.pay_costs(code, &mut frame)?;
         }
@@ -656,7 +657,7 @@ impl Game {
         Ok(true)
     }
     fn next_turn(&mut self) -> Result<()> {
-        self.expire_silence()?;
+        self.expire_effects()?;
         let mut extra_turns = list(&self.state.turn["extra_turns"]);
         let seat = if extra_turns.is_empty() {
             other(self.active()).to_owned()

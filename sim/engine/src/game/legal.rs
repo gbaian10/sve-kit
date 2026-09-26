@@ -6,7 +6,7 @@ use alloc::collections::BTreeSet;
 
 use serde_json::{Value, json};
 
-use super::{AbilityUse, Frame, Game, int, list, other, scalar, string};
+use super::{AbilityUse, Frame, Game, int, list, other, string};
 use crate::{EngineFailure, Result, invalid};
 
 pub(super) fn subsets(items: &[String], min: usize, max: usize) -> Vec<Vec<String>> {
@@ -327,62 +327,6 @@ impl Game {
         Ok(guards.is_empty() || guards.iter().any(|guard_id| guard_id == target))
     }
 
-    pub(super) fn play_cost_context(&self, id: &str, context: &Frame) -> Result<i64> {
-        let mut cost = scalar(&self.face(id)?["cost"]);
-        let mut sources = self.field_ids();
-        if !sources.iter().any(|source| source == id) {
-            sources.push(id.into());
-        }
-        for source in sources {
-            for code in self.abilities(&source)? {
-                let body = &code["body"];
-                if code["kind"] != "static" || body["op"] != "adjust_cost" {
-                    continue;
-                }
-                let mut frame = self.frame_for(&source)?;
-                frame.values = context.values.clone();
-                frame.decision = context.decision.clone();
-                if !self.matches(id, &body["subjects"], &frame)? {
-                    continue;
-                }
-                if let Some(condition) = body.get("condition")
-                    && !self.truth(condition, &frame)?
-                {
-                    continue;
-                }
-                if body.get("uses").is_some() || body.get("until").is_some() {
-                    return Err(EngineFailure::Unsupported(
-                        "limited-use static cost adjustment".into(),
-                    ));
-                }
-                if let Some(set) = body.get("set") {
-                    cost = self.number(set, &frame)?;
-                }
-                cost = cost.saturating_add(self.number(&body["amount"], &frame)?);
-            }
-        }
-        for entry in &self.state.continuous {
-            let effect = &entry["effect"];
-            if effect["op"] != "adjust_cost"
-                || !self.continuous_applies(entry, id)
-                || effect["kind"] == "evolve"
-            {
-                continue;
-            }
-            let frame: Frame = serde_json::from_value(entry["context"].clone()).map_err(invalid)?;
-            if let Some(value) = effect.get("set") {
-                cost = self.number(value, &frame)?;
-            }
-            cost = cost.saturating_add(self.number(&effect["amount"], &frame)?);
-        }
-        Ok(cost
-            .saturating_add(int(context
-                .values
-                .get("additional_pp")
-                .unwrap_or(&Value::Null)))
-            .max(0))
-    }
-
     pub(super) fn can_pay(&self, costs: &[Value], frame: &Frame) -> Result<bool> {
         let mut pp = 0_i64;
         let mut acted = BTreeSet::new();
@@ -391,6 +335,23 @@ impl Game {
         for (cost, context) in atoms {
             match string(&cost["op"]) {
                 "pp" => pp = pp.saturating_add(self.number(&cost["amount"], &context)?.max(0)),
+                "earth_rite" => {
+                    let count = self.number(&cost["count"], &context)?;
+                    if !self
+                        .select(
+                            &json!({"side":"self","zone":"field","keyword":"stack"}),
+                            &context,
+                        )?
+                        .iter()
+                        .any(|id| {
+                            self.object(id).is_ok_and(|object| {
+                                int(&object.state["counters"]["stack_counter"]) >= count
+                            })
+                        })
+                    {
+                        return Ok(false);
+                    }
+                }
                 "act" => {
                     for id in self.select(&cost["subjects"], &context)? {
                         if self.object(&id)?.state["acted"] == true || !acted.insert(id) {

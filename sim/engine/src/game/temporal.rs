@@ -157,7 +157,7 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn expire_silence(&mut self) -> Result<()> {
+    pub(super) fn expire_effects(&mut self) -> Result<()> {
         self.state
             .delayed
             .retain(|entry| entry["until"] != "end-of-turn");
@@ -176,6 +176,9 @@ impl Game {
             active.push(entry);
         }
         for entry in expired.into_iter().rev() {
+            if entry["effect"]["op"] != "pilot" && entry["effect"]["remove_abilities"] != true {
+                continue;
+            }
             for id in list(&entry["applies_to"]) {
                 let id = string(&id);
                 if Some(self.object(id)?.generation) != entry["generation"].as_u64() {
