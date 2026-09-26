@@ -773,3 +773,25 @@ fn last_words_trigger_once_for_destroy_and_for_payment_movement() {
         );
     }
 }
+
+#[test]
+fn semantic_digest_preserves_selector_sources_in_suspended_programs() {
+    let mut engine = game(&json!({"op":"seq","steps":[
+        {"op":"optional","then":{"op":"draw","count":0_i64}},
+        {"op":"damage","subjects":{"from":"target.1"},"amount":1_i64}
+    ]}));
+    engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast",
+        )
+        .unwrap();
+    let mut state = serde_json::to_value(&engine).unwrap();
+    assert_eq!(
+        state["state"]["frame"]["todo"][0]["subjects"]["from"],
+        "target.1"
+    );
+    state["state"]["frame"]["todo"][0]["subjects"]["from"] = json!("self");
+    let changed: Game = serde_json::from_value(state).unwrap();
+    assert_ne!(changed.digest().unwrap(), engine.digest().unwrap());
+}

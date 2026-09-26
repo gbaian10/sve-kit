@@ -230,6 +230,20 @@ impl Game {
     pub fn digest(&self) -> Result<String> {
         let mut value = serde_json::to_value(&self.state).map_err(invalid)?;
         normalize_origins(&mut value);
+        if let Some(observers) = value["knowledge"].as_object_mut() {
+            for knowledge in observers.values_mut() {
+                if let Some(seen) = knowledge["seen"].as_object_mut() {
+                    for entry in seen.values_mut() {
+                        entry["from"] = json!("origin");
+                    }
+                }
+                if let Some(carried) = knowledge["carried"].as_array_mut() {
+                    for entry in carried {
+                        entry["from"] = json!("origin");
+                    }
+                }
+            }
+        }
         let bytes = serde_json::to_vec(&json!({"version":"astra-digest/1","state":value}))
             .map_err(invalid)?;
         let mut hex = String::new();
@@ -272,9 +286,7 @@ fn normalize_origins(root: &mut Value) {
     match root {
         Value::Object(map) => {
             for (key, value) in map {
-                if matches!(key.as_str(), "cause" | "from")
-                    && (value.is_object() || value.is_string())
-                {
+                if key == "cause" && (value.is_object() || value.is_string()) {
                     *value = json!("origin");
                 } else {
                     normalize_origins(value);
