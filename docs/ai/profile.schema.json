@@ -1,0 +1,1334 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Astra AI profile v2 (design only)",
+  "$comment": "Future contract; not accepted by the current Rust Profile loader.",
+  "type": "object",
+  "properties": {
+    "schema_version": {
+      "const": "astra-ai-profile/2"
+    },
+    "profile_id": {
+      "type": "string",
+      "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+    },
+    "revision": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+\\.\\d+$"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "validated"
+      ]
+    },
+    "validity": {
+      "type": "object",
+      "properties": {
+        "from": {
+          "type": "string",
+          "format": "date"
+        },
+        "through": {
+          "anyOf": [
+            {
+              "type": "string",
+              "format": "date"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "format": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "rules_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "catalog_sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+        },
+        "dsl_version": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        }
+      },
+      "required": [
+        "from",
+        "through",
+        "format",
+        "rules_version",
+        "catalog_sha256",
+        "dsl_version"
+      ],
+      "additionalProperties": false
+    },
+    "deck": {
+      "type": "object",
+      "properties": {
+        "card_class": {
+          "type": "string",
+          "enum": [
+            "エルフ",
+            "ロイヤル",
+            "ウィッチ",
+            "ドラゴン",
+            "ナイトメア",
+            "ビショップ",
+            "ニュートラル"
+          ]
+        },
+        "title": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "archetype": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "subtype": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "variant": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "decklist_sha256": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[0-9a-f]{64}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "core_cards": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "card": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 64
+              },
+              "minimum_copies": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 50
+              }
+            },
+            "required": [
+              "card",
+              "minimum_copies"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 1,
+          "maxItems": 64
+        }
+      },
+      "required": [
+        "card_class",
+        "title",
+        "archetype",
+        "subtype",
+        "variant",
+        "decklist_sha256",
+        "core_cards"
+      ],
+      "additionalProperties": false
+    },
+    "evaluation": {
+      "type": "object",
+      "properties": {
+        "feature_version": {
+          "const": "astra-ai-features/2"
+        },
+        "weights": {
+          "$ref": "#/$defs/weights"
+        },
+        "opening_through_turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "endgame_from_turn": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "phase_overrides": {
+          "type": "object",
+          "properties": {
+            "opening": {
+              "$ref": "#/$defs/weight_overrides"
+            },
+            "midgame": {
+              "$ref": "#/$defs/weight_overrides"
+            },
+            "endgame": {
+              "$ref": "#/$defs/weight_overrides"
+            }
+          },
+          "required": [
+            "opening",
+            "midgame",
+            "endgame"
+          ],
+          "additionalProperties": false
+        },
+        "cvar_alpha": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "discount_per_decision": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "feature_version",
+        "weights",
+        "opening_through_turn",
+        "endgame_from_turn",
+        "phase_overrides",
+        "cvar_alpha",
+        "discount_per_decision"
+      ],
+      "additionalProperties": false
+    },
+    "key_cards": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "card": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "finisher",
+              "engine",
+              "removal",
+              "defense",
+              "draw",
+              "combo_piece"
+            ]
+          },
+          "priority": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          },
+          "reserve_copies": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 10
+          },
+          "when": {
+            "$ref": "#/$defs/condition"
+          }
+        },
+        "required": [
+          "card",
+          "role",
+          "priority",
+          "reserve_copies",
+          "when"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "maxItems": 64
+    },
+    "mulligan": {
+      "type": "object",
+      "properties": {
+        "default_keep_cost_ceiling": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "max_total_kept": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "rules": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/mulligan_rule"
+          },
+          "minItems": 0,
+          "maxItems": 32
+        },
+        "bundles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "cards": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 64
+                },
+                "minItems": 2,
+                "maxItems": 8
+              },
+              "when": {
+                "$ref": "#/$defs/condition"
+              },
+              "score_bonus": {
+                "type": "number",
+                "minimum": 0,
+                "maximum": 10
+              }
+            },
+            "required": [
+              "cards",
+              "when",
+              "score_bonus"
+            ],
+            "additionalProperties": false
+          },
+          "minItems": 0,
+          "maxItems": 16
+        }
+      },
+      "required": [
+        "default_keep_cost_ceiling",
+        "max_total_kept",
+        "rules",
+        "bundles"
+      ],
+      "additionalProperties": false
+    },
+    "seat_adjustments": {
+      "type": "object",
+      "properties": {
+        "first": {
+          "$ref": "#/$defs/seat"
+        },
+        "second": {
+          "$ref": "#/$defs/seat"
+        }
+      },
+      "required": [
+        "first",
+        "second"
+      ],
+      "additionalProperties": false
+    },
+    "matchups": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/matchup"
+      },
+      "minItems": 0,
+      "maxItems": 64
+    },
+    "reserve": {
+      "type": "object",
+      "properties": {
+        "baseline_pp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "maximum_pp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "minimum_threat_probability": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "unused_pp_penalty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "windows": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "attack_quick",
+              "end_quick"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 2
+        },
+        "release_if_no_feasible_response": {
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "baseline_pp",
+        "maximum_pp",
+        "minimum_threat_probability",
+        "unused_pp_penalty",
+        "windows",
+        "release_if_no_feasible_response"
+      ],
+      "additionalProperties": false
+    },
+    "opponent_model": {
+      "type": "object",
+      "properties": {
+        "prior_version": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "minimum_unknown_mass": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "behavior_likelihood_floor": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "behavior_likelihood_ceiling": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "resample_ess_fraction": {
+          "type": "number",
+          "exclusiveMinimum": 0,
+          "maximum": 1
+        },
+        "public_list_mode": {
+          "const": "copy_conserving"
+        },
+        "hidden_list_mode": {
+          "const": "class_and_format_mixture"
+        }
+      },
+      "required": [
+        "prior_version",
+        "minimum_unknown_mass",
+        "behavior_likelihood_floor",
+        "behavior_likelihood_ceiling",
+        "resample_ess_fraction",
+        "public_list_mode",
+        "hidden_list_mode"
+      ],
+      "additionalProperties": false
+    },
+    "search": {
+      "type": "object",
+      "properties": {
+        "algorithm": {
+          "type": "string",
+          "enum": [
+            "information_set_root",
+            "information_set_mcts"
+          ]
+        },
+        "candidate_policy": {
+          "const": "all_legal_then_rank"
+        },
+        "default_difficulty": {
+          "type": "string",
+          "enum": [
+            "simple",
+            "normal",
+            "hard",
+            "expert"
+          ]
+        },
+        "difficulty": {
+          "type": "object",
+          "properties": {
+            "simple": {
+              "$ref": "#/$defs/budget"
+            },
+            "normal": {
+              "$ref": "#/$defs/budget"
+            },
+            "hard": {
+              "$ref": "#/$defs/budget"
+            },
+            "expert": {
+              "$ref": "#/$defs/budget"
+            }
+          },
+          "required": [
+            "simple",
+            "normal",
+            "hard",
+            "expert"
+          ],
+          "additionalProperties": false
+        },
+        "reproducible_reduction": {
+          "const": true
+        }
+      },
+      "required": [
+        "algorithm",
+        "candidate_policy",
+        "default_difficulty",
+        "difficulty",
+        "reproducible_reduction"
+      ],
+      "additionalProperties": false
+    },
+    "llm": {
+      "type": "object",
+      "properties": {
+        "enabled": {
+          "type": "boolean"
+        },
+        "provider_model": {
+          "anyOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 160
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prematch_profile": {
+          "type": "boolean"
+        },
+        "per_turn_plan": {
+          "type": "boolean"
+        },
+        "critical_escalation": {
+          "type": "boolean"
+        },
+        "decision_timeout_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000
+        },
+        "max_calls_per_turn": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        },
+        "max_calls_per_game": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 200
+        },
+        "critical": {
+          "type": "object",
+          "properties": {
+            "score_margin_below": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            },
+            "belief_entropy_above": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 10
+            },
+            "minimum_remaining_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60000
+            }
+          },
+          "required": [
+            "score_margin_below",
+            "belief_entropy_above",
+            "minimum_remaining_ms"
+          ],
+          "additionalProperties": false
+        },
+        "max_weight_multiplier": {
+          "type": "number",
+          "minimum": 1,
+          "maximum": 2
+        },
+        "max_response_bytes": {
+          "type": "integer",
+          "minimum": 256,
+          "maximum": 65536
+        },
+        "action_source": {
+          "const": "engine_legal_ids_only"
+        }
+      },
+      "required": [
+        "enabled",
+        "provider_model",
+        "prematch_profile",
+        "per_turn_plan",
+        "critical_escalation",
+        "decision_timeout_ms",
+        "max_calls_per_turn",
+        "max_calls_per_game",
+        "critical",
+        "max_weight_multiplier",
+        "max_response_bytes",
+        "action_source"
+      ],
+      "additionalProperties": false
+    },
+    "tuning": {
+      "type": "object",
+      "properties": {
+        "method": {
+          "type": "string",
+          "enum": [
+            "coordinate_search",
+            "random_search"
+          ]
+        },
+        "train_split": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "validation_split": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "test_split": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "paired_seats": {
+          "const": true
+        },
+        "seed_policy": {
+          "const": "independent_streams"
+        },
+        "max_trials": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100000
+        },
+        "minimum_paired_games": {
+          "type": "integer",
+          "minimum": 10,
+          "maximum": 1000000
+        },
+        "promotion": {
+          "type": "object",
+          "properties": {
+            "win_rate_delta_lower_bound": {
+              "type": "number",
+              "minimum": -1,
+              "maximum": 1
+            },
+            "confidence": {
+              "const": 0.95
+            },
+            "max_illegal_actions": {
+              "const": 0
+            },
+            "max_information_leaks": {
+              "const": 0
+            },
+            "max_p95_ms": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 60000
+            }
+          },
+          "required": [
+            "win_rate_delta_lower_bound",
+            "confidence",
+            "max_illegal_actions",
+            "max_information_leaks",
+            "max_p95_ms"
+          ],
+          "additionalProperties": false
+        }
+      },
+      "required": [
+        "method",
+        "train_split",
+        "validation_split",
+        "test_split",
+        "paired_seats",
+        "seed_policy",
+        "max_trials",
+        "minimum_paired_games",
+        "promotion"
+      ],
+      "additionalProperties": false
+    },
+    "provenance": {
+      "type": "object",
+      "properties": {
+        "source": {
+          "type": "string",
+          "enum": [
+            "human",
+            "llm",
+            "self_play"
+          ]
+        },
+        "author": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 160
+        },
+        "evidence_ids": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 160
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "validation_run_id": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "required": [
+        "source",
+        "author",
+        "evidence_ids",
+        "validation_run_id"
+      ],
+      "additionalProperties": false
+    }
+  },
+  "required": [
+    "schema_version",
+    "profile_id",
+    "revision",
+    "status",
+    "validity",
+    "deck",
+    "evaluation",
+    "key_cards",
+    "mulligan",
+    "seat_adjustments",
+    "matchups",
+    "reserve",
+    "opponent_model",
+    "search",
+    "llm",
+    "tuning",
+    "provenance"
+  ],
+  "additionalProperties": false,
+  "$defs": {
+    "condition": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "all": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/condition"
+              },
+              "minItems": 0,
+              "maxItems": 12
+            }
+          },
+          "required": [
+            "all"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "any": {
+              "type": "array",
+              "items": {
+                "$ref": "#/$defs/condition"
+              },
+              "minItems": 1,
+              "maxItems": 12
+            }
+          },
+          "required": [
+            "any"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "not": {
+              "$ref": "#/$defs/condition"
+            }
+          },
+          "required": [
+            "not"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "fact": {
+              "type": "string",
+              "enum": [
+                "turn",
+                "own.pp_available",
+                "own.pp_max",
+                "own.hand_count",
+                "own.cheap_followers_in_opening",
+                "own.has_quick_removal",
+                "own.board_slots",
+                "own.hp",
+                "opponent.board_count",
+                "opponent.public_attack",
+                "opponent.hp",
+                "threat.probability",
+                "threat.damage_bound",
+                "seat.first",
+                "phase.main",
+                "phase.quick"
+              ]
+            },
+            "op": {
+              "type": "string",
+              "enum": [
+                "eq",
+                "lt",
+                "le",
+                "gt",
+                "ge"
+              ]
+            },
+            "value": {
+              "type": "number",
+              "minimum": -1000,
+              "maximum": 1000
+            }
+          },
+          "required": [
+            "fact",
+            "op",
+            "value"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "matcher": {
+      "type": "object",
+      "properties": {
+        "cards": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "minItems": 0,
+          "maxItems": 64
+        },
+        "tags": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "cheap_follower",
+              "quick_removal",
+              "guard",
+              "healing",
+              "draw",
+              "finisher",
+              "combo_piece",
+              "board_clear",
+              "storm",
+              "evolution"
+            ]
+          },
+          "minItems": 0,
+          "maxItems": 10
+        }
+      },
+      "required": [
+        "cards",
+        "tags"
+      ],
+      "additionalProperties": false,
+      "anyOf": [
+        {
+          "properties": {
+            "cards": {
+              "minItems": 1
+            }
+          }
+        },
+        {
+          "properties": {
+            "tags": {
+              "minItems": 1
+            }
+          }
+        }
+      ]
+    },
+    "weights": {
+      "type": "object",
+      "properties": {
+        "life_safety": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "board_trade": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "board_presence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "hand_options": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "card_advantage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "pp_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "resource_future": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "lethal_pressure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "threat_answer": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "quick_readiness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "tempo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "combo_progress": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "information_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "deck_safety": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "uncertainty_penalty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        }
+      },
+      "required": [
+        "life_safety",
+        "board_trade",
+        "board_presence",
+        "hand_options",
+        "card_advantage",
+        "pp_efficiency",
+        "resource_future",
+        "lethal_pressure",
+        "threat_answer",
+        "quick_readiness",
+        "tempo",
+        "combo_progress",
+        "information_value",
+        "deck_safety",
+        "uncertainty_penalty"
+      ],
+      "additionalProperties": false
+    },
+    "weight_overrides": {
+      "type": "object",
+      "properties": {
+        "life_safety": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "board_trade": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "board_presence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "hand_options": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "card_advantage": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "pp_efficiency": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "resource_future": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "lethal_pressure": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "threat_answer": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "quick_readiness": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "tempo": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "combo_progress": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "information_value": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "deck_safety": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "uncertainty_penalty": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 20
+        }
+      },
+      "required": [],
+      "additionalProperties": false
+    },
+    "budget": {
+      "type": "object",
+      "properties": {
+        "decision_edges": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1000000
+        },
+        "rule_events": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 10000000
+        },
+        "max_depth": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 1024
+        },
+        "worlds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 512
+        },
+        "deadline_ms": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 60000
+        },
+        "memory_mib": {
+          "type": "integer",
+          "minimum": 16,
+          "maximum": 4096
+        },
+        "temperature": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "exploration": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "risk_aversion": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      },
+      "required": [
+        "decision_edges",
+        "rule_events",
+        "max_depth",
+        "worlds",
+        "deadline_ms",
+        "memory_mib",
+        "temperature",
+        "exploration",
+        "risk_aversion"
+      ],
+      "additionalProperties": false
+    },
+    "seat": {
+      "type": "object",
+      "properties": {
+        "weight_overrides": {
+          "$ref": "#/$defs/weight_overrides"
+        },
+        "mulligan_cost_bias": {
+          "type": "integer",
+          "minimum": -3,
+          "maximum": 3
+        },
+        "reserve_pp_delta": {
+          "type": "integer",
+          "minimum": -5,
+          "maximum": 5
+        }
+      },
+      "required": [
+        "weight_overrides",
+        "mulligan_cost_bias",
+        "reserve_pp_delta"
+      ],
+      "additionalProperties": false
+    },
+    "mulligan_rule": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "match": {
+          "$ref": "#/$defs/matcher"
+        },
+        "when": {
+          "$ref": "#/$defs/condition"
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "keep_max": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        }
+      },
+      "required": [
+        "id",
+        "match",
+        "when",
+        "priority",
+        "keep_max"
+      ],
+      "additionalProperties": false
+    },
+    "counter": {
+      "type": "object",
+      "properties": {
+        "match": {
+          "$ref": "#/$defs/matcher"
+        },
+        "intent": {
+          "type": "string",
+          "enum": [
+            "remove",
+            "guard",
+            "heal",
+            "race",
+            "deny_resource",
+            "disrupt_combo"
+          ]
+        },
+        "priority": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 1000
+        },
+        "reserve_pp": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 20
+        },
+        "latest_window": {
+          "type": "string",
+          "enum": [
+            "own_main",
+            "attack_quick",
+            "end_quick",
+            "any_legal"
+          ]
+        }
+      },
+      "required": [
+        "match",
+        "intent",
+        "priority",
+        "reserve_pp",
+        "latest_window"
+      ],
+      "additionalProperties": false
+    },
+    "matchup": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+        },
+        "opponent_archetypes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9._-]{0,95}$"
+          },
+          "minItems": 1,
+          "maxItems": 64
+        },
+        "minimum_belief": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        },
+        "threat": {
+          "type": "object",
+          "properties": {
+            "match": {
+              "$ref": "#/$defs/matcher"
+            },
+            "when": {
+              "$ref": "#/$defs/condition"
+            },
+            "horizon_turns": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 5
+            },
+            "severity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1
+            }
+          },
+          "required": [
+            "match",
+            "when",
+            "horizon_turns",
+            "severity"
+          ],
+          "additionalProperties": false
+        },
+        "counters": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/counter"
+          },
+          "minItems": 1,
+          "maxItems": 16
+        },
+        "fallback_intent": {
+          "type": "string",
+          "enum": [
+            "develop",
+            "race",
+            "stabilize",
+            "preserve_resources"
+          ]
+        }
+      },
+      "required": [
+        "id",
+        "opponent_archetypes",
+        "minimum_belief",
+        "threat",
+        "counters",
+        "fallback_intent"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

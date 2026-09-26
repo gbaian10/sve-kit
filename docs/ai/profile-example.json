@@ -1,0 +1,329 @@
+{
+  "schema_version": "astra-ai-profile/2",
+  "profile_id": "royal-guard-control-example",
+  "revision": "0.1.0",
+  "status": "draft",
+  "validity": {
+    "from": "2026-09-26",
+    "through": null,
+    "format": "sealed-design-sandbox",
+    "rules_version": "1.27.0",
+    "catalog_sha256": "4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632",
+    "dsl_version": "astra/1"
+  },
+  "deck": {
+    "card_class": "ロイヤル",
+    "title": null,
+    "archetype": "royal-control",
+    "subtype": "guard-quick",
+    "variant": "design-example",
+    "decklist_sha256": null,
+    "core_cards": [
+      {
+        "card": "BP01-046",
+        "minimum_copies": 2
+      },
+      {
+        "card": "BP01-179",
+        "minimum_copies": 2
+      }
+    ]
+  },
+  "evaluation": {
+    "feature_version": "astra-ai-features/2",
+    "weights": {
+      "life_safety": 2.0,
+      "board_trade": 2.2,
+      "board_presence": 1.2,
+      "hand_options": 1.0,
+      "card_advantage": 1.4,
+      "pp_efficiency": 0.8,
+      "resource_future": 1.2,
+      "lethal_pressure": 1.0,
+      "threat_answer": 2.0,
+      "quick_readiness": 1.5,
+      "tempo": 0.8,
+      "combo_progress": 0.3,
+      "information_value": 0.4,
+      "deck_safety": 1.0,
+      "uncertainty_penalty": 1.2
+    },
+    "opening_through_turn": 3,
+    "endgame_from_turn": 7,
+    "phase_overrides": {
+      "opening": {
+        "tempo": 1.8,
+        "pp_efficiency": 1.5
+      },
+      "midgame": {},
+      "endgame": {
+        "lethal_pressure": 2.8,
+        "life_safety": 3.0
+      }
+    },
+    "cvar_alpha": 0.2,
+    "discount_per_decision": 0.99
+  },
+  "key_cards": [
+    {
+      "card": "BP01-046",
+      "role": "defense",
+      "priority": 0.8,
+      "reserve_copies": 0,
+      "when": {
+        "all": []
+      }
+    },
+    {
+      "card": "BP01-179",
+      "role": "removal",
+      "priority": 0.9,
+      "reserve_copies": 1,
+      "when": {
+        "fact": "own.hp",
+        "op": "le",
+        "value": 10
+      }
+    }
+  ],
+  "mulligan": {
+    "default_keep_cost_ceiling": 2,
+    "max_total_kept": 4,
+    "rules": [
+      {
+        "id": "keep-guard",
+        "match": {
+          "cards": [
+            "BP01-046"
+          ],
+          "tags": []
+        },
+        "when": {
+          "all": []
+        },
+        "priority": 100,
+        "keep_max": 1
+      },
+      {
+        "id": "keep-snipe-with-curve",
+        "match": {
+          "cards": [
+            "BP01-179"
+          ],
+          "tags": []
+        },
+        "when": {
+          "fact": "own.cheap_followers_in_opening",
+          "op": "ge",
+          "value": 1
+        },
+        "priority": 80,
+        "keep_max": 1
+      }
+    ],
+    "bundles": [
+      {
+        "cards": [
+          "BP01-046",
+          "BP01-179"
+        ],
+        "when": {
+          "fact": "seat.first",
+          "op": "eq",
+          "value": 0
+        },
+        "score_bonus": 0.5
+      }
+    ]
+  },
+  "seat_adjustments": {
+    "first": {
+      "weight_overrides": {
+        "tempo": 1.3
+      },
+      "mulligan_cost_bias": 0,
+      "reserve_pp_delta": 0
+    },
+    "second": {
+      "weight_overrides": {
+        "life_safety": 2.6,
+        "quick_readiness": 1.8
+      },
+      "mulligan_cost_bias": 0,
+      "reserve_pp_delta": 0
+    }
+  },
+  "matchups": [
+    {
+      "id": "small-storm-attacker",
+      "opponent_archetypes": [
+        "royal-aggro",
+        "unknown"
+      ],
+      "minimum_belief": 0.15,
+      "threat": {
+        "match": {
+          "cards": [
+            "BP01-P10"
+          ],
+          "tags": [
+            "storm"
+          ]
+        },
+        "when": {
+          "fact": "threat.damage_bound",
+          "op": "ge",
+          "value": 2
+        },
+        "horizon_turns": 1,
+        "severity": 0.8
+      },
+      "counters": [
+        {
+          "match": {
+            "cards": [
+              "BP01-179"
+            ],
+            "tags": [
+              "quick_removal"
+            ]
+          },
+          "intent": "remove",
+          "priority": 100,
+          "reserve_pp": 1,
+          "latest_window": "attack_quick"
+        },
+        {
+          "match": {
+            "cards": [
+              "BP01-046"
+            ],
+            "tags": [
+              "guard"
+            ]
+          },
+          "intent": "guard",
+          "priority": 60,
+          "reserve_pp": 2,
+          "latest_window": "own_main"
+        }
+      ],
+      "fallback_intent": "stabilize"
+    }
+  ],
+  "reserve": {
+    "baseline_pp": 0,
+    "maximum_pp": 3,
+    "minimum_threat_probability": 0.3,
+    "unused_pp_penalty": 0.7,
+    "windows": [
+      "attack_quick",
+      "end_quick"
+    ],
+    "release_if_no_feasible_response": true
+  },
+  "opponent_model": {
+    "prior_version": "sealed-examples-v1",
+    "minimum_unknown_mass": 0.1,
+    "behavior_likelihood_floor": 0.2,
+    "behavior_likelihood_ceiling": 5,
+    "resample_ess_fraction": 0.5,
+    "public_list_mode": "copy_conserving",
+    "hidden_list_mode": "class_and_format_mixture"
+  },
+  "search": {
+    "algorithm": "information_set_mcts",
+    "candidate_policy": "all_legal_then_rank",
+    "default_difficulty": "normal",
+    "difficulty": {
+      "simple": {
+        "decision_edges": 256,
+        "rule_events": 4096,
+        "max_depth": 16,
+        "worlds": 2,
+        "deadline_ms": 40,
+        "memory_mib": 64,
+        "temperature": 0.8,
+        "exploration": 0.15,
+        "risk_aversion": 0.1
+      },
+      "normal": {
+        "decision_edges": 2000,
+        "rule_events": 30000,
+        "max_depth": 64,
+        "worlds": 16,
+        "deadline_ms": 150,
+        "memory_mib": 128,
+        "temperature": 0.2,
+        "exploration": 0.05,
+        "risk_aversion": 0.2
+      },
+      "hard": {
+        "decision_edges": 5000,
+        "rule_events": 100000,
+        "max_depth": 128,
+        "worlds": 32,
+        "deadline_ms": 400,
+        "memory_mib": 256,
+        "temperature": 0.05,
+        "exploration": 0.02,
+        "risk_aversion": 0.3
+      },
+      "expert": {
+        "decision_edges": 20000,
+        "rule_events": 400000,
+        "max_depth": 256,
+        "worlds": 128,
+        "deadline_ms": 1500,
+        "memory_mib": 512,
+        "temperature": 0,
+        "exploration": 0.01,
+        "risk_aversion": 0.4
+      }
+    },
+    "reproducible_reduction": true
+  },
+  "llm": {
+    "enabled": false,
+    "provider_model": null,
+    "prematch_profile": true,
+    "per_turn_plan": true,
+    "critical_escalation": true,
+    "decision_timeout_ms": 1500,
+    "max_calls_per_turn": 1,
+    "max_calls_per_game": 8,
+    "critical": {
+      "score_margin_below": 0.05,
+      "belief_entropy_above": 0.8,
+      "minimum_remaining_ms": 2000
+    },
+    "max_weight_multiplier": 1.5,
+    "max_response_bytes": 8192,
+    "action_source": "engine_legal_ids_only"
+  },
+  "tuning": {
+    "method": "coordinate_search",
+    "train_split": "design-train-v1",
+    "validation_split": "design-validation-v1",
+    "test_split": "design-test-v1",
+    "paired_seats": true,
+    "seed_policy": "independent_streams",
+    "max_trials": 100,
+    "minimum_paired_games": 200,
+    "promotion": {
+      "win_rate_delta_lower_bound": 0.0,
+      "confidence": 0.95,
+      "max_illegal_actions": 0,
+      "max_information_leaks": 0,
+      "max_p95_ms": 400
+    }
+  },
+  "provenance": {
+    "source": "human",
+    "author": "Codex gpt-6-astra",
+    "evidence_ids": [
+      "design-only-untrained-example"
+    ],
+    "validation_run_id": null
+  }
+}
