@@ -1,27 +1,27 @@
 # Independent rules prototype
 
-The card database snapshot supplies card facts. Effects come from the authoritative
-JSON Schema in `dsl/` and pack files in `authored/effects/`. The engine validates
-both authored syntax and macro expansions. Partial programs fail closed.
+Card facts come from the versioned card database snapshot. Effects come from
+`authored/effects/`, validated against `dsl/effects.schema.json` before and after
+macro expansion. Missing and partial programs are rejected. Some declared
+semantics are not executable yet; see [KNOWN_LIMITS.md](../../KNOWN_LIMITS.md).
 
-`Game` owns rule resolution, visibility and legal actions. The runner adapters only
-convert protocol types. `Replay` owns immutable branches; `Assist` owns sandbox and
-shadow state. The AI takes a player packet and the public catalogue, with no access
-to the source game.
+`Game` owns resolution, visibility and legal actions. Runner adapters convert
+protocol types. `Replay` owns immutable branches; `Assist` owns sandbox and shadow
+state. AI accepts a player packet and the public catalogue, with no reference to
+the source game.
 
-Run the four shared evaluations with the sealed common input:
+Run all four shared evaluations with the sealed common input:
 
 ```bash
-cargo run --locked -p sve-engine --bin sve-prototype -- /path/to/cards.jsonl . all target/prototype
+cargo run --locked --release -p sve-engine --bin sve-prototype -- /path/to/cards.jsonl . all target/prototype
 ```
 
-The optional mode is `all`, `g1`, `ai`, `replay` or `assist`. Output includes the four
-original runner reports, a separate Q4 audit and two engine-written search forests.
-The search forests use hypothetical identities; they never reuse unseen match IDs.
+Modes are `all`, `g1`, `ai`, `replay`, `assist` and `validate`. Evaluation output
+contains unchanged runner reports, a Q4 audit and two core-written search forests.
+Forest identities are hypothetical and do not reuse unseen match IDs.
 
-Tests use synthetic cards for boundary behavior and the original snapshot for the
-shared suites. Supply the immutable snapshot explicitly instead of maintaining a
-second copy of card facts:
+Tests use synthetic cards for boundaries and the immutable original snapshot for
+the shared suites. Supply it explicitly instead of maintaining another card table:
 
 ```bash
 export SVE_TEST_SNAPSHOT=/path/to/cards.jsonl
@@ -29,10 +29,11 @@ cargo clippy --locked --workspace --all-targets -- -D warnings
 cargo llvm-cov --locked --workspace --fail-under-lines 90
 ```
 
-The shared G1 regression test permits the documented token-event ordering mismatch
-in one public scenario; the raw evaluator still reports it as a failure. See
-`DESIGN.md` and the sealed reports for supported semantics and remaining limits.
+The G1 regression test permits the documented event-order difference in one public
+scenario. The raw evaluator still reports that scenario as a failure. Results and
+reproduction commands are in [EVALUATION.md](../../docs/evaluation/EVALUATION.md).
 
 `Catalog::from_documents` accepts snapshot and YAML strings without filesystem
-access. The default `runner` feature enables the shared evaluation adapters and CLI;
-the rules API is also available with `--no-default-features`.
+access. The default `runner` feature enables evaluation adapters and the CLI. The
+library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
+bindings, host time and execution have not been validated.
