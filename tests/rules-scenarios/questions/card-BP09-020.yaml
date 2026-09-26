@@ -75,7 +75,7 @@ scenarios:
       - {n: 1, by: P1, at: main, do: end-phase}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [h1, h2]}
-      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}, event: {discarded: h1}}}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}}}
       - {n: 5, by: P1, at: end, do: guard-act, select: []}
       - {n: 6, by: P2, at: quick, do: pass}
     random: {}
@@ -111,7 +111,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: h1, line: 1}, event: {discarded: h1}}}
+            - {do: choose-pending, pending: {ability: {source: h1, line: 1}}}
       - at: after-decision-4
         view: omniscient
         outcome: resolved
@@ -195,7 +195,7 @@ scenarios:
       - {n: 1, by: P1, at: main, do: end-phase}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [h1, h2]}
-      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}, event: {discarded: h1}}}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 1}}}
     random: {}
     expected:
       - at: after-decision-3
@@ -207,7 +207,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: h1, line: 1}, event: {discarded: h1}}}
+            - {do: choose-pending, pending: {ability: {source: h1, line: 1}}}
       - at: after-decision-4
         view: omniscient
         outcome: resolved

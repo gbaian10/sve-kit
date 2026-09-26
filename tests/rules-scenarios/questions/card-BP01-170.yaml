@@ -317,8 +317,6 @@ scenarios:
           ability:
             source: a1
             line: 1
-          event:
-            discarded: a1
       - n: 5
         by: P1
         at: end
@@ -338,8 +336,6 @@ scenarios:
                 ability:
                   source: a1
                   line: 1
-                event:
-                  discarded: a1
         assert:
           P1.cemetery:
             - a1

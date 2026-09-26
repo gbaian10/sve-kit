@@ -82,7 +82,7 @@ scenarios:
               - {filler: 20}
     decisions:
       - {n: 1, by: P2, at: main, do: play, card: b2}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}, targets: {1: [b1]}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
     random: {}
     expected:
       - at: after-decision-1
@@ -91,7 +91,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
         assert:
           P1.field: []
           P1.cemetery: [a1]
@@ -103,7 +103,6 @@ scenarios:
           - {kind: 破壊, object: a1, by: rule-11.3.1, group: 2}
           - {kind: 破壊, object: a2, by: rule-11.3.1, group: 2}
           - {kind: 消去, object: a2}
-          - {kind: 待機, ability: {source: a1, line: 1}, event: {left_field: a2}}
       - at: after-decision-2
         view: omniscient
         outcome: resolved
@@ -133,7 +132,7 @@ scenarios:
               - {id: b2, card: BP01-131}                    # テミスの審判
     decisions:
       - {n: 1, by: P2, at: main, do: play, card: b2}
-      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}}
     random: {}
     expected:
       - at: after-decision-1
@@ -142,7 +141,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {left_field: a2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
         assert:
           P1.field: []
           P2.field: []
@@ -154,7 +153,6 @@ scenarios:
           - {kind: 破壊, object: a2, group: 1}
           - {kind: 破壊, object: b1, group: 1}
           - {kind: 消去, object: a2}
-          - {kind: 待機, ability: {source: a1, line: 1}, event: {left_field: a2}}
       - at: after-decision-2
         view: omniscient
         outcome: pending-cancelled

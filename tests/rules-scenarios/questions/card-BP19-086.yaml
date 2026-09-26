@@ -78,8 +78,8 @@ scenarios:
       - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: c1, line: 2}}}
       - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, select: [e1]}
       - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: c1, card: BP19-087, line: 1}}}
-      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}, event: {evolved: c1}}}
-      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {evolved: c1}}, targets: {1: [b1]}}
+      - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}}
+      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
     random: {}
     expected:
       - at: after-decision-2
@@ -117,8 +117,8 @@ scenarios:
           by: P1
           choices:
             - {do: choose-pending, pending: {ability: {source: c1, card: BP19-087, line: 1}}}
-            - {do: choose-pending, pending: {ability: {source: a2, line: 2}, event: {evolved: c1}}}
-            - {do: choose-pending, pending: {ability: {source: a1, line: 1}, event: {evolved: c1}}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 1}}}
       - at: after-decision-8
         view: omniscient
         outcome: resolved

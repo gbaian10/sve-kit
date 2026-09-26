@@ -75,11 +75,11 @@ scenarios:
       - {n: 1, by: P1, at: main, do: play, card: a3}
       - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a3, acted: false}
       - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 4}}}
-      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {damaged: a1}}, targets: {1: [b1]}}
-      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 3}, event: {damaged: a3, n: 1}}}
-      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 1}, event: {damaged: a2}}}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 3}}}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 1}}}
       - {n: 7, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b1, line: 3}}, targets: {1: [a3]}}
-      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 3}, event: {damaged: a3, n: 2}}}
+      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 3}}}
     random: {}
     expected:
       - at: after-decision-2
@@ -113,9 +113,9 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {damaged: a1}}}
-            - {do: choose-pending, pending: {ability: {source: a3, line: 3}, event: {damaged: a3, n: 1}}}
-            - {do: choose-pending, pending: {ability: {source: a2, line: 1}, event: {damaged: a2}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 3}}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 1}}}
       - at: after-decision-4
         view: omniscient
         outcome: resolved
@@ -129,8 +129,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a3, line: 3}, event: {damaged: a3, n: 1}}}
-            - {do: choose-pending, pending: {ability: {source: a2, line: 1}, event: {damaged: a2}}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 3}}}
+            - {do: choose-pending, pending: {ability: {source: a2, line: 1}}}
       - at: after-decision-6
         view: omniscient
         outcome: resolved
@@ -153,7 +153,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a3, line: 3}, event: {damaged: a3, n: 2}}}
+            - {do: choose-pending, pending: {ability: {source: a3, line: 3}}}
       - at: after-decision-8
         view: omniscient
         outcome: resolved
@@ -173,9 +173,9 @@ scenarios:
       - {n: 1, by: P1, at: main, do: play, card: a3}
       - {n: 2, by: P1, at: resolve, of: {decision: 1, occurrence: 1}, do: place-acted, object: a3, acted: false}
       - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 4}}}
-      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}, event: {damaged: a1}}, targets: {1: [b1]}}
-      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 3}, event: {damaged: a3, n: 1}}}
-      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 1}, event: {damaged: a2}}}
+      - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}, targets: {1: [b1]}}
+      - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 3}}}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 1}}}
       - {n: 7, by: P2, at: check-timing, do: choose-pending, pending: {ability: {source: b1, line: 3}}, targets: {1: [a2]}}
     random: {}
     expected:

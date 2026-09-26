@@ -78,7 +78,7 @@ scenarios:
       - {n: 5, by: P1, at: main, do: attack, attacker: a4, target: P2.leader}
       - {n: 6, by: P2, at: quick, do: pass}
       - {n: 7, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
-      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3, keyword: 攻撃時}}}
+      - {n: 8, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
       # 5.16.1.1：從エボルヴデッキ裏向き卡中指定『蒼嵐覇竜 グローリー・メイルストローム』
       - {n: 9, by: P1, at: resolve, of: {decision: 8, occurrence: 1}, do: resolve-choice, select: [e1]}
       - {n: 10, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3}}}
@@ -98,7 +98,7 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: choose-pending, pending: {ability: {source: a1, line: 3, keyword: 攻撃時}}}
+            - {do: choose-pending, pending: {ability: {source: a1, line: 3}}}
             - {do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3}}}
       - at: after-decision-8
         view: omniscient
@@ -155,7 +155,7 @@ scenarios:
       - {n: 3, by: P1, at: main, do: attack, attacker: a3, target: P2.leader}
       - {n: 4, by: P2, at: quick, do: pass}
       - {n: 5, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
-      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3, keyword: 攻撃時}}}
+      - {n: 6, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 3}}}
       - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2, keyword: ツインドライブ, rule: 14.4.6.3}}}
       - {n: 8, by: P2, at: quick, do: pass}
     random: {}

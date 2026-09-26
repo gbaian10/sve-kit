@@ -89,7 +89,6 @@ scenarios:
         ability:
           source: a
           line: 1
-          keyword: UB
     random: {}
     expected:
       - at: after-decision-1
@@ -150,7 +149,6 @@ scenarios:
         ability:
           source: a
           line: 1
-          keyword: UB
     random: {}
     expected:
       - at: after-decision-1
@@ -212,7 +210,6 @@ scenarios:
         ability:
           source: a
           line: 1
-          keyword: UB
     random: {}
     expected:
       - at: after-decision-1

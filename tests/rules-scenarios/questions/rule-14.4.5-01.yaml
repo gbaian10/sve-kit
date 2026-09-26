@@ -565,7 +565,6 @@ scenarios:
           ability:
             source: a1
             line: 3
-            keyword: 攻撃時
       - n: 5
         by: P2
         at: quick
@@ -627,7 +626,6 @@ scenarios:
                 ability:
                   source: a1
                   line: 3
-                  keyword: 攻撃時
         assert:
           P1.hand:
             - filler: 1
@@ -703,7 +701,6 @@ scenarios:
           ability:
             source: a1
             line: 3
-            keyword: 攻撃時
       - n: 5
         by: P2
         at: quick
@@ -721,7 +718,6 @@ scenarios:
                 ability:
                   source: a1
                   line: 3
-                  keyword: 攻撃時
         assert:
           P1.hand:
             - filler: 1
@@ -790,7 +786,6 @@ scenarios:
           ability:
             source: a1
             line: 3
-            keyword: 攻撃時
       - n: 4
         by: P2
         at: quick
@@ -808,7 +803,6 @@ scenarios:
                 ability:
                   source: a1
                   line: 3
-                  keyword: 攻撃時
         assert:
           P1.hand:
             - filler: 1
