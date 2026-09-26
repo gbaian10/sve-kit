@@ -425,6 +425,11 @@ impl Game {
                 if !self.selection_constraints(&spec, &selected, &frame.decision[field])? {
                     return Ok(false);
                 }
+                if let Some(constraint) = spec.get("constraint")
+                    && !self.truth(constraint, frame)?
+                {
+                    return Ok(false);
+                }
                 if let Some(total) = spec.get("distribute") {
                     if chosen.is_empty() {
                         continue;

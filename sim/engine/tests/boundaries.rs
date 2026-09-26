@@ -3265,3 +3265,60 @@ fn unknown_distinct_properties_fail_without_creating_an_empty_prompt() {
     ));
     assert_eq!(engine.digest().unwrap(), before);
 }
+
+#[test]
+fn a_single_flat_target_list_can_require_different_counts_from_two_groups() {
+    let specs = json!([{"key":"1","select":{"union":[
+        {"side":"self","zone":"field"},{"side":"opponent","zone":"field"}
+    ]},"min":1_i64,"max":2_i64,"constraint":{"fn":"eq","args":[{"count":{"from":"target.1","side":"opponent"}},1_i64]}}]);
+    let body = json!({"op":"seq","steps":[
+        {"op":"damage","subjects":{"from":"target.1","side":"opponent"},"amount":1_i64},
+        {"op":"modify","subjects":{"from":"target.1","side":"self"},"power":2_i64}
+    ]});
+    let (loaded, initial) = selection_fixture(&specs, &body);
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "flat-group").unwrap();
+    let choices = engine
+        .legal()
+        .unwrap()
+        .into_iter()
+        .filter(|choice| choice["do"] == "play")
+        .collect::<Vec<_>>();
+    assert_eq!(choices.len(), 6);
+    assert!(
+        choices
+            .iter()
+            .all(|choice| choice["targets"].as_object().unwrap().len() == 1)
+    );
+    let before = engine.digest().unwrap();
+    for selected in [json!(["a"]), json!(["b", "c"])] {
+        assert_eq!(
+            engine
+                .decide(
+                    &json!({"do":"play","card":"s","targets":{"1":selected}}),
+                    "invalid-groups"
+                )
+                .unwrap()
+                .outcome,
+            "cannot-play"
+        );
+        assert_eq!(engine.digest().unwrap(), before);
+    }
+    assert_eq!(
+        engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b","a"]}}),
+                "valid-groups"
+            )
+            .unwrap()
+            .outcome,
+        "resolved"
+    );
+    assert_eq!(
+        engine.query(View::P1, "P2.field.b.hp").unwrap(),
+        Some(json!(2_i64))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.field.a.power").unwrap(),
+        Some(json!(4_i64))
+    );
+}

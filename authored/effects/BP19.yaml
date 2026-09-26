@@ -664,7 +664,7 @@ cards:
         subject: self
   BP19-P21:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。
     abilities:
       - line: 1
         kind: trigger
@@ -707,10 +707,7 @@ cards:
         kind: activated
         body:
           op: move
-          subjects:
-            union:
-              - target.1
-              - target.2
+          subjects: target.1
           to: field
         targets:
           - key: '1'
@@ -725,22 +722,18 @@ cards:
                   - read: item.cost
                   - 5
             min: 0
-            max: 1
-          - key: '2'
-            select:
-              side: self
-              zone: cemetery
-              type: follower
-              trait: 八獄
-              where:
-                fn: le
-                args:
-                  - read: item.cost
-                  - 3
-            min: 0
-            max: 1
-            different_from:
-              - '1'
+            max: 2
+            constraint:
+              fn: le
+              args:
+                - count:
+                    from: target.1
+                    where:
+                      fn: gt
+                      args:
+                        - read: item.cost
+                        - 3
+                - 1
         costs:
           - op: act
             subjects: self

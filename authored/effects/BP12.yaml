@@ -163,39 +163,53 @@ cards:
             to: cemetery
   BP12-SL08:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。
     abilities:
       - line: 2
         kind: spell
         body:
           op: seq
           steps:
-            - op: damage
-              subjects: target.1
-              amount: 5
-            - op: damage
-              subjects: target.1.leader
-              amount: 2
+            - op: for_each
+              select:
+                from: target.1
+                side: opponent
+              bind: enemy
+              body:
+                op: seq
+                steps:
+                  - op: damage
+                    subjects: enemy
+                    amount: 5
+                  - op: damage
+                    subjects: enemy.leader
+                    amount: 2
             - op: modify
-              subjects: target.2
+              subjects:
+                from: target.1
+                side: self
               power: 1
               hp: 1
         targets:
           - key: '1'
             select:
-              side: opponent
-              zone: field
-              type: follower
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - side: self
+                  zone: field
+                  type: follower
+                  trait: 自然
             min: 1
-            max: 1
-          - key: '2'
-            select:
-              side: self
-              zone: field
-              type: follower
-              trait: 自然
-            min: 0
-            max: 1
+            max: 2
+            constraint:
+              fn: eq
+              args:
+                - count:
+                    from: target.1
+                    side: opponent
+                - 1
         cost_selections:
           - key: '1'
             select:

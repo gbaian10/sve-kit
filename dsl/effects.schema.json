@@ -2451,6 +2451,9 @@
           "items": {
             "type": "string"
           }
+        },
+        "constraint": {
+          "$ref": "#/$defs/expr"
         }
       },
       "required": [
