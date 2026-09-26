@@ -384,18 +384,38 @@ impl Game {
                 self.object_mut(&frame.source)?.state["links"][link] = json!(ids);
             }
             "race" => self.race(node, frame)?,
-            "gain_drive" => {
-                let ids = self.select(&node["subjects"], frame)?;
-                let objects = ids
-                    .iter()
-                    .map(|id| self.object(id).cloned())
-                    .collect::<Result<Vec<_>>>()?;
-                let pending = self.collect_triggers(string(&node["op"]), &objects, &frame.cause)?;
-                self.enqueue(pending);
-            }
+            "gain_drive" => self.gain_drive(node, frame)?,
             "stack" => self.increase_stack(node, frame)?,
             _ => return Err(invalid("unknown resource effect")),
         }
+        Ok(())
+    }
+
+    fn gain_drive(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        frame.performed = 0;
+        let mut gained = Vec::new();
+        for id in self.select(&node["subjects"], frame)? {
+            if self.object(&id)?.zone != "field" || !self.object_type(&id)?.contains("フォロワー")
+            {
+                continue;
+            }
+            if self.object(&id)?.state["drive_gained"] == true {
+                continue;
+            }
+            self.object_mut(&id)?.state["drive_gained"] = json!(true);
+            if self.keywords(&id)?.contains("drive") {
+                continue;
+            }
+            let abilities: Vec<_> = ["drive", "single_drive", "rush"]
+                .into_iter()
+                .map(|keyword| json!({"kind":"static","body":{"op":"keyword","name":keyword}}))
+                .collect();
+            self.state.continuous.push(json!({"source":id,"reference":{"source":id,"rule":"14.4.7.3.2"},"applies_to":[id],"generation":self.object(&id)?.generation,"effect":{"op":"modify","abilities":abilities},"until":"game","order":self.state.next_event}));
+            gained.push(self.object(&id)?.clone());
+            frame.performed = frame.performed.saturating_add(1);
+        }
+        let pending = self.collect_triggers("gain_drive", &gained, &frame.cause)?;
+        self.enqueue(pending);
         Ok(())
     }
 

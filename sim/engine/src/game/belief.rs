@@ -35,7 +35,7 @@ impl Game {
                 for item in list(&packet[owner][zone]) {
                     if let Some(id) = item.as_str() {
                         let visible = &packet["objects"][id];
-                        objects.push(json!({"id":id,"card":visible["card"],"state":visible}));
+                        objects.push(json!({"id":id,"card":visible["card"],"state":visible,"owner":visible_owner(packet,id,owner)}));
                     } else {
                         if zone != "hand" && zone != "deck" && int(&item["filler"]) > 0 {
                             return Err(EngineFailure::Unsupported(format!(
@@ -184,16 +184,20 @@ fn remaining_pool(
         }
     }
     let mut seen = BTreeSet::new();
-    for zone in ZONES {
-        if matches!(zone, "evolve_deck" | "evolution" | "void") {
-            continue;
-        }
-        for item in list(&packet[owner][zone]) {
-            if let Some(id) = item.as_str() {
-                seen.insert(id.to_owned());
-                let card = string(&packet["objects"][id]["card"]);
-                if let Some(count) = counts.get_mut(card) {
-                    *count = count.saturating_sub(1);
+    for controller in ["P1", "P2"] {
+        for zone in ZONES {
+            if matches!(zone, "evolve_deck" | "evolution" | "void") {
+                continue;
+            }
+            for item in list(&packet[controller][zone]) {
+                if let Some(id) = item.as_str() {
+                    seen.insert(id.to_owned());
+                    let card = string(&packet["objects"][id]["card"]);
+                    if visible_owner(packet, id, controller) == owner
+                        && let Some(count) = counts.get_mut(card)
+                    {
+                        *count = count.saturating_sub(1);
+                    }
                 }
             }
         }
@@ -240,6 +244,18 @@ fn remaining_pool(
     pool.extend(forced);
     random.shuffle(&mut pool);
     Ok(pool)
+}
+
+fn visible_owner<'packet>(
+    packet: &'packet Value,
+    id: &str,
+    controller: &'packet str,
+) -> &'packet str {
+    packet["known_cards"]
+        .as_array()
+        .and_then(|entries| entries.iter().find(|entry| entry["id"] == id))
+        .and_then(|entry| entry["owner"].as_str())
+        .unwrap_or(controller)
 }
 
 fn supported_prior(value: &Value) -> bool {

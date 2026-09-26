@@ -6124,7 +6124,7 @@ fn ride_fixture(extra_costs: &[Value]) -> (Arc<Catalog>, Value) {
     let loaded = Arc::new(
         Catalog::from_documents(
             &format!("{}\n{resource}", snapshot()),
-            &registry(),
+            &drive_registry(),
             &[("ride".into(), doc.to_string())],
         )
         .unwrap(),
@@ -6217,4 +6217,314 @@ fn ride_payment_rejects_ambiguous_declarations_and_missing_unique_materials() {
     let before = engine.digest().unwrap();
     assert_eq!(engine.decide(&json!({"do":"activate","ability":{"source":"a","line":1_i64},"pay":{"pp":1_i64,"ep":0_i64}}),"missing").unwrap().outcome,"cannot-activate");
     assert_eq!(engine.digest().unwrap(), before);
+}
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The fixture extends valid registry JSON with the three rule keywords."
+)]
+fn drive_registry() -> String {
+    let mut data: Value = serde_json::from_str(&registry()).unwrap();
+    for (id, name) in [
+        ("drive", "ドライブ"),
+        ("single_drive", "シングルドライブ"),
+        ("rush", "突進"),
+    ] {
+        data["keywords"][id] = json!({"ja":name,"expansion":{"op":"keyword","name":id}});
+    }
+    data.to_string()
+}
+
+#[expect(
+    clippy::indexing_slicing,
+    clippy::unwrap_used,
+    reason = "The fixture builds complete synthetic abilities, target declarations and zones."
+)]
+fn drive_fixture() -> (Arc<Catalog>, Value) {
+    let mut doc = document(&json!({"op":"draw","count":0_i64}));
+    let mut abilities = vec![
+        json!({"line":1_i64,"kind":"activated","body":{"op":"gain_drive","subjects":"self"}}),
+        json!({"line":2_i64,"kind":"trigger","event":"gain_drive","subject":"self","body":{"op":"modify","subjects":"self","power":1_i64}}),
+    ];
+    for (line, body) in [
+        (3_i64, json!({"op":"gain_drive","subjects":"target.1"})),
+        (
+            4_i64,
+            json!({"op":"modify","subjects":"target.1","remove_abilities":true}),
+        ),
+        (
+            5_i64,
+            json!({"op":"control","subjects":"target.1","side":"self"}),
+        ),
+        (
+            6_i64,
+            json!({"op":"seq","steps":[
+                {"op":"move","subjects":"target.1","to":"hand","bind":"returned"},
+                {"op":"move","subjects":"returned","to":"field","bind":"entered"},
+                {"op":"gain_drive","subjects":"entered"}
+            ]}),
+        ),
+    ] {
+        abilities.push(json!({"line":line,"kind":"activated","targets":[{"key":"1","select":{"side":"both","zone":"field","type":"follower"},"min":1_i64,"max":1_i64}],"body":body}));
+    }
+    doc["cards"]["unit-follower"]["abilities"] = json!(abilities);
+    let loaded = Arc::new(
+        Catalog::from_documents(
+            &snapshot(),
+            &drive_registry(),
+            &[("drive".into(), doc.to_string())],
+        )
+        .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["field"][0]["state"]["entered_this_turn"] = json!(true);
+    initial["players"]["P2"]["zones"]["field"][0]["state"]["acted"] = json!(true);
+    initial["players"]["P1"]["zones"]["deck"] =
+        json!([{"id":"top","card":"unit-spell"},{"id":"bottom","card":"unit-spell"}]);
+    (loaded, initial)
+}
+
+#[test]
+fn gained_drive_installs_rule_abilities_and_triggers_only_once_without_a_resource_link() {
+    let (loaded, initial) = drive_fixture();
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "drive",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+            "gain",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":2_i64}}}),
+            "boost",
+        )
+        .unwrap();
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled =
+        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "drive")
+            .unwrap();
+    for instance in [&mut engine, &mut saved, &mut sampled] {
+        assert_eq!(
+            instance.query(View::P1, "P1.field.a.power").unwrap(),
+            Some(json!(3_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.field.a.keywords").unwrap(),
+            Some(json!(["ドライブ", "突進", "シングルドライブ"]))
+        );
+        instance
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "gain-again",
+            )
+            .unwrap();
+        assert_eq!(
+            instance
+                .query(View::P1, "semantic_state.pending_triggers")
+                .unwrap(),
+            Some(json!([]))
+        );
+        assert!(
+            !instance
+                .legal()
+                .unwrap()
+                .iter()
+                .any(|action| action["do"] == "attack" && action["target"] == "P2.leader")
+        );
+        instance
+            .decide(
+                &json!({"do":"attack","attacker":"a","target":"b"}),
+                "attack",
+            )
+            .unwrap();
+        let pending = instance.legal().unwrap();
+        assert_eq!(
+            pending,
+            vec![
+                json!({"do":"choose-pending","pending":{"ability":{"source":"a","rule":"14.4.7.3.2","keyword":"シングルドライブ"}}})
+            ]
+        );
+        let before = instance.query(View::Referee, "P1.deck").unwrap().unwrap();
+        let mut after = before.as_array().unwrap().clone();
+        after.rotate_left(1);
+        instance.decide(&pending[0], "check").unwrap();
+        assert_eq!(
+            instance.query(View::Referee, "P1.deck").unwrap(),
+            Some(json!(after))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.trigger").unwrap(),
+            Some(json!([]))
+        );
+    }
+}
+
+#[test]
+fn drive_history_survives_silence_and_control_but_a_new_generation_can_gain_again() {
+    let (loaded, initial) = drive_fixture();
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "drive",
+    )
+    .unwrap();
+    engine
+        .decide(
+            &json!({"do":"activate","ability":{"source":"a","line":3_i64},"targets":{"1":["b"]}}),
+            "gain",
+        )
+        .unwrap();
+    engine
+        .decide(
+            &json!({"do":"choose-pending","pending":{"ability":{"source":"b","line":2_i64}}}),
+            "boost",
+        )
+        .unwrap();
+    for line in [4_i64, 5_i64] {
+        engine.decide(&json!({"do":"activate","ability":{"source":"a","line":line},"targets":{"1":["b"]}}),"silence-control").unwrap();
+    }
+    let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
+    let mut sampled =
+        Game::from_observation(loaded, &engine.projection(View::P1).unwrap(), "P1", "drive")
+            .unwrap();
+    for instance in [&mut engine, &mut saved, &mut sampled] {
+        instance.decide(&json!({"do":"activate","ability":{"source":"a","line":3_i64},"targets":{"1":["b"]}}),"no-regain").unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P1.field.b.keywords").unwrap(),
+            Some(json!([]))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P1.field.b.drive_gained").unwrap(),
+            Some(json!(true))
+        );
+        assert_eq!(
+            instance
+                .query(View::P1, "semantic_state.pending_triggers")
+                .unwrap(),
+            Some(json!([]))
+        );
+        instance.decide(&json!({"do":"activate","ability":{"source":"a","line":6_i64},"targets":{"1":["b"]}}),"return-regain").unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.generation").unwrap(),
+            Some(json!(2_i64))
+        );
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.keywords").unwrap(),
+            Some(json!(["ドライブ", "突進", "シングルドライブ"]))
+        );
+        instance
+            .decide(
+                &json!({"do":"choose-pending","pending":{"ability":{"source":"b","line":2_i64}}}),
+                "new-boost",
+            )
+            .unwrap();
+        assert_eq!(
+            instance.query(View::P1, "P2.field.b.power").unwrap(),
+            Some(json!(3_i64))
+        );
+    }
+}
+
+#[test]
+fn a_resource_link_alone_never_grants_drive_and_existing_drive_does_not_gain_again() {
+    for gained in [false, true] {
+        let (loaded, mut initial) = drive_fixture();
+        initial["players"]["P1"]["zones"]["field"][0]["state"]["links"] = json!({"憑依":[]});
+        if gained {
+            initial["players"]["P1"]["zones"]["field"][0]["state"]["keywords"] =
+                json!(["ドライブ"]);
+        }
+        let mut engine =
+            Game::new(loaded, &initial, &Value::Null, &Value::Null, "prior-drive").unwrap();
+        engine
+            .decide(
+                &json!({"do":"activate","ability":{"source":"a","line":1_i64}}),
+                "gain",
+            )
+            .unwrap();
+        let pending = engine
+            .query(View::P1, "semantic_state.pending_triggers")
+            .unwrap()
+            .unwrap();
+        assert_eq!(pending.as_array().unwrap().is_empty(), gained);
+    }
+    let (loaded, mut initial) = ride_fixture(&[]);
+    initial["players"]["P1"]["zones"]["evolve_deck"] = json!([]);
+    initial["players"]["P1"]["zones"]["drive"] = json!([{"id":"r1","card":"unit-resource"}]);
+    initial["players"]["P1"]["zones"]["field"][0]["state"]["links"] = json!({"憑依":["r1"]});
+    let engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "cost-only").unwrap();
+    assert_eq!(
+        engine.query(View::P1, "P1.field.a.keywords").unwrap(),
+        Some(json!([]))
+    );
+}
+
+#[test]
+fn observed_ownership_constrains_each_public_deck_list_after_control_changes() {
+    let (loaded, mut initial) = drive_fixture();
+    initial["room"] = json!({"open_decklists":true});
+    initial["players"]["P1"]["deck_list"] =
+        json!([{"card":"unit-follower","count":1_i64},{"card":"unit-spell","count":3_i64}]);
+    initial["players"]["P2"]["deck_list"] = json!([{"card":"unit-follower","count":1_i64}]);
+    initial["players"]["P2"]["zones"]["field"][0]["state"]["keywords"] = json!(["ドライブ"]);
+    let mut engine = Game::new(
+        Arc::clone(&loaded),
+        &initial,
+        &Value::Null,
+        &Value::Null,
+        "owner",
+    )
+    .unwrap();
+    for line in [4_i64, 5_i64, 3_i64] {
+        engine.decide(&json!({"do":"activate","ability":{"source":"a","line":line},"targets":{"1":["b"]}}),"silence-control-regain").unwrap();
+    }
+    assert_eq!(
+        engine.query(View::P1, "P1.field.b.keywords").unwrap(),
+        Some(json!([]))
+    );
+    assert_eq!(
+        engine
+            .query(View::P1, "semantic_state.pending_triggers")
+            .unwrap(),
+        Some(json!([]))
+    );
+    for (view, seat) in [(View::P1, "P1"), (View::P2, "P2")] {
+        let mut sampled = Game::from_observation(
+            Arc::clone(&loaded),
+            &engine.projection(view).unwrap(),
+            seat,
+            "owner",
+        )
+        .unwrap();
+        let packet = sampled.projection(view).unwrap();
+        assert!(
+            packet["known_cards"]
+                .as_array()
+                .unwrap()
+                .iter()
+                .any(|known| known["id"] == "b" && known["owner"] == "P2")
+        );
+        sampled.decide(&json!({"do":"activate","ability":{"source":"a","line":6_i64},"targets":{"1":["b"]}}),"return").unwrap();
+        assert_eq!(sampled.query(view, "P2.field").unwrap(), Some(json!(["b"])));
+        assert_eq!(
+            sampled
+                .query(view, "semantic_state.pending_triggers")
+                .unwrap()
+                .unwrap()[0]["controller"],
+            json!("P2")
+        );
+    }
+    initial["players"]["P1"]["zones"]["field"][0]["owner"] = json!("unknown");
+    Game::new(loaded, &initial, &Value::Null, &Value::Null, "bad-owner").unwrap_err();
 }

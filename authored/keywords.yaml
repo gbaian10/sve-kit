@@ -72,6 +72,12 @@ keywords:
     expansion:
       op: keyword
       name: twin_drive
+  drive:
+    ja: ドライブ
+    rule: 14.4.7
+    expansion:
+      op: keyword
+      name: drive
   single_drive:
     ja: シングルドライブ
     rule: 14.4.6.2

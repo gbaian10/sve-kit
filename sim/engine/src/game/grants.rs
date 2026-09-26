@@ -66,18 +66,30 @@ impl Game {
             if entry["effect"]["remove_abilities"] == true {
                 granted.clear();
             }
-            for mut ability in list(&entry["effect"]["abilities"]) {
+            for mut ability in list(&entry["effect"]["abilities"])
+                .into_iter()
+                .map(Self::resource_code)
+            {
                 let mut reference = entry["reference"].clone();
-                if !reference.is_object() || reference["line"].is_null() {
+                if !reference.is_object()
+                    || (reference["line"].is_null() && reference["rule"].is_null())
+                {
                     return Err(EngineFailure::Unsupported(
                         "ability grant is missing the saved provider reference".into(),
                     ));
                 }
-                reference["line"] = ability["line"].clone();
-                for key in ["section", "face", "keyword"] {
+                for key in ["line", "section", "face"] {
                     if let Some(value) = ability.get(key) {
                         reference[key] = value.clone();
                     }
+                }
+                if let Some(keyword) = ability["keyword"].as_str() {
+                    reference["keyword"] = self.catalog.keyword_name(keyword).into();
+                }
+                if reference["rule"].is_null()
+                    && let Some(rule) = ability.get("rule")
+                {
+                    reference["rule"] = rule.clone();
                 }
                 ability["granted_reference"] = reference;
                 granted.push(ability);

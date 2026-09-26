@@ -290,6 +290,10 @@ impl Game {
                     }
                     let id = string(&item["id"]).to_owned();
                     let card = string(&item["card"]).to_owned();
+                    let owner = item["owner"].as_str().unwrap_or(seat);
+                    if !matches!(owner, "P1" | "P2") {
+                        return Err(invalid("object owner must be a player"));
+                    }
                     let face_index =
                         usize::try_from(int(&item["state"]["face"])).map_err(invalid)?;
                     let face = catalog.face(&card, face_index)?;
@@ -316,7 +320,7 @@ impl Game {
                             Object {
                                 id: id.clone(),
                                 card,
-                                owner: seat.into(),
+                                owner: owner.into(),
                                 controller: seat.into(),
                                 zone: zone.into(),
                                 generation: 0,
@@ -446,7 +450,7 @@ impl Game {
             let printed = self.catalog.face(&object.card, 0)?;
             let dp = scalar(&face["power"]).saturating_sub(scalar(&printed["power"]));
             let dh = scalar(&face["hp"]).saturating_sub(scalar(&printed["hp"]));
-            let patch = list(&setup["players"][&object.owner]["zones"][&object.zone])
+            let patch = list(&setup["players"][&object.controller]["zones"][&object.zone])
                 .into_iter()
                 .find(|value| value["id"] == id)
                 .unwrap_or(Value::Null);
@@ -593,7 +597,6 @@ impl Game {
                     .get("face")
                     .is_none_or(|face| int(face) == int(&object.state["face"]))
             })
-            .map(Self::resource_code)
             .flat_map(|ability| {
                 if ability["kind"] == "static" && ability["body"]["op"] == "seq" {
                     list(&ability["body"]["steps"])
@@ -608,6 +611,7 @@ impl Game {
                     vec![ability]
                 }
             })
+            .map(Self::resource_code)
             .collect())
     }
     fn abilities(&self, id: &str) -> Result<Vec<Value>> {
@@ -625,7 +629,10 @@ impl Game {
                             .get("condition")
                             .map_or(Ok(true), |condition| self.truth(condition, &frame))?
                     {
-                        for mut granted in list(&body["abilities"]) {
+                        for mut granted in list(&body["abilities"])
+                            .into_iter()
+                            .map(Self::resource_code)
+                        {
                             granted["granted_by"] = json!(source);
                             abilities.push(granted);
                         }

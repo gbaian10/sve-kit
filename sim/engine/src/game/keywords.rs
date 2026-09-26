@@ -45,12 +45,6 @@ impl Game {
         if !list(&object.state["links"]["出走"]).is_empty() {
             result.insert("rush".into());
         }
-        if !list(&object.state["links"]["ドライブ"]).is_empty()
-            || !list(&object.state["links"]["憑依"]).is_empty()
-        {
-            result.insert("rush".into());
-            result.insert("single_drive".into());
-        }
         for ability in self.abilities(id)? {
             if ability["body"]["op"] == "drive" {
                 result.insert(string(&ability["keyword"]).into());

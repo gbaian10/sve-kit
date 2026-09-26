@@ -794,6 +794,9 @@ impl Game {
                 }
             }
             if node["remove_abilities"] == true {
+                if self.keywords(&id)?.contains("drive") {
+                    self.object_mut(&id)?.state["drive_gained"] = json!(true);
+                }
                 self.object_mut(&id)?.state["silenced"] = json!(true);
                 self.object_mut(&id)?.state["keywords"] = json!([]);
             }
