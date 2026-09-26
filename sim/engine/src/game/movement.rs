@@ -30,6 +30,7 @@ impl Game {
             && matches!(destination, "ex" | "equipment" | "cemetery" | "banish")
         {
             event["card"] = json!(previous.card);
+            event["source"] = json!(frame.source);
         }
         if let Some(pos) = position
             && destination == "deck"
@@ -71,6 +72,39 @@ impl Game {
             self.collect_triggers(if acted { "act" } else { "stand" }, &changed, cause)?;
         self.enqueue(pending);
         Ok(changed.into_iter().map(|object| object.id).collect())
+    }
+
+    pub(super) fn emit_banish_instruction(
+        &mut self,
+        movable: &[String],
+        destinations: &BTreeMap<String, String>,
+        frame: &Frame,
+    ) -> Result<()> {
+        if frame.values.get("banish_instruction") == Some(&json!(true)) {
+            let group = self.group();
+            for id in movable {
+                if destinations
+                    .get(id)
+                    .is_some_and(|destination| destination == "banish")
+                    && !matches!(self.object(id)?.zone.as_str(), "banish" | "void")
+                {
+                    self.emit(
+                        json!({"kind":"消滅","object":id,"source":frame.source}),
+                        &frame.cause,
+                        group,
+                    );
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub(super) fn banish_objects(&mut self, ids: &[String], frame: &Frame) -> Result<()> {
+        let mut movement = frame.clone();
+        movement
+            .values
+            .insert("banish_instruction".into(), json!(true));
+        self.move_objects(ids, "banish", None, None, &movement)
     }
 
     pub(super) fn discard(&mut self, ids: &[String], frame: &Frame) -> Result<()> {

@@ -162,7 +162,7 @@ impl Game {
         }))
     }
 
-    fn chosen_references(&self, reference: &str, frame: &Frame) -> Result<Vec<String>> {
+    pub(super) fn chosen_references(&self, reference: &str, frame: &Frame) -> Result<Vec<String>> {
         if let Some(key) = reference.strip_prefix("target.") {
             return Ok(list(&frame.decision["targets"][key])
                 .iter()

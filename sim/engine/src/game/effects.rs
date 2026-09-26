@@ -295,6 +295,7 @@ impl Game {
                 }
             }
             "destroy" | "banish" | "discard" | "move" => self.zone_action(node, frame)?,
+            "transform" => self.transform(node, frame)?,
             "act" | "stand" => {
                 let subjects = self.select(&node["subjects"], frame)?;
                 let changed = self.change_posture(&subjects, node["op"] == "act", &frame.cause)?;
@@ -466,17 +467,7 @@ impl Game {
         );
         match string(&node["op"]) {
             "destroy" => self.destroy(&ids, Some(frame))?,
-            "banish" => {
-                let group = self.group();
-                for id in &ids {
-                    self.emit(
-                        json!({"kind":"消滅","object":id,"source":frame.source}),
-                        &frame.cause,
-                        group,
-                    );
-                }
-                self.move_objects(&ids, "banish", None, None, frame)?;
-            }
+            "banish" => self.banish_objects(&ids, frame)?,
             "discard" => self.discard(&ids, frame)?,
             _ => {
                 let zone = string(&node["to"]);
@@ -516,6 +507,14 @@ impl Game {
                                 ],
                                 json!({"resume":"place-batch","node":node}),
                             );
+                            if let Some(side) = node["side"].as_str() {
+                                let by = self.seats(side, frame).into_iter().next();
+                                if let Some(prompt) = self.state.prompt.as_mut()
+                                    && let Some(by) = by
+                                {
+                                    prompt.by = by;
+                                }
+                            }
                             return Ok(());
                         }
                     }
@@ -571,6 +570,7 @@ impl Game {
             }
         }
         let destinations = self.movement_destinations(&movable, zone, frame)?;
+        self.emit_banish_instruction(&movable, &destinations, frame)?;
         let leaving = movable
             .iter()
             .filter_map(|id| self.state.objects.get(id))

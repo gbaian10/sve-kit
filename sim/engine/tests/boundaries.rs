@@ -4026,3 +4026,180 @@ fn token_capacity_keeps_single_and_empty_choices_without_allocating_rejected_tok
         );
     }
 }
+
+#[test]
+fn transformation_banishes_and_erases_before_creating_a_fresh_batch() {
+    let body = json!({"op":"seq","steps":[{"op":"transform","subjects":"target.1","names":["shared-token","other-token"],"bind":"changed"},{"op":"modify","subjects":"changed","power":1_i64}]});
+    let (facts, mut docs) = token_fixture(&body);
+    docs["cards"]["unit-spell"]["abilities"][0]["targets"][0] = json!({"key":"1","select":{"zone":"ex","side":"self"},"min":2_i64,"max":2_i64,"order":true});
+    let loaded = Arc::new(
+        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
+            .unwrap(),
+    );
+    let mut initial = setup();
+    initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"x","card":"token-a","state":{"power":9_i64,"hp":9_i64,"keywords":["guard"]}},{"id":"y","card":"token-a"}]);
+    let mut engine = Game::new(loaded, &initial, &Value::Null, &Value::Null, "transform").unwrap();
+    let done = engine
+        .decide(
+            &json!({"do":"play","card":"s","targets":{"1":["x","y"]}}),
+            "cast",
+        )
+        .unwrap();
+    assert_eq!(done.outcome, "resolved");
+    let phase = |kind: &str| {
+        done.events
+            .iter()
+            .filter(|event| event["kind"] == kind)
+            .collect::<Vec<_>>()
+    };
+    let banished = phase("消滅");
+    let erased = phase("消去");
+    let created = done
+        .events
+        .iter()
+        .filter(|event| event["to"] == "P1.ex")
+        .collect::<Vec<_>>();
+    assert_eq!(banished.len(), 2);
+    assert_eq!(erased.len(), 2);
+    assert_eq!(created.len(), 2);
+    assert_eq!(banished[0]["group"], banished[1]["group"]);
+    assert_eq!(erased[0]["group"], erased[1]["group"]);
+    assert_eq!(created[0]["group"], created[1]["group"]);
+    let groups = [
+        banished[0]["group"].as_u64().unwrap(),
+        erased[0]["group"].as_u64().unwrap(),
+        created[0]["group"].as_u64().unwrap(),
+    ];
+    assert!(groups[0] < groups[1] && groups[1] < groups[2]);
+    assert_eq!(created[0]["card"], "token-z");
+    assert_eq!(created[1]["card"], "token-b");
+    assert_eq!(created[0]["source"], "s");
+    assert!(phase("場に出す").is_empty());
+    assert_eq!(
+        engine.query(View::P1, "P1.banish").unwrap(),
+        Some(json!([]))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.ex").unwrap(),
+        Some(json!(["new-1", "new-2"]))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.ex.new-1.power").unwrap(),
+        Some(json!(2_i64))
+    );
+    assert_eq!(
+        engine.query(View::P1, "P1.ex.new-1.hp").unwrap(),
+        Some(json!(2_i64))
+    );
+    let state = serde_json::to_value(&engine).unwrap();
+    assert_eq!(state["state"]["objects"]["x"]["zone"], "void");
+    assert_eq!(
+        state["state"]["objects"]["new-1"]["state"]["keywords"],
+        json!([])
+    );
+}
+
+#[test]
+fn transformations_keep_original_pairing_after_prohibition_replacement_or_stale_targets() {
+    for case in ["stale", "prohibited", "replaced"] {
+        let first = match case {
+            "stale" => json!({"op":"move","subjects":"b","to":"ex"}),
+            "prohibited" => {
+                json!({"op":"restrict","subjects":"b","action":"banish","until":"game"})
+            }
+            _ => json!({"op":"draw","count":0_i64}),
+        };
+        let body = json!({"op":"seq","steps":[first,{"op":"transform","subjects":"target.1","names":["shared-token","other-token"],"bind":"changed"},{"op":"modify","subjects":"changed","power":1_i64}]});
+        let (facts, mut docs) = token_fixture(&body);
+        docs["cards"]["unit-spell"]["abilities"][0]["targets"][0]["min"] = json!(2_i64);
+        docs["cards"]["unit-spell"]["abilities"][0]["targets"][0]["max"] = json!(2_i64);
+        docs["cards"]["unit-spell"]["abilities"][0]["targets"][0]["order"] = json!(true);
+        docs["cards"]["token-b"]["abilities"] =
+            json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"guard"}}]);
+        docs["cards"]["token-z"]["abilities"] =
+            json!([{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"stack"}}]);
+        let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
+        keywords["keywords"]["stack"] =
+            json!({"ja":"スタック","rule":"13.3.2","expansion":{"op":"keyword","name":"stack"}});
+        let loaded = Arc::new(
+            Catalog::from_documents(
+                &facts,
+                &keywords.to_string(),
+                &[("tokens".into(), docs.to_string())],
+            )
+            .unwrap(),
+        );
+        let mut initial = setup();
+        initial["players"]["P2"]["zones"]["field"] = json!([{"id":"b","card":if case == "replaced" {"token-z"} else {"unit-follower"},"state":{"counters":{"stack_counter":2_i64}}},{"id":"c","card":"unit-follower"}]);
+        let mut engine =
+            Game::new(loaded, &initial, &Value::Null, &Value::Null, "transform").unwrap();
+        let step = engine
+            .decide(
+                &json!({"do":"play","card":"s","targets":{"1":["b","c"]}}),
+                "cast",
+            )
+            .unwrap();
+        assert_eq!(step.outcome, "paused");
+        assert!(
+            step.events
+                .iter()
+                .any(|event| event["kind"] == "消滅" && event["object"] == "c")
+        );
+        assert!(
+            !step
+                .events
+                .iter()
+                .any(|event| event["kind"] == "消滅" && event["object"] == "b")
+        );
+        assert_eq!(engine.projection(View::P2).unwrap()["awaiting"]["by"], "P2");
+        let state = serde_json::to_value(&engine).unwrap();
+        assert_eq!(state["state"]["objects"]["new-1"]["card"], "token-b");
+        assert_eq!(state["state"]["objects"]["new-1"]["owner"], "P2");
+        let mut restored: Game = serde_json::from_value(state).unwrap();
+        for instance in [&mut engine, &mut restored] {
+            assert_eq!(
+                instance
+                    .decide(
+                        &json!({"do":"place-acted","object":"new-1","acted":true}),
+                        "place"
+                    )
+                    .unwrap()
+                    .outcome,
+                "resolved"
+            );
+            assert_eq!(
+                instance.query(View::P1, "P2.field.new-1.acted").unwrap(),
+                Some(json!(true))
+            );
+            assert_eq!(
+                instance.query(View::P1, "P2.field.new-1.power").unwrap(),
+                Some(json!(2_i64))
+            );
+            assert_eq!(
+                instance.query(View::P1, "P2.banish").unwrap(),
+                Some(json!(["c"]))
+            );
+        }
+    }
+}
+
+#[test]
+fn unsupported_mixed_origin_transformations_roll_back_payment_and_every_object() {
+    let (facts, docs) = token_fixture(
+        &json!({"op":"transform","subjects":{"union":["a","target.1"]},"name":"other-token"}),
+    );
+    let loaded = Arc::new(
+        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
+            .unwrap(),
+    );
+    let mut engine = Game::new(loaded, &setup(), &Value::Null, &Value::Null, "transform").unwrap();
+    let before = engine.digest().unwrap();
+    assert!(matches!(
+        engine.decide(
+            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
+            "cast"
+        ),
+        Err(EngineFailure::Unsupported(_))
+    ));
+    assert_eq!(engine.digest().unwrap(), before);
+}

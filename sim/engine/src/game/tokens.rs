@@ -125,7 +125,7 @@ impl Game {
                 return Ok(());
             }
         }
-        self.create_prints(&prints, node, frame)
+        self.create_prints(&prints, node, &frame.controller.clone(), frame)
     }
 
     pub(super) fn resume_creation(
@@ -142,21 +142,95 @@ impl Game {
             .iter()
             .map(|card| string(card).into())
             .collect::<Vec<_>>();
-        self.create_prints(&in_print_order(&prints, &selected), &task["node"], frame)
+        self.create_prints(
+            &in_print_order(&prints, &selected),
+            &task["node"],
+            &frame.controller.clone(),
+            frame,
+        )
     }
 
-    fn create_prints(&mut self, prints: &[String], node: &Value, frame: &mut Frame) -> Result<()> {
+    fn create_prints(
+        &mut self,
+        prints: &[String],
+        node: &Value,
+        controller: &str,
+        frame: &mut Frame,
+    ) -> Result<()> {
         let created = prints
             .iter()
-            .map(|card| self.new_token_object(card, &frame.controller))
+            .map(|card| self.new_token_object(card, controller))
             .collect::<Result<Vec<_>>>()?;
         frame.bindings.insert("created-tokens".into(), created);
         Self::prepend(
             frame,
             vec![
-                json!({"op":"move","subjects":"created-tokens","to":node["to"],"bind":node["bind"],"capacity_checked":true}),
+                json!({"op":"move","subjects":"created-tokens","to":node["to"],"side":controller,"bind":node["bind"],"capacity_checked":true}),
             ],
         );
         Ok(())
+    }
+
+    pub(super) fn transform(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
+        let selected = self.select(&node["subjects"], frame)?;
+        let original = node["subjects"].as_str().map_or_else(
+            || Ok(selected.clone()),
+            |reference| self.chosen_references(reference, frame),
+        )?;
+        let names = node
+            .get("names")
+            .map_or_else(|| vec![node["name"].clone(); original.len()], list);
+        if names.len() != original.len() {
+            return Err(invalid(
+                "transform names must correspond to the original selected subjects",
+            ));
+        }
+        let mut plans = Vec::new();
+        for (id, name) in original.iter().zip(&names) {
+            if selected.contains(id) && !self.restricted(id, "banish")? {
+                let object = self.object(id)?;
+                if !matches!(object.zone.as_str(), "void" | "banish") {
+                    plans.push((object.clone(), self.catalog.token_print(string(name))?));
+                }
+            }
+        }
+        let Some((first, _)) = plans.first() else {
+            frame.performed = 0;
+            if let Some(bind) = node["bind"].as_str() {
+                frame.bindings.insert(bind.into(), Vec::new());
+            }
+            return Ok(());
+        };
+        let controller = first.controller.clone();
+        let zone = first.zone.clone();
+        if plans
+            .iter()
+            .any(|(object, _)| object.controller != controller || object.zone != zone)
+        {
+            return Err(EngineFailure::Unsupported(
+                "simultaneous transformation across distinct origin zones".into(),
+            ));
+        }
+        let ids = plans
+            .iter()
+            .map(|(object, _)| object.id.clone())
+            .collect::<Vec<_>>();
+        self.banish_objects(&ids, frame)?;
+        let prints = plans
+            .iter()
+            .filter(|(before, _)| {
+                self.state.objects.get(&before.id).is_some_and(|after| {
+                    before.generation != after.generation
+                        && matches!(after.zone.as_str(), "banish" | "void")
+                })
+            })
+            .map(|(_, card)| card.clone())
+            .collect::<Vec<_>>();
+        self.create_prints(
+            &prints,
+            &json!({"to":zone,"bind":node["bind"]}),
+            &controller,
+            frame,
+        )
     }
 }
