@@ -663,6 +663,11 @@ impl Game {
             } else {
                 self.emit_zone_movement(previous, destination, position, frame, group)?;
             }
+            if (previous.zone != destination || previous.controller != *owner)
+                && let Some(count) = self.state.counters.get_mut(&format!("{id}.attacks"))
+            {
+                *count = 0;
+            }
             for viewer in ["P1", "P2"] {
                 let was_known = self
                     .state

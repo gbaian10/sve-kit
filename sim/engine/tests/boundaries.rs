@@ -6011,6 +6011,10 @@ fn attack_requirements_follow_the_future_period_and_current_object_generation() 
             .unwrap(),
         Some(json!(0_i64))
     );
+    let counts =
+        engine.projection(View::P2).unwrap()["semantic_state"]["counters_this_turn"].clone();
+    assert_eq!(counts["b.attacks"], 0_i64);
+    assert_eq!(counts["P2.attacks"], 1_i64);
     assert!(!engine.legal().unwrap().contains(&json!({"do":"end-phase"})));
     let mut saved: Game = serde_json::from_str(&serde_json::to_string(&engine).unwrap()).unwrap();
     let mut sampled = Game::from_observation(
