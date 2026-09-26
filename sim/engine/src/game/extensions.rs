@@ -226,22 +226,43 @@ impl Game {
         Ok(())
     }
 
-    fn change_controller(&mut self, node: &Value, frame: &Frame) -> Result<()> {
+    fn change_controller(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let controller = self
             .seats(string(&node["side"]), frame)
             .into_iter()
             .next()
             .unwrap_or_default();
-        for id in self.select(&node["subjects"], frame)? {
+        let ids =
+            self.select(&node["subjects"], frame)?
+                .into_iter()
+                .filter(|id| {
+                    self.state.objects.get(id).is_some_and(|object| {
+                        object.zone == "field" && object.controller != controller
+                    })
+                })
+                .collect::<Vec<_>>();
+        let available = usize::try_from(
+            5_i64
+                .saturating_sub(self.zone_count(&controller, "field"))
+                .max(0),
+        )
+        .map_err(invalid)?;
+        if ids.len() > available {
+            let choices = subsets(&ids, available, available)
+                .iter()
+                .map(|chosen| json!({"do":"resolve-choice","select":chosen}))
+                .collect();
+            self.prompt(
+                frame,
+                choices,
+                json!({"resume":"move-capacity","node":node}),
+            );
+            return Ok(());
+        }
+        frame.performed = i64::try_from(ids.len()).unwrap_or(i64::MAX);
+        let group = self.group();
+        for id in ids {
             let previous = self.object(&id)?.clone();
-            if previous.zone != "field" || previous.controller == controller {
-                continue;
-            }
-            if self.zone_count(&controller, "field") >= 5 {
-                return Err(EngineFailure::Unsupported(
-                    "control transfer to a full field".into(),
-                ));
-            }
             self.player_mut(&previous.controller)?
                 .zones
                 .entry("field".into())
@@ -255,7 +276,6 @@ impl Game {
             let object = self.object_mut(&id)?;
             object.controller.clone_from(&controller);
             object.state["entered_this_turn"] = json!(true);
-            let group = self.group();
             self.emit(
                 json!({"kind":"移動","object":id,"from":format!("{}.field",previous.controller),"to":format!("{controller}.field")}),
                 &frame.cause,
