@@ -114,6 +114,11 @@ class Sv1Crawler:
         if found == url:
             msg = f"{url}: missing, yet the card page links it"
             raise FetchError(msg)
+        return await self._fallback(url, found)
+
+    async def _fallback(self, url: str, found: str) -> ImageResult:
+        """Fetch the image the card page shows after the template missed."""
+        crawler = self.crawler
         if crawler.writer.local_state(found) is LocalState.TRUSTED:
             self.misses.record_success()
             return ImageResult.SHARED
@@ -122,7 +127,9 @@ class Sv1Crawler:
             # later in the run or the other face; a changed template would not match
             # the old shape.
             self.misses.record_success()
-            await crawler.image(found)
+            if not await crawler.image(found, missing_ok=True):
+                # Some 910xxxxxx pages link an image the site does not have either.
+                return ImageResult.NO_IMAGE
             return ImageResult.SHARED
         self.misses.record_failure(f"{url}: missing, card page shows {found}")
         await crawler.image(found)
