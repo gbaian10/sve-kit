@@ -17,13 +17,13 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 ## 目錄與職責
 
-| 路徑        | 職責                                                            | 技術        |
-| ----------- | --------------------------------------------------------------- | ----------- |
-| `carddb/`   | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照       | Python、uv  |
-| `authored/` | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料         | YAML        |
-| `dsl/`      | 效果 DSL 的 JSON Schema，**語法的唯一權威**                     | JSON Schema |
-| `sim/`      | 模擬器（尚未開始）：之後會有 `engine/`、`server/`、`web/`       | Rust、TS    |
-| `docs/`     | 進版控的正式文件：ADR、schema、DSL 規格、mermaid 圖（尚未建立） | Markdown    |
+| 路徑        | 職責                                                                              | 技術        |
+| ----------- | --------------------------------------------------------------------------------- | ----------- |
+| `carddb/`   | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
+| `authored/` | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
+| `dsl/`      | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
+| `sim/`      | 模擬器（尚未開始）：之後會有 `engine/`、`server/`、`web/`                         | Rust、TS    |
+| `docs/`     | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
 
 依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`。
 `carddb` 匯出的有版號快照是卡片資料的**唯一權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），

@@ -89,7 +89,7 @@ AI-generated code tends to over-comment. Keep comments few and short:
 - Do not restate the function body or write comments like "call X here".
 
 ```python
-# Card numbers may contain Ⓢ (U+24C8); keep them as-is (see ADR-0004).
+# Evolution swaps base stats without a stat-change event; only super evolution's +1 counts (see ADR-0008).
 ```
 
 ## Lint and types
