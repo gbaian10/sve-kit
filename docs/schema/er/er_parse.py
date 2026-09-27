@@ -36,6 +36,7 @@ class _ConstraintFk:
     target_cols: list[str] | None
     nullable: bool
     label: str
+    source_tokens: list[str]
 
 
 @dataclass(slots=True)
@@ -314,6 +315,7 @@ def _apply_constraint_fks(
                 target_cols,
                 all(by[n].nullable for n in present),
                 label,
+                src,
             )
         )
     return extra
@@ -395,6 +397,7 @@ def build_layer(
                 e.nullable,
                 "constraint",
                 e.label,
+                e.source_tokens,
             )
             for e in extra
         )

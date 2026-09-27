@@ -789,7 +789,7 @@ function renderPanel() {
     <div class="meta"><span>${LAYER_NAME[L]}</span>${groups}</div>
     <div class="src">${esc(t.source)}:${t.line} · ${t.cols.length} 欄</div>
     <div class="sec"><h3>欄位</h3><table class="fields"><tbody>${rows}</tbody></table></div>
-    ${cfks.length ? `<div class="sec"><h3>約束 FK（${cfks.length}）</h3><table class="fields"><tbody>${cfks.map((r, i) => `<tr><td><b class="uq cfk">FK${i + 1}</b></td><td>(${esc(r.cols.join(", "))}) → <button type="button" class="pill" data-goto="${esc(r.to)}">${esc(r.to)}</button>${r.to_cols ? ` (${esc(r.to_cols.join(", "))})` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    ${cfks.length ? `<div class="sec"><h3>約束 FK（${cfks.length}）</h3><table class="fields"><tbody>${cfks.map((r, i) => `<tr><td><b class="uq cfk">FK${i + 1}</b></td><td>(${esc((r.src_tokens || r.cols).map(x => r.cols.includes(x) ? x : x + "（常數）").join(", "))}) → <button type="button" class="pill" data-goto="${esc(r.to)}">${esc(r.to)}</button>${r.to_cols ? ` (${esc(r.to_cols.join(", "))})` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}
     <div class="sec"><h3>約束與說明（原文）</h3>${t.constraints ? `<p class="cons">${esc(t.constraints)}</p>` : `<p class="note">無</p>`}</div>
     <div class="sec"><h3>引用（${outs.length}）</h3>${outs.length ? `<div class="links">${outs.map(n => link(n)).join("")}</div>` : `<p class="note">無</p>`}</div>
     <div class="sec"><h3>被引用（${ins.length}）</h3>${ins.length ? `<div class="links">${ins.map(r => link(r.from, `${r.from}.${r.col}`)).join("")}</div>` : `<p class="note">沒有表引用它</p>`}</div>

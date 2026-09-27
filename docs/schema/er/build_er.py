@@ -115,6 +115,17 @@ def check_constraint_fks(
         for x in config.required_constraints
         if x not in labels
     )
+    anchors = {
+        f"{r.source}.{r.cols[0]} → {r.target}.{r.target_anchor}"
+        for lr in layers.values()
+        for r in lr.rels
+        if r.via == "constraint"
+    }
+    diag.errors.extend(
+        f"diagram.toml checks.constraint_anchors：圖線錨點不是 {x}"
+        for x in config.required_anchors
+        if x not in anchors
+    )
 
 
 def fill_template(template: str, payload: str) -> str:

@@ -19,6 +19,7 @@ class DiagramConfig:
     groups: dict[LayerName, list[Group]]
     snapshot_aliases: dict[str, str]
     required_constraints: list[str]
+    required_anchors: list[str]
 
 
 def _table(value: object, where: str) -> dict[str, object]:
@@ -72,7 +73,11 @@ def load_config(path: Path) -> DiagramConfig:
         _table(data.get("checks", {}), "checks").get("constraint_fks", []),
         "checks.constraint_fks",
     )
-    return DiagramConfig(groups, aliases, required)
+    anchors = _str_list(
+        _table(data.get("checks", {}), "checks").get("constraint_anchors", []),
+        "checks.constraint_anchors",
+    )
+    return DiagramConfig(groups, aliases, required, anchors)
 
 
 def check_groups(

@@ -86,6 +86,16 @@ class Relation:
     nullable: bool
     via: FkVia
     label: str | None = None
+    # Constraint FKs only: every source token in order, including fixed constants.
+    source_tokens: list[str] | None = None
+
+    @property
+    def target_anchor(self) -> str | None:
+        """Target column paired with the first source column by position in the constraint."""
+        if not self.target_cols:
+            return None
+        i = self.source_tokens.index(self.cols[0]) if self.source_tokens else 0
+        return self.target_cols[i] if i < len(self.target_cols) else None
 
     def to_json(self) -> dict[str, object]:
         """Serialise with the keys template.html expects."""
@@ -94,11 +104,12 @@ class Relation:
             "col": self.cols[0],
             "cols": self.cols,
             "to": self.target,
-            "to_col": self.target_cols[0] if self.target_cols else None,
+            "to_col": self.target_anchor,
             "to_cols": self.target_cols,
             "nullable": self.nullable,
             "via": self.via,
             "label": self.label,
+            "src_tokens": self.source_tokens,
         }
 
 

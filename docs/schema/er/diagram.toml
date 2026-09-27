@@ -303,3 +303,10 @@ constraint_fks = [
     "printing_face: FK(face_id,card_id)→face(id,card_id)",
     "printing_face: FK(art_id,face_id)→art(id,face_id)",
 ]
+# Constraints with fixed constants: the line must pair the real column with the target column
+# at the same position, written `table.column → target.column`.
+constraint_anchors = [
+    "stamp.series_code → vocabulary.code",
+    "route_override.route_key → card_route.route_key",
+    "art.face_id → face.id",
+]
