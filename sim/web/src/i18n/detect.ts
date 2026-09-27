@@ -1,10 +1,15 @@
 import type { UiLanguage } from "./languages"
 
-/**
- * First-visit default only; a language the user picked is stored in settings and wins.
- * Any Chinese (including Simplified and bare `zh`) maps to Traditional Chinese, and
- * unsupported languages fall back to Japanese.
- */
+/** Tolerates browsers or embedded webviews that lack `navigator.languages` or `navigator.language`. */
+export function preferredLanguages(nav?: {
+  readonly languages?: readonly string[] | undefined
+  readonly language?: string | undefined
+}): readonly string[] {
+  if (nav?.languages && nav.languages.length > 0) return nav.languages
+  return nav?.language ? [nav.language] : []
+}
+
+// First-visit default only (a stored choice wins); any Chinese -> zh-TW, unsupported -> ja.
 export function detectUiLanguage(preferred: readonly string[]): UiLanguage {
   for (const tag of preferred) {
     const primary = tag.trim().toLowerCase().split(/[-_]/, 1)[0]

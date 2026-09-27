@@ -4,8 +4,9 @@ The web client: card browser, deck builder and game board in one app (React, Vit
 
 ## Setup
 
-Bun is pinned in the repo-root `mise.toml` (`mise install`). Node.js must also be on `PATH`:
-`bun run` executes the Node-shebang CLIs (Vite, Vitest, ESLint, …) with Node.
+Bun is pinned in the repo-root `mise.toml` (`mise install`); the git hooks call it through
+`mise exec`, so they do not depend on shell activation. Node.js must still be on `PATH`: `bun run`
+executes the Node-shebang CLIs (Vite, Vitest, ESLint, …) with Node.
 
 ```bash
 cd sim/web
@@ -33,8 +34,9 @@ the full `tsc -b` and Vitest.
 
 `tests/lint-fixtures/` is a small fake project full of code that must, or must not, trip the lint
 rules. Each case starts with `// case: <what> -> <rule ids | none>`; `// bypass:` marks holes the
-rules knowingly cannot close. `tests/eslint-rules.test.ts` checks that every case reports exactly
-the rules it declares. Update the fixtures together with the rules.
+rules knowingly cannot close. `tests/eslint-rules.test.ts` lints every file under the fixture
+`src/` and checks that each case reports exactly the rules it declares, as many times as it
+declares them (list a rule twice when it fires twice). Update the fixtures together with the rules.
 
 ## Known issues
 

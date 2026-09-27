@@ -1,8 +1,4 @@
-/*
- * Theme tokens: the only file allowed to hold colour literals.
- * Every managed colour token is defined in all three places below (light,
- * system dark unless forced light, forced dark).
- */
+/* The only file allowed colour literals; each colour token needs all three theme selectors. */
 
 :root {
   color-scheme: light;

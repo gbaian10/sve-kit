@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { detectUiLanguage } from "./detect"
+import { detectUiLanguage, preferredLanguages } from "./detect"
 
 describe("detectUiLanguage", () => {
   it.each([
@@ -28,5 +28,29 @@ describe("detectUiLanguage", () => {
 
   it("does not treat languages sharing a prefix as supported", () => {
     expect(detectUiLanguage(["jam", "eng", "en"])).toBe("en")
+  })
+})
+
+describe("preferredLanguages", () => {
+  it("prefers navigator.languages", () => {
+    expect(preferredLanguages({ languages: ["en-US", "ja"], language: "fr" })).toEqual([
+      "en-US",
+      "ja",
+    ])
+  })
+
+  it("falls back to navigator.language when languages is missing or empty", () => {
+    expect(preferredLanguages({ language: "zh-CN" })).toEqual(["zh-CN"])
+    expect(preferredLanguages({ languages: [], language: "en" })).toEqual(["en"])
+  })
+
+  it("returns no preference when neither is available", () => {
+    expect(preferredLanguages({})).toEqual([])
+    expect(preferredLanguages({ language: "" })).toEqual([])
+    expect(preferredLanguages(undefined)).toEqual([])
+  })
+
+  it("ends at the Japanese default without any browser language", () => {
+    expect(detectUiLanguage(preferredLanguages(undefined))).toBe("ja")
   })
 })

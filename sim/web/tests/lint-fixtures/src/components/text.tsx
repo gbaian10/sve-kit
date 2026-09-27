@@ -19,7 +19,7 @@ export const LiteralExpression = ({ on }: { on: boolean }) => <p>{on ? "Enabled"
 // case: literal aria-label -> i18next/no-literal-string
 export const LiteralAriaLabel = () => <button type="button" aria-label="Close" />
 
-// case: literal placeholder -> i18next/no-literal-string
+// case: literal placeholder and aria-label -> i18next/no-literal-string, i18next/no-literal-string
 export const LiteralPlaceholder = () => <input aria-label="Search" placeholder="Search cards" />
 
 // case: literal alt -> i18next/no-literal-string

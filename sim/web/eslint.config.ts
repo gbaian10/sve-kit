@@ -1,6 +1,7 @@
 import path from "node:path"
 
 import js from "@eslint/js"
+import type { Linter } from "eslint"
 import { defineConfig, globalIgnores } from "eslint/config"
 import prettier from "eslint-config-prettier/flat"
 import betterTailwind from "eslint-plugin-better-tailwindcss"
@@ -20,6 +21,9 @@ const PREFIX = String.raw`^(?:.*:)?!?-?`
 const COLOR_UTILITY = String.raw`(?:bg|text|border(?:-[xytrblse])?|outline|ring(?:-offset)?|inset-ring|divide|fill|stroke|decoration|accent|caret|shadow|inset-shadow|drop-shadow|text-shadow|placeholder|from|via|to)`
 const COLOR_VALUE = String.raw`(?:#|color:|--|(?:rgba?|hsla?|hwb|lab|lch|oklab|oklch|color|color-mix|light-dark|var)\(|[a-z]+\])`
 const NON_COLOR_HINT = String.raw`(?:length|number|percentage|integer|ratio|angle|image|url|position|bg-size|line-width|family-name|absolute-size|relative-size):`
+// Tailwind v4 also accepts a trailing `!` (important) and a `/opacity` modifier.
+const IMPORTANT = String.raw`!?$`
+const OPACITY_IMPORTANT = String.raw`(?:/\S+)?!?$`
 
 const TOKEN_ONLY =
   "Colours must come from semantic tokens: add a token in src/styles, then use its class."
@@ -28,7 +32,7 @@ const TOKEN_ONLY =
 const restrictedClasses = [
   { pattern: String.raw`${PREFIX}${COLOR_UTILITY}-\[${COLOR_VALUE}.*`, message: TOKEN_ONLY },
   {
-    pattern: String.raw`${PREFIX}${COLOR_UTILITY}-\((?!${NON_COLOR_HINT}).*\)$`,
+    pattern: String.raw`${PREFIX}${COLOR_UTILITY}-\((?!${NON_COLOR_HINT})[^)]*\)${OPACITY_IMPORTANT}`,
     message: TOKEN_ONLY,
   },
   {
@@ -40,17 +44,17 @@ const restrictedClasses = [
     message: "Tokens already switch per theme; `dark:` would keep a second palette by hand.",
   },
   {
-    pattern: String.raw`${PREFIX}(?:min-|max-)?w-screen$`,
+    pattern: String.raw`${PREFIX}(?:min-|max-)?w-screen${IMPORTANT}`,
     message:
       "`w-screen` ignores the scrollbar and causes horizontal scrolling; let the container decide the width.",
   },
   {
-    pattern: String.raw`${PREFIX}(?:min-|max-)?h-screen$`,
+    pattern: String.raw`${PREFIX}(?:min-|max-)?h-screen${IMPORTANT}`,
     message:
       "`h-screen` is wrong while the mobile address bar resizes; use `h-dvh` or `min-h-svh`.",
   },
   {
-    pattern: String.raw`${PREFIX}(?:w|min-w|size|basis)-\[[\d.]+(?:px|rem|em|ch)\]$`,
+    pattern: String.raw`${PREFIX}(?:w|min-w|size|basis)-\[[\d.]+(?:px|rem|em|ch)\]${IMPORTANT}`,
     message:
       "Fixed arbitrary widths overflow narrow screens; use `w-full` with a `max-w-*` token, or grid/flex ratios.",
   },
@@ -59,7 +63,7 @@ const restrictedClasses = [
 /** One array for every `no-restricted-syntax` entry: a later config would replace, not merge, it. */
 const restrictedSyntax = {
   styleColor: {
-    selector: String.raw`JSXAttribute[name.name='style'] Property[key.name=/^(?:color|background|fill|stroke)$|Color$/]`,
+    selector: String.raw`JSXAttribute[name.name='style'] Property:matches([key.name=/^(?:color|background|fill|stroke)$|Color$/], [key.value=/^(?:color|background|fill|stroke)$|Color$/])`,
     message: TOKEN_ONLY,
   },
   dangerousHtmlAttribute: {
@@ -67,20 +71,53 @@ const restrictedSyntax = {
     message: "Render card text through the markup parser instead of injecting HTML.",
   },
   dangerousHtmlProperty: {
-    selector: `Property[key.name='dangerouslySetInnerHTML']`,
+    selector: `Property:matches([key.name='dangerouslySetInnerHTML'], [key.value='dangerouslySetInnerHTML'])`,
     message: "Render card text through the markup parser instead of injecting HTML.",
   },
   // eslint-plugin-i18next cannot check option objects outside JSX without flagging every string.
   literalLabel: {
-    selector: String.raw`Property[key.name='label'] > Literal[value=/\S/]`,
+    selector: String.raw`Property:matches([key.name='label'], [key.value='label']) > :matches(Literal.value[value=/\S/], TemplateLiteral.value:has(TemplateElement[value.raw=/\S/]))`,
     message: "User-visible labels must come from t().",
   },
 }
 
 const uiRestrictedSyntax = Object.values(restrictedSyntax)
-const testRestrictedSyntax = uiRestrictedSyntax.filter(
+// Tests and locale files legitimately hold literal labels.
+const nonUiRestrictedSyntax = uiRestrictedSyntax.filter(
   (entry) => entry !== restrictedSyntax.literalLabel,
 )
+
+const FETCH_ONLY_IN_DATA = "Only src/data/ may fetch; import its public API."
+const STORAGE_ONLY_IN_SETTINGS = "Only src/settings/ may touch storage; import its public API."
+const fetchBan = {
+  globals: [{ name: "fetch", message: FETCH_ONLY_IN_DATA }],
+  properties: ["fetch"].map((property) => ({ property, message: FETCH_ONLY_IN_DATA })),
+}
+const storageBan = {
+  globals: ["localStorage", "sessionStorage"].map((name) => ({
+    name,
+    message: STORAGE_ONLY_IN_SETTINGS,
+  })),
+  properties: ["localStorage", "sessionStorage"].map((property) => ({
+    property,
+    message: STORAGE_ONLY_IN_SETTINGS,
+  })),
+}
+
+/** Builds the whole rule arrays per directory, so no block half-overrides another. */
+function apiBans(...bans: (typeof fetchBan)[]): Linter.RulesRecord {
+  return {
+    "no-restricted-globals": ["error", ...bans.flatMap((ban) => ban.globals)],
+    "no-restricted-properties": [
+      "error",
+      ...bans.flatMap((ban) =>
+        ["window", "globalThis", "self"].flatMap((object) =>
+          ban.properties.map((entry) => ({ object, ...entry })),
+        ),
+      ),
+    ],
+  }
+}
 
 export default defineConfig(
   globalIgnores(["dist/", "node_modules/", "tests/lint-fixtures/"]),
@@ -96,7 +133,7 @@ export default defineConfig(
     },
   },
   {
-    files: ["**/*.js"],
+    files: ["**/*.{js,mjs,cjs}"],
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
   },
@@ -107,10 +144,12 @@ export default defineConfig(
       "simple-import-sort": simpleImportSort,
     },
     rules: {
+      // unused-imports skips imports here, so each unused name is reported once.
+      "@typescript-eslint/no-unused-vars": "off",
       "unused-imports/no-unused-imports": "error",
       "simple-import-sort/imports": "error",
       "simple-import-sort/exports": "error",
-      "@typescript-eslint/no-unused-vars": [
+      "unused-imports/no-unused-vars": [
         "error",
         { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrors: "none" },
       ],
@@ -162,22 +201,8 @@ export default defineConfig(
 
   {
     files: ["src/**/*.{ts,tsx}"],
-    ignores: ["src/data/**", "src/settings/**"],
     rules: {
-      "no-restricted-globals": [
-        "error",
-        { name: "fetch", message: "Only src/data/ may fetch; import its public API." },
-        { name: "localStorage", message: "Only src/settings/ may touch storage." },
-        { name: "sessionStorage", message: "Only src/settings/ may touch storage." },
-      ],
-      "no-restricted-properties": [
-        "error",
-        ...["window", "globalThis", "self"].flatMap((object) => [
-          { object, property: "fetch", message: "Only src/data/ may fetch." },
-          { object, property: "localStorage", message: "Only src/settings/ may touch storage." },
-          { object, property: "sessionStorage", message: "Only src/settings/ may touch storage." },
-        ]),
-      ],
+      ...apiBans(fetchBan, storageBan),
       "no-restricted-imports": [
         "error",
         {
@@ -191,12 +216,18 @@ export default defineConfig(
       ],
     },
   },
+  { files: ["src/data/**"], rules: apiBans(storageBan) },
+  { files: ["src/settings/**"], rules: apiBans(fetchBan) },
+  {
+    files: ["src/i18n/locales/**"],
+    rules: { "no-restricted-syntax": ["error", ...nonUiRestrictedSyntax] },
+  },
 
   {
     files: ["src/**/*.test.{ts,tsx}", "src/test-setup.ts", "tests/**/*.ts"],
     rules: {
       "i18next/no-literal-string": "off",
-      "no-restricted-syntax": ["error", ...testRestrictedSyntax],
+      "no-restricted-syntax": ["error", ...nonUiRestrictedSyntax],
     },
   },
 

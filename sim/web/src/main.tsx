@@ -5,13 +5,13 @@ import { createRoot } from "react-dom/client"
 import { I18nextProvider } from "react-i18next"
 
 import { App } from "./App"
-import { createI18n, detectUiLanguage } from "./i18n"
+import { createI18n, detectUiLanguage, preferredLanguages } from "./i18n"
 import { loadUiLanguage } from "./settings"
 
 const root = document.getElementById("root")
 if (!root) throw new Error("#root is missing from index.html")
 
-const language = loadUiLanguage() ?? detectUiLanguage(navigator.languages)
+const language = loadUiLanguage() ?? detectUiLanguage(preferredLanguages(globalThis.navigator))
 document.documentElement.lang = language
 
 void createI18n(language).then((i18n) => {

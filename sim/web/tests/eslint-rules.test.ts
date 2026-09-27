@@ -1,37 +1,27 @@
 // @vitest-environment node
-import { readFileSync } from "node:fs"
+import { readdirSync, readFileSync } from "node:fs"
 import path from "node:path"
 
 import { ESLint } from "eslint"
 import { beforeAll, describe, expect, it } from "vitest"
 
-/*
- * Every fixture case is a `// case: <what> -> <rule ids | none>` (or `// bypass:`) comment
- * followed by code. Each lint message is attributed to the nearest case above it, and the
- * set of rules reported for a case must equal the set it declares. Bypass cases document
- * holes the rules cannot close, so they must stay silent until a rule starts catching them.
- */
-
+// Case syntax is described in README.md; every message counts, so duplicates show up.
 const root = path.resolve(import.meta.dirname, "..")
 const fixtureRoot = path.join(import.meta.dirname, "lint-fixtures")
-const fixtureFiles = [
-  "src/components/theme.tsx",
-  "src/components/rwd.tsx",
-  "src/components/text.tsx",
-  "src/components/logic.ts",
-  "src/components/boundaries.ts",
-  "src/components/markup.tsx",
-  "src/data/index.ts",
-  "src/data/cache.ts",
-  "src/settings/index.ts",
-]
+const fixtureFiles = readdirSync(path.join(fixtureRoot, "src"), {
+  recursive: true,
+  encoding: "utf8",
+})
+  .filter((file) => /\.tsx?$/.test(file))
+  .map((file) => path.join("src", file))
+  .sort()
 
 interface FixtureCase {
   file: string
   line: number
   title: string
   expected: string[]
-  actual: Set<string>
+  actual: string[]
 }
 
 const CASE = /^\s*\/\/ (case|bypass): (.+) -> (.+)$/
@@ -47,7 +37,7 @@ function parseCases(file: string): FixtureCase[] {
       line: index + 1,
       title: `${kind}: ${title}`,
       expected: rules.trim() === "none" ? [] : rules.split(",").map((rule) => rule.trim()),
-      actual: new Set<string>(),
+      actual: [],
     }
   })
 }
@@ -67,14 +57,15 @@ beforeAll(async () => {
     for (const message of result.messages) {
       const owner = fileCases.findLast((c) => c.line < message.line)
       if (!owner) throw new Error(`${file}:${String(message.line)} is outside any case`)
-      owner.actual.add(message.ruleId ?? `fatal: ${message.message}`)
+      owner.actual.push(message.ruleId ?? `fatal: ${message.message}`)
     }
   }
 }, 60_000)
 
 describe("eslint rule fixtures", () => {
   it("found the fixture cases", () => {
-    expect(cases.length).toBeGreaterThan(40)
+    expect(fixtureFiles.length).toBeGreaterThan(10)
+    expect(cases.length).toBeGreaterThan(60)
   })
 
   it.each(cases.map((c) => [`${c.file}:${String(c.line)} ${c.title}`, c] as const))(

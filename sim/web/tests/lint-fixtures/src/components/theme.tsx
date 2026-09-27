@@ -35,7 +35,7 @@ export const Dark = () => <div className="dark:bg-surface" />
 // case: stacked dark variant -> better-tailwindcss/no-restricted-classes
 export const StackedDark = () => <div className="md:dark:text-text" />
 
-// case: conflicting classes -> better-tailwindcss/no-conflicting-classes
+// case: conflicting classes (reported on each side) -> better-tailwindcss/no-conflicting-classes, better-tailwindcss/no-conflicting-classes
 export const Conflict = () => <div className="p-2 p-4" />
 
 // case: style colour property -> no-restricted-syntax
