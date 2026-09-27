@@ -1,14 +1,19 @@
 //! M1: load-time rejection, the engine behaviours it made explicit, and the R1–R3
 //! properties from the design cross-review (docs/m0/known-errors.md).
 
-#![allow(
+#![expect(
     clippy::unwrap_used,
     clippy::indexing_slicing,
     clippy::default_numeric_fallback,
-    clippy::too_many_lines,
-    clippy::shadow_unrelated,
-    clippy::format_push_string,
     reason = "Synthetic fixtures are literal JSON; a construction error or missing field must fail the test."
+)]
+#![expect(
+    clippy::shadow_unrelated,
+    reason = "Each case rebuilds `engine`/`step` from scratch; the old one is not needed."
+)]
+#![expect(
+    clippy::format_push_string,
+    reason = "YAML fixtures are assembled line by line to keep known line numbers."
 )]
 
 extern crate alloc;
@@ -627,6 +632,33 @@ fn r3_same_observation_and_seed_give_the_same_world() {
             "{left}/{right} leaked into the world"
         );
     }
+    // The original R3 probe swapped the opponent's face-down evolve deck (M-016):
+    // the projection must not reveal it, and rebuilding either fails closed or gives
+    // the same world.
+    let evolve_world = |hidden: &str| {
+        let mut position = setup(&json!({"field":[{"id":"a","card":"f-a"}]}), &json!({}));
+        position["players"]["P2"]["zones"]["evolve_deck"] = json!([{"id":"e","card":hidden}]);
+        let game = Game::new(
+            Arc::clone(&loaded),
+            &position,
+            &Value::Null,
+            &Value::Null,
+            "table",
+        )
+        .unwrap();
+        let observed = game.projection(View::P1).unwrap();
+        let rebuilt = Game::from_observation(Arc::clone(&loaded), &observed, "P1", "same-seed")
+            .map(|world| world.digest().unwrap());
+        (observed, rebuilt)
+    };
+    let (seen_left, rebuilt_left) = evolve_world("f-a");
+    let (seen_right, rebuilt_right) = evolve_world("f-b");
+    assert_eq!(seen_left, seen_right);
+    match (rebuilt_left, rebuilt_right) {
+        (Ok(left), Ok(right)) => assert_eq!(left, right),
+        (Err(EngineFailure::Unsupported(_)), Err(EngineFailure::Unsupported(_))) => {}
+        other => panic!("evolve deck identity changed the rebuilt world: {other:?}"),
+    }
 }
 
 /// R-0009: a long-form "〜とき、…なら" ability triggers on the event alone; the
@@ -844,4 +876,128 @@ fn scope_and_ruling_violations_are_rejected_at_load() {
     };
     assert!(rejections_for("f-a", &alias("any"))[0].contains("Q424"));
     assert!(rejections_for("f-a", &alias("field")).is_empty());
+}
+
+/// M-008: `replace_choice` also widens a choice made while resolving, and never the
+/// opponent's choice.
+#[test]
+fn replace_choice_applies_to_resolution_choices_of_its_controller_only() {
+    let hit = |n: i64| json!({"op":"damage","subjects":"opponent.leader","amount":n});
+    let crest = json!([{"line":1,"kind":"static","body":{"op":"replace_choice","side":"self","min":0,
+        "max":{"read":"choice.mode_count"},"condition":{"fn":"ge","args":[{"read":"choice.min"},1]}}}]);
+    for (by, expected) in [(None, 8), (Some("opponent"), 3)] {
+        let mut choice = json!({"op":"choice","timing":"resolve","min":1,"max":1,"modes":[hit(1),hit(2),hit(4)]});
+        if let Some(by) = by {
+            choice["by"] = json!(by);
+        }
+        let loaded = catalog(&json!({
+            "amulet":crest,
+            "spell":[{"line":1,"kind":"spell","body":choice}]
+        }));
+        let mut engine = start(
+            loaded,
+            &setup(
+                &json!({"field":[{"id":"w","card":"amulet"}],"hand":[{"id":"s","card":"spell"}]}),
+                &json!({}),
+            ),
+        );
+        let step = engine
+            .decide(&json!({"do":"play","card":"s"}), "play")
+            .unwrap();
+        assert_eq!(step.outcome, "paused");
+        assert_eq!(engine.legal().unwrap().len(), expected, "{by:?}");
+    }
+}
+
+/// M-008: a card that is not actually moved to the banish zone (already there) forms
+/// no "消滅したとき" trigger.
+#[test]
+fn banish_without_movement_does_not_trigger() {
+    let hit = json!({"op":"damage","subjects":"opponent.leader","amount":1});
+    let loaded = catalog(&json!({
+        "f-a":[{"line":1,"kind":"trigger","event":"banish","subject":"self","active_zones":["banish","hand"],"body":hit}],
+        "spell":[{"line":1,"kind":"spell","body":{"op":"banish","subjects":{"side":"self","zone":"any","name":"f-a"}}}]
+    }));
+    let mut engine = start(
+        loaded,
+        &setup(
+            &json!({"banish":[{"id":"old","card":"f-a"}],"hand":[{"id":"s","card":"spell"},{"id":"x","card":"f-a"}]}),
+            &json!({}),
+        ),
+    );
+    assert_eq!(play_and_settle(&mut engine, "s"), 1);
+    assert_eq!(life(&engine, "P2"), json!(14));
+}
+
+/// M-008: a banish that does not happen (prohibited) forms no "消滅したとき" trigger.
+#[test]
+fn prevented_banish_does_not_trigger() {
+    let hit = json!({"op":"damage","subjects":"opponent.leader","amount":1});
+    for prohibited in [false, true] {
+        let mut programs = json!({
+            "f-a":[{"line":1,"kind":"trigger","event":"banish","subject":"self","active_zones":["hand"],"body":hit}],
+            "spell":[{"line":1,"kind":"spell","body":{"op":"banish","subjects":{"side":"self","zone":"hand","name":"f-a"}}}]
+        });
+        if prohibited {
+            programs["amulet"] = json!([{"line":1,"kind":"static","body":{"op":"restrict",
+                "subjects":{"side":"self","zone":"hand"},"action":"banish"}}]);
+        }
+        let mut engine = start(
+            catalog(&programs),
+            &setup(
+                &json!({"field":[{"id":"w","card":"amulet"}],"hand":[{"id":"s","card":"spell"},{"id":"x","card":"f-a"}]}),
+                &json!({}),
+            ),
+        );
+        let formed = play_and_settle(&mut engine, "s");
+        assert_eq!(formed, usize::from(!prohibited), "prohibited={prohibited}");
+        let zone = if prohibited { "hand" } else { "banish" };
+        assert!(
+            engine
+                .query(View::Referee, &format!("P1.{zone}"))
+                .unwrap()
+                .unwrap()
+                .as_array()
+                .unwrap()
+                .contains(&json!("x")),
+            "prohibited={prohibited}"
+        );
+    }
+}
+
+/// M-008: "次の相手のターン終了時まで" registered during the opponent's turn lasts
+/// through the opponent's *next* turn, not the current one.
+#[test]
+fn next_opponent_turn_end_registered_in_the_opponent_turn() {
+    let loaded = catalog(&json!({
+        "amulet":[{"line":1,"kind":"trigger","event":"field_to_cemetery","subject":"self",
+            "body":{"op":"replace_damage","subjects":"self.leader","prevent":true,"kind":"any","until":"next-opponent-turn-end"}}]
+    }));
+    let mut position = setup(
+        &json!({"tag":"p1","cemetery":[{"id":"w","card":"amulet"}]}),
+        &json!({"tag":"p2"}),
+    );
+    position["turn"]["active"] = json!("P2");
+    position["semantic_state"] = json!({"pending_triggers":[
+        {"controller":"P1","ability":{"source":"w","line":1},"event":{"left_field":"w"}}
+    ],"check_timing":{"in_progress":true,"rules_processed":true}});
+    let mut engine = start(loaded, &position);
+    let choice = engine.legal().unwrap().into_iter().next().unwrap();
+    engine.decide(&choice, "register").unwrap();
+    let active = |engine: &Game| {
+        serde_json::to_value(engine).unwrap()["state"]["continuous"]
+            .as_array()
+            .map_or(0, Vec::len)
+    };
+    let mut alive = Vec::new();
+    for turn in 0..3 {
+        settle_turn(&mut engine);
+        engine
+            .decide(&json!({"do":"end-phase"}), &format!("end-{turn}"))
+            .unwrap();
+        settle_turn(&mut engine);
+        alive.push(active(&engine));
+    }
+    // Ends of: this P2 turn (kept), P1's turn (kept), P2's next turn (gone).
+    assert_eq!(alive, [1, 1, 0]);
 }

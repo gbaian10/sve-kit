@@ -1,9 +1,8 @@
 //! M0/M1 regression tests: one test per fixed known error (docs/m0/known-errors.md)
 //! and the R1–R3 properties from the design cross-review.
 
-#![allow(
+#![expect(
     clippy::unwrap_used,
-    clippy::indexing_slicing,
     clippy::default_numeric_fallback,
     reason = "Synthetic fixtures are literal JSON; a construction error or missing field must fail the test."
 )]
