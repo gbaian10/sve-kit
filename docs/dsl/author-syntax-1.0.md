@@ -128,7 +128,7 @@ evolve:
 
 `item` 是保留的局部名稱：`Sel.where` 求值時綁定目前候選元素，型別為該 Sel 的元素型別，只在該 predicate 有效；`by_kind` 分支則綁定窄化後的接受者。禁止巢狀 where／by_kind 隱式遮蔽 item；需要巢狀時以 `Sel.as: name` 或 `by_kind.as: name` 明確命名，該層不再引入 item。別名與一般 bind 同樣不得重名，離開 predicate／分支即失效，外層 item 仍可明確讀取。
 
-`Sel` 欄位沿用 who、zone、kind、class/not*class、trait/traits_any/not_trait、name/names/name_contains/not_same_name_as_this、other、cost\*\*/orig*cost\*\*、hp_le、power_max、acted、evolved、keyword、has_trigger/has_evolve、not_token、face_up、leader/leader_or/leader_of、in/rest、entered_this_turn、any_of、except、where；增加 as（局部元素別名）、advance_follower、boxed、racing、同型／同名引用與頂底切片。`in` 僅接物件 binding，receipt 必須先用 objects_of（或 count_of.where 在材料快照篩選）。未知 filter 不當 no-op。
+`Sel` 欄位沿用 `who`、`zone`、`kind`、`class/not_class`、`trait/traits_any/not_trait`、`name/names/name_contains/not_same_name_as_this`、`other`、`cost_*/orig_cost_*`、`hp_le`、`power_max`、`acted`、`evolved`、`keyword`、`has_trigger/has_evolve`、`not_token`、`face_up`、`leader/leader_or/leader_of`、`in/rest`、`entered_this_turn`、`any_of`、`except`、`where`；增加 as（局部元素別名）、advance_follower、boxed、racing、同型／同名引用與頂底切片。`in` 僅接物件 binding，receipt 必須先用 objects_of（或 count_of.where 在材料快照篩選）。未知 filter 不當 no-op。
 
 ## 6. 玩家、引用、結果
 
