@@ -31,7 +31,7 @@ sve-kit/
 │   ├── server/            Authoritative game server (planned)
 │   └── web/               Web client: game board, deck builder, card browser (planned)
 │
-└── docs/                  ADRs (docs/adr), DSL specs (docs/dsl); schema and diagrams planned
+└── docs/                  ADRs (docs/adr), DSL specs (docs/dsl), terminology; schema planned
 ```
 
 ## How the parts fit

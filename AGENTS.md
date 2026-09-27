@@ -25,6 +25,8 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | `sim/`      | 模擬器（尚未開始）：之後會有 `engine/`、`server/`、`web/`                         | Rust、TS    |
 | `docs/`     | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
 
+專案用語（卡表快照、啟動包、分片、版次等）以 `docs/terminology.md` 為準，新名詞先加進那份。
+
 依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`。
 `carddb` 匯出的有版號快照是卡片資料的**唯一權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
 但**不要維護另一份獨立的卡表**。
