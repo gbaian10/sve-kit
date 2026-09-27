@@ -20,6 +20,8 @@
   --accent-ink: #ffffff;
   --fk: #a16207;
   --fk-soft: #fbf1dc;
+  --cfk: #7c3aed;
+  --inf: #0f766e;
   --edge: #97a3b2;
   --shadow: 0 1px 2px rgba(28, 36, 48, .08), 0 2px 8px rgba(28, 36, 48, .06);
   --shadow-lg: 0 4px 24px rgba(28, 36, 48, .16);
@@ -45,6 +47,8 @@
     --accent-ink: #0d2230;
     --fk: #e8b64a;
     --fk-soft: #3b3325;
+    --cfk: #b49cf5;
+    --inf: #5eead4;
     --edge: #6f7b8b;
     --shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 2px 8px rgba(0, 0, 0, .2);
     --shadow-lg: 0 6px 28px rgba(0, 0, 0, .45);
@@ -68,6 +72,8 @@
   --accent-ink: #0d2230;
   --fk: #e8b64a;
   --fk-soft: #3b3325;
+  --cfk: #b49cf5;
+  --inf: #5eead4;
   --edge: #6f7b8b;
   --shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 2px 8px rgba(0, 0, 0, .2);
   --shadow-lg: 0 6px 28px rgba(0, 0, 0, .45);
@@ -135,6 +141,8 @@ select#group {
 #edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
 .edge { fill: none; stroke: var(--edge); stroke-width: 1.4; transition: opacity .15s; }
 .edge.null { stroke-dasharray: 5 4; }
+.edge.via-constraint { stroke: var(--cfk); }
+.edge.via-inferred { stroke: var(--inf); stroke-dasharray: 1 4; stroke-linecap: round; stroke-width: 1.8; }
 .edge.hi { stroke: var(--accent); stroke-width: 2.2; }
 .edge.hi.in { stroke: var(--fk); }
 .mk { fill: var(--edge); }
@@ -175,6 +183,8 @@ select#group {
 .ic { width: 14px; height: 14px; flex: none; display: inline-flex; color: var(--faint); }
 .row.pk .ic { color: var(--accent); }
 .row.fk:not(.pk) .ic { color: var(--fk); }
+.row.fk.via-constraint:not(.pk) .ic { color: var(--cfk); }
+.row.fk.via-inferred:not(.pk) .ic, .row.nref:not(.pk):not(.fk) .ic { color: var(--inf); }
 .cn { color: var(--text); }
 .row.pk .cn { color: var(--accent); font-weight: 600; }
 .ct { margin-left: auto; padding-left: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; max-width: 22ch; }
@@ -184,7 +194,8 @@ select#group {
 .row .ct.enum { margin-left: auto; }
 .ct.fk { color: var(--fk); }
 .ct.fk.null { opacity: .75; }
-.ct.inf { font-style: italic; }
+.ct.fk.via-constraint { color: var(--cfk); }
+.ct.fk.via-inferred { color: var(--inf); font-style: italic; text-decoration: underline dotted; text-underline-offset: 2px; }
 .ct.raw { color: var(--muted); font-style: italic; }
 .xchip {
   display: inline-flex; align-items: center; gap: 3px; margin-left: auto; padding: 0 5px; max-width: 24ch;
@@ -193,6 +204,8 @@ select#group {
 }
 .xchip:hover { border-style: solid; }
 .xchip.null { opacity: .8; }
+.xchip.via-constraint { color: var(--cfk); border-color: var(--cfk); }
+.xchip.via-inferred { color: var(--inf); border-color: var(--inf); font-style: italic; }
 .uq {
   flex: none; font: 600 9.5px/1 var(--mono); padding: 2px 4px; border-radius: 3px;
   color: var(--muted); border: 1px solid var(--line-strong); letter-spacing: .02em;
@@ -253,6 +266,8 @@ select#group {
 .tag { font: 600 10px/1.5 var(--mono); padding: 0 4px; border-radius: 3px; border: 1px solid var(--line-strong); color: var(--muted); }
 .tag.pk { color: var(--accent); border-color: var(--accent); }
 .tag.fk { color: var(--fk); border-color: var(--fk); cursor: pointer; background: transparent; }
+.tag.fk.via-constraint { color: var(--cfk); border-color: var(--cfk); }
+.tag.fk.via-inferred { color: var(--inf); border-color: var(--inf); border-style: dotted; }
 .cons { margin: 0; padding: 10px 12px; background: var(--card-head); border-radius: 6px; font-size: 13px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
 .links { display: flex; flex-wrap: wrap; gap: 4px; }
 .links button { font: 12px var(--mono); }
@@ -292,7 +307,7 @@ select#group {
 
 <div class="app">
   <header class="bar">
-    <div class="brand"><b>Schema v1 ER</b><span>r3.2</span></div>
+    <div class="brand"><b>Schema v1 ER</b><span>docs/schema</span></div>
     <div class="seg" role="group" aria-label="層">
       <button type="button" id="L-build" data-layer="build" aria-pressed="true">建置層</button>
       <button type="button" id="L-snapshot" data-layer="snapshot" aria-pressed="false">快照層</button>
@@ -322,11 +337,12 @@ select#group {
     <div class="status" id="status" role="status">載入中…</div>
     <div class="legend" id="legend">
       <span><i class="k" data-ic="key"></i>PK</span>
-      <span><i class="f" data-ic="link"></i>FK</span>
+      <span><i class="f" data-ic="link"></i>FK 欄</span>
       <span><b class="uq">UQ</b>唯一</span>
-      <span><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6"/></svg>必填 FK</span>
-      <span><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>可空 FK</span>
-      <span class="opt" id="lg-inf" hidden><i class="f" style="font:italic 11px var(--mono)">card</i>由欄位名推斷</span>
+      <span id="lg-decl"><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6"/></svg>宣告 FK</span>
+      <span id="lg-null"><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>可空 FK</span>
+      <span id="lg-cons" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--cfk)" stroke-width="1.6"/></svg>約束 FK</span>
+      <span id="lg-inf" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M1 4h26" stroke="var(--inf)" stroke-width="1.8" stroke-dasharray="1 4" stroke-linecap="round"/></svg><i style="color:var(--inf);font:italic 11px var(--mono)">card</i>欄名推斷的引用</span>
       <span class="opt" id="lg-hub" hidden>總圖不畫指向 decision／source_record／text_unit 的線</span>
       <span class="zoom" id="zoomlbl">100%</span>
     </div>
@@ -341,6 +357,8 @@ const DATA = /*__DATA__*/null;
 // Provenance tables nearly everything points at; the overview leaves their edges out so the layout stays readable.
 const HUBS = new Set(["decision", "source_record", "text_unit"]);
 const LAYER_NAME = { build: "建置層", snapshot: "快照層" };
+const VIA_NAME = { decl: "欄位宣告的 FK", constraint: "約束 FK(...) 宣告的 FK", inferred: "由欄位名推斷的引用，不是宣告的 FK" };
+const VIA_SHORT = { constraint: "約束", inferred: "推斷" };
 const ICON = {
   key: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="8" r="3"/><path d="M8 8h7M12.5 8v2.6M15 8v2"/></svg>',
   link: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6.5 9.5l3-3"/><path d="M7.6 4.6l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7l-1.2 1.2M8.4 11.4l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7l1.2-1.2"/></svg>',
@@ -406,7 +424,10 @@ function fillGroups() {
     L.groups.map(g => `<option value="${g.key}">${g.key} ${esc(g.short)}（${g.tables.length}）</option>`).join("");
   sel.value = S.group;
   document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.layer === S.layer)));
-  $("#lg-inf").hidden = S.layer !== "snapshot";
+  const vias = new Set(L.rels.map(r => r.via));
+  $("#lg-decl").hidden = $("#lg-null").hidden = !vias.has("decl");
+  $("#lg-cons").hidden = !vias.has("constraint");
+  $("#lg-inf").hidden = !vias.has("inferred");
 }
 document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
   if (b.dataset.layer === S.layer) return;
@@ -428,13 +449,13 @@ function typeHTML(c, overview) {
   if (c.raw) return `<span class="ct raw" title="${esc(c.raw)}">${esc(c.raw)}</span>`;
   if (c.fk_target) {
     const label = c.type && c.type.startsWith("[") ? `[${c.fk_target}]` : c.fk_target;
-    const inf = c.fk_inferred ? " inf" : "";
+    const inf = " via-" + c.fk_via;
     if (!S.visible.has(c.fk_target) || overview && HUBS.has(c.fk_target)) {
       const g = IDX[S.layer].tg[c.fk_target]?.[0];
       const gt = g ? `${g} ${IDX[S.layer].groups[g].short}` : "未分組";
       return `<button type="button" class="xchip${c.nullable ? " null" : ""}${inf}" data-jump="${esc(c.fk_target)}" title="跳到 ${esc(c.fk_target)}（${esc(gt)}）">${esc(label)}${c.nullable ? "?" : ""}${ICON.out}</button>`;
     }
-    return `<span class="ct fk${c.nullable ? " null" : ""}${inf}"${c.fk_inferred ? ' title="由欄位名推斷的引用"' : ""}>${esc(label)}${q}</span>`;
+    return `<span class="ct fk${c.nullable ? " null" : ""}${inf}"${c.fk_via === "inferred" ? ' title="由欄位名推斷的引用"' : c.fk_via === "constraint" ? ' title="由約束 FK(...) 宣告"' : ""}>${esc(label)}${q}</span>`;
   }
   if (c.enum_values) {
     const full = c.enum_values.join(" | ");
@@ -455,12 +476,12 @@ function cardEl(t, overview) {
   const el = document.createElement("div");
   el.className = "tbl"; el.dataset.t = t.name; el.tabIndex = 0; el.setAttribute("role", "button");
   el.setAttribute("aria-label", `${t.name} 表，${t.cols.length} 欄`);
-  const cols = overview ? t.cols.filter(c => c.pk || c.fk_target) : t.cols;
+  const cols = overview ? t.cols.filter(c => c.pk || c.fk_target || c.nested_refs.length) : t.cols;
   const hidden = t.cols.length - cols.length;
   el.innerHTML = `<div class="th"><span class="tn">${esc(t.name)}</span><span class="tx">${t.cols.length} 欄</span></div>` +
     `<div class="rows">` + cols.map(c => {
-      const cls = ["row", c.pk && "pk", c.fk_target && "fk", c.nullable && "null"].filter(Boolean).join(" ");
-      const ic = c.pk ? ICON.key : c.fk_target ? ICON.link : "";
+      const cls = ["row", c.pk && "pk", c.fk_target && "fk", c.fk_via && "via-" + c.fk_via, c.nested_refs.length && "nref", c.nullable && "null"].filter(Boolean).join(" ");
+      const ic = c.pk ? ICON.key : c.fk_target || c.nested_refs.length ? ICON.link : "";
       return `<div class="${cls}" data-c="${esc(c.name)}"><span class="ic">${ic}</span><span class="cn">${esc(c.name)}</span>${typeHTML(c, overview)}${uqHTML(t, c)}</div>`;
     }).join("") + (hidden ? `<div class="more">＋${hidden} 個一般欄位</div>` : "") + `</div>`;
   return el;
@@ -636,7 +657,7 @@ const MARKERS = `<defs>
 
 function drawEdges(edges, routes, selfLoops, cross = []) {
   const out = [MARKERS];
-  const pathEl = (d, r) => `<path class="edge${r.nullable ? " null" : ""}" data-from="${esc(r.from)}" data-to="${esc(r.to)}" data-col="${esc(r.col)}" d="${d}" marker-start="url(#mo)" marker-end="url(#md)"/>`;
+  const pathEl = (d, r) => `<path class="edge via-${r.via}${r.nullable ? " null" : ""}" data-from="${esc(r.from)}" data-to="${esc(r.to)}" data-col="${esc(r.col)}" d="${d}" marker-start="url(#mo)" marker-end="url(#md)"/>`;
   for (const e of edges) {
     const s = routes[e.id];
     let d;
@@ -729,10 +750,11 @@ function renderPanel() {
   panel.classList.toggle("closed", !t);
   if (!t) {
     panelIn.innerHTML = `<div class="help">
-      <p><b style="color:var(--text)">sve-kit 卡片資料 schema v1（r3.2）</b>。建置層 ${Object.keys(DATA.layers.build.tables).length} 張表、快照層 ${Object.keys(DATA.layers.snapshot.tables).length} 個集合。</p>
+      <p><b style="color:var(--text)">sve-kit 卡片資料 schema v1</b>。建置層 ${Object.keys(DATA.layers.build.tables).length} 張表、快照層 ${Object.keys(DATA.layers.snapshot.tables).length} 個集合。</p>
       <p>點一張表看完整欄位、約束與引用關係。欄位右側帶虛框的琥珀色標籤是跨分組的 FK，點了會跳到目標表所在的分組。</p>
       <p>拖曳平移、滾輪或雙指縮放。<kbd>/</kbd> 搜尋，<kbd>Esc</kbd> 取消選取，<kbd>Tab</kbd> 可在表之間移動、<kbd>Enter</kbd> 選取。</p>
-      <p>快照層的宣告沒有 PK／FK 記號：開頭的 <code>id</code> 視為主鍵，<code>*_id</code> 欄位依名稱推斷引用（斜體）。</p></div>`;
+      <p>連線樣式：灰色實線是欄位宣告的 FK（虛線為可空）、紫色是約束 <code>FK(...)</code> 宣告的 FK、綠色點線是依 <code>*_id</code> 欄名推斷的引用（快照層沒有 FK 記號，內嵌物件裡的 ID 也畫成點線）。</p>
+      <p>快照層未註明 PK 的集合以首欄 <code>id</code> 為主鍵（依 snapshot-format.md）。</p></div>`;
     return;
   }
   const L = S.layer, ix = IDX[L];
@@ -740,7 +762,8 @@ function renderPanel() {
   const rows = t.cols.map(c => {
     const flags = [];
     if (c.pk) flags.push(`<span class="tag pk">PK</span>`);
-    if (c.fk_target) flags.push(`<button type="button" class="tag fk" data-goto="${esc(c.fk_target)}">FK→${esc(c.fk_target)}${c.fk_cols ? "（" + esc(c.fk_cols.join(",")) + "）" : ""}${c.fk_inferred ? " 推斷" : ""}</button>`);
+    if (c.fk_target) flags.push(`<button type="button" class="tag fk via-${c.fk_via}" data-goto="${esc(c.fk_target)}" title="${VIA_NAME[c.fk_via]}">FK→${esc(c.fk_target)}${c.fk_cols ? "（" + esc(c.fk_cols.join(",")) + "）" : ""}${c.fk_via === "decl" ? "" : " " + VIA_SHORT[c.fk_via]}</button>`);
+    c.nested_refs.forEach(n => flags.push(`<button type="button" class="tag fk via-inferred" data-goto="${esc(n)}" title="內嵌物件中的 *_id，由欄名推斷">內嵌→${esc(n)}</button>`));
     c.uq.forEach(u => flags.push(`<span class="tag" title="${u === "UNIQUE" ? "單欄唯一" : esc("(" + ix.uqTitle[t.name][u].join(", ") + ")")}">${u === "UNIQUE" ? "UQ" : esc(u)}</span>`));
     if (c.nullable) flags.push(`<span class="tag">可空</span>`);
     const ty = c.raw ? `<i>未解析：</i>${esc(c.raw)}` : c.enum_values ? `<span class="ev">${c.enum_values.map(v => `<span>${esc(v)}</span>`).join("")}</span>` : esc(c.type || "");

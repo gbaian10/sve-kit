@@ -1,0 +1,295 @@
+# Diagram groups and snapshot reference hints for build_er.py.
+# Every table of a layer must belong to exactly one group; the generator fails otherwise.
+
+[[build.groups]]
+key = "b01"
+title = "來源與確認"
+tables = [
+    "source_record",
+    "source_coverage",
+    "decision",
+    "decision_source",
+    "build_issue",
+]
+
+[[build.groups]]
+key = "b02"
+title = "身分與商品"
+tables = [
+    "card",
+    "face",
+    "printing",
+    "identity_change",
+    "card_int_id",
+    "product_family",
+    "product",
+    "printing_product",
+    "printing_reference",
+    "region_mapping_review",
+    "region_availability_override",
+]
+
+[[build.groups]]
+key = "b03"
+title = "插畫與加工"
+tables = [
+    "artist",
+    "art",
+    "face_art_baseline",
+    "art_artist",
+    "printing_face",
+    "stamp",
+    "printing_stamp",
+]
+
+[[build.groups]]
+key = "b04"
+title = "文字與勘誤"
+tables = [
+    "text_unit",
+    "face_revision",
+    "face_text_section",
+    "printing_text_section",
+    "face_trait",
+    "face_title",
+    "face_special_kind",
+    "face_current",
+    "printing_face_observation",
+    "face_semantics",
+    "revision_semantics",
+    "semantic_reference",
+    "errata",
+    "errata_version",
+    "errata_change",
+    "errata_printing",
+]
+
+[[build.groups]]
+key = "b05"
+title = "跨區與構築"
+tables = [
+    "card_related",
+    "region_divergence",
+    "region_text_review",
+    "rules_name",
+    "face_rules_name",
+    "rules_profile",
+    "rules_profile_revision",
+    "restriction",
+    "restriction_member",
+    "restriction_event",
+    "restriction_coverage",
+    "deck_role_override",
+]
+
+[[build.groups]]
+key = "b06"
+title = "問答與裁定"
+tables = [
+    "qa",
+    "qa_version",
+    "qa_card",
+    "cr_version",
+    "cr_clause",
+    "ruling",
+    "ruling_revision",
+    "ruling_evidence",
+    "ruling_card",
+    "ruling_template",
+    "ruling_hint",
+    "ruling_supersession",
+    "ruling_review",
+]
+
+[[build.groups]]
+key = "b07"
+title = "數位與語音"
+tables = [
+    "digital_card",
+    "digital_face",
+    "digital_text",
+    "digital_art",
+    "digital_art_source",
+    "digital_link",
+    "digital_art_link",
+    "digital_link_coverage",
+    "digital_endpoint",
+    "voice",
+    "card_voice",
+]
+
+[[build.groups]]
+key = "b08"
+title = "翻譯依賴"
+tables = [
+    "glossary_term",
+    "glossary_translation",
+    "sentence_template",
+    "template_translation",
+    "template_component",
+    "text_template_binding",
+    "translation",
+    "translation_binding",
+    "translation_term",
+    "translation_selection",
+    "translation_context",
+    "translation_use",
+]
+
+[[build.groups]]
+key = "b09"
+title = "DSL 證據"
+tables = [
+    "dsl_document",
+    "dsl_source",
+    "dsl_review",
+    "dsl_exam",
+    "dsl_load",
+    "card_engine_support",
+    "dsl_ruling",
+    "dsl_qa",
+    "author_macro",
+    "macro_review",
+    "dsl_macro_use",
+]
+
+[[build.groups]]
+key = "b10"
+title = "機制"
+tables = [
+    "keyword",
+    "mechanic_action",
+    "card_mechanic",
+    "mechanic_coverage",
+    "mechanic_override",
+    "mechanic_projection",
+    "card_mechanic_coverage",
+]
+
+[[build.groups]]
+key = "b11"
+title = "影像與更正"
+tables = [
+    "image_asset",
+    "printing_image",
+    "image_variant",
+    "image_size",
+    "source_correction",
+    "correction_evidence",
+    "correction_application",
+]
+
+[[build.groups]]
+key = "b12"
+title = "顯示與路由"
+tables = [
+    "language",
+    "vocabulary",
+    "shop_link_template",
+    "text_symbol",
+    "card_route",
+    "card_route_alias",
+    "route_override",
+    "default_printing_override",
+    "search_alias",
+]
+
+[[snapshot.groups]]
+key = "s01"
+title = "查卡與商品"
+tables = [
+    "card",
+    "face",
+    "printing",
+    "product_family",
+    "product",
+    "printing_product",
+    "identity_change",
+]
+
+[[snapshot.groups]]
+key = "s02"
+title = "插畫、卡圖與語音"
+tables = [
+    "art",
+    "artist",
+    "stamp",
+    "image_asset",
+    "printing_image",
+    "image_variant",
+    "voice",
+    "card_voice",
+]
+
+[[snapshot.groups]]
+key = "s03"
+title = "文字與版本"
+tables = [
+    "text_unit",
+    "face_revision",
+    "translation",
+    "qa",
+    "qa_version",
+    "cr_version",
+    "cr_clause",
+    "errata",
+]
+
+[[snapshot.groups]]
+key = "s04"
+title = "構築與輔助提示"
+tables = [
+    "ruling_revision",
+    "rules_name",
+    "face_rules_name",
+    "rules_profile",
+    "restriction",
+    "card_related",
+]
+
+[[snapshot.groups]]
+key = "s05"
+title = "數位對應"
+tables = [
+    "digital_card",
+    "digital_art",
+    "digital_link",
+    "digital_art_link",
+    "digital_link_coverage",
+]
+
+[[snapshot.groups]]
+key = "s06"
+title = "機制、引擎與搜尋"
+tables = [
+    "keyword",
+    "mechanic_projection",
+    "card_mechanic_coverage",
+    "card_engine_support",
+    "vocabulary",
+    "search_alias",
+    "text_symbol",
+    "card_route_alias",
+    "route_override",
+]
+
+# Snapshot fields carry no FK markers, so `*_id` names are matched to collections:
+# `*_unit_id` is text_unit, otherwise the longest trailing word run that names a collection.
+# List here the names that rule gets wrong or cannot resolve. A `table.field` key applies to that
+# field only and may name a non-`*_id` field that the document says references a collection.
+# An empty string means the field is an identifier but not a reference to a snapshot collection.
+[snapshot.references]
+"qa.current_version_id" = "qa_version"
+"stamp.series_code" = "vocabulary"          # snapshot-format.md §8
+family_id = "product_family"
+home_set_id = "product_family"
+image_id = "image_asset"
+interaction_target_id = "digital_card"
+profile_id = "rules_profile"
+replacement_revision_id = "ruling_revision"
+revision_id = "face_revision"
+dsl_id = ""
+entry_id = ""
+int_id = ""
+official_id = ""
+ruling_id = ""
