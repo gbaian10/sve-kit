@@ -53,6 +53,7 @@ class Site:
     region: Region
     allowed: Callable[[str], bool]
     image_path: Callable[[str], PurePosixPath]
+    headers: Callable[[str], tuple[tuple[str, str], ...]] = lambda _url: ()
 
 
 JP_SITE = Site(jp.REGION, jp.allowed, jp.image_path)
@@ -201,7 +202,12 @@ class Crawler:
         resource = self.manifest.resources.get(url) if conditional else None
         etag = resource.etag if resource is not None else None
         response = await self.client.get(
-            Request(url=url, allowed=self.site.allowed, if_none_match=etag)
+            Request(
+                url=url,
+                allowed=self.site.allowed,
+                if_none_match=etag,
+                headers=self.site.headers(url),
+            )
         )
         if missing_ok and _missing(response):
             with self.manifest.transaction():

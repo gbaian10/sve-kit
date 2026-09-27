@@ -13,10 +13,12 @@ from sve_carddb.fetch.throttle import Throttle
 from sve_carddb.manifest import ExclusiveLock, Manifest
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources import official_sv1 as sv1
+from sve_carddb.sources import official_svwb as svwb
 
 from .conftest import FakeClock
 from .fakeportal import FakePortal, card_id
 from .fakesite import IMG, FakeSite
+from .fakewb import FakeWb
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -359,3 +361,37 @@ def test_sv1_cards_dry_run_sends_nothing(portal: FakePortal) -> None:
     assert result.exit_code == 0, result.output
     assert "3 of 3 URLs would be requested" in result.output
     assert portal.calls == []
+
+
+@pytest.fixture
+def wb(monkeypatch: pytest.MonkeyPatch, data_dir: Path, clock: FakeClock) -> FakeWb:
+    del data_dir, clock  # requested for their side effects
+    fake = FakeWb()
+
+    def factory(settings: Settings) -> httpx.AsyncClient:
+        del settings
+        return httpx.AsyncClient(transport=httpx.MockTransport(fake))
+
+    monkeypatch.setattr(cli, "http_factory", factory)
+    return fake
+
+
+def test_svwb_cards_dry_run_then_crawl(wb: FakeWb, data_dir: Path) -> None:
+    before = invoke("crawl", "svwb-cards", "--dry-run")
+    assert before.exit_code == 0, before.output
+    assert "3 URLs would be requested" in before.output
+    result = invoke("crawl", "svwb-cards")
+    assert result.exit_code == 0, result.output
+    assert "   cht: 505 cards" in result.output
+    assert (data_dir / svwb.list_path("cht", 480)).is_file()
+    after = invoke("crawl", "svwb-cards", "--dry-run")
+    assert "51 URLs would be requested" in after.output
+    assert len(wb.calls) == 51
+
+
+def test_svwb_cards_reports_a_failed_language(wb: FakeWb) -> None:
+    wb.grow_after = 1
+    result = invoke("crawl", "svwb-cards")
+    assert result.exit_code == 1, result.output
+    assert "ja:" in result.output
+    assert "changed" in result.output

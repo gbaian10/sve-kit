@@ -58,6 +58,8 @@ class Request:
     url: str
     allowed: Callable[[str], bool]
     if_none_match: str | None = None
+    headers: tuple[tuple[str, str], ...] = ()
+    """Sent on every hop, for APIs that pick the language by header."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -182,7 +184,7 @@ class Client:
                     sent_if_none_match=if_none_match,
                 )
             )
-            response = await self._send(url, if_none_match, request_id)
+            response = await self._send(url, request.headers, if_none_match, request_id)
             status = response.status_code
             if status in _RETURNED_STATUS:
                 return Response(
@@ -208,9 +210,15 @@ class Client:
         raise FetchError(msg)
 
     async def _send(
-        self, url: str, if_none_match: str | None, request_id: int
+        self,
+        url: str,
+        extra: tuple[tuple[str, str], ...],
+        if_none_match: str | None,
+        request_id: int,
     ) -> httpx.Response:
-        headers = {"If-None-Match": if_none_match} if if_none_match else {}
+        headers = dict(extra)
+        if if_none_match:
+            headers["If-None-Match"] = if_none_match
         try:
             return await self._http.get(url, headers=headers, follow_redirects=False)
         except httpx.TimeoutException as exc:

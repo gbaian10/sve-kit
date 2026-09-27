@@ -22,6 +22,7 @@ from sve_carddb.crawl import (
     LimitReachedError,
     ListInconsistentError,
     Mode,
+    Site,
     card_numbers,
     current_sets,
     image_urls,
@@ -34,6 +35,8 @@ from sve_carddb.crawl_sv1 import (
     stored_cards,
     stored_image,
 )
+from sve_carddb.crawl_svwb import SVWB_SITE
+from sve_carddb.crawl_svwb import cards as svwb_cards
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.client import (
     BudgetExhaustedError,
@@ -47,9 +50,10 @@ from sve_carddb.fetch.writer import DiskFullError, LocalState, Writer, remove_te
 from sve_carddb.manifest import AlreadyRunningError, ExclusiveLock, Manifest
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources import official_sv1 as sv1
+from sve_carddb.sources import official_svwb as svwb
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Awaitable, Callable
 
 app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card database.")
 crawl_app = typer.Typer(
@@ -81,6 +85,7 @@ class Stage(StrEnum):
     P5 = "p5"
     SV1_CARDS = "sv1-cards"
     SV1_IMAGES = "sv1-images"
+    SVWB_CARDS = "svwb-cards"
 
 
 _SV1_STAGES = frozenset({Stage.SV1_CARDS, Stage.SV1_IMAGES})
@@ -193,6 +198,14 @@ def crawl_sv1_images(
 ) -> None:
     """Fetch the shadowverse-portal.com card images not stored yet."""
     _run(Job(Stage.SV1_IMAGES, limit=limit, max_requests=max_requests, dry_run=dry_run))
+
+
+@crawl_app.command("svwb-cards")
+def crawl_svwb_cards(
+    max_requests: BudgetOption = None, dry_run: DryRunOption = False
+) -> None:
+    """Fetch the shadowverse-wb.com card list in ja, en and cht, text only."""
+    _run(Job(Stage.SVWB_CARDS, max_requests=max_requests, dry_run=dry_run))
 
 
 @manifest_app.command("check")
@@ -313,23 +326,20 @@ async def _crawl(
             breaker=CircuitBreaker(settings.breaker_threshold),
             mode=job.mode,
             limit=job.limit,
-            site=SV1_SITE if job.stage in _SV1_STAGES else JP_SITE,
+            site=_site(job.stage),
         )
         sv1_crawler = Sv1Crawler(crawler, CircuitBreaker(settings.breaker_threshold))
+        stages: dict[Stage, Callable[[], Awaitable[int]]] = {
+            Stage.P0: lambda: _p0(crawler),
+            Stage.P1: lambda: _p1(crawler, job.sets),
+            Stage.P2: lambda: _p2(crawler, job.sets),
+            Stage.P5: lambda: _p5(crawler, job, settings, writer),
+            Stage.SV1_CARDS: lambda: _sv1_cards(sv1_crawler),
+            Stage.SV1_IMAGES: lambda: _sv1_images(sv1_crawler, job, settings),
+            Stage.SVWB_CARDS: lambda: _svwb_cards(crawler),
+        }
         try:
-            match job.stage:
-                case Stage.P0:
-                    return await _p0(crawler)
-                case Stage.P1:
-                    return await _p1(crawler, job.sets)
-                case Stage.P2:
-                    return await _p2(crawler, job.sets)
-                case Stage.P5:
-                    return await _p5(crawler, job, settings, writer)
-                case Stage.SV1_CARDS:
-                    return await _sv1_cards(sv1_crawler)
-                case Stage.SV1_IMAGES:
-                    return await _sv1_images(sv1_crawler, job, settings)
+            return await stages[job.stage]()
         finally:
             console.print(f"HTTP requests sent: {client.requests_sent}")
 
@@ -427,6 +437,27 @@ def _check_space(
     console.print(f"{total} images, {pending} to fetch; {free >> 30} GiB free")
 
 
+def _site(stage: Stage) -> Site:
+    if stage in _SV1_STAGES:
+        return SV1_SITE
+    if stage is Stage.SVWB_CARDS:
+        return SVWB_SITE
+    return JP_SITE
+
+
+async def _svwb_cards(crawler: Crawler) -> int:
+    failures = 0
+    for lang in svwb.LANGUAGES:
+        try:
+            count = await svwb_cards(crawler, lang)
+        except FetchError as exc:
+            failures += 1
+            console.print(f"[red]{lang}:[/red] {exc}")
+            continue
+        console.print(f"{lang:>6}: {count} cards")
+    return failures
+
+
 async def _sv1_cards(crawler: Sv1Crawler) -> int:
     failures = 0
     for lang in sv1.LANGUAGES:
@@ -473,6 +504,9 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
     if job.stage in _SV1_STAGES:
         _dry_run_sv1(job, writer, manifest)
         return
+    if job.stage is Stage.SVWB_CARDS:
+        _dry_run_svwb(writer)
+        return
     known = current_sets(manifest)
     urls: list[str] = []
     match job.stage:
@@ -513,6 +547,20 @@ def _dry_run_sv1(job: Job, writer: Writer, manifest: Manifest) -> None:
     for url in fetch:
         console.print(url)
     console.print(f"{len(fetch)} of {len(urls)} URLs would be requested")
+
+
+def _dry_run_svwb(writer: Writer) -> None:
+    # Every page is re-checked; the stored first page tells how many there are.
+    urls: list[str] = []
+    for lang in svwb.LANGUAGES:
+        first = svwb.list_url(lang, 0)
+        count = 1
+        if writer.local_state(first) is LocalState.TRUSTED:
+            count = svwb.parse_list(writer.read(first)).count
+        urls += [svwb.list_url(lang, o) for o in range(0, count, svwb.PAGE_SIZE)]
+    for url in urls:
+        console.print(url)
+    console.print(f"{len(urls)} URLs would be requested (more if the list grew)")
 
 
 def _list_urls(code: str, writer: Writer) -> list[str]:

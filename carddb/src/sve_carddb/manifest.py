@@ -126,8 +126,9 @@ CREATE TABLE IF NOT EXISTS generation_edge (
 class Region(StrEnum):
     JP = "jp"
     EN = "en"
-    # The digital game's portal, kept for mapping SVE cards to digital ones.
+    # The digital games' official card lists, kept for mapping SVE cards to digital ones.
     SV1 = "sv1"
+    SVWB = "svwb"
 
 
 class Kind(StrEnum):
