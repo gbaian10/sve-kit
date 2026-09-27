@@ -4,14 +4,6 @@
 # docs/m0/known-errors.md.
 expected_scenarios: 706
 known:
-  - question: card-BP19-P21
-    scenario: blessing 蘇生ミロエル後當回合起動
-    status: adapter-error
-    error: KE-02
-  - question: card-BP19-P21
-    scenario: necromancer 蘇生ミロエル後當回合起動
-    status: adapter-error
-    error: KE-02
   - question: rule-10.5.2-02
     scenario: '[astra] 回合玩家 P1'
     status: fail

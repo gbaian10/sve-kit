@@ -349,36 +349,38 @@ cards:
       - line: 3
         kind: trigger
         body:
-          op: seq
-          steps:
-            - op: move
-              subjects: self
-              to: ex
-              bind: returned
-            - op: modify
-              subjects: returned
-              abilities:
-                - line: 3
-                  kind: static
-                  body:
-                    op: adjust_cost
-                    subjects: self
-                    amount: -1
-                  active_zones:
-                    - ex
+          op: pay
+          cost_selections:
+            - key: '1'
+              select:
+                side: self
+                zone: hand
+                trait: 機械
+              min: 2
+              max: 2
+          costs:
+            - op: discard
+              subjects: cost.1
+          then:
+            op: seq
+            steps:
+              - op: move
+                subjects: self
+                to: ex
+                bind: returned
+              - op: modify
+                subjects: returned
+                abilities:
+                  - line: 3
+                    kind: static
+                    body:
+                      op: adjust_cost
+                      subjects: self
+                      amount: -1
+                    active_zones:
+                      - ex
         event: field_to_cemetery
         subject: self
-        cost_selections:
-          - key: '1'
-            select:
-              side: self
-              zone: hand
-              trait: 機械
-            min: 2
-            max: 2
-        costs:
-          - op: discard
-            subjects: cost.1
   BP17-P21:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
