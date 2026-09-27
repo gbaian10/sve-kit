@@ -20,6 +20,7 @@ SCHEMA_DIR = HERE.parent
 TEMPLATE = HERE / "template.html"
 CONFIG = HERE / "diagram.toml"
 DEFAULT_OUT = HERE / "out" / "schema-er.html"
+DATA_SLOT = "/*__DATA__*/null"
 
 
 @dataclass(slots=True)
@@ -88,6 +89,42 @@ def parse_layers(
     return out
 
 
+def check_constraint_fks(
+    model: SchemaModel,
+    config: DiagramConfig,
+    layers: dict[LayerName, LayerResult],
+    diag: Diagnostics,
+) -> None:
+    """Every `FK(` in the documents must become a constraint relation."""
+    written = sum(
+        t.constraints.count("FK(") for layer in LAYERS for t in model.layer(layer)
+    )
+    labels = {
+        f"{r.source}: {r.label}"
+        for lr in layers.values()
+        for r in lr.rels
+        if r.via == "constraint"
+    }
+    drawn = sum(r.via == "constraint" for lr in layers.values() for r in lr.rels)
+    if drawn != written:
+        diag.errors.append(
+            f"文件寫了 {written} 個 FK(...)，圖上只有 {drawn} 條約束關係"
+        )
+    diag.errors.extend(
+        f"diagram.toml checks.constraint_fks：找不到約束關係 {x}"
+        for x in config.required_constraints
+        if x not in labels
+    )
+
+
+def fill_template(template: str, payload: str) -> str:
+    """Put the data into the template's single data slot."""
+    if (n := template.count(DATA_SLOT)) != 1:
+        msg = f"template.html 的資料插槽 {DATA_SLOT} 應恰好出現一次，實際 {n} 次"
+        raise ValueError(msg)
+    return template.replace(DATA_SLOT, payload)
+
+
 def render_html(
     model: SchemaModel,
     config: DiagramConfig,
@@ -110,7 +147,7 @@ def render_html(
     payload = json.dumps(data, ensure_ascii=False, separators=(",", ":")).replace(
         "</", "<\\/"
     )
-    html = TEMPLATE.read_text(encoding="utf-8").replace("/*__DATA__*/null", payload)
+    html = fill_template(TEMPLATE.read_text(encoding="utf-8"), payload)
     if artifact:
         return html
     # Opened from disk, the page needs the charset and viewport the artifact host would supply.
@@ -127,6 +164,7 @@ def report_lines(
     """Human-readable parse report."""
     n_cols = sum(len(t.cols) for lr in layers.values() for t in lr.tables.values())
     n_rels = {k: len(v.rels) for k, v in layers.items()}
+    n_constraint = sum(r.via == "constraint" for lr in layers.values() for r in lr.rels)
     snapshot_pk = sum(
         any(c.pk for c in t.cols) for t in layers["snapshot"].tables.values()
     )
@@ -136,6 +174,7 @@ def report_lines(
         (
             f"表數：建置 {len(layers['build'].tables)}、快照 {len(layers['snapshot'].tables)}"
             f"（其中 {snapshot_pk} 個標到 PK）；欄位 {n_cols}；關係 {n_rels}"
+            f"（約束 FK {n_constraint}）"
         ),
         "",
         f"## 無法解析／無法標記（{len(diag.errors)}）",
@@ -157,6 +196,12 @@ def main(argv: list[str] | None = None) -> int:
     model = load_model(args.model, diag)
     config = load_config(CONFIG)
     layers = parse_layers(model, config, diag)
+    check_constraint_fks(model, config, layers, diag)
+    html = ""
+    try:
+        html = render_html(model, config, layers, artifact=args.artifact)
+    except ValueError as e:
+        diag.errors.append(str(e))
 
     out.parent.mkdir(parents=True, exist_ok=True)
     if args.model is None:
@@ -171,9 +216,7 @@ def main(argv: list[str] | None = None) -> int:
             "\n".join(lines) + f"\n\n解析失敗，未產生 HTML；報告：{report}\n"
         )
         return 1
-    out.write_text(
-        render_html(model, config, layers, artifact=args.artifact), encoding="utf-8"
-    )
+    out.write_text(html, encoding="utf-8")
     summary = next(x for x in lines if x.startswith("表數"))
     sys.stdout.write(
         f"{summary}\n備註 {len(diag.notes)} 則（見 {report}）\nHTML：{out}\n"

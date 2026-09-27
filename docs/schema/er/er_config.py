@@ -18,6 +18,7 @@ class DiagramConfig:
 
     groups: dict[LayerName, list[Group]]
     snapshot_aliases: dict[str, str]
+    required_constraints: list[str]
 
 
 def _table(value: object, where: str) -> dict[str, object]:
@@ -67,7 +68,11 @@ def load_config(path: Path) -> DiagramConfig:
             msg = f"diagram.toml: snapshot.references.{k} 應為字串"
             raise TypeError(msg)
         aliases[k] = v
-    return DiagramConfig(groups, aliases)
+    required = _str_list(
+        _table(data.get("checks", {}), "checks").get("constraint_fks", []),
+        "checks.constraint_fks",
+    )
+    return DiagramConfig(groups, aliases, required)
 
 
 def check_groups(

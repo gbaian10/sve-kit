@@ -142,6 +142,9 @@ select#group {
 .edge { fill: none; stroke: var(--edge); stroke-width: 1.4; transition: opacity .15s; }
 .edge.null { stroke-dasharray: 5 4; }
 .edge.via-constraint { stroke: var(--cfk); }
+.edge.multi { stroke-width: 3; }
+.edge.multi.hi { stroke-width: 3.6; }
+.uq.cfk { color: var(--cfk); border-color: var(--cfk); }
 .edge.via-inferred { stroke: var(--inf); stroke-dasharray: 1 4; stroke-linecap: round; stroke-width: 1.8; }
 .edge.hi { stroke: var(--accent); stroke-width: 2.2; }
 .edge.hi.in { stroke: var(--fk); }
@@ -342,6 +345,7 @@ select#group {
       <span id="lg-decl"><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6"/></svg>宣告 FK</span>
       <span id="lg-null"><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>可空 FK</span>
       <span id="lg-cons" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--cfk)" stroke-width="1.6"/></svg>約束 FK</span>
+      <span id="lg-multi" class="opt" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--cfk)" stroke-width="3"/></svg><b class="uq cfk">FK1</b>複合約束</span>
       <span id="lg-inf" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M1 4h26" stroke="var(--inf)" stroke-width="1.8" stroke-dasharray="1 4" stroke-linecap="round"/></svg><i style="color:var(--inf);font:italic 11px var(--mono)">card</i>欄名推斷的引用</span>
       <span class="opt" id="lg-hub" hidden>總圖不畫指向 decision／source_record／text_unit 的線</span>
       <span class="zoom" id="zoomlbl">100%</span>
@@ -385,13 +389,14 @@ for (const [L, d] of Object.entries(DATA.layers)) {
   const tg = {}, incoming = {}, outgoing = {};
   d.groups.forEach(g => g.tables.forEach(t => (tg[t] ||= []).push(g.key)));
   d.rels.forEach(r => { (incoming[r.to] ||= []).push(r); (outgoing[r.from] ||= []).push(r); });
-  const uqTitle = {};
+  const uqTitle = {}, cfk = {};
   for (const t of Object.values(d.tables)) {
+    cfk[t.name] = d.rels.filter(r => r.from === t.name && r.via === "constraint").map(r => r.label);
     const m = {};
     t.cols.forEach(c => c.uq.forEach(u => { (m[u] ||= []).push(c.name); }));
     uqTitle[t.name] = m;
   }
-  IDX[L] = { tg, incoming, outgoing, uqTitle, groups: Object.fromEntries(d.groups.map(g => [g.key, g])) };
+  IDX[L] = { tg, incoming, outgoing, uqTitle, cfk, groups: Object.fromEntries(d.groups.map(g => [g.key, g])) };
 }
 
 const S = { layer: "build", group: "b02", sel: null, tf: { x: 0, y: 0, k: 1 }, size: { w: 0, h: 0 }, token: 0, visible: new Set(), pos: {} };
@@ -427,6 +432,7 @@ function fillGroups() {
   const vias = new Set(L.rels.map(r => r.via));
   $("#lg-decl").hidden = $("#lg-null").hidden = !vias.has("decl");
   $("#lg-cons").hidden = !vias.has("constraint");
+  $("#lg-multi").hidden = !L.rels.some(r => r.via === "constraint" && r.cols.length > 1);
   $("#lg-inf").hidden = !vias.has("inferred");
 }
 document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
@@ -464,9 +470,13 @@ function typeHTML(c, overview) {
   if (!c.type) return c.nullable ? `<span class="ct null">?</span>` : "";
   return `<span class="ct${c.nullable ? " null" : ""}" title="${esc(c.type)}">${esc(c.type)}${q}</span>`;
 }
+function cfkHTML(t, c) {
+  const all = IDX[S.layer].cfk[t.name];
+  return c.constraint_fks.map(l => `<b class="uq cfk" title="${esc(l)}">FK${all.indexOf(l) + 1}</b>`).join("");
+}
 function uqHTML(t, c) {
   const m = IDX[S.layer].uqTitle[t.name];
-  return c.uq.map(u => {
+  return cfkHTML(t, c) + c.uq.map(u => {
     const label = u === "UNIQUE" ? "UQ" : u;
     const tip = u === "UNIQUE" ? "單欄唯一" : `${u.endsWith("*") ? "部分唯一" : "唯一"}：(${m[u].join(", ")})`;
     return `<b class="uq" title="${esc(tip)}">${esc(label)}</b>`;
@@ -657,7 +667,7 @@ const MARKERS = `<defs>
 
 function drawEdges(edges, routes, selfLoops, cross = []) {
   const out = [MARKERS];
-  const pathEl = (d, r) => `<path class="edge via-${r.via}${r.nullable ? " null" : ""}" data-from="${esc(r.from)}" data-to="${esc(r.to)}" data-col="${esc(r.col)}" d="${d}" marker-start="url(#mo)" marker-end="url(#md)"/>`;
+  const pathEl = (d, r) => `<path class="edge via-${r.via}${r.cols.length > 1 ? " multi" : ""}${r.nullable ? " null" : ""}" data-from="${esc(r.from)}" data-to="${esc(r.to)}" data-col="${esc(r.col)}" d="${d}" marker-start="url(#mo)" marker-end="url(#md)"/>`;
   for (const e of edges) {
     const s = routes[e.id];
     let d;
@@ -753,7 +763,7 @@ function renderPanel() {
       <p><b style="color:var(--text)">sve-kit 卡片資料 schema v1</b>。建置層 ${Object.keys(DATA.layers.build.tables).length} 張表、快照層 ${Object.keys(DATA.layers.snapshot.tables).length} 個集合。</p>
       <p>點一張表看完整欄位、約束與引用關係。欄位右側帶虛框的琥珀色標籤是跨分組的 FK，點了會跳到目標表所在的分組。</p>
       <p>拖曳平移、滾輪或雙指縮放。<kbd>/</kbd> 搜尋，<kbd>Esc</kbd> 取消選取，<kbd>Tab</kbd> 可在表之間移動、<kbd>Enter</kbd> 選取。</p>
-      <p>連線樣式：灰色實線是欄位宣告的 FK（虛線為可空）、紫色是約束 <code>FK(...)</code> 宣告的 FK、綠色點線是依 <code>*_id</code> 欄名推斷的引用（快照層沒有 FK 記號，內嵌物件裡的 ID 也畫成點線）。</p>
+      <p>連線樣式：灰色實線是欄位宣告的 FK（虛線為可空）、紫色是約束 <code>FK(...)</code> 宣告的 FK（粗線為複合約束，欄位旁的 FK1、FK2… 標出成員欄）、綠色點線是依 <code>*_id</code> 欄名推斷的引用（快照層沒有 FK 記號，內嵌物件裡的 ID 也畫成點線）。</p>
       <p>快照層未註明 PK 的集合以首欄 <code>id</code> 為主鍵（依 snapshot-format.md）。</p></div>`;
     return;
   }
@@ -763,6 +773,7 @@ function renderPanel() {
     const flags = [];
     if (c.pk) flags.push(`<span class="tag pk">PK</span>`);
     if (c.fk_target) flags.push(`<button type="button" class="tag fk via-${c.fk_via}" data-goto="${esc(c.fk_target)}" title="${VIA_NAME[c.fk_via]}">FK→${esc(c.fk_target)}${c.fk_cols ? "（" + esc(c.fk_cols.join(",")) + "）" : ""}${c.fk_via === "decl" ? "" : " " + VIA_SHORT[c.fk_via]}</button>`);
+    c.constraint_fks.forEach(l => flags.push(`<span class="tag fk via-constraint" title="${esc(l)}">約束 FK${ix.cfk[t.name].indexOf(l) + 1}</span>`));
     c.nested_refs.forEach(n => flags.push(`<button type="button" class="tag fk via-inferred" data-goto="${esc(n)}" title="內嵌物件中的 *_id，由欄名推斷">內嵌→${esc(n)}</button>`));
     c.uq.forEach(u => flags.push(`<span class="tag" title="${u === "UNIQUE" ? "單欄唯一" : esc("(" + ix.uqTitle[t.name][u].join(", ") + ")")}">${u === "UNIQUE" ? "UQ" : esc(u)}</span>`));
     if (c.nullable) flags.push(`<span class="tag">可空</span>`);
@@ -770,6 +781,7 @@ function renderPanel() {
     return `<tr><td class="${c.pk ? "pkn" : c.nullable ? "nul" : ""}">${esc(c.name)}</td><td><div class="ty">${ty}</div>${flags.length ? `<div class="fl">${flags.join("")}</div>` : ""}</td></tr>`;
   }).join("");
   const outs = [...new Set((ix.outgoing[t.name] || []).map(r => r.to))];
+  const cfks = (ix.outgoing[t.name] || []).filter(r => r.via === "constraint");
   const ins = ix.incoming[t.name] || [];
   const link = (name, label) => `<button type="button" class="pill" data-goto="${esc(name)}">${esc(label || name)}</button>`;
   panelIn.innerHTML = `
@@ -777,6 +789,7 @@ function renderPanel() {
     <div class="meta"><span>${LAYER_NAME[L]}</span>${groups}</div>
     <div class="src">${esc(t.source)}:${t.line} · ${t.cols.length} 欄</div>
     <div class="sec"><h3>欄位</h3><table class="fields"><tbody>${rows}</tbody></table></div>
+    ${cfks.length ? `<div class="sec"><h3>約束 FK（${cfks.length}）</h3><table class="fields"><tbody>${cfks.map((r, i) => `<tr><td><b class="uq cfk">FK${i + 1}</b></td><td>(${esc(r.cols.join(", "))}) → <button type="button" class="pill" data-goto="${esc(r.to)}">${esc(r.to)}</button>${r.to_cols ? ` (${esc(r.to_cols.join(", "))})` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}
     <div class="sec"><h3>約束與說明（原文）</h3>${t.constraints ? `<p class="cons">${esc(t.constraints)}</p>` : `<p class="note">無</p>`}</div>
     <div class="sec"><h3>引用（${outs.length}）</h3>${outs.length ? `<div class="links">${outs.map(n => link(n)).join("")}</div>` : `<p class="note">無</p>`}</div>
     <div class="sec"><h3>被引用（${ins.length}）</h3>${ins.length ? `<div class="links">${ins.map(r => link(r.from, `${r.from}.${r.col}`)).join("")}</div>` : `<p class="note">沒有表引用它</p>`}</div>

@@ -293,3 +293,13 @@ entry_id = ""
 int_id = ""
 official_id = ""
 ruling_id = ""
+
+# Regression guard: each entry must come out as one complete constraint relation,
+# written `table: FK(cols)→target(cols)` exactly as the page labels it.
+[checks]
+constraint_fks = [
+    "art: FK(face_id,card_id)→face(id,card_id)",
+    "printing_face: FK(printing_id,card_id)→printing(id,card_id)",
+    "printing_face: FK(face_id,card_id)→face(id,card_id)",
+    "printing_face: FK(art_id,face_id)→art(id,face_id)",
+]

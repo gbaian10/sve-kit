@@ -72,6 +72,7 @@ class Column:
     enum_values: list[str] | None = None
     raw: str | None = None
     nested_refs: list[str] = field(default_factory=list[str])
+    constraint_fks: list[str] = field(default_factory=list[str])
 
 
 @dataclass(slots=True)
@@ -81,9 +82,10 @@ class Relation:
     source: str
     cols: list[str]
     target: str
-    target_col: str | None
+    target_cols: list[str] | None
     nullable: bool
     via: FkVia
+    label: str | None = None
 
     def to_json(self) -> dict[str, object]:
         """Serialise with the keys template.html expects."""
@@ -92,9 +94,11 @@ class Relation:
             "col": self.cols[0],
             "cols": self.cols,
             "to": self.target,
-            "to_col": self.target_col,
+            "to_col": self.target_cols[0] if self.target_cols else None,
+            "to_cols": self.target_cols,
             "nullable": self.nullable,
             "via": self.via,
+            "label": self.label,
         }
 
 

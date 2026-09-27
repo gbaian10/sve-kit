@@ -35,6 +35,7 @@ class _ConstraintFk:
     target: str
     target_cols: list[str] | None
     nullable: bool
+    label: str
 
 
 @dataclass(slots=True)
@@ -275,29 +276,44 @@ def _apply_constraint_fks(
 ) -> list[_ConstraintFk]:
     by = {c.name: c for c in cols}
     extra: list[_ConstraintFk] = []
+    seen: set[tuple[tuple[str, ...], str, tuple[str, ...] | None]] = set()
     for m in _CONSTRAINT_FK.finditer(cons):
-        src = [x.strip() for x in m.group(1).split(",")]
+        src = [" ".join(x.split()) for x in m.group(1).split(",")]
         target = m.group(2)
+        target_cols = [x.strip() for x in m.group(3).split(",")] if m.group(3) else None
+        label = f"FK({','.join(src)})→{target}" + (
+            f"({','.join(target_cols)})" if target_cols else ""
+        )
         if target not in ctx.tables:
-            ctx.diag.fk_missing.append(f"{ctx.where} 約束 FK({m.group(1)}) → {target}")
+            ctx.diag.fk_missing.append(f"{ctx.where} 約束 {label}")
         present = [n for n in src if n in by]
         if absent := [n for n in src if n not in by]:
             ctx.diag.notes.append(
-                f"{ctx.where}: 約束 FK({m.group(1)})→{target} 的 {absent} 不是宣告欄（常數或隱含欄）"
+                f"{ctx.where}: 約束 {label} 的 {absent} 不是宣告欄（常數或隱含欄）"
             )
-        # Skip when a column already declares an FK to the same target: the constraint only narrows it.
-        if not present or any(by[n].fk_target == target for n in present):
+        if not present:
+            ctx.diag.errors.append(f"{ctx.where}: 約束 {label} 沒有任何宣告欄")
             continue
+        # Only an identical constraint is a duplicate; a composite FK is not implied by single-column ones.
+        key = (tuple(src), target, tuple(target_cols) if target_cols else None)
+        if key in seen:
+            ctx.diag.notes.append(f"{ctx.where}: 約束 {label} 重複出現，只畫一次")
+            continue
+        seen.add(key)
         for n in present:
             c = by[n]
+            c.constraint_fks.append(label)
             if c.fk_target is None:
                 c.fk_target = target
                 c.fk_via = "constraint"
                 c.fk_cols = present if len(present) > 1 else None
-        target_cols = [x.strip() for x in m.group(3).split(",")] if m.group(3) else None
         extra.append(
             _ConstraintFk(
-                present, target, target_cols, all(by[n].nullable for n in present)
+                present,
+                target,
+                target_cols,
+                all(by[n].nullable for n in present),
+                label,
             )
         )
     return extra
@@ -362,15 +378,23 @@ def build_layer(
             _mark_snapshot_default_pk(ctx, cols)
         elif not any(c.pk for c in cols):
             diag.errors.append(f"{ctx.where}: 找不到 PK")
-        rels.extend(_column_relations(t.name, cols))
+        # A constraint over the same columns and table as a declared FK carries the target
+        # columns too, so it replaces that edge instead of doubling it.
+        covered = {(tuple(e.cols), e.target) for e in extra}
+        rels.extend(
+            r
+            for r in _column_relations(t.name, cols)
+            if r.via != "decl" or (tuple(r.cols), r.target) not in covered
+        )
         rels.extend(
             Relation(
                 t.name,
                 e.cols,
                 e.target,
-                e.target_cols[0] if e.target_cols else None,
+                e.target_cols,
                 e.nullable,
                 "constraint",
+                e.label,
             )
             for e in extra
         )
