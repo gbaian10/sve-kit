@@ -4,7 +4,7 @@
 //! A listed scenario that starts passing also fails the gate, so the list can only
 //! shrink on purpose and never hides a fixed or a changed failure.
 
-use alloc::collections::BTreeMap;
+use alloc::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::Path;
 
@@ -85,6 +85,22 @@ pub enum GateProblem {
         /// Scenario name.
         scenario: String,
     },
+    /// The run produced the same scenario twice (e.g. two question files share an id).
+    DuplicateRun {
+        /// Question id.
+        question: String,
+        /// Scenario name.
+        scenario: String,
+    },
+    /// A listed status is not one of the verdict kinds.
+    UnknownStatus {
+        /// Question id.
+        question: String,
+        /// Scenario name.
+        scenario: String,
+        /// The listed status.
+        status: String,
+    },
     /// The same scenario is listed twice.
     Duplicate {
         /// Question id.
@@ -142,6 +158,16 @@ pub fn gate(reports: &[ScenarioReport], known: &KnownFailures) -> GateReport {
     let mut listed: BTreeMap<(&str, &str), &KnownFailure> = BTreeMap::new();
     for entry in &known.known {
         let key = (entry.question.as_str(), entry.scenario.as_str());
+        if !matches!(
+            entry.status.as_str(),
+            "fail" | "unsupported" | "adapter-error" | "ineligible"
+        ) {
+            report.problems.push(GateProblem::UnknownStatus {
+                question: entry.question.clone(),
+                scenario: entry.scenario.clone(),
+                status: entry.status.clone(),
+            });
+        }
         if listed.insert(key, entry).is_some() {
             report.problems.push(GateProblem::Duplicate {
                 question: entry.question.clone(),
@@ -155,8 +181,15 @@ pub fn gate(reports: &[ScenarioReport], known: &KnownFailures) -> GateReport {
             actual: reports.len(),
         });
     }
+    let mut seen = BTreeSet::new();
     for scenario in reports {
         let key = (scenario.question.as_str(), scenario.scenario.as_str());
+        if !seen.insert(key) {
+            report.problems.push(GateProblem::DuplicateRun {
+                question: scenario.question.clone(),
+                scenario: scenario.scenario.clone(),
+            });
+        }
         let actual = status(&scenario.verdict);
         match (listed.remove(&key), actual) {
             (None, "pass") => report.passed = report.passed.saturating_add(1),

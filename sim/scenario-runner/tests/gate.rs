@@ -1,11 +1,5 @@
 //! The strict gate fails on every deviation from the reviewed list.
 
-#![allow(
-    clippy::indexing_slicing,
-    clippy::std_instead_of_alloc,
-    reason = "test code: a panic is a test failure"
-)]
-
 use sve_scenario_runner::gate::{GateProblem, KnownFailure, KnownFailures, gate, status};
 use sve_scenario_runner::runner::{Failure, ScenarioReport, Verdict};
 
@@ -140,5 +134,30 @@ fn stale_duplicate_and_count_problems_are_reported() {
     assert!(result.problems.contains(&GateProblem::Count {
         expected: 2,
         actual: 1,
+    }));
+}
+
+#[test]
+fn a_scenario_run_twice_and_an_unknown_listed_status_are_reported() {
+    let run = [
+        report("q", "a", Verdict::Pass),
+        report("q", "a", Verdict::Pass),
+    ];
+    let result = gate(&run, &known(2, Vec::new()));
+    assert_eq!(
+        result.problems,
+        vec![GateProblem::DuplicateRun {
+            question: "q".into(),
+            scenario: "a".into(),
+        }]
+    );
+    let misspelt = gate(
+        &[report("q", "a", fail())],
+        &known(1, vec![listed("q", "a", "failed")]),
+    );
+    assert!(misspelt.problems.contains(&GateProblem::UnknownStatus {
+        question: "q".into(),
+        scenario: "a".into(),
+        status: "failed".into(),
     }));
 }
