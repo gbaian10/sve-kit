@@ -15,6 +15,7 @@ why: >-
   **官方英文 Q&A：誘發時條件不成立就不誘發**（英文版同一則 Q&A 答 "the ability does not trigger"，見 evidence；使用者定案 2026-09-25）。
   日文 Q302 的「プレイしません」依此讀成「不誘發」，不是「打出但無效果」也不是「待機後取消」；B、C 因此不寫該能力的 choose-pending，並以 forbidden_events 斷言沒有它的 待機。
   互驗第二輪修正（astra）：三個局面都推進到 P2 的回合，P2 牌庫頂改放真實卡（契約 10.10）。
+  2026-09-27 改題（使用者決定，做法 A，見 sve-kit-m0 docs/m0/exam-changes.md）：B、C 改為只斷言可觀察結果（不造成傷害、狀態不變），不再斷言「不誘發／沒有待機」；上面關於不誘發的敘述保留為歷史，不再是判定依據。決定序列依裁定 R-0009（一律誘發、結算時查）。
 discriminates: >-
   沒記錄「本回合捨過牌」的引擎：A 的竜少女 會扣 3 PP、儀式不造成傷害。把費用的捨棄排除在歷史外的引擎同上。
   把「なら」當成結算時才判定（誘發、待機、打出後無效果或取消）的引擎：B、C 會出現 待機 事件並在 after-decision-2／after-decision-1 停在 P1 的 choose-pending，而不是 P2 的クイック時點。
@@ -126,11 +127,15 @@ scenarios:
 
   - name: B 本回合沒捨過牌 → 竜少女 3 費 → 結束階段儀式不誘發、不造成傷害
     inherit: A 用第二張儀式的費用捨 1 張 → 竜少女 −2 費 → 結束階段兩張儀式各造成 2 傷害
+    # 2026-09-27 改題（使用者決定，做法 A）：只斷言可觀察結果，不斷言是否誘發／待機。
+    # Q302 日文「プレイしません」與英文「does not trigger」說法不同；Q940「2回誘発します」、Q852、Q2418
+    # 是「〜とき、…なら」一律誘發的直接證據（裁定 R-0009）。兩種讀法的結果相同（沒有傷害），故改驗結果。
+    # 決定序列依 R-0009：結束階段照常誘發、打出時選目標，結算時條件不成立而不做。
     decisions:
       - {n: 1, by: P1, at: main, do: play, card: h1}
       - {n: 2, by: P1, at: main, do: end-phase}
-      # 誘發當下沒捨過牌 → 儀式不誘發（官方英文 Q&A）→ 沒有 P1 的 choose-pending，直接到 P2 的 7.4.5 クイック時點
-      - {n: 3, by: P2, at: quick, do: pass}
+      - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: m1, line: 1}}, targets: {1: [b1]}}
+      - {n: 4, by: P2, at: quick, do: pass}
     random: {}
     expected:
       - at: after-decision-1
@@ -139,21 +144,15 @@ scenarios:
         assert:
           P1.pp.current: 3
           P1.field: [m1, h1]
-      - at: after-decision-2
+      - at: after-decision-3
         view: omniscient
         outcome: resolved
-        awaiting:
-          by: P2
-          choices:
-            - {do: pass}
         assert:
-          semantic_state.pending_triggers: []
+          P2.field.b1: {hp: 6}
           P2.leader.life: 20
         forbidden_events:
-          - {kind: 待機}
-          - {kind: プレイ, ability: {source: m1, line: 1}}
           - {kind: ダメージ}
-      - at: after-decision-3
+      - at: after-decision-4
         view: omniscient
         outcome: resolved
         assert:
@@ -162,7 +161,6 @@ scenarios:
           turn: {active: P2, phase: main}
           P2.hand: [q1, q2, q3, p1]
         forbidden_events:
-          - {kind: 待機}
           - {kind: ダメージ}
 
   - name: C 結束階段手牌上限的捨牌在誘發之後 → 誘發當下不算「捨てていた」→ 不誘發、不造成傷害
@@ -180,28 +178,25 @@ scenarios:
               - {id: h6, card: BP01-173}
               - {id: h7, card: BP01-173}
               - {id: h8, card: BP01-173}
+    # 2026-09-27 改題（使用者決定，做法 A）：理由同局面 B；Q302 本身就是本局面（7.4.7 的捨牌在誘發之後）。
     decisions:
       - {n: 1, by: P1, at: main, do: end-phase}
-      - {n: 2, by: P2, at: quick, do: pass}
-      - {n: 3, by: P1, at: end, do: end-discard, select: [h8]}
+      - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: m1, line: 1}}, targets: {1: [b1]}}
+      - {n: 3, by: P2, at: quick, do: pass}
+      - {n: 4, by: P1, at: end, do: end-discard, select: [h8]}
     random: {}
     expected:
-      - at: after-decision-1
+      - at: after-decision-2
         view: omniscient
         outcome: resolved
-        awaiting:
-          by: P2
-          choices:
-            - {do: pass}
         assert:
           P1.hand_count: 8
           P1.cemetery: []
-          semantic_state.pending_triggers: []
+          P2.field.b1: {hp: 6}
+          P2.leader.life: 20
         forbidden_events:
-          - {kind: 待機}
-          - {kind: プレイ, ability: {source: m1, line: 1}}
           - {kind: ダメージ}
-      - at: after-decision-3
+      - at: after-decision-4
         view: omniscient
         outcome: resolved
         assert:
@@ -213,5 +208,4 @@ scenarios:
         events:
           - {kind: 捨てる, player: P1, object: h8}
         forbidden_events:
-          - {kind: 待機}
           - {kind: ダメージ}

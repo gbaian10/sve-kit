@@ -52,15 +52,17 @@ cards:
       - line: 1
         kind: trigger
         body:
-          op: damage
-          subjects: target.1
-          amount: 2
+          op: if
+          condition:
+            fn: gt
+            args:
+              - read: self.turn.discarded
+              - 0
+          then:
+            op: damage
+            subjects: target.1
+            amount: 2
         event: end
-        trigger_if:
-          fn: gt
-          args:
-            - read: self.turn.discarded
-            - 0
         targets:
           - key: '1'
             select:
