@@ -1,0 +1,37 @@
+/*
+ * Theme tokens: the only file allowed to hold colour literals.
+ * Every managed colour token is defined in all three places below (light,
+ * system dark unless forced light, forced dark).
+ */
+
+:root {
+  color-scheme: light;
+
+  --surface: oklch(98.5% 0.003 250deg);
+  --surface-raised: oklch(100% 0 0deg);
+  --text: oklch(24% 0.01 250deg);
+  --text-muted: oklch(45% 0.01 250deg);
+  --accent: oklch(52% 0.16 255deg);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --surface: oklch(26% 0.008 250deg);
+    --surface-raised: oklch(31% 0.008 250deg);
+    --text: oklch(93% 0.005 250deg);
+    --text-muted: oklch(75% 0.008 250deg);
+    --accent: oklch(74% 0.12 255deg);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --surface: oklch(26% 0.008 250deg);
+  --surface-raised: oklch(31% 0.008 250deg);
+  --text: oklch(93% 0.005 250deg);
+  --text-muted: oklch(75% 0.008 250deg);
+  --accent: oklch(74% 0.12 255deg);
+}

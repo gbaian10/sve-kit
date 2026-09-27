@@ -129,6 +129,40 @@ repos:
         pass_filenames: false
         files: ^(Cargo\.lock|(.*/)?Cargo\.toml|deny\.toml)$
         stages: [pre-push]
+      # sim/web: the hooks run from the repo root, so strip the sim/web/ prefix after cd.
+      - id: web-prettier
+        name: prettier (sim/web)
+        language: system
+        entry: bash -c 'cd sim/web && exec bun x prettier --write --ignore-unknown -- "${@#sim/web/}"' --
+        files: ^sim/web/
+        stages: [pre-commit, manual]
+      - id: web-eslint
+        name: eslint (sim/web)
+        language: system
+        entry: bash -c 'cd sim/web && exec bun x eslint --max-warnings=0 --no-warn-ignored -- "${@#sim/web/}"' --
+        files: ^sim/web/.*\.(ts|tsx|js)$
+        exclude: ^sim/web/tests/lint-fixtures/
+        stages: [pre-commit, manual]
+      - id: web-stylelint
+        name: stylelint (sim/web)
+        language: system
+        entry: bash -c 'cd sim/web && exec bun x stylelint -- "${@#sim/web/}"' --
+        files: ^sim/web/.*\.css$
+        stages: [pre-commit, manual]
+      - id: web-typecheck
+        name: tsc -b (sim/web)
+        language: system
+        entry: bun run --cwd sim/web typecheck
+        pass_filenames: false
+        files: ^(sim/web/|mise\.toml$)
+        stages: [pre-push]
+      - id: web-test
+        name: vitest (sim/web)
+        language: system
+        entry: bun run --cwd sim/web test
+        pass_filenames: false
+        files: ^(sim/web/|mise\.toml$)
+        stages: [pre-push]
       - id: mypy
         name: mypy_check
         stages: [pre-push]

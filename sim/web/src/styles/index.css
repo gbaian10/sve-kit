@@ -1,0 +1,13 @@
+/* Scan src/ only: configs and lint fixtures name forbidden classes on purpose. */
+@import "tailwindcss" source("..");
+@import "./tokens.css";
+
+/* Drop the default palette so only semantic tokens exist as colour utilities. */
+@theme inline {
+  --color-*: initial;
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-text: var(--text);
+  --color-text-muted: var(--text-muted);
+  --color-accent: var(--accent);
+}
