@@ -709,3 +709,70 @@ fn all_name_conditions_use_aliases_only_in_their_zone() {
     // 1 (name_contains via alias) + 0 (not_name excludes the alias) + 0 (EX copy has no alias).
     assert_eq!(life(&engine, "P2"), json!(14));
 }
+
+/// M-002: an `event.subject.*` read must name a key of the subject snapshot, and
+/// `event.target` is an id with no attributes; both are load errors, not null.
+#[test]
+fn event_reads_are_checked_against_the_snapshot() {
+    let trigger = |event: &str, path: &str| {
+        format!(
+            "      - line: 1\n        kind: trigger\n        event: {event}\n        subject: self\n        body:\n          op: damage\n          subjects: opponent.leader\n          amount:\n            read: {path}\n"
+        )
+    };
+    for (event, path) in [
+        ("enter", "event.subject.current_cost"),
+        ("enter", "event.subject.entered_by_play"),
+        ("enter", "event.subject.class"),
+        ("attack", "event.target.power"),
+        ("deal_damage", "event.amount.value"),
+    ] {
+        let found = rejections(&trigger(event, path));
+        assert_eq!(found.len(), 1, "{path}: {found:?}");
+    }
+    for path in [
+        "event.subject.cost",
+        "event.subject.entered_from",
+        "event.subject.counters.guard",
+    ] {
+        assert!(rejections(&trigger("enter", path)).is_empty(), "{path}");
+    }
+}
+
+/// M-002: every snapshot field that is also an object field reads the same through
+/// `event.subject.` (at the event) as through `self.` (at resolution, nothing changed).
+#[test]
+fn event_subject_fields_match_object_reads() {
+    for field in [
+        "name",
+        "traits",
+        "cost",
+        "power",
+        "hp",
+        "max_hp",
+        "acted",
+        "evolved",
+        "entered_this_turn",
+        "entered_from",
+        "entered_by",
+        "face",
+        "damage",
+        "silenced",
+        "id",
+        "zone",
+        "token",
+        "card_class",
+        "card_type",
+    ] {
+        let loaded = catalog(&json!({
+            "f-a":[{"line":1,"kind":"trigger","event":"enter","subject":"self","body":{"op":"damage",
+                "subjects":"opponent.leader","amount":{"if":{"fn":"eq","args":[
+                    {"read":format!("event.subject.{field}")},{"read":format!("self.{field}")}]},"then":1,"else":0}}}]
+        }));
+        let mut engine = start(
+            loaded,
+            &setup(&json!({"hand":[{"id":"x","card":"f-a"}]}), &json!({})),
+        );
+        play_and_settle(&mut engine, "x");
+        assert_eq!(life(&engine, "P2"), json!(14), "{field} differs");
+    }
+}

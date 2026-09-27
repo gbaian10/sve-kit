@@ -199,6 +199,40 @@ fn event_fields(event: &str) -> &'static [&'static str] {
     }
 }
 
+/// Keys of an event subject snapshot (`Game::object_attributes`: printed face, object
+/// state and a few fixed keys). Derived values such as `current_cost` are not in it.
+pub(crate) const EVENT_SUBJECT_FIELDS: &[&str] = &[
+    "name",
+    "card_class",
+    "card_type",
+    "traits",
+    "cost",
+    "power",
+    "hp",
+    "max_hp",
+    "acted",
+    "evolved",
+    "entered_this_turn",
+    "entered_from",
+    "entered_by",
+    "face",
+    "face_up",
+    "damage",
+    "counters",
+    "keywords",
+    "silenced",
+    "stats_increased_this_turn",
+    "attacks_this_turn",
+    "id",
+    "zone",
+    "token",
+    "generation",
+    "controller",
+];
+
+/// Extra keys when the subject is a leader.
+const LEADER_SUBJECT_FIELDS: &[&str] = &["id", "controller", "owner", "zone", "life"];
+
 /// Per-player turn counters the engine increments (`Game::bump`).
 const TURN_COUNTERS: &[&str] = &[
     "cards_played",
@@ -882,17 +916,7 @@ impl Checker<'_> {
             };
         }
         if let Some(rest) = path.strip_prefix("event.") {
-            let event = context
-                .event
-                .ok_or_else(|| format!("`{path}` read outside a trigger"))?;
-            let (field, attribute) = rest.split_once('.').unwrap_or((rest, ""));
-            if !event_fields(event).contains(&field) {
-                return Err(format!("event `{event}` has no field `{field}`"));
-            }
-            if field == "subject" && !attribute.is_empty() && !one_of(attribute, OBJECT_FIELDS) {
-                return Err(format!("unknown subject attribute `{attribute}`"));
-            }
-            return Ok(());
+            return Self::event_read(path, rest, context);
         }
         if let Some(counter) = path.strip_prefix("self.counters.") {
             return if self
@@ -951,6 +975,42 @@ impl Checker<'_> {
         } else {
             Err(format!("unknown object field `{field}`"))
         }
+    }
+
+    fn event_read(path: &str, rest: &str, context: &Context<'_>) -> Result<(), String> {
+        let event = context
+            .event
+            .ok_or_else(|| format!("`{path}` read outside a trigger"))?;
+        let (field, attribute) = rest.split_once('.').unwrap_or((rest, ""));
+        if !event_fields(event).contains(&field) {
+            return Err(format!("event `{event}` has no field `{field}`"));
+        }
+        if field == "subject" && !attribute.is_empty() {
+            let (head, _) = attribute.split_once('.').unwrap_or((attribute, ""));
+            let known = if event == "leader_life_change" {
+                one_of(attribute, LEADER_SUBJECT_FIELDS)
+            } else {
+                one_of(head, EVENT_SUBJECT_FIELDS) && (head == "counters" || head == attribute)
+            };
+            if !known {
+                return Err(format!(
+                    "the `{event}` subject snapshot has no field `{attribute}`"
+                ));
+            }
+        }
+        if field == "target" && !attribute.is_empty() {
+            return Err(format!(
+                "`event.target` is an object id; `{path}` would read null"
+            ));
+        }
+        if field != "subject"
+            && field != "target"
+            && field != "fused_trait"
+            && !attribute.is_empty()
+        {
+            return Err(format!("`event.{field}` has no field `{attribute}`"));
+        }
+        Ok(())
     }
 
     fn object_reference(&self, reference: &str) -> Result<(), String> {
