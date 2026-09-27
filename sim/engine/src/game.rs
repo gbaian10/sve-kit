@@ -601,7 +601,7 @@ impl Game {
             .as_str()
             .unwrap_or(string(&self.face(id)?["card_type"])))
     }
-    fn printed_abilities(&self, id: &str) -> Result<Vec<Value>> {
+    pub(super) fn printed_abilities(&self, id: &str) -> Result<Vec<Value>> {
         let object = self.object(id)?;
         if object.state["silenced"] == true {
             return Ok(Vec::new());

@@ -651,3 +651,61 @@ fn long_form_condition_triggers_and_is_checked_at_resolution() {
         assert_eq!(life(&engine, "P2"), json!(expected));
     }
 }
+
+/// M-001: an aura that grants abilities and compares names (in its condition or its
+/// subjects) must not recurse through alias lookup; aliases come from printed text only.
+#[test]
+fn granting_aura_with_name_conditions_does_not_recurse() {
+    let granted = json!([{"line":9,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":1}}]);
+    for aura in [
+        json!({"op":"aura","subjects":{"side":"self","zone":"field","type":"follower"},"abilities":granted,
+            "condition":{"fn":"gt","args":[{"count":{"side":"self","zone":"field","name":"ゴースト"}},0]}}),
+        json!({"op":"aura","subjects":{"side":"self","zone":"field","name":"ゴースト"},"abilities":granted}),
+    ] {
+        let loaded = catalog(&json!({
+            "amulet":[{"line":1,"kind":"static","body":aura}],
+            "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"ゴースト","while_zone":"field"}}]
+        }));
+        let engine = start(
+            loaded,
+            &setup(
+                &json!({"field":[{"id":"w","card":"amulet"},{"id":"g","card":"f-a"},{"id":"n","card":"f-c"}]}),
+                &json!({}),
+            ),
+        );
+        let legal = engine.legal().unwrap();
+        // The alias makes the aura active and gives g the granted ability.
+        assert!(
+            legal
+                .iter()
+                .any(|choice| choice["do"] == "activate" && choice["ability"]["source"] == "g"),
+            "{legal:?}"
+        );
+    }
+}
+
+/// M-013: every name condition sees the alias (Q1145), and M-008: outside its zone
+/// the alias does not count.
+#[test]
+fn all_name_conditions_use_aliases_only_in_their_zone() {
+    let loaded = catalog(&json!({
+        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"操り人形","while_zone":"field"}}],
+        "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader","amount":{"fn":"add","args":[
+            {"count":{"side":"self","zone":"field","name_contains":"人形"}},
+            {"fn":"mul","args":[{"count":{"side":"self","zone":"field","not_name":"操り人形"}},10]},
+            {"fn":"mul","args":[{"count":{"side":"self","zone":"ex","name":"操り人形"}},100]}
+        ]}}}]
+    }));
+    let mut engine = start(
+        loaded,
+        &setup(
+            &json!({"field":[{"id":"g","card":"f-a"}],"ex":[{"id":"x","card":"f-a"}],"hand":[{"id":"s","card":"spell"}]}),
+            &json!({"tag":"p2","field":[],"deck":[{"id":"big","card":"f-a"}]}),
+        ),
+    );
+    engine
+        .decide(&json!({"do":"play","card":"s"}), "count")
+        .unwrap();
+    // 1 (name_contains via alias) + 0 (not_name excludes the alias) + 0 (EX copy has no alias).
+    assert_eq!(life(&engine, "P2"), json!(14));
+}

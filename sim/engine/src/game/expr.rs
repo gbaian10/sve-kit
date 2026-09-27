@@ -223,14 +223,14 @@ impl Game {
         if !card_type.contains(typ) {
             return Ok(false);
         }
+        let names = self.card_names(id)?;
         if let Some(name) = selector["name"].as_str()
-            && self.card_name(id)? != name
-            && !self.name_aliases(id)?.iter().any(|alias| alias == name)
+            && !names.iter().any(|own| own == name)
         {
             return Ok(false);
         }
         if let Some(part) = selector["name_contains"].as_str()
-            && !string(&face["name"]).contains(part)
+            && !names.iter().any(|own| own.contains(part))
         {
             return Ok(false);
         }
@@ -240,7 +240,7 @@ impl Game {
             } else {
                 name
             };
-            if string(&face["name"]) == name {
+            if names.iter().any(|own| own == name) {
                 return Ok(false);
             }
         }
@@ -274,12 +274,21 @@ impl Game {
         Ok(true)
     }
 
+    /// The rules name plus every alias (Q1145: an alias is an additional card name).
+    fn card_names(&self, id: &str) -> Result<Vec<String>> {
+        let mut names = vec![self.card_name(id)?];
+        names.extend(self.name_aliases(id)?);
+        Ok(names)
+    }
+
     /// "これは『X』でもある" (static `name_alias`): extra names while in the given zone.
     fn name_aliases(&self, id: &str) -> Result<Vec<String>> {
         let zone = self.object(id)?.zone.clone();
         // A card without an executable program has no alias to offer; its other
         // abilities still fail closed when something tries to use them.
-        let abilities = match self.abilities(id) {
+        // Only the card's own printed abilities: an alias is never granted, and
+        // `abilities()` evaluates auras whose conditions may compare names again.
+        let abilities = match self.printed_abilities(id) {
             Ok(abilities) => abilities,
             Err(crate::EngineFailure::Unsupported(_)) => return Ok(Vec::new()),
             Err(error) => return Err(error),
