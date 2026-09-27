@@ -4,20 +4,20 @@
 
 ## 1. 人寫例外與永久登錄分開
 
-| 類別              | 路徑提案                                                                                                         | 維護方式                                                                      |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
-| 永久身分/面/版次  | registry/identities/BP01.yaml、registry/identities/PR/001.yaml                                                   | 工具產候選，採納後固定 ID；不是每次重新分組                                   |
-| printing UInt32   | card-ids.yaml（include）、ids/BP01.yaml                                                                          | 工具全域唯一配號，只能新增；不能靠排序重建                                    |
-| 模板/詞彙永久 key | templates/BP01/001.yaml、keywords.yaml、`vocabulary/_shared/001.yaml`                                            | 內容 ID/穩定 code；工具檢碰撞，舊 ID 不覆寫                                   |
-| 身分修復/特殊構築 | overrides/identities/BP01.yaml、overrides/deck-roles/BP01.yaml                                                   | merge/split/reassign 與例外角色需人工                                         |
-| JP/EN 對應        | registry/identities/BP01.yaml 的 EN printing 歸屬                                                                | 每筆人工確認；不另寫 `region_mapping` 真值                                    |
-| 新包策展          | curation/BP01/001.yaml                                                                                           | 一包封套包含 art/stamps/digital/serials/related；按 kind 分段，避免到處開空檔 |
-| 來源錯誤/語義差異 | corrections/BP01.yaml、divergences/BP01.yaml                                                                     | confirmed 例外，含來源版本與原因                                              |
-| 翻譯              | translations/zh-Hant/BP01.yaml、translation-templates/zh-Hant/BP01/001.yaml、`glossary/zh-Hant/_shared/001.yaml` | 全句/子句模板，繁中跟 JP；EN 只掛適用選用                                     |
-| DSL/巨集          | effects/BP01.yaml、effects/index.yaml、macros/BP01/001.yaml                                                      | 工具填 meta；EN 只有 divergence/EN-only 才加 override                         |
-| 裁定/機制/禁限    | rulings/CP02.yaml、mechanics/BP01.yaml、`rules/_shared/001.yaml`                                                 | 人工證據/覆寫，推導 projection 不寫 authored                                  |
-| 路由/預設例外     | overrides/routes.yaml、overrides/defaults/BP01.yaml                                                              | 正常 route/default 不人寫，改號 alias/多 variant 入口才登錄                   |
-| 搜尋/記號/設定    | aliases/zh-Hant/BP01.yaml、`symbols/_shared/001.yaml`、`config/*.yaml`                                           | 一張 `search_alias`；圖示 SVG 屬 app shell                                    |
+| 類別              | 路徑提案                                                                                                         | 維護方式                                                                                              |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| 永久身分/面/版次  | registry/identities/BP01.yaml、registry/identities/PR/001.yaml                                                   | 工具產候選，採納後固定 ID；不是每次重新分組                                                           |
+| printing UInt32   | ids/index.yaml（include）、ids/BP01.yaml                                                                         | 工具全域唯一配號，只能新增；不能靠排序重建                                                            |
+| 模板/詞彙永久 key | templates/BP01/001.yaml、keywords.yaml、`vocabulary/_shared/001.yaml`                                            | 內容 ID/穩定 code；工具檢碰撞，舊 ID 不覆寫                                                           |
+| 身分修復/特殊構築 | overrides/identities/BP01.yaml、overrides/deck-roles/BP01.yaml                                                   | merge/split/reassign 與例外角色需人工                                                                 |
+| JP/EN 對應        | registry/identities/BP01.yaml 的 EN printing 歸屬                                                                | 每筆人工確認；不另寫 `region_mapping` 真值                                                            |
+| 新包策展          | curation/BP01/001.yaml                                                                                           | 一包封套包含 art/stamps/digital/serials/related；按 kind 分段，避免到處開空檔                         |
+| 來源錯誤/語義差異 | corrections/BP01.yaml、divergences/BP01.yaml                                                                     | confirmed 例外，含來源版本與原因                                                                      |
+| 翻譯              | translations/zh-Hant/BP01.yaml、translation-templates/zh-Hant/BP01/001.yaml、`glossary/zh-Hant/_shared/001.yaml` | 全句/子句模板，繁中跟 JP；EN 只掛適用選用                                                             |
+| DSL/巨集          | effects/BP01.yaml、effects/index.yaml、macros/BP01/001.yaml                                                      | 工具填 meta；EN 只有 divergence/EN-only 才加 override                                                 |
+| 裁定/機制/禁限    | rulings/R-0001.yaml（每裁定一檔，ADR-0011）、mechanics/BP01.yaml、`rules/_shared/001.yaml`                       | 人工證據/覆寫，推導 projection 不寫 authored；裁定匯入時 Q 號轉 `qa_version_id`、`zh-TW` 轉 `zh-Hant` |
+| 路由/預設例外     | overrides/routes.yaml、overrides/defaults/BP01.yaml                                                              | 正常 route/default 不人寫，改號 alias/多 variant 入口才登錄                                           |
+| 搜尋/記號/設定    | aliases/zh-Hant/BP01.yaml、`symbols/_shared/001.yaml`、`config/*.yaml`                                           | 一張 `search_alias`；圖示 SVG 屬 app shell                                                            |
 
 authored 是人工判斷或不能重建的永久狀態。官方原文/QA/圖像、可重建 `face_current/route/projection` 不整份複製入 git。檔案按首次 `owner/home_set` 固定；共用模板/裁定放首次定義包或 `_shared`；PR 大檔依固定序號 bucket 切。每檔 <1,048,576 bytes，建議 512 KiB 分片；include 亦可分層。安全 YAML 解析、禁止重複鍵/tag/跨檔 anchor，日期與 ID 引號明示。
 
@@ -103,7 +103,7 @@ records:
     allocated_at: "2026-09-27"
 ```
 
-沒有 `decision_id`。配號工具鎖全域 next-id，append 後驗重複；與前次公開 registry 比較，不能更改/刪除/重用。主入口 card-ids.yaml 只 include shards。未發表草稿號不當正式分配。
+沒有 `decision_id`。配號工具鎖全域 next-id，append 後驗重複；與前次公開 registry 比較，不能更改/刪除/重用。主入口 ids/index.yaml 只 include shards。現行 `authored/README.md` 的 `card-ids.yaml`（卡片 ID、各區卡號與跨區對應）落地時改由 registry/identities 與 ids/ 承接，並同步更新該 README。未發表草稿號不當正式分配。
 
 `identity_change` 另寫 `old/new/kind/printing?/data_version/decision/reason`。split 多目的與受影響 printing 清單完整；永久 int→printing 不變，父 card 修復要可見，不靜默改玩家牌組。
 
