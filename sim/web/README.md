@@ -33,10 +33,13 @@ the full `tsc -b` and Vitest.
 
 ## i18n
 
-UI text comes from `t()`. Labels with letters in their fixed text, or built with `+`, fail lint;
-pure interpolation such as `` `${a}/${b}` `` passes. Use one key per sentence and pass values
-through interpolation: `t("cost", { n })`, never `` `${t("a")} ${n}` ``. Lint cannot catch that
-kind of sentence assembly, so review has to.
+UI text comes from `t()`. A `label` fails lint when its own fixed text (a string, or the literal
+parts of a template) contains letters, or when a `+` chain up to four levels below the label has
+such a string as an operand. Pure interpolation such as `` `${a}/${b}` `` passes. Deeper chains,
+and text that arrives through a function or variable, are left to review.
+
+Use one key per sentence and pass values through interpolation: `t("cost", { n })`, never
+`` `${t("a")} ${n}` ``. Lint cannot catch that kind of sentence assembly, so review has to.
 
 ## Lint rule fixtures
 

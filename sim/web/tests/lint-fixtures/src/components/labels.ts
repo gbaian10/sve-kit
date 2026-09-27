@@ -25,8 +25,18 @@ export const concatLeft = (n: string) => ({ label: "Cost " + n })
 // case: text on the right of + -> no-restricted-syntax
 export const concatRight = (n: string) => ({ label: n + " cards" })
 
-// case: text deep in a + chain -> no-restricted-syntax
-export const concatChain = (a: string, b: string, c: string) => ({ label: a + b + c + " cards" })
+// case: text on the right end of a + chain -> no-restricted-syntax
+export const concatChainEnd = (a: string, b: string, c: string) => ({ label: a + b + c + " cards" })
+
+// case: text at the deepest covered + level -> no-restricted-syntax
+export const concatDeepest = (a: string, b: string, c: string, d: string) => ({
+  label: "Cost" + a + b + c + d,
+})
+
+// bypass: text one + level deeper than covered -> none
+export const concatTooDeep = (a: string, b: string, c: string, d: string, e: string) => ({
+  label: "Cost" + a + b + c + d + e,
+})
 
 // case: letter-bearing template inside + -> no-restricted-syntax
 export const concatTemplate = (a: string, b: string) => ({ label: a + `枚${b}` })
@@ -36,6 +46,18 @@ export const ratio = (a: string, b: string) => ({ label: `${a}/${b}` })
 
 // case: interpolation with a space -> none
 export const spaced = (n: string, m: string) => ({ label: `${n} ${m}` })
+
+// case: interpolation around an escaped newline -> none
+export const newline = (a: string, b: string) => ({ label: `${a}\n${b}` })
+
+// case: escaped punctuation only -> none
+export const escapedDash = [{ label: `\u2014` }]
+
+// case: key of a nested template does not count as fixed text -> none
+export const nestedKey = (a: string) => ({ label: `${t(`cost`)}${a}` })
+
+// case: escaped letter is still text -> no-restricted-syntax
+export const escapedLetter = (a: string) => ({ label: `\u0041${a}` })
 
 // case: interpolation only -> none
 export const joined = (n: string, m: string) => ({ label: `${n}${m}` })

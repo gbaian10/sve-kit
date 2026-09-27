@@ -60,11 +60,13 @@ const restrictedClasses = [
   },
 ]
 
-// Same bar as i18next/no-literal-string: fixed text with letters is UI copy; pure interpolation is not.
-const LETTER_TEXT = String.raw`:matches(Literal[value=/\p{L}/u], TemplateLiteral:has(TemplateElement[value.raw=/\p{L}/u]))`
+// Fixed text with letters is UI copy, as in i18next/no-literal-string. Cooked, direct quasis only,
+// so escapes (`\n`) and templates nested in `${}` do not count.
+const LETTER_TEXT = String.raw`:matches(Literal[value=/\p{L}/u], TemplateLiteral:has(> TemplateElement[value.cooked=/\p{L}/u]))`
 const LABEL = `Property:matches([key.name='label'], [key.value='label'])`
 const PLUS = `BinaryExpression[operator='+']`
-// esquery cannot chain `>` inside :has, so nest :has once per `+` level (up to five operands).
+// `:has(> A > B)` missed nested operands in our esquery 1.7 tests, so nest one :has per `+`:
+// four `+` levels (five operands) from the label down.
 const plusWithLetterText = Array.from({ length: 3 }).reduce<string[]>(
   (levels) => [...levels, `:has(> ${PLUS}${levels.at(-1) ?? ""})`],
   [`:has(> ${LETTER_TEXT})`],
