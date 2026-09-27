@@ -34,7 +34,8 @@ use sve_scenario_runner::arch::{
     load_fixtures,
 };
 use sve_scenario_runner::{
-    Fixture, RunOptions, View, load_dir, load_selection, run, score_g1, summary,
+    Fixture, RunOptions, View, gate, load_dir, load_known_failures, load_selection, run, score_g1,
+    summary,
 };
 
 type Result<T> = result::Result<T, Box<dyn Error>>;
@@ -42,7 +43,7 @@ type Result<T> = result::Result<T, Box<dyn Error>>;
 fn main() -> Result<()> {
     let mut arguments = args().skip(1);
     let snapshot = PathBuf::from(arguments.next().ok_or(
-        "usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist|validate|rules] [OUTPUT] [SELECTION]",
+        "usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist|validate|rules|gate] [OUTPUT] [SELECTION|KNOWN]",
     )?);
     let root = PathBuf::from(arguments.next().unwrap_or_else(|| ".".into()));
     let mode = arguments.next().unwrap_or_else(|| "all".into());
@@ -60,6 +61,12 @@ fn main() -> Result<()> {
             &output,
             arguments.next().map(PathBuf::from).as_deref(),
         );
+    }
+    if mode == "gate" {
+        let known = arguments
+            .next()
+            .map_or_else(|| root.join("docs/m0/known-failures.yaml"), PathBuf::from);
+        return strict_gate(&catalog, &root, &output, &known);
     }
     if mode == "validate" {
         println!(
@@ -115,6 +122,40 @@ fn rules(
     write(output.join("rules.json"), bytes)?;
     println!("Rules {:?}", summary(&reports));
     Ok(())
+}
+
+/// Runs every shared scenario and fails unless the result matches the reviewed list exactly.
+fn strict_gate(catalog: &Arc<Catalog>, root: &Path, output: &Path, known: &Path) -> Result<()> {
+    let known = load_known_failures(known)?;
+    let questions = load_dir(&root.join("tests/rules-scenarios/questions"))?;
+    let reports = run(
+        &mut Adapter::new(Arc::clone(catalog)),
+        &questions,
+        None,
+        RunOptions {
+            require_verified: true,
+        },
+    )?;
+    retain(&output.join("rules.txt"), &reports)?;
+    let mut bytes = to_vec_pretty(&reports)?;
+    bytes.push(b'\n');
+    write(output.join("rules.json"), bytes)?;
+    let result = gate(&reports, &known);
+    println!("Rules {:?}", summary(&reports));
+    println!(
+        "Gate: {} pass, {} known failures, {} problems",
+        result.passed,
+        result.known,
+        result.problems.len()
+    );
+    for problem in &result.problems {
+        println!("GATE {problem:?}");
+    }
+    if result.ok() {
+        Ok(())
+    } else {
+        Err(format!("gate failed with {} problems", result.problems.len()).into())
+    }
 }
 
 fn retain<T>(path: &Path, reports: &[T]) -> Result<()>

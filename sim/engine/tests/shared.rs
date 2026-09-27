@@ -17,7 +17,9 @@ use sve_scenario_runner::ai::{AiEngine, AiOutcome, check_ai, load_positions};
 use sve_scenario_runner::arch::{
     ArchOptions, AssistEngine, Outcome, ReplayEngine, check_assist, check_replay, load_fixtures,
 };
-use sve_scenario_runner::{RunOptions, Verdict, load_dir, load_selection, run, score_g1};
+use sve_scenario_runner::{
+    RunOptions, Verdict, gate, load_dir, load_known_failures, load_selection, run, score_g1,
+};
 
 fn root() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..")
@@ -54,43 +56,20 @@ fn representative_rules_pass_every_checkpoint() {
 }
 
 #[test]
-fn second_exam_passes_every_new_scenario_without_contract_exceptions() {
+fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
     let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
-    let selection =
-        load_selection(&root().join("docs/evaluation/seal-2/new-selection.yaml")).unwrap();
+    let known = load_known_failures(&root().join("docs/m0/known-failures.yaml")).unwrap();
     let reports = run(
         &mut Adapter::new(catalog()),
         &questions,
-        Some(&selection),
+        None,
         RunOptions {
             require_verified: true,
         },
     )
     .unwrap();
-    assert_eq!(reports.len(), 139);
-    for report in reports {
-        assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
-    }
-}
-
-#[test]
-fn third_round_completed_mechanisms_remain_correct() {
-    let questions = load_dir(&root().join("tests/rules-scenarios/questions")).unwrap();
-    let selection =
-        load_selection(&root().join("docs/evaluation/seal-3/regression-selection.yaml")).unwrap();
-    let reports = run(
-        &mut Adapter::new(catalog()),
-        &questions,
-        Some(&selection),
-        RunOptions {
-            require_verified: true,
-        },
-    )
-    .unwrap();
-    assert_eq!(reports.len(), 276);
-    for report in reports {
-        assert!(matches!(report.verdict, Verdict::Pass), "{report:?}");
-    }
+    let result = gate(&reports, &known);
+    assert!(result.ok(), "{:#?}", result.problems);
 }
 
 #[test]

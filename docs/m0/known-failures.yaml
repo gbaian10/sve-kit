@@ -1,0 +1,62 @@
+# Scenarios of the shared exam (tests/rules-scenarios, b96f6d8) that may not pass yet.
+# The M0 gate fails on any other non-pass, on a listed scenario that now passes,
+# and on a listed scenario whose verdict kind changed. Each entry points to
+# docs/m0/known-errors.md.
+expected_scenarios: 706
+known:
+  - question: card-BP09-004
+    scenario: B 選『深緑の純心・ポーラ』（face 0）：看 5 張、公開エルフ・スペル加入手牌、其餘放底
+    status: fail
+    error: KE-01
+  - question: card-BP14-023
+    scenario: A EX 有 3 張金貨 → 起動打出進化時 → 選 2 張消滅、看 5 張 → 達人の芸者 進 EX → 0 費打出
+    status: fail
+    error: KE-01
+  - question: card-BP14-023
+    scenario: C 對手場上有ジェンティルドンナ → 不是誘發，照樣可以打出進化時能力
+    status: fail
+    error: KE-01
+  - question: card-BP15-066
+    scenario: A 覚醒：ファンファーレ 對體力 1 的崇拝者 與ガルミーユ 各 1 傷害 → 崇拝者 先被破壞，兩個誘發再結算
+    status: fail
+    error: KE-01
+  - question: card-BP18-059
+    scenario: A 進化時把爆炎の咆哮 放 EX → 付 +3 打出 → 只扣 2 PP，找ドラーク 上場
+    status: fail
+    error: KE-01
+  - question: card-ECP02-001
+    scenario: A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出
+    status: fail
+    error: KE-01
+  - question: card-BP19-P21
+    scenario: blessing 蘇生ミロエル後當回合起動
+    status: adapter-error
+    error: KE-02
+  - question: card-BP19-P21
+    scenario: necromancer 蘇生ミロエル後當回合起動
+    status: adapter-error
+    error: KE-02
+  - question: rule-10.5.2-02
+    scenario: '[astra] 回合玩家 P1'
+    status: fail
+    error: KE-03
+  - question: rule-10.5.2-02
+    scenario: '[astra] 回合玩家 P2'
+    status: fail
+    error: KE-03
+  - question: rule-14.4-01
+    scenario: A 憑依 → ドライブ獲得時 → 進化不可 → 疾走攻擊：シングルドライブ與攻撃時同時待機
+    status: fail
+    error: KE-04
+  - question: rule-4.4.4-01
+    scenario: A 場上 3 張、要出 3 個 token → 只能選 2 個
+    status: fail
+    error: KE-05
+  - question: rule-1.3.4-01
+    scenario: '[astra] 場數 1/5'
+    status: fail
+    error: KE-06
+  - question: rule-1.3.4-01
+    scenario: '[astra] 場數 5/5'
+    status: fail
+    error: KE-06
