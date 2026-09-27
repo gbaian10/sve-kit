@@ -363,6 +363,58 @@ def test_en_limits_stop_cleanly(en_site: FakeSite) -> None:
     assert len(en_site.calls) == 3
 
 
+def test_en_p5_fetches_the_images_the_card_pages_link(
+    en_site: FakeSite, data_dir: Path
+) -> None:
+    odd = f"{IMG}/PR/promo/odd-name.png"
+    en_site.image_override["PR-002EN"] = odd
+    for stage in ("en-p0", "en-p1"):
+        assert invoke("crawl", stage).exit_code == 0
+    assert invoke("crawl", "en-p2", "--set", "PR").exit_code == 0
+    result = invoke("crawl", "en-p5", "--set", "PR")
+    assert result.exit_code == 0, result.output
+    images = [c for c in en_site.calls if c.endswith(".png")]
+    assert len(images) == len(set(images)) == 3
+    assert f"{en.BASE}{odd}" in images
+    assert all(c.startswith(f"{en.BASE}/") for c in images)
+    stored = data_dir / "media/images/en/PR/promo/odd-name.png"
+    assert stored.read_bytes().startswith(b"\x89PNG")
+    with manifest_at(data_dir) as manifest:
+        resource = manifest.resources.get(f"{en.BASE}{odd}")
+        assert resource is not None
+        assert resource.region is en.REGION
+    again = invoke("crawl", "en-p5", "--set", "PR")
+    assert again.exit_code == 0, again.output
+    assert "HTTP requests sent: 0" in again.output
+    # The Japanese stage does not see the English card pages.
+    assert "run `crawl p2` first" in invoke("crawl", "p5").output
+
+
+def test_en_p5_dry_run_counts_only_missing_images(en_site: FakeSite) -> None:
+    for stage in ("en-p0", "en-p1"):
+        assert invoke("crawl", stage).exit_code == 0
+    assert invoke("crawl", "en-p2", "--set", "PR").exit_code == 0
+    calls = len(en_site.calls)
+    dry = invoke("crawl", "en-p5", "--dry-run", "--set", "PR")
+    assert dry.exit_code == 0, dry.output
+    assert f"{en.BASE}{IMG}/PR/pr-003en.png" in dry.output
+    assert "3 of 3 URLs would be requested" in dry.output
+    assert len(en_site.calls) == calls
+    assert invoke("crawl", "en-p5", "--set", "PR", "--limit", "1").exit_code == 0
+    calls = len(en_site.calls)
+    after = invoke("crawl", "en-p5", "--dry-run", "--set", "PR")
+    assert "2 of 3 URLs would be requested" in after.output
+    assert len(en_site.calls) == calls
+
+
+def test_en_p5_before_en_p2_says_what_to_run(en_site: FakeSite) -> None:
+    assert invoke("crawl", "en-p0").exit_code == 0
+    result = invoke("crawl", "en-p5")
+    assert result.exit_code == 1
+    assert "run `crawl en-p2` first" in result.output
+    assert not [c for c in en_site.calls if c.endswith(".png")]
+
+
 @pytest.fixture
 def portal(
     monkeypatch: pytest.MonkeyPatch, data_dir: Path, clock: FakeClock

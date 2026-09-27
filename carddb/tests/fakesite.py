@@ -26,6 +26,8 @@ class FakeSite:
         self.card_number_override: dict[str, str] = {}
         self.list_page_one_totals: list[int] = []
         self.broken_images: set[str] = set()
+        # Image paths that cannot be derived from the card number.
+        self.image_override: dict[str, str] = {}
 
     def numbers(self, code: str) -> list[str]:
         suffix = "EN" if self.english else ""
@@ -86,9 +88,10 @@ class FakeSite:
     def card_page(self, number: str) -> str:
         shown = self.card_number_override.get(number, number)
         code = number.split("-", maxsplit=1)[0]
+        src = self.image_override.get(number, f"{IMG}/{code}/{number.lower()}.png")
         return page(
             '<div class="cardlist-Detail"><div class="cardlist-Detail_Box_Inner">'
-            f'<div class="img"><img src="{IMG}/{code}/{number.lower()}.png"></div>'
+            f'<div class="img"><img src="{src}"></div>'
             f'<p class="ttl">Card {number}</p>'
             '<div class="info">'
             "<dl><dt>クラス</dt><dd>エルフ</dd></dl>"

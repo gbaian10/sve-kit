@@ -89,6 +89,7 @@ class Stage(StrEnum):
     EN_P0 = "en-p0"
     EN_P1 = "en-p1"
     EN_P2 = "en-p2"
+    EN_P5 = "en-p5"
     SV1_CARDS = "sv1-cards"
     SV1_IMAGES = "sv1-images"
     SVWB_CARDS = "svwb-cards"
@@ -98,7 +99,12 @@ class Stage(StrEnum):
 _SV1_STAGES = frozenset({Stage.SV1_CARDS, Stage.SV1_IMAGES})
 _SVWB_STAGES = frozenset({Stage.SVWB_CARDS, Stage.SVWB_IMAGES})
 # The English site runs the same stages as the Japanese one, on its own catalog.
-_EN_STAGES = {Stage.EN_P0: Stage.P0, Stage.EN_P1: Stage.P1, Stage.EN_P2: Stage.P2}
+_EN_STAGES = {
+    Stage.EN_P0: Stage.P0,
+    Stage.EN_P1: Stage.P1,
+    Stage.EN_P2: Stage.P2,
+    Stage.EN_P5: Stage.P5,
+}
 
 
 @dataclass(frozen=True, slots=True)
@@ -222,8 +228,20 @@ def crawl_en_p2(
     max_requests: BudgetOption = None,
     dry_run: DryRunOption = False,
 ) -> None:
-    """P2 on the English site: the card pages (text only, no images)."""
+    """P2 on the English site: the card pages; their images are fetched by en-p5."""
     _run(Job(Stage.EN_P2, mode, sets, limit, max_requests, dry_run))
+
+
+@crawl_app.command("en-p5")
+def crawl_en_p5(
+    mode: ModeOption = Mode.RESUME,
+    sets: SetOption = None,
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """P5 on the English site: the card images linked from the stored English card pages."""
+    _run(Job(Stage.EN_P5, mode, sets, limit, max_requests, dry_run))
 
 
 @crawl_app.command("sv1-cards")
@@ -391,7 +409,7 @@ async def _crawl(
             Stage.P0: lambda: _p0(crawler),
             Stage.P1: lambda: _p1(crawler, job.sets, prefix),
             Stage.P2: lambda: _p2(crawler, job.sets, prefix),
-            Stage.P5: lambda: _p5(crawler, job, settings, writer),
+            Stage.P5: lambda: _p5(crawler, job, settings, prefix),
             Stage.SV1_CARDS: lambda: _sv1_cards(sv1_crawler),
             Stage.SV1_IMAGES: lambda: _sv1_images(sv1_crawler, job, settings),
             Stage.SVWB_CARDS: lambda: _svwb_cards(crawler),
@@ -460,11 +478,12 @@ async def _p2(crawler: Crawler, sets: list[str] | None, prefix: str) -> int:
     return failures
 
 
-async def _p5(crawler: Crawler, job: Job, settings: Settings, writer: Writer) -> int:
-    urls = image_urls(crawler.manifest, job.sets)
+async def _p5(crawler: Crawler, job: Job, settings: Settings, prefix: str) -> int:
+    urls = image_urls(crawler.manifest, job.sets, crawler.catalog)
     if not urls:
-        console.print("[red]no stored card pages; run `crawl p2` first[/red]")
+        console.print(f"[red]no stored card pages; run `crawl {prefix}p2` first[/red]")
         return 1
+    writer = crawler.writer
     pending = sum(_would_fetch(job, u, writer.local_state(u)) for u in urls)
     _check_space(settings, job, len(urls), pending)
     failures = 0
@@ -614,7 +633,7 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
             numbers = card_numbers(manifest, job.sets, catalog.region)
             urls = [catalog.card_url(n) for n in numbers]
         case _:
-            urls = image_urls(manifest, job.sets)
+            urls = image_urls(manifest, job.sets, catalog)
     fetch = [u for u in urls if _would_fetch(job, u, writer.local_state(u))]
     for url in fetch:
         console.print(url)
