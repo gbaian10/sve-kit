@@ -3902,7 +3902,7 @@ fn token_templates_require_one_complete_representative_for_ambiguous_names() {
 }
 
 #[test]
-fn token_capacity_selects_print_multisets_before_allocating_and_restores_text_order() {
+fn token_capacity_selects_name_multisets_before_allocating_and_restores_text_order() {
     let body = json!({"op":"seq","steps":[{"op":"create","tokens":[{"name":"shared-token","count":1_i64},{"name":"other-token","count":1_i64},{"name":"shared-token","count":1_i64}],"to":"field","bind":"made"},{"op":"modify","subjects":"made","power":1_i64}]});
     let (facts, docs) = token_fixture(&body);
     let loaded = Arc::new(
@@ -3931,12 +3931,16 @@ fn token_capacity_selects_print_multisets_before_allocating_and_restores_text_or
     assert!(state["state"]["objects"].get("new-1").is_none());
     let choices = engine.legal().unwrap();
     assert_eq!(choices.len(), 2);
-    assert!(choices.contains(&json!({"do":"resolve-choice","select":["token-z","token-z"]})));
-    assert!(choices.contains(&json!({"do":"resolve-choice","select":["token-z","token-b"]})));
+    assert!(
+        choices.contains(&json!({"do":"resolve-choice","select":["shared-token","shared-token"]}))
+    );
+    assert!(
+        choices.contains(&json!({"do":"resolve-choice","select":["shared-token","other-token"]}))
+    );
     let saved = engine.digest().unwrap();
     let rejected = engine
         .decide(
-            &json!({"do":"resolve-choice","select":["token-z","token-z","token-z"]}),
+            &json!({"do":"resolve-choice","select":["shared-token","shared-token","shared-token"]}),
             "invalid",
         )
         .unwrap();
@@ -3954,7 +3958,7 @@ fn token_capacity_selects_print_multisets_before_allocating_and_restores_text_or
         assert_eq!(instance.legal().unwrap(), choices);
         let done = instance
             .decide(
-                &json!({"do":"resolve-choice","select":["token-b","token-z"]}),
+                &json!({"do":"resolve-choice","select":["other-token","shared-token"]}),
                 "choose",
             )
             .unwrap();
@@ -4020,7 +4024,7 @@ fn token_capacity_keeps_single_and_empty_choices_without_allocating_rejected_tok
         let selected = if available == 0 {
             Vec::new()
         } else {
-            vec!["token-z"]
+            vec!["shared-token"]
         };
         let choice = json!({"do":"resolve-choice","select":selected});
         assert_eq!(engine.legal().unwrap(), vec![choice.clone()]);

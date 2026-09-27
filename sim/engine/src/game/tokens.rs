@@ -2,41 +2,22 @@
     clippy::indexing_slicing,
     reason = "Validated JSON uses total read indexing; writes target constructed objects."
 )]
-use alloc::collections::{BTreeMap, BTreeSet};
+use alloc::collections::BTreeSet;
 use serde_json::{Value, json};
 
 use super::{Frame, Game, Object, list, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
-fn in_print_order(prints: &[String], selected: &[String]) -> Vec<String> {
-    let mut counts = BTreeMap::<&str, usize>::new();
-    for card in selected {
-        let count = counts.entry(card).or_default();
-        *count = count.saturating_add(1);
-    }
-    prints
-        .iter()
-        .filter(|card| {
-            let remaining = counts.entry(card.as_str()).or_default();
-            if *remaining == 0 {
-                return false;
-            }
-            *remaining = remaining.saturating_sub(1);
-            true
-        })
-        .cloned()
-        .collect()
-}
-
-fn token_choices(prints: &[String], count: usize) -> Result<Vec<Value>> {
-    let mut sets = BTreeSet::from([Vec::new()]);
-    for card in prints {
+/// Contract 35: a token not yet created is chosen by its rules name (9.1.2.3), so
+/// choices list names in card-text order and identical names collapse.
+fn token_choices(names: &[String], count: usize) -> Result<Vec<Value>> {
+    let mut sets = BTreeSet::from([Vec::<usize>::new()]);
+    for index in 0..names.len() {
         let mut additions = Vec::new();
         for selected in &sets {
             if selected.len() < count {
                 let mut next = selected.clone();
-                next.push(card.clone());
-                next.sort();
+                next.push(index);
                 additions.push(next);
             }
         }
@@ -47,10 +28,36 @@ fn token_choices(prints: &[String], count: usize) -> Result<Vec<Value>> {
             ));
         }
     }
-    Ok(sets
+    let mut seen = BTreeSet::new();
+    let mut choices = Vec::new();
+    for selected in sets.into_iter().filter(|selected| selected.len() == count) {
+        let chosen = selected
+            .iter()
+            .filter_map(|index| names.get(*index).cloned())
+            .collect::<Vec<_>>();
+        let mut multiset = chosen.clone();
+        multiset.sort();
+        if seen.insert(multiset) {
+            choices.push(json!({"do":"resolve-choice","select":chosen}));
+        }
+    }
+    Ok(choices)
+}
+
+/// Maps chosen names back to the earliest unused print of each name, in text order.
+fn prints_for_names(prints: &[String], names: &[String], chosen: &[String]) -> Result<Vec<String>> {
+    let mut used = BTreeSet::new();
+    for name in chosen {
+        let index = names
+            .iter()
+            .enumerate()
+            .position(|(index, candidate)| candidate == name && !used.contains(&index))
+            .ok_or_else(|| invalid(format!("token not offered for creation: {name}")))?;
+        used.insert(index);
+    }
+    Ok(used
         .into_iter()
-        .filter(|selected| selected.len() == count)
-        .map(|selected| json!({"do":"resolve-choice","select":in_print_order(prints, &selected)}))
+        .filter_map(|index| prints.get(index).cloned())
         .collect())
 }
 
@@ -117,11 +124,15 @@ impl Game {
             )
             .map_err(invalid)?;
             if prints.len() > available {
-                let choices = token_choices(&prints, available)?;
+                let names = prints
+                    .iter()
+                    .map(|card| self.token_name(card))
+                    .collect::<Result<Vec<_>>>()?;
+                let choices = token_choices(&names, available)?;
                 self.prompt(
                     frame,
                     choices,
-                    json!({"resume":"create","node":node,"prints":prints}),
+                    json!({"resume":"create","node":node,"prints":prints,"names":names}),
                 );
                 return Ok(());
             }
@@ -139,14 +150,18 @@ impl Game {
             .iter()
             .map(|card| string(card).into())
             .collect::<Vec<_>>();
+        let names = list(&task["names"])
+            .iter()
+            .map(|name| string(name).into())
+            .collect::<Vec<_>>();
         let selected = list(&decision["select"])
             .iter()
-            .map(|card| string(card).into())
+            .map(|name| string(name).into())
             .collect::<Vec<_>>();
         let mut node = task["node"].clone();
         node["print_selected"] = json!(true);
         self.create_prints(
-            &in_print_order(&prints, &selected),
+            &prints_for_names(&prints, &names, &selected)?,
             &node,
             &frame.controller.clone(),
             frame,
@@ -178,6 +193,14 @@ impl Game {
             ],
         );
         Ok(())
+    }
+
+    fn token_name(&self, card: &str) -> Result<String> {
+        let face = self.catalog.face(card, 0)?;
+        Ok(self.catalog.program(card)?["rules_name"]
+            .as_str()
+            .unwrap_or_else(|| string(&face["name"]))
+            .into())
     }
 
     fn unique_crest_creations(

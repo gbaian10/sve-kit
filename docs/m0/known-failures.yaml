@@ -4,10 +4,6 @@
 # docs/m0/known-errors.md.
 expected_scenarios: 706
 known:
-  - question: rule-4.4.4-01
-    scenario: A 場上 3 張、要出 3 個 token → 只能選 2 個
-    status: fail
-    error: KE-05
   - question: rule-1.3.4-01
     scenario: '[astra] 場數 1/5'
     status: fail
