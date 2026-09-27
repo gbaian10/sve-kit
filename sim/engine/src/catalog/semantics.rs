@@ -991,6 +991,32 @@ impl Checker<'_> {
                         self.expr(inner, context);
                     }
                 }
+                if let Some(function) = fields.get("fn").and_then(Value::as_str) {
+                    let count = fields
+                        .get("args")
+                        .and_then(Value::as_array)
+                        .map_or(0, Vec::len);
+                    // `Game::eval` reads a fixed number of arguments and drops the rest.
+                    let (least, most) = match function {
+                        "not" | "distinct" | "sum" | "half_up" => (1, 1),
+                        "min" | "max" => (1, 2),
+                        "and" | "or" => (1, usize::MAX),
+                        _ => (2, 2),
+                    };
+                    if count < least || count > most {
+                        let expected = if least == most {
+                            least.to_string()
+                        } else if most == usize::MAX {
+                            format!("{least} or more")
+                        } else {
+                            format!("{least} or {most}")
+                        };
+                        self.reject(
+                            format!("fn: {function}"),
+                            format!("`{function}` takes {expected} arguments, got {count}"),
+                        );
+                    }
+                }
                 for arg in fields
                     .get("args")
                     .and_then(Value::as_array)

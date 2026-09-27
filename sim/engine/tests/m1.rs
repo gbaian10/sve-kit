@@ -728,8 +728,10 @@ fn all_name_conditions_use_aliases_only_in_their_zone() {
         "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"操り人形","while_zone":"field"}}],
         "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader","amount":{"fn":"add","args":[
             {"count":{"side":"self","zone":"field","name_contains":"人形"}},
-            {"fn":"mul","args":[{"count":{"side":"self","zone":"field","not_name":"操り人形"}},10]},
-            {"fn":"mul","args":[{"count":{"side":"self","zone":"ex","name":"操り人形"}},100]}
+            {"fn":"add","args":[
+                {"fn":"mul","args":[{"count":{"side":"self","zone":"field","not_name":"操り人形"}},10]},
+                {"fn":"mul","args":[{"count":{"side":"self","zone":"ex","name":"操り人形"}},100]}
+            ]}
         ]}}}]
     }));
     let mut engine = start(
@@ -847,6 +849,14 @@ fn scope_and_ruling_violations_are_rejected_at_load() {
         (
             "          op: move\n          subjects: self\n          to: banish\n",
             "write `op: banish`",
+        ),
+        (
+            "          op: damage\n          subjects: opponent.leader\n          amount:\n            fn: add\n            args: [1, 2, 3]\n",
+            "`add` takes 2 arguments, got 3",
+        ),
+        (
+            "          op: damage\n          subjects: opponent.leader\n          amount:\n            fn: not\n            args: []\n",
+            "`not` takes 1 arguments, got 0",
         ),
     ];
     for (body, expected) in cases {
