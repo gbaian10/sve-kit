@@ -11,6 +11,7 @@ from sve_carddb import cli
 from sve_carddb.config import Settings
 from sve_carddb.fetch.throttle import Throttle
 from sve_carddb.manifest import ExclusiveLock, Manifest
+from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
@@ -286,6 +287,80 @@ def test_p5_dry_run_lists_missing_images(site: FakeSite) -> None:
     assert result.exit_code == 0, result.output
     assert len(site.calls) == calls
     assert "3 of 3 URLs would be requested" in result.output
+
+
+@pytest.fixture
+def en_site(
+    monkeypatch: pytest.MonkeyPatch, data_dir: Path, clock: FakeClock
+) -> FakeSite:
+    del data_dir, clock  # requested for their side effects
+    fake = FakeSite({"BP01": 17, "PR": 3}, english=True)
+
+    def factory(settings: Settings) -> httpx.AsyncClient:
+        return httpx.AsyncClient(
+            transport=httpx.MockTransport(fake),
+            headers={"User-Agent": settings.user_agent},
+        )
+
+    monkeypatch.setattr(cli, "http_factory", factory)
+    return fake
+
+
+def test_en_pipeline(en_site: FakeSite, data_dir: Path) -> None:
+    p0 = invoke("crawl", "en-p0")
+    assert p0.exit_code == 0, p0.output
+    assert "2 products" in p0.output
+    assert "BP01:   17 cards,   2 pages" in p0.output
+    p1 = invoke("crawl", "en-p1")
+    assert p1.exit_code == 0, p1.output
+    assert "PR: 3 cards on 1 pages" in p1.output
+    p2 = invoke("crawl", "en-p2", "--set", "PR")
+    assert p2.exit_code == 0, p2.output
+    assert all("://en.shadowverse-evolve.com/" in c for c in en_site.calls)
+    with manifest_at(data_dir) as manifest:
+        assert manifest.resources.get(en.card_url("PR-003EN")) is not None
+        assert manifest.resources.get(en.card_url("BP01-001EN")) is None
+    assert (data_dir / en.card_path("PR-003EN")).is_file()
+    # Japanese stages do not see the English products.
+    assert "run `crawl p0` first" in invoke("crawl", "p1").output
+
+
+def test_en_dry_runs_send_nothing(en_site: FakeSite) -> None:
+    assert "1 of 1 URLs" in invoke("crawl", "en-p0", "--dry-run").output
+    assert invoke("crawl", "en-p0").exit_code == 0
+    calls = len(en_site.calls)
+    p1 = invoke("crawl", "en-p1", "--dry-run")
+    assert p1.exit_code == 0, p1.output
+    assert en.list_url("BP01", 2) in p1.output
+    assert "3 of 3 URLs would be requested" in p1.output
+    assert len(en_site.calls) == calls
+    assert invoke("crawl", "en-p1").exit_code == 0
+    calls = len(en_site.calls)
+    p2 = invoke("crawl", "en-p2", "--dry-run")
+    assert en.card_url("BP01-017EN") in p2.output
+    assert "20 of 20 URLs would be requested" in p2.output
+    assert len(en_site.calls) == calls
+
+
+def test_en_stages_say_which_stage_to_run(en_site: FakeSite) -> None:
+    p1 = invoke("crawl", "en-p1")
+    assert p1.exit_code == 1
+    assert "run `crawl en-p0` first" in p1.output
+    p2 = invoke("crawl", "en-p2")
+    assert p2.exit_code == 1
+    assert "run `crawl en-p1` first" in p2.output
+    dry = invoke("crawl", "en-p1", "--dry-run", "--set", "BP01")
+    assert "run `crawl en-p0` first" in dry.output
+    assert en_site.calls == []
+
+
+def test_en_limits_stop_cleanly(en_site: FakeSite) -> None:
+    result = invoke("crawl", "en-p0", "--limit", "2")
+    assert result.exit_code == 0, result.output
+    assert "--limit of 2 URLs reached" in result.output
+    budget = invoke("crawl", "en-p1", "--max-requests", "1")
+    assert budget.exit_code == 0, budget.output
+    assert len(en_site.calls) == 3
 
 
 @pytest.fixture

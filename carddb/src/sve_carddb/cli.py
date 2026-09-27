@@ -17,7 +17,9 @@ from rich.console import Console
 
 from sve_carddb.config import Settings
 from sve_carddb.crawl import (
-    JP_SITE,
+    EN_CATALOG,
+    JP_CATALOG,
+    Catalog,
     Crawler,
     LimitReachedError,
     ListInconsistentError,
@@ -49,9 +51,9 @@ from sve_carddb.fetch.client import (
 from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
 from sve_carddb.fetch.writer import DiskFullError, LocalState, Writer, remove_temp_files
 from sve_carddb.manifest import AlreadyRunningError, ExclusiveLock, Manifest
-from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
+from sve_carddb.sources.official_jp import parse_list_first
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -84,6 +86,9 @@ class Stage(StrEnum):
     P1 = "p1"
     P2 = "p2"
     P5 = "p5"
+    EN_P0 = "en-p0"
+    EN_P1 = "en-p1"
+    EN_P2 = "en-p2"
     SV1_CARDS = "sv1-cards"
     SV1_IMAGES = "sv1-images"
     SVWB_CARDS = "svwb-cards"
@@ -92,6 +97,8 @@ class Stage(StrEnum):
 
 _SV1_STAGES = frozenset({Stage.SV1_CARDS, Stage.SV1_IMAGES})
 _SVWB_STAGES = frozenset({Stage.SVWB_CARDS, Stage.SVWB_IMAGES})
+# The English site runs the same stages as the Japanese one, on its own catalog.
+_EN_STAGES = {Stage.EN_P0: Stage.P0, Stage.EN_P1: Stage.P1, Stage.EN_P2: Stage.P2}
 
 
 @dataclass(frozen=True, slots=True)
@@ -183,6 +190,40 @@ def crawl_p5(
 ) -> None:
     """Fetch the card images linked from the stored card pages."""
     _run(Job(Stage.P5, mode, sets, limit, max_requests, dry_run))
+
+
+@crawl_app.command("en-p0")
+def crawl_en_p0(
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """P0 on the English site: products and page 1 of every product list."""
+    _run(Job(Stage.EN_P0, limit=limit, max_requests=max_requests, dry_run=dry_run))
+
+
+@crawl_app.command("en-p1")
+def crawl_en_p1(
+    mode: ModeOption = Mode.RESUME,
+    sets: SetOption = None,
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """P1 on the English site: every page of the product lists."""
+    _run(Job(Stage.EN_P1, mode, sets, limit, max_requests, dry_run))
+
+
+@crawl_app.command("en-p2")
+def crawl_en_p2(
+    mode: ModeOption = Mode.RESUME,
+    sets: SetOption = None,
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """P2 on the English site: the card pages (text only, no images)."""
+    _run(Job(Stage.EN_P2, mode, sets, limit, max_requests, dry_run))
 
 
 @crawl_app.command("sv1-cards")
@@ -342,12 +383,14 @@ async def _crawl(
             mode=job.mode,
             limit=job.limit,
             site=_site(job.stage),
+            catalog=_catalog(job.stage),
         )
+        prefix = _prefix(job.stage)
         sv1_crawler = Sv1Crawler(crawler, CircuitBreaker(settings.breaker_threshold))
         stages: dict[Stage, Callable[[], Awaitable[int]]] = {
             Stage.P0: lambda: _p0(crawler),
-            Stage.P1: lambda: _p1(crawler, job.sets),
-            Stage.P2: lambda: _p2(crawler, job.sets),
+            Stage.P1: lambda: _p1(crawler, job.sets, prefix),
+            Stage.P2: lambda: _p2(crawler, job.sets, prefix),
             Stage.P5: lambda: _p5(crawler, job, settings, writer),
             Stage.SV1_CARDS: lambda: _sv1_cards(sv1_crawler),
             Stage.SV1_IMAGES: lambda: _sv1_images(sv1_crawler, job, settings),
@@ -355,7 +398,7 @@ async def _crawl(
             Stage.SVWB_IMAGES: lambda: _svwb_images(crawler, job, settings),
         }
         try:
-            return await stages[job.stage]()
+            return await stages[_EN_STAGES.get(job.stage, job.stage)]()
         finally:
             console.print(f"HTTP requests sent: {client.requests_sent}")
 
@@ -379,10 +422,10 @@ async def _p0(crawler: Crawler) -> int:
     return 0
 
 
-async def _p1(crawler: Crawler, sets: list[str] | None) -> int:
+async def _p1(crawler: Crawler, sets: list[str] | None, prefix: str) -> int:
     codes = sets or crawler.current_sets()
     if not codes:
-        console.print("[red]no products known; run `crawl p0` first[/red]")
+        console.print(f"[red]no products known; run `crawl {prefix}p0` first[/red]")
         return 1
     failures = 0
     for code in codes:
@@ -396,10 +439,12 @@ async def _p1(crawler: Crawler, sets: list[str] | None) -> int:
     return failures
 
 
-async def _p2(crawler: Crawler, sets: list[str] | None) -> int:
+async def _p2(crawler: Crawler, sets: list[str] | None, prefix: str) -> int:
     numbers = crawler.card_numbers(sets)
     if not numbers:
-        console.print("[red]no validated product lists; run `crawl p1` first[/red]")
+        console.print(
+            f"[red]no validated product lists; run `crawl {prefix}p1` first[/red]"
+        )
         return 1
     failures = 0
     for index, number in enumerate(numbers, start=1):
@@ -458,7 +503,15 @@ def _site(stage: Stage) -> Site:
         return SV1_SITE
     if stage in _SVWB_STAGES:
         return SVWB_SITE
-    return JP_SITE
+    return _catalog(stage).site
+
+
+def _catalog(stage: Stage) -> Catalog:
+    return EN_CATALOG if stage in _EN_STAGES else JP_CATALOG
+
+
+def _prefix(stage: Stage) -> str:
+    return "en-" if stage in _EN_STAGES else ""
 
 
 async def _svwb_cards(crawler: Crawler) -> int:
@@ -546,18 +599,20 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
     if job.stage is Stage.SVWB_IMAGES:
         _dry_run_svwb_images(writer)
         return
-    known = current_sets(manifest)
+    catalog = _catalog(job.stage)
+    known = current_sets(manifest, catalog.region)
     urls: list[str] = []
-    match job.stage:
+    match _EN_STAGES.get(job.stage, job.stage):
         case Stage.P0:
-            urls = [jp.sets_url(), *(jp.list_url(code, 1) for code in known)]
+            urls = [catalog.sets_url(), *(catalog.list_url(c, 1) for c in known)]
             if not known:
                 console.print("products not discovered yet: page 1 URLs unknown")
         case Stage.P1:
             for code in job.sets or known:
-                urls += _list_urls(code, writer)
+                urls += _list_urls(code, writer, catalog, _prefix(job.stage))
         case Stage.P2:
-            urls = [jp.card_url(n) for n in card_numbers(manifest, job.sets)]
+            numbers = card_numbers(manifest, job.sets, catalog.region)
+            urls = [catalog.card_url(n) for n in numbers]
         case _:
             urls = image_urls(manifest, job.sets)
     fetch = [u for u in urls if _would_fetch(job, u, writer.local_state(u))]
@@ -613,19 +668,19 @@ def _dry_run_svwb_images(writer: Writer) -> None:
     console.print(f"{len(fetch)} of {len(urls)} URLs would be requested")
 
 
-def _list_urls(code: str, writer: Writer) -> list[str]:
-    first = jp.list_url(code, 1)
+def _list_urls(code: str, writer: Writer, catalog: Catalog, prefix: str) -> list[str]:
+    first = catalog.list_url(code, 1)
     if writer.local_state(first) is not LocalState.TRUSTED:
-        console.print(f"{code}: page 1 not stored yet; run `crawl p0` first")
+        console.print(f"{code}: page 1 not stored yet; run `crawl {prefix}p0` first")
         return []
-    max_page = jp.parse_list_first(writer.read(first)).max_page or 1
-    return [jp.list_url(code, n) for n in range(1, max_page + 1)]
+    max_page = parse_list_first(writer.read(first)).max_page or 1
+    return [catalog.list_url(code, n) for n in range(1, max_page + 1)]
 
 
 def _would_fetch(job: Job, url: str, state: LocalState) -> bool:
     # The product page and P1's list pages are always re-read to build a new
     # generation; everything else follows the mode.
-    if url == jp.sets_url() or job.stage is Stage.P1:
+    if url == _catalog(job.stage).sets_url() or job.stage in {Stage.P1, Stage.EN_P1}:
         return True
     if state is not LocalState.TRUSTED:
         return True

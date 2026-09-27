@@ -29,6 +29,7 @@ if TYPE_CHECKING:
 
 HOST = "shadowverse-evolve.com"
 BASE = f"https://{HOST}"
+CARD_DIR = f"{BASE}/cardlist/"
 REGION = Region.JP
 PAGE_SIZE = 15
 MIN_PAGE_BYTES = 1000
@@ -96,12 +97,12 @@ def list_url(set_code: str, page: int) -> str:
 
 def card_url(card_number: str) -> str:
     """The card page, rebuilt from the number: list links carry extra query parameters."""
-    return canonicalize(f"{BASE}/cardlist/?cardno={quote(card_number, safe='')}")
+    return canonicalize(f"{CARD_DIR}?cardno={quote(card_number, safe='')}")
 
 
-def image_url(src: str) -> str:
-    """Resolve an `<img src>` from a card page."""
-    return canonicalize(urljoin(f"{BASE}/cardlist/", src))
+def image_url(src: str, page_dir: str = CARD_DIR) -> str:
+    """Resolve an `<img src>` from a card page in `page_dir`."""
+    return canonicalize(urljoin(page_dir, src))
 
 
 # --- local paths ------------------------------------------------------------
@@ -122,7 +123,7 @@ def card_path(card_number: str) -> PurePosixPath:
     return relpath("raw", REGION.value, "card", f"{card_number}.html.zst")
 
 
-def image_path(url: str) -> PurePosixPath:
+def image_path(url: str, region: Region = REGION) -> PurePosixPath:
     """Where an image is stored: the official path below `cardlist/`, unchanged."""
     marker = "/wp-content/images/cardlist/"
     path = urlsplit(url).path
@@ -130,7 +131,7 @@ def image_path(url: str) -> PurePosixPath:
         msg = f"not a card image URL: {url}"
         raise ValidationError(msg)
     segments = [unquote(s) for s in path.split(marker, 1)[1].split("/")]
-    return relpath("media", "images", REGION.value, *segments)
+    return relpath("media", "images", region.value, *segments)
 
 
 # --- page checks and discovery ----------------------------------------------
@@ -185,8 +186,13 @@ def parse_list_more(body: bytes, *, page: int, max_page: int, total: int) -> Lis
     return ListPage(card_numbers=numbers)
 
 
-def parse_card(body: bytes, *, expected_number: str) -> CardPage:
-    """A card page: it must be the card we asked for, and have at least one image."""
+def parse_card(
+    body: bytes, *, expected_number: str, page_dir: str = CARD_DIR
+) -> CardPage:
+    """A card page: it must be the card we asked for, and have at least one image.
+
+    The English site shares this layout; `page_dir` resolves its image paths.
+    """
     tree = parse(decode_html(body, min_bytes=MIN_PAGE_BYTES))
     detail = require_one(tree, ".cardlist-Detail")
     number = _card_page_number(detail)
@@ -206,7 +212,7 @@ def parse_card(body: bytes, *, expected_number: str) -> CardPage:
     return CardPage(
         card_number=number,
         name=name,
-        image_urls=[image_url(src) for src in originals],
+        image_urls=[image_url(src, page_dir) for src in originals],
         image_originals=originals,
     )
 

@@ -1,4 +1,4 @@
-"""A fake Japanese official site, shaped like the real pages."""
+"""A fake official site (Japanese or English), shaped like the real pages."""
 
 import struct
 import zlib
@@ -15,15 +15,21 @@ IMG = "/wordpress/wp-content/images/cardlist"
 class FakeSite:
     """Serves pages shaped like the real site, from an editable product catalogue."""
 
-    def __init__(self, sets: dict[str, int]) -> None:
+    def __init__(self, sets: dict[str, int], *, english: bool = False) -> None:
         self.sets = sets
+        # The English site serves the same markup under other paths.
+        self.english = english
+        self.card_dir = "/cards/" if english else "/cardlist/"
+        self.first_path = "searchresults/" if english else "cardsearch/"
+        self.set_param = "expansion" if english else "expansion_name"
         self.calls: list[str] = []
         self.card_number_override: dict[str, str] = {}
         self.list_page_one_totals: list[int] = []
         self.broken_images: set[str] = set()
 
     def numbers(self, code: str) -> list[str]:
-        return [f"{code}-{i:03d}" for i in range(1, self.sets[code] + 1)]
+        suffix = "EN" if self.english else ""
+        return [f"{code}-{i:03d}{suffix}" for i in range(1, self.sets[code] + 1)]
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.calls.append(str(request.url))
@@ -37,12 +43,12 @@ class FakeSite:
             return httpx.Response(
                 200, content=PNG, headers={"Content-Type": "image/png"}
             )
-        if parts.path == "/cardlist/" and "cardno" in query:
+        if parts.path == self.card_dir and "cardno" in query:
             return html(self.card_page(query["cardno"]))
-        if parts.path == "/cardlist/":
+        if parts.path == self.card_dir:
             return html(self.sets_page())
-        code = query["expansion_name"]
-        if parts.path == "/cardlist/cardsearch/":
+        code = query[self.set_param]
+        if parts.path == self.card_dir + self.first_path:
             return html(self.list_first(code))
         return html(self.list_more(code, int(query["page"])))
 

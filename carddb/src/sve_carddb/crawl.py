@@ -1,4 +1,4 @@
-"""Crawl stages for the Japanese official site.
+"""Crawl stages for the Japanese and English official sites.
 
 P0 discovers products and fetches page 1 of each list. P1 discovers every list
 page as one generation per product. P2 fetches the card pages listed by the
@@ -20,6 +20,7 @@ from sve_carddb.fetch.validate import ValidationError, check_image, require_medi
 from sve_carddb.fetch.writer import Fetched, LocalState, sha256
 from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Link, Outcome, Region, RequestResult
+from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 
 if TYPE_CHECKING:
@@ -31,7 +32,6 @@ if TYPE_CHECKING:
     from sve_carddb.fetch.writer import Writer
     from sve_carddb.manifest import Manifest
 
-SETS_ROOT = f"{jp.REGION.value}:sets"
 _OK = 200
 _NOT_MODIFIED = 304
 _NOT_FOUND = 404
@@ -57,6 +57,59 @@ class Site:
 
 
 JP_SITE = Site(jp.REGION, jp.allowed, jp.image_path)
+EN_SITE = Site(en.REGION, en.allowed, en.image_path)
+
+
+@dataclass(frozen=True, slots=True)
+class Catalog:
+    """Where one official card list lives: its URLs, local paths and card parser.
+
+    Both sites share the product form and list markup, so only these differ.
+    """
+
+    site: Site
+    sets_url: Callable[[], str]
+    sets_path: Callable[[], PurePosixPath]
+    list_url: Callable[[str, int], str]
+    list_path: Callable[[str, int], PurePosixPath]
+    card_url: Callable[[str], str]
+    card_path: Callable[[str], PurePosixPath]
+    parse_card: Callable[[bytes, str], jp.CardPage]
+
+    @property
+    def region(self) -> Region:
+        """The region the stored pages are recorded under."""
+        return self.site.region
+
+
+JP_CATALOG = Catalog(
+    JP_SITE,
+    jp.sets_url,
+    jp.sets_path,
+    jp.list_url,
+    jp.list_path,
+    jp.card_url,
+    jp.card_path,
+    lambda body, number: jp.parse_card(body, expected_number=number),
+)
+EN_CATALOG = Catalog(
+    EN_SITE,
+    en.sets_url,
+    en.sets_path,
+    en.list_url,
+    en.list_path,
+    en.card_url,
+    en.card_path,
+    lambda body, number: en.parse_card(body, expected_number=number),
+)
+
+
+def sets_root(region: Region) -> str:
+    """The generation root of a region's product list."""
+    return f"{region.value}:sets"
+
+
+SETS_ROOT = sets_root(jp.REGION)
 
 
 class LimitReachedError(RuntimeError):
@@ -67,25 +120,29 @@ class ListInconsistentError(RuntimeError):
     """A product list changed while it was being read, on every attempt."""
 
 
-def list_root(set_code: str) -> str:
+def list_root(set_code: str, region: Region = jp.REGION) -> str:
     """The generation root of a product's list."""
-    return f"{jp.REGION.value}:list:{set_code}"
+    return f"{region.value}:list:{set_code}"
 
 
-def current_sets(manifest: Manifest) -> list[str]:
+def current_sets(manifest: Manifest, region: Region = jp.REGION) -> list[str]:
     """Product codes from the validated product generation."""
-    current = manifest.generations.current(SETS_ROOT)
+    current = manifest.generations.current(sets_root(region))
     if current is None:
         return []
     return [edge.link.original for edge in manifest.generations.edges(current.id)]
 
 
-def card_numbers(manifest: Manifest, set_codes: list[str] | None = None) -> list[str]:
+def card_numbers(
+    manifest: Manifest,
+    set_codes: list[str] | None = None,
+    region: Region = jp.REGION,
+) -> list[str]:
     """Card numbers from validated list generations, deduplicated, in list order."""
     numbers: dict[str, None] = {}
-    codes = set_codes if set_codes is not None else current_sets(manifest)
+    codes = set_codes if set_codes is not None else current_sets(manifest, region)
     for code in codes:
-        current = manifest.generations.current(list_root(code))
+        current = manifest.generations.current(list_root(code, region))
         if current is None:
             continue
         for edge in manifest.generations.edges(current.id):
@@ -93,11 +150,15 @@ def card_numbers(manifest: Manifest, set_codes: list[str] | None = None) -> list
     return list(numbers)
 
 
-def image_urls(manifest: Manifest, set_codes: list[str] | None = None) -> list[str]:
+def image_urls(
+    manifest: Manifest,
+    set_codes: list[str] | None = None,
+    catalog: Catalog = JP_CATALOG,
+) -> list[str]:
     """Card image URLs recorded by P2, deduplicated, in card and page order."""
     urls: dict[str, None] = {}
-    for number in card_numbers(manifest, set_codes):
-        for link in manifest.links.current(jp.card_url(number)):
+    for number in card_numbers(manifest, set_codes, catalog.region):
+        for link in manifest.links.current(catalog.card_url(number)):
             if link.to_kind is Kind.IMAGE:
                 urls.setdefault(link.to_url)
     return list(urls)
@@ -131,6 +192,8 @@ class Crawler:
     mode: Mode = Mode.RESUME
     limit: int | None = None
     site: Site = JP_SITE
+    # P0-P2 use the catalog; `site` must be `catalog.site` when they run.
+    catalog: Catalog = JP_CATALOG
     fetched: int = field(default=0, init=False)
 
     async def page[T](
@@ -255,17 +318,17 @@ class Crawler:
 
     async def discover_sets(self) -> list[jp.CardSet]:
         """Fetch the product list as a one-page generation and publish it."""
-        generation = self.manifest.generations.start(SETS_ROOT)
-        url = jp.sets_url()
+        generation = self.manifest.generations.start(sets_root(self.catalog.region))
+        url = self.catalog.sets_url()
         page = await self.page(
             url,
             kind=Kind.SETS,
-            path=jp.sets_path(),
+            path=self.catalog.sets_path(),
             parse=jp.parse_sets,
             bypass_resume=True,
         )
         links = [
-            Link(jp.list_url(s.code, 1), Kind.LIST, i, s.code)
+            Link(self.catalog.list_url(s.code, 1), Kind.LIST, i, s.code)
             for i, s in enumerate(page.value)
         ]
         self._add_generation_page(generation.id, url, Page(links, page.sha256))
@@ -276,14 +339,14 @@ class Crawler:
 
     def current_sets(self) -> list[str]:
         """Product codes from the validated product generation."""
-        return current_sets(self.manifest)
+        return current_sets(self.manifest, self.catalog.region)
 
     async def first_page(self, set_code: str) -> ListSummary:
         """P0: page 1 of a product list and the totals it declares."""
         page = await self.page(
-            jp.list_url(set_code, 1),
+            self.catalog.list_url(set_code, 1),
             kind=Kind.LIST,
-            path=jp.list_path(set_code, 1),
+            path=self.catalog.list_path(set_code, 1),
             parse=jp.parse_list_first,
         )
         return _summary(set_code, page.value)
@@ -300,14 +363,16 @@ class Crawler:
         raise ListInconsistentError(msg)
 
     async def _try_discover_list(self, set_code: str) -> ListSummary | None:
-        generation = self.manifest.generations.start(list_root(set_code))
-        first_url = jp.list_url(set_code, 1)
+        generation = self.manifest.generations.start(
+            list_root(set_code, self.catalog.region)
+        )
+        first_url = self.catalog.list_url(set_code, 1)
         first = await self._list_page(first_url, set_code, 1, jp.parse_list_first)
         summary = _summary(set_code, first.value)
         numbers = list(first.value.card_numbers)
         self._record_list_page(generation.id, first_url, first)
         for page_no in range(2, summary.max_page + 1):
-            url = jp.list_url(set_code, page_no)
+            url = self.catalog.list_url(set_code, page_no)
             page = await self._list_page(
                 url, set_code, page_no, _more(page_no, summary.max_page, summary.total)
             )
@@ -338,7 +403,7 @@ class Crawler:
         return await self.page(
             url,
             kind=Kind.LIST,
-            path=jp.list_path(set_code, page_no),
+            path=self.catalog.list_path(set_code, page_no),
             parse=parse,
             bypass_resume=True,
         )
@@ -347,7 +412,7 @@ class Crawler:
         self, generation_id: int, url: str, page: Page[jp.ListPage]
     ) -> None:
         links = [
-            Link(jp.card_url(n), Kind.CARD, i, n)
+            Link(self.catalog.card_url(n), Kind.CARD, i, n)
             for i, n in enumerate(page.value.card_numbers)
         ]
         self._add_generation_page(generation_id, url, Page(links, page.sha256))
@@ -400,16 +465,16 @@ class Crawler:
 
     def card_numbers(self, set_codes: list[str] | None = None) -> list[str]:
         """Card numbers from validated list generations, deduplicated, in list order."""
-        return card_numbers(self.manifest, set_codes)
+        return card_numbers(self.manifest, set_codes, self.catalog.region)
 
     async def card(self, number: str) -> jp.CardPage:
         """Fetch one card page and record its images as the card's current links."""
-        url = jp.card_url(number)
+        url = self.catalog.card_url(number)
         page = await self.page(
             url,
             kind=Kind.CARD,
-            path=jp.card_path(number),
-            parse=lambda body: jp.parse_card(body, expected_number=number),
+            path=self.catalog.card_path(number),
+            parse=lambda body: self.catalog.parse_card(body, number),
         )
         card = page.value
         links = [
