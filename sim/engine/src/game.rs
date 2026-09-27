@@ -697,11 +697,13 @@ impl Game {
             .collect()
     }
     fn ability(&self, id: &str, reference: &Value) -> Result<Value> {
-        if let Some(code) = self
-            .abilities(id)?
-            .into_iter()
-            .find(|code| legal::reference_matches(reference, &self.reference(id, code)))
-        {
+        if let Some(code) = self.abilities(id)?.into_iter().find(|code| {
+            legal::reference_matches(
+                reference,
+                &self.reference(id, code),
+                self.keyword_label(code),
+            )
+        }) {
             return Ok(code);
         }
         if let Some(source) = reference["granted_by"].as_str() {
@@ -773,6 +775,12 @@ impl Game {
             value["keyword"] = json!(self.catalog.keyword_name(keyword));
         }
         value
+    }
+    fn keyword_label(&self, ability: &Value) -> Option<&str> {
+        ability["keyword"]
+            .as_str()
+            .map(|keyword| self.catalog.keyword_name(keyword))
+            .filter(|name| !name.is_empty())
     }
     fn active(&self) -> &str {
         string(&self.state.turn["active"])

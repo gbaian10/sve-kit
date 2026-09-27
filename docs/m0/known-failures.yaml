@@ -4,10 +4,6 @@
 # docs/m0/known-errors.md.
 expected_scenarios: 706
 known:
-  - question: rule-14.4-01
-    scenario: A 憑依 → ドライブ獲得時 → 進化不可 → 疾走攻擊：シングルドライブ與攻撃時同時待機
-    status: fail
-    error: KE-04
   - question: rule-4.4.4-01
     scenario: A 場上 3 張、要出 3 個 token → 只能選 2 個
     status: fail

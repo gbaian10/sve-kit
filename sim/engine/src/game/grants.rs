@@ -108,7 +108,11 @@ impl Game {
         let mut selected = None;
         for code in self.abilities(id)? {
             if !matches!(string(&code["kind"]), "activated" | "meal" | "ride")
-                || !super::legal::reference_matches(reference, &self.reference(id, &code))
+                || !super::legal::reference_matches(
+                    reference,
+                    &self.reference(id, &code),
+                    self.keyword_label(&code),
+                )
             {
                 continue;
             }

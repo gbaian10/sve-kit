@@ -423,8 +423,11 @@ impl Game {
                 if choice.is_string() {
                     return p.id.as_deref() == choice.as_str();
                 }
-                super::legal::reference_matches(&choice["ability"], &p.reference)
-                    && (choice["event"].is_null() || choice["event"] == p.event)
+                super::legal::reference_matches(
+                    &choice["ability"],
+                    &p.reference,
+                    self.keyword_label(&p.code),
+                ) && (choice["event"].is_null() || choice["event"] == p.event)
             });
         let (index, first) = matches
             .next()

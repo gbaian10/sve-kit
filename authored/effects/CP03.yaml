@@ -209,6 +209,7 @@ cards:
           abilities:
             - line: 2
               kind: trigger
+              keyword: on_attack
               body:
                 op: if
                 condition:

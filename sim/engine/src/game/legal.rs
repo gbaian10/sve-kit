@@ -80,10 +80,15 @@ fn distributions(ids: &[String], total: i64) -> Vec<Value> {
     out
 }
 
-pub(super) fn reference_matches(query: &Value, actual: &Value) -> bool {
+/// `label` is the ability's own keyword; a query may name it even when the short
+/// reference omits it (unique line), but a different keyword never matches.
+pub(super) fn reference_matches(query: &Value, actual: &Value, label: Option<&str>) -> bool {
     query.as_object().is_some_and(|fields| {
         fields.iter().all(|(key, value)| {
-            (key == "keyword" && actual.get(key).is_none()) || actual.get(key) == Some(value)
+            actual.get(key).map_or_else(
+                || key == "keyword" && label.is_none_or(|label| value == label),
+                |own| own == value,
+            )
         })
     })
 }

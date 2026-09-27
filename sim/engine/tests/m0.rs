@@ -28,7 +28,12 @@ fn snapshot() -> String {
 }
 
 fn registry() -> String {
-    json!({"version":"astra/1","keywords":{"guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}}}}).to_string()
+    json!({"version":"astra/1","keywords":{
+        "guard":{"ja":"守護","rule":"12.8","expansion":{"op":"keyword","name":"guard"}},
+        "fanfare":{"ja":"ファンファーレ","role":"ability-label"},
+        "last_words":{"ja":"ラストワード","role":"ability-label"}
+    }})
+    .to_string()
 }
 
 fn document(follower: &Value, spell: &Value) -> Value {
@@ -82,4 +87,44 @@ fn ke03_setup_labelled_pending_is_offered_by_ability_reference() {
         .decide(&json!({"do":"choose-pending","pending":"ta"}), "1")
         .unwrap();
     assert_eq!(step.outcome, "resolved");
+}
+
+fn pending_setup(ability: &Value) -> Value {
+    json!({
+        "turn":{"active":"P1","first_player":"P1","elapsed_turns":{"P1":3,"P2":2},"phase":"main"},
+        "history":"explicit",
+        "players":{"P1":player(&json!([]),&json!([{"id":"a","card":"unit-follower"}])),
+                   "P2":player(&json!([]),&json!([]))},
+        "semantic_state":{"pending_triggers":[
+            {"controller":"P1","ability":ability,"event":{"left_field":"a"}}
+        ],"check_timing":{"in_progress":true,"rules_processed":true}}
+    })
+}
+
+/// KE-04 (contract 3.1): abilities sharing a printed line are told apart by keyword,
+/// and a reference that names a different keyword never matches.
+#[test]
+fn ke04_shared_line_references_carry_and_check_the_keyword() {
+    let hit = json!({"op":"damage","subjects":"opponent.leader","amount":1});
+    let shared = json!([
+        {"line":1,"kind":"trigger","keyword":"fanfare","event":"enter","subject":"self","body":hit},
+        {"line":1,"kind":"trigger","keyword":"last_words","event":"field_to_cemetery","subject":"self","body":hit}
+    ]);
+    let last_words = json!({"source":"a","line":1,"keyword":"ラストワード"});
+    let mut engine = start(
+        load(&shared, &json!([])).unwrap(),
+        &pending_setup(&last_words),
+    );
+    assert_eq!(engine.legal().unwrap()[0]["pending"]["ability"], last_words);
+    let wrong = json!({"do":"choose-pending","pending":{"ability":{"source":"a","line":1,"keyword":"ファンファーレ"}}});
+    engine.decide(&wrong, "wrong").unwrap_err();
+    let alone = json!([
+        {"line":1,"kind":"trigger","keyword":"last_words","event":"field_to_cemetery","subject":"self","body":hit}
+    ]);
+    let short = json!({"source":"a","line":1});
+    let mut single = start(load(&alone, &json!([])).unwrap(), &pending_setup(&short));
+    assert_eq!(single.legal().unwrap()[0]["pending"]["ability"], short);
+    single.decide(&wrong, "wrong").unwrap_err();
+    let named = json!({"do":"choose-pending","pending":{"ability":last_words}});
+    assert_eq!(single.decide(&named, "named").unwrap().outcome, "resolved");
 }
