@@ -189,7 +189,7 @@ cards:
               - 2
   BP13-043:
     status: complete
-    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 括號「（場が上限ではない自身以外のプレイヤーの場に移動する）」是卡文先決條件：接收方場已滿時該次移動不開始、不是輸入點（契約 33(c)②）。
     abilities:
       - line: 1
         kind: spell
@@ -217,13 +217,31 @@ cards:
                 bind: gift_other
                 by: opponent
               - &id005
-                op: control
-                subjects: gift_self
-                side: opponent
+                op: if
+                condition:
+                  fn: lt
+                  args:
+                    - count:
+                        side: opponent
+                        zone: field
+                    - 5
+                then:
+                  op: control
+                  subjects: gift_self
+                  side: opponent
               - &id004
-                op: control
-                subjects: gift_other
-                side: self
+                op: if
+                condition:
+                  fn: lt
+                  args:
+                    - count:
+                        side: self
+                        zone: field
+                    - 5
+                then:
+                  op: control
+                  subjects: gift_other
+                  side: self
           else:
             op: seq
             steps:
