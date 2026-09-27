@@ -835,34 +835,36 @@ cards:
       - line: 3
         kind: trigger
         body:
-          op: seq
-          steps:
-            - op: damage
-              subjects: opponent.leader
-              amount: 3
-            - op: if
-              condition:
-                fn: eq
-                args:
-                  - count:
-                      side: self
-                      zone: hand
-                  - 0
-              then:
-                op: damage
-                subjects:
-                  side: opponent
-                  zone: field
-                  type: follower
+          op: if
+          condition:
+            fn: le
+            args:
+              - count:
+                  side: self
+                  zone: hand
+              - 2
+          then:
+            op: seq
+            steps:
+              - op: damage
+                subjects: opponent.leader
                 amount: 3
+              - op: if
+                condition:
+                  fn: eq
+                  args:
+                    - count:
+                        side: self
+                        zone: hand
+                    - 0
+                then:
+                  op: damage
+                  subjects:
+                    side: opponent
+                    zone: field
+                    type: follower
+                  amount: 3
         event: end
-        trigger_if:
-          fn: le
-          args:
-            - count:
-                side: self
-                zone: hand
-            - 2
   BP20-SL17:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

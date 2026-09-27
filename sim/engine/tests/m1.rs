@@ -624,3 +624,30 @@ fn r3_same_observation_and_seed_give_the_same_world() {
         );
     }
 }
+
+/// R-0009: a long-form "〜とき、…なら" ability triggers on the event alone; the
+/// condition is read when it resolves, and a false condition just does nothing.
+#[test]
+fn long_form_condition_triggers_and_is_checked_at_resolution() {
+    let loaded = catalog(&json!({
+        "amulet":[{"line":1,"kind":"trigger","event":"end","side":"self",
+            "body":{"op":"if","condition":{"fn":"eq","args":[{"count":{"side":"self","zone":"hand"}},0]},
+                "then":{"op":"damage","subjects":"opponent.leader","amount":3}}}]
+    }));
+    for (hand, expected) in [(json!([]), 12), (json!([{"id":"h","card":"f-a"}]), 15)] {
+        let mut engine = start(
+            loaded.clone(),
+            &setup(
+                &json!({"field":[{"id":"w","card":"amulet"}],"hand":hand}),
+                &json!({}),
+            ),
+        );
+        let step = engine.decide(&json!({"do":"end-phase"}), "end").unwrap();
+        assert!(
+            step.events.iter().any(|event| event["kind"] == "待機"),
+            "the ability forms even when the condition is false: {step:?}"
+        );
+        settle_turn(&mut engine);
+        assert_eq!(life(&engine, "P2"), json!(expected));
+    }
+}

@@ -337,15 +337,17 @@ cards:
       - line: 2
         kind: trigger
         body:
-          op: modify
-          subjects: self.leader
-          hp: 2
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.turn.trait_attacks.アクアフォース
+              - 3
+          then:
+            op: modify
+            subjects: self.leader
+            hp: 2
         event: end
-        trigger_if:
-          fn: ge
-          args:
-            - read: self.turn.trait_attacks.アクアフォース
-            - 3
   CP03-021:
     status: complete
     review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。

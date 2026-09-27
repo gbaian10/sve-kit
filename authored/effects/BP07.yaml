@@ -188,24 +188,26 @@ cards:
       - line: 1
         kind: trigger
         body:
-          op: damage
-          subjects: opponent.leader
-          amount:
-            fn: div
+          op: if
+          condition:
+            fn: eq
             args:
-              - count:
-                  side: self
-                  zone: cemetery
-                  trait: 自然
-              - 5
+              - read: self.zone
+              - ex
+          then:
+            op: damage
+            subjects: opponent.leader
+            amount:
+              fn: div
+              args:
+                - count:
+                    side: self
+                    zone: cemetery
+                    trait: 自然
+                - 5
         event: end
         active_zones:
           - ex
-        trigger_if:
-          fn: eq
-          args:
-            - read: self.zone
-            - ex
       - line: 1
         kind: static
         body:

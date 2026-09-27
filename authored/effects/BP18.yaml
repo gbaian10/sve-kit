@@ -252,11 +252,6 @@ cards:
             to: field
         event: damage
         subject: self
-        trigger_if:
-          fn: eq
-          args:
-            - read: self.zone
-            - field
       - line: 3
         kind: trigger
         body:
