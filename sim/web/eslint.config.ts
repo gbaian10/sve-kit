@@ -60,6 +60,16 @@ const restrictedClasses = [
   },
 ]
 
+// Same bar as i18next/no-literal-string: fixed text with letters is UI copy; pure interpolation is not.
+const LETTER_TEXT = String.raw`:matches(Literal[value=/\p{L}/u], TemplateLiteral:has(TemplateElement[value.raw=/\p{L}/u]))`
+const LABEL = `Property:matches([key.name='label'], [key.value='label'])`
+const PLUS = `BinaryExpression[operator='+']`
+// esquery cannot chain `>` inside :has, so nest :has once per `+` level (up to five operands).
+const plusWithLetterText = Array.from({ length: 3 }).reduce<string[]>(
+  (levels) => [...levels, `:has(> ${PLUS}${levels.at(-1) ?? ""})`],
+  [`:has(> ${LETTER_TEXT})`],
+)
+
 /** One array for every `no-restricted-syntax` entry: a later config would replace, not merge, it. */
 const restrictedSyntax = {
   styleColor: {
@@ -76,15 +86,20 @@ const restrictedSyntax = {
   },
   // eslint-plugin-i18next cannot check option objects outside JSX without flagging every string.
   literalLabel: {
-    selector: String.raw`Property:matches([key.name='label'], [key.value='label']) > :matches(Literal.value[value=/\S/], TemplateLiteral.value:has(TemplateElement[value.raw=/\S/]))`,
-    message: "User-visible labels must come from t().",
+    selector: `${LABEL} > ${LETTER_TEXT}.value`,
+    message: "User-visible labels must come from t(); use t() interpolation for values.",
+  },
+  concatenatedLabel: {
+    selector: `${LABEL} > ${PLUS}.value:matches(${plusWithLetterText.join(", ")})`,
+    message: "Do not build labels by concatenation; use one t() key with interpolation.",
   },
 }
 
 const uiRestrictedSyntax = Object.values(restrictedSyntax)
 // Tests and locale files legitimately hold literal labels.
 const nonUiRestrictedSyntax = uiRestrictedSyntax.filter(
-  (entry) => entry !== restrictedSyntax.literalLabel,
+  (entry) =>
+    entry !== restrictedSyntax.literalLabel && entry !== restrictedSyntax.concatenatedLabel,
 )
 
 const FETCH_ONLY_IN_DATA = "Only src/data/ may fetch; import its public API."

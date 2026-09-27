@@ -31,6 +31,13 @@ bun run dev
 The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hooks run
 the full `tsc -b` and Vitest.
 
+## i18n
+
+UI text comes from `t()`. Labels with letters in their fixed text, or built with `+`, fail lint;
+pure interpolation such as `` `${a}/${b}` `` passes. Use one key per sentence and pass values
+through interpolation: `t("cost", { n })`, never `` `${t("a")} ${n}` ``. Lint cannot catch that
+kind of sentence assembly, so review has to.
+
 ## Lint rule fixtures
 
 `tests/lint-fixtures/` is a small fake project full of code that must, or must not, trip the lint
