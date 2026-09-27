@@ -82,11 +82,11 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 2}, costs: {1: [n1, n2]}, pay: {pp: 2, ep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 1}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d1]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute, select: [d1]}
       # 9.8：「残りを好きな順にデッキの下に置く」是另一句 → 另一個輸入點；列表由前到後＝放完後由上到下
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d3, d2]}
       - {n: 5, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}, event: {raced: a1, n: 2}}}
-      - {n: 6, by: P1, at: resolve, of: {decision: 5, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 6, by: P1, at: resolve, of: {decision: 5, occurrence: 1}, do: resolve-choice, choice: decline}
       - {n: 7, by: P1, at: resolve, of: {decision: 5, occurrence: 2}, do: resolve-choice, order: [d6, d5, d4]}
     random: {}
     expected:
@@ -173,7 +173,7 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, costs: {1: [n1]}, pay: {pp: 1, ep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 4}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: decline}
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3]}
       - {n: 5, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
       - {n: 6, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 1}, evolve_card: g1, pay: {pp: 0, ep: 1, sep: 0}}

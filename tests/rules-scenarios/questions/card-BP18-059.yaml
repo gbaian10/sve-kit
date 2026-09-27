@@ -89,7 +89,7 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, pay: {pp: 0, ep: 1, sep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: BP18-059, line: 1}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d2]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute, select: [d2]}
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d1, d3]}
       - {n: 5, by: P1, at: main, do: play, card: d2, targets: {1: [b1]}, optional_costs: {additional: {pp: 3}}}
       - {n: 6, by: P1, at: resolve, of: {decision: 5, occurrence: 1}, do: resolve-choice, select: [s1]}
@@ -104,8 +104,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [d2]}
-            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, choice: execute, select: [d2]}
+            - {do: resolve-choice, choice: decline}
         assert:
           P1.ep: 1
           P1.pp.current: 7
@@ -158,7 +158,7 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: evolve, source: a1, ability: {source: a1, line: 1}, evolve_card: e1, pay: {pp: 0, ep: 1, sep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, card: BP18-059, line: 1}}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [d2]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute, select: [d2]}
       - {n: 4, by: P1, at: resolve, of: {decision: 2, occurrence: 2}, do: resolve-choice, order: [d1, d3]}
       - {n: 5, by: P1, at: main, do: play, card: d2, targets: {1: [b1]}, optional_costs: {additional: decline}}
     random: {}

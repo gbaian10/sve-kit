@@ -167,7 +167,10 @@ scenarios:
           by: P2
           choices:
             - do: choose-pending
-              pending: tb
+              pending:
+                ability:
+                  source: b
+                  line: 1
   - name: '[astra] 回合玩家 P2'
     setup:
       turn:
@@ -255,7 +258,10 @@ scenarios:
           by: P1
           choices:
             - do: choose-pending
-              pending: ta
+              pending:
+                ability:
+                  source: a
+                  line: 1
   - name: '[fable] A 雙方各兩個ラストワード；P1 先清完；P2 的サロメ選不到目標取消，デモンビーター照常'
     setup:
       turn:

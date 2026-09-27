@@ -79,7 +79,7 @@ scenarios:
     decisions:
       - {n: 1, by: P1, at: main, do: play, card: h1}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 2}}, costs: {1: [i1]}}
-      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [h2]}
+      - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, choice: execute, select: [h2]}
       - {n: 4, by: P1, at: main, do: play, card: h2}
     random: {}
     expected:
@@ -100,8 +100,8 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [h2]}
-            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, choice: execute, select: [h2]}
+            - {do: resolve-choice, choice: decline}
         assert:
           P1.pp.current: 1
           P1.ex: [e1, e2, e3, e4]

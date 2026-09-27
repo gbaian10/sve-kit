@@ -75,7 +75,7 @@ scenarios:
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h1, line: 3}}, targets: {1: [a2, a3]}}
       - {n: 3, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a2, line: 2}}, targets: {1: [b1]}}
       - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a3, line: 1}}}
-      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, select: [d1]}
+      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, choice: execute, select: [d1]}
     random: {}
     expected:
       - at: after-decision-2
@@ -115,9 +115,9 @@ scenarios:
         awaiting:
           by: P1
           choices:
-            - {do: resolve-choice, select: [d1]}
-            - {do: resolve-choice, select: [d2]}
-            - {do: resolve-choice, select: []}
+            - {do: resolve-choice, choice: execute, select: [d1]}
+            - {do: resolve-choice, choice: execute, select: [d2]}
+            - {do: resolve-choice, choice: decline}
       - at: after-decision-5
         view: omniscient
         outcome: resolved

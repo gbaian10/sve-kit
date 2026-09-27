@@ -125,10 +125,8 @@ scenarios:
           occurrence: 1
         order:
           - source: shield
-            card: BP14-090
             line: 3
           - source: sword
-            card: CP04-PR16
             line: 1
     random: {}
     expected:
@@ -143,18 +141,14 @@ scenarios:
             - do: order-replacements
               order:
                 - source: shield
-                  card: BP14-090
                   line: 3
                 - source: sword
-                  card: CP04-PR16
                   line: 1
             - do: order-replacements
               order:
                 - source: sword
-                  card: CP04-PR16
                   line: 1
                 - source: shield
-                  card: BP14-090
                   line: 3
       - at: after-decision-3
         view: omniscient
@@ -240,10 +234,8 @@ scenarios:
           occurrence: 1
         order:
           - source: sword
-            card: CP04-PR16
             line: 1
           - source: shield
-            card: BP14-090
             line: 3
     random: {}
     expected:
@@ -258,18 +250,14 @@ scenarios:
             - do: order-replacements
               order:
                 - source: shield
-                  card: BP14-090
                   line: 3
                 - source: sword
-                  card: CP04-PR16
                   line: 1
             - do: order-replacements
               order:
                 - source: sword
-                  card: CP04-PR16
                   line: 1
                 - source: shield
-                  card: BP14-090
                   line: 3
       - at: after-decision-3
         view: omniscient

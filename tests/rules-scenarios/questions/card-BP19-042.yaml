@@ -485,14 +485,14 @@ scenarios:
           P1.field.new-1:
             name: 多頭の実験体
         events:
-          - kind: 費用成立
-            ability:
-              source: a1
-              line: 2
           - kind: カウンター
             object: a1
             name: 融合カウンター
             delta: -1
+          - kind: 費用成立
+            ability:
+              source: a1
+              line: 2
           - kind: 場に出す
             object: new-1
             to: P1.field

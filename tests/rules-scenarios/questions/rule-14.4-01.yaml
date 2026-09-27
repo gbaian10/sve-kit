@@ -87,7 +87,7 @@ scenarios:
             deck:
               - {filler: 20}
     decisions:
-      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 1, ep: 0}}
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, costs: {1: [dp1]}, pay: {pp: 1, ep: 0}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
       - {n: 3, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 1}, evolve_card: ev1, pay: {pp: 0, ep: 1, sep: 0}}
       - {n: 4, by: P1, at: main, do: attack, attacker: a1, target: P2.leader}
@@ -184,7 +184,7 @@ scenarios:
   - name: B 憑依的 PP 1 用 EP 代付 → PP 不減、EP −1
     inherit: A 憑依 → ドライブ獲得時 → 進化不可 → 疾走攻擊：シングルドライブ與攻撃時同時待機
     decisions:
-      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, pay: {pp: 0, ep: 1}}
+      - {n: 1, by: P1, at: main, do: activate, ability: {source: a1, line: 1}, costs: {1: [dp1]}, pay: {pp: 0, ep: 1}}
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 2}}}
     random: {}
     expected:

@@ -10,24 +10,29 @@ mechanisms:
   - 12.4.3
   - 10.7.4.2
   - 5.5.3
+  - 10.1.1.2.2
+  - 10.7.3.2
 cards:
   - BP01-115
   - BP01-176
   - BP14-076
   - BP19-P21
   - BP19-P22
-why: 死の祝福與寒冷の死霊術師都能拉七費ミロエル；自己回場也觸發傷害。寒冷設1/1不抹能力，回場當回合可付橫置費用再拉八獄。
-discriminates: 不計自己進場會少1傷害；把橫置費用當攻擊限制會拒絕當回合起動；1/1當無能力會完全沒有鏈。
+why: 死の祝福與寒冷の死霊術師都能拉七費ミロエル；自己回場也觸發傷害。寒冷設1/1不抹能力，回場當回合可付橫置費用再拉八獄。{ファンファーレ}的捨牌費用在打出時支付，手牌沒有八獄卡只能拒付，待機取消一次。
+discriminates: 不計自己進場會少1傷害；把橫置費用當攻擊限制會拒絕當回合起動；1/1當無能力會完全沒有鏈；把{ファンファーレ}費用當成結算時可選費用的引擎會先打出再停下問 decline，而不是拒付取消。
 refs:
   rules:
     - 10.4.6.1
     - 12.4.3
     - 10.7.4.2
     - 5.5.3
-    - 10.4.7.3
+    - 10.1.1.2.2
+    - 10.6.2.5
+    - 10.7.3.2
     - 10.4.2.2
   qa:
     - Q2621
+    - Q1982
 evidence:
   - ref: cr 10.4.6.1
     quote: このコストは、このコストをもつカードが場に出たターンであっても実行する事が可能です。
@@ -45,18 +50,23 @@ evidence:
     quote: "{ラストワード}これは消滅する。\n{起動}これを{アクト}：自分の墓場の元のコスト8以下のフォロワー1枚を選ぶ。それを場に出す。それの攻撃力と体力を1にする。"
   - ref: BP19-P21
     quote: "自分の場にフォロワーが出たとき、それが墓場から場に出ていたなら、相手の場のフォロワーすべてに1ダメージ。\n{ファンファーレ}手札の八獄・カード1枚を捨てる：1枚引く。\n{起動}これを{アクト}：自分の墓場の元のコスト5以下の八獄・フォロワーと元のコスト3以下の八獄・フォロワーそれぞれ1枚まで選ぶ。それを場に出す。"
-  - ref: cr 10.4.7.3
-    quote: なんらかの自動能力において‘～とき、（処理）：（効果）’と書かれている場合、これはその自動能力を解決する際にその処理を実行することで、その効果を適用することを選択することができます。
+  - ref: cr 10.1.1.2.2
+    quote: 自動能力の一部は、「（条件）とき、（コスト）：（効果）」と表記されています。この場合、この自動能力をプレイするためには（コスト）で示されたコストの支払いが必要です。
     derivation:
-      - 12.4.3 把ファンファーレ展開為進場時的自動能力；此處是結算時的可選費用。
-      - 手牌為空，無法完整支付，依契約 9.8 仍保留唯一 decline 輸入；能力已打出並解決，不是待機取消。
-      - 新增 after-decision-2、3 後，兩次傷害均發生在 after-decision-3 至 6 的最後區間。
+      - 12.4.3 把ファンファーレ展開為進場時的自動能力；「手札の八獄・カード1枚を捨てる」是打出這個能力要付的費用，依 10.6.2.5 在打出程序中支付。
+      - 手牌為空，付不出費用，只能拒付（契約 4.1、第 10 節第 20、36 條）→ 依 10.7.3.2 取消這次待機，沒有プレイ、抽牌、捨牌。
+      - 兩次傷害落在 after-decision-2 至 5 的最後區間。
+  - ref: Q1982
+    quote: いいえ。《ファンファーレ》能力のコストである「場のトークン・フォロワー1体をEXエリアに置く」が実行できず、コストを支払うことができないので《ファンファーレ》能力をプレイすることができません。
+    derivation:
+      - Q1982 是 BP15-013 ヒーリングフェアリー 的 Q&A，不是本卡的直接裁定；該卡同樣是「{ファンファーレ}（コスト）：（効果）」句型，本題依同型類推：費用付不出時 {ファンファーレ} 不能打出。
+      - 沒有找到直接問 BP19-P21 拒付時點的官方 Q&A；同句卡文的 card-BP19-080 D 也是打出時拒付。
 status: verified
 author: astra
 verified_by:
   - by: fable
     method: qa
-    note: Q2621、10.4.6.1、12.4.3、10.4.7.3；xverify-2/result.md〈補題〉2/2；fix-2 改結算中 decline 後 xverify-2/recheck.md 同意
+    note: Q2621、10.4.6.1、12.4.3；xverify-2/result.md〈補題〉2/2（其餘部分）。{ファンファーレ} 費用時點依第三次封存裁定與 Sol 複核改為打出時拒付（10.1.1.2.2、10.6.2.5；Q1982 同型類推），改後尚待重新交叉驗證
 scenarios:
   - name: blessing 蘇生ミロエル後當回合起動
     setup:
@@ -115,6 +125,7 @@ scenarios:
         targets:
           1:
             - m
+      # 10.1.1.2.2、10.6.2.5：{ファンファーレ} 的「（コスト）：」在打出時支付；手牌沒有八獄卡，只能拒付（契約第 10 節第 20、36 條）
       - n: 2
         by: P1
         at: check-timing
@@ -123,15 +134,8 @@ scenarios:
           ability:
             source: m
             line: 2
-      - by: P1
-        at: resolve
-        do: resolve-choice
-        of:
-          decision: 2
-          occurrence: 1
-        choice: decline
-        n: 3
-      - n: 4
+        costs: decline
+      - n: 3
         by: P1
         at: check-timing
         do: choose-pending
@@ -139,7 +143,7 @@ scenarios:
           ability:
             source: m
             line: 1
-      - n: 5
+      - n: 4
         by: P1
         at: main
         do: activate
@@ -149,7 +153,7 @@ scenarios:
         targets:
           1:
             - target
-      - n: 6
+      - n: 5
         by: P1
         at: check-timing
         do: choose-pending
@@ -159,48 +163,43 @@ scenarios:
             line: 1
     random: {}
     expected:
-      - at: after-decision-2
+      - at: after-decision-1
         view: omniscient
-        outcome: paused
-        assert:
-          P1.hand: []
-          P2.field.b:
-            hp: 6
+        outcome: resolved
         awaiting:
           by: P1
           choices:
-            - do: resolve-choice
-              choice: decline
-        events:
-          - kind: プレイ
-            ability:
-              source: m
-              line: 2
-        forbidden_events:
-          - kind: 待機取消
-            ability:
-              source: m
-              line: 2
-      - at: after-decision-3
+            - do: choose-pending
+              pending:
+                ability:
+                  source: m
+                  line: 1
+            - do: choose-pending
+              pending:
+                ability:
+                  source: m
+                  line: 2
+              costs: decline
+      - at: after-decision-2
         view: omniscient
-        outcome: resolved
+        outcome: pending-cancelled
         assert:
           P1.hand: []
           P2.field.b:
             hp: 6
         events:
-          - kind: 解決
+          - kind: 待機取消
             ability:
               source: m
               line: 2
         forbidden_events:
-          - kind: 待機取消
+          - kind: プレイ
             ability:
               source: m
               line: 2
           - kind: 引く
           - kind: 捨てる
-      - at: after-decision-6
+      - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:
@@ -288,6 +287,7 @@ scenarios:
         targets:
           1:
             - m
+      # 10.1.1.2.2、10.6.2.5：{ファンファーレ} 的「（コスト）：」在打出時支付；手牌沒有八獄卡，只能拒付（契約第 10 節第 20、36 條）
       - n: 2
         by: P1
         at: check-timing
@@ -296,15 +296,8 @@ scenarios:
           ability:
             source: m
             line: 2
-      - by: P1
-        at: resolve
-        do: resolve-choice
-        of:
-          decision: 2
-          occurrence: 1
-        choice: decline
-        n: 3
-      - n: 4
+        costs: decline
+      - n: 3
         by: P1
         at: check-timing
         do: choose-pending
@@ -312,7 +305,7 @@ scenarios:
           ability:
             source: m
             line: 1
-      - n: 5
+      - n: 4
         by: P1
         at: main
         do: activate
@@ -322,7 +315,7 @@ scenarios:
         targets:
           1:
             - target
-      - n: 6
+      - n: 5
         by: P1
         at: check-timing
         do: choose-pending
@@ -332,48 +325,43 @@ scenarios:
             line: 1
     random: {}
     expected:
-      - at: after-decision-2
+      - at: after-decision-1
         view: omniscient
-        outcome: paused
-        assert:
-          P1.hand: []
-          P2.field.b:
-            hp: 6
+        outcome: resolved
         awaiting:
           by: P1
           choices:
-            - do: resolve-choice
-              choice: decline
-        events:
-          - kind: プレイ
-            ability:
-              source: m
-              line: 2
-        forbidden_events:
-          - kind: 待機取消
-            ability:
-              source: m
-              line: 2
-      - at: after-decision-3
+            - do: choose-pending
+              pending:
+                ability:
+                  source: m
+                  line: 1
+            - do: choose-pending
+              pending:
+                ability:
+                  source: m
+                  line: 2
+              costs: decline
+      - at: after-decision-2
         view: omniscient
-        outcome: resolved
+        outcome: pending-cancelled
         assert:
           P1.hand: []
           P2.field.b:
             hp: 6
         events:
-          - kind: 解決
+          - kind: 待機取消
             ability:
               source: m
               line: 2
         forbidden_events:
-          - kind: 待機取消
+          - kind: プレイ
             ability:
               source: m
               line: 2
           - kind: 引く
           - kind: 捨てる
-      - at: after-decision-6
+      - at: after-decision-5
         view: omniscient
         outcome: resolved
         assert:

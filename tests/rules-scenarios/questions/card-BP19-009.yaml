@@ -77,7 +77,7 @@ scenarios:
       - {n: 2, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h3, line: 2}}}
       - {n: 3, by: P1, at: resolve, of: {decision: 2, occurrence: 1}, do: resolve-choice, select: [e1]}
       - {n: 4, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: h3, card: BP19-010, line: 1}}}
-      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, select: []}
+      - {n: 5, by: P1, at: resolve, of: {decision: 4, occurrence: 1}, do: resolve-choice, choice: decline}
       - {n: 6, by: P1, at: resolve, of: {decision: 4, occurrence: 2}, do: resolve-choice, order: [d1, d2, d3, d4]}
       - {n: 7, by: P1, at: check-timing, do: choose-pending, pending: {ability: {source: a1, line: 1}}, targets: {1: [b1]}}
       - {n: 8, by: P1, at: main, do: evolve, source: a2, ability: {source: a2, line: 1}, evolve_card: e2, pay: {pp: 1, ep: 0}}
