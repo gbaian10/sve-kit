@@ -4,14 +4,6 @@
 # docs/m0/known-errors.md.
 expected_scenarios: 706
 known:
-  - question: rule-10.5.2-02
-    scenario: '[astra] 回合玩家 P1'
-    status: fail
-    error: KE-03
-  - question: rule-10.5.2-02
-    scenario: '[astra] 回合玩家 P2'
-    status: fail
-    error: KE-03
   - question: rule-14.4-01
     scenario: A 憑依 → ドライブ獲得時 → 進化不可 → 疾走攻擊：シングルドライブ與攻撃時同時待機
     status: fail

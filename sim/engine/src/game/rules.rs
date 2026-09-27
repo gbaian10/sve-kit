@@ -200,13 +200,22 @@ impl Game {
             self.state.pending.first().map(|p| p.controller.as_str())
         }
     }
-    pub(super) fn pending_choice(pending: &Pending) -> Value {
+    /// Contract 34: the offered choice names the ability, never a setup label; the
+    /// label is kept only when the reference and event cannot tell two instances apart.
+    pub(super) fn pending_choice(&self, pending: &Pending) -> Value {
         let mut choice = json!({"do":"choose-pending","pending":{"ability":pending.reference}});
-        if let Some(id) = &pending.id {
-            choice["pending"] = json!(id);
-        }
-        if pending.id.is_none() && pending.retained {
+        let retained = pending.retained;
+        if retained {
             choice["pending"]["event"] = pending.event.clone();
+        }
+        let indistinct = self.state.pending.iter().any(|other| {
+            other.controller == pending.controller
+                && other.reference == pending.reference
+                && (!retained || other.event == pending.event)
+                && (other.code != pending.code || other.context != pending.context)
+        });
+        if indistinct && let Some(id) = &pending.id {
+            choice["pending"] = json!(id);
         }
         choice
     }
@@ -444,7 +453,7 @@ impl Game {
             && self.can_pay(&Self::payment_nodes(&pending.code, &frame), &frame)?;
         let cancelled = decision["costs"] == "decline" || !valid;
         if cancelled && decision["costs"] != "decline" {
-            let base = Self::pending_choice(&pending);
+            let base = self.pending_choice(&pending);
             let initial = self.pending_frame(&pending, &base)?;
             if !self.parameterize(base, &pending.code, &initial)?.is_empty() {
                 return Ok("cannot-play".into());

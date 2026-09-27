@@ -324,7 +324,7 @@ impl Game {
             .filter(|p| p.controller == seat)
             .flat_map(Self::pending_variants)
         {
-            let base = Self::pending_choice(&pending);
+            let base = self.pending_choice(&pending);
             let frame = self.pending_frame(&pending, &base)?;
             let choices = self.parameterize(base.clone(), &pending.code, &frame)?;
             if choices.is_empty() {
