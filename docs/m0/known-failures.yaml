@@ -4,30 +4,6 @@
 # docs/m0/known-errors.md.
 expected_scenarios: 706
 known:
-  - question: card-BP09-004
-    scenario: B 選『深緑の純心・ポーラ』（face 0）：看 5 張、公開エルフ・スペル加入手牌、其餘放底
-    status: fail
-    error: KE-01
-  - question: card-BP14-023
-    scenario: A EX 有 3 張金貨 → 起動打出進化時 → 選 2 張消滅、看 5 張 → 達人の芸者 進 EX → 0 費打出
-    status: fail
-    error: KE-01
-  - question: card-BP14-023
-    scenario: C 對手場上有ジェンティルドンナ → 不是誘發，照樣可以打出進化時能力
-    status: fail
-    error: KE-01
-  - question: card-BP15-066
-    scenario: A 覚醒：ファンファーレ 對體力 1 的崇拝者 與ガルミーユ 各 1 傷害 → 崇拝者 先被破壞，兩個誘發再結算
-    status: fail
-    error: KE-01
-  - question: card-BP18-059
-    scenario: A 進化時把爆炎の咆哮 放 EX → 付 +3 打出 → 只扣 2 PP，找ドラーク 上場
-    status: fail
-    error: KE-01
-  - question: card-ECP02-001
-    scenario: A EX 滿（含 1 アイテム）→ 付レッスン 費用空出一格 → 前川みく 進 EX → 同回合 0 費打出
-    status: fail
-    error: KE-01
   - question: card-BP19-P21
     scenario: blessing 蘇生ミロエル後當回合起動
     status: adapter-error

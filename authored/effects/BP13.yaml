@@ -14,29 +14,33 @@ cards:
                 - op: look
                   count: 3
                   bind: seen
-                - op: select
-                  select:
-                    from: seen
-                    where:
-                      fn: and
-                      args:
-                        - fn: eq
-                          args:
-                            - read: item.class
-                            - エルフ
-                        - fn: le
-                          args:
-                            - read: item.cost
-                            - 2
-                  min: 0
-                  max: 1
-                  bind: chosen
-                - op: reveal
-                  subjects: chosen
-                  to: all
-                - op: move
-                  subjects: chosen
-                  to: hand
+                - op: optional
+                  selection:
+                    select:
+                      from: seen
+                      where:
+                        fn: and
+                        args:
+                          - fn: eq
+                            args:
+                              - read: item.class
+                              - エルフ
+                          - fn: le
+                            args:
+                              - read: item.cost
+                              - 2
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  then:
+                    op: seq
+                    steps:
+                      - op: reveal
+                        subjects: chosen
+                        to: all
+                      - op: move
+                        subjects: chosen
+                        to: hand
                 - op: seq
                   steps:
                     - op: select

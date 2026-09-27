@@ -149,19 +149,23 @@ cards:
             - op: look
               count: 4
               bind: seen
-            - op: select
-              select:
-                from: seen
-                trait: 八獄
-              min: 0
-              max: 1
-              bind: chosen
-            - op: reveal
-              subjects: chosen
-              to: all
-            - op: move
-              subjects: chosen
-              to: hand
+            - op: optional
+              selection:
+                select:
+                  from: seen
+                  trait: 八獄
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: seq
+                steps:
+                  - op: reveal
+                    subjects: chosen
+                    to: all
+                  - op: move
+                    subjects: chosen
+                    to: hand
             - op: seq
               steps:
                 - op: select
@@ -871,18 +875,20 @@ cards:
                     to: cemetery
                   - op: seq
                     steps:
-                      - op: select
-                        select:
-                          side: self
-                          zone: evolve_deck
-                          name: 流転の統治者・ゼラエル
-                        min: 0
-                        max: 1
-                        bind: chosen
-                      - op: move
-                        subjects: chosen
-                        to: field
-                        bind: placed
+                      - op: optional
+                        selection:
+                          select:
+                            side: self
+                            zone: evolve_deck
+                            name: 流転の統治者・ゼラエル
+                          min: 1
+                          max: 1
+                          bind: chosen
+                        then:
+                          op: move
+                          subjects: chosen
+                          to: field
+                          bind: placed
         event: enter
         subject: self
   BP19-P32:
