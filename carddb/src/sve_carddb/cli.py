@@ -37,6 +37,7 @@ from sve_carddb.crawl_sv1 import (
 )
 from sve_carddb.crawl_svwb import SVWB_SITE
 from sve_carddb.crawl_svwb import cards as svwb_cards
+from sve_carddb.crawl_svwb import stored_image_urls as svwb_image_urls
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.client import (
     BudgetExhaustedError,
@@ -86,9 +87,11 @@ class Stage(StrEnum):
     SV1_CARDS = "sv1-cards"
     SV1_IMAGES = "sv1-images"
     SVWB_CARDS = "svwb-cards"
+    SVWB_IMAGES = "svwb-images"
 
 
 _SV1_STAGES = frozenset({Stage.SV1_CARDS, Stage.SV1_IMAGES})
+_SVWB_STAGES = frozenset({Stage.SVWB_CARDS, Stage.SVWB_IMAGES})
 
 
 @dataclass(frozen=True, slots=True)
@@ -206,6 +209,18 @@ def crawl_svwb_cards(
 ) -> None:
     """Fetch the shadowverse-wb.com card list in ja, en and cht, text only."""
     _run(Job(Stage.SVWB_CARDS, max_requests=max_requests, dry_run=dry_run))
+
+
+@crawl_app.command("svwb-images")
+def crawl_svwb_images(
+    limit: LimitOption = None,
+    max_requests: BudgetOption = None,
+    dry_run: DryRunOption = False,
+) -> None:
+    """Fetch the shadowverse-wb.com card images (Japanese art) not stored yet."""
+    _run(
+        Job(Stage.SVWB_IMAGES, limit=limit, max_requests=max_requests, dry_run=dry_run)
+    )
 
 
 @manifest_app.command("check")
@@ -337,6 +352,7 @@ async def _crawl(
             Stage.SV1_CARDS: lambda: _sv1_cards(sv1_crawler),
             Stage.SV1_IMAGES: lambda: _sv1_images(sv1_crawler, job, settings),
             Stage.SVWB_CARDS: lambda: _svwb_cards(crawler),
+            Stage.SVWB_IMAGES: lambda: _svwb_images(crawler, job, settings),
         }
         try:
             return await stages[job.stage]()
@@ -440,7 +456,7 @@ def _check_space(
 def _site(stage: Stage) -> Site:
     if stage in _SV1_STAGES:
         return SV1_SITE
-    if stage is Stage.SVWB_CARDS:
+    if stage in _SVWB_STAGES:
         return SVWB_SITE
     return JP_SITE
 
@@ -455,6 +471,26 @@ async def _svwb_cards(crawler: Crawler) -> int:
             console.print(f"[red]{lang}:[/red] {exc}")
             continue
         console.print(f"{lang:>6}: {count} cards")
+    return failures
+
+
+async def _svwb_images(crawler: Crawler, job: Job, settings: Settings) -> int:
+    urls = svwb_image_urls(crawler.writer)
+    if urls is None:
+        console.print("[red]no stored card list; run `crawl svwb-cards` first[/red]")
+        return 1
+    writer = crawler.writer
+    pending = sum(writer.local_state(u) is not LocalState.TRUSTED for u in urls)
+    _check_space(settings, job, len(urls), pending, svwb.IMAGE_RESERVE_BYTES)
+    failures = 0
+    for index, url in enumerate(urls, start=1):
+        try:
+            await crawler.image(url)
+        except FetchError as exc:
+            failures += 1
+            console.print(f"[red]{url}:[/red] {exc}")
+        if index % 200 == 0:
+            console.print(f"{index}/{len(urls)} images")
     return failures
 
 
@@ -506,6 +542,9 @@ def _dry_run(job: Job, writer: Writer, manifest: Manifest) -> None:
         return
     if job.stage is Stage.SVWB_CARDS:
         _dry_run_svwb(writer)
+        return
+    if job.stage is Stage.SVWB_IMAGES:
+        _dry_run_svwb_images(writer)
         return
     known = current_sets(manifest)
     urls: list[str] = []
@@ -561,6 +600,17 @@ def _dry_run_svwb(writer: Writer) -> None:
     for url in urls:
         console.print(url)
     console.print(f"{len(urls)} URLs would be requested (more if the list grew)")
+
+
+def _dry_run_svwb_images(writer: Writer) -> None:
+    urls = svwb_image_urls(writer)
+    if urls is None:
+        console.print("no stored card list; run `crawl svwb-cards` first")
+        return
+    fetch = [u for u in urls if writer.local_state(u) is not LocalState.TRUSTED]
+    for url in fetch:
+        console.print(url)
+    console.print(f"{len(fetch)} of {len(urls)} URLs would be requested")
 
 
 def _list_urls(code: str, writer: Writer) -> list[str]:

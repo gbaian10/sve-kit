@@ -7,6 +7,8 @@ import orjson
 
 from sve_carddb.sources import official_svwb as svwb
 
+from .fakesite import PNG
+
 
 class FakeWb:
     """`count` cards, served 30 per page; names carry the `Lang` header."""
@@ -23,6 +25,10 @@ class FakeWb:
         lang = request.headers.get("lang")
         self.calls.append((str(request.url), lang))
         parts = urlsplit(str(request.url))
+        if parts.path.startswith("/uploads/card_image/"):
+            return httpx.Response(
+                200, content=PNG, headers={"Content-Type": "image/png"}
+            )
         assert parts.path == "/web/CardList/cardList"
         query = parse_qs(parts.query)
         # The server ignores the query; the header must match what the URL names.
@@ -40,8 +46,7 @@ class FakeWb:
                     "count": len(self.ids),
                     "sort_card_id_list": ids,
                     "card_details": {
-                        str(i): {"common": {"card_id": i, "name": f"{lang} {i}"}}
-                        for i in ids
+                        str(i): self.details(i, f"{lang} {i}") for i in ids
                     },
                 },
             }
@@ -49,3 +54,26 @@ class FakeWb:
         return httpx.Response(
             200, content=body, headers={"Content-Type": "application/json"}
         )
+
+    @staticmethod
+    def details(card_id: int, name: str) -> dict[str, object]:
+        """Even cards are followers with an evolved image; every tenth has a style."""
+        follower = card_id % 2 == 0
+        styles = (
+            [{"hash": image_hash(card_id, "s"), "evo_hash": ""}]
+            if card_id % 10 == 0
+            else []
+        )
+        return {
+            "common": {
+                "card_id": card_id,
+                "name": name,
+                "card_image_hash": image_hash(card_id, "c"),
+            },
+            "evo": {"card_image_hash": image_hash(card_id, "e")} if follower else [],
+            "style_card_list": styles,
+        }
+
+
+def image_hash(card_id: int, kind: str) -> str:
+    return f"{card_id:030x}{ord(kind):02x}"[-32:]

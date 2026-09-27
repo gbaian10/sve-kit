@@ -1,17 +1,20 @@
 """Crawl stage for shadowverse-wb.com, sharing the JP crawler's machinery.
 
-svwb-cards stores every page of the card list once per language, text only.
+svwb-cards stores every page of the card list once per language; svwb-images
+fetches the Japanese art those pages name, alternate styles included.
 """
 
 from typing import TYPE_CHECKING
 
 from sve_carddb.crawl import Site
 from sve_carddb.fetch.client import FetchError
+from sve_carddb.fetch.writer import LocalState
 from sve_carddb.manifest import Kind
 from sve_carddb.sources import official_svwb as svwb
 
 if TYPE_CHECKING:
     from sve_carddb.crawl import Crawler
+    from sve_carddb.fetch.writer import Writer
 
 SVWB_SITE = Site(svwb.REGION, svwb.allowed, svwb.image_path, svwb.headers)
 
@@ -48,3 +51,18 @@ async def cards(crawler: Crawler, lang: str) -> int:
         msg = f"{lang}: pages list {len(seen)} cards, the API says {count}"
         raise FetchError(msg)
     return count
+
+
+def stored_image_urls(writer: Writer) -> list[str] | None:
+    """Images named by the stored Japanese list, or None before `svwb-cards`."""
+    first = svwb.list_url("ja", 0)
+    if writer.local_state(first) is not LocalState.TRUSTED:
+        return None
+    count = svwb.parse_list(writer.read(first)).count
+    found: list[str] = []
+    for offset in range(0, count, svwb.PAGE_SIZE):
+        url = svwb.list_url("ja", offset)
+        if writer.local_state(url) is not LocalState.TRUSTED:
+            return None
+        found += svwb.image_hashes(writer.read(url))
+    return [svwb.image_url(h) for h in dict.fromkeys(found)]

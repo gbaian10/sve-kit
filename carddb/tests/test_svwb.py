@@ -6,7 +6,7 @@ import orjson
 import pytest
 
 from sve_carddb.crawl import Crawler
-from sve_carddb.crawl_svwb import SVWB_SITE, cards
+from sve_carddb.crawl_svwb import SVWB_SITE, cards, stored_image_urls
 from sve_carddb.fetch.client import Client, ClientPolicy, FetchError
 from sve_carddb.fetch.throttle import CircuitBreaker, Throttle
 from sve_carddb.fetch.validate import ValidationError
@@ -14,7 +14,7 @@ from sve_carddb.fetch.writer import Writer
 from sve_carddb.manifest import Kind, Manifest, Region
 from sve_carddb.sources import official_svwb as svwb
 
-from .fakewb import FakeWb
+from .fakewb import FakeWb, image_hash
 
 if TYPE_CHECKING:
     from .conftest import FakeClock
@@ -70,12 +70,45 @@ def test_unknown_languages_are_refused() -> None:
     assert svwb.headers("https://shadowverse-wb.com/ja/") == ()
 
 
-def test_only_the_official_site_is_allowed_and_no_images() -> None:
+def test_only_the_official_site_is_allowed() -> None:
     assert svwb.allowed(svwb.list_url("ja", 0))
     assert not svwb.allowed("http://shadowverse-wb.com/")
     assert not svwb.allowed("https://example.com/web/CardList/cardList")
+
+
+def test_image_url_and_path_follow_the_official_pattern() -> None:
+    url = svwb.image_url("917e60bac28d4027b9af8d7738281173")
+    assert url == (
+        "https://shadowverse-wb.com/uploads/card_image/jpn/card/"
+        "917e60bac28d4027b9af8d7738281173.png"
+    )
+    assert svwb.image_path(url) == PurePosixPath(
+        "media/images/svwb/uploads/card_image/jpn/card/"
+        "917e60bac28d4027b9af8d7738281173.png"
+    )
     with pytest.raises(ValidationError):
         svwb.image_path("https://shadowverse-wb.com/x.png")
+
+
+def test_image_hashes_of_a_real_page() -> None:
+    body = (FIXTURES / "cardlist_ja_offset30_trimmed.json").read_bytes()
+    hashes = svwb.image_hashes(body)
+    assert hashes
+    assert all(len(h) == 32 for h in hashes)
+    assert len(set(hashes)) == len(hashes)
+
+
+def test_image_hashes_cover_evolved_and_styles() -> None:
+    card = FakeWb.details(10, "x")
+    body = orjson.dumps({"data": {"card_details": {"10": card}}})
+    assert svwb.image_hashes(body) == [
+        image_hash(10, "c"),
+        image_hash(10, "e"),
+        image_hash(10, "s"),
+    ]
+    card["common"] = {"card_image_hash": "not-a-hash"}
+    with pytest.raises(ValidationError, match="image hash"):
+        svwb.image_hashes(orjson.dumps({"data": {"card_details": {"10": card}}}))
 
 
 def test_parses_a_real_page() -> None:
@@ -146,3 +179,16 @@ async def test_pages_repeating_cards_stop_the_language(
     crawler = make_crawler(manifest, tmp_path, clock, site)
     with pytest.raises(FetchError, match="repeats a card"):
         await cards(crawler, "ja")
+
+
+async def test_image_urls_need_every_stored_page(
+    manifest: Manifest, tmp_path: Path, clock: FakeClock
+) -> None:
+    crawler = make_crawler(manifest, tmp_path, clock, FakeWb())
+    assert stored_image_urls(crawler.writer) is None
+    await cards(crawler, "ja")
+    urls = stored_image_urls(crawler.writer)
+    assert urls is not None
+    # 505 cards, half with an evolved side, one in ten with a style.
+    assert len(urls) == 505 + 253 + 51
+    assert urls[0] == svwb.image_url(image_hash(10_000_000, "c"))

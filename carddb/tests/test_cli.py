@@ -395,3 +395,21 @@ def test_svwb_cards_reports_a_failed_language(wb: FakeWb) -> None:
     assert result.exit_code == 1, result.output
     assert "ja:" in result.output
     assert "changed" in result.output
+
+
+def test_svwb_images_after_cards(wb: FakeWb, data_dir: Path) -> None:
+    before = invoke("crawl", "svwb-images")
+    assert before.exit_code == 1, before.output
+    assert "run `crawl svwb-cards` first" in before.output
+    assert invoke("crawl", "svwb-cards").exit_code == 0
+    result = invoke("crawl", "svwb-images", "--limit", "3")
+    assert result.exit_code == 0, result.output
+    assert "809 images, 3 to fetch" in result.output
+    image_calls = [u for u, _ in wb.calls if "/uploads/" in u]
+    assert len(image_calls) == 3
+    with manifest_at(data_dir) as manifest:
+        resource = manifest.resources.get(image_calls[0])
+        assert resource is not None
+        assert (data_dir / resource.path).read_bytes().startswith(b"\x89PNG")
+    dry = invoke("crawl", "svwb-images", "--dry-run")
+    assert "806 of 809 URLs would be requested" in dry.output
