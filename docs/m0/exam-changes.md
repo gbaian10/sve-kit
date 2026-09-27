@@ -51,7 +51,9 @@
 - 共同題本的 `decisions` 是固定序列，契約沒有條件式決定；兩種讀法的輸入點不同，所以一份題目
   不能同時讓兩種讀法都走完。本題採用已裁定的 R-0009，**等於斷言有誘發**
 - `status: verified` 與原 `verified_by`（astra，覆核的是改題前的 B／C）保留，並在題目中註明
-  B／C 的覆核已不適用。**同步回 main 前需要重新覆核**（或把 status 降回待覆核）
+  B／C 的部分已不適用。改題後的 B、C 已由 opus 覆核通過（`sve-kit/spec/design/m0-review/opus-r2.md` 第 3 節），
+  `verified_by` 加一筆 `by: opus`。審核建議的 `method: qa+mutation` 不在契約列舉（`qa | independent-derivation`）內，
+  所以寫 `qa`，變異驗證寫在 note
 
 ### 引擎側配合
 

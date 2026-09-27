@@ -37,13 +37,16 @@ evidence:
   - ref: cr 5.12.1
     quote: カードを‘捨てる’指示がある場合、指定のプレイヤーは指定された枚数の手札を選び、それらを墓場に置きます。
     derivation: [ファンファーレ 費用「手札1枚を捨てる」也是「捨てる」指示 → 本回合捨過牌成立]
-# B、C 在 2026-09-27 改題；下方 verified_by 是改題前的覆核（B／C 部分已不適用），同步回 main 時需要重新覆核。
+# B、C 在 2026-09-27 改題；astra 的覆核是改題前的（B／C 部分已不適用），opus 的覆核涵蓋改題後的 B、C。
 status: verified
 author: fable
 verified_by:
   - by: astra
     method: qa
     note: A：xverify-2/recheck.md:106〈全部改動局面的核對索引〉確認真實牌庫頂，再由 last.md:20 確認僅替換 P2 手牌；B／C：xverify-2/last.md:15、16〈同意 B、C 改為不誘發〉，依已提供並定案的官方英文 Q&A 與 7.4.1／7.4.5／7.4.7，不再沿用 split.md 的待定模型。（B／C 已於 2026-09-27 改題，此覆核不再涵蓋 B／C）
+  - by: opus
+    method: qa
+    note: 2026-09-27 覆核 ca4cc1d 版本的 B、C（依裁定 R-0009）：局面名稱、決定序列、斷言與其他欄位一致；另以變異確認抓得到「忽略なら」「7.4.7 捨牌算進去」「誘發時判定」的錯誤實作。紀錄：sve-kit/spec/design/m0-review/opus-r2.md 第 3 節
 
 scenarios:
   - name: A 用第二張儀式的費用捨 1 張 → 竜少女 −2 費 → 結束階段兩張儀式各造成 2 傷害
