@@ -201,6 +201,9 @@ impl Game {
         let mut expired = Vec::new();
         for entry in take(&mut self.state.continuous) {
             let should_expire = entry["until"] == "end-of-turn"
+                || (entry["expiry_player"] == self.active()
+                    && int(&self.state.turn["elapsed_turns"][self.active()])
+                        >= int(&entry["expiry_turn"]))
                 || (entry["window_player"] == self.active()
                     && int(&self.state.turn["elapsed_turns"][self.active()])
                         >= int(&entry["window_turn"]))

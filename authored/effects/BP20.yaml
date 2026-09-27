@@ -273,24 +273,12 @@ cards:
             - op: optional
               selection:
                 select:
-                  from: seen
-                  where:
-                    fn: or
-                    args:
-                      - fn: and
-                        args:
-                          - fn: eq
-                            args:
-                              - read: item.type
-                              - follower
-                          - fn: in
-                            args:
-                              - 陰陽師
-                              - read: item.traits
-                      - fn: eq
-                        args:
-                          - read: item.type
-                          - spell
+                  union:
+                    - from: seen
+                      type: follower
+                      trait: 陰陽師
+                    - from: seen
+                      type: spell
                 min: 1
                 max: 1
                 bind: chosen
@@ -595,6 +583,9 @@ cards:
                     max: 1
                     to: hand
         event: fusion
+        subject:
+          side: self
+          zone: any
         active_zones:
           - ex
         trigger_if:

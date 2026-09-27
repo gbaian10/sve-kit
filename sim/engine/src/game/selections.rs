@@ -148,6 +148,30 @@ impl Game {
         Ok(result)
     }
 
+    /// "A1枚とB1枚を探し": the chosen cards must split into the groups, each card in
+    /// one group it matches, every group within its own bounds.
+    fn fits_groups(&self, selected: &[String], groups: &[Value], frame: &Frame) -> Result<bool> {
+        let mut bounds = Vec::new();
+        for group in groups {
+            bounds.push((
+                usize::try_from(self.number(&group["min"], frame)?.max(0)).map_err(invalid)?,
+                usize::try_from(self.number(&group["max"], frame)?.max(0)).map_err(invalid)?,
+            ));
+        }
+        let mut fits = Vec::new();
+        for id in selected {
+            let mut matching = Vec::new();
+            for (index, group) in groups.iter().enumerate() {
+                if self.matches(id, &group["select"], frame)? {
+                    matching.push(index);
+                }
+            }
+            fits.push(matching);
+        }
+        let mut counts = vec![0_usize; groups.len()];
+        Ok(assign_groups(&fits, &bounds, &mut counts))
+    }
+
     pub(super) fn resolution_subsets(
         &self,
         node: &Value,
@@ -170,6 +194,11 @@ impl Game {
             {
                 continue;
             }
+            if let Some(groups) = node["groups"].as_array()
+                && !self.fits_groups(&selected, groups, frame)?
+            {
+                continue;
+            }
             candidates.push(selected);
         }
         let possible = candidates.iter().map(Vec::len).max().unwrap_or_default();
@@ -182,4 +211,31 @@ impl Game {
         }
         Ok(candidates)
     }
+}
+
+fn assign_groups(fits: &[Vec<usize>], bounds: &[(usize, usize)], counts: &mut [usize]) -> bool {
+    let Some((first, rest)) = fits.split_first() else {
+        return counts
+            .iter()
+            .zip(bounds)
+            .all(|(count, (min, _))| count >= min);
+    };
+    for &group in first {
+        let (Some(count), Some((_, max))) = (counts.get(group).copied(), bounds.get(group)) else {
+            continue;
+        };
+        if count >= *max {
+            continue;
+        }
+        if let Some(slot) = counts.get_mut(group) {
+            *slot = count.saturating_add(1);
+        }
+        if assign_groups(rest, bounds, counts) {
+            return true;
+        }
+        if let Some(slot) = counts.get_mut(group) {
+            *slot = count;
+        }
+    }
+    false
 }

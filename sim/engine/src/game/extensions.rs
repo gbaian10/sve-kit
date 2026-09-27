@@ -7,7 +7,7 @@ use core::slice::from_ref;
 use serde_json::{Value, json};
 
 use super::legal::subsets;
-use super::{Frame, Game, Object, int, list, scalar, string};
+use super::{Frame, Game, Object, int, list, other, scalar, string};
 use crate::{EngineFailure, Result, invalid};
 
 #[expect(
@@ -67,12 +67,64 @@ impl Game {
         }
     }
 
+    /// Choice bounds after "代わりに好きな数チョイスする" statics (`replace_choice`) of
+    /// the chooser: their condition and new bounds read `choice.min`/`choice.mode_count`.
+    pub(super) fn choice_bounds(
+        &self,
+        node: &Value,
+        frame: &Frame,
+        chooser: &str,
+    ) -> Result<(usize, usize)> {
+        let mut min = self.number(&node["min"], frame)?.max(0);
+        let mut max = self.number(&node["max"], frame)?.max(0);
+        let modes = i64::try_from(list(&node["modes"]).len()).map_err(invalid)?;
+        for source in self.ability_sources() {
+            for code in self.abilities(&source)? {
+                let body = &code["body"];
+                if code["kind"] != "static"
+                    || body["op"] != "replace_choice"
+                    || !self.ability_zone(&source, &code)?
+                {
+                    continue;
+                }
+                let mut context = self.frame_for(&source)?;
+                if !self
+                    .seats(string(&body["side"]), &context)
+                    .iter()
+                    .any(|seat| seat == chooser)
+                {
+                    continue;
+                }
+                context.values.insert("choice.min".into(), json!(min));
+                context.values.insert("choice.max".into(), json!(max));
+                context
+                    .values
+                    .insert("choice.mode_count".into(), json!(modes));
+                if let Some(condition) = body.get("condition")
+                    && !self.truth(condition, &context)?
+                {
+                    continue;
+                }
+                min = self.number(&body["min"], &context)?.max(0);
+                max = self.number(&body["max"], &context)?.max(0);
+            }
+        }
+        Ok((
+            usize::try_from(min).map_err(invalid)?,
+            usize::try_from(max).map_err(invalid)?,
+        ))
+    }
+
     pub(super) fn resolution_choice(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         let ids = (1..=list(&node["modes"]).len())
             .map(|n| n.to_string())
             .collect::<Vec<_>>();
-        let min = usize::try_from(self.number(&node["min"], frame)?.max(0)).map_err(invalid)?;
-        let max = usize::try_from(self.number(&node["max"], frame)?.max(0)).map_err(invalid)?;
+        let chooser = if node["by"] == "opponent" {
+            other(&frame.controller).to_owned()
+        } else {
+            frame.controller.clone()
+        };
+        let (min, max) = self.choice_bounds(node, frame, &chooser)?;
         let mut labels = list(&node["labels"]);
         for label in &mut labels {
             if let Some(keyword) = label["keyword"].as_str() {
@@ -286,6 +338,14 @@ impl Game {
             let generation = self.state.objects.get(&id).map(|object| object.generation);
             let mut entry = json!({"source":frame.source,"controller":frame.controller,"applies_to":[id],"generation":generation,"effect":node,"until":node.get("until").cloned().unwrap_or_else(||json!("game")),"during":node["during"],"duration_controller":self.state.objects.get(&id).map(|object|object.controller.clone()),"expires_turn":self.state.objects.get(&id).map_or(0,|object|int(&self.state.turn["elapsed_turns"][&object.controller]).saturating_add(i64::from(self.active()!=object.controller))),"order":self.state.next_event,"context":frame});
             self.capture_effect_period(&mut entry, &id, frame)?;
+            if node["until"] == "next-opponent-turn-end" {
+                // "次の相手のターン終了時まで": ends with the opponent's next turn,
+                // even when registered during an opponent turn.
+                let opponent = other(&frame.controller);
+                entry["expiry_player"] = json!(opponent);
+                entry["expiry_turn"] =
+                    json!(int(&self.state.turn["elapsed_turns"][opponent]).saturating_add(1));
+            }
             self.state.continuous.push(entry);
         }
         Ok(())

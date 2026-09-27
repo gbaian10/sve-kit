@@ -225,6 +225,7 @@ impl Game {
         }
         if let Some(name) = selector["name"].as_str()
             && self.card_name(id)? != name
+            && !self.name_aliases(id)?.iter().any(|alias| alias == name)
         {
             return Ok(false);
         }
@@ -271,6 +272,28 @@ impl Game {
             }
         }
         Ok(true)
+    }
+
+    /// "これは『X』でもある" (static `name_alias`): extra names while in the given zone.
+    fn name_aliases(&self, id: &str) -> Result<Vec<String>> {
+        let zone = self.object(id)?.zone.clone();
+        // A card without an executable program has no alias to offer; its other
+        // abilities still fail closed when something tries to use them.
+        let abilities = match self.abilities(id) {
+            Ok(abilities) => abilities,
+            Err(crate::EngineFailure::Unsupported(_)) => return Ok(Vec::new()),
+            Err(error) => return Err(error),
+        };
+        Ok(abilities
+            .iter()
+            .map(|ability| &ability["body"])
+            .filter(|body| {
+                body["op"] == "name_alias"
+                    && body["subjects"] == "self"
+                    && (body["while_zone"] == "any" || body["while_zone"] == zone.as_str())
+            })
+            .filter_map(|body| body["name"].as_str().map(str::to_owned))
+            .collect())
     }
 
     pub(super) fn seats(&self, side: &str, frame: &Frame) -> Vec<String> {
@@ -423,6 +446,9 @@ impl Game {
         }
         if path == "x" {
             return Ok(frame.decision["x"].clone());
+        }
+        if path == "turn.phase" {
+            return Ok(self.state.turn["phase"].clone());
         }
         if let Some(rest) = path
             .strip_prefix("self.")

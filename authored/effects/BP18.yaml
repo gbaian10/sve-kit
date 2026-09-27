@@ -568,7 +568,7 @@ cards:
               subjects: target.1
             - op: box
               subjects: target.1
-              until: next-controller-turn-end
+              until: next-controller-end
         limit: 1
         targets:
           - key: '1'

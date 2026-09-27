@@ -112,7 +112,38 @@ impl Game {
         movement
             .values
             .insert("banish_instruction".into(), json!(true));
-        self.move_objects(ids, "banish", None, None, &movement)
+        // Like discard, "消滅したとき" looks back at the zone the card left, so the
+        // triggers are collected first and kept only for cards that really moved.
+        let before = ids
+            .iter()
+            .filter_map(|id| self.state.objects.get(id))
+            .cloned()
+            .collect::<Vec<_>>();
+        let pending = self.collect_triggers("banish", &before, &frame.cause)?;
+        self.move_objects(ids, "banish", None, None, &movement)?;
+        let banished = before
+            .iter()
+            .filter(|object| {
+                self.state.objects.get(&object.id).is_some_and(|now| {
+                    now.generation != object.generation
+                        && matches!(now.zone.as_str(), "banish" | "void")
+                })
+            })
+            .map(|object| object.id.clone())
+            .collect::<Vec<_>>();
+        self.enqueue(
+            pending
+                .into_iter()
+                .filter(|pending| {
+                    pending.context.as_ref().is_some_and(|context| {
+                        context.event["subject_id"]
+                            .as_str()
+                            .is_some_and(|id| banished.iter().any(|done| done == id))
+                    })
+                })
+                .collect(),
+        );
+        Ok(())
     }
 
     pub(super) fn discard(&mut self, ids: &[String], frame: &Frame) -> Result<()> {

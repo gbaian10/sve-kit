@@ -566,9 +566,9 @@ impl Game {
         let body = &code["body"];
         if body["op"] == "choice" && body["timing"] != "resolve" && body.get("by").is_none() {
             let options = list(&frame.decision["options"]);
-            let count = i64::try_from(options.len()).unwrap_or(i64::MAX);
-            if count < self.number(&body["min"], frame)?
-                || count > self.number(&body["max"], frame)?
+            let (min, max) = self.choice_bounds(body, frame, &frame.controller)?;
+            if options.len() < min
+                || options.len() > max
                 || options
                     .iter()
                     .map(Value::to_string)
@@ -643,10 +643,6 @@ impl Game {
         self.parameterize_fixed(base, code, initial)
     }
 
-    #[expect(
-        clippy::too_many_lines,
-        reason = "Parameter expansion preserves the ordered Cartesian product of every independent choice."
-    )]
     fn parameterize_fixed(&self, base: Value, code: &Value, initial: &Frame) -> Result<Vec<Value>> {
         let mut frame = initial.clone();
         frame.decision = base.clone();
@@ -657,10 +653,7 @@ impl Game {
             let ids = (1..=list(&body["modes"]).len())
                 .map(|n| n.to_string())
                 .collect::<Vec<_>>();
-            let min =
-                usize::try_from(self.number(&body["min"], &frame)?.max(0)).map_err(invalid)?;
-            let max =
-                usize::try_from(self.number(&body["max"], &frame)?.max(0)).map_err(invalid)?;
+            let (min, max) = self.choice_bounds(body, &frame, &frame.controller)?;
             let mut expanded = Vec::new();
             for option in options {
                 for subset in subsets(&ids, min, max) {

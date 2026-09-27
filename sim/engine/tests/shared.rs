@@ -7,6 +7,7 @@ extern crate alloc;
 use alloc::collections::BTreeMap;
 use alloc::sync::Arc;
 use std::env::var_os;
+use std::fs::read_to_string;
 use std::path::PathBuf;
 use std::sync::OnceLock;
 
@@ -70,6 +71,38 @@ fn every_shared_scenario_passes_or_is_a_listed_known_failure() {
     .unwrap();
     let result = gate(&reports, &known);
     assert!(result.ok(), "{:#?}", result.problems);
+}
+
+/// Load-time rejection (M1): every authored card either loads or is a reviewed rejection.
+#[test]
+fn authored_yaml_loads_or_is_a_listed_rejection() {
+    let listed: serde_json::Value =
+        serde_saphyr::from_str(&read_to_string(root().join("docs/m0/rejected-yaml.yaml")).unwrap())
+            .unwrap();
+    let mut expected = listed["rejected"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|entry| {
+            (
+                entry["card"].as_str().unwrap().to_owned(),
+                entry["finding"].as_str().unwrap().to_owned(),
+            )
+        })
+        .collect::<Vec<_>>();
+    let mut actual = catalog()
+        .rejections()
+        .iter()
+        .flat_map(|(card, findings)| {
+            findings.iter().map(move |finding| {
+                let message = finding.splitn(3, ':').nth(2).unwrap_or(finding).trim();
+                (card.clone(), message.to_owned())
+            })
+        })
+        .collect::<Vec<_>>();
+    expected.sort();
+    actual.sort();
+    assert_eq!(actual, expected);
 }
 
 #[test]

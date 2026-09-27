@@ -10,6 +10,12 @@ use sve_engine::EngineFailure;
 use sve_engine::catalog::Catalog;
 use sve_engine::game::{Game, View};
 
+/// Authored programs cannot name runtime object ids (the loader rejects unknown
+/// references), so fixtures select one object by its id instead.
+fn by_id(id: &str) -> Value {
+    json!({"side":"both","zone":"any","where":{"fn":"eq","args":[{"read":"item.id"},id]}})
+}
+
 fn snapshot() -> String {
     [("unit-follower","フォロワー"),("unit-spell","スペル")].iter().map(|(number,kind)|json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":kind,"cost":"1","power":"2","hp":"3","traits":[],"text":null,"sections":[]}]}).to_string()).collect::<Vec<_>>().join("\n")
 }
@@ -91,7 +97,8 @@ fn loader_rejects_invalid_grammar_duplicates_and_macro_cycles() {
 fn illegal_and_unsupported_decisions_rollback_every_state_component() {
     for body in [
         json!({"op":"damage","subjects":"target.1","amount":2_i64}),
-        json!({"op":"unsupported","reason":"synthetic unsupported frontier"}),
+        // Loads, but exceeds the prototype fuel only while resolving.
+        json!({"op":"per","count":10_001_i64,"body":{"op":"draw","count":0_i64}}),
     ] {
         let mut engine = game(&body);
         let before = engine.digest().unwrap();
@@ -2095,8 +2102,7 @@ fn stack_catalog(body: &Value) -> Catalog {
     let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
     keywords["keywords"]["stack"] =
         json!({"ja":"スタック","rule":"13.3.2","expansion":{"op":"keyword","name":"stack"}});
-    keywords["keywords"]["stack_counter"] =
-        json!({"ja":"スタックカウンター","expansion":{"op":"keyword","name":"stack_counter"}});
+    keywords["keywords"]["stack_counter"] = json!({"ja":"スタックカウンター","role":"counter","expansion":{"op":"keyword","name":"stack_counter"}});
     Catalog::from_documents(
         &format!("{}\n{soil}", snapshot()),
         &keywords.to_string(),
@@ -2575,8 +2581,8 @@ fn damage_prevention_tracks_the_recipient_generation_and_attack_kind() {
     let mut engine = game(&json!({"op":"seq","steps":[
         {"op":"replace_damage","subjects":"target.1","prevent":true,"kind":"any","until":"end-of-turn"},
         {"op":"move","subjects":"target.1","to":"hand"},
-        {"op":"move","subjects":"b","to":"field"},
-        {"op":"damage","subjects":"b","amount":2_i64}
+        {"op":"move","subjects":by_id("b"),"to":"field"},
+        {"op":"damage","subjects":by_id("b"),"amount":2_i64}
     ]}));
     engine
         .decide(
@@ -4124,9 +4130,9 @@ fn transformation_banishes_and_erases_before_creating_a_fresh_batch() {
 fn transformations_keep_original_pairing_after_prohibition_replacement_or_stale_targets() {
     for case in ["stale", "prohibited", "replaced"] {
         let first = match case {
-            "stale" => json!({"op":"move","subjects":"b","to":"ex"}),
+            "stale" => json!({"op":"move","subjects":by_id("b"),"to":"ex"}),
             "prohibited" => {
-                json!({"op":"restrict","subjects":"b","action":"banish","until":"game"})
+                json!({"op":"restrict","subjects":by_id("b"),"action":"banish","until":"game"})
             }
             _ => json!({"op":"draw","count":0_i64}),
         };
@@ -5619,7 +5625,7 @@ fn explicit_ordering_in_unordered_zones_is_rejected_transactionally() {
 fn full_control_destination_keeps_empty_input_and_resumes_later_transfers() {
     let body = json!({"op":"seq","steps":[
         {"op":"if_done","attempt":{"op":"control","subjects":"target.1","side":"self"},"then":{"op":"damage","subjects":"opponent.leader","amount":3_i64}},
-        {"op":"control","subjects":"a","side":"opponent"}
+        {"op":"control","subjects":by_id("a"),"side":"opponent"}
     ]});
     let loaded = Arc::new(stack_catalog(&body));
     let mut initial = setup();
@@ -5825,9 +5831,9 @@ fn losing_abilities_erases_prior_grants_but_allows_later_grants_and_expiry_resto
     let early = json!({"line":1_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}});
     let late = json!({"line":2_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":3_i64}});
     let body = json!({"op":"seq","steps":[
-        {"op":"modify","subjects":"a","abilities":[early]},
-        {"op":"modify","subjects":"a","remove_abilities":true,"until":"end-of-turn"},
-        {"op":"modify","subjects":"a","abilities":[late]}
+        {"op":"modify","subjects":by_id("a"),"abilities":[early]},
+        {"op":"modify","subjects":by_id("a"),"remove_abilities":true,"until":"end-of-turn"},
+        {"op":"modify","subjects":by_id("a"),"abilities":[late]}
     ]});
     let loaded = Arc::new(catalog(&body));
     let mut engine = Game::new(loaded, &turn_setup(), &Value::Null, &Value::Null, "grant").unwrap();
@@ -5903,9 +5909,9 @@ fn temporary_grants_expire_and_amulet_guard_does_not_restrict_attack_targets() {
 #[test]
 fn ambiguous_or_unsupported_grants_fail_closed_without_partial_payment() {
     for grant in [
-        json!({"op":"modify","subjects":"a","abilities":[{"line":1_i64,"kind":"activated","limit":1_i64,"body":{"op":"draw","count":1_i64}}]}),
-        json!({"op":"modify","subjects":"a","until":"end-of-turn","power":1_i64,"abilities":[]}),
-        json!({"op":"modify","subjects":"a","abilities":[{"line":1_i64,"kind":"activated","active_zones":["hand"],"body":{"op":"draw","count":1_i64}}]}),
+        json!({"op":"modify","subjects":by_id("a"),"abilities":[{"line":1_i64,"kind":"activated","limit":1_i64,"body":{"op":"draw","count":1_i64}}]}),
+        json!({"op":"modify","subjects":by_id("a"),"until":"end-of-turn","power":1_i64,"abilities":[]}),
+        json!({"op":"modify","subjects":by_id("a"),"abilities":[{"line":1_i64,"kind":"activated","active_zones":["hand"],"body":{"op":"draw","count":1_i64}}]}),
     ] {
         let mut engine = game(&grant);
         let before = engine.digest().unwrap();
@@ -5918,25 +5924,26 @@ fn ambiguous_or_unsupported_grants_fail_closed_without_partial_payment() {
         ));
         assert_eq!(engine.digest().unwrap(), before);
     }
-    let mut engine = game(&json!({"op":"modify","subjects":"a","abilities":[
+    // Two different granted abilities on one line cannot be referenced apart; the
+    // loader now rejects them instead of failing when one is activated.
+    let ambiguous = document(&json!({"op":"modify","subjects":by_id("a"),"abilities":[
         {"line":1_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":1_i64}},
         {"line":1_i64,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":2_i64}}
     ]}));
-    engine
-        .decide(
-            &json!({"do":"play","card":"s","targets":{"1":["b"]}}),
-            "cast",
-        )
-        .unwrap();
-    let before = engine.digest().unwrap();
-    assert!(matches!(
-        engine.decide(
-            &json!({"do":"activate","ability":{"source":"a","card":"unit-spell","line":1_i64}}),
-            "ambiguous"
-        ),
-        Err(EngineFailure::Unsupported(_))
-    ));
-    assert_eq!(engine.digest().unwrap(), before);
+    let loaded = Catalog::from_documents(
+        &snapshot(),
+        &registry(),
+        &[("ambiguous.yaml".into(), ambiguous.to_string())],
+    )
+    .unwrap();
+    assert!(
+        loaded
+            .rejections()
+            .get("unit-spell")
+            .is_some_and(|findings| findings
+                .iter()
+                .any(|finding| finding.contains("contract 3.1")))
+    );
 }
 
 #[expect(
@@ -5947,8 +5954,8 @@ fn ambiguous_or_unsupported_grants_fail_closed_without_partial_payment() {
 fn attack_requirement_fixture(prohibited: bool) -> (Arc<Catalog>, Value) {
     let requirement = json!({"line":1_i64,"kind":"static","body":{"op":"require_attack","subjects":{"side":"opponent","zone":"field","type":"follower"},"count":1_i64,"condition":{"read":"self.acted"}}});
     let body = json!({"op":"seq","steps":[
-        {"op":"act","subjects":"a"},
-        {"op":"modify","subjects":"a","during":"next-opponent-turn","abilities":[requirement.clone(),requirement]}
+        {"op":"act","subjects":by_id("a")},
+        {"op":"modify","subjects":by_id("a"),"during":"next-opponent-turn","abilities":[requirement.clone(),requirement]}
     ]});
     let mut doc = document(&body);
     doc["cards"]["unit-follower"]["abilities"] = json!([
@@ -8472,7 +8479,7 @@ fn a_batch_moving_to_both_players_respects_both_capacities() {
 #[test]
 fn guard_placement_belongs_to_the_recipient_and_same_field_moves_are_not_entries() {
     for subject in ["b", "c"] {
-        let mut doc = document(&json!({"op":"move","subjects":subject,"to":"field"}));
+        let mut doc = document(&json!({"op":"move","subjects":by_id(subject),"to":"field"}));
         doc["cards"]["unit-follower"]["abilities"] =
             json!([{"kind":"static","line":1_i64,"body":{"op":"macro","name":"guard"}}]);
         let loaded = Arc::new(
@@ -8523,7 +8530,7 @@ fn guard_placement_belongs_to_the_recipient_and_same_field_moves_are_not_entries
 fn explicit_recipient_moves_keep_the_owner_and_reject_undefined_same_zone_transfers() {
     let loaded = counter_payment_catalog(
         &json!([]),
-        &json!({"op":"move","subjects":"b","to":"ex","side":"self"}),
+        &json!({"op":"move","subjects":by_id("b"),"to":"ex","side":"self"}),
     );
     for origin in ["field", "ex"] {
         let mut position = setup();

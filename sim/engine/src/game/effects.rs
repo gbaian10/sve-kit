@@ -827,6 +827,10 @@ impl Game {
     }
 
     pub(super) fn draw(&mut self, seat: &str, frame: &Frame) -> Result<()> {
+        // "カードを引けない": the draw does not happen; it is not a failed draw either.
+        if self.restricted(&format!("{seat}.leader"), "draw")? {
+            return Ok(());
+        }
         let deck = self.zone(seat, "deck");
         let Some(top) = deck.first() else {
             self.state.draws_failed.insert(seat.into());

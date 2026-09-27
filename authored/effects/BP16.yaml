@@ -59,7 +59,7 @@ cards:
           min: 1
           max:
             if:
-              read: self.turn.evolved
+              read: self.turn.evolutions
             then: 2
             else: 1
           modes:

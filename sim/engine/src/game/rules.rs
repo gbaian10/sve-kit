@@ -349,6 +349,9 @@ impl Game {
             group,
         );
         frame.cause = json!({"event":cause});
+        let played = [self.object(source)?.clone()];
+        let pending = self.collect_triggers("card_play", &played, &frame.cause)?;
+        self.enqueue(pending);
         if is_spell {
             for ability in &spells {
                 self.freeze(ability, "resolution-start", &mut frame)?;
@@ -486,7 +489,37 @@ impl Game {
         .into())
     }
 
+    /// 融合 (13.x): the fused materials are the ability's cost selections; the event
+    /// records which traits they had so "財宝・カードを融合したとき" can be checked.
+    fn notify_fusion(&mut self, frame: &Frame, code: &Value) -> Result<()> {
+        if code["keyword"] != "fusion" {
+            return Ok(());
+        }
+        let mut traits = serde_json::Map::new();
+        for selected in frame.decision["costs"]
+            .as_object()
+            .into_iter()
+            .flat_map(|costs| costs.values())
+        {
+            for id in list(selected) {
+                for name in list(&self.face(string(&id))?["traits"]) {
+                    traits.insert(string(&name).into(), json!(true));
+                }
+            }
+        }
+        let fused = [self.object(&frame.source)?.clone()];
+        let pending = self.collect_event(
+            "fusion",
+            &fused,
+            &frame.cause,
+            &json!({"fused_trait":traits}),
+        )?;
+        self.enqueue(pending);
+        Ok(())
+    }
+
     fn notify_ability_start(&mut self, frame: &Frame, code: &Value) -> Result<()> {
+        self.notify_fusion(frame, code)?;
         let mut targets = Vec::new();
         if let Some(selections) = frame.decision["targets"].as_object() {
             for selected in selections.values() {

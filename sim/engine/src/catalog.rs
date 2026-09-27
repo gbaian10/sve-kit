@@ -16,6 +16,8 @@ use serde_json::{Value, json};
 
 use crate::{EngineFailure, Result, invalid};
 
+mod semantics;
+
 /// Card facts from the sole versioned card database snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Card {
@@ -31,6 +33,10 @@ pub struct Catalog {
     pub(crate) cards: BTreeMap<String, Card>,
     pub(crate) programs: BTreeMap<String, Value>,
     pub(crate) keywords: BTreeMap<String, Value>,
+    /// Schema-valid programs that failed the load-time semantic checks, with every
+    /// finding as `file:line: message`. They are never executed.
+    #[serde(default)]
+    pub(crate) rejected: BTreeMap<String, Vec<String>>,
 }
 
 impl Catalog {
@@ -110,8 +116,24 @@ impl Catalog {
                 validator
                     .validate(&json!({"version":"astra/1","cards":{number:program}}))
                     .map_err(invalid)?;
-                if catalog.programs.insert(number.clone(), program).is_some() {
+                if catalog.programs.contains_key(number) || catalog.rejected.contains_key(number) {
                     return Err(invalid(format!("duplicate program: {number}")));
+                }
+                let findings = semantics::check_program(&program, &catalog.keywords);
+                if findings.is_empty() {
+                    catalog.programs.insert(number.clone(), program);
+                } else {
+                    let located = findings
+                        .iter()
+                        .map(|finding| {
+                            format!(
+                                "{name}:{}: {}",
+                                locate(text, number, &finding.needle),
+                                finding.message
+                            )
+                        })
+                        .collect();
+                    catalog.rejected.insert(number.clone(), located);
                 }
             }
         }
@@ -132,7 +154,19 @@ impl Catalog {
             .ok_or_else(|| invalid(format!("unknown card face: {number}/{index}")))
     }
 
+    /// Cards whose authored program was rejected at load, with located findings.
+    #[must_use]
+    pub const fn rejections(&self) -> &BTreeMap<String, Vec<String>> {
+        &self.rejected
+    }
+
     pub(crate) fn program(&self, number: &str) -> Result<&Value> {
+        if let Some(findings) = self.rejected.get(number) {
+            return Err(EngineFailure::Unsupported(format!(
+                "card program rejected at load: {number}: {}",
+                findings.join("; ")
+            )));
+        }
         let program = self
             .programs
             .get(number)
@@ -282,6 +316,26 @@ impl Catalog {
             })
             .map_or_else(|| name.to_owned(), |(key, _)| key.clone())
     }
+}
+
+/// 1-based line of `needle` inside the card's block, or of the card key itself.
+fn locate(text: &str, number: &str, needle: &str) -> usize {
+    let key = format!("  {number}:");
+    let lines = text.lines().collect::<Vec<_>>();
+    let Some(start) = lines.iter().position(|line| *line == key) else {
+        return 0;
+    };
+    let block = lines
+        .iter()
+        .enumerate()
+        .skip(start.saturating_add(1))
+        .take_while(|(_, line)| !line.starts_with("  ") || line.starts_with("   "));
+    block
+        .filter(|(_, line)| line.contains(needle))
+        .map(|(index, _)| index)
+        .next()
+        .unwrap_or(start)
+        .saturating_add(1)
 }
 
 pub(crate) fn yaml<'de, T>(text: &'de str) -> Result<T>

@@ -69,10 +69,13 @@ fn main() -> Result<()> {
         return strict_gate(&catalog, &root, &output, &known);
     }
     if mode == "validate" {
-        println!(
-            "Schema-validated authored programs: {}",
-            catalog.authored_count()
-        );
+        println!("Loaded authored programs: {}", catalog.authored_count());
+        println!("Rejected at load: {}", catalog.rejections().len());
+        for (card, findings) in catalog.rejections() {
+            for finding in findings {
+                println!("REJECTED {card} {finding}");
+            }
+        }
         return Ok(());
     }
     if mode == "all" || mode == "g1" {
