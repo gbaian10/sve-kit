@@ -86,8 +86,15 @@ cards:
       - line: 2
         kind: trigger
         body:
-          op: evolve
-          subjects: self
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.turn.leader_hp_decreased
+              - 4
+          then:
+            op: evolve
+            subjects: self
         event: leader_life_change
         subject: self.leader
         trigger_if:
@@ -98,10 +105,6 @@ cards:
               args:
                 - read: event.after_life
                 - read: event.before_life
-            - fn: ge
-              args:
-                - read: self.turn.leader_hp_decreased
-                - 4
       - line: 3
         kind: trigger
         body:
