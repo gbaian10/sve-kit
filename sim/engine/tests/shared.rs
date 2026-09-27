@@ -103,6 +103,13 @@ fn authored_yaml_loads_or_is_a_listed_rejection() {
     expected.sort();
     actual.sort();
     assert_eq!(actual, expected);
+    // Every finding points at a line of its card, never at "line 0".
+    for findings in catalog().rejections().values() {
+        for finding in findings {
+            let line = finding.split(':').nth(1).unwrap_or_default();
+            assert!(line.parse::<usize>().is_ok_and(|n| n > 0), "{finding}");
+        }
+    }
 }
 
 #[test]

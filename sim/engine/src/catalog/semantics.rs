@@ -317,12 +317,26 @@ struct Checker<'registry> {
     top: Vec<Value>,
     objects: BTreeSet<String>,
     values: BTreeSet<String>,
+    /// Selection keys of the whole card: `target.<key>`, `cost.<key>`, `split`.
+    target_keys: BTreeSet<String>,
+    cost_keys: BTreeSet<String>,
+    distribute_keys: BTreeSet<String>,
+    /// The printed card type, for rules that depend on it.
+    card_type: String,
     findings: Vec<Finding>,
 }
 
 /// Checks one expanded card program.
-pub(crate) fn check_program(program: &Value, keywords: &BTreeMap<String, Value>) -> Vec<Finding> {
+pub(crate) fn check_program(
+    program: &Value,
+    keywords: &BTreeMap<String, Value>,
+    card_type: &str,
+) -> Vec<Finding> {
     let mut checker = Checker {
+        target_keys: BTreeSet::new(),
+        cost_keys: BTreeSet::new(),
+        distribute_keys: BTreeSet::new(),
+        card_type: card_type.to_owned(),
         keywords,
         top: program["abilities"].as_array().cloned().unwrap_or_default(),
         objects: INTERNAL_BINDS
@@ -370,6 +384,27 @@ impl Checker<'_> {
                     for spec in costs {
                         if let Some(key) = spec["key"].as_str() {
                             self.values.insert(format!("paid.{key}"));
+                            self.cost_keys.insert(key.to_owned());
+                        }
+                    }
+                }
+                for (list, target) in [("targets", true), ("cost_selections", false)] {
+                    for selection in fields
+                        .get(list)
+                        .and_then(Value::as_array)
+                        .into_iter()
+                        .flatten()
+                    {
+                        let Some(key) = selection["key"].as_str() else {
+                            continue;
+                        };
+                        if target {
+                            self.target_keys.insert(key.to_owned());
+                        } else {
+                            self.cost_keys.insert(key.to_owned());
+                        }
+                        if selection.get("distribute").is_some() {
+                            self.distribute_keys.insert(key.to_owned());
                         }
                     }
                 }
@@ -421,8 +456,11 @@ impl Checker<'_> {
                 .collect::<Vec<_>>();
             let distinct = labels.iter().flatten().collect::<BTreeSet<_>>();
             if bodies.len() > 1 && (labels.contains(&None) || distinct.len() != labels.len()) {
+                let line = entries
+                    .first()
+                    .map_or_else(String::new, |ability| ability["line"].to_string());
                 self.reject(
-                    "line:",
+                    format!("line: {line}"),
                     format!(
                         "{key}: abilities sharing a line need distinct keywords (contract 3.1)"
                     ),
@@ -459,6 +497,8 @@ impl Checker<'_> {
             event: if kind == "trigger" { event } else { None },
             variables: ability.get("variables").is_some(),
             choice: ability["body"]["op"] == "replace_choice",
+            item: false,
+            damage: false,
         };
         self.ability_parts(ability, &context);
         let position = match kind {
@@ -475,7 +515,29 @@ impl Checker<'_> {
         }
     }
 
+    /// R-0009: the trigger condition may only restrict the event itself; a long-form
+    /// "…なら" condition is checked at resolution, in the body.
+    fn trigger_condition(&mut self, condition: &Value) {
+        let mut reads = Vec::new();
+        collect_reads(condition, &mut reads);
+        for path in reads {
+            let event_limit = path.starts_with("event.")
+                || matches!(path.as_str(), "self.is_active" | "opponent.is_active");
+            if !event_limit {
+                self.reject(
+                    "trigger_if:",
+                    format!(
+                        "`trigger_if` reads `{path}`; a long-form condition belongs in the body (R-0009)"
+                    ),
+                );
+            }
+        }
+    }
+
     fn trigger_fields(&mut self, ability: &Value, kind: &str, event: Option<&str>) {
+        if let Some(condition) = ability.get("trigger_if") {
+            self.trigger_condition(condition);
+        }
         if kind != "trigger" {
             for key in ["event", "subject", "trigger_if", "side", "retain_event"] {
                 if ability.get(key).is_some() {
@@ -556,19 +618,23 @@ impl Checker<'_> {
             );
         }
         self.parameters(node, op, context);
+        let scoped = Context {
+            damage: context.damage || op == "replace_damage",
+            ..*context
+        };
         for (key, value) in node.as_object().into_iter().flatten() {
             match key.as_str() {
                 "steps" | "modes" => {
                     for step in value.as_array().into_iter().flatten() {
-                        self.node(step, position.body(), context);
+                        self.node(step, position.body(), &scoped);
                     }
                 }
                 "body" | "attempt" | "then" | "else" => {
-                    self.node(value, position.body(), context);
+                    self.node(value, position.body(), &scoped);
                 }
                 "costs" => {
                     for cost in value.as_array().into_iter().flatten() {
-                        self.node(cost, Position::Cost, context);
+                        self.node(cost, Position::Cost, &scoped);
                     }
                 }
                 "abilities" => {
@@ -585,22 +651,35 @@ impl Checker<'_> {
                 }
                 "cost_selections" | "groups" => {
                     for selection in value.as_array().into_iter().flatten() {
-                        self.selection(selection, context);
+                        self.selection(selection, &scoped);
                     }
                 }
-                "selection" => self.selection(value, context),
+                "selection" => self.selection(value, &scoped),
                 "select" | "subjects" | "sources" | "qualifies" | "left" | "right" => {
-                    self.selector(value, context);
+                    self.selector(value, &scoped);
+                }
+                "by" if op == "pilot" => self.selector(value, &scoped),
+                "name" if op == "create" => self.expr(value, &scoped),
+                "split" => {
+                    let split = value.as_str().unwrap_or_default();
+                    if !self.distribute_keys.contains(split) {
+                        self.reject(
+                            format!("split: {split}"),
+                            format!(
+                                "`split: {split}` has no play-time selection with `distribute`"
+                            ),
+                        );
+                    }
                 }
                 "tokens" => {
                     for token in value.as_array().into_iter().flatten() {
-                        self.expr(&token["count"], context);
+                        self.expr(&token["count"], &scoped);
                     }
                 }
-                "until" if op == "repeat" => self.expr(value, context),
+                "until" if op == "repeat" => self.expr(value, &scoped),
                 "condition" | "count" | "amount" | "min" | "max" | "power" | "hp" | "set_power"
                 | "set_hp" | "set_cost" | "cost" | "set" | "additional" | "distribute"
-                | "constraint" => self.expr(value, context),
+                | "constraint" => self.expr(value, &scoped),
                 _ => {}
             }
         }
@@ -736,6 +815,17 @@ impl Checker<'_> {
             "name_alias" if !matches!(node["while_zone"].as_str(), Some("any" | "field")) => {
                 self.reject("while_zone:", "name alias zone must be `any` or `field`");
             }
+            // CR 10.3.5, Q424: a follower's or amulet's abilities work only on the field.
+            "name_alias"
+                if node["while_zone"] != "field"
+                    && (self.card_type.contains("フォロワー")
+                        || self.card_type.contains("アミュレット")) =>
+            {
+                self.reject(
+                    "while_zone:",
+                    "a follower or amulet alias works only on the field (CR 10.3.5, Q424)",
+                );
+            }
             _ => {}
         }
     }
@@ -749,7 +839,16 @@ impl Checker<'_> {
                 }
             }
         }
-        for key in ["to", "from_zone", "while_zone"] {
+        if node["op"] == "move" && node["to"] == "banish" {
+            self.reject(
+                "to: banish",
+                "`move` to banish skips 消滅 events and triggers; write `op: banish`",
+            );
+        }
+        for key in ["to", "from_zone", "while_zone", "from", "replacement"] {
+            if node["op"] != "replace_move" && matches!(key, "from" | "replacement") {
+                continue;
+            }
             if let Some(zone) = node[key].as_str()
                 && !one_of(zone, ZONES)
                 && !matches!(zone, "any" | "all" | "self" | "opponent")
@@ -764,6 +863,15 @@ impl Checker<'_> {
         for key in ["min", "max", "distribute", "constraint"] {
             if let Some(expr) = selection.get(key) {
                 self.expr(expr, context);
+            }
+        }
+        for other in selection["different_from"].as_array().into_iter().flatten() {
+            let key = other.as_str().unwrap_or_default();
+            if !self.target_keys.contains(key) && !self.cost_keys.contains(key) {
+                self.reject(
+                    "different_from",
+                    format!("`different_from: {key}` names no selection of this card"),
+                );
             }
         }
         if let Some(by) = selection["distinct_by"].as_str()
@@ -812,10 +920,17 @@ impl Checker<'_> {
                 {
                     self.reject(event, format!("unknown ability event `{event}`"));
                 }
-                for key in ["top", "where"] {
-                    if let Some(expr) = fields.get(key) {
-                        self.expr(expr, context);
-                    }
+                if let Some(expr) = fields.get("top") {
+                    self.expr(expr, context);
+                }
+                if let Some(expr) = fields.get("where") {
+                    self.expr(
+                        expr,
+                        &Context {
+                            item: true,
+                            ..*context
+                        },
+                    );
                 }
             }
             Value::Null | Value::Bool(_) | Value::Number(_) | Value::Array(_) => {}
@@ -833,9 +948,11 @@ impl Checker<'_> {
                 | "event.target"
                 | "event.subject"
         ) || reference.strip_prefix("target.").is_some_and(|rest| {
-            let index = rest.strip_suffix(".leader").unwrap_or(rest);
-            !index.is_empty() && index.bytes().all(|b| b.is_ascii_digit())
-        }) || reference.starts_with("cost.")
+            self.target_keys
+                .contains(rest.strip_suffix(".leader").unwrap_or(rest))
+        }) || reference
+            .strip_prefix("cost.")
+            .is_some_and(|key| self.cost_keys.contains(key))
             || {
                 let base = reference.strip_suffix(".leader").unwrap_or(reference);
                 self.objects.contains(base)
@@ -905,8 +1022,20 @@ impl Checker<'_> {
                 Err("`x` needs `variables.x` on the same ability".into())
             };
         }
-        if matches!(path, "turn.phase" | "damage.amount") {
+        if path == "turn.phase" {
             return Ok(());
+        }
+        if path == "damage.amount" {
+            return if context.damage {
+                Ok(())
+            } else {
+                Err("`damage.amount` is only set inside `replace_damage`".into())
+            };
+        }
+        if path.starts_with("item.") && !context.item {
+            return Err(format!(
+                "`{path}` is only bound inside a selector `where` or `values`"
+            ));
         }
         if matches!(path, "choice.min" | "choice.max" | "choice.mode_count") {
             return if context.choice {
@@ -1019,8 +1148,10 @@ impl Checker<'_> {
             "self" | "item" | "event.target" | "event.subject"
         ) || reference
             .strip_prefix("target.")
-            .is_some_and(|index| index.bytes().all(|b| b.is_ascii_digit()))
-            || reference.starts_with("cost.")
+            .is_some_and(|key| self.target_keys.contains(key))
+            || reference
+                .strip_prefix("cost.")
+                .is_some_and(|key| self.cost_keys.contains(key))
             || self.objects.contains(reference);
         if known {
             Ok(())
@@ -1030,11 +1161,20 @@ impl Checker<'_> {
     }
 }
 
+#[derive(Clone, Copy)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Independent scope flags of one expression position, not a state machine."
+)]
 struct Context<'event> {
     event: Option<&'event str>,
     variables: bool,
     /// Inside `replace_choice`, which reads the bounds it replaces.
     choice: bool,
+    /// Inside a selector `where` or `values`, where `item` is bound.
+    item: bool,
+    /// Inside `replace_damage`, where `damage.amount` is set.
+    damage: bool,
 }
 
 impl Position {
@@ -1044,5 +1184,30 @@ impl Position {
             Self::Static => Self::Static,
             Self::Construction => Self::Construction,
         }
+    }
+}
+
+/// Every `read` path, plus a pseudo path for `count`/`values`, inside an expression.
+fn collect_reads(expr: &Value, reads: &mut Vec<String>) {
+    match expr {
+        Value::Object(fields) => {
+            if let Some(path) = fields.get("read").and_then(Value::as_str) {
+                reads.push(path.to_owned());
+            }
+            for key in ["count", "values"] {
+                if fields.contains_key(key) {
+                    reads.push(key.to_owned());
+                }
+            }
+            for value in fields.values() {
+                collect_reads(value, reads);
+            }
+        }
+        Value::Array(items) => {
+            for item in items {
+                collect_reads(item, reads);
+            }
+        }
+        Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => {}
     }
 }

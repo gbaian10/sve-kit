@@ -385,16 +385,10 @@ impl Game {
     pub(super) fn resource_effect(&mut self, node: &Value, frame: &mut Frame) -> Result<()> {
         match string(&node["op"]) {
             "lesson" => {
+                // A lesson banishes, so it goes through the same path as `op: banish`
+                // (消滅 events and banish triggers).
                 let ids = self.select(&node["subjects"], frame)?;
-                let group = self.group();
-                for id in &ids {
-                    self.emit(
-                        json!({"kind":"消滅","object":id,"source":frame.source}),
-                        &frame.cause,
-                        group,
-                    );
-                }
-                self.move_objects(&ids, "banish", None, None, frame)?;
+                self.banish_objects(&ids, frame)?;
             }
             "eat" | "_drive_point" => {
                 let ids = self.select(&node["subjects"], frame)?;

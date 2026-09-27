@@ -5104,7 +5104,11 @@ fn stat_increase_triggers_compare_actual_values_and_collect_after_the_whole_batc
             .unwrap()
             .extend(change.as_object().unwrap().clone());
         let mut doc = stat_event_document(&body);
-        doc["cards"]["unit-follower"]["abilities"][0]["trigger_if"] = json!({"fn":"eq","args":[{"count":{"side":"self","zone":"field","where":{"fn":"ge","args":[{"read":"item.hp"},5_i64]}}},2_i64]});
+        // R-0009: the board condition is read at resolution (body `if`); the trigger
+        // itself only restricts the event (actual value reached 5).
+        let trigger = &mut doc["cards"]["unit-follower"]["abilities"][0];
+        trigger["trigger_if"] = json!({"fn":"ge","args":[{"read":"event.after"},5_i64]});
+        trigger["body"] = json!({"op":"if","condition":{"fn":"eq","args":[{"count":{"side":"self","zone":"field","where":{"fn":"ge","args":[{"read":"item.hp"},5_i64]}}},2_i64]},"then":trigger["body"].clone()});
         let loaded = Arc::new(
             Catalog::from_documents(
                 &snapshot(),
@@ -6573,7 +6577,8 @@ fn numeric_history_fixture(buff: &Value, text: &str) -> (Arc<Catalog>, Value) {
         ),
     ] {
         lines.push(json!({"number":number,"faces":[{"name":number,"card_class":"ニュートラル","card_type":"スペル","cost":"0","power":"-","hp":"-","traits":[],"text":printed,"sections":[]}]}).to_string());
-        doc["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[{"line":1_i64,"kind":"spell","body":body}]});
+        doc["cards"][number] = json!({"status":"complete","review":"synthetic","abilities":[{"line":1_i64,"kind":"spell","body":body,
+            "targets":[{"key":"1","select":{"side":"both","zone":"field","type":"follower"},"min":1_i64,"max":1_i64}]}]});
     }
     let loaded = Arc::new(
         Catalog::from_documents(
@@ -7142,8 +7147,13 @@ fn advances_return_face_up_to_the_owner_before_the_effect_continues() {
     ] {
         let owner = if origin == "hand" { "P2" } else { "P1" };
         let owner_side = if owner == "P1" { "self" } else { "opponent" };
+        let departure = if destination == "banish" {
+            json!({"op":"banish","subjects":{"side":"opponent","zone":origin}})
+        } else {
+            json!({"op":"move","subjects":{"side":"opponent","zone":origin},"to":destination})
+        };
         let body = json!({"op":"seq","steps":[
-            {"op":"move","subjects":{"side":"opponent","zone":origin},"to":destination},
+            departure,
             {"op":"modify","subjects":"self.leader","hp":{"count":{"side":owner_side,"zone":"evolve_deck"}}}
         ]});
         let mut doc = document(&body);

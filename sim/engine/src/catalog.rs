@@ -119,7 +119,13 @@ impl Catalog {
                 if catalog.programs.contains_key(number) || catalog.rejected.contains_key(number) {
                     return Err(invalid(format!("duplicate program: {number}")));
                 }
-                let findings = semantics::check_program(&program, &catalog.keywords);
+                let card_type = catalog
+                    .face(number, 0)
+                    .ok()
+                    .and_then(|face| face["card_type"].as_str())
+                    .unwrap_or_default()
+                    .to_owned();
+                let findings = semantics::check_program(&program, &catalog.keywords, &card_type);
                 if findings.is_empty() {
                     catalog.programs.insert(number.clone(), program);
                 } else {

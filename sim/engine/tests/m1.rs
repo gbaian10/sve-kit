@@ -150,11 +150,15 @@ fn play_and_settle(engine: &mut Game, card: &str) -> usize {
 
 /// A YAML document where one card carries the construct under test at a known line.
 fn yaml_document(body: &str) -> String {
+    yaml_document_for("spell", body)
+}
+
+fn yaml_document_for(card: &str, body: &str) -> String {
     let mut text = String::from("version: astra/1\ncards:\n");
     for (number, ..) in CARDS {
-        if *number == "spell" {
+        if *number == card {
             text.push_str(&format!(
-                "  spell:\n    status: complete\n    review: synthetic\n    abilities:\n{body}"
+                "  {number}:\n    status: complete\n    review: synthetic\n    abilities:\n{body}"
             ));
         } else {
             text.push_str(&format!(
@@ -166,17 +170,17 @@ fn yaml_document(body: &str) -> String {
 }
 
 fn rejections(body: &str) -> Vec<String> {
+    rejections_for("spell", body)
+}
+
+fn rejections_for(card: &str, body: &str) -> Vec<String> {
     let loaded = Catalog::from_documents(
         &snapshot(),
         &registry(),
-        &[("unit.yaml".into(), yaml_document(body))],
+        &[("unit.yaml".into(), yaml_document_for(card, body))],
     )
     .unwrap();
-    loaded
-        .rejections()
-        .get("spell")
-        .cloned()
-        .unwrap_or_default()
+    loaded.rejections().get(card).cloned().unwrap_or_default()
 }
 
 #[test]
@@ -353,7 +357,7 @@ fn banish_card_play_and_fusion_events_reach_their_triggers() {
 #[test]
 fn name_alias_counts_for_name_selectors() {
     let loaded = catalog(&json!({
-        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"ゴースト","while_zone":"any"}}],
+        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"ゴースト","while_zone":"field"}}],
         "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader",
             "amount":{"count":{"side":"self","zone":"field","name":"ゴースト"}}}}]
     }));
@@ -775,4 +779,69 @@ fn event_subject_fields_match_object_reads() {
         play_and_settle(&mut engine, "x");
         assert_eq!(life(&engine, "P2"), json!(14), "{field} differs");
     }
+}
+
+/// M-006, M-010, M-004 and R-0009 (M-003): constructs that loaded but silently did
+/// nothing, read null, or broke a ruling are now load errors.
+#[test]
+fn scope_and_ruling_violations_are_rejected_at_load() {
+    let spell =
+        |inner: &str| format!("      - line: 1\n        kind: spell\n        body:\n{inner}");
+    let cases = [
+        (
+            "          op: damage\n          subjects: target.9\n          amount: 1\n",
+            "unknown reference `target.9`",
+        ),
+        (
+            "          op: banish\n          subjects: cost.9\n",
+            "unknown reference `cost.9`",
+        ),
+        (
+            "          op: damage\n          subjects: opponent.leader\n          amount:\n            read: damage.amount\n",
+            "only set inside `replace_damage`",
+        ),
+        (
+            "          op: damage\n          subjects: opponent.leader\n          amount:\n            read: item.cost\n",
+            "only bound inside a selector",
+        ),
+        (
+            "          op: damage\n          subjects: opponent.leader\n          amount: 2\n          split: '1'\n",
+            "no play-time selection with `distribute`",
+        ),
+        (
+            "          op: create\n          name:\n            read: self.bogus\n          count: 1\n          to: field\n",
+            "unknown object field `bogus`",
+        ),
+        (
+            "          op: move\n          subjects: self\n          to: banish\n",
+            "write `op: banish`",
+        ),
+    ];
+    for (body, expected) in cases {
+        let found = rejections(&spell(body));
+        assert!(
+            found.iter().any(|f| f.contains(expected)),
+            "{body}: {found:?}"
+        );
+    }
+    let replace_move = "      - line: 1\n        kind: static\n        body:\n          op: replace_move\n          subjects: self\n          from: feild\n          to: cemetery\n          replacement: banish\n";
+    assert!(rejections(replace_move)[0].contains("unknown zone `feild`"));
+    // R-0009: a long-form condition in trigger_if; an event restriction stays allowed.
+    let trigger = |condition: &str| {
+        format!(
+            "      - line: 1\n        kind: trigger\n        event: leader_life_change\n        subject: self.leader\n        trigger_if:\n{condition}        body:\n          op: draw\n          count: 0\n"
+        )
+    };
+    let long_form = "          fn: ge\n          args:\n            - read: self.turn.leader_hp_decreased\n            - 4\n";
+    assert!(rejections(&trigger(long_form))[0].contains("R-0009"));
+    let event_limit = "          fn: lt\n          args:\n            - read: event.after_life\n            - read: event.before_life\n";
+    assert!(rejections(&trigger(event_limit)).is_empty());
+    // CR 10.3.5, Q424: a follower's alias is field-only; `any` is rejected.
+    let alias = |zone: &str| {
+        format!(
+            "      - line: 1\n        kind: static\n        body:\n          op: name_alias\n          subjects: self\n          name: ゴースト\n          while_zone: {zone}\n"
+        )
+    };
+    assert!(rejections_for("f-a", &alias("any"))[0].contains("Q424"));
+    assert!(rejections_for("f-a", &alias("field")).is_empty());
 }
