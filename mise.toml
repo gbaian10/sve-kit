@@ -1,2 +1,4 @@
 [tools]
 bun = "1.4.2"
+# bun run executes the Node-shebang CLIs (Vite, Vitest, ESLint) with Node; jsdom needs ^22.22.2 || ^24.15.0.
+node = "24.19.0"

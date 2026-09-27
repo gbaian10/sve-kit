@@ -4,9 +4,10 @@ The web client: card browser, deck builder and game board in one app (React, Vit
 
 ## Setup
 
-Bun is pinned in the repo-root `mise.toml` (`mise install`); the git hooks call it through
-`mise exec`, so they do not depend on shell activation. Node.js must still be on `PATH`: `bun run`
-executes the Node-shebang CLIs (Vite, Vitest, ESLint, …) with Node.
+Bun and Node.js are pinned in the repo-root `mise.toml` (`mise install`); the git hooks call them
+through `mise exec`, so they do not depend on shell activation. Bun is the package manager; `bun run`
+executes the Node-shebang CLIs (Vite, Vitest, ESLint, …) with Node, and Vitest's jsdom tests do not
+run on the Bun runtime (see Known issues).
 
 ```bash
 cd sim/web
