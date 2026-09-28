@@ -593,7 +593,7 @@ class Manifest:
 
     @classmethod
     def open(cls, path: Path) -> Self:
-        """Open or create the manifest at `path`."""
+        """Open or create the manifest at `path`, applying the current schema."""
         path.parent.mkdir(parents=True, exist_ok=True)
         # Pragmas such as journal_mode cannot change inside a transaction, so set
         # everything up in autocommit mode and switch to explicit transactions after.
@@ -608,6 +608,49 @@ class Manifest:
         conn.executescript(_SCHEMA)
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
         conn.autocommit = False
+        return cls(conn)
+
+    @classmethod
+    def open_empty(cls) -> Self:
+        """Create an in-memory manifest for a preview before the first crawl."""
+        conn = sqlite3.connect(":memory:", autocommit=True)
+        conn.executescript(_SCHEMA)
+        conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
+        conn.autocommit = False
+        return cls(conn)
+
+    @classmethod
+    def open_live(cls, path: Path) -> Self:
+        """Read an existing live manifest without initializing or migrating it.
+
+        SQLite may create or retain WAL sidecars while reading; the manifest is not written.
+        """
+        return cls._open_readonly(path, immutable=False)
+
+    @classmethod
+    def open_snapshot(cls, path: Path) -> Self:
+        """Read a closed backup without creating or changing SQLite sidecars."""
+        return cls._open_readonly(path, immutable=True)
+
+    @classmethod
+    def _open_readonly(cls, path: Path, *, immutable: bool) -> Self:
+        uri = f"{path.resolve().as_uri()}?mode=ro"
+        if immutable:
+            uri += "&immutable=1"
+        conn = sqlite3.connect(uri, uri=True, autocommit=True)
+        try:
+            conn.execute("PRAGMA query_only = ON")
+            version = _int(conn.execute("PRAGMA user_version").fetchone()[0])
+        except BaseException:
+            conn.close()
+            raise
+        if version != SCHEMA_VERSION:
+            conn.close()
+            msg = (
+                f"manifest schema {version} is not supported "
+                f"(expected {SCHEMA_VERSION}); run a writing command to migrate it"
+            )
+            raise ManifestError(msg)
         return cls(conn)
 
     def close(self) -> None:
@@ -637,6 +680,10 @@ class Manifest:
             raise
         self._conn.commit()
 
+    def integrity_check(self) -> str:
+        """Return SQLite's integrity check result."""
+        return _str(self._conn.execute("PRAGMA integrity_check").fetchone()[0])
+
     # --- backup ---------------------------------------------------------
 
     def backup(self, dest: Path) -> BackupInfo:
@@ -652,9 +699,10 @@ class Manifest:
         target = sqlite3.connect(dest)
         try:
             self._conn.backup(target)
-            check = _str(target.execute("PRAGMA integrity_check").fetchone()[0])
         finally:
             target.close()
+        with self.open_snapshot(dest) as snapshot:
+            check = snapshot.integrity_check()
         if check != "ok":
             msg = f"backup failed integrity_check: {check}"
             raise ManifestError(msg)

@@ -1,3 +1,4 @@
+import hashlib
 import sqlite3
 from dataclasses import replace
 from datetime import UTC, datetime
@@ -144,10 +145,60 @@ def test_backup_is_consistent_and_restorable(
 ) -> None:
     with manifest.transaction():
         manifest.resources.put(make_resource())
+    live_path = tmp_path / "manifest" / "manifest.sqlite"
+    assert live_path.with_name("manifest.sqlite-wal").exists()
     info = manifest.backup(tmp_path / "backup" / "manifest.sqlite")
-    assert len(info.sha256) == 64
-    with Manifest.open(info.path) as restored:
+    before = info.path.read_bytes()
+    assert info.sha256 == hashlib.sha256(before).hexdigest()
+    with Manifest.open_snapshot(info.path) as restored:
         assert restored.resources.get(CARD_URL) == make_resource()
+        assert restored.integrity_check() == "ok"
+    assert info.path.read_bytes() == before
+    assert not info.path.with_name("manifest.sqlite-wal").exists()
+    assert not info.path.with_name("manifest.sqlite-shm").exists()
+
+
+def test_live_reader_does_not_initialize_database(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.sqlite"
+    with sqlite3.connect(path) as conn:
+        conn.execute("PRAGMA user_version = 1")
+    before = path.read_bytes()
+    with Manifest.open_live(path) as manifest:
+        with pytest.raises(sqlite3.OperationalError):
+            manifest.resources.get(CARD_URL)
+    assert path.read_bytes() == before
+    assert not path.with_name("manifest.sqlite-wal").exists()
+
+
+def test_live_reader_preserves_wal_manifest(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.sqlite"
+    with Manifest.open(path) as manifest, manifest.transaction():
+        manifest.resources.put(make_resource())
+    before = path.read_bytes()
+    with Manifest.open_live(path) as reader:
+        assert reader.resources.get(CARD_URL) == make_resource()
+    assert path.read_bytes() == before
+    assert {item.name for item in tmp_path.iterdir()} <= {
+        "manifest.sqlite",
+        "manifest.sqlite-wal",
+        "manifest.sqlite-shm",
+    }
+    wal = path.with_name("manifest.sqlite-wal")
+    assert not wal.exists() or wal.stat().st_size == 0
+
+
+def test_live_reader_requires_existing_supported_schema(tmp_path: Path) -> None:
+    missing = tmp_path / "missing.sqlite"
+    with pytest.raises(sqlite3.OperationalError):
+        Manifest.open_live(missing)
+    assert not missing.exists()
+    unsupported = tmp_path / "unsupported.sqlite"
+    with sqlite3.connect(unsupported) as conn:
+        conn.execute("PRAGMA user_version = 99")
+    before = unsupported.read_bytes()
+    with pytest.raises(ManifestError, match="schema 99"):
+        Manifest.open_live(unsupported)
+    assert unsupported.read_bytes() == before
 
 
 def test_backup_refuses_to_overwrite(manifest: Manifest, tmp_path: Path) -> None:
