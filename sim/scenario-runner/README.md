@@ -118,7 +118,8 @@ Phase D also asks each design for two thin prototypes: **replay** and **assist**
 `sve_scenario_runner::arch` checks both with the same positions and third-party
 expectations, in [`tests/architecture-fixtures/`](../../tests/architecture-fixtures/):
 `positions.yaml` (contract-format setups) and `checks.yaml` (paths, fixed assertions,
-seeds, hidden identities). The design is `spec/design/d-prep/arch-fixture-design.md` (r5).
+seeds, hidden identities).
+These fixture files and the checks below are the contract.
 
 ```rust
 use sve_scenario_runner::arch::{ArchOptions, check_assist, check_replay, load_fixtures};
