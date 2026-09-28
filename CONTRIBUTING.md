@@ -52,7 +52,8 @@ other data layouts remain proposed.
 
 ## Commit messages
 
-The format is checked by commitizen on every commit. The scope is optional:
+The format is checked by commitizen on every commit, and again in CI for every commit in a pull
+request and for the pull request title (a squash merge uses it as the commit title). The scope is optional:
 
 ```text
 <gitmoji> <type>(<scope>): <description>

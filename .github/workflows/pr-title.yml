@@ -1,0 +1,32 @@
+# The squash-merge commit title defaults to the PR title, so it must pass the same commitizen check
+# as local commits. Kept apart from ci.yml: re-running on `edited` there would post a new ci-ok for
+# the same head commit without re-checking the code.
+name: pr-title
+
+on:
+  pull_request:
+    types: [opened, edited, reopened, synchronize]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  pr-title:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: carddb/uv.lock
+      - name: cz check (PR title)
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+        run: uv run --project carddb --locked --no-default-groups --group dev cz check --message "$TITLE"
