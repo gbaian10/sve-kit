@@ -87,6 +87,14 @@ repos:
 
   - repo: local
     hooks:
+      # GitHub does not enforce rulesets on free private repos; until it does, main only changes through PRs.
+      - id: no-push-to-main
+        name: no direct push to main
+        language: system
+        entry: bash -c '[ "$PRE_COMMIT_REMOTE_BRANCH" != refs/heads/main ] || { echo "Push a branch and open a pull request instead of pushing to main."; exit 1; }'
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]
       - id: cargo-fmt
         name: cargo fmt
         language: system
