@@ -64,18 +64,20 @@ The format is checked by commitizen on every commit. The scope is optional:
 
 Use the component as the scope, so `git log --grep '(carddb)'` shows one component's history:
 
-| Scope        | Component                                |
-| ------------ | ---------------------------------------- |
-| `carddb`     | Card data pipeline                       |
-| `authored`   | Human-maintained data                    |
-| `dsl`        | Effect DSL schema                        |
-| `sim/engine` | Rules engine                             |
-| `sim/server` | Game server                              |
-| `sim/web`    | Web client                               |
-| `docs`       | ADRs and design docs                     |
-| _(none)_     | Repo-wide changes, or several components |
+| Scope        | Component                                       |
+| ------------ | ----------------------------------------------- |
+| `carddb`     | Card data pipeline                              |
+| `authored`   | Human-maintained data                           |
+| `dsl`        | Effect DSL schema                               |
+| `sim/engine` | Rules engine                                    |
+| `sim/server` | Game server                                     |
+| `sim/web`    | Web client                                      |
+| `docs`       | ADRs and design docs                            |
+| _(none)_     | Repo-wide changes (CI, tooling, top-level docs) |
 
-When a change touches several components, leave the scope out and list them in the body.
+Each component is versioned on its own, and its next version is worked out from the commits
+that carry its scope. So keep one component per commit: when a change touches several components,
+split it into one commit per component. Commits without a scope never bump a component version.
 Write the description and body in one natural language; do not repeat the same text in two languages.
 The gitmoji, type and scope are fixed tokens and do not count.
 
