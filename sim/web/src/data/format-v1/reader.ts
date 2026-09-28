@@ -35,7 +35,7 @@ export interface Fragment {
   readonly identity: string
 }
 
-type Files = Map<string, JsonObject>
+export type Files = Map<string, JsonObject>
 
 const IMAGE_TABLES = new Set(["image_asset", "printing_image", "image_variant"])
 const TEXT_ROLES = new Set(["bootstrap", "text", "config"])
@@ -112,7 +112,7 @@ function files(manifest: JsonObject): Files {
 }
 
 /** Exact bytes: hash, length, content-addressed path and canonical form all have to hold. */
-function payload(file: JsonObject, data: Uint8Array): JsonValue {
+export function readPayload(file: JsonObject, data: Uint8Array): JsonValue {
   const hash = stringValue(file["sha256"])
   if (digest(data) !== hash || data.length !== integerValue(file["bytes"] ?? null)) {
     fail("blob-integrity", `blob hash or length mismatch for ${stringValue(file["key"])}`)
@@ -125,7 +125,7 @@ function payload(file: JsonObject, data: Uint8Array): JsonValue {
   return value
 }
 
-function container(file: JsonObject, value: JsonObject): Fragment[] {
+export function readContainer(file: JsonObject, value: JsonObject): Fragment[] {
   validate("Container", value)
   const key = stringValue(file["key"])
   const result: Fragment[] = []
@@ -187,7 +187,7 @@ function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>): Fragment[]
     fail("payload-set", "payload set does not match manifest")
   const result: Fragment[] = []
   for (const [key, file] of all) {
-    const value = objectValue(payload(file, payloads.get(key) ?? new Uint8Array()))
+    const value = objectValue(readPayload(file, payloads.get(key) ?? new Uint8Array()))
     const role = stringValue(file["role"])
     if (role === "config" || role === "programs") {
       validate(role === "config" ? "Config" : "Programs", value, [key])
@@ -195,7 +195,7 @@ function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>): Fragment[]
       if (arrayValue(file["row_counts"] ?? null).length !== 0)
         fail("non-table-row-counts", `${key} has row counts`)
     } else {
-      result.push(...container(file, value))
+      result.push(...readContainer(file, value))
     }
   }
   if (new Set(result.map((fragment) => fragment.identity)).size !== result.length) {
@@ -204,7 +204,7 @@ function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>): Fragment[]
   return result
 }
 
-function base(detail: Fragment, fragments: Fragment[], all: Files): Fragment {
+export function findBase(detail: Fragment, fragments: Fragment[], all: Files): Fragment {
   const baseRef = objectValue(detail.value["base"] ?? null)
   const fileRef = objectValue(baseRef["file"] ?? null)
   const key = stringValue(fileRef["key"])
@@ -291,7 +291,11 @@ function joinPrinting(baseRow: Row, detailRow: Row, faces: Map<string, Row>): Ro
   return { ...baseRow, faces: merged }
 }
 
-function join(detail: Fragment, baseFragment: Fragment, faces: Map<string, Row>): Row[] {
+export function joinDetail(
+  detail: Fragment,
+  baseFragment: Fragment,
+  faces: Map<string, Row>,
+): Row[] {
   const indexes = detail.rows.map((row) => integerValue(row["row_index"] ?? null))
   if (
     indexes.length !== baseFragment.rows.length ||
@@ -338,11 +342,11 @@ function logical(fragments: Fragment[], all: Files): View {
       partition !== "history"
     ) {
       if (partition === "bootstrap") continue
-      const baseFragment = base(fragment, fragments, all)
+      const baseFragment = findBase(fragment, fragments, all)
       if (joined.has(baseFragment.identity))
         fail("multiple-details", `multiple details for one base in ${fragment.table}`)
       joined.add(baseFragment.identity)
-      view[fragment.table]?.push(...join(fragment, baseFragment, faces))
+      view[fragment.table]?.push(...joinDetail(fragment, baseFragment, faces))
     } else {
       view[fragment.table]?.push(...fragment.rows)
     }
@@ -534,27 +538,25 @@ function metadata(manifest: JsonObject, all: Files): void {
   }
 }
 
-/**
- * Verify every file before joining a complete snapshot into logical rows. Missing keys and invalid
- * shapes propagate as `SnapshotError`; nothing is repaired and no other snapshot is consulted.
- */
-export function readSnapshot(
-  manifestValue: JsonValue,
-  payloads: ReadonlyMap<string, Uint8Array>,
-): View {
-  validate("Manifest", manifestValue)
-  const manifest = objectValue(manifestValue)
-  const capabilities = arrayValue(manifest["required_capabilities"] ?? null).map((item) =>
+/** Whether a manifest or version-index entry can be read by this reader (transport §1.1). */
+export function isCompatible(entry: JsonObject): boolean {
+  const capabilities = arrayValue(entry["required_capabilities"] ?? null).map((item) =>
     stringValue(item),
   )
-  if (
-    manifest["format_version"] !== FORMAT ||
-    newerThan(stringValue(manifest["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) ||
-    capabilities.length !== CAPABILITIES.length ||
-    CAPABILITIES.some((capability) => !capabilities.includes(capability))
-  ) {
+  return (
+    entry["format_version"] === FORMAT &&
+    !newerThan(stringValue(entry["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) &&
+    capabilities.length === CAPABILITIES.length &&
+    CAPABILITIES.every((capability) => capabilities.includes(capability))
+  )
+}
+
+/** Everything the manifest alone can prove: shape, compatibility, files, dependencies, metadata. */
+export function verifyManifest(manifestValue: JsonValue): { manifest: JsonObject; files: Files } {
+  validate("Manifest", manifestValue)
+  const manifest = objectValue(manifestValue)
+  if (!isCompatible(manifest))
     fail("unsupported-version", "unsupported format, reader version or capability")
-  }
   const all = files(manifest)
   metadata(manifest, all)
   const configs = [...all.values()].filter((file) => file["role"] === "config")
@@ -576,6 +578,18 @@ export function readSnapshot(
       fail("images-config-dependency", "images must depend on config")
     }
   }
+  return { manifest, files: all }
+}
+
+/**
+ * Verify every file before joining a complete snapshot into logical rows. Missing keys and invalid
+ * shapes propagate as `SnapshotError`; nothing is repaired and no other snapshot is consulted.
+ */
+export function readSnapshot(
+  manifestValue: JsonValue,
+  payloads: ReadonlyMap<string, Uint8Array>,
+): View {
+  const { manifest, files: all } = verifyManifest(manifestValue)
   const fragments = load(all, payloads)
   validateFragments(fragments)
   const view = logical(fragments, all)
@@ -595,7 +609,7 @@ export function readTextAll(
   validate("Manifest", manifestValue)
   const manifest = objectValue(manifestValue)
   const description = objectValue(manifest["text_all"] ?? null)
-  const value = objectValue(payload(description, data))
+  const value = objectValue(readPayload(description, data))
   validate("TextAll", value)
   const all = files(manifest)
   const expected = [...all.values()]

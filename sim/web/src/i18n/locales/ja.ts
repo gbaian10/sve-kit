@@ -61,4 +61,19 @@ export default {
   dialog: {
     close: "閉じる",
   },
+  dev: {
+    root: { cdn: "本番", preview: "プレビュー" },
+    status: {
+      idle: "未読み込み",
+      loading: "読み込み中：{{phase}}",
+      error: "エラー：{{kind}}",
+      updateFailed: "{{version}}（更新失敗：{{kind}}）",
+      updating: "{{version}}（更新中：{{phase}}）",
+    },
+    phase: { index: "バージョン索引", manifest: "マニフェスト", bootstrap: "ブートストラップ" },
+    error: { network: "ネットワーク", incompatible: "サイトの更新が必要", corrupt: "データ破損" },
+    retry: "再試行",
+    usePreview: "プレビューデータへ",
+    useCdn: "本番データへ戻す",
+  },
 } satisfies Messages
