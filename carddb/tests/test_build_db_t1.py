@@ -263,6 +263,43 @@ def test_review_source_deletion_fails_and_rolls_back() -> None:
         assert db.rows("decision_source")
 
 
+def test_review_evidence_for_another_source_fails_and_rolls_back() -> None:
+    with create_database(compile_build(("images", "cr"))) as db:
+        with db.transaction():
+            populate(db)
+            db.insert(
+                "source_record",
+                dict(db.rows("source_record")[0].values)
+                | {"id": "other_source", "sha256": "sha256:" + "b" * 64},
+            )
+        before = db.rows("decision_source")
+        with (
+            pytest.raises(sqlite3.IntegrityError, match="image_review_source"),
+            db.transaction(),
+        ):
+            db.update(
+                "decision_source",
+                {"decision_id": "decision", "source_id": "source", "role": "synthetic"},
+                {"source_id": "other_source"},
+            )
+        assert db.rows("decision_source") == before
+
+
+def test_variant_requires_an_existing_image_size() -> None:
+    with create_database(compile_build(("images", "cr"))) as db:
+        with db.transaction():
+            populate(db)
+        before = db.rows("image_variant")
+        with (
+            pytest.raises(sqlite3.IntegrityError, match="Foreign key check failed"),
+            db.transaction(),
+        ):
+            db.insert(
+                "image_variant", rows()["image_variant"] | {"size_key": "missing_size"}
+            )
+        assert db.rows("image_variant") == before
+
+
 def test_original_size_parent_update_fails() -> None:
     with create_database(compile_build(("images", "cr"))) as db:
         with db.transaction():

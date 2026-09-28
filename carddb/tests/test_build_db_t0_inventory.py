@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from sve_carddb.build_db import Kind, Table
+from sve_carddb.build_db import ForeignKey, Kind, Table
 from sve_carddb.build_db.domains import DATE, HASH, INSTANT, LANG
 from sve_carddb.build_db.t0 import TABLES
 from sve_carddb.build_db.t1 import TABLES as T1_TABLES
@@ -124,7 +124,8 @@ def test_documented_primary_and_unique_keys(table: object) -> None:
 
 @pytest.mark.parametrize("table", [*TABLES, *T1_TABLES], ids=lambda table: table.name)
 def test_every_documented_foreign_column_has_target(table: Table) -> None:
-    declaration = re.findall(r"`([^`]+)`", _rows()[table.name])[0]
+    documented = _rows()[table.name]
+    declaration = re.findall(r"`([^`]+)`", documented)[0]
     pending: list[str] = []
     for raw in declaration.split(","):
         field = raw.strip().removesuffix(" PK").removesuffix(" UNIQUE")
@@ -139,6 +140,15 @@ def test_every_documented_foreign_column_has_target(table: Table) -> None:
         elif ":" not in field:
             pending.append(field)
     assert not pending
+    # Fixed-namespace prose is covered by the dedicated assertions below.
+    for columns, target, target_columns in re.findall(
+        r"FK\(([a-z_]+(?:,[a-z_]+)*)\)→([a-z_]+)\(([a-z_]+(?:,[a-z_]+)*)\)",
+        documented,
+    ):
+        expected = ForeignKey(
+            tuple(columns.split(",")), target, tuple(target_columns.split(","))
+        )
+        assert expected in table.foreign_keys, (table.name, expected)
 
 
 def test_fixed_vocabulary_and_route_keys_are_not_omitted() -> None:
