@@ -10,7 +10,7 @@
 
 傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；Fragment 完整包含 `owner,bucket,partition,base,columns,rows`，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。manifest 宣告 `required_capabilities` 至少含 `column-partition-v1` 與 `fragment-container-v1`；舊 reader 不支援時拒絕載入此傳輸格式。
 
-巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`params/parameter_schema/corrected_from` 等本來就是任意受限 JSON 的值保持 JSON，不轉成位置陣列。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
+巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
 reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，與所有已發布歷史鍵聯集檢查碰撞；碰撞停止發布，不能重配舊鍵或自動加長，快照不附完整 hash。
 
@@ -93,7 +93,7 @@ translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen
 
 卡圖固定檔位、裁切與原 PNG 不公開的規則見 [卡圖衍生檔契約](image-variants.md)；image_variant 不要求 original。
 
-DSL 程式包（`dsl-programs`）不是集合，內容為 `{format_version,entries:[{id,dsl_version,ast}]}`：供離線/線上自動處理所選卡；作者巨集展開後才出貨。
+DSL 程式包（`dsl-programs`）不是集合；封套、各 format 的 DSL 版本准入及 AST 驗證統一依 [傳輸契約 §3.4](snapshot-transport.md#34-dsl-程式包與版本准入)。
 
 所有 reference（含 JSON 內 ID）都在 producer 驗閉包；瀏覽器不全量驗 FK。`image_variant/path`、`voice/asset_path` 是不透明 CDN path，不能用卡號重建。blob 內容定址的 hash 可在 path，這是實際快取定位，不是為了追溯逐列附 hash。
 
@@ -214,6 +214,6 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 `shared_jp/official_counterpart` 的 FieldTranslation 從已核對的來源 owner/use 及跨區關係推導，不偽造 EN 欄位擁有 JP 原文字串。只有 `own_source` 才以顯示引用者的原文直接核 `context.source_unit`。這項建置驗證不出貨 dependency 表。
 
-Spelling.variable 只接受 `parameter_schema` 白名單（初始 X），保留 `{コストX}` 原樣與參數 X；uint 不吃字母；`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
+Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
 withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，variants 為空；UI 顯示撤下原因與來源 hostname/連結，不顯示未出貨的確認日期。舊快照不可變，已下載舊副本不保證立即移除；實際 CDN blob 移除另行處理。`route_override` 僅作用於 official namespace，provisional 路由禁止覆寫。

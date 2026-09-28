@@ -151,10 +151,10 @@ type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipmen
 | ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `errata`          | `id:ID PK, region:Region, official_url:Text UNIQUE`                                                                                                                                                                                                                  |
 | `errata_version`  | `id:ID PK, errata_id→errata, revision:UInt, announced_on:Date?, effective_on:Date?, date_raw:Text?, reason_unit_id→text_unit?, exchange_offered:Bool?, source_id→source_record, supersedes_id→errata_version?`；`UQ(errata_id,revision)`                             |
-| `errata_change`   | `id:ID PK, errata_version_id→errata_version, face_id→face, before_revision_id→face_revision?, after_revision_id→face_revision?, before_value:Json, after_value:Json, field:effect\|name\|cost\|attack\|defense\|other`；同區同面；修正前後可僅一段，不能當作完整效果 |
+| `errata_change`   | `id:ID PK, errata_version_id→errata_version, face_id→face, before_revision_id→face_revision?, after_revision_id→face_revision?, before_value:Json, after_value:Json, field:Code`；同區同面；修正前後可僅一段，不能當作完整效果                                       |
 | `errata_printing` | `errata_version_id→errata_version, printing_id→printing, scope:listed\|confirmed_applies, decision_id→decision?` `PK(errata_version_id,printing_id)`；與 errata.region 相同                                                                                          |
 
-公告日與生效日分開；before/after 可以只是一段，不能假當全文。官方誤植更正另在 §13，不冒充勘誤。各 `errata_version` 保留來源；卡表快照內嵌 changes 與適用 printing，仍保留 revision 歷史及日期未知。
+errata_change 的 field 與 before_value／after_value 型別依 [傳輸契約 §3.3](snapshot-transport.md#33-公開更正值)，與公開 ErrataChange 同一白名單。公告日與生效日分開；before/after 可以只是一段，不能假當全文。官方誤植更正另在 §13，不冒充勘誤。各 `errata_version` 保留來源；卡表快照內嵌 changes 與適用 printing，仍保留 revision 歷史及日期未知。
 
 ## 5. 關聯與地區差異
 
@@ -189,6 +189,8 @@ Decklog 的 JP/EN adapter 是不同常數命名空間。未有實際樣本，不
 | `ruling_hint`         | `ruling_revision_id→ruling_revision,lang:Lang,text_unit_id→text_unit,parameter_schema:Json` `PK(前兩欄)`；A，多語佔位符一致                                                                                                                                                                                        |
 | `ruling_supersession` | `old_revision_id→ruling_revision,new_revision_id→ruling_revision,scope_unit_id→text_unit` `PK(前兩欄)`；A；支援 R-0009 只取代 R-0002 的部分判斷，不刪其其餘效力                                                                                                                                                    |
 | `ruling_review`       | `ruling_revision_id→ruling_revision,cr_version_id→cr_version,reviewed_by:Text?,reviewed_on:Date?,verdict:pending\|valid\|revise` `PK(前兩欄)`；A                                                                                                                                                                   |
+
+ruling_hint.parameter_schema 與 text_symbol 共用 [傳輸契約 §3.2 的公開參數宣告](snapshot-transport.md#32-公開參數宣告)，建置與出貨使用同一形狀。
 
 QA 無編號不可造 Q 號，日期不是 revision key，同日修改保留兩版。CR 同版換檔另存來源版本。evidence.quote 必須逐字屬於指定 QA/CR 版本；terminology/community 不能單獨升 official。strength 與 `review_state` 分開，inferred 明示專案解讀，undecided 不出行為提示。
 
@@ -342,7 +344,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 先比本次原值：已等於 `corrected_value`→不再套，`upstream_fixed` 並警告退役；符合 `expected_raw_value`＋hash→套用；其他`→needs_review`、不套用。更正引用 evidence 的圖片/其他版次/官方頁 exact hash，核對者日期與是否回報留建置資料庫。`text_unit` 去重後沒有來源欄，觀測來源由 revision/application 表示。
 
-卡表快照只在受影響 revision/printing/field 的 correction 內嵌 `{field,corrected_from,is_corrected,reason,source_url}`；不要掛在共享 `text_unit` 上，避免同字串其他卡也被標更正。原值允許 JSON 數值/陣列/文字，不能只處理 effect。人工更正不稱官方勘誤。
+卡表快照只在受影響 revision/printing/field 的 correction 內嵌 `{field,corrected_from,is_corrected,reason,source_url}`；不要掛在共享 `text_unit` 上，避免同字串其他卡也被標更正。公開 field 與原值型別統一依 [傳輸契約 §3.3](snapshot-transport.md#33-公開更正值)。人工更正不稱官方勘誤。
 
 `identity_change` 統一記錄身分修復；`int_id→printing` 永不改，printing 父 card 若原先錯誤以 confirmed 事件修復，所有 face/art 所屬也驗一致。split 多目的必請玩家選，不靜默改牌組；舊 URL 維持 printing 身分，必要時 alias 永久轉址。消費端只出公開修復事實，不出 decision。
 
@@ -389,7 +391,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 輸入框與面板共用 typed AST，有限值输出小寫 code；AND 按 `(field,operator,value)` 排序去重、OR 加括號並按 canonical 子式排序；自由文字保留大小寫、引號/反斜線跳脫。q UTF-8 percent encoding、空白 %20；不另寫 class= 等 query params。未知條件不能忽略，grammar 釘 `required_capabilities`。詞彙翻譯改名不能重配 code。
 
-`text_symbol` 合併拼法/三語 aria/tooltip/copy，參數 schema 必須一致且可 roundtrip 原文；圖示由 code 對 app shell 自製 SVG 資產，asset 版本由 app manifest 釘。不把圖示 metadata 誤當官方圖檔授權。缺圖示顯示原記號/文字，不丟能力。記號出現只是機制候選，不能把「給予守護」當自身 has。
+`text_symbol` 合併拼法/三語 aria/tooltip/copy，parameter_schema 及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)，必須可 roundtrip 原文；圖示由 code 對 app shell 自製 SVG 資產，asset 版本由 app manifest 釘。不把圖示 metadata 誤當官方圖檔授權。缺圖示顯示原記號/文字，不丟能力。記號出現只是機制候選，不能把「給予守護」當自身 has。
 
 ## 16. 發布閘門與投影邊界
 

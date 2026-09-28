@@ -93,7 +93,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 }
 ```
 
-`[0,"t:ja:0123456789abcdef","effect"]` 是該型別的一列。Section.kind 的允許值仍須遵守邏輯欄位約束；descriptor 不放寬 enum。snapshot-format §2 既有具名型別的 columns 一律按 [snapshot-format.md §2](snapshot-format.md#2-公開表完整欄位與玩家用途) 表列順序，`program_ref` 的 tuple 型別名統一為 `ProgramRef`。下列原本匿名記錄也有固定名稱／欄序：
+`[0,"t:ja:0123456789abcdef","rule"]` 是該型別的一列。Section.kind 的允許值仍須遵守邏輯欄位約束；descriptor 不放寬 enum。snapshot-format §2 既有具名型別的 columns 一律按 [snapshot-format.md §2](snapshot-format.md#2-公開表完整欄位與玩家用途) 表列順序，`program_ref` 的 tuple 型別名統一為 `ProgramRef`。下列原本匿名記錄也有固定名稱／欄序：
 
 | 出現位置 | 型別名 | columns（依序） |
 | --- | --- | --- |
@@ -110,7 +110,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | card_engine_support.overrides | SupportOverride | region, support |
 | card_engine_support.region_blocks | RegionBlock | region, reasons |
 
-每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。`parameter_schema` 保留 object，遵守其既有參數白名單；`corrected_from`、errata before/after 保留 JSON，是所指 field 的玩家可讀原值／改值，不是 text_unit ID。文字為 Text、數值為 Int?、特性等集合為 `[Text]`；field 必須由 format Schema 明列與對應值型別綁定，不能帶建置端欄位或任意 object。既有 authored 更正的 effect/card_type 兩欄均為來源表記 Text，不套用 type_code enum 改寫原值。DSL ast 完整遵守 `dsl/` Schema，不經 tuple 轉換。
+每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表格 tuple 中保留的 JSON 值只接受 §3.2 的 `ParameterSchema` 與 §3.3 的 `CorrectionValue`，descriptor 分別用 `{"json":"ParameterSchema"}`／`{"json":"CorrectionValue"}`；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
 
 `Correction.source_url` 沒有可公開官方頁 URL 時填 null；`card_related.applicable_regions` 非 reskin 時填 null。所有 tuple 仍佔原位置；空字串、缺欄、少一格不等於 null。
 
@@ -119,6 +119,69 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 ```json
 ["effect", "更正前的合成範例", true, "修正測試文字", null]
 ```
+
+### 3.2 公開參數宣告
+
+`text_symbol.parameter_schema` 與 `RulingHint.parameter_schema` 共用 `ParameterSchema`，以下是這兩個公開位置的唯一物件定義。它是有限的參數宣告，不是可執行的 JSON Schema、regex 或 DSL；建置端 `sentence_template` 的參數與 card／term 引用不因此取得公開權限。
+
+| 物件 | 完整欄位 | 約束 |
+| --- | --- | --- |
+| ParameterSchema | `parameters:[Parameter]` | 按 name 排序且唯一；無參數恰為 `{"parameters":[]}` |
+| Parameter | `name:Code, uint:UIntRange?, variables:[Text]` | name 符合 `[a-z][a-z0-9_-]*`；uint 與 variables 至少啟用一種值域 |
+| UIntRange | `minimum:UInt, maximum:UInt` | 閉區間，`0 ≤ minimum ≤ maximum ≤ 9007199254740991` |
+
+表中所有鍵皆 required，未知鍵拒絕；只有 `uint` 可為 null，陣列及成員不可 null。`uint=null` 禁止整數值；`variables=[]` 禁止變數值。變數白名單固定為字串 `X`，variables 為其排序、唯一子集；不可從資料新增 Y 或其他名稱。純 variable 宣告使用 `uint=null, variables=["X"]`；純 uint 使用非 null 範圍與空 variables；兩者並存時接受兩值域的聯集。所有實際參數都必填、不得多出未宣告名稱，不設 default 或隱式轉型；整數值為 JSON integer，Bool、浮點數、數字字串均拒絕，變數值則為 exact 字串 `"X"`。
+
+`Spelling.parameter_name` 在 parse_kind=uint／variable 時必須指向同一 text_symbol 宣告的 name，且該值域已啟用；literal 時為 null。uint 拼法只解析 ASCII 數字並驗上述界限，不吃字母；variable 拼法只接受宣告的 exact 變數值。字面拼法保留原文以供 roundtrip。`Localization` 的參數引用必須已宣告；同一 ruling_revision 的多語 hints 必須使用相同 ParameterSchema，不能因翻譯擴張值域。宣告只限制文字替換，不賦予遊戲規則或引擎語義。
+
+合法合成例（兩個公開位置均適用）：name=value 接受整數 0 到 9，或字串 X；name 是參數名稱，X 是參數值，兩者不能混淆。
+
+```json
+{"parameters":[{"name":"value","uint":{"minimum":0,"maximum":9},"variables":["X"]}]}
+```
+
+合法的純 variable 例：
+
+```json
+{"parameters":[{"name":"value","uint":null,"variables":["X"]}]}
+```
+
+非法的 uint 合成例（minimum 大於 maximum）：
+
+```json
+{"parameters":[{"name":"value","uint":{"minimum":2,"maximum":1},"variables":[]}]}
+```
+
+非法的 variable 合成例（Y 不在格式白名單）：
+
+```json
+{"parameters":[{"name":"value","uint":null,"variables":["Y"]}]}
+```
+
+`{}`、省略 uint／variables、兩值域皆停用或 bounds 超出上述範圍也拒絕；無參數只能使用表列的空 parameters 表示。新增參數種類或變數值須依 §1.1 升版，不能靠更換 data_version 放寬。
+
+### 3.3 公開更正值
+
+`Correction.corrected_from` 與 `ErrataChange.before/after` 共用下表的 field 白名單與 `CorrectionValue` 型別對照；before、after 各自按同一 field 驗證。這些值是玩家可讀的來源原值／改值，不是 text_unit ID；field 也不是可任意存取公開欄位的路徑。
+
+| field（固定 enum） | CorrectionValue | 語意 |
+| --- | --- | --- |
+| `effect`, `name`, `card_type`, `flavor` | Text | 保留來源表記；card_type 不改寫成 type_code enum |
+| `cost`, `attack`, `defense` | Int? | 安全整數或 null；不以空字串表示未知 |
+| `traits`, `titles`, `special_kinds` | `[Text]` | 來源表記陣列，保留次序；不替換為 vocabulary code／ID，空陣列是已知無成員 |
+| `other` | Text | 其他更正的文字描述，不接受 object 或任意 JSON |
+
+除數值列外皆不可 null；Text 可以空字串，陣列成員不可 null。所有值仍遵守 §1 的 canonical 整數界限，禁止 Bool／浮點數冒充 Int。未知 field、數值字串、額外建置物件一律拒絕。`Correction.is_corrected` 固定 true；source_url 的 required-nullable 規則見 §3.1。
+
+例如 `field=cost, before=null, after=3` 合法，after="3" 非法；`field=traits, before=[], after=["合成特性"]` 合法，after=null 非法；`field=other` 的前後值只能是文字。人工更正的 authored 輸入仍受其自身格式白名單限制，公開值域不擴張該輸入格式的可寫欄位。
+
+### 3.4 DSL 程式包與版本准入
+
+DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得有額外鍵，format_version 與所屬 manifest 相同，entries 是陣列、不可 null。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
+
+format_version=`1.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
+
+啟用正式 DSL 1.0 時須由新的 format 配置至少升 minor，明列支援 DSL 版本到 `dsl/` Schema 資源的映射、所需 capability 與最低 reader 版本，並依 §1.1 協商；reader 使用釘住的權威資源驗 ast，且拒絕未展開的作者巨集。未知 DSL 版本仍拒絕整包，不改寫既有 `1.0.0` 的空集合。
 
 ## 4. fragment 容器與 join
 
