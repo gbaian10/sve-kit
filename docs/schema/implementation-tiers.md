@@ -12,7 +12,7 @@
 | 關聯               | `card_related`                                                                                                                     |
 | 構築引用的 CR      | `cr_version`、`cr_clause`                                                                                                          |
 
-T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction、`restriction_member`、`restriction_coverage`、`deck_role_override`、`identity_change`。`rules_name/face_rules_name` 原已在 T0。首發有已知規則/禁限須填入，覆蓋不足仍明示 unknown，不能捏造合法；`construction_rules_ref` 與非空 FK 的依賴一併提供。首發 `card_related` 支援已確認相關卡與追加區建議；未知 relation 不猜。EN/非官方 SNC/翻譯/裁定等若納入該次資料，再啟用對應條件組及完整非空引用閉包；57 是明列最低集合，不是略過實際資料依賴的上限。
+T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction、`restriction_member`、`restriction_coverage`、`deck_role_override`、`identity_change`。`rules_name/face_rules_name` 原已在 T0。首發有已知規則/禁限須填入，覆蓋不足仍明示 unknown，不能捏造合法；`construction_rules_ref` 與非空 FK 的依賴一併提供。首發 `card_related` 支援已確認相關卡與追加區建議；未知 relation 不猜；有已核對的換皮資料時，`same_rules_reskin` 依 build-db §5 的採納與失效規則投影。EN/非官方 SNC/翻譯/裁定等若納入該次資料，再啟用對應條件組及完整非空引用閉包；57 是明列最低集合，不是略過實際資料依賴的上限。
 
 | `tier` | 用途                               | 啟用/未啟用行為                                                                                                                                                                          | 表數 |
 | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
