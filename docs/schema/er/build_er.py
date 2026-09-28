@@ -4,7 +4,10 @@
 """Build the interactive schema ER page from docs/schema/*.md and open it in a browser."""
 
 import argparse
+import functools
+import http.server
 import json
+import os
 import sys
 import webbrowser
 from dataclasses import asdict, dataclass
@@ -42,6 +45,14 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     )
     ap.add_argument(
         "--no-open", action="store_true", help="do not open the result in a browser"
+    )
+    ap.add_argument(
+        "--serve",
+        nargs="?",
+        const=8000,
+        type=int,
+        metavar="PORT",
+        help="serve the output directory on localhost (default port 8000) until Ctrl-C",
     )
     ap.add_argument(
         "--artifact",
@@ -232,9 +243,52 @@ def main(argv: list[str] | None = None) -> int:
     sys.stdout.write(
         f"{summary}\n備註 {len(diag.notes)} 則（見 {report}）\nHTML：{out}\n"
     )
-    if not args.no_open:
-        webbrowser.open(out.as_uri())
+    url = f"http://localhost:{args.serve}/{out.name}" if args.serve else out.as_uri()
+    if args.no_open:
+        pass
+    elif is_headless_remote():
+        # Over SSH without a display, webbrowser would pick a text browser on the remote host.
+        sys.stdout.write(remote_hint(out, args.serve))
+    else:
+        webbrowser.open(url)
+    if args.serve:
+        serve(out.parent, args.serve)
     return 0
+
+
+def is_headless_remote() -> bool:
+    """Tell whether this runs in an SSH session with no graphical display."""
+    ssh = "SSH_CONNECTION" in os.environ or "SSH_TTY" in os.environ
+    display = "DISPLAY" in os.environ or "WAYLAND_DISPLAY" in os.environ
+    return ssh and not display
+
+
+def remote_hint(out: Path, port: int | None) -> str:
+    """Explain how to view the page from the local machine."""
+    p = port or 8000
+    serve_line = "" if port else f"  uv run docs/schema/er/build_er.py --serve {p}\n"
+    return (
+        "偵測到 SSH 且沒有圖形環境，不自動開啟瀏覽器。在本機瀏覽器查看：\n"
+        f"{serve_line}"
+        f"  VS Code Remote-SSH 會自動轉送 port；一般 SSH 請用 ssh -L {p}:localhost:{p} <主機>\n"
+        f"  然後開 http://localhost:{p}/{out.name}\n"
+    )
+
+
+def serve(directory: Path, port: int) -> None:
+    """Serve the output directory on localhost until interrupted."""
+    handler = functools.partial(
+        http.server.SimpleHTTPRequestHandler, directory=str(directory)
+    )
+    with http.server.ThreadingHTTPServer(("127.0.0.1", port), handler) as httpd:
+        sys.stdout.write(
+            f"serving {directory} at http://localhost:{port}/ （Ctrl-C 結束）\n"
+        )
+        sys.stdout.flush()
+        try:
+            httpd.serve_forever()
+        except KeyboardInterrupt:
+            sys.stdout.write("\n")
 
 
 if __name__ == "__main__":

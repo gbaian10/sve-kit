@@ -38,6 +38,7 @@ flowchart LR
 ```bash
 uv run docs/schema/er/build_er.py            # 產生後用瀏覽器開啟
 uv run docs/schema/er/build_er.py --no-open  # 只產生（CI、hook 用）
+uv run docs/schema/er/build_er.py --serve    # 產生後在 localhost:8000 提供（SSH 時搭配 port 轉送）
 ```
 
 輸出在 `docs/schema/er/out/`（不進 git）：`schema-er.html` 是單檔頁面，`parse-report.txt` 是解析報告，`schema-model.json` 是從 Markdown 讀出的中間資料（除錯用）。`--out <路徑>/schema-er.html` 改輸出位置，`--artifact` 省略 doctype 外殼。有任何欄位無法解析、PK 無法標記、FK 目標不存在或分組錯誤時，不產生 HTML 並以非零狀態結束；修改 `docs/schema/` 時 pre-commit 會跑一次確認能產出。分組與快照欄名的引用對應寫在 `docs/schema/er/diagram.toml`，新增表或集合時要一起登記。
