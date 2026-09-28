@@ -1,0 +1,560 @@
+"""Deterministic, content-addressed WebP variants for approved SVE card images."""
+
+import hashlib
+import json
+import os
+import re
+import tempfile
+from dataclasses import asdict, dataclass
+from io import BytesIO
+from pathlib import Path
+from typing import TYPE_CHECKING, Literal
+
+from PIL import Image, ImageCms, ImageOps, UnidentifiedImageError, features
+from PIL import __version__ as pillow_version
+from pydantic import BaseModel, ConfigDict, ValidationError
+
+if TYPE_CHECKING:
+    from collections.abc import Iterable
+
+PILLOW_VERSION = "12.3.0"
+LIBWEBP_VERSION = "1.6.0"
+LITTLECMS_VERSION = "2.19"
+_MAX_QUALITY = 100
+_MAX_METHOD = 6
+_HASH = re.compile(r"[0-9a-f]{64}\Z")
+
+
+class ImageVariantError(ValueError):
+    """The source, recipe, or existing output cannot produce valid variants."""
+
+
+@dataclass(frozen=True, slots=True)
+class SizeSpec:
+    key: str
+    purpose: Literal["card", "art"]
+    max_width: int
+    max_height: int
+
+
+SIZES = (
+    SizeSpec("card_s", "card", 128, 179),
+    SizeSpec("card_m", "card", 320, 447),
+    SizeSpec("card_l", "card", 459, 641),
+    SizeSpec("art_s", "art", 160, 120),
+    SizeSpec("art_m", "art", 384, 288),
+)
+
+
+@dataclass(frozen=True, slots=True)
+class ImageSource:
+    image_id: str
+    source_bytes: bytes
+    source_sha256: str
+    source_src_raw: str
+    asset_kind: Literal["sve_card", "digital"]
+    origin: Literal["official", "third_party"]
+    publication_state: Literal["pending", "approved", "withdrawn"]
+    availability: Literal["available", "missing", "unfetched"]
+
+
+@dataclass(frozen=True, slots=True)
+class CropOverride:
+    image_id: str
+    source_sha256: str
+    left: int
+    top: int
+    width: int
+    height: int
+    reason: str
+
+
+@dataclass(frozen=True, slots=True)
+class CropBox:
+    left: int
+    top: int
+    width: int
+    height: int
+
+    @property
+    def bounds(self) -> tuple[int, int, int, int]:
+        """The half-open crop rectangle."""
+        return (self.left, self.top, self.left + self.width, self.top + self.height)
+
+
+@dataclass(frozen=True, slots=True)
+class Recipe:
+    quality: int = 82
+    alpha_quality: int = 100
+    method: int = 6
+    exact_alpha: bool = True
+
+    def definition(self) -> dict[str, object]:
+        """Return every setting that can affect the encoded bytes."""
+        return {
+            "algorithm": "sve-webp-v1",
+            "pillow": PILLOW_VERSION,
+            "libwebp": LIBWEBP_VERSION,
+            "littlecms": LITTLECMS_VERSION,
+            "decode": "png-single-frame",
+            "orientation": "exif-transpose-before-geometry",
+            "color": "embedded-icc-to-srgb-else-assume-srgb",
+            "icc_rendering_intent": "perceptual",
+            "icc_flags": 0,
+            "alpha": "preserve-rgba-exact",
+            "metadata": "strip-icc-exif-xmp",
+            "resize": "lanczos-no-reducing-gap",
+            "rounding": "floor-x-plus-half-min-one",
+            "crop": "integer-4x3-v1",
+            "sizes": [asdict(size) for size in SIZES],
+            "lossless": False,
+            "quality": self.quality,
+            "alpha_quality": self.alpha_quality,
+            "method": self.method,
+            "exact_alpha": self.exact_alpha,
+        }
+
+    @property
+    def version(self) -> str:
+        """Hash the complete encoding and geometry recipe."""
+        return "sha256:" + hashlib.sha256(_canonical(self.definition())).hexdigest()
+
+
+DEFAULT_RECIPE = Recipe()
+
+
+@dataclass(frozen=True, slots=True)
+class ImageVariant:
+    image_id: str
+    size_key: str
+    format: Literal["webp"]
+    path: str
+    width: int
+    height: int
+    bytes: int
+    sha256: str
+    recipe_version: str
+    is_original: Literal[False] = False
+
+
+@dataclass(frozen=True, slots=True)
+class VariantSet:
+    image_id: str
+    source_src_raw: str
+    source_sha256: str
+    source_width: int
+    source_height: int
+    crop_box: CropBox | None
+    recipe_version: str
+    variants: tuple[ImageVariant, ...]
+    cache_hit: bool
+
+
+class _CachedVariant(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    size_key: str
+    width: int
+    height: int
+    bytes: int
+    sha256: str
+
+
+class _CacheEntry(BaseModel):
+    model_config = ConfigDict(extra="forbid", strict=True)
+
+    cache_key: str
+    source_sha256: str
+    recipe_version: str
+    source_width: int
+    source_height: int
+    crop: list[int] | None
+    variants: list[_CachedVariant]
+
+
+def build_variants(
+    source: ImageSource,
+    *,
+    blob_root: Path,
+    cache_root: Path,
+    override: CropOverride | None = None,
+    recipe: Recipe = DEFAULT_RECIPE,
+) -> VariantSet:
+    """Build or reuse WebP variants without reading any project data directory."""
+    _validate_source(source)
+    _validate_recipe(recipe)
+    image = _decode(source.source_bytes)
+    crop = _crop_box(source, image.width, image.height, override)
+    cache_key = hashlib.sha256(
+        _canonical(
+            {
+                "source_sha256": source.source_sha256,
+                "crop": None if crop is None else list(crop.bounds),
+                "recipe": recipe.definition(),
+            }
+        )
+    ).hexdigest()
+    cache_path = cache_root / "image-variants" / f"{cache_key}.json"
+    cached = _read_cache(cache_path, source, image, crop, recipe, blob_root)
+    if cached is not None:
+        return cached
+
+    generated: list[ImageVariant] = []
+    for size in SIZES:
+        if size.purpose == "art":
+            if crop is None:
+                continue
+            pixels = image.crop(crop.bounds)
+            dimensions = _art_dimensions(crop, size)
+        else:
+            pixels = image
+            dimensions = _card_dimensions(image.width, image.height, size)
+        if pixels.size != dimensions:
+            pixels = pixels.resize(
+                dimensions, Image.Resampling.LANCZOS, reducing_gap=None
+            )
+        encoded = _encode(pixels, recipe)
+        digest = hashlib.sha256(encoded).hexdigest()
+        path = _blob_path(digest)
+        _write_blob(blob_root / path, encoded, digest)
+        generated.append(
+            ImageVariant(
+                image_id=source.image_id,
+                size_key=size.key,
+                format="webp",
+                path=path,
+                width=dimensions[0],
+                height=dimensions[1],
+                bytes=len(encoded),
+                sha256=digest,
+                recipe_version=recipe.version,
+            )
+        )
+
+    result = VariantSet(
+        image_id=source.image_id,
+        source_src_raw=source.source_src_raw,
+        source_sha256=source.source_sha256,
+        source_width=image.width,
+        source_height=image.height,
+        crop_box=crop,
+        recipe_version=recipe.version,
+        variants=tuple(generated),
+        cache_hit=False,
+    )
+    _write_cache(cache_path, result, cache_key)
+    return result
+
+
+def _canonical(value: object) -> bytes:
+    return json.dumps(value, sort_keys=True, separators=(",", ":")).encode("utf-8")
+
+
+def _validate_source(source: ImageSource) -> None:
+    if not source.image_id or not source.source_src_raw:
+        msg = "image identity and original source URL are required"
+        raise ImageVariantError(msg)
+    if source.asset_kind != "sve_card" or source.origin not in {
+        "official",
+        "third_party",
+    }:
+        msg = "digital images cannot enter SVE card variants"
+        raise ImageVariantError(msg)
+    if source.publication_state != "approved" or source.availability != "available":
+        msg = "only approved, available SVE card images can have public variants"
+        raise ImageVariantError(msg)
+    digest = hashlib.sha256(source.source_bytes).hexdigest()
+    if not _HASH.fullmatch(source.source_sha256) or digest != source.source_sha256:
+        msg = "source SHA-256 does not match the frozen image bytes"
+        raise ImageVariantError(msg)
+
+
+def _validate_recipe(recipe: Recipe) -> None:
+    if (
+        pillow_version != PILLOW_VERSION
+        or features.version("webp") != LIBWEBP_VERSION
+        or features.version("littlecms2") != LITTLECMS_VERSION
+    ):
+        msg = "Pillow, libwebp, or LittleCMS differs from the pinned image recipe"
+        raise ImageVariantError(msg)
+    if (
+        not 0 <= recipe.quality <= _MAX_QUALITY
+        or not 0 <= recipe.alpha_quality <= _MAX_QUALITY
+        or not 0 <= recipe.method <= _MAX_METHOD
+    ):
+        msg = "invalid WebP encoding parameters"
+        raise ImageVariantError(msg)
+
+
+def _decode(source_bytes: bytes) -> Image.Image:
+    try:
+        with Image.open(BytesIO(source_bytes)) as opened:
+            if opened.format != "PNG" or getattr(opened, "n_frames", 1) != 1:
+                msg = "source must be a single-frame PNG"
+                raise ImageVariantError(msg)
+            opened.load()
+            oriented = ImageOps.exif_transpose(opened)
+    except (OSError, UnidentifiedImageError) as exc:
+        msg = "cannot decode source image"
+        raise ImageVariantError(msg) from exc
+    if oriented.width <= 0 or oriented.height <= 0:
+        msg = "source dimensions must be positive"
+        raise ImageVariantError(msg)
+    profile = oriented.info.get("icc_profile")
+    if profile is not None:
+        if not isinstance(profile, bytes) or oriented.mode not in {"RGB", "RGBA"}:
+            msg = "unsupported ICC profile or source color mode"
+            raise ImageVariantError(msg)
+        try:
+            converted_profile = ImageCms.profileToProfile(
+                oriented,
+                BytesIO(profile),
+                ImageCms.createProfile("sRGB"),
+                renderingIntent=ImageCms.Intent.PERCEPTUAL,
+                outputMode=oriented.mode,
+            )
+            if converted_profile is None:
+                msg = "cannot convert source ICC profile to sRGB"
+                raise ImageVariantError(msg)
+            oriented = converted_profile
+        except (ImageCms.PyCMSError, OSError, ValueError) as exc:
+            msg = "cannot convert source ICC profile to sRGB"
+            raise ImageVariantError(msg) from exc
+    has_alpha = "A" in oriented.getbands() or "transparency" in oriented.info
+    mode = "RGBA" if has_alpha else "RGB"
+    converted = oriented.convert(mode)
+    return Image.frombytes(mode, converted.size, converted.tobytes())
+
+
+def _crop_box(
+    source: ImageSource, width: int, height: int, override: CropOverride | None
+) -> CropBox | None:
+    if width > height:
+        if override is not None:
+            msg = "landscape images cannot have art crop overrides"
+            raise ImageVariantError(msg)
+        return None
+    if override is not None:
+        if (
+            override.image_id != source.image_id
+            or override.source_sha256 != source.source_sha256
+            or not override.reason.strip()
+        ):
+            msg = "invalid or stale art crop override"
+            raise ImageVariantError(msg)
+        if (
+            override.left < 0
+            or override.top < 0
+            or override.width <= 0
+            or override.height <= 0
+        ):
+            msg = "invalid or stale art crop override"
+            raise ImageVariantError(msg)
+        if (
+            override.width * 3 != override.height * 4
+            or override.left + override.width > width
+            or override.top + override.height > height
+        ):
+            msg = "invalid or stale art crop override"
+            raise ImageVariantError(msg)
+        return CropBox(override.left, override.top, override.width, override.height)
+    left = (8 * width) // 100
+    top = (14 * height) // 100
+    k = min((84 * width) // 400, (width - left) // 4, (height - top) // 3)
+    if k <= 0:
+        msg = "portrait source is too small for a 4:3 art crop"
+        raise ImageVariantError(msg)
+    return CropBox(left, top, 4 * k, 3 * k)
+
+
+def _card_dimensions(width: int, height: int, size: SizeSpec) -> tuple[int, int]:
+    if width > height:
+        numerator, denominator = (
+            (1, 1) if width <= size.max_height else (size.max_height, width)
+        )
+    elif width <= size.max_width and height <= size.max_height:
+        numerator, denominator = 1, 1
+    elif size.max_width * height <= size.max_height * width:
+        numerator, denominator = size.max_width, width
+    else:
+        numerator, denominator = size.max_height, height
+    return (
+        max(1, (2 * width * numerator + denominator) // (2 * denominator)),
+        max(1, (2 * height * numerator + denominator) // (2 * denominator)),
+    )
+
+
+def _art_dimensions(crop: CropBox, size: SizeSpec) -> tuple[int, int]:
+    n = min(crop.width // 4, size.max_width // 4, size.max_height // 3)
+    return (4 * n, 3 * n)
+
+
+def _encode(image: Image.Image, recipe: Recipe) -> bytes:
+    target = BytesIO()
+    image.save(
+        target,
+        format="WEBP",
+        lossless=False,
+        quality=recipe.quality,
+        alpha_quality=recipe.alpha_quality,
+        method=recipe.method,
+        exact=recipe.exact_alpha,
+        icc_profile=b"",
+        exif=b"",
+        xmp=b"",
+    )
+    return target.getvalue()
+
+
+def _blob_path(digest: str) -> str:
+    if not _HASH.fullmatch(digest):
+        msg = "invalid WebP blob SHA-256"
+        raise ImageVariantError(msg)
+    return f"images/sha256/{digest[:2]}/{digest}.webp"
+
+
+def _write_blob(path: Path, data: bytes, digest: str) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".webp-", dir=path.parent)
+    temporary = Path(temp_name)
+    try:
+        with os.fdopen(fd, "wb") as file:
+            file.write(data)
+            file.flush()
+            os.fsync(file.fileno())
+        try:
+            os.link(temporary, path)
+        except FileExistsError:
+            _verify_blob(path, digest, len(data))
+    finally:
+        temporary.unlink(missing_ok=True)
+
+
+def _verify_blob(path: Path, digest: str, byte_count: int) -> None:
+    data = path.read_bytes()
+    if len(data) != byte_count or hashlib.sha256(data).hexdigest() != digest:
+        msg = f"content-addressed WebP blob is corrupt: {path}"
+        raise ImageVariantError(msg)
+
+
+def _read_cache(
+    path: Path,
+    source: ImageSource,
+    image: Image.Image,
+    crop: CropBox | None,
+    recipe: Recipe,
+    blob_root: Path,
+) -> VariantSet | None:
+    try:
+        entry = _CacheEntry.model_validate_json(path.read_bytes())
+    except FileNotFoundError, ValidationError:
+        return None
+    crop_values = None if crop is None else list(crop.bounds)
+    expected_specs = [
+        size for size in SIZES if size.purpose == "card" or crop is not None
+    ]
+    if (
+        entry.cache_key != path.stem
+        or entry.source_sha256 != source.source_sha256
+        or entry.recipe_version != recipe.version
+        or entry.source_width != image.width
+        or entry.source_height != image.height
+    ):
+        return None
+    if entry.crop != crop_values or [item.size_key for item in entry.variants] != [
+        size.key for size in expected_specs
+    ]:
+        return None
+    variants = _cached_variants(
+        zip(entry.variants, expected_specs, strict=True),
+        image,
+        crop,
+        source,
+        recipe,
+        blob_root,
+    )
+    if variants is None:
+        return None
+    return VariantSet(
+        image_id=source.image_id,
+        source_src_raw=source.source_src_raw,
+        source_sha256=source.source_sha256,
+        source_width=image.width,
+        source_height=image.height,
+        crop_box=crop,
+        recipe_version=recipe.version,
+        variants=tuple(variants),
+        cache_hit=True,
+    )
+
+
+def _cached_variants(
+    entries: Iterable[tuple[_CachedVariant, SizeSpec]],
+    image: Image.Image,
+    crop: CropBox | None,
+    source: ImageSource,
+    recipe: Recipe,
+    blob_root: Path,
+) -> list[ImageVariant] | None:
+    variants: list[ImageVariant] = []
+    for item, size in entries:
+        if item.width <= 0 or item.height <= 0 or item.bytes <= 0:
+            return None
+        if size.purpose == "art":
+            if crop is None:
+                return None
+            dimensions = _art_dimensions(crop, size)
+        else:
+            dimensions = _card_dimensions(image.width, image.height, size)
+        if (item.width, item.height) != dimensions:
+            return None
+        blob = blob_root / _blob_path(item.sha256)
+        if not blob.exists():
+            return None
+        _verify_blob(blob, item.sha256, item.bytes)
+        variants.append(
+            ImageVariant(
+                image_id=source.image_id,
+                size_key=item.size_key,
+                format="webp",
+                path=_blob_path(item.sha256),
+                width=item.width,
+                height=item.height,
+                bytes=item.bytes,
+                sha256=item.sha256,
+                recipe_version=recipe.version,
+            )
+        )
+    return variants
+
+
+def _write_cache(path: Path, result: VariantSet, key: str) -> None:
+    entry = _CacheEntry(
+        cache_key=key,
+        source_sha256=result.source_sha256,
+        recipe_version=result.recipe_version,
+        source_width=result.source_width,
+        source_height=result.source_height,
+        crop=None if result.crop_box is None else list(result.crop_box.bounds),
+        variants=[
+            _CachedVariant(
+                size_key=item.size_key,
+                width=item.width,
+                height=item.height,
+                bytes=item.bytes,
+                sha256=item.sha256,
+            )
+            for item in result.variants
+        ],
+    )
+    path.parent.mkdir(parents=True, exist_ok=True)
+    fd, temp_name = tempfile.mkstemp(prefix=".variant-cache-", dir=path.parent)
+    temporary = Path(temp_name)
+    try:
+        with os.fdopen(fd, "wb") as file:
+            file.write(_canonical(entry.model_dump(mode="json")))
+            file.flush()
+            os.fsync(file.fileno())
+        temporary.replace(path)
+    finally:
+        temporary.unlink(missing_ok=True)
