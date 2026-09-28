@@ -3,7 +3,7 @@
 import asyncio
 import shutil
 import uuid
-from contextlib import AbstractContextManager, nullcontext
+from contextlib import contextmanager
 from dataclasses import dataclass
 from enum import StrEnum
 from itertools import starmap
@@ -57,7 +57,7 @@ from sve_carddb.sources.official_jp import parse_list_first
 from sve_carddb.store import UnsafePathError
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable
+    from collections.abc import Awaitable, Callable, Iterator
 
 app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card database.")
 crawl_app = typer.Typer(
@@ -299,7 +299,7 @@ def manifest_check(allow_root: AllowRootOption = None) -> None:
     """Verify every stored file against the manifest; exit 1 if any is damaged or unsafe."""
     settings = _settings()
     roots = (*settings.extra_roots, *(allow_root or ()))
-    with Manifest.open(settings.manifest_path) as manifest:
+    with _locked_read_manifest(settings) as manifest:
         writer = Writer(settings.data_dir, manifest, read_roots=roots)
         counts = dict.fromkeys(LocalState, 0)
         damaged: list[str] = []
@@ -326,7 +326,7 @@ def manifest_check(allow_root: AllowRootOption = None) -> None:
 def manifest_backup(dest: Path) -> None:
     """Write a verified snapshot of the manifest to DEST, which must not exist."""
     settings = _settings()
-    with Manifest.open(settings.manifest_path) as manifest:
+    with _locked_read_manifest(settings) as manifest:
         info = manifest.backup(dest)
     console.print(f"backup: {info.path}\nsha256: {info.sha256}")
 
@@ -336,7 +336,7 @@ def extract_cards_command() -> None:
     """Transcribe the stored card pages into `derived/jp/cards.jsonl`."""
     settings = _settings()
     dest = settings.data_dir / "derived" / "jp" / "cards.jsonl"
-    with Manifest.open(settings.manifest_path) as manifest:
+    with _locked_read_manifest(settings) as manifest:
         report = extract_cards(manifest, Writer(settings.data_dir, manifest), dest)
     console.print(f"{report.written} cards written to {dest}")
     for number in report.missing:
@@ -370,22 +370,41 @@ def _settings() -> Settings:
         raise typer.Exit(2) from exc
 
 
+@contextmanager
+def _locked_read_manifest(settings: Settings) -> Iterator[Manifest]:
+    try:
+        with (
+            ExclusiveLock(settings.lock_path),
+            Manifest.open_live(settings.manifest_path) as manifest,
+        ):
+            yield manifest
+    except AlreadyRunningError as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+
+
 def _run(job: Job) -> None:
     if job.mode is Mode.REFRESH and not job.sets:
         console.print("[red]--mode refresh needs --set[/red]")
         raise typer.Exit(2)
     settings = _settings()
-    lock: AbstractContextManager[object] = (
-        nullcontext() if job.dry_run else ExclusiveLock(settings.lock_path)
-    )
     try:
-        with lock, Manifest.open(settings.manifest_path) as manifest:
-            writer = Writer(settings.data_dir, manifest)
+        with ExclusiveLock(settings.lock_path):
             if job.dry_run:
-                _dry_run(job, writer, manifest)
-                return
-            _recover(settings, manifest)
-            failures = asyncio.run(_crawl(job, settings, manifest, writer))
+                source = (
+                    Manifest.open_live(settings.manifest_path)
+                    if settings.manifest_path.exists()
+                    else Manifest.open_empty()
+                )
+            else:
+                source = Manifest.open(settings.manifest_path)
+            with source as manifest:
+                writer = Writer(settings.data_dir, manifest)
+                if job.dry_run:
+                    _dry_run(job, writer, manifest)
+                    return
+                _recover(settings, manifest)
+                failures = asyncio.run(_crawl(job, settings, manifest, writer))
     except (LimitReachedError, BudgetExhaustedError) as exc:
         console.print(f"[yellow]stopped:[/yellow] {exc}")
         return

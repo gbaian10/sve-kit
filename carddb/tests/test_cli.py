@@ -12,9 +12,17 @@ from typer.testing import CliRunner
 
 from sve_carddb import cli
 from sve_carddb.config import Settings
+from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.throttle import Throttle
 from sve_carddb.fetch.writer import Fetched, Writer
-from sve_carddb.manifest import ExclusiveLock, Kind, Manifest, Region, RequestStart
+from sve_carddb.manifest import (
+    AlreadyRunningError,
+    ExclusiveLock,
+    Kind,
+    Manifest,
+    Region,
+    RequestStart,
+)
 from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources import official_sv1 as sv1
@@ -30,6 +38,8 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from typer.testing import Result
+
+    from sve_carddb.extract.jsonl import ExtractReport
 
 runner = CliRunner()
 pytestmark = pytest.mark.usefixtures("no_retry_waits")
@@ -115,6 +125,30 @@ def test_extract_cards_after_crawl(site: FakeSite, data_dir: Path) -> None:
 
 
 @pytest.mark.usefixtures("site")
+def test_extract_keeps_lock_while_reading_raw(
+    data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    for stage in ("p0", "p1", "p2"):
+        assert invoke("crawl", stage).exit_code == 0
+    manifest_path = data_dir / "manifest" / "manifest.sqlite"
+    before = manifest_path.read_bytes()
+
+    def under_lock(manifest: Manifest, writer: Writer, dest: Path) -> ExtractReport:
+        with (
+            pytest.raises(AlreadyRunningError),
+            ExclusiveLock(data_dir / "manifest" / ".lock"),
+        ):
+            pass
+        return extract_cards(manifest, writer, dest)
+
+    monkeypatch.setattr(cli, "extract_cards", under_lock)
+    result = invoke("extract", "cards")
+    assert result.exit_code == 0, result.output
+    assert manifest_path.read_bytes() == before
+    assert (data_dir / "derived" / "jp" / "cards.jsonl").exists()
+
+
+@pytest.mark.usefixtures("site")
 def test_requests_are_spaced_by_the_configured_interval(clock: FakeClock) -> None:
     assert invoke("crawl", "p0").exit_code == 0
     assert clock.sleeps
@@ -195,6 +229,49 @@ def test_second_crawler_is_refused(site: FakeSite, data_dir: Path) -> None:
     assert result.exit_code == 1
     assert "another crawler" in result.output
     assert site.calls == []
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        ("manifest", "check"),
+        ("manifest", "backup"),
+        ("extract", "cards"),
+        ("crawl", "p0", "--dry-run"),
+    ],
+)
+def test_read_commands_refuse_lock_before_opening_manifest(
+    command: tuple[str, ...],
+    data_dir: Path,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    with manifest_at(data_dir):
+        pass
+    manifest_path = data_dir / "manifest" / "manifest.sqlite"
+    before = manifest_path.read_bytes()
+    dest = tmp_path / "backup.sqlite"
+    args = (*command, str(dest)) if command == ("manifest", "backup") else command
+
+    def unexpected_open(*_args: object, **_kwargs: object) -> Manifest:
+        pytest.fail("manifest opened despite lock contention")
+
+    monkeypatch.setattr(Manifest, "open", unexpected_open)
+    monkeypatch.setattr(Manifest, "open_live", unexpected_open)
+    with ExclusiveLock(data_dir / "manifest" / ".lock"):
+        result = invoke(*args)
+    assert result.exit_code == 1
+    assert "another crawler" in result.output
+    assert manifest_path.read_bytes() == before
+    assert not dest.exists()
+    assert not (data_dir / "derived").exists()
+
+
+@pytest.mark.usefixtures("site")
+def test_dry_run_before_first_crawl_does_not_create_manifest(data_dir: Path) -> None:
+    result = invoke("crawl", "p0", "--dry-run")
+    assert result.exit_code == 0, result.output
+    assert not (data_dir / "manifest" / "manifest.sqlite").exists()
 
 
 def test_p2_before_p1_says_what_to_run(site: FakeSite) -> None:
