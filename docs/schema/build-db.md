@@ -324,6 +324,15 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 卡圖看過快取、牌組離線備妥只抓實選版次與雙面；未抓圖顯示文字；無全圖下載。語音按需。sprite 不入卡表，自製固定 UI 圖示屬 app shell，未來動態拼圖只用自己牌組與已公開對手卡。卡店僅 HTTPS 白名單參數模板，dev 開/prod 關，不抓價格。`image_size/language/digital_endpoint/shop` 設定合為卡表快照 config，不做客戶端小表 join。
 
+建置約束將上述來源狀態與公開衍生檔政策具體化如下：
+
+- `availability=available` 必須有 `content_hash/mime/width/height/bytes`，mime 非空、寬高為正；這些 metadata 不代替實際 bytes 解碼與比對。
+- `publication_state=withdrawn` 必須有非空白 `withdrawal_reason`；官方 approved 必須 available，且 `review_decision_id` 為 null。第三方 approved 必須有 confirmed decision、核對人與時間，`decision_source` 連回該圖的 `source_id`。
+- `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／withdrawn／missing／unfetched 不得保有公開 variant 列。
+- 公開 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。
+
+跨表條件在建置交易完成寫入後、提交前檢查最終資料圖；修改圖片、decision、decision_source 或 image_size 同樣必須重驗，不能只在新增 variant 時檢查。任一條件失敗即回滾整筆交易；可以在同一交易中撤下圖片並刪除其 variants。已有 available／approved 來源但尚未產 variants 是合法的建置中間狀態，不代表影像發布閉包已完成。
+
 尺寸、橫向長邊、4:3 裁切及取整／覆寫依 [卡圖衍生檔契約](image-variants.md)。原 PNG 不公開；`image_size.is_original` 不投影至 config，發布器拒收 true。card_l 同尺寸重新編碼仍為 false；recipe 與來源 hash 留建置端。
 
 ## 12. 建置品質與新卡包流程
@@ -436,3 +445,9 @@ SNC 最低資料仍為 `catalog_state`、`card_no_state`、`serial_total`、`lis
 完整邏輯契約不要求第一次查卡發布就實作所有能力；[implementation-tiers.md](implementation-tiers.md) 逐表分配唯一 tier 與啟用條件。首發明列 T0 40＋T1 必要子組 17＝57 表（含構築與 CR 引用），`identity_change` 先於第一次公開 `int_id`；必須同時滿足來源、永久身分、全部面、現行/印刷觀測、商品/路由、文字快照與缺 DSL 狀態；條件表沒上線時相關公開欄位為明定 null/空/unknown，不能假裝已完整或省掉 required 欄。
 
 跨 tier nullable FK 在未啟用該能力時必須為 null；非空 FK 的依賴 closure 必須一併啟用（tier 是最早實作時間，不是略過 FK 的許可）。若某批輸入有勘誤/更正/雙區/模板/禁限/DSL，就在發布前把對應組及引用閉包完成，不以「未實作」丟棄已知更正而出錯資料。可以先發布支援的資料子集並明示 coverage，但不能聲稱全庫能力通過。v1 延後的 event/signature 等尚未建表項仍留待未來設計，不建空表冒充完成。
+
+### 18.1 DDL 能力與建置 schema 升版
+
+DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 57 表及條件組的可用性驗收。
+
+建置 SQLite 的 `PRAGMA user_version` 記錄實作宣告版號，與本文件的邏輯契約 v1、抓取 manifest schema、快照 format／data_version 分開。相同宣告版號仍可依能力選擇不同表集合。啟用新組或升版時，正常路徑是從釘住的輸入全量建置新檔，套用新 FK、CHECK 與跨表驗證，成功提交並關閉後才替換舊的建置產物；不複製未驗證的舊列，也不關閉 FK 作為升版捷徑。建立／匯入／驗證／替換失敗保留舊產物；呼叫端必須獨占離線目標並關閉所有連線，不對帶 SQLite sidecar 的目標替換。此流程不處理來源歸檔，也不代替正式發布交易。
