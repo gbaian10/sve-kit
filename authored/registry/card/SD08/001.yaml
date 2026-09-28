@@ -1,0 +1,29 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:a34c15bc98c488e1a9c9394b3effab6debb4147b569c4daaf53629cf27c73bee
+records:
+  - record_key: card:c:fd34c9c1085757a9b01f327f3448a2c4
+    kind: card
+    owner: SD08
+    data:
+      id: c:fd34c9c1085757a9b01f327f3448a2c4
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD08
+decisions:
+  - id: d:a34c15bc98c488e1a9c9394b3effab6debb4147b569c4daaf53629cf27c73bee
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:a34c15bc98c488e1a9c9394b3effab6debb4147b569c4daaf53629cf27c73bee
+    members:
+      -   - card:c:fd34c9c1085757a9b01f327f3448a2c4
+          - sha256:2daf2abdefb69849ee2c2d99445f4374230914fd73a9d0a2a3507b80fe5ae291
+    sample_ids:
+      - card:c:fd34c9c1085757a9b01f327f3448a2c4
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

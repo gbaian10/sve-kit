@@ -1,0 +1,73 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:0bcf988596a23c3792b95bcf073a859eec505eb3f8510dbeb913546fdd003a99
+records:
+  - record_key: card:c:6d786a1370775948b7c4a7256a23ab64
+    kind: card
+    owner: SD05
+    data:
+      id: c:6d786a1370775948b7c4a7256a23ab64
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD05
+  - record_key: card:c:c8a865d115b75c07b9c2567a12e1e6cd
+    kind: card
+    owner: SD05
+    data:
+      id: c:c8a865d115b75c07b9c2567a12e1e6cd
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD05
+  - record_key: card:c:095974ccbd5350e6b27b7e6b122fee18
+    kind: card
+    owner: SD05
+    data:
+      id: c:095974ccbd5350e6b27b7e6b122fee18
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD05
+  - record_key: card:c:525fff1263d5590f988741e946e335c8
+    kind: card
+    owner: SD05
+    data:
+      id: c:525fff1263d5590f988741e946e335c8
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD05
+  - record_key: card:c:44b3c923a46b557f9047b75d1208e61b
+    kind: card
+    owner: SD05
+    data:
+      id: c:44b3c923a46b557f9047b75d1208e61b
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD05
+decisions:
+  - id: d:0bcf988596a23c3792b95bcf073a859eec505eb3f8510dbeb913546fdd003a99
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:0bcf988596a23c3792b95bcf073a859eec505eb3f8510dbeb913546fdd003a99
+    members:
+      -   - card:c:095974ccbd5350e6b27b7e6b122fee18
+          - sha256:d9abad6ef24def9ddc8ed14873d15a1febe0fed7ccc4b48e7259fb6f67175a8c
+      -   - card:c:44b3c923a46b557f9047b75d1208e61b
+          - sha256:d2e6674263615888d45ee614bf3c3234bd1190b73fbf362d39d9891d24b31a2d
+      -   - card:c:525fff1263d5590f988741e946e335c8
+          - sha256:b297577516168206e08c9c57b59799ee9e4551a461f61876064ab18c2d7b0ce1
+      -   - card:c:6d786a1370775948b7c4a7256a23ab64
+          - sha256:15098fd64836dfc26cab4c363d5add41a825a1c0637af5aaaf4a3e023b6f900d
+      -   - card:c:c8a865d115b75c07b9c2567a12e1e6cd
+          - sha256:64edc0abd6c5a1a2fd0038e02bddcc46c9e1dae28376500783c264427dd8202e
+    sample_ids:
+      - card:c:095974ccbd5350e6b27b7e6b122fee18
+      - card:c:44b3c923a46b557f9047b75d1208e61b
+      - card:c:525fff1263d5590f988741e946e335c8
+      - card:c:6d786a1370775948b7c4a7256a23ab64
+      - card:c:c8a865d115b75c07b9c2567a12e1e6cd
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

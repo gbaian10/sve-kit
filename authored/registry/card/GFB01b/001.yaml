@@ -1,0 +1,194 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:fff49f4cbcb1e4cdf82fa48ad1d5ae24d3b3f22dc9aa25e3417590cb2d1d19cf
+records:
+  - record_key: card:c:be19c1560cbf55c1aa28bbbaf8c532e4
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:be19c1560cbf55c1aa28bbbaf8c532e4
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:1b8e971cb76b5447bd78a076df386f73
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:1b8e971cb76b5447bd78a076df386f73
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:a489cc375a6256dd820f95c2194ce8dc
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:a489cc375a6256dd820f95c2194ce8dc
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:aea81d9859225fd7a7a357d191ec9147
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:aea81d9859225fd7a7a357d191ec9147
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:7ffc577b8e4d51c590be26f8c3ad0cef
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:7ffc577b8e4d51c590be26f8c3ad0cef
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:cb00dc320e3353e48fae6d4390e5d586
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:cb00dc320e3353e48fae6d4390e5d586
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:0f0643339cba56d0b5b8c6b4fb077dc8
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:0f0643339cba56d0b5b8c6b4fb077dc8
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:0d7c732c586a52eba17798ff39461ab0
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:0d7c732c586a52eba17798ff39461ab0
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:8fe8e94b40b55e7d9235afeaf45c1d5d
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:8fe8e94b40b55e7d9235afeaf45c1d5d
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:0e55c2df8dba56a98e5b41d9d1d6fd43
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:0e55c2df8dba56a98e5b41d9d1d6fd43
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:f0ee5f3d3cf451ff9f5dab01554f1933
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:f0ee5f3d3cf451ff9f5dab01554f1933
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:87b87b416a815da5b323277b68abf1a2
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:87b87b416a815da5b323277b68abf1a2
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:b5dffe6f822755698fc6807688ef1110
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:b5dffe6f822755698fc6807688ef1110
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:663229821dda51d9ad1ab722774ad56d
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:663229821dda51d9ad1ab722774ad56d
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:f6463b6c6ebb55929c2be206e0bd405e
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:f6463b6c6ebb55929c2be206e0bd405e
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+  - record_key: card:c:b706193e26be5c21a46c913da3ee0ba6
+    kind: card
+    owner: GFB01b
+    data:
+      id: c:b706193e26be5c21a46c913da3ee0ba6
+      layout: single
+      identity_state: confirmed
+      home_set_id: GFB01b
+decisions:
+  - id: d:fff49f4cbcb1e4cdf82fa48ad1d5ae24d3b3f22dc9aa25e3417590cb2d1d19cf
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:fff49f4cbcb1e4cdf82fa48ad1d5ae24d3b3f22dc9aa25e3417590cb2d1d19cf
+    members:
+      -   - card:c:0d7c732c586a52eba17798ff39461ab0
+          - sha256:62a6c97a8fb88487eb2a1d0c0f31819a7607b02b700de7bf20a90e936642bada
+      -   - card:c:0e55c2df8dba56a98e5b41d9d1d6fd43
+          - sha256:a8414ab2c154f5ca1c53311bd33aea29f96eb4f6d33be208d122a0694b829c40
+      -   - card:c:0f0643339cba56d0b5b8c6b4fb077dc8
+          - sha256:14a6fe7c4b6c66b6087258a1c9f4dc9427623a69239d93744ab3a748d71fc1f4
+      -   - card:c:1b8e971cb76b5447bd78a076df386f73
+          - sha256:d568d2996ed0d14b752892ef6430899473dd341d8fc1f35b6e63e584e1735c52
+      -   - card:c:663229821dda51d9ad1ab722774ad56d
+          - sha256:e176b395d3a945c64c8e75261d4a16ea5a32c0b3d14fd8bcd295aaf18205152b
+      -   - card:c:7ffc577b8e4d51c590be26f8c3ad0cef
+          - sha256:877f3db3fedfb63198c20bdd3ed21028b16de01c9b8422ee69997cc91987b74f
+      -   - card:c:87b87b416a815da5b323277b68abf1a2
+          - sha256:aa81edcd6d8673b75148a132b4a6dba6c5e7e172ff6fcab7967eb4a140fa280b
+      -   - card:c:8fe8e94b40b55e7d9235afeaf45c1d5d
+          - sha256:5dd01e4a825c68ae6f8c7c20f16bd2ecd3431b77a4eb2639ed394f5cdf5560a0
+      -   - card:c:a489cc375a6256dd820f95c2194ce8dc
+          - sha256:b2e7f271b30576d719ea08b5433d7d15b60410bfcb90b6db97f8d519aad71ce5
+      -   - card:c:aea81d9859225fd7a7a357d191ec9147
+          - sha256:4faabb9cd502ddab784476bb12e62177a96ba361a2a2ba626b8baa7e619e04ba
+      -   - card:c:b5dffe6f822755698fc6807688ef1110
+          - sha256:575103bc7f9ca34b0f64fb4638f4d39b4deb6ab98e7cd74befb582488fd4d40e
+      -   - card:c:b706193e26be5c21a46c913da3ee0ba6
+          - sha256:210b51338e37358a9e04aee905b774170f5f3ac9022ad3c3eff1fe1c0eb2ceec
+      -   - card:c:be19c1560cbf55c1aa28bbbaf8c532e4
+          - sha256:badaa5c533f381225acb5cfd80dd4cd486cd2c123a9c04dbee44f005d2bb3abe
+      -   - card:c:cb00dc320e3353e48fae6d4390e5d586
+          - sha256:15af72bc0b5e7e055d0b75dfbc9147fa640c4e6ef18e3f7f99719dff3c3732e8
+      -   - card:c:f0ee5f3d3cf451ff9f5dab01554f1933
+          - sha256:95fd02a76d4c965f5ff8662bacfdc8888417b6d08d5c80bf40078b97d692e138
+      -   - card:c:f6463b6c6ebb55929c2be206e0bd405e
+          - sha256:fff8f34d597a632b6382778124d31a5cee17c24717e4e1d232c4c96c6b32c9aa
+    sample_ids:
+      - card:c:0d7c732c586a52eba17798ff39461ab0
+      - card:c:0e55c2df8dba56a98e5b41d9d1d6fd43
+      - card:c:0f0643339cba56d0b5b8c6b4fb077dc8
+      - card:c:1b8e971cb76b5447bd78a076df386f73
+      - card:c:663229821dda51d9ad1ab722774ad56d
+      - card:c:7ffc577b8e4d51c590be26f8c3ad0cef
+      - card:c:87b87b416a815da5b323277b68abf1a2
+      - card:c:8fe8e94b40b55e7d9235afeaf45c1d5d
+      - card:c:a489cc375a6256dd820f95c2194ce8dc
+      - card:c:aea81d9859225fd7a7a357d191ec9147
+      - card:c:b5dffe6f822755698fc6807688ef1110
+      - card:c:b706193e26be5c21a46c913da3ee0ba6
+      - card:c:be19c1560cbf55c1aa28bbbaf8c532e4
+      - card:c:cb00dc320e3353e48fae6d4390e5d586
+      - card:c:f0ee5f3d3cf451ff9f5dab01554f1933
+      - card:c:f6463b6c6ebb55929c2be206e0bd405e
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

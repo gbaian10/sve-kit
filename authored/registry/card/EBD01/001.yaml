@@ -1,0 +1,51 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:c78a1eaeea1a2ed40492eb329a1a9b45c21759db36a31e5ed2521c79e4501c54
+records:
+  - record_key: card:c:32238265f6795ae5824c8dfc0b8ebba3
+    kind: card
+    owner: EBD01
+    data:
+      id: c:32238265f6795ae5824c8dfc0b8ebba3
+      layout: single
+      identity_state: confirmed
+      home_set_id: EBD01
+  - record_key: card:c:b47835e91a6d5c74baab4a23ec164644
+    kind: card
+    owner: EBD01
+    data:
+      id: c:b47835e91a6d5c74baab4a23ec164644
+      layout: single
+      identity_state: confirmed
+      home_set_id: EBD01
+  - record_key: card:c:5807c89e0e51554d87de735bdd325a44
+    kind: card
+    owner: EBD01
+    data:
+      id: c:5807c89e0e51554d87de735bdd325a44
+      layout: single
+      identity_state: confirmed
+      home_set_id: EBD01
+decisions:
+  - id: d:c78a1eaeea1a2ed40492eb329a1a9b45c21759db36a31e5ed2521c79e4501c54
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:c78a1eaeea1a2ed40492eb329a1a9b45c21759db36a31e5ed2521c79e4501c54
+    members:
+      -   - card:c:32238265f6795ae5824c8dfc0b8ebba3
+          - sha256:df68eabc1bc5c73e06b03e665087873468f2ba81fa592515b8f971c02470b364
+      -   - card:c:5807c89e0e51554d87de735bdd325a44
+          - sha256:b1face3c1f51726f846d7831e2d5e4a477ae8777eac04fe2e3e55ec6156606e1
+      -   - card:c:b47835e91a6d5c74baab4a23ec164644
+          - sha256:c2b53fe62fa388d4a9dd4d26188daa867f8597949d6bb0d367110060993754f0
+    sample_ids:
+      - card:c:32238265f6795ae5824c8dfc0b8ebba3
+      - card:c:5807c89e0e51554d87de735bdd325a44
+      - card:c:b47835e91a6d5c74baab4a23ec164644
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

@@ -1,0 +1,73 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:806a365c48f4b266d2f6a34f444b21831b33845d9cd7e60af101e9ac3540a27e
+records:
+  - record_key: face:f:6492fc8ca1bc5a7e8722013ad537619b
+    kind: face
+    owner: SP01
+    data:
+      id: f:6492fc8ca1bc5a7e8722013ad537619b
+      card_id: c:a31d3387d8845172ae5c62a1b54acb16
+      ordinal: 0
+      side: front
+  - record_key: face:f:f6e27ef6dc405f55a59a0c0873ee93b2
+    kind: face
+    owner: SP01
+    data:
+      id: f:f6e27ef6dc405f55a59a0c0873ee93b2
+      card_id: c:a6db1a5133955fb895f07115494a7345
+      ordinal: 0
+      side: front
+  - record_key: face:f:9fe87feb9ffb5af5b4f8791503b77920
+    kind: face
+    owner: SP01
+    data:
+      id: f:9fe87feb9ffb5af5b4f8791503b77920
+      card_id: c:4d4c8839b4dd521eb15a6046a3d52ee2
+      ordinal: 0
+      side: front
+  - record_key: face:f:0ab14e859a0d5d4ebccf04a59b00f92f
+    kind: face
+    owner: SP01
+    data:
+      id: f:0ab14e859a0d5d4ebccf04a59b00f92f
+      card_id: c:3df730eb1f9c525a9ea9456f4a739294
+      ordinal: 0
+      side: front
+  - record_key: face:f:d3ee6bd11a8b58ce99900fb97a6b1a67
+    kind: face
+    owner: SP01
+    data:
+      id: f:d3ee6bd11a8b58ce99900fb97a6b1a67
+      card_id: c:70a6fa0385e25032bdc95d2b5185a905
+      ordinal: 0
+      side: front
+decisions:
+  - id: d:806a365c48f4b266d2f6a34f444b21831b33845d9cd7e60af101e9ac3540a27e
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:806a365c48f4b266d2f6a34f444b21831b33845d9cd7e60af101e9ac3540a27e
+    members:
+      -   - face:f:0ab14e859a0d5d4ebccf04a59b00f92f
+          - sha256:06bc7aed7a481d67021d9ca5d3ed2c45651128b48c17dc53ae09b16d10d1eed4
+      -   - face:f:6492fc8ca1bc5a7e8722013ad537619b
+          - sha256:810c6b2cef18409e842b86bb277c2f61dc92cbb85c587541fe0bb86f81ad4b59
+      -   - face:f:9fe87feb9ffb5af5b4f8791503b77920
+          - sha256:408278be7f80bc55b2488f6b19e94c6d1e6e94c68f02fdd2dac3805121d2037a
+      -   - face:f:d3ee6bd11a8b58ce99900fb97a6b1a67
+          - sha256:98ed290f3b176ca66367052ff9ee8309bbf85e22fdb44dc29e7aff952f5b8e9a
+      -   - face:f:f6e27ef6dc405f55a59a0c0873ee93b2
+          - sha256:63a05fc2d0fd5a4632e457da1919f40424b0ca0ba6b0573b063d76a107388671
+    sample_ids:
+      - face:f:0ab14e859a0d5d4ebccf04a59b00f92f
+      - face:f:6492fc8ca1bc5a7e8722013ad537619b
+      - face:f:9fe87feb9ffb5af5b4f8791503b77920
+      - face:f:d3ee6bd11a8b58ce99900fb97a6b1a67
+      - face:f:f6e27ef6dc405f55a59a0c0873ee93b2
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

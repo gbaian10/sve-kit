@@ -1,0 +1,29 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:c864dafe192549aadded2983e213f8d6f5c63729b841ca23ec8b94ffcc4fa606
+records:
+  - record_key: face:f:d45995fa867554fba8a98d3f995d8446
+    kind: face
+    owner: SD07
+    data:
+      id: f:d45995fa867554fba8a98d3f995d8446
+      card_id: c:8deed9529b125f0c9c041400f24f03d7
+      ordinal: 0
+      side: front
+decisions:
+  - id: d:c864dafe192549aadded2983e213f8d6f5c63729b841ca23ec8b94ffcc4fa606
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:c864dafe192549aadded2983e213f8d6f5c63729b841ca23ec8b94ffcc4fa606
+    members:
+      -   - face:f:d45995fa867554fba8a98d3f995d8446
+          - sha256:607f17722f377605fa89349bd1a09e50a833c0e88fd4cae7edcfb7a78174cf7a
+    sample_ids:
+      - face:f:d45995fa867554fba8a98d3f995d8446
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

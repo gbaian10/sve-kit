@@ -1,0 +1,44 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:147c578fecfc1ae8072e7bce8fc7c1d06346247c86b143b31eb32a15e936ab8e
+records:
+  - record_key: source_correction:x:d529a2a90bd757f2be41c721eb0eaf4b
+    kind: source_correction
+    owner: BP07
+    data:
+      id: x:d529a2a90bd757f2be41c721eb0eaf4b
+      printing_id: p:c86a45340a3b512d98e117f0810c26d3
+      face_id: f:8b7ea5fbe29053308a8659e466983301
+      field: effect
+      expected_raw_value: "これをプレイする際、場の『ナテラの大樹』2つを{アクト}：コストを-2する。\nこれをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。"
+      corrected_value: "これをプレイする際、場の『ナテラの大樹』2つを{アクト}：コストを-2する。\nこれをプレイする際、自分の場に『王たる光・ベイリオン』がいるなら、コストを-1する。\n相手の場のフォロワー1体を選ぶ。それに4ダメージ。"
+      expected_source_hash: sha256:e676d30e4a32e2895ba5593fd52546781292723c201e6def6d721ffb3d4b3774
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:1836823f9314c7bbe7c33b300d5acc99f754eb6edf566f6a69dfcb49a6bbc79b
+          image_src: /wordpress/wp-content/images/cardlist/BP07/bp07-p06.png
+          region: jp
+          locator: Card rules text box
+decisions:
+  - id: d:147c578fecfc1ae8072e7bce8fc7c1d06346247c86b143b31eb32a15e936ab8e
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:147c578fecfc1ae8072e7bce8fc7c1d06346247c86b143b31eb32a15e936ab8e
+    members:
+      -   - source_correction:x:d529a2a90bd757f2be41c721eb0eaf4b
+          - sha256:beae83ec23a6d18e19dbd8a118b40f09c81d51c31e3bcfa67033109abc4fecea
+    sample_ids:
+      - source_correction:x:d529a2a90bd757f2be41c721eb0eaf4b
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

@@ -1,0 +1,44 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:11ac850e5c261a12a67395a88f67f591cfe9c38b0f636c6def0fd5ac8295830d
+records:
+  - record_key: source_correction:x:55323a6a5b9550f79130283e61f223db
+    kind: source_correction
+    owner: CP03
+    data:
+      id: x:55323a6a5b9550f79130283e61f223db
+      printing_id: p:c441734f8357590da8e3d6d818006885
+      face_id: f:27c28687d18b51a09f73bbf9dca8d5dd
+      field: card_type
+      expected_raw_value: Spell
+      corrected_value: Spell / Evolved
+      expected_source_hash: sha256:26e83f68a889fedefafb3955c2553653c1748ea1f485c661c55edbb320f7ef8e
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:892aba55b6e78e97b9a6157992537e73ae477c0b08ed50e4a2840c4da9d581f3
+          image_src: /wordpress/wp-content/images/cardlist/CP03/CP03-127EN.png
+          region: en
+          locator: Card type label and evolved banner
+decisions:
+  - id: d:11ac850e5c261a12a67395a88f67f591cfe9c38b0f636c6def0fd5ac8295830d
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:11ac850e5c261a12a67395a88f67f591cfe9c38b0f636c6def0fd5ac8295830d
+    members:
+      -   - source_correction:x:55323a6a5b9550f79130283e61f223db
+          - sha256:ebbff59fa55e32e4712e82fd151cb845af6456143e45038ad0b7d64168e01601
+    sample_ids:
+      - source_correction:x:55323a6a5b9550f79130283e61f223db
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

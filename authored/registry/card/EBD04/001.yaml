@@ -1,0 +1,29 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:644417aabb3170dc294adc70d75fe0ac9eb19413863d59d8f94fa3562a85225e
+records:
+  - record_key: card:c:962e66074a18578f9aa9fa954646c978
+    kind: card
+    owner: EBD04
+    data:
+      id: c:962e66074a18578f9aa9fa954646c978
+      layout: single
+      identity_state: confirmed
+      home_set_id: EBD04
+decisions:
+  - id: d:644417aabb3170dc294adc70d75fe0ac9eb19413863d59d8f94fa3562a85225e
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:644417aabb3170dc294adc70d75fe0ac9eb19413863d59d8f94fa3562a85225e
+    members:
+      -   - card:c:962e66074a18578f9aa9fa954646c978
+          - sha256:336136f495e78475d78a2f6392ad57f28f46d7a65fde03e17d5262e7324943e1
+    sample_ids:
+      - card:c:962e66074a18578f9aa9fa954646c978
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

@@ -1,0 +1,44 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:4cff01a70a9e73a237ff9b04f26aa45e000b1f6533137e52ec7ed454f3e821a5
+records:
+  - record_key: printing:p:71d7dcf68dbb5a3488876b2472194389
+    kind: printing
+    owner: NY2024
+    data:
+      id: p:71d7dcf68dbb5a3488876b2472194389
+      card_id: c:36d1c70e4a2b55f3aaa4ccc7c88e2a17
+      region: en
+      card_no: NY2024-001EN
+      variant_key: standard
+      home_set_id: NY2024
+      source_face_map:
+        - source_index: 0
+          face_id: f:67b8b56d010558398bab2692d34a5aed
+      observation:
+        region: en
+        card_no: NY2024-001EN
+        observation_hash: sha256:9bedcd9560e240ad0a922f3ec320778a79e5329e533d867152572b4d6801a2e2
+        rules_hash: sha256:a23e5a112ed255c2d072da4829d0c1ebe1ee226eb4d46c6f959f7ad4019314e2
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no:
+        target_observation:
+decisions:
+  - id: d:4cff01a70a9e73a237ff9b04f26aa45e000b1f6533137e52ec7ed454f3e821a5
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:4cff01a70a9e73a237ff9b04f26aa45e000b1f6533137e52ec7ed454f3e821a5
+    members:
+      -   - printing:p:71d7dcf68dbb5a3488876b2472194389
+          - sha256:dbb9e78403e610fce49568cbd4b6d0a70ff21b240517ec77ea1ebce8f9b45922
+    sample_ids:
+      - printing:p:71d7dcf68dbb5a3488876b2472194389
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

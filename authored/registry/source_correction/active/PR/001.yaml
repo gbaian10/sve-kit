@@ -1,0 +1,96 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:aea48ef0537985c988ad891a0fc365cf6d8aeb09acb749d3bcc01afff73b0688
+records:
+  - record_key: source_correction:x:95684aa0cb8059e49c425bac82293f09
+    kind: source_correction
+    owner: PR
+    data:
+      id: x:95684aa0cb8059e49c425bac82293f09
+      printing_id: p:682d9aaefe425f34b3f01fe82c81c831
+      face_id: f:31c7d998836b5d858f4c4510c849dcfe
+      field: card_type
+      expected_raw_value: '-'
+      corrected_value: Evolution Point
+      expected_source_hash: sha256:5eb7197540d32918de7c23a45fa7a57a142dc5c738d8150717636007b71ccb91
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:d0d9b571d6e0dc8b6f357c44a62de92d5bbbdad4eadc3eabcfeb1d0e9672edc8
+          image_src: /wordpress/wp-content/images/cardlist/PR/PR-388EN.png
+          region: en
+          locator: Card type label and evolved banner
+  - record_key: source_correction:x:9ad87765dec35da1baefc68fbdd3b332
+    kind: source_correction
+    owner: PR
+    data:
+      id: x:9ad87765dec35da1baefc68fbdd3b332
+      printing_id: p:35d063a4a7665dedbfecbfcee6ed62bd
+      face_id: f:31c7d998836b5d858f4c4510c849dcfe
+      field: card_type
+      expected_raw_value: '-'
+      corrected_value: Evolution Point
+      expected_source_hash: sha256:902ee86efccf6c52df8f8282c3d116519c3d5a77555bcbc2bea4fba166fee7ca
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:2f7f4a75f30403a911863f3fcf3f08518344bc26f4ba1489f9a9ada9214d558c
+          image_src: /wordpress/wp-content/images/cardlist/PR/PR-442EN.png
+          region: en
+          locator: Card type label and evolved banner
+  - record_key: source_correction:x:d8a9c3a94e465f08996614d65049600d
+    kind: source_correction
+    owner: PR
+    data:
+      id: x:d8a9c3a94e465f08996614d65049600d
+      printing_id: p:ad519fe804bd57faa496afd5234c60bf
+      face_id: f:73273aecebd45d9a81196a7e6613eed5
+      field: effect
+      expected_raw_value: 【疾走】
+      corrected_value: "【疾走】\n自分のエンドフェイズが来たとき、これは消滅する。"
+      expected_source_hash: sha256:daae2afa3464a8882766c4da357ffdd91c143b96fba626a59490210ea354313c
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:32a12bf6b0cccd667b8d38e162ba90261a08cd32f4efe769881c919199e69793
+          image_src: /wordpress/wp-content/images/cardlist/PR/pr-114.png
+          region: jp
+          locator: Card rules text box
+decisions:
+  - id: d:aea48ef0537985c988ad891a0fc365cf6d8aeb09acb749d3bcc01afff73b0688
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:aea48ef0537985c988ad891a0fc365cf6d8aeb09acb749d3bcc01afff73b0688
+    members:
+      -   - source_correction:x:95684aa0cb8059e49c425bac82293f09
+          - sha256:ea9f84117a1802a9fe21c11b8fba378cc6695ffdd2ad8fd16bb94e0d532d95d8
+      -   - source_correction:x:9ad87765dec35da1baefc68fbdd3b332
+          - sha256:124fd779dedba3fc39f615cdc0518f0ddd0b0822cc2aa57ada02b45718629db0
+      -   - source_correction:x:d8a9c3a94e465f08996614d65049600d
+          - sha256:b6c614d4deeb77bd77c4be198a7cfa57a7be03ffa87b0b9d33b7cfae14ab9cdc
+    sample_ids:
+      - source_correction:x:95684aa0cb8059e49c425bac82293f09
+      - source_correction:x:9ad87765dec35da1baefc68fbdd3b332
+      - source_correction:x:d8a9c3a94e465f08996614d65049600d
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

@@ -1,0 +1,546 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:a2b0b14987aba604c8ec1b069742b44a3bb993aaee1af461057968f340c36940
+records:
+  - record_key: printing:p:04718bdbba2d5baf84edbd0c2ae70669
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:04718bdbba2d5baf84edbd0c2ae70669
+      card_id: c:cb6eb30048d75b12bd814259783def11
+      region: jp
+      card_no: EBD01-001
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:42268c6af8f85de5b096a3f605f65b47
+      observation:
+        region: jp
+        card_no: EBD01-001
+        observation_hash: sha256:46eec645f1d8d444d8982dacb5d3336cdf6b700d24fbf612f5d3e93f552ebc6e
+        rules_hash: sha256:468d282bf9e7fb2e2e470e42e00d4456a4d9f19aabb670a8e6cf52f12642a81c
+        recipe: registry-observation-v1
+  - record_key: printing:p:aee8c6a898bb5a4f8a377a1ae2cf36bf
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:aee8c6a898bb5a4f8a377a1ae2cf36bf
+      card_id: c:df14c17f0afe5e80a62409b431875fd5
+      region: jp
+      card_no: EBD01-002
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:40771a3eeaa85d9c8e741f939a2ffd73
+      observation:
+        region: jp
+        card_no: EBD01-002
+        observation_hash: sha256:41ce93e270ed66a042c611e3a8214fc474b5e04b7cfd4d8d146611c85f8ab25e
+        rules_hash: sha256:d3a412c497612f43dbef8d29c4b9bb1a809a02190379471d79223baafe6a9777
+        recipe: registry-observation-v1
+  - record_key: printing:p:b664817aa19357269137362f2a21f381
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:b664817aa19357269137362f2a21f381
+      card_id: c:36afb8f4c6ab5617829da18f8c07be3e
+      region: jp
+      card_no: EBD01-003
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:264cf770a1315317a0e0498be3f296eb
+      observation:
+        region: jp
+        card_no: EBD01-003
+        observation_hash: sha256:784ea1d394aeeccc2798fa773e8f4c0ffa47eadd8c1ea25c17afad408965c28a
+        rules_hash: sha256:bd16242f4185ffef6772cf538ab914acaf4c6bf826e1c47cee4201c8e738f535
+        recipe: registry-observation-v1
+  - record_key: printing:p:73ca18fb76905596819022600f15cc79
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:73ca18fb76905596819022600f15cc79
+      card_id: c:194d5e280cea56f2887d8b840e59a2e6
+      region: jp
+      card_no: EBD01-004
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:0280fb68a3715317964bb1166d6a5238
+      observation:
+        region: jp
+        card_no: EBD01-004
+        observation_hash: sha256:9fa709f6641b0039a92d5e1ce6bde23994fd834b0cadbfc6d65cb497be08c8b8
+        rules_hash: sha256:e6e11d7a3b49ac15362387ae54604e05d72bc2ca24e2c082da6ef8522ee947d1
+        recipe: registry-observation-v1
+  - record_key: printing:p:79193c89aa6e520080e3941d09da5035
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:79193c89aa6e520080e3941d09da5035
+      card_id: c:d83d576b36d25aabbae68f940bcf04f3
+      region: jp
+      card_no: EBD01-005
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:87cb9686ce195951923f600c2e0be610
+      observation:
+        region: jp
+        card_no: EBD01-005
+        observation_hash: sha256:32e8aaeb5a03f93f511891ea456dff6e6cad6e8a8132be52f84f008c5f798d5e
+        rules_hash: sha256:bf28f9fe4635f9a055fbbea4ca47001f0a9d0aeb5922725a3c5b11cdeedffb12
+        recipe: registry-observation-v1
+  - record_key: printing:p:5981888b95ca5938ac95a2c7851e841b
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:5981888b95ca5938ac95a2c7851e841b
+      card_id: c:3529dd06046857d5a65f93a558c57ee9
+      region: jp
+      card_no: EBD01-006
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:0f3b321b42725f889ca364de0218a946
+      observation:
+        region: jp
+        card_no: EBD01-006
+        observation_hash: sha256:801b4ba05740de3d042c99da164a5dd07c831f2f870725ab441abc1828b180b4
+        rules_hash: sha256:c12fa7c269338ea54372a520c0340e5d5fa36a7a94a1ab34eaff60376fdbcbe0
+        recipe: registry-observation-v1
+  - record_key: printing:p:aeba21d26263504bba2f9e2bf0c45092
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:aeba21d26263504bba2f9e2bf0c45092
+      card_id: c:b47835e91a6d5c74baab4a23ec164644
+      region: jp
+      card_no: EBD01-007
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:e8e7c4c425e95507a59d55d5dbe316f3
+      observation:
+        region: jp
+        card_no: EBD01-007
+        observation_hash: sha256:50830f557fa468a1fd715190c7811b61290300d580906f08afe57840cc9b769b
+        rules_hash: sha256:7e61bbc34bd17cbd261b4ee245256a97630544c77cc86fd265aad98506fbfbc8
+        recipe: registry-observation-v1
+  - record_key: printing:p:52a4d7959d365079a53f79d36ee4c90f
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:52a4d7959d365079a53f79d36ee4c90f
+      card_id: c:6a5ae488c8e3593daeabd4956db9a1ed
+      region: jp
+      card_no: EBD01-008
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:0ceac8aefc0e5dcab1687e59ceba8363
+      observation:
+        region: jp
+        card_no: EBD01-008
+        observation_hash: sha256:702d64b8fb6448385487ab8c755677e164295b8d5dd1f9fc29fada0bff22746c
+        rules_hash: sha256:a197c96d0e64e944befb4f5bacefcf7add8e80f2a413df708549917b74b15ea3
+        recipe: registry-observation-v1
+  - record_key: printing:p:ceb70a7c59905e42896265fd0eb5caf9
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:ceb70a7c59905e42896265fd0eb5caf9
+      card_id: c:b65bb2bc04d5575aaa5c7873f2ee3b80
+      region: jp
+      card_no: EBD01-009
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:f16d953463e35b24ab349aa5fb262a6c
+      observation:
+        region: jp
+        card_no: EBD01-009
+        observation_hash: sha256:ed820e5018e7469020e364c0b2b7ba3bacd563d53be18738b1a28fba60a56682
+        rules_hash: sha256:5235c7d3106aa0e8adaaee9f0388426d0b88c05541888b8fe932c929939d7c93
+        recipe: registry-observation-v1
+  - record_key: printing:p:17be86f2801850269206a1beb048af51
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:17be86f2801850269206a1beb048af51
+      card_id: c:e1dda5c2d62b508e8d145177bd73bf3b
+      region: jp
+      card_no: EBD01-010
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:28ece823195055c6afdedf4702c50bae
+      observation:
+        region: jp
+        card_no: EBD01-010
+        observation_hash: sha256:f357d5dca7573fc3f4115581039eb56dfcde968501ecb1a57abc138836dd44e7
+        rules_hash: sha256:492b5877cbb86628a663fadd9532f6aebf4bb5f46216ee08372cba7fdb5ece07
+        recipe: registry-observation-v1
+  - record_key: printing:p:7f8d242cdbe35bcfbd914795514bd951
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:7f8d242cdbe35bcfbd914795514bd951
+      card_id: c:d6d609a7709556d784d927fa312aa70e
+      region: jp
+      card_no: EBD01-011
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:a7960eb5fd4a5c849344ae37cf90caec
+      observation:
+        region: jp
+        card_no: EBD01-011
+        observation_hash: sha256:cc9af5b6a423051dac1518adb79f0dd331ce290db9f9f39967df1548c9b77379
+        rules_hash: sha256:7c313865ba8833db8500a5bde2f98b21d72f9fd484c003603d7f887009d788f6
+        recipe: registry-observation-v1
+  - record_key: printing:p:6ad39210c5515644a47c97a5f1a0ce69
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:6ad39210c5515644a47c97a5f1a0ce69
+      card_id: c:56ae87588e225566bf94145f5adcce72
+      region: jp
+      card_no: EBD01-012
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:94c92d7d1b0d5e4589c00330aa7e7fc6
+      observation:
+        region: jp
+        card_no: EBD01-012
+        observation_hash: sha256:8b920f34a1ccc22fe2ed1e8f8fd7ae2aaac1240629df13a6386b1f9706e2564c
+        rules_hash: sha256:ae73e129a63593c477c078ef1bab62ae1e297ce0d6895bed3841b8c7124e6bb2
+        recipe: registry-observation-v1
+  - record_key: printing:p:1079c66004fc501fb2aea87f4734bdca
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:1079c66004fc501fb2aea87f4734bdca
+      card_id: c:32238265f6795ae5824c8dfc0b8ebba3
+      region: jp
+      card_no: EBD01-013
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:4d4b83d3339c59f0b0472068759351cb
+      observation:
+        region: jp
+        card_no: EBD01-013
+        observation_hash: sha256:970f890f30248e000e03ec0660ade4a30b28c8a8363a9367363f86e8176b18ed
+        rules_hash: sha256:7f40fff91257575c7c7a82072be4ec20342086ae700f2a8a393fcbd589c574d9
+        recipe: registry-observation-v1
+  - record_key: printing:p:b1298a3160265aef82bf4907854b8e3b
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:b1298a3160265aef82bf4907854b8e3b
+      card_id: c:7235ef5885865ba2a18ec785cd39a87f
+      region: jp
+      card_no: EBD01-014
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:8ff794fb9f4a5b3c87475db2821a65e6
+      observation:
+        region: jp
+        card_no: EBD01-014
+        observation_hash: sha256:4ebf8b84bd3c13e34d9d770ded7a5e3b5f74fb79e6e52310482a49f8237e1155
+        rules_hash: sha256:599d1bcc98dafe7e96b7b3181aad63aad9e7d2e489eb97eee10eb6329f9c2609
+        recipe: registry-observation-v1
+  - record_key: printing:p:1a330bdf962b5ac691781a3428854daf
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:1a330bdf962b5ac691781a3428854daf
+      card_id: c:31a10e3616ac560580d059cd2299152a
+      region: jp
+      card_no: EBD01-015
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:9c90c743b99e5e4d8a0b473977312762
+      observation:
+        region: jp
+        card_no: EBD01-015
+        observation_hash: sha256:79cdf24485f679ff69fb060b84020063489379959b129de0adac50736f78ac10
+        rules_hash: sha256:3f52fce02548954118fe7d832174d73e651f696688b43f2d2b5d7a9edb3c84c2
+        recipe: registry-observation-v1
+  - record_key: printing:p:464091c1ab095adeb1fe7169ab4f3545
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:464091c1ab095adeb1fe7169ab4f3545
+      card_id: c:fb5946ec232a5b619e2d5e58ba4b827e
+      region: jp
+      card_no: EBD01-016
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:f8308d84c5835190b1ab572984a4a9c0
+      observation:
+        region: jp
+        card_no: EBD01-016
+        observation_hash: sha256:9f9e39736e18456b8fc936503e839bff78bee6d8d0b1d256befdab759433f4a8
+        rules_hash: sha256:06429819b78f7186ca11498edbc4902d02160d67b94cc2b4367772ba778a6647
+        recipe: registry-observation-v1
+  - record_key: printing:p:372950b571ea5c1ca0c5ab4d3fc49b38
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:372950b571ea5c1ca0c5ab4d3fc49b38
+      card_id: c:1b1067432f955514a890db8cbee56979
+      region: jp
+      card_no: EBD01-017
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:f25993f3034451d093ced714c2946ba3
+      observation:
+        region: jp
+        card_no: EBD01-017
+        observation_hash: sha256:4ec78f2a2c4d92d08035f0bbedaaecdc1104ae0ca2de442d541518d71055ba65
+        rules_hash: sha256:0b03dafcccee123f2ac488ade7d8cf9dda2c5e6c1d50b4eeaaa7305f8bb3cc5e
+        recipe: registry-observation-v1
+  - record_key: printing:p:9e484b808e4d5de98affacca9463ab79
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:9e484b808e4d5de98affacca9463ab79
+      card_id: c:25b3fe881d4159afb4bb206c926f4633
+      region: jp
+      card_no: EBD01-018
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:53dda541b64c5ee0b8551e3fa54fa43e
+      observation:
+        region: jp
+        card_no: EBD01-018
+        observation_hash: sha256:a41a7d8113512b3fc68ef4c389e513fa485dce435706e7210de50e819943d14b
+        rules_hash: sha256:695ea06efce01bde2783a66bd7afbb7dd5599a918753ca02fb84211de281fd16
+        recipe: registry-observation-v1
+  - record_key: printing:p:2928a303f4e353a2b601e01c8e0585ca
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:2928a303f4e353a2b601e01c8e0585ca
+      card_id: c:bb1582a3a4b95a24aca8fa2d5290e2c7
+      region: jp
+      card_no: EBD01-019
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:68bdd140a2995c42917d32dc9f2a52ae
+      observation:
+        region: jp
+        card_no: EBD01-019
+        observation_hash: sha256:9c521f5e52e4bb4a6d9a28071aaea7e94b19bed2b06b55cf85a3c31588fae621
+        rules_hash: sha256:1828a741d1d221a5dfc483bf4aae112274b6c32bbf0d239ebde210af49594d31
+        recipe: registry-observation-v1
+  - record_key: printing:p:ee91b2f4c78a523184a215a4580155af
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:ee91b2f4c78a523184a215a4580155af
+      card_id: c:7e4fbf03046554d3b1d9847dcf171bf0
+      region: jp
+      card_no: EBD01-020
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:76c5750dc9665003a05f7915d0f6996d
+      observation:
+        region: jp
+        card_no: EBD01-020
+        observation_hash: sha256:18f3e501c77728b405187fe392d0706f325e0a46e391a56690b58ad9364b70bd
+        rules_hash: sha256:744a1b3bc6a096715c01641d90986a0f3dbe91a33315d97050cd653a193c6351
+        recipe: registry-observation-v1
+  - record_key: printing:p:d98adcbe5d97578a9b42fdda24ec1f64
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:d98adcbe5d97578a9b42fdda24ec1f64
+      card_id: c:b195275b18fc54529e70f0460d35cdc3
+      region: jp
+      card_no: EBD01-021
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:65c583d7a14157d2be6dcd0c54e4383d
+      observation:
+        region: jp
+        card_no: EBD01-021
+        observation_hash: sha256:441eb528884d93518ca131ab44fb0aa9857aeecfea320db32c5391e966055c2c
+        rules_hash: sha256:718c7435ffeccbf407fd61d8312aae2931e1dc6723f9b6eeab2d8b1078aed045
+        recipe: registry-observation-v1
+  - record_key: printing:p:b9202e6d28975d13b8f27b6625c995ac
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:b9202e6d28975d13b8f27b6625c995ac
+      card_id: c:5807c89e0e51554d87de735bdd325a44
+      region: jp
+      card_no: EBD01-LD01
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:316b5d22b7b759818c1b91c18e69c496
+      observation:
+        region: jp
+        card_no: EBD01-LD01
+        observation_hash: sha256:c5471db031df005b1568f1539c35257953fdcb0cc183c3c603111f4cc0e0e7fd
+        rules_hash: sha256:26e72e961f26a02151f5129674dd4bd8c43546562e044c5fccb15b10bcef779b
+        recipe: registry-observation-v1
+  - record_key: printing:p:1c4b5693f7285223ac6b193f2c263e55
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:1c4b5693f7285223ac6b193f2c263e55
+      card_id: c:01391302a9d850a3b1502877fa6276bb
+      region: jp
+      card_no: EBD01-T01
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:11f9dcf8fc2c5a05888853ecd88b19c5
+      observation:
+        region: jp
+        card_no: EBD01-T01
+        observation_hash: sha256:8c679f0aa8295c9c0e0743b19d05f3716c7089ed0d253d32b7cdcc8c124643b1
+        rules_hash: sha256:0ccceb5e6e4739bced24538b3d2f57257e1c2d460aa49487b953b70e2fbfcb5e
+        recipe: registry-observation-v1
+  - record_key: printing:p:6f5a066f3cef58cc8dbaa9b3d0480275
+    kind: printing
+    owner: EBD01
+    data:
+      id: p:6f5a066f3cef58cc8dbaa9b3d0480275
+      card_id: c:1c5a74b1e95a5d3594bae80573767824
+      region: jp
+      card_no: EBD01-T02
+      variant_key: standard
+      home_set_id: EBD01
+      source_face_map:
+        - source_index: 0
+          face_id: f:3ea425a71e145b8c890ef31e462acc18
+      observation:
+        region: jp
+        card_no: EBD01-T02
+        observation_hash: sha256:c5c43744b2212acd9772d7fe5ef2bfb7a12de6a544a99b24c0f1e900ee069903
+        rules_hash: sha256:8f6f1969d8927e6494eb77042352ee0f448a7d225c2cab6152a9b39c206929ff
+        recipe: registry-observation-v1
+decisions:
+  - id: d:a2b0b14987aba604c8ec1b069742b44a3bb993aaee1af461057968f340c36940
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:a2b0b14987aba604c8ec1b069742b44a3bb993aaee1af461057968f340c36940
+    members:
+      -   - printing:p:04718bdbba2d5baf84edbd0c2ae70669
+          - sha256:5129cc48a56e93fcf07f7bf9bcf406226526147bf0098ddeb23ecee26ed0dea9
+      -   - printing:p:1079c66004fc501fb2aea87f4734bdca
+          - sha256:e25ee97afdf7abd72c6a904da4bb60950d4b9b302168715e749c679857c02693
+      -   - printing:p:17be86f2801850269206a1beb048af51
+          - sha256:491c362f2ad082378db4156484c3f69f456f78b0bf64f026302a0d62dc71f99d
+      -   - printing:p:1a330bdf962b5ac691781a3428854daf
+          - sha256:d3d28e13af2717e3d32bbcff65a0555df34562cc5bdb7ce03df1edfbd9eef3a1
+      -   - printing:p:1c4b5693f7285223ac6b193f2c263e55
+          - sha256:e5cd318be20ed9fa5279d967a3a82f71b9fadeb2dfea23fbd8d7350dbaaa862b
+      -   - printing:p:2928a303f4e353a2b601e01c8e0585ca
+          - sha256:37213eb3d40c4bdb191c0377738b5b1a306d59ec6e1b1ed7f846260f2c689187
+      -   - printing:p:372950b571ea5c1ca0c5ab4d3fc49b38
+          - sha256:d151e955820a00bdcd0fb1dfec977eb49f6d8dc1df11b6a3c91cb048c2a27d25
+      -   - printing:p:464091c1ab095adeb1fe7169ab4f3545
+          - sha256:d704d66cab4e3d35f64046f3c8396aa5b0f9e8f860753920217201244d30cfa3
+      -   - printing:p:52a4d7959d365079a53f79d36ee4c90f
+          - sha256:1828e320f754d74ebcca55d1eb0e5e3dbcdb2ba94d0e5a87c293ed47ab8efee4
+      -   - printing:p:5981888b95ca5938ac95a2c7851e841b
+          - sha256:638c6cf6bca8e0bace2a682fe89419919e92ff6c4f1bd079462ce6349306e2a7
+      -   - printing:p:6ad39210c5515644a47c97a5f1a0ce69
+          - sha256:dba3fa870e6c6617c793de62d25a06ad8149863156ab25bc4a15c383851ddd43
+      -   - printing:p:6f5a066f3cef58cc8dbaa9b3d0480275
+          - sha256:5df9f9fb37fc3691423ada2c68e5540305c4726f4f1759776faa56bc1db9b754
+      -   - printing:p:73ca18fb76905596819022600f15cc79
+          - sha256:54056cbce4d9683d0d1aec910f273ebed6340206bc314b8993c289f3dabc505f
+      -   - printing:p:79193c89aa6e520080e3941d09da5035
+          - sha256:24ca273aa23dbf5803ace9bd607ecdc43777fba2b84a84d8b43ca488201d2c05
+      -   - printing:p:7f8d242cdbe35bcfbd914795514bd951
+          - sha256:c3cd3401491efc9196228987c18bf1ca7cd5e8840c57a2889337909494b47d5f
+      -   - printing:p:9e484b808e4d5de98affacca9463ab79
+          - sha256:ddf7742ab959c7f83cbc341c7e64dab7af26781f2fcedf66b552489dd4a77004
+      -   - printing:p:aeba21d26263504bba2f9e2bf0c45092
+          - sha256:324b4fe77f43daad27c1ef34174257d5bb05fb9831c35d707bae213cce61599f
+      -   - printing:p:aee8c6a898bb5a4f8a377a1ae2cf36bf
+          - sha256:eca9eb7a8c90975ded583febd3e085a6b4b10600b9ebf4a13ee57173ec622aff
+      -   - printing:p:b1298a3160265aef82bf4907854b8e3b
+          - sha256:7ba57d07400daf7a82a9ee39ec05ea67f4d8fce69dd04c4ce87873be56a8b837
+      -   - printing:p:b664817aa19357269137362f2a21f381
+          - sha256:87416f774b83c977de6c9ff8bc8988e6f8b7116531249396865fffdce4830c98
+      -   - printing:p:b9202e6d28975d13b8f27b6625c995ac
+          - sha256:17510f79e6a0e89477bddc6c3f0a3575ff7f40c6e163c86d22e0db762210ad6e
+      -   - printing:p:ceb70a7c59905e42896265fd0eb5caf9
+          - sha256:de0b7bd0481907bd2fdb224e775d46dd28d178a4cf0d75e1f73d417415f788f2
+      -   - printing:p:d98adcbe5d97578a9b42fdda24ec1f64
+          - sha256:f1c29a4891e112d231dc5df5f9eaa9a30cff8f6233ecfcd9ec97a7be8f5c17b0
+      -   - printing:p:ee91b2f4c78a523184a215a4580155af
+          - sha256:8bfe967e53454e2fa129e5642a8924aa81d4b9f09f681a57bda0843bbf0cc9ee
+    sample_ids:
+      - printing:p:04718bdbba2d5baf84edbd0c2ae70669
+      - printing:p:1079c66004fc501fb2aea87f4734bdca
+      - printing:p:17be86f2801850269206a1beb048af51
+      - printing:p:1a330bdf962b5ac691781a3428854daf
+      - printing:p:1c4b5693f7285223ac6b193f2c263e55
+      - printing:p:2928a303f4e353a2b601e01c8e0585ca
+      - printing:p:372950b571ea5c1ca0c5ab4d3fc49b38
+      - printing:p:464091c1ab095adeb1fe7169ab4f3545
+      - printing:p:52a4d7959d365079a53f79d36ee4c90f
+      - printing:p:5981888b95ca5938ac95a2c7851e841b
+      - printing:p:6ad39210c5515644a47c97a5f1a0ce69
+      - printing:p:6f5a066f3cef58cc8dbaa9b3d0480275
+      - printing:p:73ca18fb76905596819022600f15cc79
+      - printing:p:79193c89aa6e520080e3941d09da5035
+      - printing:p:7f8d242cdbe35bcfbd914795514bd951
+      - printing:p:9e484b808e4d5de98affacca9463ab79
+      - printing:p:aeba21d26263504bba2f9e2bf0c45092
+      - printing:p:aee8c6a898bb5a4f8a377a1ae2cf36bf
+      - printing:p:b1298a3160265aef82bf4907854b8e3b
+      - printing:p:b664817aa19357269137362f2a21f381
+      - printing:p:b9202e6d28975d13b8f27b6625c995ac
+      - printing:p:ceb70a7c59905e42896265fd0eb5caf9
+      - printing:p:d98adcbe5d97578a9b42fdda24ec1f64
+      - printing:p:ee91b2f4c78a523184a215a4580155af
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

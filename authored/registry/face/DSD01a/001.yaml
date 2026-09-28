@@ -1,0 +1,128 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:3127f27b0df9461c5462e712d0ad56b4782c910e4fa63fc230db8f3ca9c130d9
+records:
+  - record_key: face:f:28951bc3e7585694ae9dbd2a99b6233e
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:28951bc3e7585694ae9dbd2a99b6233e
+      card_id: c:afe07906e1345490ab8c1474f3005425
+      ordinal: 0
+      side: front
+  - record_key: face:f:febf47a0dc5e5973a72c176a1569116c
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:febf47a0dc5e5973a72c176a1569116c
+      card_id: c:3654b2c800df5fec8eaec42a0b6b3c92
+      ordinal: 0
+      side: front
+  - record_key: face:f:93aa239cc4ca5315b5ba054e002803fa
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:93aa239cc4ca5315b5ba054e002803fa
+      card_id: c:5f273be39d6e54c3a9863814af95bca5
+      ordinal: 0
+      side: front
+  - record_key: face:f:0fa4e8c040cb5156a6da3468fff9ab0b
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:0fa4e8c040cb5156a6da3468fff9ab0b
+      card_id: c:d605f700a4105013afee2e21816c3739
+      ordinal: 0
+      side: front
+  - record_key: face:f:8be4564d79125a60b2aa718b2d33df3b
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:8be4564d79125a60b2aa718b2d33df3b
+      card_id: c:c1a7e10c96e458638cb5262a958f21f2
+      ordinal: 0
+      side: front
+  - record_key: face:f:ae7d49589faa504983d60e3fed1373ac
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:ae7d49589faa504983d60e3fed1373ac
+      card_id: c:bb7791cbf9965d3184644f772088f71a
+      ordinal: 0
+      side: front
+  - record_key: face:f:1953b522c4995fa9a5aec8b13e101669
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:1953b522c4995fa9a5aec8b13e101669
+      card_id: c:082c289cbfee53dc98f166eaa6ba23c6
+      ordinal: 0
+      side: front
+  - record_key: face:f:44d14435460d5831a4b740a4e404870b
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:44d14435460d5831a4b740a4e404870b
+      card_id: c:0bff6efb1643594d95449da31162ad56
+      ordinal: 0
+      side: front
+  - record_key: face:f:ceb7e35335a751a798aa957ffef35e6f
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:ceb7e35335a751a798aa957ffef35e6f
+      card_id: c:c313fe0b8a6f5b6eaa659e0b5d522fd9
+      ordinal: 0
+      side: front
+  - record_key: face:f:23c91a5993025b88b46b5bae2c1ab299
+    kind: face
+    owner: DSD01a
+    data:
+      id: f:23c91a5993025b88b46b5bae2c1ab299
+      card_id: c:5728a1cc3e8b5fe6a34aa606d95e4073
+      ordinal: 0
+      side: front
+decisions:
+  - id: d:3127f27b0df9461c5462e712d0ad56b4782c910e4fa63fc230db8f3ca9c130d9
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:3127f27b0df9461c5462e712d0ad56b4782c910e4fa63fc230db8f3ca9c130d9
+    members:
+      -   - face:f:0fa4e8c040cb5156a6da3468fff9ab0b
+          - sha256:2c504d1453cf686cad746be281c8b0489a59942780350a83e0c6d9236a1d6ba2
+      -   - face:f:1953b522c4995fa9a5aec8b13e101669
+          - sha256:98093cefdcae2b513ae4d52f8a343dc46b30dd6f4a13b7df5a67e2d019787e01
+      -   - face:f:23c91a5993025b88b46b5bae2c1ab299
+          - sha256:812f222e918c9366333d3ff2be52bc7de6a9f22bed23793c0ec73a3820ab0fa6
+      -   - face:f:28951bc3e7585694ae9dbd2a99b6233e
+          - sha256:eb5a23ff06253fe144a1096aa3728c7faf53db18dd872137b5170e79b888ab4a
+      -   - face:f:44d14435460d5831a4b740a4e404870b
+          - sha256:538d669061c66561ff1e8ea6c7bedf0cd4c1f0672ab7051792065d3b1b2216b2
+      -   - face:f:8be4564d79125a60b2aa718b2d33df3b
+          - sha256:f6ddf4c885d3e4377f40be7c1052094101bcbf04a356093f99029a18b161cb10
+      -   - face:f:93aa239cc4ca5315b5ba054e002803fa
+          - sha256:3295b152d7eac245e03cdc95969c53081004d1f882d21c02bd3d45fc1d4d58a1
+      -   - face:f:ae7d49589faa504983d60e3fed1373ac
+          - sha256:5fb124937c11c8a9e698ae1ca45834867a824f2944c3d4be0fd1d2241f459de2
+      -   - face:f:ceb7e35335a751a798aa957ffef35e6f
+          - sha256:af0d7faf5d4061909668df99807e8389cb8cdcb56ad5e0ace83635788b1b3da7
+      -   - face:f:febf47a0dc5e5973a72c176a1569116c
+          - sha256:dc28594b6f8f74daecd37f6a448920d39b9d7364cb79e59148e33508b4e50004
+    sample_ids:
+      - face:f:0fa4e8c040cb5156a6da3468fff9ab0b
+      - face:f:1953b522c4995fa9a5aec8b13e101669
+      - face:f:23c91a5993025b88b46b5bae2c1ab299
+      - face:f:28951bc3e7585694ae9dbd2a99b6233e
+      - face:f:44d14435460d5831a4b740a4e404870b
+      - face:f:8be4564d79125a60b2aa718b2d33df3b
+      - face:f:93aa239cc4ca5315b5ba054e002803fa
+      - face:f:ae7d49589faa504983d60e3fed1373ac
+      - face:f:ceb7e35335a751a798aa957ffef35e6f
+      - face:f:febf47a0dc5e5973a72c176a1569116c
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

@@ -1,0 +1,73 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:25eff17585e21dc94b7cb8f019d052fc285705e0b1f7af73f17dc63c2bb8bf52
+records:
+  - record_key: card:c:8fee50b1ea67517f89d066bb11e40c1e
+    kind: card
+    owner: CSD01
+    data:
+      id: c:8fee50b1ea67517f89d066bb11e40c1e
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD01
+  - record_key: card:c:d9f3d953abdf568396d2229059505a5f
+    kind: card
+    owner: CSD01
+    data:
+      id: c:d9f3d953abdf568396d2229059505a5f
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD01
+  - record_key: card:c:9211dcd6ae0b55138da2d1aa47f56b58
+    kind: card
+    owner: CSD01
+    data:
+      id: c:9211dcd6ae0b55138da2d1aa47f56b58
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD01
+  - record_key: card:c:1e1ceaee79cf5bf28234b69be56a9337
+    kind: card
+    owner: CSD01
+    data:
+      id: c:1e1ceaee79cf5bf28234b69be56a9337
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD01
+  - record_key: card:c:9c5bec5e9f245860bcbcb72378498d06
+    kind: card
+    owner: CSD01
+    data:
+      id: c:9c5bec5e9f245860bcbcb72378498d06
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD01
+decisions:
+  - id: d:25eff17585e21dc94b7cb8f019d052fc285705e0b1f7af73f17dc63c2bb8bf52
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:25eff17585e21dc94b7cb8f019d052fc285705e0b1f7af73f17dc63c2bb8bf52
+    members:
+      -   - card:c:1e1ceaee79cf5bf28234b69be56a9337
+          - sha256:c01c3dcc1521f0ccc2d90bf679395c9c13db60d33135dcb2521e129fb96dd28b
+      -   - card:c:8fee50b1ea67517f89d066bb11e40c1e
+          - sha256:49fab1b1685c33ab571f82225c89df44c792620cdbdaf383692eec77d07e31b7
+      -   - card:c:9211dcd6ae0b55138da2d1aa47f56b58
+          - sha256:b377290e5098313413c59734e959b214eba2178092b95f9cf6b7257fc5df1793
+      -   - card:c:9c5bec5e9f245860bcbcb72378498d06
+          - sha256:a50a4d173a8144ea00fdaea10e76b000e85289de12d4954eb00fa242e9b50d26
+      -   - card:c:d9f3d953abdf568396d2229059505a5f
+          - sha256:9498e7935a326ac61eb26f5024bef3e260f16e4ef6a66d88fc748bf723ed5ead
+    sample_ids:
+      - card:c:1e1ceaee79cf5bf28234b69be56a9337
+      - card:c:8fee50b1ea67517f89d066bb11e40c1e
+      - card:c:9211dcd6ae0b55138da2d1aa47f56b58
+      - card:c:9c5bec5e9f245860bcbcb72378498d06
+      - card:c:d9f3d953abdf568396d2229059505a5f
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

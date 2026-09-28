@@ -1,0 +1,96 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:f22be718d0a6a9ac057b0c85eed4a9dc2d1bb2ebc7a9b1f25539aad2845d2dfc
+records:
+  - record_key: source_correction:x:0f9180eb38865e18b388ed096b000237
+    kind: source_correction
+    owner: BP20
+    data:
+      id: x:0f9180eb38865e18b388ed096b000237
+      printing_id: p:3e2a484b3eb4519694da6f67e91aa74b
+      face_id: f:96e917bc3acb591daa03892682aa21a4
+      field: effect
+      expected_raw_value: '{ファンファーレ}下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに3ダメージ。【2】相手のリーダーすべてに2ダメージ。【3】1枚引く。自分の手札1枚を捨てる。【4】自分のPPを1回復する。'
+      corrected_value: 下記から1つチョイスする。【1】相手の場のフォロワー1体を選ぶ。それに3ダメージ。【2】相手のリーダーすべてに2ダメージ。【3】1枚引く。自分の手札1枚を捨てる。【4】自分のPPを1回復する。
+      expected_source_hash: sha256:0cd58a312a43e1e69b6599d7cc00ee292f5cf4b7329e3e80c151440adce361b6
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:5775f32fa09e25e17f5175cee9626934137a010c84114841acbf159ce4f2113e
+          image_src: /wordpress/wp-content/images/cardlist/BP20/bp20-p42.png
+          region: jp
+          locator: Card rules text box
+  - record_key: source_correction:x:fb2b48ffd61d5befb124b00a6bf6adfa
+    kind: source_correction
+    owner: BP20
+    data:
+      id: x:fb2b48ffd61d5befb124b00a6bf6adfa
+      printing_id: p:9d3fd19c0fe8507a88da6fecd183e8a6
+      face_id: f:dfaf60c973a45b73b232309dd6952811
+      field: effect
+      expected_raw_value: "{進化}{コスト1}：これは進化する。\n場の他のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}-2する。"
+      corrected_value: "{進化}{コスト1}：これは進化する。\n{ファンファーレ}場の他のフォロワー1体を選ぶ。それは{攻撃力}+2/{体力}-2する。"
+      expected_source_hash: sha256:91cfaa87e272443b35af9234cec721822d18176d744717b5bae67e9b82afe649
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:0216a0da640932d7103fd9e6fdc6d10675aa192146a3476b97d20107190814cb
+          image_src: /wordpress/wp-content/images/cardlist/BP20/bp20-p57.png
+          region: jp
+          locator: Card rules text box
+  - record_key: source_correction:x:8e4b0430ce215f9c9a4b83c4befade0a
+    kind: source_correction
+    owner: BP20
+    data:
+      id: x:8e4b0430ce215f9c9a4b83c4befade0a
+      printing_id: p:bf234b3d0ed1537d8d903132a7873d4a
+      face_id: f:e931d13f14ed5bd38833284ab051bfbc
+      field: effect
+      expected_raw_value: 自分のエンドフェイズが来たとき、相手の場のフォロワー1体を選ぶ。自分のEXエリアのクレストが3枚以上なら、それは{攻撃力}-2/{体力}-2する。5枚以上なら、代わりに{攻撃力}-4/{体力}-4する。
+      corrected_value: 自分のエンドフェイズが来たとき、相手の場のフォロワー1体を選ぶ。自分のEXエリアのクレストが3枚以上なら、それは{攻撃力}-2/{体力}-2する。5枚なら、代わりに{攻撃力}-4/{体力}-4する。
+      expected_source_hash: sha256:084d708a0874928abd2e02b62c519e28fccd308c46f9d5a72186850a0d42597a
+      source_hash_recipe: registry-observation-v1
+      reason: Official page transcription differs from the printed card image.
+      state: active
+      reported_to_official: false
+      reported_on:
+      report_url:
+      evidence:
+        - kind: card_image
+          sha256: sha256:566425ffe7eac8e851a6a357bfd0d125a54fbed05eda83a37aa840afe778a03f
+          image_src: /wordpress/wp-content/images/cardlist/BP20/bp20-p67.png
+          region: jp
+          locator: Card rules text box
+decisions:
+  - id: d:f22be718d0a6a9ac057b0c85eed4a9dc2d1bb2ebc7a9b1f25539aad2845d2dfc
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:f22be718d0a6a9ac057b0c85eed4a9dc2d1bb2ebc7a9b1f25539aad2845d2dfc
+    members:
+      -   - source_correction:x:0f9180eb38865e18b388ed096b000237
+          - sha256:222dd5c8023a9633b7184ef8b2faf35be900017522e246d9c9d61cef429a6183
+      -   - source_correction:x:8e4b0430ce215f9c9a4b83c4befade0a
+          - sha256:1b3881f7f88b217936d95f46dfa2db8a840657714d4c4c71a3121ec821fd70ce
+      -   - source_correction:x:fb2b48ffd61d5befb124b00a6bf6adfa
+          - sha256:560cc459623f6c85a840441d068d36a7fa4b7778252d52ada3824466b35eac93
+    sample_ids:
+      - source_correction:x:0f9180eb38865e18b388ed096b000237
+      - source_correction:x:8e4b0430ce215f9c9a4b83c4befade0a
+      - source_correction:x:fb2b48ffd61d5befb124b00a6bf6adfa
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

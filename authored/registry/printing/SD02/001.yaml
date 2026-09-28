@@ -1,0 +1,1237 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:e690f9f09eec7ccc9cb3fba54fc1a90af2d9a694747c5c81a31b6ec687e50611
+records:
+  - record_key: printing:p:03d92962d8105434ad451e4b8d6198af
+    kind: printing
+    owner: SD02
+    data:
+      id: p:03d92962d8105434ad451e4b8d6198af
+      card_id: c:217b8ff5c1ad58faab5ec0770ea33b40
+      region: en
+      card_no: SD02-001EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:a173c75a5e7453d9a1238e0cb41f42d4
+      observation:
+        region: en
+        card_no: SD02-001EN
+        observation_hash: sha256:56d95e9eb8656b9e159a2629fb06b984ae5c1f6bb8db8cc6e95db94c56b53a9d
+        rules_hash: sha256:eb2cbb009d73f43aab3d004b2c37ed952d5be74992f983fbbaf13ce6a5f39ecf
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-001
+        target_observation:
+          region: jp
+          card_no: SD02-001
+          observation_hash: sha256:2d030db3715078c104a89d230860ad48496894d6f49deaf81fa2a635eba9b704
+          rules_hash: sha256:e9252a415d09f479da17af862e13007a3cf06b9cabe46075471850ead9cc7ae5
+          recipe: registry-observation-v1
+  - record_key: printing:p:da4b060b52d8529ba18507691432ecd2
+    kind: printing
+    owner: SD02
+    data:
+      id: p:da4b060b52d8529ba18507691432ecd2
+      card_id: c:2e23114fdbad57d892717de0aa769c19
+      region: en
+      card_no: SD02-002EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1425b60840255f8eaec6aa8e6f609ed7
+      observation:
+        region: en
+        card_no: SD02-002EN
+        observation_hash: sha256:f789530a893070c68b1ee9b8c668958a59f9ede7aa680b97b1c3b7b144e65962
+        rules_hash: sha256:7df90e45aa320b4834b18fe1759a213360397fb7f727dc361080a4d0c08f1060
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-002
+        target_observation:
+          region: jp
+          card_no: SD02-002
+          observation_hash: sha256:4f56dfcb9c3f1ecd750a3d06688ee7bac6169dcf82ccd8678eeafe5073076d47
+          rules_hash: sha256:aeb3692be0df1619d8f9a21cfc462e791d3bbb8acff7a9c6999adacc869bec12
+          recipe: registry-observation-v1
+  - record_key: printing:p:7ea8785668955f6eaa5bbd3eeb53eeae
+    kind: printing
+    owner: SD02
+    data:
+      id: p:7ea8785668955f6eaa5bbd3eeb53eeae
+      card_id: c:c54aa263c8ee5a468e50f8cf3b831d03
+      region: en
+      card_no: SD02-003EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:8c11a3891bb1591f85a6e9e2f2f6b488
+      observation:
+        region: en
+        card_no: SD02-003EN
+        observation_hash: sha256:6b008de554be00b64d2d84ac8ea1298260f98237a6ffe63016d9180dd0dba7b2
+        rules_hash: sha256:4e8f7fe0e80f2c46c36c72ab8524e4eb22e0b589f7542252408a5f5c687fd7a6
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-003
+        target_observation:
+          region: jp
+          card_no: SD02-003
+          observation_hash: sha256:5aa0d3d138131a828ef24d29c4a903b3c2bfbf3fa908a2b831189bd65dc1ebe3
+          rules_hash: sha256:105094ac6fd52ed3e00115b3165958289f951e220354e0dd560279ad29c37f37
+          recipe: registry-observation-v1
+  - record_key: printing:p:42d380d1f61655ae82bb743dabcbb148
+    kind: printing
+    owner: SD02
+    data:
+      id: p:42d380d1f61655ae82bb743dabcbb148
+      card_id: c:856230f78b325207b9af44d8fce06b04
+      region: en
+      card_no: SD02-004EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:135728184ff45af699369f8cbb6a9769
+      observation:
+        region: en
+        card_no: SD02-004EN
+        observation_hash: sha256:2946a3bf92d4f9f465e8961069efd483f3a2ab1ddd98e2d18a8b9974ef5da982
+        rules_hash: sha256:eb2274f29b0954ba53ad89f701b1202fa8775108ff9be8b3e1355309f18336a5
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-004
+        target_observation:
+          region: jp
+          card_no: SD02-004
+          observation_hash: sha256:43902e4ded42446787af9a08cd669000db6a02cdbcc0d1abfc0d4e9c4769f94a
+          rules_hash: sha256:5e7b3b1aa91afdc4b0e6955632e4991a5118437b70cceb9b78e9b327da6971c9
+          recipe: registry-observation-v1
+  - record_key: printing:p:5f631d4153595ab6a099d98a8d67e4f7
+    kind: printing
+    owner: SD02
+    data:
+      id: p:5f631d4153595ab6a099d98a8d67e4f7
+      card_id: c:92b9929ab4435cd2a86a995d6502a110
+      region: en
+      card_no: SD02-005EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:77a6afdb6c635de0b42912b312e2bb0a
+      observation:
+        region: en
+        card_no: SD02-005EN
+        observation_hash: sha256:7c4b4f9405072b30f2de42564bb459c691d7bbbae680fe187b2a2b33da09b2f2
+        rules_hash: sha256:fec71398705f032a8612ec6f918507bb0c443878d638adcad5b502b0aa3db22e
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-005
+        target_observation:
+          region: jp
+          card_no: SD02-005
+          observation_hash: sha256:a4cb7330673cde32a9fedd5fb3179a4e93e91ee7c18387650d37bae8179e1958
+          rules_hash: sha256:75c87e3c020e1fb4938d608fa4e425097939a5a69f02644fb38c516fe3ae26b9
+          recipe: registry-observation-v1
+  - record_key: printing:p:a5affcf4d03e5f20a05462fe6e579e3f
+    kind: printing
+    owner: SD02
+    data:
+      id: p:a5affcf4d03e5f20a05462fe6e579e3f
+      card_id: c:7fec422b9fdd588f9e6d6f8c25d112f7
+      region: en
+      card_no: SD02-006EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:4031820e3b4d5c2cb926c7560a424f88
+      observation:
+        region: en
+        card_no: SD02-006EN
+        observation_hash: sha256:3a35d33dd76acfd87fdc6810aad1df6e3913b03ab33e192930cbbf8ae726e05c
+        rules_hash: sha256:7869aa98013cbfd31658058fd0d1dd210567fba9023d4da871e2a2762eedccc8
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-006
+        target_observation:
+          region: jp
+          card_no: SD02-006
+          observation_hash: sha256:d874ef7f3a7ccb6007252067049f2eef71cf40f0ce64a853d1360c8155215e76
+          rules_hash: sha256:e888588a744b37dc22f84f5cb56c96ed51eeb28cf313bcd658eb1c84c5d1c11b
+          recipe: registry-observation-v1
+  - record_key: printing:p:cec71f82a43c5ad39641640802579829
+    kind: printing
+    owner: SD02
+    data:
+      id: p:cec71f82a43c5ad39641640802579829
+      card_id: c:a800525557fe5a9281ceb0240881e438
+      region: en
+      card_no: SD02-007EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1e03caf64472598cadfbee9b676c02c9
+      observation:
+        region: en
+        card_no: SD02-007EN
+        observation_hash: sha256:d7724195cbcbc3f934690c80d5b4f3a6e884b5c4e7849035e0320381b871662f
+        rules_hash: sha256:c00470441eb96c6407696f7e408bbaf5d0a10821567091b8edfc0a2ffc3af530
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-007
+        target_observation:
+          region: jp
+          card_no: SD02-007
+          observation_hash: sha256:4ac261ec168bfd499beb9a8923ae324d9f82ccde6e7f7835fe650a52b0c8ccb7
+          rules_hash: sha256:0d89be2e8f44c73c9df7ecd538838e69bffe3e2a9051330dab7737b97e53c85a
+          recipe: registry-observation-v1
+  - record_key: printing:p:b206bcff83385bea80e404db282d8f30
+    kind: printing
+    owner: SD02
+    data:
+      id: p:b206bcff83385bea80e404db282d8f30
+      card_id: c:53a02d8082c75adab4ca7ad06ad97987
+      region: en
+      card_no: SD02-008EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:22681cc2040b5e0981164398201ee1d8
+      observation:
+        region: en
+        card_no: SD02-008EN
+        observation_hash: sha256:0d41caece15a37662bb48a496fce152c524685be3882f0dfdb2d67a927922919
+        rules_hash: sha256:3dc2cd83d9e65a4cdcbd199864416790391bb085744a750798aa801ef87719c0
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-008
+        target_observation:
+          region: jp
+          card_no: SD02-008
+          observation_hash: sha256:9a71d01ed4ba2bb7e498db06f6fbffd40acaa119685b117bfd6e828e6c5ade3f
+          rules_hash: sha256:85ecdf8b6024edf43cfbecbe2741dc6b1c5f6f672e5cd4fce201e38427b5a8f2
+          recipe: registry-observation-v1
+  - record_key: printing:p:84d2270300cb580db84c890e740016f4
+    kind: printing
+    owner: SD02
+    data:
+      id: p:84d2270300cb580db84c890e740016f4
+      card_id: c:32b2b38805a454f5b52218f7274458ae
+      region: en
+      card_no: SD02-009EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:024745f79eba5cfa97ac21ecfe63000e
+      observation:
+        region: en
+        card_no: SD02-009EN
+        observation_hash: sha256:8f5dbf0d2db6f70587d88162fb5fd5036a9a5997537adf52ea3516ef99a20ccb
+        rules_hash: sha256:facf3975357d655f100aa8f45b273d99ee89417ebeca70a53d3a6021485508e0
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-009
+        target_observation:
+          region: jp
+          card_no: SD02-009
+          observation_hash: sha256:0c02e22ce7d9ee2cb1b66a32c96a742c1f26c8b900d07d4072a1edd0faf13b44
+          rules_hash: sha256:68bd30bc54dccd1d391937327f5b80b35c06dddbba8bc2348e2a17d62bc35d48
+          recipe: registry-observation-v1
+  - record_key: printing:p:6f71986e39c75c99b9cd4428b5773253
+    kind: printing
+    owner: SD02
+    data:
+      id: p:6f71986e39c75c99b9cd4428b5773253
+      card_id: c:e24a3cc9237c5c99afabae635c329e67
+      region: en
+      card_no: SD02-010EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:b8dcd54e078f57b7a21782160e29949b
+      observation:
+        region: en
+        card_no: SD02-010EN
+        observation_hash: sha256:e4a272f74a6c5d7a10ad3a25db04c671950bc9271ca8383a916f62ab193d7e99
+        rules_hash: sha256:c18e964181998a5fa200a6d32f56716d398c650939063fb902ed118b65633a2e
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-010
+        target_observation:
+          region: jp
+          card_no: SD02-010
+          observation_hash: sha256:5e31658e52cc02de5703cba9b02576466decd52e51d03a36fa94c6351df45dba
+          rules_hash: sha256:6a74ee5281bc014d52f18908642e839a55b080595ad8bb95e765df7637d7801e
+          recipe: registry-observation-v1
+  - record_key: printing:p:a854b88103d952f896e97e04ab13d04a
+    kind: printing
+    owner: SD02
+    data:
+      id: p:a854b88103d952f896e97e04ab13d04a
+      card_id: c:c794c812a71b5bd3933da2473c1c2563
+      region: en
+      card_no: SD02-011EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:159e0648d522511495cb93cba2ba9051
+      observation:
+        region: en
+        card_no: SD02-011EN
+        observation_hash: sha256:78d0c409ade79b578eb5a12470680c4c0f2149b0b02c49542228766f23244235
+        rules_hash: sha256:214f6d4f668461b543a89a4799b517ce22234822e76a2411319c883346979bcd
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-011
+        target_observation:
+          region: jp
+          card_no: SD02-011
+          observation_hash: sha256:bf012427dd839f1b8635a579040ff0bedbd545cf5bd4908615f9dd8221ebe71e
+          rules_hash: sha256:64ba8cf0ee94b22c6efb5ff4e5c9f33c8fb4c7fb53efdc18151e9b8d678c079c
+          recipe: registry-observation-v1
+  - record_key: printing:p:cb208038f5365eadb7749d808f94a1aa
+    kind: printing
+    owner: SD02
+    data:
+      id: p:cb208038f5365eadb7749d808f94a1aa
+      card_id: c:464aeaca7f3e5f63b21fbaf625c149e2
+      region: en
+      card_no: SD02-012EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:b9d324698f5a539c8a9279b56a4504a0
+      observation:
+        region: en
+        card_no: SD02-012EN
+        observation_hash: sha256:ddc56e39774e36afadc935ad4eb2abb6ba5bfa648b6c01269ce8d43146a59deb
+        rules_hash: sha256:60d5746e55b477fdf5801c69782f387f839c020350a38ccfad844d4c2f5197e4
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-012
+        target_observation:
+          region: jp
+          card_no: SD02-012
+          observation_hash: sha256:2b8fc4c1010360df201096d0495fc0f0de92e20e19fdd4e3c5168faa45cd4a6f
+          rules_hash: sha256:00e472b2deb68f58246e072d1c40296539850ce3d2f342bf4887c0aa71d22359
+          recipe: registry-observation-v1
+  - record_key: printing:p:9264ed7494e25388b1b991761a44cc75
+    kind: printing
+    owner: SD02
+    data:
+      id: p:9264ed7494e25388b1b991761a44cc75
+      card_id: c:9074274015c859758b45a24aa8a26bf9
+      region: en
+      card_no: SD02-013EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:71bcf30f36e551eb87215cd24cc32222
+      observation:
+        region: en
+        card_no: SD02-013EN
+        observation_hash: sha256:a7bff314fa2d87ff37b2dfa65cdf980ce3413d2bd832197fafc50fe126307eb1
+        rules_hash: sha256:cbe4ab8fa09a793d6b111985e0d25023aefae1b5d00a6286f06ffca612882052
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-013
+        target_observation:
+          region: jp
+          card_no: SD02-013
+          observation_hash: sha256:9b69295ca8f56711d621def450ec423a4e2f8fa57159ad12ed457e0f943e6ff0
+          rules_hash: sha256:0d815d65d5f96916c3b45f5ad8d7ba12dfd164ed9922625ffab882f4929db7dc
+          recipe: registry-observation-v1
+  - record_key: printing:p:763c58f75a115e4bb4b5b3978024d4a7
+    kind: printing
+    owner: SD02
+    data:
+      id: p:763c58f75a115e4bb4b5b3978024d4a7
+      card_id: c:6a52cfc7f6cc5750965713aaa8bbf487
+      region: en
+      card_no: SD02-014EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1dfd0fee40415c3fb226da8a780a6bb3
+      observation:
+        region: en
+        card_no: SD02-014EN
+        observation_hash: sha256:f2d6dd91b0af09a970abbc6eebd2084341835515003a91a9850ce3a19c752a36
+        rules_hash: sha256:bdd643006090c1868366001b9042d6e904978e3abff44e3c4a222ae328a30111
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-014
+        target_observation:
+          region: jp
+          card_no: SD02-014
+          observation_hash: sha256:50ac398f4f54124803be522422797bd85dc49f1ac477db459b243e54507522cf
+          rules_hash: sha256:13ab22937a8e91be26121cfaf4deafca1d8636f9db8b81e0e8d92b43f60a4b14
+          recipe: registry-observation-v1
+  - record_key: printing:p:4f92ece1b9e55d518816c65cd6cd1d5f
+    kind: printing
+    owner: SD02
+    data:
+      id: p:4f92ece1b9e55d518816c65cd6cd1d5f
+      card_id: c:af5fc4f3eb5d5789bed7be5b35bd945e
+      region: en
+      card_no: SD02-015EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:e96999415e865ad189e80a2a811618d0
+      observation:
+        region: en
+        card_no: SD02-015EN
+        observation_hash: sha256:c00644710f5b24de8915aeb65345c2e79004e149ed6f96f7e48809141c2ef510
+        rules_hash: sha256:cdfaafbbf4b89d5f9955c617a456b6021bfc1c38d4009d4054701cdaeb5f0a08
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-015
+        target_observation:
+          region: jp
+          card_no: SD02-015
+          observation_hash: sha256:b50d6614ee7601919155d5217e8a57b50640803df121a12543d8a4b4828acbb6
+          rules_hash: sha256:5930f5e86faacce9e8f44ecd74d60474a56b26b15de7240a9baca6ec969e2b38
+          recipe: registry-observation-v1
+  - record_key: printing:p:f8ee40b3e3685092817634252ae7bd17
+    kind: printing
+    owner: SD02
+    data:
+      id: p:f8ee40b3e3685092817634252ae7bd17
+      card_id: c:4403e215e8625f99a9095148691105cd
+      region: en
+      card_no: SD02-016EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:4d905d6de475581da24f3bfec80762f3
+      observation:
+        region: en
+        card_no: SD02-016EN
+        observation_hash: sha256:9b32907585feaf5e1e84b3df63225d1dea9bd6a49e48987a3edc18586bf294e7
+        rules_hash: sha256:a9319cbb6ce28b8b21a147c8351cc6aeb00d121adead1bf3d89ab84e98392f0f
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-016
+        target_observation:
+          region: jp
+          card_no: SD02-016
+          observation_hash: sha256:af8279ca656856209f537f365dd35df89133a1dc1533fb668afaa608c47a9333
+          rules_hash: sha256:7bfcca34545f0bb86d3c202bbda8be983251986e50a1ec0c70c7afe44913ed68
+          recipe: registry-observation-v1
+  - record_key: printing:p:0fa72abe16ba55f19f1b3adb29e6f0af
+    kind: printing
+    owner: SD02
+    data:
+      id: p:0fa72abe16ba55f19f1b3adb29e6f0af
+      card_id: c:9c30875ac83f5fcab8dacb83c89ccf0d
+      region: en
+      card_no: SD02-017EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1a954dc4b5535c2d8e8e1ffff3a50e20
+      observation:
+        region: en
+        card_no: SD02-017EN
+        observation_hash: sha256:41ff6d9001a14d20f0d16d422dec506249cbeb3c4d14f4d30f133b59951de318
+        rules_hash: sha256:bd8b922d59b048e07d1372906ed4bbfad743222d6ad7639d157bf3d89483b50c
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-017
+        target_observation:
+          region: jp
+          card_no: SD02-017
+          observation_hash: sha256:3c6da8c5610cf4c2111bdf0769fabb7c5c5faee354ff8f71398c9fd29aab855d
+          rules_hash: sha256:aa2ffb2dab6b1f09c934b96a3732a2cb4eeddfcec721fba438818a3f1b4f8293
+          recipe: registry-observation-v1
+  - record_key: printing:p:53ac5e6b252a565caa3258872ed79f85
+    kind: printing
+    owner: SD02
+    data:
+      id: p:53ac5e6b252a565caa3258872ed79f85
+      card_id: c:375395f8f4b454c096d776d6ee12edc8
+      region: en
+      card_no: SD02-018EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:2e94140bb5685b78bc88f6529fcd5d91
+      observation:
+        region: en
+        card_no: SD02-018EN
+        observation_hash: sha256:6ea83b7920fad3b22c1af9c60b92375c6202af784049d64e092ebecb227d0ca7
+        rules_hash: sha256:cc3ab8a533d1dcc0b3ad29c198d12347cb596d74511523bb1c1e8a47c167011a
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-018
+        target_observation:
+          region: jp
+          card_no: SD02-018
+          observation_hash: sha256:4b63ed003fcdbe1cfef9b97c181bc0a728ae400a1abce59f58fb44d9f1fbd826
+          rules_hash: sha256:94c3a2cf3df7d29135b1e58e32e3c0a02d5b2da2df88a20148822dac3724a660
+          recipe: registry-observation-v1
+  - record_key: printing:p:18fba1208e8d5402ba5e4e0a03d11c59
+    kind: printing
+    owner: SD02
+    data:
+      id: p:18fba1208e8d5402ba5e4e0a03d11c59
+      card_id: c:d1482a55b1a658028d1b283ba461dd4c
+      region: en
+      card_no: SD02-019EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:6ab931f867435822bfcb5dedafedc09c
+      observation:
+        region: en
+        card_no: SD02-019EN
+        observation_hash: sha256:582ea1d8e02fd1d23cf62b503b479eed993945ca5a99ecccec207f1f6391aca1
+        rules_hash: sha256:54ae40f87de8f25d92e0aa30774fae7f8c57cc4e1f13f90478d15fca4f00a480
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-019
+        target_observation:
+          region: jp
+          card_no: SD02-019
+          observation_hash: sha256:982f84bad727cf9649e9b8460d1a6e60d70fea1d88f5e9994dac33a2bc9e9998
+          rules_hash: sha256:19b6337a96320737223060f7a5adc503447f7e8d0a60c7b210cfa7cf05ce1ddb
+          recipe: registry-observation-v1
+  - record_key: printing:p:d7ebed18f91252269411a9ccd7fde8d7
+    kind: printing
+    owner: SD02
+    data:
+      id: p:d7ebed18f91252269411a9ccd7fde8d7
+      card_id: c:5b70c7caa4ca58e5bc4daa9e4b9c3cf9
+      region: en
+      card_no: SD02-020EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:12efcffea9dd55ce8763d2cfd1972d74
+      observation:
+        region: en
+        card_no: SD02-020EN
+        observation_hash: sha256:0edd6034a6507161b7307e18c6ab359da118e1dc59072963e081c575175a4552
+        rules_hash: sha256:3dcf72ad5485d10b39fd7db128493d3cc7c1f30b5ccf611c1c0d6f84ce29740d
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-020
+        target_observation:
+          region: jp
+          card_no: SD02-020
+          observation_hash: sha256:b27249e988a45f0f85e5c48888e8684d22921c76f9c5e945aeac20a26a964e12
+          rules_hash: sha256:d62faaa1d15c775acb481bd7830963ef5b9bae42f1178b03a73d6c7a7158aad9
+          recipe: registry-observation-v1
+  - record_key: printing:p:55295912249658e4b5fede25a5635ba5
+    kind: printing
+    owner: SD02
+    data:
+      id: p:55295912249658e4b5fede25a5635ba5
+      card_id: c:195dadd62803580bb28c9ea2283e08d0
+      region: en
+      card_no: SD02-LD01EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:991c025c62cd54bd85995190a0dd0d14
+      observation:
+        region: en
+        card_no: SD02-LD01EN
+        observation_hash: sha256:3d4c1959abc0170abd195462c542a514e24e8f19cc3304f2efc8cbe9313d390f
+        rules_hash: sha256:aefc770dbecb00b6a07e65a0f9e68dfc9676b7cb6e10ffe945bc8357fb62a346
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-LD01
+        target_observation:
+          region: jp
+          card_no: SD02-LD01
+          observation_hash: sha256:6a3c3982ff4bb768210aef6f41e4e5808de18aee77e70aad65e20357a4ed851b
+          rules_hash: sha256:091ccf0e4a24136df334ae09f2f2d797175cf659aa6dfee2aea1c628f7f9e08e
+          recipe: registry-observation-v1
+  - record_key: printing:p:e325f050628b589c906dc049b5792485
+    kind: printing
+    owner: SD02
+    data:
+      id: p:e325f050628b589c906dc049b5792485
+      card_id: c:82d42f86b30051be8c7ff26f75eecffa
+      region: en
+      card_no: SD02-T01EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:b7118b3c326a5dda9d4c3e833dce30b0
+      observation:
+        region: en
+        card_no: SD02-T01EN
+        observation_hash: sha256:c7251e1852a74030329d51941f808567ec4afde9a853a97cf36eeca18f1bc129
+        rules_hash: sha256:ee00fefe2f86f5e7ebd8285026322e8d7ef82fc9ad38d95fff428ef57f014dd8
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-T01
+        target_observation:
+          region: jp
+          card_no: SD02-T01
+          observation_hash: sha256:c932c9b9b55e2b3d6a059b66ff2b93428b616d5f86961c2ca6be8327bd627b67
+          rules_hash: sha256:2df83c7ac18f709ce053fffdfda6e4e6066262d4e5681130c17c1294051c89c9
+          recipe: registry-observation-v1
+  - record_key: printing:p:6f9531a21659554e9a089bc80c4b4e79
+    kind: printing
+    owner: SD02
+    data:
+      id: p:6f9531a21659554e9a089bc80c4b4e79
+      card_id: c:7267d7f95ff95d90a7b661d3aa67b285
+      region: en
+      card_no: SD02-T02EN
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:16087914d2dd55d48257d73dc88b6353
+      observation:
+        region: en
+        card_no: SD02-T02EN
+        observation_hash: sha256:a59386fcc1400ef0ad654ab6d7a7aab779deef8890e5c2e8dca0a35a310ec21c
+        rules_hash: sha256:f200ca738167943f6bbcf41847b3e6b637b982361f1ea3cb04d00faf6a97731d
+        recipe: registry-observation-v1
+      cross_region_review:
+        checked: true
+        target_jp_card_no: SD02-T02
+        target_observation:
+          region: jp
+          card_no: SD02-T02
+          observation_hash: sha256:226cd674ebed8723c4854dee6e8f455261b088ef01b667c9aad99448600c424d
+          rules_hash: sha256:f6862976f7f768acc4ff2d197e4c67efa047552890de298fab64a46f7b059400
+          recipe: registry-observation-v1
+  - record_key: printing:p:a63a1b723f6c5caebe1a73c5da21ba22
+    kind: printing
+    owner: SD02
+    data:
+      id: p:a63a1b723f6c5caebe1a73c5da21ba22
+      card_id: c:217b8ff5c1ad58faab5ec0770ea33b40
+      region: jp
+      card_no: SD02-001
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:a173c75a5e7453d9a1238e0cb41f42d4
+      observation:
+        region: jp
+        card_no: SD02-001
+        observation_hash: sha256:2d030db3715078c104a89d230860ad48496894d6f49deaf81fa2a635eba9b704
+        rules_hash: sha256:e9252a415d09f479da17af862e13007a3cf06b9cabe46075471850ead9cc7ae5
+        recipe: registry-observation-v1
+  - record_key: printing:p:d2f1a6d0d85758f186c34d8598b17dfc
+    kind: printing
+    owner: SD02
+    data:
+      id: p:d2f1a6d0d85758f186c34d8598b17dfc
+      card_id: c:2e23114fdbad57d892717de0aa769c19
+      region: jp
+      card_no: SD02-002
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1425b60840255f8eaec6aa8e6f609ed7
+      observation:
+        region: jp
+        card_no: SD02-002
+        observation_hash: sha256:4f56dfcb9c3f1ecd750a3d06688ee7bac6169dcf82ccd8678eeafe5073076d47
+        rules_hash: sha256:aeb3692be0df1619d8f9a21cfc462e791d3bbb8acff7a9c6999adacc869bec12
+        recipe: registry-observation-v1
+  - record_key: printing:p:da877e067f425b4aa20a234b6b295a68
+    kind: printing
+    owner: SD02
+    data:
+      id: p:da877e067f425b4aa20a234b6b295a68
+      card_id: c:c54aa263c8ee5a468e50f8cf3b831d03
+      region: jp
+      card_no: SD02-003
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:8c11a3891bb1591f85a6e9e2f2f6b488
+      observation:
+        region: jp
+        card_no: SD02-003
+        observation_hash: sha256:5aa0d3d138131a828ef24d29c4a903b3c2bfbf3fa908a2b831189bd65dc1ebe3
+        rules_hash: sha256:105094ac6fd52ed3e00115b3165958289f951e220354e0dd560279ad29c37f37
+        recipe: registry-observation-v1
+  - record_key: printing:p:81c471d60710543683c5e6b9ed715f01
+    kind: printing
+    owner: SD02
+    data:
+      id: p:81c471d60710543683c5e6b9ed715f01
+      card_id: c:856230f78b325207b9af44d8fce06b04
+      region: jp
+      card_no: SD02-004
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:135728184ff45af699369f8cbb6a9769
+      observation:
+        region: jp
+        card_no: SD02-004
+        observation_hash: sha256:43902e4ded42446787af9a08cd669000db6a02cdbcc0d1abfc0d4e9c4769f94a
+        rules_hash: sha256:5e7b3b1aa91afdc4b0e6955632e4991a5118437b70cceb9b78e9b327da6971c9
+        recipe: registry-observation-v1
+  - record_key: printing:p:c96b64324cb354a4aba378f752e5f353
+    kind: printing
+    owner: SD02
+    data:
+      id: p:c96b64324cb354a4aba378f752e5f353
+      card_id: c:92b9929ab4435cd2a86a995d6502a110
+      region: jp
+      card_no: SD02-005
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:77a6afdb6c635de0b42912b312e2bb0a
+      observation:
+        region: jp
+        card_no: SD02-005
+        observation_hash: sha256:a4cb7330673cde32a9fedd5fb3179a4e93e91ee7c18387650d37bae8179e1958
+        rules_hash: sha256:75c87e3c020e1fb4938d608fa4e425097939a5a69f02644fb38c516fe3ae26b9
+        recipe: registry-observation-v1
+  - record_key: printing:p:797fff9fcff65b07ae9c5ec3381751e4
+    kind: printing
+    owner: SD02
+    data:
+      id: p:797fff9fcff65b07ae9c5ec3381751e4
+      card_id: c:7fec422b9fdd588f9e6d6f8c25d112f7
+      region: jp
+      card_no: SD02-006
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:4031820e3b4d5c2cb926c7560a424f88
+      observation:
+        region: jp
+        card_no: SD02-006
+        observation_hash: sha256:d874ef7f3a7ccb6007252067049f2eef71cf40f0ce64a853d1360c8155215e76
+        rules_hash: sha256:e888588a744b37dc22f84f5cb56c96ed51eeb28cf313bcd658eb1c84c5d1c11b
+        recipe: registry-observation-v1
+  - record_key: printing:p:5be418b08f835ac08e8293ca33dbef2d
+    kind: printing
+    owner: SD02
+    data:
+      id: p:5be418b08f835ac08e8293ca33dbef2d
+      card_id: c:a800525557fe5a9281ceb0240881e438
+      region: jp
+      card_no: SD02-007
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1e03caf64472598cadfbee9b676c02c9
+      observation:
+        region: jp
+        card_no: SD02-007
+        observation_hash: sha256:4ac261ec168bfd499beb9a8923ae324d9f82ccde6e7f7835fe650a52b0c8ccb7
+        rules_hash: sha256:0d89be2e8f44c73c9df7ecd538838e69bffe3e2a9051330dab7737b97e53c85a
+        recipe: registry-observation-v1
+  - record_key: printing:p:f6bbb001ee0f5f51ae091bb22bc24b11
+    kind: printing
+    owner: SD02
+    data:
+      id: p:f6bbb001ee0f5f51ae091bb22bc24b11
+      card_id: c:53a02d8082c75adab4ca7ad06ad97987
+      region: jp
+      card_no: SD02-008
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:22681cc2040b5e0981164398201ee1d8
+      observation:
+        region: jp
+        card_no: SD02-008
+        observation_hash: sha256:9a71d01ed4ba2bb7e498db06f6fbffd40acaa119685b117bfd6e828e6c5ade3f
+        rules_hash: sha256:85ecdf8b6024edf43cfbecbe2741dc6b1c5f6f672e5cd4fce201e38427b5a8f2
+        recipe: registry-observation-v1
+  - record_key: printing:p:97ae9cd6515055e4b2165d0cb42a7af4
+    kind: printing
+    owner: SD02
+    data:
+      id: p:97ae9cd6515055e4b2165d0cb42a7af4
+      card_id: c:32b2b38805a454f5b52218f7274458ae
+      region: jp
+      card_no: SD02-009
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:024745f79eba5cfa97ac21ecfe63000e
+      observation:
+        region: jp
+        card_no: SD02-009
+        observation_hash: sha256:0c02e22ce7d9ee2cb1b66a32c96a742c1f26c8b900d07d4072a1edd0faf13b44
+        rules_hash: sha256:68bd30bc54dccd1d391937327f5b80b35c06dddbba8bc2348e2a17d62bc35d48
+        recipe: registry-observation-v1
+  - record_key: printing:p:9bd9497c2b48526082459ffacb546c16
+    kind: printing
+    owner: SD02
+    data:
+      id: p:9bd9497c2b48526082459ffacb546c16
+      card_id: c:e24a3cc9237c5c99afabae635c329e67
+      region: jp
+      card_no: SD02-010
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:b8dcd54e078f57b7a21782160e29949b
+      observation:
+        region: jp
+        card_no: SD02-010
+        observation_hash: sha256:5e31658e52cc02de5703cba9b02576466decd52e51d03a36fa94c6351df45dba
+        rules_hash: sha256:6a74ee5281bc014d52f18908642e839a55b080595ad8bb95e765df7637d7801e
+        recipe: registry-observation-v1
+  - record_key: printing:p:5b9c87de55655dc58bdbc2a5f9e8cf28
+    kind: printing
+    owner: SD02
+    data:
+      id: p:5b9c87de55655dc58bdbc2a5f9e8cf28
+      card_id: c:c794c812a71b5bd3933da2473c1c2563
+      region: jp
+      card_no: SD02-011
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:159e0648d522511495cb93cba2ba9051
+      observation:
+        region: jp
+        card_no: SD02-011
+        observation_hash: sha256:bf012427dd839f1b8635a579040ff0bedbd545cf5bd4908615f9dd8221ebe71e
+        rules_hash: sha256:64ba8cf0ee94b22c6efb5ff4e5c9f33c8fb4c7fb53efdc18151e9b8d678c079c
+        recipe: registry-observation-v1
+  - record_key: printing:p:cb2026ff90aa5177bf29fb504a16c224
+    kind: printing
+    owner: SD02
+    data:
+      id: p:cb2026ff90aa5177bf29fb504a16c224
+      card_id: c:464aeaca7f3e5f63b21fbaf625c149e2
+      region: jp
+      card_no: SD02-012
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:b9d324698f5a539c8a9279b56a4504a0
+      observation:
+        region: jp
+        card_no: SD02-012
+        observation_hash: sha256:2b8fc4c1010360df201096d0495fc0f0de92e20e19fdd4e3c5168faa45cd4a6f
+        rules_hash: sha256:00e472b2deb68f58246e072d1c40296539850ce3d2f342bf4887c0aa71d22359
+        recipe: registry-observation-v1
+  - record_key: printing:p:ba94a9a392ca5400ab1c05963d5771bd
+    kind: printing
+    owner: SD02
+    data:
+      id: p:ba94a9a392ca5400ab1c05963d5771bd
+      card_id: c:9074274015c859758b45a24aa8a26bf9
+      region: jp
+      card_no: SD02-013
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:71bcf30f36e551eb87215cd24cc32222
+      observation:
+        region: jp
+        card_no: SD02-013
+        observation_hash: sha256:9b69295ca8f56711d621def450ec423a4e2f8fa57159ad12ed457e0f943e6ff0
+        rules_hash: sha256:0d815d65d5f96916c3b45f5ad8d7ba12dfd164ed9922625ffab882f4929db7dc
+        recipe: registry-observation-v1
+  - record_key: printing:p:18aad09466cb5c0c93c495515ba2c097
+    kind: printing
+    owner: SD02
+    data:
+      id: p:18aad09466cb5c0c93c495515ba2c097
+      card_id: c:6a52cfc7f6cc5750965713aaa8bbf487
+      region: jp
+      card_no: SD02-014
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1dfd0fee40415c3fb226da8a780a6bb3
+      observation:
+        region: jp
+        card_no: SD02-014
+        observation_hash: sha256:50ac398f4f54124803be522422797bd85dc49f1ac477db459b243e54507522cf
+        rules_hash: sha256:13ab22937a8e91be26121cfaf4deafca1d8636f9db8b81e0e8d92b43f60a4b14
+        recipe: registry-observation-v1
+  - record_key: printing:p:31707622463f50179a6218df043b259b
+    kind: printing
+    owner: SD02
+    data:
+      id: p:31707622463f50179a6218df043b259b
+      card_id: c:af5fc4f3eb5d5789bed7be5b35bd945e
+      region: jp
+      card_no: SD02-015
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:e96999415e865ad189e80a2a811618d0
+      observation:
+        region: jp
+        card_no: SD02-015
+        observation_hash: sha256:b50d6614ee7601919155d5217e8a57b50640803df121a12543d8a4b4828acbb6
+        rules_hash: sha256:5930f5e86faacce9e8f44ecd74d60474a56b26b15de7240a9baca6ec969e2b38
+        recipe: registry-observation-v1
+  - record_key: printing:p:a8d2b173adaa51f6b150412bba746ee9
+    kind: printing
+    owner: SD02
+    data:
+      id: p:a8d2b173adaa51f6b150412bba746ee9
+      card_id: c:4403e215e8625f99a9095148691105cd
+      region: jp
+      card_no: SD02-016
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:4d905d6de475581da24f3bfec80762f3
+      observation:
+        region: jp
+        card_no: SD02-016
+        observation_hash: sha256:af8279ca656856209f537f365dd35df89133a1dc1533fb668afaa608c47a9333
+        rules_hash: sha256:7bfcca34545f0bb86d3c202bbda8be983251986e50a1ec0c70c7afe44913ed68
+        recipe: registry-observation-v1
+  - record_key: printing:p:c0580eb613dc53be959881b0088be63c
+    kind: printing
+    owner: SD02
+    data:
+      id: p:c0580eb613dc53be959881b0088be63c
+      card_id: c:9c30875ac83f5fcab8dacb83c89ccf0d
+      region: jp
+      card_no: SD02-017
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1a954dc4b5535c2d8e8e1ffff3a50e20
+      observation:
+        region: jp
+        card_no: SD02-017
+        observation_hash: sha256:3c6da8c5610cf4c2111bdf0769fabb7c5c5faee354ff8f71398c9fd29aab855d
+        rules_hash: sha256:aa2ffb2dab6b1f09c934b96a3732a2cb4eeddfcec721fba438818a3f1b4f8293
+        recipe: registry-observation-v1
+  - record_key: printing:p:465a1258d9af5739b577026ac47180de
+    kind: printing
+    owner: SD02
+    data:
+      id: p:465a1258d9af5739b577026ac47180de
+      card_id: c:375395f8f4b454c096d776d6ee12edc8
+      region: jp
+      card_no: SD02-018
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:2e94140bb5685b78bc88f6529fcd5d91
+      observation:
+        region: jp
+        card_no: SD02-018
+        observation_hash: sha256:4b63ed003fcdbe1cfef9b97c181bc0a728ae400a1abce59f58fb44d9f1fbd826
+        rules_hash: sha256:94c3a2cf3df7d29135b1e58e32e3c0a02d5b2da2df88a20148822dac3724a660
+        recipe: registry-observation-v1
+  - record_key: printing:p:9ad0a98360dd5886b17a8af436338cab
+    kind: printing
+    owner: SD02
+    data:
+      id: p:9ad0a98360dd5886b17a8af436338cab
+      card_id: c:d1482a55b1a658028d1b283ba461dd4c
+      region: jp
+      card_no: SD02-019
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:6ab931f867435822bfcb5dedafedc09c
+      observation:
+        region: jp
+        card_no: SD02-019
+        observation_hash: sha256:982f84bad727cf9649e9b8460d1a6e60d70fea1d88f5e9994dac33a2bc9e9998
+        rules_hash: sha256:19b6337a96320737223060f7a5adc503447f7e8d0a60c7b210cfa7cf05ce1ddb
+        recipe: registry-observation-v1
+  - record_key: printing:p:21966a8acd2d56a691b1cde80d19eeec
+    kind: printing
+    owner: SD02
+    data:
+      id: p:21966a8acd2d56a691b1cde80d19eeec
+      card_id: c:5b70c7caa4ca58e5bc4daa9e4b9c3cf9
+      region: jp
+      card_no: SD02-020
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:12efcffea9dd55ce8763d2cfd1972d74
+      observation:
+        region: jp
+        card_no: SD02-020
+        observation_hash: sha256:b27249e988a45f0f85e5c48888e8684d22921c76f9c5e945aeac20a26a964e12
+        rules_hash: sha256:d62faaa1d15c775acb481bd7830963ef5b9bae42f1178b03a73d6c7a7158aad9
+        recipe: registry-observation-v1
+  - record_key: printing:p:7e14643714535921a76658868b5f5df7
+    kind: printing
+    owner: SD02
+    data:
+      id: p:7e14643714535921a76658868b5f5df7
+      card_id: c:195dadd62803580bb28c9ea2283e08d0
+      region: jp
+      card_no: SD02-LD01
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:991c025c62cd54bd85995190a0dd0d14
+      observation:
+        region: jp
+        card_no: SD02-LD01
+        observation_hash: sha256:6a3c3982ff4bb768210aef6f41e4e5808de18aee77e70aad65e20357a4ed851b
+        rules_hash: sha256:091ccf0e4a24136df334ae09f2f2d797175cf659aa6dfee2aea1c628f7f9e08e
+        recipe: registry-observation-v1
+  - record_key: printing:p:5e333dcf968b5f4690b3809899ee8dd0
+    kind: printing
+    owner: SD02
+    data:
+      id: p:5e333dcf968b5f4690b3809899ee8dd0
+      card_id: c:82d42f86b30051be8c7ff26f75eecffa
+      region: jp
+      card_no: SD02-T01
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:b7118b3c326a5dda9d4c3e833dce30b0
+      observation:
+        region: jp
+        card_no: SD02-T01
+        observation_hash: sha256:c932c9b9b55e2b3d6a059b66ff2b93428b616d5f86961c2ca6be8327bd627b67
+        rules_hash: sha256:2df83c7ac18f709ce053fffdfda6e4e6066262d4e5681130c17c1294051c89c9
+        recipe: registry-observation-v1
+  - record_key: printing:p:9f2d0b1e471d5d3993066c3ab5dc9862
+    kind: printing
+    owner: SD02
+    data:
+      id: p:9f2d0b1e471d5d3993066c3ab5dc9862
+      card_id: c:7267d7f95ff95d90a7b661d3aa67b285
+      region: jp
+      card_no: SD02-T02
+      variant_key: standard
+      home_set_id: SD02
+      source_face_map:
+        - source_index: 0
+          face_id: f:16087914d2dd55d48257d73dc88b6353
+      observation:
+        region: jp
+        card_no: SD02-T02
+        observation_hash: sha256:226cd674ebed8723c4854dee6e8f455261b088ef01b667c9aad99448600c424d
+        rules_hash: sha256:f6862976f7f768acc4ff2d197e4c67efa047552890de298fab64a46f7b059400
+        recipe: registry-observation-v1
+decisions:
+  - id: d:e690f9f09eec7ccc9cb3fba54fc1a90af2d9a694747c5c81a31b6ec687e50611
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:e690f9f09eec7ccc9cb3fba54fc1a90af2d9a694747c5c81a31b6ec687e50611
+    members:
+      -   - printing:p:03d92962d8105434ad451e4b8d6198af
+          - sha256:e72d71199619f0b14fea610cae1a0f479e364b93096b78f040a2e57129f42673
+      -   - printing:p:0fa72abe16ba55f19f1b3adb29e6f0af
+          - sha256:f6a0d34221d8479eed393b93a99ddfaef02aab709f7639bbd6442de9ad1d47fc
+      -   - printing:p:18aad09466cb5c0c93c495515ba2c097
+          - sha256:60bbe4ea775764f33a6e26e6af571d69f811b54d8ca54d7db456f89904d50679
+      -   - printing:p:18fba1208e8d5402ba5e4e0a03d11c59
+          - sha256:f37c3806e6e93488819f82bd83ca4d6047f9fa2de0dfbff48f9124a4f64eccf2
+      -   - printing:p:21966a8acd2d56a691b1cde80d19eeec
+          - sha256:a21d12bb9b9a68e720707c71209418a84951c3f5a32dd7f56b20505ecfb61583
+      -   - printing:p:31707622463f50179a6218df043b259b
+          - sha256:b2cc180735608b70ab54ab9691d4e70b41aba11bf68fb4f1f2f5ba59f9eb82eb
+      -   - printing:p:42d380d1f61655ae82bb743dabcbb148
+          - sha256:f9105fa7f8b53a92037db7cdf0ac06e25145f67ee1fb68208ffd2dffa94f6415
+      -   - printing:p:465a1258d9af5739b577026ac47180de
+          - sha256:483e854b862fb3d4d2e7220eff2e12d9f0aa287d1c6d3f77f1f74db2eb89471b
+      -   - printing:p:4f92ece1b9e55d518816c65cd6cd1d5f
+          - sha256:1e32f0c0c42f354d76b1cefdfe2a6e9d1dc3ad4d57f4d34099e6f37dfcc6c2f3
+      -   - printing:p:53ac5e6b252a565caa3258872ed79f85
+          - sha256:2666fd9769bd336d3ac28ca396509b2542251596989de7cdbeb86498e01079d3
+      -   - printing:p:55295912249658e4b5fede25a5635ba5
+          - sha256:3b2827a46caa0f4259f0510b036ba6436740d5903e3d559dc18622c580674e6a
+      -   - printing:p:5b9c87de55655dc58bdbc2a5f9e8cf28
+          - sha256:18d982704bc7423ab3964798a4bd0920f1c7c98f8508f311fb8f3c917d537e73
+      -   - printing:p:5be418b08f835ac08e8293ca33dbef2d
+          - sha256:1b1102f520ead818e015b002e3b7284fa1b44da80cae204d69f6012af0703886
+      -   - printing:p:5e333dcf968b5f4690b3809899ee8dd0
+          - sha256:a68fdc0f115215e1afc7a81e1b9646e0a0251abd63b2da04ee90cbe1bdb5ccd1
+      -   - printing:p:5f631d4153595ab6a099d98a8d67e4f7
+          - sha256:f4c6a9c6514ced8c5d7334909099f308b4634c9c54a565ff753a75eab8eed604
+      -   - printing:p:6f71986e39c75c99b9cd4428b5773253
+          - sha256:e4ba8b1dd9c71e670a6c74a467a9ad19e3217094973b1dae7fd123aaa538e997
+      -   - printing:p:6f9531a21659554e9a089bc80c4b4e79
+          - sha256:343fc8d182ded4f818a75900586b32d062dca7415f80493a8b560fff578bd301
+      -   - printing:p:763c58f75a115e4bb4b5b3978024d4a7
+          - sha256:830880962e7125f08e0289941eff5fea4f038c415081a658ec3b28dd967480c2
+      -   - printing:p:797fff9fcff65b07ae9c5ec3381751e4
+          - sha256:b88f8bb415ae7143b688615f3ca57569085cfecc9f402ff5294db90b799f3d16
+      -   - printing:p:7e14643714535921a76658868b5f5df7
+          - sha256:878a9a72e0a8a5759c053e70f5261f268fc22f1e2024dda0c854a374cef228f5
+      -   - printing:p:7ea8785668955f6eaa5bbd3eeb53eeae
+          - sha256:1354b6941a9a8c7c4f7c52630fd1992744fb31cf78305e039553c23e1d5aa40a
+      -   - printing:p:81c471d60710543683c5e6b9ed715f01
+          - sha256:1bf48d9ee4e80dddf8788bed399120dbe2e1bf07a7011897ee27d6e667ef9fa3
+      -   - printing:p:84d2270300cb580db84c890e740016f4
+          - sha256:331f701a97485fc0ee59499c78f7bb79c198a13b8e9dc1571dcc7560df141ef0
+      -   - printing:p:9264ed7494e25388b1b991761a44cc75
+          - sha256:40e2a5cb16aa9e22c5e3e6f79a8152db59afb3d89e2299103df7f3e00286bb7c
+      -   - printing:p:97ae9cd6515055e4b2165d0cb42a7af4
+          - sha256:47e7afda746e5c9f88ef901b3990dbbe317e099cbbec81410ee673a2e640a0ac
+      -   - printing:p:9ad0a98360dd5886b17a8af436338cab
+          - sha256:7489fa4a1935a351c56da622af1e4453929a616c5559397cf49fdc49ec05a5b0
+      -   - printing:p:9bd9497c2b48526082459ffacb546c16
+          - sha256:65266da389ee501315399160b37167cf9f72822167da6c1f053230b7fe030570
+      -   - printing:p:9f2d0b1e471d5d3993066c3ab5dc9862
+          - sha256:68c242e9dcf24a56b5523f929a2c92fb30622df44fe14ea6cdb67ddf90084acd
+      -   - printing:p:a5affcf4d03e5f20a05462fe6e579e3f
+          - sha256:e920d6233426354243ef209c502ab474aaedb651d3269f0835e0b878f2802218
+      -   - printing:p:a63a1b723f6c5caebe1a73c5da21ba22
+          - sha256:ceab2404bcf72472fc618f5cb3c025130955bb45c3bba71d64c452d073f387f1
+      -   - printing:p:a854b88103d952f896e97e04ab13d04a
+          - sha256:b22ead60722ca0f5e12ac039bd8ffb360148486ffcd520f64b794819c7f4d21f
+      -   - printing:p:a8d2b173adaa51f6b150412bba746ee9
+          - sha256:4ce0425dbc60c6a11816d6f9b8ee236f54f8f8bf1cd9fa23ef843ee8bb4358ee
+      -   - printing:p:b206bcff83385bea80e404db282d8f30
+          - sha256:f2f019c4417e80575b53a575a4b0ae21e6a0fe304acb9949802346f266ccb9b8
+      -   - printing:p:ba94a9a392ca5400ab1c05963d5771bd
+          - sha256:ef1232f1bdc1efd279f29a3dde5f6d885c10523cebaa19479534e6a989b86be6
+      -   - printing:p:c0580eb613dc53be959881b0088be63c
+          - sha256:bf02033ec3c1b2b6329f50b0363c4686627b99f55fbc48585b8604d2cae3ba0a
+      -   - printing:p:c96b64324cb354a4aba378f752e5f353
+          - sha256:deb1a89515edcb84e369fa540c616c2bec959b767f4dd59fb8c1721da3ca01b5
+      -   - printing:p:cb2026ff90aa5177bf29fb504a16c224
+          - sha256:7b0312ec91c8dfd4950a98915f665475156f12141609af263ed7b4a37d2d87ca
+      -   - printing:p:cb208038f5365eadb7749d808f94a1aa
+          - sha256:5f0bd33bd6994b0c403e43d4905eb91e01b7932245597945b965d45373f9de3f
+      -   - printing:p:cec71f82a43c5ad39641640802579829
+          - sha256:b3363f7064a28b2d36589ca37b3c87a39f46e3cd310358293840431d537bdf73
+      -   - printing:p:d2f1a6d0d85758f186c34d8598b17dfc
+          - sha256:61510494c9e866a097bb185469593873dbd885c9303c574885d317959a99c880
+      -   - printing:p:d7ebed18f91252269411a9ccd7fde8d7
+          - sha256:104717da6ca7482951ad3dcf503a5ea20475126e9da14d1038a82b40d1d02bfe
+      -   - printing:p:da4b060b52d8529ba18507691432ecd2
+          - sha256:0eba7d3c0284016d8539a6b96baf355ce4aae54d1d0208e5813227431115520c
+      -   - printing:p:da877e067f425b4aa20a234b6b295a68
+          - sha256:d894daea721c2f05bd3b3724f61260dc7c0c154aa347f6be908990edd6c8b5b1
+      -   - printing:p:e325f050628b589c906dc049b5792485
+          - sha256:9ad73f3c5b709242f65a5dd8de18e9463cac447841a47cee60b40164aad739e0
+      -   - printing:p:f6bbb001ee0f5f51ae091bb22bc24b11
+          - sha256:04ea3b2ab38248d63a560bcfaa3558c143a53bc9550d1a07ac2bbc4115579d0a
+      -   - printing:p:f8ee40b3e3685092817634252ae7bd17
+          - sha256:52a9a675ea0954d6b6863bae5f42be8f15005073de116ca1c349d6fb4f1c9444
+    sample_ids:
+      - printing:p:03d92962d8105434ad451e4b8d6198af
+      - printing:p:0fa72abe16ba55f19f1b3adb29e6f0af
+      - printing:p:18aad09466cb5c0c93c495515ba2c097
+      - printing:p:18fba1208e8d5402ba5e4e0a03d11c59
+      - printing:p:21966a8acd2d56a691b1cde80d19eeec
+      - printing:p:31707622463f50179a6218df043b259b
+      - printing:p:42d380d1f61655ae82bb743dabcbb148
+      - printing:p:465a1258d9af5739b577026ac47180de
+      - printing:p:4f92ece1b9e55d518816c65cd6cd1d5f
+      - printing:p:53ac5e6b252a565caa3258872ed79f85
+      - printing:p:55295912249658e4b5fede25a5635ba5
+      - printing:p:5b9c87de55655dc58bdbc2a5f9e8cf28
+      - printing:p:5be418b08f835ac08e8293ca33dbef2d
+      - printing:p:5e333dcf968b5f4690b3809899ee8dd0
+      - printing:p:5f631d4153595ab6a099d98a8d67e4f7
+      - printing:p:6f71986e39c75c99b9cd4428b5773253
+      - printing:p:6f9531a21659554e9a089bc80c4b4e79
+      - printing:p:763c58f75a115e4bb4b5b3978024d4a7
+      - printing:p:797fff9fcff65b07ae9c5ec3381751e4
+      - printing:p:7e14643714535921a76658868b5f5df7
+      - printing:p:7ea8785668955f6eaa5bbd3eeb53eeae
+      - printing:p:81c471d60710543683c5e6b9ed715f01
+      - printing:p:84d2270300cb580db84c890e740016f4
+      - printing:p:9264ed7494e25388b1b991761a44cc75
+      - printing:p:97ae9cd6515055e4b2165d0cb42a7af4
+      - printing:p:9ad0a98360dd5886b17a8af436338cab
+      - printing:p:9bd9497c2b48526082459ffacb546c16
+      - printing:p:9f2d0b1e471d5d3993066c3ab5dc9862
+      - printing:p:a5affcf4d03e5f20a05462fe6e579e3f
+      - printing:p:a63a1b723f6c5caebe1a73c5da21ba22
+      - printing:p:a854b88103d952f896e97e04ab13d04a
+      - printing:p:a8d2b173adaa51f6b150412bba746ee9
+      - printing:p:b206bcff83385bea80e404db282d8f30
+      - printing:p:ba94a9a392ca5400ab1c05963d5771bd
+      - printing:p:c0580eb613dc53be959881b0088be63c
+      - printing:p:c96b64324cb354a4aba378f752e5f353
+      - printing:p:cb2026ff90aa5177bf29fb504a16c224
+      - printing:p:cb208038f5365eadb7749d808f94a1aa
+      - printing:p:cec71f82a43c5ad39641640802579829
+      - printing:p:d2f1a6d0d85758f186c34d8598b17dfc
+      - printing:p:d7ebed18f91252269411a9ccd7fde8d7
+      - printing:p:da4b060b52d8529ba18507691432ecd2
+      - printing:p:da877e067f425b4aa20a234b6b295a68
+      - printing:p:e325f050628b589c906dc049b5792485
+      - printing:p:f6bbb001ee0f5f51ae091bb22bc24b11
+      - printing:p:f8ee40b3e3685092817634252ae7bd17
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

@@ -1,0 +1,84 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:616ef72386c5d33e50eed382eab39967e870ded3e263ddecd40e24839f32909b
+records:
+  - record_key: face:f:7f7064cb855859fcad4dbb5e541c86fa
+    kind: face
+    owner: PCS01
+    data:
+      id: f:7f7064cb855859fcad4dbb5e541c86fa
+      card_id: c:9b8e626121e75774bca5b4d7bde7b293
+      ordinal: 0
+      side: front
+  - record_key: face:f:7134581cda3a5f9cacf8beed8396e574
+    kind: face
+    owner: PCS01
+    data:
+      id: f:7134581cda3a5f9cacf8beed8396e574
+      card_id: c:c007072f9a575f388efa52176ebee957
+      ordinal: 0
+      side: front
+  - record_key: face:f:356890df67f45909bd2be42da4b9ec85
+    kind: face
+    owner: PCS01
+    data:
+      id: f:356890df67f45909bd2be42da4b9ec85
+      card_id: c:01c3f057865e5d8ba1ab32d964fddf1b
+      ordinal: 0
+      side: front
+  - record_key: face:f:f27b007dd29c5b4aa5c3d38917d78f25
+    kind: face
+    owner: PCS01
+    data:
+      id: f:f27b007dd29c5b4aa5c3d38917d78f25
+      card_id: c:d33be2c8d71852e29540c684518e50e1
+      ordinal: 0
+      side: front
+  - record_key: face:f:03eab540eafb5322a08042eadcddb7ee
+    kind: face
+    owner: PCS01
+    data:
+      id: f:03eab540eafb5322a08042eadcddb7ee
+      card_id: c:220b2f6cfaab513d91256bb4e72cfc87
+      ordinal: 0
+      side: front
+  - record_key: face:f:15165e40ad6458a8afb1a4cc9046d82f
+    kind: face
+    owner: PCS01
+    data:
+      id: f:15165e40ad6458a8afb1a4cc9046d82f
+      card_id: c:3fcabb50da0d52a6b43ca6ad71081690
+      ordinal: 0
+      side: front
+decisions:
+  - id: d:616ef72386c5d33e50eed382eab39967e870ded3e263ddecd40e24839f32909b
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:616ef72386c5d33e50eed382eab39967e870ded3e263ddecd40e24839f32909b
+    members:
+      -   - face:f:03eab540eafb5322a08042eadcddb7ee
+          - sha256:8e4269e833d54345c6334dd348a0752b86dbcaab5e50caf788791529749a0b06
+      -   - face:f:15165e40ad6458a8afb1a4cc9046d82f
+          - sha256:4d958c27d7ced3ce725536d56908a2c5f8bb8f69ede35dae1d8b45e9bd6ee018
+      -   - face:f:356890df67f45909bd2be42da4b9ec85
+          - sha256:3dd85acdf4a3924fb84ae4d4c0e1358c4cb2c6898f10d2ccbae64345b454f831
+      -   - face:f:7134581cda3a5f9cacf8beed8396e574
+          - sha256:007325547750b58638d7ade1e7f52594e3118204ee510949983140f3e83dc22e
+      -   - face:f:7f7064cb855859fcad4dbb5e541c86fa
+          - sha256:549756bd960e02fe1c845a7d49c401dde2d0a6e53917b4bff7a87ec1d7ed167e
+      -   - face:f:f27b007dd29c5b4aa5c3d38917d78f25
+          - sha256:155fbb349a080006bde0d3b67e48572382e3af9ac6698691255dfc5d9f9c92bb
+    sample_ids:
+      - face:f:03eab540eafb5322a08042eadcddb7ee
+      - face:f:15165e40ad6458a8afb1a4cc9046d82f
+      - face:f:356890df67f45909bd2be42da4b9ec85
+      - face:f:7134581cda3a5f9cacf8beed8396e574
+      - face:f:7f7064cb855859fcad4dbb5e541c86fa
+      - face:f:f27b007dd29c5b4aa5c3d38917d78f25
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

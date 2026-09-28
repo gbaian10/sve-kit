@@ -1,0 +1,84 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:634e981c9fe984d73e4a5e7b1847b8a36ff8cf92ae4e766ea155d83f778ff0d6
+records:
+  - record_key: printing:p:ff0c3d5df3275c7ca57a0b08ab1237be
+    kind: printing
+    owner: PCS02
+    data:
+      id: p:ff0c3d5df3275c7ca57a0b08ab1237be
+      card_id: c:5ff546e9284a54e38e3ee79ce6ca00fe
+      region: jp
+      card_no: PCS02-001
+      variant_key: standard
+      home_set_id: PCS02
+      source_face_map:
+        - source_index: 0
+          face_id: f:2e78d628603f53cbb86f939815ce18af
+      observation:
+        region: jp
+        card_no: PCS02-001
+        observation_hash: sha256:37ed8eb11db2ee26e6019995424101c5d6a18e09da20e1df179ece8d5d53644e
+        rules_hash: sha256:327bd1f3680d05f406d6765a0b6632bb2b981701d2b25909553c93e20f3694bc
+        recipe: registry-observation-v1
+  - record_key: printing:p:9d2ef2222df75914b2e1be2fb42d90b4
+    kind: printing
+    owner: PCS02
+    data:
+      id: p:9d2ef2222df75914b2e1be2fb42d90b4
+      card_id: c:c41a6d3b42485e77ac0c8e2889b2727c
+      region: jp
+      card_no: PCS02-002
+      variant_key: standard
+      home_set_id: PCS02
+      source_face_map:
+        - source_index: 0
+          face_id: f:1245a7b4b1d65161b0ba22c66549fc7b
+      observation:
+        region: jp
+        card_no: PCS02-002
+        observation_hash: sha256:87086cc587f219606e123221f4dfc5379cfe9f5e0b50dd1b0c314c830d088698
+        rules_hash: sha256:14e18055801998d777d0386218b63ec72e52bc9321d4bf4d4e554def8813c62e
+        recipe: registry-observation-v1
+  - record_key: printing:p:e8878265aeba5a6d85622fe0ac37d57c
+    kind: printing
+    owner: PCS02
+    data:
+      id: p:e8878265aeba5a6d85622fe0ac37d57c
+      card_id: c:dbe63f1999f35868ac0210d2aa48a372
+      region: jp
+      card_no: PCS02-003
+      variant_key: standard
+      home_set_id: PCS02
+      source_face_map:
+        - source_index: 0
+          face_id: f:d1aa70cdbb6f5de3a2db7decead5410a
+      observation:
+        region: jp
+        card_no: PCS02-003
+        observation_hash: sha256:d2f2f0665cc2c4a24920ae766a0c839b8692f9f448854ab5c392a1f275fd5f4c
+        rules_hash: sha256:2ef30bc9b7a4b352526bac5495fe3ea60f39df94cdfa92cbb3f91d4296972bf3
+        recipe: registry-observation-v1
+decisions:
+  - id: d:634e981c9fe984d73e4a5e7b1847b8a36ff8cf92ae4e766ea155d83f778ff0d6
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:634e981c9fe984d73e4a5e7b1847b8a36ff8cf92ae4e766ea155d83f778ff0d6
+    members:
+      -   - printing:p:9d2ef2222df75914b2e1be2fb42d90b4
+          - sha256:7dcaf71f6ae970669f00033e208ff19079c9190ec3578087f7507558f2993551
+      -   - printing:p:e8878265aeba5a6d85622fe0ac37d57c
+          - sha256:88d41f49237f69cdd09170ac38401894720f7d70b7637ec39eec6a72b2b67db9
+      -   - printing:p:ff0c3d5df3275c7ca57a0b08ab1237be
+          - sha256:bcea79cabe5ed637b0a3edbf7a9a2a26a607271d6c97ce45ba2dec7d3c5dd1a2
+    sample_ids:
+      - printing:p:9d2ef2222df75914b2e1be2fb42d90b4
+      - printing:p:e8878265aeba5a6d85622fe0ac37d57c
+      - printing:p:ff0c3d5df3275c7ca57a0b08ab1237be
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

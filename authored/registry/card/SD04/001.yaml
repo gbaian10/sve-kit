@@ -1,0 +1,106 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:0ff8aa4d12fd2bec7b48e9c36b9abe17f90619fa04e4b0a3e5bf93dff492b12d
+records:
+  - record_key: card:c:7d744183f17b5687883a57d407aa3704
+    kind: card
+    owner: SD04
+    data:
+      id: c:7d744183f17b5687883a57d407aa3704
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:bc60aa8ec15457b09ae7a5cd59ccedf9
+    kind: card
+    owner: SD04
+    data:
+      id: c:bc60aa8ec15457b09ae7a5cd59ccedf9
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:53983649abf852ce87a1251a9eb2afc1
+    kind: card
+    owner: SD04
+    data:
+      id: c:53983649abf852ce87a1251a9eb2afc1
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:11eb4d75b4fe59bc85a3ba95570728f7
+    kind: card
+    owner: SD04
+    data:
+      id: c:11eb4d75b4fe59bc85a3ba95570728f7
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:f6422d5c30e55ca582cf89c4bed32a74
+    kind: card
+    owner: SD04
+    data:
+      id: c:f6422d5c30e55ca582cf89c4bed32a74
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:be9b221ffe6159a99a53ce9d8176401d
+    kind: card
+    owner: SD04
+    data:
+      id: c:be9b221ffe6159a99a53ce9d8176401d
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:ebaa3f4db88955849a883603843b95b1
+    kind: card
+    owner: SD04
+    data:
+      id: c:ebaa3f4db88955849a883603843b95b1
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+  - record_key: card:c:cd1afdb1a11b57678821196bb9c8cec7
+    kind: card
+    owner: SD04
+    data:
+      id: c:cd1afdb1a11b57678821196bb9c8cec7
+      layout: single
+      identity_state: confirmed
+      home_set_id: SD04
+decisions:
+  - id: d:0ff8aa4d12fd2bec7b48e9c36b9abe17f90619fa04e4b0a3e5bf93dff492b12d
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:0ff8aa4d12fd2bec7b48e9c36b9abe17f90619fa04e4b0a3e5bf93dff492b12d
+    members:
+      -   - card:c:11eb4d75b4fe59bc85a3ba95570728f7
+          - sha256:12e85b709e2b6c5d9786cb94c7a48f306d4f7ed2505fd09582137dce952155c5
+      -   - card:c:53983649abf852ce87a1251a9eb2afc1
+          - sha256:89f85776731d88e66ba24dfdd0e93f8c20ccccbb296d330ff919becb7c3e9a16
+      -   - card:c:7d744183f17b5687883a57d407aa3704
+          - sha256:2e3f6cdb5a5c45b8ff97d0a388cedd2fdcf6d74de1c95a32d0f7208a00eff2c6
+      -   - card:c:bc60aa8ec15457b09ae7a5cd59ccedf9
+          - sha256:d3a6bf0c19e5d2cfccab1d1f10e763e96c57e4387475e7dc03b340ddfa498ba3
+      -   - card:c:be9b221ffe6159a99a53ce9d8176401d
+          - sha256:0a755e16ebbef20ebc4905307e0d0c7da182cea801308cc0fcf5ad111698522e
+      -   - card:c:cd1afdb1a11b57678821196bb9c8cec7
+          - sha256:9d8dc9b30d7ce1c2713da5c23538f55a2bb556a5a37bd6039868feb85bb10f9b
+      -   - card:c:ebaa3f4db88955849a883603843b95b1
+          - sha256:592188a2901293a7d7b2b31eb5cfcbf94feeb47411df5fbfc29e453e1e53a961
+      -   - card:c:f6422d5c30e55ca582cf89c4bed32a74
+          - sha256:561e88ec7273c4e6f3319a6a3f501d67576eb692a167b25e0b1f36b9e7cb8194
+    sample_ids:
+      - card:c:11eb4d75b4fe59bc85a3ba95570728f7
+      - card:c:53983649abf852ce87a1251a9eb2afc1
+      - card:c:7d744183f17b5687883a57d407aa3704
+      - card:c:bc60aa8ec15457b09ae7a5cd59ccedf9
+      - card:c:be9b221ffe6159a99a53ce9d8176401d
+      - card:c:cd1afdb1a11b57678821196bb9c8cec7
+      - card:c:ebaa3f4db88955849a883603843b95b1
+      - card:c:f6422d5c30e55ca582cf89c4bed32a74
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day

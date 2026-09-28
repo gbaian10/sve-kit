@@ -1,0 +1,161 @@
+authored_format: 1
+kind: registry_shard
+default_decision_id: d:06971e064051ec95b291c03410ec3a9d83a22ba701c9717c883bb2888eb2dbf4
+records:
+  - record_key: card:c:47d1296a1797595da3cc224989407e77
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:47d1296a1797595da3cc224989407e77
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:271ef5c2d8f95be282ab9314da02e31d
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:271ef5c2d8f95be282ab9314da02e31d
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:b64337309e325998a6d210be247dc352
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:b64337309e325998a6d210be247dc352
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:7f071876126554ff9f0a296f7c5831a0
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:7f071876126554ff9f0a296f7c5831a0
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:2241203e51615827b183716569567aea
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:2241203e51615827b183716569567aea
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:93885a29a0d5531a98139dbe458c4efe
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:93885a29a0d5531a98139dbe458c4efe
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:a9d64144fde859ee8e262efed62a42bd
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:a9d64144fde859ee8e262efed62a42bd
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:b308b5392eef53eaad8bfbe4cebee137
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:b308b5392eef53eaad8bfbe4cebee137
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:a130b8843c465e9ea2ad8e47f9383ae9
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:a130b8843c465e9ea2ad8e47f9383ae9
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:94a3801757165f9f9050da849dc935d3
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:94a3801757165f9f9050da849dc935d3
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:184690a19fd65e0da33f707aa9acb922
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:184690a19fd65e0da33f707aa9acb922
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:01cbf55d77d65ec4931881cfbf53e1de
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:01cbf55d77d65ec4931881cfbf53e1de
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+  - record_key: card:c:e3cb9fa98fb254018a7a290066e363e0
+    kind: card
+    owner: CSD03b
+    data:
+      id: c:e3cb9fa98fb254018a7a290066e363e0
+      layout: single
+      identity_state: confirmed
+      home_set_id: CSD03b
+decisions:
+  - id: d:06971e064051ec95b291c03410ec3a9d83a22ba701c9717c883bb2888eb2dbf4
+    state: confirmed
+    scope: batch
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: sha256:06971e064051ec95b291c03410ec3a9d83a22ba701c9717c883bb2888eb2dbf4
+    members:
+      -   - card:c:01cbf55d77d65ec4931881cfbf53e1de
+          - sha256:eaf56f131990d5f36e541e70707e11f6a0fcdf5355347f4df75d400c9da8c86e
+      -   - card:c:184690a19fd65e0da33f707aa9acb922
+          - sha256:ed6a930b1dc1b5798d13cf7b5178d29fd6bc2ceeb7e0ff8512353459c966fd26
+      -   - card:c:2241203e51615827b183716569567aea
+          - sha256:d5d20cdcbe01a0954fc4a6989e2fd1a721305e859042254a7e60cd3bc1d16926
+      -   - card:c:271ef5c2d8f95be282ab9314da02e31d
+          - sha256:2eb9f781d16d8df1cb761ad1a6d87793643340dbc0b423b289274ef20dd3e0b1
+      -   - card:c:47d1296a1797595da3cc224989407e77
+          - sha256:c74511254ef138a3d49aeb2644b1df2da7c23a247994b34862866742c7217a01
+      -   - card:c:7f071876126554ff9f0a296f7c5831a0
+          - sha256:a388bad7bdcbeaff89e2890a46a571bd55f8cb8bc9bfc484f2d44619684990f5
+      -   - card:c:93885a29a0d5531a98139dbe458c4efe
+          - sha256:9fdfc7477cf97f1634053cbec53ff182e507878b9085c9c6aacb7c66ed857d64
+      -   - card:c:94a3801757165f9f9050da849dc935d3
+          - sha256:e2a9eee2550859c7a7ae8c21a8fc2cfc3d66585b4810144cbdc20fd8558cd999
+      -   - card:c:a130b8843c465e9ea2ad8e47f9383ae9
+          - sha256:ce167abca9cd644eb765e888113325f0d628bfb3fbe03995f01ff22d411d8b81
+      -   - card:c:a9d64144fde859ee8e262efed62a42bd
+          - sha256:fca828ca76d3b1efa0356736790d73281771e485151c6be290dde292cea89d86
+      -   - card:c:b308b5392eef53eaad8bfbe4cebee137
+          - sha256:307cbaedf2ecbfb6114bb807e37913430c82114d958d13896cf5b0683fbebe50
+      -   - card:c:b64337309e325998a6d210be247dc352
+          - sha256:9c98d69075e83d146d8f98e2059a046551c0375dfbfb4714958e260697f0489c
+      -   - card:c:e3cb9fa98fb254018a7a290066e363e0
+          - sha256:7c25adf3565c8b7f269964969e7decf3604b902bccb5c797e90e7e9a7e9207dd
+    sample_ids:
+      - card:c:01cbf55d77d65ec4931881cfbf53e1de
+      - card:c:184690a19fd65e0da33f707aa9acb922
+      - card:c:2241203e51615827b183716569567aea
+      - card:c:271ef5c2d8f95be282ab9314da02e31d
+      - card:c:47d1296a1797595da3cc224989407e77
+      - card:c:7f071876126554ff9f0a296f7c5831a0
+      - card:c:93885a29a0d5531a98139dbe458c4efe
+      - card:c:94a3801757165f9f9050da849dc935d3
+      - card:c:a130b8843c465e9ea2ad8e47f9383ae9
+      - card:c:a9d64144fde859ee8e262efed62a42bd
+      - card:c:b308b5392eef53eaad8bfbe4cebee137
+      - card:c:b64337309e325998a6d210be247dc352
+      - card:c:e3cb9fa98fb254018a7a290066e363e0
+    authored_by: registry-tool
+    authored_at: '2026-09-28T00:00:00Z'
+    reviewed_by: coordinator
+    reviewed_at: '2026-09-28T00:00:00Z'
+    reviewed_precision: day
