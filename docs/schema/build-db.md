@@ -310,13 +310,15 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 | -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `image_asset`        | `id:ID PK,origin:official\|third_party,publication_state:pending\|approved\|withdrawn,withdrawal_reason:Text?,review_decision_id→decision?,source_id→source_record,source_url:Text,source_src_raw:Text,content_hash:Hash?,mime:Text?,width:UInt?,height:UInt?,bytes:UInt?,availability:available\|missing\|unfetched`；C，`source_src_raw` 原樣保存 HTML img src，URL 解析相對路徑但不由卡號猜 |
 | `printing_image`     | `printing_id,face_id→printing_face,image_id→image_asset`；`PK(printing_id,face_id)`，`FK(printing_id,face_id)→printing_face(printing_id,face_id)`；雙面每面一張，通用卡背屬 app shell                                                                                                                                                                                                          |
-| `image_variant`      | `image_id→image_asset,size_key:Code,format:Code,path:Text,width:UInt,height:UInt,bytes:UInt,sha256:Hash,recipe_version:Text` `PK(image_id,size_key,format)`；D，寬高>0；包含 original，新增 WebGL 尺寸不改 schema                                                                                                                                                                              |
-| `image_size`         | `key:Code PK,purpose:Text,max_width:UInt?,max_height:UInt?,is_original:Bool`；A 設定，尺寸清單可擴充                                                                                                                                                                                                                                                                                           |
+| `image_variant`      | `image_id→image_asset,size_key:Code,format:Code,path:Text,width:UInt,height:UInt,bytes:UInt,sha256:Hash,recipe_version:Text` `PK(image_id,size_key,format)`；D，寬高>0；只記公開衍生檔，不要求 original；固定五檔 WebP 與橫向例外見下文                                                                                                                                                        |
+| `image_size`         | `key:Code PK,purpose:Text,max_width:UInt?,max_height:UInt?,is_original:Bool`；A 設定，is_original 表示來源 bytes 直接副本；公開五檔均 false                                                                                                                                                                                                                                                    |
 | `shop_link_template` | `id:ID PK,name:Text,region:Region,url_template:Text,parameters:Json,feature_key:Text,enabled_dev:Bool,enabled_prod:Bool,decision_id→decision`；A，預設 true／false；只允許 HTTPS 及 `card_no` 等白名單參數，替換值逐個 URL encode                                                                                                                                                              |
 
 `printing_image` 恰是一個 `printing_face` 的圖，不設 `card_front/card_back` role。雙面背面是另一 face，通用卡背屬前端固定資產。`source_src_raw` 從頁面原樣取，不能由卡號猜（既有 sv1 模板例外不擴張到 SVE）。unfetched 可有來源而無 blob，variants 空陣列；available 才要求尺寸/格式/hash。卡表快照的圖像 metadata 獨立，不把來源 manifest 或圖片本體塞進文字。
 
 卡圖看過快取、牌組離線備妥只抓實選版次與雙面；未抓圖顯示文字；無全圖下載。語音按需。sprite 不入卡表，自製固定 UI 圖示屬 app shell，未來動態拼圖只用自己牌組與已公開對手卡。卡店僅 HTTPS 白名單參數模板，dev 開/prod 關，不抓價格。`image_size/language/digital_endpoint/shop` 設定合為卡表快照 config，不做客戶端小表 join。
+
+尺寸、橫向長邊、4:3 裁切及取整／覆寫依 [卡圖衍生檔契約](image-variants.md)。原 PNG 不公開；`image_size.is_original` 不投影至 config，發布器拒收 true。card_l 同尺寸重新編碼仍為 false；recipe 與來源 hash 留建置端。
 
 ## 12. 建置品質與新卡包流程
 
@@ -397,13 +399,15 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 ## 17. 已決政策：非官方圖鏡像與地區 Decklog 建牌資格
 
-已定案採用 `mirror_reviewed` 與 `regional_decklog`；config 固定輸出這兩個值，沒有政策 pending 或替代模式。`publication_state` 為 pending/approved/withdrawn；單張圖片的 `publication_state=pending` 是「尚未人工確認」，不是政策待決。
+已定案採用 `mirror_reviewed` 與 `regional_decklog`；config 固定輸出這兩個值，沒有政策 pending 或替代模式。`publication_state` 為 pending/approved/withdrawn；單張圖片的 `publication_state=pending` 是「尚未通過適用的來源驗證／人工確認」，不是政策待決。
 
 ### 17.1 `mirror_reviewed`
 
 非官方卡圖須由人確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`。建置資料庫的 `image_asset` 保留 `source_url`、`source_id`、`content_hash` 與 `review_decision_id→decision`；`third_party` 且 approved 時此 FK 必填，decision.state=confirmed，`reviewed_by/reviewed_at` 必填。確認釘住該 `image_asset` 的 `source_url/source_id/content_hash`，`decision_source` 連回原始來源；每張都須核對，可用全體 checked 的 confirmed batch，`sampled/model_reviewed` 不足以放行。圖片內容或來源換版需新 `image_asset`／新確認，不得沿用先前 approved。
 
-`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖仍依原來源驗證流程，不要求每張另作人工 decision。確認者留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
+`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖的 approved 規則見下段。確認者留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
+
+`origin=official` 的圖在官方來源歸屬、頁面原樣 `img src` 與解析後來源 URL 的對應、實際取得 bytes 的來源 hash 及圖片解碼／寬高驗證均通過後，由建置器設為 `publication_state=approved`，`review_decision_id=null`，不要求逐圖人工 decision。尚未完成或驗證失敗為 pending，並留下建置診斷；availability 仍按抓取結果表示 available/missing/unfetched，不能把 pending 當 missing，也不能把只有 URL 的 unfetched 圖當已通過。來源或內容換版須重新驗證；withdrawn 不因再次驗證通過而自動恢復 approved。
 
 圖片事後有問題或來源要求撤下時，`publication_state=withdrawn`，`withdrawal_reason` 必填可公開原因，新快照不出該圖 variants/path，但保留 `image_asset` 與來源供說明；舊快照不可變。來源標示從 `source_url` 的 hostname 顯示站名並連回原網址，不捏造人工確認日期（不出貨）。「撤下」會阻止現行清單再引用，不能保證已離線下載的舊副本立即消失；是否刪除 CDN blob 牽涉永久回放保留，另循實際移除處理，不在此承諾或自動刪除。
 
