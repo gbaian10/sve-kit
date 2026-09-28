@@ -8,8 +8,10 @@ The Rust prototype validates `authored/keywords.yaml` and every pack file, expan
 macros, then validates the expanded programs again. `carddb` does not yet invoke
 this schema and Rust types are not generated from it.
 
-See [DESIGN.md](../DESIGN.md) for semantics and [KNOWN_LIMITS.md](../KNOWN_LIMITS.md)
-for the executable subset. Schema validation does not establish card-text
+`astra/1` is the D-stage prototype grammar: its semantics are defined by the engine
+and its tests, and [docs/sim/engine-status.md](../docs/sim/engine-status.md) lists
+the executable subset. The Effect DSL 1.0 specification that replaces it is in
+[docs/dsl/](../docs/dsl/README.md). Schema validation does not establish card-text
 correctness or runtime support.
 
 `optional.selection` and resolution-time `choice.selection` explicitly combine
