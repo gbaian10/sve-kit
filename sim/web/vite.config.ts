@@ -1,8 +1,10 @@
+import { createReadStream, realpathSync, statSync } from "node:fs"
+import type { IncomingMessage, ServerResponse } from "node:http"
 import path from "node:path"
 
 import tailwindcss from "@tailwindcss/vite"
 import react from "@vitejs/plugin-react"
-import { searchForWorkspaceRoot } from "vite"
+import { type Plugin, searchForWorkspaceRoot } from "vite"
 import { defineConfig } from "vitest/config"
 
 // The reader loads the published contract schema from carddb (one source of truth, no copy).
@@ -11,14 +13,78 @@ const contractSchemaDir = path.resolve(
   "../../carddb/src/sve_carddb/snapshot/schema",
 )
 
+const MIME: Record<string, string> = { ".json": "application/json", ".webp": "image/webp" }
+
+// Serves a snapshot root (the layout the CDN will have) under a URL prefix during dev/preview.
+function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
+  const root = dir === undefined ? undefined : realpathSync(path.resolve(dir))
+  const notFound = (res: ServerResponse) => {
+    res.statusCode = 404
+    res.end()
+  }
+  const handler = (req: IncomingMessage, res: ServerResponse, next: () => void) => {
+    const url = req.url ?? ""
+    if (root === undefined || !url.startsWith(`${prefix}/`)) {
+      next()
+      return
+    }
+    let relative: string
+    try {
+      relative = decodeURIComponent(url.slice(prefix.length + 1).split("?")[0] ?? "")
+    } catch {
+      notFound(res)
+      return
+    }
+    if (
+      relative.split("/").some((segment) => segment === "" || segment === "." || segment === "..")
+    ) {
+      notFound(res)
+      return
+    }
+    // Resolve symlinks before the boundary check, so a link inside the root cannot reach outside it.
+    let file: string
+    try {
+      file = realpathSync(path.join(root, relative))
+    } catch {
+      notFound(res)
+      return
+    }
+    if (!file.startsWith(root + path.sep) || !statSync(file).isFile()) {
+      notFound(res)
+      return
+    }
+    res.setHeader("Content-Type", MIME[path.extname(file)] ?? "application/octet-stream")
+    res.setHeader("Cache-Control", "no-store")
+    createReadStream(file).pipe(res)
+  }
+  return {
+    name: `sve-serve-${prefix.slice(1)}`,
+    configureServer(server) {
+      server.middlewares.use(handler)
+    },
+    configurePreviewServer(server) {
+      server.middlewares.use(handler)
+    },
+  }
+}
+
+// Local snapshot roots: SVE_CDN_DIR (else the committed fixture) at /cdn, SVE_PREVIEW_DIR at /cdn-preview.
+const cdnDir = process.env["SVE_CDN_DIR"] ?? path.join(import.meta.dirname, "fixtures/snapshot")
+const previewDir = process.env["SVE_PREVIEW_DIR"]
+
 export default defineConfig({
-  plugins: [react(), tailwindcss()],
+  plugins: [
+    react(),
+    tailwindcss(),
+    serveSnapshotRoot("/cdn", cdnDir),
+    serveSnapshotRoot("/cdn-preview", previewDir),
+  ],
   server: {
     fs: { allow: [searchForWorkspaceRoot(process.cwd()), contractSchemaDir] },
   },
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
-    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts"],
+    include: ["src/**/*.test.{ts,tsx}", "tests/**/*.test.ts", "scripts/**/*.test.ts"],
   },
 })

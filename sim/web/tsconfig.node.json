@@ -5,5 +5,5 @@
     "lib": ["es2024"],
     "types": ["node"]
   },
-  "include": ["*.config.ts", "tests/*.ts", "types"]
+  "include": ["*.config.ts", "tests/*.ts", "types", "scripts/**/*.ts"]
 }

@@ -1,4 +1,4 @@
-import schemaText from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json?raw"
+import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json"
 import { fail } from "./errors"
 import {
   arrayValue,
@@ -6,15 +6,15 @@ import {
   type JsonPath,
   type JsonValue,
   objectValue,
-  parseStrict,
   stringValue,
 } from "./json"
 import { SchemaValidator } from "./validator"
 
 export const SCHEMA_ID = "urn:sve-kit:snapshot:1.0.0"
 
-/** The published contract schema, read through the same strict JSON boundary as snapshot data. */
-export const schemaRoot: JsonObject = objectValue(parseStrict(schemaText))
+// A plain JSON import works in Vite, Vitest and Bun scripts alike; the file is our own published
+// resource, so the strict byte boundary that snapshot data goes through is not needed here.
+export const schemaRoot: JsonObject = objectValue(contract)
 export const validator = new SchemaValidator(schemaRoot)
 
 export function definition(name: string): JsonObject {
