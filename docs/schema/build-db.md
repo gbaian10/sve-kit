@@ -14,7 +14,7 @@ card 是遊戲身分，face 是實體雙面，printing 是可選版次。一般�
 
 ID/Text/Code 是 UTF-8 非空字串（內容 Text 可空）；ID 不透明、永久、不採 rowid/排序。UInt 是 0..2^53−1，Int 是安全整數；Bool 在 SQLite CHECK IN (0,1)。Date 是完整 ISO 日期；Instant 是 UTC RFC3339。Hash 是 sha256: 加 64 小寫 hex；Json 要 `json_valid`＋指定 JSON Schema。Region 僅 jp/en；Lang 初始 ja/en/zh-Hant，可擴充。只有 `?` 允許 null。PK/UQ/FK 預設 RESTRICT；區間 `[from,until)`。
 
-A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合；建置資料庫與卡表快照都可重建不進 git。工具產生的永久 registry 是不能重新配號的維護狀態，例外進 authored。純推導欄位不需要 decision。
+A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合；建置資料庫與卡表快照都可由釘住的輸入重建不進 git；歷史 raw／來源版本 inventory 不可刪，保存與凍結契約見 [source-archive.md](source-archive.md)。工具產生的永久 registry 是不能重新配號的維護狀態，例外進 authored。純推導欄位不需要 decision。
 
 | 表                | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                     |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -42,6 +42,8 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 sampled 不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 顯示抽查狀態。confidence 只用於排審優先序。
 
 vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。實作複合 FK 時，子欄另加普通 TEXT kind 欄、DEFAULT 與 CHECK 固定值，例如 `class_kind='class'`，`FK(class_kind,class_code)→vocabulary(kind,code)`。不依賴尚未實測的 generated column。全文邏輯表省略這些固定欄，DDL 產生器必須展開；可空 code 仍要 kind 非空且固定。
+
+爬取來源的 `source_record.id`／`raw_locator` 從 [來源歸檔版本](source-archive.md#2-內容來源版本與-inventory) 投影；同 URL 換內容不覆寫來源版本，manifest 最新狀態與 raw 歷史分開保存。
 
 ## 3. 身分、商品與插畫
 
