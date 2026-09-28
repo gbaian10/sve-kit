@@ -20,6 +20,9 @@ job = "repo"
 [hooks.check-merge-conflict]
 job = "repo"
 
+[hooks.check-yaml]
+job = "repo"
+
 [hooks.check-toml]
 job = "repo"
 
