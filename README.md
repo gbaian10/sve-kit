@@ -1,5 +1,6 @@
 # sve-kit
 
+CI acceptance test line.
 Unofficial toolkit for Shadowverse: EVOLVE — card database and battle simulator.
 Not affiliated with or endorsed by Cygames or Bushiroad.
 
