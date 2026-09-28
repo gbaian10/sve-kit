@@ -125,10 +125,10 @@ semantics. Project table requirements remain in `docs/schema/build-db.md` and
 
 `t1.compile_build(("images", "cr"))` compiles the forty T0 tables plus the four
 image and two CR tables: 46 tables. Selecting `images` alone closes to 44 tables;
-`cr` alone closes to 42. The default selects only T0. Art, DSL and keywords remain
+`cr` alone closes to 42. The default selects only T0. DSL and keywords remain
 reserved, unavailable capabilities; disabled nullable references remain NULL-only.
 Enabling CR installs the existing `rules_profile_revision.cr_version_id` FK.
-This is an intermediate DDL inventory, not the minimum 57-table release schema.
+This selection is smaller than the minimum 57-table DDL inventory.
 
 `Capability.implemented` means that DDL declarations exist. The separate
 `importer_ready` and `validator_ready` flags default to false.
@@ -180,7 +180,7 @@ importer/image builder/domain validator. SQL checks do not attest those facts.
 
 Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `PRAGMA user_version` during creation and checked before every commit. Legacy
-`compile_t0()` uses version 1; the optional T1 registry uses version 2, including
+`compile_t0()` uses version 1; the optional T1 registry uses version 3 (version 2 introduced images/CR), including
 its T0-only selection. The version identifies the declaration generation; the
 selected capability closure determines the actual table set. It is independent
 of crawl-manifest schema versions and public snapshot format/data versions.
@@ -201,3 +201,42 @@ existing SQLite WAL/SHM/journal sidecars are rejected. This helper is not a
 concurrency lock, a crash-durable release transaction or an in-place migration.
 It cannot protect against unrelated processes opening/changing the destination
 concurrently. Source archives and frozen inputs are never replacement targets.
+
+## Minimum T1 and optional EN groups
+
+`t1.compile_minimum()` selects T0 plus images, CR, errata, correction, QA and
+related: exactly 57 tables. `compile_minimum(include_en=True)` adds art and the
+three region review/divergence tables: exactly 61. The `en` group explicitly
+requires `art`; selecting `art` alone is also supported. No artist, baseline,
+semantics or DSL placeholder tables are created. All importer/validator readiness
+flags remain false. These counts attest DDL coverage, not release readiness.
+
+Errata and correction before/after values reuse the public `CorrectionValue` and
+`ErrataChange` schemas, including their field-dependent types, through local
+schema references and a CHECK over the row's field and JSON values. Numeric JSON
+null uses `Json(None)`; the columns themselves are non-nullable. The build value
+domain does not widen the authored correction input's effect/card_type whitelist.
+
+New query checks validate errata face/region and applicability adoption,
+supersedes ownership, correction adoption/application output requirements and
+revision scope, reskin confirmation/reverse duplicates, confirmed-none evidence
+adoption and aligned/divergent review adoption. Foreign keys bind correction
+printing/face, related target printing/card, and art card/face ownership.
+Disabled art references are NULL-only; enabling art installs the existing
+printing_face composite FK. Switching from a version-2 build to version 3 uses
+the same rebuild helper and revalidates all imported references before replacement.
+
+The schema can retain pending reviews, unadopted needs_review corrections,
+conflict applications without outputs, unknown dates and unnumbered QA.
+Successful text correction applications require a result text unit; structured
+rule-data corrections require a revision. Referenced revisions always match the
+correction face and printing region. Reskins have one confirmed target per source
+card, no reverse duplicate, no count or inherited DSL, and require authored
+provenance. Other relation kinds are not assigned those reskin-only restrictions.
+
+Checks do not calculate bundle freshness or prove semantic equivalence, exact
+before/after/result content, confirmed batch membership, complete errata scope,
+reskin source evidence for all faces/regions, or adopted art baseline/alternate
+classification. Those domain validators and importers are still required before
+these DDL groups can pass `require_usable`. Source hashes and historic versions
+must come from pinned inputs; schema validation never invents missing evidence.
