@@ -1,0 +1,39 @@
+name: Report a rules or simulator bug
+description: Report unexpected behavior in a card interaction or the simulator.
+title: '[Rules or simulator]: '
+labels: [rules]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write this issue in any language.
+        Do not paste card lists, images, or translations copied from other sites, and do not upload card image files.
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: List the cards and actions needed to see the behavior.
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: input
+    id: rules-reference
+    attributes:
+      label: Comprehensive rules section or official Q&A
+      description: Add a section number or official Q&A link if available.
+    validations:
+      required: false

@@ -1,0 +1,48 @@
+name: Suggest a translation or term
+description: Suggest a Traditional Chinese translation or terminology correction.
+title: '[Translation]: '
+labels: [translation]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write this issue in any language. Cite the Japanese or English source.
+        Do not paste card lists, images, or translations copied from other sites, and do not upload card image files.
+  - type: input
+    id: current-translation
+    attributes:
+      label: Current translation or term
+      description: Include the original Japanese or English term if there is no translation yet.
+    validations:
+      required: true
+  - type: input
+    id: suggested-translation
+    attributes:
+      label: Suggested translation or term
+    validations:
+      required: true
+  - type: dropdown
+    id: translation-source
+    attributes:
+      label: Source of the suggested translation
+      options:
+        - My own translation
+        - Official Traditional Chinese from a digital Shadowverse game (add a link below)
+        - Community term
+    validations:
+      required: true
+  - type: input
+    id: source-link
+    attributes:
+      label: Source link
+      description: Link to the Japanese or English source; also link the digital game's official Traditional Chinese text when selected above.
+      placeholder: https://...
+    validations:
+      required: false
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Explain the term or why the proposed translation fits.
+    validations:
+      required: false

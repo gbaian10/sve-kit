@@ -1,0 +1,31 @@
+name: Report an incorrect Japanese-English mapping
+description: Report two card printings that appear incorrectly linked or unlinked.
+title: '[Region mapping]: '
+labels: [region-mapping]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write this issue in any language. Both official card page links are required.
+        Do not paste card lists, images, or translations copied from other sites, and do not upload card image files.
+  - type: input
+    id: japanese-page
+    attributes:
+      label: Japanese official card page URL
+      placeholder: https://...
+    validations:
+      required: true
+  - type: input
+    id: english-page
+    attributes:
+      label: English official card page URL
+      placeholder: https://...
+    validations:
+      required: true
+  - type: textarea
+    id: difference
+    attributes:
+      label: What difference did you notice?
+      description: Describe why the current mapping may be wrong or why these cards should match.
+    validations:
+      required: true
