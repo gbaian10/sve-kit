@@ -40,16 +40,21 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 
 ## 資料放在哪裡
 
-| 資料                                 | 位置                                    | 進 git      |
-| ------------------------------------ | --------------------------------------- | ----------- |
-| 原始 HTML、卡圖、語音、來源 manifest | repo 外，由環境變數 `SVE_DATA_DIR` 指定 | ❌ 臨時中轉 |
-| 可以隨時刪掉的暫存                   | `carddb/.cache/`                        | ❌          |
-| 建置產物（SQLite、JSON 快照）        | `carddb/dist/`                          | ❌          |
-| 人寫資料                             | `authored/`                             | ✅          |
-| 測試用官方卡文                       | 專用私有 GitHub testdata repo           | 見下述政策  |
+| 資料                                       | 位置                                    | 進 git        |
+| ------------------------------------------ | --------------------------------------- | ------------- |
+| latest cache（HTML、卡圖、語音）           | repo 外，`SVE_DATA_DIR`                 | ❌ 可替換副本 |
+| 抓取 manifest                              | repo 外，`SVE_DATA_DIR`                 | ❌ 不可刪     |
+| 歷史 raw、來源版本 inventory、凍結輸入批次 | repo 外，來源歸檔 store                 | ❌ 不可刪     |
+| 可以隨時刪掉的暫存                         | `carddb/.cache/`                        | ❌            |
+| 建置產物（SQLite、JSON 快照）              | `carddb/dist/`                          | ❌            |
+| 人寫資料                                   | `authored/`                             | ✅            |
+| 測試用官方卡文                             | 專用私有 GitHub testdata repo           | 見下述政策    |
 
-`SVE_DATA_DIR` 是上傳 R2 之前的臨時中轉站：卡圖、語音上傳 R2 並確認後可刪；
-原始 HTML 建議保留（重新解析用）；**manifest 不可刪**（唯一無法重建的資料）。
+`SVE_DATA_DIR` 的 latest cache 只保存可替換的工作副本；清理或替換前，所需來源版本須已歸檔並可從獨立備份驗回。
+**抓取 manifest 與歷史 raw／來源版本 inventory 都不可刪**；官網回寫後無法靠重抓還原，建置 DB 可重建不代表來源歷史可丟棄。
+HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表原 PNG 可刪。
+歸檔以內容 hash 去重；圖片的大量 hash／複製在鎖外準備，鎖內重驗來源並封存 inventory 與 SQLite backup API 副本。
+每批歸檔即備份並驗 restore；allow-root 僅授權讀取，私人儲存與備份路徑不進文件。完整契約見 [來源歸檔與凍結輸入](docs/schema/source-archive.md)。
 
 原則：**能用程式重新產生的不進 git；專案共用的人寫資料與正式文件進 git。**
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
@@ -89,6 +94,7 @@ SQLite 的原始 `Any` 不得離開邊界模組；其他層只使用已驗證的
 
 - 請求之間至少間隔 2 秒，帶瀏覽器 User-Agent（官網的 CloudFront 不帶會回 404）
 - **只抓新增或變動的內容**，原始資料已存在就不重抓
+- `crawl --mode refresh` 會覆寫既有 latest 原始檔；[來源歸檔保護](docs/schema/source-archive.md#4-refresh-與中斷恢復)完整接入前不要執行，不能以已有 manifest backup 代替 raw 歷史保護。
 - 每個抓下來的檔案都要在 manifest 記錄來源網址、抓取時間、ETag、雜湊值
 
 ## 開發指令

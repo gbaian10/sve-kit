@@ -12,6 +12,7 @@
 | [卡表快照格式](snapshot-format.md)        | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
 | [快照傳輸契約](snapshot-transport.md)     | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
 | [卡圖衍生檔契約](image-variants.md)       | 五檔 WebP、橫向例外、裁切取整與原圖邊界                                           |
+| [來源歸檔與凍結輸入](source-archive.md)   | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
 | [容量與記憶體預算](size-budget.md)        | 卡表快照的容量門檻、量測方法與目前結論                                            |
 | [建置表實作分期](implementation-tiers.md) | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
 | [authored 維護方式](authored-layout.md)   | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
