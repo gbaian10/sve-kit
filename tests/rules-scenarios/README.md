@@ -29,6 +29,9 @@
 
 所有題目都經過對方交叉審核，雙方同意後定案。
 
+`verified_by[].note` 裡出現的 `xverify-*/recheck.md`、`last.md`、`split.md` 等檔名是設計期本機審核稿，
+不隨 repo 發布。題目的公開依據以題目的 `refs`、`evidence` 與裁定登錄（`authored/rulings/`）為準。
+
 ## 必過題
 
 `must_pass: true` 的 170 題（518 個局面）是 DSL 必須通過的門檻；其餘 14 題是參考題，不列入門檻。
