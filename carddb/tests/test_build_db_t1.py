@@ -18,13 +18,18 @@ from sve_carddb.build_db import (
 )
 from sve_carddb.build_db.t0 import TABLES as T0_TABLES
 from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.build_db.t1 import REGISTRY, TABLES, compile_build
+from sve_carddb.build_db.t1 import REGISTRY, compile_build
+from sve_carddb.build_db.t1_cr import TABLES as CR_TABLES
+from sve_carddb.build_db.t1_images import TABLES as IMAGE_TABLES
 
 from .build_db_fixtures import seed
 from .build_db_t1_fixtures import populate, rows
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Value
+
+
+TABLES = (*CR_TABLES, *IMAGE_TABLES)
 
 
 def test_exact_inventory_and_optional_closure() -> None:
@@ -48,7 +53,7 @@ def test_exact_inventory_and_optional_closure() -> None:
     assert (
         compile_build(("images", "cr")).sql == compile_build(("cr", "images", "t0")).sql
     )
-    for cap in ("art", "dsl", "keyword", "unknown"):
+    for cap in ("dsl", "keyword", "unknown"):
         with pytest.raises(ValueError, match="Unknown or unimplemented"):
             compile_build((cap,))
 
@@ -60,7 +65,7 @@ def test_connected_graph_and_pragma_inventory() -> None:
             populate(db)
         for table in schema.tables:
             assert db.rows(table.name)
-        assert db._read("PRAGMA user_version") == ((2,),)
+        assert db._read("PRAGMA user_version") == ((3,),)
         assert db._read("SELECT count(*) FROM sqlite_schema WHERE type='table'") == (
             (46,),
         )
