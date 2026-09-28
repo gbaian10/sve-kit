@@ -4,7 +4,7 @@
 
 ## 1. 快照清單（manifest）、版本與容器
 
-`format_version` 是傳輸格式 SemVer；`data_version` 是 UTC 發布批次；`dsl_version` 是 DSL 主版.次版，不能混用。快照清單一份釘住 `format_version,data_version,published_at,regions,languages,min_reader_version,required_capabilities,engine_support_target,files,text_all,coverage,mechanic_universe_id,restriction_coverage,source_windows,changes_ref`。
+`format_version` 是傳輸格式 SemVer；`data_version` 是資料批次識別，正式版表示 UTC 發布批次，`preview-` 前綴保留給不發布的預覽批次、不得用於正式版；`dsl_version` 是 DSL 主版.次版，不能混用。快照清單一份釘住 `format_version,data_version,published_at,regions,languages,min_reader_version,required_capabilities,engine_support_target,files,text_all,coverage,mechanic_universe_id,restriction_coverage,source_windows,changes_ref`。
 
 `engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 每筆 `{key,path,sha256,bytes,compressed_bytes,row_counts,dependencies,role}`，role 是 `bootstrap/text/images/programs`；hash 是**未壓縮 canonical payload bytes**。傳輸 br/gzip 的 bytes 另記；解壓後驗 hash，下載中止不切版。path 為內容定址，不含 `data_version`。dependencies 是 key 陣列，檢查無環或先收斂互相引用的分片成一載入組；表列參照的閉包在建置端驗證。
 
@@ -157,6 +157,14 @@ R2 永久保留所有已發布快照清單及其引用的 text/完整文字包/�
 - page：`{index_format:1,entries:[{data_version,published_at,format_version,min_reader_version,required_capabilities,manifest_path,manifest_sha256,engine_support_target}]}`；`data_version` 全域唯一，同版號不可換快照清單；建置比前索引確認 append-only。索引可以更新，但每一代 index 本身也另以 hash 留存，供除錯。
 
 舊 reader 按 format `major/min_reader_version/capabilities` 找最後相容項；回放按 `data_version`＋`manifest_sha256` 精確定位，不能自動換最新卡文。`index_format` 不支援時保留本機 active 並提示更新。永久索引屬發行基礎檔，不計 40 個玩家文字集合；全部歷史也不強制每次預取到手機。
+
+### 4.2 預覽快照
+
+預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`，正式本機發布使用 `SVE_CDN_DIR`，兩個根目錄不得相同或互相包含。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
+
+預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；不寫 `snapshots/versions/index.json` 或其 pages，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
+
+預覽仍須驗已啟用能力、JSON Schema、公開引用閉包、分片 join、hash／counts，並提供容量與排除清單、尚未通過的正式閘門報告。來源覆蓋不足維持未知語意；`source_windows` 只用 §8 的 complete／partial 或空窗口，不因集合為空就宣稱 absent 或合法。已知且適用的更正仍須套用；未解 current 衝突須排除受影響閉包並列明原因。
 
 ## 5. 語言矩陣與取用
 

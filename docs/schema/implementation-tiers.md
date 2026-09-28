@@ -14,6 +14,10 @@
 
 T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction、`restriction_member`、`restriction_coverage`、`deck_role_override`、`identity_change`。`rules_name/face_rules_name` 原已在 T0。首發有已知規則/禁限須填入，覆蓋不足仍明示 unknown，不能捏造合法；`construction_rules_ref` 與非空 FK 的依賴一併提供。首發 `card_related` 支援已確認相關卡與追加區建議；未知 relation 不猜；有已核對的換皮資料時，`same_rules_reskin` 依 build-db §5 的採納與失效規則投影。EN/非官方 SNC/翻譯/裁定等若納入該次資料，再啟用對應條件組及完整非空引用閉包；57 是明列最低集合，不是略過實際資料依賴的上限。
 
+若首發納入現有 EN 登錄，另啟用 `region_mapping_review`、`art`、`region_text_review`、`region_divergence`，最低集合成為 61 表；61 是含 EN 條件組的結果，不是所有發布無條件必建的數量，其他非空引用仍須補齊閉包。
+
+首發不啟用 `face_semantics`／`revision_semantics`／`semantic_reference`；身分分組不視為規則等義證明。`astra/1` 原型不符合 [正式候選入口](authored-layout.md#7-dsl-與拒絕輸入) 與 DSL 1.0 Schema，不構成正式 DSL 候選；沒有正式候選的卡依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 輸出 `missing_dsl`，`dsl_id/dsl_version` 為 null、`automatic=false`；未指定引擎時引擎目標為 null；公開 automatic 仍由支援狀態推導，不新增傳輸欄位。預覽快照通過其已啟用能力的驗證，不代表正式首發 57 表已驗收。
+
 | `tier` | 用途                               | 啟用/未啟用行為                                                                                                                                                                          | 表數 |
 | ------ | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- |
 | T0     | 查卡與構築共同必要集合             | 必做；缺 DSL 仍輸出 `missing_dsl`。建置資料庫的 `card_engine_support` 未啟用引擎時 dsl/load/engine 欄為 null；`printing_face.art_id=null`、加工未知、printed unknown，頁面仍能顯示原文。 | 40   |
