@@ -10,7 +10,7 @@ import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
 import { createTextResolver } from "./text"
 
-const stubImage = (width: number, height: number, seed: number) =>
+const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
     new TextEncoder().encode(`stub-webp:${String(width)}x${String(height)}:${String(seed)}`),
   )

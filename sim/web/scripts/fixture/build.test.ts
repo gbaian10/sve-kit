@@ -13,7 +13,7 @@ import { buildSnapshot, canonicalSize } from "./build"
 import { CARDS } from "./cards"
 
 // Deterministic stand-in for the WebP encoder: the bytes only need to be unique per seed and size.
-const stubImage = (width: number, height: number, seed: number) =>
+const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
     new TextEncoder().encode(`stub-webp:${String(width)}x${String(height)}:${String(seed)}`),
   )
