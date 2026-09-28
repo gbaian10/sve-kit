@@ -31,7 +31,7 @@ B 的交接須附 manifest 入口、輸入 hash、地區範圍、卡數與排除
 已知且適用的更正須套用；無法解決的 current 衝突排除受影響預覽閉包並列清單。
 
 卡圖在預覽階段交付，先於 [M2-16／#43](https://github.com/gbaian10/sve-kit/issues/43) 與 [M2-17／#44](https://github.com/gbaian10/sve-kit/issues/44) 的 CI 引擎接線。
-CI 使用測試 adapter 從正式最小快照推導原型需要的 legacy shape，不綁 DSL 1.0 遷移；移除對應 ignore 並實測行覆蓋率達 90% 是接線的驗收要求。
+CI 使用測試 adapter 從正式最小快照推導原型需要的 legacy shape，不綁 DSL 1.0 遷移；主分支與專案自己的 PR 須移除對應 ignore、跑完整測試並實測行覆蓋率達 90%，fork PR 的例外依下節 G08 決定。
 本里程碑先輸出本機；上傳 R2 仍須另行明確授權。
 
 ## 首發能力與引擎狀態
@@ -47,13 +47,22 @@ CI 使用測試 adapter 從正式最小快照推導原型需要的 legacy shape�
 因此依 [build-db.md §10](build-db.md#10-dsl驗證與未實作卡片頁) 的「沒有選定候選」規則，`dsl_id`／`dsl_version` 與引擎目標皆為 null，`automatic=false`，公開支援狀態附未實作理由。
 公開 `automatic` 沿快照契約由 effective status 推導，不新增傳輸欄位。查卡介面顯示「未實作」，卡文仍可使用；此結果已定，不再要求確認是否接受。
 
+## G08：測試資料存放與 CI 取用（已決）
+
+使用者於 2026-09-28 [決定採專用的私有 GitHub repo](https://github.com/gbaian10/sve-kit/issues/9#issuecomment-5873014140) 保存測試用官方卡文，例如 `gbaian10/sve-kit-testdata`；這批卡文不進 `sve-kit`，不用 R2。
+[M2-16／#43](https://github.com/gbaian10/sve-kit/issues/43) 與 [M2-17／#44](https://github.com/gbaian10/sve-kit/issues/44) 依此實作：
+
+- 資料 repo 只放測試所需最小 JSONL 與產生說明，不放完整卡表、卡圖或憑證。核對完整引用閉包（含 token、題本、AI、回放、輔助與 rejected 原文定位）、精確卡數、bytes 與來源，並以「記錄 → 產生 → 結果逐題相同」驗證。
+- `sve-kit` 保存鎖定檔，釘資料 repo 的完整 commit SHA 與各檔案 SHA-256。CI 以唯讀 deploy key 取得指定 commit 並驗 hash；secret 由使用者設定。可信任 job 缺資料、缺憑證或 hash 不符時必須失敗，不靜默跳過。
+- 更新順序：carddb 重產 → 推至資料 repo 並保留舊 commit → `sve-kit` PR 更新鎖定檔 → CI 驗證後合併。
+- 公開後 fork PR 沒有 secret，明確排除這 7 個測試並標示；主分支與專案自己的 PR 跑完整測試、維持行覆蓋率 90%。
+- 測試卡文不放進 Actions cache／artifact，避免 fork 可讀或保存期限影響重建；失敗 log 不印整行卡文。
+- 私有存放只提供存取控制，不等於取得授權；公開前決定 LICENSE 時一併確認。
+
+本節記錄後續實作要求，不表示資料 repo、deploy key 或 CI 接線已建立。
+
 ## 待量測與待決定
 
 - **正式首發地區**：由 [M2-05b0／#25](https://github.com/gbaian10/sve-kit/issues/25) 先交 EN 既有觀測的全體／可比對吻合率、缺來源與逐欄差異，再由使用者決定 JP-only 或 JP＋EN。EN 未完成不阻 A／B；若正式先 JP，EN 仍在里程碑內補齊。
-- **G08：CI 真卡測試輸入方案待定**：不提交／私有 R2 bucket／私有 testdata repo／進 git 四種方案，於 M2-16 前由使用者決定，沒有預選方案。進 git 的提案上限為 500 張、UTF-8 input 合計 1 MiB、單檔 <512 KiB；上限不是准入批准。
 - **current 真實衝突**：由 [M2-09a／#29](https://github.com/gbaian10/sve-kit/issues/29) 先列出來源、差異與可機械判定的結果；只有無法依既有政策判定的個案才交使用者選擇，不預先要求逐卡決定。
 - **翻譯首輪批次與抽查投入**：到翻譯階段有候選與工作量時再決定；首版缺繁中翻譯時回退原文，不擋文字快照交付。
-
-G08 決策前須核完整引用閉包（含 token、題本、AI、回放、輔助與 rejected 原文定位）、精確卡數、bytes 與來源，說明各方案對離線重建、fork PR CI 及權利說明的影響。
-未決前不得將這批官方卡文放進 git，亦不得建立或上傳私有遠端資料庫作為既定方案；待決只影響相關測試資料交付與 CI 收尾，不阻 A／B／卡圖。
-選「不提交」時須同步決定 CI 的資料取得與驗收安排，不能默認取消原測試或降低 90% 門檻。
