@@ -3,7 +3,7 @@ import { type KeyboardEvent, useId } from "react"
 import { cn } from "./cn"
 import { rovingRadioKeyDown } from "./useRovingRadio"
 
-export interface SegmentedOption<T extends string> {
+interface SegmentedOption<T extends string> {
   readonly value: T
   readonly label: string
 }
@@ -40,7 +40,7 @@ export function Segmented<T extends string>({
       role="radiogroup"
       aria-label={label}
       className={cn(
-        "inline-flex rounded-control border border-border bg-surface-1 p-0.5",
+        "inline-flex shrink-0 rounded-control border border-border bg-surface-1 p-0.5",
         size === "sm" ? "h-8.5" : "h-9",
         className,
       )}
@@ -60,7 +60,7 @@ export function Segmented<T extends string>({
               onChange(option.value)
             }}
             className={cn(
-              "relative min-w-11 rounded-sm px-3 text-13 font-semibold",
+              "relative min-w-11 rounded-sm px-3 text-13 font-semibold whitespace-nowrap",
               "before:absolute before:inset-x-0 before:content-['']",
               size === "sm" ? "before:-inset-y-[7px]" : "before:-inset-y-1.5",
               checked

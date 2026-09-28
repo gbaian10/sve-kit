@@ -89,6 +89,27 @@ Use one key per sentence and pass values through interpolation: `t("cost", { n }
 `{{placeholders}}`, and that the zh-TW file contains none of the Simplified-only characters
 listed in that test (extend the list when a new one slips through review).
 
+### Text length
+
+Japanese and English strings are often longer than the zh-TW ones, so the layout never assumes a
+length: text containers have no fixed width, and a setting row (`SettingRow`) lets its control
+wrap under the label when both do not fit on one line. Controls that cannot wrap (segmented
+pills) get a width budget instead: `static.test.ts` fails when any `options.*` label in any
+language is wider than about 6 em, so the fix is always to shorten that language's copy, never
+to widen the control. Language names use each language's own name (繁體中文 / 日本語 / English) in
+every locale.
+
+Two dev-only tools catch what the tests cannot:
+
+- `src/app/overflow-audit.ts` logs a console error whenever a visible box is narrower than its
+  content (after DOM changes, resizes and font loading), and `window.__sveOverflowAudit()` returns
+  the same report on demand. The headless self-check runs every screen in all three languages and
+  treats any console error as a failure.
+- `?pseudo` in the dev URL stretches every string by 35% with accented letters and brackets
+  (`[Çáŕð ñáḿéš ~~~ ~]`), which shows cut-off ends and squeezed rows before a real translation
+  does. Its findings are advisory (the three real languages are the gate): a segmented group that
+  only overflows at +35% is a warning about a fourth language, not a bug in the current three.
+
 ## Lint rule fixtures
 
 `tests/lint-fixtures/` is a small fake project full of code that must, or must not, trip the lint
@@ -96,6 +117,16 @@ rules. Each case starts with `// case: <what> -> <rule ids | none>`; `// bypass:
 rules knowingly cannot close. `tests/eslint-rules.test.ts` lints every file under the fixture
 `src/` and checks that each case reports exactly the rules it declares, as many times as it
 declares them (list a rule twice when it fires twice). Update the fixtures together with the rules.
+
+## Dead code
+
+`bun run knip` (part of `bun run check`) reports files, exports, types and dependencies that
+nothing uses. Delete what it reports together with the UI that stopped needing it; do not keep
+components or helpers "for later" — they come back from git history when their consumer lands.
+The only configured exceptions are in `knip.json`: the lint rule fixtures (input data, never
+imported) and the font package, which only CSS `@font-face` rules reference.
+`src/i18n/usage.test.ts` does the same for locale keys: every key must appear in a source file,
+either as a string literal or under a template-literal prefix such as ``t(`nav.${key}`)``.
 
 ## Known issues
 

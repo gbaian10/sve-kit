@@ -1,6 +1,6 @@
 import { House, Layers, Search } from "lucide-react"
 
-export type NavItemKey = "home" | "cards" | "decks"
+type NavItemKey = "home" | "cards" | "decks"
 
 export interface NavItem {
   readonly key: NavItemKey

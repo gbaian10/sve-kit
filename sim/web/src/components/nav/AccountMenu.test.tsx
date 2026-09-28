@@ -44,7 +44,7 @@ describe("AccountMenuPanel", () => {
     await renderInRouter(<AccountMenuPanel />)
     expect(
       within(screen.getByRole("radiogroup", { name: "介面語言" })).getByRole("radio", {
-        name: "英文",
+        name: "English",
       }),
     ).toHaveAttribute("aria-checked", "true")
   })
@@ -76,7 +76,7 @@ describe("AccountMenuPanel", () => {
 
   it("changes the UI language and the menu re-renders in it", async () => {
     await renderInRouter(<AccountMenuPanel />)
-    await userEvent.click(screen.getByRole("radio", { name: "英文" }))
+    await userEvent.click(screen.getByRole("radio", { name: "English" }))
     expect(readPrefs().uiLanguage).toBe("en")
   })
 

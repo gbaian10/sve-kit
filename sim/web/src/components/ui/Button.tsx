@@ -2,8 +2,8 @@ import type { ComponentPropsWithoutRef } from "react"
 
 import { cn } from "./cn"
 
-export type ButtonVariant = "primary" | "secondary" | "danger" | "ghost"
-export type ButtonSize = "md" | "lg" | "icon"
+type ButtonVariant = "primary" | "secondary" | "danger" | "ghost"
+type ButtonSize = "md" | "lg" | "icon"
 
 export interface ButtonProps extends ComponentPropsWithoutRef<"button"> {
   readonly variant?: ButtonVariant

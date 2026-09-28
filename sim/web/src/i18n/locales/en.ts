@@ -3,7 +3,6 @@ import type { Messages } from "./zh-TW"
 export default {
   app: {
     title: "sve-kit",
-    tagline: "Unofficial card list and battle tools for Shadowverse: EVOLVE",
   },
   nav: {
     home: "Home",
@@ -28,12 +27,10 @@ export default {
   options: {
     edition: { jp: "Japanese", en: "English" },
     nameDisplay: { translated: "Translated", original: "Original", both: "Both" },
-    language: { "zh-TW": "Traditional Chinese", ja: "Japanese", en: "English" },
-    theme: { system: "Follow system", light: "Light", dark: "Dark" },
+    language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
+    theme: { system: "System", light: "Light", dark: "Dark" },
     accent: { amber: "Amber", teal: "Teal", red: "Red" },
-    region: { jp: "Japan", en: "English regions" },
-    on: "On",
-    off: "Off",
+    region: { jp: "Japanese", en: "English" },
   },
   settings: {
     title: "Account and settings",
@@ -44,8 +41,6 @@ export default {
     banRegion: "Ban list region",
     dataSaver: "Data saver",
     dataSaverHint: "Card images load only when tapped",
-    about: "About",
-    report: "Report a problem",
   },
   pages: {
     home: "Home",

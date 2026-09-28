@@ -1,7 +1,6 @@
 const zhTW = {
   app: {
     title: "sve-kit",
-    tagline: "Shadowverse: EVOLVE 非官方卡表與對戰工具",
   },
   nav: {
     home: "首頁",
@@ -26,12 +25,10 @@ const zhTW = {
   options: {
     edition: { jp: "日版", en: "英版" },
     nameDisplay: { translated: "譯名", original: "原文", both: "兩者" },
-    language: { "zh-TW": "繁中", ja: "日文", en: "英文" },
+    language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
     theme: { system: "跟隨系統", light: "淺色", dark: "深色" },
     accent: { amber: "琥珀", teal: "青綠", red: "紅" },
     region: { jp: "日本", en: "英文圈" },
-    on: "開",
-    off: "關",
   },
   settings: {
     title: "帳號與設定",
@@ -42,8 +39,6 @@ const zhTW = {
     banRegion: "禁限地區",
     dataSaver: "省流量",
     dataSaverHint: "不自動載入卡圖，點了才載入",
-    about: "關於",
-    report: "回報問題",
   },
   pages: {
     home: "主頁",
