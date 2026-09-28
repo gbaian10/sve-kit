@@ -133,9 +133,31 @@ use `#[allow]` only when the lint does not fire everywhere the attribute applies
 
 ## Setup
 
+Install these tools with their own installers (each is one command; see the linked pages):
+
+| Tool                             | Used for                                                       | Install                                                           |
+| -------------------------------- | -------------------------------------------------------------- | ----------------------------------------------------------------- |
+| [rustup](https://rustup.rs)      | Rust; the toolchain version is pinned in `rust-toolchain.toml` | `curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs \| sh` |
+| [uv](https://docs.astral.sh/uv/) | Python (`carddb`, `docs/schema/er`)                            | `curl -LsSf https://astral.sh/uv/install.sh \| sh`                |
+| [mise](https://mise.jdx.dev)     | Bun and Node.js, pinned in `mise.toml`                         | `curl https://mise.run \| sh`, then `mise install` in the repo    |
+| Docker                           | The markdownlint hook                                          | your platform's Docker install                                    |
+
+Only Bun and Node.js are managed by mise; do not add Rust or Python to `mise.toml`,
+so rustup and uv stay in charge of them. Machine-specific paths such as `SVE_DATA_DIR`
+go in `mise.local.toml` (ignored by git), for example:
+
+```toml
+[env]
+SVE_DATA_DIR = "/path/to/sve-kit-data"
+SVE_TEST_SNAPSHOT = "/path/to/cards.jsonl"   # fixed card list the engine card tests read
+```
+
+Then:
+
 ```bash
 uv --directory carddb sync --all-groups
 cargo install --locked cargo-deny cargo-machete cargo-llvm-cov cargo-mutants
+uv tool install pre-commit
 pre-commit install
 ```
 
