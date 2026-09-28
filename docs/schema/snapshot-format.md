@@ -6,7 +6,7 @@
 
 `format_version` 是傳輸格式 SemVer；`data_version` 是資料批次識別，正式版表示 UTC 發布批次，`preview-` 前綴保留給不發布的預覽批次、不得用於正式版；`dsl_version` 是 DSL 主版.次版，不能混用。快照清單一份釘住 `format_version,data_version,published_at,regions,languages,min_reader_version,required_capabilities,engine_support_target,files,config_ref,text_all,partitioning,coverage,mechanic_universe_id,restriction_coverage,source_windows,qa_card_ids,errata_card_ids,changes_ref`；完整型別及命名規則見 [傳輸契約 §1–2](snapshot-transport.md#2-快照清單與檔案描述)。
 
-`engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 每筆 `{key,path,sha256,bytes,compressed_bytes,row_counts,dependencies,role}`，role 是 `bootstrap/text/config/images/programs`；hash 是**未壓縮 canonical payload bytes**。傳輸 br/gzip 的 bytes 另記；解壓後驗 hash，下載中止不切版。path 為內容定址，不含 `data_version`。dependencies 是 `{key,sha256}` 陣列，只表達先行解析／join 依賴並要求無環；邏輯 FK 的整體閉包另在建置端驗證。`compressed_bytes` 為 `{br:UInt?,gzip:UInt?}`，null 表示不提供該表示。
+`engine_support_target` 恰含 `engine_version,engine_build_hash,validation_policy_id`，三欄全 null 或全有值；逐卡狀態不重複它。files 的完整形狀、hash／壓縮大小及依賴規則見 [傳輸契約 §2](snapshot-transport.md#2-快照清單與檔案描述)。
 
 傳輸容器採 `{format_version,types,tables:{table_name:[Fragment]}}`；Fragment 完整包含 `owner,bucket,partition,base,columns,rows`，精確身分與欄序見 [傳輸契約 §4](snapshot-transport.md#4-fragment-容器與-join)。這是具名 schema 的 row tuple 編碼，不是欄式分析資料庫。邏輯欄位仍以下表為權威。§2 是 join 後邏輯白名單；實際 columns 必須符合 §3.1 固定的啟動包／詳情分片欄位分割，不可任意省略 required/null 欄。manifest 宣告 `required_capabilities` 至少含 `column-partition-v1` 與 `fragment-container-v1`；舊 reader 不支援時拒絕載入此傳輸格式。
 

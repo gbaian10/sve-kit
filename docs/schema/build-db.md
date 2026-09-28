@@ -399,13 +399,15 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 ## 17. 已決政策：非官方圖鏡像與地區 Decklog 建牌資格
 
-已定案採用 `mirror_reviewed` 與 `regional_decklog`；config 固定輸出這兩個值，沒有政策 pending 或替代模式。`publication_state` 為 pending/approved/withdrawn；單張圖片的 `publication_state=pending` 是「尚未人工確認」，不是政策待決。
+已定案採用 `mirror_reviewed` 與 `regional_decklog`；config 固定輸出這兩個值，沒有政策 pending 或替代模式。`publication_state` 為 pending/approved/withdrawn；單張圖片的 `publication_state=pending` 是「尚未通過適用的來源驗證／人工確認」，不是政策待決。
 
 ### 17.1 `mirror_reviewed`
 
 非官方卡圖須由人確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`。建置資料庫的 `image_asset` 保留 `source_url`、`source_id`、`content_hash` 與 `review_decision_id→decision`；`third_party` 且 approved 時此 FK 必填，decision.state=confirmed，`reviewed_by/reviewed_at` 必填。確認釘住該 `image_asset` 的 `source_url/source_id/content_hash`，`decision_source` 連回原始來源；每張都須核對，可用全體 checked 的 confirmed batch，`sampled/model_reviewed` 不足以放行。圖片內容或來源換版需新 `image_asset`／新確認，不得沿用先前 approved。
 
-`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖仍依原來源驗證流程，不要求每張另作人工 decision。確認者留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
+`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖的 approved 規則見下段。確認者留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
+
+`origin=official` 的圖在官方來源歸屬、頁面原樣 `img src` 與解析後來源 URL 的對應、實際取得 bytes 的來源 hash 及圖片解碼／寬高驗證均通過後，由建置器設為 `publication_state=approved`，`review_decision_id=null`，不要求逐圖人工 decision。尚未完成或驗證失敗為 pending，並留下建置診斷；availability 仍按抓取結果表示 available/missing/unfetched，不能把 pending 當 missing，也不能把只有 URL 的 unfetched 圖當已通過。來源或內容換版須重新驗證；withdrawn 不因再次驗證通過而自動恢復 approved。
 
 圖片事後有問題或來源要求撤下時，`publication_state=withdrawn`，`withdrawal_reason` 必填可公開原因，新快照不出該圖 variants/path，但保留 `image_asset` 與來源供說明；舊快照不可變。來源標示從 `source_url` 的 hostname 顯示站名並連回原網址，不捏造人工確認日期（不出貨）。「撤下」會阻止現行清單再引用，不能保證已離線下載的舊副本立即消失；是否刪除 CDN blob 牽涉永久回放保留，另循實際移除處理，不在此承諾或自動刪除。
 

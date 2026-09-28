@@ -18,7 +18,7 @@
 
 ## 插畫裁切與覆寫
 
-直向預設裁切的連續座標為左 `0.08W`、右 `0.92W`、上 `0.14H`，高度由裁切寬乘 3/4 決定。像素框使用半開區間：先取 `left=floor(0.08W)`、`top=floor(0.14H)`，再取 `k=floor(min(0.84W/4,(W-left)/4,(H-top)/3))`，框為 `[left,top,left+4k,top+3k)`。k 必須正值；此取整維持精確 4:3，最多損失不足 4 個寬像素。459×641 的框為 `[36,89,420,377)`（384×288）。
+直向預設裁切採左 8%、右 92%、上 14%，高度由裁切寬乘 3/4 決定。像素框用純整數算式及半開區間：`left=(8*W)//100`、`top=(14*H)//100`、`k=min((84*W)//400,(W-left)//4,(H-top)//3)`，框為 `[left,top,left+4*k,top+3*k)`。`//` 表示非負整數除法向下取整，中間乘積須使用不溢位的整數計算。k 必須正值；此取整維持精確 4:3，最多損失不足 4 個寬像素。459×641 的框為 `[36,89,420,377)`（384×288）。
 
 art_s／art_m 由同一框分別縮放，輸出為 `4n×3n`，n 分別取 `min(k,40)`、`min(k,96)`；不放大，不因原圖太小填補像素。k≤0 屬無法產圖的診斷，不能發布聲稱完整的五檔結果。
 
@@ -32,6 +32,6 @@ recipe 必須固定解碼／編碼器與底層 libwebp 版本、品質、色彩�
 
 公開 path 是 `images/sha256/<前兩碼>/<64hex>.webp`，hex 為實際輸出 WebP bytes 的 SHA-256。image_variant.bytes/width/height 均取該檔，不用來源檔大小；清單的 hash 只保護清單，下載圖片另驗 path 的 blob hash。
 
-只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending/withdrawn 不出 path。直向 approved available 的圖需五個檔位、橫向需三個，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；第三方圖片逐圖確認規則仍依 [build-db.md §17](build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
+官方圖片經來源驗證成為 approved、第三方圖經人工確認成為 approved 的規則，統一見 [build-db.md §17.1](build-db.md#171-mirror_reviewed)。只有 availability=available 且 publication_state=approved 才可出 variant；missing/unfetched/pending/withdrawn 不出 path。直向 approved available 的圖需五個檔位、橫向需三個，缺檔不得宣稱影像閉包備妥；文字預覽可明示尚無影像結果。先完成資產閉包才發布引用它的影像清單；第三方圖片逐圖確認規則仍依 [build-db.md §17](build-db.md#17-已決政策非官方圖鏡像與地區-decklog-建牌資格)。
 
 卡圖按需快取或只抓已選牌組與雙面，不預抓全庫；數位卡圖僅連官方頁，不混入 SVE 衍生檔。裁切圖的使用頁仍保留來源與版權標示；原始卡圖不是專案可再授權素材。

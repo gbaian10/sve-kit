@@ -6,7 +6,7 @@
 
 `ID/Text/Code/UInt/Int/Bool/Date/Instant/Region/Lang/Hash` 沿用 [build-db.md §2](build-db.md#2-共通型別來源與採納政策)。JSON 的 Bool 只能是 true/false。`Hash` 統一為 `sha256:` 加 64 個小寫 hex；內容定址 path 的檔名只取 hex，不含前綴。`Path` 是相對資料根的非空路徑，不含 scheme、前導斜線、反斜線、空段、`.`、`..`、query 或 fragment；不可帶本機路徑。`URL` 是公開 HTTPS URL。
 
-所有 JSON 使用 [canonical-json-v1](build-db.md#14-不可變雜湊僅建置)：UTF-8、無 BOM、無空白或結尾換行、object keys 按 Unicode code point 排序；安全整數、拒絕浮點、保留 exact Unicode。hash 與 bytes 都針對這組未壓縮 bytes。示例為便於閱讀的排版，需 canonical 序列化後才計 hash。
+所有 JSON 的序列化規則以 [build-db.md §14 的 canonical-json-v1](build-db.md#14-不可變雜湊僅建置) 為唯一依據。hash 與 bytes 都針對這組未壓縮 bytes。示例為便於閱讀的排版，需 canonical 序列化後才計 hash。
 
 集合以其鍵排序並去重；複合鍵按欄序逐項比較，整數按數值、字串按 Unicode code point；不以本地語言排序。陣列中有業務順序的保留順序：faces 按固定 ordinal、sections 按 ordinal、fallback_order 按優先順序、keyword.actions 按既定 action 順序。tuple 欄序不是 object key 排序。
 
@@ -230,7 +230,9 @@ text_all.contains 使用同一 key/sha256，其 members 的 payload 是上述整
 
 card、face、face_revision、card_engine_support、mechanic_projection、card_mechanic_coverage、card_related、digital_link、digital_link_coverage、card_voice 跟所屬 card.home_set_id；card_related 用 from_card_id。printing、printing_product、printing_image 跟永久 printing.home_set_id；art、digital_art_link 跟 art.card_id 的 home_set。其餘集合用 global owner；從全球共用的 image_asset/image_variant 到 text_unit、translation、QA、CR 都不跟最近引用者搬家。owner 只用建置資料推導，不因此將 printing.home_set_id 加入公開邏輯欄位。
 
-bucket 使用 `sha256-mod-v1`：取 canonical 分片鍵 bytes 的 SHA-256，全 256 bit 視為無號 big-endian 整數，對 bucket_count 取餘數。card 系列以 card ID 字串為鍵；printing 系列以 printing ID；art 系列以 art ID；其他以該表完整 PK 值陣列為鍵。所有同主實體欄位分割／所有 revision 共用此鍵；ID 字串不可當數字、hash 不截斷。bucket 範圍 `[0,bucket_count)`，空 bucket 不必出檔。owner 分組與 bucket 一起定位，不由檔案下載順序決定。
+bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引用的 canonical-json-v1 取得 bytes。card 系列的鍵為 `[card_id]`，printing 系列為 `[printing_id]`，art 系列為 `[art_id]`；其他集合使用依公開 PK 欄序排列的完整主鍵值陣列，單欄 PK 也保留陣列外層。對這組 bytes 算 SHA-256，全 256 bit 視為無號 big-endian 整數，對 bucket_count 取餘數。所有同主實體欄位分割／所有 revision 共用此鍵；ID 保持字串型別，hash 不截斷。bucket 範圍 `[0,bucket_count)`，空 bucket 不必出檔。owner 分組與 bucket 一起定位，不由檔案下載順序決定。
+
+可核算向量：card ID `c:example` 的鍵是 `["c:example"]`；canonical bytes 長度 13，hex 為 `5b22633a6578616d706c65225d`，SHA-256 為 `6ff93079f7688d35b704b55a2eea460f7d087079d15d238d8980a5d4b0eaea9f`。`bucket_count=4` 時餘數為 **3**（末 byte `0x9f` 對 4 取餘數亦為 3）。producer／reader 的共用 golden 須固定此向量，確保字串鍵的引號與陣列括號都參與 hash。
 
 正式配置凍結前，用候選 N（正整數，依次 1、2、4、8…）量實際 JP 資料，再量 EN 與三語閉包；依 [size-budget.md](size-budget.md) 驗總量、最大分片、bootstrap 大小。選擇通過單片預檢的最小 N，若 bootstrap／總量超標，回到投影與裝檔調整，不能只增加 N 冒稱通過。量測須含 row_index 依賴造成的重建片數與一次增量更新大小。
 
