@@ -207,12 +207,17 @@ class ArchiveStore:
     read_roots: tuple[Path, ...] = ()
 
     def __post_init__(self) -> None:
-        """Reject ambiguous store names and writes inside the latest cache."""
+        """Reject ambiguous names and archive/latest or allow-root overlap."""
         if not self.store_id or "/" in self.store_id or ".." in self.store_id:
             msg = "store_id must be a simple, stable name"
             raise ArchiveError(msg)
-        if self.root.resolve().is_relative_to(self.data_root.resolve()):
-            msg = "archive store must be outside the latest data root"
+        archive = self.root.resolve()
+        latest = self.data_root.resolve()
+        if archive.is_relative_to(latest) or latest.is_relative_to(archive):
+            msg = "archive store and latest data root must not overlap"
+            raise ArchiveError(msg)
+        if any(archive.is_relative_to(root.resolve()) for root in self.read_roots):
+            msg = "archive store must be outside allowed read roots"
             raise ArchiveError(msg)
 
 
@@ -235,6 +240,13 @@ class _Pinned:
     method: Literal["hardlink", "reflink", "copy", "reused"]
     fd: int | None = None
     candidate_stat: tuple[int, int, int, int, int] | None = None
+
+
+@dataclass(slots=True)
+class _PreparedMetadata:
+    current: list[Current]
+    entries: dict[str, Entry]
+    known: set[tuple[str, str]]
 
 
 def seal_batch(
@@ -305,22 +317,29 @@ def _seal_attempt(  # ruff: ignore[complex-structure, too-many-branches, too-man
                 msg = "a resource changed while pinning source handles"
                 raise ArchiveRaceError(msg)
             pins = []
-            for index, item in enumerate(chunk):
-                try:
-                    pins.append(_pin(store, stage, item, offset + index))
-                except (FileNotFoundError, UnsafePathError) as exc:
-                    reason: Literal["missing_raw", "unsafe_path"] = (
-                        "unsafe_path"
-                        if isinstance(exc, UnsafePathError)
-                        else "missing_raw"
-                    )
-                    missing.append(
-                        Missing(
-                            url=item.url,
-                            expected_raw_sha256=_raw_hash(item),
-                            reason=reason,
+            try:
+                for index, item in enumerate(chunk):
+                    try:
+                        pins.append(_pin(store, stage, item, offset + index))
+                    except (FileNotFoundError, UnsafePathError) as exc:
+                        reason: Literal["missing_raw", "unsafe_path"] = (
+                            "unsafe_path"
+                            if isinstance(exc, UnsafePathError)
+                            else "missing_raw"
                         )
-                    )
+                        missing.append(
+                            Missing(
+                                url=item.url,
+                                expected_raw_sha256=_raw_hash(item),
+                                reason=reason,
+                            )
+                        )
+            except BaseException:
+                for pin in pins:
+                    if pin.fd is not None:
+                        os.close(pin.fd)
+                        pin.fd = None
+                raise
         for pin in pins:
             try:
                 _prepare(pin)
@@ -358,6 +377,9 @@ def _seal_attempt(  # ruff: ignore[complex-structure, too-many-branches, too-man
         prepared.extend(pin for pin in pins if pin.candidate_stat is not None)
     if missing:
         raise IncompleteBatchError(missing)
+    metadata = _prepare_metadata(
+        store, prepared, existing, "sha256:" + first.sha256, stage / "first.sqlite"
+    )
     with (
         ExclusiveLock(store.lock_path),
         Manifest.open_live(store.manifest_path) as live,
@@ -376,7 +398,7 @@ def _seal_attempt(  # ruff: ignore[complex-structure, too-many-branches, too-man
             store,
             stage,
             prepared,
-            existing,
+            metadata,
             selected_scope,
             scoped_history,
             "sha256:" + final.sha256,
@@ -408,10 +430,13 @@ def _archived_scopes(store: ArchiveStore) -> set[tuple[str, str]]:
     }
 
 
-def _pin(store: ArchiveStore, stage: Path, resource: Resource, index: int) -> _Pinned:
+def _pin(  # ruff: ignore[complex-structure] -- pinning handles link, clone and FD ownership
+    store: ArchiveStore, stage: Path, resource: Resource, index: int
+) -> _Pinned:
     candidate = stage / "pins" / str(index)
     _mkdir_safe(candidate.parent)
     blob = store.root / _blob_path(_raw_hash(resource))
+    fd: int | None = None
     try:  # ruff: ignore[too-many-statements-in-try-clause] -- FD ownership spans pinning fallbacks
         target = resolve_within(
             store.data_root, resource.path, also_allowed=store.read_roots
@@ -419,44 +444,42 @@ def _pin(store: ArchiveStore, stage: Path, resource: Resource, index: int) -> _P
         fd = os.open(target, os.O_RDONLY | os.O_NOFOLLOW)
         details = os.fstat(fd)
         if not stat.S_ISREG(details.st_mode):
-            os.close(fd)
             msg = f"source is not a regular file: {resource.path}"
             raise UnsafePathError(msg)
         actual = Path(f"/proc/self/fd/{fd}").readlink().resolve()
         if actual != target:
-            os.close(fd)
             msg = f"source path changed while opening {resource.path}"
             raise UnsafePathError(msg)
         if blob.exists():
             identity = _identity(target, details)
-            os.close(fd)
             return _Pinned(resource, target, identity, blob, "reused")
         try:
             os.link(target, candidate)
         except OSError as exc:
             if exc.errno not in _LINK_FALLBACK_ERRNOS:
-                os.close(fd)
                 raise
             if _try_reflink(fd, candidate):
                 identity = _identity(target, os.fstat(fd))
-                os.close(fd)
                 return _Pinned(resource, target, identity, candidate, "reflink")
-            return _Pinned(
+            pinned = _Pinned(
                 resource, target, _identity(target, details), candidate, "copy", fd
             )
+            fd = None
+            return pinned
         linked = candidate.stat()
         current = os.fstat(fd)
         if (linked.st_dev, linked.st_ino) != (current.st_dev, current.st_ino):
-            os.close(fd)
             msg = f"source changed while pinning {resource.path}"
             raise ArchiveRaceError(msg)
         identity = _identity(target, current)
-        os.close(fd)
         return _Pinned(resource, target, identity, candidate, "hardlink")
     except FileNotFoundError:
         if blob.exists():
             return _Pinned(resource, None, None, blob, "reused")
         return _Pinned(resource, None, None, candidate, "copy")
+    finally:
+        if fd is not None:
+            os.close(fd)
 
 
 def _try_reflink(source_fd: int, target: Path) -> bool:
@@ -482,7 +505,7 @@ def _prepare(pin: _Pinned) -> None:
             os.fsync(output.fileno())
     if not pin.candidate.exists():
         raise FileNotFoundError(pin.candidate)
-    if resource.path.suffix == ".zst":
+    if pin.method != "reused" and resource.path.suffix == ".zst":
         raw = decompress(pin.candidate.read_bytes())
         raw_file = pin.candidate.with_suffix(".raw")
         _write_new(raw_file, raw)
@@ -712,26 +735,20 @@ def _existing_versions(
     return result
 
 
-def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments, too-many-statements, too-many-locals] -- seal inputs meet at publication
+def _prepare_metadata(  # ruff: ignore[too-many-locals] -- install immutable source metadata outside the manifest lock
     store: ArchiveStore,
-    stage: Path,
     prepared: list[_Pinned],
     existing: dict[str, tuple[Descriptor, str]],
-    scope: set[tuple[str, str]],
-    history: list[tuple[str, str]],
     manifest_sha: str,
-) -> BatchResult:
-    batch = stage / "batch"
-    _mkdir_safe(batch)
-    final_db = stage / "final.sqlite"
-    _install_link(final_db, batch / "manifest.sqlite")
+    source_db: Path,
+) -> _PreparedMetadata:
     archived_db = store.root / "manifests" / f"{manifest_sha[7:]}.sqlite"
     if archived_db.exists():
         if _hash_file(archived_db)[0] != manifest_sha:
             msg = f"archived manifest differs: {archived_db}"
             raise ArchiveError(msg)
     else:
-        _install_link(final_db, archived_db)
+        _install_link(source_db, archived_db)
     current: list[Current] = []
     entries: dict[str, Entry] = {}
     known = {(item.url, item.raw_sha256) for item, _ in existing.values()}
@@ -817,10 +834,51 @@ def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments,
         )
         current.append(Current(url=resource.url, source_version_id=source_id))
         known.add((resource.url, raw_hash))
+    for pin in prepared:
+        _refresh_after_own_link(store, pin)
+    return _PreparedMetadata(current=current, entries=entries, known=known)
+
+
+def _refresh_after_own_link(store: ArchiveStore, pin: _Pinned) -> None:
+    """Account for ctime changed by linking a verified candidate into the store."""
+    candidate = _file_identity(pin.candidate.stat())
+    if pin.candidate_stat is None or candidate[:-1] != pin.candidate_stat[:-1]:
+        msg = f"prepared source changed while installing {pin.resource.url}"
+        raise ArchiveRaceError(msg)
+    pin.candidate_stat = candidate
+    if pin.target is None or pin.identity is None:
+        return
+    try:
+        target = resolve_within(
+            store.data_root, pin.resource.path, also_allowed=store.read_roots
+        )
+        identity = _identity(target, target.stat())
+    except (FileNotFoundError, UnsafePathError) as exc:
+        msg = f"latest source changed while installing {pin.resource.url}"
+        raise ArchiveRaceError(msg) from exc
+    if identity[:-1] != pin.identity[:-1]:
+        msg = f"latest source changed while installing {pin.resource.url}"
+        raise ArchiveRaceError(msg)
+    pin.identity = identity
+
+
+def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- sealed inventory needs prepared evidence
+    store: ArchiveStore,
+    stage: Path,
+    prepared: list[_Pinned],
+    metadata: _PreparedMetadata,
+    scope: set[tuple[str, str]],
+    history: list[tuple[str, str]],
+    manifest_sha: str,
+) -> BatchResult:
+    batch = stage / "batch"
+    _mkdir_safe(batch)
+    final_db = stage / "final.sqlite"
+    _install_link(final_db, batch / "manifest.sqlite")
     gaps = [
         Missing(url=url, expected_raw_sha256="sha256:" + raw, reason="missing_history")
         for url, raw in history
-        if (url, "sha256:" + raw) not in known
+        if (url, "sha256:" + raw) not in metadata.known
         and len(raw) == _HEX_LENGTH
         and not set(raw) - _HEX
     ]
@@ -832,8 +890,8 @@ def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments,
             schema_version=SCHEMA_VERSION,
         ),
         scope=[Scope(provider=provider, kind=kind) for provider, kind in sorted(scope)],
-        current=sorted(current, key=lambda item: item.url),
-        entries=[entries[key] for key in sorted(entries)],
+        current=sorted(metadata.current, key=lambda item: item.url),
+        entries=[metadata.entries[key] for key in sorted(metadata.entries)],
         missing=[],
         history_gaps=sorted(
             gaps, key=lambda item: (item.url, item.expected_raw_sha256)
@@ -1246,15 +1304,26 @@ def backup_batch(
     for relative in paths:
         _copy_immutable(store.root / relative, backup_root / relative)
     verify_batch(backup_root, store.store_id, batch_id)
+    receipt_path = backup_root / "backups" / f"{_hex(batch_id)}.json"
+    expected_blobs = sorted({item.blob.sha256 for item in inventory.entries})
+    if receipt_path.exists():
+        _require_safe_file(backup_root, receipt_path)
+        existing_receipt = _load_model(BackupReceipt, receipt_path)
+        if (
+            existing_receipt.manifest_sha256 != inventory.manifest.sha256
+            or existing_receipt.input_batch_ids != [batch_id]
+            or existing_receipt.blob_hashes != expected_blobs
+        ):
+            msg = "existing backup receipt does not match the sealed batch"
+            raise ArchiveError(msg)
+        return existing_receipt
     receipt = BackupReceipt(
         manifest_sha256=inventory.manifest.sha256,
         input_batch_ids=[batch_id],
-        blob_hashes=sorted({item.blob.sha256 for item in inventory.entries}),
+        blob_hashes=expected_blobs,
         verified_at=datetime.now(UTC).isoformat(),
     )
-    _install_bytes(
-        backup_root / "backups" / f"{_hex(batch_id)}.json", _canonical_model(receipt)
-    )
+    _install_bytes(receipt_path, _canonical_model(receipt))
     return receipt
 
 

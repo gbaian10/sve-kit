@@ -395,8 +395,14 @@ def archive_seal(
     scope: Annotated[
         list[str] | None, typer.Option(help="Only provider:kind (repeatable).")
     ] = None,
+    restore_check: Annotated[
+        bool,
+        typer.Option(
+            help="Run a full empty-directory restore check; automatic for the first batch."
+        ),
+    ] = False,
 ) -> None:
-    """Seal current raw sources, back up their closure, and test a clean restore."""
+    """Seal and back up sources; restore-check the first batch automatically."""
     settings = _settings()
     try:
         archive = ArchiveStore(
@@ -408,12 +414,15 @@ def archive_seal(
             (*settings.extra_roots, *(allow_root or ())),
         )
         scopes = [_parse_archive_scope(value) for value in scope] if scope else None
+        batches = archive.root / "batches"
+        first_batch = not batches.exists() or not any(batches.iterdir())
         result = seal_batch(archive, scope=scopes)
         backup_batch(archive, backup, result.batch_id)
-        with tempfile.TemporaryDirectory(
-            dir=backup, prefix="restore-check-"
-        ) as temporary:
-            restore_backup(backup, Path(temporary), store_id, result.batch_id)
+        if first_batch or restore_check:
+            with tempfile.TemporaryDirectory(
+                dir=backup, prefix="restore-check-"
+            ) as temporary:
+                restore_backup(backup, Path(temporary), store_id, result.batch_id)
     except IncompleteBatchError as exc:
         console.print(f"[red]stopped:[/red] {exc}")
         _print_sample(
@@ -428,10 +437,12 @@ def archive_seal(
         console.print(f"[red]stopped:[/red] {exc}")
         raise typer.Exit(1) from exc
     console.print(
-        f"sealed and restored {result.batch_id}: {len(result.inventory.current)} current sources; "
+        f"sealed and backed up {result.batch_id}: {len(result.inventory.current)} current sources; "
         f"{result.hardlinks} hardlinks, {result.reflinks} reflinks, "
         f"{result.copied_bytes} fallback bytes"
     )
+    if first_batch or restore_check:
+        console.print("restore check: passed")
     if result.inventory.history_gaps:
         console.print(f"history gaps: {len(result.inventory.history_gaps)}")
         _print_sample(
@@ -441,6 +452,48 @@ def archive_seal(
                 for item in result.inventory.history_gaps
             ],
         )
+
+
+@archive_app.command("backup")
+def archive_backup(
+    store: Path,
+    backup: Path,
+    batch_id: str,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+) -> None:
+    """Back up an existing sealed batch without creating a new batch ID."""
+    settings = _settings()
+    try:
+        archive = ArchiveStore(
+            settings.data_dir,
+            settings.manifest_path,
+            settings.lock_path,
+            store,
+            store_id,
+        )
+        backup_batch(archive, backup, batch_id)
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"backed up {batch_id}")
+
+
+@archive_app.command("restore-check")
+def archive_restore_check(
+    backup: Path,
+    destination: Path,
+    batch_id: str,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+) -> None:
+    """Restore a backed-up batch into an empty directory and verify its closure."""
+    try:
+        inventory = restore_backup(backup, destination, store_id, batch_id)
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(
+        f"restored and verified {batch_id}: {len(inventory.current)} current sources"
+    )
 
 
 @archive_app.command("verify")

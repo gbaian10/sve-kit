@@ -9,8 +9,10 @@ from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 
 import pytest
+from typer.testing import CliRunner
 
 import sve_carddb.source_archive as archive
+from sve_carddb import cli
 from sve_carddb.crawl import list_root, sets_root
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.manifest import (
@@ -83,6 +85,27 @@ def _put(store: ArchiveStore, resource: Resource, data: bytes) -> None:
     temporary.replace(target)
     with Manifest.open(store.manifest_path) as manifest, manifest.transaction():
         manifest.resources.put(resource)
+
+
+def _put_zst(
+    store: ArchiveStore, url: str, path: str, raw: bytes, kind: Kind
+) -> Resource:
+    stored = compress(raw)
+    resource = replace(_resource(url, path, raw, kind), stored_bytes=len(stored))
+    _put(store, resource, stored)
+    return resource
+
+
+def test_archive_store_rejects_overlapping_latest_and_allowed_roots(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    with pytest.raises(ArchiveError, match="must not overlap"):
+        replace(store, root=tmp_path)
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    with pytest.raises(ArchiveError, match="allowed read roots"):
+        replace(store, root=allowed / "archive", read_roots=(allowed,))
 
 
 def test_dedup_versions_and_backup_restore(tmp_path: Path) -> None:
@@ -166,6 +189,65 @@ def test_zstd_raw_and_committed_wal(tmp_path: Path) -> None:
         assert snapshot.resources.get(resource.url) == resource
 
 
+def test_zstd_reused_raw_seals_twice_and_deduplicates_urls(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    raw = b"<html>same raw page</html>"
+    left = _put_zst(
+        store, "https://example.invalid/one", "raw/one.html.zst", raw, Kind.CARD
+    )
+    right = _put_zst(
+        store, "https://example.invalid/two", "raw/two.html.zst", raw, Kind.CARD
+    )
+    first = seal_batch(store)
+    second = seal_batch(store)
+    assert len(list((store.root / "raw").rglob("*.raw"))) == 1
+    assert len(second.inventory.current) == 2
+    assert {item.source_version_id for item in second.inventory.current} == {
+        item.source_version_id for item in first.inventory.current
+    }
+    reader = ArchiveReader(store.root, store.store_id, second.batch_id)
+    assert reader.read(left.url) == reader.read(right.url) == raw
+
+
+@pytest.mark.parametrize(
+    ("kind", "suffix", "first_raw", "second_raw"),
+    [
+        (Kind.CARD, "html", b"<html>A</html>", b"<html>B</html>"),
+        (Kind.API, "json", b'{"version":"A"}', b'{"version":"B"}'),
+    ],
+    ids=["html", "json"],
+)
+def test_zstd_a_b_a_reuses_source_version_and_new_receipt(
+    tmp_path: Path,
+    kind: Kind,
+    suffix: str,
+    first_raw: bytes,
+    second_raw: bytes,
+) -> None:
+    store = _store(tmp_path)
+    url = f"https://example.invalid/source.{suffix}"
+    path = f"raw/source.{suffix}.zst"
+    _put_zst(store, url, path, first_raw, kind)
+    first = seal_batch(store)
+    _put_zst(store, url, path, second_raw, kind)
+    middle = seal_batch(store)
+    _put_zst(store, url, path, first_raw, kind)
+    last = seal_batch(store)
+    assert (
+        first.inventory.current[0].source_version_id
+        == last.inventory.current[0].source_version_id
+    )
+    assert (
+        middle.inventory.current[0].source_version_id
+        != first.inventory.current[0].source_version_id
+    )
+    assert first.inventory.entries[0].receipt_id != last.inventory.entries[0].receipt_id
+    assert len(last.inventory.entries) == 2
+    assert (
+        ArchiveReader(store.root, store.store_id, last.batch_id).read(url) == first_raw
+    )
+
+
 def test_missing_and_unsafe_sources_never_seal(tmp_path: Path) -> None:
     store = _store(tmp_path)
     with pytest.raises(ArchiveError, match="manifest does not exist"):
@@ -189,6 +271,81 @@ def test_missing_and_unsafe_sources_never_seal(tmp_path: Path) -> None:
     assert unsafe.value.missing[0].reason == "unsafe_path"
 
 
+def test_bad_latest_hash_stops_before_seal(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    resource = _resource(
+        "https://example.invalid/damaged.png", "raw/damaged.png", b"expected"
+    )
+    _put(store, resource, b"different")
+    with pytest.raises(IncompleteBatchError) as stopped:
+        seal_batch(store, retries=0)
+    assert [(item.url, item.reason) for item in stopped.value.missing] == [
+        (resource.url, "hash_mismatch")
+    ]
+    assert not (store.root / "batches").exists()
+
+
+def test_manifest_change_between_preparation_and_final_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    first = _resource("https://example.invalid/first.png", "raw/first.png", b"first")
+    _put(store, first, b"first")
+    original_prepare = archive._prepare  # pyright: ignore[reportPrivateUsage] -- race injection
+    changed = False
+
+    def change_manifest(pin: archive._Pinned) -> None:  # pyright: ignore[reportPrivateUsage] -- race injection
+        nonlocal changed
+        original_prepare(pin)
+        if not changed:
+            changed = True
+            second = _resource(
+                "https://example.invalid/second.png", "raw/second.png", b"second"
+            )
+            with Manifest.open(store.manifest_path) as manifest, manifest.transaction():
+                manifest.resources.put(second)
+
+    monkeypatch.setattr(archive, "_prepare", change_manifest)
+    with pytest.raises(ArchiveRaceError, match="manifest changed"):
+        seal_batch(store, retries=0)
+    assert not (store.root / "batches").exists()
+
+
+def test_metadata_installs_outside_manifest_lock(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    resource = _resource(
+        "https://example.invalid/source.png", "raw/source.png", b"source"
+    )
+    _put(store, resource, b"source")
+    original_install = archive._install_bytes  # pyright: ignore[reportPrivateUsage] -- lock assertion
+    original_link = archive._install_link  # pyright: ignore[reportPrivateUsage] -- lock assertion
+    installed: list[str] = []
+
+    def check_install(path: Path, data: bytes) -> None:
+        with ExclusiveLock(store.lock_path):
+            installed.append(path.parent.name)
+        original_install(path, data)
+
+    def check_link(
+        source: Path, target: Path, *, trusted_existing: bool = False
+    ) -> None:
+        if (
+            target.is_relative_to(store.root / "raw")
+            or target.is_relative_to(store.root / "versions")
+            or target.is_relative_to(store.root / "manifests")
+        ):
+            with ExclusiveLock(store.lock_path):
+                installed.append(target.parent.name)
+        original_link(source, target, trusted_existing=trusted_existing)
+
+    monkeypatch.setattr(archive, "_install_bytes", check_install)
+    monkeypatch.setattr(archive, "_install_link", check_link)
+    seal_batch(store, retries=0)
+    assert {"receipts", "descriptors", "versions", "manifests"} <= set(installed)
+
+
 def test_hash_corruption_and_lock_conflict(tmp_path: Path) -> None:
     store = _store(tmp_path)
     raw = b"synthetic image"
@@ -201,6 +358,126 @@ def test_hash_corruption_and_lock_conflict(tmp_path: Path) -> None:
     blob.write_bytes(b"corrupt")
     with pytest.raises(ArchiveError):
         verify_batch(store.root, store.store_id, result.batch_id)
+
+
+def test_backup_rejects_same_device_by_default(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    resource = _resource(
+        "https://example.invalid/source.png", "raw/source.png", b"source"
+    )
+    _put(store, resource, b"source")
+    result = seal_batch(store)
+    with pytest.raises(ArchiveError, match="separate device"):
+        backup_batch(store, tmp_path / "same-device-backup", result.batch_id)
+
+
+def test_restore_rejects_symlink_and_changed_seal(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    resource = _resource(
+        "https://example.invalid/source.png", "raw/source.png", b"source"
+    )
+    _put(store, resource, b"source")
+    result = seal_batch(store)
+    backup = tmp_path / "backup"
+    backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    blob_path = result.inventory.entries[0].blob.path
+    blob = backup / blob_path
+    blob.unlink()
+    outside = tmp_path / "outside.png"
+    outside.write_bytes(b"source")
+    blob.symlink_to(outside)
+    with pytest.raises(ArchiveError, match="symlink"):
+        restore_backup(
+            backup, tmp_path / "bad-symlink-restore", store.store_id, result.batch_id
+        )
+    blob.unlink()
+    blob.write_bytes((store.root / blob_path).read_bytes())
+    seal = backup / "batches" / result.batch_id.removeprefix("sha256:") / "seal.json"
+    seal.write_bytes(
+        seal.read_bytes().replace(
+            result.batch_id.encode(), ("sha256:" + "0" * 64).encode()
+        )
+    )
+    with pytest.raises(ArchiveError, match="batch seal"):
+        restore_backup(
+            backup, tmp_path / "bad-seal-restore", store.store_id, result.batch_id
+        )
+
+
+def test_cli_restores_first_batch_and_allows_later_manual_check(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    resource = _resource(
+        "https://example.invalid/source.png", "raw/source.png", b"source"
+    )
+    _put(store, resource, b"source")
+    backup = tmp_path / "backup"
+    monkeypatch.setenv("SVE_DATA_DIR", str(store.data_root))
+    real_backup = backup_batch
+    real_restore = restore_backup
+    restored: list[str] = []
+
+    def local_backup(target: ArchiveStore, destination: Path, batch_id: str) -> object:
+        return real_backup(target, destination, batch_id, require_separate_device=False)
+
+    def track_restore(
+        source: Path, destination: Path, store_id: str, batch_id: str
+    ) -> object:
+        restored.append(batch_id)
+        return real_restore(source, destination, store_id, batch_id)
+
+    monkeypatch.setattr(cli, "backup_batch", local_backup)
+    monkeypatch.setattr(cli, "restore_backup", track_restore)
+    runner = CliRunner()
+    args = [
+        "archive",
+        "seal",
+        str(store.root),
+        str(backup),
+        "--store-id",
+        store.store_id,
+    ]
+    first = runner.invoke(cli.app, args)
+    assert first.exit_code == 0, first.output
+    assert "restore check: passed" in first.output
+    second = runner.invoke(cli.app, args)
+    assert second.exit_code == 0, second.output
+    assert "restore check: passed" not in second.output
+    assert len(restored) == 1
+    third = runner.invoke(cli.app, [*args, "--restore-check"])
+    assert third.exit_code == 0, third.output
+    assert len(restored) == 2
+
+    batch_id = "sha256:" + next((store.root / "batches").iterdir()).name
+    backed_up = runner.invoke(
+        cli.app,
+        [
+            "archive",
+            "backup",
+            str(store.root),
+            str(backup),
+            batch_id,
+            "--store-id",
+            store.store_id,
+        ],
+    )
+    assert backed_up.exit_code == 0, backed_up.output
+    destination = tmp_path / "manual-restore"
+    checked = runner.invoke(
+        cli.app,
+        [
+            "archive",
+            "restore-check",
+            str(backup),
+            str(destination),
+            batch_id,
+            "--store-id",
+            store.store_id,
+        ],
+    )
+    assert checked.exit_code == 0, checked.output
+    assert len(restored) == 3
 
 
 def test_allowed_root_symlink(tmp_path: Path) -> None:
@@ -312,7 +589,7 @@ def test_cross_device_copy_and_replace_race(
 
     monkeypatch.setattr(os, "link", cross_device)
     monkeypatch.setattr(archive, "_try_reflink", lambda _fd, _path: False)
-    result = seal_batch(store)
+    result = seal_batch(store, retries=0)
     assert result.copied_bytes == len(raw)
 
     another = _store(tmp_path / "other")

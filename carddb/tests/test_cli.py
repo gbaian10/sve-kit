@@ -104,7 +104,14 @@ def test_archive_help_lists_safe_entry_points(data_dir: Path) -> None:
     del data_dir
     result = invoke("archive", "--help")
     assert result.exit_code == 0, result.output
-    for command in ("seal", "verify", "capacity", "extract-cards"):
+    for command in (
+        "seal",
+        "backup",
+        "restore-check",
+        "verify",
+        "capacity",
+        "extract-cards",
+    ):
         assert command in result.output
 
 
