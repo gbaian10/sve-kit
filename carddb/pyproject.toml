@@ -29,8 +29,10 @@ dev = [
     "commitizen>=4.18.1",
     "cz-conventional-gitmoji>=0.7.0",
     "taplo>=0.9.3",
-    "pyright[nodejs]>=1.1.414",
 ]
+
+# Kept out of the default groups: it bundles a ~200 MB Node.js runtime, so CI skips it (local pre-push only).
+pyright = ["pyright[nodejs]>=1.1.414"]
 
 test = [
     "pytest>=9.1.1",
