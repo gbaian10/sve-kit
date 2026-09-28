@@ -6,7 +6,8 @@
 
 Usage:
   uv run .github/ci/hooks.py check
-  uv run .github/ci/hooks.py skip JOB   # SKIP value for `pre-commit run` in that job
+  uv run .github/ci/hooks.py skip JOB     # SKIP value for `pre-commit run` in that job
+  uv run .github/ci/hooks.py stages JOB   # hook stages that job runs
 """
 
 import sys
@@ -19,9 +20,12 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 JOBS = frozenset({"repo", "python", "rust", "web", "commit", "none"})
-# The repo job runs `pre-commit run --hook-stage manual`, which also picks up every hook left on
-# default_stages; its hooks must run at that stage.
-REPO_STAGE = "manual"
+# Stages each CI job passes to `pre-commit run --hook-stage`; a job's hooks must run at one of them.
+# `manual` also picks up every hook left on default_stages.
+JOB_STAGES: dict[str, tuple[str, ...]] = {
+    "repo": ("manual",),
+    "python": ("manual", "pre-push"),
+}
 
 
 @dataclass(frozen=True)
@@ -96,11 +100,12 @@ def problems(hooks: list[Hook], owned: dict[str, Owner]) -> list[str]:
         if owner.job == "none" and not owner.reason
     ]
     found += [
-        f"hook {hook.id!r} belongs to the repo job but does not run at stage {REPO_STAGE!r}"
+        f"hook {hook.id!r} belongs to the {owned[hook.id].job} job but runs at none of "
+        f"its stages {JOB_STAGES[owned[hook.id].job]}"
         for hook in hooks
         if hook.id in owned
-        and owned[hook.id].job == "repo"
-        and REPO_STAGE not in hook.stages
+        and owned[hook.id].job in JOB_STAGES
+        and not set(JOB_STAGES[owned[hook.id].job]) & set(hook.stages)
     ]
     raw_ids = [hook.raw_id for hook in hooks]
     found += [
@@ -124,6 +129,9 @@ def main(argv: list[str]) -> int:
         return 1
     match argv:
         case ["check"]:
+            return 0
+        case ["stages", job] if job in JOB_STAGES:
+            sys.stdout.write(" ".join(JOB_STAGES[job]) + "\n")
             return 0
         case ["skip", job] if job in JOBS - {"none"}:
             skipped = (hook.id for hook in hooks if owned[hook.id].job != job)

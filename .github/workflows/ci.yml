@@ -91,9 +91,41 @@ jobs:
           export SKIP GITLEAKS_RANGE="${BASE}..${HEAD}"
           uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage manual --show-diff-on-failure
 
+  python:
+    needs: changes
+    if: needs.changes.outputs.python == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: carddb/uv.lock
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml') }}
+      # ruff, mypy (carddb and the ER generator) and pytest, through the same hooks as local runs.
+      - name: pre-commit (python hooks)
+        run: |
+          SKIP="$(uv run .github/ci/hooks.py skip python)"
+          export SKIP
+          for stage in $(uv run .github/ci/hooks.py stages python); do
+            echo "::group::stage $stage"
+            uv run --project carddb --locked pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
+            echo "::endgroup::"
+          done
+
   ci-ok:
     if: always()
-    needs: [changes, repo]
+    needs: [changes, repo, python]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
