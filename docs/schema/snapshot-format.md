@@ -158,6 +158,14 @@ R2 永久保留所有已發布快照清單及其引用的 text/完整文字包/�
 
 舊 reader 按 format `major/min_reader_version/capabilities` 找最後相容項；回放按 `data_version`＋`manifest_sha256` 精確定位，不能自動換最新卡文。`index_format` 不支援時保留本機 active 並提示更新。永久索引屬發行基礎檔，不計 40 個玩家文字集合；全部歷史也不強制每次預取到手機。
 
+### 4.2 預覽快照
+
+預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`，正式本機發布使用 `SVE_CDN_DIR`，兩個根目錄不得相同或互相包含。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
+
+預覽 `data_version` 必須以 `preview-` 開頭，不寫 `snapshots/versions/index.json` 或其 pages，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
+
+預覽仍須驗已啟用能力、JSON Schema、公開引用閉包、分片 join、hash／counts，並提供容量與排除清單、尚未通過的正式閘門報告。來源覆蓋不足維持未知語意；`source_windows` 只用 §8 的 complete／partial 或空窗口，不因集合為空就宣稱 absent 或合法。已知且適用的更正仍須套用；未解 current 衝突須排除受影響閉包並列明原因。
+
 ## 5. 語言矩陣與取用
 
 卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊自動優先，機翻歷史留建置資料庫；繁中跟 JP，但 EN divergence 不套用 JP 譯文。

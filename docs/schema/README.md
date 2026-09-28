@@ -13,7 +13,6 @@
 | [容量與記憶體預算](size-budget.md)        | 卡表快照的容量門檻、量測方法與目前結論                                            |
 | [建置表實作分期](implementation-tiers.md) | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
 | [authored 維護方式](authored-layout.md)   | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
-| [里程碑 2 範圍與交付](milestone-2.md)     | 契約樣本、預覽與正式發布的界線、首發引擎狀態及待決事項                            |
 
 ## 文件之間的關係
 
