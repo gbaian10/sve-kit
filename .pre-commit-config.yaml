@@ -21,6 +21,10 @@ repos:
       - id: check-ast
       - id: check-case-conflict
       - id: check-merge-conflict
+      # Registry and id shards are read by carddb's strict loader (safe YAML 1.2, one document,
+      # no tags or duplicate keys) and validated in full by the carddb tests; skip only those.
+      - id: check-yaml
+        exclude: ^authored/(registry|ids)/.*\.yaml$
       - id: check-toml
 
   - repo: https://gitlab.com/bmares/check-json5
@@ -31,14 +35,13 @@ repos:
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.16.0
     hooks:
-      # Also the YAML syntax and duplicate-key check: it has to parse every file to format it.
-      # The registry is written by our own encoder and validated strictly by the carddb tests.
+      # Registry and id shards are written by carddb's own encoder; see check-yaml above.
       - id: pretty-format-yaml
         args:
           - --autofix
           - --indent=2
           - --offset=2
-        exclude: ^authored/registry/
+        exclude: ^authored/(registry|ids)/.*\.yaml$
 
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3
