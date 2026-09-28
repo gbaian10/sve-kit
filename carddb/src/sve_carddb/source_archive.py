@@ -1377,12 +1377,11 @@ def restore_backup(
     if _hash_file(receipt_path)[0] != receipt_hash:
         msg = "backup receipt changed during restore check"
         raise ArchiveRaceError(msg)
-    _record_restore_check(backup_root, store_id, batch_id, receipt_hash)
     return restored
 
 
 def has_restore_check(backup_root: Path, store_id: str) -> bool:
-    """Find a verified restore receipt for this store and backup root."""
+    """Find a past successful restore check, not the backup's current health."""
     checks = backup_root / "restore-checks"
     if not checks.exists():
         return False
@@ -1402,6 +1401,26 @@ def has_restore_check(backup_root: Path, store_id: str) -> bool:
         _require_hash(backup_root, receipt_path, check.backup_receipt_sha256)
         found = True
     return found
+
+
+def record_restore_check(
+    backup_root: Path, destination: Path, store_id: str, batch_id: str
+) -> None:
+    """Record a successful restore after restore_backup verifies its destination."""
+    name = f"{_hex(batch_id)}.json"
+    receipt_path = backup_root / "backups" / name
+    restored_receipt_path = destination / "backups" / name
+    _require_safe_file(backup_root, receipt_path)
+    _require_safe_file(destination, restored_receipt_path)
+    receipt_hash = _hash_file(receipt_path)[0]
+    if _hash_file(restored_receipt_path)[0] != receipt_hash:
+        msg = "backup receipt changed after restore check"
+        raise ArchiveRaceError(msg)
+    try:
+        _record_restore_check(backup_root, store_id, batch_id, receipt_hash)
+    except OSError as exc:
+        msg = f"could not record restore check: {exc}"
+        raise ArchiveError(msg) from exc
 
 
 def _record_restore_check(

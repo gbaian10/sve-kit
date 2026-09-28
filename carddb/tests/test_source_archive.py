@@ -37,6 +37,7 @@ from sve_carddb.source_archive import (
     backup_batch,
     capacity_report,
     has_restore_check,
+    record_restore_check,
     restore_backup,
     seal_batch,
     verify_batch,
@@ -509,6 +510,62 @@ def test_backup_and_restore_reject_mismatched_existing_receipt(tmp_path: Path) -
         backup_batch(store, backup, result.batch_id, require_separate_device=False)
 
 
+def test_restore_from_read_only_backup_does_not_write_to_backup(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    result = seal_batch(store)
+    backup = tmp_path / "backup"
+    backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    destination = tmp_path / "restored"
+    backup.chmod(0o555)
+    try:
+        restored = restore_backup(backup, destination, store.store_id, result.batch_id)
+    finally:
+        backup.chmod(0o755)
+    assert restored == verify_batch(destination, store.store_id, result.batch_id)
+    assert not (backup / "restore-checks").exists()
+
+
+def test_restore_check_receipt_rejects_changed_backup_receipt_hash(
+    tmp_path: Path,
+) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    result = seal_batch(store)
+    backup = tmp_path / "backup"
+    backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    destination = tmp_path / "restored"
+    restore_backup(backup, destination, store.store_id, result.batch_id)
+    record_restore_check(backup, destination, store.store_id, result.batch_id)
+    assert has_restore_check(backup, store.store_id)
+    receipt_path = backup / "backups" / f"{result.batch_id[7:]}.json"
+    receipt = parse(receipt_path.read_bytes())
+    assert isinstance(receipt, dict)
+    receipt["verified_at"] = "changed"
+    receipt_path.write_bytes(canonical(receipt))
+    with pytest.raises(ArchiveError, match="hash or size mismatch"):
+        has_restore_check(backup, store.store_id)
+
+
+def test_restore_check_receipt_does_not_apply_to_another_store(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    result = seal_batch(store)
+    backup = tmp_path / "backup"
+    backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    destination = tmp_path / "restored"
+    restore_backup(backup, destination, store.store_id, result.batch_id)
+    record_restore_check(backup, destination, store.store_id, result.batch_id)
+    assert has_restore_check(backup, store.store_id)
+    assert not has_restore_check(backup, "another-store")
+
+
 def test_cli_restores_first_batch_and_allows_later_manual_check(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -583,6 +640,49 @@ def test_cli_restores_first_batch_and_allows_later_manual_check(
     )
     assert checked.exit_code == 0, checked.output
     assert len(restored) == 3
+
+
+def test_cli_read_only_restore_reports_success_without_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    result = seal_batch(store)
+    backup = tmp_path / "backup"
+    backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    destination = tmp_path / "restored"
+
+    def read_only_receipt(
+        _backup: Path, _store_id: str, _batch_id: str, _receipt_hash: str
+    ) -> None:
+        raise PermissionError("synthetic read-only backup")
+
+    monkeypatch.setattr(archive, "_record_restore_check", read_only_receipt)
+    backup.chmod(0o555)
+    try:
+        checked = CliRunner().invoke(
+            cli.app,
+            [
+                "archive",
+                "restore-check",
+                str(backup),
+                str(destination),
+                result.batch_id,
+                "--store-id",
+                store.store_id,
+            ],
+        )
+    finally:
+        backup.chmod(0o755)
+    assert checked.exit_code == 0, checked.output
+    assert "restore verified; check receipt not recorded" in checked.output
+    assert "synthetic read-only backup" in checked.output
+    assert (
+        verify_batch(destination, store.store_id, result.batch_id) == result.inventory
+    )
+    assert not (backup / "restore-checks").exists()
 
 
 def test_cli_retries_automatic_restore_after_first_backup_failure(

@@ -72,6 +72,7 @@ from sve_carddb.source_archive import (
     backup_batch,
     capacity_report,
     has_restore_check,
+    record_restore_check,
     restore_backup,
     seal_batch,
     verify_batch,
@@ -399,11 +400,11 @@ def archive_seal(
     restore_check: Annotated[
         bool,
         typer.Option(
-            help="Run a full empty-directory restore check; automatic until one succeeds."
+            help="Run a full restore check; prior success skips auto checks but does not prove current backup health."
         ),
     ] = False,
 ) -> None:
-    """Seal and back up sources; restore-check automatically until one succeeds."""
+    """Seal and back up sources; restore-check until one succeeds on this backup root."""
     settings = _settings()
     try:
         archive = ArchiveStore(
@@ -422,7 +423,9 @@ def archive_seal(
             with tempfile.TemporaryDirectory(
                 dir=backup, prefix="restore-check-"
             ) as temporary:
-                restore_backup(backup, Path(temporary), store_id, result.batch_id)
+                destination = Path(temporary)
+                restore_backup(backup, destination, store_id, result.batch_id)
+                record_restore_check(backup, destination, store_id, result.batch_id)
     except IncompleteBatchError as exc:
         console.print(f"[red]stopped:[/red] {exc}")
         _print_sample(
@@ -485,12 +488,18 @@ def archive_restore_check(
     batch_id: str,
     store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
 ) -> None:
-    """Restore a backed-up batch into an empty directory and verify its closure."""
+    """Restore and verify; any receipt records a past check, not current health."""
     try:
         inventory = restore_backup(backup, destination, store_id, batch_id)
     except (ArchiveError, ManifestError) as exc:
         console.print(f"[red]stopped:[/red] {exc}")
         raise typer.Exit(1) from exc
+    try:
+        record_restore_check(backup, destination, store_id, batch_id)
+    except ArchiveError as exc:
+        console.print(
+            f"[yellow]restore verified; check receipt not recorded:[/yellow] {exc}"
+        )
     console.print(
         f"restored and verified {batch_id}: {len(inventory.current)} current sources"
     )
