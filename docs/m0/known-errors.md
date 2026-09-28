@@ -1,13 +1,13 @@
 # M0／M1 已知錯清單
 
-D 階段收尾的交接依據：Astra 第三次封存 `76c7e30` 上剩餘的引擎錯、
+D 階段收尾的交接依據：Astra 第三次封存時剩餘的引擎錯、
 預期結果、依據與處理狀態。分支 `m0/baseline`。
 
 ## 基準
 
 | 項目 | 內容 |
 | --- | --- |
-| 題本與契約 | main `b96f6d8`（契約 v2.1 第 10 節 1～36 條），commit `679fd89` 原樣搬入 `tests/` |
+| 題本與契約 | main `b96f6d8`（契約 v2.1 第 10 節 1～36 條），commit `c62fce6` 原樣搬入 `tests/` |
 | 卡表快照 | `cards.jsonl`，SHA-256 `4c7b98b7…0c632`（與封存相同） |
 | 起點 | 題本 `700511a` 時 697／8／0／1（第三次封存報告）；換成 `b96f6d8` 後 692 pass／12 fail／2 adapter-error，與中立重跑一致 |
 | 閘門 | `sve-prototype SNAPSHOT . gate`，或共用測試 `every_shared_scenario_passes_or_is_a_listed_known_failure`；已知失敗清單 `docs/m0/known-failures.yaml` |
@@ -26,20 +26,20 @@ SP01-SP30 C、rule-10.10.2-01 兩例是當時的題目疑義，`b96f6d8` 已依�
 
 | 編號 | 局面 | 預期結果 | 依據 | 來源 | 修正 |
 | --- | --- | --- | --- | --- | --- |
-| KE-01 | card-BP09-004 B、card-BP14-023 A／C、card-BP15-066 A、card-BP18-059 A、card-ECP02-001 A | 「1枚を…てよい」的結算輸入點是 `choice: execute`（帶 `select`）或 `choice: decline`，不是 `select: []` | 契約第 24 條、9.8、33(b) | 中立重跑、Fable 互審 §8.5 | `30acd17`：改成 `optional.selection`；同句型的另 10 張一併改 |
-| KE-02 | card-BP19-P21 blessing／necromancer（adapter-error） | {ファンファーレ} 的「（コスト）：」在打出能力時支付，付不出或拒付就不打出 | 契約第 36 條、CR 10.1.1.2.2、10.6.2.5、Q1982、R-0001 | 中立重跑、Astra 自評 §2.5 | `9f9875f`：費用移到打出參數；BP17-P18 的 {ラストワード} 費用依第 36 條改回結算時 |
-| KE-03 | rule-10.5.2-02 [astra] ×2 | `choose-pending` 一律用能力指稱，setup 的待機 id 只是 decisions 的簡寫 | 契約第 34 條 | 中立重跑、Fable 互審 §8.5 | `ad7cdfc`，測試 `tests/m0.rs` |
-| KE-04 | rule-14.4-01 A | 同一行有多個能力時，指稱帶 `keyword`（此例的授予【攻撃時】） | 契約 3.1、12.1.2 | 中立重跑、Astra 自評 §2.5 | `a2fccff`：CP03-009 補 keyword；`reference_matches` 不再接受錯的 keyword；測試 `tests/m0.rs` |
-| KE-05 | rule-4.4.4-01 A | 場上不足時以 token 名稱選擇要建立哪些（依卡面順序，同名只列一次） | 契約第 35 條（改寫第 4、19 條）、CR 4.4.4.2、9.1.2.3 | 中立重跑 | `4cade21`；兩個邊界測試改為名稱格式 |
-| KE-06 | rule-1.3.4-01 [astra] 1/5、5/5 | 混沌の流儀「（場が上限ではない…）」是卡文先決條件，接收方滿場時該次移動不開始、不是輸入點 | 契約 33(c)② | 中立重跑、Fable 互審 §8.5 | `3aba4ec` |
+| KE-01 | card-BP09-004 B、card-BP14-023 A／C、card-BP15-066 A、card-BP18-059 A、card-ECP02-001 A | 「1枚を…てよい」的結算輸入點是 `choice: execute`（帶 `select`）或 `choice: decline`，不是 `select: []` | 契約第 24 條、9.8、33(b) | 中立重跑、Fable 互審 §8.5 | `f73bc8f`：改成 `optional.selection`；同句型的另 10 張一併改 |
+| KE-02 | card-BP19-P21 blessing／necromancer（adapter-error） | {ファンファーレ} 的「（コスト）：」在打出能力時支付，付不出或拒付就不打出 | 契約第 36 條、CR 10.1.1.2.2、10.6.2.5、Q1982、R-0001 | 中立重跑、Astra 自評 §2.5 | `918972a`：費用移到打出參數；BP17-P18 的 {ラストワード} 費用依第 36 條改回結算時 |
+| KE-03 | rule-10.5.2-02 [astra] ×2 | `choose-pending` 一律用能力指稱，setup 的待機 id 只是 decisions 的簡寫 | 契約第 34 條 | 中立重跑、Fable 互審 §8.5 | `73880ed`，測試 `tests/m0.rs` |
+| KE-04 | rule-14.4-01 A | 同一行有多個能力時，指稱帶 `keyword`（此例的授予【攻撃時】） | 契約 3.1、12.1.2 | 中立重跑、Astra 自評 §2.5 | `b1fa7cc`：CP03-009 補 keyword；`reference_matches` 不再接受錯的 keyword；測試 `tests/m0.rs` |
+| KE-05 | rule-4.4.4-01 A | 場上不足時以 token 名稱選擇要建立哪些（依卡面順序，同名只列一次） | 契約第 35 條（改寫第 4、19 條）、CR 4.4.4.2、9.1.2.3 | 中立重跑 | `9bdbe06`；兩個邊界測試改為名稱格式 |
+| KE-06 | rule-1.3.4-01 [astra] 1/5、5/5 | 混沌の流儀「（場が上限ではない…）」是卡文先決條件，接收方滿場時該次移動不開始、不是輸入點 | 契約 33(c)② | 中立重跑、Fable 互審 §8.5 | `1919502` |
 
-## 二、載入期檢查找到的靜默錯誤（全部已修，`0b0c56a`）
+## 二、載入期檢查找到的靜默錯誤（全部已修，`03e12a3`）
 
 這些在共同題目都沒有失敗，因為錯誤是「不做」或「讀到 0」，題目沒有踩到那個分支。
 依據欄是卡文本身與引擎的實際行為。測試：KE-07～KE-12 在 `tests/m1.rs`（合成卡），
 KE-13、KE-14 在 `tests/cards.rs`（真實卡，審核 M-007 後補上；把 YAML 改回錯誤寫法會失敗）。
 
-`0b0c56a` 同時改了 `authored/`、`docs/` 與 `sim/engine/`，scope 卻寫 `sim/engine`，
+`03e12a3` 同時改了 `authored/`、`docs/` 與 `sim/engine/`，scope 卻寫 `sim/engine`，
 且一個 commit 混了載入器、八個引擎行為修正與 YAML 修正（審核 M-011）。不改寫歷史；
 之後的修正依元件分開 commit。
 
@@ -86,7 +86,7 @@ Fable 第 2 輪確認屬實。這裡改寫成對目前引擎的性質測試，�
 | 裁定 | 對照結果 |
 | --- | --- |
 | R-0001（進化時等「（コスト）：」打出時付） | 一致；KE-02 修正 BP19-P21 |
-| R-0002／R-0009（長寫「〜とき、…なら」一律誘發、結算時查） | 不一致 6 張，全部改成本文 `if`：BP07-P16、BP18-073、BP20-R15、CP03-018（`a6ddebb`）；BP02-062 隨改題一併修正（KE-16）；SCS01-007 由審核 M-003 找到（KE-24）。載入期現在拒絕 `trigger_if` 讀事件以外的值，防止再漏 |
+| R-0002／R-0009（長寫「〜とき、…なら」一律誘發、結算時查） | 不一致 6 張，全部改成本文 `if`：BP07-P16、BP18-073、BP20-R15、CP03-018（`0deb92d`）；BP02-062 隨改題一併修正（KE-16）；SCS01-007 由審核 M-003 找到（KE-24）。載入期現在拒絕 `trigger_if` 讀事件以外的值，防止再漏 |
 | R-0003（【攻撃時】Xなら是本文條件） | 一致（沒有 attack 事件用 `trigger_if`） |
 | R-0004（條件在「選ぶ」前面仍照選目標） | 一致（目標都在打出參數，條件在本文） |
 | R-0005（【土の秘術】沒付也照選目標） | 一致（Astra 沒有 `targets[].if`） |
