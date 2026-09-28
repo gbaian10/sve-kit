@@ -90,20 +90,20 @@ repos:
       - id: cargo-fmt
         name: cargo fmt
         language: system
-        entry: cargo fmt --all --check
+        entry: mise exec -- cargo fmt --all --check
         pass_filenames: false
         files: (\.rs|(^|/)Cargo\.toml|^rustfmt\.toml|^rust-toolchain\.toml)$
       - id: cargo-clippy
         name: cargo clippy
         language: system
-        entry: cargo clippy --locked --workspace --all-targets -- -D warnings
+        entry: mise exec -- cargo clippy --locked --workspace --all-targets -- -D warnings
         pass_filenames: false
         files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^clippy\.toml|^rust-toolchain\.toml)$
       - id: cargo-test
         name: cargo test (with line coverage >= 90%)
         language: system
         # Runs the whole test suite once, instrumented; raise the bar as the engine grows.
-        entry: cargo llvm-cov --locked --workspace --summary-only --fail-under-lines 90
+        entry: mise exec -- cargo llvm-cov --locked --workspace --summary-only --fail-under-lines 90
         pass_filenames: false
         # The runner tests read the scenario files too.
         files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^rust-toolchain\.toml|^tests/rules-scenarios/.*\.yaml)$
@@ -112,21 +112,21 @@ repos:
       - id: cargo-mutants
         name: cargo mutants (tests catch every injected bug)
         language: system
-        entry: cargo mutants --workspace -j 4 --timeout 120
+        entry: mise exec -- cargo mutants --workspace -j 4 --timeout 120
         pass_filenames: false
         always_run: true
         stages: [manual]
       - id: cargo-machete
         name: cargo machete (unused dependencies)
         language: system
-        entry: cargo machete
+        entry: mise exec -- cargo machete
         pass_filenames: false
         files: (^|/)Cargo\.toml$
         stages: [pre-push]
       - id: cargo-deny
         name: cargo deny
         language: system
-        entry: cargo deny check
+        entry: mise exec -- cargo deny check
         pass_filenames: false
         files: ^(Cargo\.lock|(.*/)?Cargo\.toml|deny\.toml)$
         stages: [pre-push]
