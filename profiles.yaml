@@ -1,0 +1,12 @@
+  - id: general
+    subtype: balanced
+    period: 2026-09
+    file: sim/engine/profiles/general.yaml
+  - id: aggro
+    subtype: face
+    period: 2026-09
+    file: sim/engine/profiles/aggro.yaml
+  - id: control
+    subtype: board
+    period: 2026-09
+    file: sim/engine/profiles/control.yaml

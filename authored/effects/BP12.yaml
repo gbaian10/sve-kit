@@ -1,0 +1,256 @@
+version: astra/1
+cards:
+  BP12-038:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount:
+            fn: sub
+            args:
+              - 0
+              - fn: distinct
+                args:
+                  - read: self.cemetery.cost
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 3
+        kind: static
+        body:
+          op: macro
+          name: guard
+  BP12-072:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            read: self.entered_by_effect
+          then:
+            op: evolve
+            subjects: self
+        event: enter
+        subject: self
+  BP12-073:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: プロダクトマシーン
+              count: 1
+              to: field
+            - op: move
+              subjects:
+                side: self
+                zone: deck
+                top: 1
+              to: cemetery
+        event: evolve
+        subject: self
+  BP12-079:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: seq
+              steps:
+                - op: damage
+                  subjects: opponent.leader
+                  amount: 2
+                - op: damage
+                  subjects: self.leader
+                  amount: 1
+            - op: seq
+              steps:
+                - op: create
+                  name: プロダクトマシーン
+                  count: 1
+                  to: field
+                - op: if
+                  condition:
+                    fn: gt
+                    args:
+                      - count:
+                          side: self
+                          zone: field
+                          name: 真紅の抗戦者・モノ
+                      - 0
+                  then:
+                    op: create
+                    name: プロダクトマシーン
+                    count: 1
+                    to: field
+                  else:
+                    op: create
+                    name: プロダクトマシーン
+                    count: 1
+                    to: ex
+  BP12-083:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: destroy
+          subjects: target.1
+        event: field_to_cemetery
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: activated
+        body:
+          op: move
+          subjects:
+            zone: deck
+            side: self
+            top: 2
+          to: cemetery
+        costs:
+          - op: pp
+            amount: 1
+          - op: move
+            subjects: self
+            to: cemetery
+  BP12-SL08:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E22 依契約 10.6，同一選ぶ的多組對象使用單一平坦列表，以集合條件驗證各組人數。
+    abilities:
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: for_each
+              select:
+                from: target.1
+                side: opponent
+              bind: enemy
+              body:
+                op: seq
+                steps:
+                  - op: damage
+                    subjects: enemy
+                    amount: 5
+                  - op: damage
+                    subjects: enemy.leader
+                    amount: 2
+            - op: modify
+              subjects:
+                from: target.1
+                side: self
+              power: 1
+              hp: 1
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - side: self
+                  zone: field
+                  type: follower
+                  trait: 自然
+            min: 1
+            max: 2
+            constraint:
+              fn: eq
+              args:
+                - count:
+                    from: target.1
+                    side: opponent
+                - 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              name: ナテラの大樹
+            min: 2
+            max: 2
+        costs:
+          - op: act
+            subjects: cost.1
+  BP12-T10:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 5
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 機械
+            min: 3
+            max: 3
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: cost.1
+            to: cemetery

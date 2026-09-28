@@ -1,0 +1,28 @@
+version: astra/1
+cards:
+  CSD02c-018:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          kind: any
+          set: 3
+          condition:
+            fn: ge
+            args:
+              - read: damage.amount
+              - 4

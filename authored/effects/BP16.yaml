@@ -1,0 +1,422 @@
+version: astra/1
+cards:
+  BP16-026:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: modify
+              subjects: self.leader
+              hp: 2
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      side: self
+                      zone: field
+                      type: follower
+                      name_contains: ユリウス
+                  - 0
+              then:
+                op: draw
+                count: 1
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: レヴィオン
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: cost.1
+  BP16-036:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: choice
+          min: 1
+          max:
+            if:
+              read: self.turn.evolutions
+            then: 2
+            else: 1
+          modes:
+            - op: create
+              tokens:
+                - name: スティールナイト
+                  count: 1
+                - name: シールドガーディアン
+                  count: 1
+                - name: ナイト
+                  count: 1
+              to: field
+            - op: modify
+              subjects:
+                side: self
+                zone: field
+                type: follower
+                trait: 兵士
+                where:
+                  read: item.token
+              power: 1
+              hp: 1
+  BP16-049:
+    status: complete
+    review: 先設 1／1；SC 張數固定於結算開始，不能在後續重新計數。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: target.1
+              set_power: 1
+              set_hp: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - at: resolution-start
+                    value:
+                      count:
+                        side: self
+                        zone: cemetery
+                        type: spell
+                  - 10
+              then:
+                op: modify
+                subjects: target.1
+                remove_abilities: true
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP16-055:
+    status: complete
+    review: 第二輪複核完整 text／sections；土の秘術為打出時的可選追加費用，效果只讀 paid，不在解算中再次付費。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: if
+          condition:
+            read: paid.earth
+          then:
+            op: create
+            name: ガーディアンゴーレム
+            count: 1
+            to: field
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 1
+  BP16-076:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
+        costs:
+          - op: modify
+            subjects: self.leader
+            hp: -2
+  BP16-077:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            at: play-start
+            value:
+              if:
+                fn: le
+                args:
+                  - read: self.leader.life
+                  - 10
+              then: 10
+              else: 5
+          split: '1'
+        event: evolve
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 0
+            max: 3
+            distribute:
+              at: play-start
+              value:
+                if:
+                  fn: le
+                  args:
+                    - read: self.leader.life
+                    - 10
+                then: 10
+                else: 5
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          keywords:
+            - storm
+        event: super_evolve
+        subject: self
+  BP16-082:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects: self
+          keywords:
+            - storm
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: cemetery
+              - 5
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                side: opponent
+                zone: hand
+              by: opponent
+              min: 1
+              max: 1
+              bind: discarded
+            - op: discard
+              subjects: discarded
+        event: deal_damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - read: event.to_opposing_leader
+  BP16-109:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 1
+        event: enter
+        subject:
+          side: self
+          zone: field
+          type: amulet
+  BP16-SL08:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；抽牌後以同一 choice 的 selection 與 position 標籤選手牌及牌庫上下位置。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max:
+            if:
+              fn: gt
+              args:
+                - count:
+                    side: self
+                    zone: field
+                    name: 天下の大泥棒・ジエモン
+                - 0
+            then: 3
+            else: 2
+          modes:
+            - op: seq
+              steps:
+                - op: act
+                  subjects: target.1
+                - op: restrict
+                  subjects: target.1
+                  action: normal_stand
+                  during: next-controller-start
+            - op: seq
+              steps:
+                - op: draw
+                  count: 1
+                - op: choice
+                  timing: resolve
+                  min: 1
+                  max: 1
+                  selection:
+                    select:
+                      side: self
+                      zone: hand
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  labels:
+                    - position: top
+                    - position: bottom
+                  modes:
+                    - op: move
+                      subjects: chosen
+                      to: deck
+                      position: top
+                    - op: move
+                      subjects: chosen
+                      to: deck
+                      position: bottom
+            - op: create
+              name: 輝く金貨
+              count: 2
+              to: ex
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
+  BP16-T01:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: field_to_cemetery
+        subject: self
+  BP16-T10:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities: []
+  BP16-T15:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 1
+            - op: draw
+              count: 1
+        active_zones:
+          - ex
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: ex
+              name: 輝く金貨
+              other: true
+            min: 2
+            max: 2
+        costs:
+          - op: pp
+            amount: 1
+          - op: banish
+            subjects:
+              union:
+                - self
+                - cost.1
+  BP16-T17:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities: []
+  BP16-T18:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 2
+        kind: trigger
+        body:
+          op: banish
+          subjects: self
+        event: end

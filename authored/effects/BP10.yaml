@@ -1,0 +1,398 @@
+version: astra/1
+cards:
+  BP10-020:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: attack
+      - line: 2
+        kind: trigger
+        body:
+          op: per
+          count: 2
+          body:
+            op: seq
+            steps:
+              - op: dice
+                count: 1
+                bind: die
+              - op: if
+                condition:
+                  fn: le
+                  args:
+                    - read: die
+                    - 2
+                then:
+                  op: destroy
+                  subjects:
+                    side: opponent
+                    zone: field
+                    type: follower
+                else:
+                  op: if
+                  condition:
+                    fn: le
+                    args:
+                      - read: die
+                      - 4
+                  then:
+                    op: damage
+                    subjects: opponent.leader
+                    amount: 7
+                  else:
+                    op: damage
+                    subjects: self.leader
+                    amount: 7
+        event: end
+  BP10-050:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: choice
+          min: 1
+          max: 1
+          modes:
+            - op: stack
+              amount: 1
+            - op: if
+              condition:
+                read: paid.earth
+              then:
+                op: damage
+                subjects: opponent.leader
+                amount: 2
+        event: enter
+        subject: self
+        additional_costs:
+          - key: earth
+            modes:
+              - 2
+            costs:
+              - op: earth_rite
+                count: 1
+  BP10-053:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: if
+          condition:
+            read: paid.earth
+          then:
+            op: seq
+            steps:
+              - op: damage
+                subjects: target.1
+                amount: 4
+              - op: draw
+                count: 1
+          else:
+            op: damage
+            subjects: target.1
+            amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 2
+  BP10-076:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E25 依 1.3.4，各玩家依序選擇並完成捨牌；不足三張時不執行捨牌選擇。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self.leader
+          amount: -1
+          kind: any
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: opponent.leader
+          action: draw
+          condition:
+            fn: ne
+            args:
+              - read: turn.phase
+              - start
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            read: self.is_active
+          then:
+            op: seq
+            steps:
+              - op: if
+                condition:
+                  fn: gt
+                  args:
+                    - count:
+                        side: self
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: self
+                        zone: hand
+                      by: self
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      bind: discard_self
+                    - op: discard
+                      subjects: discard_self
+              - op: if
+                condition:
+                  fn: gt
+                  args:
+                    - count:
+                        side: opponent
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: opponent
+                        zone: hand
+                      by: opponent
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      bind: discard_other
+                    - op: discard
+                      subjects: discard_other
+          else:
+            op: seq
+            steps:
+              - op: if
+                condition:
+                  fn: gt
+                  args:
+                    - count:
+                        side: opponent
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: opponent
+                        zone: hand
+                      by: opponent
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: opponent
+                                  zone: hand
+                              - 2
+                      bind: discard_other
+                    - op: discard
+                      subjects: discard_other
+              - op: if
+                condition:
+                  fn: gt
+                  args:
+                    - count:
+                        side: self
+                        zone: hand
+                    - 2
+                then:
+                  op: seq
+                  steps:
+                    - op: select
+                      select:
+                        side: self
+                        zone: hand
+                      by: self
+                      min:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      max:
+                        fn: max
+                        args:
+                          - 0
+                          - fn: sub
+                            args:
+                              - count:
+                                  side: self
+                                  zone: hand
+                              - 2
+                      bind: discard_self
+                    - op: discard
+                      subjects: discard_self
+        event: enter
+        subject: self
+  BP10-122:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: attack
+        subject: self
+  BP10-SL06:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: attack
+      - line: 2
+        kind: trigger
+        body:
+          op: per
+          count: 2
+          body:
+            op: seq
+            steps:
+              - op: dice
+                count: 1
+                bind: die
+              - op: if
+                condition:
+                  fn: le
+                  args:
+                    - read: die
+                    - 2
+                then:
+                  op: destroy
+                  subjects:
+                    side: opponent
+                    zone: field
+                    type: follower
+                else:
+                  op: if
+                  condition:
+                    fn: le
+                    args:
+                      - read: die
+                      - 4
+                  then:
+                    op: damage
+                    subjects: opponent.leader
+                    amount: 7
+                  else:
+                    op: damage
+                    subjects: self.leader
+                    amount: 7
+        event: end
+  BP10-T09:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          hp: 1
+          traits:
+            - 武装
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              where:
+                fn: eq
+                args:
+                  - read: item.class
+                  - ドラゴン
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery

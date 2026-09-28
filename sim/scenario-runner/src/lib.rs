@@ -11,11 +11,13 @@ pub mod ai;
 pub mod arch;
 pub mod compare;
 pub mod engine;
+pub mod gate;
 pub mod inherit;
 pub mod model;
 pub mod runner;
 
 pub use engine::{Engine, EngineError, Step, View};
+pub use gate::{GateProblem, GateReport, KnownFailures, gate, load_known_failures};
 pub use inherit::Fixture;
 pub use model::{Question, parse_question};
 pub use runner::{

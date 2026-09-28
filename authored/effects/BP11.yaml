@@ -1,0 +1,503 @@
+version: astra/1
+cards:
+  BP11-016:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            if:
+              fn: ge
+              args:
+                - read: self.combo
+                - 3
+            then: 5
+            else: 3
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP11-027:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: create
+          name: 機動二輪車
+          count: 1
+          to: field
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: opponent.leader
+          amount: 2
+        event: field_to_cemetery
+        subject: self
+        keyword: last_words
+  BP11-035:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+        play_if:
+          read: self.stats_increased_this_turn
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            side: self
+            zone: deck
+            trait: 荒野
+          min: 0
+          max: 1
+          to: cemetery
+        event: enter
+        subject: self
+  BP11-036:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
+                  - 3
+              then:
+                op: modify
+                subjects: self.leader
+                hp: 3
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
+                  - 6
+              then:
+                op: draw
+                count: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
+                  - 9
+              then:
+                op: damage
+                subjects:
+                  side: opponent
+                  zone: field
+                  type: follower
+                amount: 9
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
+                  - 12
+              then:
+                op: damage
+                subjects: opponent.leader
+                amount: 12
+        event: evolve
+        subject: self
+  BP11-041:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: target.1
+              remove_abilities: true
+              until: end-of-turn
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - fn: distinct
+                    args:
+                      - read: self.cemetery.cost
+                  - 6
+              then:
+                op: modify
+                subjects: self.leader
+                hp: 2
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP11-042:
+    status: complete
+    review: 第三輪依 13.3.3.2 複核土の秘術：使用可選追加費用與 paid 條件；原稿誤寫為必要成本。完整卡文與其餘能力保持原義。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 2
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: bane
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: drain
+      - line: 3
+        kind: activated
+        body:
+          op: if
+          condition:
+            read: paid.earth
+          then:
+            op: choice
+            timing: resolve
+            labels:
+              - keyword: rush
+              - keyword: bane
+              - keyword: drain
+            min: 1
+            max: 1
+            modes:
+              - op: modify
+                subjects: target.1
+                keywords:
+                  - rush
+              - op: modify
+                subjects: target.1
+                keywords:
+                  - bane
+              - op: modify
+                subjects: target.1
+                keywords:
+                  - drain
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              other: true
+            min: 1
+            max: 1
+        additional_costs:
+          - key: earth
+            costs:
+              - op: earth_rite
+                count: 1
+  BP11-074:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: create
+          name:
+            read: event.subject.name
+          count: 1
+          to: field
+        event: leave
+        subject:
+          side: self
+          zone: field
+          where:
+            fn: and
+            args:
+              - read: item.token
+              - fn: eq
+                args:
+                  - read: item.cost
+                  - 1
+        limit: 1
+        limit_at: trigger
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 4
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              other: true
+            min: 1
+            max: 1
+        costs:
+          - op: move
+            subjects: cost.1
+            to: cemetery
+  BP11-075:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: act
+          subjects: target.1
+        active_zones:
+          - cemetery
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+              name: カオスルーラー・アイシィレンドリング
+            min: 1
+            max: 1
+        costs:
+          - op: banish
+            subjects:
+              union:
+                - self
+                - cost.1
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+        section: 0
+      - line: 2
+        kind: spell
+        body:
+          op: modify
+          subjects: target.1
+          power: -2
+          hp: -2
+        section: 0
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP11-P29:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: pilot
+          subjects: self
+          by: cost.1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+              name: ファントムデュオ・バニー＆バロン
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: cost.1
+      - line: 2
+        kind: activated
+        body:
+          op: pilot
+          subjects: self
+          by: cost.1
+        cost_selections:
+          - key: '1'
+            select:
+              zone: field
+              side: self
+              type: follower
+            min: 2
+            max: 2
+        costs:
+          - op: pp
+            amount: 1
+          - op: act
+            subjects: cost.1
+      - line: 3
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 4
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  zone: field
+                  side: self
+                  type: follower
+                  trait: 荒野
+                  other: true
+              - 0
+          then:
+            op: draw
+            count: 1
+        event: attack
+        subject: self
+  BP11-P30:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: pilot
+          subjects: self
+          by: cost.1
+        play_if:
+          fn: ge
+          args:
+            - fn: sum
+              args:
+                - values: cost.1
+                  field: cost
+            - 5
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 0
+            max: 5
+        costs:
+          - op: pp
+            amount: 1
+          - op: act
+            subjects: cost.1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: modify
+              subjects: self.leader
+              hp: 2
+        event: attack
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+              where:
+                read: item.acted
+            min: 1
+            max: 1
+  BP11-P31:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  from: target.1
+                  trait: 荒野
+              - 0
+          then:
+            op: modify
+            subjects: target.1
+            power: 1
+            hp: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: move
+            subjects: self
+            to: cemetery

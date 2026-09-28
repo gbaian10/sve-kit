@@ -1,0 +1,111 @@
+version: astra/1
+cards:
+  PCS01-011:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 1
+            - op: modify
+              subjects: self.leader
+              hp: 1
+        ub: true
+        costs:
+          - op: act
+            subjects: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+        section: 0
+      - line: 2
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            type: follower
+            trait: プリコネ
+            ability_event: evolve
+            where:
+              fn: eq
+              args:
+                - read: item.cost
+                - 1
+          min: 0
+          max: 1
+          to: ex
+        event: enter
+        subject: self
+        section: 0
+  PCS01-048:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects:
+            side: self
+            zone: field
+            type: follower
+            trait: プリコネ
+            other: true
+          keywords:
+            - guard
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: reveal
+              subjects:
+                side: self
+                zone: deck
+                top: 1
+              to: all
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      side: self
+                      zone: deck
+                      type: follower
+                      trait: プリコネ
+                      top: 1
+                  - 1
+              then:
+                op: move
+                subjects:
+                  side: self
+                  zone: deck
+                  top: 1
+                to: field
+        event: enter
+        subject: self

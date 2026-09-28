@@ -1,0 +1,948 @@
+version: astra/1
+cards:
+  BP20-020:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - read: self.counters.fusion_counter
+              - 0
+          then:
+            op: draw
+            count: 1
+          else:
+            op: create
+            name: 黄金の小剣
+            count: 1
+            to: ex
+        event: enter
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: counter
+          subjects: self
+          name: fusion_counter
+          amount:
+            read: x
+        active_zones:
+          - hand
+        keyword: fusion
+        variables:
+          x:
+            min: 0
+            max: 2
+        cost_selections:
+          - key: '1'
+            select:
+              union:
+                - zone: hand
+                  side: self
+                  other: true
+                  trait: 財宝
+                  where:
+                    fn: ge
+                    args:
+                      - read: item.cost
+                      - 1
+                - zone: ex
+                  side: self
+                  other: true
+                  trait: 財宝
+                  where:
+                    fn: ge
+                    args:
+                      - read: item.cost
+                      - 1
+            min:
+              read: x
+            max:
+              read: x
+        costs:
+          - op: for_each
+            select: cost.1
+            bind: material
+            body:
+              op: if
+              condition:
+                fn: eq
+                args:
+                  - read: material.zone
+                  - hand
+              then:
+                op: discard
+                subjects: material
+              else:
+                op: move
+                subjects: material
+                to: cemetery
+          - op: move
+            subjects: self
+            to: ex
+  BP20-036:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: target.1
+              keywords:
+                - assail
+            - op: replace_damage
+              subjects: target.1
+              prevent: true
+              kind: any
+              until: end-of-turn
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP20-073:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 6
+            - op: if
+              condition:
+                fn: le
+                args:
+                  - read: target.1.original_hp
+                  - 3
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 3
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP20-099:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: replace_damage
+          subjects: self.leader
+          prevent: true
+          kind: any
+          uses: 1
+          until: end-of-turn
+        event: main_start
+        side: opponent
+  BP20-111:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: discard
+          subjects:
+            side: self
+            zone: hand
+        event: enter
+        subject: self
+  BP20-P11:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 4
+        event: attack
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP20-P12:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 2
+        kind: spell
+        body:
+          op: if
+          condition:
+            read: paid.beast
+          then:
+            op: seq
+            steps:
+              - op: damage
+                subjects: target.1
+                amount: 5
+              - op: draw
+                count: 1
+          else:
+            op: damage
+            subjects: target.1
+            amount: 3
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        additional_costs:
+          - key: beast
+            cost_selections:
+              - key: '1'
+                select:
+                  side: self
+                  zone: hand
+                  trait: 獣
+                min: 1
+                max: 1
+            costs:
+              - op: discard
+                subjects: cost.1
+  BP20-P28:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 3
+              bind: seen
+            - op: optional
+              selection:
+                select:
+                  union:
+                    - from: seen
+                      type: follower
+                      trait: 陰陽師
+                    - from: seen
+                      type: spell
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: seq
+                steps:
+                  - op: reveal
+                    subjects: chosen
+                    to: all
+                  - op: move
+                    subjects: chosen
+                    to: hand
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - chosen
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        event: enter
+        subject: self
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: hand
+            min: 1
+            max: 1
+        costs:
+          - op: discard
+            subjects: cost.1
+      - line: 2
+        kind: activated
+        body:
+          op: create
+          name: 形代
+          count: 1
+          to: field
+        play_if:
+          fn: ge
+          args:
+            - count:
+                union:
+                  - side: self
+                    zone: cemetery
+                    trait: 陰陽師
+                  - side: self
+                    zone: cemetery
+                    type: spell
+            - 7
+        costs:
+          - op: act
+            subjects: self
+  BP20-P32:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: max_pp
+          amount: 1
+        event: damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - read: event.effect_damage
+        limit: 1
+        limit_at: trigger
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.pp.max
+              - 7
+          then:
+            op: damage
+            subjects:
+              side: both
+              zone: field
+              type: follower
+            amount: 1
+        event: enter
+        subject: self
+  BP20-P38:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0
+        limit: 1
+  BP20-P44:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: move
+          subjects:
+            side: self
+            zone: deck
+            top: 3
+          to: cemetery
+        event: enter
+        subject: self
+  BP20-P47:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: クレスト 安息の団結者
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP20-P59:
+    status: complete
+    review: 第三輪依封存卡文及 Q2702／Q2685 複核；捨牌即誘發，場上マゼルベイン的存在於結算時判定；全部 sections 另列能力。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  type: follower
+                  name_contains: マゼルベイン
+              - 0
+          then:
+            op: optional
+            then:
+              op: move
+              subjects: self
+              to: ex
+        event: discard
+        subject: self
+        active_zones:
+          - hand
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -2
+          condition:
+            fn: eq
+            args:
+              - read: self.zone
+              - ex
+        section: 0
+      - line: 2
+        kind: spell
+        body:
+          op: draw
+          count: 2
+        section: 0
+  BP20-P60:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          set_hp: 1
+        active_zones:
+          - ex
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0
+        limit: 1
+  BP20-P61:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: counter
+              subjects: self
+              name: refund_counter
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.counters.refund_counter
+                  - 8
+              then:
+                op: seq
+                steps:
+                  - op: banish
+                    subjects: self
+                  - op: search
+                    select:
+                      side: self
+                      zone: deck
+                      trait: 盗賊
+                    min: 0
+                    max: 1
+                    to: hand
+        event: main_start
+        active_zones:
+          - ex
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: counter
+              subjects: self
+              name: refund_counter
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.counters.refund_counter
+                  - 8
+              then:
+                op: seq
+                steps:
+                  - op: banish
+                    subjects: self
+                  - op: search
+                    select:
+                      side: self
+                      zone: deck
+                      trait: 盗賊
+                    min: 0
+                    max: 1
+                    to: hand
+        event: fusion
+        subject:
+          side: self
+          zone: any
+        active_zones:
+          - ex
+        trigger_if:
+          read: event.fused_trait.財宝
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: counter
+              subjects: self
+              name: refund_counter
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.counters.refund_counter
+                  - 8
+              then:
+                op: seq
+                steps:
+                  - op: banish
+                    subjects: self
+                  - op: search
+                    select:
+                      side: self
+                      zone: deck
+                      trait: 盗賊
+                    min: 0
+                    max: 1
+                    to: hand
+        event: card_play
+        active_zones:
+          - ex
+        subject:
+          side: self
+          zone: any
+          trait: 財宝
+  BP20-P64:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount: 1
+        active_zones:
+          - ex
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 絶傑
+            min: 1
+            max: 1
+        costs:
+          - op: pp
+            amount: 0
+        limit: 1
+  BP20-P65:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_choice
+          side: self
+          min: 0
+          max:
+            read: choice.mode_count
+          condition:
+            fn: ge
+            args:
+              - read: choice.min
+              - 1
+        active_zones:
+          - ex
+  BP20-P66:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            if:
+              fn: eq
+              args:
+                - count:
+                    side: self
+                    zone: ex
+                    type: crest
+                - 5
+            then: 4
+            else:
+              if:
+                fn: ge
+                args:
+                  - count:
+                      side: self
+                      zone: ex
+                      type: crest
+                  - 3
+              then: 2
+              else: 1
+        event: end
+        active_zones:
+          - ex
+        targets:
+          - key: '1'
+            select:
+              union:
+                - side: opponent
+                  zone: field
+                  type: follower
+                - opponent.leader
+            min: 1
+            max: 1
+  BP20-P68:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: ex
+                  type: crest
+              - 3
+          then:
+            op: modify
+            subjects: target.1
+            power: 1
+            hp: 1
+        event: end
+        active_zones:
+          - ex
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 絶傑
+            min: 1
+            max: 1
+  BP20-P70:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 E24 結束階段先誘發，手牌張數條件在 body.if 結算時重讀。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: le
+            args:
+              - count:
+                  side: self
+                  zone: hand
+              - 1
+          then:
+            op: draw
+            count: 1
+        event: end
+        active_zones:
+          - ex
+  BP20-R13:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 4
+      - line: 2
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: skip_turn
+            side: self
+            count: 1
+  BP20-R14:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: aura
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: max_pp
+              amount: 1
+            - op: modify
+              subjects: self.leader
+              hp: 3
+            - op: draw
+              count: 1
+        event: evolve
+        subject: self
+  BP20-R15:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: le
+            args:
+              - count:
+                  side: self
+                  zone: hand
+              - 2
+          then:
+            op: seq
+            steps:
+              - op: damage
+                subjects: opponent.leader
+                amount: 3
+              - op: if
+                condition:
+                  fn: eq
+                  args:
+                    - count:
+                        side: self
+                        zone: hand
+                    - 0
+                then:
+                  op: damage
+                  subjects:
+                    side: opponent
+                    zone: field
+                    type: follower
+                  amount: 3
+        event: end
+  BP20-SL17:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            side: opponent
+            zone: field
+            type: follower
+          amount: 1
+        event: damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - read: event.effect_damage
+      - line: 4
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  union:
+                    - side: self
+                      zone: field
+                      trait: 絶傑
+                      other: true
+                    - side: self
+                      zone: ex
+                      trait: 絶傑
+                      other: true
+              - 0
+          then:
+            op: damage
+            subjects:
+              side: both
+              zone: field
+              type: follower
+            amount: 1
+        event: enter
+        subject: self
+  BP20-SL29:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: discard
+          subjects:
+            side: self
+            zone: hand
+        event: enter
+        subject: self

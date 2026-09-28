@@ -1,0 +1,607 @@
+version: astra/1
+cards:
+  CP03-001:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+          name: 蒼嵐覇竜 グローリー・メイルストローム
+        costs:
+          - op: pp
+            amount: 4
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 2
+        kind: trigger
+        body:
+          op: drive
+          count: 2
+        event: attack
+        subject: self
+        keyword: twin_drive
+        rule: 14.4.6.3
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: self.turn.trait_attacks.アクアフォース
+              - 4
+          then:
+            op: evolve
+            subjects: self
+            name: 蒼嵐覇竜 グローリー・メイルストローム
+        event: attack
+        subject: self
+        keyword: on_attack
+  CP03-002:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 1
+        kind: trigger
+        body:
+          op: drive
+          count: 2
+        event: attack
+        subject: self
+        keyword: twin_drive
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: draw
+              count: 2
+        event: deal_damage
+        subject: self
+        trigger_if:
+          read: event.to_opposing_leader
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  CP03-005:
+    status: complete
+    review: 第三輪複核完整卡文：生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體；其餘能力保持原義。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+          name: ネイブルゲイザー・ドラゴン
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: self.turn.trait_attacks.アクアフォース
+              - 3
+          then:
+            op: seq
+            steps:
+              - op: modify
+                subjects: self.leader
+                hp: 2
+              - op: draw
+                count: 1
+        event: attack
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: アクアフォース
+  CP03-006:
+    status: complete
+    review: 第三輪複核完整卡文：生命／第幾次攻擊的「なら」在結算時判斷，誘發時只判定事件主體；其餘能力保持原義。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: drive
+          count: 2
+        event: attack
+        subject: self
+        keyword: twin_drive
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: self.turn.trait_attacks.アクアフォース
+              - 3
+          then:
+            op: seq
+            steps:
+              - op: modify
+                subjects: self.leader
+                hp: 2
+              - op: draw
+                count: 1
+        event: attack
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: アクアフォース
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: optional
+              selection:
+                select:
+                  side: self
+                  zone: hand
+                  type: follower
+                  trait: アクアフォース
+                  where:
+                    fn: eq
+                    args:
+                      - read: item.cost
+                      - 1
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: move
+                subjects: chosen
+                to: field
+                bind: placed
+        event: evolve
+        subject: self
+  CP03-009:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: ride
+        body:
+          op: gain_drive
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+          - op: link_resource
+            subjects: self
+            name: ドライブポイント
+            count: 1
+            from_zone: evolve_deck
+            to: drive
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 1
+          hp: 1
+          keywords:
+            - storm
+          abilities:
+            - line: 2
+              kind: trigger
+              keyword: on_attack
+              body:
+                op: if
+                condition:
+                  fn: eq
+                  args:
+                    - read: self.turn.trait_attacks.アクアフォース
+                    - 3
+                then:
+                  op: damage
+                  subjects: target.1
+                  amount: 2
+              event: attack
+              subject: self
+              targets:
+                - key: '1'
+                  select:
+                    side: opponent
+                    zone: field
+                    type: follower
+                  min: 1
+                  max: 1
+        event: gain_drive
+        subject: self
+        keyword: on_drive_gain
+  CP03-010:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          sources:
+            side: opponent
+            zone: any
+          prevent: true
+          kind: effect
+  CP03-011:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: gt
+            args:
+              - count:
+                  zone: field
+                  side: self
+                  type: follower
+                  trait: アクアフォース
+                  other: true
+              - 0
+          then:
+            op: modify
+            subjects: self
+            keywords:
+              - rush
+              - assail
+        event: enter
+        subject: self
+  CP03-015:
+    status: complete
+    review: section 只重述 critical ドライブトリガー共通規則；圖示由共同 card facts 提供，不加第二次能力。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+  CP03-016:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: enter
+        subject: self
+  CP03-017:
+    status: complete
+    review: 本文保留完整動作選擇；section 只重述 stand トリガー共通規則，由 card facts 圖示驅動。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: choice
+          timing: resolve
+          min: 1
+          max: 1
+          modes:
+            - op: act
+              subjects: target.1
+            - op: stand
+              subjects: target.1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 0
+            max: 1
+  CP03-018:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.turn.trait_attacks.アクアフォース
+              - 3
+          then:
+            op: modify
+            subjects: self.leader
+            hp: 2
+        event: end
+  CP03-021:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: start_amulet
+      - line: 2
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          keywords:
+            - storm
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: アクアフォース
+              where:
+                fn: eq
+                args:
+                  - read: item.cost
+                  - 1
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
+  CP03-110:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: twin_drive
+      - line: 2
+        kind: trigger
+        body:
+          op: draw
+          count: 1
+        event: drive_trigger
+        side: self
+        trigger_if:
+          read: self.is_active
+        limit: 1
+        limit_at: trigger
+  CP03-112:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: ride
+        body:
+          op: gain_drive
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+          - op: link_resource
+            subjects: self
+            name: ドライブポイント
+            count: 1
+            from_zone: evolve_deck
+            to: drive
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: modify
+              subjects: self.leader
+              hp: 2
+        event: drive_trigger
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self
+              power: 1
+              hp: 1
+            - op: seq
+              steps:
+                - op: look
+                  count: 5
+                  bind: seen
+                - op: select
+                  select: seen
+                  min: 0
+                  max: 5
+                  bind: top
+                  order: true
+                - op: move
+                  subjects: top
+                  to: deck
+                  position: top
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - top
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - top
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - top
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+        event: gain_drive
+        subject: self
+  CP03-124:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: start_amulet
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 3
+              bind: seen
+            - op: select
+              select: seen
+              min: 0
+              max: 3
+              bind: top
+              order: true
+            - op: move
+              subjects: top
+              to: deck
+              position: top
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - top
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - top
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - top
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        costs:
+          - op: act
+            subjects: self
+          - op: move
+            subjects: self
+            to: cemetery
+        play_if:
+          fn: gt
+          args:
+            - count:
+                side: self
+                zone: field
+                type: follower
+                trait: オラクルシンクタンク
+            - 0
+  CP03-127:
+    status: complete
+    review: 本文的同名上限為 10；sections 括號只提示取得 drive 的共通規則 14.4.7，不重複給予能力。
+    abilities:
+      - line: 1
+        kind: construction
+        body:
+          op: deck_limit
+          name: ドライブポイント
+          limit: 10
+          zone: evolve_deck
+  CP03-P72:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: single_drive
+      - line: 3
+        kind: trigger
+        body:
+          op: move
+          subjects: target.1
+          to: deck
+          position: 3
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              zone: cemetery
+              side: self
+            min: 0
+            max: 1

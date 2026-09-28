@@ -1,0 +1,298 @@
+version: astra/1
+cards:
+  BP09-004:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+          names:
+            - 深緑の純心・ポーラ
+            - 真紅の絆・ポーラ
+        costs:
+          - op: pp
+            amount: 1
+  BP09-005:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 5
+              bind: seen
+            - op: optional
+              selection:
+                select:
+                  from: seen
+                  type: spell
+                  where:
+                    fn: eq
+                    args:
+                      - read: item.class
+                      - エルフ
+                min: 1
+                max: 1
+                bind: chosen
+              then:
+                op: seq
+                steps:
+                  - op: reveal
+                    subjects: chosen
+                    to: all
+                  - op: move
+                    subjects: chosen
+                    to: hand
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - chosen
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - chosen
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        event: evolve
+        subject: self
+        face: 0
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.combo
+              - 3
+          then:
+            op: damage
+            subjects: target.1
+            amount: 3
+        event: attack
+        subject: self
+        face: 1
+        targets:
+          - key: '1'
+            select: &id001
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: move
+          subjects: target.1
+          to: ex
+        event: evolve
+        subject: self
+        face: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              other: true
+            min: 0
+            max: 2
+  BP09-007:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: *id001
+              amount:
+                if:
+                  fn: ge
+                  args:
+                    - fn: distinct
+                      args:
+                        - values:
+                            side: self
+                            zone: cemetery
+                            type: spell
+                            where:
+                              fn: eq
+                              args:
+                                - read: item.class
+                                - エルフ
+                          field: name
+                    - 5
+                then: 5
+                else: 3
+            - op: damage
+              subjects: opponent.leader
+              amount: 2
+  BP09-020:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: select
+              select:
+                side: self
+                zone: hand
+              min: 0
+              max:
+                count:
+                  side: self
+                  zone: hand
+              bind: chosen
+            - op: discard
+              subjects: chosen
+              bind: discarded
+            - op: draw
+              count:
+                fn: add
+                args:
+                  - count: discarded
+                  - 1
+            - op: if
+              condition:
+                fn: le
+                args:
+                  - count:
+                      side: self
+                      zone: deck
+                  - 1
+              then:
+                op: win
+                side: self
+        event: end
+  BP09-055:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+          names:
+            - 聖竜・リントヴルム
+            - 邪竜・リントヴルム
+        costs:
+          - op: pp
+            amount: 5
+      - line: 2
+        kind: trigger
+        body:
+          op: recover_pp
+          amount:
+            count:
+              side: self
+              zone: cemetery
+              type: spell
+              where:
+                fn: eq
+                args:
+                  - read: item.class
+                  - ドラゴン
+        event: enter
+        subject: self
+  BP09-113:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      side: self
+                      zone: field
+                      type: follower
+                      where:
+                        read: item.evolved
+                  - 0
+              then:
+                op: move
+                subjects: self
+                to: ex
+        targets:
+          - key: '1'
+            select: *id001
+            min: 1
+            max: 1
+  BP09-P17:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+        face: 0
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: modify
+              subjects: self.leader
+              hp: 6
+            - op: draw
+              count: 3
+        event: end
+        face: 0
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: storm
+        face: 1
+      - line: 2
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: ignore_guard
+        face: 1

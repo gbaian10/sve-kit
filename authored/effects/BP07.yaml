@@ -1,0 +1,466 @@
+version: astra/1
+cards:
+  BP07-030:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: optional
+          then:
+            op: choice
+            timing: resolve
+            min: 1
+            max: 1
+            modes:
+              - op: create
+                name: ナテラの大樹
+                count: 1
+                to: field
+              - op: create
+                name: ナテラの大樹
+                count: 1
+                to: ex
+        event: enter
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: damage
+          subjects: target.1
+          amount:
+            count: cost.1
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              name: ナテラの大樹
+            min: 0
+            max: 5
+        costs:
+          - op: act
+            subjects: self
+          - op: act
+            subjects: cost.1
+  BP07-035:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: リペアモード
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP07-072:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: search
+          select:
+            zone: deck
+            side: self
+            trait: 機械
+            type: follower
+            where:
+              fn: le
+              args:
+                - read: item.cost
+                - 3
+          min: 0
+          max: 1
+          to: field
+        event: enter
+        subject: self
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self.leader
+          hp: 2
+        event: field_to_cemetery
+        subject: self
+  BP07-076:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: move
+          subjects:
+            zone: deck
+            side: self
+            top: 2
+          to: cemetery
+        event: enter
+        subject: self
+  BP07-P06:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -2
+          condition:
+            read: paid.trees
+      - line: 2
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -1
+          condition:
+            fn: gt
+            args:
+              - count:
+                  side: self
+                  zone: field
+                  name: 王たる光・ベイリオン
+              - 0
+      - line: 2
+        kind: spell
+        body:
+          op: damage
+          subjects: target.1
+          amount: 4
+        section: 0
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        additional_costs:
+          - key: trees
+            costs:
+              - op: act
+                subjects: cost.trees
+            cost_selections:
+              - key: trees
+                select:
+                  side: self
+                  zone: field
+                  name: ナテラの大樹
+                min: 2
+                max: 2
+  BP07-P16:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: eq
+            args:
+              - read: self.zone
+              - ex
+          then:
+            op: damage
+            subjects: opponent.leader
+            amount:
+              fn: div
+              args:
+                - count:
+                    side: self
+                    zone: cemetery
+                    trait: 自然
+                - 5
+        event: end
+        active_zones:
+          - ex
+      - line: 1
+        kind: static
+        body:
+          op: restrict
+          subjects: self
+          action: play
+          condition:
+            fn: eq
+            args:
+              - read: self.zone
+              - ex
+        section: 0
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 4
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      side: self
+                      zone: field
+                      name: 呪われし影・ヴァイディ
+                  - 0
+              then:
+                op: move
+                subjects: self
+                to: ex
+        section: 0
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP07-P33:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: modify
+              subjects:
+                side: self
+                zone: field
+                name: 粛清の英雄・メイシア
+              power:
+                count:
+                  side: self
+                  zone: cemetery
+                  type: follower
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP07-SL05:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 4
+              bind: seen
+            - op: select
+              select:
+                from: seen
+                trait: 自然
+              min: 0
+              max: 2
+              bind: chosen
+            - op: move
+              subjects: chosen
+              to: ex
+              bind: placed
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    difference:
+                      - seen
+                      - placed
+                  min:
+                    count:
+                      difference:
+                        - seen
+                        - placed
+                  max:
+                    count:
+                      difference:
+                        - seen
+                        - placed
+                  bind: ordered
+                  order: true
+                - op: move
+                  subjects: ordered
+                  to: deck
+                  position: bottom
+        event: evolve
+        subject: self
+      - line: 3
+        kind: activated
+        body:
+          op: modify
+          subjects: target.1
+          power: 2
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+              trait: 自然
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              name: ナテラの大樹
+            min: 2
+            max: 2
+        costs:
+          - op: banish
+            subjects: cost.1
+  BP07-SL09:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects:
+            zone: field
+            side: self
+            type: follower
+            trait: 機械
+            other: true
+          power: 1
+          hp: 1
+        event: end
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: look
+              count: 5
+              bind: looked
+            - op: select
+              select:
+                from: looked
+                type: follower
+                trait: 機械
+              min: 0
+              max: 5
+              bind: chosen
+              constraint:
+                fn: le
+                args:
+                  - fn: sum
+                    args:
+                      - values: chosen
+                        field: cost
+                  - 6
+            - op: move
+              subjects: chosen
+              to: field
+            - op: select
+              select:
+                difference:
+                  - looked
+                  - chosen
+              min:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              max:
+                count:
+                  difference:
+                    - looked
+                    - chosen
+              bind: ordered
+              order: true
+            - op: move
+              subjects: ordered
+              to: deck
+              position: bottom
+        event: enter
+        subject: self
+  BP07-T03:
+    token_template: true
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    zone: hand
+                    side: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: leave
+        subject: self
+      - line: 2
+        kind: activated
+        body:
+          op: move
+          subjects: self
+          to: cemetery
+        costs:
+          - op: pp
+            amount: 1

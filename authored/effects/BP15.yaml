@@ -1,0 +1,1000 @@
+version: astra/1
+cards:
+  BP15-004:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: opponent.leader
+              amount: 1
+            - op: damage
+              subjects:
+                side: opponent
+                zone: field
+                type: follower
+              amount: 2
+            - op: modify
+              subjects: self.leader
+              hp: 1
+        event: evolve
+        subject:
+          side: self
+          zone: field
+          type: follower
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - count:
+                  side: self
+                  zone: evolve_deck
+                  type: follower
+                  where:
+                    read: item.face_up
+              - 3
+          then:
+            op: evolve
+            subjects: self
+        event: enter
+        subject: self
+  BP15-008:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -1
+          condition:
+            fn: gt
+            args:
+              - count:
+                  zone: field
+                  side: self
+                  type: follower
+                  name_contains: エズディア
+              - 0
+      - line: 3
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 1
+            - op: delay
+              subjects: target.1
+              event: field_to_cemetery
+              until: end-of-turn
+              once: true
+              body:
+                op: draw
+                count: 1
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP15-026:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: quick
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 2
+            - op: create
+              name: 黄金の杯
+              count: 1
+              to: ex
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP15-042:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          prevent: true
+          kind: effect
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            union:
+              - opponent.leader
+              - zone: field
+                side: opponent
+                type: follower
+          amount: 5
+        event: enter
+        subject: self
+  BP15-056:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -6
+          condition:
+            fn: ge
+            args:
+              - fn: distinct
+                args:
+                  - read: self.cemetery.cost
+              - 6
+      - line: 2
+        kind: static
+        body:
+          op: macro
+          name: storm
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 0
+            max: 2
+  BP15-057:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: seq
+              steps:
+                - op: look
+                  count: 2
+                  bind: looked
+                - op: optional
+                  selection:
+                    select:
+                      from: looked
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  then:
+                    op: move
+                    subjects: chosen
+                    to: ex
+                - op: move
+                  subjects:
+                    difference:
+                      - looked
+                      - chosen
+                  to: cemetery
+            - op: if
+              condition:
+                fn: gt
+                args:
+                  - count:
+                      from: chosen
+                      trait: 絶傑
+                  - 0
+              then:
+                op: adjust_cost
+                subjects: chosen
+                amount: -3
+                until: end-of-turn
+        event: damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - read: event.effect_damage
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 烈絶の滅牙
+          count: 1
+          to: ex
+        event: enter
+        subject: self
+  BP15-064:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 1
+            - op: damage
+              subjects: opponent.leader
+              amount: 1
+            - op: draw
+              count: 1
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP15-066:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: damage
+          subjects: target.1
+          amount: 3
+        event: damage
+        subject: self
+        trigger_if:
+          fn: and
+          args:
+            - read: self.is_active
+            - read: event.effect_damage
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 3
+        kind: trigger
+        body:
+          op: if
+          condition:
+            fn: ge
+            args:
+              - read: self.pp.max
+              - 7
+          then:
+            op: damage
+            subjects: target.1
+            amount: 1
+        event: enter
+        subject: self
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              type: follower
+            min: 0
+            max: 2
+  BP15-079:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            union:
+              - target.1
+              - target.1.leader
+          amount: 1
+        event: leave
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: 妖怪
+          other: true
+        retain_event: true
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 一ツ尾狐
+          count: 2
+          to: field
+        event: enter
+        subject: self
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 一ツ尾狐
+              count: 1
+              to: field
+            - op: modify
+              subjects:
+                side: self
+                zone: field
+                type: follower
+                trait: 妖怪
+                other: true
+              power: 1
+        event: enter
+        subject: self
+        costs:
+          - op: pp
+            amount: 2
+  BP15-083:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: activated
+        body:
+          op: modify
+          subjects:
+            side: self
+            zone: field
+            name: 一ツ尾狐
+          keywords:
+            - storm
+        active_zones:
+          - cemetery
+        costs:
+          - op: banish
+            subjects: self
+      - line: 2
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: destroy
+              subjects: target.1
+            - op: draw
+              count: 1
+        section: 0
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+        cost_selections:
+          - key: '1'
+            select:
+              side: self
+              zone: field
+              name: 一ツ尾狐
+            min: 2
+            max: 2
+        costs:
+          - op: move
+            subjects: cost.1
+            to: cemetery
+  BP15-108:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            zone: field
+            side: opponent
+            type: follower
+          amount:
+            read: self.power
+        event: main_start
+        side: opponent
+      - line: 2
+        kind: trigger
+        body:
+          op: modify
+          subjects: self
+          power: 2
+        event: enter
+        subject: self
+        costs:
+          - op: pp
+            amount: 2
+  BP15-113:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: evolve
+        body:
+          op: evolve
+          subjects: self
+        costs:
+          - op: pp
+            amount: 1
+      - line: 2
+        kind: static
+        body:
+          op: aura
+          subjects: self
+          keywords:
+            - drain
+          condition:
+            fn: le
+            args:
+              - read: self.leader.life
+              - 10
+  BP15-118:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount:
+                if:
+                  fn: ge
+                  args:
+                    - count:
+                        side: self
+                        zone: evolve_deck
+                        type: follower
+                        where:
+                          read: item.face_up
+                    - 3
+                then: 4
+                else: 2
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      side: self
+                      zone: evolve_deck
+                      type: follower
+                      where:
+                        read: item.face_up
+                  - 5
+              then:
+                op: seq
+                steps:
+                  - op: draw
+                    count: 1
+                  - op: recover_pp
+                    amount: 1
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+  BP15-P29:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects: target.1
+              amount: 2
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - count:
+                      zone: cemetery
+                      side: opponent
+                  - 10
+              then:
+                op: damage
+                subjects: target.1.leader
+                amount: 2
+        targets:
+          - key: '1'
+            select:
+              zone: field
+              side: opponent
+              type: follower
+            min: 1
+            max: 1
+  BP15-P33:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: self
+                    zone: hand
+                  by: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: field_to_cemetery
+        subject: self
+  BP15-PR10:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；可選取牌以同一輸入的 execute 加 selection 或 decline 表達，拒絕後仍另問剩餘牌排序。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: choice
+          min: 1
+          max:
+            if:
+              fn: ge
+              args:
+                - count:
+                    side: opponent
+                    zone: cemetery
+                - 10
+            then: 2
+            else: 1
+          modes:
+            - op: damage
+              subjects: target.1
+              amount:
+                if:
+                  fn: ge
+                  args:
+                    - count:
+                        side: opponent
+                        zone: cemetery
+                    - 10
+                then: 8
+                else: 3
+            - op: seq
+              steps:
+                - op: look
+                  count: 3
+                  bind: seen
+                - op: optional
+                  selection:
+                    select:
+                      from: seen
+                      trait: 盗賊
+                    min: 1
+                    max: 1
+                    bind: chosen
+                  then:
+                    op: seq
+                    steps:
+                      - op: reveal
+                        subjects: chosen
+                        to: all
+                      - op: move
+                        subjects: chosen
+                        to: hand
+                - op: seq
+                  steps:
+                    - op: select
+                      select:
+                        difference:
+                          - seen
+                          - chosen
+                      min:
+                        count:
+                          difference:
+                            - seen
+                            - chosen
+                      max:
+                        count:
+                          difference:
+                            - seen
+                            - chosen
+                      bind: ordered
+                      order: true
+                    - op: move
+                      subjects: ordered
+                      to: deck
+                      position: bottom
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+            modes:
+              - 1
+  BP15-PR13:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: seq
+          steps:
+            - op: damage
+              subjects:
+                zone: field
+                side: both
+                type: follower
+              amount: 1
+            - op: if
+              condition:
+                fn: ge
+                args:
+                  - read: self.pp.max
+                  - 7
+              then:
+                op: modify
+                subjects:
+                  zone: field
+                  side: self
+                  type: follower
+                  name: 烈絶の侮蔑・ガルミーユ
+                keywords:
+                  - storm
+  BP15-SL13:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。 「1枚を場に出してよい」依契約第 24 條為 optional（execute／decline 兩種選擇）。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -1
+          condition:
+            read: paid.reveal
+      - line: 1
+        kind: play
+        body:
+          op: seq
+          steps: []
+        additional_costs:
+          - key: reveal
+            cost_selections:
+              - key: revealed
+                select:
+                  side: self
+                  zone: hand
+                  trait: 陰陽師
+                min: 2
+                max: 2
+            costs:
+              - op: reveal
+                subjects: cost.revealed
+                to: all
+      - line: 2
+        kind: activated
+        body:
+          op: seq
+          steps:
+            - op: optional
+              selection:
+                select:
+                  side: self
+                  zone: evolve_deck
+                  name: 貴人
+                min: 1
+                max: 1
+                bind: advanced
+              then:
+                op: move
+                subjects: advanced
+                to: field
+        advance: true
+        costs:
+          - op: pp
+            amount: 4
+        play_if:
+          fn: ge
+          args:
+            - count:
+                union:
+                  - side: self
+                    zone: cemetery
+                    trait: 陰陽師
+                  - side: self
+                    zone: cemetery
+                    type: spell
+            - 7
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: draw
+              count: 1
+            - op: seq
+              steps:
+                - op: select
+                  select:
+                    side: self
+                    zone: hand
+                  by: self
+                  min: 1
+                  max: 1
+                  bind: discarded
+                - op: discard
+                  subjects: discarded
+        event: enter
+        subject: self
+      - line: 4
+        kind: activated
+        body:
+          op: move
+          subjects: target.1
+          to: field
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              trait: 陰陽師
+              where:
+                fn: le
+                args:
+                  - read: item.cost
+                  - 4
+            min: 1
+            max: 1
+        costs:
+          - op: act
+            subjects: self
+  BP15-SL14:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+      - line: 2
+        kind: static
+        body:
+          op: replace_damage
+          subjects: self
+          kind: effect
+          prevent: true
+      - line: 3
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            union:
+              - opponent.leader
+              - side: opponent
+                zone: field
+                type: follower
+          amount: 5
+        event: enter
+        subject: self
+  BP15-SL23:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: trigger
+        body:
+          op: damage
+          subjects:
+            union:
+              - target.1
+              - target.1.leader
+          amount: 1
+        event: leave
+        subject:
+          side: self
+          zone: field
+          type: follower
+          trait: 妖怪
+          other: true
+        retain_event: true
+        targets:
+          - key: '1'
+            select:
+              side: opponent
+              zone: field
+              type: follower
+            min: 1
+            max: 1
+      - line: 2
+        kind: trigger
+        body:
+          op: create
+          name: 一ツ尾狐
+          count: 2
+          to: field
+        event: enter
+        subject: self
+      - line: 3
+        kind: trigger
+        body:
+          op: seq
+          steps:
+            - op: create
+              name: 一ツ尾狐
+              count: 1
+              to: field
+            - op: modify
+              subjects:
+                side: self
+                zone: field
+                type: follower
+                trait: 妖怪
+                other: true
+              power: 1
+        event: enter
+        subject: self
+        costs:
+          - op: pp
+            amount: 2
+  BP15-T02:
+    status: complete
+    review: 第二輪逐項對照封存日文 text 與全部 sections；說明性括號及 token 引文不重複執行，原型支援狀態另列。
+    abilities:
+      - line: 1
+        kind: spell
+        body:
+          op: modify
+          subjects: self.leader
+          hp:
+            if:
+              fn: ge
+              args:
+                - count:
+                    zone: cemetery
+                    side: opponent
+                - 10
+            then: 2
+            else: 1
+  BP15-T06:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: rush
+      - line: 1
+        kind: static
+        body:
+          op: macro
+          name: guard
+  BP15-U05:
+    status: complete
+    review: 逐項對照日文 text 與全部 sections；括號說明與 token 引文不重複執行。
+    abilities:
+      - line: 1
+        kind: static
+        body:
+          op: adjust_cost
+          subjects: self
+          amount: -1
+          condition:
+            fn: ge
+            args:
+              - at: play-start
+                value:
+                  count:
+                    side: self
+                    zone: cemetery
+              - 10
+      - line: 2
+        kind: spell
+        body:
+          op: move
+          subjects: target.1
+          to: field
+        targets:
+          - key: '1'
+            select:
+              side: self
+              zone: cemetery
+              type: follower
+              ability_event: field_to_cemetery
+              where:
+                fn: and
+                args:
+                  - fn: eq
+                    args:
+                      - read: item.class
+                      - ナイトメア
+                  - fn: le
+                    args:
+                      - read: item.cost
+                      - 2
+            min: 1
+            max: 1
