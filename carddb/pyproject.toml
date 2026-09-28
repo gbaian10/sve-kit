@@ -29,8 +29,10 @@ dev = [
     "commitizen>=4.18.1",
     "cz-conventional-gitmoji>=0.7.0",
     "taplo>=0.9.3",
-    "pyright[nodejs]>=1.1.414",
 ]
+
+# Optional local check, run by hand (see CONTRIBUTING); kept out of the default groups because it bundles ~200 MB of Node.js.
+pyright = ["pyright[nodejs]>=1.1.414"]
 
 test = [
     "pytest>=9.1.1",

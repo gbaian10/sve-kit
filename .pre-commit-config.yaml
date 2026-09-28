@@ -46,12 +46,12 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.8
     hooks:
-      # docs/schema/er/ruff.toml extends the carddb settings.
+      # docs/schema/er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|docs/schema/er)/
+        files: ^(carddb|docs/schema/er|\.github/ci)/
       - id: ruff-check
-        files: ^(carddb|docs/schema/er)/
+        files: ^(carddb|docs/schema/er|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.3
@@ -62,7 +62,22 @@ repos:
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
+      # Aliases keep SKIP from matching both hooks through their shared id.
       - id: gitleaks
+        alias: gitleaks-staged
+      # The hook above only sees staged changes, so it scans nothing in a clean CI checkout.
+      # This one scans every commit in GITLEAKS_RANGE=<base>..<head>; first-parent diffs also cover
+      # what a merge commit itself adds. Missing range ends fail instead of scanning zero commits.
+      - id: gitleaks
+        alias: gitleaks-range
+        name: gitleaks (commit range)
+        entry: >-
+          bash -c 'range="${GITLEAKS_RANGE:?set GITLEAKS_RANGE=<base>..<head>}";
+          git cat-file -e "${range%%..*}^{commit}" && git cat-file -e "${range##*..}^{commit}" &&
+          exec gitleaks git --log-opts="--diff-merges=first-parent $range" --redact --verbose --exit-code 1' --
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.12.17
@@ -172,6 +187,24 @@ repos:
         pass_filenames: false
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
+      # Manual locally (a full run takes minutes); CI runs it on every PR:
+      # `pre-commit run --hook-stage manual pytest`.
+      - id: pytest
+        name: pytest (carddb)
+        language: system
+        entry: uv run --directory carddb pytest -n auto
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
+      # Optional strict check on all Python, run by hand; not in CI (mypy is the gate):
+      # `pre-commit run --hook-stage manual pyright`.
+      - id: pyright
+        name: pyright (carddb, docs/schema/er)
+        language: system
+        entry: bash -c 'status=0; uv --directory carddb run --group pyright pyright || status=1; uv --directory carddb run --group pyright pyright -p ../docs/schema/er || status=1; exit $status'
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
       - id: mypy
         name: mypy_check
         stages: [pre-push]
@@ -189,13 +222,6 @@ repos:
         entry: uv run --directory carddb mypy ../docs/schema/er
         pass_filenames: false
         files: ^(docs/schema/er/.*\.py|carddb/pyproject\.toml)$
-      - id: pyright-schema-er
-        name: pyright (docs/schema/er)
-        stages: [pre-push]
-        language: system
-        entry: uv run --directory carddb pyright -p ../docs/schema/er
-        pass_filenames: false
-        files: ^(docs/schema/er/.*\.(py|json)|carddb/pyproject\.toml)$
       # Fails when the schema documents no longer parse into a complete diagram.
       - id: schema-er-build
         name: schema ER builds from docs/schema

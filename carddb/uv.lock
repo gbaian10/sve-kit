@@ -1086,9 +1086,11 @@ dev = [
     { name = "cz-conventional-gitmoji" },
     { name = "mypy" },
     { name = "pre-commit" },
-    { name = "pyright", extra = ["nodejs"] },
     { name = "ruff" },
     { name = "taplo" },
+]
+pyright = [
+    { name = "pyright", extra = ["nodejs"] },
 ]
 test = [
     { name = "pytest" },
@@ -1125,10 +1127,10 @@ dev = [
     { name = "cz-conventional-gitmoji", specifier = ">=0.7.0" },
     { name = "mypy", specifier = ">=2.3.1" },
     { name = "pre-commit", specifier = ">=4.6.2" },
-    { name = "pyright", extras = ["nodejs"], specifier = ">=1.1.414" },
     { name = "ruff", specifier = ">=0.16.8" },
     { name = "taplo", specifier = ">=0.9.3" },
 ]
+pyright = [{ name = "pyright", extras = ["nodejs"], specifier = ">=1.1.414" }]
 test = [
     { name = "pytest", specifier = ">=9.1.1" },
     { name = "pytest-asyncio", specifier = ">=1.4.0" },

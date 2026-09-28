@@ -1,0 +1,115 @@
+# Which CI job runs each pre-commit hook (keyed by alias when a hook has one). `hooks.py check` fails when a hook in
+# .pre-commit-config.yaml has no entry here, so a new hook cannot silently skip CI.
+# job = "none" means CI does not run the hook itself; `reason` says what covers it instead.
+
+[hooks.trailing-whitespace]
+job = "repo"
+
+[hooks.end-of-file-fixer]
+job = "repo"
+
+[hooks.check-added-large-files]
+job = "repo"
+
+[hooks.check-ast]
+job = "repo"
+
+[hooks.check-case-conflict]
+job = "repo"
+
+[hooks.check-merge-conflict]
+job = "repo"
+
+[hooks.check-yaml]
+job = "repo"
+
+[hooks.check-toml]
+job = "repo"
+
+[hooks.check-json5]
+job = "repo"
+
+[hooks.pretty-format-yaml]
+job = "repo"
+
+[hooks.taplo-format]
+job = "repo"
+
+[hooks.markdownlint-cli2-docker]
+job = "repo"
+
+[hooks.gitleaks-staged]
+job = "none"
+reason = "Scans staged changes only, so it would scan nothing in a clean CI checkout; gitleaks-range covers CI."
+
+[hooks.gitleaks-range]
+job = "repo"
+
+[hooks.uv-lock]
+job = "repo"
+
+[hooks.schema-er-build]
+job = "repo"
+
+[hooks.ruff-format]
+job = "python"
+
+[hooks.ruff-check]
+job = "python"
+
+[hooks.pytest]
+job = "python"
+
+[hooks.pyright]
+job = "none"
+reason = "Optional local check run by hand; mypy strict is the CI gate and pyright needs a ~200 MB Node.js runtime."
+
+[hooks.mypy]
+job = "python"
+
+[hooks.mypy-schema-er]
+job = "python"
+
+[hooks.cargo-fmt]
+job = "rust"
+
+[hooks.cargo-clippy]
+job = "rust"
+
+[hooks.cargo-test]
+job = "rust"
+
+[hooks.cargo-machete]
+job = "rust"
+
+[hooks.cargo-deny]
+job = "rust"
+
+[hooks.cargo-mutants]
+job = "none"
+reason = "Manual-stage mutation test; far too slow for CI."
+
+[hooks.web-prettier]
+job = "web"
+
+[hooks.web-eslint]
+job = "web"
+
+[hooks.web-stylelint]
+job = "web"
+
+[hooks.web-typecheck]
+job = "web"
+
+[hooks.web-test]
+job = "web"
+
+[hooks.no-push-to-main]
+job = "none"
+reason = "Local guard against pushing to main; CI never pushes."
+
+[hooks.commitizen]
+job = "commit"
+
+[hooks.conventional-gitmoji]
+job = "commit"
