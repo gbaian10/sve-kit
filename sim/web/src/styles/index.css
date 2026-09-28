@@ -3,6 +3,9 @@
 @import "./fonts.css";
 @import "./tokens.css";
 
+/* Landscape phones (design §11): the bottom bar becomes a 64px rail on the left. */
+@custom-variant phone-landscape (@media (max-height: 479px) and (orientation: landscape));
+
 /* Drop the default palette so only semantic tokens exist as colour utilities. */
 @theme inline {
   --color-*: initial;
@@ -127,5 +130,14 @@
 
   [data-class="neutral"] {
     --class-color: var(--neutral);
+  }
+
+  /* Native dialog and popover reset: our components draw the surface themselves. */
+  dialog {
+    border: 0;
+  }
+
+  [popover] {
+    border: 0;
   }
 }

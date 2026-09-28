@@ -218,6 +218,8 @@ export default defineConfig(
         },
       ],
       "no-restricted-syntax": ["error", ...uiRestrictedSyntax],
+      // Our Link wraps react-router's, whose address prop is `to`, not `href`.
+      "jsx-a11y/anchor-is-valid": ["error", { components: ["Link"], specialLink: ["to"] }],
     },
   },
 

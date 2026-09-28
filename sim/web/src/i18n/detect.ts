@@ -9,6 +9,14 @@ export function preferredLanguages(nav?: {
   return nav?.language ? [nav.language] : []
 }
 
+/** The language to show: the stored choice, else the browser's first supported language. */
+export function currentUiLanguage(
+  stored: UiLanguage | null,
+  nav: Parameters<typeof preferredLanguages>[0] = globalThis.navigator,
+): UiLanguage {
+  return stored ?? detectUiLanguage(preferredLanguages(nav))
+}
+
 // First-visit default only (a stored choice wins); any Chinese -> zh-TW, unsupported -> ja.
 export function detectUiLanguage(preferred: readonly string[]): UiLanguage {
   for (const tag of preferred) {
