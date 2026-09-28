@@ -1,0 +1,66 @@
+{
+  "format_version": "1.0.0",
+  "types": {},
+  "tables": {
+    "image_asset": [
+      {
+        "owner": {
+          "kind": "global",
+          "id": null
+        },
+        "bucket": 0,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "id",
+          "origin",
+          "publication_state",
+          "withdrawal_reason",
+          "source_src_raw",
+          "source_url",
+          "availability",
+          "width",
+          "height",
+          "format"
+        ],
+        "rows": [
+          [
+            "img:a",
+            "official",
+            "approved",
+            null,
+            "/synthetic.png",
+            "https://example.invalid/synthetic.png",
+            "unfetched",
+            null,
+            null,
+            null
+          ]
+        ]
+      }
+    ],
+    "printing_image": [
+      {
+        "owner": {
+          "kind": "home_set",
+          "id": "set:a"
+        },
+        "bucket": 0,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "printing_id",
+          "face_id",
+          "image_id"
+        ],
+        "rows": [
+          [
+            "p:a",
+            "f:a",
+            "img:a"
+          ]
+        ]
+      }
+    ]
+  }
+}

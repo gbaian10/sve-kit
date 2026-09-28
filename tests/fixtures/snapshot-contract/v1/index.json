@@ -1,0 +1,19 @@
+{
+  "format_version": "1.0.0",
+  "bucket_count": 1,
+  "manifest": "manifest.json",
+  "payloads": [
+    "payloads/bootstrap.json",
+    "payloads/config.json",
+    "payloads/detail.json",
+    "payloads/history.json",
+    "payloads/images.json",
+    "payloads/programs.json"
+  ],
+  "text_all": "text-all.json",
+  "expected": "expected-logical.json",
+  "schema_valid": "schema-valid.json",
+  "schema_invalid": "schema-invalid.json",
+  "vectors": "vectors.json",
+  "reader_invalid": "reader-invalid.json"
+}

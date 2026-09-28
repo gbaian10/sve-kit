@@ -1,0 +1,419 @@
+{
+  "card": [
+    {
+      "id": "c:a",
+      "layout": "double_faced",
+      "identity_state": "confirmed",
+      "home_set_id": "set:a",
+      "faces": [
+        "f:a",
+        "f:b"
+      ],
+      "regions": [
+        {
+          "region": "jp",
+          "release_state": "released",
+          "mapping_state": "unmapped",
+          "as_of": "2026-09-29",
+          "mapping_as_of": null,
+          "mapping_scope": null,
+          "default_printing_id": "p:a",
+          "default_method": "fallback",
+          "deck_role": "main",
+          "debut_product_ids": [],
+          "debut_state": "unknown"
+        }
+      ]
+    }
+  ],
+  "face": [
+    {
+      "id": "f:a",
+      "card_id": "c:a",
+      "ordinal": 0,
+      "side": "front",
+      "current": [
+        {
+          "region": "jp",
+          "revision_id": "r:a2",
+          "basis": "latest_adopted_wording"
+        }
+      ]
+    },
+    {
+      "id": "f:b",
+      "card_id": "c:a",
+      "ordinal": 1,
+      "side": "back",
+      "current": [
+        {
+          "region": "jp",
+          "revision_id": "r:b1",
+          "basis": "dated_effective"
+        }
+      ]
+    }
+  ],
+  "product_family": [
+    {
+      "id": "set:a",
+      "code": "synthetic",
+      "public_code": "SYN",
+      "kind": "other",
+      "name_unit_id": "t:ja:90d435ce36c2c997",
+      "translations": []
+    }
+  ],
+  "card_engine_support": [
+    {
+      "card_id": "c:a",
+      "shared": {
+        "status": "missing_dsl",
+        "dsl_status": null,
+        "dsl_version": null,
+        "dsl_id": null,
+        "validation_state": "not_applicable",
+        "reasons": [
+          "no_formal_candidate"
+        ],
+        "reason_detail": null,
+        "program_ref": null,
+        "ruling_revision_ids": []
+      },
+      "overrides": [],
+      "region_blocks": []
+    }
+  ],
+  "vocabulary": [
+    {
+      "kind": "type",
+      "code": "follower",
+      "label_unit_id": "t:ja:0f977fdcb5d4fe74",
+      "active": true,
+      "translations": []
+    }
+  ],
+  "face_revision": [
+    {
+      "id": "r:a1",
+      "face_id": "f:a",
+      "region": "jp",
+      "revision": 1,
+      "effective_from": null,
+      "effective_until": null,
+      "temporal_status": "unknown",
+      "change_kind": "initial",
+      "name_unit_id": "t:ja:c011ad4340c14396",
+      "effect_unit_id": "t:ja:4cae4ae84ce083d7",
+      "class_code": null,
+      "type_code": "follower",
+      "cost": 1,
+      "attack": 1,
+      "defense": 1,
+      "traits": [],
+      "titles": [],
+      "special_kinds": [],
+      "sections": [],
+      "translations": [],
+      "corrections": []
+    },
+    {
+      "id": "r:a2",
+      "face_id": "f:a",
+      "region": "jp",
+      "revision": 2,
+      "effective_from": null,
+      "effective_until": null,
+      "temporal_status": "unknown",
+      "change_kind": "wording",
+      "name_unit_id": "t:ja:c011ad4340c14396",
+      "effect_unit_id": "t:ja:b17a760c59cb19db",
+      "class_code": null,
+      "type_code": "follower",
+      "cost": 1,
+      "attack": 2,
+      "defense": 3,
+      "traits": [],
+      "titles": [],
+      "special_kinds": [],
+      "sections": [
+        {
+          "ordinal": 0,
+          "text_unit_id": "t:ja:b17a760c59cb19db",
+          "kind": "rule"
+        }
+      ],
+      "translations": [
+        {
+          "field": "effect",
+          "ordinal": null,
+          "target_lang": "zh-Hant",
+          "translation_id": "tr:effect",
+          "basis": "own_source"
+        },
+        {
+          "field": "name",
+          "ordinal": null,
+          "target_lang": "zh-Hant",
+          "translation_id": "tr:name",
+          "basis": "own_source"
+        }
+      ],
+      "corrections": [
+        {
+          "field": "cost",
+          "corrected_from": null,
+          "is_corrected": true,
+          "reason": "Synthetic correction",
+          "source_url": null
+        }
+      ]
+    },
+    {
+      "id": "r:b1",
+      "face_id": "f:b",
+      "region": "jp",
+      "revision": 1,
+      "effective_from": "2026-09-29",
+      "effective_until": null,
+      "temporal_status": "known",
+      "change_kind": "initial",
+      "name_unit_id": "t:ja:d772c516f7ee6f94",
+      "effect_unit_id": "t:ja:b17a760c59cb19db",
+      "class_code": null,
+      "type_code": "follower",
+      "cost": null,
+      "attack": 3,
+      "defense": 4,
+      "traits": [],
+      "titles": [],
+      "special_kinds": [],
+      "sections": [],
+      "translations": [],
+      "corrections": []
+    }
+  ],
+  "printing": [
+    {
+      "id": "p:a",
+      "card_id": "c:a",
+      "region": "jp",
+      "card_no": "SYN-001",
+      "card_no_state": "official",
+      "catalog_state": "official",
+      "listing_confidence": null,
+      "review_level": "unreviewed",
+      "reference_urls": [],
+      "variant_key": "standard",
+      "rarity_code": null,
+      "rarity_raw": "",
+      "premium": null,
+      "serial_total": null,
+      "int_id": 1,
+      "decklog_available": true,
+      "decklog_verification": "unverified",
+      "decklog_source_url": null,
+      "decklog_checked_on": null,
+      "faces": [
+        {
+          "face_id": "f:a",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": null,
+          "printed_effect_unit_id": null,
+          "flavor_unit_id": null,
+          "printed_text_state": "unknown",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": []
+        },
+        {
+          "face_id": "f:b",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": null,
+          "printed_effect_unit_id": null,
+          "flavor_unit_id": null,
+          "printed_text_state": "unknown",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": []
+        }
+      ]
+    },
+    {
+      "id": "p:b",
+      "card_id": "c:a",
+      "region": "jp",
+      "card_no": "SYN-002",
+      "card_no_state": "official",
+      "catalog_state": "official",
+      "listing_confidence": null,
+      "review_level": "unreviewed",
+      "reference_urls": [],
+      "variant_key": "standard",
+      "rarity_code": null,
+      "rarity_raw": "",
+      "premium": null,
+      "serial_total": null,
+      "int_id": 2,
+      "decklog_available": true,
+      "decklog_verification": "unverified",
+      "decklog_source_url": null,
+      "decklog_checked_on": null,
+      "faces": [
+        {
+          "face_id": "f:a",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": "t:ja:c011ad4340c14396",
+          "printed_effect_unit_id": "t:ja:b17a760c59cb19db",
+          "flavor_unit_id": null,
+          "printed_text_state": "verified",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": []
+        },
+        {
+          "face_id": "f:b",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": null,
+          "printed_effect_unit_id": null,
+          "flavor_unit_id": null,
+          "printed_text_state": "unknown",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": []
+        }
+      ]
+    }
+  ],
+  "text_unit": [
+    {
+      "id": "t:ja:0f977fdcb5d4fe74",
+      "lang": "ja",
+      "text": "Synthetic follower"
+    },
+    {
+      "id": "t:ja:4cae4ae84ce083d7",
+      "lang": "ja",
+      "text": "Synthetic old rule"
+    },
+    {
+      "id": "t:ja:90d435ce36c2c997",
+      "lang": "ja",
+      "text": "Synthetic set"
+    },
+    {
+      "id": "t:ja:b17a760c59cb19db",
+      "lang": "ja",
+      "text": "Synthetic rule"
+    },
+    {
+      "id": "t:ja:c011ad4340c14396",
+      "lang": "ja",
+      "text": "Synthetic front"
+    },
+    {
+      "id": "t:ja:d772c516f7ee6f94",
+      "lang": "ja",
+      "text": "Synthetic back"
+    },
+    {
+      "id": "t:zh-Hant:396cbc2e2e8d61a1",
+      "lang": "zh-Hant",
+      "text": "合成規則"
+    },
+    {
+      "id": "t:zh-Hant:8967c9d899bcfc91",
+      "lang": "zh-Hant",
+      "text": "合成名稱"
+    }
+  ],
+  "translation": [
+    {
+      "id": "tr:effect",
+      "source_unit_id": "t:ja:b17a760c59cb19db",
+      "target_lang": "zh-Hant",
+      "text_unit_id": "t:zh-Hant:396cbc2e2e8d61a1",
+      "origin": "project",
+      "authority": "unofficial",
+      "status": "reviewed"
+    },
+    {
+      "id": "tr:name",
+      "source_unit_id": "t:ja:c011ad4340c14396",
+      "target_lang": "zh-Hant",
+      "text_unit_id": "t:zh-Hant:8967c9d899bcfc91",
+      "origin": "project",
+      "authority": "unofficial",
+      "status": "reviewed"
+    }
+  ],
+  "image_asset": [
+    {
+      "id": "img:a",
+      "origin": "official",
+      "publication_state": "approved",
+      "withdrawal_reason": null,
+      "source_src_raw": "/synthetic.png",
+      "source_url": "https://example.invalid/synthetic.png",
+      "availability": "unfetched",
+      "width": null,
+      "height": null,
+      "format": null
+    }
+  ],
+  "printing_image": [
+    {
+      "printing_id": "p:a",
+      "face_id": "f:a",
+      "image_id": "img:a"
+    }
+  ],
+  "product": [],
+  "printing_product": [],
+  "identity_change": [],
+  "art": [],
+  "artist": [],
+  "stamp": [],
+  "qa": [],
+  "qa_version": [],
+  "cr_version": [],
+  "cr_clause": [],
+  "errata": [],
+  "ruling_revision": [],
+  "rules_name": [],
+  "face_rules_name": [],
+  "rules_profile": [],
+  "restriction": [],
+  "card_related": [],
+  "digital_card": [],
+  "digital_art": [],
+  "digital_link": [],
+  "digital_art_link": [],
+  "digital_link_coverage": [],
+  "voice": [],
+  "card_voice": [],
+  "keyword": [],
+  "mechanic_projection": [],
+  "card_mechanic_coverage": [],
+  "search_alias": [],
+  "text_symbol": [],
+  "card_route_alias": [],
+  "route_override": [],
+  "image_variant": []
+}

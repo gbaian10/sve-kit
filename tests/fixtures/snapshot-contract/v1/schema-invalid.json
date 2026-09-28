@@ -1,0 +1,199 @@
+[
+  {
+    "name": "unknown-field",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [],
+      "extra": 0
+    }
+  },
+  {
+    "name": "undeclared-variable",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": null,
+          "variables": [
+            "Y"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "empty-domains",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": null,
+          "variables": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "required-nullable",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "variables": [
+            "X"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unsafe-uint",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": {
+            "minimum": 0,
+            "maximum": 9007199254740992
+          },
+          "variables": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-section-kind",
+    "schema": "Section",
+    "value": [
+      0,
+      "t:ja:b17a760c59cb19db",
+      "effect"
+    ]
+  },
+  {
+    "name": "numeric-string",
+    "schema": "Correction",
+    "value": [
+      "cost",
+      "3",
+      true,
+      "Synthetic",
+      null
+    ]
+  },
+  {
+    "name": "other-object",
+    "schema": "ErrataChange",
+    "value": [
+      "f:a",
+      "other",
+      {},
+      "Synthetic"
+    ]
+  },
+  {
+    "name": "nullable-array",
+    "schema": "Correction",
+    "value": [
+      "traits",
+      null,
+      true,
+      "Synthetic",
+      null
+    ]
+  },
+  {
+    "name": "extra-tuple-item",
+    "schema": "Current",
+    "value": [
+      "jp",
+      "r:a",
+      "dated_effective",
+      null
+    ]
+  },
+  {
+    "name": "missing-tuple-item",
+    "schema": "PrintingFaceDetail",
+    "value": [
+      0,
+      null,
+      null,
+      null,
+      "unknown",
+      [],
+      []
+    ]
+  },
+  {
+    "name": "programs-fail-closed",
+    "schema": "Programs",
+    "value": {
+      "format_version": "1.0.0",
+      "entries": [
+        {
+          "id": "program:a",
+          "dsl_version": "1.0",
+          "ast": {}
+        }
+      ]
+    }
+  },
+  {
+    "name": "bool-int",
+    "schema": "Section",
+    "value": [
+      true,
+      "t:ja:b17a760c59cb19db",
+      "rule"
+    ]
+  },
+  {
+    "name": "float-int",
+    "schema": "Section",
+    "value": [
+      1.0,
+      "t:ja:b17a760c59cb19db",
+      "rule"
+    ],
+    "raw_json": "[1.0,\"t:ja:0000000000000000\",\"rule\"]"
+  },
+  {
+    "name": "unknown-format",
+    "schema": "Programs",
+    "value": {
+      "format_version": "1.1.0",
+      "entries": []
+    }
+  },
+  {
+    "name": "preview-in-index",
+    "schema": "IndexPage",
+    "value": {
+      "index_format": 1,
+      "entries": [
+        {
+          "data_version": "preview-20260929T010203Z-0001",
+          "published_at": "2026-09-29T01:02:03Z",
+          "format_version": "1.0.0",
+          "min_reader_version": "1.0.0",
+          "required_capabilities": [
+            "column-partition-v1",
+            "fragment-container-v1"
+          ],
+          "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+          "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "engine_support_target": {
+            "engine_version": null,
+            "engine_build_hash": null,
+            "validation_policy_id": null
+          }
+        }
+      ]
+    }
+  }
+]
