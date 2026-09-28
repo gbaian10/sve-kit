@@ -100,9 +100,8 @@ def _table(table: Table, enabled: set[str]) -> list[str]:
     clauses.extend(_foreign_keys(table, enabled))
     clauses.extend(f"CHECK ({check.sql})" for check in table.checks)
     body = ",\n  ".join(clauses)
-    result = [
-        f"CREATE TABLE {identifier(table.name)} (\n  {body}\n) STRICT, WITHOUT ROWID;"
-    ]
+    options = "STRICT, WITHOUT ROWID" if table.without_rowid else "STRICT"
+    result = [f"CREATE TABLE {identifier(table.name)} (\n  {body}\n) {options};"]
     for index, unique in enumerate(table.unique):
         if unique.where is not None:
             name = identifier(f"uq_{table.name}_{index}")
