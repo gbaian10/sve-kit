@@ -8,6 +8,7 @@ from jsonschema import Draft202012Validator, ValidationError
 from pydantic import JsonValue, TypeAdapter
 
 from sve_carddb.snapshot.contract import definition, schema, tables, validate
+from sve_carddb.snapshot.generate_schema import generate
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import (
     array,
@@ -41,6 +42,36 @@ def test_schema_is_valid_and_covers_every_collection() -> None:
     assert set(tables()) <= {string(case["schema"]) for case in valid}
     for case in valid:
         validate(string(case["schema"]), case["value"])
+
+
+def test_schema_regeneration_matches_committed_bytes() -> None:
+    resource = (
+        Path(__file__).resolve().parents[1]
+        / "src/sve_carddb/snapshot/schema/v1/contract.schema.json"
+    )
+    assert generate() == resource.read_bytes()
+
+
+def test_schema_requires_no_optional_format_checker() -> None:
+    def check(value: JsonValue) -> None:
+        if isinstance(value, dict):
+            assert not isinstance(value.get("format"), str)
+            assert r"\d" not in string(value.get("pattern", ""))
+            for item in value.values():
+                check(item)
+        elif isinstance(value, list):
+            for item in value:
+                check(item)
+
+    check(schema())
+    for raw in array(fixture("schema-invalid.json")):
+        case = object_value(raw)
+        if "raw_json" in case:
+            continue
+        selected = schema() | {"$ref": "#/$defs/" + string(case["schema"])}
+        selected.pop("oneOf")
+        with pytest.raises(ValidationError):
+            Draft202012Validator(selected).validate(case["value"])
 
 
 @pytest.mark.parametrize(
@@ -170,7 +201,10 @@ def test_shared_reader_counterexamples(case: JsonValue) -> None:
         blobs[target] = canonical(value)
         if item["rehash"]:
             _reseal(manifest, target, blobs[target])
-    with pytest.raises((ValueError, ValidationError, KeyError, TypeError)):
+    with pytest.raises(
+        (ValueError, ValidationError, KeyError, TypeError),
+        match=string(item["error"]) if "error" in item else None,
+    ):
         read_snapshot(manifest, blobs)
 
 

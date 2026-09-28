@@ -3,7 +3,7 @@
 from functools import cache
 from importlib.resources import files
 
-from jsonschema import Draft202012Validator, FormatChecker
+from jsonschema import Draft202012Validator
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
@@ -26,7 +26,7 @@ def validate(name: str, value: JsonValue) -> None:
     canonical(value)
     selected = schema() | {"$ref": "#/$defs/" + name}
     selected.pop("oneOf")
-    Draft202012Validator(selected, format_checker=FormatChecker()).validate(value)
+    Draft202012Validator(selected).validate(value)
 
 
 def columns(name: str) -> list[str]:

@@ -91,6 +91,35 @@ def _parameter(value: Row) -> None:
                 raise ValueError("Inverted parameter range")
 
 
+def _spellings(symbol: Row) -> None:
+    params = {
+        string(object_value(item)["name"]): object_value(item)
+        for item in array(object_value(symbol["parameter_schema"])["parameters"])
+    }
+    for raw in array(symbol["spellings"]):
+        spelling = object_value(raw)
+        kind = spelling["parse_kind"]
+        if kind == "literal":
+            continue
+        name = string(spelling["parameter_name"])
+        if name not in params:
+            raise ValueError("Spelling references an undeclared parameter")
+        parameter = params[name]
+        if (kind == "uint" and parameter["uint"] is None) or (
+            kind == "variable" and not array(parameter["variables"])
+        ):
+            raise ValueError("Spelling requires an enabled parameter domain")
+
+
+def _hints(ruling: Row) -> None:
+    schemas = {
+        canonical(object_value(hint)["parameter_schema"])
+        for hint in array(ruling["hints"])
+    }
+    if len(schemas) > 1:
+        raise ValueError("Multilingual hints must declare identical parameters")
+
+
 def _nested(value: JsonValue) -> None:
     if isinstance(value, list):
         for item in value:
@@ -228,6 +257,10 @@ def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
     for rows in view.values():
         for row in rows:
             _nested(row)
+    for symbol in view["text_symbol"]:
+        _spellings(symbol)
+    for ruling in view["ruling_revision"]:
+        _hints(ruling)
     if {row["card_id"] for row in view["card_engine_support"]} != {
         row["id"] for row in view["card"]
     }:
