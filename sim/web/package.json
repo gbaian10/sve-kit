@@ -15,7 +15,8 @@
     "format:check": "prettier --check .",
     "test": "vitest run",
     "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run knip && bun run build",
-    "knip": "knip"
+    "knip": "knip",
+    "fixture:build": "bun run scripts/fixture/main.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
@@ -54,6 +55,7 @@
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",
+    "sharp": "^0.35.5",
     "stylelint": "^17.15.0",
     "stylelint-config-standard": "^40.0.0",
     "tailwindcss": "^4.3.3",

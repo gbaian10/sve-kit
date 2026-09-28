@@ -147,6 +147,21 @@ code. The `reader.test.ts` cases cover what the fixture cannot express (missing 
 reformatted bytes). CI runs these whenever `carddb/src/sve_carddb/snapshot/schema/**` or the
 fixture directory changes.
 
+## Development snapshot
+
+`fixtures/snapshot/` is a small synthetic card-data snapshot in the exact layout the CDN will
+have (version index, manifest, canonical blobs, WebP placeholders). `bun run fixture:build`
+regenerates it from `scripts/fixture/cards.ts` (about two dozen handwritten cards covering
+double faces, alternate printings, errata, Q&A, bans, the JP/EN mapping states and image
+states) through `scripts/fixture/build.ts`, which emits the column partitions, sorts every
+collection the way the reader requires and hashes every blob. The output is deterministic and
+the reader must accept it (`scripts/fixture/build.test.ts`), so a change to either the reader or
+the generator that breaks the contract fails the tests, not the pages.
+
+`bun run dev` and `bun run preview` serve a snapshot root under `/cdn`: `SVE_CDN_DIR` when set
+(for a real local export), else the fixture. `SVE_PREVIEW_DIR` is served under `/cdn-preview`.
+The files are canonical JSON and are excluded from Prettier.
+
 ## Dead code
 
 `bun run knip` (part of `bun run check`) reports files, exports, types and dependencies that
