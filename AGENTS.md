@@ -26,6 +26,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | `docs/`     | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
 
 專案用語（卡表快照、啟動包、分片、版次等）以 `docs/terminology.md` 為準，新名詞先加進那份。
+`docs/` 只放完成後仍成立的規格與決定；進度、排程、交付點與待決事項放 GitHub issue／milestone。
 
 依賴方向：`dsl/` ← `authored/` ← `carddb/` → 匯出的快照 ← `sim/`。
 `carddb` 匯出的有版號快照是卡片資料的**唯一權威**。`sim/` 可以載入、打包或快取快照（例如 PWA 離線），
@@ -45,6 +46,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | 可以隨時刪掉的暫存                   | `carddb/.cache/`                        | ❌          |
 | 建置產物（SQLite、JSON 快照）        | `carddb/dist/`                          | ❌          |
 | 人寫資料                             | `authored/`                             | ✅          |
+| 測試用官方卡文                       | 專用私有 GitHub testdata repo           | 見下述政策  |
 
 `SVE_DATA_DIR` 是上傳 R2 之前的臨時中轉站：卡圖、語音上傳 R2 並確認後可刪；
 原始 HTML 建議保留（重新解析用）；**manifest 不可刪**（唯一無法重建的資料）。
@@ -52,6 +54,13 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 原則：**能用程式重新產生的不進 git；專案共用的人寫資料與正式文件進 git。**
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
 `authored/` 依卡包切檔（例如 `authored/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
+
+測試用官方卡文存於專用私有 GitHub testdata repo，只收必要的最小 JSONL 與產生說明，不收完整卡表、卡圖或憑證；卡文不進 `sve-kit`，不用 R2。
+`sve-kit` 只保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
+更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。
+主分支與專案自己的 PR 跑完整測試，行覆蓋率門檻為 90%；公開後 fork PR 沒有 secret，明確排除依賴私有卡文的 7 個測試並在 job summary 標示。
+fork PR 使用針對剩餘測試配置的獨立覆蓋率門檻與結果標示，不套用完整測試的 90% 門檻，也不宣稱完整覆蓋率驗收通過。
+測試卡文與含卡文的衍生產物不放 Actions cache／artifact；失敗 log 不印整行卡文。私有存放只是存取控制，不等於授權；公開前的 LICENSE 審查須涵蓋這批資料。
 
 ## 已定案的設計原則
 
