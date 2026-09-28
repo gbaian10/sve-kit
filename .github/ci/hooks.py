@@ -25,6 +25,7 @@ JOBS = frozenset({"repo", "python", "rust", "web", "commit", "none"})
 JOB_STAGES: dict[str, tuple[str, ...]] = {
     "repo": ("manual",),
     "python": ("manual", "pre-push"),
+    "rust": ("manual", "pre-push"),
 }
 
 
