@@ -1,6 +1,5 @@
-# The squash-merge commit title defaults to the PR title, so it must pass the same commitizen check
-# as local commits. Kept apart from ci.yml: re-running on `edited` there would post a new ci-ok for
-# the same head commit without re-checking the code.
+# The squash-merge commit title defaults to the PR title, so it must pass the same check as commits.
+# A separate workflow so that editing the title re-runs only this check, not the whole ci.yml.
 name: pr-title
 
 on:
@@ -26,7 +25,7 @@ jobs:
         with:
           enable-cache: true
           cache-dependency-glob: carddb/uv.lock
-      - name: cz check (PR title)
+      - name: Commit format (PR title)
         env:
           TITLE: ${{ github.event.pull_request.title }}
-        run: uv run --project carddb --locked --no-default-groups --group dev cz check --message "$TITLE"
+        run: uv run --project carddb --locked --no-default-groups --group dev python .github/ci/commit_msg.py --message "$TITLE"

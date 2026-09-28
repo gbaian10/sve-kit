@@ -208,7 +208,7 @@ jobs:
       # package.json scripts are the single entry point: Prettier, ESLint, Stylelint, tsc -b, Vitest and the build.
       - run: bun run check
 
-  # Every commit that reaches the base branch must follow the commitizen format (.cz.toml).
+  # Every commit that reaches the base branch must follow the commitizen format (.cz.toml), gitmoji included.
   # Runs on every event regardless of paths; the PR title has its own workflow (pr-title.yml).
   commit:
     runs-on: ubuntu-latest
@@ -229,7 +229,7 @@ jobs:
         run: |
           git cat-file -e "${BASE}^{commit}"
           git cat-file -e "${HEAD}^{commit}"
-          uv run --project carddb --locked --no-default-groups --group dev cz check --rev-range "${BASE}..${HEAD}"
+          uv run --project carddb --locked --no-default-groups --group dev python .github/ci/commit_msg.py --rev-range "${BASE}..${HEAD}"
 
   ci-ok:
     if: always()
