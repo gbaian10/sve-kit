@@ -70,6 +70,7 @@ class Table:
     foreign_keys: tuple[ForeignKey, ...] = ()
     unique: tuple[Unique, ...] = ()
     checks: tuple[Check, ...] = ()
+    without_rowid: bool = True
 
     def column(self, name: str) -> Column:
         """Resolve a declared column, rejecting misspelled or unknown names."""
