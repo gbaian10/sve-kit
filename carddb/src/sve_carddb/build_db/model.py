@@ -63,6 +63,15 @@ class Check:
 
 
 @dataclass(frozen=True)
+class QueryCheck:
+    """Trusted SELECT returning a row if a cross-table invariant is violated."""
+
+    name: str
+    sql: str
+    tables: tuple[str, ...]
+
+
+@dataclass(frozen=True)
 class Table:
     name: str
     columns: tuple[Column, ...]
@@ -71,6 +80,7 @@ class Table:
     unique: tuple[Unique, ...] = ()
     checks: tuple[Check, ...] = ()
     without_rowid: bool = True
+    query_checks: tuple[QueryCheck, ...] = ()
 
     def column(self, name: str) -> Column:
         """Resolve a declared column, rejecting misspelled or unknown names."""
@@ -86,6 +96,8 @@ class Capability:
     tables: tuple[str, ...]
     requires: tuple[str, ...] = ()
     implemented: bool = True
+    importer_ready: bool = False
+    validator_ready: bool = False
 
 
 def identifier(name: str) -> str:

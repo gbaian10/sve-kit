@@ -63,6 +63,8 @@ class Database:
         self._connection = connection
         self._tables = {table.name: table for table in schema.tables}
         self._rules = rules
+        self._version = schema.version
+        self._query_checks = schema.query_checks
 
     def _read(self, sql: str) -> tuple[tuple[SQLValue, ...], ...]:
         result: object = self._connection.execute(sql).fetchall()
@@ -78,6 +80,11 @@ class Database:
             raise sqlite3.IntegrityError("Foreign key check failed")
         if self._read("PRAGMA integrity_check") != (("ok",),):
             raise sqlite3.IntegrityError("Integrity check failed")
+        if self._read("PRAGMA user_version") != ((self._version,),):
+            raise sqlite3.IntegrityError("Build schema version mismatch")
+        for check in self._query_checks:
+            if self._read(check.sql):
+                raise sqlite3.IntegrityError(f"Cross-table check failed: {check.name}")
 
     @contextmanager
     def transaction(self) -> Iterator[Database]:

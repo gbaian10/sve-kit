@@ -5,7 +5,14 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db.model import Column, Kind, Table, identifier, literal
+from sve_carddb.build_db.model import (
+    Column,
+    Kind,
+    QueryCheck,
+    Table,
+    identifier,
+    literal,
+)
 from sve_carddb.build_db.validation import BOUNDS, Rules
 from sve_carddb.snapshot.values import canonical
 
@@ -20,6 +27,8 @@ class CompiledSchema:
     tables: tuple[Table, ...]
     statements: tuple[str, ...]
     json_schemas: tuple[tuple[str, str], ...]
+    version: int = 1
+    query_checks: tuple[QueryCheck, ...] = ()
 
     @property
     def sql(self) -> str:
@@ -116,8 +125,14 @@ def compile_schema(
     registry: Registry,
     requested: tuple[str, ...],
     json_schemas: Mapping[str, JsonValue] | None = None,
+    *,
+    version: int = 1,
 ) -> CompiledSchema:
     """Compile capability closure without inventing declarations for future tables."""
+    if type(version) is not int or not 1 <= version <= 2**31 - 1:
+        raise ValueError(
+            "Build schema version must be a positive signed 32-bit integer"
+        )
     tables = registry.resolve(requested)
     schemas = {
         name: canonical(value).decode() for name, value in (json_schemas or {}).items()
@@ -130,6 +145,11 @@ def compile_schema(
     enabled = {table.name for table in tables}
     return CompiledSchema(
         tables,
-        tuple(statement for table in tables for statement in _table(table, enabled)),
+        (
+            f"PRAGMA user_version = {version};",
+            *(statement for table in tables for statement in _table(table, enabled)),
+        ),
         tuple(sorted(schemas.items())),
+        version,
+        tuple(check for table in tables for check in table.query_checks),
     )

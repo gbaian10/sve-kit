@@ -8,6 +8,7 @@ import pytest
 from sve_carddb.build_db import Kind, Table
 from sve_carddb.build_db.domains import DATE, HASH, INSTANT, LANG
 from sve_carddb.build_db.t0 import TABLES
+from sve_carddb.build_db.t1 import TABLES as T1_TABLES
 
 DOCS = Path(__file__).resolve().parents[2] / "docs" / "schema"
 
@@ -51,7 +52,7 @@ def test_t0_table_set_exactly_matches_tiers() -> None:
     assert {table.name for table in TABLES} == set(expected)
 
 
-@pytest.mark.parametrize("table", TABLES, ids=lambda table: table.name)
+@pytest.mark.parametrize("table", [*TABLES, *T1_TABLES], ids=lambda table: table.name)
 def test_logical_columns_domains_nullability_and_enums(table: object) -> None:
     assert isinstance(table, Table)
     declaration = re.findall(r"`([^`]+)`", _rows()[table.name])[0]
@@ -85,7 +86,7 @@ def test_logical_columns_domains_nullability_and_enums(table: object) -> None:
             assert column.choices == ("jp", "en")
 
 
-@pytest.mark.parametrize("table", TABLES, ids=lambda table: table.name)
+@pytest.mark.parametrize("table", [*TABLES, *T1_TABLES], ids=lambda table: table.name)
 def test_documented_lexical_domains_have_patterns_on_every_column(table: Table) -> None:
     declaration = re.findall(r"`([^`]+)`", _rows()[table.name])[0]
     patterns = {"Date": DATE, "Instant": INSTANT, "Hash": HASH, "Lang": LANG}
@@ -94,7 +95,7 @@ def test_documented_lexical_domains_have_patterns_on_every_column(table: Table) 
             assert table.column(name).pattern == patterns[kind], (table.name, name)
 
 
-@pytest.mark.parametrize("table", TABLES, ids=lambda table: table.name)
+@pytest.mark.parametrize("table", [*TABLES, *T1_TABLES], ids=lambda table: table.name)
 def test_documented_primary_and_unique_keys(table: object) -> None:
     assert isinstance(table, Table)
     raw = _rows()[table.name]
@@ -121,7 +122,7 @@ def test_documented_primary_and_unique_keys(table: object) -> None:
             assert key.target == ("kind", "code")
 
 
-@pytest.mark.parametrize("table", TABLES, ids=lambda table: table.name)
+@pytest.mark.parametrize("table", [*TABLES, *T1_TABLES], ids=lambda table: table.name)
 def test_every_documented_foreign_column_has_target(table: Table) -> None:
     declaration = re.findall(r"`([^`]+)`", _rows()[table.name])[0]
     pending: list[str] = []

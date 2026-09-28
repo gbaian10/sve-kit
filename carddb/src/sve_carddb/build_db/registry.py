@@ -70,6 +70,11 @@ def _table(table: Table) -> None:
 def _foreign_keys(
     table: Table, tables: dict[str, Table], owners: dict[str, str]
 ) -> None:
+    for check in table.query_checks:
+        identifier(check.name)
+        _names(check.tables)
+        if not set(check.tables) <= owners.keys():
+            raise ValueError("Unregistered query check dependency")
     for foreign in table.foreign_keys:
         if foreign.table not in owners:
             raise ValueError(f"Unregistered foreign target {foreign.table}")
@@ -140,8 +145,22 @@ class Registry:
             for table_name in cap.tables:
                 table = tables[table_name]
                 pending.extend(
+                    owners[target]
+                    for check in table.query_checks
+                    for target in check.tables
+                )
+                pending.extend(
                     owners[fk.table]
                     for fk in table.foreign_keys
                     if not any(table.column(col).nullable for col in fk.columns)
                 )
         return tuple(tables[name] for name in sorted(tables) if owners[name] in enabled)
+
+    def require_usable(self, requested: tuple[str, ...]) -> None:
+        """Reject DDL-only capabilities, including those introduced by closure."""
+        tables = {table.name for table in self.resolve(requested)}
+        for cap in self.capabilities:
+            if tables.intersection(cap.tables) and not (
+                cap.importer_ready and cap.validator_ready
+            ):
+                raise ValueError(f"Importer/validator unavailable: {cap.name}")
