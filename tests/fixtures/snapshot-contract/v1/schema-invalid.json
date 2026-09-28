@@ -1,0 +1,376 @@
+[
+  {
+    "name": "unknown-field",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [],
+      "extra": 0
+    }
+  },
+  {
+    "name": "undeclared-variable",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": null,
+          "variables": [
+            "Y"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "empty-domains",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": null,
+          "variables": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "required-nullable",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "variables": [
+            "X"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "unsafe-uint",
+    "schema": "ParameterSchema",
+    "value": {
+      "parameters": [
+        {
+          "name": "value",
+          "uint": {
+            "minimum": 0,
+            "maximum": 9007199254740992
+          },
+          "variables": []
+        }
+      ]
+    }
+  },
+  {
+    "name": "unknown-section-kind",
+    "schema": "Section",
+    "value": [
+      0,
+      "t:ja:b17a760c59cb19db",
+      "effect"
+    ]
+  },
+  {
+    "name": "numeric-string",
+    "schema": "Correction",
+    "value": [
+      "cost",
+      "3",
+      true,
+      "Synthetic",
+      null
+    ]
+  },
+  {
+    "name": "other-object",
+    "schema": "ErrataChange",
+    "value": [
+      "f:a",
+      "other",
+      {},
+      "Synthetic"
+    ]
+  },
+  {
+    "name": "nullable-array",
+    "schema": "Correction",
+    "value": [
+      "traits",
+      null,
+      true,
+      "Synthetic",
+      null
+    ]
+  },
+  {
+    "name": "extra-tuple-item",
+    "schema": "Current",
+    "value": [
+      "jp",
+      "r:a",
+      "dated_effective",
+      null
+    ]
+  },
+  {
+    "name": "missing-tuple-item",
+    "schema": "PrintingFaceDetail",
+    "value": [
+      0,
+      null,
+      null,
+      null,
+      "unknown",
+      [],
+      []
+    ]
+  },
+  {
+    "name": "programs-fail-closed",
+    "schema": "Programs",
+    "value": {
+      "format_version": "1.0.0",
+      "entries": [
+        {
+          "id": "program:a",
+          "dsl_version": "1.0",
+          "ast": {}
+        }
+      ]
+    }
+  },
+  {
+    "name": "bool-int",
+    "schema": "Section",
+    "value": [
+      true,
+      "t:ja:b17a760c59cb19db",
+      "rule"
+    ]
+  },
+  {
+    "name": "float-int",
+    "schema": "Section",
+    "value": [
+      1.0,
+      "t:ja:b17a760c59cb19db",
+      "rule"
+    ],
+    "raw_json": "[1.0,\"t:ja:0000000000000000\",\"rule\"]"
+  },
+  {
+    "name": "unknown-format",
+    "schema": "Programs",
+    "value": {
+      "format_version": "1.1.0",
+      "entries": []
+    }
+  },
+  {
+    "name": "preview-in-index",
+    "schema": "IndexPage",
+    "value": {
+      "index_format": 1,
+      "entries": [
+        {
+          "data_version": "preview-20260929T010203Z-0001",
+          "published_at": "2026-09-29T01:02:03Z",
+          "format_version": "1.0.0",
+          "min_reader_version": "1.0.0",
+          "required_capabilities": [
+            "column-partition-v1",
+            "fragment-container-v1"
+          ],
+          "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+          "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+          "engine_support_target": {
+            "engine_version": null,
+            "engine_build_hash": null,
+            "validation_policy_id": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "date-february-30",
+    "schema": "Date",
+    "value": "2026-02-30"
+  },
+  {
+    "name": "date-century-not-leap",
+    "schema": "Date",
+    "value": "1900-02-29"
+  },
+  {
+    "name": "date-year-zero",
+    "schema": "Date",
+    "value": "0000-01-01"
+  },
+  {
+    "name": "date-non-ascii-year",
+    "schema": "Date",
+    "value": "２０２６-09-29"
+  },
+  {
+    "name": "date-trailing-newline",
+    "schema": "Date",
+    "value": "2026-09-29\n"
+  },
+  {
+    "name": "instant-hour-25",
+    "schema": "Instant",
+    "value": "2026-09-29T25:00:00Z"
+  },
+  {
+    "name": "instant-february-30",
+    "schema": "Instant",
+    "value": "2026-02-30T00:00:00Z"
+  },
+  {
+    "name": "instant-minute-60",
+    "schema": "Instant",
+    "value": "2026-09-29T00:60:00Z"
+  },
+  {
+    "name": "instant-second-60",
+    "schema": "Instant",
+    "value": "2026-09-29T00:00:60Z"
+  },
+  {
+    "name": "instant-non-ascii-year",
+    "schema": "Instant",
+    "value": "２０２６-09-29T00:00:00Z"
+  },
+  {
+    "name": "instant-non-ascii-fraction",
+    "schema": "Instant",
+    "value": "2026-09-29T00:00:00.١Z"
+  },
+  {
+    "name": "data-version-non-ascii-year",
+    "schema": "DataVersion",
+    "value": "preview-２０２６0929T010203Z-0001"
+  },
+  {
+    "name": "data-version-hour-25",
+    "schema": "DataVersion",
+    "value": "20260929T250000Z-0001"
+  },
+  {
+    "name": "data-version-february-30",
+    "schema": "DataVersion",
+    "value": "20260230T010203Z-0001"
+  },
+  {
+    "name": "data-version-zero-serial",
+    "schema": "DataVersion",
+    "value": "20260929T010203Z-0000"
+  },
+  {
+    "name": "reader-version-non-ascii-digit",
+    "schema": "Version",
+    "value": "1.1٠.0"
+  },
+  {
+    "name": "dsl-version-non-ascii-digit",
+    "schema": "DSLVersion",
+    "value": "1.1٠"
+  },
+  {
+    "name": "url-space",
+    "schema": "URL",
+    "value": "https://example.invalid/a b"
+  },
+  {
+    "name": "url-invalid-percent-encoding",
+    "schema": "URL",
+    "value": "https://example.invalid/%zz"
+  },
+  {
+    "name": "url-unencoded-unicode",
+    "schema": "URL",
+    "value": "https://example.invalid/漢字"
+  },
+  {
+    "name": "url-invalid-ipv6",
+    "schema": "URL",
+    "value": "https://[invalid]/"
+  },
+  {
+    "name": "url-nonnumeric-port",
+    "schema": "URL",
+    "value": "https://example.invalid:abc/"
+  },
+  {
+    "name": "url-empty-host",
+    "schema": "URL",
+    "value": "https:///missing-host"
+  },
+  {
+    "name": "Index-first_data_version-unicode",
+    "schema": "Index",
+    "value": {
+      "index_format": 1,
+      "revision": 1,
+      "pages": [
+        {
+          "path": "snapshots/versions/page.json",
+          "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "first_data_version": "２０２６0929T010203Z-0001",
+          "last_data_version": "20260929T010203Z-0001",
+          "count": 1
+        }
+      ]
+    }
+  },
+  {
+    "name": "Index-last_data_version-unicode",
+    "schema": "Index",
+    "value": {
+      "index_format": 1,
+      "revision": 1,
+      "pages": [
+        {
+          "path": "snapshots/versions/page.json",
+          "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "first_data_version": "20260929T010203Z-0001",
+          "last_data_version": "２０２６0929T010203Z-0001",
+          "count": 1
+        }
+      ]
+    }
+  },
+  {
+    "name": "IndexPage-data_version-unicode",
+    "schema": "IndexPage",
+    "value": {
+      "index_format": 1,
+      "entries": [
+        {
+          "data_version": "２０２６0929T010203Z-0001",
+          "published_at": "2026-09-29T01:02:03Z",
+          "format_version": "1.0.0",
+          "min_reader_version": "1.0.0",
+          "required_capabilities": [],
+          "manifest_path": "snapshots/manifest.json",
+          "manifest_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "engine_support_target": {
+            "engine_version": null,
+            "engine_build_hash": null,
+            "validation_policy_id": null
+          }
+        }
+      ]
+    }
+  },
+  {
+    "name": "URL-multiple-userinfo-separators",
+    "schema": "URL",
+    "value": "https://a@b@example.invalid/"
+  }
+]

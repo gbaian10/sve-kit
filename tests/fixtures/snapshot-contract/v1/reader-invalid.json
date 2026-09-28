@@ -1,0 +1,591 @@
+[
+  {
+    "name": "dependency-hash",
+    "target": "manifest",
+    "path": [
+      "files",
+      2,
+      "dependencies",
+      0,
+      "sha256"
+    ],
+    "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "rehash": false
+  },
+  {
+    "name": "base-hash",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "base",
+      "file",
+      "sha256"
+    ],
+    "value": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+    "rehash": true
+  },
+  {
+    "name": "row-index-out-of-range",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      1,
+      0
+    ],
+    "value": 2,
+    "rehash": true
+  },
+  {
+    "name": "row-index-duplicate",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      1,
+      0
+    ],
+    "value": 0,
+    "rehash": true
+  },
+  {
+    "name": "row-index-missing",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows"
+    ],
+    "value": [
+      [
+        0,
+        [
+          [
+            0,
+            null,
+            null,
+            null,
+            "unknown",
+            [],
+            [],
+            []
+          ],
+          [
+            1,
+            null,
+            null,
+            null,
+            "unknown",
+            [],
+            [],
+            []
+          ]
+        ]
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "face-ordinal-out-of-range",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      1,
+      0
+    ],
+    "value": 2,
+    "rehash": true
+  },
+  {
+    "name": "face-ordinal-duplicate",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      1,
+      0
+    ],
+    "value": 0,
+    "rehash": true
+  },
+  {
+    "name": "face-ordinal-missing",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1
+    ],
+    "value": [
+      [
+        0,
+        null,
+        null,
+        null,
+        "unknown",
+        [],
+        [],
+        []
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "dangling-text",
+    "target": "detail",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      6
+    ],
+    "value": "t:ja:0000000000000000",
+    "rehash": true
+  },
+  {
+    "name": "duplicate-translation",
+    "target": "detail",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      8
+    ],
+    "value": [
+      [
+        "effect",
+        null,
+        "zh-Hant",
+        "tr:effect",
+        "own_source"
+      ],
+      [
+        "effect",
+        null,
+        "zh-Hant",
+        "tr:effect",
+        "own_source"
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "wrong-translation-partition",
+    "target": "detail",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      8
+    ],
+    "value": [
+      [
+        "name",
+        null,
+        "zh-Hant",
+        "tr:name",
+        "own_source"
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "wrong-descriptor",
+    "target": "detail",
+    "path": [
+      "types",
+      "Section",
+      "items",
+      2
+    ],
+    "value": {
+      "scalar": "Text"
+    },
+    "rehash": true
+  },
+  {
+    "name": "wrong-columns",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "columns"
+    ],
+    "value": [
+      "faces",
+      "row_index"
+    ],
+    "rehash": true
+  },
+  {
+    "name": "row-count",
+    "target": "manifest",
+    "path": [
+      "files",
+      2,
+      "row_counts",
+      0,
+      "count"
+    ],
+    "value": 99,
+    "rehash": false
+  },
+  {
+    "name": "wrong-capability",
+    "target": "manifest",
+    "path": [
+      "required_capabilities"
+    ],
+    "value": [
+      "column-partition-v1",
+      "fragment-container-v1",
+      "unknown-v1"
+    ],
+    "rehash": false
+  },
+  {
+    "name": "wrong-bucket-profile",
+    "target": "manifest",
+    "path": [
+      "partitioning",
+      "bucket_count"
+    ],
+    "value": 2,
+    "rehash": false
+  },
+  {
+    "name": "future-reader",
+    "target": "manifest",
+    "path": [
+      "min_reader_version"
+    ],
+    "value": "2.0.0",
+    "rehash": false
+  },
+  {
+    "name": "missing-base-dependency",
+    "target": "manifest",
+    "path": [
+      "files",
+      2,
+      "dependencies"
+    ],
+    "value": [],
+    "rehash": false
+  },
+  {
+    "name": "nonempty-programs",
+    "target": "programs",
+    "path": [
+      "entries"
+    ],
+    "value": [
+      {
+        "id": "prog:a",
+        "dsl_version": "1.0",
+        "ast": {}
+      }
+    ],
+    "rehash": true
+  },
+  {
+    "name": "malformed-text-id",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_unit",
+      0,
+      "rows",
+      0,
+      2
+    ],
+    "value": "Changed synthetic text",
+    "rehash": true
+  },
+  {
+    "name": "current-in-history",
+    "target": "history",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      0
+    ],
+    "value": "r:a2",
+    "rehash": true
+  },
+  {
+    "name": "dangling-vocabulary",
+    "target": "detail",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      0,
+      7
+    ],
+    "value": [
+      [
+        0,
+        "t:ja:0000000000000000",
+        "rule"
+      ]
+    ],
+    "rehash": true
+  },
+  {
+    "name": "spelling-undeclared",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      4,
+      0,
+      3
+    ],
+    "value": "absent",
+    "rehash": true,
+    "error": "undeclared parameter"
+  },
+  {
+    "name": "spelling-disabled-uint",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "uint"
+    ],
+    "value": null,
+    "rehash": true,
+    "error": "enabled parameter domain"
+  },
+  {
+    "name": "spelling-disabled-variable",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "variables"
+    ],
+    "value": [],
+    "rehash": true,
+    "error": "enabled parameter domain"
+  },
+  {
+    "name": "parameter-inverted",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "uint",
+      "minimum"
+    ],
+    "value": 10,
+    "rehash": true,
+    "error": "Inverted parameter range"
+  },
+  {
+    "name": "parameter-duplicate",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters"
+    ],
+    "value": [
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      },
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unique keys"
+  },
+  {
+    "name": "parameter-unsorted",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters"
+    ],
+    "value": [
+      {
+        "name": "z",
+        "uint": null,
+        "variables": [
+          "X"
+        ]
+      },
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unique keys"
+  },
+  {
+    "name": "hint-parameters-disagree",
+    "target": "detail",
+    "path": [
+      "tables",
+      "ruling_revision",
+      0,
+      "rows",
+      0,
+      12,
+      1,
+      2,
+      "parameters",
+      0,
+      "uint",
+      "maximum"
+    ],
+    "value": 10,
+    "rehash": true,
+    "error": "identical parameters"
+  },
+  {
+    "name": "variant-unapproved",
+    "target": "images",
+    "path": [
+      "tables",
+      "image_asset",
+      0,
+      "rows",
+      0,
+      2
+    ],
+    "value": "pending",
+    "rehash": true,
+    "error": "approved available image"
+  },
+  {
+    "name": "variant-unavailable",
+    "target": "images",
+    "path": [
+      "tables",
+      "image_asset",
+      0,
+      "rows",
+      0,
+      6
+    ],
+    "value": "unfetched",
+    "rehash": true,
+    "error": "approved available image"
+  },
+  {
+    "name": "published-hour-25",
+    "target": "manifest",
+    "path": [
+      "published_at"
+    ],
+    "value": "2026-09-29T25:00:00Z",
+    "rehash": false
+  },
+  {
+    "name": "published-february-30",
+    "target": "manifest",
+    "path": [
+      "published_at"
+    ],
+    "value": "2026-02-30T01:00:00Z",
+    "rehash": false
+  },
+  {
+    "name": "revision-date-unicode",
+    "target": "detail",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      1,
+      2
+    ],
+    "value": "２０２６-09-29",
+    "rehash": true
+  }
+]

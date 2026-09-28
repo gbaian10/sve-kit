@@ -2,7 +2,7 @@
 
 版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)。
 
-這些文件是設計規格，不是 migration 或匯出器；正式 DDL、快照 JSON Schema 與匯出器尚未實作（見[待辦](#待辦與待實作驗收)）。
+這些文件描述資料契約；公開 JSON Schema、獨立 reader 與共用合成樣本的入口見[機器契約](snapshot-contract.md)。建置與發布閘門的規格驗收和傳輸形狀驗證分開。
 
 ## 文件
 
@@ -11,6 +11,7 @@
 | [建置資料庫 schema](build-db.md)          | 建置資料庫 121 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
 | [卡表快照格式](snapshot-format.md)        | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
 | [快照傳輸契約](snapshot-transport.md)     | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
+| [機器契約](snapshot-contract.md)          | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
 | [卡圖衍生檔契約](image-variants.md)       | 五檔 WebP、橫向例外、裁切取整與原圖邊界                                           |
 | [來源歸檔與凍結輸入](source-archive.md)   | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
 | [容量與記憶體預算](size-budget.md)        | 卡表快照的容量門檻、量測方法與目前結論                                            |
@@ -55,7 +56,7 @@ uv run docs/schema/er/build_er.py --serve    # 產生後在 localhost:8000 提�
 
 | 項目                          | 待做                                                                                                                                           | 完成前的行為                                                                                                |
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 正式 DDL、JSON Schema、匯出器 | 依本規格實作建置資料庫 DDL（含常數 kind 欄展開）、快照 JSON Schema、投影匯出器與發布閘門                                                       | 沒有可發布的卡表快照；不能聲稱 FK、PWA 或容量已全數通過                                                     |
+| 正式 DDL、匯出器              | 依本規格實作建置資料庫 DDL（含常數 kind 欄展開）、投影匯出器與發布閘門                                                                         | 沒有可發布的卡表快照；不能聲稱 FK、PWA 或容量已全數通過                                                     |
 | 永久登錄匯入與身分修復        | authored 永久 ID／配號工具已實作；待正式建置匯入器與 identity_change 執行流程                                                                  | 已配號只增不改；本機 registry 不能當作可發布快照                                                            |
 | 模板 ID 碰撞檢查              | 保留既有 10 hex 模板 ID、完整內容不可覆寫；normalizer 或參數改版時新 ID＋`supersedes`                                                          | 舊依賴不移動、標 stale 重驗；不能只升 hash 就保留 verified                                                  |
 | 雜湊遷移 ADR                  | 把 `rule-bundle-v2` 與既有 `face-bundle-v1` 證據的遷移規則寫成 ADR                                                                             | 依 build-db.md §14：以舊 recipe 計算的證據保留，但要重驗一次才能 verified                                   |

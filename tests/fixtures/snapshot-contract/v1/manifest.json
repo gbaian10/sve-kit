@@ -1,0 +1,352 @@
+{
+  "format_version": "1.0.0",
+  "data_version": "preview-20260929T010203Z-0001",
+  "published_at": "2026-09-29T01:02:03Z",
+  "regions": [
+    "jp"
+  ],
+  "languages": [
+    "ja",
+    "zh-Hant"
+  ],
+  "min_reader_version": "1.0.0",
+  "required_capabilities": [
+    "column-partition-v1",
+    "fragment-container-v1"
+  ],
+  "engine_support_target": {
+    "engine_version": null,
+    "engine_build_hash": null,
+    "validation_policy_id": null
+  },
+  "files": [
+    {
+      "path": "snapshots/blobs/330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b.json",
+      "sha256": "sha256:330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b",
+      "bytes": 5881,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": null
+      },
+      "key": "bootstrap",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "card",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "face",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 2
+        },
+        {
+          "table": "product_family",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "card_engine_support",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "vocabulary",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "printing",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 2
+        },
+        {
+          "table": "face_revision",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 2
+        },
+        {
+          "table": "text_unit",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 5
+        },
+        {
+          "table": "translation",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "path": "snapshots/blobs/9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc.json",
+      "sha256": "sha256:9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc",
+      "bytes": 781,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": null
+      },
+      "key": "config",
+      "role": "config",
+      "row_counts": [],
+      "dependencies": []
+    },
+    {
+      "path": "snapshots/blobs/ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff.json",
+      "sha256": "sha256:ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff",
+      "bytes": 5428,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": null
+      },
+      "key": "detail",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "face_revision",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 2
+        },
+        {
+          "table": "printing",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 2
+        },
+        {
+          "table": "ruling_revision",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "text_symbol",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "text_unit",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 3
+        },
+        {
+          "table": "translation",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "bootstrap",
+          "sha256": "sha256:330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b"
+        }
+      ]
+    },
+    {
+      "path": "snapshots/blobs/aa255fb79969a56b341d91c2f34c3d92a5cbdb2b6fc7d696b94f60abb419af0a.json",
+      "sha256": "sha256:aa255fb79969a56b341d91c2f34c3d92a5cbdb2b6fc7d696b94f60abb419af0a",
+      "bytes": 1312,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": null
+      },
+      "key": "history",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "face_revision",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "history",
+          "count": 1
+        }
+      ],
+      "dependencies": []
+    },
+    {
+      "path": "snapshots/blobs/2fc4dbf704535579146f3ab03bbd41c59aa48a69848e37284b8bd7375951ceed.json",
+      "sha256": "sha256:2fc4dbf704535579146f3ab03bbd41c59aa48a69848e37284b8bd7375951ceed",
+      "bytes": 1411,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": null
+      },
+      "key": "images",
+      "role": "images",
+      "row_counts": [
+        {
+          "table": "image_asset",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "image_variant",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 5
+        },
+        {
+          "table": "printing_image",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "config",
+          "sha256": "sha256:9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc"
+        }
+      ]
+    },
+    {
+      "path": "snapshots/blobs/888f01af619b95e088dc9ea7e3537ea01f742b18a6207eb842c67dfd64e1d879.json",
+      "sha256": "sha256:888f01af619b95e088dc9ea7e3537ea01f742b18a6207eb842c67dfd64e1d879",
+      "bytes": 39,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": null
+      },
+      "key": "programs",
+      "role": "programs",
+      "row_counts": [],
+      "dependencies": []
+    }
+  ],
+  "config_ref": {
+    "key": "config",
+    "sha256": "sha256:9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc"
+  },
+  "text_all": {
+    "path": "snapshots/blobs/ced928e01833ec4c0fe5c613e68e49daa4a55ff571e2f00de36d15bd669a11e6.json",
+    "sha256": "sha256:ced928e01833ec4c0fe5c613e68e49daa4a55ff571e2f00de36d15bd669a11e6",
+    "bytes": 13888,
+    "compressed_bytes": {
+      "br": null,
+      "gzip": null
+    },
+    "contains": [
+      {
+        "key": "bootstrap",
+        "sha256": "sha256:330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b"
+      },
+      {
+        "key": "config",
+        "sha256": "sha256:9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc"
+      },
+      {
+        "key": "detail",
+        "sha256": "sha256:ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff"
+      },
+      {
+        "key": "history",
+        "sha256": "sha256:aa255fb79969a56b341d91c2f34c3d92a5cbdb2b6fc7d696b94f60abb419af0a"
+      }
+    ]
+  },
+  "partitioning": {
+    "algorithm": "sha256-mod-v1",
+    "bucket_count": 1
+  },
+  "coverage": {
+    "reviews": [],
+    "translations": [],
+    "mechanics": []
+  },
+  "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "restriction_coverage": [],
+  "source_windows": [],
+  "qa_card_ids": [],
+  "errata_card_ids": [],
+  "changes_ref": null
+}

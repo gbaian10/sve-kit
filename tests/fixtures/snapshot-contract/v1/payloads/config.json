@@ -1,0 +1,58 @@
+{
+  "format_version": "1.0.0",
+  "languages": [
+    {
+      "code": "ja",
+      "fallback_order": [],
+      "display_name": "Japanese"
+    },
+    {
+      "code": "zh-Hant",
+      "fallback_order": [
+        "ja"
+      ],
+      "display_name": "繁中"
+    }
+  ],
+  "digital_endpoints": [],
+  "shop_links": [],
+  "image_sizes": [
+    {
+      "key": "art_m",
+      "purpose": "art",
+      "max_width": 384,
+      "max_height": 288
+    },
+    {
+      "key": "art_s",
+      "purpose": "art",
+      "max_width": 160,
+      "max_height": 120
+    },
+    {
+      "key": "card_l",
+      "purpose": "card",
+      "max_width": 459,
+      "max_height": 641
+    },
+    {
+      "key": "card_m",
+      "purpose": "card",
+      "max_width": 320,
+      "max_height": 447
+    },
+    {
+      "key": "card_s",
+      "purpose": "card",
+      "max_width": 128,
+      "max_height": 179
+    }
+  ],
+  "search": {
+    "grammar_version": "synthetic-v1",
+    "normalizer_version": "synthetic-v1"
+  },
+  "catalog_feedback_url": "https://example.invalid/feedback",
+  "third_party_image_policy": "mirror_reviewed",
+  "deck_eligibility_policy": "regional_decklog"
+}

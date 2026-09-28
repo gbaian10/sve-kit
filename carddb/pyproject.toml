@@ -17,6 +17,7 @@ dependencies = [
     "stamina>=26.1.0",
     "typer>=0.27.2",
     "pillow==12.3.0",
+    "jsonschema>=4.26.0",
 ]
 
 [project.scripts]
@@ -30,6 +31,7 @@ dev = [
     "commitizen>=4.18.1",
     "cz-conventional-gitmoji>=0.7.0",
     "taplo>=0.9.3",
+    "types-jsonschema>=4.26.0.20260518",
 ]
 
 # Optional local check, run by hand (see CONTRIBUTING); kept out of the default groups because it bundles ~200 MB of Node.js.
