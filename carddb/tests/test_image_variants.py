@@ -178,6 +178,49 @@ def test_alpha_and_icc_metadata_are_handled_explicitly(tmp_path: Path) -> None:
         build(source(broken_profile.getvalue()), tmp_path / "broken-icc")
 
 
+@pytest.mark.parametrize("mode", ["P", "L", "LA", "I;16"])
+def test_non_rgb_png_with_icc_is_converted(tmp_path: Path, mode: str) -> None:
+    values: dict[str, int | tuple[int, int]] = {
+        "P": 1,
+        "L": 128,
+        "LA": (128, 255),
+        "I;16": 32768,
+    }
+    image = Image.new(mode, (80, 112), values[mode])
+    if mode == "P":
+        image.putpalette([0, 0, 0, 128, 192, 224] + [0] * 762)
+        image.putpixel((0, 0), 0)
+    buffer = BytesIO()
+    image.save(
+        buffer,
+        format="PNG",
+        icc_profile=ImageCms.ImageCmsProfile(ImageCms.createProfile("sRGB")).tobytes(),
+        **({"transparency": 0} if mode == "P" else {}),
+    )
+    result = build(source(buffer.getvalue()), tmp_path)
+    assert len(result.variants) == 5
+    with Image.open(tmp_path / "blobs" / result.variants[2].path) as decoded:
+        assert decoded.size == (80, 112)
+        assert "icc_profile" not in decoded.info
+        if mode == "P":
+            assert decoded.mode == "RGBA"
+            assert decoded.getchannel("A").getpixel((0, 0)) == 0
+        elif mode == "I;16":
+            pixel = decoded.getpixel((40, 50))
+            assert isinstance(pixel, tuple)
+            assert 110 <= pixel[0] <= 145
+
+
+def test_decompression_bomb_reports_image_error(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    item = source(png(80, 112))
+    monkeypatch.setattr(Image, "MAX_IMAGE_PIXELS", 10)
+    with pytest.raises(ImageVariantError, match="cannot decode source image"):
+        build(item, tmp_path)
+    assert not (tmp_path / "blobs").exists()
+
+
 def test_two_faces_keep_separate_image_ids(tmp_path: Path) -> None:
     data = png(80, 112)
     front = build(source(data, image_id="front"), tmp_path)
@@ -207,6 +250,17 @@ def test_cache_skips_encoding_and_clean_runs_match(
     cached = build(item, tmp_path / "first")
     assert cached.cache_hit
     assert cached.variants == first.variants
+
+
+def test_synthetic_portrait_has_golden_webp_hashes(tmp_path: Path) -> None:
+    result = build(source(png(459, 641)), tmp_path)
+    assert {item.size_key: item.sha256 for item in result.variants} == {
+        "card_s": "4638a72bd2da98bdd1e0dd961bb3a71d66311cfeedfd1531351b6d25b4faeef6",
+        "card_m": "3736f161629bb0380f150a2183ceb96ad85314a0d2f2c94308b446a0e722da6f",
+        "card_l": "fadf783005819b02dc4bfe9de3bec65e51995e8760190b0d19c97f2bddecc6a9",
+        "art_s": "cb7d008c3981c200c391549a9df04db557a7ec0282512d83d63c3e49005ba82d",
+        "art_m": "2aa89708b0ea2b1111e8a40446dbce0f880d0788f47b2c96993e25531791a12e",
+    }
 
 
 def test_cache_rejects_stale_dimensions(tmp_path: Path) -> None:

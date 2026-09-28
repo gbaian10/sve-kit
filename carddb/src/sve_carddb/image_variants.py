@@ -98,7 +98,8 @@ class Recipe:
             "littlecms": LITTLECMS_VERSION,
             "decode": "png-single-frame",
             "orientation": "exif-transpose-before-geometry",
-            "color": "embedded-icc-to-srgb-else-assume-srgb",
+            "color": "rgb-or-gray-icc-to-srgb-else-assume-srgb",
+            "non_rgb": "palette-or-gray-to-rgb;16bit-gray-upper-byte",
             "icc_rendering_intent": "perceptual",
             "icc_flags": 0,
             "alpha": "preserve-rgba-exact",
@@ -294,36 +295,66 @@ def _decode(source_bytes: bytes) -> Image.Image:
                 raise ImageVariantError(msg)
             opened.load()
             oriented = ImageOps.exif_transpose(opened)
-    except (OSError, UnidentifiedImageError) as exc:
+    except (Image.DecompressionBombError, OSError, UnidentifiedImageError) as exc:
         msg = "cannot decode source image"
         raise ImageVariantError(msg) from exc
     if oriented.width <= 0 or oriented.height <= 0:
         msg = "source dimensions must be positive"
         raise ImageVariantError(msg)
     profile = oriented.info.get("icc_profile")
+    oriented = _normalize_depth(oriented)
     if profile is not None:
-        if not isinstance(profile, bytes) or oriented.mode not in {"RGB", "RGBA"}:
-            msg = "unsupported ICC profile or source color mode"
-            raise ImageVariantError(msg)
-        try:
-            converted_profile = ImageCms.profileToProfile(
-                oriented,
-                BytesIO(profile),
-                ImageCms.createProfile("sRGB"),
-                renderingIntent=ImageCms.Intent.PERCEPTUAL,
-                outputMode=oriented.mode,
-            )
-            if converted_profile is None:
-                msg = "cannot convert source ICC profile to sRGB"
-                raise ImageVariantError(msg)
-            oriented = converted_profile
-        except (ImageCms.PyCMSError, OSError, ValueError) as exc:
-            msg = "cannot convert source ICC profile to sRGB"
-            raise ImageVariantError(msg) from exc
+        oriented = _convert_icc(oriented, profile)
     has_alpha = "A" in oriented.getbands() or "transparency" in oriented.info
     mode = "RGBA" if has_alpha else "RGB"
     converted = oriented.convert(mode)
     return Image.frombytes(mode, converted.size, converted.tobytes())
+
+
+def _normalize_depth(image: Image.Image) -> Image.Image:
+    if image.mode in {"I;16", "I;16B", "I;16L"}:
+        # Pillow's direct I;16-to-L conversion clips values above 255.
+        return image.convert("I").point(lambda value: value / 256).convert("L")
+    return image
+
+
+def _convert_icc(image: Image.Image, profile: object) -> Image.Image:
+    if not isinstance(profile, bytes):
+        msg = "embedded ICC profile must contain bytes"
+        raise ImageVariantError(msg)
+    has_alpha = "A" in image.getbands() or "transparency" in image.info
+    try:
+        input_profile = ImageCms.getOpenProfile(BytesIO(profile))
+        color_space = getattr(input_profile.profile, "xcolor_space", None)
+    except (ImageCms.PyCMSError, OSError, ValueError) as exc:
+        msg = "cannot read embedded ICC profile"
+        raise ImageVariantError(msg) from exc
+    if not isinstance(color_space, str) or color_space not in {"RGB ", "GRAY"}:
+        msg = f"unsupported embedded ICC color space: {color_space}"
+        raise ImageVariantError(msg)
+    if color_space == "RGB ":
+        pixels = image.convert("RGBA" if has_alpha else "RGB")
+        output_mode = pixels.mode
+    else:
+        pixels = image.convert("L")
+        output_mode = "RGB"
+    try:
+        converted = ImageCms.profileToProfile(
+            pixels,
+            input_profile,
+            ImageCms.createProfile("sRGB"),
+            renderingIntent=ImageCms.Intent.PERCEPTUAL,
+            outputMode=output_mode,
+        )
+    except (ImageCms.PyCMSError, OSError, ValueError) as exc:
+        msg = "cannot convert source ICC profile to sRGB"
+        raise ImageVariantError(msg) from exc
+    if converted is None:
+        msg = "cannot convert source ICC profile to sRGB"
+        raise ImageVariantError(msg)
+    if has_alpha and color_space == "GRAY":
+        converted.putalpha(image.convert("RGBA").getchannel("A"))
+    return converted
 
 
 def _crop_box(
