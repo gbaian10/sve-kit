@@ -118,6 +118,35 @@ rules knowingly cannot close. `tests/eslint-rules.test.ts` lints every file unde
 `src/` and checks that each case reports exactly the rules it declares, as many times as it
 declares them (list a rule twice when it fires twice). Update the fixtures together with the rules.
 
+## Snapshot reader
+
+`src/data/format-v1/` is the pure core of the card-data reader: no `fetch`, no DOM. It follows
+[docs/schema/snapshot-format.md](../../docs/schema/snapshot-format.md),
+[snapshot-transport.md](../../docs/schema/snapshot-transport.md) and
+[snapshot-contract.md](../../docs/schema/snapshot-contract.md), and mirrors the Python reference
+reader in `carddb/src/sve_carddb/snapshot/`.
+
+- `json.ts`: the strict JSON boundary (canonical-json-v1). Bytes are parsed by our own parser, so
+  duplicate keys, floats, unsafe integers, a BOM and lone surrogates are rejected instead of being
+  silently accepted the way `JSON.parse` would; `canonical()` writes the exact bytes hashes refer to.
+- `sha256.ts`: synchronous SHA-256 and the `sha256-mod-v1` bucket function.
+- `schema.ts` + `validator.ts`: the published JSON Schema is loaded from `carddb/` at build time
+  (one source of truth, no copy) and interpreted by a small validator that supports exactly the
+  keywords the schema uses; an unknown keyword fails at load, so the schema cannot quietly mean
+  more than the reader checks. `schema.test.ts` runs the shared positive and negative examples
+  through both this validator and ajv, which must agree.
+- `decode.ts`, `reader.ts`, `semantics.ts`: fixed accessors from `x-columns`/`x-types`,
+  manifest and container checks, `row_index`/`face_ordinal` joins, reference closure and the
+  cross-row rules JSON Schema cannot express. Every rejection is a `SnapshotError` with a fixed
+  `code`; tests match codes, never message text.
+
+`contract.test.ts` is the conformance harness against `tests/fixtures/snapshot-contract/v1/`:
+the golden manifest and payloads must join into exactly `expected-logical.json`, `text-all.json`
+must give the same view, and every `reader-invalid.json` mutation must fail with its intended
+code. The `reader.test.ts` cases cover what the fixture cannot express (missing files, cycles,
+reformatted bytes). CI runs these whenever `carddb/src/sve_carddb/snapshot/schema/**` or the
+fixture directory changes.
+
 ## Dead code
 
 `bun run knip` (part of `bun run check`) reports files, exports, types and dependencies that
