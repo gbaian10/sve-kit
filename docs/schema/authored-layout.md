@@ -145,7 +145,7 @@ evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、re
 
 本批八筆候選升為 active 是使用者明示授權的來源更正採納，非一般追加：移至 active 分片、建立涵蓋精確內容的新 confirmed decision、同步更新 index。先前 proposed 分片與收據保留在 Git 歷史及舊批次資料中；其他永久登錄與決定不改動。一般產生工具仍拒絕修改既有記錄，不以自動升級取代人工確認。
 
-建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時省略 source_url，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
+建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時 source_url 仍存在、值為 null，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
 
 CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這是供後續建置使用的欄位投影，不是完整 face_revision、SQLite correction_application 或公開卡表快照；那些匯入與輸出尚未實作。
 
