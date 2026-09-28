@@ -181,6 +181,13 @@ repos:
         pass_filenames: false
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
+      - id: web-knip
+        name: knip (sim/web)
+        language: system
+        entry: mise exec -- bun run --cwd sim/web knip
+        pass_filenames: false
+        files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
+        stages: [pre-push]
       # Manual locally; CI runs `bun run check` (which includes vitest) on every web change.
       - id: web-test
         name: vitest (sim/web)
