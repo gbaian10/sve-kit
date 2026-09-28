@@ -102,6 +102,9 @@ job = "web"
 [hooks.web-typecheck]
 job = "web"
 
+[hooks.web-knip]
+job = "web"
+
 [hooks.web-test]
 job = "web"
 
