@@ -138,9 +138,9 @@
       "dependencies": []
     },
     {
-      "path": "snapshots/blobs/80b70ec606d36f770e406da1478196118741afb4e8a46537c78a6c20eab54ca2.json",
-      "sha256": "sha256:80b70ec606d36f770e406da1478196118741afb4e8a46537c78a6c20eab54ca2",
-      "bytes": 3160,
+      "path": "snapshots/blobs/ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff.json",
+      "sha256": "sha256:ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff",
+      "bytes": 5428,
       "compressed_bytes": {
         "br": null,
         "gzip": null
@@ -148,6 +148,16 @@
       "key": "detail",
       "role": "text",
       "row_counts": [
+        {
+          "table": "face_revision",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 2
+        },
         {
           "table": "printing",
           "owner": {
@@ -159,14 +169,24 @@
           "count": 2
         },
         {
-          "table": "face_revision",
+          "table": "ruling_revision",
           "owner": {
-            "kind": "home_set",
-            "id": "set:a"
+            "kind": "global",
+            "id": null
           },
           "bucket": 0,
           "partition": "detail",
-          "count": 2
+          "count": 1
+        },
+        {
+          "table": "text_symbol",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 1
         },
         {
           "table": "text_unit",
@@ -221,9 +241,9 @@
       "dependencies": []
     },
     {
-      "path": "snapshots/blobs/42cb419b9debc3fa696adc86df0e5a33814c3bc6549f32ceadeffde3548f8415.json",
-      "sha256": "sha256:42cb419b9debc3fa696adc86df0e5a33814c3bc6549f32ceadeffde3548f8415",
-      "bytes": 597,
+      "path": "snapshots/blobs/2fc4dbf704535579146f3ab03bbd41c59aa48a69848e37284b8bd7375951ceed.json",
+      "sha256": "sha256:2fc4dbf704535579146f3ab03bbd41c59aa48a69848e37284b8bd7375951ceed",
+      "bytes": 1411,
       "compressed_bytes": {
         "br": null,
         "gzip": null
@@ -240,6 +260,16 @@
           "bucket": 0,
           "partition": "detail",
           "count": 1
+        },
+        {
+          "table": "image_variant",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 0,
+          "partition": "detail",
+          "count": 5
         },
         {
           "table": "printing_image",
@@ -278,9 +308,9 @@
     "sha256": "sha256:9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc"
   },
   "text_all": {
-    "path": "snapshots/blobs/68b11d99749282b8ccbdf70722994890a2c751ee3050444f7224914926f2ad60.json",
-    "sha256": "sha256:68b11d99749282b8ccbdf70722994890a2c751ee3050444f7224914926f2ad60",
-    "bytes": 11620,
+    "path": "snapshots/blobs/ced928e01833ec4c0fe5c613e68e49daa4a55ff571e2f00de36d15bd669a11e6.json",
+    "sha256": "sha256:ced928e01833ec4c0fe5c613e68e49daa4a55ff571e2f00de36d15bd669a11e6",
+    "bytes": 13888,
     "compressed_bytes": {
       "br": null,
       "gzip": null
@@ -296,7 +326,7 @@
       },
       {
         "key": "detail",
-        "sha256": "sha256:80b70ec606d36f770e406da1478196118741afb4e8a46537c78a6c20eab54ca2"
+        "sha256": "sha256:ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff"
       },
       {
         "key": "history",

@@ -2642,5 +2642,45 @@
       "index_format": 1,
       "entries": []
     }
+  },
+  {
+    "name": "Date-valid-76",
+    "schema": "Date",
+    "value": "2000-02-29"
+  },
+  {
+    "name": "Date-valid-77",
+    "schema": "Date",
+    "value": "2024-02-29"
+  },
+  {
+    "name": "Date-valid-78",
+    "schema": "Date",
+    "value": "1900-02-28"
+  },
+  {
+    "name": "Instant-valid-79",
+    "schema": "Instant",
+    "value": "2026-09-29T23:59:59.123Z"
+  },
+  {
+    "name": "DataVersion-valid-80",
+    "schema": "DataVersion",
+    "value": "20000229T235959Z-9999"
+  },
+  {
+    "name": "URL-valid-81",
+    "schema": "URL",
+    "value": "https://example.invalid/%E5%90%88?q=a%20b#fragment"
+  },
+  {
+    "name": "URL-valid-82",
+    "schema": "URL",
+    "value": "https://[2001:db8::1]:443/a"
+  },
+  {
+    "name": "URL-valid-83",
+    "schema": "URL",
+    "value": "https://[::ffff:192.0.2.1]/"
   }
 ]

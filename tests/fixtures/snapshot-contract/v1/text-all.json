@@ -842,7 +842,7 @@
     },
     {
       "key": "detail",
-      "sha256": "sha256:80b70ec606d36f770e406da1478196118741afb4e8a46537c78a6c20eab54ca2",
+      "sha256": "sha256:ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff",
       "payload": {
         "format_version": "1.0.0",
         "types": {
@@ -886,6 +886,49 @@
               }
             ]
           },
+          "Evidence": {
+            "columns": [
+              "qa_version_id",
+              "cr_clause_id",
+              "source_url",
+              "role",
+              "quote",
+              "locator"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "nullable": {
+                  "scalar": "URL"
+                }
+              },
+              {
+                "enum": [
+                  "direct",
+                  "supporting",
+                  "terminology",
+                  "community"
+                ]
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "Text"
+                }
+              }
+            ]
+          },
           "FieldTranslation": {
             "columns": [
               "field",
@@ -924,6 +967,28 @@
                   "shared_jp",
                   "official_counterpart"
                 ]
+              }
+            ]
+          },
+          "Localization": {
+            "columns": [
+              "lang",
+              "name",
+              "tooltip",
+              "copy_pattern"
+            ],
+            "items": [
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "Text"
               }
             ]
           },
@@ -983,6 +1048,38 @@
               }
             ]
           },
+          "ReplacedScope": {
+            "columns": [
+              "scope_unit_id",
+              "replacement_revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "scalar": "ID"
+              }
+            ]
+          },
+          "RulingHint": {
+            "columns": [
+              "lang",
+              "text_unit_id",
+              "parameter_schema"
+            ],
+            "items": [
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "ID"
+              },
+              {
+                "json": "ParameterSchema"
+              }
+            ]
+          },
           "Section": {
             "columns": [
               "ordinal",
@@ -998,6 +1095,38 @@
               },
               {
                 "scalar": "Code"
+              }
+            ]
+          },
+          "Spelling": {
+            "columns": [
+              "lang",
+              "literal_prefix",
+              "literal_suffix",
+              "parameter_name",
+              "parse_kind"
+            ],
+            "items": [
+              {
+                "scalar": "Lang"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "scalar": "Text"
+              },
+              {
+                "nullable": {
+                  "scalar": "Code"
+                }
+              },
+              {
+                "enum": [
+                  "literal",
+                  "uint",
+                  "variable"
+                ]
               }
             ]
           }
@@ -1063,9 +1192,31 @@
                       "t:ja:b17a760c59cb19db",
                       null,
                       "verified",
-                      [],
-                      [],
-                      []
+                      [
+                        [
+                          0,
+                          "t:ja:b17a760c59cb19db",
+                          "rule"
+                        ]
+                      ],
+                      [
+                        [
+                          "effect",
+                          null,
+                          "zh-Hant",
+                          "tr:effect",
+                          "own_source"
+                        ]
+                      ],
+                      [
+                        [
+                          "name",
+                          "Synthetic old front",
+                          true,
+                          "Synthetic printed correction",
+                          "https://example.invalid/correction"
+                        ]
+                      ]
                     ],
                     [
                       1,
@@ -1225,6 +1376,159 @@
                   "project",
                   "unofficial",
                   "reviewed"
+                ]
+              ]
+            }
+          ],
+          "text_symbol": [
+            {
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 0,
+              "partition": "detail",
+              "base": null,
+              "columns": [
+                "id",
+                "code",
+                "parameter_schema",
+                "keyword_id",
+                "spellings",
+                "localizations"
+              ],
+              "rows": [
+                [
+                  "sym:a",
+                  "synthetic",
+                  {
+                    "parameters": [
+                      {
+                        "name": "amount",
+                        "uint": {
+                          "minimum": 0,
+                          "maximum": 9
+                        },
+                        "variables": [
+                          "X"
+                        ]
+                      }
+                    ]
+                  },
+                  null,
+                  [
+                    [
+                      "ja",
+                      "Synthetic ",
+                      "",
+                      "amount",
+                      "uint"
+                    ],
+                    [
+                      "en",
+                      "Synthetic ",
+                      "",
+                      "amount",
+                      "variable"
+                    ],
+                    [
+                      "zh-Hant",
+                      "合成",
+                      "",
+                      null,
+                      "literal"
+                    ]
+                  ],
+                  [
+                    [
+                      "ja",
+                      "Synthetic symbol",
+                      "Synthetic tooltip",
+                      "Synthetic copy"
+                    ]
+                  ]
+                ]
+              ]
+            }
+          ],
+          "ruling_revision": [
+            {
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 0,
+              "partition": "detail",
+              "base": null,
+              "columns": [
+                "id",
+                "ruling_id",
+                "revision",
+                "question_unit_id",
+                "decision_unit_id",
+                "strength",
+                "decided_on",
+                "review_state",
+                "active_scopes",
+                "replaced_scopes",
+                "cards",
+                "evidence",
+                "hints"
+              ],
+              "rows": [
+                [
+                  "rr:a",
+                  "ruling:a",
+                  1,
+                  "t:ja:c011ad4340c14396",
+                  "t:ja:b17a760c59cb19db",
+                  "inferred",
+                  "2026-09-29",
+                  "current",
+                  [],
+                  [],
+                  [
+                    "c:a"
+                  ],
+                  [],
+                  [
+                    [
+                      "ja",
+                      "t:ja:b17a760c59cb19db",
+                      {
+                        "parameters": [
+                          {
+                            "name": "amount",
+                            "uint": {
+                              "minimum": 0,
+                              "maximum": 9
+                            },
+                            "variables": [
+                              "X"
+                            ]
+                          }
+                        ]
+                      }
+                    ],
+                    [
+                      "zh-Hant",
+                      "t:zh-Hant:396cbc2e2e8d61a1",
+                      {
+                        "parameters": [
+                          {
+                            "name": "amount",
+                            "uint": {
+                              "minimum": 0,
+                              "maximum": 9
+                            },
+                            "variables": [
+                              "X"
+                            ]
+                          }
+                        ]
+                      }
+                    ]
+                  ]
                 ]
               ]
             }

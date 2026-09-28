@@ -13,3 +13,11 @@ mutation procedure, validation boundaries, Python command and TS checklist.
 Changing these fixtures requires reviewing both the wire representation and the
 independently specified expected objects. Never refresh expected objects from a
 reader or producer to make a test pass.
+
+The golden includes five image variant metadata rows, printing-face sections and
+corrections, numeric/variable/literal spellings, and matching multilingual ruling
+hints. Image paths are synthetic references; no image binaries are distributed.
+Shared negative cases cover calendar/time limits, ASCII numeric syntax, URI
+encoding, undeclared or disabled parameters, and inconsistent hint declarations.
+An optional `error` fragment checks the intended Python failure; other readers
+must reject for the same reason without copying Python exception wording.

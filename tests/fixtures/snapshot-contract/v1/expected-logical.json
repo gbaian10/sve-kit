@@ -278,10 +278,32 @@
           "printed_effect_unit_id": "t:ja:b17a760c59cb19db",
           "flavor_unit_id": null,
           "printed_text_state": "verified",
-          "sections": [],
+          "sections": [
+            {
+              "ordinal": 0,
+              "text_unit_id": "t:ja:b17a760c59cb19db",
+              "kind": "rule"
+            }
+          ],
           "stamps": [],
-          "translations": [],
-          "corrections": []
+          "translations": [
+            {
+              "field": "effect",
+              "ordinal": null,
+              "target_lang": "zh-Hant",
+              "translation_id": "tr:effect",
+              "basis": "own_source"
+            }
+          ],
+          "corrections": [
+            {
+              "field": "name",
+              "corrected_from": "Synthetic old front",
+              "is_corrected": true,
+              "reason": "Synthetic printed correction",
+              "source_url": "https://example.invalid/correction"
+            }
+          ]
         },
         {
           "face_id": "f:b",
@@ -371,10 +393,10 @@
       "withdrawal_reason": null,
       "source_src_raw": "/synthetic.png",
       "source_url": "https://example.invalid/synthetic.png",
-      "availability": "unfetched",
-      "width": null,
-      "height": null,
-      "format": null
+      "availability": "available",
+      "width": 459,
+      "height": 641,
+      "format": "png"
     }
   ],
   "printing_image": [
@@ -395,7 +417,62 @@
   "cr_version": [],
   "cr_clause": [],
   "errata": [],
-  "ruling_revision": [],
+  "ruling_revision": [
+    {
+      "id": "rr:a",
+      "ruling_id": "ruling:a",
+      "revision": 1,
+      "question_unit_id": "t:ja:c011ad4340c14396",
+      "decision_unit_id": "t:ja:b17a760c59cb19db",
+      "strength": "inferred",
+      "decided_on": "2026-09-29",
+      "review_state": "current",
+      "active_scopes": [],
+      "replaced_scopes": [],
+      "cards": [
+        "c:a"
+      ],
+      "evidence": [],
+      "hints": [
+        {
+          "lang": "ja",
+          "text_unit_id": "t:ja:b17a760c59cb19db",
+          "parameter_schema": {
+            "parameters": [
+              {
+                "name": "amount",
+                "uint": {
+                  "minimum": 0,
+                  "maximum": 9
+                },
+                "variables": [
+                  "X"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "lang": "zh-Hant",
+          "text_unit_id": "t:zh-Hant:396cbc2e2e8d61a1",
+          "parameter_schema": {
+            "parameters": [
+              {
+                "name": "amount",
+                "uint": {
+                  "minimum": 0,
+                  "maximum": 9
+                },
+                "variables": [
+                  "X"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
   "rules_name": [],
   "face_rules_name": [],
   "rules_profile": [],
@@ -412,8 +489,105 @@
   "mechanic_projection": [],
   "card_mechanic_coverage": [],
   "search_alias": [],
-  "text_symbol": [],
+  "text_symbol": [
+    {
+      "id": "sym:a",
+      "code": "synthetic",
+      "parameter_schema": {
+        "parameters": [
+          {
+            "name": "amount",
+            "uint": {
+              "minimum": 0,
+              "maximum": 9
+            },
+            "variables": [
+              "X"
+            ]
+          }
+        ]
+      },
+      "keyword_id": null,
+      "spellings": [
+        {
+          "lang": "ja",
+          "literal_prefix": "Synthetic ",
+          "literal_suffix": "",
+          "parameter_name": "amount",
+          "parse_kind": "uint"
+        },
+        {
+          "lang": "en",
+          "literal_prefix": "Synthetic ",
+          "literal_suffix": "",
+          "parameter_name": "amount",
+          "parse_kind": "variable"
+        },
+        {
+          "lang": "zh-Hant",
+          "literal_prefix": "合成",
+          "literal_suffix": "",
+          "parameter_name": null,
+          "parse_kind": "literal"
+        }
+      ],
+      "localizations": [
+        {
+          "lang": "ja",
+          "name": "Synthetic symbol",
+          "tooltip": "Synthetic tooltip",
+          "copy_pattern": "Synthetic copy"
+        }
+      ]
+    }
+  ],
   "card_route_alias": [],
   "route_override": [],
-  "image_variant": []
+  "image_variant": [
+    {
+      "image_id": "img:a",
+      "size_key": "art_m",
+      "format": "webp",
+      "path": "images/sha256/11/1111111111111111111111111111111111111111111111111111111111111111.webp",
+      "width": 384,
+      "height": 288,
+      "bytes": 100
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "art_s",
+      "format": "webp",
+      "path": "images/sha256/22/2222222222222222222222222222222222222222222222222222222222222222.webp",
+      "width": 160,
+      "height": 120,
+      "bytes": 80
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "card_l",
+      "format": "webp",
+      "path": "images/sha256/33/3333333333333333333333333333333333333333333333333333333333333333.webp",
+      "width": 459,
+      "height": 641,
+      "bytes": 300
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "card_m",
+      "format": "webp",
+      "path": "images/sha256/44/4444444444444444444444444444444444444444444444444444444444444444.webp",
+      "width": 320,
+      "height": 447,
+      "bytes": 200
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "card_s",
+      "format": "webp",
+      "path": "images/sha256/55/5555555555555555555555555555555555555555555555555555555555555555.webp",
+      "width": 128,
+      "height": 179,
+      "bytes": 90
+    }
+  ]
 }

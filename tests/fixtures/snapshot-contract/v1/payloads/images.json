@@ -31,10 +31,10 @@
             null,
             "/synthetic.png",
             "https://example.invalid/synthetic.png",
-            "unfetched",
-            null,
-            null,
-            null
+            "available",
+            459,
+            641,
+            "png"
           ]
         ]
       }
@@ -58,6 +58,73 @@
             "p:a",
             "f:a",
             "img:a"
+          ]
+        ]
+      }
+    ],
+    "image_variant": [
+      {
+        "owner": {
+          "kind": "global",
+          "id": null
+        },
+        "bucket": 0,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "image_id",
+          "size_key",
+          "format",
+          "path",
+          "width",
+          "height",
+          "bytes"
+        ],
+        "rows": [
+          [
+            "img:a",
+            "art_m",
+            "webp",
+            "images/sha256/11/1111111111111111111111111111111111111111111111111111111111111111.webp",
+            384,
+            288,
+            100
+          ],
+          [
+            "img:a",
+            "art_s",
+            "webp",
+            "images/sha256/22/2222222222222222222222222222222222222222222222222222222222222222.webp",
+            160,
+            120,
+            80
+          ],
+          [
+            "img:a",
+            "card_l",
+            "webp",
+            "images/sha256/33/3333333333333333333333333333333333333333333333333333333333333333.webp",
+            459,
+            641,
+            300
+          ],
+          [
+            "img:a",
+            "card_m",
+            "webp",
+            "images/sha256/44/4444444444444444444444444444444444444444444444444444444444444444.webp",
+            320,
+            447,
+            200
+          ],
+          [
+            "img:a",
+            "card_s",
+            "webp",
+            "images/sha256/55/5555555555555555555555555555555555555555555555555555555555555555.webp",
+            128,
+            179,
+            90
           ]
         ]
       }

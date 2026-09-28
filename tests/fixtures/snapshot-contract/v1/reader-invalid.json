@@ -361,5 +361,231 @@
       ]
     ],
     "rehash": true
+  },
+  {
+    "name": "spelling-undeclared",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      4,
+      0,
+      3
+    ],
+    "value": "absent",
+    "rehash": true,
+    "error": "undeclared parameter"
+  },
+  {
+    "name": "spelling-disabled-uint",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "uint"
+    ],
+    "value": null,
+    "rehash": true,
+    "error": "enabled parameter domain"
+  },
+  {
+    "name": "spelling-disabled-variable",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "variables"
+    ],
+    "value": [],
+    "rehash": true,
+    "error": "enabled parameter domain"
+  },
+  {
+    "name": "parameter-inverted",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters",
+      0,
+      "uint",
+      "minimum"
+    ],
+    "value": 10,
+    "rehash": true,
+    "error": "Inverted parameter range"
+  },
+  {
+    "name": "parameter-duplicate",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters"
+    ],
+    "value": [
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      },
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unique keys"
+  },
+  {
+    "name": "parameter-unsorted",
+    "target": "detail",
+    "path": [
+      "tables",
+      "text_symbol",
+      0,
+      "rows",
+      0,
+      2,
+      "parameters"
+    ],
+    "value": [
+      {
+        "name": "z",
+        "uint": null,
+        "variables": [
+          "X"
+        ]
+      },
+      {
+        "name": "amount",
+        "uint": {
+          "minimum": 0,
+          "maximum": 9
+        },
+        "variables": [
+          "X"
+        ]
+      }
+    ],
+    "rehash": true,
+    "error": "unique keys"
+  },
+  {
+    "name": "hint-parameters-disagree",
+    "target": "detail",
+    "path": [
+      "tables",
+      "ruling_revision",
+      0,
+      "rows",
+      0,
+      12,
+      1,
+      2,
+      "parameters",
+      0,
+      "uint",
+      "maximum"
+    ],
+    "value": 10,
+    "rehash": true,
+    "error": "identical parameters"
+  },
+  {
+    "name": "variant-unapproved",
+    "target": "images",
+    "path": [
+      "tables",
+      "image_asset",
+      0,
+      "rows",
+      0,
+      2
+    ],
+    "value": "pending",
+    "rehash": true,
+    "error": "approved available image"
+  },
+  {
+    "name": "variant-unavailable",
+    "target": "images",
+    "path": [
+      "tables",
+      "image_asset",
+      0,
+      "rows",
+      0,
+      6
+    ],
+    "value": "unfetched",
+    "rehash": true,
+    "error": "approved available image"
+  },
+  {
+    "name": "published-hour-25",
+    "target": "manifest",
+    "path": [
+      "published_at"
+    ],
+    "value": "2026-09-29T25:00:00Z",
+    "rehash": false
+  },
+  {
+    "name": "published-february-30",
+    "target": "manifest",
+    "path": [
+      "published_at"
+    ],
+    "value": "2026-02-30T01:00:00Z",
+    "rehash": false
+  },
+  {
+    "name": "revision-date-unicode",
+    "target": "detail",
+    "path": [
+      "tables",
+      "face_revision",
+      0,
+      "rows",
+      1,
+      2
+    ],
+    "value": "２０２６-09-29",
+    "rehash": true
   }
 ]
