@@ -71,6 +71,7 @@ from sve_carddb.source_archive import (
     Scope,
     backup_batch,
     capacity_report,
+    has_restore_check,
     restore_backup,
     seal_batch,
     verify_batch,
@@ -398,11 +399,11 @@ def archive_seal(
     restore_check: Annotated[
         bool,
         typer.Option(
-            help="Run a full empty-directory restore check; automatic for the first batch."
+            help="Run a full empty-directory restore check; automatic until one succeeds."
         ),
     ] = False,
 ) -> None:
-    """Seal and back up sources; restore-check the first batch automatically."""
+    """Seal and back up sources; restore-check automatically until one succeeds."""
     settings = _settings()
     try:
         archive = ArchiveStore(
@@ -414,11 +415,10 @@ def archive_seal(
             (*settings.extra_roots, *(allow_root or ())),
         )
         scopes = [_parse_archive_scope(value) for value in scope] if scope else None
-        batches = archive.root / "batches"
-        first_batch = not batches.exists() or not any(batches.iterdir())
         result = seal_batch(archive, scope=scopes)
         backup_batch(archive, backup, result.batch_id)
-        if first_batch or restore_check:
+        needs_restore = restore_check or not has_restore_check(backup, store_id)
+        if needs_restore:
             with tempfile.TemporaryDirectory(
                 dir=backup, prefix="restore-check-"
             ) as temporary:
@@ -441,7 +441,7 @@ def archive_seal(
         f"{result.hardlinks} hardlinks, {result.reflinks} reflinks, "
         f"{result.copied_bytes} fallback bytes"
     )
-    if first_batch or restore_check:
+    if needs_restore:
         console.print("restore check: passed")
     if result.inventory.history_gaps:
         console.print(f"history gaps: {len(result.inventory.history_gaps)}")

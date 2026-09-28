@@ -27,6 +27,7 @@ from sve_carddb.manifest import (
     RequestStart,
     Resource,
 )
+from sve_carddb.snapshot.values import canonical, parse
 from sve_carddb.source_archive import (
     ArchiveError,
     ArchiveRaceError,
@@ -35,6 +36,7 @@ from sve_carddb.source_archive import (
     IncompleteBatchError,
     backup_batch,
     capacity_report,
+    has_restore_check,
     restore_backup,
     seal_batch,
     verify_batch,
@@ -311,6 +313,68 @@ def test_manifest_change_between_preparation_and_final_lock(
     assert not (store.root / "batches").exists()
 
 
+def test_replace_after_metadata_install(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    raw = b"png" * 10
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    original = archive._prepare_metadata  # pyright: ignore[reportPrivateUsage] -- final-lock race injection
+
+    def replace_latest(
+        target_store: ArchiveStore,
+        prepared: list[archive._Pinned],  # pyright: ignore[reportPrivateUsage] -- race injection
+        existing: dict[str, tuple[archive.Descriptor, str]],
+        manifest_sha: str,
+        source_db: Path,
+    ) -> archive._PreparedMetadata:  # pyright: ignore[reportPrivateUsage] -- race injection
+        result = original(target_store, prepared, existing, manifest_sha, source_db)
+        target = store.data_root / resource.path
+        replacement = target.with_suffix(".new")
+        replacement.write_bytes(b"changed")
+        replacement.replace(target)
+        return result
+
+    monkeypatch.setattr(archive, "_prepare_metadata", replace_latest)
+    with pytest.raises(ArchiveRaceError, match="source changed while preparing"):
+        seal_batch(store, retries=0)
+    assert not list((store.root / "batches").glob("*"))
+
+
+def test_copy_source_ctime_change_during_metadata_install_is_rejected(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    latest = store.data_root / resource.path
+    original_link = os.link
+    original_install = archive._install_link  # pyright: ignore[reportPrivateUsage] -- race injection
+
+    def cross_device_link(source: Path, target: Path) -> None:
+        if target.parent.name == "pins":
+            raise OSError(errno.EXDEV, "synthetic cross-device link")
+        original_link(source, target)
+
+    def install_then_change_ctime(
+        source: Path, target: Path, *, trusted_existing: bool = False
+    ) -> None:
+        original_install(source, target, trusted_existing=trusted_existing)
+        if target.is_relative_to(store.root / "raw"):
+            latest.chmod(0o600)
+
+    monkeypatch.setattr(os, "link", cross_device_link)
+    monkeypatch.setattr(archive, "_try_reflink", lambda _fd, _target: False)
+    monkeypatch.setattr(archive, "_install_link", install_then_change_ctime)
+    with pytest.raises(
+        ArchiveRaceError, match="latest source changed while installing"
+    ):
+        seal_batch(store, retries=0)
+    assert not list((store.root / "batches").glob("*"))
+
+
 def test_metadata_installs_outside_manifest_lock(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -404,6 +468,47 @@ def test_restore_rejects_symlink_and_changed_seal(tmp_path: Path) -> None:
         )
 
 
+def test_verify_rejects_changed_inventory_with_unchanged_seal(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    result = seal_batch(store)
+    inventory_path = result.path / "inventory.json"
+    original = inventory_path.read_bytes()
+    modified = parse(original)
+    assert isinstance(modified, dict)
+    created_at = modified["created_at"]
+    assert isinstance(created_at, str)
+    modified["created_at"] = ("3" if created_at[0] == "2" else "2") + created_at[1:]
+    changed = canonical(modified)
+    assert len(changed) == len(original)
+    inventory_path.write_bytes(changed)
+    with pytest.raises(ArchiveError, match="batch seal does not match inventory"):
+        verify_batch(store.root, store.store_id, result.batch_id)
+
+
+def test_backup_and_restore_reject_mismatched_existing_receipt(tmp_path: Path) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    result = seal_batch(store)
+    backup = tmp_path / "backup"
+    backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    receipt_path = backup / "backups" / f"{result.batch_id[7:]}.json"
+    receipt = parse(receipt_path.read_bytes())
+    assert isinstance(receipt, dict)
+    receipt["manifest_sha256"] = "sha256:" + "0" * 64
+    receipt_path.write_bytes(canonical(receipt))
+    with pytest.raises(ArchiveError, match="backup receipt does not match"):
+        restore_backup(
+            backup, tmp_path / "bad-receipt", store.store_id, result.batch_id
+        )
+    with pytest.raises(ArchiveError, match="existing backup receipt does not match"):
+        backup_batch(store, backup, result.batch_id, require_separate_device=False)
+
+
 def test_cli_restores_first_batch_and_allows_later_manual_check(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -478,6 +583,52 @@ def test_cli_restores_first_batch_and_allows_later_manual_check(
     )
     assert checked.exit_code == 0, checked.output
     assert len(restored) == 3
+
+
+def test_cli_retries_automatic_restore_after_first_backup_failure(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    resource = _resource("https://example.invalid/a.png", "raw/a.png", raw)
+    _put(store, resource, raw)
+    backup = tmp_path / "backup"
+    monkeypatch.setenv("SVE_DATA_DIR", str(store.data_root))
+    calls = 0
+    real_backup = backup_batch
+
+    def backup_once_failed(
+        target: ArchiveStore, destination: Path, batch_id: str
+    ) -> object:
+        nonlocal calls
+        calls += 1
+        if calls == 1:
+            msg = "synthetic backup failure"
+            raise ArchiveError(msg)
+        return real_backup(target, destination, batch_id, require_separate_device=False)
+
+    monkeypatch.setattr(cli, "backup_batch", backup_once_failed)
+    runner = CliRunner()
+    args = [
+        "archive",
+        "seal",
+        str(store.root),
+        str(backup),
+        "--store-id",
+        store.store_id,
+    ]
+    first = runner.invoke(cli.app, args)
+    assert first.exit_code == 1, first.output
+    assert "synthetic backup failure" in first.output
+    assert list((store.root / "batches").glob("*"))
+    assert not has_restore_check(backup, store.store_id)
+    second = runner.invoke(cli.app, args)
+    assert second.exit_code == 0, second.output
+    assert "restore check: passed" in second.output
+    assert has_restore_check(backup, store.store_id)
+    third = runner.invoke(cli.app, args)
+    assert third.exit_code == 0, third.output
+    assert "restore check: passed" not in third.output
 
 
 def test_allowed_root_symlink(tmp_path: Path) -> None:

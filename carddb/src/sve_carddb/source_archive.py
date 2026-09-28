@@ -164,6 +164,13 @@ class BackupReceipt(_Model):
     verified_at: str
 
 
+class RestoreCheckReceipt(_Model):
+    store_id: str
+    batch_id: str
+    backup_receipt_sha256: str
+    verified_at: str
+
+
 class SourceGroup(_Model):
     provider: str
     kind: str
@@ -842,7 +849,17 @@ def _prepare_metadata(  # ruff: ignore[too-many-locals] -- install immutable sou
 def _refresh_after_own_link(store: ArchiveStore, pin: _Pinned) -> None:
     """Account for ctime changed by linking a verified candidate into the store."""
     candidate = _file_identity(pin.candidate.stat())
-    if pin.candidate_stat is None or candidate[:-1] != pin.candidate_stat[:-1]:
+    blob = store.root / _blob_path(_raw_hash(pin.resource))
+    candidate_linked = (
+        pin.method != "reused"
+        and blob.exists()
+        and candidate[:2] == _file_identity(blob.stat())[:2]
+    )
+    if pin.candidate_stat is None or (
+        candidate[:-1] != pin.candidate_stat[:-1]
+        if candidate_linked
+        else candidate != pin.candidate_stat
+    ):
         msg = f"prepared source changed while installing {pin.resource.url}"
         raise ArchiveRaceError(msg)
     pin.candidate_stat = candidate
@@ -856,7 +873,12 @@ def _refresh_after_own_link(store: ArchiveStore, pin: _Pinned) -> None:
     except (FileNotFoundError, UnsafePathError) as exc:
         msg = f"latest source changed while installing {pin.resource.url}"
         raise ArchiveRaceError(msg) from exc
-    if identity[:-1] != pin.identity[:-1]:
+    same_hardlink = pin.method == "hardlink" and identity[1:3] == candidate[:2]
+    if (
+        identity[:-1] != pin.identity[:-1]
+        if same_hardlink
+        else identity != pin.identity
+    ):
         msg = f"latest source changed while installing {pin.resource.url}"
         raise ArchiveRaceError(msg)
     pin.identity = identity
@@ -1333,6 +1355,7 @@ def restore_backup(
     """Restore one backed-up batch into an empty root and verify its closure."""
     receipt_path = backup_root / "backups" / f"{_hex(batch_id)}.json"
     _require_safe_file(backup_root, receipt_path)
+    receipt_hash = _hash_file(receipt_path)[0]
     receipt = _load_model(BackupReceipt, receipt_path)
     inventory = verify_batch(backup_root, store_id, batch_id)
     if (
@@ -1350,7 +1373,59 @@ def restore_backup(
     for relative in _closure_paths(backup_root, batch_id, inventory):
         _copy_immutable(backup_root / relative, destination / relative)
     _copy_immutable(receipt_path, destination / "backups" / f"{_hex(batch_id)}.json")
-    return verify_batch(destination, store_id, batch_id)
+    restored = verify_batch(destination, store_id, batch_id)
+    if _hash_file(receipt_path)[0] != receipt_hash:
+        msg = "backup receipt changed during restore check"
+        raise ArchiveRaceError(msg)
+    _record_restore_check(backup_root, store_id, batch_id, receipt_hash)
+    return restored
+
+
+def has_restore_check(backup_root: Path, store_id: str) -> bool:
+    """Find a verified restore receipt for this store and backup root."""
+    checks = backup_root / "restore-checks"
+    if not checks.exists():
+        return False
+    if checks.is_symlink() or not checks.is_dir():
+        msg = f"invalid restore-check directory: {checks}"
+        raise ArchiveError(msg)
+    found = False
+    for path in checks.glob("*.json"):
+        _require_safe_file(backup_root, path)
+        check = _load_model(RestoreCheckReceipt, path)
+        if check.store_id != store_id:
+            continue
+        if path.stem != _hex(check.batch_id):
+            msg = f"restore-check receipt path does not match batch: {path}"
+            raise ArchiveError(msg)
+        receipt_path = backup_root / "backups" / path.name
+        _require_hash(backup_root, receipt_path, check.backup_receipt_sha256)
+        found = True
+    return found
+
+
+def _record_restore_check(
+    backup_root: Path, store_id: str, batch_id: str, receipt_hash: str
+) -> None:
+    path = backup_root / "restore-checks" / f"{_hex(batch_id)}.json"
+    if path.exists():
+        _require_safe_file(backup_root, path)
+        existing = _load_model(RestoreCheckReceipt, path)
+        if (
+            existing.store_id != store_id
+            or existing.batch_id != batch_id
+            or existing.backup_receipt_sha256 != receipt_hash
+        ):
+            msg = f"existing restore-check receipt does not match backup: {path}"
+            raise ArchiveError(msg)
+        return
+    check = RestoreCheckReceipt(
+        store_id=store_id,
+        batch_id=batch_id,
+        backup_receipt_sha256=receipt_hash,
+        verified_at=datetime.now(UTC).isoformat(),
+    )
+    _install_bytes(path, _canonical_model(check))
 
 
 def _copy_immutable(source: Path, target: Path) -> None:
