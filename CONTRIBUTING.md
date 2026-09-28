@@ -170,13 +170,14 @@ uv tool install pre-commit
 pre-commit install
 ```
 
-The git hooks run the quick checks on every commit and push. `pytest` and `cargo-test` are manual
-hooks, because a full run takes minutes; CI runs each of them when a pull request changes that
-component or a shared input. Run them yourself when you change the code they cover:
+The git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
+are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
+that component or a shared input. Run them yourself when you change the code they cover:
 
 ```bash
 pre-commit run --hook-stage manual pytest       # carddb tests
 pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
+pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI runs the full `bun run check`)
 ```
 
 `cargo-test` needs `SVE_TEST_SNAPSHOT` (see Setup); CI gets the same file from a private test-data repository.

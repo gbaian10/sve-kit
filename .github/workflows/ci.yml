@@ -185,9 +185,31 @@ jobs:
             echo "::endgroup::"
           done
 
+  web:
+    needs: changes
+    if: needs.changes.outputs.web == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: sim/web
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      # Bun and Node versions come from mise.toml.
+      - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.bun/install/cache
+          key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
+      - run: bun install --frozen-lockfile
+      # package.json scripts are the single entry point: Prettier, ESLint, Stylelint, tsc -b, Vitest and the build.
+      - run: bun run check
+
   ci-ok:
     if: always()
-    needs: [changes, repo, python, rust]
+    needs: [changes, repo, python, rust, web]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:

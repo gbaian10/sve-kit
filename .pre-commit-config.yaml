@@ -181,13 +181,14 @@ repos:
         pass_filenames: false
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
+      # Manual locally; CI runs `bun run check` (which includes vitest) on every web change.
       - id: web-test
         name: vitest (sim/web)
         language: system
         entry: mise exec -- bun run --cwd sim/web test
         pass_filenames: false
-        files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
-        stages: [pre-push]
+        always_run: true
+        stages: [manual]
       # Manual locally (a full run takes minutes); CI runs it on every PR:
       # `pre-commit run --hook-stage manual pytest`.
       - id: pytest

@@ -89,6 +89,7 @@ job = "rust"
 job = "none"
 reason = "Manual-stage mutation test; far too slow for CI."
 
+# The web job runs `bun run check` (package.json scripts) instead of these hooks; they cover the same checks.
 [hooks.web-prettier]
 job = "web"
 
