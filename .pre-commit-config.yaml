@@ -46,12 +46,12 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.8
     hooks:
-      # docs/schema/er/ruff.toml extends the carddb settings.
+      # docs/schema/er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
         args: [--check]
-        files: ^(carddb|docs/schema/er)/
+        files: ^(carddb|docs/schema/er|\.github/ci)/
       - id: ruff-check
-        files: ^(carddb|docs/schema/er)/
+        files: ^(carddb|docs/schema/er|\.github/ci)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.3

@@ -1,0 +1,129 @@
+# One workflow for every PR and push to main. `changes` decides which component jobs run;
+# `ci-ok` is the single required check, so skipping a component never leaves a check pending.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  changes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # paths-filter lists PR files through the REST API
+    outputs:
+      python: ${{ steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true' }}
+      rust: ${{ steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true' }}
+      web: ${{ steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # push events diff against the previous commit with git
+          persist-credentials: false
+      - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
+        id: filter
+        with:
+          # Transitive inputs count: the engine compiles in dsl/ and its tests read tests/ and authored/.
+          filters: |
+            shared:
+              - '.github/**'
+              - '.pre-commit-config.yaml'
+              - 'mise.toml'
+            python:
+              - 'carddb/**'
+              - 'docs/schema/**'
+            rust:
+              - 'sim/engine/**'
+              - 'sim/scenario-runner/**'
+              - 'Cargo.toml'
+              - 'Cargo.lock'
+              - 'rust-toolchain.toml'
+              - 'deny.toml'
+              - 'clippy.toml'
+              - 'rustfmt.toml'
+              - 'dsl/**'
+              - 'tests/**'
+              - 'authored/**'
+              - 'docs/m0/*.yaml'
+            web:
+              - 'sim/web/**'
+
+  repo:
+    needs: changes
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # gitleaks scans the whole pushed commit range
+          persist-credentials: false
+      # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        with:
+          python-version: '3.14'
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          version-file: carddb/pyproject.toml
+          enable-cache: true
+          cache-dependency-glob: carddb/uv.lock
+      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml') }}
+      - name: Every hook has a CI owner
+        run: uv run .github/ci/hooks.py check
+      - name: pre-commit (repo-wide hooks)
+        run: |
+          SKIP="$(uv run .github/ci/hooks.py skip repo)"
+          export SKIP
+          uv run --project carddb --locked pre-commit run --all-files --hook-stage pre-commit --show-diff-on-failure
+      - name: gitleaks (pushed commit range)
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
+          VERSION: 8.30.0 # same as the pre-commit hook
+          SHA256: 79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e
+        run: |
+          # A missing end would otherwise scan zero commits and pass.
+          git cat-file -e "${BASE}^{commit}"
+          git cat-file -e "${HEAD}^{commit}"
+          archive="gitleaks_${VERSION}_linux_x64.tar.gz"
+          curl -fsSLo "$RUNNER_TEMP/$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/${archive}"
+          echo "${SHA256}  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
+          "$RUNNER_TEMP/gitleaks" git --log-opts="${BASE}..${HEAD}" --redact --verbose --exit-code 1
+
+  ci-ok:
+    if: always()
+    needs: [changes, repo]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Every job that had to run succeeded
+        env:
+          NEEDS: ${{ toJSON(needs) }}
+        run: |
+          # changes and repo always run; a component job may be skipped only when changes said so.
+          jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
+          status=0
+          for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do
+            result=$(jq -r --arg j "$job" '.[$j].result' <<<"$NEEDS")
+            wanted=$(jq -r --arg j "$job" 'if $j == "repo" then "true" else (.changes.outputs[$j] // "true") end' <<<"$NEEDS")
+            if [ "$result" = success ] || { [ "$wanted" = false ] && [ "$result" = skipped ]; }; then
+              echo "ok   $job ($result)"
+            else
+              echo "FAIL $job: $result (required: $wanted)"
+              status=1
+            fi
+          done
+          exit "$status"
