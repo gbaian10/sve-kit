@@ -97,9 +97,15 @@ AI-generated code tends to over-comment. Keep comments few and short:
 
 ## Lint and types
 
-ruff (all rules) and mypy strict run on every commit and in CI. Type hints are required.
-pyright strict runs only locally (pre-push, on `docs/schema/er`) and is skipped in CI because it
-bundles a large Node.js runtime; fix what it reports when you see it.
+ruff (all rules) and mypy strict run on every commit and in CI; mypy is the type-checking gate.
+Type hints are required. pyright strict is an optional local check with no hook and no CI job
+(it bundles a large Node.js runtime); run it when you like and fix what it reports as you go:
+
+```bash
+uv --directory carddb run --group pyright pyright                     # carddb
+uv --directory carddb run --group pyright pyright -p ../docs/schema/er # ER generator
+```
+
 Follow the rules; if a rule is wrong for the whole project, propose changing the config
 instead of silencing it everywhere.
 

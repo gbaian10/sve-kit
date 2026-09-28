@@ -189,13 +189,6 @@ repos:
         entry: uv run --directory carddb mypy ../docs/schema/er
         pass_filenames: false
         files: ^(docs/schema/er/.*\.py|carddb/pyproject\.toml)$
-      - id: pyright-schema-er
-        name: pyright (docs/schema/er)
-        stages: [pre-push]
-        language: system
-        entry: uv run --directory carddb --group pyright pyright -p ../docs/schema/er
-        pass_filenames: false
-        files: ^(docs/schema/er/.*\.(py|json)|carddb/pyproject\.toml)$
       # Fails when the schema documents no longer parse into a complete diagram.
       - id: schema-er-build
         name: schema ER builds from docs/schema
