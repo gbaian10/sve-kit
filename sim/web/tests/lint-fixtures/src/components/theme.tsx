@@ -3,7 +3,7 @@ function cn(...classes: string[]) {
 }
 
 // case: semantic token classes -> none
-export const Tokens = () => <div className="border-accent bg-surface text-text-muted" />
+export const Tokens = () => <div className="border-accent bg-surface-1 text-text-2" />
 
 // case: default palette was removed -> better-tailwindcss/no-unknown-classes
 export const Palette = () => <div className="bg-gray-900" />
@@ -30,10 +30,10 @@ export const ArbitraryProperty = () => <div className="[color:red]" />
 export const NonColorArbitrary = () => <div className="border-[3px] bg-[url(/a.png)] text-[13px]" />
 
 // case: dark variant -> better-tailwindcss/no-restricted-classes
-export const Dark = () => <div className="dark:bg-surface" />
+export const Dark = () => <div className="dark:bg-surface-1" />
 
 // case: stacked dark variant -> better-tailwindcss/no-restricted-classes
-export const StackedDark = () => <div className="md:dark:text-text" />
+export const StackedDark = () => <div className="md:dark:text-text-1" />
 
 // case: conflicting classes (reported on each side) -> better-tailwindcss/no-conflicting-classes, better-tailwindcss/no-conflicting-classes
 export const Conflict = () => <div className="p-2 p-4" />

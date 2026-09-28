@@ -26,10 +26,10 @@ export const VarOpacityImportant = () => <div className="md:text-(--raw)/[0.3]!"
 export const HexOpacityImportant = () => <div className="bg-[#123456]/50!" />
 
 // case: dark variant with important -> better-tailwindcss/no-restricted-classes
-export const DarkImportant = () => <div className="dark:bg-surface!" />
+export const DarkImportant = () => <div className="dark:bg-surface-1!" />
 
 // case: token with opacity and important -> none
-export const TokenOpacityImportant = () => <div className="md:bg-surface/50!" />
+export const TokenOpacityImportant = () => <div className="md:bg-surface-1/50!" />
 
 // case: dynamic viewport with important -> none
 export const ViewportImportant = () => <div className="h-dvh!" />

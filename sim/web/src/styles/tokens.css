@@ -1,33 +1,202 @@
-/* The only file allowed colour literals; each colour token needs all three theme selectors. */
+/*
+ * The only file allowed colour literals. Base tokens exist in three theme contexts (bare :root =
+ * light, the dark media query, data-theme="dark"); accents exist per context × data-accent, with
+ * a per-theme default when no accent is chosen. tests/tokens.test.ts checks all of that.
+ */
 
 :root {
   color-scheme: light;
 
-  --surface: oklch(98.5% 0.003 250deg);
-  --surface-raised: oklch(100% 0 0deg);
-  --text: oklch(24% 0.01 250deg);
-  --text-muted: oklch(45% 0.01 250deg);
-  --accent: oklch(52% 0.16 255deg);
+  --bg: #e3e6ea;
+  --surface-1: #f3f4f6;
+  --surface-2: #d9dde2;
+  --surface-3: #cdd2d8;
+  --well: #d6dae0;
+  --side: #eceef1;
+  --border: #c5cad1;
+  --border-strong: #a1a8b2;
+  --text-1: #15181c;
+  --text-2: #3f464f;
+  --text-3: #5b636e;
+  --scrim: rgb(10 10 10 / 86%);
+  --info: #2f62c8;
+  --success: #2f8a4a;
+  --warning: #a85c05;
+  --danger: #c0392b;
+  --info-soft: rgb(47 98 200 / 12%);
+  --success-soft: rgb(47 138 74 / 12%);
+  --warning-soft: rgb(168 92 5 / 12%);
+  --danger-soft: rgb(192 57 43 / 12%);
+  --forest: #3f8a22;
+  --sword: #8a7410;
+  --rune: #4653a6;
+  --dragon: #a8520e;
+  --abyss: #a92a58;
+  --haven: #7d6b4b;
+  --neutral: #656a72;
+  --cost: #2b62c9;
+  --def: #c0392b;
+  --accent: #0f766e;
+  --accent-ink: #fff;
+  --accent-text: #0b5f59;
+  --accent-soft: rgb(15 118 110 / 18%);
+  --font-ui:
+    "IBM Plex Sans", -apple-system, blinkmacsystemfont, "Segoe UI", "PingFang TC", "Hiragino Sans",
+    "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  --font-ja:
+    "IBM Plex Sans", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Noto Sans CJK JP", "Yu Gothic", meiryo, "PingFang TC", sans-serif;
+}
+
+:root[data-accent="amber"] {
+  --accent: #c98a0a;
+  --accent-ink: #1d1c1a;
+  --accent-text: #7a4f00;
+  --accent-soft: rgb(201 138 10 / 22%);
+}
+
+:root[data-accent="teal"] {
+  --accent: #0f766e;
+  --accent-ink: #fff;
+  --accent-text: #0b5f59;
+  --accent-soft: rgb(15 118 110 / 18%);
+}
+
+:root[data-accent="red"] {
+  --accent: #b8322e;
+  --accent-ink: #fff;
+  --accent-text: #9a2622;
+  --accent-soft: rgb(184 50 46 / 18%);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
     color-scheme: dark;
 
-    --surface: oklch(26% 0.008 250deg);
-    --surface-raised: oklch(31% 0.008 250deg);
-    --text: oklch(93% 0.005 250deg);
-    --text-muted: oklch(75% 0.008 250deg);
-    --accent: oklch(74% 0.12 255deg);
+    --bg: #22272e;
+    --surface-1: #2d333b;
+    --surface-2: #373e47;
+    --surface-3: #444c56;
+    --well: #1c2128;
+    --side: #1f242b;
+    --border: #3d444d;
+    --border-strong: #545d68;
+    --text-1: #e6edf3;
+    --text-2: #adbac7;
+    --text-3: #8b98a5;
+    --scrim: rgb(0 0 0 / 88%);
+    --info: #78a6ff;
+    --success: #5dc27a;
+    --warning: #f2a34d;
+    --danger: #f2706a;
+    --info-soft: rgb(120 166 255 / 16%);
+    --success-soft: rgb(93 194 122 / 16%);
+    --warning-soft: rgb(242 163 77 / 16%);
+    --danger-soft: rgb(242 112 106 / 16%);
+    --forest: #7fbf5a;
+    --sword: #d6bb3e;
+    --rune: #8f97dc;
+    --dragon: #e38b3d;
+    --abyss: #e4668f;
+    --haven: #cdbb9c;
+    --neutral: #a3a7ae;
+    --cost: #4d8ef0;
+    --def: #e05353;
+    --accent: #e8b64a;
+    --accent-ink: #1e1f22;
+    --accent-text: #f2c65e;
+    --accent-soft: rgb(232 182 74 / 16%);
+    --font-ui:
+      "IBM Plex Sans", -apple-system, blinkmacsystemfont, "Segoe UI", "PingFang TC",
+      "Hiragino Sans", "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+    --font-ja:
+      "IBM Plex Sans", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+      "Noto Sans CJK JP", "Yu Gothic", meiryo, "PingFang TC", sans-serif;
+  }
+
+  :root:not([data-theme="light"])[data-accent="amber"] {
+    --accent: #e8b64a;
+    --accent-ink: #1e1f22;
+    --accent-text: #f2c65e;
+    --accent-soft: rgb(232 182 74 / 16%);
+  }
+
+  :root:not([data-theme="light"])[data-accent="teal"] {
+    --accent: #4fc8bc;
+    --accent-ink: #0f1a19;
+    --accent-text: #66d6cb;
+    --accent-soft: rgb(79 200 188 / 16%);
+  }
+
+  :root:not([data-theme="light"])[data-accent="red"] {
+    --accent: #f26d6d;
+    --accent-ink: #1e1f22;
+    --accent-text: #f58a8a;
+    --accent-soft: rgb(242 109 109 / 16%);
   }
 }
 
 :root[data-theme="dark"] {
   color-scheme: dark;
 
-  --surface: oklch(26% 0.008 250deg);
-  --surface-raised: oklch(31% 0.008 250deg);
-  --text: oklch(93% 0.005 250deg);
-  --text-muted: oklch(75% 0.008 250deg);
-  --accent: oklch(74% 0.12 255deg);
+  --bg: #22272e;
+  --surface-1: #2d333b;
+  --surface-2: #373e47;
+  --surface-3: #444c56;
+  --well: #1c2128;
+  --side: #1f242b;
+  --border: #3d444d;
+  --border-strong: #545d68;
+  --text-1: #e6edf3;
+  --text-2: #adbac7;
+  --text-3: #8b98a5;
+  --scrim: rgb(0 0 0 / 88%);
+  --info: #78a6ff;
+  --success: #5dc27a;
+  --warning: #f2a34d;
+  --danger: #f2706a;
+  --info-soft: rgb(120 166 255 / 16%);
+  --success-soft: rgb(93 194 122 / 16%);
+  --warning-soft: rgb(242 163 77 / 16%);
+  --danger-soft: rgb(242 112 106 / 16%);
+  --forest: #7fbf5a;
+  --sword: #d6bb3e;
+  --rune: #8f97dc;
+  --dragon: #e38b3d;
+  --abyss: #e4668f;
+  --haven: #cdbb9c;
+  --neutral: #a3a7ae;
+  --cost: #4d8ef0;
+  --def: #e05353;
+  --accent: #e8b64a;
+  --accent-ink: #1e1f22;
+  --accent-text: #f2c65e;
+  --accent-soft: rgb(232 182 74 / 16%);
+  --font-ui:
+    "IBM Plex Sans", -apple-system, blinkmacsystemfont, "Segoe UI", "PingFang TC", "Hiragino Sans",
+    "Noto Sans TC", "Noto Sans CJK TC", "Microsoft JhengHei", sans-serif;
+  --font-ja:
+    "IBM Plex Sans", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    "Noto Sans CJK JP", "Yu Gothic", meiryo, "PingFang TC", sans-serif;
+}
+
+:root[data-theme="dark"][data-accent="amber"] {
+  --accent: #e8b64a;
+  --accent-ink: #1e1f22;
+  --accent-text: #f2c65e;
+  --accent-soft: rgb(232 182 74 / 16%);
+}
+
+:root[data-theme="dark"][data-accent="teal"] {
+  --accent: #4fc8bc;
+  --accent-ink: #0f1a19;
+  --accent-text: #66d6cb;
+  --accent-soft: rgb(79 200 188 / 16%);
+}
+
+:root[data-theme="dark"][data-accent="red"] {
+  --accent: #f26d6d;
+  --accent-ink: #1e1f22;
+  --accent-text: #f58a8a;
+  --accent-soft: rgb(242 109 109 / 16%);
 }
