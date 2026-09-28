@@ -47,6 +47,8 @@ test = [
 ]
 
 [tool.uv]
+# CI reads this through setup-uv; keep it in step with the uv-pre-commit hook rev.
+required-version = ">=0.12.17,<0.13"
 # Version comes from git tags (hatch-vcs); rebuild the editable install on commit/tag changes so _version.py stays current.
 cache-keys = [
     { file = "pyproject.toml" },
