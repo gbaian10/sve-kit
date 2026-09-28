@@ -84,6 +84,11 @@ T0 keeps five future nullable references (art, CR version, DSL document/load and
 keyword) as NULL-only columns. The registry reserves their targets without
 creating empty tables. T0 support rows require `missing_dsl`, null candidate/DSL/
 engine fields, `not_applicable`, nonempty sorted reasons and `automatic=false`.
+The nonempty reasons check implements [snapshot-format §7](../../../../docs/schema/snapshot-format.md#7-發布閘門與變動報告),
+which requires reasons for every non-passed support state. These are derived
+support rows for snapshot construction (build-db §10), not raw candidate input.
+The fixture's `missing_dsl` reason code is an example, not a required value or
+an exhaustive reason-code vocabulary.
 When implementing the engine capability, replace those T0-specific checks with
 the full support-state and evidence constraints; simply registering DSL tables
 does not lift the T0 engine restriction.
@@ -93,6 +98,13 @@ definition; spellings and localizations are objects in the build DB, not wire
 tuples. SQL also checks ordered unique parameter names, bounds and spelling
 references to enabled domains. Localization strings remain literal data: this
 module does not invent or execute a placeholder language.
+
+`text_unit.lang` and `search_alias.lang` reference `language.code`, as explicitly
+specified in build-db §2, §4 and §15. A language tag must be registered before
+commit so that text and aliases have corresponding language configuration.
+Registering an additional language permits it; the FK does not restrict the
+registry to the three initial languages. This does not automatically turn other
+Lang-typed fields or JSON members into SQL foreign keys.
 
 DDL enforces row-local checks and FKs expressible with the declared columns.
 Import/validation stages must still verify cross-row policies: printing/product

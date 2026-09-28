@@ -13,8 +13,10 @@ from sve_carddb.build_db.domains import DATE as DATE_PATTERN
 from sve_carddb.build_db.domains import INSTANT as INSTANT_PATTERN
 from sve_carddb.build_db.model import identifier
 from sve_carddb.build_db.t0 import TABLES, compile_t0
+from sve_carddb.build_db.t0_json import symbol_valid
 from sve_carddb.build_db.validation import Rules
 from sve_carddb.snapshot.contract import validate
+from sve_carddb.snapshot.values import canonical
 
 from .build_db_fixtures import DATE, HASH, INSTANT, seed
 
@@ -665,3 +667,119 @@ def test_nonredundant_unique_keys_reject_new_primary_keys(
     with pytest.raises(sqlite3.IntegrityError, match="UNIQUE"):
         with db.transaction():
             db.insert(table, row)
+
+
+@pytest.mark.parametrize(
+    "card_id", ["card", "old_card"], ids=["face_card_fk", "printing_card_fk"]
+)
+def test_printing_face_card_foreign_keys_independently(
+    db: Database, card_id: str
+) -> None:
+    with db.transaction():
+        db.insert(
+            "face",
+            {"id": "other_face", "card_id": "old_card", "ordinal": 0, "side": "front"},
+        )
+    row = dict(db.rows("printing_face")[0].values)
+    # The printing belongs to card, the face to old_card; exactly one compound FK fails.
+    with pytest.raises(sqlite3.IntegrityError, match=r"(?i)foreign key"):
+        with db.transaction():
+            db.insert(
+                "printing_face", row | {"face_id": "other_face", "card_id": card_id}
+            )
+
+
+@pytest.mark.parametrize("table", ["search_alias", "text_unit"])
+def test_language_foreign_keys_require_registration(db: Database, table: str) -> None:
+    # fr is lexically valid, so only the missing registry row can reject it.
+    with pytest.raises(sqlite3.IntegrityError, match=r"(?i)foreign key"):
+        _update(db, table, {"lang": "fr"})
+    with db.transaction():
+        db.insert(
+            "language",
+            {
+                "code": "fr",
+                "fallback_order": Json([]),
+                "display_name": "Synthetic French",
+            },
+        )
+    _update(db, table, {"lang": "fr"})
+    assert db.rows(table)[0].values["lang"] == "fr"
+
+
+def test_literal_spelling_requires_null_parameter_at_both_boundaries(
+    db: Database, schema: CompiledSchema
+) -> None:
+    parameters: JsonValue = {
+        "parameters": [{"name": "value", "uint": None, "variables": ["X"]}]
+    }
+    spelling: dict[str, JsonValue] = {
+        "lang": "ja",
+        "literal_prefix": "{Q}",
+        "literal_suffix": "",
+        "parameter_name": None,
+        "parse_kind": "literal",
+    }
+    _update(
+        db,
+        "text_symbol",
+        {"parameter_schema": Json(parameters), "spellings": Json([spelling])},
+    )
+    invalid: JsonValue = [spelling | {"parameter_name": "value"}]
+    rules = Rules(dict(schema.json_schemas))
+    with pytest.raises(ValidationError):
+        rules.validate("text_symbol_spellings", invalid)
+    assert (
+        symbol_valid(canonical(parameters).decode(), canonical(invalid).decode()) == 0
+    )
+    with pytest.raises(sqlite3.IntegrityError, match="CHECK"):
+        with db.transaction():
+            db._connection.execute(
+                "UPDATE text_symbol SET spellings=?", (canonical(invalid).decode(),)
+            )
+
+
+@pytest.mark.parametrize(
+    ("table", "column", "valid", "invalid"),
+    [
+        (
+            "source_record",
+            "sha256",
+            "sha256:" + "abcdef0123456789" * 4,
+            "sha256:" + "ABCDEF0123456789" * 4,
+        ),
+        ("vocabulary", "kind", "synthetic_kind", "Synthetic_kind"),
+        ("vocabulary", "code", "synthetic_code", "Synthetic_code"),
+        ("vocabulary", "code", "synthetic_code", "synthetic_Code"),
+    ],
+)
+def test_hash_and_vocabulary_codes_require_lowercase(
+    db: Database, table: str, column: str, valid: str, invalid: str
+) -> None:
+    row = dict(db.rows(table)[0].values)
+    if table == "vocabulary":
+        row |= {"kind": "synthetic_kind", "code": "synthetic_code"}
+    else:
+        row["id"] = "lowercase_hash"
+    row[column] = valid
+    with db.transaction():
+        db.insert(table, row)
+    declaration = next(t for t in TABLES if t.name == table)
+    key = {field: row[field] for field in declaration.primary_key}
+    with pytest.raises(ValueError, match="pattern"):
+        with db.transaction():
+            db.update(table, key, {column: invalid})
+    where = " AND ".join(f"{identifier(field)}=?" for field in key)
+    with pytest.raises(sqlite3.IntegrityError, match="CHECK"):
+        with db.transaction():
+            db._connection.execute(
+                f"UPDATE {identifier(table)} SET {identifier(column)}=? WHERE {where}",
+                (invalid, *key.values()),
+            )
+
+
+def test_missing_dsl_reason_does_not_have_to_repeat_status(db: Database) -> None:
+    _update(db, "card_engine_support", {"reason_codes": Json(["engine_unassigned"])})
+    assert db.rows("card_engine_support")[0].values["status"] == "missing_dsl"
+    with pytest.raises(sqlite3.IntegrityError, match="CHECK"):
+        _update(db, "card_engine_support", {"reason_codes": Json([])})

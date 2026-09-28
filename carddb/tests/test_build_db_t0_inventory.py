@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from sve_carddb.build_db import Kind, Table
+from sve_carddb.build_db.domains import DATE, HASH, INSTANT, LANG
 from sve_carddb.build_db.t0 import TABLES
 
 DOCS = Path(__file__).resolve().parents[2] / "docs" / "schema"
@@ -82,6 +83,15 @@ def test_logical_columns_domains_nullability_and_enums(table: object) -> None:
             assert column.choices == tuple(kind.split("|")), name
         if kind == "Region":
             assert column.choices == ("jp", "en")
+
+
+@pytest.mark.parametrize("table", TABLES, ids=lambda table: table.name)
+def test_documented_lexical_domains_have_patterns_on_every_column(table: Table) -> None:
+    declaration = re.findall(r"`([^`]+)`", _rows()[table.name])[0]
+    patterns = {"Date": DATE, "Instant": INSTANT, "Hash": HASH, "Lang": LANG}
+    for name, (kind, _) in _fields(declaration).items():
+        if kind in patterns:
+            assert table.column(name).pattern == patterns[kind], (table.name, name)
 
 
 @pytest.mark.parametrize("table", TABLES, ids=lambda table: table.name)
