@@ -46,11 +46,12 @@ repos:
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: v0.16.8
     hooks:
+      # docs/schema/er/ruff.toml extends the carddb settings.
       - id: ruff-format
         args: [--check]
-        files: ^carddb/
+        files: ^(carddb|docs/schema/er)/
       - id: ruff-check
-        files: ^carddb/
+        files: ^(carddb|docs/schema/er)/
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
     rev: v0.23.3
@@ -172,3 +173,26 @@ repos:
         types: [python]
         files: ^carddb/
         fail_fast: true
+      # The ER generator is a standalone uv script checked with the carddb toolchain and settings.
+      - id: mypy-schema-er
+        name: mypy (docs/schema/er)
+        stages: [pre-push]
+        language: system
+        entry: uv run --directory carddb mypy ../docs/schema/er
+        pass_filenames: false
+        files: ^(docs/schema/er/.*\.py|carddb/pyproject\.toml)$
+      - id: pyright-schema-er
+        name: pyright (docs/schema/er)
+        stages: [pre-push]
+        language: system
+        entry: uv run --directory carddb pyright -p ../docs/schema/er
+        pass_filenames: false
+        files: ^(docs/schema/er/.*\.(py|json)|carddb/pyproject\.toml)$
+      # Fails when the schema documents no longer parse into a complete diagram.
+      - id: schema-er-build
+        name: schema ER builds from docs/schema
+        stages: [pre-commit, manual]
+        language: system
+        entry: bash -c 'out=$(mktemp -d) && trap "rm -rf \"$out\"" EXIT && uv run docs/schema/er/build_er.py --no-open --out "$out/schema-er.html"'
+        pass_filenames: false
+        files: ^docs/schema/

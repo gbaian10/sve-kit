@@ -1,0 +1,994 @@
+<title>Schema v1 ER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Noto+Sans+TC:wght@400;500;700&display=swap">
+<style>
+:root {
+  --bg: #eef1f5;
+  --canvas: #e7ebf0;
+  --dot: #cdd4dd;
+  --bar: #f8f9fb;
+  --card: #ffffff;
+  --card-head: #f1f4f8;
+  --line: #d3dae3;
+  --line-strong: #b9c3cf;
+  --text: #1c2430;
+  --muted: #566172;
+  --faint: #8691a0;
+  --accent: #0369a1;
+  --accent-soft: #e1f0f9;
+  --accent-ink: #ffffff;
+  --fk: #a16207;
+  --fk-soft: #fbf1dc;
+  --cfk: #7c3aed;
+  --inf: #0f766e;
+  --edge: #97a3b2;
+  --shadow: 0 1px 2px rgba(28, 36, 48, .08), 0 2px 8px rgba(28, 36, 48, .06);
+  --shadow-lg: 0 4px 24px rgba(28, 36, 48, .16);
+  --ui: "Noto Sans TC", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+    --bg: #1f2329;
+    --canvas: #23282f;
+    --dot: #343b45;
+    --bar: #272c33;
+    --card: #2c323b;
+    --card-head: #343b46;
+    --line: #3e4652;
+    --line-strong: #525c69;
+    --text: #e3e7ed;
+    --muted: #a6afbc;
+    --faint: #7d8795;
+    --accent: #38bdf8;
+    --accent-soft: #1d3a4c;
+    --accent-ink: #0d2230;
+    --fk: #e8b64a;
+    --fk-soft: #3b3325;
+    --cfk: #b49cf5;
+    --inf: #5eead4;
+    --edge: #6f7b8b;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 2px 8px rgba(0, 0, 0, .2);
+    --shadow-lg: 0 6px 28px rgba(0, 0, 0, .45);
+  }
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #1f2329;
+  --canvas: #23282f;
+  --dot: #343b45;
+  --bar: #272c33;
+  --card: #2c323b;
+  --card-head: #343b46;
+  --line: #3e4652;
+  --line-strong: #525c69;
+  --text: #e3e7ed;
+  --muted: #a6afbc;
+  --faint: #7d8795;
+  --accent: #38bdf8;
+  --accent-soft: #1d3a4c;
+  --accent-ink: #0d2230;
+  --fk: #e8b64a;
+  --fk-soft: #3b3325;
+  --cfk: #b49cf5;
+  --inf: #5eead4;
+  --edge: #6f7b8b;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .25), 0 2px 8px rgba(0, 0, 0, .2);
+  --shadow-lg: 0 6px 28px rgba(0, 0, 0, .45);
+}
+html, body { height: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.5 var(--ui); overflow: hidden;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.app { height: 100%; display: grid; grid-template-rows: auto 1fr; grid-template-columns: minmax(0, 1fr) 380px; }
+.bar {
+  grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px;
+  padding: 8px 16px; background: var(--bar); border-bottom: 1px solid var(--line); position: relative; z-index: 20;
+}
+.brand { display: flex; align-items: baseline; gap: 8px; margin-right: 4px; white-space: nowrap; }
+.brand b { font-weight: 700; letter-spacing: .01em; }
+.brand span { font: 500 11px var(--mono); color: var(--muted); padding: 1px 6px; border: 1px solid var(--line); border-radius: 4px; }
+.seg { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 6px; overflow: hidden; }
+.seg button { border: 0; background: transparent; padding: 4px 12px; cursor: pointer; color: var(--muted); }
+.seg button + button { border-left: 1px solid var(--line-strong); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); font-weight: 500; }
+select#group {
+  background: var(--card); border: 1px solid var(--line-strong); border-radius: 6px;
+  padding: 4px 8px; max-width: 100%; min-width: 0;
+}
+.search { position: relative; flex: 1 1 200px; min-width: 0; max-width: 340px; }
+.search input {
+  width: 100%; background: var(--card); border: 1px solid var(--line-strong); border-radius: 6px;
+  padding: 4px 10px 4px 30px;
+}
+.search svg { position: absolute; left: 9px; top: 50%; transform: translateY(-50%); color: var(--faint); pointer-events: none; }
+.results {
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0; min-width: 260px; max-height: 60vh; overflow: auto;
+  margin: 0; padding: 4px; list-style: none; background: var(--card); border: 1px solid var(--line-strong);
+  border-radius: 8px; box-shadow: var(--shadow-lg); z-index: 50;
+}
+.results li { display: flex; gap: 8px; align-items: baseline; padding: 4px 8px; border-radius: 5px; cursor: pointer; }
+.results li[aria-selected="true"] { background: var(--accent-soft); }
+.results .rn { font: 12.5px var(--mono); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.results .rn em { font-style: normal; color: var(--accent); font-weight: 600; }
+.results .rl { margin-left: auto; font-size: 11px; color: var(--faint); white-space: nowrap; }
+.results .empty { color: var(--muted); cursor: default; }
+.tools { display: inline-flex; gap: 4px; margin-left: auto; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 4px; min-width: 30px; height: 30px;
+  padding: 0 8px; background: var(--card); border: 1px solid var(--line-strong); border-radius: 6px; cursor: pointer; color: var(--text);
+}
+.btn:hover { border-color: var(--accent); }
+
+.stage { position: relative; overflow: hidden; min-width: 0; min-height: 0; }
+.canvas {
+  position: absolute; inset: 0; overflow: hidden; touch-action: none; cursor: grab;
+  background-color: var(--canvas);
+  background-image: radial-gradient(circle, var(--dot) 1px, transparent 1.2px);
+  background-size: 22px 22px;
+}
+.canvas.panning { cursor: grabbing; }
+.world { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+.world.anim { transition: transform .28s ease; }
+#edges { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
+.edge { fill: none; stroke: var(--edge); stroke-width: 1.4; transition: opacity .15s; }
+.edge.null { stroke-dasharray: 5 4; }
+.edge.via-constraint { stroke: var(--cfk); }
+.edge.multi { stroke-width: 3; }
+.edge.multi.hi { stroke-width: 3.6; }
+.uq.cfk { color: var(--cfk); border-color: var(--cfk); }
+.edge.via-inferred { stroke: var(--inf); stroke-dasharray: 1 4; stroke-linecap: round; stroke-width: 1.8; }
+.edge.hi { stroke: var(--accent); stroke-width: 2.2; }
+.edge.hi.in { stroke: var(--fk); }
+.mk { fill: var(--edge); }
+.mk.hi { fill: var(--accent); }
+.mk.hi-in { fill: var(--fk); }
+.has-sel .edge:not(.hi) { opacity: .12; }
+.edge.x { opacity: .3; }
+.edge.x.hi { opacity: 1; }
+.gbox {
+  position: absolute; left: 0; top: 0; border: 1px dashed var(--line-strong); border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 35%, transparent);
+}
+.glabel {
+  position: absolute; left: 14px; top: 10px; padding: 2px 10px; border: 1px solid var(--line-strong); border-radius: 999px;
+  background: var(--card); font: 500 20px var(--ui); color: var(--muted); cursor: pointer; white-space: nowrap;
+}
+.glabel:hover { color: var(--accent); border-color: var(--accent); }
+.has-sel .gbox { opacity: .6; }
+
+.tbl {
+  position: absolute; left: 0; top: 0; width: max-content; min-width: 180px; max-width: 380px;
+  background: var(--card); border: 1px solid var(--line-strong); border-radius: 7px; box-shadow: var(--shadow);
+  cursor: pointer; transition: opacity .15s, box-shadow .15s; outline: none;
+}
+.tbl:focus-visible { box-shadow: 0 0 0 3px var(--accent); }
+.measuring .tbl { visibility: hidden; }
+.th {
+  display: flex; align-items: center; gap: 8px; padding: 6px 10px; background: var(--card-head);
+  border-bottom: 1px solid var(--line); border-radius: 7px 7px 0 0;
+}
+.tn { font: 600 13px var(--mono); }
+.tx { margin-left: auto; font: 11px var(--mono); color: var(--faint); white-space: nowrap; }
+.rows { padding: 3px 0; }
+.row {
+  display: flex; align-items: center; gap: 6px; padding: 1px 10px 1px 8px; min-height: 21px;
+  font: 12px/1.45 var(--mono); white-space: nowrap;
+}
+.ic { width: 14px; height: 14px; flex: none; display: inline-flex; color: var(--faint); }
+.row.pk .ic { color: var(--accent); }
+.row.fk:not(.pk) .ic { color: var(--fk); }
+.row.fk.via-constraint:not(.pk) .ic { color: var(--cfk); }
+.row.fk.via-inferred:not(.pk) .ic, .row.nref:not(.pk):not(.fk) .ic { color: var(--inf); }
+.cn { color: var(--text); }
+.row.pk .cn { color: var(--accent); font-weight: 600; }
+.ct { margin-left: auto; padding-left: 14px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; max-width: 22ch; }
+.ct.null, .row.null .cn { color: var(--faint); }
+.ct .q { color: var(--faint); }
+.ct.enum { max-width: 20ch; cursor: help; border-bottom: 1px dotted var(--line-strong); padding-left: 0; margin-left: 14px; }
+.row .ct.enum { margin-left: auto; }
+.ct.fk { color: var(--fk); }
+.ct.fk.null { opacity: .75; }
+.ct.fk.via-constraint { color: var(--cfk); }
+.ct.fk.via-inferred { color: var(--inf); font-style: italic; text-decoration: underline dotted; text-underline-offset: 2px; }
+.ct.raw { color: var(--muted); font-style: italic; }
+.xchip {
+  display: inline-flex; align-items: center; gap: 3px; margin-left: auto; padding: 0 5px; max-width: 24ch;
+  border: 1px dashed var(--fk); border-radius: 4px; background: var(--fk-soft); color: var(--fk);
+  font: 11.5px/1.5 var(--mono); cursor: pointer;
+}
+.xchip:hover { border-style: solid; }
+.xchip.null { opacity: .8; }
+.xchip.via-constraint { color: var(--cfk); border-color: var(--cfk); }
+.xchip.via-inferred { color: var(--inf); border-color: var(--inf); font-style: italic; }
+.uq {
+  flex: none; font: 600 9.5px/1 var(--mono); padding: 2px 4px; border-radius: 3px;
+  color: var(--muted); border: 1px solid var(--line-strong); letter-spacing: .02em;
+}
+.more { padding: 1px 10px 3px; font: 11px var(--mono); color: var(--faint); }
+.tbl.sel { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent), var(--shadow-lg); }
+.tbl.sel .th { background: var(--accent-soft); }
+.tbl.rel { border-color: var(--line-strong); }
+.has-sel .tbl:not(.sel):not(.rel) { opacity: .28; }
+.row.link { background: var(--fk-soft); }
+.row.hit { background: var(--accent-soft); box-shadow: inset 3px 0 0 var(--accent); }
+.tbl.flash { animation: flash 1.2s ease 2; }
+@keyframes flash { 50% { box-shadow: 0 0 0 6px var(--accent-soft), 0 0 0 2px var(--accent); } }
+
+.status {
+  position: absolute; left: 50%; top: 14px; transform: translateX(-50%); z-index: 5;
+  background: var(--card); border: 1px solid var(--line-strong); border-radius: 999px; padding: 3px 14px;
+  font-size: 12.5px; color: var(--muted); box-shadow: var(--shadow);
+}
+.status.err { color: var(--fk); border-color: var(--fk); border-radius: 8px; max-width: calc(100% - 32px); }
+.legend {
+  position: absolute; left: 12px; bottom: 12px; z-index: 4; display: flex; flex-wrap: wrap; gap: 4px 12px; align-items: center;
+  max-width: calc(100% - 24px); padding: 6px 10px; background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+  font-size: 11.5px; color: var(--muted); box-shadow: var(--shadow);
+}
+.legend span { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; }
+.legend .k { color: var(--accent); display: inline-flex; }
+.legend .f { color: var(--fk); display: inline-flex; }
+.legend svg.ln { width: 28px; height: 8px; }
+.legend .zoom { font: 11px var(--mono); color: var(--faint); }
+
+.panel {
+  grid-row: 2; grid-column: 2; background: var(--card); border-left: 1px solid var(--line);
+  overflow: auto; min-height: 0; overscroll-behavior: contain;
+}
+.panel-in { padding: 16px; display: grid; gap: 16px; }
+.ph { display: flex; align-items: flex-start; gap: 8px; }
+.ph h2 { margin: 0; font: 600 18px/1.3 var(--mono); word-break: break-all; }
+.ph .btn { margin-left: auto; flex: none; }
+.meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font-size: 12.5px; color: var(--muted); }
+.pill {
+  display: inline-flex; align-items: center; gap: 4px; padding: 1px 8px; border-radius: 999px;
+  border: 1px solid var(--line-strong); background: transparent; font-size: 12px; cursor: pointer; color: var(--text);
+}
+.pill:hover { border-color: var(--accent); color: var(--accent); }
+.pill.cur { background: var(--accent-soft); border-color: var(--accent); }
+.src { font: 12px var(--mono); color: var(--muted); }
+.sec h3 { margin: 0 0 6px; font-size: 12px; font-weight: 700; color: var(--muted); letter-spacing: .06em; }
+.fields { width: 100%; border-collapse: collapse; font: 12px/1.45 var(--mono); }
+.fields td { padding: 4px 6px 4px 0; border-top: 1px solid var(--line); vertical-align: top; }
+.fields td:first-child { white-space: nowrap; }
+.fields .pkn { color: var(--accent); font-weight: 600; }
+.fields .nul { color: var(--faint); }
+.fields .ty { color: var(--muted); word-break: break-word; }
+.fields .ev { display: flex; flex-wrap: wrap; gap: 3px; }
+.fields .ev span { padding: 0 4px; border: 1px solid var(--line); border-radius: 3px; }
+.fields .fl { display: flex; flex-wrap: wrap; gap: 3px; margin-top: 2px; }
+.tag { font: 600 10px/1.5 var(--mono); padding: 0 4px; border-radius: 3px; border: 1px solid var(--line-strong); color: var(--muted); }
+.tag.pk { color: var(--accent); border-color: var(--accent); }
+.tag.fk { color: var(--fk); border-color: var(--fk); cursor: pointer; background: transparent; }
+.tag.fk.via-constraint { color: var(--cfk); border-color: var(--cfk); }
+.tag.fk.via-inferred { color: var(--inf); border-color: var(--inf); border-style: dotted; }
+.cons { margin: 0; padding: 10px 12px; background: var(--card-head); border-radius: 6px; font-size: 13px; line-height: 1.65; white-space: pre-wrap; word-break: break-word; }
+.links { display: flex; flex-wrap: wrap; gap: 4px; }
+.links button { font: 12px var(--mono); }
+.note { font-size: 12.5px; color: var(--muted); margin: 0; }
+.help { display: grid; gap: 10px; font-size: 13px; color: var(--muted); }
+.help p { margin: 0; }
+.help kbd { font: 11px var(--mono); padding: 0 4px; border: 1px solid var(--line-strong); border-radius: 3px; }
+
+.pop {
+  position: fixed; z-index: 60; max-width: min(360px, calc(100vw - 24px)); padding: 8px 10px;
+  background: var(--card); border: 1px solid var(--line-strong); border-radius: 8px; box-shadow: var(--shadow-lg);
+  font: 12px/1.6 var(--mono);
+}
+.pop b { display: block; font: 600 11px var(--ui); color: var(--muted); margin-bottom: 4px; }
+.pop .ev { display: flex; flex-wrap: wrap; gap: 4px; }
+.pop .ev span { padding: 0 5px; border: 1px solid var(--line); border-radius: 3px; }
+
+@media (max-width: 900px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .panel {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; max-height: 58%;
+    border-left: 0; border-top: 1px solid var(--line-strong); border-radius: 14px 14px 0 0; box-shadow: var(--shadow-lg);
+    padding-bottom: env(safe-area-inset-bottom, 0px); transform: translateY(0); transition: transform .22s ease;
+  }
+  .panel.closed { transform: translateY(105%); }
+  .panel::before { content: ""; display: block; width: 36px; height: 4px; border-radius: 2px; background: var(--line-strong); margin: 8px auto 0; }
+  .tools { margin-left: 0; }
+  .search { max-width: none; flex-basis: 100%; order: 5; }
+  .legend { font-size: 11px; padding: 4px 8px; }
+  .legend .opt { display: none; }
+}
+@media (min-width: 901px) { .ph .close { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition: none !important; animation: none !important; }
+}
+</style>
+
+<div class="app">
+  <header class="bar">
+    <div class="brand"><b>Schema v1 ER</b><span>docs/schema</span></div>
+    <div class="seg" role="group" aria-label="層">
+      <button type="button" id="L-build" data-layer="build" aria-pressed="true">建置層</button>
+      <button type="button" id="L-snapshot" data-layer="snapshot" aria-pressed="false">快照層</button>
+    </div>
+    <select id="group" aria-label="分組"></select>
+    <div class="search">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><circle cx="7" cy="7" r="5"/><path d="m11 11 3.5 3.5"/></svg>
+      <input id="q" type="search" placeholder="找表或欄位（按 / ）" autocomplete="off" spellcheck="false"
+        role="combobox" aria-expanded="false" aria-controls="qres" aria-autocomplete="list">
+      <ul id="qres" class="results" role="listbox" hidden></ul>
+    </div>
+    <div class="tools">
+      <button type="button" class="btn" id="zout" aria-label="縮小" title="縮小">−</button>
+      <button type="button" class="btn" id="zin" aria-label="放大" title="放大">+</button>
+      <button type="button" class="btn" id="fit" title="適合畫面">適合畫面</button>
+      <button type="button" class="btn" id="theme" title="切換主題" aria-label="切換主題"></button>
+    </div>
+  </header>
+  <main class="stage">
+    <div class="canvas" id="canvas" aria-label="ER 圖畫布，可拖曳平移、滾輪縮放">
+      <div class="world" id="world">
+        <div id="gboxes"></div>
+        <svg id="edges" aria-hidden="true"></svg>
+        <div id="nodes"></div>
+      </div>
+    </div>
+    <div class="status" id="status" role="status">載入中…</div>
+    <div class="legend" id="legend">
+      <span><i class="k" data-ic="key"></i>PK</span>
+      <span><i class="f" data-ic="link"></i>FK 欄</span>
+      <span><b class="uq">UQ</b>唯一</span>
+      <span id="lg-decl"><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6"/></svg>宣告 FK</span>
+      <span id="lg-null"><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--edge)" stroke-width="1.6" stroke-dasharray="5 4"/></svg>可空 FK</span>
+      <span id="lg-cons" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--cfk)" stroke-width="1.6"/></svg>約束 FK</span>
+      <span id="lg-multi" class="opt" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M0 4h28" stroke="var(--cfk)" stroke-width="3"/></svg><b class="uq cfk">FK1</b>複合約束</span>
+      <span id="lg-inf" hidden><svg class="ln" viewBox="0 0 28 8"><path d="M1 4h26" stroke="var(--inf)" stroke-width="1.8" stroke-dasharray="1 4" stroke-linecap="round"/></svg><i style="color:var(--inf);font:italic 11px var(--mono)">card</i>欄名推斷的引用</span>
+      <span class="opt" id="lg-hub" hidden>總圖不畫指向 decision／source_record／text_unit 的線</span>
+      <span class="zoom" id="zoomlbl">100%</span>
+    </div>
+  </main>
+  <aside class="panel" id="panel" aria-label="表細節"><div class="panel-in" id="panelIn"></div></aside>
+</div>
+<div class="pop" id="pop" hidden></div>
+
+<script src="https://cdn.jsdelivr.net/npm/elkjs@0.9.3/lib/elk.bundled.js"></script>
+<script>
+const DATA = /*__DATA__*/null;
+// Provenance tables nearly everything points at; the overview leaves their edges out so the layout stays readable.
+const HUBS = new Set(["decision", "source_record", "text_unit"]);
+const LAYER_NAME = { build: "建置層", snapshot: "快照層" };
+const VIA_NAME = { decl: "欄位宣告的 FK", constraint: "約束 FK(...) 宣告的 FK", inferred: "由欄位名推斷的引用，不是宣告的 FK" };
+const VIA_SHORT = { constraint: "約束", inferred: "推斷" };
+const ICON = {
+  key: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="5" cy="8" r="3"/><path d="M8 8h7M12.5 8v2.6M15 8v2"/></svg>',
+  link: '<svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><path d="M6.5 9.5l3-3"/><path d="M7.6 4.6l1.2-1.2a2.6 2.6 0 0 1 3.7 3.7l-1.2 1.2M8.4 11.4l-1.2 1.2a2.6 2.6 0 0 1-3.7-3.7l1.2-1.2"/></svg>',
+  out: '<svg width="10" height="10" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M4 2h6v6M10 2 3 9"/></svg>',
+  sun: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="3"/><path d="M8 1v2M8 13v2M1 8h2M13 8h2M3 3l1.4 1.4M11.6 11.6 13 13M3 13l1.4-1.4M11.6 4.4 13 3"/></svg>',
+  moon: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><path d="M13.5 10A6 6 0 0 1 6 2.5a6 6 0 1 0 7.5 7.5z"/></svg>',
+  auto: '<svg width="15" height="15" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 2v12" /><path d="M8 2a6 6 0 0 1 0 12z" fill="currentColor"/></svg>',
+};
+document.querySelectorAll("[data-ic]").forEach(el => { el.innerHTML = ICON[el.dataset.ic]; });
+
+const store = {
+  get(k) { try { return JSON.parse(localStorage.getItem("schema-er:" + k)); } catch { return null; } },
+  set(k, v) { try { localStorage.setItem("schema-er:" + k, JSON.stringify(v)); } catch { /* storage unavailable */ } },
+};
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const $ = s => document.querySelector(s);
+const canvas = $("#canvas"), world = $("#world"), nodesEl = $("#nodes"), edgesSvg = $("#edges"), gboxesEl = $("#gboxes");
+const statusEl = $("#status"), panel = $("#panel"), panelIn = $("#panelIn"), pop = $("#pop");
+const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// ---------- indexes ----------
+const IDX = {};
+for (const [L, d] of Object.entries(DATA.layers)) {
+  const tg = {}, incoming = {}, outgoing = {};
+  d.groups.forEach(g => g.tables.forEach(t => (tg[t] ||= []).push(g.key)));
+  d.rels.forEach(r => { (incoming[r.to] ||= []).push(r); (outgoing[r.from] ||= []).push(r); });
+  const uqTitle = {}, cfk = {};
+  for (const t of Object.values(d.tables)) {
+    cfk[t.name] = d.rels.filter(r => r.from === t.name && r.via === "constraint").map(r => r.label);
+    const m = {};
+    t.cols.forEach(c => c.uq.forEach(u => { (m[u] ||= []).push(c.name); }));
+    uqTitle[t.name] = m;
+  }
+  IDX[L] = { tg, incoming, outgoing, uqTitle, cfk, groups: Object.fromEntries(d.groups.map(g => [g.key, g])) };
+}
+
+const S = { layer: "build", group: "b02", sel: null, tf: { x: 0, y: 0, k: 1 }, size: { w: 0, h: 0 }, token: 0, visible: new Set(), pos: {} };
+const saved = store.get("view");
+if (saved && DATA.layers[saved.layer] && (saved.group === "all" || IDX[saved.layer].groups[saved.group])) {
+  S.layer = saved.layer; S.group = saved.group; S.sel = saved.sel || null;
+} else {
+  S.sel = "printing";
+}
+function persist() { store.set("view", { layer: S.layer, group: S.group, sel: S.sel }); }
+
+// ---------- theme ----------
+const THEMES = ["auto", "light", "dark"];
+let theme = store.get("theme") || "auto";
+function applyTheme() {
+  if (theme === "auto") document.documentElement.removeAttribute("data-theme");
+  else document.documentElement.setAttribute("data-theme", theme);
+  const b = $("#theme");
+  b.innerHTML = ICON[theme === "auto" ? "auto" : theme === "light" ? "sun" : "moon"];
+  b.title = b.ariaLabel = "主題：" + ({ auto: "跟隨系統", light: "淺色", dark: "深色" }[theme]) + "（點擊切換）";
+}
+$("#theme").addEventListener("click", () => { theme = THEMES[(THEMES.indexOf(theme) + 1) % 3]; store.set("theme", theme); applyTheme(); });
+applyTheme();
+
+// ---------- controls ----------
+function fillGroups() {
+  const L = DATA.layers[S.layer];
+  const sel = $("#group");
+  sel.innerHTML = `<option value="all">總圖（${Object.keys(L.tables).length} 表，只列 PK／FK）</option>` +
+    L.groups.map(g => `<option value="${g.key}">${g.key} ${esc(g.short)}（${g.tables.length}）</option>`).join("");
+  sel.value = S.group;
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.layer === S.layer)));
+  const vias = new Set(L.rels.map(r => r.via));
+  $("#lg-decl").hidden = $("#lg-null").hidden = !vias.has("decl");
+  $("#lg-cons").hidden = !vias.has("constraint");
+  $("#lg-multi").hidden = !L.rels.some(r => r.via === "constraint" && r.cols.length > 1);
+  $("#lg-inf").hidden = !vias.has("inferred");
+}
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  if (b.dataset.layer === S.layer) return;
+  S.layer = b.dataset.layer;
+  S.group = DATA.layers[S.layer].groups[0].key;
+  if (S.sel && !DATA.layers[S.layer].tables[S.sel]) S.sel = null;
+  if (S.sel && !IDX[S.layer].groups[S.group].tables.includes(S.sel)) S.group = IDX[S.layer].tg[S.sel]?.[0] || S.group;
+  fillGroups(); render();
+}));
+$("#group").addEventListener("change", e => { S.group = e.target.value; render(); });
+
+function setStatus(msg, err) {
+  statusEl.hidden = !msg; statusEl.textContent = msg || ""; statusEl.classList.toggle("err", !!err);
+}
+
+// ---------- cards ----------
+function typeHTML(c, overview) {
+  const q = c.nullable ? '<span class="q">?</span>' : "";
+  if (c.raw) return `<span class="ct raw" title="${esc(c.raw)}">${esc(c.raw)}</span>`;
+  if (c.fk_target) {
+    const label = c.type && c.type.startsWith("[") ? `[${c.fk_target}]` : c.fk_target;
+    const inf = " via-" + c.fk_via;
+    if (!S.visible.has(c.fk_target) || overview && HUBS.has(c.fk_target)) {
+      const g = IDX[S.layer].tg[c.fk_target]?.[0];
+      const gt = g ? `${g} ${IDX[S.layer].groups[g].short}` : "未分組";
+      return `<button type="button" class="xchip${c.nullable ? " null" : ""}${inf}" data-jump="${esc(c.fk_target)}" title="跳到 ${esc(c.fk_target)}（${esc(gt)}）">${esc(label)}${c.nullable ? "?" : ""}${ICON.out}</button>`;
+    }
+    return `<span class="ct fk${c.nullable ? " null" : ""}${inf}"${c.fk_via === "inferred" ? ' title="由欄位名推斷的引用"' : c.fk_via === "constraint" ? ' title="由約束 FK(...) 宣告"' : ""}>${esc(label)}${q}</span>`;
+  }
+  if (c.enum_values) {
+    const full = c.enum_values.join(" | ");
+    return `<span class="ct enum${c.nullable ? " null" : ""}" data-enum="${esc(c.name)}" title="${esc(full)}">${esc(c.enum_values.join("|"))}${q}</span>`;
+  }
+  if (!c.type) return c.nullable ? `<span class="ct null">?</span>` : "";
+  return `<span class="ct${c.nullable ? " null" : ""}" title="${esc(c.type)}">${esc(c.type)}${q}</span>`;
+}
+function cfkHTML(t, c) {
+  const all = IDX[S.layer].cfk[t.name];
+  return c.constraint_fks.map(l => `<b class="uq cfk" title="${esc(l)}">FK${all.indexOf(l) + 1}</b>`).join("");
+}
+function uqHTML(t, c) {
+  const m = IDX[S.layer].uqTitle[t.name];
+  return cfkHTML(t, c) + c.uq.map(u => {
+    const label = u === "UNIQUE" ? "UQ" : u;
+    const tip = u === "UNIQUE" ? "單欄唯一" : `${u.endsWith("*") ? "部分唯一" : "唯一"}：(${m[u].join(", ")})`;
+    return `<b class="uq" title="${esc(tip)}">${esc(label)}</b>`;
+  }).join("");
+}
+function cardEl(t, overview) {
+  const el = document.createElement("div");
+  el.className = "tbl"; el.dataset.t = t.name; el.tabIndex = 0; el.setAttribute("role", "button");
+  el.setAttribute("aria-label", `${t.name} 表，${t.cols.length} 欄`);
+  const cols = overview ? t.cols.filter(c => c.pk || c.fk_target || c.nested_refs.length) : t.cols;
+  const hidden = t.cols.length - cols.length;
+  el.innerHTML = `<div class="th"><span class="tn">${esc(t.name)}</span><span class="tx">${t.cols.length} 欄</span></div>` +
+    `<div class="rows">` + cols.map(c => {
+      const cls = ["row", c.pk && "pk", c.fk_target && "fk", c.fk_via && "via-" + c.fk_via, c.nested_refs.length && "nref", c.nullable && "null"].filter(Boolean).join(" ");
+      const ic = c.pk ? ICON.key : c.fk_target || c.nested_refs.length ? ICON.link : "";
+      return `<div class="${cls}" data-c="${esc(c.name)}"><span class="ic">${ic}</span><span class="cn">${esc(c.name)}</span>${typeHTML(c, overview)}${uqHTML(t, c)}</div>`;
+    }).join("") + (hidden ? `<div class="more">＋${hidden} 個一般欄位</div>` : "") + `</div>`;
+  return el;
+}
+
+// ---------- layout ----------
+const elk = typeof ELK !== "undefined" ? new ELK() : null;
+const nextFrame = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+let fontsReady = document.fonts ? document.fonts.ready.catch(() => {}) : Promise.resolve();
+
+function anchorY(card, col) {
+  const row = col && card.querySelector(`.row[data-c="${CSS.escape(col)}"]`);
+  if (row) return row.offsetTop + row.offsetHeight / 2;
+  const th = card.querySelector(".th");
+  return th.offsetHeight / 2;
+}
+function targetCol(r) {
+  const t = DATA.layers[S.layer].tables[r.to];
+  if (r.to_col && t.cols.some(c => c.name === r.to_col)) return r.to_col;
+  const pks = t.cols.filter(c => c.pk);
+  return pks.length === 1 ? pks[0].name : null;
+}
+
+async function render() {
+  const token = ++S.token;
+  const L = DATA.layers[S.layer];
+  const overview = S.group === "all";
+  const names = overview ? Object.keys(L.tables) : IDX[S.layer].groups[S.group].tables;
+  S.visible = new Set(names);
+  persist(); hidePop();
+  $("#lg-hub").hidden = !overview;
+  setStatus(overview ? `排版中（${names.length} 張表）…` : "排版中…");
+  await fontsReady;
+  world.classList.add("measuring");
+  nodesEl.innerHTML = ""; edgesSvg.innerHTML = ""; gboxesEl.innerHTML = "";
+  const cards = {};
+  for (const n of names) { const el = cardEl(L.tables[n], overview); nodesEl.append(el); cards[n] = el; }
+  await nextFrame();
+  if (token !== S.token) return;
+  const size = {};
+  for (const n of names) size[n] = { w: Math.ceil(cards[n].offsetWidth), h: Math.ceil(cards[n].offsetHeight) };
+  const rels = L.rels.filter(r => S.visible.has(r.from) && S.visible.has(r.to) && !(overview && HUBS.has(r.to)));
+  // The overview packs each group as its own layered cluster; FKs between groups are drawn as curves afterwards.
+  const groupOf = {};
+  if (overview) L.groups.forEach(g => g.tables.forEach(t => { groupOf[t] ??= g.key; }));
+  const ports = Object.fromEntries(names.map(n => [n, []]));
+  const edges = [], selfLoops = [], cross = [];
+  const inPorts = new Set();
+  rels.forEach((r, i) => {
+    const tc = targetCol(r);
+    const sy = anchorY(cards[r.from], r.col), ty = anchorY(cards[r.to], tc);
+    if (r.from === r.to) { selfLoops.push({ r, sy, ty }); return; }
+    if (overview && groupOf[r.from] !== groupOf[r.to]) { cross.push({ r, sy, ty }); return; }
+    const inId = `${r.to}::in::${tc || "_"}`;
+    if (!inPorts.has(inId)) {
+      inPorts.add(inId);
+      ports[r.to].push({ id: inId, x: size[r.to].w, y: ty, width: 0, height: 0, layoutOptions: { "elk.port.side": "EAST" } });
+    }
+    const outId = `${r.from}::out::${i}`;
+    ports[r.from].push({ id: outId, x: 0, y: sy, width: 0, height: 0, layoutOptions: { "elk.port.side": "WEST" } });
+    edges.push({ id: "e" + i, sources: [inId], targets: [outId], r, g: groupOf[r.from] });
+  });
+  const LAYERED = {
+    "elk.algorithm": "layered", "elk.direction": "RIGHT", "elk.edgeRouting": "ORTHOGONAL",
+    "elk.layered.spacing.nodeNodeBetweenLayers": "80",
+    "elk.spacing.nodeNode": "28", "elk.spacing.edgeNode": "16", "elk.spacing.edgeEdge": "7",
+    "elk.layered.spacing.edgeNodeBetweenLayers": "14", "elk.layered.spacing.edgeEdgeBetweenLayers": "7",
+    "elk.layered.nodePlacement.strategy": "BRANDES_KOEPF",
+    "elk.layered.considerModelOrder.strategy": "NODES_AND_EDGES",
+    "elk.separateConnectedComponents": "true", "elk.spacing.componentComponent": "40",
+  };
+  const nodeSpec = n => ({ id: n, width: size[n].w, height: size[n].h, ports: ports[n], layoutOptions: { "elk.portConstraints": "FIXED_POS" } });
+  const edgeSpec = e => ({ id: e.id, sources: e.sources, targets: e.targets });
+  const aspect = String(Math.max(1, Math.min(2.2, canvas.clientWidth / Math.max(1, canvas.clientHeight))));
+  let placed = null, routes = {}, boxes = [];
+  if (elk) {
+    const graph = overview ? {
+      id: "root",
+      layoutOptions: { "elk.algorithm": "rectpacking", "elk.aspectRatio": aspect, "elk.spacing.nodeNode": "56", "elk.padding": "[top=24,left=24,bottom=24,right=24]" },
+      children: L.groups.map(g => ({
+        id: "g:" + g.key,
+        layoutOptions: { ...LAYERED, "elk.padding": "[top=46,left=20,bottom=20,right=40]" },
+        children: g.tables.filter(t => groupOf[t] === g.key).map(nodeSpec),
+        edges: edges.filter(e => e.g === g.key).map(edgeSpec),
+      })),
+    } : {
+      id: "root",
+      layoutOptions: { ...LAYERED, "elk.aspectRatio": aspect, "elk.padding": "[top=24,left=24,bottom=24,right=40]" },
+      children: names.map(nodeSpec),
+      edges: edges.map(edgeSpec),
+    };
+    try {
+      const res = await elk.layout(graph);
+      if (token !== S.token) return;
+      placed = {};
+      const take = (container, ox, oy) => {
+        (container.children || []).forEach(c => { placed[c.id] = { x: ox + c.x, y: oy + c.y }; });
+        (container.edges || []).forEach(e => {
+          const sec = e.sections && e.sections[0];
+          if (!sec) return;
+          const sh = pt => ({ x: pt.x + ox, y: pt.y + oy });
+          routes[e.id] = { startPoint: sh(sec.startPoint), endPoint: sh(sec.endPoint), bendPoints: (sec.bendPoints || []).map(sh) };
+        });
+      };
+      if (overview) {
+        res.children.forEach(g => {
+          boxes.push({ key: g.id.slice(2), x: g.x, y: g.y, w: g.width, h: g.height });
+          take(g, g.x, g.y);
+        });
+      } else take(res, 0, 0);
+      S.size = { w: res.width, h: res.height };
+    } catch (err) {
+      console.error(err);
+      setStatus("自動排版失敗，改用格狀排列：" + (err && err.message || err), true);
+    }
+  }
+  if (!placed) { placed = gridLayout(names, size); boxes = []; routes = {}; }
+  S.pos = {};
+  for (const n of names) {
+    const p = placed[n];
+    cards[n].style.transform = `translate(${p.x}px, ${p.y}px)`;
+    S.pos[n] = { x: p.x, y: p.y, w: size[n].w, h: size[n].h };
+  }
+  for (const b of boxes) {
+    const g = IDX[S.layer].groups[b.key];
+    const el = document.createElement("div");
+    el.className = "gbox";
+    el.style.cssText = `transform:translate(${b.x}px,${b.y}px);width:${b.w}px;height:${b.h}px`;
+    el.innerHTML = `<button type="button" class="glabel" data-group="${b.key}" title="只看這個分組（完整欄位）">${b.key} ${esc(g.short)}</button>`;
+    gboxesEl.append(el);
+  }
+  if (!elk || !placed) cross.length = 0;
+  drawEdges(edges, routes, selfLoops, cross);
+  world.classList.remove("measuring");
+  if (elk && !statusEl.classList.contains("err")) setStatus("");
+  if (!elk) setStatus("排版函式庫（elkjs）沒有載入，改用格狀排列、連線為直接曲線", true);
+  renderPanel();
+  fit(false);
+  applySel();
+}
+
+function gridLayout(names, size) {
+  const out = {}; const colW = 400; const cols = Math.max(1, Math.round(Math.sqrt(names.length)));
+  const colY = new Array(cols).fill(24);
+  names.forEach((n, i) => {
+    const c = colY.indexOf(Math.min(...colY));
+    out[n] = { x: 24 + c * colW, y: colY[c] }; colY[c] += size[n].h + 32;
+  });
+  S.size = { w: 24 + cols * colW, h: Math.max(...colY) + 24 };
+  return out;
+}
+
+function roundedPath(pts, rad = 6) {
+  let d = `M${pts[0].x},${pts[0].y}`;
+  for (let i = 1; i < pts.length - 1; i++) {
+    const a = pts[i - 1], b = pts[i], c = pts[i + 1];
+    const d1 = Math.hypot(b.x - a.x, b.y - a.y), d2 = Math.hypot(c.x - b.x, c.y - b.y);
+    const r = Math.min(rad, d1 / 2, d2 / 2);
+    if (r < .5) { d += ` L${b.x},${b.y}`; continue; }
+    const p1 = { x: b.x + (a.x - b.x) * r / d1, y: b.y + (a.y - b.y) * r / d1 };
+    const p2 = { x: b.x + (c.x - b.x) * r / d2, y: b.y + (c.y - b.y) * r / d2 };
+    d += ` L${p1.x},${p1.y} Q${b.x},${b.y} ${p2.x},${p2.y}`;
+  }
+  const z = pts[pts.length - 1];
+  return d + ` L${z.x},${z.y}`;
+}
+
+const MARKERS = `<defs>
+  ${["", "hi", "hi-in"].map(k => `
+  <marker id="mo${k}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path class="mk ${k}" d="M1 1 9 5 1 9z"/></marker>
+  <marker id="md${k}" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5"><circle class="mk ${k}" cx="5" cy="5" r="4"/></marker>`).join("")}
+</defs>`;
+
+function drawEdges(edges, routes, selfLoops, cross = []) {
+  const out = [MARKERS];
+  const pathEl = (d, r) => `<path class="edge via-${r.via}${r.cols.length > 1 ? " multi" : ""}${r.nullable ? " null" : ""}" data-from="${esc(r.from)}" data-to="${esc(r.to)}" data-col="${esc(r.col)}" d="${d}" marker-start="url(#mo)" marker-end="url(#md)"/>`;
+  for (const e of edges) {
+    const s = routes[e.id];
+    let d;
+    if (s) {
+      d = roundedPath([s.startPoint, ...(s.bendPoints || []), s.endPoint]);
+    } else {
+      const a = S.pos[e.r.to], b = S.pos[e.r.from];
+      const ay = a.y + anchorY(nodesEl.querySelector(`.tbl[data-t="${CSS.escape(e.r.to)}"]`), targetCol(e.r));
+      const by = b.y + anchorY(nodesEl.querySelector(`.tbl[data-t="${CSS.escape(e.r.from)}"]`), e.r.col);
+      const ax = a.x + a.w, bx = b.x; const dx = Math.max(40, Math.abs(bx - ax) / 2);
+      d = `M${ax},${ay} C${ax + dx},${ay} ${bx - dx},${by} ${bx},${by}`;
+    }
+    out.push(pathEl(d, e.r));
+  }
+  for (const { r, sy, ty } of selfLoops) {
+    const p = S.pos[r.from]; const x = p.x + p.w; const off = 22;
+    out.push(pathEl(roundedPath([{ x, y: p.y + ty }, { x: x + off, y: p.y + ty }, { x: x + off, y: p.y + sy }, { x, y: p.y + sy }]), r));
+  }
+  for (const { r, sy, ty } of cross) {
+    const a = S.pos[r.from], b = S.pos[r.to];
+    const left = b.x + b.w / 2 < a.x + a.w / 2;
+    const sx = left ? a.x : a.x + a.w, ex = left ? b.x + b.w : b.x;
+    const syA = a.y + sy, eyA = b.y + ty;
+    const dx = Math.max(50, Math.abs(ex - sx) * .35), ds = left ? -1 : 1;
+    out.push(pathEl(`M${ex},${eyA} C${ex - ds * dx},${eyA} ${sx + ds * dx},${syA} ${sx},${syA}`, r).replace('class="edge', 'class="edge x'));
+  }
+  edgesSvg.innerHTML = out.join("");
+  edgesSvg.setAttribute("width", S.size.w + 60); edgesSvg.setAttribute("height", S.size.h + 20);
+  world.style.width = S.size.w + "px"; world.style.height = S.size.h + "px";
+}
+// Note: path starts at the referenced (PK) side, so marker-start is the arrow into the parent table and marker-end the dot on the FK row.
+
+// ---------- selection ----------
+function neighbours(t) {
+  const set = new Set();
+  (IDX[S.layer].outgoing[t] || []).forEach(r => set.add(r.to));
+  (IDX[S.layer].incoming[t] || []).forEach(r => set.add(r.from));
+  set.delete(t);
+  return set;
+}
+function applySel() {
+  const sel = S.sel && S.visible.has(S.sel) ? S.sel : null;
+  world.classList.toggle("has-sel", !!sel);
+  const nb = sel ? neighbours(sel) : new Set();
+  nodesEl.querySelectorAll(".tbl").forEach(el => {
+    const t = el.dataset.t;
+    el.classList.toggle("sel", t === sel); el.classList.toggle("rel", nb.has(t));
+    el.setAttribute("aria-pressed", String(t === sel));
+  });
+  nodesEl.querySelectorAll(".row.link, .row.hit").forEach(r => r.classList.remove("link", "hit"));
+  edgesSvg.querySelectorAll(".edge").forEach(p => {
+    const out = p.dataset.from === sel, inn = p.dataset.to === sel && !out;
+    const hi = out || inn;
+    p.classList.toggle("hi", hi); p.classList.toggle("in", inn);
+    const k = !hi ? "" : inn ? "hi-in" : "hi";
+    p.setAttribute("marker-start", `url(#mo${k})`); p.setAttribute("marker-end", `url(#md${k})`);
+    if (hi) {
+      const row = nodesEl.querySelector(`.tbl[data-t="${CSS.escape(p.dataset.from)}"] .row[data-c="${CSS.escape(p.dataset.col)}"]`);
+      if (row) row.classList.add("link");
+      edgesSvg.appendChild(p);
+    }
+  });
+}
+function select(t, { center = false, flash = false } = {}) {
+  S.sel = t; persist(); applySel(); renderPanel();
+  if (t && center) centerOn(t);
+  if (t && flash) {
+    const el = nodesEl.querySelector(`.tbl[data-t="${CSS.escape(t)}"]`);
+    if (el) { el.classList.remove("flash"); void el.offsetWidth; el.classList.add("flash"); }
+  }
+}
+async function goTo(layer, t, group) {
+  hidePop();
+  if (layer !== S.layer) { S.layer = layer; }
+  const inView = layer === S.layer && S.visible.has(t) && !group && document.querySelector(`.tbl[data-t="${CSS.escape(t)}"]`);
+  if (!inView) {
+    S.group = group || IDX[layer].tg[t]?.[0] || "all";
+    S.sel = t; fillGroups();
+    await render();
+    if (!(S.group === "all")) { select(t, { flash: true }); ensureVisible(t); }
+    else select(t, { center: true, flash: true });
+    return;
+  }
+  select(t, { center: true, flash: true });
+}
+
+// ---------- panel ----------
+function renderPanel() {
+  const t = S.sel && DATA.layers[S.layer].tables[S.sel];
+  panel.classList.toggle("closed", !t);
+  if (!t) {
+    panelIn.innerHTML = `<div class="help">
+      <p><b style="color:var(--text)">sve-kit 卡片資料 schema v1</b>。建置層 ${Object.keys(DATA.layers.build.tables).length} 張表、快照層 ${Object.keys(DATA.layers.snapshot.tables).length} 個集合。</p>
+      <p>點一張表看完整欄位、約束與引用關係。欄位右側帶虛框的琥珀色標籤是跨分組的 FK，點了會跳到目標表所在的分組。</p>
+      <p>拖曳平移、滾輪或雙指縮放。<kbd>/</kbd> 搜尋，<kbd>Esc</kbd> 取消選取，<kbd>Tab</kbd> 可在表之間移動、<kbd>Enter</kbd> 選取。</p>
+      <p>連線樣式：灰色實線是欄位宣告的 FK（虛線為可空）、紫色是約束 <code>FK(...)</code> 宣告的 FK（粗線為複合約束，欄位旁的 FK1、FK2… 標出成員欄）、綠色點線是依 <code>*_id</code> 欄名推斷的引用（快照層沒有 FK 記號，內嵌物件裡的 ID 也畫成點線）。</p>
+      <p>快照層未註明 PK 的集合以首欄 <code>id</code> 為主鍵（依 snapshot-format.md）。</p></div>`;
+    return;
+  }
+  const L = S.layer, ix = IDX[L];
+  const groups = (ix.tg[t.name] || []).map(g => `<button type="button" class="pill${g === S.group ? " cur" : ""}" data-goto-group="${g}">${g} ${esc(ix.groups[g].short)}</button>`).join("");
+  const rows = t.cols.map(c => {
+    const flags = [];
+    if (c.pk) flags.push(`<span class="tag pk">PK</span>`);
+    if (c.fk_target) flags.push(`<button type="button" class="tag fk via-${c.fk_via}" data-goto="${esc(c.fk_target)}" title="${VIA_NAME[c.fk_via]}">FK→${esc(c.fk_target)}${c.fk_cols ? "（" + esc(c.fk_cols.join(",")) + "）" : ""}${c.fk_via === "decl" ? "" : " " + VIA_SHORT[c.fk_via]}</button>`);
+    c.constraint_fks.forEach(l => flags.push(`<span class="tag fk via-constraint" title="${esc(l)}">約束 FK${ix.cfk[t.name].indexOf(l) + 1}</span>`));
+    c.nested_refs.forEach(n => flags.push(`<button type="button" class="tag fk via-inferred" data-goto="${esc(n)}" title="內嵌物件中的 *_id，由欄名推斷">內嵌→${esc(n)}</button>`));
+    c.uq.forEach(u => flags.push(`<span class="tag" title="${u === "UNIQUE" ? "單欄唯一" : esc("(" + ix.uqTitle[t.name][u].join(", ") + ")")}">${u === "UNIQUE" ? "UQ" : esc(u)}</span>`));
+    if (c.nullable) flags.push(`<span class="tag">可空</span>`);
+    const ty = c.raw ? `<i>未解析：</i>${esc(c.raw)}` : c.enum_values ? `<span class="ev">${c.enum_values.map(v => `<span>${esc(v)}</span>`).join("")}</span>` : esc(c.type || "");
+    return `<tr><td class="${c.pk ? "pkn" : c.nullable ? "nul" : ""}">${esc(c.name)}</td><td><div class="ty">${ty}</div>${flags.length ? `<div class="fl">${flags.join("")}</div>` : ""}</td></tr>`;
+  }).join("");
+  const outs = [...new Set((ix.outgoing[t.name] || []).map(r => r.to))];
+  const cfks = (ix.outgoing[t.name] || []).filter(r => r.via === "constraint");
+  const ins = ix.incoming[t.name] || [];
+  const link = (name, label) => `<button type="button" class="pill" data-goto="${esc(name)}">${esc(label || name)}</button>`;
+  panelIn.innerHTML = `
+    <div class="ph"><h2>${esc(t.name)}</h2><button type="button" class="btn close" id="pclose" aria-label="關閉細節">✕</button></div>
+    <div class="meta"><span>${LAYER_NAME[L]}</span>${groups}</div>
+    <div class="src">${esc(t.source)}:${t.line} · ${t.cols.length} 欄</div>
+    <div class="sec"><h3>欄位</h3><table class="fields"><tbody>${rows}</tbody></table></div>
+    ${cfks.length ? `<div class="sec"><h3>約束 FK（${cfks.length}）</h3><table class="fields"><tbody>${cfks.map((r, i) => `<tr><td><b class="uq cfk">FK${i + 1}</b></td><td>(${esc((r.src_tokens || r.cols).map(x => r.cols.includes(x) ? x : x + "（常數）").join(", "))}) → <button type="button" class="pill" data-goto="${esc(r.to)}">${esc(r.to)}</button>${r.to_cols ? ` (${esc(r.to_cols.join(", "))})` : ""}</td></tr>`).join("")}</tbody></table></div>` : ""}
+    <div class="sec"><h3>約束與說明（原文）</h3>${t.constraints ? `<p class="cons">${esc(t.constraints)}</p>` : `<p class="note">無</p>`}</div>
+    <div class="sec"><h3>引用（${outs.length}）</h3>${outs.length ? `<div class="links">${outs.map(n => link(n)).join("")}</div>` : `<p class="note">無</p>`}</div>
+    <div class="sec"><h3>被引用（${ins.length}）</h3>${ins.length ? `<div class="links">${ins.map(r => link(r.from, `${r.from}.${r.col}`)).join("")}</div>` : `<p class="note">沒有表引用它</p>`}</div>
+    ${t.nested_refs.length ? `<div class="sec"><h3>巢狀／其他引用（來自 refs，無對應欄位）</h3><div class="links">${t.nested_refs.map(n => link(n)).join("")}</div></div>` : ""}`;
+}
+panel.addEventListener("click", e => {
+  const g = e.target.closest("[data-goto-group]");
+  if (g) { goTo(S.layer, S.sel, g.dataset.gotoGroup); return; }
+  const b = e.target.closest("[data-goto]");
+  if (b) { goTo(S.layer, b.dataset.goto); return; }
+  if (e.target.closest("#pclose")) select(null);
+});
+
+// ---------- pan & zoom ----------
+function applyTf(anim) {
+  const { x, y, k } = S.tf;
+  world.classList.toggle("anim", !!anim && !reduceMotion);
+  world.style.transform = `translate(${x}px, ${y}px) scale(${k})`;
+  canvas.style.backgroundPosition = `${x}px ${y}px`;
+  let g = 22 * k; while (g < 11) g *= 2;
+  canvas.style.backgroundSize = `${g}px ${g}px`;
+  $("#zoomlbl").textContent = Math.round(k * 100) + "%";
+}
+function viewRect() {
+  const r = canvas.getBoundingClientRect();
+  let w = r.width, h = r.height;
+  if (matchMedia("(max-width: 900px)").matches && !panel.classList.contains("closed")) h = Math.max(160, h - panel.getBoundingClientRect().height);
+  return { w, h };
+}
+function fit(anim = true) {
+  const { w, h } = viewRect();
+  const k = Math.max(.08, Math.min((w - 32) / S.size.w, (h - 60) / S.size.h, 1.1));
+  S.tf = { k, x: (w - S.size.w * k) / 2, y: Math.max(8, (h - S.size.h * k) / 2) };
+  applyTf(anim);
+}
+function centerOn(t) {
+  const p = S.pos[t]; if (!p) return;
+  const { w, h } = viewRect();
+  const k = Math.max(S.tf.k, Math.min(1, (w - 40) / p.w, (h - 40) / p.h, .9));
+  S.tf = { k, x: w / 2 - (p.x + p.w / 2) * k, y: h / 2 - (p.y + Math.min(p.h, h / k) / 2) * k };
+  applyTf(true);
+}
+function ensureVisible(t) {
+  const p = S.pos[t]; if (!p) return;
+  const { w, h } = viewRect(); const { x, y, k } = S.tf;
+  const sx = p.x * k + x, sy = p.y * k + y;
+  if (k < .45 || sx < 0 || sy < 0 || sx + p.w * k > w || sy + Math.min(p.h, 200) * k > h) centerOn(t);
+}
+function zoomAt(f, cx, cy, anim) {
+  const k = Math.min(3, Math.max(.06, S.tf.k * f)); const r = k / S.tf.k;
+  S.tf = { k, x: cx - (cx - S.tf.x) * r, y: cy - (cy - S.tf.y) * r };
+  applyTf(anim);
+}
+canvas.addEventListener("wheel", e => {
+  e.preventDefault(); hidePop();
+  const r = canvas.getBoundingClientRect();
+  // Plain wheel zooms; a sideways trackpad swipe pans.
+  if (e.ctrlKey || Math.abs(e.deltaX) < 1) {
+    zoomAt(Math.exp(-e.deltaY * (e.deltaMode === 1 ? .05 : .0018)), e.clientX - r.left, e.clientY - r.top);
+  } else {
+    S.tf.x -= e.deltaX; S.tf.y -= e.deltaY; applyTf();
+  }
+}, { passive: false });
+const ptrs = new Map(); let drag = null, moved = false;
+canvas.addEventListener("pointerdown", e => {
+  if (e.button !== 0 && e.pointerType === "mouse") return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (ptrs.size === 1) { drag = { x: e.clientX, y: e.clientY, tx: S.tf.x, ty: S.tf.y }; moved = false; }
+  else if (ptrs.size === 2) {
+    const [a, b] = [...ptrs.values()];
+    drag = { pinch: true, d: Math.hypot(a.x - b.x, a.y - b.y), k: S.tf.k, tx: S.tf.x, ty: S.tf.y, mx: (a.x + b.x) / 2, my: (a.y + b.y) / 2 };
+    moved = true;
+  }
+});
+window.addEventListener("pointermove", e => {
+  if (!ptrs.has(e.pointerId) || !drag) return;
+  ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+  if (drag.pinch && ptrs.size >= 2) {
+    const [a, b] = [...ptrs.values()]; const r = canvas.getBoundingClientRect();
+    const d = Math.hypot(a.x - b.x, a.y - b.y);
+    const k = Math.min(3, Math.max(.06, drag.k * d / drag.d)); const ratio = k / drag.k;
+    const mx = drag.mx - r.left, my = drag.my - r.top;
+    const nx = (a.x + b.x) / 2 - r.left, ny = (a.y + b.y) / 2 - r.top;
+    S.tf = { k, x: nx - (mx - drag.tx) * ratio, y: ny - (my - drag.ty) * ratio };
+    applyTf(); return;
+  }
+  const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+  if (!moved && Math.hypot(dx, dy) > 4) { moved = true; canvas.classList.add("panning"); hidePop(); }
+  if (moved) { S.tf.x = drag.tx + dx; S.tf.y = drag.ty + dy; applyTf(); }
+});
+const endPtr = e => {
+  ptrs.delete(e.pointerId);
+  if (ptrs.size === 0) { drag = null; canvas.classList.remove("panning"); }
+  else if (ptrs.size === 1) { const [p] = ptrs.values(); drag = { x: p.x, y: p.y, tx: S.tf.x, ty: S.tf.y }; }
+};
+window.addEventListener("pointerup", endPtr); window.addEventListener("pointercancel", endPtr);
+canvas.addEventListener("click", e => {
+  if (moved) { moved = false; return; }
+  const gl = e.target.closest(".glabel");
+  if (gl) { S.group = gl.dataset.group; fillGroups(); render(); return; }
+  const chip = e.target.closest(".xchip");
+  if (chip) { goTo(S.layer, chip.dataset.jump); return; }
+  const card = e.target.closest(".tbl");
+  const en = e.target.closest(".enum");
+  if (card) { if (S.sel !== card.dataset.t) select(card.dataset.t); if (en) showEnum(card.dataset.t, en); else hidePop(); return; }
+  hidePop(); select(null);
+});
+nodesEl.addEventListener("keydown", e => {
+  const card = e.target.closest(".tbl");
+  if (card && e.target === card && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); select(card.dataset.t); }
+});
+nodesEl.addEventListener("focusin", e => { const card = e.target.closest(".tbl"); if (card && e.target === card) ensureVisible(card.dataset.t); });
+$("#zin").addEventListener("click", () => { const { w, h } = viewRect(); zoomAt(1.25, w / 2, h / 2, true); });
+$("#zout").addEventListener("click", () => { const { w, h } = viewRect(); zoomAt(.8, w / 2, h / 2, true); });
+$("#fit").addEventListener("click", () => fit(true));
+let rsz; window.addEventListener("resize", () => { clearTimeout(rsz); rsz = setTimeout(() => fit(false), 150); });
+
+// ---------- enum popover ----------
+function showEnum(t, el) {
+  const c = DATA.layers[S.layer].tables[t].cols.find(x => x.name === el.dataset.enum);
+  if (!c) return;
+  pop.innerHTML = `<b>${esc(t)}.${esc(c.name)}${c.nullable ? "（可空）" : ""}</b><div class="ev">${c.enum_values.map(v => `<span>${esc(v)}</span>`).join("")}</div>`;
+  pop.hidden = false;
+  const r = el.getBoundingClientRect(), pw = pop.offsetWidth, ph = pop.offsetHeight;
+  let x = Math.min(window.innerWidth - pw - 12, Math.max(12, r.left));
+  let y = r.bottom + 6; if (y + ph > window.innerHeight - 12) y = r.top - ph - 6;
+  pop.style.left = x + "px"; pop.style.top = Math.max(12, y) + "px";
+}
+function hidePop() { pop.hidden = true; }
+
+// ---------- search ----------
+const q = $("#q"), qres = $("#qres");
+let hits = [], hitI = 0;
+function doSearch() {
+  const s = q.value.trim().toLowerCase();
+  if (!s) { qres.hidden = true; q.setAttribute("aria-expanded", "false"); return; }
+  const out = [];
+  for (const L of [S.layer, S.layer === "build" ? "snapshot" : "build"]) {
+    for (const t of Object.values(DATA.layers[L].tables)) {
+      const i = t.name.indexOf(s);
+      if (i >= 0) out.push({ L, t: t.name, score: (i === 0 ? 0 : 1) + (t.name === s ? -1 : 0) + (L === S.layer ? 0 : 10), label: t.name, i, n: s.length });
+    }
+  }
+  for (const L of [S.layer, S.layer === "build" ? "snapshot" : "build"]) {
+    for (const t of Object.values(DATA.layers[L].tables)) for (const c of t.cols) {
+      const i = c.name.indexOf(s);
+      if (i >= 0) out.push({ L, t: t.name, col: c.name, score: 3 + (i === 0 ? 0 : 1) + (L === S.layer ? 0 : 10), label: `${t.name}.${c.name}`, i: t.name.length + 1 + i, n: s.length });
+    }
+  }
+  out.sort((a, b) => a.score - b.score || a.label.localeCompare(b.label));
+  hits = out.slice(0, 40); hitI = 0;
+  qres.innerHTML = hits.length ? hits.map((h, i) => {
+    const g = IDX[h.L].tg[h.t]?.[0];
+    return `<li role="option" id="qo${i}" data-i="${i}" aria-selected="${i === 0}"><span class="rn">${esc(h.label.slice(0, h.i))}<em>${esc(h.label.slice(h.i, h.i + h.n))}</em>${esc(h.label.slice(h.i + h.n))}</span><span class="rl">${LAYER_NAME[h.L]}${g ? " · " + g : ""}</span></li>`;
+  }).join("") : `<li class="empty">沒有符合「${esc(s)}」的表或欄位</li>`;
+  qres.hidden = false; q.setAttribute("aria-expanded", "true");
+  q.setAttribute("aria-activedescendant", hits.length ? "qo0" : "");
+}
+function moveHit(d) {
+  if (!hits.length) return;
+  hitI = (hitI + d + hits.length) % hits.length;
+  qres.querySelectorAll("li").forEach((li, i) => li.setAttribute("aria-selected", String(i === hitI)));
+  const li = qres.querySelector(`#qo${hitI}`); li.scrollIntoView({ block: "nearest" });
+  q.setAttribute("aria-activedescendant", "qo" + hitI);
+}
+function pickHit(i) {
+  const h = hits[i]; if (!h) return;
+  qres.hidden = true; q.setAttribute("aria-expanded", "false");
+  goTo(h.L, h.t).then(() => {
+    if (h.col) {
+      const row = nodesEl.querySelector(`.tbl[data-t="${CSS.escape(h.t)}"] .row[data-c="${CSS.escape(h.col)}"]`);
+      if (row) row.classList.add("hit");
+    }
+  });
+}
+q.addEventListener("input", doSearch);
+q.addEventListener("focus", () => { if (q.value.trim()) doSearch(); });
+q.addEventListener("keydown", e => {
+  if (e.key === "ArrowDown") { e.preventDefault(); moveHit(1); }
+  else if (e.key === "ArrowUp") { e.preventDefault(); moveHit(-1); }
+  else if (e.key === "Enter") { e.preventDefault(); pickHit(hitI); }
+  else if (e.key === "Escape") { e.stopPropagation(); if (!qres.hidden) { qres.hidden = true; q.setAttribute("aria-expanded", "false"); } else { q.value = ""; q.blur(); } }
+});
+qres.addEventListener("mousedown", e => e.preventDefault());
+qres.addEventListener("click", e => { const li = e.target.closest("li[data-i]"); if (li) pickHit(+li.dataset.i); });
+q.addEventListener("blur", () => { setTimeout(() => { qres.hidden = true; q.setAttribute("aria-expanded", "false"); }, 100); });
+
+document.addEventListener("keydown", e => {
+  const typing = /^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement?.tagName);
+  if (e.key === "/" && !typing) { e.preventDefault(); q.focus(); q.select(); }
+  else if (e.key === "Escape") { if (!pop.hidden) hidePop(); else if (S.sel) select(null); }
+  else if (!typing && (e.key === "+" || e.key === "=")) $("#zin").click();
+  else if (!typing && e.key === "-") $("#zout").click();
+  else if (!typing && e.key === "0") fit(true);
+});
+document.addEventListener("pointerdown", e => { if (!pop.hidden && !e.target.closest(".pop,.enum")) hidePop(); });
+
+// ---------- boot ----------
+fillGroups();
+if (!DATA.layers[S.layer].tables[S.sel]) S.sel = null;
+render().then(() => { if (S.sel) ensureVisible(S.sel); });
+</script>
