@@ -20,7 +20,6 @@ repos:
       - id: check-ast
       - id: check-case-conflict
       - id: check-merge-conflict
-      - id: check-yaml
       - id: check-toml
 
   - repo: https://gitlab.com/bmares/check-json5
@@ -31,11 +30,14 @@ repos:
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.16.0
     hooks:
+      # Also the YAML syntax and duplicate-key check: it has to parse every file to format it.
+      # The registry is written by our own encoder and validated strictly by the carddb tests.
       - id: pretty-format-yaml
         args:
           - --autofix
           - --indent=2
           - --offset=2
+        exclude: ^authored/registry/
 
   - repo: https://github.com/ComPWA/taplo-pre-commit
     rev: v0.9.3

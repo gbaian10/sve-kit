@@ -43,6 +43,7 @@ jobs:
             python:
               - 'carddb/**'
               - 'docs/schema/**'
+              - 'authored/**' # the registry tests load and validate the real authored data
             rust:
               - 'sim/engine/**'
               - 'sim/scenario-runner/**'
@@ -80,7 +81,10 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml') }}
+          # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
+          # partial cache that the others hit exactly and then could never update.
+          key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
+          restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
       - name: Every hook has a CI owner
         run: uv run .github/ci/hooks.py check
       - name: pre-commit (repo-wide hooks, including the gitleaks commit-range scan)
@@ -112,7 +116,10 @@ jobs:
       - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/pre-commit
-          key: pre-commit-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml') }}
+          # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
+          # partial cache that the others hit exactly and then could never update.
+          key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
+          restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
       # ruff, mypy (carddb and the ER generator) and pytest, through the same hooks as local runs.
       - name: pre-commit (python hooks)
         run: |
