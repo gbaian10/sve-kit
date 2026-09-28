@@ -30,8 +30,9 @@ bun run dev -- --host 0.0.0.0   # also reachable from phones on the LAN
 
 `bun test` is Bun's own test runner and ignores the Vitest config. Always use `bun run test`.
 
-The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hooks run
-the full `tsc -b` and Vitest.
+The pre-commit hooks run Prettier, ESLint and Stylelint on changed files; the pre-push hook runs
+the full `tsc -b`. Vitest is a manual hook (`pre-commit run --hook-stage manual web-test`); CI runs
+the whole `bun run check` on every web change.
 
 ## Theme tokens
 
