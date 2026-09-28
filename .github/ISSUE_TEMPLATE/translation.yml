@@ -31,11 +31,21 @@ body:
         - Community term
     validations:
       required: true
-  - type: input
-    id: source-link
+  - type: textarea
+    id: original-source
     attributes:
-      label: Source link
-      description: Link to the Japanese or English source; also link the digital game's official Traditional Chinese text when selected above.
+      label: Japanese or English original text and source link
+      description: Provide the original wording and a link to its Japanese or English source.
+      placeholder: |
+        Original text:
+        Official source URL:
+    validations:
+      required: true
+  - type: input
+    id: digital-source-link
+    attributes:
+      label: Official Traditional Chinese source URL
+      description: If you selected the digital game source above, link to its official Traditional Chinese text.
       placeholder: https://...
     validations:
       required: false
