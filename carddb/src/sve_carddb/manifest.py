@@ -684,6 +684,18 @@ class Manifest:
         """Return SQLite's integrity check result."""
         return _str(self._conn.execute("PRAGMA integrity_check").fetchone()[0])
 
+    def historical_raw_hashes(self) -> list[tuple[str, str]]:
+        """Return known successful source hashes that may predate current rows."""
+        rows = self._conn.execute(
+            "SELECT url, response_sha256 FROM fetch_log"
+            " WHERE outcome IN ('changed', 'unchanged') AND response_sha256 IS NOT NULL"
+            " UNION SELECT page_url, page_sha256 FROM generation_page"
+            " UNION SELECT from_url, from_sha256 FROM link"
+            " UNION SELECT from_url, from_sha256 FROM link_log"
+            " ORDER BY 1, 2"
+        ).fetchall()
+        return [(_str(row[0]), _str(row[1])) for row in rows]
+
     # --- backup ---------------------------------------------------------
 
     def backup(self, dest: Path) -> BackupInfo:

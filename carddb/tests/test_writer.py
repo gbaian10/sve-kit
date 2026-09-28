@@ -9,6 +9,7 @@ from sve_carddb.fetch.writer import (
     Fetched,
     LocalState,
     PathConflictError,
+    RefreshProtectionError,
     Writer,
     WriteResult,
     remove_temp_files,
@@ -96,6 +97,18 @@ def test_changed_content_is_rewritten(
     write(writer, manifest, fetched())
     assert write(writer, manifest, fetched(b"<html>v2</html>")).changed
     assert decompress((root / PATH).read_bytes()) == b"<html>v2</html>"
+
+
+def test_protected_writer_stops_changed_raw_before_replace(
+    writer: Writer, manifest: Manifest, root: Path
+) -> None:
+    write(writer, manifest, fetched())
+    original = (root / PATH).read_bytes()
+    protected = Writer(root, manifest, protect_history=True)
+    with pytest.raises(RefreshProtectionError):
+        write(protected, manifest, fetched(b"<html>v2</html>"))
+    assert (root / PATH).read_bytes() == original
+    assert manifest.resources.get(URL) is not None
 
 
 def test_uncompressed_content_is_stored_as_is(

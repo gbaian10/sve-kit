@@ -92,6 +92,22 @@ def manifest_at(data_dir: Path) -> Manifest:
     return Manifest.open(data_dir / "manifest" / "manifest.sqlite")
 
 
+def test_refresh_is_guarded_until_archive_replacement_protocol(data_dir: Path) -> None:
+    result = invoke("crawl", "p5", "--mode", "refresh", "--set", "BP01")
+    assert result.exit_code == 1
+    assert "stopped:" in result.output
+    assert "source archive replacement protocol" in result.output
+    assert not (data_dir / "manifest" / "manifest.sqlite").exists()
+
+
+def test_archive_help_lists_safe_entry_points(data_dir: Path) -> None:
+    del data_dir
+    result = invoke("archive", "--help")
+    assert result.exit_code == 0, result.output
+    for command in ("seal", "verify", "capacity", "extract-cards"):
+        assert command in result.output
+
+
 @pytest.mark.usefixtures("site")
 def test_full_pipeline(data_dir: Path) -> None:
     p0 = invoke("crawl", "p0")
