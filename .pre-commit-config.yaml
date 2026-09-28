@@ -172,6 +172,24 @@ repos:
         pass_filenames: false
         files: ^(sim/web/|mise\.toml$|\.pre-commit-config\.yaml$)
         stages: [pre-push]
+      # Manual locally (a full run takes minutes); CI runs it on every PR:
+      # `pre-commit run --hook-stage manual pytest`.
+      - id: pytest
+        name: pytest (carddb)
+        language: system
+        entry: uv run --directory carddb pytest -n auto
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
+      # Optional strict check on all Python, run by hand; not in CI (mypy is the gate):
+      # `pre-commit run --hook-stage manual pyright`.
+      - id: pyright
+        name: pyright (carddb, docs/schema/er)
+        language: system
+        entry: bash -c 'status=0; uv --directory carddb run --group pyright pyright || status=1; uv --directory carddb run --group pyright pyright -p ../docs/schema/er || status=1; exit $status'
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
       - id: mypy
         name: mypy_check
         stages: [pre-push]

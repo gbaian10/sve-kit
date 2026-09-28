@@ -54,6 +54,13 @@ job = "python"
 [hooks.ruff-check]
 job = "python"
 
+[hooks.pytest]
+job = "python"
+
+[hooks.pyright]
+job = "none"
+reason = "Optional local check run by hand; mypy strict is the CI gate and pyright needs a ~200 MB Node.js runtime."
+
 [hooks.mypy]
 job = "python"
 
