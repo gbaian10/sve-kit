@@ -62,7 +62,22 @@ repos:
   - repo: https://github.com/gitleaks/gitleaks
     rev: v8.30.0
     hooks:
+      # Aliases keep SKIP from matching both hooks through their shared id.
       - id: gitleaks
+        alias: gitleaks-staged
+      # The hook above only sees staged changes, so it scans nothing in a clean CI checkout.
+      # This one scans every commit in GITLEAKS_RANGE=<base>..<head>; first-parent diffs also cover
+      # what a merge commit itself adds. Missing range ends fail instead of scanning zero commits.
+      - id: gitleaks
+        alias: gitleaks-range
+        name: gitleaks (commit range)
+        entry: >-
+          bash -c 'range="${GITLEAKS_RANGE:?set GITLEAKS_RANGE=<base>..<head>}";
+          git cat-file -e "${range%%..*}^{commit}" && git cat-file -e "${range##*..}^{commit}" &&
+          exec gitleaks git --log-opts="--diff-merges=first-parent $range" --redact --verbose --exit-code 1' --
+        pass_filenames: false
+        always_run: true
+        stages: [manual]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
     rev: 0.12.17

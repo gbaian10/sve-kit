@@ -66,7 +66,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          fetch-depth: 0 # gitleaks scans the whole pushed commit range
+          fetch-depth: 0 # gitleaks-range scans the whole pushed commit range
           persist-credentials: false
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
@@ -82,28 +82,14 @@ jobs:
           key: pre-commit-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml') }}
       - name: Every hook has a CI owner
         run: uv run .github/ci/hooks.py check
-      - name: pre-commit (repo-wide hooks)
-        run: |
-          SKIP="$(uv run .github/ci/hooks.py skip repo)"
-          export SKIP
-          uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage pre-commit --show-diff-on-failure
-      - name: gitleaks (pushed commit range)
+      - name: pre-commit (repo-wide hooks, including the gitleaks commit-range scan)
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
           HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
-          VERSION: 8.30.0 # same as the pre-commit hook
-          SHA256: 79a3ab579b53f71efd634f3aaf7e04a0fa0cf206b7ed434638d1547a2470a66e
         run: |
-          # A missing end would otherwise scan zero commits and pass.
-          git cat-file -e "${BASE}^{commit}"
-          git cat-file -e "${HEAD}^{commit}"
-          archive="gitleaks_${VERSION}_linux_x64.tar.gz"
-          curl -fsSLo "$RUNNER_TEMP/$archive" "https://github.com/gitleaks/gitleaks/releases/download/v${VERSION}/${archive}"
-          echo "${SHA256}  $RUNNER_TEMP/$archive" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" gitleaks
-          # git log prints no patch for merge commits by default; a secret added while resolving a
-          # conflict would be missed. first-parent diffs keep the full range walk (not --first-parent).
-          "$RUNNER_TEMP/gitleaks" git --log-opts="--diff-merges=first-parent ${BASE}..${HEAD}" --redact --verbose --exit-code 1
+          SKIP="$(uv run .github/ci/hooks.py skip repo)"
+          export SKIP GITLEAKS_RANGE="${BASE}..${HEAD}"
+          uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage manual --show-diff-on-failure
 
   ci-ok:
     if: always()

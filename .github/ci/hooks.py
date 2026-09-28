@@ -19,15 +19,17 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[2]
 JOBS = frozenset({"repo", "python", "rust", "web", "commit", "none"})
-# The repo job runs `pre-commit run --hook-stage pre-commit`; its hooks must run at that stage.
-REPO_STAGE = "pre-commit"
+# The repo job runs `pre-commit run --hook-stage manual`, which also picks up every hook left on
+# default_stages; its hooks must run at that stage.
+REPO_STAGE = "manual"
 
 
 @dataclass(frozen=True)
 class Hook:
-    """One hook entry of .pre-commit-config.yaml."""
+    """One hook entry of .pre-commit-config.yaml, keyed by alias when it has one (as SKIP is)."""
 
     id: str
+    raw_id: str
     stages: tuple[str, ...]
 
 
@@ -51,7 +53,8 @@ def configured_hooks(config: dict[str, object]) -> list[Hook]:
     repos = cast("list[dict[str, object]]", config["repos"])
     return [
         Hook(
-            id=str(hook["id"]),
+            id=str(hook.get("alias", hook["id"])),
+            raw_id=str(hook["id"]),
             stages=tuple(cast("list[str]", hook.get("stages", default))),
         )
         for repo in repos
@@ -98,6 +101,12 @@ def problems(hooks: list[Hook], owned: dict[str, Owner]) -> list[str]:
         if hook.id in owned
         and owned[hook.id].job == "repo"
         and REPO_STAGE not in hook.stages
+    ]
+    raw_ids = [hook.raw_id for hook in hooks]
+    found += [
+        f"hook id {hook.raw_id!r} is used more than once; give each one an alias (SKIP matches ids)"
+        for hook in hooks
+        if raw_ids.count(hook.raw_id) > 1 and hook.id == hook.raw_id
     ]
     duplicates = {hook_id for hook_id in ids if ids.count(hook_id) > 1}
     found += [
