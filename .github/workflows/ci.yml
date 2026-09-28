@@ -208,9 +208,32 @@ jobs:
       # package.json scripts are the single entry point: Prettier, ESLint, Stylelint, tsc -b, Vitest and the build.
       - run: bun run check
 
+  # Every commit that reaches the base branch must follow the commitizen format (.cz.toml), gitmoji included.
+  # Runs on every event regardless of paths; the PR title has its own workflow (pr-title.yml).
+  commit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+        with:
+          enable-cache: true
+          cache-dependency-glob: carddb/uv.lock
+      - name: cz check (pushed commit range)
+        env:
+          BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
+          HEAD: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.event.after }}
+        run: |
+          git cat-file -e "${BASE}^{commit}"
+          git cat-file -e "${HEAD}^{commit}"
+          uv run --project carddb --locked --no-default-groups --group dev python .github/ci/commit_msg.py --rev-range "${BASE}..${HEAD}"
+
   ci-ok:
     if: always()
-    needs: [changes, repo, python, rust, web]
+    needs: [changes, repo, python, rust, web, commit]
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -218,12 +241,12 @@ jobs:
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
-          # changes and repo always run; a component job may be skipped only when changes said so.
+          # changes, repo and commit always run; a component job may be skipped only when changes said so.
           jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
           status=0
           for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do
             result=$(jq -r --arg j "$job" '.[$j].result' <<<"$NEEDS")
-            wanted=$(jq -r --arg j "$job" 'if $j == "repo" then "true" else (.changes.outputs[$j] // "true") end' <<<"$NEEDS")
+            wanted=$(jq -r --arg j "$job" 'if $j == "repo" or $j == "commit" then "true" else (.changes.outputs[$j] // "true") end' <<<"$NEEDS")
             if [ "$result" = success ] || { [ "$wanted" = false ] && [ "$result" = skipped ]; }; then
               echo "ok   $job ($result)"
             else
