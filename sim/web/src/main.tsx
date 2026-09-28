@@ -5,14 +5,14 @@ import { createRoot } from "react-dom/client"
 import { I18nextProvider } from "react-i18next"
 
 import { App } from "./App"
-import { createI18n, detectUiLanguage, preferredLanguages } from "./i18n"
+import { currentUiLanguage } from "./app/language"
+import { createI18n } from "./i18n"
 import { prefsStore } from "./settings"
 
 const root = document.getElementById("root")
 if (!root) throw new Error("#root is missing from index.html")
 
-const language =
-  prefsStore.get().uiLanguage ?? detectUiLanguage(preferredLanguages(globalThis.navigator))
+const language = currentUiLanguage(prefsStore.get().uiLanguage)
 document.documentElement.lang = language
 
 void createI18n(language).then((i18n) => {
