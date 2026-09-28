@@ -621,7 +621,10 @@ class Manifest:
 
     @classmethod
     def open_live(cls, path: Path) -> Self:
-        """Read an existing live manifest without initializing or migrating it."""
+        """Read an existing live manifest without initializing or migrating it.
+
+        SQLite may create or retain WAL sidecars while reading; the manifest is not written.
+        """
         return cls._open_readonly(path, immutable=False)
 
     @classmethod

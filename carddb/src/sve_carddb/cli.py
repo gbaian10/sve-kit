@@ -50,14 +50,19 @@ from sve_carddb.fetch.client import (
 )
 from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
 from sve_carddb.fetch.writer import DiskFullError, LocalState, Writer, remove_temp_files
-from sve_carddb.manifest import AlreadyRunningError, ExclusiveLock, Manifest
+from sve_carddb.manifest import (
+    AlreadyRunningError,
+    ExclusiveLock,
+    Manifest,
+    ManifestError,
+)
 from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
 from sve_carddb.sources.official_jp import parse_list_first
 from sve_carddb.store import UnsafePathError
 
 if TYPE_CHECKING:
-    from collections.abc import Awaitable, Callable, Iterator
+    from collections.abc import Awaitable, Callable, Generator
 
 app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card database.")
 crawl_app = typer.Typer(
@@ -79,7 +84,13 @@ console = Console(soft_wrap=True)
 _IMAGE_RESERVE_BYTES = 3 * 1024 * 1024
 
 # Runs that stop on purpose (--limit, --max-requests) exit 0; these exit 1.
-_FATAL = (AlreadyRunningError, StopCrawlError, CircuitOpenError, DiskFullError)
+_FATAL = (
+    AlreadyRunningError,
+    ManifestError,
+    StopCrawlError,
+    CircuitOpenError,
+    DiskFullError,
+)
 
 
 class Stage(StrEnum):
@@ -149,7 +160,11 @@ BudgetOption = Annotated[
     typer.Option(help="Hard cap on HTTP requests, retries and redirects included."),
 ]
 DryRunOption = Annotated[
-    bool, typer.Option(help="List the URLs that would be fetched; send nothing.")
+    bool,
+    typer.Option(
+        help="List URLs without fetching. Requires the manifest lock; "
+        "unavailable while a crawler runs."
+    ),
 ]
 
 
@@ -371,16 +386,21 @@ def _settings() -> Settings:
 
 
 @contextmanager
-def _locked_read_manifest(settings: Settings) -> Iterator[Manifest]:
+def _locked_read_manifest(settings: Settings) -> Generator[Manifest]:
     try:
-        with (
-            ExclusiveLock(settings.lock_path),
-            Manifest.open_live(settings.manifest_path) as manifest,
-        ):
-            yield manifest
-    except AlreadyRunningError as exc:
+        with ExclusiveLock(settings.lock_path):
+            with _open_existing_manifest(settings) as manifest:
+                yield manifest
+    except (AlreadyRunningError, ManifestError) as exc:
         console.print(f"[red]stopped:[/red] {exc}")
         raise typer.Exit(1) from exc
+
+
+def _open_existing_manifest(settings: Settings) -> Manifest:
+    if not settings.manifest_path.exists():
+        msg = "manifest does not exist; run crawl p0 first"
+        raise ManifestError(msg)
+    return Manifest.open_live(settings.manifest_path)
 
 
 def _run(job: Job) -> None:

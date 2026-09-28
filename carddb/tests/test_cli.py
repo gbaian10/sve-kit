@@ -1,4 +1,5 @@
 import os
+import sqlite3
 from dataclasses import replace
 from functools import partial
 from pathlib import PurePosixPath
@@ -272,6 +273,58 @@ def test_dry_run_before_first_crawl_does_not_create_manifest(data_dir: Path) -> 
     result = invoke("crawl", "p0", "--dry-run")
     assert result.exit_code == 0, result.output
     assert not (data_dir / "manifest" / "manifest.sqlite").exists()
+
+
+@pytest.mark.parametrize(
+    "command", [("manifest", "check"), ("manifest", "backup"), ("extract", "cards")]
+)
+def test_read_commands_report_missing_manifest(
+    command: tuple[str, ...], data_dir: Path, tmp_path: Path
+) -> None:
+    dest = tmp_path / "backup.sqlite"
+    args = (*command, str(dest)) if command == ("manifest", "backup") else command
+    result = invoke(*args)
+    assert result.exit_code == 1
+    assert (
+        result.output.strip() == "stopped: manifest does not exist; run crawl p0 first"
+    )
+    assert not (data_dir / "manifest" / "manifest.sqlite").exists()
+    assert not dest.exists()
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        ("manifest", "check"),
+        ("manifest", "backup"),
+        ("extract", "cards"),
+        ("crawl", "p0", "--dry-run"),
+    ],
+)
+def test_read_commands_report_unsupported_schema(
+    command: tuple[str, ...], data_dir: Path, tmp_path: Path
+) -> None:
+    path = data_dir / "manifest" / "manifest.sqlite"
+    path.parent.mkdir(parents=True)
+    with sqlite3.connect(path) as conn:
+        conn.execute("CREATE TABLE legacy (id INTEGER PRIMARY KEY)")
+    before = path.read_bytes()
+    dest = tmp_path / "backup.sqlite"
+    args = (*command, str(dest)) if command == ("manifest", "backup") else command
+    result = invoke(*args)
+    assert result.exit_code == 1
+    assert result.output.strip().startswith(
+        "stopped: manifest schema 0 is not supported"
+    )
+    assert len(result.output.strip().splitlines()) == 1
+    assert path.read_bytes() == before
+    assert not dest.exists()
+
+
+def test_dry_run_help_explains_lock_requirement() -> None:
+    result = invoke("crawl", "p0", "--help")
+    assert result.exit_code == 0
+    assert "unavailable while a crawler runs" in result.output
 
 
 def test_p2_before_p1_says_what_to_run(site: FakeSite) -> None:

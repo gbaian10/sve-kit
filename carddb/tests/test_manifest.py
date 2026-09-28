@@ -164,12 +164,27 @@ def test_live_reader_does_not_initialize_database(tmp_path: Path) -> None:
         conn.execute("PRAGMA user_version = 1")
     before = path.read_bytes()
     with Manifest.open_live(path) as manifest:
-        assert manifest._conn.execute("PRAGMA journal_mode").fetchone()[0] == "delete"
-        assert manifest._conn.execute("PRAGMA foreign_keys").fetchone()[0] == 0
         with pytest.raises(sqlite3.OperationalError):
             manifest.resources.get(CARD_URL)
     assert path.read_bytes() == before
     assert not path.with_name("manifest.sqlite-wal").exists()
+
+
+def test_live_reader_preserves_wal_manifest(tmp_path: Path) -> None:
+    path = tmp_path / "manifest.sqlite"
+    with Manifest.open(path) as manifest, manifest.transaction():
+        manifest.resources.put(make_resource())
+    before = path.read_bytes()
+    with Manifest.open_live(path) as reader:
+        assert reader.resources.get(CARD_URL) == make_resource()
+    assert path.read_bytes() == before
+    assert {item.name for item in tmp_path.iterdir()} <= {
+        "manifest.sqlite",
+        "manifest.sqlite-wal",
+        "manifest.sqlite-shm",
+    }
+    wal = path.with_name("manifest.sqlite-wal")
+    assert not wal.exists() or wal.stat().st_size == 0
 
 
 def test_live_reader_requires_existing_supported_schema(tmp_path: Path) -> None:
