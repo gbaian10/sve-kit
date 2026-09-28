@@ -2,6 +2,7 @@
 
 import asyncio
 import shutil
+import tempfile
 import uuid
 from contextlib import contextmanager
 from dataclasses import dataclass
@@ -49,12 +50,32 @@ from sve_carddb.fetch.client import (
     StopCrawlError,
 )
 from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
-from sve_carddb.fetch.writer import DiskFullError, LocalState, Writer, remove_temp_files
+from sve_carddb.fetch.writer import (
+    DiskFullError,
+    LocalState,
+    RefreshProtectionError,
+    Writer,
+    remove_temp_files,
+)
 from sve_carddb.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
     Manifest,
     ManifestError,
+)
+from sve_carddb.source_archive import (
+    ArchiveError,
+    ArchiveReader,
+    ArchiveStore,
+    IncompleteBatchError,
+    Scope,
+    backup_batch,
+    capacity_report,
+    has_restore_check,
+    record_restore_check,
+    restore_backup,
+    seal_batch,
+    verify_batch,
 )
 from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
@@ -77,6 +98,10 @@ extract_app = typer.Typer(
     no_args_is_help=True, help="Turn stored pages into structured files."
 )
 app.add_typer(extract_app, name="extract")
+archive_app = typer.Typer(
+    no_args_is_help=True, help="Seal and verify immutable raw sources."
+)
+app.add_typer(archive_app, name="archive")
 
 console = Console(soft_wrap=True)
 
@@ -90,6 +115,7 @@ _FATAL = (
     StopCrawlError,
     CircuitOpenError,
     DiskFullError,
+    RefreshProtectionError,
 )
 
 
@@ -144,8 +170,8 @@ http_factory: Callable[[Settings], httpx.AsyncClient] = make_http
 ModeOption = Annotated[
     Mode,
     typer.Option(
-        help="resume: skip trusted copies; refresh: re-check them; "
-        "repair: fetch only damaged copies."
+        help="resume: skip trusted copies; refresh: blocked until raw-history "
+        "replacement is protected; repair: fetch only damaged copies."
     ),
 ]
 SetOption = Annotated[
@@ -362,6 +388,210 @@ def extract_cards_command() -> None:
         raise typer.Exit(1)
 
 
+@archive_app.command("seal")
+def archive_seal(
+    store: Annotated[Path, typer.Argument(help="Archive store outside SVE_DATA_DIR.")],
+    backup: Annotated[Path, typer.Argument(help="Backup root on another device.")],
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+    allow_root: AllowRootOption = None,
+    scope: Annotated[
+        list[str] | None, typer.Option(help="Only provider:kind (repeatable).")
+    ] = None,
+    restore_check: Annotated[
+        bool,
+        typer.Option(
+            help="Run a full restore check; prior success skips auto checks but does not prove current backup health."
+        ),
+    ] = False,
+) -> None:
+    """Seal and back up sources; restore-check until one succeeds on this backup root."""
+    settings = _settings()
+    try:
+        archive = ArchiveStore(
+            settings.data_dir,
+            settings.manifest_path,
+            settings.lock_path,
+            store,
+            store_id,
+            (*settings.extra_roots, *(allow_root or ())),
+        )
+        scopes = [_parse_archive_scope(value) for value in scope] if scope else None
+        result = seal_batch(archive, scope=scopes)
+        backup_batch(archive, backup, result.batch_id)
+        needs_restore = restore_check or not has_restore_check(backup, store_id)
+        if needs_restore:
+            with tempfile.TemporaryDirectory(
+                dir=backup, prefix="restore-check-"
+            ) as temporary:
+                destination = Path(temporary)
+                restore_backup(backup, destination, store_id, result.batch_id)
+                record_restore_check(backup, destination, store_id, result.batch_id)
+    except IncompleteBatchError as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        _print_sample(
+            "missing raw",
+            [
+                f"{item.url}: {item.reason} ({item.expected_raw_sha256})"
+                for item in exc.missing
+            ],
+        )
+        raise typer.Exit(1) from exc
+    except (ArchiveError, AlreadyRunningError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(
+        f"sealed and backed up {result.batch_id}: {len(result.inventory.current)} current sources; "
+        f"{result.hardlinks} hardlinks, {result.reflinks} reflinks, "
+        f"{result.copied_bytes} fallback bytes"
+    )
+    if needs_restore:
+        console.print("restore check: passed")
+    if result.inventory.history_gaps:
+        console.print(f"history gaps: {len(result.inventory.history_gaps)}")
+        _print_sample(
+            "missing history",
+            [
+                f"{item.url}: {item.expected_raw_sha256}"
+                for item in result.inventory.history_gaps
+            ],
+        )
+
+
+@archive_app.command("backup")
+def archive_backup(
+    store: Path,
+    backup: Path,
+    batch_id: str,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+) -> None:
+    """Back up an existing sealed batch without creating a new batch ID."""
+    settings = _settings()
+    try:
+        archive = ArchiveStore(
+            settings.data_dir,
+            settings.manifest_path,
+            settings.lock_path,
+            store,
+            store_id,
+        )
+        backup_batch(archive, backup, batch_id)
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"backed up {batch_id}")
+
+
+@archive_app.command("restore-check")
+def archive_restore_check(
+    backup: Path,
+    destination: Path,
+    batch_id: str,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+) -> None:
+    """Restore and verify; any receipt records a past check, not current health."""
+    try:
+        inventory = restore_backup(backup, destination, store_id, batch_id)
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    try:
+        record_restore_check(backup, destination, store_id, batch_id)
+    except ArchiveError as exc:
+        console.print(
+            f"[yellow]restore verified; check receipt not recorded:[/yellow] {exc}"
+        )
+    console.print(
+        f"restored and verified {batch_id}: {len(inventory.current)} current sources"
+    )
+
+
+@archive_app.command("verify")
+def archive_verify(
+    store: Path,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+    batch_id: str,
+) -> None:
+    """Verify the sealed manifest and its full metadata/raw closure."""
+    try:
+        inventory = verify_batch(store, store_id, batch_id)
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"verified {batch_id}: {len(inventory.current)} current sources")
+
+
+@archive_app.command("capacity")
+def archive_capacity(
+    store: Path,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+    batch_id: str,
+    webp_root: Annotated[
+        Path | None, typer.Option(help="Measure local WebP files here.")
+    ] = None,
+    backup_root: Annotated[
+        Path | None, typer.Option(help="Measure free space on the backup device.")
+    ] = None,
+) -> None:
+    """Report measured raw, PNG, latest, staging and backup sizes."""
+    settings = _settings()
+    try:
+        archive = ArchiveStore(
+            settings.data_dir,
+            settings.manifest_path,
+            settings.lock_path,
+            store,
+            store_id,
+            settings.extra_roots,
+        )
+        report = capacity_report(
+            archive, batch_id, webp_root=webp_root, backup_root=backup_root
+        )
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print_json(report.model_dump_json())
+
+
+@archive_app.command("extract-cards")
+def archive_extract_cards(
+    store: Path,
+    store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
+    batch_id: str,
+    dest: Path,
+) -> None:
+    """Extract JP cards solely from one verified sealed input batch."""
+    try:
+        _require_derived_outside_store(store, dest)
+        reader = ArchiveReader(store, store_id, batch_id)
+        with Manifest.open_snapshot(
+            store / "batches" / batch_id.removeprefix("sha256:") / "manifest.sqlite"
+        ) as snapshot:
+            report = extract_cards(snapshot, reader, dest)
+    except (ArchiveError, ManifestError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    console.print(f"{report.written} cards written to {dest}")
+    if report.missing or report.failed:
+        console.print(
+            f"[red]{len(report.missing)} missing, {len(report.failed)} failed[/red]"
+        )
+        raise typer.Exit(1)
+
+
+def _require_derived_outside_store(store: Path, dest: Path) -> None:
+    if dest.resolve().is_relative_to(store.resolve()):
+        msg = "derived output must be outside the archive store"
+        raise ArchiveError(msg)
+
+
+def _parse_archive_scope(value: str) -> Scope:
+    provider, separator, kind = value.partition(":")
+    if not separator or not provider or not kind:
+        msg = f"invalid scope {value}; use provider:kind"
+        raise ArchiveError(msg)
+    return Scope(provider=provider, kind=kind)
+
+
 def main() -> None:
     """Run the CLI."""
     app()
@@ -407,6 +637,11 @@ def _run(job: Job) -> None:
     if job.mode is Mode.REFRESH and not job.sets:
         console.print("[red]--mode refresh needs --set[/red]")
         raise typer.Exit(2)
+    if job.mode is Mode.REFRESH and not job.dry_run:
+        console.print(
+            "[red]stopped:[/red] refresh requires the source archive replacement protocol"
+        )
+        raise typer.Exit(1)
     settings = _settings()
     try:
         with ExclusiveLock(settings.lock_path):
@@ -419,7 +654,7 @@ def _run(job: Job) -> None:
             else:
                 source = Manifest.open(settings.manifest_path)
             with source as manifest:
-                writer = Writer(settings.data_dir, manifest)
+                writer = Writer(settings.data_dir, manifest, protect_history=True)
                 if job.dry_run:
                     _dry_run(job, writer, manifest)
                     return

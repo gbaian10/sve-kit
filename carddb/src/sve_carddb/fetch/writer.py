@@ -74,6 +74,10 @@ class WriteResult:
     """The file on disk was written (new, changed, damaged, or repair mode)."""
 
 
+class RefreshProtectionError(RuntimeError):
+    """Replacing a recorded raw version requires the archive replacement protocol."""
+
+
 def sha256(data: bytes) -> str:
     """Return the hex SHA-256 of `data`."""
     return hashlib.sha256(data).hexdigest()
@@ -83,7 +87,12 @@ class Writer:
     """Store fetched content under the data root and record it in the manifest."""
 
     def __init__(
-        self, root: Path, manifest: Manifest, *, read_roots: Sequence[Path] = ()
+        self,
+        root: Path,
+        manifest: Manifest,
+        *,
+        read_roots: Sequence[Path] = (),
+        protect_history: bool = False,
     ) -> None:
         """Write under `root`, recording into `manifest`.
 
@@ -92,6 +101,7 @@ class Writer:
         self._root = root
         self._manifest = manifest
         self._read_roots = tuple(read_roots)
+        self._protect_history = protect_history
 
     def check_path(self, url: str, path: PurePosixPath) -> None:
         """Raise `PathConflictError` if another URL owns `path`. Call before downloading."""
@@ -150,6 +160,9 @@ class Writer:
         now = utcnow()
         digest = sha256(fetched.body)
         previous = self._manifest.resources.get(fetched.url)
+        if self._protect_history and previous is not None and previous.sha256 != digest:
+            msg = f"raw history protection stopped replacement of {fetched.url}"
+            raise RefreshProtectionError(msg)
         unchanged = (
             previous is not None
             and previous.sha256 == digest

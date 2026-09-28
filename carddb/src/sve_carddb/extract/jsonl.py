@@ -4,7 +4,7 @@ import os
 import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 import orjson
 
@@ -16,8 +16,19 @@ from sve_carddb.html import MissingElementError
 from sve_carddb.sources import official_jp as jp
 
 if TYPE_CHECKING:
-    from sve_carddb.fetch.writer import Writer
     from sve_carddb.manifest import Manifest
+
+
+class RawReader(Protocol):
+    """The small read-only boundary shared by latest and sealed sources."""
+
+    def local_state(self, url: str) -> LocalState:
+        """Report whether a source can be read."""
+        ...
+
+    def read(self, url: str) -> bytes:
+        """Return the source bytes."""
+        ...
 
 
 @dataclass
@@ -29,7 +40,7 @@ class ExtractReport:
     failed: dict[str, str] = field(default_factory=dict)
 
 
-def extract_cards(manifest: Manifest, writer: Writer, dest: Path) -> ExtractReport:
+def extract_cards(manifest: Manifest, writer: RawReader, dest: Path) -> ExtractReport:
     """Transcribe every trusted card page of the current lists into `dest`.
 
     `dest` is replaced atomically, so a failed run never leaves half a file.
