@@ -1,0 +1,48 @@
+name: Report incorrect card data
+description: Report an error in a card's text, stats, links, or other data.
+title: '[Card data]: '
+labels: [card-data]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write this issue in any language. Link to the official card page.
+        Do not paste card lists, images, or translations copied from other sites, and do not upload card image files.
+  - type: input
+    id: card-number
+    attributes:
+      label: Card number
+      description: Copy the number exactly as printed on the official page.
+      placeholder: BP01-001
+    validations:
+      required: true
+  - type: dropdown
+    id: region
+    attributes:
+      label: Region
+      options:
+        - Japanese
+        - English
+    validations:
+      required: true
+  - type: input
+    id: official-page
+    attributes:
+      label: Official card page URL
+      placeholder: https://...
+    validations:
+      required: true
+  - type: textarea
+    id: incorrect-data
+    attributes:
+      label: What is incorrect?
+      description: Point to the field or link that needs correction.
+    validations:
+      required: true
+  - type: textarea
+    id: expected-data
+    attributes:
+      label: What should it be?
+      description: Include supporting details if you know the correct value.
+    validations:
+      required: false

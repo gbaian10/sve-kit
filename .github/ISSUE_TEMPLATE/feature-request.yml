@@ -1,0 +1,24 @@
+name: Suggest a feature
+description: Propose an improvement to the card database or simulator.
+title: '[Feature]: '
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        You can write this issue in any language.
+        Do not paste card lists, images, or translations copied from other sites, and do not upload card image files.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Describe the task that is difficult today.
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Suggested approach
+      description: Describe how you think the feature should work.
+    validations:
+      required: true

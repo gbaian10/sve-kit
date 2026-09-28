@@ -12,6 +12,8 @@ is unclear, just ask in an issue. Conventions for code and docs are listed under
 You do not need to write code. Many of the most useful contributions only need you to
 know the game:
 
+Use the issue forms to report problems or suggest features; you can write in any language.
+
 | Contribution                                    | What you need                                                 |
 | ----------------------------------------------- | ------------------------------------------------------------- |
 | **Report wrong card data** (text, stats, links) | The card number and a link to the official card page          |
@@ -74,7 +76,7 @@ Use the component as the scope, so `git log --grep '(carddb)'` shows one compone
 | `sim/server` | Game server                                     |
 | `sim/web`    | Web client                                      |
 | `docs`       | ADRs and design docs                            |
-| _(none)_     | Repo-wide changes (CI, tooling, top-level docs) |
+| _(none)_     | CI, tools, top-level docs (`ci` issue label)    |
 
 Each component is versioned on its own, and its next version is worked out from the commits
 that carry its scope. So keep one component per commit: when a change touches several components,
