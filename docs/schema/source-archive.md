@@ -21,10 +21,16 @@
 | 記錄／鍵 | 定義 |
 | --- | --- |
 | raw blob | `raw/sha256/<前兩碼>/<64hex>.raw`，path 中 hash 是原始 bytes；同內容跨 URL／批次只存一次。v1 歸檔直接保存 raw bytes，本機 latest 的 zstd 表示先解壓驗證 |
-| source_key | 對 canonical `{provider,kind,url}` 算完整 Hash；provider 使用來源識別 jp/en/sv1/svwb，數位來源不因此成為 SVE region；url 沿抓取 manifest 的 canonical URL，不另猜卡號或去 query |
+| source_key | 對 canonical `{provider,kind,url}` 算完整 Hash；provider 使用來源識別 jp/en/sv1/svwb，數位來源不因此成為 SVE region；kind 取抓取 manifest 的 `Resource.kind.value` 原值（`manifest.Kind`，例如 card），不取建置 source_record.kind（例如 official_page）；url 沿抓取 manifest 的 canonical URL，不另猜卡號或去 query |
 | source_version_id | `src:v1:<64hex>`；hex 為 canonical `{source_key,raw_sha256}` 的 SHA-256。相同來源同 bytes 重用 ID；同 URL 新 bytes 或不同來源即另有版本 ID，不以本機路徑／抓取順序配號 |
 | version descriptor | `{archive_format:1,id,source_key,provider,kind,url,raw_sha256,raw_bytes,first_receipt_id}`；按 source_version_id 保存，不覆寫；first 指首次歸檔收據，不冒稱官網首次發布 |
 | observation receipt | `{archive_format:1,source_key,raw_sha256,observed_at,manifest_sha256,resource}`，receipt_id 為此記錄 canonical Hash；resource 保留該 manifest 副本的完整 Resource 欄位（path 為相對路徑），時間未知維持 null，另記觀測不修改舊收據 |
+
+source_key 的可核算合成範例：provider=`jp`、kind=`card`、url=`https://example.invalid/cards/one`，canonical bytes 是下列 73-byte JSON（不含結尾換行），Hash 為 `sha256:f8a7b8029c96e85db449fe62c981aa815f72712559a7132b0142529d97af6535`：
+
+```json
+{"kind":"card","provider":"jp","url":"https://example.invalid/cards/one"}
+```
 
 observed_at 是本次歸檔觀測時間；Resource 的 first_fetched_at 是 URL 的首次抓取，不能當成每個內容版本的首次抓取。last_changed_at／last_checked_at 各保留本義。HTTP 304、ETag 或檢查時間改變但 bytes 相同，不另配 source_version_id；可追加新收據保留觀測。內容 A→B→A 時，第三次仍用 A 的版本 ID、另有新收據，不抹掉中間 B。
 
@@ -37,14 +43,16 @@ metadata 依 hash 保存：`receipts/<64hex>.json`、`descriptors/<64hex>.json` 
 批次目錄封存以下檔案，所有 path 都相對批次或具名 archive store，沒有私人絕對路徑：
 
 - `manifest.sqlite`：SQLite backup API 產生且關閉的自足副本，記 bytes、Hash、schema version；不能靠 live 的 `-wal/-shm` 才能讀。
-- `inventory.json`：`{input_format:1,created_at,manifest:{path,sha256,bytes,schema_version},scope,current,entries,missing,history_gaps}`。scope 是排序唯一的 `{provider,kind}` 陣列；current 為依 URL 排序的 `{url,source_version_id}` 陣列，對應最終 manifest 的有效 Resource。entries 包含 current 及 scope 內已歸檔的歷史版本，按 source_version_id 排序唯一，每筆 `{source_version_id,receipt_id,descriptor_sha256,blob:{store_id,path,sha256,bytes}}`。同 blob 可供不同來源版本引用。
+- `inventory.json`：`{input_format:1,created_at,manifest:{path,sha256,bytes,schema_version},scope,current,entries,missing,history_gaps}`。scope 是排序唯一的 `{provider,kind}` 陣列，兩欄沿 source_key 的抓取詞彙；current 為依 URL 排序的 `{url,source_version_id}` 陣列，對應最終 manifest 的有效 Resource。entries 包含 current 及 scope 內已歸檔的歷史版本，按 source_version_id 排序唯一，每筆 `{source_version_id,receipt_id,descriptor_sha256,blob:{store_id,path,sha256,bytes}}`。同 blob 可供不同來源版本引用。
 - `missing` 每筆為 `{url,expected_raw_sha256,reason}`，reason 限 `missing_raw/hash_mismatch/unsafe_path/missing_history`；只作診斷。非空批次不得標記封存完成或當完整建置輸入。刻意縮小 preview 範圍須另建明示 scope 的新批次，不能靜默刪列後沿用舊 hash。
 - `history_gaps` 使用相同缺失記錄，僅容納首次歸檔前已遺失、且本次建置／已採納資料沒有引用的舊版本；不能用它豁免缺少的必要輸入。批次可如實封存現有閉包，但不能聲稱完整來源歷史。舊版本被 adopted 資料或指定重建引用時，缺失必移入 missing 並阻擋建置。
 - `seal.json`：`{input_format:1,inventory_sha256,inventory_bytes}`；批次 ID 為 inventory 的完整 Hash，不含 seal 自身 hash。seal 是成功標記，不用把進度狀態寫回 inventory。
 
+批次 ID **刻意識別封存事件及其完整觀測證據，不是單純的來源內容識別**。created_at 保留於 inventory；兩次獨立封存即使 raw／source_version_id 相同，也可因 created_at、receipt 或 manifest 副本不同而有不同批次 ID。來源內容去重依 raw hash／source_version_id；比較建置是否使用相同內容須另比來源版本集合、current 選用及 authored／工具鎖定輸入，不能只比較批次 ID。重現性驗證釘住同一個已 sealed 的批次重跑，不要求重新封存得到原 ID。
+
 釘住每個 entry 的 descriptor、receipt（含 descriptor.first_receipt_id）與 raw blob 閉包；receipt 可引用準備時或歷史的另一份 manifest 副本，該副本亦須以 hash 留存於歸檔 metadata 閉包。最終 inventory 的 manifest 是提交檢查時的一致副本，不能用準備副本冒充後續發生變更的 live 狀態。依 scope 選出的每個有效 Resource 恰有一筆 current 且其版本存在 entries；歷史 entry 不需冒充最新 Resource。archived／缺資料狀態須顯式診斷，不能因找不到檔案就少算分母。
 
-批次只在同檔案系統 staging 目錄中完成，所有 raw／metadata／DB 及目錄 fsync 後，最後寫 seal 並以不覆寫既有目標的 rename 發布目錄，再 fsync 父目錄。staging 無論已有多少檔都不是 sealed。遇到相同批次 ID 比對內容後重用；不得覆寫舊完成目錄。實際 archive 根由本機設定的 store_id 對應；搬移磁碟只改設定，不改 inventory/hash。
+批次只在同檔案系統 staging 目錄中完成，所有 raw／metadata／DB 及目錄 fsync 後，最後寫 seal 並以不覆寫既有目標的 rename 發布目錄，再 fsync 父目錄。staging 無論已有多少檔都不是 sealed。相同批次 ID 的重用適用於恢復同一份 staging inventory 或重複匯入既有封存：沿用原 created_at／收據，完整比對內容後重用，不覆寫舊完成目錄。實際 archive 根由本機設定的 store_id 對應；搬移磁碟只改設定，不改 inventory/hash。
 
 ### 2.2 建置 source_record 的投影
 
