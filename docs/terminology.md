@@ -73,3 +73,4 @@
 | **IR**       | IR     | DSL 編譯後引擎實際執行的中間表示                                         |
 | **ADR**      | ADR    | 架構決策紀錄，在 `docs/adr/`，編號全 repo 共用一個序列                   |
 | **裁定**     | ruling | 官方沒有明說時本專案採用的判讀，編號 `R-0001` 起，在 `authored/rulings/` |
+trailing   
