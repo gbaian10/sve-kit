@@ -97,7 +97,9 @@ AI-generated code tends to over-comment. Keep comments few and short:
 
 ## Lint and types
 
-ruff (all rules), mypy strict and pyright strict run on every commit. Type hints are required.
+ruff (all rules) and mypy strict run on every commit and in CI. Type hints are required.
+pyright strict runs only locally (pre-push, on `docs/schema/er`) and is skipped in CI because it
+bundles a large Node.js runtime; fix what it reports when you see it.
 Follow the rules; if a rule is wrong for the whole project, propose changing the config
 instead of silencing it everywhere.
 

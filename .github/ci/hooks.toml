@@ -61,7 +61,8 @@ job = "python"
 job = "python"
 
 [hooks.pyright-schema-er]
-job = "python"
+job = "none"
+reason = "Local pre-push only; pyright needs a ~200 MB Node.js runtime, not worth it in CI."
 
 [hooks.cargo-fmt]
 job = "rust"

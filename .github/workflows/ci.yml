@@ -86,7 +86,7 @@ jobs:
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip repo)"
           export SKIP
-          uv run --project carddb --locked pre-commit run --all-files --hook-stage pre-commit --show-diff-on-failure
+          uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage pre-commit --show-diff-on-failure
       - name: gitleaks (pushed commit range)
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
