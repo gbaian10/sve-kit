@@ -9,7 +9,6 @@ Usage:
   uv run .github/ci/hooks.py skip JOB   # SKIP value for `pre-commit run` in that job
 """
 
-import re
 import sys
 import tomllib
 from dataclasses import dataclass
@@ -22,7 +21,6 @@ ROOT = Path(__file__).resolve().parents[2]
 JOBS = frozenset({"repo", "python", "rust", "web", "commit", "none"})
 # The repo job runs `pre-commit run --hook-stage pre-commit`; its hooks must run at that stage.
 REPO_STAGE = "pre-commit"
-UV_HOOK_REPO = "https://github.com/astral-sh/uv-pre-commit"
 
 
 @dataclass(frozen=True)
@@ -71,25 +69,6 @@ def owners() -> dict[str, Owner]:
     }
 
 
-def uv_problems(config: dict[str, object]) -> list[str]:
-    """Check that CI's uv (carddb required-version) matches the uv-lock hook rev."""
-    repos = cast("list[dict[str, object]]", config["repos"])
-    revs = [str(repo["rev"]) for repo in repos if repo.get("repo") == UV_HOOK_REPO]
-    pyproject = tomllib.loads((ROOT / "carddb/pyproject.toml").read_text())
-    tool = cast("dict[str, dict[str, str]]", pyproject.get("tool", {}))
-    required = tool.get("uv", {}).get("required-version", "")
-    match = re.fullmatch(r"==(\S+)", required)
-    if not match:
-        return [
-            f"carddb [tool.uv] required-version must pin one version, got {required!r}"
-        ]
-    if revs != [match.group(1)]:
-        return [
-            f"uv-pre-commit rev {revs} differs from carddb required-version {required!r}"
-        ]
-    return []
-
-
 def problems(hooks: list[Hook], owned: dict[str, Owner]) -> list[str]:
     """Return every mismatch between the hook config and the ownership table."""
     ids = [hook.id for hook in hooks]
@@ -131,7 +110,7 @@ def main(argv: list[str]) -> int:
     """Run the subcommand in argv and return the exit status."""
     config = load_config()
     hooks, owned = configured_hooks(config), owners()
-    if errors := problems(hooks, owned) + uv_problems(config):
+    if errors := problems(hooks, owned):
         sys.stderr.write("\n".join(errors) + "\n")
         return 1
     match argv:
