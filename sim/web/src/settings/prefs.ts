@@ -8,16 +8,16 @@ export const LEGACY_UI_LANGUAGE_KEY = "sve-kit:ui-language"
 const PREFS_VERSION = 1
 
 export const CARD_EDITIONS = ["jp", "en"] as const
-export type CardEdition = (typeof CARD_EDITIONS)[number]
+type CardEdition = (typeof CARD_EDITIONS)[number]
 
 export const TEXT_DISPLAYS = ["translated", "original", "both"] as const
-export type TextDisplay = (typeof TEXT_DISPLAYS)[number]
+type TextDisplay = (typeof TEXT_DISPLAYS)[number]
 
-export const GRID_DENSITIES = [2, 3] as const
-export type GridDensity = (typeof GRID_DENSITIES)[number]
+const GRID_DENSITIES = [2, 3] as const
+type GridDensity = (typeof GRID_DENSITIES)[number]
 
-export const VIEW_MODES = ["grid", "table", "list"] as const
-export type ViewMode = (typeof VIEW_MODES)[number]
+const VIEW_MODES = ["grid", "table", "list"] as const
+type ViewMode = (typeof VIEW_MODES)[number]
 
 export interface Prefs {
   /** null = not chosen yet; the app detects it from the browser languages. */

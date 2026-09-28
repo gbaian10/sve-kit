@@ -9,6 +9,7 @@ import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import { CARD_EDITIONS, prefsStore, TEXT_DISPLAYS, usePrefs } from "../../settings"
 import { cn } from "../ui/cn"
 import { Segmented } from "../ui/Segmented"
+import { SettingRow } from "../ui/SettingRow"
 import { rovingRadioKeyDown } from "../ui/useRovingRadio"
 
 const ACCENT_SWATCH: Record<Accent, string> = {
@@ -66,7 +67,6 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
   const { t } = useTranslation()
   const prefs = usePrefs()
   const navigate = useNavigate()
-  const rowClass = "flex min-h-11 items-center justify-between gap-3"
   const textDisplayOptions = TEXT_DISPLAYS.map((value) => ({
     value,
     label: t(`options.nameDisplay.${value}`),
@@ -77,8 +77,7 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
         <UserRound className="size-4" aria-hidden="true" />
         {t("account.notSignedIn")}
       </p>
-      <div className={rowClass}>
-        <span className="text-14">{t("account.cardEdition")}</span>
+      <SettingRow size="sm" label={t("account.cardEdition")}>
         <Segmented
           size="sm"
           label={t("account.cardEdition")}
@@ -86,9 +85,8 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           value={prefs.cardEdition}
           onChange={(cardEdition) => prefsStore.set({ cardEdition })}
         />
-      </div>
-      <div className={rowClass}>
-        <span className="text-14">{t("account.nameDisplay")}</span>
+      </SettingRow>
+      <SettingRow size="sm" label={t("account.nameDisplay")}>
         <Segmented
           size="sm"
           label={t("account.nameDisplay")}
@@ -96,9 +94,8 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           value={prefs.nameDisplay}
           onChange={(nameDisplay) => prefsStore.set({ nameDisplay })}
         />
-      </div>
-      <div className={rowClass}>
-        <span className="text-14">{t("settings.effectLanguage")}</span>
+      </SettingRow>
+      <SettingRow size="sm" label={t("settings.effectLanguage")}>
         <Segmented
           size="sm"
           label={t("settings.effectLanguage")}
@@ -106,9 +103,8 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           value={prefs.effectLanguage}
           onChange={(effectLanguage) => prefsStore.set({ effectLanguage })}
         />
-      </div>
-      <div className={rowClass}>
-        <span className="text-14">{t("account.uiLanguage")}</span>
+      </SettingRow>
+      <SettingRow size="sm" label={t("account.uiLanguage")}>
         <Segmented
           size="sm"
           label={t("account.uiLanguage")}
@@ -116,9 +112,8 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           value={currentUiLanguage(prefs.uiLanguage)}
           onChange={(uiLanguage) => prefsStore.set({ uiLanguage })}
         />
-      </div>
-      <div className={rowClass}>
-        <span className="text-14">{t("account.appearance")}</span>
+      </SettingRow>
+      <SettingRow size="sm" label={t("account.appearance")}>
         <Segmented
           size="sm"
           label={t("account.appearance")}
@@ -126,11 +121,10 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
           value={prefs.theme}
           onChange={(theme) => prefsStore.set({ theme })}
         />
-      </div>
-      <div className={rowClass}>
-        <span className="text-14">{t("account.accent")}</span>
+      </SettingRow>
+      <SettingRow size="sm" label={t("account.accent")}>
         <AccentPicker label={t("account.accent")} />
-      </div>
+      </SettingRow>
       <button
         type="button"
         onClick={() => {

@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "vitest run",
-    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run build"
+    "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run knip && bun run build",
+    "knip": "knip"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",
@@ -48,6 +49,7 @@
     "eslint-plugin-unused-imports": "^4.4.1",
     "globals": "^17.12.0",
     "jsdom": "^30.1.1",
+    "knip": "^6.38.0",
     "postcss": "^8.5.28",
     "prettier": "^3.9.9",
     "prettier-plugin-tailwindcss": "^0.8.1",

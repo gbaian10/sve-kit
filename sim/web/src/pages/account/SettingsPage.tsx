@@ -1,33 +1,15 @@
-import type { ReactNode } from "react"
 import { useTranslation } from "react-i18next"
 
 import { AccentPicker } from "../../components/nav/AccountMenu"
 import { Segmented } from "../../components/ui/Segmented"
+import { SettingRow } from "../../components/ui/SettingRow"
 import { Switch } from "../../components/ui/Switch"
 import { THEME_PREFS } from "../../domain/theme"
 import { currentUiLanguage, UI_LANGUAGES } from "../../i18n"
 import { CARD_EDITIONS, prefsStore, TEXT_DISPLAYS, usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 
-function Row({
-  label,
-  hint,
-  children,
-}: {
-  readonly label: string
-  readonly hint?: string
-  readonly children: ReactNode
-}) {
-  return (
-    <div className="flex min-h-14 items-center justify-between gap-4 border-b border-border py-2">
-      <div className="min-w-0">
-        <div className="text-15">{label}</div>
-        {hint && <div className="text-12 text-text-3">{hint}</div>}
-      </div>
-      {children}
-    </div>
-  )
-}
+const ROW = "min-h-14 border-b border-border py-2"
 
 // Design 11 without the account card (R1 has no sign-in): the display settings only.
 export function SettingsPage() {
@@ -40,7 +22,7 @@ export function SettingsPage() {
         <h2 id="settings-display" className="pt-3 text-13 font-semibold text-text-3">
           {t("settings.display")}
         </h2>
-        <Row label={t("account.uiLanguage")}>
+        <SettingRow className={ROW} label={t("account.uiLanguage")}>
           <Segmented
             size="sm"
             label={t("account.uiLanguage")}
@@ -51,8 +33,8 @@ export function SettingsPage() {
             value={currentUiLanguage(prefs.uiLanguage)}
             onChange={(uiLanguage) => prefsStore.set({ uiLanguage })}
           />
-        </Row>
-        <Row label={t("account.cardEdition")}>
+        </SettingRow>
+        <SettingRow className={ROW} label={t("account.cardEdition")}>
           <Segmented
             size="sm"
             label={t("account.cardEdition")}
@@ -63,8 +45,8 @@ export function SettingsPage() {
             value={prefs.cardEdition}
             onChange={(cardEdition) => prefsStore.set({ cardEdition })}
           />
-        </Row>
-        <Row label={t("account.nameDisplay")}>
+        </SettingRow>
+        <SettingRow className={ROW} label={t("account.nameDisplay")}>
           <Segmented
             size="sm"
             label={t("account.nameDisplay")}
@@ -75,8 +57,8 @@ export function SettingsPage() {
             value={prefs.nameDisplay}
             onChange={(nameDisplay) => prefsStore.set({ nameDisplay })}
           />
-        </Row>
-        <Row label={t("settings.effectLanguage")}>
+        </SettingRow>
+        <SettingRow className={ROW} label={t("settings.effectLanguage")}>
           <Segmented
             size="sm"
             label={t("settings.effectLanguage")}
@@ -87,15 +69,19 @@ export function SettingsPage() {
             value={prefs.effectLanguage}
             onChange={(effectLanguage) => prefsStore.set({ effectLanguage })}
           />
-        </Row>
-        <Row label={t("settings.symbolLabels")} hint={t("settings.symbolLabelsHint")}>
+        </SettingRow>
+        <SettingRow
+          className={ROW}
+          label={t("settings.symbolLabels")}
+          hint={t("settings.symbolLabelsHint")}
+        >
           <Switch
             label={t("settings.symbolLabels")}
             checked={prefs.symbolLabels}
             onChange={(symbolLabels) => prefsStore.set({ symbolLabels })}
           />
-        </Row>
-        <Row label={t("account.appearance")}>
+        </SettingRow>
+        <SettingRow className={ROW} label={t("account.appearance")}>
           <Segmented
             size="sm"
             label={t("account.appearance")}
@@ -103,11 +89,11 @@ export function SettingsPage() {
             value={prefs.theme}
             onChange={(theme) => prefsStore.set({ theme })}
           />
-        </Row>
-        <Row label={t("account.accent")}>
+        </SettingRow>
+        <SettingRow className={ROW} label={t("account.accent")}>
           <AccentPicker label={t("account.accent")} />
-        </Row>
-        <Row label={t("settings.banRegion")}>
+        </SettingRow>
+        <SettingRow className={ROW} label={t("settings.banRegion")}>
           <Segmented
             size="sm"
             label={t("settings.banRegion")}
@@ -115,14 +101,18 @@ export function SettingsPage() {
             value={prefs.banRegion}
             onChange={(banRegion) => prefsStore.set({ banRegion })}
           />
-        </Row>
-        <Row label={t("settings.dataSaver")} hint={t("settings.dataSaverHint")}>
+        </SettingRow>
+        <SettingRow
+          className={ROW}
+          label={t("settings.dataSaver")}
+          hint={t("settings.dataSaverHint")}
+        >
           <Switch
             label={t("settings.dataSaver")}
             checked={prefs.dataSaver}
             onChange={(dataSaver) => prefsStore.set({ dataSaver })}
           />
-        </Row>
+        </SettingRow>
       </section>
     </>
   )

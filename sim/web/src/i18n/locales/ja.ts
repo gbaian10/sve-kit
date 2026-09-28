@@ -3,7 +3,6 @@ import type { Messages } from "./zh-TW"
 export default {
   app: {
     title: "sve-kit",
-    tagline: "Shadowverse: EVOLVE 非公式カードリスト・対戦ツール",
   },
   nav: {
     home: "ホーム",
@@ -28,12 +27,10 @@ export default {
   options: {
     edition: { jp: "日本語版", en: "英語版" },
     nameDisplay: { translated: "訳名", original: "原文", both: "両方" },
-    language: { "zh-TW": "繁体字中国語", ja: "日本語", en: "英語" },
-    theme: { system: "システムに従う", light: "ライト", dark: "ダーク" },
+    language: { "zh-TW": "繁體中文", ja: "日本語", en: "English" },
+    theme: { system: "システム", light: "ライト", dark: "ダーク" },
     accent: { amber: "アンバー", teal: "ティール", red: "レッド" },
     region: { jp: "日本", en: "英語圏" },
-    on: "オン",
-    off: "オフ",
   },
   settings: {
     title: "アカウントと設定",
@@ -44,8 +41,6 @@ export default {
     banRegion: "禁止・制限の地域",
     dataSaver: "データ節約",
     dataSaverHint: "カード画像を自動で読み込まず、タップで読み込みます",
-    about: "このサイトについて",
-    report: "問題を報告",
   },
   pages: {
     home: "ホーム",
