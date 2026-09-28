@@ -58,6 +58,7 @@ jobs:
               - 'docs/m0/*.yaml'
             web:
               - 'sim/web/**'
+              - 'carddb/src/sve_carddb/snapshot/schema/**' # the web reader validates against the published schema
 
   repo:
     needs: changes
