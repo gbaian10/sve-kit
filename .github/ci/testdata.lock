@@ -1,0 +1,6 @@
+# Pin for the private test data repository (see AGENTS.md, "資料放在哪裡").
+# CI checks out exactly this commit with the read-only deploy key and verifies the file hash.
+repo = "gbaian10/sve-kit-testdata"
+commit = "c2057bce24264cd1d62ea8819c1cf7177fca3956"
+snapshot_path = "fixtures/engine/cards.jsonl"
+snapshot_sha256 = "4c7b98b77342d2a94d19a47fe673c5b2b03637988cb7acabeda88e09fde0c632"

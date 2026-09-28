@@ -128,9 +128,10 @@ repos:
         # Runs the whole test suite once, instrumented; raise the bar as the engine grows.
         entry: mise exec -- cargo llvm-cov --locked --workspace --summary-only --fail-under-lines 90
         pass_filenames: false
-        # The runner tests read the scenario files too.
-        files: (\.rs|(^|/)Cargo\.toml|^Cargo\.lock|^rust-toolchain\.toml|^tests/rules-scenarios/.*\.yaml)$
-        stages: [pre-push]
+        # Manual locally (it needs SVE_TEST_SNAPSHOT and takes minutes); CI runs it on every Rust change:
+        # `pre-commit run --hook-stage manual cargo-test`.
+        always_run: true
+        stages: [manual]
       # Slow (minutes): run by hand with `pre-commit run --hook-stage manual cargo-mutants`.
       - id: cargo-mutants
         name: cargo mutants (tests catch every injected bug)

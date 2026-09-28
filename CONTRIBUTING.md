@@ -170,15 +170,16 @@ uv tool install pre-commit
 pre-commit install
 ```
 
-Run the checks before committing:
+The git hooks run the quick checks on every commit and push. `pytest` and `cargo-test` are manual
+hooks, because a full run takes minutes; CI runs each of them when a pull request changes that
+component or a shared input. Run them yourself when you change the code they cover:
 
 ```bash
-uv --directory carddb run ruff check
-uv --directory carddb run mypy
-uv --directory carddb run pytest
-cargo clippy --locked --workspace --all-targets -- -D warnings
-cargo llvm-cov --locked --workspace --fail-under-lines 90   # tests + coverage
+pre-commit run --hook-stage manual pytest       # carddb tests
+pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
 ```
+
+`cargo-test` needs `SVE_TEST_SNAPSHOT` (see Setup); CI gets the same file from a private test-data repository.
 
 Now and then, and before a release, run the mutation test. Every surviving mutant
 is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:
