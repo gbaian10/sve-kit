@@ -50,6 +50,56 @@ def test_resolve_within_rejects_symlink_escape(tmp_path: Path) -> None:
         resolve_within(root, PurePosixPath("link/file"))
 
 
+def _moved_away(tmp_path: Path) -> tuple[Path, Path]:
+    """A root whose `media` symlinks to a directory on another disk."""
+    root = tmp_path / "root"
+    disk = tmp_path / "disk"
+    (disk / "media").mkdir(parents=True)
+    (disk / "media" / "a.png").write_bytes(b"png")
+    root.mkdir()
+    (root / "media").symlink_to(disk / "media")
+    return root, disk
+
+
+def test_resolve_within_accepts_symlink_into_allowed_root(tmp_path: Path) -> None:
+    root, disk = _moved_away(tmp_path)
+    target = resolve_within(root, PurePosixPath("media/a.png"), also_allowed=[disk])
+    assert target == (disk / "media" / "a.png").resolve()
+
+
+def test_resolve_within_accepts_any_of_several_allowed_roots(tmp_path: Path) -> None:
+    root, disk = _moved_away(tmp_path)
+    other = tmp_path / "other"
+    other.mkdir()
+    rel = PurePosixPath("media/a.png")
+    assert resolve_within(root, rel, also_allowed=[other, disk]).exists()
+
+
+def test_resolve_within_rejects_symlink_outside_allowed_roots(tmp_path: Path) -> None:
+    root, _ = _moved_away(tmp_path)
+    other = tmp_path / "other"
+    other.mkdir()
+    with pytest.raises(UnsafePathError, match="outside"):
+        resolve_within(root, PurePosixPath("media/a.png"), also_allowed=[other])
+
+
+def test_resolve_within_rejects_parent_traversal_into_allowed_root(
+    tmp_path: Path,
+) -> None:
+    root, disk = _moved_away(tmp_path)
+    with pytest.raises(UnsafePathError, match="outside"):
+        resolve_within(root, PurePosixPath("../disk/media/a.png"), also_allowed=[disk])
+
+
+def test_resolve_within_rejects_absolute_path_even_inside_allowed_root(
+    tmp_path: Path,
+) -> None:
+    root, disk = _moved_away(tmp_path)
+    absolute = PurePosixPath(disk / "media" / "a.png")
+    with pytest.raises(UnsafePathError, match="relative"):
+        resolve_within(root, absolute, also_allowed=[disk])
+
+
 def test_compress_round_trip() -> None:
     html = "<html><p>竜の魔女・リリウム</p></html>".encode()
     stored = compress(html)

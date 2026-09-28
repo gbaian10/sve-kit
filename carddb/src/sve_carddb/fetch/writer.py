@@ -27,7 +27,7 @@ from sve_carddb.manifest import (
 from sve_carddb.store import CorruptDataError, compress, decompress, resolve_within
 
 if TYPE_CHECKING:
-    from collections.abc import Callable
+    from collections.abc import Callable, Sequence
     from pathlib import Path, PurePosixPath
 
 _TEMP_MARKER = ".tmp-"
@@ -82,10 +82,16 @@ def sha256(data: bytes) -> str:
 class Writer:
     """Store fetched content under the data root and record it in the manifest."""
 
-    def __init__(self, root: Path, manifest: Manifest) -> None:
-        """Write under `root`, recording into `manifest`."""
+    def __init__(
+        self, root: Path, manifest: Manifest, *, read_roots: Sequence[Path] = ()
+    ) -> None:
+        """Write under `root`, recording into `manifest`.
+
+        Reads may also follow symlinks into `read_roots`; writes never do.
+        """
         self._root = root
         self._manifest = manifest
+        self._read_roots = tuple(read_roots)
 
     def check_path(self, url: str, path: PurePosixPath) -> None:
         """Raise `PathConflictError` if another URL owns `path`. Call before downloading."""
@@ -101,7 +107,7 @@ class Writer:
             return LocalState.MISSING
         if resource.archived_at is not None:
             return LocalState.ARCHIVED
-        target = resolve_within(self._root, resource.path)
+        target = self._resolve_for_read(resource.path)
         try:
             stored = target.read_bytes()
         except FileNotFoundError:
@@ -124,7 +130,7 @@ class Writer:
         if resource is None or self.local_state(url) is not LocalState.TRUSTED:
             msg = f"no trusted local copy of {url}"
             raise RuntimeError(msg)
-        stored = resolve_within(self._root, resource.path).read_bytes()
+        stored = self._resolve_for_read(resource.path).read_bytes()
         return decompress(stored) if _is_compressed(resource) else stored
 
     def write(
@@ -206,6 +212,9 @@ class Writer:
                 request_id, RequestResult(outcome=Outcome.NOT_MODIFIED, status=304)
             )
         return updated
+
+    def _resolve_for_read(self, path: PurePosixPath) -> Path:
+        return resolve_within(self._root, path, also_allowed=self._read_roots)
 
     def _write_file(self, fetched: Fetched) -> int:
         target = resolve_within(self._root, fetched.path)

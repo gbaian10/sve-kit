@@ -150,6 +150,23 @@ def test_path_outside_the_root_is_refused(writer: Writer, manifest: Manifest) ->
         write(writer, manifest, escaping)
 
 
+def test_read_roots_allow_reads_but_not_writes_through_a_symlink(
+    writer: Writer, manifest: Manifest, root: Path, tmp_path: Path
+) -> None:
+    write(writer, manifest, fetched())
+    disk = tmp_path / "disk"
+    disk.mkdir()
+    (root / "raw").rename(disk / "raw")
+    (root / "raw").symlink_to(disk / "raw")
+    reader = Writer(root, manifest, read_roots=[disk])
+    assert reader.local_state(URL) is LocalState.TRUSTED
+    assert reader.read(URL) == b"<html>v1</html>"
+    with pytest.raises(UnsafePathError):
+        writer.local_state(URL)
+    with pytest.raises(UnsafePathError):
+        write(reader, manifest, fetched(), rewrite=True)
+
+
 def test_disk_full_is_fatal_and_leaves_no_temp_file(
     writer: Writer,
     manifest: Manifest,

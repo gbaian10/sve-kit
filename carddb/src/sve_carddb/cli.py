@@ -7,7 +7,7 @@ from contextlib import AbstractContextManager, nullcontext
 from dataclasses import dataclass
 from enum import StrEnum
 from itertools import starmap
-from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- typer reads annotations at runtime
+from pathlib import Path
 from typing import TYPE_CHECKING, Annotated
 
 import httpx
@@ -54,6 +54,7 @@ from sve_carddb.manifest import AlreadyRunningError, ExclusiveLock, Manifest
 from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
 from sve_carddb.sources.official_jp import parse_list_first
+from sve_carddb.store import UnsafePathError
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable
@@ -282,24 +283,42 @@ def crawl_svwb_images(
     )
 
 
+AllowRootOption = Annotated[
+    list[Path] | None,
+    typer.Option(
+        "--allow-root",
+        resolve_path=True,
+        help="Also accept symlinks that land inside this directory (repeatable); "
+        "adds to SVE_EXTRA_ROOTS.",
+    ),
+]
+
+
 @manifest_app.command("check")
-def manifest_check() -> None:
-    """Verify every stored file against the manifest; exit 1 if any is damaged."""
+def manifest_check(allow_root: AllowRootOption = None) -> None:
+    """Verify every stored file against the manifest; exit 1 if any is damaged or unsafe."""
     settings = _settings()
+    roots = (*settings.extra_roots, *(allow_root or ()))
     with Manifest.open(settings.manifest_path) as manifest:
-        writer = Writer(settings.data_dir, manifest)
+        writer = Writer(settings.data_dir, manifest, read_roots=roots)
         counts = dict.fromkeys(LocalState, 0)
         damaged: list[str] = []
+        unsafe: list[str] = []
         for resource in manifest.resources.all():
-            state = writer.local_state(resource.url)
+            try:
+                state = writer.local_state(resource.url)
+            except UnsafePathError as exc:
+                unsafe.append(f"{resource.url}: {exc}")
+                continue
             counts[state] += 1
             if state in {LocalState.UNTRUSTED, LocalState.MISSING}:
                 damaged.append(resource.url)
     for state, count in counts.items():
         console.print(f"{state:>10}: {count}")
-    for url in damaged[:20]:
-        console.print(f"  damaged: {url}")
-    if damaged:
+    console.print(f"{'unsafe':>10}: {len(unsafe)}")
+    _print_sample("damaged", damaged)
+    _print_sample("unsafe", unsafe)
+    if damaged or unsafe:
         raise typer.Exit(1)
 
 
@@ -334,6 +353,13 @@ def main() -> None:
 
 
 # --- implementation ---------------------------------------------------------
+
+
+def _print_sample(label: str, items: list[str], limit: int = 20) -> None:
+    for item in items[:limit]:
+        console.print(f"  {label}: {item}", highlight=False, soft_wrap=True)
+    if len(items) > limit:
+        console.print(f"  ... and {len(items) - limit} more {label}")
 
 
 def _settings() -> Settings:

@@ -1,4 +1,7 @@
+import os
+from dataclasses import replace
 from functools import partial
+from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
 
 import httpx
@@ -10,7 +13,8 @@ from typer.testing import CliRunner
 from sve_carddb import cli
 from sve_carddb.config import Settings
 from sve_carddb.fetch.throttle import Throttle
-from sve_carddb.manifest import ExclusiveLock, Manifest
+from sve_carddb.fetch.writer import Fetched, Writer
+from sve_carddb.manifest import ExclusiveLock, Kind, Manifest, Region, RequestStart
 from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources import official_sv1 as sv1
@@ -231,6 +235,141 @@ def test_manifest_check_reports_damage(data_dir: Path) -> None:
     damaged = invoke("manifest", "check")
     assert damaged.exit_code == 1
     assert f"damaged: {jp.sets_url()}" in damaged.output
+
+
+IMAGES = {
+    "media/images/sv1/a.png": b"sv1-a",
+    "media/images/svwb/b.png": b"svwb-b",
+    "media/images/jp/c.png": b"jp-c",
+}
+
+
+def media_url(rel: str) -> str:
+    return f"https://images.example.test/{rel}"
+
+
+def store_images(data_dir: Path) -> None:
+    with manifest_at(data_dir) as manifest:
+        writer = Writer(data_dir, manifest)
+        for rel, body in IMAGES.items():
+            url = media_url(rel)
+            item = Fetched(
+                url=url,
+                region=Region.SV1,
+                kind=Kind.IMAGE,
+                path=PurePosixPath(rel),
+                body=body,
+                content_type="image/png",
+                etag=None,
+                last_modified=None,
+                compressed=False,
+            )
+            request = RequestStart(
+                "run", "fetch", 1, 0, url, url, sent_if_none_match=None
+            )
+            writer.write(item, request_id=manifest.requests.start(request))
+
+
+def move_to(data_dir: Path, disk: Path, *names: str) -> None:
+    """Move media folders to `disk` and leave symlinks behind, as a user would."""
+    for name in names:
+        source = data_dir / "media" / "images" / name
+        dest = disk / "media" / "images" / name
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        source.rename(dest)
+        source.symlink_to(dest)
+
+
+def test_manifest_check_follows_symlinks_into_an_allowed_root(
+    data_dir: Path, tmp_path: Path
+) -> None:
+    store_images(data_dir)
+    disk = tmp_path / "disk"
+    move_to(data_dir, disk, "sv1", "svwb")
+    result = invoke("manifest", "check", "--allow-root", str(disk))
+    assert result.exit_code == 0, result.output
+    assert "trusted: 3" in result.output
+    assert "unsafe: 0" in result.output
+
+
+def test_manifest_check_lists_unsafe_paths_and_checks_the_rest(
+    data_dir: Path, tmp_path: Path
+) -> None:
+    store_images(data_dir)
+    move_to(data_dir, tmp_path / "disk", "sv1", "svwb")
+    result = invoke("manifest", "check")
+    assert result.exit_code == 1
+    assert "trusted: 1" in result.output
+    assert "unsafe: 2" in result.output
+    for rel in ("media/images/sv1/a.png", "media/images/svwb/b.png"):
+        assert f"unsafe: {media_url(rel)}: {rel} resolves outside" in result.output
+
+
+def test_manifest_check_rejects_symlinks_outside_the_allowed_roots(
+    data_dir: Path, tmp_path: Path
+) -> None:
+    store_images(data_dir)
+    allowed = tmp_path / "allowed"
+    allowed.mkdir()
+    move_to(data_dir, tmp_path / "elsewhere", "sv1")
+    result = invoke("manifest", "check", "--allow-root", str(allowed))
+    assert result.exit_code == 1
+    assert "trusted: 2" in result.output
+    assert f"unsafe: {media_url('media/images/sv1/a.png')}" in result.output
+
+
+def test_manifest_check_rejects_parent_traversal(
+    data_dir: Path, tmp_path: Path
+) -> None:
+    store_images(data_dir)
+    rel = "media/images/jp/c.png"
+    escaped = tmp_path / "c.png"
+    escaped.write_bytes(IMAGES[rel])
+    with manifest_at(data_dir) as manifest, manifest.transaction():
+        resource = manifest.resources.get(media_url(rel))
+        assert resource is not None
+        manifest.resources.put(replace(resource, path=PurePosixPath("../c.png")))
+    result = invoke("manifest", "check", "--allow-root", str(tmp_path))
+    assert result.exit_code == 1
+    assert "trusted: 2" in result.output
+    assert f"unsafe: {media_url(rel)}: ../c.png resolves outside" in result.output
+
+
+def test_manifest_check_reads_extra_roots_from_the_environment(
+    data_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store_images(data_dir)
+    first, second = tmp_path / "disk1", tmp_path / "disk2"
+    move_to(data_dir, first, "sv1")
+    move_to(data_dir, second, "svwb")
+    monkeypatch.setenv("SVE_EXTRA_ROOTS", os.pathsep.join([str(first), str(second)]))
+    result = invoke("manifest", "check")
+    assert result.exit_code == 0, result.output
+    assert "trusted: 3" in result.output
+
+
+def test_manifest_check_combines_environment_and_repeated_options(
+    data_dir: Path, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store_images(data_dir)
+    disks = [tmp_path / f"disk{i}" for i in range(3)]
+    for disk, name in zip(disks, ("sv1", "svwb", "jp"), strict=True):
+        move_to(data_dir, disk, name)
+    monkeypatch.setenv("SVE_EXTRA_ROOTS", str(disks[0]))
+    options = ["--allow-root", str(disks[1]), "--allow-root", str(disks[2])]
+    result = invoke("manifest", "check", *options)
+    assert result.exit_code == 0, result.output
+    assert "trusted: 3" in result.output
+
+
+def test_relative_extra_root_is_a_configuration_error(
+    data_dir: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store_images(data_dir)
+    monkeypatch.setenv("SVE_EXTRA_ROOTS", "relative/disk")
+    result = invoke("manifest", "check")
+    assert result.exit_code == 2
+    assert "absolute" in result.output
 
 
 @pytest.mark.usefixtures("site")
