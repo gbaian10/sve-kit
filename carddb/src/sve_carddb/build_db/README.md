@@ -120,3 +120,84 @@ See SQLite's [foreign key rules](https://www.sqlite.org/foreignkeys.html) and
 [STRICT tables](https://www.sqlite.org/stricttables.html) for native constraint
 semantics. Project table requirements remain in `docs/schema/build-db.md` and
 `docs/schema/implementation-tiers.md`.
+
+## Optional T1 DDL and pipeline readiness
+
+`t1.compile_build(("images", "cr"))` compiles the forty T0 tables plus the four
+image and two CR tables: 46 tables. Selecting `images` alone closes to 44 tables;
+`cr` alone closes to 42. The default selects only T0. Art, DSL and keywords remain
+reserved, unavailable capabilities; disabled nullable references remain NULL-only.
+Enabling CR installs the existing `rules_profile_revision.cr_version_id` FK.
+This is an intermediate DDL inventory, not the minimum 57-table release schema.
+
+`Capability.implemented` means that DDL declarations exist. The separate
+`importer_ready` and `validator_ready` flags default to false.
+`Registry.require_usable(requested)` checks both flags for the complete resolved
+graph, including required FK and query dependencies. All production capabilities
+currently fail that gate: no build importer or complete domain validator exists.
+These flags are code-maintained registration claims, not evidence generated from
+successful SQL compilation. A future preview pipeline must call this gate for its
+actual supported subset; a release pipeline must additionally require the full
+minimum table set and conditional groups. Creating empty tables does not enable a
+preview capability or turn unknown coverage into complete coverage.
+
+## Cross-table verification and transactions
+
+`QueryCheck` is a trusted, code-authored SELECT that returns a row when an invariant
+is violated. Its `tables` declaration lists every referenced table; these are
+required dependencies in capability closure. The compiler attaches these checks
+to `CompiledSchema.query_checks` in deterministic table order. Like `Check.sql`,
+this SQL must never come from imported values. Use bounded existence queries,
+not queries returning imported content.
+
+`Database.verify()` runs FK/check-enforcement checks, `foreign_key_check`,
+`integrity_check`, the build schema version check, then all selected query checks.
+`transaction()` invokes it **after the body, before COMMIT**, on the final graph.
+An insert, update or delete can temporarily violate a query check inside the
+transaction, allowing related rows to be repaired together. Updating an image,
+its decision or size configuration is checked even when no variant row changed.
+A failing query raises `sqlite3.IntegrityError` naming the check, without printing
+source rows. Any unhandled body, verification or commit failure rolls back the
+**whole transaction**, including parent updates and child writes. A caught
+intermediate error cannot bypass the final verification. Nested transactions
+remain unsupported. Direct `verify()` outside `transaction()` only checks and
+raises; it does not itself roll back an externally owned transaction.
+
+These checks execute through the typed SQLite boundary. They are **not triggers**
+and are not contained in `CompiledSchema.sql`; external/raw SQL writers must not
+treat executing DDL alone as validated build creation. Use the Database API and
+run complete domain validation before publication.
+
+The image checks enforce publishable variant parents, confirmed third-party
+review and its source link, and non-original output settings. Row-local checks
+cover required source metadata, withdrawal reasons, WebP format and hash-derived
+paths. Available/approved source metadata may have no variants yet. Physical
+source/bytes matching, decoding, review envelope and batch membership, exact
+recipe output and the complete five/three-size image set still require the future
+importer/image builder/domain validator. SQL checks do not attest those facts.
+
+## Schema version and rebuilds
+
+Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
+`PRAGMA user_version` during creation and checked before every commit. Legacy
+`compile_t0()` uses version 1; the optional T1 registry uses version 2, including
+its T0-only selection. The version identifies the declaration generation; the
+selected capability closure determines the actual table set. It is independent
+of crawl-manifest schema versions and public snapshot format/data versions.
+
+`rebuild_database(schema, destination, populate)` creates a private sibling
+candidate file and calls `populate(database)` inside one transaction. The callback
+must import from pinned inputs using typed writes; it must not start another
+transaction. It does not copy old DB rows, infer missing data or disable FKs.
+All rows are therefore checked against newly enabled constraints. After a
+successful commit and connection close, the candidate atomically replaces the
+destination. Creation, population, verification or replacement failures clean up
+the candidate and leave an existing destination unchanged. No partially built
+candidate is handed to readers. A missing destination is also supported.
+
+The destination must be an exclusively owned, offline build artifact with all
+connections closed; callers provide that ownership. Symlink destinations and
+existing SQLite WAL/SHM/journal sidecars are rejected. This helper is not a
+concurrency lock, a crash-durable release transaction or an in-place migration.
+It cannot protect against unrelated processes opening/changing the destination
+concurrently. Source archives and frozen inputs are never replacement targets.

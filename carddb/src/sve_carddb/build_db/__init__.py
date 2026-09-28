@@ -9,10 +9,12 @@ from sve_carddb.build_db.model import (
     ForeignKey,
     Json,
     Kind,
+    QueryCheck,
     Table,
     Unique,
     Value,
 )
+from sve_carddb.build_db.rebuild import rebuild_database
 from sve_carddb.build_db.registry import Registry
 
 __all__ = [
@@ -24,6 +26,7 @@ __all__ = [
     "ForeignKey",
     "Json",
     "Kind",
+    "QueryCheck",
     "Registry",
     "Row",
     "Table",
@@ -31,4 +34,5 @@ __all__ = [
     "Value",
     "compile_schema",
     "create_database",
+    "rebuild_database",
 ]
