@@ -61,5 +61,5 @@ cargo run --locked -p sve-engine --bin sve-prototype -- "$SVE_TEST_SNAPSHOT" . v
 `search.groups`（CP04-088）、`name_alias`（BP03-078、BP08-T01、BP08-T02），引擎補實作後
 把這些值加進檢查（KE-08、KE-09、KE-11、KE-12）。
 
-審核第 1 輪（`sve-kit/spec/design/m0-review/opus-r1.md`）後加嚴的檢查又抓到兩張，已改 YAML：
+交叉審核第 1 輪後加嚴的檢查又抓到兩張，已改 YAML：
 SCS01-007（`trigger_if` 讀回合計數，R-0009，M-003）、BP03-078（別名 `while_zone: any`，M-004）。

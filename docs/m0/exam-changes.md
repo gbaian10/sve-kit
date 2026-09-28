@@ -1,7 +1,7 @@
 # M0 期間的改題紀錄
 
 分支 `m0/baseline` 上對共同題本（基準 main `b96f6d8`）做的修改。之後要同步回 main 的
-`tests/rules-scenarios/` 與 post-d-plan §2 的基準清單，並重跑兩邊或新基線。
+`tests/rules-scenarios/` 與基準清單，並重跑兩邊或新基線。
 
 ## 1. card-BP02-062 B、C（2026-09-27）
 
@@ -51,7 +51,8 @@
 - 共同題本的 `decisions` 是固定序列，契約沒有條件式決定；兩種讀法的輸入點不同，所以一份題目
   不能同時讓兩種讀法都走完。本題採用已裁定的 R-0009，**等於斷言有誘發**
 - `status: verified` 與原 `verified_by`（astra，覆核的是改題前的 B／C）保留，並在題目中註明
-  B／C 的部分已不適用。改題後的 B、C 已由 opus 覆核通過（`sve-kit/spec/design/m0-review/opus-r2.md` 第 3 節），
+  B／C 的部分已不適用。改題後的 B、C 已由 opus 在審核第 2 輪覆核通過（局面名稱、決定序列、斷言與其他欄位一致，
+  並以變異確認抓得到「忽略なら」「7.4.7 捨牌算進去」「誘發時判定」三種錯誤實作），
   `verified_by` 加一筆 `by: opus`。審核建議的 `method: qa+mutation` 不在契約列舉（`qa | independent-derivation`）內，
   所以寫 `qa`，變異驗證寫在 note
 
