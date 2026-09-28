@@ -1,13 +1,131 @@
 /* Scan src/ only: configs and lint fixtures name forbidden classes on purpose. */
 @import "tailwindcss" source("..");
+@import "./fonts.css";
 @import "./tokens.css";
 
 /* Drop the default palette so only semantic tokens exist as colour utilities. */
 @theme inline {
   --color-*: initial;
-  --color-surface: var(--surface);
-  --color-surface-raised: var(--surface-raised);
-  --color-text: var(--text);
-  --color-text-muted: var(--text-muted);
+  --color-bg: var(--bg);
+  --color-surface-1: var(--surface-1);
+  --color-surface-2: var(--surface-2);
+  --color-surface-3: var(--surface-3);
+  --color-well: var(--well);
+  --color-side: var(--side);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-scrim: var(--scrim);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --color-warning: var(--warning);
+  --color-warning-soft: var(--warning-soft);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-class-forest: var(--forest);
+  --color-class-sword: var(--sword);
+  --color-class-rune: var(--rune);
+  --color-class-dragon: var(--dragon);
+  --color-class-abyss: var(--abyss);
+  --color-class-haven: var(--haven);
+  --color-class-neutral: var(--neutral);
+
+  /* The class colour of the nearest [data-class] ancestor (see the base layer below). */
+  --color-class-current: var(--class-color);
+  --color-cost: var(--cost);
+  --color-def: var(--def);
   --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-text: var(--accent-text);
+  --color-accent-soft: var(--accent-soft);
+
+  /* Radii from the design: badge 5, small 6, card image 8, small control 10, button/input 12,
+     block card 14, chip pill 16, dialog 18, bottom sheet 20. */
+  --radius-*: initial;
+  --radius-badge: 5px;
+  --radius-sm: 6px;
+  --radius-card: 8px;
+  --radius-control: 10px;
+  --radius-button: 12px;
+  --radius-block: 14px;
+  --radius-pill: 16px;
+  --radius-dialog: 18px;
+  --radius-sheet: 20px;
+
+  /* Type scale named by design px; rem so users can zoom text. */
+  --text-*: initial;
+  --text-11: 0.6875rem;
+  --text-12: 0.75rem;
+  --text-13: 0.8125rem;
+  --text-14: 0.875rem;
+  --text-15: 0.9375rem;
+  --text-16: 1rem;
+  --text-17: 1.0625rem;
+  --text-18: 1.125rem;
+  --text-20: 1.25rem;
+  --text-22: 1.375rem;
+  --text-24: 1.5rem;
+  --leading-effect: 1.75;
+
+  /* Layout switches on content width: phone < 600, wide phone/tablet portrait 600–999, desktop ≥ 1000. */
+  --breakpoint-*: initial;
+  --breakpoint-md: 600px;
+  --breakpoint-lg: 1000px;
+  --breakpoint-xl: 1440px;
+  --font-sans: var(--font-ui);
+  --font-ja: var(--font-ja);
+}
+
+@layer base {
+  :root {
+    --class-color: var(--neutral);
+  }
+
+  html {
+    background-color: var(--bg);
+    color: var(--text-1);
+    font-family: var(--font-ui);
+    text-wrap: pretty;
+  }
+
+  :lang(ja) {
+    font-family: var(--font-ja);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--text-1);
+    outline-offset: 2px;
+  }
+
+  [data-class="forest"] {
+    --class-color: var(--forest);
+  }
+
+  [data-class="sword"] {
+    --class-color: var(--sword);
+  }
+
+  [data-class="rune"] {
+    --class-color: var(--rune);
+  }
+
+  [data-class="dragon"] {
+    --class-color: var(--dragon);
+  }
+
+  [data-class="abyss"] {
+    --class-color: var(--abyss);
+  }
+
+  [data-class="haven"] {
+    --class-color: var(--haven);
+  }
+
+  [data-class="neutral"] {
+    --class-color: var(--neutral);
+  }
 }

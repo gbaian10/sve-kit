@@ -154,6 +154,11 @@ export default defineConfig(
     extends: [tseslint.configs.disableTypeChecked],
     languageOptions: { globals: globals.node },
   },
+  // public/ holds plain browser scripts served as-is (theme-boot.js); no Node, no bundle.
+  {
+    files: ["public/**/*.js"],
+    languageOptions: { globals: globals.browser },
+  },
 
   {
     plugins: {
