@@ -1,111 +1,185 @@
 # authored 維護方式
 
-`authored/` 的檔案配置與匯入規則。下列路徑是提案；ID、決定和配號皆為結構示例，不能當人工審核證據。規則以 [build-db.md](build-db.md) 為準。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；本格式不變更出貨契約。
 
-## 1. 人寫例外與永久登錄分開
+## 1. 路徑與共同格式
 
-| 類別              | 路徑提案                                                                                                         | 維護方式                                                                                              |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 永久身分/面/版次  | registry/identities/BP01.yaml、registry/identities/PR/001.yaml                                                   | 工具產候選，採納後固定 ID；不是每次重新分組                                                           |
-| printing UInt32   | ids/index.yaml（include）、ids/BP01.yaml                                                                         | 工具全域唯一配號，只能新增；不能靠排序重建                                                            |
-| 模板/詞彙永久 key | templates/BP01/001.yaml、keywords.yaml、`vocabulary/_shared/001.yaml`                                            | 內容 ID/穩定 code；工具檢碰撞，舊 ID 不覆寫                                                           |
-| 身分修復/特殊構築 | overrides/identities/BP01.yaml、overrides/deck-roles/BP01.yaml                                                   | merge/split/reassign 與例外角色需人工                                                                 |
-| JP/EN 對應        | registry/identities/BP01.yaml 的 EN printing 歸屬                                                                | 每筆人工確認；不另寫 `region_mapping` 真值                                                            |
-| 新包策展          | curation/BP01/001.yaml                                                                                           | 一包封套包含 art/stamps/digital/serials/related；按 kind 分段，避免到處開空檔                         |
-| 來源錯誤/語義差異 | corrections/BP01.yaml、divergences/BP01.yaml                                                                     | confirmed 例外，含來源版本與原因                                                                      |
-| 翻譯              | translations/zh-Hant/BP01.yaml、translation-templates/zh-Hant/BP01/001.yaml、`glossary/zh-Hant/_shared/001.yaml` | 全句/子句模板，繁中跟 JP；EN 只掛適用選用                                                             |
-| DSL/巨集          | effects/BP01.yaml、effects/index.yaml、macros/BP01/001.yaml                                                      | 工具填 meta；EN 只有 divergence/EN-only 才加 override                                                 |
-| 裁定/機制/禁限    | rulings/R-0001.yaml（每裁定一檔，ADR-0011）、mechanics/BP01.yaml、`rules/_shared/001.yaml`                       | 人工證據/覆寫，推導 projection 不寫 authored；裁定匯入時 Q 號轉 `qa_version_id`、`zh-TW` 轉 `zh-Hant` |
-| 路由/預設例外     | overrides/routes.yaml、overrides/defaults/BP01.yaml                                                              | 正常 route/default 不人寫，改號 alias/多 variant 入口才登錄                                           |
-| 搜尋/記號/設定    | aliases/zh-Hant/BP01.yaml、`symbols/_shared/001.yaml`、`config/*.yaml`                                           | 一張 `search_alias`；圖示 SVG 屬 app shell                                                            |
+| 狀態 | 類別 | 實際路徑或提案 |
+| ---- | ---- | -------------- |
+| 定案 | 永久卡、面、版次 | `registry/card/<owner>/001.yaml`、`registry/face/<owner>/001.yaml`、`registry/printing/<owner>/001.yaml` |
+| 定案 | 整數編號配號／全域入口 | `ids/<owner>/001.yaml`、`ids/index.yaml` |
+| 定案 | 英文獨有查核 | `registry/region_mapping_review/<owner>/001.yaml` |
+| 定案 | 英文原創插畫 | `registry/art/<owner>/001.yaml` |
+| 定案 | 換皮卡 | `registry/card_related/<owner>/001.yaml` |
+| 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
+| 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
+| 提案 | 身分修復、特殊構築 | `overrides/identities/BP01.yaml`、`overrides/deck-roles/BP01.yaml` |
+| 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
+| 提案 | 模板、詞彙、翻譯 | `templates/BP01/001.yaml`、`keywords.yaml`、`translations/zh-Hant/BP01.yaml` 等 |
+| 提案 | 語義差異、DSL、路由、設定 | `divergences/`、`effects/`、`macros/`、`overrides/routes.yaml`、`config/` 等，見後續各節 |
 
-authored 是人工判斷或不能重建的永久狀態。官方原文/QA/圖像、可重建 `face_current/route/projection` 不整份複製入 git。檔案按首次 `owner/home_set` 固定；共用模板/裁定放首次定義包或 `_shared`；PR 大檔依固定序號 bucket 切。每檔 <1,048,576 bytes，建議 512 KiB 分片；include 亦可分層。安全 YAML 解析、禁止重複鍵/tag/跨檔 anchor，日期與 ID 引號明示。
+`owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
-## 2. 批次封套與確認
+分片內記錄依對應 printing 的 `(region, card_no, variant_key, printing id)` 排序（`card_no` 為原樣字串的 code-point 字典序）：printing、配號、來源更正用自身或所指 printing；art 用第一個 use 的 printing；card、face、英文獨有查核、換皮卡用該 card 所有 printing 中最小的鍵（face 再加 ordinal）；最後一律以 `record_key` 收尾。排序只作用於**同一次寫入的新記錄**：正常追加只排序本次新增、寫到該 `(area, owner)` 的下一個序號檔，舊分片不動，所以同一 owner 的多個分片合起來不保證是全域卡號序。2026-09-28 首次公開前曾一次性全量重新分片（見 §3.2）；此後不再重排。
+
+YAML 固定 1.2 core schema、單一文件、UTF-8；所有鍵必須是字串，禁止重複鍵、anchor、alias、merge key、顯式 tag、非有限浮點及 YAML 1.1 指示。日期字串須加引號；隱式日期仍是字串，不啟用 timestamp resolver。遵循 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤) 的解析邊界。`ruamel.yaml` pure safe 載入後仍要做結構與引用檢查。
+
+## 2. 分片、批次決定與來源
+
+每個分片有 `authored_format: 1`（分片格式未變；`ids/index.yaml` 為 2，見下）、`kind: registry_shard`、`default_decision_id`、`records`、`decisions`。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。配號以外，匯入時將封套的 decision 展開成具體資料表 FK，不另建立 subject 真值表。配號分片的 decision 為 null，decisions 為空。
 
 ```yaml
 authored_format: 1
-kind: curation_batch
-owner: BP01
-default_decision_id: example-batch
+kind: registry_shard
+default_decision_id: "d:<64 hex>"
 records:
-  - record_key: art-group-example
-    kind: art_group
-    art_id: "a:example"
-    card_id: "c:example"
-    face_id: "f:example:front"
-    classification: alternate
-    uses:
-      - printing_id: "p:jp:example"
-    decision_id: null
+  - record_key: "card:c:<32 hex>"
+    kind: card
+    owner: BP01
+    data:
+      id: "c:<32 hex>"
+      layout: single
+      identity_state: confirmed
+      home_set_id: BP01
 decisions:
-  - id: example-batch
-    category: art
-    state: proposed
+  - id: "d:<64 hex>"
+    state: confirmed
     scope: batch
-    policy_id: art-review-v1
-    membership_hash: "sha256:<工具計算精確成員與內容>"
-    sample_ids: []
-    authored_by: example-author
-    authored_at: "2026-09-27T00:00:00Z"
-    reviewed_by: null
-    reviewed_at: null
-    note: "尚未抽查；此例不能發布為採納資料"
+    category: identity_registry
+    policy_id: identity-init-2026-09-28-v1
+    membership_hash: "sha256:<64 hex>"
+    members: [["card:c:<32 hex>", "sha256:<64 hex>"]]
+    sample_ids: ["card:c:<32 hex>"]
+    authored_by: registry-tool
+    authored_at: "2026-09-28T00:00:00Z"
+    reviewed_by: coordinator
+    reviewed_at: "2026-09-28T00:00:00Z"
+    reviewed_precision: day
 ```
 
-`decision_id=null` 表示匯入時沿封套；SQLite 必須展開為實際 FK。`membership_hash` 由記錄 canonical 語義內容（排除 decision 指針）與 key 排序計算。新增/修改記錄不沿舊 sampled；工具產下一批 decision，舊決定不可覆寫。sampled 必含實際抽查的 record keys、審核者/時間、抽樣政策和失敗例外；confidence `high/model_reviewed` 均不足以代替人。
+這是格式示意，不是額外審核證據。2026-09-28 的採納依使用者整批確認與後續裁決；`sample_ids` 列**全部 checked record keys**，不是抽樣。`reviewed_precision=day` 表示原紀錄只有日期；UTC 日界是可重現的日精度編碼，不聲稱核對發生於零時。該精度保留於 authored 證據，匯入 decision 的 Instant 採此編碼。本批新找出的更正候選用 proposed decision、空 checked 集合與 null reviewer/time，不能冒稱 coordinator 已確認。
 
-art/stamp/digital/serial/翻譯可 sampled；UI 顯示抽查覆蓋。跨區身分仍 confirmed＋每筆 checked，不因採用同封套就抽查取代全筆人工。
+hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。先對完整 record（不含封套的 decision 指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序，再計 membership hash。decision ID 使用完整 membership hash。任何新成員或內容變更都不得沿用舊決定。2026-09-28 的一次性重新分片讓部分 printing 分片合併，這些分片的 decision 依新成員重算 ID／members／membership_hash；審核者、日期與政策沿用原成員的決定（原本就是同一次使用者整批確認），不是新的審核事件，也不保留舊 decision ID。
 
-## 3. 身分、跨區與配號
+`ids/index.yaml` 的 `includes` 是 authored 根目錄相對路徑 → 分片**解析後 canonical JSON** hash；`authored_format: 2` 的 index 另有 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。解析內容 hash 可容忍格式工具只調整 YAML 排版。入口列出所有登錄分片，不掃描未被納入的檔案作為有效資料；存在未索引的登錄檔時停止，避免中斷後重用配號。
+
+每張 printing 的 `observation` 保存 `region/card_no/recipe/observation_hash/rules_hash`。`registry-observation-v1` 是工具 `Card` typed projection 的 canonical JSON；包括全部 faces 的 card name、職業、種類、數值、特性、原文、sections／speech、來源 img src，不含抓取時間或本機路徑。它是**萃取觀測 hash，不是原 HTML hash**。原始萃取仍留 repo 外；建置匯入需以同 recipe 驗證原始觀測並連到 source_record／decision_source，不能把它偽裝成官方 HTML 的 sha256。僅取得此 registry 不足以重建官方卡文。
+
+規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生 confirmed 的 revision_semantics 或規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
+
+## 3. 永久身分、配號與策展
+
+### 3.1 ID 與身分
+
+ID 使用 `c:`／`f:`／`p:`／`a:`／`r:`／`x:` 加 UUIDv5 的 32 小寫 hex；固定 namespace 為 `e304714a-f18c-5fb6-a987-222988ffbb7a`。UUID 名稱為 kind、NUL、首次 anchor，並檢查全域碰撞。首次 printing anchor 是 exact `region:card_no`（目前 variant 固定 standard）；card anchor 是採納群組首次代表 printing 的 anchor；face anchor 是 card ID 與固定 source ordinal。art anchor 是 printing ID 與 face ordinal。這些配方只用於首次配發，**既有 registry 優先，不能日後重新算 card 分組來換 ID**。
+
+card 的 `data` 如前例。face 的 `data` 為 `id/card_id/ordinal/side`，single 恰一個 front，double_faced 恰 front/back；一般進化前後不同種類，因此不同 card。printing 格式：
 
 ```yaml
-authored_format: 1
-kind: identity_registry
-records:
-  - card_id: "c:example"
-    home_set_id: BP02
-    identity_state: provisional
-    faces:
-      - { id: "f:example:front", ordinal: 0, side: front }
-    printings:
-      - id: "p:jp:example"
-        region: jp
-        card_no: "EXAMPLE-JP"
-        variant_key: standard
-        source_face_map:
-          - { source_index: 0, face_id: "f:example:front" }
-      - id: "p:en:example"
-        region: en
-        card_no: "EXAMPLE-EN"
-        variant_key: standard
-        cross_region_review:
-          state: proposed
-          checked: false
-          decision_id: example-region-review
-        source_face_map:
-          - { source_index: 0, face_id: "f:example:front" }
+record_key: "printing:p:<32 hex>"
+kind: printing
+owner: BP02
+data:
+  id: "p:<32 hex>"
+  card_id: "c:<32 hex>"
+  region: en
+  card_no: "BP02-070EN"
+  variant_key: standard
+  home_set_id: BP02
+  source_face_map:
+    - {source_index: 0, face_id: "f:<32 hex>"}
+  observation:
+    region: en
+    card_no: "BP02-070EN"
+    recipe: registry-observation-v1
+    observation_hash: "sha256:<64 hex>"
+    rules_hash: "sha256:<64 hex>"
+  cross_region_review:
+    checked: true
+    target_jp_card_no: "BP02-071"
+    target_observation:
+      region: jp
+      card_no: "BP02-071"
+      recipe: registry-observation-v1
+      observation_hash: "sha256:<64 hex>"
+      rules_hash: "sha256:<64 hex>"
 ```
 
-日英身分只存這裡，EN `source_face_map` 也是同一確認的一部分；`cross_region_review` 是 authored 輸入，匯入後 decision/source 與 `printing.card_id` 表達，不出貨第二張 `region_mapping`。
+卡號保存官網原樣，含 `Ⓢ`、小寫 `a`。EN 的 target 來自已確認候選及有序覆寫，絕不以去 EN 自動配對；JP printing 不填 cross_region_review。有對應時兩端共用 card／face；target 卡號只是核對證據，不是第二張 region_mapping 真值。EN-only 仍有獨立 card 和 printing，target 及 target_observation 為 null。
 
-JP 初始化工具以全部面完整特徵產候選，對既有 registry 優先保持 ID；新勘誤造成效果不同不能自動拆卡，依同卡通則歸併 EP/SEP、CP03-125/126、ルゥ 與經核對等義表記，真歧義才隔離。普通單面 `source_face_map` 可由工具生成；雙面依來源順序先配候選但覆核完整面後才採納，不拿 ordinal 當跨區推斷。
+JP 初始分組依全部面同名／同職業／同種類／同數值／同特性，加上人工審閱規則差異的收據；不是只依同名自動採納。EP、SEP、CP03-125/126、ルゥ遵循 build-db §3.1。同欄位但實際卡面規則不同時，收據 `separate_groups` 指定不同群組。雙面的 source_index 是此次全體 checked 的面對應，不是以 ordinal 猜日英面對應。
 
-```yaml
-authored_format: 1
-kind: card_int_registry_shard
-records:
-  - int_id: 1
-    printing_id: "p:jp:example"
-    region: jp
-    card_no: "EXAMPLE-JP"
-    variant_key: standard
-    allocated_at: "2026-09-27"
-```
+### 3.2 UInt32
 
-沒有 `decision_id`。配號工具鎖全域 next-id，append 後驗重複；與前次公開 registry 比較，不能更改/刪除/重用。主入口 ids/index.yaml 只 include shards。現行 `authored/README.md` 的 `card-ids.yaml`（卡片 ID、各區卡號與跨區對應）落地時改由 registry/identities 與 ids/ 承接，並同步更新該 README。未發表草稿號不當正式分配。
+`card_int_id` 的 `data` 僅 `int_id/printing_id/allocated_at`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-09-28-v1` 決定，程式唯一定義在 `sve_carddb.registry.allocation`：
 
-`identity_change` 另寫 `old/new/kind/printing?/data_version/decision/reason`。split 多目的與受影響 printing 清單完整；永久 int→printing 不變，父 card 修復要可見，不靜默改玩家牌組。
+| 號段（閉區間） | 用途 |
+| -------------- | ---- |
+| 1..20000 | 保留；一般配號器不得使用，特殊用途須另定放行程序（尚未定義） |
+| 20001..59999 | `region=jp` 的 printing |
+| 60000 | 未分配 |
+| 60001..99999 | `region=en` 的 printing |
+| 100000..4294967295 | 未分配；新地區開新的、不重疊的號段 |
+
+號段依 printing 登錄的 `region` 查詢，**不從號碼反推地區**。新增只從該區游標往後追加，不回填空號、不依最新卡號排序重編。配發前先算出本批各區需求，任一區超出區段即整批失敗，不部分寫入、不溢出到其他號段；擴區規則日後另定。驗證要求每號落在所屬 printing 地區的閉區間、全域唯一且與 printing 一對一，各區游標等於該區最大號＋1（空區為起點），游標不得回退。
+
+2026-09-28（首次公開前）曾一次性重配全部 14,789 筆：各區依 `(region, owner, card_no 原樣字串, variant_key, printing id)` 自區段起點連續配發（JP 20001..27369、EN 60001..67420），並同時全量重新分片。字串 ID、地區、卡號與其他語義資料不變。這是公開前唯一的例外；此後只增不改。
+
+工具持有全域檔案鎖，先驗證全部輸入、既有索引／hash／外鍵、計畫與大小，再寫新分片，最後原子替換 index。重跑無變更時不寫檔。中斷留下未索引分片時停止；恢復者須從 git／備份核對完整批次，不能刪檔後猜 next-id。來源更新拒絕覆寫舊證據，另走來源版本與決定重審流程，不因文字更新產生 identity_change。父 card 改動或合併既有 card 才需 confirmed identity_change；此工具不實作身分修復或同號 variant 猜測。
+
+### 3.3 英文獨有、原創插畫與換皮卡
+
+`region_mapping_review` 的 `data` 為 `card_id/target_region/state/as_of/coverage_scope/coverage_hash/observations`。本批 target_region=jp、state=confirmed_none，coverage_hash 釘當次完整 JP 萃取輸入，observations 釘受審 EN 版次。匯入 source_id 指這份 immutable authored 查核紀錄；不是推論永遠不會出日版。
+
+`art` 的 `data` 為 `id/card_id/face_id/classification/uses/observation`，uses 是 printing_id＋face_id 陣列。本批原創插畫只掛已確認的 EN printing；未確認基準及跨版次同圖組，故 classification=unclassified，不造假 base／alternate 或 JP art。`art_id=null` 的其他 printing 不代表沒有插畫。
+
+`card_related` 的 `data` 為 `id/from_card_id/to_card_id/relation/source_kind/target_printing_id/suggested_count/dsl_id/evidence`。relation=same_rules_reskin、source_kind=authored，三個選用欄為 null。evidence 逐筆記 `role: from|to` 及全部兩端已採納版次的觀測；匯入 decision_source 釘兩端來源。相同換皮卡的普通／特殊 printing 只產一條關係，禁止自指、多目標與反向重複。只能在兩端都有版次且來源驗證仍匹配的地區投影；任一端目前來源改變就停止該地區投影，依 build-db §5 重審。不能繼承原卡 DSL 或構築張數。
+
+confirmed_none 與 same_rules_reskin 的決定不可因追加版次自動擴張。工具與獨立 validate 都逐筆比對 printing 的完整 observation（換皮關係另含 from／to），拒絕缺漏、重複、過期或多餘證據。新版次需要新的 review／relation 決定並釘住新觀測；v1 尚未定義決定續版格式，因此追加既有 EN-only card 或換皮關係任一端的版次會直接失敗並提示重審，不改寫舊決定。
+
+### 3.4 來源更正
+
+`source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類；值保留來源表記。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
+
+evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，decision 為 confirmed、reviewed_by=user、日期精度 day。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review＋proposed decision，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
+
+本批八筆候選升為 active 是使用者明示授權的來源更正採納，非一般追加：移至 active 分片、建立涵蓋精確內容的新 confirmed decision、同步更新 index。先前 proposed 分片與收據保留在 Git 歷史及舊批次資料中；其他永久登錄與決定不改動。一般產生工具仍拒絕修改既有記錄，不以自動升級取代人工確認。
+
+建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時省略 source_url，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
+
+CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這是供後續建置使用的欄位投影，不是完整 face_revision、SQLite correction_application 或公開卡表快照；那些匯入與輸出尚未實作。
+
+### 3.5 重跑與新卡包
+
+工具入口為 `uv --directory <absolute-carddb> run python -m sve_carddb.registry`；參數 `--jp/--en/--candidates/--confirmations/--original-art/--receipt/--images/--authored` 全為明示路徑，`--check` 要求現有輸出完全相同。全程只讀本機來源，不讀 manifest、不抓網路。
+
+receipt 是本機審閱收據，JSON 欄位為 policy、reviewed_by、reviewed_on、input_hashes（五個完整輸入檔的 exact bytes SHA-256）、corrections、reskins、separate_groups、art_groups。policy 目前固定 identity-init-2026-09-28-v1。工具不從 confidence 產生 approval；操作者須在完成逐筆核對／本批政策審閱後建立收據。新包先產候選、核對所有面與差異、核圖實質增刪，再建立新收據；新增內容不能沿用舊輸入 hash。任何未核對的職業、種類、數值或英文同卡名稱衝突都失敗。
+
+corrections 元素包含 region、card_no、face_index、field、expected_raw_value、corrected_value、image_sha256、locator、state、reason。needs_review 的 card_type 候選另須明示 `adoption_scope: identity_check_only` 與 `source_correction_status: pending_user_confirmation`，否則拒絕用於身分核對；這兩欄不會提升來源更正狀態，也不改寫原觀測或正式分片。reskins 是 EN 卡號 → JP 原卡號；separate_groups 是 `region:exact_card_no` → 明示分組鍵；art_groups 是已核對同幅插畫的 EN 卡號陣列集合，組間不得重疊、不能跨 card。未列入者各自登錄；本批 CP02-072EN／CP02-P57EN 依同圖不同簽名加工規則共用 art。receipt 不進 git，採納後的永久登錄與其精確成員決定才是維護狀態。新增 package 使用包含原觀測的完整輸入集合，不把變動的舊來源塞進追加工具；舊來源更新另走 source／identity 修復流程。
+
+### 3.6 輸入保存與收據建立
+
+每批在 repo 外的 `SVE_DATA_DIR/derived/registry/<batch-id>/` 建立新的永久目錄；不可覆寫舊批次。保存以下 exact bytes，不重新序列化或排序既有輸入：
+
+| 檔名 | 取得方式與內容 |
+| ---- | -------------- |
+| jp.jsonl | 取得已核對的 JP 萃取快照；每行 Card 的 number 與完整 faces。一般 JP 萃取由 extract/jsonl.py 產生；本工具不讀 manifest、不執行萃取 |
+| en.jsonl | 取得審閱批次的完整 EN 萃取快照；每行同樣符合 registry.inputs.Card。目前沒有正式 EN 萃取 CLI，不可假定重新解析 HTML 能還原舊批次 exact bytes |
+| candidates.jsonl | 取得本批已審候選；每行 en_no、category（A/B/C）、jp_candidates（含 jp_no）。新增批次須完整列出 EN 版次，人工確認 A/B 第一候選或 C 無對應 |
+| confirmations.tsv | 保存依序追加的人工裁決，欄位 en_no、jp_no、verdict、confirmed_on；後列覆蓋前列，不能重排 |
+| original_art.jsonl | 保存人工卡圖比對結果，每行含 en_no、verdict；en_original_art 是插畫確認證據 |
+| receipt-original.json | 原收據的 exact bytes 副本；供稽核比對，不能就地修訂 |
+| receipt.json | 本次使用的收據；若只補採納範圍，明記衍生自哪份原收據及新增欄位，不變更五個輸入 hash |
+
+舊批次的取得方式是從保存目錄或其備份複製上述檔案，使用 SHA256SUMS 驗證；不依賴 session 暫存檔、個人草稿或重新生成候選。本批先保留原收據與補充 scope 的收據；使用者確認後另建批次，五份輸入 exact bytes 相同，新 receipt 記 active 與 user／2026-09-28，移除不再適用的 pending scope。舊批次搭配確認前的 Git commit 重現。inventory.json 記各檔 hash、大小、來源及補充原因。SHA256SUMS 與收據都需納入批次備份；git 不存官方原文。
+
+新批次依序執行：
+
+1. 取得完整日英萃取與所有候選／人工確認／插畫證據，依 §3.5 核對各面、規則差異及必要卡圖。保留原始欄位，不將候選更正寫回輸入。沒有 EN 萃取器時須先提供可審閱的完整 Card JSONL，不能省略原文或沿用 confidence 當決定。
+2. 建立全新 batch-id 目錄，複製五份輸入；以 SHA-256 比對來源與副本 exact bytes。原有卡片觀測若更新，走來源版本重審流程，不能覆寫舊批次。
+3. 人工完成核對後，建立符合 registry.review.Receipt 的 JSON：填 policy、reviewed_by、reviewed_on，input_hashes 的鍵恰為 jp/en/candidates/confirmations/original_art，值是 `sha256:` 加該副本的 hashlib.sha256(path.read_bytes()).hexdigest()。corrections／reskins／separate_groups／art_groups 依 §3.5 填寫；無資料則空集合，不能自行沿用上一批批准。
+4. 寫入 inventory.json 與 SHA256SUMS，記錄輸入取得方式、收據建立人與範圍。修改收據時另存新檔並保留原件，逐項說明差異；收據本身的 hash 也納入 SHA256SUMS。
+5. 將 §3.5 CLI 的五個輸入與 --receipt 全部指向此持久目錄，--images 指本機官方卡圖、--authored 指登錄目錄。先驗證輸入／計畫，完成後用相同命令加 --check 驗證零改寫。既有 EN-only／換皮卡追加需等待續版決定格式，不能透過新收據繞過拒絕。
 
 ## 4. 新卡包的人工作業量
 
@@ -170,6 +244,6 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 
 例如 BP20-SNC01（ANV，4 周年，初版限定 n/10）的 10 可寫 `serial_total` 候選；卡號是否真的印於卡面仍依來源核對，不能因本文件提到就改 official。PR-350/PR-442 上限 150、PR-544 上限 500 為已知的維護需求，仍留下原證據/欄位來源。月年日期原樣保存，不補完整日期；QR 兌換與初版限定用 `inclusion_kind` 區分。unlisted 公開頁有「非官方整理，可能不完整」、來源/信心/回報入口。
 
-暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都追加分配。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。每張第三方圖以 `review_decision_id` 連到 confirmed 的來源/圖片確認，保存 `source_url`、內容 hash、確認者 `reviewed_by` 與時間 `reviewed_at`；換圖/換來源須重新確認，抽樣不代替逐圖確認。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
+暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都依其地區號段追加分配（§3.2）。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。每張第三方圖以 `review_decision_id` 連到 confirmed 的來源/圖片確認，保存 `source_url`、內容 hash、確認者 `reviewed_by` 與時間 `reviewed_at`；換圖/換來源須重新確認，抽樣不代替逐圖確認。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
 
 發布程序另外追加永久版本索引及內容閉包；所有舊 text 鍵集合用來做固定 16 hex＋lang 的碰撞檢查，無碰撞才可追加，不能重配歷史鍵。這個可重建鍵索引不進人工 registry，也不刪 R2 歷史來省索引工作。

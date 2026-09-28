@@ -35,7 +35,8 @@ cross-region mapping by hand, so a report does not need to be certain.
   upload card image files — link to the official page instead.
 
 Data contributions are plain YAML files under `authored/`, split per card set.
-The exact format will be documented once the schema is settled; until then, an issue is the best way.
+The identity registry format is defined in [authored layout](docs/schema/authored-layout.md);
+other data layouts remain proposed.
 
 ## Languages
 
