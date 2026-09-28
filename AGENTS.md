@@ -55,7 +55,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
 `authored/` 依卡包切檔（例如 `authored/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
 
-測試用官方卡文存於專用私有 GitHub testdata repo，只收必要的最小 JSONL 與產生說明，不收完整卡表、卡圖或憑證；卡文不進 `sve-kit`，不用 R2。
+測試用官方卡文存於專用私有 GitHub testdata repo，只放測試需要的卡表輸入（目前是完整的日文卡表 JSONL）與來源說明，不放卡圖或憑證；卡文不進 `sve-kit`，不用 R2。
 `sve-kit` 只保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
 更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。
 主分支與專案自己的 PR 跑完整測試，行覆蓋率門檻為 90%；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
