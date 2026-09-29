@@ -65,8 +65,9 @@ const ORIGINS: readonly TranslationOrigin[] = [
 ]
 const isOrigin = (value: JsonValue | undefined): value is TranslationOrigin =>
   typeof value === "string" && (ORIGINS as readonly string[]).includes(value)
+const LANGS = ["ja", "en", "zh-Hant"] as const
 const isLang = (value: JsonValue | undefined): value is TextLang =>
-  value === "ja" || value === "en" || value === "zh-Hant"
+  (LANGS as readonly string[]).includes(value as string)
 
 function nullableInteger(value: JsonValue | undefined): number | null {
   return value === null || value === undefined ? null : integerValue(value)
@@ -104,6 +105,65 @@ async function effectTranslations(
   return candidates.filter((item): item is TranslationCandidate => item !== undefined)
 }
 
+/** The parser vocabulary, icon names and keyword lookups that every text of one snapshot shares. */
+export interface TextContext {
+  readonly vocabulary: CardTextVocabulary
+  /** Name/tooltip of a text icon in one language; in memory once the context exists. */
+  readonly symbolLocalization: (symbolId: string, lang: TextLang) => Row | undefined
+  readonly keyword: (id: string) => KeywordInfo | undefined
+}
+
+async function buildTextContext(client: SnapshotClient, catalog: Catalog): Promise<TextContext> {
+  const { index } = catalog
+  const global = globalDetailOf(client, index)
+  const vocabulary = await global.vocabulary()
+  const symbolIds = [...new Set(vocabulary.spellings.map((spelling) => spelling.symbolId))]
+  const localizations = new Map<string, Row | undefined>()
+  await Promise.all(
+    symbolIds.flatMap((symbolId) =>
+      LANGS.map(async (lang) => {
+        localizations.set(
+          `${symbolId}\u0000${lang}`,
+          await global.symbolLocalization(symbolId, lang),
+        )
+      }),
+    ),
+  )
+  return {
+    vocabulary,
+    symbolLocalization: (symbolId, lang) => localizations.get(`${symbolId}\u0000${lang}`),
+    keyword: (id) => {
+      const row = index.keyword(id)
+      if (!row) return undefined
+      const names = vocabulary.keywords.filter((item) => item.keywordId === id)
+      const definitionId = row["definition_unit_id"]
+      return {
+        id,
+        name: (lang) => (names.find((item) => item.lang === lang) ?? names[0])?.name ?? id,
+        definition: async () => {
+          if (typeof definitionId !== "string") return undefined
+          const unit = await global.textUnit(definitionId)
+          return unit ? stringValue(unit["text"]) : undefined
+        },
+      }
+    },
+  }
+}
+
+const textContexts = new WeakMap<Catalog, Promise<TextContext>>()
+
+/** One text context per catalog, built on first use; a failed build is retried on the next call. */
+export function textContextOf(client: SnapshotClient, catalog: Catalog): Promise<TextContext> {
+  const cached = textContexts.get(catalog)
+  if (cached) return cached
+  const context = buildTextContext(client, catalog)
+  textContexts.set(catalog, context)
+  void context.catch(() => {
+    textContexts.delete(catalog)
+  })
+  return context
+}
+
 /**
  * Everything the card page's first screen needs for one printing. Only the home set's revision
  * file, the buckets holding this card's texts and translations, and the icon table are fetched.
@@ -123,7 +183,10 @@ export async function loadCardView(
   const region = stringValue(printing["region"]) === "en" ? "en" : "jp"
   const setId = stringValue(card["home_set_id"])
   const global = globalDetailOf(client, index)
-  const [set, vocabulary] = await Promise.all([setDetailOf(client, setId), global.vocabulary()])
+  const [set, context] = await Promise.all([
+    setDetailOf(client, setId),
+    textContextOf(client, catalog),
+  ])
   const faces: CardFaceView[] = []
   for (const face of index.facesOf(cardId)) {
     const faceId = stringValue(face["id"])
@@ -168,32 +231,6 @@ export async function loadCardView(
     if (viewRegion === region) mappingState = stringValue(view["mapping_state"])
   }
   const family = index.family(setId)
-  // Localizations were fetched with the vocabulary; read them back synchronously for rendering.
-  const localizations = new Map<string, Row | undefined>()
-  await Promise.all(
-    vocabulary.spellings.flatMap((spelling) =>
-      (["ja", "en", "zh-Hant"] as const).map(async (lang) => {
-        const key = `${spelling.symbolId}\u0000${lang}`
-        if (!localizations.has(key))
-          localizations.set(key, await global.symbolLocalization(spelling.symbolId, lang))
-      }),
-    ),
-  )
-  const keywordInfo = (id: string): KeywordInfo | undefined => {
-    const row = index.keyword(id)
-    if (!row) return undefined
-    const names = vocabulary.keywords.filter((item) => item.keywordId === id)
-    const definitionId = row["definition_unit_id"]
-    return {
-      id,
-      name: (lang) => (names.find((item) => item.lang === lang) ?? names[0])?.name ?? id,
-      definition: async () => {
-        if (typeof definitionId !== "string") return undefined
-        const unit = await global.textUnit(definitionId)
-        return unit ? stringValue(unit["text"]) : undefined
-      },
-    }
-  }
   return {
     cardId,
     printingId,
@@ -204,9 +241,7 @@ export async function loadCardView(
     faces,
     editions,
     mappingState,
-    vocabulary,
-    symbolLocalization: (symbolId, lang) => localizations.get(`${symbolId}\u0000${lang}`),
-    keyword: keywordInfo,
+    ...context,
     vocabularyLabel: catalog.vocabularyLabel,
   }
 }
@@ -240,12 +275,17 @@ export async function createRouteLookups(
   }
 }
 
+export interface EffectPreview {
+  readonly text: string
+  readonly lang: TextLang
+}
+
 /** The front face's original effect text for a table row, or undefined when there is none. */
 export async function loadEffectPreview(
   client: SnapshotClient,
   catalog: Catalog,
   printingId: string,
-): Promise<string | undefined> {
+): Promise<EffectPreview | undefined> {
   const { index } = catalog
   const printing = index.printing(printingId)
   if (!printing) return undefined
@@ -260,6 +300,7 @@ export async function loadEffectPreview(
   const unitId = (set.revision(stringValue(base["id"])) ?? base)["effect_unit_id"]
   const unit =
     typeof unitId === "string" ? await globalDetailOf(client, index).textUnit(unitId) : undefined
-  const text = unit ? stringValue(unit["text"]) : ""
-  return text === "" ? undefined : text
+  if (!unit || !isLang(unit["lang"])) return undefined
+  const text = stringValue(unit["text"])
+  return text === "" ? undefined : { text, lang: unit["lang"] }
 }

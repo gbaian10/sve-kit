@@ -2,7 +2,7 @@ import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, use
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
-import { useEffectPreviews } from "../../app/effectPreviews"
+import { useEffectPreviews, useTextContext } from "../../app/effectPreviews"
 import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
 import { useCatalog, useImageIndex } from "../../app/snapshot"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
@@ -248,6 +248,7 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
   const options = useMemo(() => catalog?.filterOptions(), [catalog])
   const previewIds = useMemo(() => cells.map((cell) => cell.summary.printingId), [cells])
   const preview = useEffectPreviews(client, catalog, previewIds, view === "table")
+  const textContext = useTextContext(client, catalog, view === "table")
   const chips = useMemo(
     () =>
       catalog
@@ -271,9 +272,12 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
     [catalog, query, textLang, options, t],
   )
   const setView = (next: ViewMode) => {
-    // Switching writes both the URL and the preference; conditions and the anchor stay.
     prefsStore.set({ viewMode: next })
-    commit({ ...query, view: next })
+    setEdit(null)
+    // Switching writes both the URL and the preference; the list's own entry state (loaded pages,
+    // anchor) travels to the new entry, so the conditions and the anchor card stay.
+    const search = formatQuery({ ...query, view: next }).toString()
+    void navigate(location.pathname + (search === "" ? "" : `?${search}`), { state: entry })
   }
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
@@ -450,6 +454,8 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
               images={images}
               onOpen={openCell}
               preview={preview}
+              context={textContext}
+              uiLang={textLang}
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
             />
           )}

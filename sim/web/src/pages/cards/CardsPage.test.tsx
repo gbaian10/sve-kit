@@ -185,6 +185,9 @@ describe("CardsPage", () => {
     expect(
       (await screen.findAllByText("能力預覽・未完整", {}, { timeout: 5000 })).length,
     ).toBeGreaterThan(0)
+    // The preview draws the same icons as the card page; keyword chips are plain text here.
+    expect((await screen.findAllByRole("img", { name: "入場曲" })).length).toBeGreaterThan(0)
+    expect(screen.queryByRole("button", { name: "守護" })).not.toBeInTheDocument()
     const shared = await renderRoutes(routes, { initialEntries: ["/cards?view=grid"] })
     await within(shared.container).findByRole("group", { name: "職業" }, { timeout: 4000 })
     expect(
@@ -194,6 +197,26 @@ describe("CardsPage", () => {
       ),
     ).toHaveAttribute("aria-checked", "true")
     shared.unmount()
+  })
+
+  it("keeps the anchor card and the loaded pages when the view changes", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("link", { name: /試作聖堂騎士/u }))
+    await router.navigate(-1)
+    // Wait for the list to be back on screen, not only for the router state.
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
+    expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
+    await user.click(
+      within(screen.getByRole("radiogroup", { name: "檢視" })).getByRole("radio", { name: "清單" }),
+    )
+    expect(router.state.location.search).toBe("?view=list")
+    expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
+    await waitFor(() => {
+      expect(document.querySelector('a[data-result-key="c:bp01-051"]')).toHaveClass("ring-accent")
+    })
   })
 
   it("opens the filter sheet, applies a draft and shows chips with the badge count", async () => {

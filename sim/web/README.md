@@ -203,6 +203,38 @@ The class quick bar shows labels only when an off-screen labelled copy fits the 
 classes of the physical game plus neutral. A class code the design does not know yet would use the
 neutral colour and an initial.
 
+## Filters, views and sorting
+
+Every facet of `QueryState` applies in `apply` (`src/domain/search.ts`): text, classes, cost range
+(7 means 7 and above), types, mechanics, sets, rarities and alt art only. Types, cost and mechanics
+are judged per printing in that printing's region, so a card stays listed while any eligible
+printing matches; `unit` then decides what one result is: a card (the typed printing, else the
+edition's default among the eligible ones), an art group (`printing.art_id`, else the printing
+itself) or a printing. Sorting is one comparator per `QuerySort` (`COMPARATORS`): the default keeps
+the search rank and snapshot order, the others compare cost / attack / defense / name / release
+date with unknown values last and fall back to that order on ties.
+
+`src/domain/mechanics.ts` is the tri-state of architecture §4.6: `present` from
+`mechanic_projection`, `absent` only when the card's `card_mechanic_coverage` row proves the keyword
+was checked (include / exclude modes, `complete_all`), `unknown` otherwise; an EN printing whose
+`card_engine_support` has an EN block degrades a shared-scope answer to `unknown`. The filter sheet
+prints "annotated N / M cards" from the same coverage rows. The design's "search the text instead"
+entry waits for effect-text search (W8).
+
+The sheet (`components/filters/FilterSheet.tsx`) edits a draft of the applied state: the count in
+its footer is computed live from the draft, "show" commits it and keeps the URL's text and `view`,
+"reset" clears the draft, closing keeps what was applied. `chips.ts` turns the applied state into
+the summary chips (four shown, then "N more"); each chip removes only its own condition.
+
+`ControlBar` holds the result count in the unit's word, the sort select, the grid density (2 or 3
+columns, phones only, a preference) and the view control. `view` follows architecture §2.1: the
+URL wins, else `Prefs.viewMode`; switching writes both and keeps the conditions and the anchor.
+The table view fetches the effect preview of its rows on demand from the set's detail file
+(`src/app/effectPreviews.ts`) renders it through `CardText` in its compact form (small icons, keyword names
+without explanations) and labels it as an incomplete preview; the list view is the 52 px row
+of design §6.2. `useOnline` drives the offline notice, and a card image that fails to load falls
+back to the text card with a "no image" tag.
+
 ## Card page
 
 `/cards/:cardNo/:slug?` and `/cards/_provisional/:intId` resolve through `src/domain/route.ts`:

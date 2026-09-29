@@ -3,8 +3,10 @@ import { useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useHref, useNavigate } from "react-router"
 
-import type { ImageIndex } from "../../data"
+import type { EffectPreview, ImageIndex, TextContext } from "../../data"
+import type { TextLang } from "../../domain/search"
 import { CardImage } from "../card/CardImage"
+import { CardText } from "../card/CardText"
 import { symbolIcon } from "../card/symbolIcons"
 import { cn } from "../ui/cn"
 import type { GridCell } from "./CardGrid"
@@ -14,8 +16,11 @@ export interface TableViewProps {
   readonly images: ImageIndex | undefined
   readonly onOpen: (cell: GridCell) => void
   readonly anchor?: string
-  /** Effect preview lines per printing (first two lines), when already known. */
-  readonly preview: (printingId: string) => string | undefined
+  /** The effect text of a printing's front face, once loaded. */
+  readonly preview: (printingId: string) => EffectPreview | undefined
+  /** Icons and keyword names for the previews; plain text until it has loaded. */
+  readonly context: TextContext | undefined
+  readonly uiLang: TextLang
 }
 
 function Row({
@@ -24,12 +29,16 @@ function Row({
   onOpen,
   highlighted,
   preview,
+  context,
+  uiLang,
 }: {
   readonly cell: GridCell
   readonly images: ImageIndex | undefined
   readonly onOpen: (cell: GridCell) => void
   readonly highlighted: boolean
-  readonly preview: string | undefined
+  readonly preview: EffectPreview | undefined
+  readonly context: TextContext | undefined
+  readonly uiLang: TextLang
 }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -95,7 +104,20 @@ function Row({
           </span>
           {preview !== undefined && (
             <span className={cn("text-13 text-text-2", !expanded && "line-clamp-2")}>
-              {preview}
+              {context ? (
+                <CardText
+                  compact
+                  text={preview.text}
+                  lang={preview.lang}
+                  vocabulary={context.vocabulary}
+                  symbolLocalization={context.symbolLocalization}
+                  keyword={context.keyword}
+                  uiLang={uiLang}
+                  symbolLabels={false}
+                />
+              ) : (
+                preview.text
+              )}
             </span>
           )}
           {preview !== undefined && (
@@ -125,7 +147,15 @@ function Row({
 }
 
 // Design §6.2 table view: 48×67 thumbnail, names, cost/attack/defense and a two-line preview.
-export function TableView({ cells, images, onOpen, anchor, preview }: TableViewProps) {
+export function TableView({
+  cells,
+  images,
+  onOpen,
+  anchor,
+  preview,
+  context,
+  uiLang,
+}: TableViewProps) {
   return (
     <ul>
       {cells.map((cell) => (
@@ -136,6 +166,8 @@ export function TableView({ cells, images, onOpen, anchor, preview }: TableViewP
           onOpen={onOpen}
           highlighted={anchor === cell.key}
           preview={preview(cell.summary.printingId)}
+          context={context}
+          uiLang={uiLang}
         />
       ))}
     </ul>

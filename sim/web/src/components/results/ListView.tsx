@@ -23,6 +23,7 @@ function Row({
   const navigate = useNavigate()
   const href = useHref(cell.to)
   const cost = cell.summary.cost
+  const costIcon = cost === null ? undefined : symbolIcon("cost", String(cost))
   return (
     <li>
       <a
@@ -50,12 +51,12 @@ function Row({
       >
         {cost === null ? (
           <span className="size-5.5 shrink-0" />
+        ) : costIcon === undefined ? (
+          <span className="flex size-5.5 shrink-0 items-center justify-center rounded-full bg-cost text-11 font-bold text-surface-1 tabular-nums">
+            {cost}
+          </span>
         ) : (
-          <img
-            src={symbolIcon("cost", String(cost))}
-            alt={String(cost)}
-            className="size-5.5 shrink-0"
-          />
+          <img src={costIcon} alt={String(cost)} className="size-5.5 shrink-0" />
         )}
         <span className="flex min-w-0 flex-1 flex-col leading-tight">
           <span lang={cell.name.primary.lang} className="truncate text-15 font-semibold">
