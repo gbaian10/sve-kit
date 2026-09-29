@@ -3,10 +3,11 @@
 import argparse
 import hashlib
 import json
+import re
 import sys
 import tempfile
 from collections import Counter, defaultdict
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
 from urllib.parse import parse_qs, urlsplit
@@ -29,6 +30,20 @@ RECORD = TypeAdapter(CardRecord)
 OBSERVATION_FIELDS = frozenset(
     {"region", "card_no", "recipe", "observation_hash", "rules_hash"}
 )
+APPROVED_NEW_FIELDS = frozenset(
+    {"card.products", "card.related_cards", "card.faces[].trait_raw"}
+)
+# Each approved semantic change must name one card, field, and both value hashes.
+APPROVED_RAW_FIELD_CHANGES: frozenset[tuple[str, str, str, str]] = frozenset()
+
+
+@dataclass
+class RawChanges:
+    differences: list[dict[str, JsonValue]]
+    added: list[str]
+    removed: list[str]
+    array_added: list[str]
+    array_removed: list[str]
 
 
 def legacy_projection(record: CardRecord) -> Card:
@@ -134,31 +149,33 @@ def _raw_walk(
     before: JsonValue,
     after: JsonValue,
     path: str,
-    differences: list[dict[str, JsonValue]],
-    added: list[str],
-    removed: list[str],
+    changes: RawChanges,
 ) -> None:
     if isinstance(before, dict) and isinstance(after, dict):
-        added.extend(f"{path}.{key}" for key in sorted(after.keys() - before.keys()))
-        removed.extend(f"{path}.{key}" for key in sorted(before.keys() - after.keys()))
+        changes.added.extend(
+            f"{path}.{key}" for key in sorted(after.keys() - before.keys())
+        )
+        changes.removed.extend(
+            f"{path}.{key}" for key in sorted(before.keys() - after.keys())
+        )
         for key in sorted(before.keys() & after.keys()):
-            _raw_walk(
-                before[key], after[key], f"{path}.{key}", differences, added, removed
-            )
+            _raw_walk(before[key], after[key], f"{path}.{key}", changes)
     elif isinstance(before, list) and isinstance(after, list):
         for index in range(min(len(before), len(after))):
             _raw_walk(
                 before[index],
                 after[index],
                 f"{path}[{index}]",
-                differences,
-                added,
-                removed,
+                changes,
             )
-        added.extend(f"{path}[{index}]" for index in range(len(before), len(after)))
-        removed.extend(f"{path}[{index}]" for index in range(len(after), len(before)))
+        changes.array_added.extend(
+            f"{path}[{index}]" for index in range(len(before), len(after))
+        )
+        changes.array_removed.extend(
+            f"{path}[{index}]" for index in range(len(after), len(before))
+        )
     elif before != after or type(before) is not type(after):
-        differences.append(
+        changes.differences.append(
             {
                 "field": path,
                 "old": _summary(before),
@@ -179,14 +196,27 @@ def _transition(before: JsonValue, after: JsonValue) -> str:
     return f"{state(before)}->{state(after)}"
 
 
-def _raw_comparison(
-    before: dict[str, JsonValue], after: CardRecord
-) -> tuple[list[dict[str, JsonValue]], list[str], list[str]]:
-    differences: list[dict[str, JsonValue]] = []
-    added: list[str] = []
-    removed: list[str] = []
-    _raw_walk(before, asdict(after), "card", differences, added, removed)
-    return differences, added, removed
+def _raw_comparison(before: dict[str, JsonValue], after: CardRecord) -> RawChanges:
+    changes = RawChanges([], [], [], [], [])
+    _raw_walk(before, asdict(after), "card", changes)
+    return changes
+
+
+def _approved_raw_change(number: str, change: dict[str, JsonValue]) -> bool:
+    old = change["old"]
+    new = change["new"]
+    if not isinstance(old, dict) or not isinstance(new, dict):
+        return False
+    return (
+        number,
+        str(change["field"]),
+        str(old["sha256"]),
+        str(new["sha256"]),
+    ) in APPROVED_RAW_FIELD_CHANGES
+
+
+def _approved_new_field(path: str) -> bool:
+    return re.sub(r"\[\d+\]", "[]", path) in APPROVED_NEW_FIELDS
 
 
 def _envelope_differences(
@@ -227,10 +257,15 @@ def _card_row(
         else []
     )
     envelope_diffs = _envelope_differences(envelopes, old_observation, new_observation)
-    raw_diffs, added_fields, removed_fields = (
+    raw = (
         _raw_comparison(legacy_raw, candidate)
         if legacy_raw is not None and candidate is not None
-        else ([], [], [])
+        else RawChanges([], [], [], [], [])
+    )
+    unexpected_raw = (
+        any(not _approved_raw_change(number, diff) for diff in raw.differences)
+        or any(not _approved_new_field(field) for field in raw.added)
+        or bool(raw.removed or raw.array_added or raw.array_removed)
     )
     status = (
         "unexpected"
@@ -245,6 +280,8 @@ def _card_row(
         if envelope_diffs
         else "projection_difference"
         if field_diffs
+        else "raw_field_difference"
+        if unexpected_raw
         else "exact"
     )
     return {
@@ -258,9 +295,11 @@ def _card_row(
             else None
         ),
         "field_diffs": field_diffs,
-        "raw_field_diffs": raw_diffs,
-        "added_fields": added_fields,
-        "removed_fields": removed_fields,
+        "raw_field_diffs": raw.differences,
+        "added_fields": raw.added,
+        "removed_fields": raw.removed,
+        "array_added_items": raw.array_added,
+        "array_removed_items": raw.array_removed,
         "envelope_diffs": envelope_diffs,
         "envelope_paths": [path for path, _ in envelopes],
     }
@@ -402,6 +441,8 @@ def compare(
         "raw_field_changes": _raw_field_summary(rows),
         "added_fields": _field_presence_summary(rows, "added_fields"),
         "removed_fields": _field_presence_summary(rows, "removed_fields"),
+        "array_added_items": _field_presence_summary(rows, "array_added_items"),
+        "array_removed_items": _field_presence_summary(rows, "array_removed_items"),
         "hints": _hint_summary(candidates),
         "cards": rows,
         "inputs": {
