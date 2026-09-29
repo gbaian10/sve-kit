@@ -61,7 +61,12 @@ function spellingsOf(symbols: readonly Row[]): SymbolSpelling[] {
       if (!isTextLang(spelling["lang"])) continue
       const parse = stringValue(spelling["parse_kind"])
       const parameter = parameters.find((item) => item["name"] === spelling["parameter_name"])
-      const uint = parameter?.["uint"] as Row | undefined
+      // A pure-variable parameter declares `uint: null` (transport §3.2).
+      const declared = parameter?.["uint"]
+      const uint =
+        typeof declared === "object" && declared !== null && !Array.isArray(declared)
+          ? declared
+          : undefined
       out.push({
         symbolId: stringValue(symbol["id"]),
         code: stringValue(symbol["code"]),

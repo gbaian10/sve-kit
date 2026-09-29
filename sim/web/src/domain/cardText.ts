@@ -69,7 +69,7 @@ function matchSymbol(
     }
     if (spelling.parse === "uint") {
       // Only digits, within the declared bounds and safe to represent; anything else stays raw.
-      if (!/^\d+$/u.test(middle) || middle.length > 15) continue
+      if (!/^\d+$/u.test(middle)) continue
       const value = Number(middle)
       if (!Number.isSafeInteger(value)) continue
       if (spelling.minimum !== undefined && value < spelling.minimum) continue

@@ -487,6 +487,41 @@ function addTextSymbols(builder: Builder, withKeywords: boolean): void {
       { lang: LANGS.zhHant, name: "進化點數", tooltip: "進化用的點數", copy_pattern: "EP{amount}" },
     ],
   })
+  // A pure-variable parameter (`uint: null`, transport §3.2), which real symbols such as EP X use.
+  builder.push("text_symbol", GLOBAL, "detail", {
+    id: "sym:xvar",
+    code: "xvar",
+    parameter_schema: { parameters: [{ name: "value", uint: null, variables: ["X"] }] },
+    keyword_id: null,
+    spellings: [
+      {
+        lang: LANGS.ja,
+        literal_prefix: "変数",
+        literal_suffix: "",
+        parameter_name: "value",
+        parse_kind: "variable",
+      },
+      {
+        lang: LANGS.en,
+        literal_prefix: "[var",
+        literal_suffix: "]",
+        parameter_name: "value",
+        parse_kind: "variable",
+      },
+      {
+        lang: LANGS.zhHant,
+        literal_prefix: "変数",
+        literal_suffix: "",
+        parameter_name: "value",
+        parse_kind: "variable",
+      },
+    ],
+    localizations: [
+      { lang: LANGS.ja, name: "変数", tooltip: "変数", copy_pattern: "変数{value}" },
+      { lang: LANGS.en, name: "Variable", tooltip: "Variable", copy_pattern: "[var{value}]" },
+      { lang: LANGS.zhHant, name: "變數", tooltip: "變數", copy_pattern: "変数{value}" },
+    ],
+  })
   // The icons card text actually uses; cost carries a number (0–10) or X.
   const costSchema = {
     parameters: [{ name: "amount", uint: { minimum: 0, maximum: 10 }, variables: ["X"] }],

@@ -52,6 +52,15 @@ describe("loadCardView", () => {
     expect(segments[2]).toMatchObject({ code: "fanfare" })
     expect(segments[3]).toMatchObject({ code: "cost", parameter: "2" })
     expect(view.symbolLocalization("sym:cost", "zh-Hant")?.["name"]).toBe("費用")
+    // A pure-variable symbol (uint: null) parses its variable and declares no bounds.
+    const xvar = view.vocabulary.spellings.find(
+      (item) => item.code === "xvar" && item.lang === "ja",
+    )
+    expect(xvar).toMatchObject({ parse: "variable", variables: ["X"] })
+    expect(xvar?.minimum).toBeUndefined()
+    expect(
+      parseCardText("{変数X}{変数Y}", "ja", view.vocabulary).map((segment) => segment.kind),
+    ).toEqual(["symbol", "unknown"])
     const ward = view.keyword("kw:ward")
     expect(ward?.name("zh-Hant")).toBe("守護")
     expect(await ward?.definition()).toBeTruthy()

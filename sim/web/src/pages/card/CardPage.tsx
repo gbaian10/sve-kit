@@ -173,7 +173,9 @@ function CardOverlay({
   }, [])
   useEffect(() => {
     const dialog = ref.current
-    if (!dialog || !ready || dialog.contains(document.activeElement)) return
+    // showModal leaves focus on the dialog itself while only the skeleton is there.
+    const active = document.activeElement
+    if (!dialog || !ready || (active !== dialog && dialog.contains(active))) return
     // showModal focuses the dialog itself; once the card is there, its first control (back) takes it.
     dialog.querySelector<HTMLElement>("button, a[href]")?.focus()
   }, [ready])
