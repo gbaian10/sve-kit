@@ -4,7 +4,7 @@ import type { TextLang } from "../domain/search"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v1/decode"
 import { integerValue, stringValue } from "./format-v1/json"
-import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
+import { createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import type { CardIndex } from "./store"
 
 const LANGS: readonly TextLang[] = ["ja", "en", "zh-Hant"]
@@ -80,8 +80,21 @@ async function loadGlobal(client: SnapshotClient, index: CardIndex): Promise<Glo
   const snapshot = client.snapshot()
   if (!snapshot) throw new Error("snapshot not loaded")
   const locate = createLocator(snapshot.files)
-  const key = locate({ table: "text_symbol", owner: GLOBAL_OWNER, bucket: 0, partition: "detail" })
-  const fragments = key === undefined ? [] : await client.fragments(key)
+  const bucketCount = integerValue((snapshot.manifest["partitioning"] as Row)["bucket_count"])
+  // Every global detail table, every bucket: a snapshot may leave out a table it has no rows for.
+  const keys = new Set<string>()
+  for (const table of [
+    "text_unit",
+    "translation",
+    "text_symbol",
+    "card_route_alias",
+    "route_override",
+  ])
+    for (let bucket = 0; bucket < bucketCount; bucket += 1) {
+      const key = locate({ table, owner: GLOBAL_OWNER, bucket, partition: "detail" })
+      if (key !== undefined) keys.add(key)
+    }
+  const fragments = (await Promise.all([...keys].map((key) => client.fragments(key)))).flat()
   const rows = (table: string) =>
     fragments.filter((fragment) => fragment.table === table).flatMap((fragment) => fragment.rows)
   const units = byId(rows("text_unit"))
@@ -177,5 +190,3 @@ export function setDetailOf(client: SnapshotClient, setId: string): Promise<SetD
   }
   return pending
 }
-
-export { bucketOf }

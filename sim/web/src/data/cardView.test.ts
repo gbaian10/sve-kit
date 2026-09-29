@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { parseCardText } from "../domain/cardText"
 import { resolveCardRoute } from "../domain/route"
-import { loadCardView } from "./cardView"
+import { createRouteLookups, loadCardView } from "./cardView"
 import { createCatalog } from "./catalog"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
@@ -83,19 +83,7 @@ describe("loadCardView", () => {
 
   it("feeds the route resolver with aliases, overrides and provisional ids", async () => {
     const global = await globalDetailOf(client, catalog.index)
-    const lookups = {
-      printingByCardNo: (cardNo: string) => {
-        const row = catalog.index.printingByAnyCardNo(cardNo)
-        return row ? stringValue(row["id"]) : undefined
-      },
-      printingByIntId: (intId: number) => {
-        const row = catalog.index.printingByIntId(intId)
-        return row ? stringValue(row["id"]) : undefined
-      },
-      alias: global.alias,
-      override: global.override,
-      nameOf: (printingId: string) => catalog.summary(printingId)?.name.original.text,
-    }
+    const lookups = createRouteLookups(catalog, global)
     expect(resolveCardRoute("BP01-002A", undefined, lookups)).toEqual({
       kind: "redirect",
       to: "/cards/BP01-002a",

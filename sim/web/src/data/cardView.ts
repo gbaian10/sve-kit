@@ -1,5 +1,6 @@
 import type { CardTextVocabulary } from "../domain/cardText"
 import type { NameSource } from "../domain/nameDisplay"
+import type { RouteLookups } from "../domain/route"
 import type { Region, TextLang } from "../domain/search"
 import {
   type ResolvedFaceText,
@@ -49,6 +50,7 @@ export interface CardView {
   readonly vocabulary: CardTextVocabulary
   readonly symbolLocalization: GlobalDetail["symbolLocalization"]
   readonly keyword: (id: string) => KeywordInfo | undefined
+  readonly vocabularyLabel: Catalog["vocabularyLabel"]
 }
 
 const ORIGINS: readonly TranslationOrigin[] = [
@@ -187,5 +189,23 @@ export async function loadCardView(
     vocabulary: global.vocabulary,
     symbolLocalization: global.symbolLocalization,
     keyword: keywordInfo,
+    vocabularyLabel: catalog.vocabularyLabel,
+  }
+}
+
+/** What the route resolver needs, from the bootstrap index and the global route tables. */
+export function createRouteLookups(catalog: Catalog, global: GlobalDetail): RouteLookups {
+  return {
+    printingByCardNo: (cardNo) => {
+      const row = catalog.index.printingByAnyCardNo(cardNo)
+      return row ? stringValue(row["id"]) : undefined
+    },
+    printingByIntId: (intId) => {
+      const row = catalog.index.printingByIntId(intId)
+      return row ? stringValue(row["id"]) : undefined
+    },
+    alias: global.alias,
+    override: global.override,
+    nameOf: (printingId) => catalog.summary(printingId)?.name.original.text,
   }
 }

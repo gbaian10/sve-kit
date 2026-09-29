@@ -203,6 +203,37 @@ The class quick bar shows labels only when an off-screen labelled copy fits the 
 classes of the physical game plus neutral. A class code the design does not know yet would use the
 neutral colour and an initial.
 
+## Card page
+
+`/cards/:cardNo/:slug?` and `/cards/_provisional/:intId` resolve through `src/domain/route.ts`:
+the number (or provisional id) decides the printing, `card_route_alias` rows redirect old numbers,
+`route_override` picks the printing a shared number opens as, and a missing or wrong slug is
+replaced with the canonical one (`/cards/{number}/{original name}`, design decision D7). Unknown
+numbers show the 404 page with a search box.
+
+The page is an overlay only when `location.state` carries `{ background, source, pages, resultKey }`
+(architecture §2.2): the list renders underneath from that background string (`CardsPage` with
+`search`, `pages`, `inert`) and the bottom bar becomes previous / add to deck (disabled until M4)
+/ next. `src/app/cardSequence.ts` rebuilds the sequence prev/next walks (the list's results within
+the loaded pages, or the suggestions for a suggest-opened card) and finds the current card by
+result key, else by card id. Without state (direct link, new tab) it is a full page with a
+"back to cards" link and no prev/next.
+
+Text: `src/domain/cardText.ts` splits `{記號}`, `{コスト2}`, `【關鍵字】` and `\n` into segments
+using the snapshot's `text_symbol` spellings and `keyword` names per language (nothing hard-coded);
+`components/card/CardText.tsx` draws official icons (mapped by `text_symbol.code` in
+`symbolIcons.ts`) and keyword chips that explain themselves in place and link to
+`/cards?mech=…`. `src/domain/textLanguage.ts` is the language matrix of snapshot-format §5: the
+printing's region gives the original, the UI language picks the translation row (official >
+project > community > machine, reviewed before draft), Japanese and English UIs never fall back to
+Traditional Chinese, and a missing translation shows the original with a notice. Detail files load
+through `src/data/detail.ts` (global texts, icons, route tables; one file per home set for the
+full revisions), once per snapshot.
+
+Real card text writes icons as `{alt}` of the official site's images; the local fixture emits
+`text_symbol` rows for the common ones so the demo renders them. Keywords come from the snapshot
+only, so the local demo shows `【…】` as text until the real snapshot ships keywords.
+
 ## Dead code
 
 `bun run knip` (part of `bun run check`) reports files, exports, types and dependencies that

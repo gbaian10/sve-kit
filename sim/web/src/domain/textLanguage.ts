@@ -8,7 +8,7 @@ import type { Region, TextLang } from "./search"
 export type TranslationOrigin =
   "official_sve" | "official_svwb" | "official_sv1" | "project" | "machine" | "community"
 
-export interface OriginalText {
+interface OriginalText {
   readonly lang: TextLang
   readonly text: string
 }
@@ -33,7 +33,7 @@ export interface FaceTextInput {
   readonly translations: readonly TranslationCandidate[]
 }
 
-export type TranslationLabel = "official" | "project" | "machine" | "community"
+type TranslationLabel = "official" | "project" | "machine" | "community"
 
 export interface ResolvedFaceText {
   readonly original: OriginalText

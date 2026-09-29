@@ -436,6 +436,10 @@ function addKeywords(builder: Builder): void {
         })
     }
   }
+}
+
+// Text icons ship with every build; the keyword links only when the keywords themselves are built.
+function addTextSymbols(builder: Builder, withKeywords: boolean): void {
   const schema = {
     parameters: [{ name: "amount", uint: { minimum: 0, maximum: 9 }, variables: ["X"] }],
   }
@@ -443,7 +447,7 @@ function addKeywords(builder: Builder): void {
     id: "sym:ep",
     code: "ep",
     parameter_schema: schema,
-    keyword_id: "kw:evolve",
+    keyword_id: withKeywords ? "kw:evolve" : null,
     spellings: [
       {
         lang: LANGS.en,
@@ -521,7 +525,7 @@ function addKeywords(builder: Builder): void {
       id: `sym:${symbol.code}`,
       code: symbol.code,
       parameter_schema: withParameter ? costSchema : { parameters: [] },
-      keyword_id: symbol.keyword === undefined ? null : `kw:${symbol.keyword}`,
+      keyword_id: symbol.keyword === undefined || !withKeywords ? null : `kw:${symbol.keyword}`,
       spellings: [
         ...spelling(LANGS.ja, symbol.ja, ""),
         ...spelling(LANGS.zhHant, symbol.ja, ""),
@@ -1272,6 +1276,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     addStamp(builder)
     addKeywords(builder)
   }
+  addTextSymbols(builder, synthetic)
   addRules(builder)
   for (const [seed, card] of cards.entries()) {
     await addCard({

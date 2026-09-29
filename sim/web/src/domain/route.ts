@@ -27,7 +27,7 @@ export function cardPath(cardNo: string, name?: string): string {
   return name === undefined || name === "" ? base : `${base}/${encodeURIComponent(name)}`
 }
 
-export function provisionalPath(intId: number): string {
+function provisionalPath(intId: number): string {
   return `/cards/_provisional/${String(intId)}`
 }
 
