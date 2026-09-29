@@ -8,7 +8,9 @@ import { SideRail } from "../components/nav/SideRail"
 import { TopBar } from "../components/nav/TopBar"
 import { cn } from "../components/ui/cn"
 import { ToastProvider } from "../components/ui/Toast"
+import { DevBadge } from "./DevBadge"
 import { useUiLanguageSync } from "./language"
+import { useActiveSnapshot } from "./snapshot"
 import { useThemeAttributes } from "./theme-attributes"
 
 // Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail; content is
@@ -18,6 +20,7 @@ export function AppShell() {
   const [railExpanded, setRailExpanded] = useState(false)
   useThemeAttributes()
   useUiLanguageSync()
+  const { client, status } = useActiveSnapshot()
   return (
     <ToastProvider>
       <div
@@ -42,8 +45,9 @@ export function AppShell() {
         <main id="main" className="mx-auto w-full max-w-320 flex-1 px-4 lg:px-6">
           <Outlet />
         </main>
-        <Footer />
+        <Footer dataVersion={status.state === "ready" ? status.dataVersion : undefined} />
         <BottomNav />
+        {import.meta.env.DEV && <DevBadge client={client} />}
       </div>
       <ScrollRestoration getKey={(location) => location.pathname + location.search} />
     </ToastProvider>

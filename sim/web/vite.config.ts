@@ -24,8 +24,13 @@ function serveSnapshotRoot(prefix: string, dir: string | undefined): Plugin {
   }
   const handler = (req: IncomingMessage, res: ServerResponse, next: () => void) => {
     const url = req.url ?? ""
-    if (root === undefined || !url.startsWith(`${prefix}/`)) {
+    if (!url.startsWith(`${prefix}/`)) {
       next()
+      return
+    }
+    // An unconfigured root answers 404 like the CDN would, instead of the SPA fallback's HTML.
+    if (root === undefined) {
+      notFound(res)
       return
     }
     let relative: string
@@ -73,6 +78,10 @@ const cdnDir = process.env["SVE_CDN_DIR"] ?? path.join(import.meta.dirname, "fix
 const previewDir = process.env["SVE_PREVIEW_DIR"]
 
 export default defineConfig({
+  // Lets the dev badge hide its root switch when no preview root is configured.
+  define: {
+    "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
+  },
   plugins: [
     react(),
     tailwindcss(),

@@ -59,6 +59,21 @@ const zhTW = {
   dialog: {
     close: "關閉",
   },
+  dev: {
+    root: { cdn: "正式", preview: "預覽" },
+    status: {
+      idle: "未載入",
+      loading: "載入中：{{phase}}",
+      error: "錯誤：{{kind}}",
+      updateFailed: "{{version}}（更新失敗：{{kind}}）",
+      updating: "{{version}}（更新中：{{phase}}）",
+    },
+    phase: { index: "版本索引", manifest: "快照清單", bootstrap: "啟動包" },
+    error: { network: "網路失敗", incompatible: "網站需要更新", corrupt: "資料損毀" },
+    retry: "重試",
+    usePreview: "改用預覽資料",
+    useCdn: "改回正式資料",
+  },
 } as const
 
 type Widen<T> = { readonly [K in keyof T]: T[K] extends string ? string : Widen<T[K]> }

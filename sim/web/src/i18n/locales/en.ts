@@ -61,4 +61,19 @@ export default {
   dialog: {
     close: "Close",
   },
+  dev: {
+    root: { cdn: "Live", preview: "Preview" },
+    status: {
+      idle: "Not loaded",
+      loading: "Loading: {{phase}}",
+      error: "Error: {{kind}}",
+      updateFailed: "{{version}} (update failed: {{kind}})",
+      updating: "{{version}} (updating: {{phase}})",
+    },
+    phase: { index: "version index", manifest: "manifest", bootstrap: "bootstrap" },
+    error: { network: "network", incompatible: "site update needed", corrupt: "corrupt data" },
+    retry: "Retry",
+    usePreview: "Use preview data",
+    useCdn: "Back to live data",
+  },
 } satisfies Messages
