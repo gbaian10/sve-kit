@@ -171,6 +171,38 @@ cards it names; vocabulary is whatever the records use. The output directory mus
 repository and the card list's directory, and must not contain `SVE_DATA_DIR`; an existing directory
 is only replaced when it carries the `.sve-local-snapshot` marker the tool writes.
 
+## Search and the card list
+
+`/cards` is described by its URL alone (`docs/sim/web-architecture.md` §2.1): `src/domain/query/`
+holds the state, the codec (`q class cost type mech set rarity alt unit sort view`; defaults are
+never written) and nothing else. Matching lives in `src/domain/search.ts` as pure functions over
+`SearchEntry` rows that `src/data/catalog.ts` flattens from the bootstrap: card-number exact/loose
+hit (`bp01-51`, `BP01 051`, `BP01-051EN`) > number prefix (`bp01-5` lists BP01-050…) > name prefix
+
+> name contains, names in every shipped language plus `search_alias` rows of kind `card`. The
+> suggest list and the results page share that ranking, so the sequence prev/next follows is the same
+> one the user saw.
+
+Card aliases: the snapshot's `search_alias.code` must match `Code` (no colon), so the fixture writes
+the card id without its `c:` prefix and the catalog prepends it back. This is an assumption raised
+in #4; change `createCatalog` if the exporter settles on another form.
+
+The list keeps `pages` and `anchor` on its own history entry through `useListEntryState()`
+(router `navigate(..., { replace: true, state })`, never `history.replaceState`). Opening a card
+writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source, pages, resultKey }`;
+`src/app/listEntryState.test.tsx` pins that replace-then-push keeps both states in the data router.
+
+Each grid cell shows the name with the card number at the right of the same line (user request
+2026-09-29), then the translation line when the name display asks for one.
+
+`CardImage` is one fixed 63:88 slot: the text card (name, class frame, cost, number, stats) sits
+underneath and the image fades in over it; missing, pending and withdrawn images keep the text card
+with a reason, and data saver waits for a tap. Callers set the width (`w-full`, `w-8`).
+
+The class quick bar shows labels only when an off-screen labelled copy fits the row width: the six
+classes of the physical game plus neutral. A class code the design does not know yet would use the
+neutral colour and an initial.
+
 ## Dead code
 
 `bun run knip` (part of `bun run check`) reports files, exports, types and dependencies that

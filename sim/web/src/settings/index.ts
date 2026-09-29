@@ -6,3 +6,4 @@ export {
   TEXT_DISPLAYS,
   usePrefs,
 } from "./prefs"
+export { recentStore, useRecent } from "./recent"
