@@ -1,4 +1,4 @@
-import type { SnapshotClient } from "./client"
+import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v1/decode"
 import { integerValue, stringValue } from "./format-v1/json"
 
@@ -70,4 +70,19 @@ export async function loadImageIndex(client: SnapshotClient): Promise<ImageIndex
       return id === undefined ? undefined : imageSource(client.base, variants.get(id) ?? [])
     },
   }
+}
+
+const indexes = new WeakMap<LoadedSnapshot, Promise<ImageIndex>>()
+
+/** The image index of the client's current snapshot, loaded once per snapshot object. */
+export function imageIndexOf(client: SnapshotClient): Promise<ImageIndex> {
+  const snapshot = client.snapshot()
+  if (!snapshot) return Promise.reject(new Error("snapshot not loaded"))
+  let pending = indexes.get(snapshot)
+  if (!pending) {
+    pending = loadImageIndex(client)
+    indexes.set(snapshot, pending)
+    pending.catch(() => indexes.delete(snapshot))
+  }
+  return pending
 }

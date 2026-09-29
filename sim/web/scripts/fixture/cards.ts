@@ -88,6 +88,8 @@ export interface Card {
     readonly relation: "evolves_to" | "produces_token" | "mentions" | "advances_to"
   }[]
   readonly qa?: readonly Qa[]
+  /** Nicknames people type (search_alias kind `card`), by language. */
+  readonly aliases?: readonly { readonly lang: "ja" | "en" | "zh-Hant"; readonly text: string }[]
   readonly errata?: Errata
   readonly ban?: {
     readonly maxCopies: 0 | 1
@@ -735,6 +737,10 @@ export const CARDS: readonly Card[] = [
     printings: [bp("bp01-051", "jp", 51), bp("bp01-051-en", "en", 51)],
     keywords: [{ code: "ward", relation: "has" }],
     coverage: "complete",
+    aliases: [
+      { lang: "ja", text: "テンプラー" },
+      { lang: "zh-Hant", text: "聖騎" },
+    ],
   },
   {
     id: "c:bp01-060",

@@ -902,6 +902,16 @@ async function addCard(ctx: CardContext): Promise<void> {
       debut_state: first ? "known" : "unknown",
     })
   }
+  // Alias codes are the card id without its `c:` prefix, because Code allows no colon.
+  for (const alias of card.aliases ?? []) {
+    builder.push("search_alias", GLOBAL, "bootstrap", {
+      kind: "card",
+      code: card.id.slice(2),
+      lang: alias.lang,
+      text: alias.text,
+      normalized: alias.text.toLowerCase(),
+    })
+  }
   builder.push("card", owner, "bootstrap", {
     id: card.id,
     layout: card.layout,

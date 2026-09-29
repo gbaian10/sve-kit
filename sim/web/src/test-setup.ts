@@ -40,3 +40,13 @@ if (typeof HTMLDialogElement !== "undefined" && !("showModal" in HTMLDialogEleme
     this.dispatchEvent(new Event("close"))
   }
 }
+
+// jsdom has no ResizeObserver; components only need it to re-measure on resize.
+if (typeof ResizeObserver === "undefined") {
+  class StubResizeObserver {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  }
+  globalThis.ResizeObserver = StubResizeObserver
+}

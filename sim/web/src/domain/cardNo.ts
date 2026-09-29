@@ -8,6 +8,7 @@ import { normalizeText } from "./normalize"
 // takes two digits after the letters except for the digit-less promo code.
 const TAIL = /^([a-z]*)(\d+)([a-z]*)$/u
 const SETS_WITHOUT_DIGITS = new Set(["pr"])
+const REGION_MARKER = "en"
 
 function splitSet(flat: string, sets: ReadonlySet<string> | undefined): [string, string] | null {
   if (sets) {
@@ -38,10 +39,14 @@ export function cardNoKey(text: string, sets?: ReadonlySet<string>): CardNoKey |
   if (!parts) return null
   const match = TAIL.exec(parts[1])
   if (!match) return null
+  // English printings carry the region after the set (`BP01EN-051`) while people type it at the end
+  // (`BP01-051EN`); either way it is the same marker, so it always ends up in the suffix.
+  const prefix = match[1] ?? ""
+  const english = prefix.startsWith(REGION_MARKER)
   return {
     set: parts[0],
-    number: `${match[1] ?? ""}${String(Number(match[2] ?? "0"))}`,
-    suffix: match[3] ?? "",
+    number: `${english ? prefix.slice(REGION_MARKER.length) : prefix}${String(Number(match[2] ?? "0"))}`,
+    suffix: `${match[3] ?? ""}${english ? REGION_MARKER : ""}`,
   }
 }
 
