@@ -21,6 +21,8 @@ export interface SuggestListProps {
   readonly images: ImageIndex | undefined
   readonly onPick: (index: number) => void
   readonly onHover: (index: number) => void
+  /** The rows belong to an older text than the input holds; they stay visible but cannot be picked. */
+  readonly stale?: boolean
   /** Suggestions mode: the query and the total behind "see all". Recent mode when undefined. */
   readonly query?: { readonly text: string; readonly total: number; readonly onSeeAll: () => void }
   readonly onClearRecent?: () => void
@@ -35,6 +37,7 @@ export function SuggestList({
   images,
   onPick,
   onHover,
+  stale = false,
   query,
   onClearRecent,
 }: SuggestListProps) {
@@ -74,7 +77,13 @@ export function SuggestList({
           {query ? t("search.noSuggestions") : t("search.noRecent")}
         </p>
       ) : (
-        <div id={id} role="listbox" aria-label={heading} className="pb-1">
+        <div
+          id={id}
+          role="listbox"
+          aria-label={heading}
+          aria-busy={stale}
+          className={cn("pb-1", stale && "opacity-60")}
+        >
           {rows.map((row, index) => {
             const active = index === activeIndex
             const details = [
@@ -92,6 +101,7 @@ export function SuggestList({
                 id={optionId(id, index)}
                 role="option"
                 aria-selected={active}
+                aria-disabled={stale}
                 tabIndex={-1}
                 onMouseDown={(event) => {
                   event.preventDefault()
@@ -100,7 +110,7 @@ export function SuggestList({
                   onHover(index)
                 }}
                 onClick={() => {
-                  onPick(index)
+                  if (!stale) onPick(index)
                 }}
                 className={cn(
                   "flex h-14 w-full cursor-pointer items-center gap-3 px-4 text-left",

@@ -131,6 +131,26 @@ describe("CardsPage", () => {
     expect(router.state.location.search).toBe("?q=bp01-05")
   })
 
+  it("ignores clicks on stale suggestions until the list has caught up", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox")
+    await user.type(input, "bp01-0")
+    const list = await screen.findByRole("listbox")
+    const first = within(list).getAllByRole("option")[0]
+    await user.type(input, "5")
+    expect(list).toHaveAttribute("aria-busy", "true")
+    if (!first) throw new Error("no option")
+    await user.click(first)
+    expect(router.state.location.pathname).toBe("/cards")
+    await waitFor(() => {
+      expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "false")
+    })
+    await user.click(within(screen.getByRole("listbox")).getAllByRole("option")[0] ?? first)
+    expect(router.state.location.pathname).toBe("/cards/BP01-050")
+    expect(router.state.location.state).toMatchObject({ background: "?q=bp01-05" })
+  })
+
   it("shows the empty state with a reset, and recent cards on focus", async () => {
     const { router } = await open("/cards?q=zzz&class=elf")
     const user = userEvent.setup()

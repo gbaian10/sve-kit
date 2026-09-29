@@ -91,6 +91,9 @@ export function CardsPage() {
   // so "see all" counts and commits the typed text alone. It reads the input, not the debounced
   // text, so a click during the debounce window keeps what was typed last.
   const typed = input.trim()
+  // While the debounce is pending the list still shows the previous text's rows; picking one
+  // would open a card the new text may not match and rebuild the list URL from the old text.
+  const stale = typed !== debounced
   const suggestTotal = useMemo(
     () =>
       catalog && typed !== ""
@@ -136,7 +139,7 @@ export function CardsPage() {
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
-    if (!row) return
+    if (!row || stale) return
     const fromSuggest = debounced !== ""
     // The typed text becomes the list's URL first, so back returns to it with the string kept.
     const background = fromSuggest ? `?q=${encodeURIComponent(debounced)}` : location.search
@@ -244,6 +247,7 @@ export function CardsPage() {
               images={images}
               onPick={openSuggestion}
               onHover={setActive}
+              stale={stale}
               {...(debounced !== ""
                 ? { query: { text: typed, total: suggestTotal, onSeeAll: seeAll } }
                 : {
