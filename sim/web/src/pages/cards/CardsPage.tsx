@@ -2,11 +2,19 @@ import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, use
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
+import { useEffectPreviews, useTextContext } from "../../app/effectPreviews"
 import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
 import { useCatalog, useImageIndex } from "../../app/snapshot"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
+import { useOnline } from "../../app/useOnline"
+import { chipsFor } from "../../components/filters/chips"
+import { FilterChips } from "../../components/filters/FilterChips"
+import { FilterSheet } from "../../components/filters/FilterSheet"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
+import { ControlBar } from "../../components/results/ControlBar"
+import { ListView } from "../../components/results/ListView"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
+import { TableView } from "../../components/results/TableView"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
 import { SearchBar } from "../../components/search/SearchBar"
 import { optionId } from "../../components/search/suggest-ids"
@@ -22,10 +30,11 @@ import {
   NEUTRAL_CLASS,
   type QueryState,
   toggleClass,
+  type ViewMode,
 } from "../../domain/query/model"
 import type { Suggestion } from "../../domain/search"
 import { currentUiLanguage } from "../../i18n"
-import { recentStore, usePrefs, useRecent } from "../../settings"
+import { prefsStore, recentStore, usePrefs, useRecent } from "../../settings"
 
 const PAGE_SIZE = 60
 const SUGGEST_LIMIT = 8
@@ -72,6 +81,9 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
     setEdit({ key: location.key, value })
   }
   const [focused, setFocused] = useState(false)
+  const online = useOnline()
+  // The view: the URL when it says so, else the preference (architecture §2.4).
+  const view: ViewMode = query.view ?? prefs.viewMode
   // The highlighted option belongs to one debounced text; another text starts from "none".
   const [highlight, setHighlight] = useState<{
     readonly text: string
@@ -89,6 +101,23 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
   const commit = (next: QueryState) => {
     setEdit(null)
     setParams(formatQuery(next))
+  }
+  // The filter sheet lives on its own history entry (architecture §7): opening pushes one, so the
+  // browser's back closes it; applying replaces that entry with the new list URL.
+  const sheetOpen = entry.sheet === true
+  const openSheet = () => {
+    void navigate(location.pathname + location.search, { state: { ...entry, sheet: true } })
+  }
+  const closeSheet = () => {
+    void navigate(-1)
+  }
+  const applySheet = (next: QueryState) => {
+    setEdit(null)
+    const search = formatQuery(next).toString()
+    void navigate(location.pathname + (search === "" ? "" : `?${search}`), {
+      replace: true,
+      state: { pages: 1 },
+    })
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -232,6 +261,40 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
     const cell = document.querySelector<HTMLElement>(`a[data-result-key="${CSS.escape(anchor)}"]`)
     if (cell && document.activeElement === document.body) cell.focus({ preventScroll: true })
   }, [anchor, inert, cells.length])
+  const options = useMemo(() => catalog?.filterOptions(), [catalog])
+  const previewIds = useMemo(() => cells.map((cell) => cell.summary.printingId), [cells])
+  const preview = useEffectPreviews(client, catalog, previewIds, view === "table")
+  const textContext = useTextContext(client, catalog, view === "table")
+  const chips = useMemo(
+    () =>
+      catalog
+        ? chipsFor(query, {
+            classLabel: (code) => catalog.classLabel(code, textLang),
+            neutralLabel: t("search.neutral"),
+            typeLabel: (code) => catalog.vocabularyLabel("type", code, textLang),
+            rarityLabel: (code) => catalog.vocabularyLabel("rarity", code, textLang),
+            costLabel: (range) => t("filters.chip.cost", { range }),
+            mechanicLabel: (id, wanted) => {
+              const name =
+                options?.keywords.find((keyword) => keyword.id === id)?.name(textLang) ?? id
+              return wanted === "has"
+                ? t("filters.chip.has", { name })
+                : t("filters.chip.not", { name })
+            },
+            altLabel: t("filters.chip.alt"),
+            unitLabel: (unit) => t(`filters.units.${unit}`),
+          })
+        : [],
+    [catalog, query, textLang, options, t],
+  )
+  const setView = (next: ViewMode) => {
+    prefsStore.set({ viewMode: next })
+    setEdit(null)
+    // Switching writes both the URL and the preference; the list's own entry state (loaded pages,
+    // anchor) travels to the new entry, so the conditions and the anchor card stay.
+    const search = formatQuery({ ...query, view: next }).toString()
+    void navigate(location.pathname + (search === "" ? "" : `?${search}`), { state: entry })
+  }
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
   const failed = status.state === "error"
@@ -259,6 +322,11 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
           expanded={listOpen}
           {...(active >= 0 ? { activeOptionId: optionId(listId, active) } : {})}
           filterCount={filterCount}
+          {...(catalog
+            ? {
+                onOpenFilters: openSheet,
+              }
+            : {})}
         />
         {listOpen && (
           <div className="absolute inset-x-0 top-full mt-1">
@@ -289,6 +357,38 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
           onToggle={(code) => {
             commit(toggleClass(query, code))
           }}
+        />
+      )}
+      {chips.length > 0 && (
+        <FilterChips
+          chips={chips}
+          onChange={commit}
+          onClear={() => {
+            commit({
+              ...DEFAULT_QUERY,
+              text: query.text,
+              ...(query.view === undefined ? {} : { view: query.view }),
+            })
+          }}
+        />
+      )}
+      {!online && (
+        <p className="rounded-badge bg-warning-soft px-2 py-1 text-12 text-warning">
+          {t("views.offline")}
+        </p>
+      )}
+      {catalog && options && sheetOpen && (
+        <FilterSheet
+          open={sheetOpen}
+          onClose={closeSheet}
+          applied={query}
+          onApply={applySheet}
+          options={options}
+          classes={quickBar}
+          label={(kind, code) => catalog.vocabularyLabel(kind, code, textLang)}
+          uiLang={textLang}
+          count={(draft) => catalog.results(draft, edition).length}
+          coverage={catalog.mechanicCoverageSummary(edition)}
         />
       )}
       {failed && (
@@ -333,18 +433,48 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
       )}
       {catalog !== null && results.length > 0 && (
         <>
-          <p className="text-13 text-text-2" aria-live="polite">
-            <b className="font-semibold text-text-1 tabular-nums">
-              {new Intl.NumberFormat(uiLanguage).format(results.length)}
-            </b>{" "}
-            {t("results.countUnit")}
-          </p>
-          <CardGrid
-            cells={cells}
-            images={images}
-            onOpen={openCell}
-            {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+          <ControlBar
+            count={results.length}
+            unit={query.unit}
+            sort={query.sort}
+            onSort={(sort) => {
+              commit({ ...query, sort })
+            }}
+            view={view}
+            onView={setView}
+            uiLanguage={uiLanguage}
+            density={prefs.gridDensity}
+            onDensity={(gridDensity) => {
+              prefsStore.set({ gridDensity })
+            }}
           />
+          {view === "grid" && (
+            <CardGrid
+              cells={cells}
+              images={images}
+              onOpen={openCell}
+              density={prefs.gridDensity}
+              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+            />
+          )}
+          {view === "table" && (
+            <TableView
+              cells={cells}
+              images={images}
+              onOpen={openCell}
+              preview={preview}
+              context={textContext}
+              uiLang={textLang}
+              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+            />
+          )}
+          {view === "list" && (
+            <ListView
+              cells={cells}
+              onOpen={openCell}
+              {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
+            />
+          )}
           {visible.length < results.length && (
             <Button
               className="mx-auto mt-2 w-full max-w-80"

@@ -7,6 +7,9 @@ export interface CardIndex {
   readonly cards: readonly Row[]
   readonly families: readonly Row[]
   readonly keywords: readonly Row[]
+  readonly mechanicProjections: readonly Row[]
+  readonly mechanicCoverage: readonly Row[]
+  readonly printingProducts: readonly Row[]
   readonly card: (id: string) => Row | undefined
   readonly face: (id: string) => Row | undefined
   readonly facesOf: (cardId: string) => readonly Row[]
@@ -76,6 +79,9 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
     ]),
   )
   const keywords = rows("keyword")
+  const mechanicProjections = rows("mechanic_projection")
+  const mechanicCoverage = rows("card_mechanic_coverage")
+  const printingProducts = rows("printing_product")
   const keywordMap = byId(keywords)
   const supportMap = byId(rows("card_engine_support"), "card_id")
   const textMap = byId(rows("text_unit"))
@@ -84,6 +90,9 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
     cards,
     families,
     keywords,
+    mechanicProjections,
+    mechanicCoverage,
+    printingProducts,
     card: (id) => cardMap.get(id),
     face: (id) => faceMap.get(id),
     facesOf: (cardId) => facesByCard.get(cardId) ?? [],

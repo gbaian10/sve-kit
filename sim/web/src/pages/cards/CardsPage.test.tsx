@@ -4,7 +4,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
-import { DEFAULT_PREFS, prefsStore, recentStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, readPrefs, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 
 // The page reads the fixture through the real client; fetch is answered from the in-memory build.
@@ -36,7 +36,7 @@ async function open(path = "/cards") {
   prefsStore.set({ uiLanguage: "zh-TW" })
   const rendered = await renderRoutes(routes, { initialEntries: [path] })
   // The quick bar appears once the snapshot has loaded, whatever the results are.
-  await screen.findByRole("button", { name: "精靈" }, { timeout: 4000 })
+  await screen.findByRole("group", { name: "職業" }, { timeout: 4000 })
   return rendered
 }
 
@@ -47,17 +47,23 @@ describe("CardsPage", () => {
     expect(
       screen.getAllByRole("link").filter((a) => a.hasAttribute("data-result-key")).length,
     ).toBeGreaterThan(20)
-    await user.click(screen.getByRole("button", { name: "主教" }))
+    await user.click(
+      within(screen.getByRole("group", { name: "職業" })).getByRole("button", { name: "主教" }),
+    )
     expect(router.state.location.search).toBe("?class=bishop")
-    expect(screen.getByRole("button", { name: "主教" })).toHaveAttribute("aria-pressed", "true")
-    await user.click(screen.getByRole("button", { name: "中立" }))
+    expect(
+      within(screen.getByRole("group", { name: "職業" })).getByRole("button", { name: "主教" }),
+    ).toHaveAttribute("aria-pressed", "true")
+    await user.click(
+      within(screen.getByRole("group", { name: "職業" })).getByRole("button", { name: "中立" }),
+    )
     expect(router.state.location.search).toBe("?class=bishop%2Cneutral")
   })
 
   it("suggests while typing, names the matched field and opens with the keyboard", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-51")
     const list = await screen.findByRole("listbox")
     const options = within(list).getAllByRole("option")
@@ -78,7 +84,7 @@ describe("CardsPage", () => {
     // Back lands on the list with the typed text in the URL and the input.
     await router.navigate(-1)
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("bp01-51")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("bp01-51")
     })
     expect(router.state.location.search).toBe("?q=bp01-51")
   })
@@ -86,7 +92,7 @@ describe("CardsPage", () => {
   it("marks alias hits, shows all with the see-all link and keeps the text on back", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "テンプラー")
     expect(await screen.findByText(/符合：別名/u)).toBeInTheDocument()
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
@@ -105,7 +111,7 @@ describe("CardsPage", () => {
     })
     await router.navigate(-1)
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("テンプラー")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("テンプラー")
     })
     expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
   })
@@ -113,7 +119,7 @@ describe("CardsPage", () => {
   it("suggests across classes and 'see all' commits the text alone", async () => {
     const { router } = await open("/cards?class=bishop")
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "試作の妖精")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "試作の妖精")
     const list = await screen.findByRole("listbox")
     expect(within(list).getAllByRole("option").length).toBeGreaterThan(0)
     await user.click(await screen.findByRole("button", { name: /看全部/u }))
@@ -123,7 +129,7 @@ describe("CardsPage", () => {
   it("'see all' takes what is typed now, even during the debounce window", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-0")
     await screen.findByRole("listbox")
     await user.type(input, "5")
@@ -134,7 +140,7 @@ describe("CardsPage", () => {
   it("ignores clicks on stale suggestions until the list has caught up", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    const input = screen.getByRole("combobox")
+    const input = screen.getByRole("combobox", { name: "搜尋卡片" })
     await user.type(input, "bp01-0")
     const list = await screen.findByRole("listbox")
     const first = within(list).getAllByRole("option")[0]
@@ -154,7 +160,7 @@ describe("CardsPage", () => {
   it("keeps suggestions pickable when the text has surrounding spaces", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), " bp01-51 ")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), " bp01-51 ")
     const list = await screen.findByRole("listbox")
     await waitFor(() => {
       expect(list).toHaveAttribute("aria-busy", "false")
@@ -164,6 +170,106 @@ describe("CardsPage", () => {
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-51" })
   })
 
+  it("uses the view from the URL, else the preference, and writes both when switching", async () => {
+    prefsStore.set({ viewMode: "list" })
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    expect(
+      within(screen.getByRole("radiogroup", { name: "檢視" })).getByRole("radio", { name: "清單" }),
+    ).toHaveAttribute("aria-checked", "true")
+    await user.click(
+      within(screen.getByRole("radiogroup", { name: "檢視" })).getByRole("radio", { name: "表格" }),
+    )
+    expect(router.state.location.search).toBe("?view=table")
+    expect(readPrefs().viewMode).toBe("table")
+    expect(
+      (await screen.findAllByText("能力預覽・未完整", {}, { timeout: 5000 })).length,
+    ).toBeGreaterThan(0)
+    // The preview draws the same icons as the card page; keyword chips are plain text here.
+    expect((await screen.findAllByRole("img", { name: "入場曲" })).length).toBeGreaterThan(0)
+    expect(screen.queryByRole("button", { name: "守護" })).not.toBeInTheDocument()
+    const shared = await renderRoutes(routes, { initialEntries: ["/cards?view=grid"] })
+    await within(shared.container).findByRole("group", { name: "職業" }, { timeout: 4000 })
+    expect(
+      within(within(shared.container).getByRole("radiogroup", { name: "檢視" })).getByRole(
+        "radio",
+        { name: "卡圖" },
+      ),
+    ).toHaveAttribute("aria-checked", "true")
+    shared.unmount()
+  })
+
+  it("keeps the anchor card and the loaded pages when the view changes", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("link", { name: /試作聖堂騎士/u }))
+    await router.navigate(-1)
+    // Wait for the list to be back on screen, not only for the router state.
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
+    expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
+    await user.click(
+      within(screen.getByRole("radiogroup", { name: "檢視" })).getByRole("radio", { name: "清單" }),
+    )
+    expect(router.state.location.search).toBe("?view=list")
+    expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
+    await waitFor(() => {
+      expect(document.querySelector('a[data-result-key="c:bp01-051"]')).toHaveClass("ring-accent")
+    })
+  })
+
+  it("opens the filter sheet, applies a draft and shows chips with the badge count", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("button", { name: "篩選" }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "主教" }))
+    await user.click(within(dialog).getByRole("switch", { name: "只看異畫" }))
+    await user.click(within(dialog).getByRole("button", { name: /顯示/u }))
+    expect(router.state.location.search).toBe("?class=bishop&alt=1")
+    expect(screen.getByRole("button", { name: "篩選" })).toHaveTextContent("2")
+    expect(screen.getByRole("button", { name: "移除 主教" })).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "移除 只看異畫" }))
+    expect(router.state.location.search).toBe("?class=bishop")
+    await user.click(screen.getByRole("button", { name: "清除" }))
+    expect(router.state.location.search).toBe("")
+  })
+
+  it("gives the filter sheet its own history entry: back closes it, apply replaces it", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("button", { name: "篩選" }))
+    await screen.findByRole("dialog")
+    expect(router.state.location.state).toMatchObject({ sheet: true })
+    await router.navigate(-1)
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
+    await router.navigate(1)
+    await screen.findByRole("dialog")
+    // jsdom fires no `cancel` on Escape; the close button takes the same onClose path.
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "關閉" }))
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
+    expect(router.state.location.state ?? {}).not.toHaveProperty("sheet")
+    // Applying replaces the sheet's entry, so back returns to the list before the sheet.
+    await user.click(screen.getByRole("button", { name: "篩選" }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "主教" }))
+    await user.click(within(dialog).getByRole("button", { name: /顯示/u }))
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("?class=bishop")
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    await router.navigate(-1)
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("")
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
   it("shows the empty state with a reset, and recent cards on focus", async () => {
     const { router } = await open("/cards?q=zzz&class=elf")
     const user = userEvent.setup()
@@ -171,7 +277,7 @@ describe("CardsPage", () => {
     await user.click(screen.getByRole("button", { name: "清除全部條件" }))
     expect(router.state.location.search).toBe("")
     await screen.findByText("張卡片", { exact: false })
-    await user.click(screen.getByRole("combobox"))
+    await user.click(screen.getByRole("combobox", { name: "搜尋卡片" }))
     expect(await screen.findByText("還沒看過任何卡", { exact: false })).toBeInTheDocument()
     await user.keyboard("{Escape}")
     expect(screen.queryByRole("listbox")).not.toBeInTheDocument()
@@ -180,12 +286,12 @@ describe("CardsPage", () => {
   it("drops the typed draft when the browser goes back to an older URL", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "foo")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "foo")
     await user.keyboard("{Enter}")
     expect(router.state.location.search).toBe("?q=foo")
     await router.navigate(-1)
     await waitFor(() => {
-      expect(screen.getByRole("combobox")).toHaveValue("")
+      expect(screen.getByRole("combobox", { name: "搜尋卡片" })).toHaveValue("")
     })
     expect(router.state.location.search).toBe("")
   })
@@ -193,7 +299,7 @@ describe("CardsPage", () => {
   it("commits typed text with Enter when nothing matches and the Escape closes the list", async () => {
     const { router } = await open()
     const user = userEvent.setup()
-    await user.type(screen.getByRole("combobox"), "nothing-here")
+    await user.type(screen.getByRole("combobox", { name: "搜尋卡片" }), "nothing-here")
     expect(await screen.findByText("沒有符合的卡")).toBeInTheDocument()
     await user.keyboard("{Enter}")
     expect(router.state.location.search).toBe("?q=nothing-here")

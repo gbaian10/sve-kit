@@ -55,9 +55,16 @@ export function CardImage({
 }: CardImageProps) {
   const { t } = useTranslation()
   const { dataSaver } = usePrefs()
-  const [loaded, setLoaded] = useState(false)
+  // Load state belongs to one image URL: another printing in the same slot starts afresh.
+  const [image, setImage] = useState<{
+    readonly src: string | undefined
+    readonly loaded: boolean
+    readonly failed: boolean
+  }>({ src: undefined, loaded: false, failed: false })
   const asset = images?.asset(summary.printingId, summary.faceId)
   const source = images?.cardImage(summary.printingId, summary.faceId)
+  const { loaded, failed } =
+    source !== undefined && image.src === source.src ? image : { loaded: false, failed: false }
   const availability = asset?.["availability"]
   const publication = asset?.["publication_state"]
   const tag =
@@ -72,7 +79,8 @@ export function CardImage({
         : publication === "pending" || availability === "unfetched"
           ? t("card.imagePending")
           : undefined
-  const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)
+  const showImage =
+    source !== undefined && tag === undefined && !failed && (!dataSaver || imageWanted)
   // In identify mode the slot itself carries the name, so the card is announced with or without
   // a visible image (the text card underneath is decorative); the <img> then stays silent.
   const identify = alt === "identify"
@@ -95,7 +103,7 @@ export function CardImage({
           attack={summary.attack}
           defense={summary.defense}
           cardNo={summary.cardNo}
-          {...(tag === undefined ? {} : { tag })}
+          {...(tag === undefined ? (failed ? { tag: t("card.noImage") } : {}) : { tag })}
         />
       )}
       {showImage && (
@@ -109,7 +117,10 @@ export function CardImage({
           loading="lazy"
           decoding="async"
           onLoad={() => {
-            setLoaded(true)
+            setImage({ src: source.src, loaded: true, failed: false })
+          }}
+          onError={() => {
+            setImage({ src: source.src, loaded: false, failed: true })
           }}
           className={cn(
             "absolute inset-0 size-full transition-opacity duration-200",

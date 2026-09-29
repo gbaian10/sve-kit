@@ -89,7 +89,7 @@ describe("CardPage", () => {
   it("is a modal overlay with prev/next when opened with a background, and back closes it", async () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
     const { router } = await renderRoutes(routes, { initialEntries: ["/cards"] })
-    await screen.findByRole("button", { name: "精靈" }, { timeout: 5000 })
+    await screen.findByRole("group", { name: "職業" }, { timeout: 5000 })
     await router.navigate("/cards/BP01-051", { state: listState })
     await screen.findByRole("heading", { level: 1, name: /試作/u }, { timeout: 5000 })
     const user = userEvent.setup()
@@ -101,7 +101,7 @@ describe("CardPage", () => {
     })
     expect(within(dialog).queryByRole("link", { name: "回查卡" })).not.toBeInTheDocument()
     // The list renders underneath, inert; prev/next live inside the dialog.
-    expect(screen.getByRole("combobox", { hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole("combobox", { name: "搜尋卡片", hidden: true })).toBeInTheDocument()
     const next = within(dialog).getByRole("button", { name: "下一張" })
     expect(next).toBeEnabled()
     await user.click(next)
@@ -196,6 +196,57 @@ describe("CardPage", () => {
     })
     expect(router.state.location.state).toMatchObject(listState)
     expect(await screen.findByText("Ward", { exact: false })).toBeInTheDocument()
+  })
+
+  it("walks printings as their own unit, also after switching the edition", async () => {
+    // SD01-002 has three printings; in number order they are BP01-004, SD01-002, SD01EN-002.
+    const { router } = await open("/cards/SD01-002", {
+      background: "?unit=printing",
+      source: "results",
+      pages: 1,
+      resultKey: "p:sd01-002",
+    } satisfies CardEntryState)
+    const user = userEvent.setup()
+    const dialog = () => within(screen.getByRole("dialog"))
+    await user.click(dialog().getByRole("button", { name: "下一張" }))
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/SD01EN-002/u)
+    })
+    expect(router.state.location.state).toMatchObject({ resultKey: "p:sd01-002-en" })
+    await user.click(dialog().getByRole("button", { name: "上一張" }))
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/SD01-002\//u)
+    })
+    // Switching the edition shows the counterpart but keeps the position the list opened.
+    await user.click(screen.getByRole("radio", { name: "英版" }))
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/SD01EN-002/u)
+    })
+    expect(router.state.location.state).toMatchObject({ resultKey: "p:sd01-002" })
+    await user.click(dialog().getByRole("button", { name: "上一張" }))
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-004/u)
+    })
+    expect(router.state.location.state).toMatchObject({ resultKey: "p:sd01-002-bp" })
+  })
+
+  it("walks art groups as their own unit", async () => {
+    const { router } = await open("/cards/SD01-002", {
+      background: "?unit=art",
+      source: "results",
+      pages: 1,
+      resultKey: "art:sd01-002:0",
+    } satisfies CardEntryState)
+    const user = userEvent.setup()
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "下一張" }))
+    await waitFor(() => {
+      expect(router.state.location.pathname).toMatch(/^\/cards\/SD01EN-002/u)
+    })
+    expect(router.state.location.state).toMatchObject({ resultKey: "art:sd01-002-en:0" })
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "上一張" }))
+    await waitFor(() => {
+      expect(router.state.location.state).toMatchObject({ resultKey: "art:sd01-002:0" })
+    })
   })
 
   it("shows the English row for the en UI, and the missing notice for a Japanese-only card", async () => {

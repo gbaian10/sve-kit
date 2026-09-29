@@ -22,6 +22,8 @@ export interface CardTextProps {
   readonly uiLang: TextLang
   /** Show the symbol's name next to keyword-like icons (setting `symbolLabels`). */
   readonly symbolLabels: boolean
+  /** Inline form for list rows: small icons, keyword names as plain chips, no explanations. */
+  readonly compact?: boolean
   readonly className?: string
 }
 
@@ -31,16 +33,28 @@ function SymbolIcon({
   segment,
   label,
   showLabel,
+  compact,
 }: {
   readonly segment: Extract<Segment, { kind: "symbol" }>
   readonly label: string
   readonly showLabel: boolean
+  readonly compact: boolean
 }) {
   const icon = symbolIcon(segment.code, segment.parameter)
   if (icon === undefined) return <span>{segment.raw}</span>
   return (
-    <span className="inline-flex items-center gap-0.5 align-[-0.3em]">
-      <img src={icon} alt={label} title={label} className="inline-block size-5.5" />
+    <span
+      className={cn(
+        "inline-flex items-center gap-0.5",
+        compact ? "align-[-0.2em]" : "align-[-0.3em]",
+      )}
+    >
+      <img
+        src={icon}
+        alt={label}
+        title={label}
+        className={cn("inline-block", compact ? "size-4" : "size-5.5")}
+      />
       {showLabel && <span className="text-[0.875em] text-text-2">{label}</span>}
     </span>
   )
@@ -139,9 +153,54 @@ export function CardText({
   keyword,
   uiLang,
   symbolLabels,
+  compact = false,
   className,
 }: CardTextProps) {
   const segments = parseCardText(text, lang, vocabulary)
+  const symbolLabel = (segment: Extract<Segment, { kind: "symbol" }>) => {
+    const localized = symbolLocalization(segment.symbolId, uiLang)
+    const name = typeof localized?.["name"] === "string" ? localized["name"] : segment.raw
+    return segment.parameter === undefined ? name : `${name} ${segment.parameter}`
+  }
+  if (compact) {
+    return (
+      <span lang={lang} className={className}>
+        {segments.map((segment, position) => {
+          const key = position
+          switch (segment.kind) {
+            case "text":
+              return <span key={key}>{segment.text}</span>
+            case "unknown":
+              return <span key={key}>{segment.raw}</span>
+            case "break":
+              return <br key={key} />
+            case "symbol":
+              return (
+                <SymbolIcon
+                  key={key}
+                  segment={segment}
+                  label={symbolLabel(segment)}
+                  showLabel={false}
+                  compact
+                />
+              )
+            case "keyword": {
+              const name = keyword(segment.keywordId)?.name(uiLang) ?? segment.name
+              const label = segment.parameter === undefined ? name : `${name} ${segment.parameter}`
+              return (
+                <span
+                  key={key}
+                  className="mx-0.5 inline-block rounded-sm border border-border-strong bg-surface-2 px-1 text-[0.875em] font-semibold text-text-1"
+                >
+                  {label}
+                </span>
+              )
+            }
+          }
+        })}
+      </span>
+    )
+  }
   const paragraphs: Segment[][] = [[]]
   for (const segment of segments) {
     if (segment.kind === "break") paragraphs.push([])
@@ -158,21 +217,16 @@ export function CardText({
               case "text":
               case "unknown":
                 return <span key={key}>{segment.kind === "text" ? segment.text : segment.raw}</span>
-              case "symbol": {
-                const localized = symbolLocalization(segment.symbolId, uiLang)
-                const name =
-                  typeof localized?.["name"] === "string" ? localized["name"] : segment.raw
-                const label =
-                  segment.parameter === undefined ? name : `${name} ${segment.parameter}`
+              case "symbol":
                 return (
                   <SymbolIcon
                     key={key}
                     segment={segment}
-                    label={label}
+                    label={symbolLabel(segment)}
                     showLabel={symbolLabels && LABELLED_SYMBOLS.has(segment.code)}
+                    compact={false}
                   />
                 )
-              }
               case "keyword":
                 return (
                   <KeywordChip

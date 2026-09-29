@@ -4,10 +4,14 @@ export {
   type CardFaceView,
   type CardView,
   createRouteLookups,
+  type EffectPreview,
   type KeywordInfo,
   loadCardView,
+  loadEffectPreview,
+  type TextContext,
+  textContextOf,
 } from "./cardView"
-export { type CardSummary, type Catalog, catalogOf } from "./catalog"
+export { type CardSummary, type Catalog, catalogOf, type FilterOptions } from "./catalog"
 export type { LoadedSnapshot, SnapshotClient, SnapshotStatus } from "./client"
 export { globalDetailOf } from "./detail"
 export { type ImageIndex, imageIndexOf } from "./images"

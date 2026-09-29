@@ -87,6 +87,40 @@ describe("catalog", () => {
     expect(bishops[0]?.printingId).toBe("p:bp01-050-en")
   })
 
+  it("carries the facet data the filter sheet needs", () => {
+    const captain = catalog.entries.find((entry) => entry.cardId === "c:bp01-002")
+    expect(captain?.setCode).toBe("bp01")
+    expect(captain?.faces.jp).toMatchObject({ typeCode: "follower", cost: 3 })
+    expect(captain?.printings.map((printing) => printing.variant).sort()).toEqual([
+      "alt",
+      "standard",
+      "standard",
+    ])
+    expect(
+      captain?.printings.every(
+        (printing) => printing.rarity === "silver" && printing.artId !== null,
+      ),
+    ).toBe(true)
+    expect(captain?.printings[0]?.releasedOn).toBe("2026-02-01")
+    // BP01-001 lists fanfare and its coverage is complete: other keywords are absent.
+    const recruit = catalog.entries.find((entry) => entry.cardId === "c:bp01-001")
+    expect(recruit?.mechanic("kw:fanfare", "jp")).toBe("present")
+    expect(recruit?.mechanic("kw:ward", "jp")).toBe("absent")
+    const options = catalog.filterOptions()
+    expect(options.types).toContain("follower")
+    expect(options.rarities).toContain("gold")
+    expect(options.sets.map((set) => set.code)).toEqual(["bp01", "pr", "sd01"])
+    expect(options.keywords.find((keyword) => keyword.id === "kw:ward")?.name("zh-Hant")).toBe(
+      "守護",
+    )
+    const summary = catalog.mechanicCoverageSummary("jp")
+    expect(summary.total).toBeGreaterThan(summary.annotated)
+    expect(summary.annotated).toBeGreaterThan(0)
+    expect(catalog.results({ ...DEFAULT_QUERY, unit: "printing" }, "jp").length).toBeGreaterThan(
+      catalog.results(DEFAULT_QUERY, "jp").length,
+    )
+  })
+
   it("labels classes in the UI language and caches one catalog per snapshot", () => {
     expect(catalog.classLabel("elf", "zh-Hant")).toBe("精靈")
     expect(catalog.classLabel("elf", "ja")).toBe("エルフ")
