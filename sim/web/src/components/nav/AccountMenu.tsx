@@ -139,16 +139,13 @@ export function AccountMenuPanel({ onNavigate }: { readonly onNavigate?: () => v
   )
 }
 
-export interface AccountMenuButtonProps {
-  /** `top`: right end of the top bar; `rail`: bottom of the desktop side rail. */
-  readonly placement: "top" | "rail"
-}
-
 const POPOVER_SUPPORTED = typeof HTMLElement !== "undefined" && "popover" in HTMLElement.prototype
 
-// Avatar = menu entry (design 03d). Not signed in: dashed outline person. Uses the Popover API
-// for open/close and light dismiss; browsers without it (Safari < 17) get a plain toggle instead.
-export function AccountMenuButton({ placement }: AccountMenuButtonProps) {
+// Avatar = menu entry (design 03d), always at the right end of the top bar (the design's rail-bottom
+// placement on desktop was unified with the other layouts, user 2026-09-29). Not signed in: dashed
+// outline person. Uses the Popover API for open/close and light dismiss; browsers without it
+// (Safari < 17) get a plain toggle instead.
+export function AccountMenuButton() {
   const { t } = useTranslation()
   const id = useId()
   const panelId = `${id}-account`
@@ -185,7 +182,7 @@ export function AccountMenuButton({ placement }: AccountMenuButtonProps) {
         className={cn(
           "m-0 rounded-block border border-border bg-surface-1 p-0 text-text-1 shadow-lg",
           POPOVER_SUPPORTED ? "inset-auto" : "fixed z-50",
-          placement === "top" ? "top-14 right-4" : "bottom-3 left-20",
+          "top-14 right-4 lg:right-6",
         )}
       >
         <AccountMenuPanel onNavigate={close} />

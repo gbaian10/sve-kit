@@ -65,7 +65,7 @@ describe("AccountMenuPanel", () => {
   })
 
   it("falls back to a plain toggle when the Popover API is missing (as in jsdom)", async () => {
-    await renderInRouter(<AccountMenuButton placement="top" />)
+    await renderInRouter(<AccountMenuButton />)
     const button = screen.getByRole("button", { name: "帳號與設定" })
     expect(button).toHaveAttribute("aria-expanded", "false")
     expect(screen.queryByRole("radiogroup", { name: "外觀" })).not.toBeInTheDocument()

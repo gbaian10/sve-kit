@@ -9,8 +9,6 @@ export default {
     cards: "Cards",
     decks: "Decks",
     account: "Account and settings",
-    expand: "Expand sidebar",
-    collapse: "Collapse sidebar",
     primary: "Primary navigation",
     skipToContent: "Skip to content",
     logoAlt: "sve-kit",

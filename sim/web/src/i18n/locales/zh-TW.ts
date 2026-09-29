@@ -7,8 +7,6 @@ const zhTW = {
     cards: "查卡",
     decks: "牌組",
     account: "帳號與設定",
-    expand: "展開側欄",
-    collapse: "收合側欄",
     primary: "主要導覽",
     skipToContent: "跳到主內容",
     logoAlt: "sve-kit",
