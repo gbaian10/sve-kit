@@ -80,6 +80,91 @@ def test_flavor_keeps_line_breaks() -> None:
     )
 
 
+def test_compound_trait_is_not_split() -> None:
+    body = fixture("card_BP02-071.html").replace(
+        "<dd>魔界</dd>".encode(), "<dd>魔界・ジオ・テオゴニア・光輝</dd>".encode()
+    )
+    [face] = extract_card(body, number="BP02-071").faces
+    assert face.traits == ["魔界", "ジオ・テオゴニア", "光輝"]
+    assert face.trait_raw == "魔界・ジオ・テオゴニア・光輝"
+
+
+@pytest.mark.parametrize("number", ["BP03-LDⓈ01", "CP01-001a"])
+def test_special_card_numbers_keep_raw_fields_and_hints(number: str) -> None:
+    body = f"""<!DOCTYPE html><html><body>
+    <div class="cardlist-Detail"><div class="cardlist-Detail_Box_Inner">
+    <div class="img"><img src="/images/{number}.png"></div>
+    <h1 class="ttl">名前</h1><div class="info">
+    <dl><dt>クラス</dt><dd>エルフ</dd></dl>
+    <dl><dt>カード種類</dt><dd>トークン</dd></dl>
+    <dl><dt>タイプ</dt><dd>-</dd></dl>
+    <dl><dt>レアリティ</dt><dd>PR</dd></dl>
+    </div><div class="status">
+    <span class="status-Item status-Item-Cost"><span class="heading">コスト</span>-</span>
+    <span class="status-Item status-Item-Power"><span class="heading">攻撃力</span>0</span>
+    <span class="status-Item status-Item-Hp"><span class="heading">体力</span>1</span>
+    </div><div class="detail"></div><div class="speech"></div>
+    </div></div><div class="cardlist-Under">
+    <div class="cardlist-Detail_Products_Inner"><p class="date">2026-01-01</p>
+    <p class="ttl">商品</p><a href="/products/test/">商品ページ</a></div>
+    <a href="/cardlist/?cardno=BP01-003">関連カード</a></div>
+    <!-- {"x" * 1000} --></body></html>""".encode()
+    record = extract_card(body, number=number)
+    [face] = record.faces
+    assert record.number == number
+    assert (face.cost, face.power, face.hp) == ("-", "0", "1")
+    assert face.image == f"/images/{number}.png"
+    assert face.traits == []
+    assert face.text == ""  # ruff: ignore[compare-to-empty-string] -- distinguish present empty from missing
+    assert face.flavor == ""  # ruff: ignore[compare-to-empty-string] -- distinguish present empty from missing
+    assert record.products[0].name == "商品"
+    assert record.products[0].links == ["/products/test/"]
+    assert record.related_cards[0].href == "/cardlist/?cardno=BP01-003"
+
+
+def test_missing_ability_differs_from_present_empty_ability() -> None:
+    body = fixture("card_BP02-071.html")
+    start = body.index(b'<div class="detail">')
+    end = body.index(b"</div>", start) + len(b"</div>")
+    missing = extract_card(body[:start] + body[end:], number="BP02-071")
+    empty = extract_card(
+        body[:start] + b'<div class="detail"></div>' + body[end:],
+        number="BP02-071",
+    )
+    assert missing.faces[0].text is None
+    assert empty.faces[0].text == ""  # ruff: ignore[compare-to-empty-string] -- distinguish present empty from missing
+
+
+def test_empty_section_keeps_its_position() -> None:
+    body = fixture("card_BP02-071.html")
+    start = body.index(b'<div class="detail">')
+    end = body.index(b"</div>", start) + len(b"</div>")
+    section_only = (
+        body[:start] + "<div class='detail'>―――――</div>".encode() + body[end:]
+    )
+    [face] = extract_card(section_only, number="BP02-071").faces
+    assert face.text == ""  # ruff: ignore[compare-to-empty-string] -- empty leading section is present
+    assert face.sections == [""]
+
+
+def test_missing_image_src_is_rejected() -> None:
+    body = fixture("card_BP02-071.html").replace(
+        b'<img src="/wordpress/wp-content/images/cardlist/BP02/bp02_071.png"',
+        b"<img",
+    )
+    with pytest.raises(ValidationError, match="without src"):
+        extract_card(body, number="BP02-071")
+
+
+def test_empty_card_name_is_rejected() -> None:
+    body = fixture("card_BP02-071.html").replace(
+        '<h1 class="ttl Sans">ソウルディーラー</h1>'.encode(),
+        b'<h1 class="ttl Sans"></h1>',
+    )
+    with pytest.raises(ValidationError, match="empty card name"):
+        extract_card(body, number="BP02-071")
+
+
 def test_page_without_card_detail_is_rejected() -> None:
     body = (
         b"<!DOCTYPE html><html><body>" + b"<p>maintenance</p>" * 100 + b"</body></html>"
