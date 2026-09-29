@@ -7,7 +7,7 @@ export {
   type KeywordInfo,
   loadCardView,
 } from "./cardView"
-export { type CardSummary, type Catalog, catalogOf } from "./catalog"
+export { type CardSummary, type Catalog, catalogOf, type FilterOptions } from "./catalog"
 export type { LoadedSnapshot, SnapshotClient, SnapshotStatus } from "./client"
 export { globalDetailOf } from "./detail"
 export { type ImageIndex, imageIndexOf } from "./images"

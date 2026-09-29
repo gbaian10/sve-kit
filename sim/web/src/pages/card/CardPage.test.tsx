@@ -89,7 +89,7 @@ describe("CardPage", () => {
   it("is a modal overlay with prev/next when opened with a background, and back closes it", async () => {
     prefsStore.set({ uiLanguage: "zh-TW" })
     const { router } = await renderRoutes(routes, { initialEntries: ["/cards"] })
-    await screen.findByRole("button", { name: "精靈" }, { timeout: 5000 })
+    await screen.findByRole("group", { name: "職業" }, { timeout: 5000 })
     await router.navigate("/cards/BP01-051", { state: listState })
     await screen.findByRole("heading", { level: 1, name: /試作/u }, { timeout: 5000 })
     const user = userEvent.setup()
@@ -101,7 +101,7 @@ describe("CardPage", () => {
     })
     expect(within(dialog).queryByRole("link", { name: "回查卡" })).not.toBeInTheDocument()
     // The list renders underneath, inert; prev/next live inside the dialog.
-    expect(screen.getByRole("combobox", { hidden: true })).toBeInTheDocument()
+    expect(screen.getByRole("combobox", { name: "搜尋卡片", hidden: true })).toBeInTheDocument()
     const next = within(dialog).getByRole("button", { name: "下一張" })
     expect(next).toBeEnabled()
     await user.click(next)

@@ -6,7 +6,7 @@ import type { Region } from "./search"
 export type TriState = "present" | "absent" | "unknown"
 export type MechanicScope = "shared" | "en_override"
 
-export interface MechanicCoverage {
+interface MechanicCoverage {
   readonly completeAll: boolean
   readonly completeMode: "include" | "exclude"
   readonly completeIds: readonly string[]

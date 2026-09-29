@@ -24,6 +24,8 @@ export interface CardGridProps {
   readonly onOpen: (cell: GridCell, event: MouseEvent<HTMLAnchorElement>) => void
   /** Cell to highlight briefly after returning from a card. */
   readonly anchor?: string
+  /** Columns on phones; tablets and desktops always use the design's 4 / 5 / 6. */
+  readonly density?: 2 | 3
 }
 
 // Design: 2 columns under 600 (gap 14×12), 4 up to 999, 5–6 on desktop; each cell is the image
@@ -117,9 +119,14 @@ function CardCell({
   )
 }
 
-export function CardGrid({ cells, images, onOpen, anchor }: CardGridProps) {
+export function CardGrid({ cells, images, onOpen, anchor, density = 2 }: CardGridProps) {
   return (
-    <ul className="grid grid-cols-2 gap-x-3 gap-y-3.5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6">
+    <ul
+      className={cn(
+        "grid gap-x-3 gap-y-3.5 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6",
+        density === 3 ? "grid-cols-3" : "grid-cols-2",
+      )}
+    >
       {cells.map((cell) => (
         <li key={cell.key} className="min-w-0">
           <CardCell cell={cell} images={images} onOpen={onOpen} highlighted={anchor === cell.key} />

@@ -56,6 +56,7 @@ export function CardImage({
   const { t } = useTranslation()
   const { dataSaver } = usePrefs()
   const [loaded, setLoaded] = useState(false)
+  const [failed, setFailed] = useState(false)
   const asset = images?.asset(summary.printingId, summary.faceId)
   const source = images?.cardImage(summary.printingId, summary.faceId)
   const availability = asset?.["availability"]
@@ -72,7 +73,8 @@ export function CardImage({
         : publication === "pending" || availability === "unfetched"
           ? t("card.imagePending")
           : undefined
-  const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)
+  const showImage =
+    source !== undefined && tag === undefined && !failed && (!dataSaver || imageWanted)
   // In identify mode the slot itself carries the name, so the card is announced with or without
   // a visible image (the text card underneath is decorative); the <img> then stays silent.
   const identify = alt === "identify"
@@ -95,7 +97,7 @@ export function CardImage({
           attack={summary.attack}
           defense={summary.defense}
           cardNo={summary.cardNo}
-          {...(tag === undefined ? {} : { tag })}
+          {...(tag === undefined ? (failed ? { tag: t("card.noImage") } : {}) : { tag })}
         />
       )}
       {showImage && (
@@ -110,6 +112,9 @@ export function CardImage({
           decoding="async"
           onLoad={() => {
             setLoaded(true)
+          }}
+          onError={() => {
+            setFailed(true)
           }}
           className={cn(
             "absolute inset-0 size-full transition-opacity duration-200",
