@@ -137,7 +137,7 @@ export function cardTextToPlain(
           const pattern = copyPattern(segment.symbolId)
           return pattern === undefined
             ? segment.raw
-            : pattern.replaceAll(/\{[a-z_]+\}/gu, segment.parameter ?? "")
+            : pattern.replaceAll(/\{[a-z][a-z0-9_-]*\}/gu, segment.parameter ?? "")
         }
         case "keyword":
           return `【${segment.name}${segment.parameter === undefined ? "" : `_${segment.parameter}`}】`

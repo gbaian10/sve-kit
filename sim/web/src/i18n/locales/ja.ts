@@ -110,6 +110,7 @@ export default {
     },
     missingTranslation: "日本語訳はまだありません。原文を表示しています",
     findCards: "【{{name}}】を持つカードを探す",
+    definitionFailed: "解説を読み込めませんでした。もう一度押すと再試行します",
     noDefinition: "解説はまだありません",
     loading: "読み込み中",
     loadFailed: "カードの読み込みに失敗しました",

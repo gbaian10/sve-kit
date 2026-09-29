@@ -108,6 +108,7 @@ const zhTW = {
     },
     missingTranslation: "尚無繁中譯文，顯示原文",
     findCards: "找有【{{name}}】的卡",
+    definitionFailed: "解說載入失敗，再點一次重試",
     noDefinition: "尚無解說",
     loading: "載入中",
     loadFailed: "卡片資料載入失敗",

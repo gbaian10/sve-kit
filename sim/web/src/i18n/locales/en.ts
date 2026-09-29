@@ -111,6 +111,7 @@ export default {
     },
     missingTranslation: "No English text yet; showing the original",
     findCards: "Find cards with [{{name}}]",
+    definitionFailed: "The explanation could not be loaded; open again to retry",
     noDefinition: "No explanation yet",
     loading: "Loading",
     loadFailed: "The card could not be loaded",
