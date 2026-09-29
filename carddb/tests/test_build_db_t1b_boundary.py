@@ -193,7 +193,7 @@ def test_art_reference_is_null_only_when_group_disabled() -> None:
             )
 
 
-def test_rebuild_v2_to_v3_revalidates_art(tmp_path: Path) -> None:
+def test_rebuild_v2_to_v4_revalidates_art(tmp_path: Path) -> None:
     path = tmp_path / "build.sqlite"
     old = compile_schema(REGISTRY, ("images", "cr"), t0_schemas(), version=2)
     with create_database(old, path) as database:
@@ -214,7 +214,7 @@ def test_rebuild_v2_to_v3_revalidates_art(tmp_path: Path) -> None:
     assert path.read_bytes() == before
     rebuild_database(compile_minimum(include_en=True), path, populate)
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchall() == [(3,)]
+        assert connection.execute("PRAGMA user_version").fetchall() == [(4,)]
         assert connection.execute(
             "SELECT count(*) FROM sqlite_schema WHERE type='table'"
         ).fetchall() == [(61,)]

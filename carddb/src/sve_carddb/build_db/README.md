@@ -2,7 +2,8 @@
 
 This package compiles code-authored declarations into SQLite DDL and owns the
 SQLite boundary. `t0.compile_t0()` supplies the forty production T0 tables from
-`docs/schema/build-db.md`. There are no importers or CLI integration.
+`docs/schema/build-db.md`. The regional identity staging importer is described in
+[registry/preview](../registry/preview/README.md); there is no complete build CLI.
 
 ```python
 from sve_carddb.build_db import (
@@ -180,8 +181,10 @@ importer/image builder/domain validator. SQL checks do not attest those facts.
 
 Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `PRAGMA user_version` during creation and checked before every commit. Legacy
-`compile_t0()` uses version 1; the optional T1 registry uses version 3 (version 2 introduced images/CR), including
-its T0-only selection. The version identifies the declaration generation; the
+`compile_t0()` uses version 1; the optional T1 registry uses version 4, including
+its T0-only selection. Version 2 introduced images/CR, version 3 the remaining T1
+groups, and version 4 adopted art-use verification. The version identifies the
+declaration generation; the
 selected capability closure determines the actual table set. It is independent
 of crawl-manifest schema versions and public snapshot format/data versions.
 
@@ -223,7 +226,7 @@ revision scope, reskin confirmation/reverse duplicates, confirmed-none evidence
 adoption and aligned/divergent review adoption. Foreign keys bind correction
 printing/face, related target printing/card, and art card/face ownership.
 Disabled art references are NULL-only; enabling art installs the existing
-printing_face composite FK. Switching from a version-2 build to version 3 uses
+printing_face composite FK. Switching from an earlier build to version 4 uses
 the same rebuild helper and revalidates all imported references before replacement.
 
 The schema can retain pending reviews, unadopted needs_review corrections,
@@ -240,3 +243,9 @@ reskin source evidence for all faces/regions, or adopted art baseline/alternate
 classification. Those domain validators and importers are still required before
 these DDL groups can pass `require_usable`. Source hashes and historic versions
 must come from pinned inputs; schema validation never invents missing evidence.
+
+Art rows referenced by `printing_face.art_id` require a sampled or confirmed
+decision (`art_use_adopted`). Unreferenced candidates remain storable. This check
+runs with the other query checks before COMMIT, including when only the decision
+is changed; failure rolls back the whole transaction. It does not prove art
+baseline, classification or raw evidence validity.

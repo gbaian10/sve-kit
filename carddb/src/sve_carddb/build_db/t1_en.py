@@ -33,6 +33,15 @@ TABLES = (
             ForeignKey(("decision_id",), "decision", ("id",)),
         ),
         unique=(Unique(("id", "face_id")),),
+        query_checks=(
+            QueryCheck(
+                "art_use_adopted",
+                "SELECT 1 FROM printing_face AS p JOIN art AS a ON a.id = p.art_id "
+                "JOIN decision AS d ON d.id = a.decision_id "
+                "WHERE d.state NOT IN ('sampled', 'confirmed') LIMIT 1",
+                ("printing_face", "art", "decision"),
+            ),
+        ),
     ),
     Table(
         "region_mapping_review",

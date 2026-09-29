@@ -26,7 +26,7 @@ def test_rebuild_upgrades_offline_file_and_adds_real_cr_fk(tmp_path: Path) -> No
     rebuild_database(compile_build(("images", "cr")), path, populate)
     assert path.read_bytes() != original
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchall() == [(3,)]
+        assert connection.execute("PRAGMA user_version").fetchall() == [(4,)]
         assert connection.execute(
             "SELECT cr_version_id FROM rules_profile_revision"
         ).fetchall() == [("cr",)]
@@ -122,4 +122,4 @@ def test_schema_version_tampering_fails_verification() -> None:
             db.transaction(),
         ):
             db._connection.execute("PRAGMA user_version = 99")
-        assert db._read("PRAGMA user_version") == ((3,),)
+        assert db._read("PRAGMA user_version") == ((4,),)

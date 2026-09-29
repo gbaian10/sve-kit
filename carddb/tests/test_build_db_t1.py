@@ -65,7 +65,7 @@ def test_connected_graph_and_pragma_inventory() -> None:
             populate(db)
         for table in schema.tables:
             assert db.rows(table.name)
-        assert db._read("PRAGMA user_version") == ((3,),)
+        assert db._read("PRAGMA user_version") == ((4,),)
         assert db._read("SELECT count(*) FROM sqlite_schema WHERE type='table'") == (
             (46,),
         )
