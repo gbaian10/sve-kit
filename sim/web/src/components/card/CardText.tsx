@@ -1,4 +1,4 @@
-import { useEffect, useId, useRef, useState } from "react"
+import { useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { KeywordInfo } from "../../data"
@@ -64,22 +64,17 @@ function KeywordChip({
     | { readonly status: "idle" | "loading" | "failed" }
     | { readonly status: "ready"; readonly text: string | null }
   >({ status: "idle" })
-  const mounted = useRef(true)
-  useEffect(
-    () => () => {
-      mounted.current = false
-    },
-    [],
-  )
   const load = () => {
     if (!info) return
     setDefinition({ status: "loading" })
+    // A response after unmount is dropped by React itself; no guard needed (and a guard that
+    // outlives StrictMode's double effect run would swallow every response).
     info.definition().then(
       (text) => {
-        if (mounted.current) setDefinition({ status: "ready", text: text ?? null })
+        setDefinition({ status: "ready", text: text ?? null })
       },
       () => {
-        if (mounted.current) setDefinition({ status: "failed" })
+        setDefinition({ status: "failed" })
       },
     )
   }

@@ -101,4 +101,10 @@ describe("parseCardText", () => {
       cardTextToPlain(segments, (id) => (id === "sym:cost" ? "コスト{amount}" : undefined)),
     ).toBe("コスト2{謎}【守護_2】\nend")
   })
+
+  it("replaces copy-pattern placeholders whatever the parameter is called", () => {
+    const segments = parseCardText("{コスト2}", "ja", vocabulary)
+    expect(cardTextToPlain(segments, () => "[cost{x-value2}]")).toBe("[cost2]")
+    expect(cardTextToPlain(segments, () => "コスト{amount_1}")).toBe("コスト2")
+  })
 })
