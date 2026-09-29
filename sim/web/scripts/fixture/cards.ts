@@ -1,9 +1,9 @@
 // Handwritten synthetic cards for the development snapshot. Nothing here is real card text; the
 // point is coverage of every shape the pages must render (docs/schema/snapshot-format.md).
 
-export type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop" | "nemesis"
-export type TypeCode = "follower" | "spell" | "amulet" | "evolved" | "leader" | "token"
-export type Rarity = "bronze" | "silver" | "gold" | "legend" | "sp"
+type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop" | "nemesis"
+type TypeCode = "follower" | "spell" | "amulet" | "evolved" | "leader" | "token"
+type Rarity = "bronze" | "silver" | "gold" | "legend" | "sp"
 export type Region = "jp" | "en"
 type MappingState = "confirmed" | "unmapped" | "pending" | "confirmed_none"
 
@@ -19,11 +19,13 @@ export interface Face {
   readonly side: "front" | "back"
   readonly name: Text
   readonly effect: Text
-  readonly type: TypeCode
+  readonly type: string
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
   readonly traits: readonly string[]
+  readonly flavor?: string
+  readonly illustrator?: string
   /** An older wording that the current revision replaced (errata); JP only. */
   readonly previousEffectJa?: string
 }
@@ -34,20 +36,30 @@ export interface Printing {
   readonly cardNo: string
   readonly intId: number
   readonly variant: "standard" | "alt" | "signed"
-  readonly rarity: Rarity
+  readonly rarity: string | null
+  readonly premium?: boolean
+  /**
+   * Source image per face ordinal, for the real-data build; the synthetic build paints colours.
+   * A null entry marks that face's image as missing instead of painting a placeholder.
+   */
+  readonly imagePaths?: readonly (string | null)[]
   readonly product: string
   readonly stamp?: string
   /** Image state for the front face; back faces reuse it. */
   readonly image?: "approved" | "pending" | "withdrawn" | "missing"
 }
 
-interface Qa {
+export interface Qa {
   readonly id: string
   readonly number: string
   readonly question: Text
   readonly answer: Text
   /** Extra revisions of the same question (newest is current). */
   readonly revisions?: number
+  /** Every card the question is about; defaults to the card it is attached to. */
+  readonly cards?: readonly string[]
+  /** First publication date (YYYY-MM-DD); synthetic data uses a fixed demo date. */
+  readonly publishedOn?: string
 }
 
 interface Errata {
@@ -61,7 +73,7 @@ interface Errata {
 export interface Card {
   readonly id: string
   readonly set: string
-  readonly class: ClassCode | null
+  readonly class: string | null
   readonly layout: "single" | "double_faced"
   readonly faces: readonly Face[]
   readonly printings: readonly Printing[]
@@ -87,28 +99,46 @@ export interface Card {
   readonly enBlock?: readonly string[]
 }
 
-export const SETS = {
+export interface Family {
+  readonly code: string
+  readonly publicCode: string
+  readonly kind: "booster" | "promo" | "deck" | "collaboration" | "special" | "other"
+  readonly name: Text
+  readonly regions: readonly Region[]
+}
+
+export const SETS: Record<string, Family> = {
   "set:bp01": {
     code: "bp01",
     publicCode: "BP01",
     kind: "booster",
     name: { ja: "試作ブースター第1弾", zhHant: "試作補充包第1彈", en: "Prototype Booster 1" },
+    regions: ["jp", "en"],
   },
   "set:pr": {
     code: "pr",
     publicCode: "PR",
     kind: "promo",
     name: { ja: "試作プロモ", zhHant: "試作促銷卡", en: "Prototype Promos" },
+    regions: ["jp"],
   },
   "set:sd01": {
     code: "sd01",
     publicCode: "SD01",
     kind: "deck",
     name: { ja: "試作スタートデッキ", zhHant: "試作起始牌組", en: "Prototype Starter Deck" },
+    regions: ["jp", "en"],
   },
-} as const
+}
 
-export const CLASSES: Record<ClassCode, Text> = {
+export interface Vocabulary {
+  readonly classes: Record<string, Text>
+  readonly types: Record<string, Text>
+  readonly rarities: Record<string, Text>
+  readonly traits: Record<string, Text>
+}
+
+const CLASSES: Record<ClassCode, Text> = {
   elf: { ja: "エルフ", zhHant: "精靈", en: "Forestcraft" },
   royal: { ja: "ロイヤル", zhHant: "皇家", en: "Swordcraft" },
   witch: { ja: "ウィッチ", zhHant: "巫師", en: "Runecraft" },
@@ -118,7 +148,7 @@ export const CLASSES: Record<ClassCode, Text> = {
   nemesis: { ja: "ネメシス", zhHant: "復仇者", en: "Portalcraft" },
 }
 
-export const TYPES: Record<TypeCode, Text> = {
+const TYPES: Record<TypeCode, Text> = {
   follower: { ja: "フォロワー", zhHant: "從者", en: "Follower" },
   spell: { ja: "スペル", zhHant: "法術", en: "Spell" },
   amulet: { ja: "アミュレット", zhHant: "護符", en: "Amulet" },
@@ -127,7 +157,7 @@ export const TYPES: Record<TypeCode, Text> = {
   token: { ja: "トークン", zhHant: "衍生物", en: "Token" },
 }
 
-export const RARITIES: Record<Rarity, Text> = {
+const RARITIES: Record<Rarity, Text> = {
   bronze: { ja: "ブロンズ", zhHant: "銅", en: "Bronze" },
   silver: { ja: "シルバー", zhHant: "銀", en: "Silver" },
   gold: { ja: "ゴールド", zhHant: "金", en: "Gold" },
@@ -135,7 +165,7 @@ export const RARITIES: Record<Rarity, Text> = {
   sp: { ja: "スペシャル", zhHant: "特別", en: "Special" },
 }
 
-export const TRAITS: Record<string, Text> = {
+const TRAITS: Record<string, Text> = {
   soldier: { ja: "兵士", zhHant: "士兵", en: "Officer" },
   commander: { ja: "指揮官", zhHant: "指揮官", en: "Commander" },
   fairy: { ja: "フェアリー", zhHant: "妖精", en: "Fairy" },
@@ -1053,3 +1083,10 @@ export const CARDS: readonly Card[] = [
     coverage: "complete",
   },
 ]
+
+export const SYNTHETIC_VOCABULARY: Vocabulary = {
+  classes: CLASSES,
+  types: TYPES,
+  rarities: RARITIES,
+  traits: TRAITS,
+}

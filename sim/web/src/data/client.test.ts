@@ -6,7 +6,7 @@ import { type Fetcher } from "./cdn"
 import { createSnapshotClient, type SnapshotStatus } from "./client"
 import { type JsonObject, parseStrict, stringValue } from "./format-v1/json"
 
-const stubImage = (width: number, height: number, seed: number) =>
+const stubImage = ({ width, height, seed }: { width: number; height: number; seed: number }) =>
   Promise.resolve(
     new TextEncoder().encode(`stub-webp:${String(width)}x${String(height)}:${String(seed)}`),
   )

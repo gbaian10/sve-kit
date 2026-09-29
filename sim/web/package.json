@@ -16,7 +16,8 @@
     "test": "vitest run",
     "check": "bun run format:check && bun run lint && bun run typecheck && bun run test && bun run knip && bun run build",
     "knip": "knip",
-    "fixture:build": "bun run scripts/fixture/main.ts"
+    "fixture:build": "bun run scripts/fixture/main.ts",
+    "fixture:local": "bun run scripts/fixture/local-main.ts"
   },
   "dependencies": {
     "@fontsource/ibm-plex-sans": "^5.3.0",

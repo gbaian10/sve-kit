@@ -3,10 +3,10 @@ import path from "node:path"
 
 import sharp from "sharp"
 
-import { buildSnapshot, canonicalSize } from "./build"
+import { buildSnapshot, canonicalSize, type ImageRequest } from "./build"
 
 // Solid-colour lossless WebP placeholders; the colour follows the seed so cards look different.
-async function encodeImage(width: number, height: number, seed: number): Promise<Uint8Array> {
+async function encodeImage({ width, height, seed }: ImageRequest): Promise<Uint8Array> {
   const background = {
     r: (seed * 53 + 40) % 256,
     g: (seed * 97 + 80) % 256,

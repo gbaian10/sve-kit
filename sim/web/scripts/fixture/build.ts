@@ -19,25 +19,36 @@ import { digest, hex, sha256 } from "../../src/data/format-v1/sha256"
 import {
   type Card,
   CARDS,
-  CLASSES,
   type Face,
+  type Family,
   KEYWORDS,
   type Printing,
   PROFILE,
-  RARITIES,
   type Region,
   SETS,
   STAMPS,
+  SYNTHETIC_VOCABULARY,
   type Text,
-  TRAITS,
-  TYPES,
+  type Vocabulary,
 } from "./cards"
 
-type ImageEncoder = (width: number, height: number, seed: number) => Promise<Uint8Array>
+export interface ImageRequest {
+  readonly width: number
+  readonly height: number
+  readonly seed: number
+  /** A source file to resize, or null for a synthetic placeholder. */
+  readonly source: string | null
+}
+
+type ImageEncoder = (request: ImageRequest) => Promise<Uint8Array>
 
 export interface BuildOptions {
   readonly encodeImage: ImageEncoder
   readonly cards?: readonly Card[]
+  readonly families?: Record<string, Family>
+  readonly vocabulary?: Vocabulary
+  /** Synthetic-only extras (keywords, symbol, stamp, route rows); off for real data. */
+  readonly synthetic?: boolean
   readonly dataVersion?: string
   readonly publishedAt?: string
 }
@@ -343,8 +354,8 @@ function addVocabulary(builder: Builder, kind: string, code: string, text: Text)
   }
 }
 
-function addSets(builder: Builder): void {
-  for (const [id, set] of Object.entries(SETS)) {
+function addSets(builder: Builder, families: Record<string, Family>): void {
+  for (const [id, set] of Object.entries(families)) {
     builder.push("product_family", GLOBAL, "bootstrap", {
       id,
       code: set.code,
@@ -353,8 +364,7 @@ function addSets(builder: Builder): void {
       name_unit_id: builder.unit(LANGS.ja, set.name.ja, true),
       translations: builder.labelTranslations(`family:${set.code}`, "name", set.name, true),
     })
-    for (const region of ["jp", "en"] as const) {
-      if (set.code === "pr" && region === "en") continue
+    for (const region of set.regions) {
       const released = set.code === "pr" ? null : region === "jp" ? "2026-02-01" : "2026-04-01"
       builder.push("product", GLOBAL, "bootstrap", {
         id: `prod:${set.code}-${region}`,
@@ -363,8 +373,8 @@ function addSets(builder: Builder): void {
         product_code:
           set.code === "pr" ? null : region === "jp" ? set.publicCode : `${set.publicCode}EN`,
         name_unit_id: builder.unit(
-          region === "en" ? LANGS.en : LANGS.ja,
-          region === "en" ? set.name.en : set.name.ja,
+          region === "en" && set.name.en !== undefined ? LANGS.en : LANGS.ja,
+          region === "en" && set.name.en !== undefined ? set.name.en : set.name.ja,
           true,
         ),
         product_type: set.kind,
@@ -500,6 +510,9 @@ interface CardContext {
   readonly encodeImage: ImageEncoder
   readonly images: Map<string, Uint8Array>
   readonly seed: number
+  readonly vocabulary: Vocabulary
+  readonly artistIds: Map<string, string>
+  readonly synthetic: boolean
 }
 
 interface FaceRevisions {
@@ -698,7 +711,11 @@ async function addImages(
   ordinal: number,
 ): Promise<void> {
   const { builder, owner, encodeImage, images } = ctx
-  const state = printing.image ?? "approved"
+  const source = printing.imagePaths?.[ordinal] ?? null
+  const state =
+    printing.imagePaths !== undefined && source === null
+      ? "missing"
+      : (printing.image ?? "approved")
   const imageId = `img:${printing.id.slice(2)}:${String(ordinal)}`
   builder.push("image_asset", GLOBAL, "detail", {
     id: imageId,
@@ -720,13 +737,15 @@ async function addImages(
   })
   if (state !== "approved") return
   for (const size of CARD_SIZES) {
-    const bytes = await encodeImage(
-      size.max_width,
-      size.max_height,
-      ctx.seed * 8 +
+    const bytes = await encodeImage({
+      width: size.max_width,
+      height: size.max_height,
+      seed:
+        ctx.seed * 8 +
         ordinal * 3 +
         (printing.variant === "alt" ? 1 : printing.variant === "signed" ? 2 : 0),
-    )
+      source,
+    })
     const hash = hex(sha256(bytes))
     const path = `images/sha256/${hash.slice(0, 2)}/${hash}.webp`
     images.set(path, bytes)
@@ -740,6 +759,22 @@ async function addImages(
       bytes: bytes.length,
     })
   }
+}
+
+function artistFor(ctx: CardContext, face: Face, index: number): string | null {
+  if (face.illustrator === undefined) {
+    return ctx.synthetic ? (ARTISTS[(ctx.seed + index) % ARTISTS.length] ?? "") : null
+  }
+  let id = ctx.artistIds.get(face.illustrator)
+  if (id === undefined) {
+    id = `artist:${String(ctx.artistIds.size + 1)}`
+    ctx.artistIds.set(face.illustrator, id)
+  }
+  return id
+}
+
+function artistRows(artistId: string | null): JsonObject[] {
+  return artistId === null ? [] : [{ artist_id: artistId, role: "illustrator" }]
 }
 
 async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<void> {
@@ -757,9 +792,7 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
         classification: printing.variant === "standard" ? "base" : "alternate",
         review_level: "unreviewed",
         regions: [printing.region],
-        artists: [
-          { artist_id: ARTISTS[(ctx.seed + index) % ARTISTS.length] ?? "", role: "illustrator" },
-        ],
+        artists: artistRows(artistFor(ctx, face, index)),
       })
       facesBootstrap.push({
         face_id: face.id,
@@ -789,7 +822,7 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
         face_ordinal: ordinal,
         printed_name_unit_id: revision ? builder.unit(lang, nameText, true) : null,
         printed_effect_unit_id: revision ? (revision["effect_unit_id"] ?? null) : null,
-        flavor_unit_id: null,
+        flavor_unit_id: face.flavor === undefined ? null : builder.unit(lang, face.flavor),
         printed_text_state: revision ? (index === 0 ? "verified" : "derived_no_errata") : "unknown",
         sections: revision ? (revision["sections"] ?? []) : [],
         stamps: [],
@@ -810,8 +843,11 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
       reference_urls: [],
       variant_key: printing.variant,
       rarity_code: printing.rarity,
-      rarity_raw: RARITIES[printing.rarity].ja,
-      premium: printing.variant === "signed" ? true : null,
+      rarity_raw:
+        printing.rarity === null
+          ? ""
+          : (ctx.vocabulary.rarities[printing.rarity]?.ja ?? printing.rarity),
+      premium: printing.premium ?? (printing.variant === "signed" ? true : null),
       serial_total: null,
       int_id: printing.intId,
       decklog_available: true,
@@ -973,13 +1009,13 @@ async function addCard(ctx: CardContext): Promise<void> {
         id: versionId,
         qa_id: qa.id,
         revision: i + 1,
-        published_on: "2026-05-01",
+        published_on: qa.publishedOn ?? "2026-05-01",
         updated_on: i === 0 ? null : "2026-06-01",
         date_raw: null,
         question_unit_id: questionUnit,
         answer_unit_id: answerUnit,
         state: "active",
-        cards: [card.id],
+        cards: [...(qa.cards ?? [card.id])].sort(compareCodePoints),
         translations: sortRows(translations, ["field", "ordinal", "target_lang"]),
       })
     })
@@ -1032,6 +1068,12 @@ async function addCard(ctx: CardContext): Promise<void> {
       ],
     })
   }
+}
+
+function fragmentsOf(builder: Builder, table: string): JsonObject[] {
+  return [...builder.fragments.values()]
+    .filter((fragment) => fragment.table === table)
+    .flatMap((fragment) => fragment.rows)
 }
 
 /** Encode a logical object as the tuple of a fixed row or nested type. */
@@ -1131,18 +1173,28 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   const cards = options.cards ?? CARDS
   const dataVersion = options.dataVersion ?? "20260929T000000Z-0001"
   const publishedAt = options.publishedAt ?? "2026-09-29T00:00:00Z"
+  const families = options.families ?? SETS
+  const vocabulary = options.vocabulary ?? SYNTHETIC_VOCABULARY
+  const synthetic = options.synthetic ?? true
   const builder = new Builder()
   const images = new Map<string, Uint8Array>()
+  const artistIds = new Map<string, string>()
 
-  for (const [code, text] of Object.entries(CLASSES)) addVocabulary(builder, "class", code, text)
-  for (const [code, text] of Object.entries(TYPES)) addVocabulary(builder, "type", code, text)
-  for (const [code, text] of Object.entries(RARITIES)) addVocabulary(builder, "rarity", code, text)
-  for (const [code, text] of Object.entries(TRAITS)) addVocabulary(builder, "trait", code, text)
+  for (const [code, text] of Object.entries(vocabulary.classes))
+    addVocabulary(builder, "class", code, text)
+  for (const [code, text] of Object.entries(vocabulary.types))
+    addVocabulary(builder, "type", code, text)
+  for (const [code, text] of Object.entries(vocabulary.rarities))
+    addVocabulary(builder, "rarity", code, text)
+  for (const [code, text] of Object.entries(vocabulary.traits))
+    addVocabulary(builder, "trait", code, text)
   addVocabulary(builder, "frame", "normal", { ja: "通常", zhHant: "一般", en: "Standard" })
   addVocabulary(builder, "frame", "alt", { ja: "特別", zhHant: "特別", en: "Special" })
-  addSets(builder)
-  addStamp(builder)
-  addKeywords(builder)
+  addSets(builder, families)
+  if (synthetic) {
+    addStamp(builder)
+    addKeywords(builder)
+  }
   addRules(builder)
   for (const [seed, card] of cards.entries()) {
     await addCard({
@@ -1152,21 +1204,35 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       encodeImage: options.encodeImage,
       images,
       seed,
+      vocabulary,
+      artistIds,
+      synthetic,
     })
   }
-  builder.push("card_route_alias", GLOBAL, "detail", {
-    namespace: "official",
-    old_key: "BP01-002A",
-    target_namespace: "official",
-    target_key: "BP01-002a",
-    reason: "renumbered",
-  })
-  builder.push("route_override", GLOBAL, "detail", {
-    route_key: "BP01-002",
-    printing_id: "p:bp01-002",
-  })
+  if (synthetic)
+    builder.push("card_route_alias", GLOBAL, "detail", {
+      namespace: "official",
+      old_key: "BP01-002A",
+      target_namespace: "official",
+      target_key: "BP01-002a",
+      reason: "renumbered",
+    })
+  if (synthetic) {
+    builder.push("route_override", GLOBAL, "detail", {
+      route_key: "BP01-002",
+      printing_id: "p:bp01-002",
+    })
+  }
+  const usedArtists = new Set(
+    fragmentsOf(builder, "art").flatMap((row) =>
+      (row["artists"] as JsonObject[]).map((item) => stringValue(item["artist_id"])),
+    ),
+  )
   for (const id of ARTISTS)
-    builder.push("artist", GLOBAL, "detail", { id, display_name: id.slice(7) })
+    if (usedArtists.has(id))
+      builder.push("artist", GLOBAL, "detail", { id, display_name: id.slice(7) })
+  for (const [name, id] of artistIds)
+    builder.push("artist", GLOBAL, "detail", { id, display_name: name })
 
   // Text units and chosen translations land in the bootstrap or the detail partition (format §3.1).
   for (const [id, unit] of builder.units) {
@@ -1238,7 +1304,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       { code: "en", fallback_order: ["ja"], display_name: "English" },
       { code: "ja", fallback_order: [], display_name: "日本語" },
       { code: "zh-Hant", fallback_order: ["ja"], display_name: "繁體中文" },
-    ],
+    ].filter((language) => [...builder.units.values()].some((unit) => unit.lang === language.code)),
     digital_endpoints: [],
     shop_links: [],
     image_sizes: IMAGE_SIZES.map((size) => ({ ...size })),
@@ -1360,12 +1426,18 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       for (const change of version["changes"] as JsonObject[])
         errataCards.add(faceCards.get(stringValue(change["face_id"])) ?? "")
 
+  const regions = [
+    ...new Set(cards.flatMap((card) => card.printings.map((printing) => printing.region))),
+  ].sort(compareCodePoints)
+  const languages = [...new Set([...builder.units.values()].map((unit) => unit.lang))].sort(
+    compareCodePoints,
+  )
   const manifest: JsonObject = {
     format_version: FORMAT,
     data_version: dataVersion,
     published_at: publishedAt,
-    regions: ["en", "jp"],
-    languages: ["en", "ja", "zh-Hant"],
+    regions,
+    languages,
     min_reader_version: "1.0.0",
     required_capabilities: ["column-partition-v1", "fragment-container-v1"],
     engine_support_target: {
