@@ -1,5 +1,6 @@
-# Weekly, one grouped pull request per ecosystem, only for releases at least 7 days old (a freshly
-# published release is the usual window for a hijacked package). The commit prefix makes the title
+# Version updates: weekly, one grouped pull request per ecosystem, only for releases at least 7 days
+# old (a freshly published release is the usual window for a hijacked package). Security updates
+# skip the cooldown and the groups, as they should. The commit prefix makes the title
 # pass the commit-format check (`<gitmoji> <type>(<scope>): …`); Dependabot adds the colon itself.
 version: 2
 updates:
@@ -25,6 +26,8 @@ updates:
       cargo:
         patterns: ['*']
     commit-message:
+      # The workspace's other member, sim/scenario-runner, only runs the rules scenarios and has no
+      # version of its own, so every Rust update is filed under sim/engine.
       prefix: ⬆️ dep-bump(sim/engine)
 
   - package-ecosystem: uv

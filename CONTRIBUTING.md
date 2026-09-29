@@ -213,7 +213,7 @@ pre-commit run --hook-stage manual cargo-mutants
 | What                                                                | How it is updated                                                                       |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
 | GitHub Actions (pinned by commit SHA)                               | Dependabot, weekly (`.github/dependabot.yml`)                                           |
-| Rust, Python (`carddb`) and Bun (`sim/web`) dependencies            | Dependabot, weekly, one grouped pull request per ecosystem                              |
+| Rust, Python (`carddb`) and Bun (`sim/web`) dependencies            | Dependabot, weekly, one grouped pull request per ecosystem (version updates)            |
 | pre-commit hook versions (`rev:`)                                   | `pre-commit autoupdate` by hand, monthly                                                |
 | `cz-conventional-gitmoji` in the commitizen hook                    | Pinned in `.pre-commit-config.yaml`; bump it together with the `carddb` dev dependency  |
 | Node for the markdownlint hook                                      | `language_version` in `.pre-commit-config.yaml`; keep it equal to `node` in `mise.toml` |
@@ -221,7 +221,8 @@ pre-commit run --hook-stage manual cargo-mutants
 | Rust toolchain                                                      | `rust-toolchain.toml`, by hand, together with `rust-version` in `Cargo.toml`            |
 | cargo tools in CI (`cargo-llvm-cov`, `cargo-deny`, `cargo-machete`) | The `tool:` versions in `.github/workflows/ci.yml`, by hand                             |
 
-Dependabot waits 7 days after a release before proposing it. Workflow files are also checked by
+For version updates Dependabot waits 7 days after a release before proposing it; security updates
+are proposed at once, one pull request each. Workflow files are also checked by
 actionlint (syntax and expressions) and zizmor (security) on every commit and in CI.
 
 ## Crawling etiquette
