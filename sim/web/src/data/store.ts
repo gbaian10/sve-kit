@@ -6,12 +6,16 @@ import { integerValue, stringValue } from "./format-v1/json"
 export interface CardIndex {
   readonly cards: readonly Row[]
   readonly families: readonly Row[]
+  readonly keywords: readonly Row[]
   readonly card: (id: string) => Row | undefined
   readonly face: (id: string) => Row | undefined
   readonly facesOf: (cardId: string) => readonly Row[]
   readonly printing: (id: string) => Row | undefined
   readonly printingsOf: (cardId: string) => readonly Row[]
   readonly printingByCardNo: (region: string, cardNo: string) => Row | undefined
+  /** Any region's printing with this raw card number (numbers are unique across regions). */
+  readonly printingByAnyCardNo: (cardNo: string) => Row | undefined
+  readonly printingByIntId: (intId: number) => Row | undefined
   /** The bootstrap columns of the current revision for one face in one region. */
   readonly currentRevision: (faceId: string, region: string) => Row | undefined
   readonly family: (id: string) => Row | undefined
@@ -60,6 +64,8 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
       row,
     ]),
   )
+  const printingByAnyNo = new Map(printings.map((row) => [stringValue(row["card_no"]), row]))
+  const printingByInt = new Map(printings.map((row) => [integerValue(row["int_id"]), row]))
   const revisionMap = byId(revisions)
   const familyMap = byId(families)
   const productMap = byId(rows("product"))
@@ -69,19 +75,23 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
       row,
     ]),
   )
-  const keywordMap = byId(rows("keyword"))
+  const keywords = rows("keyword")
+  const keywordMap = byId(keywords)
   const supportMap = byId(rows("card_engine_support"), "card_id")
   const textMap = byId(rows("text_unit"))
   const translationMap = byId(rows("translation"))
   return {
     cards,
     families,
+    keywords,
     card: (id) => cardMap.get(id),
     face: (id) => faceMap.get(id),
     facesOf: (cardId) => facesByCard.get(cardId) ?? [],
     printing: (id) => printingMap.get(id),
     printingsOf: (cardId) => printingsByCard.get(cardId) ?? [],
     printingByCardNo: (region, cardNo) => printingByNo.get(`${region}\u0000${cardNo}`),
+    printingByAnyCardNo: (cardNo) => printingByAnyNo.get(cardNo),
+    printingByIntId: (intId) => printingByInt.get(intId),
     currentRevision: (faceId, region) => {
       const face = faceMap.get(faceId)
       if (!face) return undefined

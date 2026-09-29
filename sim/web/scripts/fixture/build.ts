@@ -29,6 +29,7 @@ import {
   STAMPS,
   SYNTHETIC_VOCABULARY,
   type Text,
+  TEXT_SYMBOLS,
   type Vocabulary,
 } from "./cards"
 
@@ -482,6 +483,72 @@ function addKeywords(builder: Builder): void {
       { lang: LANGS.zhHant, name: "進化點數", tooltip: "進化用的點數", copy_pattern: "EP{amount}" },
     ],
   })
+  // The icons card text actually uses; cost carries a number (0–10) or X.
+  const costSchema = {
+    parameters: [{ name: "amount", uint: { minimum: 0, maximum: 10 }, variables: ["X"] }],
+  }
+  for (const symbol of TEXT_SYMBOLS) {
+    const withParameter = symbol.parameter !== undefined
+    const spelling = (lang: string, prefix: string, suffix: string) =>
+      withParameter
+        ? [
+            {
+              lang,
+              literal_prefix: prefix,
+              literal_suffix: suffix,
+              parameter_name: "amount",
+              parse_kind: "uint",
+            },
+            {
+              lang,
+              literal_prefix: prefix,
+              literal_suffix: suffix,
+              parameter_name: "amount",
+              parse_kind: "variable",
+            },
+          ]
+        : [
+            {
+              lang,
+              literal_prefix: prefix,
+              literal_suffix: suffix,
+              parameter_name: null,
+              parse_kind: "literal",
+            },
+          ]
+    const copy = (text: string) => (withParameter ? `${text}{amount}` : text)
+    builder.push("text_symbol", GLOBAL, "detail", {
+      id: `sym:${symbol.code}`,
+      code: symbol.code,
+      parameter_schema: withParameter ? costSchema : { parameters: [] },
+      keyword_id: symbol.keyword === undefined ? null : `kw:${symbol.keyword}`,
+      spellings: [
+        ...spelling(LANGS.ja, symbol.ja, ""),
+        ...spelling(LANGS.zhHant, symbol.ja, ""),
+        ...spelling(LANGS.en, symbol.en, withParameter ? "]" : ""),
+      ],
+      localizations: [
+        {
+          lang: LANGS.ja,
+          name: symbol.name.ja,
+          tooltip: symbol.name.ja,
+          copy_pattern: copy(symbol.ja),
+        },
+        {
+          lang: LANGS.zhHant,
+          name: symbol.name.zhHant ?? symbol.name.ja,
+          tooltip: symbol.name.zhHant ?? symbol.name.ja,
+          copy_pattern: copy(symbol.ja),
+        },
+        {
+          lang: LANGS.en,
+          name: symbol.name.en ?? symbol.name.ja,
+          tooltip: symbol.name.en ?? symbol.name.ja,
+          copy_pattern: withParameter ? `${symbol.en}{amount}]` : symbol.en,
+        },
+      ],
+    })
+  }
 }
 
 function addRules(builder: Builder): void {

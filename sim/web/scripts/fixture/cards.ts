@@ -174,6 +174,72 @@ const TRAITS: Record<string, Text> = {
   artifact: { ja: "アーティファクト", zhHant: "神器", en: "Artifact" },
 }
 
+/**
+ * Official text icons as they appear in card text (`{ファンファーレ}`, `{コスト2}`): the code names the
+ * icon file under `src/assets/official/texticon/`; the Japanese site writes the icon's alt text, the
+ * English site a bracketed token. Cost takes a number or X.
+ */
+export interface TextSymbol {
+  readonly code: string
+  readonly ja: string
+  readonly en: string
+  readonly name: Text
+  readonly parameter?: "cost"
+  readonly keyword?: string
+}
+
+export const TEXT_SYMBOLS: readonly TextSymbol[] = [
+  {
+    code: "fanfare",
+    ja: "ファンファーレ",
+    en: "[fanfare]",
+    name: { ja: "ファンファーレ", zhHant: "入場曲", en: "Fanfare" },
+    keyword: "fanfare",
+  },
+  {
+    code: "lastword",
+    ja: "ラストワード",
+    en: "[lastword]",
+    name: { ja: "ラストワード", zhHant: "謝幕曲", en: "Last Words" },
+    keyword: "lastword",
+  },
+  {
+    code: "evolve",
+    ja: "進化",
+    en: "[evolve]",
+    name: { ja: "進化", zhHant: "進化", en: "Evolve" },
+    keyword: "evolve",
+  },
+  {
+    code: "cost",
+    ja: "コスト",
+    en: "[cost",
+    name: { ja: "コスト", zhHant: "費用", en: "Cost" },
+    parameter: "cost",
+  },
+  {
+    code: "power",
+    ja: "攻撃力",
+    en: "[attack]",
+    name: { ja: "攻撃力", zhHant: "攻擊力", en: "Attack" },
+  },
+  { code: "hp", ja: "体力", en: "[defense]", name: { ja: "体力", zhHant: "體力", en: "Defense" } },
+  { code: "stand", ja: "起動", en: "[engage]", name: { ja: "起動", zhHant: "起動", en: "Engage" } },
+  { code: "act", ja: "アクト", en: "[act]", name: { ja: "アクト", zhHant: "橫置", en: "Act" } },
+  {
+    code: "quick",
+    ja: "クイック",
+    en: "[quick]",
+    name: { ja: "クイック", zhHant: "快速", en: "Quick" },
+  },
+  {
+    code: "ub",
+    ja: "UB",
+    en: "[ub]",
+    name: { ja: "アルティメットバトル", zhHant: "終極戰鬥", en: "Ultimate Battle" },
+  },
+]
+
 export const KEYWORDS: Record<
   string,
   {
@@ -730,7 +796,11 @@ export const CARDS: readonly Card[] = [
         defense: 4,
         traits: [],
         name: { ja: "試作の聖堂騎士", zhHant: "試作聖堂騎士", en: "Prototype Templar" },
-        effect: { ja: "【守護】", zhHant: "【守護】", en: "Ward" },
+        effect: {
+          ja: "【守護】\n{ファンファーレ}{コスト2}以下の相手のフォロワー1体を破壊する。",
+          zhHant: "【守護】\n{ファンファーレ}破壞對手 1 隻{コスト2}以下的從者。",
+          en: "Ward\n[fanfare] Destroy an enemy follower with [cost2] or less.",
+        },
       },
     ],
     printings: [bp("bp01-051", "jp", 51), bp("bp01-051-en", "en", 51)],
