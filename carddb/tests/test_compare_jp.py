@@ -256,6 +256,31 @@ def test_raw_change_needs_exact_approval(
     assert approved["counts"] == {"exact": 1}
     assert approved["raw_field_changes"] == report["raw_field_changes"]
 
+    wrong_hash = "sha256:" + "0" * 64
+    invalid_approvals = {
+        "other card": ("BP01-002", "card.faces[0].flavor", old_hash, new_hash),
+        "other field": (record.number, "card.faces[1].flavor", old_hash, new_hash),
+        "other old value": (
+            record.number,
+            "card.faces[0].flavor",
+            wrong_hash,
+            new_hash,
+        ),
+        "other new value": (
+            record.number,
+            "card.faces[0].flavor",
+            old_hash,
+            wrong_hash,
+        ),
+    }
+    for label, approval in invalid_approvals.items():
+        monkeypatch.setattr(
+            compare_jp, "APPROVED_RAW_FIELD_CHANGES", frozenset({approval})
+        )
+        rejected = compare_jp.compare(legacy, candidate, tmp_path, {record.number})
+        assert rejected["complete"] is False, label
+        assert rejected["counts"] == {"raw_field_difference": 1}, label
+
 
 def test_array_items_and_schema_keys_have_separate_status_and_summary(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
@@ -328,6 +353,66 @@ def test_unapproved_schema_key_fails_closed(
     assert report["complete"] is False
     assert report["counts"] == {"raw_field_difference": 1}
     assert set(cast("dict[str, object]", report["added_fields"])) == {"card.notes"}
+
+
+def test_array_addition_alone_cannot_claim_complete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record = synthetic()
+    legacy, candidate = files(tmp_path, record)
+    first = RelatedHint(label="保留", href="/cardlist/?cardno=BP01-002")
+    second = RelatedHint(label="新增", href="/cardlist/?cardno=BP01-003")
+    old = asdict(record)
+    old["related_cards"] = [asdict(first)]
+    legacy.write_text(json.dumps(old, ensure_ascii=False) + "\n", encoding="utf-8")
+    changed = replace(record, related_cards=[first, second])
+    candidate.write_text(
+        json.dumps(asdict(changed), ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    entry = Entry(
+        record_key="printing:one",
+        kind="printing",
+        owner="BP01",
+        data={"observation": observation(compare_jp.legacy_projection(record), "jp")},
+    )
+    monkeypatch.setattr(compare_jp, "load", lambda _: (Index(), {"one": entry}))
+    report = compare_jp.compare(legacy, candidate, tmp_path, {record.number})
+    assert report["raw_field_changes"] == {}
+    assert report["added_fields"] == {}
+    assert report["removed_fields"] == {}
+    assert set(cast("dict[str, object]", report["array_added_items"])) == {
+        "card.related_cards[1]"
+    }
+    assert report["array_removed_items"] == {}
+    assert report["complete"] is False
+    assert report["counts"] == {"raw_field_difference": 1}
+
+
+def test_removed_legacy_key_alone_cannot_claim_complete(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record = synthetic()
+    legacy, candidate = files(tmp_path, record)
+    old = asdict(record)
+    old["legacy_only"] = "old value"
+    legacy.write_text(json.dumps(old, ensure_ascii=False) + "\n", encoding="utf-8")
+    entry = Entry(
+        record_key="printing:one",
+        kind="printing",
+        owner="BP01",
+        data={"observation": observation(compare_jp.legacy_projection(record), "jp")},
+    )
+    monkeypatch.setattr(compare_jp, "load", lambda _: (Index(), {"one": entry}))
+    report = compare_jp.compare(legacy, candidate, tmp_path, {record.number})
+    assert report["raw_field_changes"] == {}
+    assert report["added_fields"] == {}
+    assert set(cast("dict[str, object]", report["removed_fields"])) == {
+        "card.legacy_only"
+    }
+    assert report["array_added_items"] == {}
+    assert report["array_removed_items"] == {}
+    assert report["complete"] is False
+    assert report["counts"] == {"raw_field_difference": 1}
 
 
 def test_hint_summary_counts_links_and_self_reference(
