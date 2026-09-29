@@ -2,7 +2,8 @@
 
 This package compiles code-authored declarations into SQLite DDL and owns the
 SQLite boundary. `t0.compile_t0()` supplies the forty production T0 tables from
-`docs/schema/build-db.md`. There are no importers or CLI integration.
+`docs/schema/build-db.md`. The regional identity staging importer is described in
+[registry/preview](../registry/preview/README.md); there is no complete build CLI.
 
 ```python
 from sve_carddb.build_db import (
