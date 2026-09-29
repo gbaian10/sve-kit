@@ -2,6 +2,8 @@
 # old (a freshly published release is the usual window for a hijacked package). Security updates
 # skip the cooldown and the groups, as they should. The commit prefix makes the title
 # pass the commit-format check (`<gitmoji> <type>(<scope>): …`); Dependabot adds the colon itself.
+# Bun (sim/web) is updated by hand: Dependabot's bun reads bun.lock only up to lockfileVersion 1,
+# and Bun 1.4 writes version 2.
 version: 2
 updates:
   - package-ecosystem: github-actions
@@ -41,15 +43,3 @@ updates:
         patterns: ['*']
     commit-message:
       prefix: ⬆️ dep-bump(carddb)
-
-  - package-ecosystem: bun
-    directory: /sim/web
-    schedule:
-      interval: weekly
-    cooldown:
-      default-days: 7
-    groups:
-      bun:
-        patterns: ['*']
-    commit-message:
-      prefix: ⬆️ dep-bump(sim/web)
