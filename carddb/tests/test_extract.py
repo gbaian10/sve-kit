@@ -62,6 +62,7 @@ def test_errata_release_date_and_rulings() -> None:
     card = extract_card(fixture("card_BP01-004.html"), number="BP01-004")
     assert card.errata_url == "https://shadowverse-evolve.com/errata/bp01-004/"
     assert card.release_date == "2022-04-28"
+    assert card.products[0].date == "2022-04-28"
     # The errata notice must not be mistaken for the illustrator.
     assert card.faces[0].illustrator == "ねじ太"
     assert card.notes == ["能力テキストにエラッタが含まれます。くわしくはこちら"]
@@ -107,7 +108,10 @@ def test_special_card_numbers_keep_raw_fields_and_hints(number: str) -> None:
     </div></div><div class="cardlist-Under">
     <div class="cardlist-Detail_Products_Inner"><p class="date">2026-01-01</p>
     <p class="ttl">商品</p><a href="/products/test/">商品ページ</a></div>
-    <a href="/cardlist/?cardno=BP01-003">関連カード</a></div>
+    <div class="cardlist-Detail_Relation">
+    <a href="/cardlist/?cardno=BP01-003">関連カード</a></div></div>
+    <header><a href="/cardlist/?cardno={number}">自己導覽</a></header>
+    <footer><a href="/cardlist/?cardno=PR-001">共有</a></footer>
     <!-- {"x" * 1000} --></body></html>""".encode()
     record = extract_card(body, number=number)
     [face] = record.faces
@@ -119,7 +123,9 @@ def test_special_card_numbers_keep_raw_fields_and_hints(number: str) -> None:
     assert face.flavor == ""  # ruff: ignore[compare-to-empty-string] -- distinguish present empty from missing
     assert record.products[0].name == "商品"
     assert record.products[0].links == ["/products/test/"]
-    assert record.related_cards[0].href == "/cardlist/?cardno=BP01-003"
+    assert [hint.href for hint in record.related_cards] == [
+        "/cardlist/?cardno=BP01-003"
+    ]
 
 
 def test_missing_ability_differs_from_present_empty_ability() -> None:
@@ -179,6 +185,49 @@ def test_missing_info_row_is_rejected() -> None:
     )
     with pytest.raises(ValidationError, match="クラス"):
         extract_card(body, number="BP02-071")
+
+
+def test_empty_required_info_is_rejected() -> None:
+    body = fixture("card_BP02-071.html").replace(
+        "<dt>クラス</dt><dd>ナイトメア</dd>".encode(),
+        "<dt>クラス</dt><dd></dd>".encode(),
+    )
+    with pytest.raises(ValidationError, match="empty 'クラス'"):
+        extract_card(body, number="BP02-071")
+
+
+def test_empty_status_is_rejected() -> None:
+    body = fixture("card_BP02-071.html").replace(
+        '<span class="heading heading-Cost">コスト</span>4'.encode(),
+        '<span class="heading heading-Cost">コスト</span>'.encode(),
+    )
+    with pytest.raises(ValidationError, match="empty cost"):
+        extract_card(body, number="BP02-071")
+
+
+def test_duplicate_info_key_is_rejected() -> None:
+    row = "<dl><dt>クラス</dt><dd>ナイトメア</dd></dl>".encode()
+    body = fixture("card_BP02-071.html").replace(row, row + row)
+    with pytest.raises(ValidationError, match="duplicate card info 'クラス'"):
+        extract_card(body, number="BP02-071")
+
+
+@pytest.mark.parametrize("traits", ["魔界・・光輝", "・魔界", "魔界・"])
+def test_malformed_trait_separators_are_rejected(traits: str) -> None:
+    body = fixture("card_BP02-071.html").replace(
+        "<dd>魔界</dd>".encode(), f"<dd>{traits}</dd>".encode()
+    )
+    with pytest.raises(ValidationError, match="malformed trait list"):
+        extract_card(body, number="BP02-071")
+
+
+def test_present_empty_illustrator_heading_is_empty_text() -> None:
+    body = fixture("card_BP02-071.html").replace(
+        b'<span class="heading">InHyuk Lee</span>',
+        b'<span class="heading"></span>',
+    )
+    [face] = extract_card(body, number="BP02-071").faces
+    assert face.illustrator == ""  # ruff: ignore[compare-to-empty-string] -- present empty differs from missing
 
 
 def test_extract_cards_writes_only_trusted_listed_cards(

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
     import pytest
 
 from sve_carddb.extract import compare_jp
-from sve_carddb.extract.official_jp import CardRecord, Face
+from sve_carddb.extract.official_jp import CardRecord, Face, ProductHint, RelatedHint
 from sve_carddb.registry.review import observation
 from sve_carddb.registry.storage import Entry, Index
 
@@ -173,3 +173,77 @@ def test_unexpected_number_and_recipe_change_are_reported(
     assert {
         diff["field"] for diff in cast("list[dict[str, object]]", row["envelope_diffs"])
     } == {"recipe"}
+
+
+def test_raw_fields_report_null_to_empty_without_counting_new_fields(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record = synthetic()
+    legacy, candidate = files(tmp_path, record)
+    old = asdict(record)
+    old.pop("products")
+    old.pop("related_cards")
+    old["faces"][0].pop("trait_raw")
+    old["faces"][0]["flavor"] = None
+    old["faces"][0]["illustrator"] = None
+    legacy.write_text(json.dumps(old, ensure_ascii=False) + "\n", encoding="utf-8")
+    changed = replace(
+        record,
+        faces=[replace(record.faces[0], flavor="", illustrator="")],
+    )
+    candidate.write_text(
+        json.dumps(asdict(changed), ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    entry = Entry(
+        record_key="printing:one",
+        kind="printing",
+        owner="BP01",
+        data={"observation": observation(compare_jp.legacy_projection(record), "jp")},
+    )
+    monkeypatch.setattr(compare_jp, "load", lambda _: (Index(), {"one": entry}))
+    report = compare_jp.compare(legacy, candidate, tmp_path, {record.number})
+    assert report["complete"] is True
+    changes = cast("dict[str, dict[str, object]]", report["raw_field_changes"])
+    assert changes["card.faces[0].flavor"] == {
+        "count": 1,
+        "card_numbers": [record.number],
+        "transitions": {"null->empty": 1},
+    }
+    assert changes["card.faces[0].illustrator"] == changes["card.faces[0].flavor"]
+    added = cast("dict[str, dict[str, object]]", report["added_fields"])
+    assert set(added) == {
+        "card.products",
+        "card.related_cards",
+        "card.faces[0].trait_raw",
+    }
+
+
+def test_hint_summary_counts_links_and_self_reference(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    record = synthetic()
+    legacy, candidate = files(tmp_path, record)
+    changed = replace(
+        record,
+        products=[
+            ProductHint(name="商品", date="2026-01-01", links=["/products/test/"])
+        ],
+        related_cards=[RelatedHint(label="自身", href="/cardlist/?cardno=BP01-001a")],
+    )
+    candidate.write_text(
+        json.dumps(asdict(changed), ensure_ascii=False) + "\n", encoding="utf-8"
+    )
+    entry = Entry(
+        record_key="printing:one",
+        kind="printing",
+        owner="BP01",
+        data={"observation": observation(compare_jp.legacy_projection(record), "jp")},
+    )
+    monkeypatch.setattr(compare_jp, "load", lambda _: (Index(), {"one": entry}))
+    report = compare_jp.compare(legacy, candidate, tmp_path, {record.number})
+    hints = cast("dict[str, object]", report["hints"])
+    assert hints["product_cards"] == 1
+    assert hints["related_cards"] == 1
+    assert hints["self_related_cards"] == [record.number]
+    assert hints["related_href_paths"] == {"/cardlist/": 1}
+    assert hints["non_card_related_hrefs"] == []

@@ -5,10 +5,11 @@ import hashlib
 import json
 import sys
 import tempfile
-from collections import Counter
+from collections import Counter, defaultdict
 from dataclasses import asdict
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
+from urllib.parse import parse_qs, urlsplit
 
 from pydantic import JsonValue, TypeAdapter
 
@@ -16,7 +17,7 @@ from sve_carddb.crawl import card_numbers
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.extract.official_jp import CardRecord
 from sve_carddb.manifest import Manifest
-from sve_carddb.registry.inputs import Card, canonical, digest
+from sve_carddb.registry.inputs import JSON_VALUE, Card, canonical, digest
 from sve_carddb.registry.review import observation
 from sve_carddb.registry.storage import load
 from sve_carddb.source_archive import ArchiveReader
@@ -35,15 +36,23 @@ def legacy_projection(record: CardRecord) -> Card:
     return Card.model_validate(asdict(record))
 
 
-def _read_legacy(path: Path) -> dict[str, Card]:
+def _read_legacy(
+    path: Path,
+) -> tuple[dict[str, Card], dict[str, dict[str, JsonValue]]]:
     cards: dict[str, Card] = {}
+    raw: dict[str, dict[str, JsonValue]] = {}
     for line in path.read_bytes().splitlines():
         card = Card.model_validate_json(line)
+        value = JSON_VALUE.validate_json(line)
+        if not isinstance(value, dict):
+            msg = f"legacy JP card is not an object: {card.number}"
+            raise TypeError(msg)
         if card.number in cards:
             msg = f"duplicate legacy JP card: {card.number}"
             raise ValueError(msg)
         cards[card.number] = card
-    return cards
+        raw[card.number] = value
+    return cards, raw
 
 
 def _read_candidates(path: Path) -> dict[str, CardRecord]:
@@ -121,6 +130,65 @@ def _diff(before: JsonValue, after: JsonValue, path: str) -> list[dict[str, Json
     return [{"field": path, "old": _summary(before), "new": _summary(after)}]
 
 
+def _raw_walk(
+    before: JsonValue,
+    after: JsonValue,
+    path: str,
+    differences: list[dict[str, JsonValue]],
+    added: list[str],
+    removed: list[str],
+) -> None:
+    if isinstance(before, dict) and isinstance(after, dict):
+        added.extend(f"{path}.{key}" for key in sorted(after.keys() - before.keys()))
+        removed.extend(f"{path}.{key}" for key in sorted(before.keys() - after.keys()))
+        for key in sorted(before.keys() & after.keys()):
+            _raw_walk(
+                before[key], after[key], f"{path}.{key}", differences, added, removed
+            )
+    elif isinstance(before, list) and isinstance(after, list):
+        for index in range(min(len(before), len(after))):
+            _raw_walk(
+                before[index],
+                after[index],
+                f"{path}[{index}]",
+                differences,
+                added,
+                removed,
+            )
+        added.extend(f"{path}[{index}]" for index in range(len(before), len(after)))
+        removed.extend(f"{path}[{index}]" for index in range(len(after), len(before)))
+    elif before != after or type(before) is not type(after):
+        differences.append(
+            {
+                "field": path,
+                "old": _summary(before),
+                "new": _summary(after),
+                "transition": _transition(before, after),
+            }
+        )
+
+
+def _transition(before: JsonValue, after: JsonValue) -> str:
+    def state(value: JsonValue) -> str:
+        if value is None:
+            return "null"
+        if value == "":  # ruff: ignore[compare-to-empty-string] -- distinguish empty text from other falsey JSON values
+            return "empty"
+        return "value"
+
+    return f"{state(before)}->{state(after)}"
+
+
+def _raw_comparison(
+    before: dict[str, JsonValue], after: CardRecord
+) -> tuple[list[dict[str, JsonValue]], list[str], list[str]]:
+    differences: list[dict[str, JsonValue]] = []
+    added: list[str] = []
+    removed: list[str] = []
+    _raw_walk(before, asdict(after), "card", differences, added, removed)
+    return differences, added, removed
+
+
 def _envelope_differences(
     envelopes: list[tuple[str, dict[str, JsonValue]]],
     old: dict[str, JsonValue] | None,
@@ -145,6 +213,7 @@ def _envelope_differences(
 def _card_row(
     number: str,
     legacy: Card | None,
+    legacy_raw: dict[str, JsonValue] | None,
     candidate: CardRecord | None,
     envelopes: list[tuple[str, dict[str, JsonValue]]],
     expected: bool,
@@ -158,6 +227,11 @@ def _card_row(
         else []
     )
     envelope_diffs = _envelope_differences(envelopes, old_observation, new_observation)
+    raw_diffs, added_fields, removed_fields = (
+        _raw_comparison(legacy_raw, candidate)
+        if legacy_raw is not None and candidate is not None
+        else ([], [], [])
+    )
     status = (
         "unexpected"
         if not expected
@@ -184,8 +258,87 @@ def _card_row(
             else None
         ),
         "field_diffs": field_diffs,
+        "raw_field_diffs": raw_diffs,
+        "added_fields": added_fields,
+        "removed_fields": removed_fields,
         "envelope_diffs": envelope_diffs,
         "envelope_paths": [path for path, _ in envelopes],
+    }
+
+
+def _raw_field_summary(rows: list[dict[str, object]]) -> dict[str, dict[str, object]]:
+    cards: dict[str, set[str]] = defaultdict(set)
+    transitions: dict[str, Counter[str]] = defaultdict(Counter)
+    for row in rows:
+        number = str(row["card_no"])
+        for change in cast("list[dict[str, JsonValue]]", row["raw_field_diffs"]):
+            field = str(change["field"])
+            cards[field].add(number)
+            transitions[field][str(change["transition"])] += 1
+    return {
+        field: {
+            "count": len(numbers),
+            "card_numbers": sorted(numbers),
+            "transitions": dict(sorted(transitions[field].items())),
+        }
+        for field, numbers in sorted(cards.items())
+    }
+
+
+def _field_presence_summary(
+    rows: list[dict[str, object]], key: str
+) -> dict[str, dict[str, object]]:
+    cards: dict[str, set[str]] = defaultdict(set)
+    for row in rows:
+        for field in cast("list[str]", row[key]):
+            cards[field].add(str(row["card_no"]))
+    return {
+        field: {"count": len(numbers), "card_numbers": sorted(numbers)}
+        for field, numbers in sorted(cards.items())
+    }
+
+
+def _hint_summary(candidates: dict[str, CardRecord]) -> dict[str, object]:
+    product_hrefs = sorted(
+        (number, href)
+        for number, card in candidates.items()
+        for product in card.products
+        for href in product.links
+    )
+    related_hrefs = sorted(
+        (number, related.href)
+        for number, card in candidates.items()
+        for related in card.related_cards
+    )
+    self_links = sorted(
+        {
+            number
+            for number, href in related_hrefs
+            if number in parse_qs(urlsplit(href).query).get("cardno", [])
+        }
+    )
+    related_paths = Counter(urlsplit(href).path for _, href in related_hrefs)
+    non_card_links = [
+        {"card_no": number, "href": href}
+        for number, href in related_hrefs
+        if urlsplit(href).path != "/cardlist/"
+        or urlsplit(href).hostname not in {None, "shadowverse-evolve.com"}
+        or not parse_qs(urlsplit(href).query).get("cardno")
+    ]
+    return {
+        "product_cards": sum(bool(card.products) for card in candidates.values()),
+        "related_cards": sum(bool(card.related_cards) for card in candidates.values()),
+        "product_href_count": len(product_hrefs),
+        "related_href_count": len(related_hrefs),
+        "product_href_examples": [
+            {"card_no": number, "href": href} for number, href in product_hrefs[:8]
+        ],
+        "related_href_examples": [
+            {"card_no": number, "href": href} for number, href in related_hrefs[:8]
+        ],
+        "self_related_cards": self_links,
+        "related_href_paths": dict(sorted(related_paths.items())),
+        "non_card_related_hrefs": non_card_links,
     }
 
 
@@ -196,7 +349,7 @@ def compare(
     expected_numbers: set[str],
 ) -> dict[str, object]:
     """Compare every expected JP number and all authored JP observation envelopes."""
-    old = _read_legacy(legacy_path)
+    old, old_raw = _read_legacy(legacy_path)
     candidates = _read_candidates(candidate_path)
     _, entries = load(authored_root)
     envelopes: dict[str, list[tuple[str, dict[str, JsonValue]]]] = {}
@@ -208,6 +361,7 @@ def compare(
         _card_row(
             number,
             old.get(number),
+            old_raw.get(number),
             candidates.get(number),
             envelopes.get(number, []),
             number in expected_numbers,
@@ -245,6 +399,10 @@ def compare(
             "unexpected_envelope": sorted(envelopes.keys() - expected_numbers),
         },
         "field_counts": dict(sorted(field_counts.items())),
+        "raw_field_changes": _raw_field_summary(rows),
+        "added_fields": _field_presence_summary(rows, "added_fields"),
+        "removed_fields": _field_presence_summary(rows, "removed_fields"),
+        "hints": _hint_summary(candidates),
         "cards": rows,
         "inputs": {
             "legacy_sha256": _file_hash(legacy_path),

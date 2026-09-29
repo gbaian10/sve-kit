@@ -261,7 +261,7 @@ def _products(under: LexborNode | None) -> list[ProductHint]:
 def _related_cards(tree: Queryable) -> list[RelatedHint]:
     return [
         RelatedHint(label=_text(link), href=href)
-        for link in select_all(tree, "a[href*='cardno=']")
+        for link in select_all(tree, ".cardlist-Detail_Relation a[href*='cardno=']")
         if (href := attribute(link, "href")) is not None
     ]
 
