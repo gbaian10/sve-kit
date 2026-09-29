@@ -9,8 +9,6 @@ export default {
     cards: "カード検索",
     decks: "デッキ",
     account: "アカウントと設定",
-    expand: "サイドバーを開く",
-    collapse: "サイドバーを閉じる",
     primary: "メインナビゲーション",
     skipToContent: "本文へ移動",
     logoAlt: "sve-kit",
