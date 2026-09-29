@@ -67,6 +67,8 @@ hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔
 
 規則 hash 包含逐面 `name/text/speech/sections` 的原值。JP／EN 再錄措辭、提醒文字與標點差異可依本批人工政策共用 card，但各觀測分別保留；**不產生 confirmed 的 revision_semantics 或規則等義證明**，不沿用 DSL 驗證。未來來源變動須重新審核，不是忽略括號後自動通過。
 
+建置讀取先驗完整 index 與全區分片，再做地區投影；不得先濾 JP 再改寫 decision 成員、checked 集合或配號游標。讀取保留分片路徑、解析後 canonical 內容及 hash、record 的原 decision 指向與完整封套。格式／kind 等封套欄位必須明示；配號與帶 decision 的 record 不得混在同一分片。decision ID 必須由其完整 membership hash 決定；任何狀態的 sample_ids 都不可重複或含非成員，confirmed 仍須全部 checked。這些檢查驗歷史登錄一致性，不代表已對目前 raw 來源驗證 fresh 採納。
+
 ## 3. 永久身分、配號與策展
 
 ### 3.1 ID 與身分
@@ -136,6 +138,8 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 `card_related` 的 `data` 為 `id/from_card_id/to_card_id/relation/source_kind/target_printing_id/suggested_count/dsl_id/evidence`。relation=same_rules_reskin、source_kind=authored，三個選用欄為 null。evidence 逐筆記 `role: from|to` 及全部兩端已採納版次的觀測；匯入 decision_source 釘兩端來源。相同換皮卡的普通／特殊 printing 只產一條關係，禁止自指、多目標與反向重複。只能在兩端都有版次且來源驗證仍匹配的地區投影；任一端目前來源改變就停止該地區投影，依 build-db §5 重審。不能繼承原卡 DSL 或構築張數。
 
 confirmed_none 與 same_rules_reskin 的決定不可因追加版次自動擴張。工具與獨立 validate 都逐筆比對 printing 的完整 observation（換皮關係另含 from／to），拒絕缺漏、重複、過期或多餘證據。新版次需要新的 review／relation 決定並釘住新觀測；v1 尚未定義決定續版格式，因此追加既有 EN-only card 或換皮關係任一端的版次會直接失敗並提示重審，不改寫舊決定。
+
+登錄內的 printing.observation 必須與 printing 的地區及原樣卡號一致；有 EN 對應時 target_observation 必須與已登錄 JP 目標的完整 observation 相同，無目標時為 null。art 的 observation 必須對應其已登錄 use，uses 不可重複；換皮關係不可反向成對。這些是既有證據的引用一致性要求；實際來源版本的觀測比對、跨區採納新鮮度及發布投影仍由匯入器另驗。
 
 ### 3.4 來源更正
 

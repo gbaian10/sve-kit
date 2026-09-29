@@ -4,6 +4,7 @@ import io
 import os
 import tempfile
 from collections import defaultdict
+from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING, Literal
 
@@ -17,7 +18,7 @@ from sve_carddb.registry.allocation import (
     cursors,
     region_allocations,
 )
-from sve_carddb.registry.inputs import JSON_VALUE, digest
+from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -164,16 +165,45 @@ def member_hash(items: list[tuple[str, str]]) -> str:
     return digest([[key, value] for key, value in items])
 
 
-def load(root: Path) -> tuple[Index, dict[str, Entry]]:
-    """Load only indexed files and verify the complete immutable closure."""
+@dataclass(frozen=True)
+class LoadedShard:
+    path: str
+    content_hash: str
+    content: bytes
+    _ordered_content: bytes
+
+    def envelope(self) -> Shard:
+        """Return a detached copy; canonical input remains immutable."""
+        return Shard.model_validate_json(self._ordered_content)
+
+
+@dataclass(frozen=True)
+class RegistryFiles:
+    index_content: bytes
+    shards: tuple[LoadedShard, ...]
+
+    def index(self) -> Index:
+        """Return a detached index, including the original global cursors."""
+        return Index.model_validate_json(self.index_content)
+
+
+def read_registry_files(root: Path) -> RegistryFiles:
+    """Read checked envelopes once, without discarding their source or membership."""
     path = root / "ids" / "index.yaml"
     if not path.exists():
         if any((root / "registry").glob("**/*.yaml")) or any(
             (root / "ids").glob("**/*.yaml")
         ):
             raise ValueError("Unindexed registry files; recover before allocating IDs")
-        return Index(), {}
-    index = Index.model_validate(read_yaml(path))
+        return RegistryFiles(canonical(Index().model_dump(mode="json")), ())
+    _safe_file(root, path)
+    raw_index = read_yaml(path)
+    _wire_fields(
+        raw_index,
+        2,
+        {"authored_format", "kind", "allocation_policy", "next_int_id", "includes"},
+    )
+    index = Index.model_validate(raw_index)
     present = {
         file.relative_to(root).as_posix()
         for directory in (root / "registry", root / "ids")
@@ -184,28 +214,64 @@ def load(root: Path) -> tuple[Index, dict[str, Entry]]:
         raise ValueError(
             "Indexed file closure differs from disk; recover interrupted writes"
         )
-    entries: dict[str, Entry] = {}
-    for name, checksum in index.includes.items():
+    shards = []
+    keys: set[str] = set()
+    for name, checksum in sorted(index.includes.items()):
         relative = Path(name)
         if (
             relative.is_absolute()
+            or not relative.parts
             or ".." in relative.parts
             or relative.parts[0] not in {"registry", "ids"}
         ):
             raise ValueError(f"Unsafe include: {name}")
         file = root / relative
-        if file.is_symlink() or not file.resolve().is_relative_to(root.resolve()):
-            raise ValueError(f"Unsafe include: {name}")
+        _safe_file(root, file)
         raw = read_yaml(file)
         if digest(raw) != checksum:
             raise ValueError(f"Modified immutable shard: {name}")
+        _wire_fields(
+            raw,
+            1,
+            {"authored_format", "kind", "default_decision_id", "records", "decisions"},
+        )
         shard = Shard.model_validate(raw)
         _check_decision(shard)
         for entry in shard.records:
-            if entry.record_key in entries:
+            if entry.record_key in keys:
                 raise ValueError(f"Duplicate record: {entry.record_key}")
-            entries[entry.record_key] = entry
-    return index, entries
+            keys.add(entry.record_key)
+        shards.append(
+            LoadedShard(
+                name, checksum, canonical(raw), shard.model_dump_json().encode()
+            )
+        )
+    return RegistryFiles(canonical(raw_index), tuple(shards))
+
+
+def _wire_fields(raw: JsonValue, version: int, fields: set[str]) -> None:
+    if (
+        not isinstance(raw, dict)
+        or set(raw) != fields
+        or type(raw.get("authored_format")) is not int
+        or raw["authored_format"] != version
+    ):
+        raise ValueError("Invalid registry envelope fields or format")
+
+
+def _safe_file(root: Path, path: Path) -> None:
+    if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
+        raise ValueError("Unsafe registry file")
+
+
+def load(root: Path) -> tuple[Index, dict[str, Entry]]:
+    """Keep the append tool's legacy API; builders should use snapshot.load_registry."""
+    files = read_registry_files(root)
+    return files.index(), {
+        entry.record_key: entry
+        for shard in files.shards
+        for entry in shard.envelope().records
+    }
 
 
 def _check_decision(shard: Shard) -> None:
@@ -213,12 +279,15 @@ def _check_decision(shard: Shard) -> None:
         if shard.default_decision_id is not None or shard.decisions:
             raise ValueError("Deterministic allocations must not carry a decision")
         return
+    if any(record.kind == "card_int_id" for record in shard.records):
+        raise ValueError("Allocations cannot share a decision shard")
     if len(shard.decisions) != 1:
         raise ValueError("A shard needs exactly one batch decision")
     decision = shard.decisions[0]
     expected = members(shard.records)
     if (
-        decision.id != shard.default_decision_id
+        decision.id != "d:" + decision.membership_hash.removeprefix("sha256:")
+        or decision.id != shard.default_decision_id
         or decision.members != expected
         or decision.membership_hash != member_hash(expected)
     ):
@@ -230,7 +299,14 @@ def _check_decision(shard: Shard) -> None:
             )
             if decision.state != required:
                 raise ValueError("Correction state disagrees with decision")
-    checked = [key for key, _ in expected]
+    _check_samples(decision, [key for key, _ in expected])
+
+
+def _check_samples(decision: Decision, checked: list[str]) -> None:
+    if len(set(decision.sample_ids)) != len(decision.sample_ids) or not set(
+        decision.sample_ids
+    ) <= set(checked):
+        raise ValueError("Checked members must be a unique subset of the batch")
     if decision.state == "confirmed" and (
         decision.sample_ids != checked
         or not decision.reviewed_by
