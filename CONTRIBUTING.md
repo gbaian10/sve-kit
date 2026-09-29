@@ -89,17 +89,20 @@ The gitmoji, type and scope are fixed tokens and do not count.
 
 ### Trailers
 
-Pull requests are squash-merged, so the merge commit records who worked on the change.
-Put these trailers at the end of the message, in this order:
+Pull requests are squash-merged, so the squash commit records who worked on the change.
+Its message ends with these trailers, in this order, after a blank line that follows the body
+and any issue references:
 
-| Trailer          | Add one for                                                        | Example                                                |
-| ---------------- | ------------------------------------------------------------------ | ------------------------------------------------------ |
-| `Co-Authored-By` | every person or AI model that wrote part of the change             | `Co-Authored-By: Codex gpt-6-sol <noreply@openai.com>` |
-| `Reviewed-by`    | every reviewer, person or AI model, whose final review approved it | `Reviewed-by: Claude Opus 5.5 <noreply@anthropic.com>` |
-| `Acked-by`       | the maintainer, only when they approved this change themselves     | `Acked-by: <maintainer, as in git log>`                |
+| Trailer          | Add one for                                                         | Example                                                |
+| ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| `Co-Authored-By` | every person or AI model that wrote part of the change              | `Co-Authored-By: Codex gpt-6-sol <noreply@openai.com>` |
+| `Reviewed-by`    | every reviewer, person or AI model, who approved the final revision | `Reviewed-by: Claude Opus 5.5 <noreply@anthropic.com>` |
+| `Acked-by`       | the maintainer, only when they approved this change themselves      | `Acked-by: Maintainer Name <maintainer@example.com>`   |
 
-Name an AI model by its product and version, as in the examples. A change merged under the
-standing review rules, without the maintainer looking at it, has no `Acked-by`.
+Name an AI model by its product and version, and the maintainer by the name and email in
+`git log`. A change merged under the standing review rules, without the maintainer looking at it,
+has no `Acked-by`. If you open a pull request, list everyone and every AI model that wrote part
+of it in the description, so the maintainer can credit them in the squash commit.
 
 ## Code comments
 
