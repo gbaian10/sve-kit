@@ -117,6 +117,7 @@ const zhTW = {
     title: "篩選",
     reset: "重設",
     show: "顯示 {{count}} 張",
+    remove: "移除 {{label}}",
     clear: "清除",
     more: "還有 {{count}} 項",
     classes: "職業",

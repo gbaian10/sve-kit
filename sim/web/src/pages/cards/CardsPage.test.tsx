@@ -4,7 +4,7 @@ import { afterAll, afterEach, beforeAll, describe, expect, it, vi } from "vitest
 
 import { buildSnapshot } from "../../../scripts/fixture/build"
 import { routes } from "../../app/routes"
-import { DEFAULT_PREFS, prefsStore, recentStore } from "../../settings"
+import { DEFAULT_PREFS, prefsStore, readPrefs, recentStore } from "../../settings"
 import { renderRoutes } from "../../test-utils"
 
 // The page reads the fixture through the real client; fetch is answered from the in-memory build.
@@ -168,6 +168,49 @@ describe("CardsPage", () => {
     await user.click(within(list).getAllByRole("option")[0] ?? list)
     expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-051(?:\/|$)/u)
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-51" })
+  })
+
+  it("uses the view from the URL, else the preference, and writes both when switching", async () => {
+    prefsStore.set({ viewMode: "list" })
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    expect(
+      within(screen.getByRole("radiogroup", { name: "檢視" })).getByRole("radio", { name: "清單" }),
+    ).toHaveAttribute("aria-checked", "true")
+    await user.click(
+      within(screen.getByRole("radiogroup", { name: "檢視" })).getByRole("radio", { name: "表格" }),
+    )
+    expect(router.state.location.search).toBe("?view=table")
+    expect(readPrefs().viewMode).toBe("table")
+    expect(
+      (await screen.findAllByText("能力預覽・未完整", {}, { timeout: 5000 })).length,
+    ).toBeGreaterThan(0)
+    const shared = await renderRoutes(routes, { initialEntries: ["/cards?view=grid"] })
+    await within(shared.container).findByRole("group", { name: "職業" }, { timeout: 4000 })
+    expect(
+      within(within(shared.container).getByRole("radiogroup", { name: "檢視" })).getByRole(
+        "radio",
+        { name: "卡圖" },
+      ),
+    ).toHaveAttribute("aria-checked", "true")
+    shared.unmount()
+  })
+
+  it("opens the filter sheet, applies a draft and shows chips with the badge count", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("button", { name: "篩選" }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "主教" }))
+    await user.click(within(dialog).getByRole("switch", { name: "只看異畫" }))
+    await user.click(within(dialog).getByRole("button", { name: /顯示/u }))
+    expect(router.state.location.search).toBe("?class=bishop&alt=1")
+    expect(screen.getByRole("button", { name: "篩選" })).toHaveTextContent("2")
+    expect(screen.getByRole("button", { name: "移除 主教" })).toBeInTheDocument()
+    await user.click(screen.getByRole("button", { name: "移除 只看異畫" }))
+    expect(router.state.location.search).toBe("?class=bishop")
+    await user.click(screen.getByRole("button", { name: "清除" }))
+    expect(router.state.location.search).toBe("")
   })
 
   it("shows the empty state with a reset, and recent cards on focus", async () => {

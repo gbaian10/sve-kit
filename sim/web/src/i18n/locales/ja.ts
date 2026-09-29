@@ -119,6 +119,7 @@ export default {
     title: "絞り込み",
     reset: "リセット",
     show: "{{count}}枚を表示",
+    remove: "{{label}} を外す",
     clear: "クリア",
     more: "他 {{count}} 件",
     classes: "クラス",

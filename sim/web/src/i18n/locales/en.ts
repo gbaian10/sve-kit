@@ -120,6 +120,7 @@ export default {
     title: "Filters",
     reset: "Reset",
     show: "Show {{count}}",
+    remove: "Remove {{label}}",
     clear: "Clear",
     more: "{{count}} more",
     classes: "Class",

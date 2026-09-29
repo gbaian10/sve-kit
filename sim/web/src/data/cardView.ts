@@ -239,3 +239,27 @@ export async function createRouteLookups(
     nameOf: (printingId) => catalog.summary(printingId)?.name.original.text,
   }
 }
+
+/** The front face's original effect text for a table row, or undefined when there is none. */
+export async function loadEffectPreview(
+  client: SnapshotClient,
+  catalog: Catalog,
+  printingId: string,
+): Promise<string | undefined> {
+  const { index } = catalog
+  const printing = index.printing(printingId)
+  if (!printing) return undefined
+  const cardId = stringValue(printing["card_id"])
+  const card = index.card(cardId)
+  const face = index.facesOf(cardId)[0]
+  if (!card || !face) return undefined
+  const region = stringValue(printing["region"]) === "en" ? "en" : "jp"
+  const base = index.currentRevision(stringValue(face["id"]), region)
+  if (!base) return undefined
+  const set = await setDetailOf(client, stringValue(card["home_set_id"]))
+  const unitId = (set.revision(stringValue(base["id"])) ?? base)["effect_unit_id"]
+  const unit =
+    typeof unitId === "string" ? await globalDetailOf(client, index).textUnit(unitId) : undefined
+  const text = unit ? stringValue(unit["text"]) : ""
+  return text === "" ? undefined : text
+}

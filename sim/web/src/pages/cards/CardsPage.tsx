@@ -2,6 +2,7 @@ import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, use
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
+import { useEffectPreviews } from "../../app/effectPreviews"
 import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
 import { useCatalog, useImageIndex } from "../../app/snapshot"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
@@ -245,6 +246,8 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
     if (cell && document.activeElement === document.body) cell.focus({ preventScroll: true })
   }, [anchor, inert, cells.length])
   const options = useMemo(() => catalog?.filterOptions(), [catalog])
+  const previewIds = useMemo(() => cells.map((cell) => cell.summary.printingId), [cells])
+  const preview = useEffectPreviews(client, catalog, previewIds, view === "table")
   const chips = useMemo(
     () =>
       catalog
@@ -446,7 +449,7 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
               cells={cells}
               images={images}
               onOpen={openCell}
-              preview={() => undefined}
+              preview={preview}
               {...(entry.anchor === undefined ? {} : { anchor: entry.anchor })}
             />
           )}

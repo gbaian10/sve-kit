@@ -27,6 +27,7 @@ export function FilterChips({
         <button
           key={chip.key}
           type="button"
+          aria-label={t("filters.remove", { label: chip.label })}
           onClick={() => {
             onChange(chip.remove())
           }}
