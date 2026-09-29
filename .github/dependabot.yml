@@ -1,0 +1,55 @@
+# Version updates: weekly, one grouped pull request per ecosystem, only for releases at least 7 days
+# old (a freshly published release is the usual window for a hijacked package). Security updates
+# skip the cooldown and the groups, as they should. The commit prefix makes the title
+# pass the commit-format check (`<gitmoji> <type>(<scope>): …`); Dependabot adds the colon itself.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      github-actions:
+        patterns: ['*']
+    commit-message:
+      prefix: ⬆️ dep-bump
+
+  - package-ecosystem: cargo
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      cargo:
+        patterns: ['*']
+    commit-message:
+      # The workspace's other member, sim/scenario-runner, only runs the rules scenarios and has no
+      # version of its own, so every Rust update is filed under sim/engine.
+      prefix: ⬆️ dep-bump(sim/engine)
+
+  - package-ecosystem: uv
+    directory: /carddb
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      uv:
+        patterns: ['*']
+    commit-message:
+      prefix: ⬆️ dep-bump(carddb)
+
+  - package-ecosystem: bun
+    directory: /sim/web
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      bun:
+        patterns: ['*']
+    commit-message:
+      prefix: ⬆️ dep-bump(sim/web)
