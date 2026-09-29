@@ -93,7 +93,8 @@ export function CardsPage() {
   const typed = input.trim()
   // While the debounce is pending the list still shows the previous text's rows; picking one
   // would open a card the new text may not match and rebuild the list URL from the old text.
-  const stale = typed !== debounced
+  // Compared untrimmed on both sides: `typed` is only for what "see all" commits.
+  const stale = input !== debounced
   const suggestTotal = useMemo(
     () =>
       catalog && typed !== ""
@@ -140,9 +141,10 @@ export function CardsPage() {
   const openSuggestion = (index: number) => {
     const row = rows[index]
     if (!row || stale) return
-    const fromSuggest = debounced !== ""
+    // Not stale here, so `typed` is the debounced text trimmed: the list URL never carries spaces.
+    const fromSuggest = typed !== ""
     // The typed text becomes the list's URL first, so back returns to it with the string kept.
-    const background = fromSuggest ? `?q=${encodeURIComponent(debounced)}` : location.search
+    const background = fromSuggest ? `?q=${encodeURIComponent(typed)}` : location.search
     if (fromSuggest && background !== location.search) {
       void navigate(location.pathname + background, { replace: true, state: { pages: 1 } })
     }

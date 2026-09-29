@@ -151,6 +151,19 @@ describe("CardsPage", () => {
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-05" })
   })
 
+  it("keeps suggestions pickable when the text has surrounding spaces", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    await user.type(screen.getByRole("combobox"), " bp01-51 ")
+    const list = await screen.findByRole("listbox")
+    await waitFor(() => {
+      expect(list).toHaveAttribute("aria-busy", "false")
+    })
+    await user.click(within(list).getAllByRole("option")[0] ?? list)
+    expect(router.state.location.pathname).toBe("/cards/BP01-051")
+    expect(router.state.location.state).toMatchObject({ background: "?q=bp01-51" })
+  })
+
   it("shows the empty state with a reset, and recent cards on focus", async () => {
     const { router } = await open("/cards?q=zzz&class=elf")
     const user = userEvent.setup()
