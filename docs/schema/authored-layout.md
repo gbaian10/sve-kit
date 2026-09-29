@@ -141,6 +141,8 @@ confirmed_none 與 same_rules_reskin 的決定不可因追加版次自動擴張�
 
 登錄內的 printing.observation 必須與 printing 的地區及原樣卡號一致；有 EN 對應時 target_observation 必須與已登錄 JP 目標的完整 observation 相同，無目標時為 null。art 的 observation 必須對應其已登錄 use，uses 不可重複；換皮關係不可反向成對。這些是既有證據的引用一致性要求；實際來源版本的觀測比對、跨區採納新鮮度及發布投影仍由匯入器另驗。
 
+匯入器先驗完整登錄，再明示輸出地區；完整歷史決定與「凍結來源仍匹配」是兩個維度。來源缺失或變動時保留原封套及決定狀態，逐筆回報 record_key、決定與來源比對結果，不能把歷史 confirmed 當成重新確認。來源面數須與 source_face_map 完整覆蓋一致，每面欄位依原 source_index 取值；同一 printing＋face 不得同時採納兩個 art。未投影與暫緩的登錄亦保留於完整輸入，不得由區域子集重算 members／sample_ids／配號游標。
+
 ### 3.4 來源更正
 
 `source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類；公開 field／值型別依 [傳輸契約 §3.3](snapshot-transport.md#33-公開更正值)，不擴張此 authored 格式的兩欄白名單。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
