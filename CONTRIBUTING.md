@@ -70,22 +70,39 @@ gitmoji; locally the gitmojify hook adds it for you. Messages that start with `M
 
 Use the component as the scope, so `git log --grep '(carddb)'` shows one component's history:
 
-| Scope        | Component                                       |
-| ------------ | ----------------------------------------------- |
-| `carddb`     | Card data pipeline                              |
-| `authored`   | Human-maintained data                           |
-| `dsl`        | Effect DSL schema                               |
-| `sim/engine` | Rules engine                                    |
-| `sim/server` | Game server                                     |
-| `sim/web`    | Web client                                      |
-| `docs`       | ADRs and design docs                            |
-| _(none)_     | CI, tools, top-level docs (`ci` issue label)    |
+| Scope        | Component                                    |
+| ------------ | -------------------------------------------- |
+| `carddb`     | Card data pipeline                           |
+| `authored`   | Human-maintained data                        |
+| `dsl`        | Effect DSL schema                            |
+| `sim/engine` | Rules engine                                 |
+| `sim/server` | Game server                                  |
+| `sim/web`    | Web client                                   |
+| `docs`       | ADRs and design docs                         |
+| _(none)_     | CI, tools, top-level docs (`ci` issue label) |
 
 Each component is versioned on its own, and its next version is worked out from the commits
 that carry its scope. So keep one component per commit: when a change touches several components,
 split it into one commit per component. Commits without a scope never bump a component version.
 Write the description and body in one natural language; do not repeat the same text in two languages.
 The gitmoji, type and scope are fixed tokens and do not count.
+
+### Trailers
+
+Pull requests are squash-merged, so the squash commit records who worked on the change.
+Its message ends with these trailers, in this order, after a blank line that follows the body
+and any issue references:
+
+| Trailer          | Add one for                                                         | Example                                                |
+| ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
+| `Co-Authored-By` | every person or AI model that wrote part of the change              | `Co-Authored-By: Codex gpt-6-sol <noreply@openai.com>` |
+| `Reviewed-by`    | every reviewer, person or AI model, who approved the final revision | `Reviewed-by: Claude Opus 5.5 <noreply@anthropic.com>` |
+| `Acked-by`       | the maintainer, only when they approved this change themselves      | `Acked-by: Maintainer Name <maintainer@example.com>`   |
+
+Name an AI model by its product and version, and the maintainer by the name and email in
+`git log`. A change merged under the standing review rules, without the maintainer looking at it,
+has no `Acked-by`. If you open a pull request, list everyone and every AI model that wrote part
+of it in the description, so the maintainer can credit them in the squash commit.
 
 ## Code comments
 
