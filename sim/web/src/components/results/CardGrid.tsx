@@ -83,8 +83,14 @@ function CardCell({
           imageWanted={imageWanted}
         />
         <span className="flex min-w-0 flex-col leading-tight">
-          <span lang={cell.name.primary.lang} className="truncate text-13 font-medium">
-            {cell.name.primary.text}
+          <span className="flex items-baseline gap-2">
+            <span
+              lang={cell.name.primary.lang}
+              className="min-w-0 flex-1 truncate text-13 font-medium"
+            >
+              {cell.name.primary.text}
+            </span>
+            <span className="shrink-0 text-11 text-text-3 tabular-nums">{cell.summary.cardNo}</span>
           </span>
           {cell.name.secondary && (
             <span lang={cell.name.secondary.lang} className="truncate text-11 text-text-3">

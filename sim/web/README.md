@@ -192,6 +192,9 @@ The list keeps `pages` and `anchor` on its own history entry through `useListEnt
 writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source, pages, resultKey }`;
 `src/app/listEntryState.test.tsx` pins that replace-then-push keeps both states in the data router.
 
+Each grid cell shows the name with the card number at the right of the same line (user request
+2026-09-29), then the translation line when the name display asks for one.
+
 `CardImage` is one fixed 63:88 slot: the text card (name, class frame, cost, number, stats) sits
 underneath and the image fades in over it; missing, pending and withdrawn images keep the text card
 with a reason, and data saver waits for a tap. Callers set the width (`w-full`, `w-8`).
