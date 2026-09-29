@@ -1,9 +1,11 @@
 import { cardNoKey, cardNoLookupKey } from "../domain/cardNo"
+import { type MechanicFacts, triState } from "../domain/mechanics"
 import type { NameSource } from "../domain/nameDisplay"
 import { NORMALIZER_VERSION, normalizeText } from "../domain/normalize"
 import type { QueryState } from "../domain/query/model"
 import {
   apply,
+  type FaceStats,
   type Region,
   type ResultItem,
   type SearchEntry,
@@ -32,6 +34,13 @@ export interface CardSummary {
   readonly defense: number | null
 }
 
+export interface FilterOptions {
+  readonly types: readonly string[]
+  readonly rarities: readonly string[]
+  readonly sets: readonly { readonly code: string; readonly id: string }[]
+  readonly keywords: readonly { readonly id: string; readonly name: (lang: TextLang) => string }[]
+}
+
 export interface Catalog {
   readonly index: CardIndex
   readonly entries: readonly SearchEntry[]
@@ -43,6 +52,13 @@ export interface Catalog {
   readonly results: (state: QueryState, edition: Region) => ResultItem[]
   /** The summary of a printing's front face, or undefined for an unknown printing id. */
   readonly summary: (printingId: string) => CardSummary | undefined
+  /** Vocabulary codes and keyword ids the filter sheet offers. */
+  readonly filterOptions: () => FilterOptions
+  /** Cards with any mechanic annotation for a region, for the completeness hint. */
+  readonly mechanicCoverageSummary: (region: Region) => {
+    readonly annotated: number
+    readonly total: number
+  }
   /** The class label for the UI language (vocabulary translation), else the Japanese label. */
   readonly classLabel: (code: string, lang: TextLang) => string
   /** Any vocabulary label (`type`, `trait`, `rarity`…) for the language, else the Japanese label. */
@@ -116,6 +132,52 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
       searchName(lang, stringValue(row["text"])),
     ])
   }
+  // Facet lookups: rarity/variant/art per printing, release dates, mechanic facts per card.
+  const productDate = new Map(
+    rows("product").map((row) => [stringValue(row["id"]), row["released_on"]] as const),
+  )
+  const releasedOn = new Map<string, string>()
+  for (const link of index.printingProducts) {
+    const printingId = stringValue(link["printing_id"])
+    const date = link["available_on"] ?? productDate.get(stringValue(link["product_id"]))
+    if (typeof date !== "string") continue
+    const known = releasedOn.get(printingId)
+    if (known === undefined || date < known) releasedOn.set(printingId, date)
+  }
+  const universe = new Set(index.keywords.map((row) => stringValue(row["id"])))
+  const projections = new Map<string, Set<string>>()
+  for (const row of index.mechanicProjections) {
+    const key = `${stringValue(row["card_id"])}\u0000${stringValue(row["scope"])}`
+    projections.set(key, (projections.get(key) ?? new Set()).add(stringValue(row["keyword_id"])))
+  }
+  const coverage = new Map(
+    index.mechanicCoverage.map((row) => [
+      `${stringValue(row["card_id"])}\u0000${stringValue(row["scope"])}`,
+      row,
+    ]),
+  )
+  const factsOf = (cardId: string, scope: "shared" | "en_override"): MechanicFacts => {
+    const row = coverage.get(`${cardId}\u0000${scope}`)
+    const support = index.support(cardId)
+    const blocks = (support?.["region_blocks"] as Row[] | undefined) ?? []
+    return {
+      present: projections.get(`${cardId}\u0000${scope}`) ?? new Set(),
+      coverage: row
+        ? {
+            completeAll: row["complete_all"] === true,
+            completeMode: row["complete_mode"] === "exclude" ? "exclude" : "include",
+            completeIds: (row["complete_keyword_ids"] as string[] | undefined) ?? [],
+            partialMode: row["partial_mode"] === "exclude" ? "exclude" : "include",
+            partialIds: (row["partial_keyword_ids"] as string[] | undefined) ?? [],
+          }
+        : undefined,
+      enBlocked: blocks.some((block) => block["region"] === "en"),
+    }
+  }
+  const setCodeOf = (id: string): string => {
+    const family = index.family(id)
+    return family ? stringValue(family["code"]) : id
+  }
   const entries: SearchEntry[] = []
   const summaries = new Map<string, CardSummary>()
   index.cards.forEach((card, order) => {
@@ -126,6 +188,7 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
     const names: SearchName[] = []
     const seen = new Set<string>()
     const defaultPrinting: Partial<Record<Region, string>> = {}
+    const faces: Partial<Record<Region, FaceStats>> = {}
     let classCode: string | null = null
     for (const view of card["regions"] as Row[]) {
       const region = stringValue(view["region"])
@@ -138,6 +201,13 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
       if (typeof code === "string") classCode = code
       const name = nameOf(index, revision)
       if (!name) continue
+      faces[region] = {
+        typeCode: stringValue(revision["type_code"]),
+        cost: nullableInteger(revision["cost"]),
+        attack: nullableInteger(revision["attack"]),
+        defense: nullableInteger(revision["defense"]),
+        name: name.original.text,
+      }
       for (const [lang, text] of [
         [name.original.lang, name.original.text] as const,
         ...(Object.entries(name.translations) as [TextLang, string][]),
@@ -167,14 +237,22 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
       const region = stringValue(printing["region"])
       if (!isRegion(region)) return []
       const cardNo = stringValue(printing["card_no"])
+      const printingId = stringValue(printing["id"])
+      const front = (printing["faces"] as Row[])[0]
+      const rarity = printing["rarity_code"]
+      const art = front?.["art_id"]
       return [
         {
-          id: stringValue(printing["id"]),
+          id: printingId,
           region,
           cardNo,
           lookupKey: cardNoLookupKey(cardNo, sets),
           key: cardNoKey(cardNo, sets),
           flat: normalizeText(cardNo),
+          rarity: typeof rarity === "string" ? rarity : null,
+          variant: stringValue(printing["variant_key"]),
+          artId: typeof art === "string" ? art : null,
+          releasedOn: releasedOn.get(printingId) ?? null,
         },
       ]
     })
@@ -187,6 +265,15 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
       aliases: aliases.get(cardId) ?? [],
       printings,
       defaultPrinting,
+      setCode: setCodeOf(stringValue(card["home_set_id"])),
+      faces,
+      mechanic: (keywordId, region) => {
+        // An EN override, when present, is the English card's own annotation.
+        const override = region === "en" ? factsOf(cardId, "en_override") : undefined
+        if (override && (override.present.size > 0 || override.coverage))
+          return triState(override, keywordId, universe, region, "en_override")
+        return triState(factsOf(cardId, "shared"), keywordId, universe, region, "shared")
+      },
     })
   })
   const vocabularyLabel = (kind: string, code: string, lang: TextLang): string => {
@@ -206,12 +293,49 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
     search !== null &&
     !Array.isArray(search) &&
     search["normalizer_version"] === NORMALIZER_VERSION
+  const vocabularyCodes = (kind: string): string[] =>
+    rows("vocabulary")
+      .filter((row) => row["kind"] === kind && row["active"] === true)
+      .map((row) => stringValue(row["code"]))
+  const keywordOptions = index.keywords.map((row) => {
+    const id = stringValue(row["id"])
+    const own = index.textUnit(stringValue(row["name_unit_id"]))
+    const names = new Map<string, string>()
+    if (own) names.set(stringValue(own["lang"]), stringValue(own["text"]))
+    for (const entry of row["translations"] as Row[]) {
+      if (entry["field"] !== "name") continue
+      const text = translationText(index, stringValue(entry["translation_id"]))
+      if (text !== undefined) names.set(stringValue(entry["target_lang"]), text)
+    }
+    return { id, name: (lang: TextLang) => names.get(lang) ?? names.get("ja") ?? id }
+  })
+  const filterOptions = (): FilterOptions => ({
+    types: vocabularyCodes("type"),
+    rarities: vocabularyCodes("rarity"),
+    sets: index.families.map((row) => ({
+      code: stringValue(row["code"]),
+      id: stringValue(row["id"]),
+    })),
+    keywords: keywordOptions,
+  })
+  const mechanicCoverageSummary = (region: Region) => {
+    const released = entries.filter((entry) => entry.defaultPrinting[region] !== undefined)
+    const annotated = released.filter((entry) => {
+      const shared = factsOf(entry.cardId, "shared")
+      const override = region === "en" ? factsOf(entry.cardId, "en_override") : undefined
+      const facts = override && (override.present.size > 0 || override.coverage) ? override : shared
+      return facts.present.size > 0 || facts.coverage !== undefined
+    })
+    return { annotated: annotated.length, total: released.length }
+  }
   return {
     index,
     entries,
     sets,
     classCodes,
     normalizerMatches,
+    filterOptions,
+    mechanicCoverageSummary,
     suggest: (text, edition, limit) => suggest(text, entries, { edition, sets, limit }),
     results: (state, edition) => apply(state, entries, { edition, sets }),
     summary: (printingId) => summaries.get(printingId),

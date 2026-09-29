@@ -1,6 +1,6 @@
 import { type CardNoKey, cardNoKey, cardNoLookupKey } from "./cardNo"
-import { normalizeText } from "./normalize"
-import { NEUTRAL_CLASS, type QueryState } from "./query/model"
+import { compareCodePoints, normalizeText } from "./normalize"
+import { NEUTRAL_CLASS, type QuerySort, type QueryState } from "./query/model"
 
 // Search over the bootstrap only (architecture §4.7): the data layer flattens each card into one
 // entry, and everything here is a pure function of those entries, so ranking is testable without a
@@ -14,10 +14,26 @@ export interface SearchName {
   readonly normalized: string
 }
 
+export interface FaceStats {
+  readonly typeCode: string
+  readonly cost: number | null
+  readonly attack: number | null
+  readonly defense: number | null
+  /** The original name of this region's front face, for name sorting. */
+  readonly name: string
+}
+
 export interface SearchPrinting {
   readonly id: string
   readonly region: Region
   readonly cardNo: string
+  readonly rarity: string | null
+  /** `standard`, `alt`, `signed`… (printing.variant_key). */
+  readonly variant: string
+  /** The front face's art id; printings of one art group together in the art unit. */
+  readonly artId: string | null
+  /** Earliest product release date (YYYY-MM-DD) of this printing, when known. */
+  readonly releasedOn: string | null
   /** `cardNoLookupKey` of the printed number, or null when it does not parse. */
   readonly lookupKey: string | null
   /** `cardNoKey` of the printed number, for prefix matching by set and leading digits. */
@@ -38,6 +54,12 @@ export interface SearchEntry {
   readonly printings: readonly SearchPrinting[]
   /** The region view's default printing per region, when the card is released there. */
   readonly defaultPrinting: Partial<Record<Region, string>>
+  /** Set code (product_family.code) for the `set` facet. */
+  readonly setCode: string
+  /** Front-face stats per region the card is released in. */
+  readonly faces: Partial<Record<Region, FaceStats>>
+  /** Mechanic tri-state for a keyword as seen from a region (architecture §4.6). */
+  readonly mechanic: (keywordId: string, region: Region) => "present" | "absent" | "unknown"
 }
 
 export type MatchedField = "cardNo" | "name" | "alias"
@@ -149,27 +171,144 @@ function classMatches(entry: SearchEntry, classes: readonly string[]): boolean {
   return classes.includes(entry.classCode ?? NEUTRAL_CLASS)
 }
 
+const COST_CAP = 7
+
+/** The stats of the region a printing belongs to, else the other region's. */
+function statsOf(entry: SearchEntry, region: Region): FaceStats | undefined {
+  return entry.faces[region] ?? entry.faces[region === "jp" ? "en" : "jp"]
+}
+
+function costMatches(stats: FaceStats | undefined, range: QueryState["cost"]): boolean {
+  if (range.min === undefined && range.max === undefined) return true
+  if (stats?.cost === null || stats?.cost === undefined) return false
+  const cost = Math.min(stats.cost, COST_CAP)
+  return (
+    (range.min === undefined || cost >= range.min) && (range.max === undefined || cost <= range.max)
+  )
+}
+
+function mechanicsMatch(
+  entry: SearchEntry,
+  region: Region,
+  mechanics: QueryState["mechanics"],
+): boolean {
+  for (const [keywordId, wanted] of Object.entries(mechanics)) {
+    const state = entry.mechanic(keywordId, region)
+    if (wanted === "has" ? state !== "present" : state !== "absent") return false
+  }
+  return true
+}
+
+/** Printings of the entry that pass the printing-level facets (rarity, alt art). */
+function eligiblePrintings(entry: SearchEntry, state: QueryState): SearchPrinting[] {
+  return entry.printings.filter(
+    (printing) =>
+      (state.rarities.length === 0 ||
+        (printing.rarity !== null && state.rarities.includes(printing.rarity))) &&
+      (!state.altArtOnly || printing.variant !== "standard"),
+  )
+}
+
+/** Among candidates, the edition's default printing if eligible, else the first in snapshot order. */
+function representative(
+  entry: SearchEntry,
+  candidates: readonly SearchPrinting[],
+  edition: Region,
+): SearchPrinting | undefined {
+  const preferred = entry.defaultPrinting[edition]
+  return (
+    candidates.find((printing) => printing.id === preferred) ??
+    candidates.find((printing) => printing.region === edition) ??
+    candidates[0]
+  )
+}
+
+interface Sortable extends ResultItem {
+  readonly order: number
+  readonly rank: number
+  readonly printing: SearchPrinting
+  readonly stats: FaceStats | undefined
+}
+
+function compareNullable(a: number | null | undefined, b: number | null | undefined): number {
+  if (a === b) return 0
+  if (a === null || a === undefined) return 1
+  if (b === null || b === undefined) return -1
+  return a - b
+}
+
+const COMPARATORS: Record<QuerySort, (a: Sortable, b: Sortable) => number> = {
+  no: (a, b) =>
+    a.rank - b.rank || a.order - b.order || compareCodePoints(a.printing.cardNo, b.printing.cardNo),
+  cost: (a, b) => compareNullable(a.stats?.cost, b.stats?.cost) || a.order - b.order,
+  atk: (a, b) => compareNullable(a.stats?.attack, b.stats?.attack) || a.order - b.order,
+  def: (a, b) => compareNullable(a.stats?.defense, b.stats?.defense) || a.order - b.order,
+  name: (a, b) =>
+    compareCodePoints(normalizeText(a.stats?.name ?? ""), normalizeText(b.stats?.name ?? "")) ||
+    a.order - b.order,
+  date: (a, b) => {
+    const left = a.printing.releasedOn
+    const right = b.printing.releasedOn
+    if (left === right) return a.order - b.order
+    if (left === null) return 1
+    if (right === null) return -1
+    return compareCodePoints(left, right)
+  },
+}
+
 /**
  * The result list for a URL state: a pure function of the entries, so the same snapshot and the
- * same URL always give the same sequence. W3 applies `text` and `classes`; the other facets and
- * units arrive with the filter panel.
+ * same URL always give the same sequence. Every facet of the state applies; `unit` decides what
+ * one cell is (a card, an art, a printing) and the sort orders the cells.
  */
 export function apply(
   state: QueryState,
   entries: readonly SearchEntry[],
   options: SearchOptions,
 ): ResultItem[] {
-  // With text, the order is the suggest list's (rank, then snapshot order), so "see all" and the
-  // suggestions agree; without text it is the snapshot order.
-  const items: (ResultItem & { readonly rank: number; readonly order: number })[] = []
+  const items: Sortable[] = []
   for (const entry of entries) {
     if (!classMatches(entry, state.classes)) continue
+    if (state.sets.length > 0 && !state.sets.includes(entry.setCode)) continue
     const match = state.text === "" ? null : matchEntry(state.text, entry, options)
     if (state.text !== "" && match === null) continue
-    const printingId = match?.printingId ?? representativePrinting(entry, options.edition)
-    if (printingId === undefined) continue
-    items.push({ key: entry.cardId, printingId, rank: match?.rank ?? 0, order: entry.order })
+    const candidates = eligiblePrintings(entry, state)
+    if (candidates.length === 0) continue
+    const push = (printing: SearchPrinting, key: string) => {
+      const stats = statsOf(entry, printing.region)
+      if (state.types.length > 0 && (stats === undefined || !state.types.includes(stats.typeCode)))
+        return
+      if (!costMatches(stats, state.cost)) return
+      if (!mechanicsMatch(entry, printing.region, state.mechanics)) return
+      items.push({
+        key,
+        printingId: printing.id,
+        order: entry.order,
+        rank: match?.rank ?? 0,
+        printing,
+        stats,
+      })
+    }
+    if (state.unit === "printing") {
+      for (const printing of candidates) push(printing, printing.id)
+    } else if (state.unit === "art") {
+      const groups = new Map<string, SearchPrinting[]>()
+      for (const printing of candidates) {
+        const key = printing.artId ?? printing.id
+        groups.set(key, [...(groups.get(key) ?? []), printing])
+      }
+      for (const [key, group] of groups) {
+        const chosen = representative(entry, group, options.edition)
+        if (chosen) push(chosen, key)
+      }
+    } else {
+      // A typed card number opens that very printing; otherwise the edition's default.
+      const typed =
+        match?.field === "cardNo" ? candidates.find((p) => p.id === match.printingId) : undefined
+      const chosen = typed ?? representative(entry, candidates, options.edition)
+      if (chosen) push(chosen, entry.cardId)
+    }
   }
-  items.sort((a, b) => a.rank - b.rank || a.order - b.order)
+  items.sort(COMPARATORS[state.sort])
   return items.map(({ key, printingId }) => ({ key, printingId }))
 }

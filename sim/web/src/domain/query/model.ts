@@ -3,13 +3,13 @@
 // it. Vocabulary codes (classes, types, sets, rarities) come from the snapshot; `neutral` stands for
 // cards without a class.
 export const QUERY_UNITS = ["card", "art", "printing"] as const
-type QueryUnit = (typeof QUERY_UNITS)[number]
+export type QueryUnit = (typeof QUERY_UNITS)[number]
 
 export const QUERY_SORTS = ["no", "cost", "name", "date", "atk", "def"] as const
-type QuerySort = (typeof QUERY_SORTS)[number]
+export type QuerySort = (typeof QUERY_SORTS)[number]
 
 export const VIEW_MODES = ["grid", "table", "list"] as const
-type ViewMode = (typeof VIEW_MODES)[number]
+export type ViewMode = (typeof VIEW_MODES)[number]
 
 export type MechanicState = "has" | "not"
 

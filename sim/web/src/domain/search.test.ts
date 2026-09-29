@@ -22,6 +22,7 @@ const printing = (
   id: string,
   region: SearchPrinting["region"],
   cardNo: string,
+  extra: Partial<SearchPrinting> = {},
 ): SearchPrinting => ({
   id,
   region,
@@ -29,6 +30,11 @@ const printing = (
   lookupKey: cardNoLookupKey(cardNo, SETS),
   key: cardNoKey(cardNo, SETS),
   flat: normalizeText(cardNo),
+  rarity: null,
+  variant: "standard",
+  artId: null,
+  releasedOn: null,
+  ...extra,
 })
 const entry = (
   over: Partial<SearchEntry> & Pick<SearchEntry, "cardId" | "order">,
@@ -39,6 +45,9 @@ const entry = (
   aliases: [],
   printings: [],
   defaultPrinting: {},
+  setCode: "bp01",
+  faces: {},
+  mechanic: () => "unknown",
   ...over,
 })
 
@@ -192,5 +201,109 @@ describe("apply", () => {
       apply({ ...DEFAULT_QUERY, text: "BP01EN", classes: ["bishop"] }, ENTRIES, options),
     ).toEqual([{ key: "c:bp01-051", printingId: "p:bp01-051-en" }])
     expect(apply({ ...DEFAULT_QUERY, text: "nothing" }, ENTRIES, options)).toEqual([])
+  })
+})
+
+describe("apply facets, units and sorts", () => {
+  const stats = (over: Partial<import("./search").FaceStats> = {}) => ({
+    typeCode: "follower",
+    cost: 2,
+    attack: 2,
+    defense: 2,
+    name: "試作",
+    ...over,
+  })
+  const a = entry({
+    cardId: "c:a",
+    order: 1,
+    setCode: "bp01",
+    faces: { jp: stats({ cost: 1, attack: 1, defense: 3, name: "い" }) },
+    printings: [
+      printing("p:a", "jp", "BP01-001", {
+        rarity: "bronze",
+        artId: "art:a",
+        releasedOn: "2026-02-01",
+      }),
+      printing("p:a-alt", "jp", "BP01-001a", {
+        rarity: "bronze",
+        variant: "alt",
+        artId: "art:a2",
+        releasedOn: "2026-03-01",
+      }),
+    ],
+    defaultPrinting: { jp: "p:a" },
+    mechanic: (id) => (id === "kw:ward" ? "present" : "absent"),
+  })
+  const b = entry({
+    cardId: "c:b",
+    order: 2,
+    setCode: "sd01",
+    setId: "set:sd01",
+    faces: { jp: stats({ cost: 8, attack: 5, defense: 5, name: "あ", typeCode: "spell" }) },
+    printings: [
+      printing("p:b", "jp", "SD01-001", {
+        rarity: "gold",
+        artId: "art:b",
+        releasedOn: "2026-01-01",
+      }),
+      printing("p:b-sign", "jp", "SD01-001S", {
+        rarity: "gold",
+        variant: "signed",
+        artId: "art:b",
+        releasedOn: "2026-01-01",
+      }),
+    ],
+    defaultPrinting: { jp: "p:b" },
+    mechanic: () => "unknown",
+  })
+  const c = entry({
+    cardId: "c:c",
+    order: 3,
+    faces: { jp: stats({ cost: null, attack: null, defense: null, name: "う" }) },
+    printings: [printing("p:c", "jp", "BP01-003", { rarity: "silver", artId: "art:c" })],
+    defaultPrinting: { jp: "p:c" },
+    mechanic: () => "unknown",
+  })
+  const all = [a, b, c]
+  const keys = (state: Partial<typeof DEFAULT_QUERY>) =>
+    apply({ ...DEFAULT_QUERY, ...state }, all, options).map((item) => item.key)
+
+  it("filters by set, type, cost (7 = 7+), rarity and alt art", () => {
+    expect(keys({ sets: ["sd01"] })).toEqual(["c:b"])
+    expect(keys({ types: ["spell"] })).toEqual(["c:b"])
+    expect(keys({ cost: { min: 2 } })).toEqual(["c:b"])
+    expect(keys({ cost: { max: 7 } })).toEqual(["c:a", "c:b"])
+    expect(keys({ cost: { min: 7, max: 7 } })).toEqual(["c:b"])
+    expect(keys({ rarities: ["gold", "silver"] })).toEqual(["c:b", "c:c"])
+    expect(keys({ altArtOnly: true })).toEqual(["c:a", "c:b"])
+    expect(apply({ ...DEFAULT_QUERY, altArtOnly: true }, all, options)[0]?.printingId).toBe(
+      "p:a-alt",
+    )
+  })
+
+  it("filters by mechanic tri-state: has needs present, not needs absent", () => {
+    expect(keys({ mechanics: { "kw:ward": "has" } })).toEqual(["c:a"])
+    expect(keys({ mechanics: { "kw:x": "not" } })).toEqual(["c:a"])
+    expect(keys({ mechanics: { "kw:ward": "not" } })).toEqual([])
+  })
+
+  it("groups by unit: card, art, printing", () => {
+    expect(apply({ ...DEFAULT_QUERY, unit: "art" }, all, options)).toEqual([
+      { key: "art:a", printingId: "p:a" },
+      { key: "art:a2", printingId: "p:a-alt" },
+      { key: "art:b", printingId: "p:b" },
+      { key: "art:c", printingId: "p:c" },
+    ])
+    expect(
+      apply({ ...DEFAULT_QUERY, unit: "printing" }, all, options).map((item) => item.key),
+    ).toEqual(["p:a", "p:a-alt", "p:b", "p:b-sign", "p:c"])
+  })
+
+  it("sorts by cost, attack, defense, name and date with unknowns last", () => {
+    expect(keys({ sort: "cost" })).toEqual(["c:a", "c:b", "c:c"])
+    expect(keys({ sort: "atk" })).toEqual(["c:a", "c:b", "c:c"])
+    expect(keys({ sort: "def" })).toEqual(["c:a", "c:b", "c:c"])
+    expect(keys({ sort: "name" })).toEqual(["c:b", "c:a", "c:c"])
+    expect(keys({ sort: "date" })).toEqual(["c:b", "c:a", "c:c"])
   })
 })
