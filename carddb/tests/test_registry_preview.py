@@ -59,6 +59,7 @@ def test_jp_projection_preserves_all_history_and_explains_en(
     ]
     assert len(corrections) == 2
     assert all(p.disposition == "deferred" for p in corrections)
+    assert all(p.reasons == ("source_correction_deferred",) for p in corrections)
     report = json.dumps(plan.report())
     assert "Corrected synthetic rule." not in report
     assert "Rule." not in report
@@ -391,3 +392,30 @@ def test_art_without_adopted_baseline_is_explicitly_deferred(
     plan = plan_preview(registry_root, evidence(inputs), regions=("en",))
     assert not plan.included("art")
     assert any(p.reasons == ("art_baseline_deferred",) for p in plan.projections)
+
+
+@pytest.mark.parametrize("kind", ["art", "region_mapping_review", "card_related"])
+def test_proposed_review_is_excluded_with_reason(
+    registry_root: Path, inputs: Inputs, kind: str
+) -> None:
+    original = plan_preview(registry_root, evidence(inputs), regions=("jp", "en"))
+    [record] = original.included(kind)
+    path = registry_root / record.shard_path
+    shard = Shard.model_validate(read_yaml(path))
+    [decision] = [d for d in shard.decisions if d.id == record.decision_id]
+    decision.state = "proposed"
+    decision.sample_ids = []
+    rewrite(registry_root, path, shard)
+
+    plan = plan_preview(registry_root, evidence(inputs), regions=("jp", "en"))
+    item = next(p for p in plan.projections if p.record_key == record.record_key)
+    assert item.decision_state == "proposed"
+    assert item.disposition == "excluded"
+    assert item.reasons == ("decision_not_confirmed",)
+    assert not plan.included(kind)
+    with create_database(compile_build(("en", "related"))) as db:
+        parents(db, plan)
+        import_preview(db, plan, authored_revision=REVISION)
+        assert not db.rows(kind)
+        if kind == "art":
+            assert all(row.values["art_id"] is None for row in db.rows("printing_face"))

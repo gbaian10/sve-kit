@@ -19,10 +19,11 @@ An EN suffix is never used to infer an identity or source.
 Source IDs, URLs and raw hashes come from the descriptor. The locator is
 `<store-id>:<relative-content-addressed-path>`, with no machine path. Fetched time,
 ETag and Last-Modified come from the descriptor's **first** receipt, not the
-batch's most recent receipt. Its known `first_fetched_at` is normalized to UTC
-`Z`; this preserves the receipt's URL-level timestamp and does not invent a
-first publication or first content-version fetch time. Callers pin the parser's
-code/dependency version explicitly.
+batch's most recent receipt. Fetched time uses that receipt's `last_changed_at`,
+normalized to UTC `Z`: the writer records when these raw bytes replaced the
+previous content. `first_fetched_at` belongs to the URL, not this content version;
+neither that timestamp nor archive observation time is substituted. Callers pin
+the parser's code/dependency version explicitly.
 
 `EvidenceProvider` is the injection boundary for already verified, pinned inputs.
 Providers must bind extracted observations and face metadata to the actual raw

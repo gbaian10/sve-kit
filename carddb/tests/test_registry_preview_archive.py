@@ -47,6 +47,8 @@ def test_pins_version_url_hash_first_receipt_and_parser(
     resource = replace(
         _resource(card_url("TEST-001"), "raw/card.html", RAW, Kind.CARD),
         etag="first-etag",
+        first_fetched_at=NOW - timedelta(days=3),
+        last_changed_at=NOW - timedelta(days=1),
     )
     _put(store, resource, RAW)
     first = seal_batch(store)
@@ -74,7 +76,7 @@ def test_pins_version_url_hash_first_receipt_and_parser(
         found.source.raw_locator == "test-store:" + first.inventory.entries[0].blob.path
     )
     assert found.source.etag == "first-etag"
-    assert found.source.fetched_at == "2026-09-29T00:00:00Z"
+    assert found.source.fetched_at == "2026-09-28T00:00:00Z"
     assert found.source.parser_version == "test-parser"
     expected = observation(
         legacy_projection(extract_card(RAW, number="TEST-001")), "jp"

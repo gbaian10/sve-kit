@@ -88,7 +88,7 @@ class FrozenJP:
             url=descriptor.url,
             raw_locator=f"{self._store_id}:{entry.blob.path}",
             sha256=descriptor.raw_sha256,
-            fetched_at=_instant(resource.first_fetched_at),
+            fetched_at=_instant(resource.last_changed_at),
             etag=resource.etag,
             last_modified=resource.last_modified,
             parser_version=self._parser_version,
