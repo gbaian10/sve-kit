@@ -5,6 +5,8 @@ import { useLocation, useNavigate } from "react-router"
 export interface ListEntryState {
   readonly pages?: number
   readonly anchor?: string
+  /** The filter sheet is open on this entry (architecture §7: it gets its own history entry). */
+  readonly sheet?: boolean
 }
 
 /** What a card entry receives from the list or suggest list that opened it. */

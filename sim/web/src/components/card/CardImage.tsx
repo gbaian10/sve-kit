@@ -55,10 +55,16 @@ export function CardImage({
 }: CardImageProps) {
   const { t } = useTranslation()
   const { dataSaver } = usePrefs()
-  const [loaded, setLoaded] = useState(false)
-  const [failed, setFailed] = useState(false)
+  // Load state belongs to one image URL: another printing in the same slot starts afresh.
+  const [image, setImage] = useState<{
+    readonly src: string | undefined
+    readonly loaded: boolean
+    readonly failed: boolean
+  }>({ src: undefined, loaded: false, failed: false })
   const asset = images?.asset(summary.printingId, summary.faceId)
   const source = images?.cardImage(summary.printingId, summary.faceId)
+  const { loaded, failed } =
+    source !== undefined && image.src === source.src ? image : { loaded: false, failed: false }
   const availability = asset?.["availability"]
   const publication = asset?.["publication_state"]
   const tag =
@@ -111,10 +117,10 @@ export function CardImage({
           loading="lazy"
           decoding="async"
           onLoad={() => {
-            setLoaded(true)
+            setImage({ src: source.src, loaded: true, failed: false })
           }}
           onError={() => {
-            setFailed(true)
+            setImage({ src: source.src, loaded: false, failed: true })
           }}
           className={cn(
             "absolute inset-0 size-full transition-opacity duration-200",

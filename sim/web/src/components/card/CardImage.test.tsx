@@ -1,4 +1,6 @@
 import { act, screen } from "@testing-library/react"
+import userEvent from "@testing-library/user-event"
+import { useState } from "react"
 import { afterEach, describe, expect, it } from "vitest"
 
 import type { CardSummary, ImageIndex } from "../../data"
@@ -46,7 +48,56 @@ afterEach(() => {
   prefsStore.set(DEFAULT_PREFS)
 })
 
+// Two printings through one slot, as a results cell keyed by card id does after a filter change.
+function TwoPrintings() {
+  const [second, setSecond] = useState(false)
+  const index: ImageIndex = {
+    asset: () => ({ id: "img", availability: "available", publication_state: "approved" }),
+    cardImage: (printingId) => ({
+      src: `/cdn/${printingId}.webp`,
+      srcSet: `/cdn/${printingId}.webp 320w`,
+      width: 320,
+      height: 447,
+    }),
+  }
+  return (
+    <>
+      <button
+        type="button"
+        onClick={() => {
+          setSecond(true)
+        }}
+      >
+        next
+      </button>
+      <CardImage
+        summary={second ? { ...summary, printingId: "p:bp01-002", cardNo: "BP01-002" } : summary}
+        name={name}
+        images={index}
+        alt="redundant"
+        sizes="50vw"
+        className="w-full"
+      />
+    </>
+  )
+}
+
 describe("CardImage", () => {
+  it("tries the image of another printing after one failed in the same slot", async () => {
+    await renderInRouter(<TwoPrintings />)
+    const user = userEvent.setup()
+    const img = document.querySelector("img[srcset]")
+    if (!img) throw new Error("no image")
+    act(() => {
+      img.dispatchEvent(new Event("error"))
+    })
+    expect(screen.getByText("尚無卡圖")).toBeInTheDocument()
+    expect(document.querySelector("img[srcset]")).toBeNull()
+    await user.click(screen.getByRole("button", { name: "next" }))
+    expect(document.querySelector("img[srcset]")).toHaveAttribute("src", "/cdn/p:bp01-002.webp")
+    expect(screen.queryByText("尚無卡圖")).not.toBeInTheDocument()
+  })
+
   it("names the card in identify mode and stays silent in redundant mode", async () => {
     await renderInRouter(
       <CardImage

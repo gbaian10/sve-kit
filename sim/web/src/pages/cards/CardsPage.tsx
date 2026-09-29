@@ -81,7 +81,6 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
     setEdit({ key: location.key, value })
   }
   const [focused, setFocused] = useState(false)
-  const [sheetOpen, setSheetOpen] = useState(false)
   const online = useOnline()
   // The view: the URL when it says so, else the preference (architecture §2.4).
   const view: ViewMode = query.view ?? prefs.viewMode
@@ -102,6 +101,23 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
   const commit = (next: QueryState) => {
     setEdit(null)
     setParams(formatQuery(next))
+  }
+  // The filter sheet lives on its own history entry (architecture §7): opening pushes one, so the
+  // browser's back closes it; applying replaces that entry with the new list URL.
+  const sheetOpen = entry.sheet === true
+  const openSheet = () => {
+    void navigate(location.pathname + location.search, { state: { ...entry, sheet: true } })
+  }
+  const closeSheet = () => {
+    void navigate(-1)
+  }
+  const applySheet = (next: QueryState) => {
+    setEdit(null)
+    const search = formatQuery(next).toString()
+    void navigate(location.pathname + (search === "" ? "" : `?${search}`), {
+      replace: true,
+      state: { pages: 1 },
+    })
   }
   const nameOf = useCallback(
     (summary: CardSummary) => displayName(summary.name, uiLanguage, prefs.nameDisplay),
@@ -308,9 +324,7 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
           filterCount={filterCount}
           {...(catalog
             ? {
-                onOpenFilters: () => {
-                  setSheetOpen(true)
-                },
+                onOpenFilters: openSheet,
               }
             : {})}
         />
@@ -366,14 +380,9 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
       {catalog && options && sheetOpen && (
         <FilterSheet
           open={sheetOpen}
-          onClose={() => {
-            setSheetOpen(false)
-          }}
+          onClose={closeSheet}
           applied={query}
-          onApply={(next) => {
-            setSheetOpen(false)
-            commit(next)
-          }}
+          onApply={applySheet}
           options={options}
           classes={quickBar}
           label={(kind, code) => catalog.vocabularyLabel(kind, code, textLang)}

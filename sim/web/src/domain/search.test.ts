@@ -299,6 +299,31 @@ describe("apply facets, units and sorts", () => {
     ).toEqual(["p:a", "p:a-alt", "p:b", "p:b-sign", "p:c"])
   })
 
+  it("judges type, cost and mechanics per printing and lists the printing that passes", () => {
+    const d = entry({
+      cardId: "c:d",
+      order: 4,
+      faces: { jp: stats({ cost: 2 }), en: stats({ cost: 3, typeCode: "spell", name: "Proto" }) },
+      printings: [
+        printing("p:d", "jp", "BP01-004", { artId: "art:d" }),
+        printing("p:d-en", "en", "BP01EN-004", { artId: "art:d" }),
+      ],
+      defaultPrinting: { jp: "p:d", en: "p:d-en" },
+      mechanic: (id, region) => (id === "kw:x" && region === "en" ? "present" : "absent"),
+    })
+    const only = (state: Partial<typeof DEFAULT_QUERY>) =>
+      apply({ ...DEFAULT_QUERY, ...state }, [d], options)
+    expect(only({ cost: { min: 3, max: 3 } })).toEqual([{ key: "c:d", printingId: "p:d-en" }])
+    expect(only({ types: ["spell"], unit: "art" })).toEqual([
+      { key: "art:d", printingId: "p:d-en" },
+    ])
+    expect(only({ mechanics: { "kw:x": "has" }, unit: "printing" })).toEqual([
+      { key: "p:d-en", printingId: "p:d-en" },
+    ])
+    expect(only({ cost: { min: 2, max: 2 } })).toEqual([{ key: "c:d", printingId: "p:d" }])
+    expect(only({ cost: { min: 4 } })).toEqual([])
+  })
+
   it("sorts by cost, attack, defense, name and date with unknowns last", () => {
     expect(keys({ sort: "cost" })).toEqual(["c:a", "c:b", "c:c"])
     expect(keys({ sort: "atk" })).toEqual(["c:a", "c:b", "c:c"])

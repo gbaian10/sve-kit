@@ -28,7 +28,8 @@ async function open(applied: QueryState = DEFAULT_QUERY) {
     (state: QueryState) =>
       state.classes.length * 10 +
       (state.altArtOnly ? 1 : 0) +
-      Object.keys(state.mechanics).length * 100,
+      Object.keys(state.mechanics).length * 100 +
+      (state.text === "" ? 0 : 5),
   )
   await renderInRouter(
     <FilterSheet
@@ -84,6 +85,18 @@ describe("FilterSheet", () => {
     expect(onApply).toHaveBeenCalledWith(
       expect.objectContaining({ mechanics: { "kw:ward": "has" }, cost: { min: 2, max: 7 } }),
     )
+  })
+
+  it("keeps the text and view on reset, so the count is what show applies", async () => {
+    const applied: QueryState = { ...DEFAULT_QUERY, text: "bp01", view: "table", classes: ["elf"] }
+    const { onApply } = await open(applied)
+    const user = userEvent.setup()
+    const dialog = screen.getByRole("dialog")
+    expect(within(dialog).getByRole("button", { name: "顯示 15 張" })).toBeInTheDocument()
+    await user.click(within(dialog).getAllByRole("button", { name: "重設" })[0] ?? dialog)
+    expect(within(dialog).getByRole("button", { name: "顯示 5 張" })).toBeInTheDocument()
+    await user.click(within(dialog).getByRole("button", { name: "顯示 5 張" }))
+    expect(onApply).toHaveBeenCalledWith({ ...DEFAULT_QUERY, text: "bp01", view: "table" })
   })
 
   it("resets the draft and keeps the applied text and view when applying", async () => {

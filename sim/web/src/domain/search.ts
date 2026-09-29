@@ -209,6 +209,19 @@ function eligiblePrintings(entry: SearchEntry, state: QueryState): SearchPrintin
   )
 }
 
+/** Type, cost and mechanics belong to one region's face: judged where the printing is. */
+function regionFacetsMatch(
+  entry: SearchEntry,
+  printing: SearchPrinting,
+  state: QueryState,
+): boolean {
+  const stats = statsOf(entry, printing.region)
+  if (state.types.length > 0 && (stats === undefined || !state.types.includes(stats.typeCode)))
+    return false
+  if (!costMatches(stats, state.cost)) return false
+  return mechanicsMatch(entry, printing.region, state.mechanics)
+}
+
 /** Among candidates, the edition's default printing if eligible, else the first in snapshot order. */
 function representative(
   entry: SearchEntry,
@@ -272,21 +285,21 @@ export function apply(
     if (state.sets.length > 0 && !state.sets.includes(entry.setCode)) continue
     const match = state.text === "" ? null : matchEntry(state.text, entry, options)
     if (state.text !== "" && match === null) continue
-    const candidates = eligiblePrintings(entry, state)
+    // Region-bound facets are judged per printing first, so the representative of a card or an
+    // art group is chosen among the printings that pass: a card costing 2 in JP and 3 in EN stays
+    // listed, as its EN printing, when cost 3 is asked for.
+    const candidates = eligiblePrintings(entry, state).filter((printing) =>
+      regionFacetsMatch(entry, printing, state),
+    )
     if (candidates.length === 0) continue
     const push = (printing: SearchPrinting, key: string) => {
-      const stats = statsOf(entry, printing.region)
-      if (state.types.length > 0 && (stats === undefined || !state.types.includes(stats.typeCode)))
-        return
-      if (!costMatches(stats, state.cost)) return
-      if (!mechanicsMatch(entry, printing.region, state.mechanics)) return
       items.push({
         key,
         printingId: printing.id,
         order: entry.order,
         rank: match?.rank ?? 0,
         printing,
-        stats,
+        stats: statsOf(entry, printing.region),
       })
     }
     if (state.unit === "printing") {

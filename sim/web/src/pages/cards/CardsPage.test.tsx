@@ -236,6 +236,40 @@ describe("CardsPage", () => {
     expect(router.state.location.search).toBe("")
   })
 
+  it("gives the filter sheet its own history entry: back closes it, apply replaces it", async () => {
+    const { router } = await open("/cards")
+    const user = userEvent.setup()
+    await user.click(screen.getByRole("button", { name: "篩選" }))
+    await screen.findByRole("dialog")
+    expect(router.state.location.state).toMatchObject({ sheet: true })
+    await router.navigate(-1)
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
+    await router.navigate(1)
+    await screen.findByRole("dialog")
+    // jsdom fires no `cancel` on Escape; the close button takes the same onClose path.
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "關閉" }))
+    await waitFor(() => {
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    })
+    expect(router.state.location.state ?? {}).not.toHaveProperty("sheet")
+    // Applying replaces the sheet's entry, so back returns to the list before the sheet.
+    await user.click(screen.getByRole("button", { name: "篩選" }))
+    const dialog = await screen.findByRole("dialog")
+    await user.click(within(dialog).getByRole("button", { name: "主教" }))
+    await user.click(within(dialog).getByRole("button", { name: /顯示/u }))
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("?class=bishop")
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+    await router.navigate(-1)
+    await waitFor(() => {
+      expect(router.state.location.search).toBe("")
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
+  })
+
   it("shows the empty state with a reset, and recent cards on focus", async () => {
     const { router } = await open("/cards?q=zzz&class=elf")
     const user = userEvent.setup()

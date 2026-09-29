@@ -159,7 +159,13 @@ export function FilterSheet({
           <Button
             size="lg"
             onClick={() => {
-              setDraft(DEFAULT_QUERY)
+              // Reset clears the facets only; the text and view stay, so the count is what "show"
+              // will apply.
+              setDraft({
+                ...DEFAULT_QUERY,
+                text: applied.text,
+                ...(applied.view === undefined ? {} : { view: applied.view }),
+              })
             }}
           >
             {t("filters.reset")}

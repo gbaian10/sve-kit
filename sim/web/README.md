@@ -207,8 +207,7 @@ neutral colour and an initial.
 
 Every facet of `QueryState` applies in `apply` (`src/domain/search.ts`): text, classes, cost range
 (7 means 7 and above), types, mechanics, sets, rarities and alt art only. Types, cost and mechanics
-are judged per printing in that printing's region, so a card stays listed while any eligible
-printing matches; `unit` then decides what one result is: a card (the typed printing, else the
+are judged per printing in that printing's region, so a card stays listed while any eligible printing matches and its representative is chosen among the printings that pass; `unit` then decides what one result is: a card (the typed printing, else the
 edition's default among the eligible ones), an art group (`printing.art_id`, else the printing
 itself) or a printing. Sorting is one comparator per `QuerySort` (`COMPARATORS`): the default keeps
 the search rank and snapshot order, the others compare cost / attack / defense / name / release
@@ -223,8 +222,11 @@ entry waits for effect-text search (W8).
 
 The sheet (`components/filters/FilterSheet.tsx`) edits a draft of the applied state: the count in
 its footer is computed live from the draft, "show" commits it and keeps the URL's text and `view`,
-"reset" clears the draft, closing keeps what was applied. `chips.ts` turns the applied state into
-the summary chips (four shown, then "N more"); each chip removes only its own condition.
+"reset" clears the facets but keeps that text and view (so the count stays what "show" applies),
+closing keeps what was applied. The sheet has its own history entry (architecture §7): opening
+pushes one so the browser's back closes it, closing goes back, and applying replaces that entry
+with the new list URL. `chips.ts` turns the applied state into the summary chips (four shown, then
+"N more"); each chip removes only its own condition.
 
 `ControlBar` holds the result count in the unit's word, the sort select, the grid density (2 or 3
 columns, phones only, a preference) and the view control. `view` follows architecture §2.1: the
