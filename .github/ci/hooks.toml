@@ -35,7 +35,7 @@ job = "repo"
 [hooks.taplo-format]
 job = "repo"
 
-[hooks.markdownlint-cli2-docker]
+[hooks.markdownlint-cli2]
 job = "repo"
 
 [hooks.gitleaks-staged]
@@ -46,6 +46,12 @@ reason = "Scans staged changes only, so it would scan nothing in a clean CI chec
 job = "repo"
 
 [hooks.uv-lock]
+job = "repo"
+
+[hooks.actionlint]
+job = "repo"
+
+[hooks.zizmor]
 job = "repo"
 
 [hooks.schema-er-build]
