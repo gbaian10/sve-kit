@@ -1,7 +1,8 @@
 """Check commit messages against the commitizen rules with the gitmoji made mandatory.
 
 cz-conventional-gitmoji leaves the gitmoji optional (the local gitmojify hook adds it), but a
-squash merge on GitHub runs no local hook, so CI must reject a message without one.
+squash merge on GitHub runs no local hook, so CI must reject a message without one. A leading
+GitHub shortcode such as `:arrow_up:` counts as its gitmoji: Dependabot writes commits that way.
 
 Usage (run through the carddb dev environment, which has commitizen):
   uv run --project carddb --no-default-groups --group dev python .github/ci/commit_msg.py --message TEXT
@@ -16,6 +17,7 @@ import sys
 
 from commitizen.config import read_cfg
 from commitizen.factory import committer_factory
+from shared.utils import get_gitmojis
 
 # The pattern wraps each gitmoji in an optional group such as `(✨ {1,2})?feat`; drop the `?`.
 _OPTIONAL_EMOJI = re.compile(r"(\(\S+ \{1,2\}\))\?")
@@ -25,6 +27,14 @@ def strict_pattern() -> re.Pattern[str]:
     """Return the commitizen schema pattern with the gitmoji required."""
     committer = committer_factory(read_cfg())
     return re.compile(_OPTIONAL_EMOJI.sub(r"\1", committer.schema_pattern()))
+
+
+def with_icon(text: str) -> str:
+    """Replace a leading gitmoji shortcode (`:arrow_up: …`) with its emoji."""
+    for moji in get_gitmojis():
+        if text.startswith(f"{moji.code} "):
+            return moji.icon + text.removeprefix(moji.code)
+    return text
 
 
 def allowed_prefixes() -> tuple[str, ...]:
@@ -67,7 +77,7 @@ def main(argv: list[str]) -> int:
     failures = [
         (ref, text.splitlines()[0] if text else "")
         for ref, text in items
-        if not text.startswith(prefixes) and not pattern.fullmatch(text)
+        if not text.startswith(prefixes) and not pattern.fullmatch(with_icon(text))
     ]
     for ref, first_line in failures:
         sys.stderr.write(
