@@ -96,11 +96,18 @@ export function matchEntry(text: string, entry: SearchEntry, options: SearchOpti
     const exact = entry.printings.find((printing) => printing.lookupKey === typedKey)
     if (exact) return { field: "cardNo", rank: 0, printingId: exact.id }
   }
+  // Digits alone (`51`, `051`) are the number part of any set (design: "part of the number");
+  // a whole-number hit counts as an exact one, a shorter run of digits as a prefix.
+  const digits = /^\d+$/u.test(flat) ? String(Number(flat)) : null
+  if (digits !== null) {
+    const whole = entry.printings.find(
+      (printing) => printing.key !== null && printing.key.number === digits,
+    )
+    if (whole) return { field: "cardNo", rank: 0, printingId: whole.id }
+  }
   // `bp01-5` should list BP01-050…059 too: leading zeros make a plain prefix miss, so a typed
   // number is compared by set and number digits; text without a number falls back to the flat form.
   const typed = cardNoKey(text, options.sets)
-  // Digits alone (`51`, `051`) are the number part of any set (design: "part of the number").
-  const digits = /^\d+$/u.test(flat) ? String(Number(flat)) : null
   const prefix = entry.printings.find(
     (printing) =>
       printing.flat.startsWith(flat) ||

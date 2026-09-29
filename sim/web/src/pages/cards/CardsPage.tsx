@@ -87,12 +87,16 @@ export function CardsPage() {
     () => (catalog && debounced !== "" ? catalog.suggest(debounced, edition, SUGGEST_LIMIT) : []),
     [catalog, debounced, edition],
   )
+  // Suggestions ignore the list's filters (architecture §2.2: a suggest background is `?q=` only),
+  // so "see all" counts and commits the typed text alone. It reads the input, not the debounced
+  // text, so a click during the debounce window keeps what was typed last.
+  const typed = input.trim()
   const suggestTotal = useMemo(
     () =>
-      catalog && debounced !== ""
-        ? catalog.results({ ...query, text: debounced }, edition).length
+      catalog && typed !== ""
+        ? catalog.results({ ...DEFAULT_QUERY, text: typed }, edition).length
         : 0,
-    [catalog, debounced, edition, query],
+    [catalog, typed, edition],
   )
   const rows: SuggestRow[] = useMemo(() => {
     if (!catalog) return []
@@ -153,7 +157,7 @@ export function CardsPage() {
   const seeAll = () => {
     setFocused(false)
     inputRef.current?.blur()
-    commit({ ...query, text: debounced })
+    commit({ ...DEFAULT_QUERY, text: typed })
   }
   const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
     if (event.key === "ArrowDown" || event.key === "ArrowUp") {
@@ -241,7 +245,7 @@ export function CardsPage() {
               onPick={openSuggestion}
               onHover={setActive}
               {...(debounced !== ""
-                ? { query: { text: debounced, total: suggestTotal, onSeeAll: seeAll } }
+                ? { query: { text: typed, total: suggestTotal, onSeeAll: seeAll } }
                 : {
                     onClearRecent: () => {
                       recentStore.clear()

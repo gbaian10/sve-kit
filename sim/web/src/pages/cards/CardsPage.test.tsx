@@ -110,6 +110,27 @@ describe("CardsPage", () => {
     expect(router.state.location.state).toMatchObject({ anchor: "c:bp01-051", pages: 1 })
   })
 
+  it("suggests across classes and 'see all' commits the text alone", async () => {
+    const { router } = await open("/cards?class=bishop")
+    const user = userEvent.setup()
+    await user.type(screen.getByRole("combobox"), "試作の妖精")
+    const list = await screen.findByRole("listbox")
+    expect(within(list).getAllByRole("option").length).toBeGreaterThan(0)
+    await user.click(await screen.findByRole("button", { name: /看全部/u }))
+    expect(router.state.location.search).toBe("?q=%E8%A9%A6%E4%BD%9C%E3%81%AE%E5%A6%96%E7%B2%BE")
+  })
+
+  it("'see all' takes what is typed now, even during the debounce window", async () => {
+    const { router } = await open()
+    const user = userEvent.setup()
+    const input = screen.getByRole("combobox")
+    await user.type(input, "bp01-0")
+    await screen.findByRole("listbox")
+    await user.type(input, "5")
+    await user.click(screen.getByRole("button", { name: /看全部/u }))
+    expect(router.state.location.search).toBe("?q=bp01-05")
+  })
+
   it("shows the empty state with a reset, and recent cards on focus", async () => {
     const { router } = await open("/cards?q=zzz&class=elf")
     const user = userEvent.setup()

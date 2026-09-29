@@ -98,8 +98,9 @@ describe("matchEntry", () => {
     expect(matchEntry("bp01-0", templar, options)).toMatchObject({ field: "cardNo", rank: 1 })
     expect(matchEntry("bp01-5", templar, options)).toMatchObject({ field: "cardNo", rank: 1 })
     expect(matchEntry("bp01", templar, options)).toMatchObject({ field: "cardNo", rank: 1 })
-    expect(matchEntry("51", templar, options)).toMatchObject({ field: "cardNo", rank: 1 })
-    expect(matchEntry("051", templar, options)).toMatchObject({ field: "cardNo", rank: 1 })
+    expect(matchEntry("51", templar, options)).toMatchObject({ field: "cardNo", rank: 0 })
+    expect(matchEntry("051", templar, options)).toMatchObject({ field: "cardNo", rank: 0 })
+    expect(matchEntry("5", templar, options)).toMatchObject({ field: "cardNo", rank: 1 })
     expect(matchEntry("52", templar, options)).toBeNull()
     expect(matchEntry("bp01-6", templar, options)).toBeNull()
     expect(matchEntry("bp02-5", templar, options)).toBeNull()
@@ -158,6 +159,18 @@ describe("apply", () => {
       { key: "c:bp01-001", printingId: "p:bp01-001" },
       { key: "c:pr-001", printingId: "p:pr-001" },
     ])
+  })
+
+  it("puts a whole-number hit before a same-digits prefix across sets", () => {
+    const later = entry({
+      cardId: "c:sd01-510",
+      order: 2,
+      printings: [printing("p:sd01-510", "jp", "SD01-510")],
+      defaultPrinting: { jp: "p:sd01-510" },
+    })
+    expect(
+      apply({ ...DEFAULT_QUERY, text: "51" }, [later, templar], options).map((item) => item.key),
+    ).toEqual(["c:bp01-051", "c:sd01-510"])
   })
 
   it("orders text hits like the suggest list: number hits before name hits", () => {
