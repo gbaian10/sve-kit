@@ -68,7 +68,9 @@ describe("CardPage", () => {
     expect(screen.getAllByRole("img", { name: "入場曲" }).length).toBeGreaterThan(0)
     expect(screen.getAllByRole("img", { name: "費用 2" }).length).toBeGreaterThan(0)
     expect(screen.getByText("本站翻譯・非官方")).toBeInTheDocument()
-    expect(recentStore.get()).toEqual(["p:bp01-051"])
+    await waitFor(() => {
+      expect(recentStore.get()).toEqual(["p:bp01-051"])
+    })
   })
 
   it("explains a keyword in place and links to cards with it", async () => {
@@ -84,15 +86,23 @@ describe("CardPage", () => {
     )
   })
 
-  it("is an overlay with prev/next when opened with a background, and back closes it", async () => {
-    const { router } = await open("/cards/BP01-051", listState)
+  it("is a modal overlay with prev/next when opened with a background, and back closes it", async () => {
+    prefsStore.set({ uiLanguage: "zh-TW" })
+    const { router } = await renderRoutes(routes, { initialEntries: ["/cards"] })
+    await screen.findByRole("button", { name: "精靈" }, { timeout: 5000 })
+    await router.navigate("/cards/BP01-051", { state: listState })
+    await screen.findByRole("heading", { level: 1, name: /試作/u }, { timeout: 5000 })
     const user = userEvent.setup()
     const dialog = screen.getByRole("dialog")
-    expect(within(dialog).getByRole("button", { name: "返回" })).toBeInTheDocument()
+    expect(dialog).toHaveAttribute("open")
+    const back = within(dialog).getByRole("button", { name: "返回" })
+    await waitFor(() => {
+      expect(back).toHaveFocus()
+    })
     expect(within(dialog).queryByRole("link", { name: "回查卡" })).not.toBeInTheDocument()
-    // The list renders underneath, inert.
+    // The list renders underneath, inert; prev/next live inside the dialog.
     expect(screen.getByRole("combobox", { hidden: true })).toBeInTheDocument()
-    const next = screen.getByRole("button", { name: "下一張" })
+    const next = within(dialog).getByRole("button", { name: "下一張" })
     expect(next).toBeEnabled()
     await user.click(next)
     await waitFor(() => {
@@ -100,11 +110,16 @@ describe("CardPage", () => {
     })
     expect(router.state.location.state).toMatchObject({ source: "results", pages: 1 })
     expect((router.state.location.state as CardEntryState).resultKey).not.toBe("c:bp01-051")
-    await user.click(screen.getByRole("button", { name: "上一張" }))
+    await user.click(within(screen.getByRole("dialog")).getByRole("button", { name: "上一張" }))
     await waitFor(() => {
       expect(router.state.location.pathname).toBe(SLUG_051)
     })
     expect((router.state.location.state as CardEntryState).resultKey).toBe("c:bp01-051")
+    await user.keyboard("{Escape}")
+    await waitFor(() => {
+      expect(router.state.location.pathname).toBe("/cards")
+    })
+    expect(screen.queryByRole("dialog")).not.toBeInTheDocument()
   })
 
   it("hides prev/next when the card is not in the sequence and at the ends", async () => {
@@ -164,6 +179,12 @@ describe("CardPage", () => {
       await screen.findByRole("heading", { level: 1, name: "試作見習兵" }, { timeout: 5000 }),
     ).toBeInTheDocument()
     provisional.unmount()
+  })
+
+  it("tells an English-only card apart from a Japanese card without an English edition", async () => {
+    await open("/cards/BP01EN-090")
+    expect(screen.getByText(/尚未發行日文版|尚無已確認對應/u)).toBeInTheDocument()
+    expect(screen.queryByText("尚未發行英文版")).not.toBeInTheDocument()
   })
 
   it("switches edition to the counterpart printing and keeps the entry state", async () => {

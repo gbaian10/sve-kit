@@ -1,4 +1,4 @@
-import { useId, useState } from "react"
+import { useEffect, useId, useState } from "react"
 import { useTranslation } from "react-i18next"
 
 import type { KeywordInfo } from "../../data"
@@ -58,9 +58,25 @@ function KeywordChip({
   const { t } = useTranslation()
   const id = useId()
   const [open, setOpen] = useState(false)
+  // The definition lives in a detail bucket; it is fetched the first time the chip opens.
+  const [definition, setDefinition] = useState<string | null | undefined>()
+  useEffect(() => {
+    if (!open || definition !== undefined || !info) return
+    let cancelled = false
+    info.definition().then(
+      (text) => {
+        if (!cancelled) setDefinition(text ?? null)
+      },
+      () => {
+        if (!cancelled) setDefinition(null)
+      },
+    )
+    return () => {
+      cancelled = true
+    }
+  }, [open, definition, info])
   const name = info?.name(lang) ?? segment.name
   const text = segment.parameter === undefined ? name : `${name} ${segment.parameter}`
-  const definition = info?.definition(lang)
   return (
     <>
       <button
@@ -82,8 +98,12 @@ function KeywordChip({
           id={`${id}-definition`}
           className="my-1.5 block rounded-control border border-border bg-surface-1 px-3 py-2 text-14 leading-relaxed text-text-2"
         >
-          <span className="block" lang={definition === undefined ? undefined : "ja"}>
-            {definition ?? t("cardPage.noDefinition")}
+          <span className="block" lang={typeof definition === "string" ? "ja" : undefined}>
+            {typeof definition === "string"
+              ? definition
+              : definition === null || !info
+                ? t("cardPage.noDefinition")
+                : t("cardPage.loading")}
           </span>
           {info && (
             <Link

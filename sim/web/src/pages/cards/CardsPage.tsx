@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
+import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
@@ -224,6 +224,14 @@ export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPag
         : [],
     [catalog, textLang, t],
   )
+  // Returning from a card: the closed dialog restored focus to the old cell only if that element
+  // still exists; after a remount the anchor cell takes it so keyboard users continue in place.
+  const anchor = entry.anchor
+  useEffect(() => {
+    if (anchor === undefined || inert || cells.length === 0) return
+    const cell = document.querySelector<HTMLElement>(`a[data-result-key="${CSS.escape(anchor)}"]`)
+    if (cell && document.activeElement === document.body) cell.focus({ preventScroll: true })
+  }, [anchor, inert, cells.length])
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
   const failed = status.state === "error"

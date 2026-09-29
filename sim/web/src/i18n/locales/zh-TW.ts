@@ -96,6 +96,7 @@ const zhTW = {
     addToDeckSoon: "建牌器在里程碑 4 才會有",
     edition: "卡片版本",
     noEnEdition: "尚未發行英文版",
+    noJpEdition: "尚未發行日文版",
     noMapping: "尚無已確認對應",
     stats: { cost: "費用", attack: "攻擊力", defense: "體力" },
     effect: "效果",

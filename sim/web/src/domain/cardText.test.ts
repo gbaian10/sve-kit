@@ -21,6 +21,8 @@ const vocabulary: CardTextVocabulary = {
       suffix: "",
       parse: "uint",
       variables: [],
+      minimum: 0,
+      maximum: 10,
     },
     {
       symbolId: "sym:cost",
@@ -67,6 +69,16 @@ describe("parseCardText", () => {
     ])
     expect(parseCardText("【守護_2】", "ja", vocabulary)).toEqual([
       { kind: "keyword", keywordId: "kw:ward", name: "守護", parameter: "2" },
+    ])
+  })
+
+  it("keeps out-of-range and unsafe numbers as raw tokens", () => {
+    expect(
+      parseCardText("{コスト10}{コスト11}{コスト99999999999999999999}", "ja", vocabulary),
+    ).toEqual([
+      { kind: "symbol", code: "cost", symbolId: "sym:cost", parameter: "10", raw: "コスト10" },
+      { kind: "unknown", raw: "{コスト11}" },
+      { kind: "unknown", raw: "{コスト99999999999999999999}" },
     ])
   })
 

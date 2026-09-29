@@ -1,4 +1,4 @@
-import { useEffect } from "react"
+import { type KeyboardEvent, type SyntheticEvent, useEffect, useRef } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useParams } from "react-router"
 
@@ -120,29 +120,84 @@ export function CardPage() {
   return (
     <>
       <CardsPage search={entry.background} pages={entry.pages} inert />
-      <div
-        className="fixed inset-0 z-50 overflow-y-auto bg-bg pb-21 lg:left-18"
-        role="dialog"
-        aria-modal="true"
+      <CardOverlay
+        onClose={() => void navigate(-1)}
+        ready={view !== undefined}
+        bar={
+          <CardBottomBar
+            onPrev={
+              around?.prev
+                ? () => {
+                    go(around.prev)
+                  }
+                : undefined
+            }
+            onNext={
+              around?.next
+                ? () => {
+                    go(around.next)
+                  }
+                : undefined
+            }
+          />
+        }
       >
-        <div className="mx-auto w-full max-w-320 px-4 lg:px-6">{content}</div>
-      </div>
-      <CardBottomBar
-        onPrev={
-          around?.prev
-            ? () => {
-                go(around.prev)
-              }
-            : undefined
-        }
-        onNext={
-          around?.next
-            ? () => {
-                go(around.next)
-              }
-            : undefined
-        }
-      />
+        {content}
+      </CardOverlay>
     </>
+  )
+}
+
+// A native modal dialog: the browser makes everything else inert, traps focus and returns it to
+// the opener when it closes (design §11). Escape and the back button both go back in history.
+function CardOverlay({
+  children,
+  bar,
+  onClose,
+  ready,
+}: {
+  readonly children: React.ReactNode
+  readonly bar: React.ReactNode
+  readonly onClose: () => void
+  /** The card has rendered: the back button exists and takes focus once. */
+  readonly ready: boolean
+}) {
+  const ref = useRef<HTMLDialogElement>(null)
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog) return
+    if (!dialog.open) dialog.showModal()
+    return () => {
+      if (dialog.open) dialog.close()
+    }
+  }, [])
+  useEffect(() => {
+    const dialog = ref.current
+    if (!dialog || !ready || dialog.contains(document.activeElement)) return
+    // showModal focuses the dialog itself; once the card is there, its first control (back) takes it.
+    dialog.querySelector<HTMLElement>("button, a[href]")?.focus()
+  }, [ready])
+  const onCancel = (event: SyntheticEvent<HTMLDialogElement>) => {
+    event.preventDefault()
+    onClose()
+  }
+  // Escape is handled here and its default (the dialog's cancel request) suppressed, so one press
+  // goes back exactly once; `cancel` still covers other close requests.
+  const onKeyDown = (event: KeyboardEvent<HTMLDialogElement>) => {
+    if (event.key !== "Escape") return
+    event.preventDefault()
+    onClose()
+  }
+  return (
+    // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions -- Escape closes the layer like a native cancel would
+    <dialog
+      ref={ref}
+      onCancel={onCancel}
+      onKeyDown={onKeyDown}
+      className="fixed inset-0 m-0 h-dvh max-h-none w-full max-w-none overflow-y-auto bg-bg p-0 pb-21 text-text-1 lg:left-18 lg:w-[calc(100%-4.5rem)]"
+    >
+      <div className="mx-auto w-full max-w-320 px-4 lg:px-6">{children}</div>
+      {bar}
+    </dialog>
   )
 }

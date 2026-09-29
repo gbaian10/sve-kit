@@ -98,6 +98,7 @@ export default {
     addToDeckSoon: "デッキ構築はマイルストーン 4 で対応",
     edition: "カードの版",
     noEnEdition: "英語版は未発売",
+    noJpEdition: "日本語版は未発売",
     noMapping: "確認済みの対応なし",
     stats: { cost: "コスト", attack: "攻撃力", defense: "体力" },
     effect: "効果",

@@ -33,6 +33,9 @@ export interface SymbolSpelling {
   readonly parse: "literal" | "uint" | "variable"
   /** Allowed exact values for `variable`, e.g. ["X"]. */
   readonly variables: readonly string[]
+  /** Inclusive bounds of a `uint` parameter from the snapshot's parameter schema. */
+  readonly minimum?: number
+  readonly maximum?: number
 }
 
 export interface KeywordName {
@@ -65,8 +68,13 @@ function matchSymbol(
       continue
     }
     if (spelling.parse === "uint") {
-      if (/^\d+$/u.test(middle)) return { ...base, parameter: String(Number(middle)) }
-      continue
+      // Only digits, within the declared bounds and safe to represent; anything else stays raw.
+      if (!/^\d+$/u.test(middle) || middle.length > 15) continue
+      const value = Number(middle)
+      if (!Number.isSafeInteger(value)) continue
+      if (spelling.minimum !== undefined && value < spelling.minimum) continue
+      if (spelling.maximum !== undefined && value > spelling.maximum) continue
+      return { ...base, parameter: String(value) }
     }
     if (spelling.variables.includes(middle)) return { ...base, parameter: middle }
   }

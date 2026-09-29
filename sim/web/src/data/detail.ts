@@ -3,26 +3,29 @@ import type { RouteNamespace } from "../domain/route"
 import type { TextLang } from "../domain/search"
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v1/decode"
-import { integerValue, stringValue } from "./format-v1/json"
-import { createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
+import { integerValue, type JsonValue, stringValue } from "./format-v1/json"
+import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import type { CardIndex } from "./store"
 
 const LANGS: readonly TextLang[] = ["ja", "en", "zh-Hant"]
 const isTextLang = (value: unknown): value is TextLang =>
   typeof value === "string" && (LANGS as readonly string[]).includes(value)
 
-/** The global detail file: effect texts, their translations, text icons, route tables. */
+/**
+ * Global detail rows, fetched by primary key: each id hashes to one bucket (transport §5), so a
+ * card needs only the files its own texts and translations live in, never the whole library.
+ */
 export interface GlobalDetail {
-  readonly textUnit: (id: string) => Row | undefined
-  readonly translation: (id: string) => Row | undefined
-  readonly vocabulary: CardTextVocabulary
-  /** Name/tooltip/copy pattern of one text icon in one language. */
-  readonly symbolLocalization: (symbolId: string, lang: TextLang) => Row | undefined
+  readonly textUnit: (id: string) => Promise<Row | undefined>
+  readonly translation: (id: string) => Promise<Row | undefined>
   readonly alias: (
     namespace: RouteNamespace,
     key: string,
-  ) => { readonly namespace: RouteNamespace; readonly key: string } | undefined
-  readonly override: (routeKey: string) => string | undefined
+  ) => Promise<{ readonly namespace: RouteNamespace; readonly key: string } | undefined>
+  readonly override: (routeKey: string) => Promise<string | undefined>
+  /** Every text icon (a small table, but it may span buckets); keyword names come from the bootstrap. */
+  readonly vocabulary: () => Promise<CardTextVocabulary>
+  readonly symbolLocalization: (symbolId: string, lang: TextLang) => Promise<Row | undefined>
 }
 
 /** One home set's detail file: the full current revisions (effect unit, sections, translations). */
@@ -30,21 +33,19 @@ export interface SetDetail {
   readonly revision: (id: string) => Row | undefined
 }
 
-function byId(rows: readonly Row[]): Map<string, Row> {
-  return new Map(rows.map((row) => [stringValue(row["id"]), row]))
-}
-
-function keywordNames(index: CardIndex, textUnit: (id: string) => Row | undefined): KeywordName[] {
+function keywordNames(index: CardIndex): KeywordName[] {
   const out: KeywordName[] = []
   for (const row of index.keywords) {
     const keywordId = stringValue(row["id"])
-    const own = textUnit(stringValue(row["name_unit_id"]))
+    const own = index.textUnit(stringValue(row["name_unit_id"]))
     if (own && isTextLang(own["lang"]))
       out.push({ keywordId, lang: own["lang"], name: stringValue(own["text"]) })
     for (const entry of row["translations"] as Row[]) {
       if (entry["field"] !== "name") continue
       const translation = index.translation(stringValue(entry["translation_id"]))
-      const unit = translation ? textUnit(stringValue(translation["text_unit_id"])) : undefined
+      const unit = translation
+        ? index.textUnit(stringValue(translation["text_unit_id"]))
+        : undefined
       if (unit && isTextLang(unit["lang"]))
         out.push({ keywordId, lang: unit["lang"], name: stringValue(unit["text"]) })
     }
@@ -55,13 +56,12 @@ function keywordNames(index: CardIndex, textUnit: (id: string) => Row | undefine
 function spellingsOf(symbols: readonly Row[]): SymbolSpelling[] {
   const out: SymbolSpelling[] = []
   for (const symbol of symbols) {
-    const schema = symbol["parameter_schema"] as Row
-    const variables = (schema["parameters"] as Row[]).flatMap(
-      (parameter) => (parameter["variables"] as string[] | undefined) ?? [],
-    )
+    const parameters = (symbol["parameter_schema"] as Row)["parameters"] as Row[]
     for (const spelling of symbol["spellings"] as Row[]) {
       if (!isTextLang(spelling["lang"])) continue
       const parse = stringValue(spelling["parse_kind"])
+      const parameter = parameters.find((item) => item["name"] === spelling["parameter_name"])
+      const uint = parameter?.["uint"] as Row | undefined
       out.push({
         symbolId: stringValue(symbol["id"]),
         code: stringValue(symbol["code"]),
@@ -69,61 +69,66 @@ function spellingsOf(symbols: readonly Row[]): SymbolSpelling[] {
         prefix: stringValue(spelling["literal_prefix"]),
         suffix: stringValue(spelling["literal_suffix"]),
         parse: parse === "uint" ? "uint" : parse === "variable" ? "variable" : "literal",
-        variables,
+        variables: (parameter?.["variables"] as string[] | undefined) ?? [],
+        ...(uint === undefined
+          ? {}
+          : { minimum: integerValue(uint["minimum"]), maximum: integerValue(uint["maximum"]) }),
       })
     }
   }
   return out
 }
 
-async function loadGlobal(client: SnapshotClient, index: CardIndex): Promise<GlobalDetail> {
-  const snapshot = client.snapshot()
-  if (!snapshot) throw new Error("snapshot not loaded")
+function createGlobal(
+  client: SnapshotClient,
+  snapshot: LoadedSnapshot,
+  index: CardIndex,
+): GlobalDetail {
   const locate = createLocator(snapshot.files)
   const bucketCount = integerValue((snapshot.manifest["partitioning"] as Row)["bucket_count"])
-  // Every global detail table, every bucket: a snapshot may leave out a table it has no rows for.
-  const keys = new Set<string>()
-  for (const table of [
-    "text_unit",
-    "translation",
-    "text_symbol",
-    "card_route_alias",
-    "route_override",
-  ])
-    for (let bucket = 0; bucket < bucketCount; bucket += 1) {
-      const key = locate({ table, owner: GLOBAL_OWNER, bucket, partition: "detail" })
-      if (key !== undefined) keys.add(key)
-    }
-  const fragments = (await Promise.all([...keys].map((key) => client.fragments(key)))).flat()
-  const rows = (table: string) =>
-    fragments.filter((fragment) => fragment.table === table).flatMap((fragment) => fragment.rows)
-  const units = byId(rows("text_unit"))
-  const translations = byId(rows("translation"))
-  const symbols = rows("text_symbol")
-  const symbolMap = byId(symbols)
-  const aliases = new Map(
-    rows("card_route_alias").map((row) => [
-      `${stringValue(row["namespace"])}\u0000${stringValue(row["old_key"])}`,
-      row,
-    ]),
-  )
-  const overrides = new Map(
-    rows("route_override").map((row) => [
-      stringValue(row["route_key"]),
-      stringValue(row["printing_id"]),
-    ]),
-  )
-  const textUnit = (id: string) => index.textUnit(id) ?? units.get(id)
+  const rowsOf = async (table: string, primaryKey: readonly JsonValue[]): Promise<Row[]> => {
+    const key = locate({
+      table,
+      owner: GLOBAL_OWNER,
+      bucket: bucketOf(primaryKey, bucketCount),
+      partition: "detail",
+    })
+    if (key === undefined) return []
+    return (await client.fragments(key))
+      .filter((fragment) => fragment.table === table)
+      .flatMap((fragment) => fragment.rows)
+  }
+  const byId = async (table: string, id: string): Promise<Row | undefined> =>
+    (await rowsOf(table, [id])).find((row) => row["id"] === id)
+  // The icon table is read whole; every bucket that has a fragment of it is one file.
+  let symbols: Promise<Row[]> | undefined
+  const allSymbols = (): Promise<Row[]> => {
+    symbols ??= (async () => {
+      const keys = new Set<string>()
+      for (let bucket = 0; bucket < bucketCount; bucket += 1) {
+        const key = locate({
+          table: "text_symbol",
+          owner: GLOBAL_OWNER,
+          bucket,
+          partition: "detail",
+        })
+        if (key !== undefined) keys.add(key)
+      }
+      const fragments = (await Promise.all([...keys].map((key) => client.fragments(key)))).flat()
+      return fragments.filter((fragment) => fragment.table === "text_symbol").flatMap((f) => f.rows)
+    })()
+    symbols.catch(() => {
+      symbols = undefined
+    })
+    return symbols
+  }
   return {
-    textUnit,
-    translation: (id) => index.translation(id) ?? translations.get(id),
-    vocabulary: { spellings: spellingsOf(symbols), keywords: keywordNames(index, textUnit) },
-    symbolLocalization: (symbolId, lang) =>
-      (symbolMap.get(symbolId)?.["localizations"] as Row[] | undefined)?.find(
-        (row) => row["lang"] === lang,
-      ),
-    alias: (namespace, key) => {
-      const row = aliases.get(`${namespace}\u0000${key}`)
+    textUnit: async (id) => index.textUnit(id) ?? (await byId("text_unit", id)),
+    translation: async (id) => index.translation(id) ?? (await byId("translation", id)),
+    alias: async (namespace, key) => {
+      const row = (await rowsOf("card_route_alias", [namespace, key])).find(
+        (item) => item["namespace"] === namespace && item["old_key"] === key,
+      )
       if (!row) return undefined
       const target = stringValue(row["target_namespace"])
       return {
@@ -131,7 +136,21 @@ async function loadGlobal(client: SnapshotClient, index: CardIndex): Promise<Glo
         key: stringValue(row["target_key"]),
       }
     },
-    override: (routeKey) => overrides.get(routeKey),
+    override: async (routeKey) => {
+      const row = (await rowsOf("route_override", [routeKey])).find(
+        (item) => item["route_key"] === routeKey,
+      )
+      return row ? stringValue(row["printing_id"]) : undefined
+    },
+    vocabulary: async () => ({
+      spellings: spellingsOf(await allSymbols()),
+      keywords: keywordNames(index),
+    }),
+    symbolLocalization: async (symbolId, lang) =>
+      (
+        (await allSymbols()).find((row) => row["id"] === symbolId)?.["localizations"] as
+          Row[] | undefined
+      )?.find((row) => row["lang"] === lang),
   }
 }
 
@@ -152,26 +171,28 @@ async function loadSet(client: SnapshotClient, setId: string): Promise<SetDetail
     if (key !== undefined) keys.add(key)
   }
   const fragments = (await Promise.all([...keys].map((key) => client.fragments(key)))).flat()
-  const revisions = byId(
-    fragments.filter((fragment) => fragment.table === "face_revision").flatMap((f) => f.rows),
+  const revisions = new Map(
+    fragments
+      .filter((fragment) => fragment.table === "face_revision")
+      .flatMap((f) => f.rows)
+      .map((row) => [stringValue(row["id"]), row]),
   )
   return { revision: (id) => revisions.get(id) }
 }
 
-const globals = new WeakMap<LoadedSnapshot, Promise<GlobalDetail>>()
+const globals = new WeakMap<LoadedSnapshot, GlobalDetail>()
 const sets = new WeakMap<LoadedSnapshot, Map<string, Promise<SetDetail>>>()
 
-/** Loaded once per snapshot object; a failed load is forgotten so a retry can succeed. */
-export function globalDetailOf(client: SnapshotClient, index: CardIndex): Promise<GlobalDetail> {
+/** One accessor per snapshot object; nothing downloads until a lookup asks for it. */
+export function globalDetailOf(client: SnapshotClient, index: CardIndex): GlobalDetail {
   const snapshot = client.snapshot()
-  if (!snapshot) return Promise.reject(new Error("snapshot not loaded"))
-  let pending = globals.get(snapshot)
-  if (!pending) {
-    pending = loadGlobal(client, index)
-    globals.set(snapshot, pending)
-    pending.catch(() => globals.delete(snapshot))
+  if (!snapshot) throw new Error("snapshot not loaded")
+  let global = globals.get(snapshot)
+  if (!global) {
+    global = createGlobal(client, snapshot, index)
+    globals.set(snapshot, global)
   }
-  return pending
+  return global
 }
 
 export function setDetailOf(client: SnapshotClient, setId: string): Promise<SetDetail> {

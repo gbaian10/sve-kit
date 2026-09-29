@@ -32,7 +32,8 @@ export interface CardFaceView {
 export interface KeywordInfo {
   readonly id: string
   readonly name: (lang: TextLang) => string
-  readonly definition: (lang: TextLang) => string | undefined
+  /** The rule definition (source language only), fetched when first asked for. */
+  readonly definition: () => Promise<string | undefined>
 }
 
 export interface CardView {
@@ -48,7 +49,8 @@ export interface CardView {
   /** Mapping state of the shown region towards the other one (snapshot-format §8). */
   readonly mappingState: string
   readonly vocabulary: CardTextVocabulary
-  readonly symbolLocalization: GlobalDetail["symbolLocalization"]
+  /** Name/tooltip of a text icon in one language; the table is in memory once the view exists. */
+  readonly symbolLocalization: (symbolId: string, lang: TextLang) => Row | undefined
   readonly keyword: (id: string) => KeywordInfo | undefined
   readonly vocabularyLabel: Catalog["vocabularyLabel"]
 }
@@ -71,36 +73,40 @@ function nullableInteger(value: JsonValue | undefined): number | null {
 }
 
 /** Effect translations of one revision as candidates for the language matrix. */
-function effectTranslations(revision: Row, global: GlobalDetail): TranslationCandidate[] {
-  const out: TranslationCandidate[] = []
-  for (const entry of revision["translations"] as Row[]) {
-    if (entry["field"] !== "effect") continue
-    const translation = global.translation(stringValue(entry["translation_id"]))
-    if (!translation) continue
-    const unit = global.textUnit(stringValue(translation["text_unit_id"]))
-    const origin = translation["origin"]
-    const status = translation["status"]
-    const basis = entry["basis"]
-    if (!unit || !isLang(unit["lang"]) || !isOrigin(origin)) continue
-    out.push({
-      lang: unit["lang"],
-      text: stringValue(unit["text"]),
-      origin,
-      status: status === "draft" ? "draft" : status === "stale" ? "stale" : "reviewed",
-      basis:
-        basis === "official_counterpart"
-          ? "official_counterpart"
-          : basis === "shared_jp"
-            ? "shared_jp"
-            : "own_source",
-    })
-  }
-  return out
+async function effectTranslations(
+  revision: Row,
+  global: GlobalDetail,
+): Promise<TranslationCandidate[]> {
+  const entries = (revision["translations"] as Row[]).filter((entry) => entry["field"] === "effect")
+  const candidates = await Promise.all(
+    entries.map(async (entry): Promise<TranslationCandidate | undefined> => {
+      const translation = await global.translation(stringValue(entry["translation_id"]))
+      if (!translation) return undefined
+      const unit = await global.textUnit(stringValue(translation["text_unit_id"]))
+      const origin = translation["origin"]
+      const status = translation["status"]
+      const basis = entry["basis"]
+      if (!unit || !isLang(unit["lang"]) || !isOrigin(origin)) return undefined
+      return {
+        lang: unit["lang"],
+        text: stringValue(unit["text"]),
+        origin,
+        status: status === "draft" ? "draft" : status === "stale" ? "stale" : "reviewed",
+        basis:
+          basis === "official_counterpart"
+            ? "official_counterpart"
+            : basis === "shared_jp"
+              ? "shared_jp"
+              : "own_source",
+      }
+    }),
+  )
+  return candidates.filter((item): item is TranslationCandidate => item !== undefined)
 }
 
 /**
- * Everything the card page's first screen needs for one printing: the global detail (texts,
- * icons, routes) and the home set's detail (full revisions) are fetched once each per snapshot.
+ * Everything the card page's first screen needs for one printing. Only the home set's revision
+ * file, the buckets holding this card's texts and translations, and the icon table are fetched.
  */
 export async function loadCardView(
   client: SnapshotClient,
@@ -116,10 +122,8 @@ export async function loadCardView(
   if (!card) return undefined
   const region = stringValue(printing["region"]) === "en" ? "en" : "jp"
   const setId = stringValue(card["home_set_id"])
-  const [global, set] = await Promise.all([
-    globalDetailOf(client, index),
-    setDetailOf(client, setId),
-  ])
+  const global = globalDetailOf(client, index)
+  const [set, vocabulary] = await Promise.all([setDetailOf(client, setId), global.vocabulary()])
   const faces: CardFaceView[] = []
   for (const face of index.facesOf(cardId)) {
     const faceId = stringValue(face["id"])
@@ -127,7 +131,8 @@ export async function loadCardView(
     const name = catalog.faceName(faceId, region)
     if (!base || !name) continue
     const revision = set.revision(stringValue(base["id"])) ?? base
-    const unit = global.textUnit(stringValue(revision["effect_unit_id"] ?? ""))
+    const unitId = revision["effect_unit_id"]
+    const unit = typeof unitId === "string" ? await global.textUnit(unitId) : undefined
     const text = unit ? stringValue(unit["text"]) : ""
     const original =
       unit && isLang(unit["lang"]) && text !== "" ? { lang: unit["lang"], text } : undefined
@@ -142,7 +147,7 @@ export async function loadCardView(
             uiLanguage,
             original,
             fallback: undefined,
-            translations: effectTranslations(revision, global),
+            translations: await effectTranslations(revision, global),
           })
         : null,
       classCode: typeof classCode === "string" ? classCode : null,
@@ -163,17 +168,30 @@ export async function loadCardView(
     if (viewRegion === region) mappingState = stringValue(view["mapping_state"])
   }
   const family = index.family(setId)
+  // Localizations were fetched with the vocabulary; read them back synchronously for rendering.
+  const localizations = new Map<string, Row | undefined>()
+  await Promise.all(
+    vocabulary.spellings.flatMap((spelling) =>
+      (["ja", "en", "zh-Hant"] as const).map(async (lang) => {
+        const key = `${spelling.symbolId}\u0000${lang}`
+        if (!localizations.has(key))
+          localizations.set(key, await global.symbolLocalization(spelling.symbolId, lang))
+      }),
+    ),
+  )
   const keywordInfo = (id: string): KeywordInfo | undefined => {
     const row = index.keyword(id)
     if (!row) return undefined
-    const names = global.vocabulary.keywords.filter((item) => item.keywordId === id)
+    const names = vocabulary.keywords.filter((item) => item.keywordId === id)
     const definitionId = row["definition_unit_id"]
-    const definition = typeof definitionId === "string" ? global.textUnit(definitionId) : undefined
     return {
       id,
       name: (lang) => (names.find((item) => item.lang === lang) ?? names[0])?.name ?? id,
-      // Definitions ship in the source language only; the UI shows it with a lang attribute.
-      definition: () => (definition ? stringValue(definition["text"]) : undefined),
+      definition: async () => {
+        if (typeof definitionId !== "string") return undefined
+        const unit = await global.textUnit(definitionId)
+        return unit ? stringValue(unit["text"]) : undefined
+      },
     }
   }
   return {
@@ -186,15 +204,26 @@ export async function loadCardView(
     faces,
     editions,
     mappingState,
-    vocabulary: global.vocabulary,
-    symbolLocalization: global.symbolLocalization,
+    vocabulary,
+    symbolLocalization: (symbolId, lang) => localizations.get(`${symbolId}\u0000${lang}`),
     keyword: keywordInfo,
     vocabularyLabel: catalog.vocabularyLabel,
   }
 }
 
-/** What the route resolver needs, from the bootstrap index and the global route tables. */
-export function createRouteLookups(catalog: Catalog, global: GlobalDetail): RouteLookups {
+/**
+ * What the route resolver needs for one URL: the bootstrap index plus the alias and override rows
+ * of that key (each one bucket), fetched before resolving.
+ */
+export async function createRouteLookups(
+  catalog: Catalog,
+  global: GlobalDetail,
+  key: { readonly namespace: "official" | "provisional"; readonly value: string },
+): Promise<RouteLookups> {
+  const [alias, override] = await Promise.all([
+    global.alias(key.namespace, key.value),
+    key.namespace === "official" ? global.override(key.value) : Promise.resolve(undefined),
+  ])
   return {
     printingByCardNo: (cardNo) => {
       const row = catalog.index.printingByAnyCardNo(cardNo)
@@ -204,8 +233,9 @@ export function createRouteLookups(catalog: Catalog, global: GlobalDetail): Rout
       const row = catalog.index.printingByIntId(intId)
       return row ? stringValue(row["id"]) : undefined
     },
-    alias: global.alias,
-    override: global.override,
+    alias: (namespace, value) =>
+      namespace === key.namespace && value === key.value ? alias : undefined,
+    override: (routeKey) => (routeKey === key.value ? override : undefined),
     nameOf: (printingId) => catalog.summary(printingId)?.name.original.text,
   }
 }

@@ -99,6 +99,7 @@ export default {
     addToDeckSoon: "Deck building arrives in milestone 4",
     edition: "Card edition",
     noEnEdition: "No English edition yet",
+    noJpEdition: "No Japanese edition yet",
     noMapping: "No confirmed counterpart yet",
     stats: { cost: "Cost", attack: "Attack", defense: "Defense" },
     effect: "Effect",

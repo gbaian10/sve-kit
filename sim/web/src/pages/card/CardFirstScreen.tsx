@@ -320,7 +320,9 @@ export function CardFirstScreen({
             {t(`options.edition.${view.region}`)}
             {" · "}
             {view.mappingState === "confirmed_none"
-              ? t("cardPage.noEnEdition")
+              ? view.region === "jp"
+                ? t("cardPage.noEnEdition")
+                : t("cardPage.noJpEdition")
               : t("cardPage.noMapping")}
           </span>
         )}

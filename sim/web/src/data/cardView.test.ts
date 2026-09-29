@@ -54,7 +54,7 @@ describe("loadCardView", () => {
     expect(view.symbolLocalization("sym:cost", "zh-Hant")?.["name"]).toBe("費用")
     const ward = view.keyword("kw:ward")
     expect(ward?.name("zh-Hant")).toBe("守護")
-    expect(ward?.definition("ja")).toBeTruthy()
+    expect(await ward?.definition()).toBeTruthy()
   })
 
   it("uses the printing's region for the original and the English counterpart for the en UI", async () => {
@@ -82,16 +82,45 @@ describe("loadCardView", () => {
   })
 
   it("feeds the route resolver with aliases, overrides and provisional ids", async () => {
-    const global = await globalDetailOf(client, catalog.index)
-    const lookups = createRouteLookups(catalog, global)
-    expect(resolveCardRoute("BP01-002A", undefined, lookups)).toEqual({
+    const global = globalDetailOf(client, catalog.index)
+    const lookupsFor = (value: string, namespace: "official" | "provisional" = "official") =>
+      createRouteLookups(catalog, global, { namespace, value })
+    expect(resolveCardRoute("BP01-002A", undefined, await lookupsFor("BP01-002A"))).toEqual({
       kind: "redirect",
       to: "/cards/BP01-002a",
     })
-    expect(resolveCardRoute("BP01-002", undefined, lookups)).toMatchObject({ kind: "redirect" })
-    const found = resolveCardRoute("BP01-002", "試作の隊長", lookups)
-    expect(found).toMatchObject({ kind: "found", printingId: "p:bp01-002" })
+    expect(resolveCardRoute("BP01-002", undefined, await lookupsFor("BP01-002"))).toMatchObject({
+      kind: "redirect",
+    })
+    expect(resolveCardRoute("BP01-002", "試作の隊長", await lookupsFor("BP01-002"))).toMatchObject({
+      kind: "found",
+      printingId: "p:bp01-002",
+    })
     const intId = integerValue(catalog.index.printing("p:bp01-001")?.["int_id"])
-    expect(lookups.printingByIntId(intId)).toBe("p:bp01-001")
+    expect((await lookupsFor(String(intId), "provisional")).printingByIntId(intId)).toBe(
+      "p:bp01-001",
+    )
+  })
+
+  it("fetches only the buckets a card needs", async () => {
+    const requested: string[] = []
+    const recording = createSnapshotClient("/cdn", {
+      fetch: (url) => {
+        requested.push(url.slice("/cdn/".length))
+        return fetcher(url)
+      },
+    })
+    await recording.load()
+    const snapshot2 = recording.snapshot()
+    if (!snapshot2) throw new Error("no snapshot")
+    const catalog2 = createCatalog(snapshot2)
+    requested.length = 0
+    await loadCardView(recording, catalog2, "p:bp01-051", "zh-TW")
+    const files = [...snapshot2.files.entries()]
+      .filter(([, file]) => file["role"] === "text")
+      .map(([key, file]) => [key, stringValue(file["path"])] as const)
+    const fetched = files.filter(([, path]) => requested.includes(path)).map(([key]) => key)
+    // The home set's file and the global file; other sets' text files are never touched.
+    expect(fetched.sort()).toEqual(["text/bp01", "text/global"])
   })
 })

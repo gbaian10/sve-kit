@@ -14,7 +14,7 @@ export type CardRouteState =
   | { readonly status: "failed" }
   | ({ readonly status: "resolved" } & RouteResolution)
 
-/** Resolves the URL to a printing once the snapshot and its route tables are available. */
+/** Resolves the URL to a printing once the snapshot and this key's route rows are available. */
 export function useCardRoute(
   client: SnapshotClient,
   catalog: Catalog | null,
@@ -25,10 +25,13 @@ export function useCardRoute(
   useEffect(() => {
     if (!catalog) return
     let cancelled = false
-    globalDetailOf(client, catalog.index).then(
-      (global) => {
+    const routeKey =
+      params.intId === undefined
+        ? { namespace: "official" as const, value: params.cardNo ?? "" }
+        : { namespace: "provisional" as const, value: params.intId }
+    createRouteLookups(catalog, globalDetailOf(client, catalog.index), routeKey).then(
+      (lookups) => {
         if (cancelled) return
-        const lookups = createRouteLookups(catalog, global)
         const resolution =
           params.intId !== undefined
             ? resolveProvisionalRoute(params.intId, lookups)
