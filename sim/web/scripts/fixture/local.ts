@@ -52,7 +52,6 @@ const CLASS_CODES: Record<string, string | null> = {
   ドラゴン: "dragon",
   ナイトメア: "nightmare",
   ビショップ: "bishop",
-  ネメシス: "nemesis",
   ニュートラル: null,
   "-": null,
 }
@@ -238,7 +237,6 @@ export function convertLocal(
     dragon: { ja: "ドラゴン", zhHant: "龍族", en: "Dragoncraft" },
     nightmare: { ja: "ナイトメア", zhHant: "夢魘", en: "Abysscraft" },
     bishop: { ja: "ビショップ", zhHant: "主教", en: "Havencraft" },
-    nemesis: { ja: "ネメシス", zhHant: "復仇者", en: "Portalcraft" },
   }
   return { cards: withQa, families, vocabulary: { classes, types, rarities, traits } }
 }

@@ -196,8 +196,9 @@ writes the anchor first, then pushes `/cards/:cardNo` with `{ background, source
 underneath and the image fades in over it; missing, pending and withdrawn images keep the text card
 with a reason, and data saver waits for a tap. Callers set the width (`w-full`, `w-8`).
 
-The class quick bar shows labels only when an off-screen labelled copy fits the row width. Classes
-the design has no icon or colour for (Portalcraft / `nemesis`) use the neutral colour and an initial.
+The class quick bar shows labels only when an off-screen labelled copy fits the row width: the six
+classes of the physical game plus neutral. A class code the design does not know yet would use the
+neutral colour and an initial.
 
 ## Dead code
 

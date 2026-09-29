@@ -1,8 +1,8 @@
 import { NEUTRAL_CLASS } from "./query/model"
 
 // The design names classes by their digital-game craft (tokens.css); the snapshot uses the SVE
-// vocabulary codes. Codes without a design colour or icon (Portalcraft / nemesis today) render in
-// the neutral style until the design adds them.
+// vocabulary codes. The physical game has six classes plus neutral; a code the design does not
+// know (a future class) renders in the neutral style until the design adds it.
 export type DesignClass = "forest" | "sword" | "rune" | "dragon" | "abyss" | "haven" | "neutral"
 
 const STYLE: Record<string, DesignClass> = {
@@ -20,7 +20,7 @@ export function classStyle(code: string | null): DesignClass {
 }
 
 // The game's own class order (rulebook and card list), then anything newer, then neutral.
-const CLASS_ORDER = ["elf", "royal", "witch", "dragon", "nightmare", "bishop", "nemesis"]
+const CLASS_ORDER = ["elf", "royal", "witch", "dragon", "nightmare", "bishop"]
 
 /** Quick-bar order: known classes in game order, unknown codes after them, neutral last. */
 export function quickBarClasses(codes: readonly string[]): string[] {

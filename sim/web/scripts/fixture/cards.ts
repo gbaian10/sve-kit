@@ -1,7 +1,7 @@
 // Handwritten synthetic cards for the development snapshot. Nothing here is real card text; the
 // point is coverage of every shape the pages must render (docs/schema/snapshot-format.md).
 
-type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop" | "nemesis"
+type ClassCode = "elf" | "royal" | "witch" | "dragon" | "nightmare" | "bishop"
 type TypeCode = "follower" | "spell" | "amulet" | "evolved" | "leader" | "token"
 type Rarity = "bronze" | "silver" | "gold" | "legend" | "sp"
 export type Region = "jp" | "en"
@@ -147,7 +147,6 @@ const CLASSES: Record<ClassCode, Text> = {
   dragon: { ja: "ドラゴン", zhHant: "龍族", en: "Dragoncraft" },
   nightmare: { ja: "ナイトメア", zhHant: "夢魘", en: "Abysscraft" },
   bishop: { ja: "ビショップ", zhHant: "主教", en: "Havencraft" },
-  nemesis: { ja: "ネメシス", zhHant: "復仇者", en: "Portalcraft" },
 }
 
 const TYPES: Record<TypeCode, Text> = {
@@ -745,7 +744,7 @@ export const CARDS: readonly Card[] = [
   {
     id: "c:bp01-060",
     set: "set:bp01",
-    class: "nemesis",
+    class: "witch",
     layout: "single",
     mapping: "confirmed",
     engine: "reviewed",
@@ -773,7 +772,7 @@ export const CARDS: readonly Card[] = [
   {
     id: "c:bp01-061",
     set: "set:bp01",
-    class: "nemesis",
+    class: "witch",
     layout: "single",
     mapping: "confirmed",
     engine: "engine_passed",

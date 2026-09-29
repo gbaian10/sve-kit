@@ -7,7 +7,7 @@ import { ClassQuickBar } from "./ClassQuickBar"
 const classes = [
   { code: "elf", label: "精靈" },
   { code: "royal", label: "皇家" },
-  { code: "nemesis", label: "復仇者" },
+  { code: "zz_future", label: "未來職業" },
   { code: "neutral", label: "中立" },
 ]
 
@@ -65,9 +65,9 @@ describe("ClassQuickBar", () => {
         fits={() => false}
       />,
     )
-    const nemesis = screen.getByRole("button", { name: "復仇者" })
-    expect(nemesis.querySelector("img")).toBeNull()
-    expect(nemesis).toHaveTextContent("復")
+    const future = screen.getByRole("button", { name: "未來職業" })
+    expect(future.querySelector("img")).toBeNull()
+    expect(future).toHaveTextContent("未")
     expect(screen.getByRole("button", { name: "精靈" }).querySelector("img")).not.toBeNull()
   })
 })

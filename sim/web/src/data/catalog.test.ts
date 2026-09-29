@@ -39,7 +39,14 @@ describe("catalog", () => {
       "BP01EN-001",
     ])
     expect(catalog.sets).toEqual(new Set(["bp01", "pr", "sd01"]))
-    expect(catalog.classCodes).toContain("nemesis")
+    expect([...catalog.classCodes].sort()).toEqual([
+      "bishop",
+      "dragon",
+      "elf",
+      "nightmare",
+      "royal",
+      "witch",
+    ])
   })
 
   it("answers the three loose card numbers of the design and marks alias hits", () => {
