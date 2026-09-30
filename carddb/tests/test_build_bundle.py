@@ -389,3 +389,69 @@ def test_boolean_format_is_rejected_even_after_resigning(
         verify_bundle(
             compile_build(), root, BUILD, expected, stores={"test-store": store}
         )
+
+
+@pytest.mark.parametrize(
+    "field", ["first_receipt_id", "descriptor_sha256", "etag", "url"]
+)
+def test_self_consistent_false_claim_still_fails_archived_metadata(
+    tmp_path: Path,
+    sealed_uses: tuple[Path, tuple[SourceUse, ...]],
+    field: str,
+) -> None:
+    store, uses = sealed_uses
+    source = uses[0].source
+    if field in {"first_receipt_id", "descriptor_sha256"}:
+        source = source.model_copy(
+            update={
+                "archive": source.archive.model_copy(
+                    update={field: "sha256:" + "0" * 64}
+                )
+            }
+        )
+    else:
+        source = source.model_copy(
+            update={
+                field: "https://example.invalid/wrong" if field == "url" else "wrong"
+            }
+        )
+    expected = (uses[0].model_copy(update={"source": source}),)
+    root = tmp_path / "bundle"
+
+    def populate(db: Database) -> InputRecord:
+        insert_raw_sources(db, (source,))
+        return input_record(BUILD, expected)
+
+    with pytest.raises(ValueError, match="archive provenance mismatch"):
+        publish_bundle(
+            compile_build(),
+            root,
+            BUILD,
+            expected,
+            populate,
+            {},
+            stores={"test-store": store},
+        )
+    assert not root.exists()
+
+
+def test_noncanonical_inputs_are_rejected_after_hashes_are_resigned(
+    tmp_path: Path,
+    sealed_uses: tuple[Path, tuple[SourceUse, ...]],
+) -> None:
+    root = tmp_path / "bundle"
+    store, expected = sealed_uses
+    publish(root, sealed_uses)
+    data = json.loads((root / "inputs.json").read_bytes())
+    content = json.dumps(data, indent=2).encode()
+    (root / "inputs.json").write_bytes(content)
+    report = json.loads((root / "report.json").read_bytes())
+    report["build_inputs_hash"] = "sha256:" + hashlib.sha256(content).hexdigest()
+    (root / "report.json").write_text(
+        json.dumps(report, sort_keys=True, separators=(",", ":"))
+    )
+    resign(root)
+    with pytest.raises(ValueError, match="Noncanonical build input record"):
+        verify_bundle(
+            compile_build(), root, BUILD, expected, stores={"test-store": store}
+        )
