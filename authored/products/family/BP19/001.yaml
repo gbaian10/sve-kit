@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:c801b782fbcd3ee73317f0fb0a5805a3c63235df7a6fc6b4e48cb503dbe12fab
+records:
+  - record_key: '["product_family","BP19"]'
+    kind: product_family
+    filing_key: BP19
+    data:
+      id: BP19
+      code: bp19
+      public_code: BP19
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック「天魔八虐」
+    evidence: []
+decisions:
+  - id: d:c801b782fbcd3ee73317f0fb0a5805a3c63235df7a6fc6b4e48cb503dbe12fab
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:c801b782fbcd3ee73317f0fb0a5805a3c63235df7a6fc6b4e48cb503dbe12fab
+    members:
+      -   - '["product_family","BP19"]'
+          - sha256:5dfe2fba1693f46ce4245483ff17ccdf1e4d7fccb6135cb24eaaeb98a33f20c8
+    sample_ids:
+      - '["product_family","BP19"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

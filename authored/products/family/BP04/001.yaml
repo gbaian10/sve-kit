@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:b5d580c081d563ca33edc9b113c669b16c210e5010dc2506b403b8000bea5a81
+records:
+  - record_key: '["product_family","BP04"]'
+    kind: product_family
+    filing_key: BP04
+    data:
+      id: BP04
+      code: bp04
+      public_code: BP04
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第4弾「天星神話」
+    evidence: []
+decisions:
+  - id: d:b5d580c081d563ca33edc9b113c669b16c210e5010dc2506b403b8000bea5a81
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:b5d580c081d563ca33edc9b113c669b16c210e5010dc2506b403b8000bea5a81
+    members:
+      -   - '["product_family","BP04"]'
+          - sha256:b00377727c883d46155412a2c2c3bff5ccf17505ea79c7530250fdf6f6e42304
+    sample_ids:
+      - '["product_family","BP04"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:1431ebc0bda0de86b68c50d4d98a18b751fa7328d8816491ed8a65d89d24d1ff
+records:
+  - record_key: '["product_family","BP03"]'
+    kind: product_family
+    filing_key: BP03
+    data:
+      id: BP03
+      code: bp03
+      public_code: BP03
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第3弾「FLAME OF LAEVATEINN / フレイム・オブ・レーヴァテイン」
+    evidence: []
+decisions:
+  - id: d:1431ebc0bda0de86b68c50d4d98a18b751fa7328d8816491ed8a65d89d24d1ff
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:1431ebc0bda0de86b68c50d4d98a18b751fa7328d8816491ed8a65d89d24d1ff
+    members:
+      -   - '["product_family","BP03"]'
+          - sha256:949a13e857f761f98da28e5e4c9c3472ba456f465f47ca1490cc4544a416508a
+    sample_ids:
+      - '["product_family","BP03"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

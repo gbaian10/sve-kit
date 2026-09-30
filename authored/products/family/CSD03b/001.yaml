@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:d4ec4ac7a332fdd97d941ccffbf025adf0c18cb23b06e7d63fb91f94dcf4cd24
+records:
+  - record_key: '["product_family","CSD03b"]'
+    kind: product_family
+    filing_key: CSD03b
+    data:
+      id: CSD03b
+      code: csd03b
+      public_code: CSD03b
+      kind: deck
+      name:
+        lang: ja
+        text: コラボスターターデッキ「黙示録の炎」
+    evidence: []
+decisions:
+  - id: d:d4ec4ac7a332fdd97d941ccffbf025adf0c18cb23b06e7d63fb91f94dcf4cd24
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:d4ec4ac7a332fdd97d941ccffbf025adf0c18cb23b06e7d63fb91f94dcf4cd24
+    members:
+      -   - '["product_family","CSD03b"]'
+          - sha256:f93f4485a02aa3f6b92992b97605b758a7d740dfb34b4ee69deb2e754d45e460
+    sample_ids:
+      - '["product_family","CSD03b"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：合作預組歸「預組」（放下拉選單）。合作作品：卡片戰鬥先導者

@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:7ea62e79ec0521c28a062db6bdee622da82a02aca8d1752e94f334f49c0b6b61
+records:
+  - record_key: '["product_family","CSD02c"]'
+    kind: product_family
+    filing_key: CSD02c
+    data:
+      id: CSD02c
+      code: csd02c
+      public_code: CSD02c
+      kind: deck
+      name:
+        lang: ja
+        text: コラボスターターデッキ「Passion」
+    evidence: []
+decisions:
+  - id: d:7ea62e79ec0521c28a062db6bdee622da82a02aca8d1752e94f334f49c0b6b61
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:7ea62e79ec0521c28a062db6bdee622da82a02aca8d1752e94f334f49c0b6b61
+    members:
+      -   - '["product_family","CSD02c"]'
+          - sha256:e580e98446360bc28cdaf0b7e092eb2aae1eff307453edfeb79fe82031b9b0aa
+    sample_ids:
+      - '["product_family","CSD02c"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：合作預組歸「預組」（放下拉選單）。合作作品：偶像大師 灰姑娘女孩

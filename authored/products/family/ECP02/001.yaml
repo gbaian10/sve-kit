@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:97893b2f00078aa17296b263fd721f47a9feffe7fba1e6721a8c141890953dcb
+records:
+  - record_key: '["product_family","ECP02"]'
+    kind: product_family
+    filing_key: ECP02
+    data:
+      id: ECP02
+      code: ecp02
+      public_code: ECP02
+      kind: collaboration
+      name:
+        lang: ja
+        text: EXコラボパック「アイドルマスター シンデレラガールズ」
+    evidence: []
+decisions:
+  - id: d:97893b2f00078aa17296b263fd721f47a9feffe7fba1e6721a8c141890953dcb
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:97893b2f00078aa17296b263fd721f47a9feffe7fba1e6721a8c141890953dcb
+    members:
+      -   - '["product_family","ECP02"]'
+          - sha256:a3d896371fd17be89ba88b6c03379ce94abb7b4ba91f6699a65e11a51c800035
+    sample_ids:
+      - '["product_family","ECP02"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:fcbd9469a20514787d5d38f2770c0e0f6b5bace7740f71aa07d039253b7c7f4e
+records:
+  - record_key: '["product_family","DSD01a"]'
+    kind: product_family
+    filing_key: DSD01a
+    data:
+      id: DSD01a
+      code: dsd01a
+      public_code: DSD01a
+      kind: deck
+      name:
+        lang: ja
+        text: DXスターターデッキ「学院に咲く双華」「武なる雷鳴」
+    evidence: []
+decisions:
+  - id: d:fcbd9469a20514787d5d38f2770c0e0f6b5bace7740f71aa07d039253b7c7f4e
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:fcbd9469a20514787d5d38f2770c0e0f6b5bace7740f71aa07d039253b7c7f4e
+    members:
+      -   - '["product_family","DSD01a"]'
+          - sha256:b1335dde6779f61ebcf58326c43ca0c3f80932b9e1c3fc73ddae4bcdff029207
+    sample_ids:
+      - '["product_family","DSD01a"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：預組（DXスターターデッキ）。代號在卡號上；部分卡的 EN 版收錄在 BP09（見卡號對照）

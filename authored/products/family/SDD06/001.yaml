@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:0b1bee285ce520e8483a28f7fb97d9387a52d3441fa263fcfdf641e5e0fe4771
+records:
+  - record_key: '["product_family","SDD06"]'
+    kind: product_family
+    filing_key: SDD06
+    data:
+      id: SDD06
+      code: sdd06
+      public_code: SDD06
+      kind: deck
+      name:
+        lang: en
+        text: 'Showdown Deck: Havencraft'
+    evidence: []
+decisions:
+  - id: d:0b1bee285ce520e8483a28f7fb97d9387a52d3441fa263fcfdf641e5e0fe4771
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:0b1bee285ce520e8483a28f7fb97d9387a52d3441fa263fcfdf641e5e0fe4771
+    members:
+      -   - '["product_family","SDD06"]'
+          - sha256:dbfbfd2865b004c377a53ecdeacf739fe44ec9ed42ef62505606291a64d1d55b
+    sample_ids:
+      - '["product_family","SDD06"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''
