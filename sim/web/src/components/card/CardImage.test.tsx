@@ -33,6 +33,7 @@ const images = (availability: string, publication = "approved"): ImageIndex => (
     withdrawal_reason: "rights holder request",
     source_url: "https://example.invalid/x.png",
   }),
+  artImage: () => undefined,
   cardImage: () =>
     availability === "available"
       ? {
@@ -53,6 +54,7 @@ function TwoPrintings() {
   const [second, setSecond] = useState(false)
   const index: ImageIndex = {
     asset: () => ({ id: "img", availability: "available", publication_state: "approved" }),
+    artImage: () => undefined,
     cardImage: (printingId) => ({
       src: `/cdn/${printingId}.webp`,
       srcSet: `/cdn/${printingId}.webp 320w`,
@@ -82,7 +84,45 @@ function TwoPrintings() {
   )
 }
 
+const withArt: ImageIndex = {
+  asset: () => ({ id: "img", availability: "available", publication_state: "approved" }),
+  cardImage: () => ({
+    src: "/cdn/card.webp",
+    srcSet: "/cdn/card.webp 320w",
+    width: 320,
+    height: 447,
+  }),
+  artImage: () => ({ src: "/cdn/art.webp", srcSet: "/cdn/art.webp 160w", width: 160, height: 120 }),
+}
+
 describe("CardImage", () => {
+  it("shows the art crop in a 4:3 slot and falls back to the whole card when it fails", async () => {
+    await renderInRouter(
+      <CardImage
+        summary={summary}
+        name={name}
+        images={withArt}
+        alt="redundant"
+        sizes="64px"
+        variant="art"
+        className="w-16"
+      />,
+    )
+    const art = document.querySelector("img[srcset]")
+    if (!art) throw new Error("no image")
+    expect(art).toHaveAttribute("src", "/cdn/art.webp")
+    expect(art.parentElement).toHaveClass("aspect-[4/3]")
+    // No text card behind an art crop: it is drawn for the portrait card.
+    expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+    act(() => {
+      art.dispatchEvent(new Event("error"))
+    })
+    const card = document.querySelector("img[srcset]")
+    expect(card).toHaveAttribute("src", "/cdn/card.webp")
+    expect(card?.parentElement).toHaveClass("aspect-[63/88]")
+    expect(screen.getByText("BP01-001", { selector: "[aria-hidden] *" })).toBeInTheDocument()
+  })
+
   it("tries the image of another printing after one failed in the same slot", async () => {
     await renderInRouter(<TwoPrintings />)
     const user = userEvent.setup()

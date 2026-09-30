@@ -4,7 +4,14 @@ import path from "node:path"
 
 import sharp from "sharp"
 
-import { buildSnapshot, canonicalSize, type ImageRequest } from "./build"
+import {
+  artBox,
+  ASSET_HEIGHT,
+  ASSET_WIDTH,
+  buildSnapshot,
+  canonicalSize,
+  type ImageRequest,
+} from "./build"
 import { convertLocal, type LocalRecord, outputTargetError } from "./local"
 
 // Written into every output directory; the tool only ever replaces a directory carrying it.
@@ -42,23 +49,46 @@ function argument(name: string): string | undefined {
   return index === -1 ? undefined : process.argv[index + 1]
 }
 
-async function encodeImage({ width, height, seed, source }: ImageRequest): Promise<Uint8Array> {
-  const image =
-    source === null
-      ? sharp({
-          create: {
-            width,
-            height,
-            channels: 3,
-            background: {
-              r: (seed * 53 + 40) % 256,
-              g: (seed * 97 + 80) % 256,
-              b: (seed * 193 + 120) % 256,
-            },
-          },
-        })
-      : sharp(source).resize(width, height, { fit: "cover" })
-  return new Uint8Array(await image.webp({ quality: 80 }).toBuffer())
+async function encodeImage({
+  width,
+  height,
+  seed,
+  source,
+  crop,
+}: ImageRequest): Promise<Uint8Array> {
+  if (source === null) {
+    const placeholder = sharp({
+      create: {
+        width,
+        height,
+        channels: 3,
+        background: {
+          r: (seed * 53 + 40) % 256,
+          g: (seed * 97 + 80) % 256,
+          b: (seed * 193 + 120) % 256,
+        },
+      },
+    })
+    return new Uint8Array(await placeholder.webp({ quality: 80 }).toBuffer())
+  }
+  let image = sharp(source)
+  if (crop !== undefined) {
+    // The box was computed for the official 459×641 scan; a file of another size gets the same
+    // formula on its own dimensions (development data only, see docs/schema/image-variants.md).
+    const meta = await image.metadata()
+    const own =
+      meta.width === ASSET_WIDTH && meta.height === ASSET_HEIGHT
+        ? undefined
+        : artBox(meta.width, meta.height)
+    image = image.extract(
+      own === undefined
+        ? crop
+        : { left: own.left, top: own.top, width: 4 * own.k, height: 3 * own.k },
+    )
+  }
+  return new Uint8Array(
+    await image.resize(width, height, { fit: "cover" }).webp({ quality: 80 }).toBuffer(),
+  )
 }
 
 async function main(): Promise<void> {
@@ -93,7 +123,7 @@ async function main(): Promise<void> {
     families: converted.families,
     vocabulary: converted.vocabulary,
     synthetic: false,
-    dataVersion: "20260929T000000Z-0002",
+    dataVersion: "20260930T000000Z-0003",
   })
   await rm(target, { recursive: true, force: true })
   await mkdir(target, { recursive: true })

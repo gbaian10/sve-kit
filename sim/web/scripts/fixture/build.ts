@@ -39,6 +39,13 @@ export interface ImageRequest {
   readonly seed: number
   /** A source file to resize, or null for a synthetic placeholder. */
   readonly source: string | null
+  /** The region of the source to keep before resizing (art crops); the whole image otherwise. */
+  readonly crop?: {
+    readonly left: number
+    readonly top: number
+    readonly width: number
+    readonly height: number
+  }
 }
 
 type ImageEncoder = (request: ImageRequest) => Promise<Uint8Array>
@@ -72,6 +79,29 @@ const IMAGE_SIZES = [
   { key: "card_s", purpose: "card", max_width: 128, max_height: 179 },
 ] as const
 const CARD_SIZES = IMAGE_SIZES.filter((size) => size.purpose === "card")
+const ART_SIZES = IMAGE_SIZES.filter((size) => size.purpose === "art")
+/** The fixture's card images are the official 459×641 scans (real files are resized to it). */
+export const ASSET_WIDTH = 459
+export const ASSET_HEIGHT = 641
+
+/**
+ * The illustration crop of a portrait card (docs/schema/image-variants.md): a 4:3 box of side
+ * 4k×3k below the frame; landscape cards have no art crop.
+ */
+export function artBox(
+  width: number,
+  height: number,
+): { readonly left: number; readonly top: number; readonly k: number } | undefined {
+  if (width > height) return undefined
+  const left = Math.floor((8 * width) / 100)
+  const top = Math.floor((14 * height) / 100)
+  const k = Math.min(
+    Math.floor((84 * width) / 400),
+    Math.floor((width - left) / 4),
+    Math.floor((height - top) / 3),
+  )
+  return { left, top, k }
+}
 const LANGS = { ja: "ja", zhHant: "zh-Hant", en: "en" } as const
 const ARTISTS = ["artist:aoi", "artist:kuro", "artist:shiro"]
 
@@ -832,8 +862,8 @@ async function addImages(
     source_src_raw: `/synthetic/${printing.cardNo}-${String(ordinal)}.png`,
     source_url: `https://example.invalid/cards/${printing.cardNo}-${String(ordinal)}.png`,
     availability: state === "missing" ? "missing" : state === "pending" ? "unfetched" : "available",
-    width: state === "missing" ? null : 459,
-    height: state === "missing" ? null : 641,
+    width: state === "missing" ? null : ASSET_WIDTH,
+    height: state === "missing" ? null : ASSET_HEIGHT,
     format: state === "missing" ? null : "png",
   })
   builder.push("printing_image", owner, "detail", {
@@ -842,27 +872,39 @@ async function addImages(
     image_id: imageId,
   })
   if (state !== "approved") return
-  for (const size of CARD_SIZES) {
-    const bytes = await encodeImage({
-      width: size.max_width,
-      height: size.max_height,
-      seed:
-        ctx.seed * 8 +
-        ordinal * 3 +
-        (printing.variant === "alt" ? 1 : printing.variant === "signed" ? 2 : 0),
-      source,
-    })
+  const seed =
+    ctx.seed * 8 +
+    ordinal * 3 +
+    (printing.variant === "alt" ? 1 : printing.variant === "signed" ? 2 : 0)
+  const push = async (key: string, request: ImageRequest) => {
+    const bytes = await encodeImage(request)
     const hash = hex(sha256(bytes))
     const path = `images/sha256/${hash.slice(0, 2)}/${hash}.webp`
     images.set(path, bytes)
     builder.push("image_variant", GLOBAL, "detail", {
       image_id: imageId,
-      size_key: size.key,
+      size_key: key,
       format: "webp",
       path,
-      width: size.max_width,
-      height: size.max_height,
+      width: request.width,
+      height: request.height,
       bytes: bytes.length,
+    })
+  }
+  for (const size of CARD_SIZES) {
+    await push(size.key, { width: size.max_width, height: size.max_height, seed, source })
+  }
+  // Art variants: the same crop box scaled to 4n×3n, never upscaled (n capped per size).
+  const box = artBox(ASSET_WIDTH, ASSET_HEIGHT)
+  if (box === undefined) return
+  for (const size of ART_SIZES) {
+    const n = Math.min(box.k, size.max_width / 4)
+    await push(size.key, {
+      width: 4 * n,
+      height: 3 * n,
+      seed,
+      source,
+      crop: { left: box.left, top: box.top, width: 4 * box.k, height: 3 * box.k },
     })
   }
 }

@@ -9,7 +9,7 @@ import {
 } from "../../src/data/format-v1/json"
 import { readSnapshot } from "../../src/data/format-v1/reader"
 import { hex } from "../../src/data/format-v1/sha256"
-import { buildSnapshot, canonicalSize } from "./build"
+import { artBox, buildSnapshot, canonicalSize } from "./build"
 import { CARDS } from "./cards"
 
 // Deterministic stand-in for the WebP encoder: the bytes only need to be unique per seed and size.
@@ -98,5 +98,43 @@ describe("fixture snapshot", async () => {
 
   it("stays well under the 1 MiB fixture budget without images", () => {
     expect(canonicalSize(snapshot)).toBeLessThan(600 * 1024)
+  })
+})
+
+describe("artBox", () => {
+  it("crops the illustration of a portrait card and skips landscape cards", () => {
+    expect(artBox(459, 641)).toEqual({ left: 36, top: 89, k: 96 })
+    expect(artBox(641, 459)).toBeUndefined()
+  })
+
+  it("requests art crops next to the card sizes for every approved image", async () => {
+    const requests: { readonly width: number; readonly height: number; readonly crop?: unknown }[] =
+      []
+    await buildSnapshot({
+      encodeImage: (request) => {
+        requests.push({
+          width: request.width,
+          height: request.height,
+          ...(request.crop === undefined ? {} : { crop: request.crop }),
+        })
+        return Promise.resolve(
+          new TextEncoder().encode(`${String(request.width)}x${String(request.height)}`),
+        )
+      },
+    })
+    const art = requests.filter((request) => request.crop !== undefined)
+    expect(art.length).toBeGreaterThan(0)
+    expect(
+      art.every(
+        (request) =>
+          JSON.stringify(request.crop) ===
+          JSON.stringify({ left: 36, top: 89, width: 384, height: 288 }),
+      ),
+    ).toBe(true)
+    expect(
+      new Set(art.map((request) => `${String(request.width)}x${String(request.height)}`)),
+    ).toEqual(new Set(["384x288", "160x120"]))
+    // Two art sizes for every three card sizes.
+    expect(art.length * 3).toBe((requests.length - art.length) * 2)
   })
 })

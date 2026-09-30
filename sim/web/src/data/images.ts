@@ -12,14 +12,24 @@ export interface ImageSource {
 export interface ImageIndex {
   /** The card image of one printing face, or undefined when withdrawn, pending or missing. */
   readonly cardImage: (printingId: string, faceId: string) => ImageSource | undefined
+  /**
+   * The 4:3 illustration crop of one face (`art_s` / `art_m`, docs/schema/image-variants.md), or
+   * undefined when the snapshot ships none: landscape cards, or an export without art variants.
+   */
+  readonly artImage: (printingId: string, faceId: string) => ImageSource | undefined
   readonly asset: (printingId: string, faceId: string) => Row | undefined
 }
 
 const CARD_SIZES = ["card_s", "card_m", "card_l"]
+const ART_SIZES = ["art_s", "art_m"]
 
-export function imageSource(base: string, variants: readonly Row[]): ImageSource | undefined {
+export function imageSource(
+  base: string,
+  variants: readonly Row[],
+  sizes: readonly string[] = CARD_SIZES,
+): ImageSource | undefined {
   const cards = variants
-    .filter((row) => CARD_SIZES.includes(stringValue(row["size_key"])))
+    .filter((row) => sizes.includes(stringValue(row["size_key"])))
     .sort((a, b) => integerValue(a["width"]) - integerValue(b["width"]))
   const largest = cards.at(-1)
   if (!largest) return undefined
@@ -68,6 +78,12 @@ export async function loadImageIndex(client: SnapshotClient): Promise<ImageIndex
     cardImage: (printingId, faceId) => {
       const id = imageId(printingId, faceId)
       return id === undefined ? undefined : imageSource(client.base, variants.get(id) ?? [])
+    },
+    artImage: (printingId, faceId) => {
+      const id = imageId(printingId, faceId)
+      return id === undefined
+        ? undefined
+        : imageSource(client.base, variants.get(id) ?? [], ART_SIZES)
     },
   }
 }

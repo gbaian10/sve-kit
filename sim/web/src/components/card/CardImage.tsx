@@ -23,8 +23,10 @@ export interface CardImageProps {
   readonly sizes: string
   /** `contain` for landscape cards shown in a portrait slot. */
   readonly fit?: "cover" | "contain"
-  /** Must set the width (`w-full`, `w-8`); the height follows the 63:88 ratio. */
+  /** Must set the width (`w-full`, `w-8`); the height follows the slot's ratio. */
   readonly className: string
+  /** `art`: the 4:3 illustration crop when the snapshot has one and it loads, else the whole card. */
+  readonly variant?: "card" | "art"
   /**
    * Data saver: images load only when the caller says so (its own button outside any link).
    * Ignored when data saver is off.
@@ -41,8 +43,9 @@ function hostOf(url: unknown): string {
   }
 }
 
-// One fixed 63:88 slot: the text card sits underneath and the image fades in over it when it has
-// loaded, so nothing shifts. Missing, pending and withdrawn images keep the text card and say why.
+// One fixed slot (63:88 for the card, 4:3 for an art crop): the text card sits underneath and the
+// image fades in over it when it has loaded, so nothing shifts. Missing, pending and withdrawn
+// images keep the text card and say why.
 export function CardImage({
   summary,
   name,
@@ -52,6 +55,7 @@ export function CardImage({
   fit = "cover",
   className,
   imageWanted = false,
+  variant = "card",
 }: CardImageProps) {
   const { t } = useTranslation()
   const { dataSaver } = usePrefs()
@@ -62,9 +66,6 @@ export function CardImage({
     readonly failed: boolean
   }>({ src: undefined, loaded: false, failed: false })
   const asset = images?.asset(summary.printingId, summary.faceId)
-  const source = images?.cardImage(summary.printingId, summary.faceId)
-  const { loaded, failed } =
-    source !== undefined && image.src === source.src ? image : { loaded: false, failed: false }
   const availability = asset?.["availability"]
   const publication = asset?.["publication_state"]
   const tag =
@@ -79,6 +80,16 @@ export function CardImage({
         : publication === "pending" || availability === "unfetched"
           ? t("card.imagePending")
           : undefined
+  // The art crop is shown only while it can be: a crop that failed to load, a withheld image or
+  // data saver fall back to the whole card (and its text card).
+  const art =
+    variant === "art" && tag === undefined && (!dataSaver || imageWanted)
+      ? images?.artImage(summary.printingId, summary.faceId)
+      : undefined
+  const useArt = art !== undefined && !(image.src === art.src && image.failed)
+  const source = useArt ? art : images?.cardImage(summary.printingId, summary.faceId)
+  const { loaded, failed } =
+    source !== undefined && image.src === source.src ? image : { loaded: false, failed: false }
   const showImage =
     source !== undefined && tag === undefined && !failed && (!dataSaver || imageWanted)
   // In identify mode the slot itself carries the name, so the card is announced with or without
@@ -87,7 +98,8 @@ export function CardImage({
   return (
     <span
       className={cn(
-        "relative block aspect-[63/88] overflow-hidden rounded-card border border-border bg-surface-2",
+        "relative block overflow-hidden rounded-card border border-border bg-surface-2",
+        useArt ? "aspect-[4/3]" : "aspect-[63/88]",
         className,
       )}
       role={identify ? "img" : alt === "decorative" ? "presentation" : undefined}
@@ -95,7 +107,7 @@ export function CardImage({
         identify ? t("card.imageAlt", { name: name.text, cardNo: summary.cardNo }) : undefined
       }
     >
-      {!(showImage && loaded) && (
+      {!useArt && !(showImage && loaded) && (
         <TextCard
           name={name}
           classCode={summary.classCode}

@@ -231,7 +231,9 @@ with the new list URL. `chips.ts` turns the applied state into the summary chips
 `ControlBar` holds the result count in the unit's word, the sort select, the grid density (2 or 3
 columns, phones only, a preference) and the view control. `view` follows architecture §2.1: the
 URL wins, else `Prefs.viewMode`; switching writes both and keeps the conditions and the anchor.
-The table view fetches the effect preview of its rows on demand from the set's detail file
+The table view shows the 4:3 illustration crop as its thumbnail (`art_s` / `art_m` variants,
+`docs/schema/image-variants.md`) when the snapshot ships one, else the whole card; the local fixture
+crops it with the same formula, as development data only. It fetches the effect preview of its rows on demand from the set's detail file
 (`src/app/effectPreviews.ts`) renders it through `CardText` in its compact form (small icons, keyword names
 without explanations) and labels it as an incomplete preview; the list view is the 52 px row
 of design §6.2. `useOnline` drives the offline notice, and a card image that fails to load falls

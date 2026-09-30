@@ -78,15 +78,21 @@ function Row({
           onOpen(cell)
           void navigate(cell.to, { state: cell.state })
         }}
-        className="flex min-w-0 flex-1 gap-3 text-text-1"
+        className="flex min-w-0 flex-1 items-start gap-3 text-text-1"
       >
         <CardImage
           summary={cell.summary}
           name={cell.name.primary}
           images={images}
           alt="redundant"
-          sizes="48px"
-          className="w-12 shrink-0"
+          sizes="64px"
+          variant="art"
+          className={cn(
+            "shrink-0",
+            images?.artImage(cell.summary.printingId, cell.summary.faceId) === undefined
+              ? "w-12"
+              : "w-16",
+          )}
         />
         <span className="flex min-w-0 flex-1 flex-col gap-0.5">
           <span lang={cell.name.primary.lang} className="truncate text-15 font-semibold">
