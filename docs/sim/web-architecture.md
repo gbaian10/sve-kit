@@ -52,6 +52,20 @@ sim/web/
 `:slug?` 是原文卡名的可讀片段，可有可無：決定卡片的永遠是卡號；slug 缺少或錯誤時照常開啟，並把網址 `replace` 成 canonical
 （`/cards/{卡號}/{原文卡名}`）。`card_route_alias` 永久轉址、`route_override` 與暫定號碼依快照格式 §8；找不到的卡號進 404 頁。
 
+### 卡包分組
+
+**使用者決定（2026-09-30）**：卡包選擇依 `product_family.kind` 分成主要分類與下拉選單兩區，套用全站目前選定的 JP／EN 版本，兩區結果不混。
+
+| 顯示區域 | kind | 顯示分類 |
+| --- | --- | --- |
+| 主要分類 | `booster` | 補充包 |
+| 主要分類 | `collaboration` | 合作包 |
+| 主要分類 | `special_pack` | 特殊卡包 |
+| 主要分類 | `promo` | PR |
+| 下拉選單「預組與特別商品」 | `deck`、`special`、`other` | 預組、特別商品、其他 |
+
+`special_pack` 表示隨機抽取、但不是補充包／合作包／PR 的特殊卡包，例如 SP01「スペシャルパック『シーサイド・メモリーズ』」。BSF2024、BSF2025、NY2024、GFE01 是有自己卡號的非賣品活動獎品，保留各自家族，`kind=promo`，顯示在 PR 分類底下；這項分組不合併歸檔代號或改寫 owner。GFB01a–d 使用 `kind=deck`，因為 Gloryfinder Bundle 是四副固定預組的同捆商品，顯示於「預組與特別商品」。
+
 ### 2.1 URL 是列表狀態的唯一來源
 
 `domain/query/model.ts` 的 `QueryState`：
