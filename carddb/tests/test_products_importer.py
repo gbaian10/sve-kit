@@ -35,7 +35,7 @@ from .product_fixtures import (
     write_yaml,
 )
 from .product_fixtures import product_root as product_root  # ruff: ignore[useless-import-alias] -- shared fixture
-from .registry_preview_fixtures import REVISION, evidence
+from .registry_preview_fixtures import BUILD, REVISION, evidence
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- shared fixture dependency
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared fixture dependency
 
@@ -68,7 +68,12 @@ def test_confirmed_family_and_identity_are_one_graph(
     before = {p: p.read_bytes() for p in product_root.rglob("*.yaml")}
     with create_database(compile_build()) as db:
         import_product_preview(
-            db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+            db,
+            catalog,
+            plan,
+            build=BUILD,
+            authored_revision=REVISION,
+            languages=LANGUAGES,
         )
         assert len(db.rows("product_family")) == 3
         assert len(db.rows("text_unit")) == 1
@@ -132,7 +137,12 @@ def test_late_identity_failure_rolls_back_families_too(
     with create_database(compile_build()) as db:
         with pytest.raises(KeyError, match="art"):
             import_product_preview(
-                db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                plan,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
         for table in AUDIT:
             assert not db.rows(table)
@@ -163,7 +173,12 @@ def test_missing_or_proposed_parent_keeps_existing_preview_rejection(
     with create_database(compile_build()) as db:
         with pytest.raises(ValueError, match="Missing product_family"):
             import_product_preview(
-                db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                plan,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
         for table in AUDIT:
             assert not db.rows(table)
@@ -185,7 +200,9 @@ def test_proposed_retains_audit_without_adopted_parent(product_root: Path) -> No
         for item in items(catalog.report()["records"])
     )
     with create_database(compile_build()) as db, db.transaction():
-        populate_families(db, catalog, authored_revision=REVISION, languages=LANGUAGES)
+        populate_families(
+            db, catalog, build=BUILD, authored_revision=REVISION, languages=LANGUAGES
+        )
         assert "BP02" not in {r.values["id"] for r in db.rows("product_family")}
         assert len(db.rows("product_family")) == 2
         assert len(db.rows("decision")) == 3
@@ -217,7 +234,12 @@ def test_unsupported_db_projection_is_explicit_and_atomic(
             + ("product" if kind == "product" else "printing_product"),
         ):
             import_product_preview(
-                db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                plan,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
         for table in AUDIT:
             assert not db.rows(table)
@@ -232,7 +254,12 @@ def test_revision_is_full_and_exact(
     with create_database(compile_build()) as db:
         with pytest.raises(ValueError, match="full Git commit"):
             import_product_preview(
-                db, catalog, plan, authored_revision=revision, languages=LANGUAGES
+                db,
+                catalog,
+                plan,
+                build=BUILD,
+                authored_revision=revision,
+                languages=LANGUAGES,
             )
         assert not db.rows("language")
 
@@ -248,6 +275,7 @@ def test_inconsistent_registry_input_cannot_be_composed(
                 db,
                 replace(catalog, registry_index_content=b"different"),
                 plan,
+                build=BUILD,
                 authored_revision=REVISION,
                 languages=LANGUAGES,
             )
@@ -268,6 +296,7 @@ def test_language_must_be_registered(product_root: Path, language: str) -> None:
             populate_families(
                 db,
                 catalog,
+                build=BUILD,
                 authored_revision=REVISION,
                 languages=() if language == "ja" else LANGUAGES,
             )
@@ -295,7 +324,11 @@ def test_existing_language_and_exact_text_are_reused(product_root: Path) -> None
             )
         with db.transaction():
             populate_families(
-                db, catalog, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
         assert len(db.rows("language")) == 1
         assert len(db.rows("text_unit")) == 1
@@ -326,7 +359,11 @@ def test_each_text_collision_compares_exact_bytes(
             )
         with pytest.raises(ValueError, match="collision"), db.transaction():
             populate_families(
-                db, catalog, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
         assert len(db.rows("text_unit")) == 1
         assert not db.rows("source_record")
@@ -354,6 +391,7 @@ def test_names_are_not_normalized_and_languages_do_not_share_keys(
         populate_families(
             db,
             catalog,
+            build=BUILD,
             authored_revision=REVISION,
             languages=(
                 *LANGUAGES,
@@ -377,7 +415,11 @@ def test_language_config_conflict_does_not_overwrite(product_root: Path) -> None
             )
         with pytest.raises(ValueError, match="Conflicting language"), db.transaction():
             populate_families(
-                db, catalog, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
         assert db.rows("language")[0].values["display_name"] == "Existing name"
 
@@ -390,7 +432,12 @@ def test_final_verification_failure_rolls_back_both_importers(
     with create_database(compile_build()) as db:
         with pytest.raises(sqlite3.IntegrityError), db.transaction():  # ruff: ignore[pytest-raises-with-multiple-statements] -- exercise commit-time verification after both importers write
             populate_product_preview(
-                db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+                db,
+                catalog,
+                plan,
+                build=BUILD,
+                authored_revision=REVISION,
+                languages=LANGUAGES,
             )
             db.insert(
                 "card_int_id",
@@ -414,7 +461,12 @@ def test_rebuild_failure_preserves_old_destination(
 
     def populate(db: Database) -> None:
         populate_product_preview(
-            db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+            db,
+            catalog,
+            plan,
+            build=BUILD,
+            authored_revision=REVISION,
+            languages=LANGUAGES,
         )
 
     with pytest.raises(KeyError, match="art"):
@@ -431,7 +483,12 @@ def test_rebuild_success_uses_the_caller_transaction(
 
     def populate(db: Database) -> None:
         populate_product_preview(
-            db, catalog, plan, authored_revision=REVISION, languages=LANGUAGES
+            db,
+            catalog,
+            plan,
+            build=BUILD,
+            authored_revision=REVISION,
+            languages=LANGUAGES,
         )
         assert len(db.rows("printing")) == 2
 

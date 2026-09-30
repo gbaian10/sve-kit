@@ -78,6 +78,11 @@ def test_pins_version_url_hash_first_receipt_and_parser(
     assert found.source.etag == "first-etag"
     assert found.source.fetched_at == "2026-09-28T00:00:00Z"
     assert found.source.parser_version == "test-parser"
+    assert found.source.archive.batch_id == latest.batch_id
+    assert (
+        found.source.archive.first_receipt_id != latest.inventory.entries[0].receipt_id
+    )
+    assert found.source.values()["parser_version"] is None
     expected = observation(
         legacy_projection(extract_card(RAW, number="TEST-001")), "jp"
     )

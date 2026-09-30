@@ -67,11 +67,12 @@ proof of a real product relationship.
 from sve_carddb.products import import_product_preview, load_products
 
 catalog = load_products(authored_root, registry=plan.snapshot)
-import_product_preview(
+inputs = import_product_preview(
     db,
     catalog,
     plan,
     authored_revision=authored_revision,
+    build=build_context,
     languages=build_languages,
 )
 ```
@@ -91,3 +92,27 @@ printing integers remain unchanged. This supplies family parents for identity
 staging; it does not build card text, products, inclusions, vocabulary, public
 snapshots or a complete release pipeline, and does not enable broad capability
 readiness flags.
+
+## Shared raw evidence and saved build inputs
+
+Raw source rows have `parser_version=NULL` and are shared with identity staging
+only when every version metadata field matches. The authored source rows keep
+their original envelope parser recipes. `FrozenSources` provides one reusable
+sealed-source metadata boundary; product evidence records `archive-closure-v1`
+under `product_evidence_closure`, since checking bytes does not parse or adopt
+a product relationship. Identity evidence keeps its actual parser pin.
+
+Each staging entry point requires an explicit `BuildContext` and returns an
+immutable `InputRecord`. `product_preview_uses(catalog, plan, stores)` declares
+expected uses independently of writes. Import verifies the complete combined
+raw source/use closure; standalone populate operations verify their own subset,
+which the caller must include in a final complete record.
+
+Save a completed staging build using `build_bundle.publish_bundle`: it owns the
+transaction, checks an independently supplied context/use plan, rechecks archive
+closure and publishes DB, inputs and report together. Its population callback
+uses `populate_product_preview`, not the transaction-owning import function.
+`verify_bundle` requires the same pinned expected inputs and named stores, checks
+all four files and reads the closed DB without writes. See the
+[build DB example](../build_db/README.md#saved-build-inputs) and the
+[approved source contract](../../../../docs/schema/source-archive.md#221-建置輸入紀錄與完整使用閉包).

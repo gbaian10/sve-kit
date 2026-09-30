@@ -5,6 +5,7 @@ from sve_carddb.products.importer import (
     import_product_preview,
     populate_families,
     populate_product_preview,
+    product_preview_uses,
 )
 from sve_carddb.products.loader import ProductSnapshot, load_products
 
@@ -15,4 +16,5 @@ __all__ = [
     "load_products",
     "populate_families",
     "populate_product_preview",
+    "product_preview_uses",
 ]

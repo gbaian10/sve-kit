@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue
 
+from sve_carddb.build_inputs import SourceUse
 from sve_carddb.registry.records import (
     AllocationData,
     ArtData,
@@ -21,6 +22,7 @@ from sve_carddb.registry.records import (
     RelatedData,
 )
 from sve_carddb.registry.snapshot import RegistryRecord, RegistrySnapshot, load_registry
+from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -58,6 +60,17 @@ class PreviewPlan:
     regions: tuple[Region, ...]
     projections: tuple[Projection, ...]
     evidence: Mapping[tuple[Region, str], CardEvidence]
+
+    def source_uses(self) -> tuple[SourceUse, ...]:
+        """Declare all successfully read observations, including excluded identity evidence."""
+        return tuple(
+            SourceUse(
+                source=item.source,
+                usage="registry_observation",
+                locator=canonical({"region": region, "card_no": number}).decode(),
+            )
+            for (region, number), item in sorted(self.evidence.items())
+        )
 
     def included(self, kind: str) -> tuple[RegistryRecord, ...]:
         """Return only records whose regional dependencies are included."""

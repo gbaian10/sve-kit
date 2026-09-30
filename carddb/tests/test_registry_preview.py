@@ -14,7 +14,7 @@ from sve_carddb.registry.records import CorrectionData, PrintingData
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import Shard, read_yaml
 
-from .registry_preview_fixtures import REVISION, evidence, parents
+from .registry_preview_fixtures import BUILD, REVISION, evidence, parents
 from .registry_snapshot_fixtures import edit_record, rewrite
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- expose shared synthetic fixture
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose shared fixture dependency
@@ -81,7 +81,7 @@ def test_full_synthetic_import_links_en_art_reskin_and_historic_decisions(
     assert related.regions == ("en",)
     with create_database(compile_build(("en", "related"))) as db:
         parents(db, plan)
-        import_preview(db, plan, authored_revision=REVISION)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert len(db.rows("card")) == 2
         assert len(db.rows("printing")) == 4
         assert len(db.rows("printing_face")) == 4
@@ -207,7 +207,7 @@ def test_missing_parents_does_not_write_any_identity(
     plan = plan_preview(registry_root, evidence(inputs), regions=("jp",))
     with create_database(compile_build()) as db:
         with pytest.raises(ValueError, match="Missing product_family"):
-            import_preview(db, plan, authored_revision=REVISION)
+            import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         for table in ("source_record", "decision", "card", "printing"):
             assert not db.rows(table)
 
@@ -220,7 +220,7 @@ def test_late_failure_rolls_back_all_imported_rows(
     with create_database(compile_build()) as db:
         parents(db, plan)
         with pytest.raises(KeyError, match="art"):
-            import_preview(db, plan, authored_revision=REVISION)
+            import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert not db.rows("source_record")
         assert not db.rows("card")
         assert len(db.rows("decision")) == 1
@@ -241,8 +241,8 @@ def test_source_version_conflict_is_not_silently_deduplicated(
     plan = plan_preview(registry_root, replace(provider, cards=cards), regions=("jp",))
     with create_database(compile_build()) as db:
         parents(db, plan)
-        with pytest.raises(ValueError, match="Conflicting metadata"):
-            import_preview(db, plan, authored_revision=REVISION)
+        with pytest.raises(ValueError, match="Conflicting raw source metadata"):
+            import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert not db.rows("source_record")
 
 
@@ -287,7 +287,7 @@ def test_jp_database_has_no_references_to_excluded_region(
     plan = plan_preview(registry_root, evidence(inputs, en=False), regions=("jp",))
     with create_database(compile_build()) as db:
         parents(db, plan)
-        import_preview(db, plan, authored_revision=REVISION)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert {r.values["region"] for r in db.rows("printing")} == {"jp"}
         assert {r.values["int_id"] for r in db.rows("card_int_id")} == {20001, 20002}
         assert all(r.values["art_id"] is None for r in db.rows("printing_face"))
@@ -339,7 +339,7 @@ def test_authored_source_requires_full_revision(
     with create_database(compile_build()) as db:
         parents(db, plan)
         with pytest.raises(ValueError, match="full Git commit"):
-            import_preview(db, plan, authored_revision=bad_revision)
+            import_preview(db, plan, build=BUILD, authored_revision=bad_revision)
         assert not db.rows("source_record")
 
 
@@ -358,7 +358,7 @@ def test_unconfirmed_identity_cannot_leave_partial_graph(
     assert any("identity_decision_not_confirmed" in p.reasons for p in plan.projections)
     with create_database(compile_build(("en", "related"))) as db:
         parents(db, plan)
-        import_preview(db, plan, authored_revision=REVISION)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         db.verify()
 
 
@@ -377,7 +377,7 @@ def test_conflicting_art_uses_fail_atomically(
     with create_database(compile_build(("en", "related"))) as db:
         parents(db, plan)
         with pytest.raises(ValueError, match="Multiple adopted art groups"):
-            import_preview(db, plan, authored_revision=REVISION)
+            import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert not db.rows("art")
         assert not db.rows("source_record")
 
@@ -415,7 +415,7 @@ def test_proposed_review_is_excluded_with_reason(
     assert not plan.included(kind)
     with create_database(compile_build(("en", "related"))) as db:
         parents(db, plan)
-        import_preview(db, plan, authored_revision=REVISION)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert not db.rows(kind)
         if kind == "art":
             assert all(row.values["art_id"] is None for row in db.rows("printing_face"))

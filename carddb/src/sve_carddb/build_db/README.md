@@ -252,3 +252,65 @@ decision (`art_use_adopted`). Unreferenced candidates remain storable. This chec
 runs with the other query checks before COMMIT, including when only the decision
 is changed; failure rolls back the whole transaction. It does not prove art
 baseline, classification or raw evidence validity.
+
+## Saved build inputs
+
+The shared raw source boundary in `sve_carddb.build_inputs` reuses a source
+version only when all metadata matches, with `parser_version=NULL`. Each actual
+use keeps its own parser and archive pin in an immutable input record. The
+[approved contract](../../../../docs/schema/source-archive.md#22-建置-source_record-的投影)
+requires that record alongside the saved DB and report.
+
+```python
+from sve_carddb.build_bundle import publish_bundle, verify_bundle
+from sve_carddb.build_inputs import BuildContext
+from sve_carddb.products import populate_product_preview, product_preview_uses
+
+context = BuildContext.from_inputs(
+    program_revision,
+    {"carddb/uv.lock": dependency_lock_bytes},
+    {"regions": list(plan.regions), "languages": language_configuration},
+)
+expected = product_preview_uses(catalog, plan, stores)
+
+
+def populate(db):
+    return populate_product_preview(
+        db,
+        catalog,
+        plan,
+        authored_revision=authored_revision,
+        build=context,
+        languages=languages,
+        stores=stores,
+    )
+
+
+publish_bundle(
+    schema,
+    new_bundle_directory,
+    context,
+    expected,
+    populate,
+    {"identity": plan.report(), "products": catalog.report()},
+    stores=stores,
+)
+verify_bundle(schema, new_bundle_directory, context, expected, stores=stores)
+```
+
+Callers pin the actual full program revision, exact dependency input bytes and
+configuration; these are independent of the authored revision. Input comparison
+is against that independently supplied context and use plan, never just a
+recomputed self-hash. The four-file directory contains `build.sqlite`,
+`inputs.json`, `report.json` and `seal.json`; the seal binds all three payload
+hashes, and the report binds the input-record hash. Publication validates the
+complete raw/use/archive closure inside the transaction and uses an atomic
+no-overwrite directory rename after fsync. Failed builds publish no bundle.
+Existing bundles are immutable; create a new destination for another build.
+
+Offline verification rechecks archived source closure and first-receipt
+metadata, expected uses, artifact hashes, schema and DB integrity.
+`database.open_database` opens only a closed regular database without sidecars,
+using read-only immutable mode; it never installs DDL or reads live manifests.
+Low-level rebuild/populate APIs still support temporary work, but saving a DB
+without its input record does not satisfy this bundle contract.

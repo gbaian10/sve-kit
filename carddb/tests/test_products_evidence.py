@@ -17,7 +17,7 @@ from sve_carddb.source_archive import ArchiveError, seal_batch, verify_batch
 
 from .product_fixtures import LANGUAGES, envelope, family, first_record, install, obj
 from .product_fixtures import product_root as product_root  # ruff: ignore[useless-import-alias] -- shared fixture
-from .registry_preview_fixtures import REVISION
+from .registry_preview_fixtures import BUILD, REVISION
 from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: ignore[useless-import-alias] -- shared fixture dependency
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared fixture dependency
 from .test_source_archive import _put, _put_zst, _store
@@ -80,6 +80,7 @@ def test_family_evidence_uses_descriptor_raw_hash_and_original_locator(
         populate_families(
             db,
             catalog,
+            build=BUILD,
             authored_revision=REVISION,
             languages=LANGUAGES,
             stores={"test-store": root},
@@ -152,6 +153,7 @@ def test_each_evidence_closure_failure_is_atomic(
             populate_families(
                 db,
                 catalog,
+                build=BUILD,
                 authored_revision=REVISION,
                 languages=LANGUAGES,
                 stores={} if case == "unconfigured" else {"test-store": root},
@@ -181,6 +183,7 @@ def test_shared_evidence_links_are_deduplicated_and_distinct_locators_survive(
         populate_families(
             db,
             catalog,
+            build=BUILD,
             authored_revision=REVISION,
             languages=LANGUAGES,
             stores={"test-store": root},
