@@ -113,6 +113,19 @@ def test_each_membership_check(
         load(product_root)
 
 
+def test_decision_id_is_derived_from_full_membership_hash(product_root: Path) -> None:
+    raw = shard(product_root)
+    wrong_id = "d:" + "0" * 64
+    assert decision(raw)["id"] != wrong_id
+    decision(raw)["id"] = wrong_id
+    raw["default_decision_id"] = wrong_id
+    install(product_root, NAME, raw)
+    with pytest.raises(
+        ValueError, match="Product decision ID disagrees with membership hash"
+    ):
+        load(product_root)
+
+
 def test_default_pointer_has_its_own_check(product_root: Path) -> None:
     raw = shard(product_root)
     raw["default_decision_id"] = "d:" + "0" * 64
