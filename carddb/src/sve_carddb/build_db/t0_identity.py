@@ -244,6 +244,7 @@ TABLES = (
                     "promo",
                     "deck",
                     "collaboration",
+                    "special_pack",
                     "special",
                     "other",
                 ),

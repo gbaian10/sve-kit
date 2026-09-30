@@ -299,11 +299,11 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 
 | kind | data 的完整欄位 |
 | --- | --- |
-| `product_family` | `id, code, public_code, kind, name`；kind 六選一：`booster/promo/deck/collaboration/special/other`；code 為穩定小寫搜尋碼 `[a-z][a-z0-9_-]*`，public_code 保留人工確認的公開代號大小寫 |
+| `product_family` | `id, code, public_code, kind, name`；kind 七選一：`booster/promo/deck/collaboration/special_pack/special/other`；code 為穩定小寫搜尋碼 `[a-z][a-z0-9_-]*`，public_code 保留人工確認的公開代號大小寫 |
 | `product` | `id, region, family_id?, product_code?, name, product_type, released_on?, date_precision, date_raw?` |
 | `printing_product` | `printing_id, product_id, first_available_on?, first_available_precision?, first_available_raw?, inclusion_kind, note?` |
 
-family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的家族須保留該 ID。product.id 是人工首次採納時指定的永久非空 ID，全域唯一，不由當下排序／名稱／URL 重算；product_code 不是 ID，也不假定兩區相同。`product_type` 沿 build-db 的 Code，不把家族的六種 kind 偷換成商品型別 enum。`inclusion_kind` 僅 `pack/box/first_edition_campaign/qr_redemption/event_prize/other`，無證據時不得由家族 kind 猜配布方式。
+family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的家族須保留該 ID。product.id 是人工首次採納時指定的永久非空 ID，全域唯一，不由當下排序／名稱／URL 重算；product_code 不是 ID，也不假定兩區相同。`product_type` 沿 build-db 的 Code，不把家族的七種 kind 偷換成商品型別 enum。`inclusion_kind` 僅 `pack/box/first_edition_campaign/qr_redemption/event_prize/other`，無證據時不得由家族 kind 猜配布方式。
 
 `product.id` 的新定字元限制為 ASCII `[a-z][a-z0-9_-]*`：採小寫字母起首，只允許小寫字母、數字、底線與連字號，避免空白、路徑分隔符及 Unicode／大小寫正規化的歧義；不要求語意前綴，避免把地區或商品代號編成 ID 的解讀規則。格式驗證須對原始字串作完整比對，拒絕非字串或不匹配的值，不 trim、轉小寫或正規化後再接受；`printing_product.product_id` 與 record_key 中的 product 主鍵亦須符合此格式，並與被引用的 `product.id` 原樣相等。格式通過仍須檢查全域唯一與引用存在，不代表已採納商品身分。
 
