@@ -7,6 +7,7 @@ from urllib.parse import parse_qs, urlsplit
 
 if TYPE_CHECKING:
     import pytest
+    from pydantic import JsonValue
 
 from sve_carddb.extract import compare_en
 from sve_carddb.fetch.validate import ValidationError
@@ -36,6 +37,46 @@ def test_candidate_parser_uses_english_page_fields() -> None:
     assert set(card.faces[0].stats) == {"cost", "power", "hp"}
     assert {"Class", "Card Type", "Trait"} <= card.faces[0].info.keys()
     assert card.faces[0].image.endswith("/BP01-001EN.png")
+
+
+def test_info_value_keeps_break_between_text_nodes() -> None:
+    body = (
+        "<html><div class='cardlist-Detail'><div class='cardlist-Detail_Box_Inner'>"
+        "<div class='ttl'>Synthetic</div><div class='img'><img src='/synthetic.png'></div>"
+        "<div class='info'><dl><dt>Card Set</dt>"
+        "<dd>Starter Deck 2<br />\nBlade of Steel</dd></dl></div>"
+        "<div class='status-Item status-Item-Cost'><span class='heading'>Cost</span>1</div>"
+        "<div class='status-Item status-Item-Power'><span class='heading'>Power</span>2</div>"
+        "<div class='status-Item status-Item-Hp'><span class='heading'>HP</span>3</div>"
+        "<div class='illustrator'><span class='name'>SYN-001EN</span></div>"
+        "</div></div><!-- " + "x" * 1100 + " --></html>"
+    ).encode()
+    card = compare_en.parse_card(body, "SYN-001EN")
+    assert card.faces[0].info["Card Set"] == "Starter Deck 2\nBlade of Steel"
+
+
+def test_length_distribution_separates_direction_and_common_deltas() -> None:
+    items = cast(
+        "list[dict[str, JsonValue]]",
+        [
+            {"old": compare_en._summary("abc"), "new": compare_en._summary("a")},
+            {"old": compare_en._summary("def"), "new": compare_en._summary("d")},
+            {"old": compare_en._summary("ab"), "new": compare_en._summary("cd")},
+            {"old": compare_en._summary("a"), "new": compare_en._summary("abc")},
+            {"old": None, "new": compare_en._summary("added")},
+        ],
+    )
+    assert compare_en._length_distribution(items) == {
+        "candidate_shorter": 2,
+        "equal_length": 1,
+        "candidate_longer": 1,
+        "unpaired": 1,
+        "common_deltas": [
+            {"candidate_minus_legacy_bytes": -2, "count": 2},
+            {"candidate_minus_legacy_bytes": 0, "count": 1},
+            {"candidate_minus_legacy_bytes": 2, "count": 1},
+        ],
+    }
 
 
 def test_measurement_partitions_statuses_and_diffs_every_face(
@@ -90,6 +131,13 @@ def test_measurement_partitions_statuses_and_diffs_every_face(
     assert set(groups) == {"card.faces[].text"}
     assert groups["card.faces[].text"]["face_indexes"] == [1]
     assert groups["card.faces[].text"]["card_numbers"] == ["B"]
+    assert groups["card.faces[].text"]["length_delta_bytes"] == {
+        "candidate_shorter": 1,
+        "equal_length": 0,
+        "candidate_longer": 0,
+        "unpaired": 0,
+        "common_deltas": [{"candidate_minus_legacy_bytes": -2, "count": 1}],
+    }
     rows = cast("list[dict[str, object]]", report["cards"])
     assert [row["status"] for row in rows] == [
         "exact",

@@ -59,7 +59,7 @@ def parse_card(body: bytes, number: str) -> Card:
             if not key or key in info:
                 msg = "missing or duplicate EN info key"
                 raise ValidationError(msg)
-            info[key] = require_one(row, "dd").text(strip=True)
+            info[key] = _render(require_one(row, "dd"))
         stats: dict[str, str] = {}
         for item in select_all(inner, ".status-Item"):
             classes = (attribute(item, "class") or "").split()
@@ -168,6 +168,34 @@ def _diff(before: JsonValue, after: JsonValue, path: str) -> list[dict[str, Json
                 changes.extend(_diff(before[index], after[index], child))
         return changes
     return [{"field": path, "old": _summary(before), "new": _summary(after)}]
+
+
+def _length_distribution(items: list[dict[str, JsonValue]]) -> dict[str, object]:
+    """Count canonical byte deltas; positive means the candidate is longer."""
+    deltas: Counter[int] = Counter()
+    unpaired = 0
+    for item in items:
+        old, new = item["old"], item["new"]
+        if not isinstance(old, dict) or not isinstance(new, dict):
+            unpaired += 1
+            continue
+        old_bytes, new_bytes = old.get("bytes"), new.get("bytes")
+        if not isinstance(old_bytes, int) or not isinstance(new_bytes, int):
+            unpaired += 1
+            continue
+        deltas[new_bytes - old_bytes] += 1
+    return {
+        "candidate_shorter": sum(count for delta, count in deltas.items() if delta < 0),
+        "equal_length": deltas[0],
+        "candidate_longer": sum(count for delta, count in deltas.items() if delta > 0),
+        "unpaired": unpaired,
+        "common_deltas": [
+            {"candidate_minus_legacy_bytes": delta, "count": count}
+            for delta, count in sorted(
+                deltas.items(), key=lambda pair: (-pair[1], pair[0])
+            )[:8]
+        ],
+    }
 
 
 def measure(
@@ -284,6 +312,7 @@ def measure(
                     }
                 ),
                 "card_numbers": sorted({str(item["card_no"]) for item in items}),
+                "length_delta_bytes": _length_distribution(items),
                 "samples": items[:8],
             }
             for field, items in sorted(groups.items())
