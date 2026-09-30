@@ -402,7 +402,9 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 **使用者決定（2026-09-30，規格變更）**：卡包瀏覽與搜尋以歸檔代號 `home_set_id` 為主，在全站目前選定的 JP 或 EN 版本內進行，兩區結果不混；版本選擇指卡片地區，與介面語言分開。`/sets/{code}` 的 code 使用 `product_family.public_code`（例如 BP01），先解析到歸檔類別 ID，再依 `printing.home_set_id` 及目前 `printing.region` 篩選，列出該代號下的版次所屬卡片；卡片合併顯示也只使用這批命中的版次，不以共用 card 身分帶入另一區或其他歸檔代號的版次。搜尋 code 使用 family.code（例如 bp01），套用同一歸檔與地區條件。此規則取代原本沿 `product_family→product→printing_product` 決定卡包頁收錄的方式。
 
-實際商品名稱、發售日、合併包與 `printing_product` 收錄關係，只作單卡頁的補充資訊與來源連結，不驅動卡包瀏覽／搜尋結果；商品資料尚缺或 `product.family_id=null` 不阻擋依歸檔代號列卡。`card.home_set_id` 仍是 card 的固定歸檔與分片依據，不代替篩選版次用的 `printing.home_set_id`；再錄不搬既有 owner。單純依已登錄的歸檔代號篩選可以，不能據此推斷真實商品收錄。variants 仍篩採納的插畫／加工，未知報 coverage。
+實際商品名稱、發售日、合併包與 `printing_product` 收錄關係，作單卡頁的補充資訊與來源連結；卡包（`set=`）瀏覽與搜尋不由收錄驅動；商品資料尚缺或 `product.family_id=null` 不阻擋依歸檔代號列卡。`card.home_set_id` 仍是 card 的固定歸檔與分片依據，不代替篩選版次用的 `printing.home_set_id`；再錄不搬既有 owner。單純依已登錄的歸檔代號篩選可以，不能據此推斷真實商品收錄。variants 仍篩採納的插畫／加工，未知報 coverage。
+
+**協調者決定（2026-09-30，使用者可推翻）**：保留獨立的初收錄（首次／再錄）篩選，該 facet 可依收錄資料建立，不受上述卡包（`set=`）篩選來源限制。資料缺少或初收錄狀態未知時標示 coverage，不因此隱藏卡片，也不把未知當成首次或再錄。初收錄篩選同樣限定目前 JP／EN 版本，不能用另一區的收錄資料補判。
 
 `search_alias` 是單一別名表；kind 由固定映射指 `vocabulary/keyword/product_family/stamp/card`（`stamp_series` 指 vocabulary 的同名 kind），code 要存在目標；固定 enum 亦入 vocabulary。SQL 以白名單 union/join 驗證多型引用，不因單表精簡而略 FK 語義。alias 多義提示選擇；canonical code 精確優先。`query_alias` 複合條件延後。
 
