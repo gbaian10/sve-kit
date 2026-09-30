@@ -62,7 +62,7 @@ is **not** a fresh-adoption claim.
 
 ## Database boundary and failure behavior
 
-Use `import_preview(db, plan, authored_revision=<full Git SHA>)` for an existing
+Use `import_preview(db, plan, authored_revision=<full Git SHA>, build=build_context)` for an existing
 new build database, or `populate_preview` inside the transaction owned by
 `rebuild_database`. The caller supplies a stable, verified authored checkout and
 its full revision. Shard source IDs pin revision, path and the canonical envelope
@@ -100,3 +100,20 @@ included review rows. This is an identity staging importer, not the complete
 preview pipeline, public snapshot exporter or release gate. It does not mark
 T0 or any other broad capability importer/validator ready. The later preview
 pipeline still needs product, text, public projection and capability validation.
+
+## Shared sources and build input records
+
+`Source` lives in `sve_carddb.build_inputs`. It retains each use's parser and
+sealed archive pin (store, batch, descriptor and first receipt); `Source.values()`
+projects shared raw metadata with `parser_version=NULL`. Authored envelope
+sources keep `registry-envelope-v1`. No source ID is derived from a parser.
+`FrozenJP` and product evidence use the same `FrozenSources` metadata reader.
+
+Both import and populate require an explicit `BuildContext` and return an
+`InputRecord`. `plan.source_uses()` independently declares every successfully
+read observation, including evidence used to exclude a printing. Import checks
+the entire raw source/use closure; populate checks its subset for later
+composition. Preserve the returned record and save completed staging DBs via
+[build bundles](../../build_db/README.md#saved-build-inputs); a bare SQLite file
+does not attest the build-input contract. Parser pins remain distinct from
+identity decisions and never bypass the existing adoption gates.

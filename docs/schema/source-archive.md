@@ -58,7 +58,24 @@ metadata 依 hash 保存：`receipts/<64hex>.json`、`descriptors/<64hex>.json` 
 
 raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha256，`raw_locator` 是具名 store＋相對內容定址 path；來源 kind 依實際用途映射 official_page/official_api/official_pdf/image 等建置 enum。`url` 沿 descriptor；fetched_at／ETag 等採 first_receipt_id 的已知來源值，後續觀測留收據，不就地修改同一版本。不能把 observed_at 填成未知的原始 fetched_at。
 
-parser_version 不參與來源版本 ID；它表示本次建置採用的解析器版本，須由建置輸入／工具鎖定記錄保存。換 parser 重新產生建置 DB，不配一個假 raw 版本。QA 同官號、CR 同官方版本號但 raw hash 改變仍是不同來源版本；下游 QA／CR revision 另按建置契約追加，不由「官方版號沒改」覆寫歷史。authored 來源沿自身 Git／內容版號鎖定，不混成爬取 raw。
+**使用者核可（2026-10-01，F1 方案 A）**：同一 raw 來源版本只投影一列 `source_record`，`parser_version` 一律 null；每個實際使用的 `(source_version_id, usage, parser pin)` 另存於與 DB／report 一起輸出的建置輸入紀錄。不能以不同 parser 或用途配假 raw ID。authored 來源維持自身 Git／內容版號，`parser_version` 仍為 `registry-envelope-v1` 或 `product-authored-v1`，不混成爬取 raw。
+
+共用列的 id／url／raw hash 取 descriptor，raw_locator 為具名 store＋相對內容定址 path；fetched_at／ETag／Last-Modified 採 descriptor.first_receipt_id，fetched_at 使用該收據的 last_changed_at 並轉 UTC Z，不以 URL 首次抓取、批次最新 receipt 或 observed_at 替代。官方 JP／EN 卡片 HTML 的 kind 為 official_page，須驗來源身分與 HTML media type；不得按身分／商品用途分成不同 kind。相同 ID 的全部版本 metadata（含 kind、locator、HTTP metadata 及空 parser／authored 欄）逐欄相同才可重用；任一衝突整筆匯入交易回滾，禁止 `INSERT OR IGNORE` 或任取先寫入者。
+
+換 parser 重新產生建置 DB，不改 raw 版本。QA 同官號、CR 同官方版本號但 raw hash 改變仍是不同來源版本；下游 QA／CR revision 另按建置契約追加，不由「官方版號沒改」覆寫歷史。
+
+#### 2.2.1 建置輸入紀錄與完整使用閉包
+
+F1 的建置輸入紀錄使用 `input_format: 1`，由 `context` 與排序唯一的 `uses` 組成，採 canonical-json-v1，完整 hash 可重算。紀錄不含卡片效果文或私人絕對路徑。
+
+- `context` 保存完整 40 碼 `program_revision`、非空的 `dependencies` 與 `configuration`。依賴項恰有 `{name, sha256}`，name 為來源 checkout／工具輸入內可追回的 canonical 相對路徑，按 name 排序唯一，hash 對 exact bytes 計算；呼叫端釘住實際依賴鎖定檔及相關輸入，不能以套件顯示版本代替。configuration 是完整 canonical JSON 字串，保留明示設定輸入；不能從 authored revision 猜程式 revision 或使用預設機器設定補值。
+- 每個 use 恰有 `{source, usage, locator}`。source 保存來源 metadata、該使用端的非空 parser_version，及 `archive:{store_id,batch_id,descriptor_sha256,first_receipt_id}`；source.id 即 source_version_id。按 use 的完整 canonical bytes 排序，完全相同才去重；同版本不同 parser／用途／batch／定位都須保留。
+- 身分用途為 `registry_observation`，locator 保存精確 region／card_no 的 canonical JSON；讀取成功但被身分閘門排除的來源也已被實際使用，須保留。人工商品 evidence 僅驗來源閉包時，用途為 `product_evidence_closure`、parser pin 為 `archive-closure-v1`，locator 保存原 evidence 的完整 canonical 物件，不冒稱解析過商品內容或取得人工採納。後續官方商品／收錄解析以各自實際 parser 與精確區塊定位登錄；不要求或偽造人工 decision。
+- 輸出前必須與**從釘住的身分／商品輸入獨立宣告**的完整使用集合比對，再與實際 DB raw source_record 集合及全部 metadata 比對。缺／多用途、錯 parser／來源／定位／archive pin、依賴／設定／程式 revision 不符皆失敗。不能只對紀錄本身重算 hash，或拿實際登錄結果作為唯一 expected 集合。
+
+正式保存此 staging 產物時，以同一新目錄保存 `build.sqlite`、`inputs.json`、`report.json`、`seal.json`；report 外層保存 `build_inputs_hash` 及原報告，seal 保存 DB／inputs／report 的 exact bytes hash 與 `bundle_format:1`。交易及完整使用閉包驗證通過，所有檔案／目錄耐久寫入後才以不覆寫目標的原子 rename 發布。失敗不得發布只有 DB 或只有紀錄的半套產物；既有 bundle 不覆寫。這是建置期保存邊界，不是公開快照或永久來源歸檔。
+
+讀取先驗四檔閉包、canonical metadata、全部 hash 及 report 的 inputs 引用，再以唯讀 immutable 方式驗關閉且無 sidecars 的 DB；另用具名 store 重驗紀錄中的 sealed batch／descriptor／first receipt／raw 閉包與 metadata。缺任一檔案、來源或用途即失敗，不聯網或回查 live/latest 補資料。低階 populate 可回傳局部使用紀錄，但完整產物仍須由呼叫端合併並驗證完整閉包；in-memory 測試或失敗中的 staging 不冒稱保存完成。
 
 ## 3. 鎖定、準備與封存
 

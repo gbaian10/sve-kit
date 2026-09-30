@@ -47,6 +47,8 @@ vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。
 
 爬取來源的 `source_record.id`／`raw_locator` 從 [來源歸檔版本](source-archive.md#2-內容來源版本與-inventory) 投影；同 URL 換內容不覆寫來源版本，manifest 最新狀態與 raw 歷史分開保存。
 
+**使用者核可（2026-10-01，F1 方案 A）**：raw 來源版本共用一列，parser_version 一律 null；所有實際 parser／用途連同來源歸檔與程式／依賴／設定輸入保存於 DB／report 所附的建置輸入紀錄，輸出前驗完整使用閉包。共用 metadata 取 descriptor 與 first receipt 並逐欄比對，衝突回滾整筆交易，不略過插入錯誤。authored 的 parser_version 維持原封套 recipe。詳見 [來源投影與建置輸入紀錄](source-archive.md#22-建置-source_record-的投影)；不新增資料表或改變來源版本 ID。
+
 ## 3. 身分、商品與插畫
 
 ### 3.1 永久身分
