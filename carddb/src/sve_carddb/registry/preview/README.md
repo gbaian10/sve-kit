@@ -74,7 +74,9 @@ rows. Available raw evidence has separate matched/mismatch decision-source roles
 
 Before writing rows, the importer requires existing verified `product_family`
 parents for every selected card/printing. Product/vocabulary import is a caller
-responsibility. Missing parents fail explicitly; no inferred product names, types,
+responsibility. The [product family importer](../../products/README.md) supplies
+confirmed authored families and composes with `populate_preview` in the caller's
+transaction. Missing parents fail explicitly; no inferred product names, types,
 dates or placeholders are created. Rarity text is preserved; its normalized code
 remains NULL for the product/vocabulary stage. Premium is unknown except the
 specified exact pure-premium label. Conflicting rarity evidence between faces
