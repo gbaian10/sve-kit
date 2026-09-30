@@ -165,6 +165,28 @@ def test_each_artifact_is_required_and_hashed(
 
 
 @pytest.mark.parametrize(
+    "name", ["unexpected.txt", "build.sqlite-journal", "unexpected-directory"]
+)
+def test_bundle_rejects_every_unlisted_directory_entry(
+    tmp_path: Path,
+    sealed_uses: tuple[Path, tuple[SourceUse, ...]],
+    name: str,
+) -> None:
+    root = tmp_path / "bundle"
+    store, expected = sealed_uses
+    publish(root, sealed_uses)
+    extra = root / name
+    if name == "unexpected-directory":
+        extra.mkdir()
+    else:
+        extra.write_bytes(b"synthetic extra entry")
+    with pytest.raises(ValueError, match="Build bundle file closure mismatch"):
+        verify_bundle(
+            compile_build(), root, BUILD, expected, stores={"test-store": store}
+        )
+
+
+@pytest.mark.parametrize(
     "case",
     [
         "missing_use",

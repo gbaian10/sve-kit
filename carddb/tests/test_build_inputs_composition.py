@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import sve_carddb.products.importer as product_importer
+import sve_carddb.registry.preview.importer as identity_importer
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import SourceUse, input_record, insert_raw_sources
@@ -28,9 +30,113 @@ from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: 
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- fixture dependency
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
     from pathlib import Path
 
+    from sve_carddb.build_inputs import BuildContext, InputRecord
+    from sve_carddb.registry.preview.evidence import MemoryEvidence
     from sve_carddb.registry.review import Inputs
+
+
+def _omit_first_use(build: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:
+    return input_record(build, tuple(uses)[1:])
+
+
+def _jp_only(provider: MemoryEvidence) -> MemoryEvidence:
+    return replace(
+        provider,
+        cards={key: value for key, value in provider.cards.items() if key[0] == "jp"},
+    )
+
+
+@pytest.mark.parametrize("target", ["families", "identity"])
+@pytest.mark.parametrize("omit_use", [False, True])
+def test_each_partial_populator_checks_its_own_uses(
+    product_root: Path,
+    inputs: Inputs,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    target: str,
+    omit_use: bool,
+) -> None:
+    provider, store = frozen_provider(inputs, tmp_path / "frozen")
+    reference_identity_source(product_root, provider)
+    plan = plan_preview(product_root, _jp_only(provider), regions=("jp",))
+    catalog = load_products(product_root, registry=plan.snapshot)
+    schema = compile_build()
+    with create_database(schema) as db:
+        with db.transaction():
+            insert_raw_sources(db, (provider.cards["en", "BP02-070EN"].source,))
+            if target == "identity":
+                product_importer.populate_families(
+                    db,
+                    catalog,
+                    authored_revision=REVISION,
+                    build=BUILD,
+                    languages=LANGUAGES,
+                    stores={"test-store": store},
+                )
+        before = {table.name: db.rows(table.name) for table in schema.tables}
+        if omit_use:
+            module = product_importer if target == "families" else identity_importer
+            monkeypatch.setattr(module, "input_record", _omit_first_use)
+
+        def populate() -> InputRecord:
+            if target == "families":
+                return product_importer.populate_families(
+                    db,
+                    catalog,
+                    authored_revision=REVISION,
+                    build=BUILD,
+                    languages=LANGUAGES,
+                    stores={"test-store": store},
+                )
+            return identity_importer.populate_preview(
+                db, plan, authored_revision=REVISION, build=BUILD
+            )
+
+        # Call the partial boundary alone so a later composer cannot hide its omission.
+        if omit_use:
+            with (
+                pytest.raises(ValueError, match="Build input use closure"),
+                db.transaction(),
+            ):
+                populate()
+            assert before == {
+                table.name: db.rows(table.name) for table in schema.tables
+            }
+        else:
+            with db.transaction():
+                record = populate()
+            assert record.uses
+            assert provider.cards["en", "BP02-070EN"].source.id not in {
+                use.source.id for use in record.uses
+            }
+
+
+def test_standalone_composer_rejects_an_unclaimed_existing_raw_source(
+    product_root: Path, inputs: Inputs, tmp_path: Path
+) -> None:
+    provider, store = frozen_provider(inputs, tmp_path / "frozen")
+    reference_identity_source(product_root, provider)
+    plan = plan_preview(product_root, _jp_only(provider), regions=("jp",))
+    catalog = load_products(product_root, registry=plan.snapshot)
+    schema = compile_build()
+    with create_database(schema) as db:
+        with db.transaction():
+            insert_raw_sources(db, (provider.cards["en", "BP02-070EN"].source,))
+        before = {table.name: db.rows(table.name) for table in schema.tables}
+        with pytest.raises(ValueError, match="Build input raw source closure"):
+            import_product_preview(
+                db,
+                catalog,
+                plan,
+                authored_revision=REVISION,
+                build=BUILD,
+                languages=LANGUAGES,
+                stores={"test-store": store},
+            )
+        assert before == {table.name: db.rows(table.name) for table in schema.tables}
 
 
 @pytest.mark.parametrize("preexisting", [False, True])
