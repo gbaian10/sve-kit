@@ -42,7 +42,7 @@ sim/web/
 | `/cards`                     | 查卡 | 條件全部在 URL（§2.1）                               |
 | `/cards/:cardNo/:slug?`      | 單卡 | 疊層或整頁，由 `location.state` 能否重建決定（§2.2） |
 | `/cards/_provisional/:intId` | 單卡 | 暫定號碼版次（快照格式 §8）                          |
-| `/sets`、`/sets/:code`       | 卡包 | `/sets/:code`＝查卡頁預設 `set=`＋商品標頭           |
+| `/sets`、`/sets/:code`       | 卡包 | 預設 `set=`＋歸檔類別標頭（見 §2.1）                 |
 | `/settings`                  | 設定 | 顯示設定；R1 沒有登入                                |
 | `/decks`                     | 佔位 | 建牌器的入口，佔位頁                                 |
 | `*`                          | 404  | 含搜尋框                                             |
@@ -63,7 +63,7 @@ interface QueryState {
   cost: { min?: number; max?: number }; // 7 代表 ≥7
   types: TypeCode[];
   mechanics: Record<KeywordId, "has" | "not">; // 沒列＝不管
-  sets: ProductCode[];
+  sets: SetCode[];
   rarities: RarityCode[];
   altArtOnly: boolean;
   unit: "card" | "art" | "printing"; // 每格單位，預設 card（合併印刷）
@@ -73,8 +73,10 @@ interface QueryState {
 ```
 
 `domain/query/codec.ts` 在 `QueryState` 與 URL 參數（`q class cost type mech set rarity alt unit sort view`）之間互轉：
-值用 vocabulary 的英文 code，順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
+`set` 值用歸檔類別的 `product_family.code`（`SetCode`）；vocabulary 篩選值用其英文 code。順序固定，篩選、排序、單位的預設值不寫進 URL，所以同一狀態只有一種網址。
 `view` 是例外：URL 有帶就照 URL；沒帶就用偏好 `viewMode`；使用者切換檢視時同時寫 URL 與偏好。
+
+依使用者 2026-09-30 的規格變更（build-db §15），`/sets/:code` 的路徑代號是 `product_family.public_code`，解析到同一歸檔類別後，以其 `code` 預設 `set=`，標頭顯示歸檔類別名稱。卡包瀏覽與搜尋依已登錄的 `printing.home_set_id` 篩選，且只納入 `printing.region` 符合目前 `cardEdition`（`jp`／`en`，§3）的版次，兩區結果不混；合併卡片顯示也只使用命中的版次。商品名稱、發售日與收錄供單卡頁補充資訊及連結，不驅動 `set=` 篩選；獨立的初收錄 facet 依 build-db §15 的協調者決定，資料缺少或未知時標示 coverage，不因此隱藏卡片。
 
 進階查詢語法由快照格式的 `config.search.grammar_version` 定義；本文的 URL 參數是結構化篩選，語法到位時只是 codec 的另一種輸入。
 

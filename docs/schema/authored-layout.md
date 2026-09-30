@@ -1,6 +1,6 @@
 # authored 維護方式
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；本格式不變更出貨契約。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；本格式不變更出貨契約。
 
 ## 1. 路徑與共同格式
 
@@ -12,6 +12,7 @@
 | 定案 | 英文原創插畫 | `registry/art/<owner>/001.yaml` |
 | 定案 | 換皮卡 | `registry/card_related/<owner>/001.yaml` |
 | 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
+| 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 提案 | 身分修復、特殊構築 | `overrides/identities/BP01.yaml`、`overrides/deck-roles/BP01.yaml` |
 | 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
@@ -26,7 +27,7 @@ YAML 固定 1.2 core schema、單一文件、UTF-8；所有鍵必須是字串，
 
 ## 2. 分片、批次決定與來源
 
-每個分片有 `authored_format: 1`（分片格式未變；`ids/index.yaml` 為 2，見下）、`kind: registry_shard`、`default_decision_id`、`records`、`decisions`。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。配號以外，匯入時將封套的 decision 展開成具體資料表 FK，不另建立 subject 真值表。配號分片的 decision 為 null，decisions 為空。
+每個身分登錄分片有 `authored_format: 1`（分片格式未變；`ids/index.yaml` 為 2，見下）、`kind: registry_shard`、`default_decision_id`、`records`、`decisions`。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。配號以外，匯入時將封套的 decision 展開成具體資料表 FK，不另建立 subject 真值表。配號分片的 decision 為 null，decisions 為空。
 
 ```yaml
 authored_format: 1
@@ -255,3 +256,71 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都依其地區號段追加分配（§3.2）。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。每張第三方圖以 `review_decision_id` 連到 confirmed 的來源/圖片確認，保存 `source_url`、內容 hash、確認者 `reviewed_by` 與時間 `reviewed_at`；換圖/換來源須重新確認，抽樣不代替逐圖確認。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
 
 發布程序另外追加永久版本索引及內容閉包；所有舊 text 鍵集合用來做固定 16 hex＋lang 的碰撞檢查，無碰撞才可追加，不能重配歷史鍵。這個可重建鍵索引不進人工 registry，也不刪 R2 歷史來省索引工作。
+
+## 10. 商品人工輸入 product-authored-v1
+
+本節定義歸檔類別、人工商品與人工收錄的持久輸入；格式定案不等於候選資料已確認，也不表示匯入器已完成。官方來源直接萃取的商品觀測仍屬凍結來源，不需要把所有觀測抄成 authored。
+
+### 10.1 資料規則與使用者決定
+
+**使用者決定（2026-09-30，規格變更）**：依 [build-db §3.2](build-db.md#32-商品與發行) 與 [§15](build-db.md#15-網址搜尋預設版次與記號)，卡包瀏覽與搜尋改以已登錄的歸檔代號 home_set_id 為主，限定全站目前選定的 JP 或 EN 版本，兩區結果不混。`/sets/{code}` 依歸檔代號與地區列卡；商品名稱、發售日、合併包與收錄作單卡頁補充資訊及連結，不驅動卡包（`set=`）瀏覽與搜尋；初收錄 facet 另依 §15 的協調者決定。以下明列本次變更與保留的資料限制：
+
+- **本次變更**：`product_family` 保留為歸檔類別，人工確認 code、public_code、kind 與 name。**日英家族串連為選填**，不同區商品仍各自成列，`product.family_id` 可留空，不必為 PCS01 撞名或 EN Combined Set 強制配家族。家族關係沒有填寫不阻擋瀏覽，也不要求先完成這項人工確認。
+- **保留限制**：`home_set_id` 是固定歸檔 owner，不能當實際商品收錄證據，再錄不搬 owner；允許單純依已登錄的歸檔代號篩選，不由卡號前綴推商品收錄。
+- 歸檔 owner 代號可能跨區撞名，例如本批 `home_set_id=PCS01` 同時歸檔 51 筆 JP 公主連結版次與 3 筆 EN Summer Edition 版次；此時該 family 只代表歸檔類別，名稱與 kind 由人工確認，各區 `product.family_id` 依實際商品另行判斷（可以不同或為 null），不因共用 owner 就視為同一商品家族。
+- `product` 是真實商品，`printing_product` 才表示實際收錄；不由卡號前綴、owner、兩區同名或去除 EN 後綴建立商品／收錄／跨區關係。日英家族串連為選填，真實商品的 `family_id=null` 是可接受的輸入，不要求強制補家族，也不能造家族 placeholder。
+- PR 可以只是一個歸檔集合，不能假造整批 PR 的商品或發售日。只有 `day` 填完整日期；`month/year` 保留原字串、完整日期為 null，不能補一號。`unknown` 不猜日期。
+- 收錄與 printing 的 region 必須一致；收錄的 `first_available_precision=null` 表示沿用商品日期，`unknown` 表示明示未知的覆寫，兩者不可混用。未知商品日期不阻擋已知卡文的展示。
+
+商品與收錄可依凍結來源中可驗證的線索匯入，供單卡頁顯示；來源明示的欄位與版次收錄不必先寫成人工商品封套，或先取得日英家族串連的決定。下列 product-authored-v1 封套仍用於人工維護的商品／收錄與歸檔類別；只有這些人工輸入需要相應採納決定，不能把官方萃取觀測冒充 confirmed 人工決定。缺少日期或配布方式證據時沿用既有未知／待核對規則，不按 owner 補值。
+
+### 10.2 新定的路徑、索引與封套
+
+以下是 **product-authored-v1 新定的格式選擇**；不修改 `ids/index.yaml`、`registry_shard`、永久配號或身分決定的內容。
+
+| 路徑（相對 authored 根目錄） | 內容 |
+| --- | --- |
+| `products/index.yaml` | 獨立商品入口：`product_authored_format: 1, kind: product_index, includes` |
+| `products/family/<filing_key>/001.yaml` | `product_family` 記錄 |
+| `products/product/<filing_key>/001.yaml` | 人工 `product` 記錄與選填的家族關係 |
+| `products/inclusion/<filing_key>/001.yaml` | 人工 `printing_product` 記錄 |
+
+`filing_key` 僅分檔，使用 `[A-Za-z0-9_-]+`，可以沿用既有 owner；不產生任何家族或收錄關係。無家族商品可用 `unassigned` 分檔，不能據此建立同名家族。檔名採只增的三位以上十進位序號；依 §1 的 512 KiB 目標及單檔嚴格小於 1 MiB 切檔。新分片按 `record_key` 字典序排列，不重排既有分片。
+
+`includes` 是 authored 相對路徑到解析後 canonical JSON Hash 的映射，hash recipe 沿 §2；只允許上述三類分片。不接受絕對路徑、`..`、symlink、重複索引或未索引的商品 YAML。讀取先驗全部商品 index／分片／決定，再作區域投影；缺檔、hash 不符、重複 record_key／資料主鍵都失敗。不將商品分片加進身分 registry 的 includes；商品匯入也不重配 printing 整數。
+
+每個分片恰有 `product_authored_format: 1, kind: product_shard, default_decision_id, records, decisions`；records 非空，同檔記錄只有一種 kind，共用一個決定，`decisions` 恰含該決定。每筆 record 恰有 `record_key, kind, filing_key, data, evidence`，不接受未知欄位。所有可空欄位也須明示 null；省略不是另一種未知狀態。YAML 解析限制沿 §1。
+
+`record_key` 是主鍵陣列的 canonical JSON **字串**：family 為 `["product_family",id]`，product 為 `["product",id]`，inclusion 為 `["printing_product",printing_id,product_id]`。例如 YAML 的 `'["product_family","EXAMPLE"]'`；不用可能相撞的字串分隔符拼複合鍵。`filing_key` 必須等於路徑的該段，但不須等於 family_id。
+
+### 10.3 新定的記錄欄位與證據
+
+下表是輸入欄位；資料語意、enum 及 FK 沿 build-db，不直接儲存建置產生的 text_unit ID。`name` 與可空 `note` 使用 `{lang: Lang, text: Text}`，語言必須在建置的 language 登錄；名稱不可空。原文 exact bytes 保留，不以名稱分配永久 ID；其他語言名稱仍由翻譯流程處理。
+
+| kind | data 的完整欄位 |
+| --- | --- |
+| `product_family` | `id, code, public_code, kind, name`；kind 六選一：`booster/promo/deck/collaboration/special/other`；code 為穩定小寫搜尋碼 `[a-z][a-z0-9_-]*`，public_code 保留人工確認的公開代號大小寫 |
+| `product` | `id, region, family_id?, product_code?, name, product_type, released_on?, date_precision, date_raw?` |
+| `printing_product` | `printing_id, product_id, first_available_on?, first_available_precision?, first_available_raw?, inclusion_kind, note?` |
+
+family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的家族須保留該 ID。product.id 是人工首次採納時指定的永久非空 ID，全域唯一，不由當下排序／名稱／URL 重算；product_code 不是 ID，也不假定兩區相同。`product_type` 沿 build-db 的 Code，不把家族的六種 kind 偷換成商品型別 enum。`inclusion_kind` 僅 `pack/box/first_edition_campaign/qr_redemption/event_prize/other`，無證據時不得由家族 kind 猜配布方式。
+
+`product.id` 的新定字元限制為 ASCII `[a-z][a-z0-9_-]*`：採小寫字母起首，只允許小寫字母、數字、底線與連字號，避免空白、路徑分隔符及 Unicode／大小寫正規化的歧義；不要求語意前綴，避免把地區或商品代號編成 ID 的解讀規則。格式驗證須對原始字串作完整比對，拒絕非字串或不匹配的值，不 trim、轉小寫或正規化後再接受；`printing_product.product_id` 與 record_key 中的 product 主鍵亦須符合此格式，並與被引用的 `product.id` 原樣相等。格式通過仍須檢查全域唯一與引用存在，不代表已採納商品身分。
+
+`date_precision` 限 `day/month/year/unknown`。day 的 released_on 必須是有效完整 ISO 日期；month/year 必須有非空 date_raw 且 released_on=null；unknown 的 released_on=null，date_raw 可以保留來源的未知描述或為 null。日精度若來源有原字串仍保留 date_raw，不把轉換後 ISO 日期冒充原字串。inclusion 的日期三欄同理；precision=null 時另兩欄皆 null，以免把無覆寫與部分覆寫混在一起。不得從抓取／封存時間補發售日期。
+
+`evidence` 是去重陣列，每項恰有 `{store_id, batch_id, source_version_id, locator, role}`。前三個識別欄釘住 [source-archive](source-archive.md) 的具名 store、已封存批次與其中來源版本；locator 是非空人工定位字串（例如商品區塊序號），role 是非空證據用途。匯入須驗 batch／descriptor／receipt／raw 閉包並由 descriptor 取得原 URL／raw hash，不接受以 URL 或 hash 字串代替實際可驗來源，也不在 authored 存本機絕對路徑。locator 不是可執行查詢語言。
+
+商品與收錄的 evidence 不可空，且須支持該地區、商品及具體版次收錄的主張；卡片頁 products 區的共現只產候選，不能自動宣稱某家族、配布方式或完整收錄全集。純人工的歸檔家族可 evidence=[]，由下節精確成員的人工決定支持；若主張與真實商品對應，仍須該商品的來源證據及人工核對。商品頁 URL 可以是卡片頁記載的線索，但未封存該商品頁就不能宣稱已驗其內容。
+
+### 10.4 新定的決定形式與匯入投影
+
+每個商品分片使用 batch 決定，恰有 `id, state, scope, category, policy_id, membership_hash, members, sample_ids, authored_by, authored_at, reviewed_by, reviewed_at, reviewed_precision, note`。scope 固定 `batch`、category 固定 `product_catalog`、policy_id 固定 `product-authored-v1`；state 限 `proposed/confirmed`。members 為排序唯一的 `[record_key,semantic_hash]` 二元素陣列，恰好包含本檔全部記錄；semantic_hash 對完整 record（含 evidence）套 §2 canonical recipe，membership_hash 對 members 套同 recipe，id 為 `d:` 加完整 membership hash 的 64 hex。default_decision_id 必須指向此 id。
+
+confirmed 必須由實際核對者填人名、核對時間，sample_ids 恰為全體 members 的 record_key 集合（排序、無重複）；不是抽查。只有日精度的真實核對日期才使用 §2 的 UTC 日界編碼，reviewed_precision=day；確知時間則為 instant。proposed 的 sample_ids=[]、reviewed_by/reviewed_at/reviewed_precision=null；兩種狀態均須實際 authored_by／authored_at，note 為 Text（可空字串，不是 null）。不能沿用 identity_registry 的決定、把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
+
+這些欄位是本格式的明示人工採納收據，不新增 product／printing_product 的 DB decision_id 欄。匯入每個分片時以完整 authored revision、分片路徑及 canonical hash 建立 authored source_record；決定以 decision_source 指回完整封套及全部 evidence 的 raw source_record。product_family.decision_id 指該決定；人工 product／printing_product.source_id 指上述 authored source_record，沿 decision_source 可追回核對及原始證據。文字以既有 text_unit 邊界建立後填 name_unit_id／note_unit_id，不另建第二套文字真值。
+
+只有 confirmed 的資料可作已採納人工輸入；proposed 僅列候選診斷，不能補 FK 父列。驗證必須逐項檢查 family／product／printing 的引用、printing 與 product 的地區一致性、既有 owner 不變，以及來源與本次主張相符；同主鍵的官方觀測與人工內容衝突需報告，不任取最後一筆。這些檢查不因 SQL FK 通過而省略。
+
+本版定義初次採納與新增記錄；既有採納記錄的續版／替代選用須另定契約，不能覆寫舊決定、悄悄替換既有分片或追加重複主鍵來繞過它。新增資料另建分片及其精確決定，最後更新商品 index。機器產生的候選表不屬此採納輸入，沒有人工確認時不寫成 confirmed。格式文件、候選產生、實際採納與匯入器驗收是各自獨立的完成狀態。
