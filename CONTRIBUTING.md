@@ -104,6 +104,11 @@ Name an AI model by its product and version, and the maintainer by the name and 
 has no `Acked-by`. If you open a pull request, list everyone and every AI model that wrote part
 of it in the description, so the maintainer can credit them in the squash commit.
 
+Some changes are written and reviewed by AI models run by the maintainer. Their pull requests
+are opened by bot accounts owned by the maintainer (`…[bot]`), and each round of AI review is
+posted on the pull request. The trailers above record which models wrote and reviewed the
+change, and whether the maintainer approved it personally.
+
 ## Code comments
 
 AI-generated code tends to over-comment. Keep comments few and short:
