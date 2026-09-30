@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:a7399591b65db84c7c915ef99f521062ec241e1023302d6ff673e47e4e19e91e
+records:
+  - record_key: '["product_family","CP04"]'
+    kind: product_family
+    filing_key: CP04
+    data:
+      id: CP04
+      code: cp04
+      public_code: CP04
+      kind: collaboration
+      name:
+        lang: ja
+        text: コラボパック「プリンセスコネクト！Re:Dive」
+    evidence: []
+decisions:
+  - id: d:a7399591b65db84c7c915ef99f521062ec241e1023302d6ff673e47e4e19e91e
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:a7399591b65db84c7c915ef99f521062ec241e1023302d6ff673e47e4e19e91e
+    members:
+      -   - '["product_family","CP04"]'
+          - sha256:d9b027dd139bb9c372b778338523ba4d584fc70b3857cc72fccd9767aea2510a
+    sample_ids:
+      - '["product_family","CP04"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

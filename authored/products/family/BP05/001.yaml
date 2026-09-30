@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:63c7712720fafcd0bf0f265272206667b02921cfda3a05986045263dcf44e559
+records:
+  - record_key: '["product_family","BP05"]'
+    kind: product_family
+    filing_key: BP05
+    data:
+      id: BP05
+      code: bp05
+      public_code: BP05
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第5弾「永劫なる絶傑」
+    evidence: []
+decisions:
+  - id: d:63c7712720fafcd0bf0f265272206667b02921cfda3a05986045263dcf44e559
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:63c7712720fafcd0bf0f265272206667b02921cfda3a05986045263dcf44e559
+    members:
+      -   - '["product_family","BP05"]'
+          - sha256:d20008ece90d60544d7f8c04017f8924f4edd40ddca065c9b742dd8be7f970cd
+    sample_ids:
+      - '["product_family","BP05"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

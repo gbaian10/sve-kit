@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:8ab00abcca50e6074baef52aa6f7360ae786c245637c6aad2674ee70b7b2614a
+records:
+  - record_key: '["product_family","EBD04"]'
+    kind: product_family
+    filing_key: EBD04
+    data:
+      id: EBD04
+      code: ebd04
+      public_code: EBD04
+      kind: deck
+      name:
+        lang: ja
+        text: EXビギナーデッキ「ビショップ」
+    evidence: []
+decisions:
+  - id: d:8ab00abcca50e6074baef52aa6f7360ae786c245637c6aad2674ee70b7b2614a
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:8ab00abcca50e6074baef52aa6f7360ae786c245637c6aad2674ee70b7b2614a
+    members:
+      -   - '["product_family","EBD04"]'
+          - sha256:b0b12080e7685932fb1052029b7ffd1d94a40c3c7537d1c9da387942545ac839
+    sample_ids:
+      - '["product_family","EBD04"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

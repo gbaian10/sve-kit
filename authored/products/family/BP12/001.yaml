@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:ee4a9e1a8a792be7b51316cc1a472ee3767e5a56c33a255e6a59d78c58f19c3a
+records:
+  - record_key: '["product_family","BP12"]'
+    kind: product_family
+    filing_key: BP12
+    data:
+      id: BP12
+      code: bp12
+      public_code: BP12
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第12弾「黒鉄の侵略者」
+    evidence: []
+decisions:
+  - id: d:ee4a9e1a8a792be7b51316cc1a472ee3767e5a56c33a255e6a59d78c58f19c3a
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:ee4a9e1a8a792be7b51316cc1a472ee3767e5a56c33a255e6a59d78c58f19c3a
+    members:
+      -   - '["product_family","BP12"]'
+          - sha256:479239cad9d94846b88730873ea8dcb70ac21b6ea28a94375c1994c8ccde9046
+    sample_ids:
+      - '["product_family","BP12"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

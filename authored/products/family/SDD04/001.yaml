@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:9369db2cee9c958b65c5795c2717a607ada2dcd8e25c52717a4a41669e3845b2
+records:
+  - record_key: '["product_family","SDD04"]'
+    kind: product_family
+    filing_key: SDD04
+    data:
+      id: SDD04
+      code: sdd04
+      public_code: SDD04
+      kind: deck
+      name:
+        lang: en
+        text: 'Showdown Deck: Dragoncraft'
+    evidence: []
+decisions:
+  - id: d:9369db2cee9c958b65c5795c2717a607ada2dcd8e25c52717a4a41669e3845b2
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:9369db2cee9c958b65c5795c2717a607ada2dcd8e25c52717a4a41669e3845b2
+    members:
+      -   - '["product_family","SDD04"]'
+          - sha256:5875249a6a78edd909a5c32382be8a25f2e171121919d262563202385a4d1caa
+    sample_ids:
+      - '["product_family","SDD04"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

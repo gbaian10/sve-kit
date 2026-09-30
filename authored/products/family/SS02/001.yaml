@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:e186ad04614e87579f9aeaaf9f5300895adadb5d15cd5d6b7bf128e298f041f8
+records:
+  - record_key: '["product_family","SS02"]'
+    kind: product_family
+    filing_key: SS02
+    data:
+      id: SS02
+      code: ss02
+      public_code: SS02
+      kind: deck
+      name:
+        lang: en
+        text: Worlds Beyond Dragoncraft Starter Set
+    evidence: []
+decisions:
+  - id: d:e186ad04614e87579f9aeaaf9f5300895adadb5d15cd5d6b7bf128e298f041f8
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:e186ad04614e87579f9aeaaf9f5300895adadb5d15cd5d6b7bf128e298f041f8
+    members:
+      -   - '["product_family","SS02"]'
+          - sha256:f7405efed5fc33d4034467350b0f3bf8df3e3f91872c013c7598b9566e30b944
+    sample_ids:
+      - '["product_family","SS02"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

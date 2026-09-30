@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:b368d62a4c749113c4e5adeee70ed85bd6b09d03854efbced5bf6c73d80318cb
+records:
+  - record_key: '["product_family","CP01"]'
+    kind: product_family
+    filing_key: CP01
+    data:
+      id: CP01
+      code: cp01
+      public_code: CP01
+      kind: collaboration
+      name:
+        lang: ja
+        text: コラボパック「ウマ娘 プリティーダービー」
+    evidence: []
+decisions:
+  - id: d:b368d62a4c749113c4e5adeee70ed85bd6b09d03854efbced5bf6c73d80318cb
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:b368d62a4c749113c4e5adeee70ed85bd6b09d03854efbced5bf6c73d80318cb
+    members:
+      -   - '["product_family","CP01"]'
+          - sha256:4f14e64629cb6c90611218dc7cfcf7da81a47bc7f1d35833b0c726fb9efb5813
+    sample_ids:
+      - '["product_family","CP01"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

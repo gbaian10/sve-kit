@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:34acddaee817defed3a9b2a53e6046d21abb608dfcf4e8b90863d632b551eed8
+records:
+  - record_key: '["product_family","GFD02"]'
+    kind: product_family
+    filing_key: GFD02
+    data:
+      id: GFD02
+      code: gfd02
+      public_code: GFD02
+      kind: deck
+      name:
+        lang: en
+        text: Gloryfinder Starter Deck "Treacherous Ambitions"
+    evidence: []
+decisions:
+  - id: d:34acddaee817defed3a9b2a53e6046d21abb608dfcf4e8b90863d632b551eed8
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:34acddaee817defed3a9b2a53e6046d21abb608dfcf4e8b90863d632b551eed8
+    members:
+      -   - '["product_family","GFD02"]'
+          - sha256:fb2b19c38c8919be9ab6527072bbf5cb7b82687cabdec55aa3b7458f34d02006
+    sample_ids:
+      - '["product_family","GFD02"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

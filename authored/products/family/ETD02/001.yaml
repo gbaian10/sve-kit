@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:69fbe5cc9ca7c704ebb592a5247fe2a73ed6ff71061d50c3ebe9612ba1b18833
+records:
+  - record_key: '["product_family","ETD02"]'
+    kind: product_family
+    filing_key: ETD02
+    data:
+      id: ETD02
+      code: etd02
+      public_code: ETD02
+      kind: deck
+      name:
+        lang: ja
+        text: エントリーデッキシャドウバースＦ第2弾「真壁スバル」
+    evidence: []
+decisions:
+  - id: d:69fbe5cc9ca7c704ebb592a5247fe2a73ed6ff71061d50c3ebe9612ba1b18833
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:69fbe5cc9ca7c704ebb592a5247fe2a73ed6ff71061d50c3ebe9612ba1b18833
+    members:
+      -   - '["product_family","ETD02"]'
+          - sha256:2b50c8b78d0391fb608f11b60f0cc49a6f6a4270c9ddd0dca28866d230ab7ed6
+    sample_ids:
+      - '["product_family","ETD02"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

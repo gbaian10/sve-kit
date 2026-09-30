@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:7665cf9c35b583e935bd97420218afc521ec42a880acd354bb6c70927de9e1b7
+records:
+  - record_key: '["product_family","BP20"]'
+    kind: product_family
+    filing_key: BP20
+    data:
+      id: BP20
+      code: bp20
+      public_code: BP20
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック「絶傑を継ぐ者」
+    evidence: []
+decisions:
+  - id: d:7665cf9c35b583e935bd97420218afc521ec42a880acd354bb6c70927de9e1b7
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:7665cf9c35b583e935bd97420218afc521ec42a880acd354bb6c70927de9e1b7
+    members:
+      -   - '["product_family","BP20"]'
+          - sha256:71c29b3e210a250352334c003443c379febe77c7a1de042333dab8311178e671
+    sample_ids:
+      - '["product_family","BP20"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

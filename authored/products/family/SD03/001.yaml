@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:63b3c317a4912160d38022bc1db1bcabcccf4845ce73f9de45c9fec092b66d39
+records:
+  - record_key: '["product_family","SD03"]'
+    kind: product_family
+    filing_key: SD03
+    data:
+      id: SD03
+      code: sd03
+      public_code: SD03
+      kind: deck
+      name:
+        lang: ja
+        text: スターターデッキ第3弾「神秘錬成」
+    evidence: []
+decisions:
+  - id: d:63b3c317a4912160d38022bc1db1bcabcccf4845ce73f9de45c9fec092b66d39
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:63b3c317a4912160d38022bc1db1bcabcccf4845ce73f9de45c9fec092b66d39
+    members:
+      -   - '["product_family","SD03"]'
+          - sha256:b66c7de4a924d8eba9a6d4d0e39586e1454a8f4a8a46411022ba4882342fee0f
+    sample_ids:
+      - '["product_family","SD03"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

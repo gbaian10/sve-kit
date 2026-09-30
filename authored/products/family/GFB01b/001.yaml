@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:ac1a9fcea641dedd30c88a5d19f5c1eb08c806560eca407013e2b708bd5b1cc0
+records:
+  - record_key: '["product_family","GFB01b"]'
+    kind: product_family
+    filing_key: GFB01b
+    data:
+      id: GFB01b
+      code: gfb01b
+      public_code: GFB01b
+      kind: deck
+      name:
+        lang: en
+        text: 'Gloryfinder Bundle #1 “Guide to Glory”'
+    evidence: []
+decisions:
+  - id: d:ac1a9fcea641dedd30c88a5d19f5c1eb08c806560eca407013e2b708bd5b1cc0
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:ac1a9fcea641dedd30c88a5d19f5c1eb08c806560eca407013e2b708bd5b1cc0
+    members:
+      -   - '["product_family","GFB01b"]'
+          - sha256:e67b952c54ac689fab016e49138d3c27132ec6f6832617e2039f1d54c2520619
+    sample_ids:
+      - '["product_family","GFB01b"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: '使用者：改為預組。GFB01 = Gloryfinder Bundle #1 "Guide to Glory"（4 副固定預組同捆，USD 90，2024-07-19）；本代號牌組名：The Ravaging Creator'

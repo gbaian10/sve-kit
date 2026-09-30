@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:32c2c0787db5d66f64027e1b4e86af41978d9034243c86a260d74a0566d3b947
+records:
+  - record_key: '["product_family","BP14"]'
+    kind: product_family
+    filing_key: BP14
+    data:
+      id: BP14
+      code: bp14
+      public_code: BP14
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第14弾「夢幻の饗󠄀宴」
+    evidence: []
+decisions:
+  - id: d:32c2c0787db5d66f64027e1b4e86af41978d9034243c86a260d74a0566d3b947
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:32c2c0787db5d66f64027e1b4e86af41978d9034243c86a260d74a0566d3b947
+    members:
+      -   - '["product_family","BP14"]'
+          - sha256:437e1e110e104950733ba6dadd080083a9c0d50e7364621ae78f7fc7b689c4be
+    sample_ids:
+      - '["product_family","BP14"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：EN 為合併包（Combined Set），在家族附商品連結即可

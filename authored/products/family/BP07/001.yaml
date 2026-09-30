@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:41ac155b344ba554894badbb8ec254d63d06fb80c6cfcd684700f89eb945bb9b
+records:
+  - record_key: '["product_family","BP07"]'
+    kind: product_family
+    filing_key: BP07
+    data:
+      id: BP07
+      code: bp07
+      public_code: BP07
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第7弾「森羅鋼鉄」
+    evidence: []
+decisions:
+  - id: d:41ac155b344ba554894badbb8ec254d63d06fb80c6cfcd684700f89eb945bb9b
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:41ac155b344ba554894badbb8ec254d63d06fb80c6cfcd684700f89eb945bb9b
+    members:
+      -   - '["product_family","BP07"]'
+          - sha256:10c01fdbf60da88063f887ccd500c85766c359949150f1effdf85b31bf53fb90
+    sample_ids:
+      - '["product_family","BP07"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

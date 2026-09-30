@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:a032275db8640759dddf278fa39ed3e7e4c7a5b0c23bbc5921430624a0e5e832
+records:
+  - record_key: '["product_family","CSD02a"]'
+    kind: product_family
+    filing_key: CSD02a
+    data:
+      id: CSD02a
+      code: csd02a
+      public_code: CSD02a
+      kind: deck
+      name:
+        lang: ja
+        text: コラボスターターデッキ「Cute」
+    evidence: []
+decisions:
+  - id: d:a032275db8640759dddf278fa39ed3e7e4c7a5b0c23bbc5921430624a0e5e832
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:a032275db8640759dddf278fa39ed3e7e4c7a5b0c23bbc5921430624a0e5e832
+    members:
+      -   - '["product_family","CSD02a"]'
+          - sha256:77ae626e02fc567c5bd484037ef97d04bfff5b3ef757d2c8c764b31f22817f52
+    sample_ids:
+      - '["product_family","CSD02a"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：合作預組歸「預組」（放下拉選單）。合作作品：偶像大師 灰姑娘女孩

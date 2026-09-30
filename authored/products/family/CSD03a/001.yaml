@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:fba3689deb7741d71a5061f5b56b77f24ba69b396e6ad633a5e432d9bb924152
+records:
+  - record_key: '["product_family","CSD03a"]'
+    kind: product_family
+    filing_key: CSD03a
+    data:
+      id: CSD03a
+      code: csd03a
+      public_code: CSD03a
+      kind: deck
+      name:
+        lang: ja
+        text: コラボスターターデッキ「聖域の騎士団」
+    evidence: []
+decisions:
+  - id: d:fba3689deb7741d71a5061f5b56b77f24ba69b396e6ad633a5e432d9bb924152
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:fba3689deb7741d71a5061f5b56b77f24ba69b396e6ad633a5e432d9bb924152
+    members:
+      -   - '["product_family","CSD03a"]'
+          - sha256:729187df7c0662f38846a525e1dc937b719f09a0536009ded21327284f581fab
+    sample_ids:
+      - '["product_family","CSD03a"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: 使用者：合作預組歸「預組」（放下拉選單）。合作作品：卡片戰鬥先導者

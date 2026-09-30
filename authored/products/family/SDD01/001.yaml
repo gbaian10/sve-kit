@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:fca568432141597557ce5b09fae998ce332b5acc2616a3ffead52d3e7da6bd20
+records:
+  - record_key: '["product_family","SDD01"]'
+    kind: product_family
+    filing_key: SDD01
+    data:
+      id: SDD01
+      code: sdd01
+      public_code: SDD01
+      kind: deck
+      name:
+        lang: en
+        text: 'Showdown Deck: Forestcraft'
+    evidence: []
+decisions:
+  - id: d:fca568432141597557ce5b09fae998ce332b5acc2616a3ffead52d3e7da6bd20
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:fca568432141597557ce5b09fae998ce332b5acc2616a3ffead52d3e7da6bd20
+    members:
+      -   - '["product_family","SDD01"]'
+          - sha256:6ec2b74a8985998e00a545f48948887d605a9578081f8ef9cec9d297206e7ef0
+    sample_ids:
+      - '["product_family","SDD01"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

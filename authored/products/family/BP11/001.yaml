@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:e64d6e718edec2011765610da6ed952e8a34488b788434aeeb3ee4e85631e1fc
+records:
+  - record_key: '["product_family","BP11"]'
+    kind: product_family
+    filing_key: BP11
+    data:
+      id: BP11
+      code: bp11
+      public_code: BP11
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第11弾「宿命の弾丸」
+    evidence: []
+decisions:
+  - id: d:e64d6e718edec2011765610da6ed952e8a34488b788434aeeb3ee4e85631e1fc
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:e64d6e718edec2011765610da6ed952e8a34488b788434aeeb3ee4e85631e1fc
+    members:
+      -   - '["product_family","BP11"]'
+          - sha256:a627f5bbcc5167ee02f6449b4aa8c1b3758278796f6011c988be40df4b46e4c9
+    sample_ids:
+      - '["product_family","BP11"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

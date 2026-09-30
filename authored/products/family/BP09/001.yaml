@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:886317810fc8c603c32b7d4007a5435d37a5f4db92b89107944ecea19b77d52a
+records:
+  - record_key: '["product_family","BP09"]'
+    kind: product_family
+    filing_key: BP09
+    data:
+      id: BP09
+      code: bp09
+      public_code: BP09
+      kind: booster
+      name:
+        lang: ja
+        text: ブースターパック第9弾「光影の二重奏」
+    evidence: []
+decisions:
+  - id: d:886317810fc8c603c32b7d4007a5435d37a5f4db92b89107944ecea19b77d52a
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:886317810fc8c603c32b7d4007a5435d37a5f4db92b89107944ecea19b77d52a
+    members:
+      -   - '["product_family","BP09"]'
+          - sha256:9fd5a4f87af35d40f3c4f1c90a5b63c30c36e6779e0f7dced14ee0fc78c0941c
+    sample_ids:
+      - '["product_family","BP09"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''

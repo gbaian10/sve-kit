@@ -1,0 +1,34 @@
+product_authored_format: 1
+kind: product_shard
+default_decision_id: d:e6c25898e8b6608bebe57bf45f67eea8a81d6169c43dea6ef9c44794f7573c15
+records:
+  - record_key: '["product_family","SD07"]'
+    kind: product_family
+    filing_key: SD07
+    data:
+      id: SD07
+      code: sd07
+      public_code: SD07
+      kind: deck
+      name:
+        lang: ja
+        text: スターターデッキ「新たなる戦場」
+    evidence: []
+decisions:
+  - id: d:e6c25898e8b6608bebe57bf45f67eea8a81d6169c43dea6ef9c44794f7573c15
+    state: confirmed
+    scope: batch
+    category: product_catalog
+    policy_id: product-authored-v1
+    membership_hash: sha256:e6c25898e8b6608bebe57bf45f67eea8a81d6169c43dea6ef9c44794f7573c15
+    members:
+      -   - '["product_family","SD07"]'
+          - sha256:44bda0bb623b5c5cc0f13335e8bc68b2efeb9bd7b5365f60b5dd441b649f54b9
+    sample_ids:
+      - '["product_family","SD07"]'
+    authored_by: Codex gpt-6-astra
+    authored_at: '2026-09-30T10:25:33Z'
+    reviewed_by: user
+    reviewed_at: '2026-09-30T00:00:00Z'
+    reviewed_precision: day
+    note: ''
