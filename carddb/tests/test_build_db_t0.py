@@ -48,6 +48,15 @@ def _update(db: Database, table: str, values: dict[str, Value]) -> None:
         db.update(table, key, values)
 
 
+@pytest.mark.parametrize(
+    "kind",
+    ["booster", "promo", "deck", "collaboration", "special_pack", "special", "other"],
+)
+def test_product_family_accepts_supported_kinds(db: Database, kind: str) -> None:
+    _update(db, "product_family", {"kind": kind})
+    assert db.rows("product_family")[0].values["kind"] == kind
+
+
 def test_all_tables_have_real_rows_and_deferred_references(db: Database) -> None:
     assert all(db.rows(table.name) for table in TABLES)
     assert db.rows("printing")[0].values["card_no"] == "TEST-001Ⓢa"

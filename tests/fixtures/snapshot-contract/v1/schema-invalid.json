@@ -372,5 +372,29 @@
     "name": "URL-multiple-userinfo-separators",
     "schema": "URL",
     "value": "https://a@b@example.invalid/"
+  },
+  {
+    "name": "product_family-unknown-kind",
+    "schema": "product_family",
+    "value": [
+      "set:a",
+      "synthetic",
+      "SYN",
+      "special_pack_unknown",
+      "t:ja:90d435ce36c2c997",
+      []
+    ]
+  },
+  {
+    "name": "product_family_bootstrap-unknown-kind",
+    "schema": "product_family_bootstrap",
+    "value": [
+      "set:a",
+      "synthetic",
+      "SYN",
+      "special_pack_unknown",
+      "t:ja:90d435ce36c2c997",
+      []
+    ]
   }
 ]
