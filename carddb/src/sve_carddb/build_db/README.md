@@ -1,7 +1,9 @@
 # Build DB core
 
 This package compiles code-authored declarations into SQLite DDL and owns the
-SQLite boundary. `t0.compile_t0()` supplies the forty production T0 tables from
+SQLite boundary. The [product family staging importer](../products/README.md)
+can supply verified family parents and compose with identity staging in one
+transaction. `t0.compile_t0()` supplies the forty production T0 tables from
 `docs/schema/build-db.md`. The regional identity staging importer is described in
 [registry/preview](../registry/preview/README.md); there is no complete build CLI.
 
@@ -135,7 +137,8 @@ This selection is smaller than the minimum 57-table DDL inventory.
 `importer_ready` and `validator_ready` flags default to false.
 `Registry.require_usable(requested)` checks both flags for the complete resolved
 graph, including required FK and query dependencies. All production capabilities
-currently fail that gate: no build importer or complete domain validator exists.
+currently fail that gate: complete capability importers and domain validators are
+still missing.
 These flags are code-maintained registration claims, not evidence generated from
 successful SQL compilation. A future preview pipeline must call this gate for its
 actual supported subset; a release pipeline must additionally require the full
