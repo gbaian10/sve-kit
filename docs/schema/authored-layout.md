@@ -12,7 +12,7 @@
 | 定案 | 英文原創插畫 | `registry/art/<owner>/001.yaml` |
 | 定案 | 換皮卡 | `registry/card_related/<owner>/001.yaml` |
 | 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
-| 定案（格式） | 商品家族、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
+| 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 提案 | 身分修復、特殊構築 | `overrides/identities/BP01.yaml`、`overrides/deck-roles/BP01.yaml` |
 | 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
@@ -259,17 +259,20 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 
 ## 10. 商品人工輸入 product-authored-v1
 
-本節定義商品家族、人工商品與人工收錄的持久輸入；格式定案不等於候選資料已確認，也不表示匯入器已完成。官方來源直接萃取的商品觀測仍屬凍結來源，不需要把所有觀測抄成 authored。
+本節定義歸檔類別、人工商品與人工收錄的持久輸入；格式定案不等於候選資料已確認，也不表示匯入器已完成。官方來源直接萃取的商品觀測仍屬凍結來源，不需要把所有觀測抄成 authored。
 
-### 10.1 沿用的資料規則
+### 10.1 資料規則與使用者決定
 
-以下均來自 [build-db §3.2](build-db.md#32-商品與發行)，不是本格式新增的推論或採納政策：
+**使用者決定（2026-09-30，規格變更）**：依 [build-db §3.2](build-db.md#32-商品與發行) 與 [§15](build-db.md#15-網址搜尋預設版次與記號)，卡包瀏覽與搜尋改以已登錄的歸檔代號 home_set_id 為主，限定全站目前選定的 JP 或 EN 版本，兩區結果不混。`/sets/{code}` 依歸檔代號與地區列卡；商品名稱、發售日、合併包與收錄只作單卡頁補充資訊及連結，不驅動瀏覽。以下明列本次變更與保留的資料限制：
 
-- `product_family` 是人工確認的商品家族或明示 promo 歸檔類別；日英商品各自成列，家族關係另行確認。`home_set_id` 是固定歸檔 owner，不能當實際商品收錄證據，再錄不搬 owner。
+- **本次變更**：`product_family` 保留為歸檔類別，人工確認 code、public_code、kind 與 name。**日英家族串連為選填**，不同區商品仍各自成列，`product.family_id` 可留空，不必為 PCS01 撞名或 EN Combined Set 強制配家族。家族關係沒有填寫不阻擋瀏覽，也不要求先完成這項人工確認。
+- **保留限制**：`home_set_id` 是固定歸檔 owner，不能當實際商品收錄證據，再錄不搬 owner；允許單純依已登錄的歸檔代號篩選，不由卡號前綴推商品收錄。
 - 歸檔 owner 代號可能跨區撞名，例如本批 `home_set_id=PCS01` 同時歸檔 51 筆 JP 公主連結版次與 3 筆 EN Summer Edition 版次；此時該 family 只代表歸檔類別，名稱與 kind 由人工確認，各區 `product.family_id` 依實際商品另行判斷（可以不同或為 null），不因共用 owner 就視為同一商品家族。
-- `product` 是真實商品，`printing_product` 才表示實際收錄；不由卡號前綴、owner、兩區同名或去除 EN 後綴建立商品／收錄／跨區關係。真實商品尚無已確認家族時 `family_id=null`，保留待補；不能造家族 placeholder。
+- `product` 是真實商品，`printing_product` 才表示實際收錄；不由卡號前綴、owner、兩區同名或去除 EN 後綴建立商品／收錄／跨區關係。日英家族串連為選填，真實商品的 `family_id=null` 是可接受的輸入，不要求強制補家族，也不能造家族 placeholder。
 - PR 可以只是一個歸檔集合，不能假造整批 PR 的商品或發售日。只有 `day` 填完整日期；`month/year` 保留原字串、完整日期為 null，不能補一號。`unknown` 不猜日期。
 - 收錄與 printing 的 region 必須一致；收錄的 `first_available_precision=null` 表示沿用商品日期，`unknown` 表示明示未知的覆寫，兩者不可混用。未知商品日期不阻擋已知卡文的展示。
+
+商品與收錄可依凍結來源中可驗證的線索匯入，供單卡頁顯示；來源明示的欄位與版次收錄不必先寫成人工商品封套，或先取得日英家族串連的決定。下列 product-authored-v1 封套仍用於人工維護的商品／收錄與歸檔類別；只有這些人工輸入需要相應採納決定，不能把官方萃取觀測冒充 confirmed 人工決定。缺少日期或配布方式證據時沿用既有未知／待核對規則，不按 owner 補值。
 
 ### 10.2 新定的路徑、索引與封套
 
@@ -279,7 +282,7 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 | --- | --- |
 | `products/index.yaml` | 獨立商品入口：`product_authored_format: 1, kind: product_index, includes` |
 | `products/family/<filing_key>/001.yaml` | `product_family` 記錄 |
-| `products/product/<filing_key>/001.yaml` | 人工 `product` 記錄與其家族關係 |
+| `products/product/<filing_key>/001.yaml` | 人工 `product` 記錄與選填的家族關係 |
 | `products/inclusion/<filing_key>/001.yaml` | 人工 `printing_product` 記錄 |
 
 `filing_key` 僅分檔，使用 `[A-Za-z0-9_-]+`，可以沿用既有 owner；不產生任何家族或收錄關係。無家族商品可用 `unassigned` 分檔，不能據此建立同名家族。檔名採只增的三位以上十進位序號；依 §1 的 512 KiB 目標及單檔嚴格小於 1 MiB 切檔。新分片按 `record_key` 字典序排列，不重排既有分片。
