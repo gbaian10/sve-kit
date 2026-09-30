@@ -13,7 +13,7 @@ from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.storage import plan_files, write_files
 
-from .registry_preview_fixtures import REVISION, evidence, observed, parents
+from .registry_preview_fixtures import BUILD, REVISION, evidence, observed, parents
 from .registry_snapshot_fixtures import edit_record
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose shared fixture dependency
 
@@ -50,7 +50,7 @@ def test_reversed_source_face_map_retains_per_face_credits(
     )
     with create_database(compile_build(("en", "related"))) as db:
         parents(db, plan)
-        import_preview(db, plan, authored_revision=REVISION)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         face_credits = {
             row.values["face_id"]: row.values["credit_raw"]
             for row in db.rows("printing_face")
@@ -102,7 +102,7 @@ def test_premium_is_only_known_for_exact_pure_premium(
     plan = plan_preview(tmp_path, replace(provider, cards=cards), regions=("jp",))
     with create_database(compile_build()) as db:
         parents(db, plan)
-        import_preview(db, plan, authored_revision=REVISION)
+        import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         by_number = {row.values["card_no"]: row.values for row in db.rows("printing")}
         assert by_number["BP02-071"]["premium"] is True
         assert by_number["BP02-071"]["rarity_code"] is None
@@ -147,6 +147,6 @@ def test_conflicting_face_rarity_requires_review(
     with create_database(compile_build()) as db:
         parents(db, plan)
         with pytest.raises(ValueError, match="disagree on rarity"):
-            import_preview(db, plan, authored_revision=REVISION)
+            import_preview(db, plan, build=BUILD, authored_revision=REVISION)
         assert not db.rows("source_record")
         assert not db.rows("printing")

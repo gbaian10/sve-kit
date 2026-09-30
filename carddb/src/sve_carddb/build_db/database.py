@@ -180,6 +180,28 @@ class Database:
 
 
 @contextmanager
+def open_database(schema: CompiledSchema, path: Path) -> Iterator[Database]:
+    """Read a closed offline database without schema, WAL or journal writes."""
+    if path.is_symlink() or not path.is_file():
+        raise ValueError("Offline build must be an existing regular file")
+    if any(
+        path.with_name(path.name + suffix).exists()
+        for suffix in ("-wal", "-shm", "-journal")
+    ):
+        raise ValueError("Offline build has SQLite sidecars; close it first")
+    connection = sqlite3.connect(
+        path.resolve().as_uri() + "?mode=ro&immutable=1", uri=True, isolation_level=None
+    )
+    try:
+        rules = install_functions(connection, schema)
+        connection.execute("PRAGMA foreign_keys = ON")
+        connection.execute("PRAGMA query_only = ON")
+        yield Database(connection, schema, rules)
+    finally:
+        connection.close()
+
+
+@contextmanager
 def create_database(
     schema: CompiledSchema, path: Path | None = None
 ) -> Iterator[Database]:

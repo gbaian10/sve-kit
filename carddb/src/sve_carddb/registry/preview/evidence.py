@@ -4,29 +4,13 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING, Protocol
 
 from sve_carddb.registry.inputs import Card, canonical
-from sve_carddb.registry.records import (
-    Hash,
-    Instant,
-    Observation,
-    RecordData,
-    Region,
-    Text,
-)
+from sve_carddb.registry.records import Observation, Region
 from sve_carddb.registry.review import observation
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-
-class Source(RecordData):
-    id: Text
-    url: Text
-    raw_locator: Text
-    sha256: Hash
-    fetched_at: Instant
-    etag: str | None = None
-    last_modified: str | None = None
-    parser_version: Text
+    from sve_carddb.build_inputs import Source
 
 
 @dataclass(frozen=True)

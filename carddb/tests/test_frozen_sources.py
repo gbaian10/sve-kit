@@ -1,0 +1,90 @@
+"""Source classification follows verified media, while identity requires a card HTML page."""
+
+from dataclasses import replace
+from typing import TYPE_CHECKING
+
+import pytest
+
+from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.manifest import Kind
+from sve_carddb.registry.preview import FrozenJP
+from sve_carddb.source_archive import ArchiveError, seal_batch
+from sve_carddb.sources.official_jp import card_url
+
+from .test_source_archive import _put, _resource, _store
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+
+@pytest.mark.parametrize(
+    ("media", "kind"),
+    [
+        ("text/html; charset=utf-8", "official_page"),
+        ("application/xhtml+xml", "official_page"),
+        ("application/json", "official_api"),
+        ("application/pdf", "official_pdf"),
+        ("image/png", "image"),
+    ],
+)
+def test_raw_kind_comes_from_verified_receipt_media(
+    tmp_path: Path, media: str, kind: str
+) -> None:
+    store = _store(tmp_path / "frozen")
+    raw = b"Synthetic content; interpretation is outside the metadata reader"
+    resource = replace(
+        _resource(card_url("TEST-001"), "raw/input", raw, Kind.CARD), content_type=media
+    )
+    _put(store, resource, raw)
+    sealed = seal_batch(store)
+    version = sealed.inventory.current[0].source_version_id
+    source, content, descriptor = FrozenSources(
+        store.root, store.store_id, sealed.batch_id
+    ).read(version, parser_version="metadata-test-v1")
+    assert content == raw
+    assert source.id == descriptor.id == version
+    assert source.kind == kind
+    assert source.values()["parser_version"] is None
+
+
+def test_unrecognized_media_is_rejected_without_inferred_kind(tmp_path: Path) -> None:
+    store = _store(tmp_path / "frozen")
+    raw = b"Synthetic content"
+    resource = replace(
+        _resource(card_url("TEST-001"), "raw/input", raw, Kind.CARD),
+        content_type="text/plain",
+    )
+    _put(store, resource, raw)
+    sealed = seal_batch(store)
+    sources = FrozenSources(store.root, store.store_id, sealed.batch_id)
+    with pytest.raises(ValueError, match="Unsupported product evidence media type"):
+        sources.read(
+            sealed.inventory.current[0].source_version_id,
+            parser_version="metadata-test-v1",
+        )
+
+
+def test_missing_version_cannot_fall_back_to_a_current_source(tmp_path: Path) -> None:
+    store = _store(tmp_path / "frozen")
+    raw = b"Synthetic content"
+    _put(store, _resource(card_url("TEST-001"), "raw/input", raw, Kind.CARD), raw)
+    sealed = seal_batch(store)
+    sources = FrozenSources(store.root, store.store_id, sealed.batch_id)
+    with pytest.raises(ArchiveError, match="absent from pinned batch"):
+        sources.read("src:v1:" + "0" * 64, parser_version="metadata-test-v1")
+
+
+def test_identity_adapter_rejects_non_html_card_source(tmp_path: Path) -> None:
+    store = _store(tmp_path / "frozen")
+    raw = b"Synthetic JSON"
+    resource = replace(
+        _resource(card_url("TEST-001"), "raw/input", raw, Kind.CARD),
+        content_type="application/json",
+    )
+    _put(store, resource, raw)
+    sealed = seal_batch(store)
+    provider = FrozenJP(
+        store.root, store.store_id, sealed.batch_id, parser_version="test-v1"
+    )
+    with pytest.raises(ArchiveError, match="source identity mismatch"):
+        provider.card("jp", "TEST-001")

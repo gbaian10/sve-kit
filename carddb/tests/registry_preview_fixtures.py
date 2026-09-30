@@ -2,12 +2,12 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.build_inputs import ArchivePin, BuildContext, Source
 from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.preview.evidence import (
     CardEvidence,
     FaceEvidence,
     MemoryEvidence,
-    Source,
 )
 from sve_carddb.registry.records import CardData, PrintingData, Region
 
@@ -20,6 +20,9 @@ if TYPE_CHECKING:
     from sve_carddb.registry.review import Inputs
 
 REVISION = "a" * 40
+BUILD = BuildContext.from_inputs(
+    REVISION, {"synthetic.lock": b"synthetic dependencies"}, {"synthetic": True}
+)
 
 
 def observed(card: Card, region: Region) -> CardEvidence:
@@ -33,6 +36,12 @@ def observed(card: Card, region: Region) -> CardEvidence:
         sha256=raw_hash,
         fetched_at="2026-09-29T00:00:00Z",
         parser_version="synthetic-v1",
+        archive=ArchivePin(
+            store_id="synthetic",
+            batch_id="sha256:" + "3" * 64,
+            descriptor_sha256="sha256:" + "4" * 64,
+            first_receipt_id="sha256:" + "5" * 64,
+        ),
     )
     return CardEvidence.from_card(
         source,

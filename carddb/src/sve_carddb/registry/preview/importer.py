@@ -4,6 +4,13 @@ import re
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import Json
+from sve_carddb.build_inputs import (
+    BuildContext,
+    InputRecord,
+    SourceUse,
+    input_record,
+    insert_raw_sources,
+)
 from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.records import (
     AllocationData,
@@ -14,25 +21,30 @@ from sve_carddb.registry.records import (
     PrintingData,
     RelatedData,
 )
+from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
-    from collections.abc import Mapping
-
     from sve_carddb.build_db import Value
     from sve_carddb.build_db.database import Database
     from sve_carddb.registry.preview.plan import PreviewPlan
     from sve_carddb.registry.snapshot import RegistryRecord
 
 
-def import_preview(db: Database, plan: PreviewPlan, *, authored_revision: str) -> None:
+def import_preview(
+    db: Database, plan: PreviewPlan, *, authored_revision: str, build: BuildContext
+) -> InputRecord:
     """Own one transaction; missing supplied product parents fail without partial import."""
     with db.transaction():
-        populate_preview(db, plan, authored_revision=authored_revision)
+        record = populate_preview(
+            db, plan, authored_revision=authored_revision, build=build
+        )
+        record.verify(db, build, plan.source_uses())
+    return record
 
 
 def populate_preview(
-    db: Database, plan: PreviewPlan, *, authored_revision: str
-) -> None:
+    db: Database, plan: PreviewPlan, *, authored_revision: str, build: BuildContext
+) -> InputRecord:
     """Populate inside a caller-owned transaction, including rebuild_database callbacks."""
     if not re.fullmatch(r"[0-9a-f]{40}", authored_revision):
         raise ValueError("Authored revision must be a full Git commit SHA")
@@ -48,7 +60,7 @@ def populate_preview(
             "Missing product_family parents; supply verified product data first"
         )
     authored = _authored(db, plan, authored_revision)
-    _evidence(db, plan)
+    uses = _evidence(db, plan)
     for kind in (
         "card",
         "face",
@@ -72,6 +84,9 @@ def populate_preview(
                 art_uses[key] = data.id
     for record in plan.included("printing"):
         _printing(db, plan, record, art_uses)
+    inputs = input_record(build, uses)
+    inputs.verify(db, build, plan.source_uses(), complete=False)
+    return inputs
 
 
 def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
@@ -126,26 +141,16 @@ def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
     return sources
 
 
-def _evidence(db: Database, plan: PreviewPlan) -> None:
-    sources: dict[str, Mapping[str, Value]] = {}
-    for evidence in plan.evidence.values():
-        source = evidence.source
-        row: dict[str, Value] = {
-            "id": source.id,
-            "kind": "official_page",
-            "url": source.url,
-            "raw_locator": source.raw_locator,
-            "sha256": source.sha256,
-            "fetched_at": source.fetched_at,
-            "etag": source.etag,
-            "last_modified": source.last_modified,
-            "parser_version": source.parser_version,
-        }
-        if source.id in sources and sources[source.id] != row:
-            raise ValueError("Conflicting metadata for a pinned source version")
-        sources[source.id] = row
-    for source_row in sources.values():
-        db.insert("source_record", source_row)
+def _evidence(db: Database, plan: PreviewPlan) -> tuple[SourceUse, ...]:
+    uses = tuple(
+        SourceUse(
+            source=item.source,
+            usage="registry_observation",
+            locator=canonical({"region": region, "card_no": number}).decode(),
+        )
+        for (region, number), item in sorted(plan.evidence.items())
+    )
+    insert_raw_sources(db, (use.source for use in uses))
     links: set[tuple[str, str, str]] = set()
     for item in plan.projections:
         if item.decision_id is None:
@@ -168,6 +173,8 @@ def _evidence(db: Database, plan: PreviewPlan) -> None:
                 "role": role,
             },
         )
+
+    return uses
 
 
 def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:

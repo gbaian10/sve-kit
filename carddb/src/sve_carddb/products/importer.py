@@ -7,11 +7,19 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
-from sve_carddb.products.evidence import resolve_evidence
-from sve_carddb.products.models import FamilyRecord, Lang, LocalizedText
+from sve_carddb.build_inputs import (
+    BuildContext,
+    InputRecord,
+    SourceUse,
+    input_record,
+    insert_raw_sources,
+)
+from sve_carddb.products.evidence import CheckedSource, resolve_evidence
+from sve_carddb.products.models import Evidence, FamilyRecord, Lang, LocalizedText
 from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.preview import populate_preview
 from sve_carddb.registry.records import RecordData
+from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -29,17 +37,7 @@ class Language(RecordData):
     display_name: str
 
 
-def populate_families(
-    db: Database,
-    catalog: ProductSnapshot,
-    *,
-    authored_revision: str,
-    languages: tuple[Language, ...] = (),
-    stores: Mapping[str, Path] | None = None,
-) -> None:
-    """Project inside the caller's transaction; unsupported record kinds fail explicitly."""
-    if not re.fullmatch(r"[0-9a-f]{40}", authored_revision):
-        raise ValueError("Authored revision must be a full Git commit SHA")
+def _require_family_catalog(catalog: ProductSnapshot) -> None:
     unsupported = sorted(
         {
             record.kind
@@ -52,10 +50,27 @@ def populate_families(
             "Product/inclusion DB projection is not implemented: "
             + ", ".join(unsupported)
         )
+
+
+def populate_families(
+    db: Database,
+    catalog: ProductSnapshot,
+    *,
+    authored_revision: str,
+    build: BuildContext,
+    languages: tuple[Language, ...] = (),
+    stores: Mapping[str, Path] | None = None,
+) -> InputRecord:
+    """Project inside the caller's transaction; unsupported record kinds fail explicitly."""
+    if not re.fullmatch(r"[0-9a-f]{40}", authored_revision):
+        raise ValueError("Authored revision must be a full Git commit SHA")
+    _require_family_catalog(catalog)
     evidence = resolve_evidence(
         tuple(ref for record in catalog.records.values() for ref in record.evidence),
         {} if stores is None else stores,
     )
+    uses: list[SourceUse] = []
+    insert_raw_sources(db, (checked.source for checked in evidence.values()))
     _languages(db, languages)
     texts = _Texts(db)
     for record in catalog.records.values():
@@ -108,7 +123,7 @@ def populate_families(
         for record in shard.envelope.records:
             for ref in record.evidence:
                 checked = evidence[ref]
-                _source(db, checked.source.model_dump() | {"kind": checked.kind})
+                uses.append(_product_use(ref, checked))
                 role = "product_evidence:" + digest(
                     ref.model_dump(mode="json")
                 ).removeprefix("sha256:")
@@ -138,45 +153,92 @@ def populate_families(
                     },
                 )
 
+    inputs = input_record(build, uses)
+    inputs.verify(db, build, product_source_uses(catalog, evidence), complete=False)
+    return inputs
 
-def populate_product_preview(
+
+def _product_use(reference: Evidence, checked: CheckedSource) -> SourceUse:
+    return SourceUse(
+        source=checked.source,
+        usage="product_evidence_closure",
+        locator=canonical(reference.model_dump(mode="json")).decode(),
+    )
+
+
+def product_source_uses(
+    catalog: ProductSnapshot, evidence: Mapping[Evidence, CheckedSource]
+) -> tuple[SourceUse, ...]:
+    """Declare every evidence use from the complete validated product input."""
+    return tuple(
+        _product_use(ref, evidence[ref])
+        for record in catalog.records.values()
+        for ref in record.evidence
+    )
+
+
+def product_preview_uses(
+    catalog: ProductSnapshot,
+    plan: PreviewPlan,
+    stores: Mapping[str, Path],
+) -> tuple[SourceUse, ...]:
+    """Declare the complete expected source closure independently of database writes."""
+    _require_family_catalog(catalog)
+    evidence = resolve_evidence(
+        tuple(ref for record in catalog.records.values() for ref in record.evidence),
+        stores,
+    )
+    return (*product_source_uses(catalog, evidence), *plan.source_uses())
+
+
+def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose explicit build, authored, language and archive inputs
     db: Database,
     catalog: ProductSnapshot,
     plan: PreviewPlan,
     *,
     authored_revision: str,
+    build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
-) -> None:
+) -> InputRecord:
     """Compose family and identity writes inside one rebuild/caller transaction."""
     if catalog.registry_index_content != plan.snapshot.files.index_content:
         raise ValueError("Product catalog and preview must use the same registry input")
-    populate_families(
+    expected = product_preview_uses(catalog, plan, {} if stores is None else stores)
+    family_inputs = populate_families(
         db,
         catalog,
         authored_revision=authored_revision,
+        build=build,
         languages=languages,
         stores=stores,
     )
-    populate_preview(db, plan, authored_revision=authored_revision)
+    identity_inputs = populate_preview(
+        db, plan, authored_revision=authored_revision, build=build
+    )
+    inputs = input_record(build, (*family_inputs.uses, *identity_inputs.uses))
+    inputs.verify(db, build, expected)
+    return inputs
 
 
-def import_product_preview(
+def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction owner forwards the complete pinned inputs
     db: Database,
     catalog: ProductSnapshot,
     plan: PreviewPlan,
     *,
     authored_revision: str,
+    build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
-) -> None:
+) -> InputRecord:
     """Own one transaction for the complete family/audit/identity graph."""
     with db.transaction():
-        populate_product_preview(
+        return populate_product_preview(
             db,
             catalog,
             plan,
             authored_revision=authored_revision,
+            build=build,
             languages=languages,
             stores=stores,
         )
@@ -196,21 +258,6 @@ def _languages(db: Database, languages: tuple[Language, ...]) -> None:
         else:
             db.insert("language", values)
             existing[language.code] = values
-
-
-def _source(db: Database, values: dict[str, Value]) -> None:
-    previous = next(
-        (
-            row.values
-            for row in db.rows("source_record")
-            if row.values["id"] == values["id"]
-        ),
-        None,
-    )
-    if previous is None:
-        db.insert("source_record", values)
-    elif any(previous[key] != value for key, value in values.items()):
-        raise ValueError("Conflicting product evidence source metadata")
 
 
 class _Texts:
