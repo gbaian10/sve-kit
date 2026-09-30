@@ -4,6 +4,8 @@
 
 此資源釘候選 format `1.0.0`、bucket_count=1；它是可核算的契約配置，不宣稱正式容量凍結。正式配置仍依傳輸契約 §5 量測；更換配置須依其版本規則同步 Schema、樣本與 reader 支援表。
 
+公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `1.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
+
 ## 資源入口
 
 | `$defs` 名稱 | 用途 |
