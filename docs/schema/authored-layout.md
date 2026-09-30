@@ -266,6 +266,7 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 以下均來自 [build-db §3.2](build-db.md#32-商品與發行)，不是本格式新增的推論或採納政策：
 
 - `product_family` 是人工確認的商品家族或明示 promo 歸檔類別；日英商品各自成列，家族關係另行確認。`home_set_id` 是固定歸檔 owner，不能當實際商品收錄證據，再錄不搬 owner。
+- 歸檔 owner 代號可能跨區撞名，例如本批 `home_set_id=PCS01` 同時歸檔 51 筆 JP 公主連結版次與 3 筆 EN Summer Edition 版次；此時該 family 只代表歸檔類別，名稱與 kind 由人工確認，各區 `product.family_id` 依實際商品另行判斷（可以不同或為 null），不因共用 owner 就視為同一商品家族。
 - `product` 是真實商品，`printing_product` 才表示實際收錄；不由卡號前綴、owner、兩區同名或去除 EN 後綴建立商品／收錄／跨區關係。真實商品尚無已確認家族時 `family_id=null`，保留待補；不能造家族 placeholder。
 - PR 可以只是一個歸檔集合，不能假造整批 PR 的商品或發售日。只有 `day` 填完整日期；`month/year` 保留原字串、完整日期為 null，不能補一號。`unknown` 不猜日期。
 - 收錄與 printing 的 region 必須一致；收錄的 `first_available_precision=null` 表示沿用商品日期，`unknown` 表示明示未知的覆寫，兩者不可混用。未知商品日期不阻擋已知卡文的展示。
@@ -300,6 +301,8 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 | `printing_product` | `printing_id, product_id, first_available_on?, first_available_precision?, first_available_raw?, inclusion_kind, note?` |
 
 family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的家族須保留該 ID。product.id 是人工首次採納時指定的永久非空 ID，全域唯一，不由當下排序／名稱／URL 重算；product_code 不是 ID，也不假定兩區相同。`product_type` 沿 build-db 的 Code，不把家族的六種 kind 偷換成商品型別 enum。`inclusion_kind` 僅 `pack/box/first_edition_campaign/qr_redemption/event_prize/other`，無證據時不得由家族 kind 猜配布方式。
+
+`product.id` 的新定字元限制為 ASCII `[a-z][a-z0-9_-]*`：採小寫字母起首，只允許小寫字母、數字、底線與連字號，避免空白、路徑分隔符及 Unicode／大小寫正規化的歧義；不要求語意前綴，避免把地區或商品代號編成 ID 的解讀規則。格式驗證須對原始字串作完整比對，拒絕非字串或不匹配的值，不 trim、轉小寫或正規化後再接受；`printing_product.product_id` 與 record_key 中的 product 主鍵亦須符合此格式，並與被引用的 `product.id` 原樣相等。格式通過仍須檢查全域唯一與引用存在，不代表已採納商品身分。
 
 `date_precision` 限 `day/month/year/unknown`。day 的 released_on 必須是有效完整 ISO 日期；month/year 必須有非空 date_raw 且 released_on=null；unknown 的 released_on=null，date_raw 可以保留來源的未知描述或為 null。日精度若來源有原字串仍保留 date_raw，不把轉換後 ISO 日期冒充原字串。inclusion 的日期三欄同理；precision=null 時另兩欄皆 null，以免把無覆寫與部分覆寫混在一起。不得從抓取／封存時間補發售日期。
 
