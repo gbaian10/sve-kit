@@ -170,7 +170,12 @@ class Writer:
         )
         rewritten = not (unchanged and not rewrite and previous is not None)
         if not rewritten and previous is not None:
-            resource = replace(previous, last_checked_at=now)
+            resource = replace(
+                previous,
+                last_checked_at=now,
+                etag=fetched.etag,
+                last_modified=fetched.last_modified,
+            )
         else:
             stored = self._write_file(fetched)
             resource = Resource(
@@ -191,6 +196,18 @@ class Writer:
                 else previous.last_changed_at,
                 archived_at=None,
             )
+        self._record(resource, request_id, unchanged, in_transaction)
+        return WriteResult(
+            resource=resource, changed=not unchanged, rewritten=rewritten
+        )
+
+    def _record(
+        self,
+        resource: Resource,
+        request_id: int,
+        unchanged: bool,
+        in_transaction: Callable[[Resource], None] | None,
+    ) -> None:
         outcome = Outcome.UNCHANGED if unchanged else Outcome.CHANGED
         with self._manifest.transaction():
             self._manifest.resources.put(resource)
@@ -198,19 +215,16 @@ class Writer:
                 request_id,
                 RequestResult(
                     outcome=outcome,
-                    final_url=fetched.url,
+                    final_url=resource.url,
                     status=200,
-                    response_sha256=digest,
-                    response_bytes=len(fetched.body),
-                    response_etag=fetched.etag,
-                    response_last_modified=fetched.last_modified,
+                    response_sha256=resource.sha256,
+                    response_bytes=resource.raw_bytes,
+                    response_etag=resource.etag,
+                    response_last_modified=resource.last_modified,
                 ),
             )
             if in_transaction is not None:
                 in_transaction(resource)
-        return WriteResult(
-            resource=resource, changed=not unchanged, rewritten=rewritten
-        )
 
     def mark_not_modified(self, url: str, *, request_id: int) -> Resource:
         """Record a 304 for a trusted local copy; nothing is written to disk."""

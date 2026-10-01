@@ -49,6 +49,7 @@ from sve_carddb.fetch.client import (
     FetchError,
     StopCrawlError,
 )
+from sve_carddb.fetch.refresh import RefreshWriter
 from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
 from sve_carddb.fetch.writer import (
     DiskFullError,
@@ -117,6 +118,9 @@ _FATAL = (
     CircuitOpenError,
     DiskFullError,
     RefreshProtectionError,
+    ArchiveError,
+    UnsafePathError,
+    OSError,
 )
 
 
@@ -171,8 +175,8 @@ http_factory: Callable[[Settings], httpx.AsyncClient] = make_http
 ModeOption = Annotated[
     Mode,
     typer.Option(
-        help="resume: skip trusted copies; refresh: blocked until raw-history "
-        "replacement is protected; repair: fetch only damaged copies."
+        help="resume: skip trusted copies; refresh: preserve source history using "
+        "the configured archive and backup; repair: fetch only damaged copies."
     ),
 ]
 SetOption = Annotated[
@@ -642,38 +646,118 @@ def _run(job: Job) -> None:
     if job.mode is Mode.REFRESH and not job.sets:
         console.print("[red]--mode refresh needs --set[/red]")
         raise typer.Exit(2)
-    if job.mode is Mode.REFRESH and not job.dry_run:
+    settings = _settings()
+    configured = (
+        settings.archive_root is not None
+        and settings.archive_store_id is not None
+        and settings.archive_backup_root is not None
+    )
+    if (
+        (
+            job.mode is Mode.REFRESH
+            or any(
+                (
+                    settings.archive_root,
+                    settings.archive_store_id,
+                    settings.archive_backup_root,
+                )
+            )
+        )
+        and not configured
+        and not job.dry_run
+    ):
         console.print(
             "[red]stopped:[/red] refresh requires the source archive replacement protocol"
         )
         raise typer.Exit(1)
-    settings = _settings()
     try:
-        with ExclusiveLock(settings.lock_path):
-            if job.dry_run:
-                source = (
-                    Manifest.open_live(settings.manifest_path)
-                    if settings.manifest_path.exists()
-                    else Manifest.open_empty()
-                )
-            else:
-                source = Manifest.open(settings.manifest_path)
-            with source as manifest:
-                writer = Writer(settings.data_dir, manifest, protect_history=True)
-                if job.dry_run:
-                    _dry_run(job, writer, manifest)
-                    return
-                _recover(settings, manifest)
-                failures = asyncio.run(_crawl(job, settings, manifest, writer))
-    except (LimitReachedError, BudgetExhaustedError) as exc:
-        console.print(f"[yellow]stopped:[/yellow] {exc}")
-        return
+        failures, archive_writer = _execute_crawl(job, settings, configured=configured)
+        if archive_writer is not None:
+            _finish_refresh(archive_writer)
     except _FATAL as exc:
         console.print(f"[red]stopped:[/red] {exc}")
+        if isinstance(exc, IncompleteBatchError):
+            for missing in exc.missing:
+                console.print(
+                    f"  {missing.reason}: {missing.url} ({missing.expected_raw_sha256})"
+                )
         raise typer.Exit(1) from exc
     if failures:
         console.print(f"[red]{failures} failed[/red]")
         raise typer.Exit(1)
+
+
+def _execute_crawl(
+    job: Job, settings: Settings, *, configured: bool
+) -> tuple[int, RefreshWriter | None]:
+    archive_writer: RefreshWriter | None = None
+    with ExclusiveLock(settings.lock_path) as lock:
+        if job.dry_run:
+            source = (
+                Manifest.open_live(settings.manifest_path)
+                if settings.manifest_path.exists()
+                else Manifest.open_empty()
+            )
+        else:
+            source = Manifest.open(settings.manifest_path)
+        with source as manifest:
+            writer = Writer(settings.data_dir, manifest, protect_history=True)
+            if job.dry_run:
+                _dry_run(job, writer, manifest)
+                return 0, None
+            if configured:
+                archive_writer = _refresh_writer(settings, manifest, lock)
+                writer = archive_writer
+                recovered = archive_writer.recover()
+                if recovered:
+                    console.print(f"recovered: {recovered} source replacements")
+            _recover(settings, manifest)
+            try:
+                failures = asyncio.run(_crawl(job, settings, manifest, writer))
+            except (LimitReachedError, BudgetExhaustedError) as exc:
+                console.print(f"[yellow]stopped:[/yellow] {exc}")
+                failures = 0
+    return failures, archive_writer
+
+
+def _refresh_writer(
+    settings: Settings, manifest: Manifest, lock: ExclusiveLock
+) -> RefreshWriter:
+    if (
+        settings.archive_root is None
+        or settings.archive_store_id is None
+        or settings.archive_backup_root is None
+    ):
+        raise RefreshProtectionError(
+            "source archive replacement protocol is not configured"
+        )
+    store = ArchiveStore(
+        settings.data_dir,
+        settings.manifest_path,
+        settings.lock_path,
+        settings.archive_root,
+        settings.archive_store_id,
+        settings.extra_roots,
+    )
+    return RefreshWriter(store, manifest, lock, settings.archive_backup_root)
+
+
+def _finish_refresh(writer: RefreshWriter) -> None:
+    result = seal_batch(writer.store)
+    backup_batch(writer.store, writer.backup_root, result.batch_id)
+    with tempfile.TemporaryDirectory(prefix="sve-refresh-restore-") as temporary:
+        restored = Path(temporary)
+        restore_backup(
+            writer.backup_root, restored, writer.store.store_id, result.batch_id
+        )
+        record_restore_check(
+            writer.backup_root, restored, writer.store.store_id, result.batch_id
+        )
+    report = capacity_report(
+        writer.store, result.batch_id, backup_root=writer.backup_root
+    )
+    console.print(f"source archive batch: {result.batch_id}")
+    console.print(report.model_dump_json(indent=2))
 
 
 def _recover(settings: Settings, manifest: Manifest) -> None:

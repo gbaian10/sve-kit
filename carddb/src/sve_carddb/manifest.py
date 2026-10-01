@@ -675,10 +675,10 @@ class Manifest:
         """Commit everything in the block together, or nothing on error."""
         try:
             yield
+            self._conn.commit()
         except BaseException:
             self._conn.rollback()
             raise
-        self._conn.commit()
 
     def integrity_check(self) -> str:
         """Return SQLite's integrity check result."""
@@ -758,6 +758,23 @@ class ExclusiveLock:
             fcntl.flock(self._file, fcntl.LOCK_UN)
             self._file.close()
             self._file = None
+
+    @contextmanager
+    def suspended(self) -> Generator[None]:
+        """Release the lock for source preparation and reacquire it before returning."""
+        if self._file is None:
+            msg = "source preparation requires a held manifest lock"
+            raise AlreadyRunningError(msg)
+        file = self._file
+        fcntl.flock(file, fcntl.LOCK_UN)
+        try:
+            yield
+        finally:
+            try:
+                fcntl.flock(file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            except BlockingIOError as exc:
+                msg = f"another crawler holds {self._path}"
+                raise AlreadyRunningError(msg) from exc
 
 
 # --- row conversion -----------------------------------------------------

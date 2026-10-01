@@ -610,13 +610,18 @@ def _write_new(path: Path, data: bytes) -> None:
 
 
 def _mkdir_safe(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True)
+    missing: list[Path] = []
     current = path
     while current != current.parent:
         if current.is_symlink():
             msg = f"archive path contains a symlink: {current}"
             raise ArchiveError(msg)
+        if not current.exists():
+            missing.append(current)
         current = current.parent
+    for directory in reversed(missing):
+        directory.mkdir(exist_ok=True)
+        _fsync_dir(directory.parent)
 
 
 def _fsync_dir(path: Path) -> None:
@@ -645,12 +650,18 @@ def _load_model[T: _Model](model: type[T], path: Path) -> T:
 
 def _install_bytes(path: Path, data: bytes) -> None:
     _mkdir_safe(path.parent)
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
     try:
-        _write_new(path, data)
-    except FileExistsError:
-        if path.read_bytes() != data:
-            msg = f"immutable archive metadata differs: {path}"
-            raise ArchiveError(msg) from None
+        _write_new(temporary, data)
+        try:
+            os.link(temporary, path)
+        except FileExistsError:
+            if path.is_symlink() or path.read_bytes() != data:
+                msg = f"immutable archive metadata differs: {path}"
+                raise ArchiveError(msg) from None
+        _fsync_dir(path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _install_link(
@@ -1449,6 +1460,9 @@ def _record_restore_check(
 
 def _copy_immutable(source: Path, target: Path) -> None:
     _mkdir_safe(target.parent)
+    if source.is_symlink() or target.is_symlink():
+        msg = "immutable backup files must not be symlinks"
+        raise ArchiveError(msg)
     source_hash = _hash_file(source)
     if target.exists():
         if _hash_file(target) != source_hash:
