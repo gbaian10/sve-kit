@@ -103,6 +103,11 @@ class Writer:
         self._read_roots = tuple(read_roots)
         self._protect_history = protect_history
 
+    @property
+    def manifest(self) -> Manifest:
+        """Expose the typed boundary used by protected source adapters."""
+        return self._manifest
+
     def check_path(self, url: str, path: PurePosixPath) -> None:
         """Raise `PathConflictError` if another URL owns `path`. Call before downloading."""
         owner = self._manifest.resources.path_owner(path)

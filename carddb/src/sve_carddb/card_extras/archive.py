@@ -1,4 +1,4 @@
-"""Read pinned JP card pages without live manifest, latest cache or network access."""
+"""Read pinned regional card pages without live manifest, latest cache or network."""
 
 import re
 from datetime import date
@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
 from sve_carddb.card_extras.models import CardPage, QAEntry, RelatedLink
+from sve_carddb.extract.official_en import _qa_text as _en_qa_text
 from sve_carddb.extract.official_jp import _qa_text
 from sve_carddb.fetch.validate import decode_html
 from sve_carddb.frozen_sources import FrozenSources
@@ -21,6 +22,7 @@ if TYPE_CHECKING:
     from sve_carddb.registry.records import Region
 
 PARSER = "official-card-extras-jp-v1"
+EN_PARSER = "official-card-extras-en-v1"
 _TITLE = re.compile(r"^(Q\d+)\s*(?:[（(]([^）)]+)[）)])?$")
 _DATE = re.compile(r"^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$")
 
@@ -46,18 +48,22 @@ def card_number(url: str, region: Region) -> str | None:
     return numbers[0]
 
 
-def parse_card_page(raw: bytes, source: Source) -> CardPage:
-    """Validate physical identity first, then transcribe only supplemental JP blocks."""
-    if source.sha256 != digest(raw) or source.parser_version != PARSER:
+def parse_card_page(raw: bytes, source: Source, *, region: Region = "jp") -> CardPage:
+    """Validate physical identity before transcribing regional supplemental blocks."""
+    adapter = official_jp if region == "jp" else official_en
+    renderer = _qa_text if region == "jp" else _en_qa_text
+    if source.sha256 != digest(raw) or source.parser_version != (
+        PARSER if region == "jp" else EN_PARSER
+    ):
         raise ValueError("Card extras raw hash/parser pin mismatch")
-    number = card_number(source.url, "jp")
+    number = card_number(source.url, region)
     if (
         number is None
-        or source.url != official_jp.card_url(number)
+        or source.url != adapter.card_url(number)
         or source.kind != "official_page"
     ):
         raise ValueError("Card extras source URL/region/media mismatch")
-    official_jp.parse_card(raw, expected_number=number)
+    adapter.parse_card(raw, expected_number=number)
     tree = parse(decode_html(raw, min_bytes=official_jp.MIN_PAGE_BYTES))
     nodes = select_all(tree, ".cardlist-Under .cardlist-Detail_QA .qa-List_Item")
     if len(nodes) != len(select_all(tree, ".qa-List_Item")):
@@ -78,8 +84,8 @@ def parse_card_page(raw: bytes, source: Source) -> CardPage:
                 stable_source_key=official_number
                 or source.url + "#" + (anchor or locator),
                 locator=locator,
-                question=_qa_text(require_one(node, ".qa-List_Txt-Q")),
-                answer=_qa_text(require_one(node, ".qa-List_Txt-A")),
+                question=renderer(require_one(node, ".qa-List_Txt-Q")),
+                answer=renderer(require_one(node, ".qa-List_Txt-A")),
                 published_on=parsed,
                 date_raw=raw_date,
             )
@@ -100,7 +106,7 @@ def parse_card_page(raw: bytes, source: Source) -> CardPage:
     )
     return CardPage(
         source=source,
-        region="jp",
+        region=region,
         card_no=number,
         qa=tuple(questions),
         related=related,

@@ -259,6 +259,14 @@ class Generation:
     max_page: int | None
 
 
+@dataclass(frozen=True, slots=True)
+class GenerationPage:
+    """An immutable generation member and its observed raw hash."""
+
+    url: str
+    sha256: str
+
+
 def utcnow() -> datetime:
     """Return the current time in UTC."""
     return datetime.now(UTC)
@@ -501,6 +509,23 @@ class GenerationStore(_Store):
             (root, GenerationStatus.VALIDATED.value),
         ).fetchone()
         return None if row is None else _generation(row)
+
+    def latest(self, root: str) -> Generation | None:
+        """Include failed attempts so stale validated coverage cannot hide interruption."""
+        row = self._conn.execute(
+            "SELECT * FROM discovery_generation WHERE root = ? ORDER BY id DESC LIMIT 1",
+            (root,),
+        ).fetchone()
+        return None if row is None else _generation(row)
+
+    def pages(self, generation_id: int) -> tuple[GenerationPage, ...]:
+        """Read verified typed page identities without exposing SQLite values."""
+        rows = self._conn.execute(
+            "SELECT page_url, page_sha256 FROM generation_page"
+            " WHERE generation_id = ? ORDER BY page_url",
+            (generation_id,),
+        ).fetchall()
+        return tuple(GenerationPage(_str(row[0]), _str(row[1])) for row in rows)
 
     def add_page(
         self, generation_id: int, page_url: str, page_sha256: str, links: Sequence[Link]
