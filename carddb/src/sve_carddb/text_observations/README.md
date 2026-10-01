@@ -38,7 +38,7 @@ can be materialized. Reports separately count `total_observations`,
 exclusions. The no-effect follower hint is diagnostic: a null main effect, no
 sections, an ordinary follower type and three numeric stats. It never fills text.
 
-## Diagnostic staging and output exclusion
+## Diagnostic staging and pending exclusion proposal
 
 `populate_text_preview` composes the original identity/product staging and text
 staging in one caller-owned transaction. Representable identity-eligible
@@ -46,15 +46,24 @@ observations remain in diagnostic DB rows even when their face-region is pending
 all actual observation and current-comparison source uses survive. This DB is a
 diagnostic build, not a public snapshot.
 
-`plan.eligible` closes quarantine over the whole card-region: one unresolved
-required face removes every regional printing, its integer and physical face
-references. Shared identities survive where another region remains eligible.
-Related edges require both endpoints in their declared region; unused art and
-mapping projections are removed. `exclusion_report(db, schema, plan)` additionally
-closes the staged row exclusions over every enabled FK, including products,
-inclusions, routes, aliases, defaults and optional text references. It reports
-counts and primary keys without card text. Source and decision history remain
-intact. No authored records, IDs or allocation cursors are rewritten.
+`plan.eligible` computes a diagnostic exclusion closure using the pending proposal
+in [#143](https://github.com/gbaian10/sve-kit/issues/143). This is not a publication
+gate and must not be used for snapshot output before user approval. The existing
+`eligible_identity` report key is retained for compatibility; its companion
+`eligible_identity_diagnostic` marks `proposal="pending-#143"`,
+`publication_gate=false` and `snapshot_output_authorized=false`.
+
+Under this proposal, one unresolved required face would exclude every regional
+printing of that card, its integer and physical face references. Shared identities
+would remain where another region remains available. Related edges would require
+both endpoints in their declared region; unused art and mapping projections would
+be excluded. `exclusion_report(db, schema, plan)` diagnoses the resulting closure
+over every enabled FK, including products, inclusions, routes, aliases, defaults
+and optional text references. It carries the same pending-proposal labels and
+reports counts and primary keys without card text. `populate_text_preview` still
+uses `plan.identity`, keeping pending observations in diagnostic DB rows. Source
+and decision history remain intact. No authored records, IDs or allocation cursors
+are rewritten.
 
 Raw vocabulary bindings are an explicit caller input, not inferred translations
 or a new authored format. `Vocabulary` requires exact unique regional bindings
