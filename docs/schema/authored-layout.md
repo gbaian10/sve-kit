@@ -349,6 +349,25 @@ previous_order 恰有 `{basis,evidence_indexes,review_receipt}`，basis 為 `sam
 
 每條待核可規則必須列唯一 rule_id、類別、適用 region／欄位／段落、精確匹配條件及排除條件、有限變換、正反例，並明示 action=`classify_only/equivalent`。只有使用者核可 action=equivalent 的規則才能讓命中差異免逐組再問；僅分類的規則仍留人工佇列。規則集以 `{policy_id,authored_revision,path,hash,approval_receipt_hash}` 釘住不可變內容與核可收據，path 為 repo 相對路徑，hash 為 §2 canonical 內容 hash，收據 hash 同 recipe；實際檔案 bytes 另進 F1 dependencies。具體儲存格式隨 #145 一併審核，未取得收據以前不啟用自動採納。
 
+**wording-rule-policy-v1 儲存格式**：格式由協調者依使用者授權採用；使用者 2026-10-02 核可的 action 只有 `wp:eol-v1`（僅 CRLF／LF）為 equivalent，其餘六條為 classify_only。這是規則政策核可，不是任何逐卡等義或採納順序回答。
+
+沿 authored 的 YAML 慣例，政策與收據配對存於 `authored/wording-rules/<version>.policy.yaml`、`authored/wording-rules/<version>.approval.yaml`；首版為 `145-v1`。`review.rule_set.path` 指政策檔的 repo 相對路徑，收據路徑以同一版本將 `.policy.yaml` 換成 `.approval.yaml` 推得，不提供可任意改指的第二個路徑。
+
+| 封套 | 必填欄位 |
+| --- | --- |
+| policy | `rule_policy_format: 1`、`kind: wording_rule_policy`、`policy_id`、`common_boundary`、`rules` |
+| common_boundary | `comparison`、`protected_fields`、`protected_condition`、`missing_text`、`sections`、`output`、`equivalence`；保存全體規則的共同比較、保護欄位、null、段落與採納邊界 |
+| rules 每項 | `rule_id`、`category`、`regions`、`fields`、`matcher_version`、`parameters`、`action`、`match_condition`、`exclusions`、`finite_transform`、`examples` |
+| examples | `positive`、`negative` 非空陣列；每項恰含 `case_id`、`region`、`before`、`after`、`parameters`；before／after 是完整合成 wording-face-v1 物件，case_id 在該規則內唯一 |
+| approval | `rule_approval_format: 1`、`kind: wording_rule_approval`、`policy_id`、`rule_set_hash`、`reviewed_by`、`reviewed_at`、`reviewed_precision`、`rules`、`note` |
+| approval.rules 每項 | `rule_id`、`action`；按 rule_id 排序唯一，恰與 policy.rules 相同 |
+
+封套欄位封閉；policy.rules 依 rule_id 排序唯一，regions／fields 保留已核可範圍。examples.parameters 是固定測試輸入，不能擴張正式 rules.parameters（首版 reminder ordinals 與 term pairs 皆空）；危險正例仍可分類，action=classify_only 不因正例而升為 equivalent。例子只可用合成文字、hash 或位置，不保存官方卡文。
+
+對**完整解析後的 YAML 值**（包含共同邊界、匹配／排除、有限變換、正反例、parameters 與 action）套 §2 canonical JSON 與 SHA-256，得到政策 hash；approval.rule_set_hash 必須等於它。收據對完整解析值套同一 recipe，得到 approval_receipt_hash。YAML 排版不是此 canonical hash 的一部分，兩個檔案的 exact bytes hash 仍各自列入 F1 dependencies，並從 rule_set.authored_revision 的 immutable Git 內容重取。policy_id 與 action 清單逐項一致；不能只釘住名稱、README 或 matcher_version。day 精度沿 §2 保存 UTC 當日零時。
+
+每個 matcher_version 與政策中的同一組固定正反例綁定，程式测试逐例核對 region、完整欄位、有限參數及預期是否命中；另驗共同排除與僅分類不能採納。更改 matcher 行為、条件、排除、參數、案例或 action 必須建立新 version／policy_id／檔名及新的實際核可收據；不能沿用版本名或舊核可。消費端拒絕未知 matcher／未支援的等義 recipe，不以類別名或相似度補判。已合併政策與收據不可原地覆寫；更正或擴張採只增續版，保留舊內容與 Git revision，使歷史採納仍能重建。
+
 record.data 新增必填 `review`，恰有 `{mode,rule_set,rule_matches}`；mode=`human/approved_rules`。human 的 rule_set=null、rule_matches=[]；approved_rules 的 rule_set 是上述完整 pin，rule_matches 為排序唯一的 `{from_observation_key,to_observation_key,rule_id,field,before_range,after_range}`。range 是兩個 UInt 的 `[start,end]`、start≤end，表示原始 Unicode code point 的零起算半開區間，sections 的 field 用 `sections/<ordinal>` 定位；前件比較以 `previous` 這個保留字指前件選中觀測。每個不同內容與選中觀測、以及非空前件的完整 diff 都須重算，所有差異區段恰被核可 equivalent 規則涵蓋；重疊、未覆蓋、跨欄位未知差異、parser／規則 pin 不符即回人工，不任取某條規則通過。原文／sections 原樣保存，規則只提供採納依據，不在 raw 或公開顯示中刪字。
 
 每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位與 hash 計算沿 §10.4；scope=`batch`、category=`wording_adoption`、policy_id=`wording-adoption-v1`、state 固定 `confirmed`。members 恰為本檔全部 `[record_key,完整 record 的 semantic_hash]`；membership_hash 對排序 members 計算，id=`d:<完整 membership hash hex>`。semantic_hash 是歷史欄位名，不表示工具已證明語義相同。
