@@ -10,7 +10,6 @@ from typing import TYPE_CHECKING, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 from ruamel.yaml import YAML
-from ruamel.yaml.tokens import AliasToken, AnchorToken, DirectiveToken, TagToken
 
 from sve_carddb.registry.allocation import (
     ALLOCATION_POLICY,
@@ -19,6 +18,7 @@ from sve_carddb.registry.allocation import (
     region_allocations,
 )
 from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
+from sve_carddb.registry.yaml_reader import parse_yaml
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -106,36 +106,12 @@ def yaml_parser() -> YAML:
     return yaml
 
 
-def _check_keys(value: object) -> None:
-    if isinstance(value, dict):
-        for key, child in value.items():
-            if not isinstance(key, str):
-                raise TypeError("YAML mapping keys must be strings")
-            if key == "<<":
-                raise ValueError("Merge keys are forbidden")
-            _check_keys(child)
-    elif isinstance(value, list):
-        for child in value:
-            _check_keys(child)
-
-
 def read_yaml(path: Path) -> JsonValue:
     """Reject aliases, tags, duplicate keys, non-core values and large files."""
     data = path.read_bytes()
     if len(data) >= MAX_BYTES:
         raise ValueError(f"Oversized YAML: {path.name}")
-    yaml = yaml_parser()
-    for token in yaml.scan(data.decode("utf-8")):
-        if isinstance(token, (AliasToken, AnchorToken, TagToken)):
-            raise TypeError("Anchors, aliases and explicit tags are forbidden")
-        if (
-            isinstance(token, DirectiveToken)
-            and token.name == "YAML"
-            and token.value != (1, 2)
-        ):
-            raise ValueError("Only YAML 1.2 is supported")
-    value: object = yaml.load(data)
-    _check_keys(value)
+    value = parse_yaml(data)
     result = JSON_VALUE.validate_python(value, strict=True)
     digest(result)
     return result

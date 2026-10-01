@@ -210,7 +210,7 @@ Until 保留 turn、next_opp_turn、this_and_next_opp_turn、game；明確長形
 
 每個鍵必須在**目前構造上下文**的登錄表：例如 cannot 沒有 n，buff 有 on；不能以另一構造曾使用 n 就放行。cards、define、roles 的動態名稱須符合其專屬卡號／識別字規則，不是任意額外欄位。未知鍵附卡號、行與完整路徑報錯。event 與 history.where 共用該事件的欄位表。
 
-Python 工具一律用 `ruamel.yaml`，`YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`，並明確限定 core scalar resolver／標籤，不能只依函式名稱推定符合 core。禁止 PyYAML 的預設 1.1 resolver；BaseLoader 全讀字串也不能替代 core 型別檢查。Rust 選 saphyr 的 YAML 1.2 路線，經節點／事件邊界先檢查鍵型別、重複鍵、版本與 core tag，再轉有型別資料；不能先轉成會覆蓋重複鍵的 map。解析器選型與文件見 ADR-0002。
+Python 載入邊界必須明確限定 YAML 1.2 core scalar resolver／標籤，不能只依函式名稱推定符合 core。`carddb` 的 authored 讀取採 PyYAML `CSafeLoader`（libyaml C 擴充）單趟事件檢查，沿用既有 ruamel 的 1.2 core 純量規則；缺 C 擴充即失敗，寫出維持 ruamel；解析前的 raw Unicode 換行字元、BOM 位置與 tab 限制見 [authored 格式 §1](../schema/authored-layout.md#1-路徑與共同格式)。其他既有 Python DSL 工具維持 `ruamel.yaml` 的 `YAML(typ="safe", pure=True)`、版本 `(1, 2)`、`allow_duplicate_keys=False`。禁止 PyYAML 的預設 1.1 resolver；BaseLoader 全讀字串也不能替代 core 型別檢查。Rust 選 saphyr 的 YAML 1.2 路線，經節點／事件邊界先檢查鍵型別、重複鍵、版本與 core tag，再轉有型別資料；不能先轉成會覆蓋重複鍵的 map。解析器選型與文件見 ADR-0002。
 
 兩端載入器必過同組金絲雀：含 on、n、yes／no 值的最小卡片保留字串與數字；true 值仍為布林；布林鍵、字串 true 鍵、重複 on、未知鍵、cannot.draw.n、stat_changed 歷史中的 subject／property 舊別名均拒絕。設計階段只以 Python 端跑過這組檢查；Rust 接入時必須重跑，不能沿用 Python 結果宣告 Rust 已驗收。
 
