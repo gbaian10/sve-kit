@@ -1,8 +1,8 @@
 # 詞彙、記號與路由採納契約
 
 本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入。
-**封套、覆寫格式與展示集合為技術契約；一般版分類等使用政策仍待使用者決定**。
-§1 摘錄既定語意；§2–§6 定義輸入，§7 區分既定選取規則與分類提案，§8 分列技術預設與僅剩的兩項使用者政策。
+**封套、覆寫格式與展示集合為技術契約；一般版稀有度白名單與繁中介面缺譯順序經使用者 2026-10-01 核可**。
+§1 摘錄既定語意；§2–§6 定義輸入，§7 區分已核可稀有度與加工證據邊界，§8 分列技術預設與使用者核可政策。
 格式不表示資料已採納；仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
 本契約不以任意 confirmed 決定或 caller 提供的布林值代替採納。
 
@@ -184,7 +184,8 @@ label 只保存一個基底原文／自撰標籤；其他語言由 translation-c
 language.code 沿 Lang；fallback_order 不含自身、未知語言或重複項。
 它是完整依序嘗試清單，不遞迴串接其他語言的清單；ja→en 與 en→ja 可並存，不因互相備援誤判為循環。ja/en 清單不得含 zh-Hant；
 最終基底回退亦不得繞過這項限制，基底為繁中時改用穩定 code。
-原文／固定 code 的最終呈現與缺譯標示見 §8；語言配置修改也需續版，不改卡面地區與卡文來源。
+使用者 2026-10-01 核可繁中介面依序回退日文、英文，完整 fallback_order 與末端呈現見 §8.1；
+語言配置修改也需續版，不改卡面地區與卡文來源。
 
 ### 4.2 搜尋別名
 
@@ -302,18 +303,35 @@ choice 必有有效採納、symbol_basis 與目前基底相符、參數相容，
 此新增 translation kind 須由 loader 明示支援並驗完整契約；尚未實作的 loader 不得靜默忽略或當作其他 kind。
 技術預設 P7 允許三語尚未齊全的記號啟用，缺譯回原記號；已核可的術語來源優先順序不在此重定。
 
-## 7. 預設版次與一般版分類的政策提案
+## 7. 預設版次與一般版分類
 
 build-db §15 已有順序：同卡同區 → confirmed override → card.home_set 內的一般候選 →
 最早可信 inclusion 日期 → 穩定 ID；無一般候選則從可展示版次以已知日期優先、固定 ID 選 fallback。
-下述日期、展示集合與完整性是既有語意的技術細化；只有一般版的實際分類清單留待使用者確認，不改選取先後。
+下述日期、展示集合與完整性是既有語意的技術細化；稀有度分類已核可，不改選取先後或宣稱加工證據已齊。
 
-**分類建議（P1，待使用者決定）**：採明示 rarity code／普通 frame code 白名單，
-每個版次必有 premium=false、全部面 signed=false、普通 frame、已採納的無 stamp 證據，才算已證實一般。
-任何一面已知特殊即排除一般；有 null／unreviewed 或缺面則為未知，不當作 false。
-稀有度／卡框／標誌的完整清單須由凍結來源重建後，對 JP／EN 實際值逐項確認；
-候選頁預設勾 BR、SR、GR、LG 供使用者檢視，不代表已採納，不能由這四個顯示值預配英文 code。
-PR、純 premium、未知稀有度或新框型不能自動歸普通。普通框的 code 本文件不預配。
+**使用者 2026-10-01 核可（P1：一般版稀有度白名單）**：一般稀有度限 BR、SR、GR、LG，
+英版原標籤 Bronze、Silver、Gold、Legendary 分別採相同分類。以下完整列出盤點的 27 個 exact 原始標籤之分類，
+不是已配發的 vocabulary code，也不是日英卡片身分對應。
+
+| 分類 | JP 原始標籤 | EN 原始標籤 | 一般版候選 |
+| --- | --- | --- | --- |
+| 一般稀有度 | BR、SR、GR、LG | Bronze、Silver、Gold、Legendary | 可進候選池，仍須同卡同區、home_set 及加工條件適用 |
+| 含 premium 的複合標籤 | BR・プレミアム、SR・プレミアム、GR・プレミアム | Bronze / Premium、Silver / Premium、Gold / Premium | 排除；即使拆出一般 rarity，premium=true 仍優先排除 |
+| 純 premium | プレミアム | Premium | 排除；rarity=null、premium=true，不捏造基礎 rarity |
+| 特殊稀有度 | SL、SP、SSP、UR | Super Legendary、Special、Super Special、Ultimate | 排除 |
+| PR／Promo | PR | Promo | 不列入一般稀有度白名單 |
+| 未標稀有度 | - | - | 不列入白名單；token、領袖等不因「-」自動成為一般版 |
+
+所有含 プレミアム／Premium 的版次均排除一般候選，不能只保留拆出的 BR／SR／GR 來繞過 premium。
+只有 PR／Promo／「-」等非白名單版次的卡仍有預設版次，method=fallback；不因此隱藏卡片，
+也不宣稱 PR／Promo 在實物上全部有特殊加工。raw 原樣保留，穩定 code 仍按詞彙採納契約登錄，
+新標籤／未核對的映射保持未知，不從卡號推分類。
+
+**卡框與標誌不在本次核可範圍**，依既有技術設計處理：要證實一般版，仍須 premium=false、
+全部面 signed=false、已採納普通 frame 及無 stamp 的證據。任一面已知特殊即排除一般候選；
+null／unreviewed／缺面維持未知，不以 variant_key=standard 代替普通框證據，也不預配 frame/stamp code。
+已知一般 rarity、尚無已知特殊加工但 frame/stamp 等缺證據者，可留候選池並標 candidate_general，
+不能因這次核可直接升成 earliest_general；沒有一般 rarity 候選才走 fallback。
 
 無 stamp 不能由 printing_stamp 空表推導。建議分類事實交後續加工採納契約，至少釘
 `printing_id,face_id,frame_code,signed,stamp_state,stamp_ids,image_ref,decision_ref`，
@@ -347,7 +365,7 @@ printing 取其全部可信 inclusion 的最早已知有效日；任何可能更
 缺卡圖、缺翻譯、表記未定不單獨縮集合；依各既定降級規則顯示。非法／缺引用輸入仍依投影閘門排除或失敗，
 本契約不授權全部 registry 無條件公開。`/sets` 的已核可區域／歸檔過濾仍在查詢端，不改全站 card 區域預設。
 
-## 8. 技術預設與待決政策
+## 8. 技術預設與核可政策
 
 協調者裁定的技術預設如下；格式與預設定案不表示真實資料或使用者偏好已採納。
 
@@ -363,14 +381,20 @@ printing 取其全部可信 inclusion 的最早已知有效日；任何可能更
 P2 的無標誌證據形式與標示門檻留待加工採納入口一起定，不要求使用者現在回答；
 目前沿 §7 已有的未知處理及 sampled/confirmed 邊界，不把缺資料當無加工。
 
-### 8.1 提案，待使用者決定
+### 8.1 使用者 2026-10-01 核可
 
-僅剩兩題；政策核可記錄與逐筆資料收據分開，不以提案當核可證據。
+P1 稀有度白名單採 §7 的 JP／EN 原始標籤分類；卡框／stamp 的個別判斷與採納證據不在本次核可範圍。
+P4 繁中介面缺翻譯時先日文、再英文，只影響介面詞彙標籤，不影響卡文；日／英不回繁中沿既有規則。
 
-| 編號 | 選項 | 建議及影響 |
-| --- | --- | --- |
-| P1 一般版分類 | A：worker 列出來源實際出現的 rarity／frame／stamp，逐項勾一般／特殊；B：先只確認部分，其餘留未知 | 建議 A，候選頁預設勾 BR、SR、GR、LG 供檢視；尚未勾選確認不算採納。未知不等於普通，既定選取與日期順序不重問 |
-| P4 繁中介面缺字 | A：繁中缺譯先日文、再英文；B：先英文、再日文 | 建議 A，符合日文來源方向；日文缺譯用英文、英文缺譯用日文且不回繁中仍是既定規則。末端用允許的原文或 code 並標缺譯，不空白，不套用卡文 |
+| 介面語言 | fallback_order（不含自身） |
+| --- | --- |
+| zh-Hant | `["ja","en"]` |
+| ja | `["en"]` |
+| en | `["ja"]` |
+
+先找目前介面語言，再依其完整清單嘗試，不遞迴。全部缺譯時用允許的基底原文或穩定 code 並標缺譯，
+不顯示空白；日／英末端也不得回退繁中，不改卡面地區或套用卡文翻譯的來源／選用。
+政策核可與逐筆資料收據分開；這兩項已無待決問題，但核可不等於 loader 已實作或正式資料已全部採納。
 
 固定英文 code、官方原值映射、各個記號拼法與文案、實際搜尋別名與特殊構築關係仍需資料採納。
 候選的頻次不是核可；萃取修正後須重產 trait 清單，不能採用被切成半截的複合特性。
@@ -397,7 +421,7 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | C10 | 同一原值兩 code／改 symbol code／譯名改字後重配 code | 衝突或穩定身分檢查拒絕 |
 | C11 | alias 假 keyword 父列／錯語言／未存在目標 | 各自拒絕，不能用 vocabulary 冒充 |
 | C12 | normalized 不可重算／混 normalizer pins／略過 canonical 優先／多義任選 | 前兩拒絕，後兩檢出錯誤解析 |
-| C13 | language 自回退／未知目標／重複 fallback／ja 或 en 回 zh-Hant；ja→en 與 en→ja 並存 | 前四項拒絕，互相備援可通過且不遞迴；UI 配置不改卡文 |
+| C13 | language 自回退／未知目標／重複 fallback／ja 或 en 回 zh-Hant／繁中先英後日；ja→en 與 en→ja 並存 | 前四項拒絕，第五項違反核可順序；互相備援可通過且不遞迴，UI 配置不改卡文 |
 | C14 | 同名再錄新增／來源換版但 exact 名稱相同／名稱改字／面重配／跨區／缺來源／剝括號 | 前兩者機械驗過仍有效，其餘拒絕或 stale；不合併 card 或 primary |
 | C15 | symbol 多餘尾字／非 ASCII 數字／越界 uint／x 當 X／Q 擴成變數 | 各自不匹配或拒絕，raw 可 roundtrip |
 | C16 | choice 改提示文字／撤回／未採納／錯 symbol_basis／新參數／缺譯硬填 | 修訂自動選用、不重簽 symbol；撤回或 basis 不符回原記號且不挑舊 choice；非法採納／參數拒絕 |
@@ -405,11 +429,11 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | C18 | default 跨 card／跨 region／目標不可展示／漏同卡候選／candidates_hash 錯／僅 selector 或 policy hash 變 | 前五項拒絕或 stale，末項覆寫仍有效；Decklog unavailable 可展示基例不誤擋 |
 | C19 | route 續版改已公開目標卻無 repair／撤回刪舊入口 | 發布拒絕；default 改選不能改 URL |
 | C20 | 未知 premium／signed／frame／stamp 當 false，或漏背面 | 各自不能 earliest_general，依既定未知狀態降級 |
-| C21 | 已知 premium／signed／stamp／特殊框／非白名單 rarity 算一般 | 各自排除一般候選，不受日期早晚影響 |
+| C21 | 已知 premium／signed／stamp／特殊框／SL/SP/SSP/UR 或英版同類／PR/Promo/「-」算一般；BR/SR/GR/LG 與英版同類、加工未知 | 前六類各自排除一般候選；一般 rarity 加工未知可 candidate_general，不冒稱 earliest_general；僅非白名單者仍有 fallback |
 | C22 | 無日期覆寫卻不沿商品 day／覆寫 month、year、unknown 卻回商品 day／商品 month 卻補 day／跨區日期／同日反向 ID | 各自檢出；兩商品日分別 2019、2022、無覆寫且晚者 ID 較小時，仍選 2019 |
 | C23 | 只驗勝出者，忽略未知競爭者／忽略 home_set／忽略 override | 各自檢出 method 或選擇錯誤 |
 | C24 | 先濾 JP 再驗 EN 壞分片／半筆失敗仍提交 DB | 全入口失敗且交易回滾 |
 | C25 | YAML 只換排版／輸入檔順序改／新卡包僅新增無關卡／重建程式或背景更新但相關內容相同 | canonical 決定不變；詞彙與 default override 保持有效，F1 記新實際輸入 |
 
 驗收須另覆蓋合法的新採納、完整續版、撤回／恢復、literal/uint/variable、雙面與多區互不污染。
-核可 §8.1 兩項政策後把相應預期固化，再以 production 凍結來源驗證覆蓋；候選清單、合成成功與格式核可都不等於正式資料可發布。
+依 §7／§8.1 已核可政策固化預期，再以 production 凍結來源驗證覆蓋；候選清單、合成成功與政策核可都不等於正式資料可發布。

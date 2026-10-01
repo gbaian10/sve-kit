@@ -1,6 +1,6 @@
 # authored 維護方式
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，分類政策待核可）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 ## 1. 路徑與共同格式
 
@@ -235,7 +235,7 @@ effects/index.yaml 提供 `card_id`＋scope＋file/record key；即使候選 YAM
 
 route/default 純推導；authored 只寫 alias、variant `route_override`、`default_printing_override`。canonical 編碼 exact 原卡號，folded 輸入只在唯一時轉址。UI `fallback_order` 只用介面詞彙，卡文保留所選區原文。
 
-詞彙、記號、搜尋別名、特殊構築名稱、語言，以及同號 variant／default 覆寫的獨立入口、精確成員 hash、只增續版與 freshness，見 [詞彙與路由採納契約](catalog-route-adoption.md)。封套已定為共享 review_context、穩定鍵依賴，default freshness 只驗同卡同區候選；記號翻譯由建置自動選用。僅一般版分類清單與繁中介面缺譯順序仍待使用者決定；格式不等於真實資料已採納，不把任意既有 confirmed 決定視為合法採納；翻譯仍走 §6，永久 alias／改號仍走 §12。
+詞彙、記號、搜尋別名、特殊構築名稱、語言，以及同號 variant／default 覆寫的獨立入口、精確成員 hash、只增續版與 freshness，見 [詞彙與路由採納契約](catalog-route-adoption.md)。封套已定為共享 review_context、穩定鍵依賴，default freshness 只驗同卡同區候選；記號翻譯由建置自動選用。使用者 2026-10-01 已核可一般版稀有度白名單與繁中缺譯先日文再英文；卡框／標誌的個別判斷不在本次核可範圍；格式不等於真實資料已採納，不把任意既有 confirmed 決定視為合法採納；翻譯仍走 §6，永久 alias／改號仍走 §12。
 
 公開的 text_symbol／ruling hints 使用 [傳輸契約 §3.2 的 ParameterSchema](snapshot-transport.md#32-公開參數宣告)，不把建置模板的參數或引用直接投影為公開物件。
 
