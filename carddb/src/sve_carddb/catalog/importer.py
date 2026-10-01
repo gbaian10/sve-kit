@@ -54,7 +54,7 @@ def _insert_exact(
 
 
 def _adopted(db: Database, decision_id: str) -> None:
-    """Fail closed until an adoption loader can prove category, members and freshness."""
+    """Keep caller-only staging separate from the authored adoption loader."""
     decisions = {row.values["id"]: row.values for row in db.rows("decision")}
     sources = {row.values["id"]: row.values for row in db.rows("source_record")}
     links = [
@@ -72,8 +72,8 @@ def _adopted(db: Database, decision_id: str) -> None:
         raise ValueError("Catalog adoption requires authored evidence")
     # A sourced confirmed decision alone cannot bind this input to its reviewed bytes.
     raise ValueError(
-        "Catalog adoption decision cannot verify category, exact members or freshness "
-        "until the adoption contract and loader are finalized"
+        "Catalog staging cannot verify category, exact members or freshness; "
+        "use import_adoptions"
     )
 
 
@@ -84,7 +84,7 @@ def populate_catalog(
     build: BuildContext,
     published: tuple[LocalizedText, ...],
 ) -> None:
-    """Project staging inputs; decision-backed adoption remains disabled."""
+    """Project synthetic staging inputs; authored receipts use import_adoptions."""
     catalog = Catalog.model_validate_json(catalog.model_dump_json())
     config = object_value(parse(build.configuration.encode()))
     if any(
