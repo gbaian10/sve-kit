@@ -20,6 +20,8 @@
 | [authored 維護方式](authored-layout.md)       | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
 | [翻譯與模板採納契約](translation-contract.md) | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約                        |
 
+新增的 [詞彙與路由採納契約提案](catalog-route-adoption.md) 說明詞彙、記號、別名、特殊名稱與顯示覆寫封套，以及待核可的一般版、回退與搜尋政策。
+
 ## 文件之間的關係
 
 ```mermaid

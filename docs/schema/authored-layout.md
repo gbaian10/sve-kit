@@ -20,7 +20,9 @@
 | 提案 | 特殊構築 | `overrides/deck-roles/BP01.yaml` |
 | 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
-| 提案 | DSL、路由、設定 | `effects/`、`macros/`、`overrides/routes.yaml`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
+| 提案 | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見 §8 的採納契約提案 |
+| 提案 | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見 §8；永久路由修復仍走 identity-transitions |
+| 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
@@ -232,6 +234,8 @@ effects/index.yaml 提供 `card_id`＋scope＋file/record key；即使候選 YAM
 `source_correction` 原值/改值/字段/來源 hash/evidence/核對者日期/是否回報完整保存。套用前先比是否已上游修正；不符合 expected/hash 則停用重審。卡表快照只出引用者上的 `corrected_from`/標記/公開理由，不能在去重 text 上全域標更正。
 
 route/default 純推導；authored 只寫 alias、variant `route_override`、`default_printing_override`。canonical 編碼 exact 原卡號，folded 輸入只在唯一時轉址。UI `fallback_order` 只用介面詞彙，卡文保留所選區原文。
+
+詞彙、記號、搜尋別名、特殊構築名稱、語言，以及同號 variant／default 覆寫的獨立入口、精確成員 hash、只增續版與 freshness，見 [詞彙與路由採納契約提案](catalog-route-adoption.md)。該格式及其政策仍待使用者核可，不把任意既有 confirmed 決定視為合法採納；翻譯仍走 §6，永久 alias／改號仍走 §12。
 
 公開的 text_symbol／ruling hints 使用 [傳輸契約 §3.2 的 ParameterSchema](snapshot-transport.md#32-公開參數宣告)，不把建置模板的參數或引用直接投影為公開物件。
 

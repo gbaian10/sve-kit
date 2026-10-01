@@ -56,6 +56,8 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 
 `evidence` 為 `{source_ref,role}` 去重陣列。source_ref 恰為 `{store_id,batch_id,source_version_id,parser,locator,text_hash}`：parser 為釘住程式與設定的 recipe ID，locator 是該 parser 完整 JSON 投影內的 JSON Pointer，text_hash 驗被定位字串的 exact UTF-8；不是任意可執行查詢。來源歸檔 batch/descriptor/receipt/raw、parser 程式／設定 hash 皆由建置輸入紀錄 F1 驗證。人工純決定可無 raw evidence，但所引用模板、概念、owner 與前件須完整可驗；聲稱官方來源的記錄不可空。author source_record/decision_source 釘完整 commit、index/分片 hash 與原證據，不在 authored 重抄官方原文。
 
+記號的三語 name/tooltip/copy_pattern 擬沿本入口追加 `symbol_localization_choice`，見 [記號文案擴充提案](catalog-route-adoption.md#6-卡文記號與三語文案)。此新增 kind 尚未核可，不屬上表的現行白名單；其來源、origin 與採納規則仍沿本契約，詞彙 label 繼續使用既有 vocabulary_choice。
+
 ## 3. 模板來源清冊與 ID
 
 不新增物件庫。runtime 從正式清冊指向的**已封存卡頁**、釘住的 extractor/normalizer 重建內容，不讀研究草稿或 latest cache。清冊 recipes 每項 `{id,code_revision,code_path,code_hash,config,config_hash}`；code_path 是 repo 相對檔案，code_revision 為完整 commit，config 為 canonical JSON。缺正式實作或不能重現舊結果時停止遷入，不能拿未版控的腳本路徑作 runtime 依賴。
