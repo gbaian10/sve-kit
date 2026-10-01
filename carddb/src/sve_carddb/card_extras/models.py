@@ -39,7 +39,7 @@ class QAEntry(RecordData):
         )
 
     def fingerprint(self) -> str:
-        """Version wording and state independently of descriptive date metadata."""
+        """Version wording, state and parsed official dates, ignoring raw date spelling."""
         return key(
             "qav",
             self.model_dump(
@@ -48,8 +48,6 @@ class QAEntry(RecordData):
                     "locator",
                     "stable_source_key",
                     "official_number",
-                    "published_on",
-                    "updated_on",
                     "date_raw",
                 },
             ),

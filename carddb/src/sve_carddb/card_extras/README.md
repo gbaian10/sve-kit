@@ -22,11 +22,14 @@ number. Unknown dates remain raw with parsed dates null.
 Q&A revisions follow observation order (`fetched_at`, immutable source ID,
 block locator), not publication date. Adjacent identical contents share a
 version and union their card IDs; a same-day wording change or reversion creates
-another immutable version. Changes only to `published_on`, `updated_on` or
-`date_raw` do not create a version. The shared version retains the first
-observation's dates; later date metadata remains in the pinned inputs and raw
-sources, without overwriting that version. This order records observed versions, not a claimed
-official effective date. All page/block uses survive in `InputRecord`, including
+another immutable version. A change to parsed `published_on` or `updated_on`, or
+to withdrawal state, also creates a version. By the coordinator's decision,
+observed official date changes must remain visible in public versions rather
+than leaving their dates stale. A different `date_raw` spelling with unchanged
+parsed dates does not create a version; that version retains the first raw
+spelling, and every observation remains in the pinned inputs and raw sources.
+This order records observed versions, not a claimed official effective date.
+All page/block uses survive in `InputRecord`, including
 sources of deduplicated versions and pages with unknown adopted identities.
 
 Incremental adapters must retain each numbered Q&A's page/block observations:

@@ -148,10 +148,9 @@ def test_distinct_unnumbered_blocks_keep_both_questions(db: Database) -> None:
     [
         ("published_on", "2026-10-02"),
         ("updated_on", "2026-10-02"),
-        ("date_raw", "Synthetic later date"),
     ],
 )
-def test_date_only_changes_keep_one_qa_version(
+def test_parsed_date_changes_create_qa_version(
     db: Database, field: str, value: str
 ) -> None:
     first = page()
@@ -163,11 +162,66 @@ def test_date_only_changes_keep_one_qa_version(
     plan = plan_card_extras(db, (later, first))
     with db.transaction():
         record = populate_card_extras(db, plan, build=context(plan))
-    versions = db.rows("qa_version")
-    assert len(versions) == 1
+    versions = sorted(
+        db.rows("qa_version"), key=lambda row: str(row.values["revision"])
+    )
+    assert len(versions) == 2
     assert versions[0].values[field] == getattr(first.qa[0], field)
+    assert versions[1].values[field] == value
+    assert versions[1].values["supersedes_id"] == versions[0].values["id"]
+    assert (
+        versions[1].values["question_unit_id"] == versions[0].values["question_unit_id"]
+    )
+    assert versions[1].values["answer_unit_id"] == versions[0].values["answer_unit_id"]
     assert {row.values["card_id"] for row in db.rows("qa_card")} == {"card", "card1"}
     assert {use.source.id for use in record.uses} == {first.source.id, later.source.id}
+
+
+def test_raw_date_spelling_with_same_parsed_dates_keeps_qa_version(
+    db: Database,
+) -> None:
+    entry = (
+        page()
+        .qa[0]
+        .model_copy(update={"updated_on": "2026-10-01", "date_raw": "2026/10/01"})
+    )
+    first = page(question=entry)
+    later = page(
+        "TEST-002",
+        hour=1,
+        question=entry.model_copy(update={"date_raw": "2026-10-01"}),
+    )
+    plan = plan_card_extras(db, (later, first))
+    with db.transaction():
+        record = populate_card_extras(db, plan, build=context(plan))
+    versions = db.rows("qa_version")
+    assert len(versions) == 1
+    assert versions[0].values["published_on"] == "2026-10-01"
+    assert versions[0].values["updated_on"] == "2026-10-01"
+    assert versions[0].values["date_raw"] == "2026/10/01"
+    assert {row.values["card_id"] for row in db.rows("qa_card")} == {"card", "card1"}
+    assert {use.source.id for use in record.uses} == {first.source.id, later.source.id}
+
+
+def test_withdrawal_only_creates_qa_version(db: Database) -> None:
+    first = page()
+    withdrawn = page(
+        hour=1, question=first.qa[0].model_copy(update={"state": "withdrawn"})
+    )
+    plan = plan_card_extras(db, (withdrawn, first))
+    with db.transaction():
+        populate_card_extras(db, plan, build=context(plan))
+    versions = sorted(
+        db.rows("qa_version"), key=lambda row: str(row.values["revision"])
+    )
+    assert len(versions) == 2
+    assert [row.values["state"] for row in versions] == ["active", "withdrawn"]
+    assert versions[1].values["supersedes_id"] == versions[0].values["id"]
+    assert versions[1].values["published_on"] == versions[0].values["published_on"]
+    assert (
+        versions[1].values["question_unit_id"] == versions[0].values["question_unit_id"]
+    )
+    assert versions[1].values["answer_unit_id"] == versions[0].values["answer_unit_id"]
 
 
 def test_regional_qa_identity_is_independent(db: Database) -> None:
@@ -251,6 +305,39 @@ def test_errata_reference_reports_manual_faces_without_excluding_cards(
         require_card_extras_ready(db, scope, strict=True)
     assert {table: db.rows(table) for table in visible} == visible
     assert not db.rows("face_current")
+
+
+def test_pending_faces_are_regional_even_for_shared_card(db: Database) -> None:
+    printing = dict(db.rows("printing")[0].values)
+    face = dict(db.rows("face")[0].values)
+    pair = dict(db.rows("printing_face")[0].values)
+    with db.transaction():
+        db.update("card", {"id": "card"}, {"layout": "double_faced"})
+        db.insert("face", face | {"id": "back", "ordinal": 1, "side": "back"})
+        db.insert(
+            "printing",
+            printing | {"id": "shared_en", "region": "en", "card_no": "TEST-SHARED"},
+        )
+        db.insert(
+            "printing_face", pair | {"printing_id": "shared_en", "face_id": "back"}
+        )
+    jp = page().model_copy(
+        update={"errata_urls": ("https://shadowverse-evolve.com/errata/synthetic/",)}
+    )
+    en = page("TEST-SHARED", region="en").model_copy(
+        update={"errata_urls": ("https://en.shadowverse-evolve.com/errata/synthetic/",)}
+    )
+    plan = plan_card_extras(db, (jp, en))
+    with db.transaction():
+        populate_card_extras(db, plan, build=context(plan))
+    restrictions = require_card_extras_ready(db, (("jp", "card"), ("en", "card")))
+    assert len(restrictions) == 2
+    assert {(item.region, item.card_id, item.face_ids) for item in restrictions} == {
+        ("jp", "card", ("face",)),
+        ("en", "card", ("back",)),
+    }
+    assert require_card_extras_ready(db, (("jp", "card"),))[0].face_ids == ("face",)
+    assert require_card_extras_ready(db, (("en", "card"),))[0].face_ids == ("back",)
 
 
 def notice() -> ErrataPage:
