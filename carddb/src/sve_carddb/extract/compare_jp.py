@@ -35,6 +35,7 @@ APPROVED_NEW_FIELDS = frozenset(
 )
 # Each approved semantic change must name one card, field, and both value hashes.
 APPROVED_RAW_FIELD_CHANGES: frozenset[tuple[str, str, str, str]] = frozenset()
+_LEGACY_TRAIT_PART = re.compile(r"ジオ・テオゴニア|[^・]+")
 
 
 @dataclass
@@ -48,7 +49,13 @@ class RawChanges:
 
 def legacy_projection(record: CardRecord) -> Card:
     """Apply the old Card input boundary, including its ignored extra fields."""
-    return Card.model_validate(asdict(record))
+    card = Card.model_validate(asdict(record))
+    # Confirmed identity receipts pin the old tokenizer, not the corrected face traits.
+    for face, raw in zip(card.faces, record.faces, strict=True):
+        face.traits = (
+            [] if raw.trait_raw == "-" else _LEGACY_TRAIT_PART.findall(raw.trait_raw)
+        )
+    return card
 
 
 def _read_legacy(

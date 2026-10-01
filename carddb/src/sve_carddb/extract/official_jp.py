@@ -26,7 +26,7 @@ if TYPE_CHECKING:
 # A line made only of these marks splits the text into sections. What follows it is
 # not always token details: some spells print their main effect there.
 _SECTION_SEPARATOR = re.compile(r"^[―─ー-]{5,}$")
-_TRAIT_PART = re.compile(r"ジオ・テオゴニア|[^・]+")
+_TRAIT_PART = re.compile(r"ジオ・テオゴニア|〈[^〉]+〉|[^・]+")
 _QA_TITLE = re.compile(r"^(?P<id>Q\d+)\s*[（(](?P<date>[^）)]+)[）)]$")
 _STAT_HEADINGS = {
     "status-Item-Cost": "cost",
