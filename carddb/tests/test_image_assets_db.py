@@ -43,8 +43,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
+    from sve_carddb.build_inputs import Source
     from sve_carddb.image_assets import ImageReference
     from sve_carddb.registry.preview import PreviewPlan
+    from sve_carddb.source_archive import Descriptor
 
 REVISION = "a" * 40
 CONTEXT = BuildContext.from_inputs(
@@ -378,6 +380,101 @@ def test_complete_bundle_binds_source_uses_after_blobs_and_is_immutable(
             stores=stores,
         )
     assert before == {path: path.read_bytes() for path in destination.iterdir()}
+
+
+@pytest.mark.parametrize("case", ["raw-bytes", "source-width"])
+def test_publication_rechecks_frozen_source_metadata(
+    tmp_path: Path, frozen: FrozenSources, staged: Staged, case: str
+) -> None:
+    output = roots(tmp_path)
+    encoded = build_jp_assets(frozen, output)
+    item = encoded.images[0]
+    if case == "raw-bytes":
+        item = replace(item, raw_bytes=item.raw_bytes + 1)
+    else:
+        item = replace(
+            item, result=replace(item.result, source_width=item.result.source_width + 1)
+        )
+    encoded = replace(encoded, images=(item, *encoded.images[1:]))
+    destination = tmp_path / "rejected-source-bundle"
+    with pytest.raises(
+        ValueError, match=r"^Image source bytes or oriented dimensions mismatch$"
+    ):
+        publish_jp_image_bundle(
+            compile_build(("images",)),
+            destination,
+            CONTEXT,
+            staged.parents,
+            encoded,
+            refs_for(staged),
+            output,
+            parent_uses=staged.plan.source_uses(),
+            stores={frozen.store_id: frozen.root},
+        )
+    assert not destination.exists()
+
+
+@pytest.mark.parametrize(
+    "case", ["provider", "kind", "url", "evidence-metadata", "db-metadata", "printings"]
+)
+def test_each_page_source_gate_has_an_independent_counterexample(
+    staged: Staged, case: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan = staged.plan
+    selected = next(iter(plan.included("printing")))
+    data = selected.data
+    assert isinstance(data, PrintingData)
+    source_id = plan.evidence["jp", data.card_no].source.id
+    original = staged.cards.read
+
+    def altered(
+        version: str, *, parser_version: str
+    ) -> tuple[Source, bytes, Descriptor]:
+        source, raw, descriptor = original(version, parser_version=parser_version)
+        if version == source_id and case in {"provider", "kind", "url"}:
+            descriptor = descriptor.model_copy(
+                update={case: {"provider": "en", "kind": "image", "url": "wrong"}[case]}
+            )
+        return source, raw, descriptor
+
+    monkeypatch.setattr(staged.cards, "read", altered)
+    if case == "evidence-metadata":
+        evidence = plan.evidence["jp", data.card_no]
+        plan = replace(
+            plan,
+            evidence={
+                **plan.evidence,
+                ("jp", data.card_no): replace(
+                    evidence,
+                    source=evidence.source.model_copy(update={"etag": "wrong"}),
+                ),
+            },
+        )
+    elif case == "printings":
+        plan = replace(
+            plan,
+            projections=tuple(
+                replace(item, disposition="excluded")
+                if item.record_key == selected.record_key
+                else item
+                for item in plan.projections
+            ),
+        )
+    with create_database(compile_build(("images",))) as db:
+        with db.transaction():
+            staged.parents(db)
+        if case == "db-metadata":
+            with db.transaction():
+                db.update("source_record", {"id": source_id}, {"etag": "wrong"})
+        expected = (
+            "JP image descriptor differs from the card page"
+            if case in {"provider", "kind", "url"}
+            else "Image identity plan does not match the build printings"
+            if case == "printings"
+            else "JP image page provenance differs from the identity input"
+        )
+        with pytest.raises(ValueError, match="^" + expected + "$"):
+            plan_jp_images(db, plan, staged.cards)
 
 
 @pytest.mark.parametrize(

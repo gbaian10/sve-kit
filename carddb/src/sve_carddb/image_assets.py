@@ -177,10 +177,15 @@ def plan_jp_images(
         row = printing_rows[printing_id]
         evidence = plan.evidence["jp", data.card_no]
         source, raw, descriptor = cards.read(evidence.source.id, parser_version=PARSER)
+        if (descriptor.provider, descriptor.kind, descriptor.url, source.kind) != (
+            "jp",
+            "card",
+            card_url(data.card_no),
+            "official_page",
+        ):
+            raise ValueError("JP image descriptor differs from the card page")
         if (
-            (descriptor.provider, descriptor.kind, descriptor.url, source.kind)
-            != ("jp", "card", card_url(data.card_no), "official_page")
-            or source.values() != evidence.source.values()
+            source.values() != evidence.source.values()
             or source_rows.get(source.id) != source.values()
         ):
             raise ValueError("JP image page provenance differs from the identity input")

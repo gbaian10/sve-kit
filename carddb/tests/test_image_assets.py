@@ -26,6 +26,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.image_variants import VariantSet
 
 
 @pytest.fixture
@@ -112,6 +113,28 @@ def test_worker_limit_is_checked_before_writing(
     with pytest.raises(ValueError, match="between 1 and 4"):
         build_jp_assets(frozen, output, workers=workers)
     assert not output.preview.exists()
+
+
+def test_build_rechecks_blob_tampering_before_returning(
+    tmp_path: Path, frozen: FrozenSources, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    output = roots(tmp_path)
+    original: Callable[..., VariantSet] = image_variants.build_variants
+    calls = 0
+
+    def corrupt_after_encoding(*args: object, **kwargs: object) -> VariantSet:
+        nonlocal calls
+        calls += 1
+        result = original(*args, **kwargs)
+        if calls == len(frozen.inventory.current):
+            path = output.preview / result.variants[0].path
+            data = path.read_bytes()
+            path.write_bytes(data[:-1] + bytes([data[-1] ^ 1]))
+        return result
+
+    monkeypatch.setattr(image_assets, "build_variants", corrupt_after_encoding)
+    with pytest.raises(ValueError, match="blob hash or bytes mismatch"):
+        build_jp_assets(frozen, output)
 
 
 @pytest.mark.parametrize(
