@@ -929,13 +929,26 @@ class RefreshWriter(Writer):
     @override
     def mark_not_modified(self, url: str, *, request_id: int) -> Resource:
         """Keep the version ID while preserving the new committed 304 observation."""
-        updated = super().mark_not_modified(url, request_id=request_id)
-        self.touched.add((updated.region.value, updated.kind.value))
         with self._stage() as stage:
             snapshot = self._snapshot(stage, "not-modified.sqlite")
-            pin = self._prepare_old(updated, stage)
+            previous = self._manifest.resources.get(url)
+            pin = self._prepare_old(previous, stage)
             try:
+                updated = super().mark_not_modified(url, request_id=request_id)
+                self.touched.add((updated.region.value, updated.kind.value))
                 with self._lock.suspended():
+                    assert previous is not None
+                    source_id = archive._version_id(
+                        archive._source_key(previous), archive._raw_hash(previous)
+                    )
+                    version = (
+                        self.store.root
+                        / "versions"
+                        / f"{source_id.removeprefix('src:v1:')}.json"
+                    )
+                    if not version.exists():
+                        # The pre-304 resource still matches the shared committed snapshot.
+                        snapshot, _ = self._intent_snapshot(snapshot, previous, url)
                     self._preserve_old(pin, snapshot)
                     self._journal(updated)
                 self._resume_reads()

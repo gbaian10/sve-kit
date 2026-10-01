@@ -1336,9 +1336,7 @@ def backup_batch(
     ):
         msg = "archive backup must be on a separate device"
         raise ArchiveError(msg)
-    paths = _closure_paths(store.root, batch_id, inventory)
-    for relative in paths:
-        _copy_immutable(store.root / relative, backup_root / relative)
+    _copy_closure(store.root, backup_root, batch_id, inventory)
     verify_batch(backup_root, store.store_id, batch_id)
     receipt_path = backup_root / "backups" / f"{_hex(batch_id)}.json"
     expected_blobs = sorted({item.blob.sha256 for item in inventory.entries})
@@ -1363,6 +1361,23 @@ def backup_batch(
     return receipt
 
 
+def _copy_closure(
+    source_root: Path, destination: Path, batch_id: str, inventory: Inventory
+) -> None:
+    batch_manifest = PurePosixPath("batches", _hex(batch_id), "manifest.sqlite")
+    for relative in _closure_paths(source_root, batch_id, inventory):
+        if relative != batch_manifest:
+            _copy_immutable(source_root / relative, destination / relative)
+    manifest = destination / "manifests" / f"{_hex(inventory.manifest.sha256)}.sqlite"
+    _require_hash(destination, manifest, inventory.manifest.sha256)
+    target = destination / batch_manifest
+    if target.exists() or target.is_symlink():
+        _require_hash(destination, target, inventory.manifest.sha256)
+    else:
+        # Link only within the copied closure; the backup must own independent bytes.
+        _install_link(manifest, target)
+
+
 def restore_backup(
     backup_root: Path, destination: Path, store_id: str, batch_id: str
 ) -> Inventory:
@@ -1384,8 +1399,7 @@ def restore_backup(
         msg = f"restore destination must be empty: {destination}"
         raise ArchiveError(msg)
     _mkdir_safe(destination)
-    for relative in _closure_paths(backup_root, batch_id, inventory):
-        _copy_immutable(backup_root / relative, destination / relative)
+    _copy_closure(backup_root, destination, batch_id, inventory)
     _copy_immutable(receipt_path, destination / "backups" / f"{_hex(batch_id)}.json")
     restored = verify_batch(destination, store_id, batch_id)
     if _hash_file(receipt_path)[0] != receipt_hash:

@@ -137,11 +137,23 @@ def test_a_b_c_versions_and_qa_links_restore_offline(
     assert result.inventory.history_gaps == []
     backup = tmp_path / "backup"
     backup_batch(store, backup, result.batch_id, require_separate_device=False)
+    backup_manifest = (
+        backup / "manifests" / f"{result.inventory.manifest.sha256[7:]}.sqlite"
+    )
+    assert (backup / "batches" / result.batch_id[7:] / "manifest.sqlite").samefile(
+        backup_manifest
+    )
+    assert not backup_manifest.samefile(result.path / "manifest.sqlite")
     expected_links = writer._manifest.links.history(URL)
     store.root.rename(tmp_path / "original-archive-unavailable")
     store.data_root.rename(tmp_path / "original-latest-unavailable")
     restored = tmp_path / "restored"
     restore_backup(backup, restored, store.store_id, result.batch_id)
+    restored_manifest = restored / "batches" / result.batch_id[7:] / "manifest.sqlite"
+    assert restored_manifest.samefile(
+        restored / "manifests" / f"{result.inventory.manifest.sha256[7:]}.sqlite"
+    )
+    assert not restored_manifest.samefile(backup_manifest)
     assert verify_batch(restored, store.store_id, result.batch_id) == result.inventory
     with Manifest.open_snapshot(
         restored / "batches" / result.batch_id[7:] / "manifest.sqlite"
@@ -933,6 +945,146 @@ def test_unarchived_old_urls_share_one_preparation_snapshot(
     writer.checkpoint()
     assert len(list((store.root / "manifests").glob("*.sqlite"))) == 2
     assert len(list((store.root / "versions").glob("*.json"))) == 16
+
+
+@pytest.mark.parametrize("prior_write", [False, True])
+def test_unarchived_304s_share_exact_pre_update_evidence(
+    writer: RefreshWriter, store: ArchiveStore, *, prior_write: bool
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    items = [
+        replace(
+            fetched(),
+            url=f"https://example.invalid/{index}",
+            path=PurePosixPath(f"raw/jp/qa/{index}.html.zst"),
+        )
+        for index in range(3)
+    ]
+    previous = {}
+    for item in items:
+        result = ordinary.write(item, request_id=start(writer._manifest, item.url))
+        previous[item.url] = result.resource
+    if prior_write:
+        write(writer, fetched(b"synthetic-unrelated"))
+    for item in items:
+        updated = writer.mark_not_modified(
+            item.url, request_id=start(writer._manifest, item.url)
+        )
+        assert updated.last_checked_at > previous[item.url].last_checked_at
+    snapshots = list((store.root / "manifests").glob("*.sqlite"))
+    assert len(snapshots) == 1
+    assert len(list((writer.backup_root / "manifests").glob("*.sqlite"))) == 1
+    with Manifest.open_snapshot(snapshots[0]) as frozen:
+        for url, resource in previous.items():
+            assert frozen.resources.get(url) == resource
+    receipts = [
+        archive._load_model(archive.Receipt, path)
+        for path in (store.root / "receipts").glob("*.json")
+    ]
+    assert {receipt.resource.url for receipt in receipts} == set(previous)
+    for receipt in receipts:
+        assert receipt.resource == archive._evidence(previous[receipt.resource.url])
+        assert receipt.manifest_sha256 == "sha256:" + snapshots[0].stem
+    writer.checkpoint()
+    assert len(list((store.root / "manifests").glob("*.sqlite"))) == 2
+    assert len(list((store.root / "versions").glob("*.json"))) == 3 + prior_write
+
+
+def test_gap_rejects_an_orphan_old_blob(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    (store.data_root / PATH).unlink()
+    raw_hash = "sha256:" + sha256(b"synthetic-A")
+    blob = store.root / archive._blob_path(raw_hash)
+    blob.parent.mkdir(parents=True, exist_ok=True)
+    blob.write_bytes(b"synthetic-A")
+    assert not list((store.root / "versions").glob("*.json"))
+    with pytest.raises(ArchiveError, match="preserved old blob"):
+        writer.acknowledge_gap(URL, raw_hash, "operator")
+    assert not list((store.root / "history-gaps").glob("*.json"))
+
+
+def test_recovery_cleans_abandoned_staging(writer: RefreshWriter) -> None:
+    abandoned = writer.store.root / "staging" / "abandoned"
+    abandoned.mkdir(parents=True)
+    (abandoned / "uncommitted.sqlite").write_bytes(b"synthetic-staging")
+    assert writer.recover() == 0
+    assert not list(abandoned.parent.iterdir())
+
+
+def test_recovery_retains_committed_candidate_encoding(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def interrupted(_resource: Resource, _intent_id: str) -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(writer, "_backup_committed", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        write(writer, fetched())
+    target = store.data_root / PATH
+    encoded = target.read_bytes()
+    target.unlink()
+    monkeypatch.undo()
+    monkeypatch.setattr(refresh, "compress", lambda raw: compress(raw) + b"longer")
+    assert writer.recover() == 1
+    assert target.read_bytes() == encoded
+    assert writer.read(URL) == b"synthetic-A"
+    intent = archive._load_model(
+        Replacement, next((store.root / "replacements").glob("*.json"))
+    )
+    assert intent.proposed_stored_sha256 == digest(encoded)
+
+
+def test_finish_batch_leaves_uncovered_observations_pending(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    write(writer, fetched())
+    other = replace(
+        fetched(),
+        region=Region.EN,
+        url="https://example.invalid/other",
+        path=PurePosixPath("raw/en/other.html.zst"),
+    )
+    writer.write(other, request_id=start(writer._manifest, other.url))
+    writer._lock.__exit__(None, None, None)
+    result = seal_batch(store, scope=[archive.Scope(provider="jp", kind="card")])
+    writer.finish_batch(result)
+    writer._unfinished_observations()
+    assert writer.touched == {("en", "card")}
+    assert len(list((store.root / "observation-seals").glob("*.json"))) == 1
+
+
+@pytest.mark.parametrize("root", [None, "overlap"])
+def test_finish_refresh_validates_its_restore_boundary(
+    writer: RefreshWriter, root: str | None
+) -> None:
+    writer.touched.add(("jp", "card"))
+    writer.restore_root = None if root is None else writer.store.root
+    with pytest.raises(ArchiveError, match=r"SVE_ARCHIVE_RESTORE_ROOT|separate"):
+        cli._finish_refresh(writer)
+    assert not list((writer.store.root / "batches").glob("*"))
+
+
+@pytest.mark.parametrize("damage", ["symlink", "corrupt"])
+def test_backup_rejects_an_unsafe_manifest_alias(
+    writer: RefreshWriter, store: ArchiveStore, *, damage: str
+) -> None:
+    write(writer, fetched())
+    writer._lock.__exit__(None, None, None)
+    result = seal_batch(store)
+    target = writer.backup_root / "batches" / result.batch_id[7:] / "manifest.sqlite"
+    target.parent.mkdir(parents=True)
+    if damage == "symlink":
+        target.symlink_to(result.path / "manifest.sqlite")
+    else:
+        target.write_bytes(b"corrupted-manifest")
+    with pytest.raises(ArchiveError):
+        backup_batch(
+            store, writer.backup_root, result.batch_id, require_separate_device=False
+        )
+    assert not list((writer.backup_root / "backups").glob("*.json"))
 
 
 def test_finish_refresh_ignores_unrelated_missing_scope(
