@@ -1,7 +1,15 @@
 """T0 declarations from docs/schema/build-db.md; domain validation is separate."""
 
 from sve_carddb.build_db.domains import DATE, HASH
-from sve_carddb.build_db.model import Check, Column, ForeignKey, Kind, Table, Unique
+from sve_carddb.build_db.model import (
+    Check,
+    Column,
+    ForeignKey,
+    Kind,
+    QueryCheck,
+    Table,
+    Unique,
+)
 
 TABLES = (
     Table(
@@ -35,6 +43,16 @@ TABLES = (
             ForeignKey(("source_id",), "source_record", ("id",)),
         ),
         checks=(Check("effective_until IS NULL OR effective_from < effective_until"),),
+        query_checks=(
+            QueryCheck(
+                "profile_revision_overlap",
+                "SELECT 1 FROM rules_profile_revision AS a JOIN rules_profile_revision AS b "
+                "ON a.profile_id = b.profile_id AND a.id < b.id "
+                "WHERE (a.effective_until IS NULL OR b.effective_from < a.effective_until) "
+                "AND (b.effective_until IS NULL OR a.effective_from < b.effective_until) LIMIT 1",
+                ("rules_profile_revision",),
+            ),
+        ),
     ),
     Table(
         "restriction",
@@ -63,6 +81,14 @@ TABLES = (
                 "(kind = 'copy_limit' AND max_copies IS NOT NULL AND max_selected_groups IS NULL) OR (kind = 'choice_group' AND max_copies IS NULL AND max_selected_groups IS NOT NULL)"
             ),
         ),
+        query_checks=(
+            QueryCheck(
+                "restriction_confirmed_decision",
+                "SELECT 1 FROM restriction AS r JOIN decision AS d ON d.id = r.decision_id "
+                "WHERE r.state = 'confirmed' AND d.state != 'confirmed' LIMIT 1",
+                ("restriction", "decision"),
+            ),
+        ),
     ),
     Table(
         "restriction_member",
@@ -76,6 +102,15 @@ TABLES = (
         foreign_keys=(
             ForeignKey(("restriction_id",), "restriction", ("id",)),
             ForeignKey(("rules_name_id",), "rules_name", ("id",)),
+        ),
+        query_checks=(
+            QueryCheck(
+                "restriction_member_region",
+                "SELECT 1 FROM restriction_member AS m JOIN restriction AS r ON r.id = m.restriction_id "
+                "JOIN rules_profile AS p ON p.id = r.profile_id JOIN rules_name AS n ON n.id = m.rules_name_id "
+                "WHERE p.region != n.region LIMIT 1",
+                ("restriction_member", "restriction", "rules_profile", "rules_name"),
+            ),
         ),
     ),
     Table(
@@ -106,6 +141,14 @@ TABLES = (
         foreign_keys=(
             ForeignKey(("card_id",), "card", ("id",)),
             ForeignKey(("decision_id",), "decision", ("id",)),
+        ),
+        query_checks=(
+            QueryCheck(
+                "deck_role_regional_card",
+                "SELECT 1 FROM deck_role_override AS o WHERE NOT EXISTS "
+                "(SELECT 1 FROM printing AS p WHERE p.card_id = o.card_id AND p.region = o.region) LIMIT 1",
+                ("deck_role_override", "printing"),
+            ),
         ),
     ),
     Table(

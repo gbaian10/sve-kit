@@ -1445,7 +1445,9 @@ def test_unconfirmed_availability_override_stays_unknown(
     assert region(projected(db), "en")["release_state"] == "unknown"
 
 
-@pytest.mark.parametrize("level", ["proposed", "model_reviewed", "sampled"])
+@pytest.mark.parametrize(
+    "level", ["proposed", "model_reviewed", "sampled", "rejected", "disputed"]
+)
 def test_unconfirmed_role_override_does_not_replace_known_role(
     db: Database, level: str
 ) -> None:
