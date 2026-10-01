@@ -15,6 +15,7 @@ from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.snapshot.values import canonical
 from sve_carddb.source_corrections.closure import correction_exclusions
 from sve_carddb.source_corrections.importer import verify_corrections
+from sve_carddb.source_corrections.plan import plan_applications
 from sve_carddb.source_corrections.projection import correction_references
 from sve_carddb.text_observations import (
     import_text_observations,
@@ -31,10 +32,120 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.registry.records import Region
+    from sve_carddb.build_inputs import Source
+    from sve_carddb.registry.records import CorrectionEvidence, Region
     from sve_carddb.registry.review import Inputs
     from sve_carddb.registry.storage import Entry
     from sve_carddb.source_corrections.plan import Application
+
+
+def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    for card in inputs.jp.values():
+        card.faces[0].text = "Rule."
+    fixture = make_correction_case(tmp_path, inputs)
+    case = fixture.texts
+
+    def edit(entry: Entry) -> None:
+        entry.data["expected_source_hash"] = "sha256:" + "0" * 64
+
+    edit_record(case.root, "source_correction", edit)
+    case.identity = replace(case.identity, snapshot=load_registry(case.root))
+    case.catalog = load_products(case.root, registry=case.identity.snapshot)
+    case.plan = plan_text_observations(
+        case.identity, case.provider, images=fixture.images
+    )
+    assert case.plan.corrections is not None
+    assert case.plan.corrections[0].status == "conflict"
+    group = next(group for group in case.plan.groups if group.region == "jp")
+    assert len({item.content.fingerprint() for item in group.observations}) == 1
+    assert group.reasons == ("source_correction_pending",)
+    assert group.current() is None
+    with create_database(compile_build(("en", "related", "correction"))) as db:
+        with db.transaction():
+            case.stage(db)
+        import_text_observations(
+            db,
+            case.plan,
+            build=case.context(),
+            vocabulary=case.vocabulary,
+            published=(),
+        )
+        assert not any(row.values["region"] == "jp" for row in db.rows("face_current"))
+
+
+def test_domain_verifier_rejects_physical_observation_pointing_to_corrected_revision(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    case = make_correction_case(tmp_path, inputs).texts
+    assert case.plan.corrections is not None
+    raw = case.plan.corrections[0].observation
+    candidate = next(
+        item for item in case.plan.candidates() if item.printing_id == raw.printing_id
+    )
+    with create_database(compile_build(("en", "related", "correction"))) as db:
+        with db.transaction():
+            case.stage(db)
+        import_text_observations(
+            db,
+            case.plan,
+            build=case.context(),
+            vocabulary=case.vocabulary,
+            published=(),
+        )
+        with db.transaction():
+            db.update(
+                "printing_face_observation",
+                {
+                    "printing_id": raw.printing_id,
+                    "face_id": raw.face_id,
+                    "source_id": raw.card.source.id,
+                },
+                {"revision_id": revision_id(candidate)},
+            )
+        with pytest.raises(ValueError, match="original physical observation"):
+            verify_corrections(db, case.plan, case.vocabulary)
+
+
+def test_other_image_provider_cannot_accept_cross_region_evidence(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    fixture = make_correction_case(tmp_path, inputs)
+    case = fixture.texts
+    assert case.plan.corrections is not None
+    source = case.plan.corrections[0].images[0]
+
+    def edit(entry: Entry) -> None:
+        evidence = entry.data["evidence"]
+        assert isinstance(evidence, list)
+        assert isinstance(evidence[0], dict)
+        evidence[0]["region"] = "en"
+        evidence[0]["image_src"] = source.url
+
+    edit_record(case.root, "source_correction", edit)
+    identity = replace(case.identity, snapshot=load_registry(case.root))
+
+    class FixedImages:
+        def image(self, _evidence: CorrectionEvidence) -> Source:
+            return source
+
+    with pytest.raises(ValueError, match="Correction image evidence metadata mismatch"):
+        plan_applications(identity, case.plan.observations, FixedImages())
+
+
+def test_selected_correction_requires_raw_observation_at_planning_boundary(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    fixture = make_correction_case(tmp_path, inputs)
+    case = fixture.texts
+    assert case.plan.corrections is not None
+    target = case.plan.corrections[0].observation
+    remaining = tuple(item for item in case.plan.observations if item != target)
+    with pytest.raises(
+        ValueError, match="Correction requires its raw face observation"
+    ):
+        plan_applications(case.identity, remaining, fixture.images)
 
 
 @pytest.mark.parametrize(
