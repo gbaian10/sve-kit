@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build_db import Json
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.importer import (
     catalog_configuration,
@@ -18,7 +17,7 @@ from sve_carddb.catalog.languages import register_languages
 from sve_carddb.catalog.models import Alias, Catalog, NameBinding, Term
 from sve_carddb.products.models import Language, LocalizedText
 
-from .build_db_fixtures import seed
+from .database_fixtures import DatabaseTemplate
 from .test_catalog_symbols import symbol
 
 if TYPE_CHECKING:
@@ -27,14 +26,23 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
 
 
-@pytest.fixture
-def db() -> Iterator[Database]:
-    with create_database(compile_t0()) as database:
-        seed(database)
+@pytest.fixture(scope="module")
+def catalog_database_template(
+    t0_database_template: DatabaseTemplate,
+) -> DatabaseTemplate:
+    with t0_database_template.copy() as database:
         with database.transaction():
             database.update(
                 "rules_name", {"id": "rules_name"}, {"official_name": "Synthetic text"}
             )
+        return DatabaseTemplate(
+            t0_database_template.schema, database._connection.serialize()
+        )
+
+
+@pytest.fixture
+def db(catalog_database_template: DatabaseTemplate) -> Iterator[Database]:
+    with catalog_database_template.copy() as database:
         yield database
 
 

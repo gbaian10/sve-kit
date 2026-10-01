@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+import shutil
 import sqlite3
 from contextlib import closing
 from dataclasses import replace
@@ -27,9 +28,11 @@ if TYPE_CHECKING:
     from sve_carddb.build_inputs import InputRecord
 
 
-@pytest.fixture
-def sealed_uses(tmp_path: Path) -> tuple[Path, tuple[SourceUse, ...]]:
-    store = _store(tmp_path / "frozen")
+@pytest.fixture(scope="module")
+def sealed_uses_template(
+    tmp_path_factory: pytest.TempPathFactory,
+) -> tuple[Path, tuple[SourceUse, ...]]:
+    store = _store(tmp_path_factory.mktemp("sealed-uses-template") / "frozen")
     raw = b"<html>Synthetic card and product</html>"
     resource = replace(
         _resource("https://example.invalid/card", "raw/card.html", raw, Kind.CARD),
@@ -54,6 +57,16 @@ def sealed_uses(tmp_path: Path) -> tuple[Path, tuple[SourceUse, ...]]:
             source=product, usage="product_observation", locator="product block 0"
         ),
     )
+
+
+@pytest.fixture
+def sealed_uses(
+    tmp_path: Path, sealed_uses_template: tuple[Path, tuple[SourceUse, ...]]
+) -> tuple[Path, tuple[SourceUse, ...]]:
+    store, uses = sealed_uses_template
+    destination = tmp_path / "frozen/archive"
+    shutil.copytree(store, destination)
+    return destination, uses
 
 
 def publish(

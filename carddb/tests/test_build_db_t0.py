@@ -7,8 +7,8 @@ import pytest
 from jsonschema import ValidationError
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Database, Json, Value, create_database
-from sve_carddb.build_db.database import install_functions
+from sve_carddb.build_db import Database, Json, Value
+from sve_carddb.build_db.database import install_functions, open_database
 from sve_carddb.build_db.domains import DATE as DATE_PATTERN
 from sve_carddb.build_db.domains import INSTANT as INSTANT_PATTERN
 from sve_carddb.build_db.model import identifier
@@ -25,6 +25,8 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import CompiledSchema
 
+    from .database_fixtures import DatabaseTemplate
+
 # ruff: file-ignore[hardcoded-sql-expression] -- transactions and fixture-authored SQL test native constraint enforcement
 
 
@@ -34,9 +36,8 @@ def schema() -> CompiledSchema:
 
 
 @pytest.fixture
-def db(schema: CompiledSchema) -> Iterator[Database]:
-    with create_database(schema) as database:
-        seed(database)
+def db(t0_database_template: DatabaseTemplate) -> Iterator[Database]:
+    with t0_database_template.copy() as database:
         yield database
 
 
@@ -55,13 +56,6 @@ def _update(db: Database, table: str, values: dict[str, Value]) -> None:
 def test_product_family_accepts_supported_kinds(db: Database, kind: str) -> None:
     _update(db, "product_family", {"kind": kind})
     assert db.rows("product_family")[0].values["kind"] == kind
-
-
-def test_all_tables_have_real_rows_and_deferred_references(db: Database) -> None:
-    assert all(db.rows(table.name) for table in TABLES)
-    assert db.rows("printing")[0].values["card_no"] == "TEST-001Ⓢa"
-    assert db.rows("printing_face")[0].values["art_id"] is None
-    db.verify()
 
 
 @pytest.mark.parametrize(
@@ -792,3 +786,35 @@ def test_missing_dsl_reason_does_not_have_to_repeat_status(db: Database) -> None
     assert db.rows("card_engine_support")[0].values["status"] == "missing_dsl"
     with pytest.raises(sqlite3.IntegrityError, match="CHECK"):
         _update(db, "card_engine_support", {"reason_codes": Json([])})
+
+
+class TestT0Inventory:
+    @pytest.fixture(scope="class")
+    def db(
+        self,
+        tmp_path_factory: pytest.TempPathFactory,
+        t0_database_template: DatabaseTemplate,
+    ) -> Iterator[Database]:
+        path = tmp_path_factory.mktemp("readonly-t0") / "build.sqlite"
+        path.write_bytes(t0_database_template.content)
+        with open_database(t0_database_template.schema, path) as database:
+            yield database
+
+    def test_all_tables_have_real_rows_and_deferred_references(
+        self, db: Database
+    ) -> None:
+        assert all(db.rows(table.name) for table in TABLES)
+        assert db.rows("printing")[0].values["card_no"] == "TEST-001Ⓢa"
+        assert db.rows("printing_face")[0].values["art_id"] is None
+        db.verify()
+
+    def test_shared_database_rejects_writes(self, db: Database) -> None:
+        before = db.rows("language")
+        with (
+            pytest.raises(sqlite3.OperationalError, match="readonly"),
+            db.transaction(),
+        ):
+            db.update("language", {"code": "ja"}, {"display_name": "changed"})
+        assert db.rows("language") == before
+        assert not db._connection.in_transaction
+        db.verify()

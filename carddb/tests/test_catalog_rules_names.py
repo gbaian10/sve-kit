@@ -6,14 +6,13 @@ from typing import TYPE_CHECKING, Literal
 
 import pytest
 
-from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build_db import Json
 from sve_carddb.catalog.models import NameBinding
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.text_observations.intern import TextInterner
 
-from .build_db_fixtures import seed
+from .database_fixtures import DatabaseTemplate
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -21,10 +20,9 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
 
 
-@pytest.fixture
-def db() -> Iterator[Database]:
-    with create_database(compile_t0()) as database:
-        seed(database)
+@pytest.fixture(scope="module")
+def names_database_template(t0_database_template: DatabaseTemplate) -> DatabaseTemplate:
+    with t0_database_template.copy() as database:
         with database.transaction():
             database.delete(
                 "face_rules_name",
@@ -35,6 +33,14 @@ def db() -> Iterator[Database]:
                     "role": "primary",
                 },
             )
+        return DatabaseTemplate(
+            t0_database_template.schema, database._connection.serialize()
+        )
+
+
+@pytest.fixture
+def db(names_database_template: DatabaseTemplate) -> Iterator[Database]:
+    with names_database_template.copy() as database:
         yield database
 
 

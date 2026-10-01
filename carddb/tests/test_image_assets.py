@@ -1,6 +1,7 @@
 """Synthetic archive images, independent bindings and interrupted asset publication."""
 
 import hashlib
+import shutil
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -15,7 +16,7 @@ from sve_carddb.image_assets import (
     verify_assets,
 )
 from sve_carddb.manifest import Kind, Manifest, Region
-from sve_carddb.source_archive import ArchiveError, Scope, seal_batch
+from sve_carddb.source_archive import ArchiveError, seal_batch
 
 from .test_image_variants import png
 from .test_registry_preview_archive import RAW
@@ -30,21 +31,14 @@ if TYPE_CHECKING:
 
 
 @pytest.fixture
-def frozen(tmp_path: Path) -> FrozenSources:
-    store = _store(tmp_path / "input")
-    for index, dimensions in enumerate(((80, 112), (112, 80), (80, 112))):
-        data = png(*dimensions)
-        _put(
-            store,
-            _resource(
-                f"https://shadowverse-evolve.com/synthetic/{index}.png",
-                f"raw/{index}.png",
-                data,
-            ),
-            data,
-        )
-    batch = seal_batch(store, scope=(Scope(provider="jp", kind="image"),))
-    return FrozenSources(store.root, store.store_id, batch.batch_id)
+def frozen(
+    tmp_path: Path, image_archive_template: tuple[Path, str, str]
+) -> FrozenSources:
+    root, store_id, batch = image_archive_template
+    destination = tmp_path / "input/archive"
+    # Staging tests append pages, so copy the synthetic latest data and manifest too.
+    shutil.copytree(root.parent, destination.parent)
+    return FrozenSources(destination, store_id, batch)
 
 
 def roots(tmp_path: Path) -> PreviewRoots:

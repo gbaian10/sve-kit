@@ -22,6 +22,8 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import Value
 
+    from .database_fixtures import DatabaseTemplate
+
 MINIMUM_TABLES = {
     "image_asset",
     "printing_image",
@@ -45,10 +47,8 @@ EN_TABLES = {"art", "region_mapping_review", "region_text_review", "region_diver
 
 
 @pytest.fixture
-def db() -> Iterator[Database]:
-    with create_database(compile_minimum(include_en=True)) as database:
-        with database.transaction():
-            populate(database)
+def db(t1b_database_template: DatabaseTemplate) -> Iterator[Database]:
+    with t1b_database_template.copy() as database:
         yield database
 
 

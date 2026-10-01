@@ -12,6 +12,8 @@ from sve_carddb.registry.snapshot import load_registry
 
 from .fixture_files import FrozenFiles, freeze_files, restore_files
 from .product_identity_fixtures import NAME, add_page, commit, html
+from .registry_snapshot_fixtures import restore_registry
+from .test_registry import make_inputs
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -83,3 +85,33 @@ def test_registry_and_product_files_restore_independent_consumers(
         Correction.model_validate_json(registry_template.corrections[0]).corrected_value
         != "polluted"
     )
+
+
+def test_registry_restores_independent_correction_objects(
+    registry_template: RegistryTemplate, tmp_path: Path
+) -> None:
+    first, second = make_inputs(), make_inputs()
+    restore_registry(registry_template, first, tmp_path / "first")
+    restore_registry(registry_template, second, tmp_path / "second")
+    assert first.receipt.corrections == second.receipt.corrections
+    assert first.receipt.corrections is not second.receipt.corrections
+    assert all(
+        left is not right
+        for left, right in zip(
+            first.receipt.corrections, second.receipt.corrections, strict=True
+        )
+    )
+    expected = tuple(value.model_dump_json() for value in second.receipt.corrections)
+    first.receipt.corrections[0].corrected_value = "polluted"
+    first.receipt.corrections.clear()
+    assert (
+        tuple(value.model_dump_json() for value in second.receipt.corrections)
+        == expected
+    )
+    third = make_inputs()
+    restore_registry(registry_template, third, tmp_path / "third")
+    assert (
+        tuple(value.model_dump_json() for value in third.receipt.corrections)
+        == expected
+    )
+    assert freeze_files(tmp_path / "third") == registry_template.files

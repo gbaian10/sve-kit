@@ -79,11 +79,17 @@ def registry_template(tmp_path_factory: pytest.TempPathFactory) -> RegistryTempl
 def registry_root(
     inputs: Inputs, tmp_path: Path, registry_template: RegistryTemplate
 ) -> Path:
+    return restore_registry(registry_template, inputs, tmp_path)
+
+
+def restore_registry(
+    template: RegistryTemplate, inputs: Inputs, destination: Path
+) -> Path:
     inputs.receipt.corrections = [
-        Correction.model_validate_json(value) for value in registry_template.corrections
+        Correction.model_validate_json(value) for value in template.corrections
     ]
-    restore_files(registry_template.files, tmp_path)
-    return tmp_path
+    restore_files(template.files, destination)
+    return destination
 
 
 def rewrite(root: Path, path: Path, shard: Shard, *, resign: bool = False) -> None:
