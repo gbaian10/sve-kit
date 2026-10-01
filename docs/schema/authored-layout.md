@@ -159,7 +159,7 @@ evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、re
 
 建置的 `registry.corrections.project_corrections` 對 active 更正比對原值與完整觀測 hash，匹配才產生更正值與欄位標記；原值已等於改值時回報 already_fixed，不重複套用，後續需警告並退役來源更正；其他差異為 conflict，不套用並阻擋 CLI 完成。needs_review 不產生投影。結果依 printing／face／field 定位，`corrections` 元素使用 snapshot-format 的 `{field, corrected_from, is_corrected: true, reason, source_url?}`；沒有可用官方頁 URL 時 source_url 仍存在、值為 null，不把卡圖 URL 冒充官方頁。此標記不附到共享文字上。
 
-CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這是供後續建置使用的欄位投影，不是完整 face_revision、SQLite correction_application 或公開卡表快照；那些匯入與輸出尚未實作。
+CLI 每次建置均驗證這個投影，可用 `--corrections-output <absolute-derived-json>` 保存更正後的欄位 value、applied／already_fixed 狀態與顯示標記；加 --check 時只比對已存的投影，不寫檔。這個 CLI 輸出仍是欄位投影，不是完整 face_revision 或公開卡表快照。正式建置 staging 由 `source_corrections` 接入文字觀測匯入器：核對封存圖片後匯入三表，保留原始觀測並建立更正後 revision，再提供受影響引用者的公開 Correction 值；完整快照序列化與發布驗證另由匯出器處理。API 與 F1 使用閉包見 [來源更正實作說明](../../carddb/src/sve_carddb/source_corrections/README.md)。
 
 ### 3.5 重跑與新卡包
 
