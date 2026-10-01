@@ -50,22 +50,30 @@ class _Candidate:
         return self.first_date is None, self.first_date or "", self.printing_id
 
 
+def _inclusion_date(inclusion: Row, product: Row) -> str | None:
+    precision = inclusion.values["first_available_precision"]
+    value = inclusion.values["first_available_on"]
+    if precision is None:
+        precision = product.values["date_precision"]
+        value = product.values["released_on"]
+    if precision != "day" or value is None:
+        return None
+    if not isinstance(value, str):
+        raise TypeError("Expected inclusion date")
+    date.fromisoformat(value)
+    return value
+
+
 def _dates(db: Database) -> dict[str, tuple[str | None, bool]]:
-    products = {text(row, "id"): text(row, "region") for row in db.rows("product")}
+    products = {text(row, "id"): row for row in db.rows("product")}
     printings = {text(row, "id"): text(row, "region") for row in db.rows("printing")}
     dates: dict[str, list[str | None]] = defaultdict(list)
     for row in db.rows("printing_product"):
         pid = text(row, "printing_id")
-        if printings[pid] != products[text(row, "product_id")]:
+        product = products[text(row, "product_id")]
+        if printings[pid] != text(product, "region"):
             raise ValueError("Default inclusion must match the printing region")
-        value = row.values["first_available_on"]
-        if value is not None and row.values["first_available_precision"] == "day":
-            if not isinstance(value, str):
-                raise TypeError("Expected inclusion date")
-            date.fromisoformat(value)
-            dates[pid].append(value)
-        else:
-            dates[pid].append(None)
+        dates[pid].append(_inclusion_date(row, product))
     return {
         pid: (
             min(known) if (known := [v for v in values if v is not None]) else None,

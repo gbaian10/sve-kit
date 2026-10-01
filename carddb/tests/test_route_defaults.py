@@ -341,3 +341,115 @@ def test_card_groups_do_not_borrow_another_cards_printings() -> None:
             ("card", "a"),
             ("other", "other"),
         ]
+
+
+def product_date(db: Database, pid: str, day: str, *, precision: str = "day") -> None:
+    db.update(
+        "product",
+        {"id": "product-" + pid},
+        {
+            "released_on": day if precision == "day" else None,
+            "date_precision": precision,
+            "date_raw": day if precision in {"month", "year"} else None,
+        },
+    )
+
+
+def test_no_inclusion_override_inherits_product_date_2019_before_2022() -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            ordinary(db, "a-late", "LATE", None)
+            ordinary(db, "z-early", "EARLY", None)
+            for pid, day in (("a-late", "2022-01-01"), ("z-early", "2019-01-01")):
+                product_date(db, pid, day)
+                db.update(
+                    "printing_product",
+                    {"printing_id": pid, "product_id": "product-" + pid},
+                    {"first_available_precision": None},
+                )
+        result = select_defaults(
+            db, general_evidence=dict.fromkeys(("a-late", "z-early"), ORDINARY)
+        )[0]
+        assert (result.printing_id, result.method) == ("z-early", "earliest_general")
+        assert select_defaults(db)[0].printing_id == "z-early"
+        assert select_defaults(db)[0].method == "fallback"
+
+
+@pytest.mark.parametrize(
+    ("precision", "raw"), [("month", "2010-01"), ("year", "2010"), ("unknown", None)]
+)
+def test_explicit_non_day_override_blocks_dated_product(
+    precision: str, raw: str | None
+) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            ordinary(db, "a-override", "A", None)
+            ordinary(db, "z-known", "Z", "2020-01-01")
+            product_date(db, "a-override", "2010-01-01")
+            db.update(
+                "printing_product",
+                {"printing_id": "a-override", "product_id": "product-a-override"},
+                {"first_available_precision": precision, "first_available_raw": raw},
+            )
+        result = select_defaults(
+            db, general_evidence=dict.fromkeys(("a-override", "z-known"), ORDINARY)
+        )[0]
+        assert (result.printing_id, result.method) == ("z-known", "candidate_general")
+        assert select_defaults(db)[0].printing_id == "z-known"
+
+
+@pytest.mark.parametrize(
+    ("precision", "raw"), [("month", "2010-01"), ("year", "2010"), ("unknown", "")]
+)
+def test_no_override_does_not_promote_partial_product_dates(
+    precision: str, raw: str
+) -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            ordinary(db, "a-partial", "A", None)
+            ordinary(db, "z-known", "Z", "2020-01-01")
+            product_date(db, "a-partial", raw, precision=precision)
+            db.update(
+                "printing_product",
+                {"printing_id": "a-partial", "product_id": "product-a-partial"},
+                {"first_available_precision": None},
+            )
+        result = select_defaults(
+            db, general_evidence=dict.fromkeys(("a-partial", "z-known"), ORDINARY)
+        )[0]
+        assert (result.printing_id, result.method) == ("z-known", "candidate_general")
+
+
+def test_full_day_override_precedes_different_product_date() -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            ordinary(db, "a", "A", "2023-01-01")
+            ordinary(db, "z", "Z", "2022-01-01")
+            product_date(db, "a", "2010-01-01")
+        assert (
+            select_defaults(db, general_evidence=dict.fromkeys(("a", "z"), ORDINARY))[
+                0
+            ].printing_id
+            == "z"
+        )
+
+
+def test_product_date_requires_an_actual_inclusion() -> None:
+    with create_database(compile_t0()) as db:
+        base(db)
+        with db.transaction():
+            printing(db, "a", "A")
+            ordinary(db, "z", "Z", "2020-01-01")
+            db.update(
+                "product",
+                {"id": "product"},
+                {"released_on": "2010-01-01", "date_precision": "day"},
+            )
+        result = select_defaults(
+            db, general_evidence=dict.fromkeys(("a", "z"), ORDINARY)
+        )[0]
+        assert (result.printing_id, result.method) == ("z", "candidate_general")

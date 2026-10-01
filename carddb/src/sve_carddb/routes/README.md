@@ -14,6 +14,8 @@ exact lookup, adopted aliases and NFKC + casefold lookup in that order. An ambig
 folded key returns `ambiguous`; exact entries remain usable. `populate_routes`
 records each such key in `build_issue` with severity `warning`, idempotently.
 Aliases with the same canonical target do not create artificial ambiguity.
+For same-number variants, only the selected printing owns that official entry;
+the other variants have no separate route. No alternative variant URL is invented.
 A `redirect` resolution supplies the canonical path for a consumer's HTTP 301.
 The consumer must handle `reserved`, `missing` and `ambiguous` explicitly.
 
@@ -51,12 +53,16 @@ ordinary. `earliest_general` requires complete inclusion dates and ordinary
 processing for the general pool, and no unclassified eligible competitor;
 otherwise the method is `candidate_general`.
 
-Dates come from `printing_product.first_available_on` at day precision and are
-checked against the product's region. Missing, month or year precision never
-becomes a first-of-month date. Product release dates, card-number order and
-another region's date do not substitute for inclusion evidence. No inclusion
-rows means unknown dates. The caller supplies the intended display/publication
+Each effective inclusion date is its override, or the product date when
+`printing_product.first_available_precision` is NULL (no override). Only day
+precision supplies a sortable date. An explicit month/year/unknown override
+blocks inheritance even when the product has a full date; a non-day product date
+also remains unknown. Dates are checked against the product's region, and no
+first-of-month date is invented. Card-number order and another region's date do
+not substitute for evidence. No inclusion rows means unknown dates even when
+unrelated dated products exist. The caller supplies the intended display/publication
 subset as build rows; this module does not infer a separate publication policy.
+The inheritance rule follows build-db §3.2 and snapshot-format §8.
 
 The specification has not assigned the general rarity/frame code lists, stamp
 classification source or an authored override-file format. Real imports therefore
