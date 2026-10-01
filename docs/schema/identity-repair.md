@@ -277,9 +277,10 @@ revert 只從有效集合移除被指名 transaction 的全部邊，不新增 B�
   已知 int_id 仍解析原 printing 並呈現修復提示。對局／回放仍釘舊 data_version 與快照 hash，
   不把新父 card、面或文字覆寫進舊快照。
 
-公開形狀新增 kind=revert 與 required nullable reverts_id。首次出貨此欄時必須使用新的 format 配置
-（至少升 minor）與 `identity-revert-v1` required capability，並同步最低 reader 版本、Schema、欄序及 golden；
-既有 1.0.0 不可原地加欄或加 enum。尚未完成 reader／匯出器相容實作時不得發布含此格式的快照。
+公開形狀新增 kind=revert 與 required nullable reverts_id。format `1.0.0` 仍為候選時，依
+[機器契約的候選期規則](snapshot-contract.md) 在候選內同步修訂 Schema、欄序、golden 與 reader，
+不要求額外升版；正式凍結後才至少升 minor、加入 `identity-revert-v1` required capability，
+並提高 min_reader_version。尚未完成 reader／匯出器相容實作時不得發布含此格式的快照。
 
 ## 7. 完整封套合成例子與 hash 驗算
 

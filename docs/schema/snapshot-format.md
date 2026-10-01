@@ -182,12 +182,13 @@ card images 看過快取或已選牌組離線備妥；雙面兩張皆列，追�
 
 身分修復的永久 printing／int_id、舊 URL、split 玩家選擇與舊快照保留原則，沿 build-db §13／§15；
 建置端的追加封套與首次發布事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
-**使用者 2026-10-01 核可**：§2 表格仍列既有 1.0.0 形狀；新的 format 配置將在原欄序尾端
+**使用者 2026-10-01 核可**：§2 表格仍列目前候選 1.0.0 已實作的形狀；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
 一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
 reader 先移除被指名的有效事件再解析修復圖；原事件與撤回事件皆保留，不改舊快照。
-新欄位／enum 的首次出貨須使用新 format 配置（至少升 minor）、`identity-revert-v1` capability
-及對應 min_reader_version／Schema／golden；未支援的 reader 依 §4 留在最近相容版。
+format `1.0.0` 仍為候選時，依 [機器契約的候選期規則](snapshot-contract.md) 在候選內同步修訂
+Schema、欄序、golden 與 reader，不要求額外升版；正式凍結後才至少升 minor、加入
+`identity-revert-v1` capability 並提高 min_reader_version。未支援的 reader 依 §4 留在最近相容版。
 不將 decision、完整移轉清單或逐列稽核 hash 出貨。
 
 ### 4.1 永久版本索引
