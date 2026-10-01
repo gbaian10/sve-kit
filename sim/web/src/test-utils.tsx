@@ -6,8 +6,13 @@ import { createMemoryRouter, type RouteObject, RouterProvider } from "react-rout
 import { ToastProvider } from "./components/ui/Toast"
 import { createI18n, type UiLanguage } from "./i18n"
 
+type InitialEntries = NonNullable<
+  NonNullable<Parameters<typeof createMemoryRouter>[1]>["initialEntries"]
+>
+
 export interface RenderRoutesOptions {
-  readonly initialEntries?: readonly string[]
+  /** Paths, or full entries with `state` for pages that read `location.state`. */
+  readonly initialEntries?: InitialEntries
   readonly language?: UiLanguage
 }
 

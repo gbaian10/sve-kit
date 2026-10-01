@@ -29,6 +29,7 @@ import {
   STAMPS,
   SYNTHETIC_VOCABULARY,
   type Text,
+  TEXT_SYMBOLS,
   type Vocabulary,
 } from "./cards"
 
@@ -435,6 +436,10 @@ function addKeywords(builder: Builder): void {
         })
     }
   }
+}
+
+// Text icons ship with every build; the keyword links only when the keywords themselves are built.
+function addTextSymbols(builder: Builder, withKeywords: boolean): void {
   const schema = {
     parameters: [{ name: "amount", uint: { minimum: 0, maximum: 9 }, variables: ["X"] }],
   }
@@ -442,7 +447,7 @@ function addKeywords(builder: Builder): void {
     id: "sym:ep",
     code: "ep",
     parameter_schema: schema,
-    keyword_id: "kw:evolve",
+    keyword_id: withKeywords ? "kw:evolve" : null,
     spellings: [
       {
         lang: LANGS.en,
@@ -482,6 +487,107 @@ function addKeywords(builder: Builder): void {
       { lang: LANGS.zhHant, name: "進化點數", tooltip: "進化用的點數", copy_pattern: "EP{amount}" },
     ],
   })
+  // A pure-variable parameter (`uint: null`, transport §3.2), which real symbols such as EP X use.
+  builder.push("text_symbol", GLOBAL, "detail", {
+    id: "sym:xvar",
+    code: "xvar",
+    parameter_schema: { parameters: [{ name: "value", uint: null, variables: ["X"] }] },
+    keyword_id: null,
+    spellings: [
+      {
+        lang: LANGS.ja,
+        literal_prefix: "変数",
+        literal_suffix: "",
+        parameter_name: "value",
+        parse_kind: "variable",
+      },
+      {
+        lang: LANGS.en,
+        literal_prefix: "[var",
+        literal_suffix: "]",
+        parameter_name: "value",
+        parse_kind: "variable",
+      },
+      {
+        lang: LANGS.zhHant,
+        literal_prefix: "変数",
+        literal_suffix: "",
+        parameter_name: "value",
+        parse_kind: "variable",
+      },
+    ],
+    localizations: [
+      { lang: LANGS.ja, name: "変数", tooltip: "変数", copy_pattern: "変数{value}" },
+      { lang: LANGS.en, name: "Variable", tooltip: "Variable", copy_pattern: "[var{value}]" },
+      { lang: LANGS.zhHant, name: "變數", tooltip: "變數", copy_pattern: "変数{value}" },
+    ],
+  })
+  // The icons card text actually uses; cost carries a number (0–10) or X.
+  const costSchema = {
+    parameters: [{ name: "amount", uint: { minimum: 0, maximum: 10 }, variables: ["X"] }],
+  }
+  for (const symbol of TEXT_SYMBOLS) {
+    const withParameter = symbol.parameter !== undefined
+    const spelling = (lang: string, prefix: string, suffix: string) =>
+      withParameter
+        ? [
+            {
+              lang,
+              literal_prefix: prefix,
+              literal_suffix: suffix,
+              parameter_name: "amount",
+              parse_kind: "uint",
+            },
+            {
+              lang,
+              literal_prefix: prefix,
+              literal_suffix: suffix,
+              parameter_name: "amount",
+              parse_kind: "variable",
+            },
+          ]
+        : [
+            {
+              lang,
+              literal_prefix: prefix,
+              literal_suffix: suffix,
+              parameter_name: null,
+              parse_kind: "literal",
+            },
+          ]
+    const copy = (text: string) => (withParameter ? `${text}{amount}` : text)
+    builder.push("text_symbol", GLOBAL, "detail", {
+      id: `sym:${symbol.code}`,
+      code: symbol.code,
+      parameter_schema: withParameter ? costSchema : { parameters: [] },
+      keyword_id: symbol.keyword === undefined || !withKeywords ? null : `kw:${symbol.keyword}`,
+      spellings: [
+        ...spelling(LANGS.ja, symbol.ja, ""),
+        ...spelling(LANGS.zhHant, symbol.ja, ""),
+        ...spelling(LANGS.en, symbol.en, withParameter ? "]" : ""),
+      ],
+      localizations: [
+        {
+          lang: LANGS.ja,
+          name: symbol.name.ja,
+          tooltip: symbol.name.ja,
+          copy_pattern: copy(symbol.ja),
+        },
+        {
+          lang: LANGS.zhHant,
+          name: symbol.name.zhHant ?? symbol.name.ja,
+          tooltip: symbol.name.zhHant ?? symbol.name.ja,
+          copy_pattern: copy(symbol.ja),
+        },
+        {
+          lang: LANGS.en,
+          name: symbol.name.en ?? symbol.name.ja,
+          tooltip: symbol.name.en ?? symbol.name.ja,
+          copy_pattern: withParameter ? `${symbol.en}{amount}]` : symbol.en,
+        },
+      ],
+    })
+  }
 }
 
 function addRules(builder: Builder): void {
@@ -1205,6 +1311,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     addStamp(builder)
     addKeywords(builder)
   }
+  addTextSymbols(builder, synthetic)
   addRules(builder)
   for (const [seed, card] of cards.entries()) {
     await addCard({

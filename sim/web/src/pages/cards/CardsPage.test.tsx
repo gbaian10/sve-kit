@@ -68,7 +68,7 @@ describe("CardsPage", () => {
     expect(input).toHaveAttribute("aria-activedescendant", options[0]?.id)
     expect(options[0]).toHaveAttribute("aria-selected", "true")
     await user.keyboard("{Enter}")
-    expect(router.state.location.pathname).toBe("/cards/BP01-051")
+    expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-051(?:\/|$)/u)
     expect(router.state.location.state).toEqual({
       background: "?q=bp01-51",
       source: "suggest",
@@ -98,7 +98,7 @@ describe("CardsPage", () => {
       ).toHaveLength(1)
     })
     await user.click(screen.getByRole("link", { name: /試作聖堂騎士/u }))
-    expect(router.state.location.pathname).toBe("/cards/BP01-051")
+    expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-051(?:\/|$)/u)
     expect(router.state.location.state).toMatchObject({
       source: "results",
       resultKey: "c:bp01-051",
@@ -147,7 +147,7 @@ describe("CardsPage", () => {
       expect(screen.getByRole("listbox")).toHaveAttribute("aria-busy", "false")
     })
     await user.click(within(screen.getByRole("listbox")).getAllByRole("option")[0] ?? first)
-    expect(router.state.location.pathname).toBe("/cards/BP01-050")
+    expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-050(?:\/|$)/u)
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-05" })
   })
 
@@ -160,7 +160,7 @@ describe("CardsPage", () => {
       expect(list).toHaveAttribute("aria-busy", "false")
     })
     await user.click(within(list).getAllByRole("option")[0] ?? list)
-    expect(router.state.location.pathname).toBe("/cards/BP01-051")
+    expect(router.state.location.pathname).toMatch(/^\/cards\/BP01-051(?:\/|$)/u)
     expect(router.state.location.state).toMatchObject({ background: "?q=bp01-51" })
   })
 

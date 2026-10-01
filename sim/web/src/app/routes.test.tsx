@@ -19,8 +19,6 @@ describe("route table", () => {
   it.each([
     ["/", "主頁"],
     ["/cards", "查卡"],
-    ["/cards/BP01-001/リノセウス", "單卡"],
-    ["/cards/_provisional/12", "單卡"],
     ["/sets", "卡包"],
     ["/sets/BP01", "卡包"],
     ["/settings", "帳號與設定"],
@@ -33,10 +31,15 @@ describe("route table", () => {
     expect(screen.getAllByRole("navigation").length).toBeGreaterThan(0)
   })
 
-  it("shows the card number and the provisional id on the card page", async () => {
-    await renderRoutes(routes, { initialEntries: ["/cards/BP01-001"] })
-    expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("BP01-001")
-  })
+  it.each(["/cards/BP01-001/リノセウス", "/cards/_provisional/12"])(
+    "%s renders the card page inside the shell and reports the missing snapshot",
+    async (path) => {
+      await renderRoutes(routes, { initialEntries: [path] })
+      expect(screen.getByRole("main")).toBeInTheDocument()
+      // No snapshot can load in this test, so the card page ends in its failure state.
+      expect(await screen.findByRole("alert")).toHaveTextContent("卡片資料載入失敗")
+    },
+  )
 
   it("keeps <html lang> and the UI text in step with the language preference", async () => {
     await renderRoutes(routes, { initialEntries: ["/cards"] })

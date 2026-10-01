@@ -45,6 +45,10 @@ export interface Catalog {
   readonly summary: (printingId: string) => CardSummary | undefined
   /** The class label for the UI language (vocabulary translation), else the Japanese label. */
   readonly classLabel: (code: string, lang: TextLang) => string
+  /** Any vocabulary label (`type`, `trait`, `rarity`…) for the language, else the Japanese label. */
+  readonly vocabularyLabel: (kind: string, code: string, lang: TextLang) => string
+  /** Name of one face in one region from the bootstrap revision (any face, not only the front). */
+  readonly faceName: (faceId: string, region: Region) => NameSource | undefined
   /** False when the snapshot's alias normalizer differs from ours, so alias hits may be missed. */
   readonly normalizerMatches: boolean
 }
@@ -185,8 +189,8 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
       defaultPrinting,
     })
   })
-  const classLabel = (code: string, lang: TextLang): string => {
-    const row = index.vocabulary("class", code)
+  const vocabularyLabel = (kind: string, code: string, lang: TextLang): string => {
+    const row = index.vocabulary(kind, code)
     if (!row) return code
     for (const entry of row["translations"] as Row[]) {
       if (entry["target_lang"] !== lang) continue
@@ -211,7 +215,12 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
     suggest: (text, edition, limit) => suggest(text, entries, { edition, sets, limit }),
     results: (state, edition) => apply(state, entries, { edition, sets }),
     summary: (printingId) => summaries.get(printingId),
-    classLabel,
+    classLabel: (code, lang) => vocabularyLabel("class", code, lang),
+    vocabularyLabel,
+    faceName: (faceId, region) => {
+      const revision = index.currentRevision(faceId, region)
+      return revision ? nameOf(index, revision) : undefined
+    },
   }
 }
 

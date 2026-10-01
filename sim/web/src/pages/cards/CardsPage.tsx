@@ -1,4 +1,4 @@
-import { type KeyboardEvent, useCallback, useId, useMemo, useRef, useState } from "react"
+import { type KeyboardEvent, useCallback, useEffect, useId, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next"
 import { useLocation, useNavigate, useSearchParams } from "react-router"
 
@@ -35,9 +35,17 @@ function cardPath(summary: CardSummary): string {
   return `/cards/${encodeURIComponent(summary.cardNo)}`
 }
 
+export interface CardsPageProps {
+  /** Render the list for this search string instead of the URL (the card overlay's background). */
+  readonly search?: string
+  readonly pages?: number
+  /** Background under an overlay: no interaction, no focus. */
+  readonly inert?: boolean
+}
+
 // The search page: the URL holds the query, the input holds what is being typed, and the suggest
 // list follows the typed text (debounced) until Enter or "see all" commits it to the URL.
-export function CardsPage() {
+export function CardsPage({ search, pages: fixedPages, inert = false }: CardsPageProps = {}) {
   const { t } = useTranslation()
   const prefs = usePrefs()
   const uiLanguage = currentUiLanguage(prefs.uiLanguage)
@@ -45,7 +53,11 @@ export function CardsPage() {
   const edition = prefs.cardEdition
   const { client, status, catalog } = useCatalog()
   const images = useImageIndex(client, catalog !== null)
-  const [params, setParams] = useSearchParams()
+  const [urlParams, setParams] = useSearchParams()
+  const params = useMemo(
+    () => (search === undefined ? urlParams : new URLSearchParams(search)),
+    [search, urlParams],
+  )
   const query = useMemo(() => parseQuery(params), [params])
   const [entry, updateEntry] = useListEntryState()
   const navigate = useNavigate()
@@ -121,7 +133,7 @@ export function CardsPage() {
     () => (catalog ? catalog.results(query, edition) : []),
     [catalog, query, edition],
   )
-  const pages = Math.max(1, entry.pages ?? 1)
+  const pages = Math.max(1, fixedPages ?? entry.pages ?? 1)
   const visible = useMemo(() => results.slice(0, pages * PAGE_SIZE), [results, pages])
   const cells: GridCell[] = useMemo(() => {
     if (!catalog) return []
@@ -129,14 +141,14 @@ export function CardsPage() {
       const summary = catalog.summary(item.printingId)
       if (!summary) return []
       const state: CardEntryState = {
-        background: location.search,
+        background: search ?? location.search,
         source: "results",
         pages,
         resultKey: item.key,
       }
       return [{ key: item.key, summary, name: nameOf(summary), to: cardPath(summary), state }]
     })
-  }, [catalog, visible, location.search, pages, nameOf])
+  }, [catalog, visible, location.search, search, pages, nameOf])
 
   const openSuggestion = (index: number) => {
     const row = rows[index]
@@ -212,13 +224,21 @@ export function CardsPage() {
         : [],
     [catalog, textLang, t],
   )
+  // Returning from a card: the closed dialog restored focus to the old cell only if that element
+  // still exists; after a remount the anchor cell takes it so keyboard users continue in place.
+  const anchor = entry.anchor
+  useEffect(() => {
+    if (anchor === undefined || inert || cells.length === 0) return
+    const cell = document.querySelector<HTMLElement>(`a[data-result-key="${CSS.escape(anchor)}"]`)
+    if (cell && document.activeElement === document.body) cell.focus({ preventScroll: true })
+  }, [anchor, inert, cells.length])
   const filterCount = activeFilterCount(query)
   const hasConditions = query.text !== "" || filterCount > 0
   const failed = status.state === "error"
   const loading = catalog === null && !failed
 
   return (
-    <div className="flex flex-col gap-3 pt-2 pb-6">
+    <div className="flex flex-col gap-3 pt-2 pb-6" inert={inert}>
       <h1 className="sr-only">{t("pages.cards")}</h1>
       <div className="relative z-20">
         <SearchBar
