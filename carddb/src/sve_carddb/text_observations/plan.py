@@ -46,7 +46,7 @@ class TextPlan:
     observations: tuple[FaceObservation, ...]
     groups: tuple[FaceGroup, ...]
     unavailable: tuple[str, ...]
-    eligible: PreviewPlan
+    diagnostic_exclusions: PreviewPlan
     corrections: tuple[Application, ...] | None = None
 
     def candidates(self) -> tuple[FaceObservation, ...]:
@@ -212,15 +212,15 @@ class TextPlan:
                 }
                 for group in self.groups
             ],
-            "eligible_identity": self.eligible.report(),
+            "diagnostic_exclusions": self.diagnostic_exclusions.report(),
             "corrections": [
                 application.report() for application in self.corrections or ()
             ],
             "publication_identity": None
             if self.corrections is None and selected_records(self.identity)
             else self.publication_identity().report(),
-            "eligible_identity_diagnostic": {
-                "proposal": "pending-#143",
+            "diagnostic_exclusion_status": {
+                "proposal": "retired-text-exclusion-proposal",
                 "publication_gate": False,
                 "snapshot_output_authorized": False,
             },
@@ -298,7 +298,9 @@ def _groups(
     return tuple(result)
 
 
-def _eligible(preview: PreviewPlan, groups: tuple[FaceGroup, ...]) -> PreviewPlan:
+def _diagnostic_exclusions(
+    preview: PreviewPlan, groups: tuple[FaceGroup, ...]
+) -> PreviewPlan:
     ready = {(group.face_id, group.region) for group in groups if not group.reasons}
     faces: dict[str, set[str]] = defaultdict(set)
     for record in preview.snapshot.records.values():
@@ -382,7 +384,7 @@ def plan_text_observations(
         exact,
         groups,
         tuple(sorted(unavailable)),
-        _eligible(preview, groups),
+        _diagnostic_exclusions(preview, groups),
         applications,
     )
 
@@ -394,7 +396,9 @@ def verify_plan(plan: TextPlan) -> None:
         verify_applications(plan.identity, plan.observations, plan.corrections)
     if plan.groups != _groups(
         plan.identity, plan.candidates(), plan.unavailable, plan.corrections
-    ) or plan.eligible != _eligible(plan.identity, plan.groups):
+    ) or plan.diagnostic_exclusions != _diagnostic_exclusions(
+        plan.identity, plan.groups
+    ):
         raise ValueError("Text selection or exclusion closure mismatch")
 
 

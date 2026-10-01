@@ -10,7 +10,7 @@ from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.registry.records import AllocationData, PrintingData, RelatedData
 from sve_carddb.text_observations import (
-    exclusion_report,
+    diagnostic_exclusion_report,
     import_text_observations,
     importer,
     plan_text_observations,
@@ -97,7 +97,7 @@ def test_related_edge_requires_both_regional_endpoints(
     assert isinstance(data, RelatedData)
     surviving = {
         item.data.card_id
-        for item in case.plan.eligible.included("printing")
+        for item in case.plan.diagnostic_exclusions.included("printing")
         if isinstance(item.data, PrintingData) and item.data.region == "en"
     }
     assert (
@@ -107,7 +107,7 @@ def test_related_edge_requires_both_regional_endpoints(
         )
         == 1
     )
-    assert not case.plan.eligible.included("card_related")
+    assert not case.plan.diagnostic_exclusions.included("card_related")
 
 
 def test_incomplete_source_face_map_fails_directly_during_planning(
@@ -144,13 +144,15 @@ class TestDefaultTextInputs:
     ) -> None:
         case = default_text_case.copy(tmp_path)
         diagnostic = {
-            "proposal": "pending-#143",
+            "proposal": "retired-text-exclusion-proposal",
             "publication_gate": False,
             "snapshot_output_authorized": False,
         }
         report = case.plan.report()
-        assert report["eligible_identity"] == case.plan.eligible.report()
-        assert report["eligible_identity_diagnostic"] == diagnostic
+        assert (
+            report["diagnostic_exclusions"] == case.plan.diagnostic_exclusions.report()
+        )
+        assert report["diagnostic_exclusion_status"] == diagnostic
         assert any(group.reasons for group in case.plan.groups)
         schema = compile_build(("en", "related"))
         with create_database(schema) as db, db.transaction():
@@ -168,7 +170,7 @@ class TestDefaultTextInputs:
             assert len(db.rows("printing")) == 4
             assert len(db.rows("face_revision")) == 4
             assert len(db.rows("printing_face_observation")) == 4
-            closure = exclusion_report(db, schema, case.plan)
+            closure = diagnostic_exclusion_report(db, schema, case.plan)
             assert {key: closure[key] for key in diagnostic} == diagnostic
 
     def test_allocation_projection_follows_excluded_printing_without_db_fk_help(
@@ -181,7 +183,10 @@ class TestDefaultTextInputs:
             if isinstance(item.data, PrintingData) and item.data.region == "jp"
         }
         assert len(jp_printings) == 2
-        projections = {item.record_key: item for item in case.plan.eligible.projections}
+        projections = {
+            item.record_key: item
+            for item in case.plan.diagnostic_exclusions.projections
+        }
         allocations = [
             item
             for item in case.identity.included("card_int_id")
@@ -193,7 +198,7 @@ class TestDefaultTextInputs:
             projected = projections[allocation.record_key]
             assert projected.disposition == "excluded"
             assert projected.regions == ()
-        assert len(case.plan.eligible.included("card_int_id")) == 2
+        assert len(case.plan.diagnostic_exclusions.included("card_int_id")) == 2
 
     def test_reverse_fk_closure_reaches_alias_through_route_in_adverse_order(
         self, tmp_path: Path, default_text_case: TextCaseTemplate

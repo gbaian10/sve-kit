@@ -38,6 +38,30 @@
           "revision_id": "r:a2",
           "basis": "latest_adopted_wording"
         }
+      ],
+      "wording": [
+        {
+          "region": "jp",
+          "state": "pending",
+          "display": {
+            "revision_id": "r:a2",
+            "basis": "current"
+          },
+          "candidates": [
+            {
+              "printing_id": "p:a",
+              "revision_id": "r:a2"
+            },
+            {
+              "printing_id": "p:b",
+              "revision_id": null
+            }
+          ],
+          "undated_printing_ids": [
+            "p:a",
+            "p:b"
+          ]
+        }
       ]
     },
     {
@@ -51,7 +75,8 @@
           "revision_id": "r:b1",
           "basis": "dated_effective"
         }
-      ]
+      ],
+      "wording": []
     }
   ],
   "product_family": [
@@ -228,7 +253,14 @@
           "sections": [],
           "stamps": [],
           "translations": [],
-          "corrections": []
+          "corrections": [],
+          "observations": [
+            {
+              "revision_id": "r:a2",
+              "state": "available",
+              "source_url": "https://example.invalid/observations/a"
+            }
+          ]
         },
         {
           "face_id": "f:b",
@@ -243,7 +275,8 @@
           "sections": [],
           "stamps": [],
           "translations": [],
-          "corrections": []
+          "corrections": [],
+          "observations": []
         }
       ]
     },
@@ -303,7 +336,8 @@
               "reason": "Synthetic printed correction",
               "source_url": "https://example.invalid/correction"
             }
-          ]
+          ],
+          "observations": []
         },
         {
           "face_id": "f:b",
@@ -318,7 +352,8 @@
           "sections": [],
           "stamps": [],
           "translations": [],
-          "corrections": []
+          "corrections": [],
+          "observations": []
         }
       ]
     }

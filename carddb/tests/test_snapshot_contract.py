@@ -177,12 +177,35 @@ def _reseal(manifest: dict[str, JsonValue], key: str, data: bytes) -> None:
         for ref in array(description["contains"]):
             if object_value(ref)["key"] == key:
                 object_value(ref)["sha256"] = hashed
-    if key == "detail":
+    if key in {"bootstrap", "detail", "history", "images"}:
         decoded = object_value(parse(data))
-        for count in array(file["row_counts"]):
-            item = object_value(count)
-            frags = array(object_value(decoded["tables"])[string(item["table"])])
-            item["count"] = len(array(object_value(frags[0])["rows"]))
+        file["row_counts"] = [
+            {
+                "table": table,
+                "owner": fragment["owner"],
+                "bucket": fragment["bucket"],
+                "partition": fragment["partition"],
+                "count": len(array(fragment["rows"])),
+            }
+            for table, entries in object_value(decoded["tables"]).items()
+            for raw in array(entries)
+            for fragment in (object_value(raw),)
+        ]
+
+
+def _apply_reader_change(
+    manifest: dict[str, JsonValue], blobs: dict[str, bytes], item: dict[str, JsonValue]
+) -> None:
+    target = string(item["target"])
+    value = manifest if target == "manifest" else parse(blobs[target])
+    _replace(value, array(item["path"]), item["value"])
+    if target != "manifest":
+        blobs[target] = canonical(value)
+        if item.get("rehash", True):
+            if target == "bootstrap":
+                _replace_bootstrap(manifest, blobs, value)
+            else:
+                _reseal(manifest, target, blobs[target])
 
 
 @pytest.mark.parametrize(
@@ -194,13 +217,9 @@ def test_shared_reader_counterexamples(case: JsonValue) -> None:
     item = object_value(case)
     manifest = object_value(fixture("manifest.json"))
     blobs = payloads()
-    target = string(item["target"])
-    value = manifest if target == "manifest" else parse(blobs[target])
-    _replace(value, array(item["path"]), item["value"])
-    if target != "manifest":
-        blobs[target] = canonical(value)
-        if item["rehash"]:
-            _reseal(manifest, target, blobs[target])
+    for raw in array(item.get("setup", [])):
+        _apply_reader_change(manifest, blobs, object_value(raw))
+    _apply_reader_change(manifest, blobs, item)
     with pytest.raises(
         (ValueError, ValidationError, KeyError, TypeError),
         match=string(item["error"]) if "error" in item else None,

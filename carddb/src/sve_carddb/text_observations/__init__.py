@@ -6,7 +6,7 @@ from sve_carddb.text_observations.composition import (
     text_preview_uses,
 )
 from sve_carddb.text_observations.configuration import text_configuration
-from sve_carddb.text_observations.exclusions import exclusion_report
+from sve_carddb.text_observations.exclusions import diagnostic_exclusion_report
 from sve_carddb.text_observations.importer import (
     import_text_observations,
     populate_text_observations,
@@ -23,7 +23,7 @@ __all__ = [
     "TextCard",
     "TextPlan",
     "Vocabulary",
-    "exclusion_report",
+    "diagnostic_exclusion_report",
     "import_text_observations",
     "plan_text_observations",
     "populate_text_observations",

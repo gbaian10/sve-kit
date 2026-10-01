@@ -77,6 +77,10 @@
     "PrintingFaceBootstrap",
     "PrintingFaceDetail",
     "card",
+    "WordingDisplay",
+    "WordingCandidate",
+    "WordingView",
+    "ObservedText",
     "face",
     "printing",
     "product_family",
@@ -3333,6 +3337,19 @@
             ]
           }
         },
+        "observations": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ObservedText"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "ObservedText"
+            }
+          }
+        },
         "sections": {
           "schema": {
             "type": "array",
@@ -4595,6 +4612,19 @@
             ]
           }
         },
+        "observations": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ObservedText"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "ObservedText"
+            }
+          }
+        },
         "sections": {
           "schema": {
             "type": "array",
@@ -4768,6 +4798,19 @@
           "descriptor": {
             "array": {
               "ref": "Current"
+            }
+          }
+        },
+        "wording": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WordingView"
+            }
+          },
+          "descriptor": {
+            "array": {
+              "ref": "WordingView"
             }
           }
         }
@@ -8953,6 +8996,9 @@
         },
         "current": {
           "from": "face"
+        },
+        "wording": {
+          "from": "face"
         }
       },
       "constraints": {}
@@ -10590,6 +10636,245 @@
         }
       },
       "constraints": {}
+    },
+    "WordingDisplay": {
+      "fields": {
+        "revision_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
+        },
+        "basis": {
+          "schema": {
+            "enum": [
+              "current",
+              "latest_known_release",
+              "candidates"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "current",
+              "latest_known_release",
+              "candidates"
+            ]
+          }
+        }
+      },
+      "constraints": {
+        "allOf": [
+          {
+            "if": {
+              "prefixItems": [
+                {},
+                {
+                  "const": "candidates"
+                }
+              ]
+            },
+            "then": {
+              "prefixItems": [
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "else": {
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/ID"
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "WordingCandidate": {
+      "fields": {
+        "printing_id": {
+          "schema": {
+            "$ref": "#/$defs/ID"
+          },
+          "descriptor": {
+            "scalar": "ID"
+          }
+        },
+        "revision_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "WordingView": {
+      "fields": {
+        "region": {
+          "schema": {
+            "$ref": "#/$defs/Region"
+          },
+          "descriptor": {
+            "scalar": "Region"
+          }
+        },
+        "state": {
+          "schema": {
+            "enum": [
+              "pending"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "pending"
+            ]
+          }
+        },
+        "display": {
+          "schema": {
+            "$ref": "#/$defs/WordingDisplay"
+          },
+          "descriptor": {
+            "ref": "WordingDisplay"
+          }
+        },
+        "candidates": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/WordingCandidate"
+            },
+            "minItems": 1
+          },
+          "descriptor": {
+            "array": {
+              "ref": "WordingCandidate"
+            }
+          }
+        },
+        "undated_printing_ids": {
+          "schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/ID"
+            },
+            "uniqueItems": true
+          },
+          "descriptor": {
+            "array": {
+              "scalar": "ID"
+            }
+          }
+        }
+      },
+      "constraints": {}
+    },
+    "ObservedText": {
+      "fields": {
+        "revision_id": {
+          "schema": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ID"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "descriptor": {
+            "nullable": {
+              "scalar": "ID"
+            }
+          }
+        },
+        "state": {
+          "schema": {
+            "enum": [
+              "available",
+              "missing_effect",
+              "correction_conflict"
+            ]
+          },
+          "descriptor": {
+            "enum": [
+              "available",
+              "missing_effect",
+              "correction_conflict"
+            ]
+          }
+        },
+        "source_url": {
+          "schema": {
+            "$ref": "#/$defs/URL"
+          },
+          "descriptor": {
+            "scalar": "URL"
+          }
+        }
+      },
+      "constraints": {
+        "allOf": [
+          {
+            "if": {
+              "prefixItems": [
+                {},
+                {
+                  "const": "available"
+                }
+              ]
+            },
+            "then": {
+              "prefixItems": [
+                {
+                  "$ref": "#/$defs/ID"
+                }
+              ]
+            }
+          },
+          {
+            "if": {
+              "prefixItems": [
+                {},
+                {
+                  "const": "missing_effect"
+                }
+              ]
+            },
+            "then": {
+              "prefixItems": [
+                {
+                  "type": "null"
+                }
+              ]
+            }
+          }
+        ]
+      }
     }
   },
   "nested": [
@@ -10617,7 +10902,11 @@
     "Spelling",
     "Localization",
     "PrintingFaceBootstrap",
-    "PrintingFaceDetail"
+    "PrintingFaceDetail",
+    "WordingDisplay",
+    "WordingCandidate",
+    "WordingView",
+    "ObservedText"
   ],
   "fragments": {
     "card": {

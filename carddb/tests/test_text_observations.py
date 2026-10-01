@@ -13,7 +13,7 @@ from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.text_observations import (
     Binding,
     Vocabulary,
-    exclusion_report,
+    diagnostic_exclusion_report,
     import_text_observations,
     plan_text_observations,
 )
@@ -165,7 +165,7 @@ def test_partial_double_face_quarantines_entire_card_region_and_all_ids(
     )
     assert not any(
         item.disposition == "included" and "jp" in item.regions
-        for item in case.plan.eligible.projections
+        for item in case.plan.diagnostic_exclusions.projections
         if item.record_key.startswith("printing:")
     )
     with create_database(schema) as db:
@@ -178,7 +178,7 @@ def test_partial_double_face_quarantines_entire_card_region_and_all_ids(
             vocabulary=case.vocabulary,
             published=(),
         )
-        report = exclusion_report(db, schema, case.plan)
+        report = diagnostic_exclusion_report(db, schema, case.plan)
         counts = report["excluded_row_counts"]
         assert isinstance(counts, dict)
         assert counts["printing"] == 2
@@ -436,7 +436,7 @@ class TestDefaultTextInputs:
         assert len(jp[0].observations) == 2
         assert all(
             "jp" not in item.regions
-            for item in plan.eligible.projections
+            for item in plan.diagnostic_exclusions.projections
             if item.record_key.startswith("printing:")
             and item.disposition == "included"
         )
@@ -491,7 +491,7 @@ class TestDefaultTextInputs:
             )
             plan = replace(plan, observations=(*plan.observations, item), groups=groups)
         else:
-            plan = replace(plan, eligible=plan.identity)
+            plan = replace(plan, diagnostic_exclusions=plan.identity)
         if problem in {"source", "index", "content"}:
             plan = replace(plan, observations=(item, *plan.observations[1:]))
         with pytest.raises(ValueError, match="Text"):
@@ -579,7 +579,9 @@ class TestDefaultTextInputs:
                 vocabulary=case.vocabulary,
                 published=(),
             )
-            counts = exclusion_report(db, schema, case.plan)["excluded_row_counts"]
+            counts = diagnostic_exclusion_report(db, schema, case.plan)[
+                "excluded_row_counts"
+            ]
             assert isinstance(counts, dict)
             assert counts["card_route"] == 2
             assert counts["card_route_alias"] == 1

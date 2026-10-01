@@ -1,4 +1,4 @@
-# Report-only regional text observations
+# Frozen regional text and pending wording
 
 `plan_text_observations(identity_plan, provider)` reads all selected-region
 printings through an independently verified `registry.preview` identity plan.
@@ -42,32 +42,67 @@ can be materialized. Reports separately count `total_observations`,
 exclusions. The no-effect follower hint is diagnostic: a null main effect, no
 sections, an ordinary follower type and three numeric stats. It never fills text.
 
-## Diagnostic staging and pending exclusion proposal
+## Publication and diagnostic exclusions
 
-`populate_text_preview` composes the original identity/product staging and text
-staging in one caller-owned transaction. Representable identity-eligible
-observations remain in diagnostic DB rows even when their face-region is pending;
-all actual observation and current-comparison source uses survive. This DB is a
-diagnostic build, not a public snapshot.
+`populate_text_preview` composes identity/product and text staging in a
+caller-owned transaction. `plan.publication_identity()` preserves pending wording
+and enforces the independent correction/identity integrity gates. Snapshot
+projectors use this identity selection; pending wording does not delete cards,
+printings, routes, defaults or integer IDs.
 
-`plan.eligible` computes a diagnostic exclusion closure using the pending proposal
-in [#143](https://github.com/gbaian10/sve-kit/issues/143). This is not a publication
-gate and must not be used for snapshot output before user approval. The existing
-`eligible_identity` report key is retained for compatibility; its companion
-`eligible_identity_diagnostic` marks `proposal="pending-#143"`,
-`publication_gate=false` and `snapshot_output_authorized=false`.
+The retired text exclusion proposal is available only as
+`plan.diagnostic_exclusions` and `diagnostic_exclusion_report(db, schema, plan)`.
+Report keys are `diagnostic_exclusions` and `diagnostic_exclusion_status`, with
+`proposal="retired-text-exclusion-proposal"`, `publication_gate=false` and
+`snapshot_output_authorized=false`. The former `eligible` and `exclusion_report`
+names have been removed so callers must explicitly select the diagnostic API.
+The general `reference_exclusions` helper remains available for the independent
+correction quarantine. No authored records, IDs or allocation cursors are rewritten.
 
-Under this proposal, one unresolved required face would exclude every regional
-printing of that card, its integer and physical face references. Shared identities
-would remain where another region remains available. Related edges would require
-both endpoints in their declared region; unused art and mapping projections would
-be excluded. `exclusion_report(db, schema, plan)` diagnoses the resulting closure
-over every enabled FK, including products, inclusions, routes, aliases, defaults
-and optional text references. It carries the same pending-proposal labels and
-reports counts and primary keys without card text. `populate_text_preview` still
-uses `plan.identity`, keeping pending observations in diagnostic DB rows. Source
-and decision history remain intact. No authored records, IDs or allocation cursors
-are rewritten.
+## Pending public projections
+
+`wording_views(db, plan)` returns sparse `WordingView` values for each pending
+public face/region. `printing_observed_texts(db, plan)` returns each physical
+printing's own observations, using successfully corrected candidates while the
+original observation and correction application stay separate in the build DB.
+An unknown main effect is a null revision with `missing_effect`; unavailable
+text positions retain the independently pinned identity source URL. These values
+never fill printed text columns or create an adopted current.
+
+This projector currently produces only `available` and `missing_effect`.
+`correction_conflict` is reserved by the public contract but is not emitted here:
+active conflicts are quarantined by `publication_identity()` before projection.
+A `needs_review` correction leaves the original observation `available`, while
+its face/region remains blocked from provisional display; it does not produce
+a per-observation conflict marker.
+
+`printing_dates(db)` uses formal product/inclusion evidence. A null inclusion
+precision inherits its product date; an explicit unknown overrides it. Every
+inclusion must have a complete day before the minimum proves a printing's first
+availability. `wording_views` prefers a valid current. Without one, it compares
+all dated candidate printings before testing content availability. The latest day
+may display one exact content (even when separate correction contexts yield
+different revision IDs); same-day different content or an unavailable latest
+candidate returns `basis=candidates`. Undated printings remain explicitly listed.
+ID ordering only chooses a stable representative and never supplies chronology.
+
+`wording_region_blocks(db, plan)` declares `wording_pending` for each public
+card/region missing a current on any required face. `mark_wording_pending` adds
+that reason and disables automatic operation on existing build support rows;
+callers generating support rows later must merge the declared blocks. A settled
+front and pending back both remain visible. These APIs do not consume equivalence
+adoptions or enable semantics/DSL capabilities.
+
+Format 1.0.0's candidate schema, descriptors, handwritten shared golden and Python
+reader now include `WordingDisplay`, `WordingCandidate`, `WordingView`,
+`ObservedText`, `face.wording`, and `PrintingFace.observations`. Display revisions
+join current revisions in bootstrap; other candidates remain in history/detail.
+The web reader update is reviewed separately and must land before this extension
+of the shared golden. Public inclusion dates use `available_on/date_precision`;
+these are distinct from the build DB columns `first_available_on/first_available_precision`.
+The later complete snapshot projector must apply these values and measure the
+entire dual-region bootstrap with available three-language name closure against
+the 1 MiB compressed budget. This module alone is not a complete snapshot export.
 
 Raw vocabulary bindings are an explicit caller input, not inferred translations
 or a new authored format. `Vocabulary` requires exact unique regional bindings
@@ -81,7 +116,7 @@ program/dependency pins and any existing product-identity configuration.
 from sve_carddb.build_bundle import publish_bundle, verify_bundle
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.text_observations import (
-    exclusion_report,
+    diagnostic_exclusion_report,
     populate_text_preview,
     text_configuration,
     text_preview_uses,
@@ -106,7 +141,7 @@ def populate(db):
         stores=stores,
         official=official_products,
     )
-    report["exclusion_closure"] = exclusion_report(db, schema, plan)
+    report["exclusion_closure"] = diagnostic_exclusion_report(db, schema, plan)
     return inputs
 
 
@@ -134,7 +169,11 @@ results, hashed over every result field. The pinned `detail-v1` recipe requires
 closed body/html boundaries, complete names, images, info, stats and an exact
 physical card-number credit on every face. The omission template additionally
 requires the img/txt/ttl/txt-Inner topology and intact info/status/optional speech/
-terminal illustrator blocks. Duplicate credits or unknown blocks remain unknown.
+terminal illustrator blocks. Duplicate credits or unknown blocks remain unknown. The JP notice template allows
+one terminal extra illustrator block only when its complete serialized HTML hash
+matches one of five pinned publication/errata notices. The physical card-number
+credit must still be unique and precede that notice; notices never waive an errata
+or correction gate. Notice text or URL changes return to unknown.
 An absent `.detail` selector alone proves nothing.
 
 Known empty containers allow only plain div/p/span/br layout nodes. Whitespace is

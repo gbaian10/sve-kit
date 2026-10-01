@@ -45,7 +45,7 @@ identity references. An active correction whose parent printing was already
 excluded by identity validation also blocks its regional card, so sibling
 printings cannot bypass the unresolved correction. `correction_exclusions(db, schema, plan)` also closes these
 seeds over every enabled FK, including routes, aliases and default overrides.
-These methods do not use `plan.eligible`: pending wording remains visible under
+These methods do not use `plan.diagnostic_exclusions`: pending wording remains visible under
 authored-layout §9.6. The DB retains blocked rows as diagnostic/source history;
 the eventual snapshot projector uses the blocked keys to preserve a closed output.
 This package supplies correction staging and reference values, not the full

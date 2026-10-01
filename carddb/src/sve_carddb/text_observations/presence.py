@@ -22,7 +22,16 @@ _REASONS = {
     "absent": {"empty_container", "template_omits_empty_effect"},
     "unknown": {"unrecognized_template", "incomplete_source", "ambiguous_container"},
 }
-_REQUIRED = (".ttl", ".img img", ".info", ".status", ".illustrator")
+_REQUIRED = (".ttl", ".img img", ".info", ".status")
+_JP_NOTICE_HASHES = frozenset(
+    {
+        "sha256:9619d488281208af272012fb0899e220856405a469def67d3b0f36b9870f66dd",
+        "sha256:faa303d69c167609c9ff300a627821e1ac855e574a41ea42e77f64635b300cc0",
+        "sha256:79e68e92c200c27fed172ca31566348ede585a57241250204df83881a5eceaf1",
+        "sha256:18f1e396ccc9f8f6512257c5d7b4a4a430e9a5a10b80cc2de99a32a277d0caa5",
+        "sha256:575100a300e1b580ac2735ab4ce357ab3acf9267fa2025f573a563c5ebbb494a",
+    }
+)
 _LAYOUT = {"div", "p", "span", "br", "-text", "-comment"}
 PresenceState = Literal["present", "absent", "unknown"]
 
@@ -75,8 +84,14 @@ def _complete(face: LexborNode, region: Region, number: str) -> bool:
         or not attribute(image, "src")
     ):
         return False
-    credit = select_one(face, ".illustrator")
-    assert credit is not None
+    credit_nodes = select_all(face, ".illustrator")
+    if len(credit_nodes) != 1 and not (
+        region == "jp"
+        and len(credit_nodes) == 2  # ruff: ignore[magic-value-comparison] -- one physical credit followed by one pinned notice
+        and digest((credit_nodes[-1].html or "").encode()) in _JP_NOTICE_HASHES
+    ):
+        return False
+    credit = credit_nodes[0]
     identity = select_one(credit, ".name") or select_one(credit, ".heading")
     if identity is None or identity.text(strip=True) != number:
         return False
@@ -195,6 +210,10 @@ def detect_presence(
         ):
             state, reason = "unknown", "incomplete_source"
         else:
+            if region == "jp" and any(
+                len(select_all(face, ".illustrator")) > 1 for face in faces
+            ):
+                template = "jp-card-detail-notice-v1"
             state, reason = _container_state(faces[source_index])
     if reason == "unrecognized_template":
         template = None
