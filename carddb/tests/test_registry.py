@@ -82,8 +82,7 @@ def int_ids(entries: list[Entry]) -> dict[str, int]:
     }
 
 
-@pytest.fixture
-def inputs() -> Inputs:
+def make_inputs() -> Inputs:
     return Inputs(
         jp={
             "BP02-071": card("BP02-071", "名前"),
@@ -105,6 +104,11 @@ def inputs() -> Inputs:
             input_hashes={"jp": "sha256:" + "0" * 64},
         ),
     )
+
+
+@pytest.fixture
+def inputs() -> Inputs:
+    return make_inputs()
 
 
 def test_rerun_and_append_preserve_all_old_ids(inputs: Inputs, tmp_path: Path) -> None:

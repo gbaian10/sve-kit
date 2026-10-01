@@ -11,6 +11,8 @@ from pydantic import JsonValue
 from sve_carddb.products import Language
 from sve_carddb.registry.storage import read_yaml, yaml_parser
 
+from .fixture_files import FrozenFiles, freeze_files, restore_files
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -187,12 +189,19 @@ def install(root: Path, name: str, shard: Object, *, resign: bool = False) -> No
     write_yaml(index_path, index)
 
 
-@pytest.fixture
-def product_root(registry_root: Path) -> Path:
+@pytest.fixture(scope="session")
+def product_files(tmp_path_factory: pytest.TempPathFactory) -> FrozenFiles:
+    registry_root = tmp_path_factory.mktemp("product-template")
     for identifier in ("BP02", "PR", "GF01"):
         install(
             registry_root,
             f"products/family/{identifier}/001.yaml",
             envelope([family(identifier)]),
         )
+    return freeze_files(registry_root)
+
+
+@pytest.fixture
+def product_root(registry_root: Path, product_files: FrozenFiles) -> Path:
+    restore_files(product_files, registry_root)
     return registry_root

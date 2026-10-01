@@ -1,5 +1,6 @@
 """Synthetic full-registry files and isolated tampering helpers."""
 
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pytest
@@ -19,6 +20,9 @@ from sve_carddb.registry.storage import (
     write_files,
 )
 
+from .fixture_files import FrozenFiles, freeze_files, restore_files
+from .test_registry import make_inputs
+
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
@@ -26,8 +30,7 @@ if TYPE_CHECKING:
     from sve_carddb.registry.review import Inputs
 
 
-@pytest.fixture
-def registry_root(inputs: Inputs, tmp_path: Path) -> Path:
+def build_registry_root(inputs: Inputs, tmp_path: Path) -> Path:
     inputs.receipt.corrections = [
         Correction(
             region="jp",
@@ -53,6 +56,33 @@ def registry_root(inputs: Inputs, tmp_path: Path) -> Path:
         ),
     ]
     write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    return tmp_path
+
+
+@dataclass(frozen=True)
+class RegistryTemplate:
+    files: FrozenFiles
+    corrections: tuple[str, ...]
+
+
+@pytest.fixture(scope="session")
+def registry_template(tmp_path_factory: pytest.TempPathFactory) -> RegistryTemplate:
+    inputs = make_inputs()
+    root = build_registry_root(inputs, tmp_path_factory.mktemp("registry-template"))
+    return RegistryTemplate(
+        freeze_files(root),
+        tuple(value.model_dump_json() for value in inputs.receipt.corrections),
+    )
+
+
+@pytest.fixture
+def registry_root(
+    inputs: Inputs, tmp_path: Path, registry_template: RegistryTemplate
+) -> Path:
+    inputs.receipt.corrections = [
+        Correction.model_validate_json(value) for value in registry_template.corrections
+    ]
+    restore_files(registry_template.files, tmp_path)
     return tmp_path
 
 
