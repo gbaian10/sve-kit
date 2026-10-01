@@ -142,9 +142,9 @@ type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipmen
 
 現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，使用者核可規則完整涵蓋或 confirmed batch 全體 checked 可採納等義表記；分類類別本身不是等義授權，規則 pin、機械全查與人工收據依 authored-layout §9.5 分開保存。當前選取依可信版次收錄日及來源更新證據選最新已採納表記，`basis=latest_adopted_wording`；日期精度不足/並列則封套明示順序，不能任取最後爬到者。已採納的新表記與舊表記共 `semantic_id` 時，不要求重新驗相同規則的 DSL。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
 
-current／wording 的封套格式見 [authored-layout §9.1–§9.7](authored-layout.md#91-currentwording-採納入口-wording-adoption-v1)，具體格式尚待使用者核可。active 更正先驗再比較投影內容，原始觀測保留，來源更正與表記決定互不代簽。排序依可信發售日／更新證據，未知或並列版本另問使用者、釘精確 reviewed_order，不用 fetched_at、卡號、hash 補順序；人工採納順序只供等義表記選取，basis=reviewed_override，不填官方生效日期。
+current／wording 的封套格式見 [authored-layout §9.1–§9.7](authored-layout.md#91-currentwording-採納入口-wording-adoption-v1)，具體格式經使用者 2026-10-01 核可。active 更正先驗再比較投影內容，原始觀測保留，來源更正與表記決定互不代簽。排序依可信發售日／更新證據，未知或並列版本另問使用者、釘精確 reviewed_order，不用 fetched_at、卡號、hash 補順序；人工採納順序只供等義表記選取，basis=reviewed_override，不填官方生效日期。
 
-**使用者 2026-10-01 核可**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
+**使用者 2026-10-01 核可以下暫顯規則**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
 
 等義採納與 DSL 重用仍受 [semantics 能力分期](implementation-tiers.md) 約束；上述未採納觀測的暫顯不使用 semantic_id，無須先啟用 semantics。觀測、暫顯、已採納 current 與 printed 狀態分開，日期排序不填未知規則生效日。輸入 hash 錯或前件缺失為驗證失敗，不降成普通候選。
 

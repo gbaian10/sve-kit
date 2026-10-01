@@ -1,6 +1,6 @@
 # authored 維護方式
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1 尚待使用者核可格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 ## 1. 路徑與共同格式
 
@@ -14,7 +14,7 @@
 | 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `product-identities/index.yaml`、`product-identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
-| 待核可（格式） | current／wording 表記採納 | `wording-adoptions/index.yaml`、`wording-adoptions/<region>/001.yaml`，見 §9.1–§9.7；已核可政策與格式核可分開，不表示已採納任何群組 |
+| 定案（格式） | current／wording 表記採納 | `wording-adoptions/index.yaml`、`wording-adoptions/<region>/001.yaml`，見 §9.1–§9.7；使用者 2026-10-01 核可格式與處理政策，不表示已採納任何群組 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 提案 | 身分修復、特殊構築 | `overrides/identities/BP01.yaml`、`overrides/deck-roles/BP01.yaml` |
 | 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
@@ -263,7 +263,7 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 
 ### 9.1 current／wording 採納入口 wording-adoption-v1
 
-**wording-adoption-v1 的具體格式尚待使用者核可**。使用者 2026-10-01 已核可：可證 absent 用空字串、表記未定仍顯示、規則清單核可一次後自動分類處理、剩餘群組以 Artifact 逐組／同型態批次確認；政策核可不等於已看過此封套的全部欄位。
+**wording-adoption-v1 的具體格式（§9.1–§9.7）經使用者 2026-10-01 核可**，含 §9.6 的暫顯選取規則。既有核可政策為：可證 absent 用空字串、表記未定仍顯示、規則清單核可一次後自動分類處理、剩餘群組以 Artifact 逐組／同型態批次確認。格式核可不表示任何群組已採納；§9.5 的具體規則清單與核可收據儲存格式仍由 #145 提交核可，#146 的實際回答與 §9.6 的 semantics 能力例外仍待決。
 
 本節補齊 §9 與 build-db §4 的持久採納輸入，適用同一 face／region 的等義表記；不修改身分 registry v1 或商品封套。公開表記未定的顯示另依 §9.6 與 snapshot-format，不能把它當已採納 current。**格式可驗、觀測全體核對、current 可選、語義能力已實作是四個分開的條件**。本格式不提供真規則變更、來源更正、未核對的顯示偏好或真規則 override 的捷徑，也不把既有 identity_registry 決定當表記決定。
 
@@ -369,7 +369,7 @@ sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_
 
 ### 9.6 未採納表記的顯示與來源更正
 
-**使用者 2026-10-01 核可**：沒有舊 current、但表記有差異的卡照樣顯示，不因待採納排除。正式／preview 採相同邊界：`face_current` 只表示已採納 current；暫時顯示的觀測另由公開 `face.wording` 投影，不能寫成 latest_adopted_wording 或虛構 decision。完整公開形狀、候選引用與分片規則見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+**使用者 2026-10-01 核可本節暫顯規則**：沒有舊 current、但表記有差異的卡照樣顯示，不因待採納排除。正式／preview 採相同邊界：`face_current` 只表示已採納 current；暫時顯示的觀測另由公開 `face.wording` 投影，不能寫成 latest_adopted_wording 或虛構 decision。完整公開形狀、候選引用與分片規則見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 | 情況 | 行為 |
 | --- | --- |

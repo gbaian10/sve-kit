@@ -47,7 +47,7 @@
 
 敏感度情境（共用來源、10% 或全部已查證、192-byte 長網址、機制標籤密度加倍或 partial coverage）的估算落在 raw 24.3～27.7 MiB、Brotli 4.70～5.12 MiB、gzip 4.84～5.28 MiB，全部在預算內。
 
-在 #145 實作表記未定的公開呈現時，須量測省略 settled wording 項後的雙區／三語啟動包：manifest、config、全部 bootstrap 與 pending wording 引用合計壓縮後 ≤1 MiB。非 current 的暫顯／候選 revision 與文字閉包按需載入，另報容量，不算成已完成啟動索引；不能讓候選引用形成必載依賴後仍漏算啟動成本。
+在 #145 實作表記未定的公開呈現時，須量測省略 settled wording 項後的雙區／三語啟動包：manifest、config、全部 bootstrap 與 pending wording 引用合計壓縮後 ≤1 MiB。bootstrap 須計入每個 pending face-region 最多一筆 display revision 的輕量投影、名稱及可用名稱翻譯文字閉包，讓首屏可讀暫顯卡名、搜尋名稱與建立 facet。display_ref 以外的候選 revision 與文字閉包按需載入，另報容量，不算成已完成候選索引；不能讓其餘候選引用形成必載依賴後仍漏算啟動成本。
 
 啟動包目前只量了日文部分：Brotli 約 0.30 MiB（raw 3.75 MiB）。雙區加上三語名稱翻譯後的啟動包總量，要等正式匯出器產出後量測，對照 ≤ 1 MiB 門檻。
 
