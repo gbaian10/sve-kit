@@ -347,7 +347,9 @@ region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔�
 
 同一 `(region,match)` 全域只允許一筆記錄，即使目標 ID 相同也不能重複；同一 product_id 可以有多筆不同 match，但 region 必須一致。product_id 與 §10 人工 product 共用全域身分命名空間：同 ID 必須指同區同商品，不能另作配號池。對照記錄不是 product 父列；沒有正式商品內容與來源仍不得填 FK。
 
-每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位、state、日期精度及 hash 計算完整沿 §10.4，只有 category 固定 `product_identity`、policy_id 固定 `product-identity-v1`。semantic_hash 包含完整 record 與 evidence；members 精確涵蓋本檔全部記錄，membership_hash 與 `d:<64hex>` 可重算。confirmed 須有使用者實際確認的收據、姓名與時間，sample_ids 恰為全部 checked record_key；工具不得自行簽名。proposed 保留空 checked 集合與 null reviewer/time，只作診斷，不參與匹配。既有 family／product_catalog／identity_registry 決定不能代簽商品身分。
+每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位、日期精度及 hash 計算沿 §10.4；本格式的 state 固定 `confirmed`，category 固定 `product_identity`、policy_id 固定 `product-identity-v1`。semantic_hash 包含完整 record 與 evidence；members 精確涵蓋本檔全部記錄，membership_hash 與 `d:<64hex>` 可重算。confirmed 須有使用者實際確認的收據、姓名與時間，sample_ids 恰為全部 checked record_key；工具不得自行簽名。既有 family／product_catalog／identity_registry 決定不能代簽商品身分。
+
+**協調者決定（2026-10-01）**：商品身分對照只接受 confirmed 記錄；proposed 或其他 state 一律視為輸入驗證失敗。因 `(region,match)` 全域唯一且分片只增，不能先納入 proposed 再原地升級或追加同鍵的 confirmed。候選草稿一律留在 authored 外，經使用者逐筆確認後才首次寫入正式分片；本限制只適用於 §11，不改 §10 的既有格式。
 
 ### 11.2 永久 ID 與可驗識別線索
 
@@ -363,6 +365,8 @@ match 是下表三選一的封閉物件；每種只接受列出的欄位，`?` �
 
 連結先解 HTML attribute entity，再以 descriptor.url 為 base 解析相對 href，保留原 href 作萃取追溯；解析後的字串 exact 比對。不移除 query、不重排 query、不改尾斜線、不將 dev host 改成正式 host；expansion 依 URL query 解碼一次，保留大小寫與完整複合代號，不切 `BP12-BP13`，不由卡號或 owner 補值。parser 必須驗連結用途與地區：JP 正式 host 為 `shadowverse-evolve.com`，EN 為 `en.shadowverse-evolve.com`；正式商品路徑為 `/products/` 下，搜尋路徑分別為 `/cardlist/cardsearch` 與 `/cards/searchresults`。非 HTTPS、其他 host 或用途不符只保留診斷線索，不當正式商品／搜尋 URL。新增來源版型需更新並釘住 parser，不放寬為任意 query 中有 expansion 就算商品證據。
 
+JP、EN 均讀搜尋 URL query 中名稱精確為 `expansion` 的參數，參數名區分大小寫，不接受 `Expansion` 等別名。依上述 query 解碼一次後，恰好一個非空值才可作 expansion_code；保留空值及重複參數供檢查，不能由 parser 預設丟掉。缺少 `expansion` 參數才算缺代號；出現空值或多個值（即使值相同）均列為歧義，不任取第一／最後值，也不能退回 null 的 product_link。依下述區塊歧義規則處理，必要時使用已確認的 source_block。此解析規則由正式 parser pin 鎖定。
+
 `product_link` 的 URL 與代號兩者都必須相等，null 只匹配缺代號，**不是 wildcard**。因此共用商品頁的 CSD03A／CSD03B 分別有兩筆對照；不得只按 URL 合併。只有 URL 且區塊不能區分多商品時，不採納 URL-only 對照，可用各自 `source_block` 確認該版本的確切區塊，或留待補證據。`expansion_link` 不表示搜尋分類本身就是真實商品；泛用 PR 分類不能建立整批 PR 商品，活動分類／合併名稱的商品邊界不明時仍留診斷。
 
 同一區塊若有多個不同商品 URL／expansion 值，parser 不任選或作笛卡兒積：列出歧義，僅容許經使用者核對的 exact `source_block` 對照辨識該區塊代表的商品；若該區塊其實含數個商品，須先有能分出個別商品的來源及 parser。`source_block` 不用名稱／日期作匹配鍵；raw 改版後即使只是更正名稱，也須為新來源補對照，沿用原 product_id，不能套用舊 ordinal 猜。
@@ -373,18 +377,20 @@ evidence 沿 §10.3 的 `{store_id,batch_id,source_version_id,locator,role}`，�
 
 首次建立時，工具只產候選 ID、match、完整來源與疑難清單；使用者逐筆確認商品邊界與對應後，才另建 confirmed 分片、更新 index。草稿不直接變成正式輸入，通過格式檢查或來源閉包驗證也不是人工採納。
 
-對每個已驗凍結來源中的商品區塊，正式 extractor 產生可用的 product_link；沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有 confirmed 對照，不使用 proposed 或 fuzzy 比較：
+對每個已驗凍結來源中的商品區塊，正式 extractor 產生可用的 product_link；沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有已驗證的 confirmed 對照，不作 fuzzy 比較；proposed 等非法狀態已在輸入驗證時拒絕：
 
 | 結果 | 建置行為 |
 | --- | --- |
 | 命中一個 product_id（多種 match 同指此 ID 亦可） | 沿用永久 ID；官方內容及收錄仍由 raw 萃取、另驗來源與地區／printing 身分閘門 |
-| 零命中／只有 proposed | 診斷列精確來源、區塊、線索及缺映射原因；不臨時配號，不產該商品與依賴它的收錄列，不影響有獨立有效證據的卡文；報告明列排除，不宣稱商品完整 |
+| 零命中 | 診斷列精確來源、區塊、線索及缺映射原因；不臨時配號，不產該商品與依賴它的收錄列，不影響有獨立有效證據的卡文；報告明列排除，不宣稱商品完整 |
 | 命中多個不同 product_id | 商品身分衝突，整筆匯入交易失敗；不得任選第一筆、較新一筆或較短 ID |
 | 同 match 多記錄、同 ID 跨 region、證據無法重現 match、缺 raw／hash 錯 | 輸入驗證失敗，整筆交易回滾；不能降成「缺映射」後忽略 |
 
 相同 ID 的多次官方觀測可以去重，但名稱、日期、商品型別等內容不一致時依既有商品衝突規則處理，不以身分 confirmed 當作選內容的授權。同名不等於同商品，同代號跨 region 亦不合併；owner 只作歸檔，不能參與商品識別或補收錄。
 
 URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補 URL 時，舊 match 保留。新線索零匹配即列待確認；使用者確認仍為同商品後，追加一筆指向**原 product_id** 的別名對照及新 evidence／decision，不改舊 record 或決定。別名直接指永久 ID，不指其他 match，沒有 alias chain。僅名稱／日期更正而 match 不變時直接沿用 ID，不要求重新確認內容。URL-only 對照若出現可驗的 URL 重用／不同商品證據，即列衝突，不因字串相同而放行。
+
+匯入器須在地區投影前檢查完整對照集合：同一 region 中，同一非空 expansion_code 出現在不同 product_id 的 product_link／expansion_link match 上時，發出 warning，列出代號、各 ID、match 與來源定位，提示可能把同一商品誤配為兩個 ID。例如 dev 連結改成正式商品 URL 後，新增對照應沿用原 ID；不同代號的 CSD02A／B／C 不觸發此警告。同 ID 的多筆別名不警告。此檢查只提示人工核對，不自動合併、重配 ID 或升為交易失敗，也不取代既有 exact match 衝突檢查。
 
 本格式只允許首次身分及不同 match 的追加；不提供重新指派已採納 match、刪除舊對照、合併／拆分永久商品 ID 的捷徑。遇到誤配或同一 exact match 被官方重用且無法區分時停止受影響匯入、交使用者決定修復契約，不能自行定義覆蓋優先序。未採納草稿的修正不算永久身分修復。
 
@@ -396,4 +402,4 @@ URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補
 
 僅驗證 evidence 閉包的實際使用以 `product_identity_evidence_closure`／`archive-closure-v1` 登錄；為重現 match 而實際解析的使用另以 `official_product_identity`、正式 parser pin 及精確區塊 locator 登錄。官方內容／收錄的 parser 用途仍各自保存；共用 raw 不吞掉不同用途。零匹配、歧義或被 printing 身分閘門排除的區塊也是已讀輸入，仍納實際 uses。輸出前從釘住輸入獨立宣告並驗完整用途閉包，依 F1 保存 DB／inputs／report／seal；來源衝突與失敗不發布半套產物。
 
-商品身分確認不授權更動 family／owner、日期精度、收錄、EN 身分採納或公開快照白名單。家族關係不明可為 null；機器候選鍵只供本機核對。正式匯入器的驗收須包括同 URL 不同代號、無 URL、名稱／日期修正、改址追加、零／多重匹配、錯 region、proposed 不放行、封套／來源 hash 錯及 F1 使用閉包缺漏；不能用本格式文件或候選盤點冒充已完成實作。
+商品身分確認不授權更動 family／owner、日期精度、收錄、EN 身分採納或公開快照白名單。家族關係不明可為 null；機器候選鍵只供本機核對。正式匯入器的驗收須包括同 URL 不同代號、無 URL、名稱／日期修正、改址追加、零／多重匹配、錯 region、proposed 輸入直接拒絕、expansion 參數缺值／空值／多值、同區同 expansion 跨 ID 的 warning、封套／來源 hash 錯及 F1 使用閉包缺漏；不能用本格式文件或候選盤點冒充已完成實作。
