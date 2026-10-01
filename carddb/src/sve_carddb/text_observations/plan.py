@@ -82,7 +82,7 @@ class TextPlan:
         )
 
     def report(self) -> dict[str, JsonValue]:
-        """Separate row counts, unresolved candidates, and a closed output identity plan."""
+        """Separate observations from a diagnostic exclusion proposal awaiting approval."""
         materialized = self.materialized()
         missing = [item for item in self.observations if item.content.effect is None]
         return {
@@ -124,6 +124,11 @@ class TextPlan:
                 for group in self.groups
             ],
             "eligible_identity": self.eligible.report(),
+            "eligible_identity_diagnostic": {
+                "proposal": "pending-#143",
+                "publication_gate": False,
+                "snapshot_output_authorized": False,
+            },
             "remaining_gates": [
                 "current_adoption_contract",
                 "source_corrections",

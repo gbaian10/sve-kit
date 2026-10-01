@@ -1,4 +1,4 @@
-"""Audit the transitive exclusion of existing staged references for preview output."""
+"""Diagnose proposed exclusions of staged references pending #143 approval."""
 
 from typing import TYPE_CHECKING
 
@@ -33,6 +33,9 @@ def exclusion_report(
                 )
     _close(tables, rows, excluded)
     return {
+        "proposal": "pending-#143",
+        "publication_gate": False,
+        "snapshot_output_authorized": False,
         "excluded_row_counts": {
             name: len(keys) for name, keys in sorted(excluded.items())
         },
