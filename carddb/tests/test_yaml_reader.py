@@ -62,10 +62,14 @@ def legacy_read_yaml(path: Path) -> JsonValue:
 def test_all_production_values_and_hashes_match_legacy(path: Path) -> None:
     before = path.read_bytes()
     old, new = legacy_read_yaml(path), read_yaml(path)
-    assert new == old
-    assert canonical(new) == canonical(old)
+    same_values = new == old
+    same_canonical = canonical(new) == canonical(old)
+    same_source = path.read_bytes() == before
+    # Assertion introspection must not print official text from authored corrections.
+    assert same_values, "Production YAML values differ"
+    assert same_canonical, "Production canonical bytes differ"
     assert digest(new) == digest(old)
-    assert path.read_bytes() == before
+    assert same_source, "Production authored bytes changed"
 
 
 @pytest.mark.parametrize(
