@@ -3,6 +3,7 @@
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from sve_carddb.routes.defaults import select_defaults
 from sve_carddb.snapshot.contract import columns, definition, tables, validate
 from sve_carddb.snapshot.project.closure import (
     prune,
@@ -190,7 +191,13 @@ def project(
     corrections(source, view)
     dates = Dates(source, view)
     inclusions(source, view, dates)
-    region_views(source, view, as_of, dates, decisions)
+    public_prints = {row["id"] for row in view["printing"]}
+    defaults = {
+        (item.card_id, item.region): item
+        for item in select_defaults(db, general_evidence=decisions.general_evidence)
+        if item.printing_id in public_prints
+    }
+    region_views(source, view, as_of, dates, defaults)
     support(source, view, decisions)
     _images(source, view)
     prune(view)

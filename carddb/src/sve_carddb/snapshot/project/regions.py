@@ -6,8 +6,11 @@ from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.values import array, integer, object_value, string
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from pydantic import JsonValue
 
+    from sve_carddb.routes.defaults import DefaultPrinting
     from sve_carddb.snapshot.project.evidence import Decisions
     from sve_carddb.snapshot.project.source import Record, Source
 
@@ -95,52 +98,6 @@ def inclusions(source: Source, view: dict[str, list[Record]], dates: Dates) -> N
         )
 
 
-def _default(
-    source: Source,
-    card: Record,
-    region: str,
-    prints: list[Record],
-    dates: Dates,
-    decisions: Decisions,
-) -> tuple[str | None, str | None]:
-    if not prints:
-        return None, None
-    for override in source.matching(
-        "default_printing_override",
-        "card_id,region,printing_id,decision_id",
-        card_id=card["id"],
-        region=region,
-    ):
-        if source.review(override["decision_id"]) == "confirmed":
-            if override["printing_id"] not in {row["id"] for row in prints}:
-                raise ValueError("Default printing crosses public region/card")
-            return string(override["printing_id"]), "override"
-    home = source.index("printing", "id,home_set_id")
-    general = [
-        row
-        for row in prints
-        if row["id"] in decisions.general_printings
-        and home[string(row["id"])]["home_set_id"] == card["home_set_id"]
-    ]
-    candidates = general or prints
-    chosen = min(
-        candidates,
-        key=lambda row: (
-            dates.earliest(string(row["id"])) is None,
-            dates.earliest(string(row["id"])) or "",
-            string(row["id"]),
-        ),
-    )
-    method = "fallback"
-    if general:
-        method = (
-            "earliest_general"
-            if all(dates.earliest(string(row["id"])) is not None for row in general)
-            else "candidate_general"
-        )
-    return string(chosen["id"]), method
-
-
 def _role(
     source: Source, card: Record, region: str, view: dict[str, list[Record]]
 ) -> str | None:
@@ -164,6 +121,10 @@ def _role(
         if revision["id"] not in currents:
             continue
         kinds = set(map(string, array(revision["special_kinds"])))
+        if not kinds <= {"token", "ep", "sep", "evolve", "advance"} or revision[
+            "type_code"
+        ] not in {"leader", "follower", "spell", "amulet"}:
+            return None
         roles.add(
             "extra"
             if kinds & {"token", "ep", "sep"}
@@ -181,7 +142,7 @@ def region_views(
     view: dict[str, list[Record]],
     as_of: str,
     dates: Dates,
-    decisions: Decisions,
+    defaults: Mapping[tuple[str, str], DefaultPrinting],
 ) -> None:
     """No counterpart printing means unknown release, never confirmed non-release."""
     for card in view["card"]:
@@ -213,7 +174,7 @@ def region_views(
                 mapping = (
                     "confirmed_none"
                     if review["state"] == "confirmed_none"
-                    and source.review(review["decision_id"]) in {"confirmed", "sampled"}
+                    and source.review(review["decision_id"]) == "confirmed"
                     else "pending"
                 )
             release = (
@@ -241,7 +202,7 @@ def region_views(
                     string(overrides[0]["state"]),
                     string(overrides[0]["as_of"]),
                 )
-            default, method = _default(source, card, region, prints, dates, decisions)
+            default = defaults.get((string(card["id"]), region))
             debut, debut_state = dates.debut(prints)
             regions.append(
                 {
@@ -253,8 +214,10 @@ def region_views(
                     "mapping_scope": None
                     if review is None
                     else review["coverage_scope"],
-                    "default_printing_id": default,
-                    "default_method": method,
+                    "default_printing_id": None
+                    if default is None
+                    else default.printing_id,
+                    "default_method": None if default is None else default.method,
                     "deck_role": _role(source, card, region, view),
                     "debut_product_ids": json_list(debut),
                     "debut_state": debut_state,

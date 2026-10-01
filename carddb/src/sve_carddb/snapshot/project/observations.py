@@ -17,12 +17,18 @@ def observations(
         for raw_face in array(printing["faces"]):
             face = object_value(raw_face)
             records: dict[bytes, Record] = {}
-            for row in source.matching(
-                "printing_face_observation",
-                "printing_id,face_id,source_id,revision_id",
-                printing_id=printing["id"],
-                face_id=face["face_id"],
-            ):
+            parent = string(printing["id"]), string(face["face_id"])
+            rows = (
+                []
+                if parent in decisions.observed_texts
+                else source.matching(
+                    "printing_face_observation",
+                    "printing_id,face_id,source_id,revision_id",
+                    printing_id=printing["id"],
+                    face_id=face["face_id"],
+                )
+            )
+            for row in rows:
                 key = (
                     string(printing["id"]),
                     string(face["face_id"]),
@@ -43,6 +49,11 @@ def observations(
                     "source_url": source.url(row["source_id"]),
                 }
                 records[canonical(item)] = item
+            if parent in decisions.observed_texts:
+                records = {
+                    canonical(item): dict(item)
+                    for item in decisions.observed_texts[parent]
+                }
             ordered = sorted(
                 records.values(),
                 key=lambda row: (
@@ -181,6 +192,23 @@ def _observed_revisions(
             face = object_value(raw)
             for item in array(face["observations"]):
                 observation = object_value(item)
+                if set(observation) != {"revision_id", "state", "source_url"}:
+                    raise ValueError("Observation whitelist mismatch")
+                if observation["state"] not in {
+                    "available",
+                    "missing_effect",
+                    "correction_conflict",
+                }:
+                    raise ValueError("Unknown observation state")
+                if (
+                    observation["state"] == "available"
+                    and observation["revision_id"] is None
+                ) or (
+                    observation["state"] == "missing_effect"
+                    and observation["revision_id"] is not None
+                ):
+                    raise ValueError("Observation state/revision mismatch")
+                string(observation["source_url"])
                 if observation["revision_id"] is not None:
                     revision = revisions[string(observation["revision_id"])]
                     if (

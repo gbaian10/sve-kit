@@ -1,14 +1,19 @@
 """Public projection acceptance cases use synthetic DB inputs and independent oracles."""
 
+import sqlite3
 from dataclasses import replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 from jsonschema import ValidationError
+from pydantic import JsonValue, RootModel
 
+import sve_carddb.snapshot.project as project_module
 from sve_carddb.build_db import Json, create_database
+from sve_carddb.build_db.database import open_database
 from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.routes.defaults import GeneralEvidence, select_defaults
 from sve_carddb.snapshot.contract import tables
 from sve_carddb.snapshot.project import (
     Decisions,
@@ -20,7 +25,9 @@ from sve_carddb.snapshot.project import (
 )
 from sve_carddb.snapshot.project.closure import validate_closure
 from sve_carddb.snapshot.project.records import initial
+from sve_carddb.snapshot.project.regions import Dates, region_views
 from sve_carddb.snapshot.project.shape import tuple_value
+from sve_carddb.snapshot.project.source import Source
 from sve_carddb.snapshot.values import (
     array,
     canonical,
@@ -37,7 +44,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import CompiledSchema, Database, Value
     from sve_carddb.snapshot.project import Projection
-    from sve_carddb.snapshot.project.source import Record, Source
+    from sve_carddb.snapshot.project.source import Record
 
 
 @pytest.fixture(scope="module")
@@ -431,7 +438,7 @@ def pending() -> Record:
     return {
         "region": "jp",
         "state": "pending",
-        "display": {"revision_id": "revision", "basis": "latest_known_release"},
+        "display": {"revision_id": None, "basis": "candidates"},
         "candidates": [{"printing_id": "printing", "revision_id": "revision"}],
         "undated_printing_ids": ["printing"],
     }
@@ -658,7 +665,9 @@ def test_default_general_evidence_and_date_uncertainty_are_separate(
 ) -> None:
     with db.transaction():
         db.delete("default_printing_override", {"card_id": "card", "region": "jp"})
-    chosen = replace(decisions(), general_printings=frozenset({"printing"}))
+    chosen = replace(
+        decisions(), general_evidence={"printing": GeneralEvidence(True, True, False)}
+    )
     result = projected(db, chosen)
     assert (
         object_value(array(one(result, "card", "card")["regions"])[1])["default_method"]
@@ -669,6 +678,12 @@ def test_default_general_evidence_and_date_uncertainty_are_separate(
             "product",
             {"id": "product"},
             {"date_precision": "day", "released_on": "2026-09-29"},
+        )
+        db.update("printing", {"id": "printing"}, {"premium": False})
+        db.update(
+            "printing_face",
+            {"printing_id": "printing", "face_id": "face"},
+            {"signed": False, "embellishment_state": "confirmed"},
         )
     result = projected(db, chosen)
     assert (
@@ -1281,3 +1296,411 @@ def test_logical_projection_runs_shared_a_semantic_checks(
     monkeypatch.setattr("sve_carddb.snapshot.project.initial", broken)
     with pytest.raises(ValueError, match="Vocabulary reference"):
         projected(db)
+
+
+def region(result: Projection, code: str = "jp") -> Record:
+    return next(
+        object_value(raw)
+        for raw in array(one(result, "card", "card")["regions"])
+        if object_value(raw)["region"] == code
+    )
+
+
+def test_unknown_inclusion_prevents_known_earliest(db: Database) -> None:
+    with db.transaction():
+        db.update(
+            "product",
+            {"id": "product"},
+            {"date_precision": "day", "released_on": "2020-01-01"},
+        )
+        db.insert(
+            "product",
+            dict(db.rows("product")[0].values)
+            | {
+                "id": "undated-product",
+                "date_precision": "unknown",
+                "released_on": None,
+            },
+        )
+        db.insert(
+            "printing_product",
+            dict(db.rows("printing_product")[0].values)
+            | {"product_id": "undated-product"},
+        )
+    result = projected(db)
+    assert region(result)["debut_state"] == "unknown"
+    assert region(result)["debut_product_ids"] == []
+    assert all(
+        row["first_inclusion_state"] == "unknown"
+        for row in result.tables["printing_product"]
+    )
+
+
+def test_unknown_other_printing_prevents_known_debut(db: Database) -> None:
+    with db.transaction():
+        db.update(
+            "product",
+            {"id": "product"},
+            {"date_precision": "day", "released_on": "2020-01-01"},
+        )
+        db.insert(
+            "printing",
+            dict(db.rows("printing")[0].values)
+            | {"id": "undated", "card_no": "TEST-002"},
+        )
+        db.insert(
+            "card_int_id",
+            {"printing_id": "undated", "int_id": 20002, "allocated_at": "2026-09-29"},
+        )
+        db.insert(
+            "printing_face",
+            dict(db.rows("printing_face")[0].values) | {"printing_id": "undated"},
+        )
+    result = projected(db)
+    assert region(result)["debut_state"] == "unknown"
+    assert region(result)["debut_product_ids"] == []
+    assert one(result, "printing_product")["first_inclusion_state"] == "unknown"
+
+
+def test_provisional_identity_with_two_regions_is_not_confirmed(db: Database) -> None:
+    dual_region(db)
+    with db.transaction():
+        db.update("card", {"id": "card"}, {"identity_state": "provisional"})
+        db.delete(
+            "region_mapping_review",
+            {"card_id": "card", "target_region": "en", "as_of": "2026-09-29"},
+        )
+    result = dual_project(db, decisions())
+    assert region(result)["mapping_state"] == "unmapped"
+    for code in ("jp", "en"):
+        assert "identity_unconfirmed" in array(
+            effective_support(one(result, "card_engine_support", "card"), code)[
+                "reasons"
+            ]
+        )
+
+
+@pytest.mark.parametrize(
+    "level", ["proposed", "model_reviewed", "sampled", "confirmed"]
+)
+def test_confirmed_none_requires_reviewed_mapping(db: Database, level: str) -> None:
+    result = projected(db)
+
+    def exercise() -> None:
+        with db.transaction():
+            db.update("decision", {"id": "mapping_decision"}, {"state": level})
+            source = Source(db)
+            region_views(
+                source, result.tables, "2026-10-01", Dates(source, result.tables), {}
+            )
+            assert region(result)["mapping_state"] == (
+                "confirmed_none" if level == "confirmed" else "pending"
+            )
+            if level != "confirmed":
+                projected(db)
+
+    if level == "confirmed":
+        exercise()
+    else:
+        with pytest.raises(sqlite3.IntegrityError, match="mapping_confirmed_none"):
+            exercise()
+
+
+def test_unreviewed_unlisted_is_not_released(db: Database) -> None:
+    with db.transaction():
+        db.insert(
+            "decision",
+            dict(db.rows("decision")[0].values)
+            | {"id": "unreviewed", "state": "proposed"},
+        )
+        db.update(
+            "printing",
+            {"id": "printing"},
+            {
+                "catalog_state": "unlisted",
+                "decision_id": "unreviewed",
+                "decklog_available": False,
+            },
+        )
+    result = projected(db)
+    assert one(result, "printing")["review_level"] == "unreviewed"
+    assert region(result)["release_state"] == "unknown"
+
+
+@pytest.mark.parametrize("level", ["proposed", "model_reviewed", "sampled"])
+def test_unconfirmed_availability_override_stays_unknown(
+    db: Database, level: str
+) -> None:
+    with db.transaction():
+        db.insert(
+            "decision",
+            dict(db.rows("decision")[0].values)
+            | {"id": "availability", "state": level},
+        )
+        db.update(
+            "region_availability_override",
+            {"card_id": "card"},
+            {"decision_id": "availability"},
+        )
+    assert region(projected(db), "en")["release_state"] == "unknown"
+
+
+@pytest.mark.parametrize("level", ["proposed", "model_reviewed", "sampled"])
+def test_unconfirmed_role_override_does_not_replace_known_role(
+    db: Database, level: str
+) -> None:
+    with db.transaction():
+        db.delete(
+            "face_special_kind",
+            {"revision_id": "revision", "special_kind_code": "synthetic"},
+        )
+        db.insert(
+            "decision",
+            dict(db.rows("decision")[0].values) | {"id": "role", "state": level},
+        )
+        db.update(
+            "deck_role_override",
+            {"card_id": "card", "region": "jp"},
+            {"decision_id": "role"},
+        )
+    assert region(projected(db))["deck_role"] == "main"
+
+
+def test_conflicting_face_roles_are_unknown(db: Database) -> None:
+    with db.transaction():
+        db.delete("deck_role_override", {"card_id": "card", "region": "jp"})
+        db.delete(
+            "face_special_kind",
+            {"revision_id": "revision", "special_kind_code": "synthetic"},
+        )
+        db.update("card", {"id": "card"}, {"layout": "double_faced"})
+        db.insert(
+            "vocabulary",
+            {"kind": "type", "code": "leader", "label_unit_id": TEXT, "active": True},
+        )
+        db.insert(
+            "face",
+            dict(db.rows("face")[0].values)
+            | {"id": "back", "ordinal": 1, "side": "back"},
+        )
+        db.insert(
+            "face_revision",
+            dict(db.rows("face_revision")[0].values)
+            | {"id": "back-revision", "face_id": "back", "type_code": "leader"},
+        )
+        db.insert(
+            "face_current",
+            dict(db.rows("face_current")[0].values)
+            | {"face_id": "back", "revision_id": "back-revision"},
+        )
+        db.insert(
+            "printing_face",
+            dict(db.rows("printing_face")[0].values)
+            | {"face_id": "back", "art_id": None},
+        )
+    assert region(projected(db))["deck_role"] is None
+
+
+@pytest.mark.parametrize("unknown", ["special_kind", "type"])
+def test_unknown_role_codes_remain_null(db: Database, unknown: str) -> None:
+    with db.transaction():
+        db.delete("deck_role_override", {"card_id": "card", "region": "jp"})
+        if unknown == "type":
+            db.delete(
+                "face_special_kind",
+                {"revision_id": "revision", "special_kind_code": "synthetic"},
+            )
+            db.insert(
+                "vocabulary",
+                {
+                    "kind": "type",
+                    "code": "future-type",
+                    "label_unit_id": TEXT,
+                    "active": True,
+                },
+            )
+            db.update("face_revision", {"id": "revision"}, {"type_code": "future-type"})
+    assert region(projected(db))["deck_role"] is None
+
+
+@pytest.mark.parametrize(
+    ("scope", "resolved"), [("rules", True), ("all", True), ("name", False)]
+)
+def test_resolved_or_non_rules_divergence_does_not_block(
+    db: Database, scope: str, *, resolved: bool
+) -> None:
+    with db.transaction():
+        db.update(
+            "region_divergence",
+            {"card_id": "card", "region": "en", "field_scope": "name"},
+            {"field_scope": scope, "resolved": resolved},
+        )
+    assert "region_divergence" not in array(
+        effective_support(one(projected(db), "card_engine_support", "card"), "en")[
+            "reasons"
+        ]
+    )
+
+
+def test_qa_current_is_highest_revision_even_when_inserted_last(db: Database) -> None:
+    with db.transaction():
+        db.insert(
+            "qa_version",
+            dict(db.rows("qa_version")[0].values) | {"id": "qa-new", "revision": 7},
+        )
+    result = projected(db)
+    assert one(result, "qa")["current_version_id"] == "qa-new"
+    assert {row["id"] for row in result.tables["qa_version"]} == {"qa_v", "qa-new"}
+
+
+def test_unapproved_image_with_variant_is_rejected_by_build_boundary(
+    db: Database,
+) -> None:
+    def exercise() -> None:
+        with db.transaction():
+            db.update("image_asset", {"id": "image"}, {"publication_state": "pending"})
+            projected(db)
+
+    with pytest.raises(sqlite3.IntegrityError, match="image_variant_publishable"):
+        exercise()
+
+
+def test_offline_schema_version_is_verified_before_projection(
+    tmp_path: Path, projection_schema: CompiledSchema
+) -> None:
+    path = tmp_path / "wrong-version.sqlite"
+    with create_database(projection_schema, path) as database, database.transaction():
+        populate(database)
+    with sqlite3.connect(path) as connection:
+        connection.execute("PRAGMA user_version = 999")
+    with (
+        open_database(projection_schema, path) as database,
+        pytest.raises(sqlite3.IntegrityError, match="schema version mismatch"),
+    ):
+        projected(database)
+
+
+def test_pipeline_checks_public_reference_closure(
+    db: Database, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def damaged(source: Source) -> dict[str, list[Record]]:
+        view = initial(source)
+        view["product_family"][0]["name_unit_id"] = "t:ja:" + "e" * 16
+        return view
+
+    monkeypatch.setattr(project_module, "initial", damaged)
+    with pytest.raises(ValueError, match="Dangling public reference to text_unit"):
+        projected(db)
+
+
+def test_default_projection_uses_native_selector_result_and_rejection(
+    db: Database,
+) -> None:
+    expected = select_defaults(db)
+    result = projected(db)
+    selected = next(
+        row for row in expected if row.card_id == "card" and row.region == "jp"
+    )
+    assert (
+        region(result)["default_printing_id"],
+        region(result)["default_method"],
+    ) == (selected.printing_id, selected.method)
+    with db.transaction():
+        db.insert(
+            "decision",
+            dict(db.rows("decision")[0].values)
+            | {"id": "default-unconfirmed", "state": "sampled"},
+        )
+        db.update(
+            "default_printing_override",
+            {"card_id": "card", "region": "jp"},
+            {"decision_id": "default-unconfirmed"},
+        )
+    with pytest.raises(ValueError, match="confirmed"):
+        projected(db)
+
+
+def test_native_model_adapter_keeps_full_observation_payload(db: Database) -> None:
+    payload: Record = {
+        "revision_id": "revision",
+        "state": "correction_conflict",
+        "source_url": "https://example.invalid/unavailable-source",
+    }
+    chosen = decisions().with_text_views(
+        {},
+        {("printing", "face"): (RootModel[dict[str, JsonValue]](payload),)},
+    )
+    assert chosen.active_scopes == decisions().active_scopes
+    result = projected(db, chosen)
+    assert object_value(array(one(result, "printing")["faces"])[0])["observations"] == [
+        payload
+    ]
+
+
+def test_native_missing_effect_without_database_observation_is_preserved(
+    db: Database,
+) -> None:
+    with db.transaction():
+        db.delete("face_current", {"face_id": "face", "region": "jp"})
+        db.delete(
+            "printing_face_observation",
+            {"printing_id": "printing", "face_id": "face", "source_id": "source"},
+        )
+    wording = pending() | {
+        "display": {"revision_id": None, "basis": "candidates"},
+        "candidates": [{"printing_id": "printing", "revision_id": None}],
+    }
+    observed: Record = {
+        "revision_id": None,
+        "state": "missing_effect",
+        "source_url": "https://example.invalid/unavailable",
+    }
+    chosen = decisions().with_text_views(
+        {"face": (RootModel[dict[str, JsonValue]](wording),)},
+        {("printing", "face"): (RootModel[dict[str, JsonValue]](observed),)},
+    )
+    result = projected(db, chosen)
+    assert one(result, "face")["current"] == []
+    assert one(result, "face")["wording"] == [wording]
+    assert object_value(array(one(result, "printing")["faces"])[0])["observations"] == [
+        observed
+    ]
+    assert "wording_pending" in array(
+        effective_support(one(result, "card_engine_support", "card"), "jp")["reasons"]
+    )
+
+
+@pytest.mark.parametrize(
+    "payload",
+    [
+        {
+            "revision_id": None,
+            "state": "available",
+            "source_url": "https://example.invalid/source",
+        },
+        {
+            "revision_id": "revision",
+            "state": "missing_effect",
+            "source_url": "https://example.invalid/source",
+        },
+        {
+            "revision_id": "revision",
+            "state": "unknown",
+            "source_url": "https://example.invalid/source",
+        },
+        {
+            "revision_id": "revision",
+            "state": "available",
+            "source_url": "https://example.invalid/source",
+            "source_id": "private",
+        },
+    ],
+)
+def test_native_observation_boundary_rejects_invalid_public_payload(
+    db: Database, payload: Record
+) -> None:
+    chosen = decisions().with_text_views(
+        {}, {("printing", "face"): (RootModel[dict[str, JsonValue]](payload),)}
+    )
+    with pytest.raises(ValueError, match=r"Observation|observation"):
+        projected(db, chosen)

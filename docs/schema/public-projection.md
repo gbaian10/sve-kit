@@ -38,7 +38,8 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 | `printing.faces` | `printing_face` 加 section、stamp、觀測、翻譯、更正；按永久 face ordinal | 未知印刷原文維持 null/unknown；觀測不填回 printed 欄 |
 | `printing_product.available_on/date_precision/date_raw` | 三個 `first_available_*` 覆寫欄 | null precision 沿 product；unknown 明示未知；month/year 不補一日 |
 | `printing_product.first_inclusion_state`、debut | 同卡同區全部 inclusion 的有效日期 | 任一可能更早日期不明就 unknown，不把空 inclusion 宣稱 first |
-| 預設版次 | confirmed override → 已由建置器確認的一般版、home owner、日期、穩定 ID → fallback | 一般版分類尚未提供時 fallback；一般版日期不全為 candidate_general，全部可信才 earliest_general |
+| 預設版次 | 直接使用 `routes.defaults.select_defaults` 的版次 ID／method；分類證據承接 `GeneralEvidence` | 依路由採納契約驗 override、home、一般版加工、競爭版次與日期；本投影不另寫選取算法 |
+| `card.regions.deck_role` | confirmed override，否則依同卡同區 current 的已識別 type／special kind 推導 | 未確認 override 不採用；未知代碼、沒有 current 或多面角色衝突為 null |
 | `art.regions/artists`、`artist` | 此次地區的現行 `printing_face` 使用關係、`art_artist` | 無現行用途的舊 art 與只被舊 art 引用的 artist 不出貨；被排除 art 的 nullable 引用留 null |
 | `traits/titles/special_kinds/sections` | `face_trait/title/special_kind/text_section`、`printing_text_section` | ID/code 集合穩定排序；段落保留 ordinal；未有資料為 [] |
 | `translation.source_unit_id/text_unit_id`、各 owner 的 translations | `translation_use/context/selection` 的精確 owner/field/ordinal，chosen translation 的原文與譯文 | 未選、未 reviewed 不出；同 source 的不同 context 不合併；缺譯留原文 |
@@ -64,7 +65,12 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
 `Decisions` 只承接其他建置能力已驗證的結果，不重新執行其採納邏輯：
 
 - `wording`：face ID → pending WordingView 陣列；由 #145 計算 display、候選與未知日期。
-  `observation_states`：精確 `(printing_id,face_id,source_id)` 的 missing/conflict 狀態。
+  `observed_texts`：精確 `(printing_id,face_id)` → 完整公開觀測陣列，包含 revision、state、source URL。
+  `Decisions.with_text_views(wording_views(db, plan), printing_observed_texts(db, plan))`
+  直接接收 #145 的 Pydantic 模型，經 JSON 型別邊界保留全部公開欄位；不重算表記或觀測狀態。
+  來源不可用時即使 DB 沒有觀測列，仍保留原生輸出的 `missing_effect`／null revision／來源 URL。
+  `observation_states` 為既有 DB 觀測列的精確 `(printing_id,face_id,source_id)` 狀態接點；
+  提供完整 `observed_texts` 的 parent 以完整模型為準，不走此推導。
   projector 驗 shape、唯一 region、同面同區 revision、候選能回 observations、display/current 與 ID 閉包。
   有觀測且沒有 current 時不得缺 wording；未定觀測不改 printed、route 或 Decklog。
 - `display_bindings` 與 `aligned_regions`：建置器已核對且 fresh 的來源 owner／跨區顯示選用；
@@ -75,7 +81,8 @@ Schema descriptor 驗完整欄序、nullable、enum 與額外鍵，不以 SQL �
   #29 的 shared_jp_unchecked 尚待 Schema／建置能力接入，本模組不自行產生未核對選用。
 - `related_regions`：reskin 在各輸出地區的已驗證 eligibility。
 - `active_scopes`：ruling revision 的已驗證現行有效文字單元；projector 不猜部分取代的切段。
-- `general_printings`：預設版次建置器已確認的一般版分類；不由卡號、字串猜加工。
+- `general_evidence`：printing ID → 路由建置器的 `GeneralEvidence`，原樣傳給唯一的預設版次選取器；
+  不由卡號、字串猜加工，不把未知分類補成已確認一般版。
 
 目前 baseline 機器契約尚未含 `face.wording`／PrintingFace.observations；依 #143 的既定分工，
 這兩項使用本模組的 exact shape／連結檢查，其他欄位仍完整通過 baseline Schema。
@@ -90,4 +97,6 @@ uv --directory carddb run pytest tests/test_snapshot_project.py
 
 合成 DB 正例讓 43 集合都有資料。`tests/fixtures/snapshot-project/expected-ancillary.json`
 是獨立手寫的完整附屬列 oracle；測試另驗核心、config、support、nullable 欄與缺能力反例。
+區域反例分別覆蓋混合日期、未確認 mapping／release／role、角色衝突、未知代碼、divergence 範圍與 QA 現行版本。
+整體反例驗離線 DB 版號與 join 後的引用閉包；未核可圖帶 variant 則先由建置完整性約束拒絕。
 正式卡文不進 fixture 或回報；真實封存來源與合成資料的數量須分開記錄。
