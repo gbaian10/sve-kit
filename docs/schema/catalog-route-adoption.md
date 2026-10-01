@@ -1,9 +1,9 @@
-# 詞彙、記號與路由採納契約提案
+# 詞彙、記號與路由採納契約
 
 本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入。
-**新增格式與政策均為提案，待使用者決定**；不是已核可資料、loader 實作或發布驗收。
-§1 摘錄既定語意；§2–§7 是可供審核的技術格式；§8 集中列出政策選項。
-格式核可後，仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
+**封套、覆寫格式與展示集合為技術契約；一般版分類等使用政策仍待使用者決定**。
+§1 摘錄既定語意；§2–§6 定義輸入，§7 區分既定選取規則與分類提案，§8 僅列使用者需決定的政策。
+格式不表示資料已採納；仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
 本契約不以任意 confirmed 決定或 caller 提供的布林值代替採納。
 
 ## 1. 既定邊界
@@ -143,7 +143,7 @@ F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 autho
 | vocabulary_adoption | `{kind,code}` | `{label,raw_mappings,active}`；label 為 TextValue，active 為 Bool |
 | language_adoption | `{code}` | `{display_name,fallback_order}`；非空 Text、排序有意義且無重複的 Lang 陣列 |
 | search_alias_adoption | `{kind,code,lang,text}` | `{normalized,normalizer}`；normalized 為非空 Text，normalizer 見下文 |
-| rules_name_adoption | `{face_id,region,role}` | `{name,identity_ref,observations}`；name 為來源型 TextValue，另兩欄見下文 |
+| rules_name_adoption | `{face_id,region,role}` | `{names,identity_ref,observations}`；names 為非空來源型 TextValue 陣列，另兩欄見下文 |
 
 ### 4.1 詞彙與語言
 
@@ -181,15 +181,16 @@ loader 重算 normalized，不能信 caller 傳字串；同次查找索引只接
 ### 4.3 特殊構築名稱
 
 role 限 collab/treated_as；一般 primary 仍從同區官方 current 名稱推導，無 current 但所有觀測名稱 exact 相同亦可推導，
-有不同名稱則留未定，不藉特殊名稱封套偷選 primary。name 的語言必與 region 相符（jp→ja，en→en）。
+有不同名稱則留未定，不藉特殊名稱封套偷選 primary。names 每項語言必與 region 相符（jp→ja，en→en）。
+陣列按 canonical bytes 排序，重建後的 exact 名稱不得重複；它是此 face/region/role 的完整特殊名稱集合。
 
 identity_ref 是 `{face_id,card_id,registry_record_key,record_hash,decision_id}`，引用有效面身分；observations 是
 排序唯一的 `{printing_id,face_id,source_ref}` 陣列，完整列該 face/region 在核對範圍的全部名稱來源，
 printing 必同 card、同區且包含此面。新增／移走版次、面重配或任何名稱來源變更均重驗並需新採納。
 規則依據另列 evidence，不因名稱共現就認定 treated_as；沒有同區版次不能造該區名稱關聯。
 
-name 重建後沿既有 `(region,official_name exact)` 產 rules_name，特殊關聯 decision 指本決定。
-本版每個 face/region/role 只採一個特殊名稱；多名稱同 role 是另案擴充，不能塞字串列表或冒用第二個 role。
+各 name 重建後沿既有 `(region,official_name exact)` 產 rules_name，全部特殊關聯 decision 指本決定。
+新增／移除其中一名也要對完整 names 集合續版，不借另一 role 繞過完整集合核對。
 撤回移除該人工關聯，若同名群組仍被其他面／推導 primary 引用則保留，不刪共享物件。
 不剝括號、不跨區合群、不逐面多算牌組張數。
 
@@ -203,6 +204,8 @@ name 重建後沿既有 `(region,official_name exact)` 產 rules_name，特殊�
 route_key 為原始 official 卡號，不是 URL encoded 字串；route 只解決**同區同 exact 卡號**的多個 variant。
 candidates 必完整列同區該 exact 卡號的全部 official printing，至少兩個；選中 printing_id 必為成員。
 不允許 provisional override、跨區 exact 撞號、保留路徑、不存在／錯號目標，亦不修改 card_no 或 variant_key。
+該同號入口只指選中的 variant；其他 variant 保留版次資料但不因此各有一條 official route，
+不得擅加 slug／假卡號／provisional 入口替它們補 URL，新增 URL 能力須另定路由契約。
 跨 JP/EN exact 撞號仍是待決 URL 設計，不能把 region 加入此 authored subject 就假裝公開 URL 已隔離。
 
 兩種 candidates 都是按 printing_id 排序唯一的
@@ -213,9 +216,10 @@ candidates 必完整列同區該 exact 卡號的全部 official printing，至�
 
 預設覆寫的 candidates 完整列同卡同區、在 selection_basis 指定的展示集合內的版次。
 selection_basis 恰為 `{scope_id,scope_hash,selector_version,policy_hash}`；scope_id 是建置配置的具名展示範圍，
-scope_hash 釘該範圍內排序唯一的完整 printing_id 集合；selector 與政策 bytes 由 F1 驗回。
-不是只 hash 當前卡片所挑的一筆。覆寫目標須同卡、同區、可展示；Decklog 不可用不等於不可展示。
-本版採保守 freshness：集合或上述 pins 改變即需重新採納，不把特定 preview 的選擇自動帶到正式全量輸出。
+scope_hash=H(`{scope_id,card_id,region,printing_ids}`)，printing_ids 恰為該範圍中**此卡此區**排序唯一的完整集合；
+selector 與政策 bytes 由 F1 驗回。不是只 hash 選中者，也不把無關卡新增混入此卡的 freshness。覆寫目標須同卡、同區、可展示；Decklog 不可用不等於不可展示。
+此卡此區集合或上述 pins 改變即需重新採納，不把特定 preview 的選擇自動帶到正式全量輸出；
+無關卡新增不使本覆寫失效。
 人工 override 可以選特殊版，不必偽造「一般」證據；投影 method=override，不標 earliest_general。
 
 一般唯一 official 路由仍自動推導，不能為每卡造冗餘 route 決定。
@@ -242,7 +246,7 @@ localization_refs 是按 lang 排序唯一的 `{lang,record_key,record_hash,deci
 不得與基底 lang 重複，且全部 refs 都列入 data.dependencies。所有文案與翻譯的 placeholder 必依 parameter_schema 驗證，不能引入新參數或藏執行語言。
 三語缺項如實缺譯，不能先填未採納文字湊滿三語；32 是候選觀測數，非格式上限或已核可名單。
 
-**技術擴充提案（P7）**：在 translations/glossary 入口增加 `symbol_localization_choice`，
+**翻譯入口的技術擴充**：在 translations/glossary 入口增加 `symbol_localization_choice`，
 record_key 為 `["symbol_localization_choice",symbol_id,lang,adoption_no]` 的 canonical JSON 字串，
 data 恰為 `{symbol_id,lang,symbol_basis,value,origin,concept_evidence,adoption_no,predecessor}`。
 symbol_basis 釘 `{code,parameter_schema_hash,source_localization_hash}`，均可從上述基底重算；不引用將引用它的 symbol 採納決定，避免循環。
@@ -250,24 +254,24 @@ value 為 null（撤回），或 `{name,tooltip,copy_pattern}`，各值**直接�
 採納門檻／來源／續版全部沿該翻譯契約，無模板長尾例外。
 origin／concept_evidence 一律各為以 name/tooltip/copy_pattern 為鍵的完整映射，逐欄沿該契約的 origin enum／證據陣列驗證；
 value=null 時兩者亦為 null。category 固定 symbol_localization_choice、policy_id 固定 translation-symbol-choice-v1，
-其餘決定與 members/hash 規則沿 translation-contract §2；新增 kind 仍須單獨核可。
+其餘決定與 members/hash 規則沿 translation-contract §2。
 不把 tooltip 或 copy_pattern 偽裝 glossary_term，也不新增公開 translation owner／FieldTranslation enum。
 
 symbol 封套只核對這些已採納翻譯引用及參數相容，不重簽翻譯語義；loader 解析 refs 後產公開 Localization 純字串。
 某 choice 續版或撤回後，要新 symbol 採納版更新精確 refs；舊 ref 不可默默套到新基底／schema。
-P7 未核可／未實作前，此新增 translation kind 不合法，不能用本提案繞過既有 loader。
+此新增 translation kind 須由 loader 明示支援並驗完整契約；尚未實作的 loader 不得靜默忽略或當作其他 kind。
 固定三語完整度或缺文案策略見 §8，已核可的術語來源優先順序不在此重定。
 
 ## 7. 預設版次與一般版分類的政策提案
 
 build-db §15 已有順序：同卡同區 → confirmed override → card.home_set 內的一般候選 →
 最早可信 inclusion 日期 → 穩定 ID；無一般候選則從可展示版次以已知日期優先、固定 ID 選 fallback。
-本節提案只細化尚缺的分類證據、完整性與展示集合，不自行改既有先後。
+下述日期、展示集合與完整性是既有語意的技術細化；只有一般版的實際分類清單留待使用者確認，不改選取先後。
 
-**建議方案（P1、P2，待使用者決定）**：採明示 rarity code／普通 frame code 白名單，
+**分類建議（P1，待使用者決定）**：採明示 rarity code／普通 frame code 白名單，
 每個版次必有 premium=false、全部面 signed=false、普通 frame、已採納的無 stamp 證據，才算已證實一般。
 任何一面已知特殊即排除一般；有 null／unreviewed 或缺面則為未知，不當作 false。
-稀有度白名單先考慮 br/sr/gr/lg，但這只是候選，須對 JP／EN 實際完整 code 清單逐項確認；
+稀有度／卡框／標誌的完整清單須由凍結來源重建後，對 JP／EN 實際值逐項確認；本契約不預配白名單。
 PR、純 premium、未知稀有度或新框型不能自動歸普通。普通框的 code 本文件不預配。
 
 無 stamp 不能由 printing_stamp 空表推導。建議分類事實交後續加工採納契約，至少釘
@@ -275,27 +279,32 @@ PR、純 premium、未知稀有度或新框型不能自動歸普通。普通框�
 stamp_state 為 none/present/unknown，none 需該面已完整檢查且 stamp_ids=[]，present 需完整有效 stamp_ids。
 premium 的來源／解析 recipe 亦必可驗；各面與版次完整受審才可供 classifier。
 這是**所需證據的提案，不是新增可寫入 authored 的第三入口**；未完成其正式 loader 前保持未知，不能用裸 GeneralEvidence 布林假冒採納。
-不降低其他加工功能既有 sampled 門檻；是否 sampled 足以宣稱「最早一般版」另見 P2。
+加工審查沿 build-db §3.3 的 sampled/confirmed 門檻並保留抽查標示，不自行提高為全筆 confirmed。
+分類規則的核可與各面加工事實的採納分開；未完成事實採納時維持未知。
 
-日期只取同區 printing_product 的最早可信 day 級 first_available_on；月／年／unknown 不補成某日，
-product.released_on、抓取日、owner 或卡號順序不能代替 inclusion 日期。
+日期依 [build-db §3.2](build-db.md#32-商品與發行)：每筆同區 printing_product 的有效日期，
+在 first_available_precision=null（沒有覆寫）時沿該 product 的 released_on/date_precision；
+有覆寫則以 first_available_on/first_available_precision 為準。只有有效精度為 day 才有完整日期。
+覆寫為 month/year/unknown 時不得回退商品 day，也不得補成某日；商品自身不是 day 時同樣未知。
+必須先有可驗的同區收錄關係才能沿商品日期，不從 owner、抓取日或卡號順序猜收錄。
+printing 取其全部可信 inclusion 的最早已知有效日；任何可能更早的收錄日期未知，仍不能聲稱最早已證實。
 固定 ID tie-break 採 printing.id 原字串升序，不以建置插入次序排序。
 
-| method | 提案中的精確條件 |
+| method | 既有規則的技術細化 |
 | --- | --- |
 | override | fresh confirmed 覆寫，目標在本次展示集合 |
-| earliest_general | 存在 home_set 一般候選，所有可能競爭的一般候選分類已知且可信日期完整；依最早日期、固定 ID 選出 |
-| candidate_general | home_set 尚有未排除的一般候選，但分類或日期不齊；已證實一般者優先，再按已知日期、固定 ID；不稱「最早」 |
-| fallback | home_set 無未排除的一般候選，從本次可展示集合按已知日期、固定 ID 選取；全無版次則不造 default |
+| earliest_general | 存在 home_set 一般候選，全部可能競爭者的分類與有效收錄日期完整；依最早日期、固定 ID 選出 |
+| candidate_general | home_set 有已知一般 rarity 且未有證據排除的一般候選，但加工或有效日期不齊；仍依已知日期、固定 ID 選，不稱「最早」 |
+| fallback | home_set 無上述一般候選，從本次可展示集合按已知日期、固定 ID 選取；全無版次則不造 default |
 
 未知分類者即使暫未選中，仍會阻止 earliest_general；不能只檢查勝出的版次。
-若只有未知加工的 home_set 版次，建議列 candidate_general 並附缺項，這是 P1 待決細節，
-不是已實作 API 行為的背書。政策 pins 與所缺證據須進建置報告；後補證據可改卡片預設，永久 URL 不變。
+只有未知 rarity 而沒有可辨識的一般候選時使用 fallback；已知一般 rarity 但加工未知可為 candidate_general。
+不新增「加工更完整者優先於較早日期者」的排序。政策 pins 與所缺證據須進建置報告；後補證據可改卡片預設，永久 URL 不變。
 
-**展示集合提案（P6）**：selector 接收由既有公開投影規則產生並釘住的完整同區 printing 閉包，
+**展示集合技術契約**：selector 接收由既有公開投影規則產生並釘住的完整同區 printing 閉包，
 包括 unlisted/provisional 與 Decklog unavailable，只要原有發布／投影閘門允許展示；不能由 selector 另作資格黑名單。
 缺卡圖、缺翻譯、表記未定不單獨縮集合；依各既定降級規則顯示。非法／缺引用輸入仍依投影閘門排除或失敗，
-不是本提案授權全部 registry 無條件公開。`/sets` 的已核可區域／歸檔過濾仍在查詢端，不改全站 card 區域預設。
+本契約不授權全部 registry 無條件公開。`/sets` 的已核可區域／歸檔過濾仍在查詢端，不改全站 card 區域預設。
 
 ## 8. 提案，待使用者決定
 
@@ -303,16 +312,14 @@ product.released_on、抓取日、owner 或卡號順序不能代替 inclusion �
 
 | 編號 | 選項 | 建議及影響 |
 | --- | --- | --- |
-| P0 封套與修正 | A：採 §2–§6 的獨立入口、confirmed 全筆、精確成員與只增續版；B：先修訂格式再採用 | 建議 A。已確認資料才能進正式檔；來源變動要重驗，不借身分決定代簽 |
-| P1 一般版及完整性 | A：明示 rarity/frame 白名單＋逐面三態證據，未知可作 candidate；B：未知一律只走 fallback；C：只靠 rarity 推定普通（改變既定未知政策） | 建議 A，白名單逐項確認；C 不建議，會把特殊加工當普通。既定 override/home_set/日期/ID 順序不重問 |
-| P2 無 stamp 與審查程度 | A：逐面 confirmed 的完整圖像核對才能宣稱無 stamp／一般；B：允許已有 sampled 加工組且如實標抽查 | 建議 A 作 earliest_general 的證據門檻；B 可減少人工，但需另定抽查範圍與如何呈現，不把空表當無標誌 |
+| P1 一般版分類 | A：從實際候選清單逐項確認 rarity／frame／stamp 算一般或特殊；B：先只確認部分，其餘留未知 | 建議 A，以來源重產清單為準，不預填已核可。未知不等於普通；既定選取順序、加工採納門檻與日期規則不重問 |
 | P3 稀有度顯示 | A：基礎 rarity 與 premium 分開篩選，可組合顯示；B：另採複合顯示別名 | 建議 A；DB 已分欄，不重問要不要拆。B 也不得另造重複稀有度真值；完整 code/raw 對照另逐條確認 |
 | P4 介面缺字 | A：zh-Hant→ja→en，ja→en，en→ja；B：zh-Hant→en→ja，ja→en，en→ja | 建議 A，符合日文來源方向。末端回基底原文或穩定 code 並標缺譯，不空白；ja/en 仍不得回繁中。卡文沿翻譯契約，不套此順序 |
 | P5 別名比對 | A：NFKC＋casefold，不 trim／合併空白、不折假名、不去標點；B：只 exact；C：再加空白／假名折疊 | 建議 A 並版本化；只改搜尋比對索引，多義保留。C 需另列轉換順序與碰撞清單後核可，不自動擴充 |
-| P6 展示集合 | A：使用既有投影允許的完整同區集合；B：另外選較窄的展示政策 | 建議 A，Decklog 資格與查卡分開；若選 B 須列明排除條件，不讓 caller 任意挑集合冒稱全量 |
-| P7 記號三語文案 | A：§6 的翻譯入口擴充與精確 refs，允許缺譯回原記號；B：相同入口但每個記號三語齊全才啟用 | 建議 A；沿既有翻譯採納，不複製第二份三語表。name/tooltip/copy_pattern 仍需逐項採納；32 個候選不自動全收 |
+| P7 記號三語完整度 | A：允許缺譯回原記號；B：每個記號三語齊全才啟用 | 建議 A；沿既有翻譯採納，不複製第二份三語表。name/tooltip/copy_pattern 仍需逐項採納；32 個候選不自動全收 |
 | P8 固定 enum 顯示 | A：所有對使用者展示的既有 enum 明列專用 vocabulary kind/code；B：首批只採查卡需要者 | 建議 B，其餘保持未啟用且不假裝已翻譯；同名 kind 不跨表混用，不新增 enum 值 |
-| P9 特殊名稱多值 | A：首版每面每區每 role 一個特殊名稱；B：允許同 role 多名稱並改為完整集合續版 | 建議 A，遇真實多名稱需求再擴充；不得為繞限制把名稱誤填另一 role |
+
+P0（封套）、P6（展示集合）屬技術細節，不送使用者核可；其餘編號保留便於對照。
 
 固定英文 code、官方原值映射、各個記號拼法與文案、實際搜尋別名與特殊構築關係仍需資料採納。
 候選的頻次不是核可；萃取修正後須重產 trait 清單，不能採用被切成半截的複合特性。
@@ -346,12 +353,12 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | C17 | route 候選漏 variant／新增競爭者／target 錯號／provisional／跨區撞號 | 拒絕或 stale，不看 UI 語言選勝者 |
 | C18 | default 跨 card／跨 region／目標不在展示集合／scope_hash 錯 | 各自拒絕；Decklog unavailable 可展示基例不誤擋 |
 | C19 | route 續版改已公開目標卻無 repair／撤回刪舊入口 | 發布拒絕；default 改選不能改 URL |
-| C20 | 未知 premium／signed／frame／stamp 當 false，或漏背面 | 各自不能 earliest_general，依核可 P1 降級 |
+| C20 | 未知 premium／signed／frame／stamp 當 false，或漏背面 | 各自不能 earliest_general，依既定未知狀態降級 |
 | C21 | 已知 premium／signed／stamp／特殊框／非白名單 rarity 算一般 | 各自排除一般候選，不受日期早晚影響 |
-| C22 | month 補 day／用 product 日代 inclusion／用跨區日期／同日反向 ID | 各自檢出日期或確定性規則違反 |
+| C22 | 無日期覆寫卻不沿商品 day／覆寫 month、year、unknown 卻回商品 day／商品 month 卻補 day／跨區日期／同日反向 ID | 各自檢出；兩商品日分別 2019、2022、無覆寫且晚者 ID 較小時，仍選 2019 |
 | C23 | 只驗勝出者，忽略未知競爭者／忽略 home_set／忽略 override | 各自檢出 method 或選擇錯誤 |
 | C24 | 先濾 JP 再驗 EN 壞分片／半筆失敗仍提交 DB | 全入口失敗且交易回滾 |
-| C25 | YAML 只換排版／輸入檔順序改／無關卡變而原值映射不變 | canonical 決定與適用詞彙結果不變，不亂失效 |
+| C25 | YAML 只換排版／輸入檔順序改／無關卡變而原值映射不變 | canonical 決定、詞彙結果與不受影響卡片的 default override 保持有效 |
 
 驗收須另覆蓋合法的新採納、完整續版、撤回／恢復、literal/uint/variable、雙面與多區互不污染。
-選定 P1–P9 後把相應預期固化，再以 production 凍結來源驗證覆蓋；候選清單、合成成功與格式核可都不等於正式資料可發布。
+核可 §8 剩餘政策後把相應預期固化，再以 production 凍結來源驗證覆蓋；候選清單、合成成功與格式核可都不等於正式資料可發布。
