@@ -1,0 +1,89 @@
+# Frozen Q&A, errata and related cards
+
+`card_extras` supplies immutable `CardPage` / `ErrataPage` input records for the
+initial sealed-source import and future incremental adapters. It does not fetch
+pages, open a live manifest, read latest cache, or write authored data.
+
+`FrozenCardExtras(store_root, store_id, batch_id).pages()` streams only current
+JP card pages in the pinned batch. Every read verifies the descriptor, receipt,
+raw hash, region, resource kind and physical card number. Its parser recipe is
+`official-card-extras-jp-v1`. The adapter transcribes Q&A text with the existing
+JP renderer, retains the original related href and resolves errata references.
+EN uses the same typed input contract; a real EN adapter is separate work.
+
+Numbered Q&A is identified by `(region, official_number)`, regardless of its
+page-local key. Unnumbered Q&A keeps `official_number=None` and uses the explicit
+stable source key. The JP adapter prefers an HTML anchor; without one, it uses the
+page URL and block locator. That locator is an internal source identity, not an
+official Q number. Future adapters must preserve known unnumbered keys; a moved
+unanchored block needs explicit identity reconciliation rather than a guessed
+number. Unknown dates remain raw with parsed dates null.
+
+Q&A revisions follow observation order (`fetched_at`, immutable source ID,
+block locator), not publication date. Adjacent identical contents share a
+version and union their card IDs; a same-day wording change or reversion creates
+another immutable version. This order records observed versions, not a claimed
+official effective date. All page/block uses survive in `InputRecord`, including
+sources of deduplicated versions and pages with unknown adopted identities.
+
+`plan_card_extras(db, pages, errata=...)` resolves related targets solely by exact
+`(region, raw card_no)` in the already adopted printing graph. A resolved link
+keeps the target printing ID and `official_unspecified`; it does not infer token
+production, counts or DSL. Unknown, external and same-card links remain staging
+entries in `plan.report()` and `build_issue`, without dangling FK or self-links.
+The report contains identifiers, URLs, counts and diagnostics, never Q&A text.
+
+`ErrataPage` accepts independently transcribed announcement/effective dates,
+exact fragments and explicit face identities. Its official source must match the
+region and URL. The importer validates the change's printing/face scope and the
+shared correction-value schema. It leaves before/after revision references null
+and never manufactures a full face revision from a fragment. A printing listing
+stays `listed`; `confirmed_applies` requires an existing confirmed decision linked
+to the exact announcement source. Importing an announcement does not itself
+adjudicate current text. Missing printing/face evidence fails the transaction.
+
+Compose the importer after identity and language staging, in the same caller-owned
+transaction:
+
+```python
+from sve_carddb.build_inputs import BuildContext, input_record
+from sve_carddb.card_extras import plan_card_extras, populate_card_extras
+
+plan = plan_card_extras(db, pinned_pages, errata=pinned_announcements)
+configuration = {**other_configuration, "card_extras": plan.configuration()}
+context = BuildContext.from_inputs(program_revision, dependency_bytes, configuration)
+extra_inputs = populate_card_extras(db, plan, build=context)
+combined = input_record(context, (*other_inputs.uses, *extra_inputs.uses))
+combined.verify(db, context, (*expected_other_uses, *plan.source_uses()))
+```
+
+The configuration pins complete input semantics by hash. Population reconstructs
+the plan against the actual DB before writes and verifies its own input-use subset.
+Use the existing build-bundle publication/verification boundary to recheck archived
+bytes and save DB, complete input record and report together. No capability is
+marked ready merely because this importer or its DDL exists.
+
+A card-page errata reference, or an announcement listing/changing a card, records
+`card_extras:errata_current_pending`. Until separate adjudication has supplied
+valid current evidence, callers must run `require_card_extras_ready(db, scope)`
+for the proposed first-release `(region, card_id)` scope. An unresolved source
+printing uses `(region, region + ":" + raw_card_no)` as its staging scope key.
+The gate rejects only affected scopes and cannot be satisfied by importing
+fragments or confirming that an old printing was listed. Resolution belongs to
+the subsequent adjudication workflow; this importer does not create a decision
+or clear a blocker. The precise missing announcement URLs remain in staging.
+
+No Q&A/errata `source_coverage` is inferred from card pages. Empty or partial
+cardlist coverage does not prove QA/errata absence, and even complete cardlist
+coverage cannot become QA/errata completeness. `plan.report().source_windows`
+is empty; separately verified coverage remains the coverage producer's input.
+
+Already adopted `same_rules_reskin` rows come from the existing registry importer.
+After current text staging, `applicable_reskin_regions(db, text_plan,
+vocabulary=...)` returns only regions with both complete endpoint printings,
+confirmed decisions, exact decision-source pins, unchanged physical evidence and
+matching current rules fields, sections and memberships. It recomputes these
+fields rather than trusting the revision ID alone. A changed current or source
+withholds that region until a new confirmed decision pins both endpoints. The
+result is solely a display projection input; DSL, mechanics, support results and
+construction identities are never inherited.
