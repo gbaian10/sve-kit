@@ -1620,6 +1620,18 @@ def test_default_projection_uses_native_selector_result_and_rejection(
         projected(db)
 
 
+def test_single_region_defaults_only_reference_public_printings(db: Database) -> None:
+    dual_region(db)
+    assert {row.values["region"] for row in db.rows("printing")} == {"jp", "en"}
+    assert {item.region for item in select_defaults(db)} == {"jp", "en"}
+
+    result = projected(db)
+    assert {row["id"] for row in result.tables["printing"]} == {"printing"}
+    assert region(result)["default_printing_id"] == "printing"
+    assert region(result, "en")["default_printing_id"] is None
+    assert region(result, "en")["default_method"] is None
+
+
 def test_native_model_adapter_keeps_full_observation_payload(db: Database) -> None:
     payload: Record = {
         "revision_id": "revision",
