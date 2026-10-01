@@ -87,7 +87,10 @@ class Application:
             "field": self.data.field,
             "status": self.status or "needs_review",
             "correction_hash": self.key(),
-            "raw_face_hash": self.observation.content.fingerprint(),
+            "raw_face_hash": self.observation.card.faces[
+                self.observation.source_index
+            ].fingerprint(),
+            "projected_face_hash": self.observation.content.fingerprint(),
             "observation_hash": self.observation.card.observation.observation_hash,
             "image_source_ids": [source.id for source in self.images],
             "warning": "retire_upstream_fixed_correction"

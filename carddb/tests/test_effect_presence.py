@@ -7,8 +7,10 @@ import pytest
 from pydantic import ValidationError
 
 from sve_carddb.manifest import Kind, Region
+from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.source_archive import seal_batch
+from sve_carddb.source_corrections.plan import corrected_observations
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.text_observations import FrozenTexts
 from sve_carddb.text_observations import plan as planning
@@ -21,6 +23,8 @@ from sve_carddb.text_observations.presence import (
 )
 from sve_carddb.text_observations.report import observation_report
 
+from .registry_snapshot_fixtures import edit_record
+from .source_correction_fixtures import make_correction_case
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture
 from .test_source_archive import _put, _resource, _store
 from .text_observation_fixtures import make_case
@@ -30,6 +34,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.registry.records import Region as CardRegion
     from sve_carddb.registry.review import Inputs
+    from sve_carddb.registry.storage import Entry
     from sve_carddb.text_observations.models import TextCard
 
 
@@ -59,9 +64,11 @@ def page(region: CardRegion, effect: str = "", *, double: bool = False) -> bytes
     ).encode()
 
 
-def card_from_raw(tmp_path: Path, raw: bytes, region: CardRegion = "jp") -> TextCard:
+def card_from_raw(
+    tmp_path: Path, raw: bytes, region: CardRegion = "jp", *, number: str = "SYN-01"
+) -> TextCard:
     store = _store(tmp_path)
-    url = (official_jp if region == "jp" else official_en).card_url("SYN-01")
+    url = (official_jp if region == "jp" else official_en).card_url(number)
     resource = replace(
         _resource(url, "raw/synthetic.html", raw, Kind.CARD),
         region=Region.JP if region == "jp" else Region.EN,
@@ -74,7 +81,7 @@ def card_from_raw(tmp_path: Path, raw: bytes, region: CardRegion = "jp") -> Text
         sealed.batch_id,
         region=region,
         parser_version="synthetic-extractor-pin",
-    ).card(region, "SYN-01")
+    ).card(region, number)
     assert card is not None
     return card
 
@@ -438,3 +445,80 @@ def test_planning_verifies_card_before_processing_evidence(
     monkeypatch.setattr(planning, "verify_card", rejected)
     with pytest.raises(RuntimeError, match="first-line verification"):
         planning.plan_text_observations(case.identity, case.provider)
+
+
+def test_absent_projection_is_preserved_when_source_correction_changes_type(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    fixture = make_correction_case(
+        tmp_path / "authored", inputs, region="en", field="card_type"
+    )
+    assert fixture.texts.plan.corrections is not None
+    case = fixture.texts
+    number = "BP02-070EN"
+    card = card_from_raw(
+        tmp_path / "sealed",
+        page("en")
+        .replace(b"Synthetic type", b"Spell")
+        .replace(b"SYN-01", number.encode()),
+        "en",
+        number=number,
+    )
+
+    def edit(entry: Entry) -> None:
+        entry.data["expected_source_hash"] = card.observation.observation_hash
+
+    edit_record(case.root, "source_correction", edit)
+    evidence = dict(case.identity.evidence)
+    evidence["en", number] = replace(
+        evidence["en", number], source=card.source, observation=card.observation
+    )
+    identity = replace(
+        case.identity, snapshot=load_registry(case.root), evidence=evidence
+    )
+    case.provider.cards["en", number] = card
+    plan = planning.plan_text_observations(
+        identity, case.provider, images=fixture.images
+    )
+    assert plan.corrections is not None
+    application = plan.corrections[0]
+    assert application.status == "applied"
+    raw = application.observation
+    candidate = next(
+        item for item in plan.candidates() if item.printing_id == raw.printing_id
+    )
+    assert candidate == corrected_observations((raw,), (application,))[0]
+    assert card.faces[0].effect is None
+    assert card.effect_presence[0].result.state == "absent"
+    assert raw.content.effect is not None
+    assert not raw.content.effect
+    assert candidate.content.effect is not None
+    assert not candidate.content.effect
+    assert raw.content.type_raw == "Spell"
+    assert candidate.content.type_raw == "Follower"
+    assert candidate.correction_keys == (application.key(),)
+    assert (
+        candidate.content.fingerprint()
+        == raw.content.model_copy(update={"type_raw": "Follower"}).fingerprint()
+    )
+    assert candidate.content.fingerprint() != raw.content.fingerprint()
+    report = application.report()
+    assert report["raw_face_hash"] == card.faces[0].fingerprint()
+    assert report["projected_face_hash"] == raw.content.fingerprint()
+    assert report["raw_face_hash"] != report["projected_face_hash"]
+    assert {use.usage for use in plan.source_uses()} == {
+        "face_text_observation",
+        "face_current_comparison",
+        "effect_presence",
+        "source_correction_comparison",
+        "source_correction_evidence",
+    }
+
+
+def test_raw_observation_cannot_inherit_corrected_candidate_keys(
+    tmp_path: Path, inputs: Inputs
+) -> None:
+    plan = make_correction_case(tmp_path, inputs).texts.plan
+    item = plan.observations[0].model_copy(update={"correction_keys": ("tampered",)})
+    with pytest.raises(ValueError, match="content/source face mismatch"):
+        planning.verify_plan(replace(plan, observations=(item, *plan.observations[1:])))
