@@ -105,9 +105,10 @@ has no `Acked-by`. If you open a pull request, list everyone and every AI model 
 of it in the description, so the maintainer can credit them in the squash commit.
 
 Some changes are written and reviewed by AI models run by the maintainer. Their pull requests
-are opened by bot accounts owned by the maintainer (`…[bot]`), and each round of AI review is
-posted on the pull request. The trailers above record which models wrote and reviewed the
-change, and whether the maintainer approved it personally.
+are opened by bot accounts owned by the maintainer (`…[bot]`). AI review must pass on the local
+branch before pushing and opening the pull request; the reviewer then posts one summary of all
+rounds' findings, fixes and validation on the pull request. The trailers above record which models
+wrote and reviewed the change, and whether the maintainer approved it personally.
 
 ## Code comments
 
