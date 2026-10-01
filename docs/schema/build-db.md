@@ -26,7 +26,7 @@ A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合�
 
 `text_unit.lang` 與 `search_alias.lang` 必須以 `FK(lang)→language(code)` 引用已登錄語言，避免文字或搜尋別名缺少對應的語言配置。新增語言先登錄 `language`，不把外鍵限縮成初始三語的 enum；此規則不將其他 Lang 欄或 JSON 成員自動轉成 SQL FK。
 
-record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，標 policy_checked，不冒稱逐組人工審閱；其他類別的人工門檻不變。
+record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱；其他類別的人工門檻不變。
 
 批次決定以精確 `(record_key,semantic_content_hash)` 成員集合排序後計 `membership_hash`，`sample_ids` 必須是集合子集；不可讓日後新增／修改列繼承舊抽查。各具體表自己的 `decision_id` 是 FK，封套在匯入時展開，不使用可逃避 FK 的 subject 表。證據 source 可多筆。
 

@@ -359,7 +359,7 @@ record.data 新增必填 `review`，恰有 `{mode,rule_set,rule_matches}`；mode
 
 每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位與 hash 計算沿 §10.4；scope=`batch`、category=`wording_adoption`、policy_id=`wording-adoption-v1`、state 固定 `confirmed`。members 恰為本檔全部 `[record_key,完整 record 的 semantic_hash]`；membership_hash 對排序 members 計算，id=`d:<完整 membership hash hex>`。semantic_hash 是歷史欄位名，不表示工具已證明語義相同。
 
-sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_keys 恰為全部精確觀測；human 表示人逐組／逐型態核對，approved_rules 表示依核可政策逐觀測完整機械檢查，**不能把後者宣稱為逐卡人工審閱**。兩種 mode 分檔；同檔 approved_rules 使用同一 rule_set。human 保存實際核對者與時間；approved_rules 的 reviewed_by／reviewed_at／reviewed_precision 保存該規則集核可收據的人名／時間，note 明示「政策核可」，authored_by／authored_at 才是此次工具套用的作者／時間。不捏造使用者此次逐組點擊，也不以舊身分／商品決定代簽。報告分開計 individually_checked_rows、policy_checked_rows 與仍待人工的群組。
+sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_keys 恰為全部精確觀測；human 表示人逐組／逐型態核對，approved_rules 表示依核可政策逐觀測完整機械檢查，**不能把後者宣稱為逐卡人工審閱**。兩種 mode 分檔；同檔 approved_rules 使用同一 rule_set。human 保存實際核對者與時間；approved_rules 的 reviewed_by／reviewed_at／reviewed_precision 保存該規則集核可收據的人名／時間，note 明示「政策核可」，authored_by／authored_at 才是此次工具套用的作者／時間。不捏造使用者此次逐組點擊，也不以舊身分／商品決定代簽。報告分開計 `human_rows`（mode=human）、`approved_rules_rows`（mode=approved_rules）與仍待人工的群組。
 
 只對等義且可表示、排序已解的群組追加採納；未回答、勘誤、不確定、未涵蓋或待排序者留 authored 外的精確收據／診斷，不先寫 proposed 再覆寫。null 主文未能依 §9.8 證明 absent 者仍 deferred，不能以等義回答補造缺文。
 
