@@ -21,6 +21,7 @@ from sve_carddb.registry.records import (
     PrintingData,
     RelatedData,
 )
+from sve_carddb.routes import populate_routes
 from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
@@ -84,6 +85,7 @@ def populate_preview(
                 art_uses[key] = data.id
     for record in plan.included("printing"):
         _printing(db, plan, record, art_uses)
+    populate_routes(db)
     inputs = input_record(build, uses)
     inputs.verify(db, build, plan.source_uses(), complete=False)
     return inputs
