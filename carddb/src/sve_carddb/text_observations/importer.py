@@ -2,6 +2,8 @@
 
 from typing import TYPE_CHECKING
 
+from pydantic import JsonValue
+
 from sve_carddb.build_inputs import (
     BuildContext,
     InputRecord,
@@ -10,6 +12,11 @@ from sve_carddb.build_inputs import (
 )
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import SAFE_INTEGER, canonical, digest, parse
+from sve_carddb.source_corrections.importer import (
+    populate_corrections,
+    verify_corrections,
+)
+from sve_carddb.source_corrections.plan import selected_records
 from sve_carddb.text_observations.configuration import text_configuration
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.plan import verify_plan
@@ -34,9 +41,10 @@ def stat(value: str) -> int | None:
 
 def revision_id(item: FaceObservation) -> str:
     """Bind a candidate identity to its exact face/region/content, never crawl order."""
-    return "rev:v1:" + digest(
-        canonical([item.face_id, item.region, item.content.fingerprint()])
-    ).removeprefix("sha256:")
+    identity: list[JsonValue] = [item.face_id, item.region, item.content.fingerprint()]
+    if item.correction_keys:
+        identity.extend(item.correction_keys)
+    return "rev:v1:" + digest(canonical(identity)).removeprefix("sha256:")
 
 
 def _vocabulary(db: Database, texts: TextInterner, vocabulary: Vocabulary) -> None:
@@ -79,12 +87,15 @@ def _vocabulary(db: Database, texts: TextInterner, vocabulary: Vocabulary) -> No
         existing[key] = values
 
 
-def _revision(
+def _revision(  # ruff: ignore[too-many-arguments] -- the original and corrected variants share one writer with explicit adoption provenance
     db: Database,
     item: FaceObservation,
     ordinal: int,
     texts: TextInterner,
     vocabulary: Vocabulary,
+    *,
+    decision_id: str | None = None,
+    supersedes_id: str | None = None,
 ) -> None:
     content = item.content
     assert content.effect is not None
@@ -108,7 +119,11 @@ def _revision(
             "effective_until": None,
             "temporal_status": "unknown",
             "observed_at": item.card.source.fetched_at,
-            "change_kind": "initial" if ordinal == 1 else "wording",
+            "change_kind": "source_correction"
+            if item.correction_keys
+            else "initial"
+            if ordinal == 1
+            else "wording",
             "name_unit_id": texts.intern(
                 LocalizedText(lang=language, text=content.name)
             ),
@@ -121,8 +136,8 @@ def _revision(
             "attack": attack,
             "defense": defense,
             "source_id": item.card.source.id,
-            "decision_id": None,
-            "supersedes_id": None,
+            "decision_id": decision_id,
+            "supersedes_id": supersedes_id,
         },
     )
     for position, section in enumerate(content.sections):
@@ -209,17 +224,42 @@ def _groups_to_database(
     texts: TextInterner,
     vocabulary: Vocabulary,
 ) -> None:
+    raw_groups: dict[tuple[str, str], list[FaceObservation]] = {}
+    for item in plan.observations:
+        raw_groups.setdefault((item.face_id, item.region), []).append(item)
+    decisions = {
+        application.key(): application.record.decision_id
+        for application in plan.corrections or ()
+    }
     for group in plan.groups:
         variants: dict[str, FaceObservation] = {}
-        for item in group.observations:
+        raw = raw_groups[group.face_id, group.region]
+        for item in (*raw, *group.observations):
             if (item.printing_id, item.face_id, item.card.source.id) in selected:
                 if (item.printing_id, item.face_id) not in parents or parents[
                     item.printing_id, item.face_id
                 ]["source_id"] != item.card.source.id:
                     raise ValueError("Observation printing/face/source parent mismatch")
-                variants.setdefault(item.content.fingerprint(), item)
-        for ordinal, fingerprint in enumerate(sorted(variants), 1):
-            _revision(db, variants[fingerprint], ordinal, texts, vocabulary)
+                variants.setdefault(revision_id(item), item)
+        ordered = sorted(
+            variants.values(),
+            key=lambda item: (bool(item.correction_keys), revision_id(item)),
+        )
+        for ordinal, item in enumerate(ordered, 1):
+            original = next(
+                source for source in raw if source.printing_id == item.printing_id
+            )
+            _revision(
+                db,
+                item,
+                ordinal,
+                texts,
+                vocabulary,
+                decision_id=decisions[item.correction_keys[-1]]
+                if item.correction_keys
+                else None,
+                supersedes_id=revision_id(original) if item.correction_keys else None,
+            )
         current = group.current()
         if current is not None:
             db.insert(
@@ -244,6 +284,8 @@ def populate_text_observations(
 ) -> InputRecord:
     """Populate in a caller-owned transaction, preserving missing-effect source uses."""
     verify_plan(plan)
+    if plan.corrections is None and selected_records(plan.identity):
+        raise ValueError("Scoped source corrections require pinned image evidence")
     if any(
         db.rows(table)
         for table in ("face_revision", "face_current", "printing_face_observation")
@@ -284,6 +326,9 @@ def populate_text_observations(
     _groups_to_database(db, plan, selected, parents, texts, vocabulary)
     for item in materialized:
         _physical(db, item, texts)
+    populate_corrections(db, plan, texts)
+    if plan.corrections is not None:
+        verify_corrections(db, plan, vocabulary)
     record = input_record(build, expected)
     record.verify(db, build, plan.source_uses(), complete=False)
     return record

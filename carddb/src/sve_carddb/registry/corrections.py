@@ -1,6 +1,6 @@
 """Project confirmed corrections without mutating source observations."""
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue
 
@@ -10,6 +10,24 @@ from sve_carddb.registry.inputs import digest
 if TYPE_CHECKING:
     from sve_carddb.registry.review import Inputs
     from sve_carddb.registry.storage import Entry
+
+Status = Literal["applied", "already_fixed", "conflict"]
+
+
+def correction_status(
+    raw: str | None,
+    observation_hash: str,
+    *,
+    expected: str,
+    corrected: str,
+    expected_hash: str,
+) -> Status:
+    """Check upstream fixes before exact old bytes and the complete observation pin."""
+    if raw == corrected:
+        return "already_fixed"
+    if raw == expected and observation_hash == expected_hash:
+        return "applied"
+    return "conflict"
 
 
 def project_corrections(
@@ -51,16 +69,12 @@ def project_corrections(
             else (face.card_type if region == "jp" else face.info["Card Type"])
         )
         source_hash = digest(card.model_dump(mode="json"))
-        matches = (
-            raw == data["expected_raw_value"]
-            and source_hash == data["expected_source_hash"]
-        )
-        status = (
-            "already_fixed"
-            if raw == data["corrected_value"]
-            else "applied"
-            if matches
-            else "conflict"
+        status = correction_status(
+            raw,
+            source_hash,
+            expected=string(data, "expected_raw_value"),
+            corrected=string(data, "corrected_value"),
+            expected_hash=string(data, "expected_source_hash"),
         )
         marker: list[JsonValue] = []
         if status == "applied":

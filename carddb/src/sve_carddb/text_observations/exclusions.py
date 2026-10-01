@@ -6,6 +6,7 @@ from pydantic import JsonValue
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import CompiledSchema, Database, Row, Table, Value
+    from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.records import Region
     from sve_carddb.text_observations.plan import TextPlan
 
@@ -14,12 +15,24 @@ def exclusion_report(
     db: Database, schema: CompiledSchema, plan: TextPlan
 ) -> dict[str, JsonValue]:
     """Close regional seeds over all enabled DB foreign keys, including optional uses."""
+    return {
+        "proposal": "pending-#143",
+        "publication_gate": False,
+        "snapshot_output_authorized": False,
+        **reference_exclusions(db, schema, plan.identity, plan.eligible),
+    }
+
+
+def reference_exclusions(
+    db: Database, schema: CompiledSchema, identity: PreviewPlan, selected: PreviewPlan
+) -> dict[str, JsonValue]:
+    """Close a caller's explicit regional selection over every enabled reference."""
     tables = {table.name: table for table in schema.tables}
     rows = {name: db.rows(name) for name in tables}
     excluded: dict[str, set[tuple[Value, ...]]] = {name: set() for name in tables}
-    _identity_seeds(tables, rows, excluded, plan)
+    _identity_seeds(tables, rows, excluded, identity, selected)
     allowed: set[tuple[str, Region]] = set()
-    for item in plan.eligible.projections:
+    for item in selected.projections:
         if item.disposition == "included" and item.record_key.startswith("face:"):
             allowed.update(
                 (item.record_key.removeprefix("face:"), region)
@@ -33,9 +46,6 @@ def exclusion_report(
                 )
     _close(tables, rows, excluded)
     return {
-        "proposal": "pending-#143",
-        "publication_gate": False,
-        "snapshot_output_authorized": False,
         "excluded_row_counts": {
             name: len(keys) for name, keys in sorted(excluded.items())
         },
@@ -60,7 +70,8 @@ def _identity_seeds(
     tables: dict[str, Table],
     rows: dict[str, tuple[Row, ...]],
     excluded: dict[str, set[tuple[Value, ...]]],
-    plan: TextPlan,
+    identity: PreviewPlan,
+    selected: PreviewPlan,
 ) -> None:
     indices = {
         name: {
@@ -69,13 +80,11 @@ def _identity_seeds(
         }
         for name, table in tables.items()
     }
-    for old, new in zip(
-        plan.identity.projections, plan.eligible.projections, strict=True
-    ):
+    for old, new in zip(identity.projections, selected.projections, strict=True):
         if old.record_key != new.record_key:
             raise ValueError("Identity closure record order mismatch")
         if old.disposition == "included" and new.disposition != "included":
-            record = plan.identity.snapshot.records[old.record_key]
+            record = identity.snapshot.records[old.record_key]
             if record.kind in tables:
                 data = record.entry().data
                 values = tuple(

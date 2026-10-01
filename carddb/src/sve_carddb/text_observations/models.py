@@ -61,6 +61,7 @@ class FaceObservation(RecordData):
     source_index: int
     card: TextCard
     content: FaceContent
+    correction_keys: tuple[str, ...] = ()
 
     def locator(self) -> str:
         """Bind the use to the original physical source index, never inferred ordinals."""
