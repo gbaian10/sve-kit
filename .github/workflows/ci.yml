@@ -62,7 +62,6 @@ jobs:
               - 'carddb/src/sve_carddb/snapshot/schema/**' # the web reader validates against the published schema
 
   repo:
-    needs: changes
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -77,16 +76,21 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
           cache-dependency-glob: carddb/uv.lock
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: hook-cache
         with:
           path: ~/.cache/pre-commit
           # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
           # partial cache that the others hit exactly and then could never update.
           key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
           restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
-      - name: Every hook has a CI owner
-        run: uv run .github/ci/hooks.py check
+      - name: Every hook has a CI owner and every job reaches ci-ok
+        run: |
+          uv run .github/ci/hooks.py check
+          uv run --project carddb --locked --no-default-groups --group dev python -m unittest discover -s .github/ci -p 'test_hooks.py'
       - name: pre-commit (repo-wide hooks, including the gitleaks commit-range scan)
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
@@ -95,6 +99,11 @@ jobs:
           SKIP="$(uv run .github/ci/hooks.py skip repo)"
           export SKIP GITLEAKS_RANGE="${BASE}..${HEAD}"
           uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage manual --show-diff-on-failure
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   python:
     needs: changes
@@ -112,24 +121,47 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
           cache-dependency-glob: carddb/uv.lock
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: hook-cache
         with:
           path: ~/.cache/pre-commit
           # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
           # partial cache that the others hit exactly and then could never update.
           key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
           restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: mypy-cache
+        with:
+          path: carddb/.mypy_cache
+          key: mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml') }}-${{ github.sha }}
+          restore-keys: |
+            mypy-${{ runner.os }}-py3.14-${{ hashFiles('carddb/uv.lock', 'carddb/pyproject.toml') }}-
+            mypy-${{ runner.os }}-py3.14-
+      - name: Runner CPU count
+        run: nproc
       # ruff, mypy (carddb and the ER generator) and pytest, through the same hooks as local runs.
       - name: pre-commit (python hooks)
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip python)"
-          export SKIP
+          export SKIP SVE_DATA_DIR="${RUNNER_TEMP}/sve-carddb-test-data"
           for stage in $(uv run .github/ci/hooks.py stages python); do
             echo "::group::stage $stage"
             uv run --project carddb --locked pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
+        with:
+          path: carddb/.mypy_cache
+          key: ${{ steps.mypy-cache.outputs.cache-primary-key }}
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   rust:
     needs: changes
@@ -172,16 +204,29 @@ jobs:
       - name: Install the pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        with:
+          save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       - uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
         with:
           tool: cargo-llvm-cov@0.9.1,cargo-deny@0.19.9,cargo-machete@0.9.2
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
           install: false
+          cache: false
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
           cache-dependency-glob: carddb/uv.lock
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: hook-cache
+        with:
+          path: ~/.cache/pre-commit
+          # Per job, keyed on the hook set it installs: a shared key let the first job to finish save a
+          # partial cache that the others hit exactly and then could never update.
+          key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
+          restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
       # fmt, clippy, tests with the 90% line-coverage gate, deny and machete, through the local hooks.
       - name: pre-commit (rust hooks)
         run: |
@@ -192,6 +237,11 @@ jobs:
             uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.cache/pre-commit
+          key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   web:
     needs: changes
@@ -207,13 +257,21 @@ jobs:
           persist-credentials: false
       # Bun and Node versions come from mise.toml.
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
-      - uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+      - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        id: hook-cache
         with:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
       # package.json scripts are the single entry point: Prettier, ESLint, Stylelint, tsc -b, Vitest and the build.
       - run: bun run check
+      - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
+        with:
+          path: ~/.bun/install/cache
+          key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   # Every commit that reaches the base branch must follow the commitizen format (.cz.toml), gitmoji included.
   # Runs on every event regardless of paths; the PR title has its own workflow (pr-title.yml).
@@ -228,6 +286,8 @@ jobs:
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
+          save-cache: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+          cache-suffix: ${{ github.job }}
           cache-dependency-glob: carddb/uv.lock
       - name: cz check (pushed commit range)
         env:
@@ -248,12 +308,13 @@ jobs:
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
-          # changes, repo and commit always run; a component job may be skipped only when changes said so.
+          # Unmapped jobs are mandatory; only unchanged components may skip.
+          component='{"python":"python","rust":"rust","web":"web"}'
           jq -e '.changes.result == "success"' <<<"$NEEDS" >/dev/null || { echo "changes: $(jq -r .changes.result <<<"$NEEDS")"; exit 1; }
           status=0
           for job in $(jq -r 'keys[] | select(. != "changes")' <<<"$NEEDS"); do
             result=$(jq -r --arg j "$job" '.[$j].result' <<<"$NEEDS")
-            wanted=$(jq -r --arg j "$job" 'if $j == "repo" or $j == "commit" then "true" else (.changes.outputs[$j] // "true") end' <<<"$NEEDS")
+            wanted=$(jq -r --arg j "$job" --argjson c "$component" 'if $c[$j] then (.changes.outputs[$c[$j]] // "true") else "true" end' <<<"$NEEDS")
             if [ "$result" = success ] || { [ "$wanted" = false ] && [ "$result" = skipped ]; }; then
               echo "ok   $job ($result)"
             else

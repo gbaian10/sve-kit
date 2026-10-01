@@ -63,7 +63,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 測試用官方卡文存於專用私有 GitHub testdata repo，只放測試需要的卡表輸入（目前是完整的日文卡表 JSONL）與來源說明，不放卡圖或憑證；卡文不進 `sve-kit`，不用 R2。
 `sve-kit` 只保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
 更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。
-主分支與專案自己的 PR 跑完整測試，行覆蓋率門檻為 90%；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
+主分支與專案自己的 PR 跑完整測試：Rust 行覆蓋率門檻為 90%，Python 行與分支覆蓋率合計門檻為 90%（本機 pytest hook 與 CI 相同）；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
 fork PR 使用針對剩餘測試配置的獨立覆蓋率門檻與結果標示，不套用完整測試的 90% 門檻，也不宣稱完整覆蓋率驗收通過。
 測試卡文與含卡文的衍生產物不放 Actions cache／artifact；失敗 log 不印整行卡文。私有存放只是存取控制，不等於授權；公開前的 LICENSE 審查須涵蓋這批資料。
 

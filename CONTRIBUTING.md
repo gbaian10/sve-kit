@@ -196,10 +196,12 @@ pre-commit install
 
 The git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
-that component or a shared input. Run them yourself when you change the code they cover:
+that component or a shared input. Python tests enforce 90% combined line and branch coverage;
+Rust tests enforce 90% line coverage. The same thresholds apply locally and in CI.
+Run them yourself when you change the code they cover:
 
 ```bash
-pre-commit run --hook-stage manual pytest       # carddb tests
+pre-commit run --hook-stage manual pytest       # carddb tests with the 90% combined line/branch gate
 pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
 pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI runs the full `bun run check`)
 ```
