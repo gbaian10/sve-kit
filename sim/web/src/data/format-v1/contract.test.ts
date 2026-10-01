@@ -193,20 +193,7 @@ describe("snapshot contract golden", () => {
       }
       const target = item["target"] as string
       const value = target === "manifest" ? m : parseStrict(blobs.get(target) ?? new Uint8Array())
-      // Derive these omissions from the current golden so a new nested tuple column does not
-      // turn their intended positional-join rejection into an unrelated shape failure.
-      let replacement = item["value"] ?? null
-      if (name === "row-index-missing" || name === "face-ordinal-missing") {
-        const fragment = (
-          ((value as JsonObject)["tables"] as JsonObject)["printing"] as JsonObject[]
-        )[0] as JsonObject
-        const rows = fragment["rows"] as JsonValue[][]
-        replacement =
-          name === "row-index-missing"
-            ? rows.slice(0, 1)
-            : (rows[0]?.[1] as JsonValue[]).slice(0, 1)
-      }
-      replace(value, item["path"] as (string | number)[], replacement)
+      replace(value, item["path"] as (string | number)[], item["value"] ?? null)
       if (target !== "manifest") {
         blobs.set(target, canonical(value))
         if (item["rehash"] === true) {
