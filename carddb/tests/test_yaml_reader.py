@@ -9,6 +9,7 @@ import pytest
 import yaml
 from pydantic import JsonValue, RootModel, ValidationError
 from ruamel.yaml import YAML
+from ruamel.yaml.error import YAMLError
 from ruamel.yaml.tokens import AliasToken, AnchorToken, DirectiveToken, TagToken
 
 from sve_carddb.registry import storage, yaml_reader
@@ -17,6 +18,8 @@ from sve_carddb.registry.storage import MAX_BYTES, encode, read_yaml
 
 if TYPE_CHECKING:
     from pytest_mock import MockerFixture
+
+from .yaml_reader_cases import DIFFERENTIAL_CASES
 
 AUTHORED = Path(__file__).resolve().parents[2] / "authored"
 LEGACY_REJECTED = {
@@ -51,9 +54,24 @@ def legacy_read_yaml(path: Path) -> JsonValue:
             and token.value != (1, 2)
         ):
             raise ValueError("Only YAML 1.2 is supported")
-    value = JSON_VALUE.validate_python(parser.load(data), strict=True)
+    parsed = parser.load(data)
+    _legacy_check_keys(parsed)
+    value = JSON_VALUE.validate_python(parsed, strict=True)
     digest(value)
     return value
+
+
+def _legacy_check_keys(value: object) -> None:
+    if isinstance(value, dict):
+        for key, child in value.items():
+            if not isinstance(key, str):
+                raise TypeError("YAML mapping keys must be strings")
+            if key == "<<":
+                raise ValueError("Merge keys are forbidden")
+            _legacy_check_keys(child)
+    elif isinstance(value, list):
+        for child in value:
+            _legacy_check_keys(child)
 
 
 @pytest.mark.parametrize(
@@ -308,3 +326,171 @@ def test_existing_prototypes_with_anchors_remain_rejected(name: str) -> None:
         legacy_read_yaml(path)
     with pytest.raises(TypeError, match="Anchors"):
         read_yaml(path)
+
+
+@pytest.mark.parametrize(
+    "character", ["\u0085", "\u2028", "\u2029"], ids=["nel", "ls", "ps"]
+)
+@pytest.mark.parametrize(
+    "template",
+    ["a: 1{}b: 2\n", "a: 'x{}y'\n", "# comment{}\na: 1\n"],
+    ids=["structure", "scalar", "comment"],
+)
+def test_raw_unicode_breaks_fail_before_c_parser(
+    tmp_path: Path, mocker: MockerFixture, character: str, template: str
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text(template.format(character), encoding="utf-8")
+    constructor = mocker.spy(yaml_reader, "CSafeLoader")
+    with pytest.raises(ValueError, match="Raw Unicode line separators"):
+        read_yaml(path)
+    constructor.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "\ufeff\ufeffa: 1\n",
+        "---\n\ufeffa: 1\n",
+        "a: 1\n\ufeffb: 2\n",
+        "a: 'x\ufeffy'\n",
+        "# comment\ufeff\na: 1\n",
+    ],
+    ids=["double-leading", "document", "key", "scalar", "comment"],
+)
+def test_interior_bom_is_rejected(
+    tmp_path: Path, mocker: MockerFixture, source: str
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text(source, encoding="utf-8")
+    constructor = mocker.spy(yaml_reader, "CSafeLoader")
+    with pytest.raises(ValueError, match="BOM is only allowed"):
+        read_yaml(path)
+    constructor.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "source",
+    [
+        "a:\tb\n",
+        "a: b\t\n",
+        "a: 1 \t# c\n",
+        "a: 'x\ty'\n",
+        "a: |\n  x\ty\n",
+        "# comment\t\na: 1\n",
+    ],
+    ids=["separator", "trailing", "before-comment", "quoted", "block", "comment"],
+)
+def test_all_raw_tabs_are_rejected(
+    tmp_path: Path, mocker: MockerFixture, source: str
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text(source, encoding="utf-8")
+    constructor = mocker.spy(yaml_reader, "CSafeLoader")
+    with pytest.raises(ValueError, match="Raw tab characters"):
+        read_yaml(path)
+    constructor.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    ("escape", "character"),
+    [
+        (r"\u0085", "\u0085"),
+        (r"\u2028", "\u2028"),
+        (r"\u2029", "\u2029"),
+        (r"\uFEFF", "\ufeff"),
+        (r"\t", "\t"),
+    ],
+    ids=["nel", "ls", "ps", "bom", "tab"],
+)
+def test_escaped_characters_preserve_values(
+    tmp_path: Path, escape: str, character: str
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text('a: "x' + escape + 'y"\n')
+    value = read_yaml(path)
+    assert value == {"a": "x" + character + "y"}
+    assert canonical(value) == canonical(legacy_read_yaml(path))
+
+
+@pytest.mark.parametrize(
+    "character", ["\u0085", "\u2028", "\u2029"], ids=["nel", "ls", "ps"]
+)
+def test_encoder_raw_breaks_fail_explicitly(tmp_path: Path, character: str) -> None:
+    path = tmp_path / "input.yaml"
+    data = encode(RootModel[JsonValue]("x" + character + "y"))
+    assert character in data.decode("utf-8")
+    path.write_bytes(data)
+    with pytest.raises(ValueError, match="Raw Unicode line separators"):
+        read_yaml(path)
+
+
+def test_encoder_escapes_tab_and_bom_for_round_trip(tmp_path: Path) -> None:
+    value = "x\t\ufeffy"
+    path = tmp_path / "input.yaml"
+    data = encode(RootModel[JsonValue](value))
+    assert "\t" not in data.decode("utf-8")
+    assert "\ufeff" not in data.decode("utf-8")
+    path.write_bytes(data)
+    assert read_yaml(path) == value
+
+
+@pytest.mark.parametrize(
+    ("source", "expected"),
+    [
+        ("1__0", 10),
+        ("1_", 1),
+        ("+_1", 1),
+        ("0x_1", 1),
+        ("0b1__0", 2),
+        ("0o1_7_", 15),
+        ("1_0.5_", 10.5),
+    ],
+    ids=[
+        "double",
+        "trailing",
+        "after-sign",
+        "after-prefix",
+        "binary-double",
+        "octal-trailing",
+        "float-trailing",
+    ],
+)
+def test_underscore_boundaries_match_legacy(
+    tmp_path: Path, source: str, expected: JsonValue
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text("a: " + source)
+    value = read_yaml(path)
+    assert value == {"a": expected}
+    assert canonical(value) == canonical(legacy_read_yaml(path))
+
+
+@pytest.mark.parametrize(
+    "source",
+    DIFFERENTIAL_CASES,
+    ids=[f"case-{index:03}" for index in range(len(DIFFERENTIAL_CASES))],
+)
+def test_differential_cases_never_loosen_or_rewrite(
+    tmp_path: Path, source: str
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_bytes(source.encode("utf-8", "surrogatepass"))
+    try:
+        old = legacy_read_yaml(path)
+    except ValueError, TypeError, YAMLError:
+        with pytest.raises((ValueError, TypeError), match=r".+"):
+            read_yaml(path)
+        return
+    try:
+        new = read_yaml(path)
+    except ValueError, TypeError:
+        stricter_character = (
+            any(c in source for c in ("\u0085", "\u2028", "\u2029", "\t"))
+            or "\ufeff" in source[1:]
+        )
+        assert stricter_character or source.startswith("%FOO bar\n"), (
+            "Undocumented stricter input"
+        )
+    else:
+        assert canonical(new) == canonical(old)

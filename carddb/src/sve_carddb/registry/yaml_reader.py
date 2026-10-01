@@ -110,11 +110,23 @@ def _mapping(loader: CSafeLoader) -> dict[str, object]:
     return result
 
 
+def _check_characters(text: str) -> None:
+    # libyaml's 1.1 lexer otherwise treats these as breaks and drops interior BOMs.
+    if any(character in text for character in ("\u0085", "\u2028", "\u2029")):
+        raise ValueError("Raw Unicode line separators are forbidden")
+    if "\ufeff" in text[1:]:
+        raise ValueError("BOM is only allowed at character zero")
+    if "\t" in text:
+        raise ValueError("Raw tab characters are forbidden")
+
+
 def parse_yaml(data: bytes) -> object:
     """Parse a single UTF-8 document, rejecting forbidden syntax as events arrive."""
     if not yaml.__with_libyaml__:
         raise RuntimeError("Authored YAML requires PyYAML's libyaml C extension")
-    loader = CSafeLoader(data.decode("utf-8"))
+    text = data.decode("utf-8")
+    _check_characters(text)
+    loader = CSafeLoader(text)
     try:
         if not isinstance(loader.get_event(), StreamStartEvent):
             raise TypeError("Expected a YAML stream")
