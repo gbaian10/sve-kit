@@ -106,7 +106,6 @@ env_files = [
 env_override_existing_values = false
 addopts = [
     "--import-mode=importlib",
-    "-vv",
     "--strict-markers",
     "--maxfail=3",
     # "--durations=5",
@@ -114,7 +113,6 @@ addopts = [
     "--cov-config=pyproject.toml",
     "--cov-report=term-missing",
 ]
-## The --cov-* options above only take effect together with --cov
 
 # <https://pytest-cov.readthedocs.io/en/latest/>  # pytest-cov
 # <https://coverage.readthedocs.io/en/latest/config.html>  # Coverage.py
@@ -137,7 +135,7 @@ exclude_also = [
     "class .*\\bProtocol\\):",
     "if settings.is_dev()",
 ]
-# fail_under = 50
+fail_under = 90
 
 [tool.coverage.html]
 directory = "htmlcov"

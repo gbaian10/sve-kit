@@ -121,11 +121,29 @@ def problems(hooks: list[Hook], owned: dict[str, Owner]) -> list[str]:
     return found
 
 
+def workflow_problems(workflow: dict[str, object]) -> list[str]:
+    """Require the final gate to depend on every other job, including new jobs."""
+    jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
+    needs = jobs.get("ci-ok", {}).get("needs", [])
+    expected = set(jobs) - {"ci-ok"}
+    if (
+        not isinstance(needs, list)
+        or set(needs) != expected
+        or len(needs) != len(expected)
+    ):
+        return ["ci-ok.needs must list every other workflow job exactly once"]
+    return []
+
+
 def main(argv: list[str]) -> int:
     """Run the subcommand in argv and return the exit status."""
     config = load_config()
     hooks, owned = configured_hooks(config), owners()
-    if errors := problems(hooks, owned):
+    workflow = cast(
+        "dict[str, object]",
+        yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
+    )
+    if errors := problems(hooks, owned) + workflow_problems(workflow):
         sys.stderr.write("\n".join(errors) + "\n")
         return 1
     match argv:

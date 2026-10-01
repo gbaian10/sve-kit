@@ -105,9 +105,10 @@ has no `Acked-by`. If you open a pull request, list everyone and every AI model 
 of it in the description, so the maintainer can credit them in the squash commit.
 
 Some changes are written and reviewed by AI models run by the maintainer. Their pull requests
-are opened by bot accounts owned by the maintainer (`…[bot]`), and each round of AI review is
-posted on the pull request. The trailers above record which models wrote and reviewed the
-change, and whether the maintainer approved it personally.
+are opened by bot accounts owned by the maintainer (`…[bot]`). AI review must pass on the local
+branch before pushing and opening the pull request; the reviewer then posts one summary of all
+rounds' findings, fixes and validation on the pull request. The trailers above record which models
+wrote and reviewed the change, and whether the maintainer approved it personally.
 
 ## Code comments
 
@@ -196,10 +197,14 @@ pre-commit install
 
 The git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
-that component or a shared input. Run them yourself when you change the code they cover:
+that component or a shared input. The Python manual hook enforces 90% combined line and branch
+coverage; Rust tests enforce 90% line coverage. The same thresholds apply locally and in CI.
+Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
+full-suite gate; use the Python manual hook for the complete coverage check.
+Run them yourself when you change the code they cover:
 
 ```bash
-pre-commit run --hook-stage manual pytest       # carddb tests
+pre-commit run --hook-stage manual pytest       # carddb tests with the 90% combined line/branch gate
 pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line-coverage gate
 pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI runs the full `bun run check`)
 ```
