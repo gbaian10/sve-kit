@@ -94,7 +94,7 @@ SQLite 的原始 `Any` 不得離開邊界模組；其他層只使用已驗證的
 
 - 請求之間至少間隔 2 秒，帶瀏覽器 User-Agent（官網的 CloudFront 不帶會回 404）
 - **只抓新增或變動的內容**，原始資料已存在就不重抓
-- `crawl --mode refresh` 會覆寫既有 latest 原始檔；[來源歸檔保護](docs/schema/source-archive.md#4-refresh-與中斷恢復)完整接入前不要執行，不能以已有 manifest backup 代替 raw 歷史保護。
+- `crawl --mode refresh` 會覆寫既有 latest 原始檔；須依[受保護抓取的操作條件](docs/schema/refresh-operation.md)完成前置條件並經維護者明示同意才可執行，不能以已有 manifest backup 代替[來源歸檔保護](docs/schema/source-archive.md#4-refresh-與中斷恢復)。
 - 每個抓下來的檔案都要在 manifest 記錄來源網址、抓取時間、ETag、雜湊值
 
 ## 開發指令

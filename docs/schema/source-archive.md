@@ -106,6 +106,8 @@ live manifest 與 latest cache 的所有受控入口共用 `Settings.lock_path`�
 
 ## 4. refresh 與中斷恢復
 
+實際配置與啟用前置見[受保護抓取的操作條件](refresh-operation.md)；須完成前置條件並經維護者明示同意才可執行。協議完整接入或程式合併本身不授權對真實資料執行 refresh。
+
 Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有順序為 temp write→驗證→fsync→replace→目錄 fsync→manifest commit。replace 後、commit 前中斷會成為 untrusted；不能宣稱拿到 ExclusiveLock 就能消除此空隙。
 
 替換協議在這個順序前增加：核對舊 Resource／raw，確認舊 blob、版本 descriptor 及收據已耐久封存；新 bytes 亦先產出內容定址 blob 與候選寫入 metadata，才允許替換 latest／commit 新 Resource；候選不是 observation receipt，正式收據需在 commit 後由吻合的新 manifest 副本產生。大量圖片準備仍按 §3 在鎖外做，最終持鎖重驗舊狀態。無舊內容或 hash 不符時，列入缺失診斷並阻止覆蓋，不能先換新版再嘗試歸檔舊版。
