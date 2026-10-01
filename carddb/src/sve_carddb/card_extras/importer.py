@@ -22,7 +22,9 @@ def populate_card_extras(
     db: Database, plan: ExtrasPlan, *, build: BuildContext
 ) -> InputRecord:
     """Populate in the composing transaction; recheck plans against actual identities."""
-    if plan != plan_card_extras(db, plan.pages, errata=plan.errata):
+    if plan != plan_card_extras(
+        db, plan.pages, errata=plan.errata, qa_pages=plan.qa_pages
+    ):
         raise ValueError("Card extras plan differs from adopted identities")
     configuration = parse(build.configuration.encode())
     if (

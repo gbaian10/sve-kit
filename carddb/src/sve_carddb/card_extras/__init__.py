@@ -11,7 +11,9 @@ from sve_carddb.card_extras.models import (
     ErrataChange,
     ErrataPage,
     ErrataPrinting,
+    QABlock,
     QAEntry,
+    QAPage,
     RelatedLink,
 )
 from sve_carddb.card_extras.plan import ExtrasPlan, plan_card_extras
@@ -25,7 +27,9 @@ __all__ = [
     "ErrataPrinting",
     "ExtrasPlan",
     "FrozenCardExtras",
+    "QABlock",
     "QAEntry",
+    "QAPage",
     "RelatedLink",
     "applicable_reskin_regions",
     "parse_card_page",

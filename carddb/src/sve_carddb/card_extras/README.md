@@ -1,15 +1,19 @@
 # Frozen Q&A, errata and related cards
 
 `card_extras` supplies immutable `CardPage` / `ErrataPage` input records for the
-initial sealed-source import and future incremental adapters. It does not fetch
-pages, open a live manifest, read latest cache, or write authored data.
+initial sealed-source import and incremental adapters. Its parsing/planning and
+frozen readers do not fetch pages, open a live manifest or read latest cache.
+Protected fetching is a separate explicit adapter described below; none writes
+authored data.
 
 `FrozenCardExtras(store_root, store_id, batch_id).pages()` streams only current
 JP card pages in the pinned batch. Every read verifies the descriptor, receipt,
 raw hash, region, resource kind and physical card number. Its parser recipe is
 `official-card-extras-jp-v1`. The adapter transcribes Q&A text with the existing
 JP renderer, retains the original related href and resolves errata references.
-EN uses the same typed input contract; a real EN adapter is separate work.
+`parse_card_page(..., region="en")` uses the same typed input contract with the
+existing EN physical-page validator and EN text renderer. Its parser recipe is
+`official-card-extras-en-v1`. Regional URLs and raw numbers remain independent.
 
 Numbered Q&A is identified by `(region, official_number)`, regardless of its
 page-local key. Unnumbered Q&A keeps `official_number=None` and uses the explicit
@@ -38,9 +42,9 @@ crawl. Observation order then produces separate observed versions, even within
 one crawl; it does not prove an official revision or select authoritative current
 wording. Compare cross-page wording and inspect all retained source uses before
 consuming a version as current. Do not collapse a crawl to the last page, infer
-official chronology from fetch time, or discard conflicting pages. A future
-incremental adapter must expose such conflicts for reconciliation; this initial
-import has no crawl-wide reconciliation policy.
+official chronology from fetch time, or discard conflicting pages. `FrozenOfficialExtras.report(root)` exposes such conflicts for reconciliation,
+scoped to the latest generation rather than mixing historical changes with a
+single crawl. It does not supply an authoritative-current-wording policy.
 
 `plan_card_extras(db, pages, errata=...)` resolves related targets solely by exact
 `(region, raw card_no)` in the already adopted printing graph. A resolved link
@@ -117,3 +121,78 @@ fields rather than trusting the revision ID alone. A changed current or source
 withholds that region until a new confirmed decision pins both endpoints. The
 result is solely a display projection input; DSL, mechanics, support results and
 construction identities are never inherited.
+
+## Protected incremental adapters
+
+`QACrawler(http, refresh_writer, region=..., run_id=...)` uses the existing
+`Client` / `Crawler` and requires a `RefreshWriter` before any request. It fixes
+the minimum gap at two seconds, sends a browser User-Agent, preserves ETags and
+uses conditional requests. A 304 or byte-identical 200 preserves the source
+version; a changed body goes through the protected old-version archival and
+backup protocol before replacement. `collect(root)` discovers explicit listing
+and detail links; `cards(raw_numbers)` refreshes explicitly selected regional
+physical card pages and retains their related hrefs. It never fetches unknown
+related targets automatically. Both checkpoint protected history even after an
+interruption. These are library adapters; no automatic production crawl command
+or official endpoint discovery is enabled here.
+
+The pure `sources.official_qa` parser retains every `.qa-List_Item` and its
+original card links. Listings use `.qa-Pager` links with explicit `data-page`
+numbers and `.qa-List` `data-page`, `data-max-page`, `data-total` declarations.
+The root must expose all page URLs; the total counts listing positions, including
+repeated detail associations. Full question/answer blocks may appear inline or
+on detail pages. A partial wording block is rejected. Empty listings require an
+explicit `.qa-Empty` marker. Dates use the existing full-year date parser, or
+explicit `data-published-on` / `data-updated-on`; unparseable dates remain raw and
+null. `data-state="withdrawn"` is explicit evidence; absence, a 404 or an
+unfetched detail never manufactures withdrawal. Unanchored unnumbered blocks
+are marked as needing identity reconciliation.
+
+These listing/detail signals are an explicit synthetic adapter contract, tested
+in both regions with invented wording. Actual official listing pagination and
+withdrawal markup have not been validated by this change. Before production
+use, verify the signals against separately pinned frozen source examples.
+Missing declarations remain unknown rather than receiving inferred defaults.
+EN card-page tests use the existing EN icon renderer's `src` plus `alt` contract;
+they do not establish real EN Q&A listing compatibility.
+
+Generation closure requires every page from 1 through the explicit maximum,
+matching declarations and targets, all referenced detail bodies, matching total
+positions and no unrelated members. The root is fetched again before validation;
+a changed root fails the attempt. This proves observed discovery closure, not an
+atomic official snapshot. Cross-page wording conflicts can coexist with complete
+discovery and remain visible for reconciliation. Interruptions and malformed or
+incomplete discovery mark the new generation failed and retain partial sources.
+A previous validated generation is not evidence that this new attempt completed.
+
+`FrozenOfficialExtras(store_root, store_id, batch_id, region=...)` opens only a
+verified frozen manifest snapshot. `qa_pages()` and `card_pages()` expose every
+archived regional version, preserving replaced and withdrawn observations.
+Listing sources are stored as `list`, details as `qa`, card pages as `card`;
+pin the applicable archive scopes when sealing. `coverage(root)` independently
+checks the latest attempt's raw hashes, frozen sources, exact edges, metadata and
+closure even if its manifest flag says validated. `generation_pages(root)` gives
+that attempt's verified observations. `report(root)` combines identifier-only
+coverage and cross-page conflicts; it contains no official wording. None of
+these methods writes a temporal QA `source_coverage` window or confirms semantic
+absence from a card-list generation.
+
+Compose the shared importer with all retained observations:
+
+```python
+plan = plan_card_extras(db, provider.card_pages(), qa_pages=provider.qa_pages())
+# Use the same BuildContext / InputRecord composition shown above.
+report = {**plan.report(), "qa_incremental": provider.report(root)}
+```
+
+`changes(previous_db, plan, references=...)` returns only new `qa_version` IDs
+and affected downstream identifiers. It never adjudicates semantic impact or
+changes a ruling, DSL document or translation. Association-only changes can list
+affected downstream IDs without inventing a wording version. Adopted card associations come
+from the existing DB and new plan. Ruling/DSL/translation QA dependency tables
+are not implemented in the current build DB, so callers can supply an explicit
+inventory of `DownstreamUse(qa_version_id, kind, id)` records from those producers.
+Missing inventory returns null for those categories, never an empty list that
+claims no references. Provided records must refer to versions in the previous
+DB. Confirming inventory completeness belongs to those producers; this adapter
+does not invent dependencies or implement their schemas.

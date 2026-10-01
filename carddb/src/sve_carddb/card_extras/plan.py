@@ -9,7 +9,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse, uses_sorted
 from sve_carddb.card_extras.archive import card_number
-from sve_carddb.card_extras.models import CardPage, ErrataPage, QAEntry, key
+from sve_carddb.card_extras.models import CardPage, ErrataPage, QAEntry, QAPage, key
 from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
@@ -25,7 +25,7 @@ class QAVersion:
     id: str
     revision: int
     entry: QAEntry
-    pages: tuple[CardPage, ...]
+    pages: tuple[CardPage | QAPage, ...]
     card_ids: tuple[str, ...]
 
 
@@ -68,6 +68,7 @@ class ExtrasPlan:
     questions: tuple[QAVersion, ...]
     relations: tuple[Relation, ...]
     gaps: tuple[Gap, ...]
+    qa_pages: tuple[QAPage, ...] = ()
 
     def source_uses(self) -> tuple[SourceUse, ...]:
         """Keep evidence closure even for duplicates, unknown targets and empty pages."""
@@ -98,6 +99,30 @@ class ExtrasPlan:
                 SourceUse(source=page.source, usage="errata_reference", locator=url)
                 for url in page.errata_urls
             )
+        for qa_page in self.qa_pages:
+            uses.append(
+                SourceUse(
+                    source=qa_page.source,
+                    usage="qa_page",
+                    locator=qa_page.source.url,
+                )
+            )
+            for block in qa_page.blocks:
+                uses.append(
+                    SourceUse(
+                        source=qa_page.source,
+                        usage="official_qa",
+                        locator=block.entry.locator,
+                    )
+                )
+                uses.extend(
+                    SourceUse(
+                        source=qa_page.source,
+                        usage="qa_card_reference",
+                        locator=link.locator,
+                    )
+                    for link in block.card_links
+                )
         for notice in self.errata:
             uses.append(
                 SourceUse(
@@ -118,13 +143,18 @@ class ExtrasPlan:
 
     def configuration(self) -> dict[str, JsonValue]:
         """Pin input semantics by hash, without persisting official content in reports."""
-        return {
+        result: dict[str, JsonValue] = {
             "recipe": "card-extras-v1",
             "pages": [key("page", page.model_dump(mode="json")) for page in self.pages],
             "errata": [
                 key("notice", page.model_dump(mode="json")) for page in self.errata
             ],
         }
+        if self.qa_pages:
+            result["qa_pages"] = [
+                key("qa-page", page.model_dump(mode="json")) for page in self.qa_pages
+            ]
+        return result
 
     def report(self) -> dict[str, JsonValue]:
         """Keep production counts separate from caller-owned synthetic test counts."""
@@ -155,7 +185,11 @@ def printing_index(db: Database) -> dict[tuple[str, str], Mapping[str, Value]]:
 
 
 def plan_card_extras(
-    db: Database, pages: Iterable[CardPage], *, errata: tuple[ErrataPage, ...] = ()
+    db: Database,
+    pages: Iterable[CardPage],
+    *,
+    errata: tuple[ErrataPage, ...] = (),
+    qa_pages: Iterable[QAPage] = (),
 ) -> ExtrasPlan:
     """Create deterministic offline staging against an already adopted identity graph."""
     checked = tuple(
@@ -186,7 +220,9 @@ def plan_card_extras(
         )
     )
     printings = printing_index(db)
-    questions: dict[str, list[tuple[QAEntry, CardPage, str]]] = defaultdict(list)
+    questions: dict[str, list[tuple[QAEntry, CardPage | QAPage, str | None]]] = (
+        defaultdict(list)
+    )
     relations: dict[str, Relation] = {}
     gaps: list[Gap] = []
     for page in checked:
@@ -225,6 +261,13 @@ def plan_card_extras(
             )
             for url in page.errata_urls
         )
+    checked_qa = tuple(
+        sorted(
+            {QAPage.model_validate_json(page.model_dump_json()) for page in qa_pages},
+            key=lambda page: (page.region, page.source.fetched_at, page.source.id),
+        )
+    )
+    _qa_observations(checked_qa, printings, questions, gaps)
     for notice in notices:
         numbers = {item.card_no for item in notice.printings} | {
             item.card_no for item in notice.changes
@@ -249,7 +292,45 @@ def plan_card_extras(
         versions,
         tuple(relations[name] for name in sorted(relations)),
         tuple(gaps),
+        checked_qa,
     )
+
+
+def _qa_observations(
+    pages: tuple[QAPage, ...],
+    printings: dict[tuple[str, str], Mapping[str, Value]],
+    questions: dict[str, list[tuple[QAEntry, CardPage | QAPage, str | None]]],
+    gaps: list[Gap],
+) -> None:
+    for page in pages:
+        for block in page.blocks:
+            cards: set[str] = set()
+            for link in block.card_links:
+                url = urljoin(page.source.url, link.href_raw)
+                number = card_number(url, page.region)
+                printing = (
+                    None if number is None else printings.get((page.region, number))
+                )
+                if printing is None:
+                    gaps.append(
+                        Gap(
+                            "qa_target_missing"
+                            if number is not None
+                            else "qa_link_unrecognized",
+                            page.region,
+                            number or "",
+                            None,
+                            page.source.id,
+                            link.locator,
+                            url,
+                        )
+                    )
+                else:
+                    cards.add(str(printing["card_id"]))
+            for card in sorted(cards) if cards else [None]:
+                questions[block.entry.identity(page.region)].append(
+                    (block.entry, page, card)
+                )
 
 
 def _relations(
@@ -302,11 +383,11 @@ def _relations(
 
 
 def _qa_versions(
-    questions: dict[str, list[tuple[QAEntry, CardPage, str]]],
+    questions: dict[str, list[tuple[QAEntry, CardPage | QAPage, str | None]]],
 ) -> tuple[QAVersion, ...]:
     versions: list[QAVersion] = []
     for owner, entries in sorted(questions.items()):
-        episodes: list[list[tuple[QAEntry, CardPage, str]]] = []
+        episodes: list[list[tuple[QAEntry, CardPage | QAPage, str | None]]] = []
         for observed in sorted(
             entries,
             key=lambda item: (
@@ -336,7 +417,7 @@ def _qa_versions(
                     revision,
                     entry,
                     tuple(item[1] for item in episode),
-                    tuple(sorted({item[2] for item in episode})),
+                    tuple(sorted({item[2] for item in episode if item[2] is not None})),
                 )
             )
     return tuple(versions)

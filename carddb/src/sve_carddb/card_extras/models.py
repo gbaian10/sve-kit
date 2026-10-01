@@ -77,6 +77,41 @@ class CardPage(RecordData):
         return self
 
 
+class QABlock(RecordData):
+    entry: QAEntry
+    card_links: tuple[RelatedLink, ...] = ()
+
+    @model_validator(mode="after")
+    def unique_locators(self) -> QABlock:
+        """Require a distinct locator for each retained reference."""
+        locators = [link.locator for link in self.card_links]
+        if len(set(locators)) != len(locators):
+            raise ValueError("Duplicate Q&A card-link locator")
+        return self
+
+
+class QAPage(RecordData):
+    source: Source
+    region: Region
+    blocks: tuple[QABlock, ...] = ()
+
+    @model_validator(mode="after")
+    def source_identity(self) -> QAPage:
+        """Reject foreign sources and ambiguous block locators."""
+        host = official_jp.HOST if self.region == "jp" else official_en.HOST
+        parts = urlsplit(self.source.url)
+        if (
+            (parts.scheme, parts.netloc) != ("https", host)
+            or not parts.path.startswith(("/qa/", "/faq/"))
+            or self.source.kind != "official_page"
+        ):
+            raise ValueError("Q&A source URL/region/media mismatch")
+        locators = [block.entry.locator for block in self.blocks]
+        if len(set(locators)) != len(locators):
+            raise ValueError("Duplicate Q&A block locator")
+        return self
+
+
 class ErrataChange(RecordData):
     card_no: Text
     face_id: Text
