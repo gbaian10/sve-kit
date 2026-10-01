@@ -177,7 +177,7 @@ review and its source link, and non-original output settings. Row-local checks
 cover required source metadata, withdrawal reasons, WebP format and hash-derived
 paths. Available/approved source metadata may have no variants yet. Physical
 source/bytes matching, decoding, review envelope and batch membership, exact
-recipe output and the complete five/three-size image set still require the future
+recipe output and the complete five-size image set for both orientations still require the future
 importer/image builder/domain validator. SQL checks do not attest those facts.
 
 ## Schema version and rebuilds
