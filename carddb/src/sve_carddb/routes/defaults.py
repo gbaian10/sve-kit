@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
 
     from sve_carddb.build_db.database import Database, Row
+    from sve_carddb.routes.rarity_policy import RarityWhitelist
 
 
 @dataclass(frozen=True)
@@ -125,9 +126,18 @@ def select_defaults(
     db: Database,
     *,
     general_evidence: Mapping[str, GeneralEvidence] | None = None,
+    rarity_whitelist: RarityWhitelist | None = None,
 ) -> tuple[DefaultPrinting, ...]:
     """Select per card/region; unspecified rarity/frame/stamp policy yields fallback."""
-    evidence = {} if general_evidence is None else general_evidence
+    if rarity_whitelist is not None and general_evidence is not None:
+        raise ValueError("Rarity whitelist cannot borrow unadopted processing facts")
+    evidence = (
+        rarity_whitelist.evidence(db)
+        if rarity_whitelist is not None
+        else {}
+        if general_evidence is None
+        else general_evidence
+    )
     printings = db.rows("printing")
     if set(evidence) - {text(row, "id") for row in printings}:
         raise ValueError("General evidence references an absent printing")

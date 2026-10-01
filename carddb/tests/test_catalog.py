@@ -166,7 +166,16 @@ def test_symbol_cannot_bypass_pins_and_adoption(
     if mutation == "unpinned":
         build = BuildContext.from_inputs("a" * 40, {"synthetic.lock": b"lock"}, {})
     with (
-        pytest.raises(ValueError, match=r"configuration|decision|evidence|language"),
+        pytest.raises(
+            ValueError,
+            match={
+                "unpinned": r"^Build configuration does not pin the catalog$",
+                "unconfirmed": r"^Catalog adoption requires confirmed sourced decision$",
+                "no_evidence": r"^Catalog adoption requires confirmed sourced decision$",
+                "raw_only": r"^Catalog adoption requires authored evidence$",
+                "unknown_language": r"^Symbol language is not registered$",
+            }[mutation],
+        ),
         db.transaction(),
     ):
         if mutation == "unconfirmed":

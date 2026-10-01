@@ -47,6 +47,17 @@ def populate_preview(
     db: Database, plan: PreviewPlan, *, authored_revision: str, build: BuildContext
 ) -> InputRecord:
     """Populate inside a caller-owned transaction, including rebuild_database callbacks."""
+    inputs = populate_identity_rows(
+        db, plan, authored_revision=authored_revision, build=build
+    )
+    populate_routes(db)
+    return inputs
+
+
+def populate_identity_rows(
+    db: Database, plan: PreviewPlan, *, authored_revision: str, build: BuildContext
+) -> InputRecord:
+    """Stage identities before checked same-number overrides in one owned transaction."""
     if not re.fullmatch(r"[0-9a-f]{40}", authored_revision):
         raise ValueError("Authored revision must be a full Git commit SHA")
     parents = {row.values["id"] for row in db.rows("product_family")}
@@ -85,7 +96,6 @@ def populate_preview(
                 art_uses[key] = data.id
     for record in plan.included("printing"):
         _printing(db, plan, record, art_uses)
-    populate_routes(db)
     inputs = input_record(build, uses)
     inputs.verify(db, build, plan.source_uses(), complete=False)
     return inputs
