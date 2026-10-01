@@ -208,6 +208,48 @@ def test_markup_rendering_handles_nested_breaks_whitespace_and_exact_stem() -> N
     assert official_en.render(require_one(tree, "div")) == "A B\nC {a.multi|δ}\nD"
 
 
+def test_icon_stem_preserves_case() -> None:
+    tree = parse(
+        '<div><img src="/icons/Synthetic.BadGe.svg?version=1#fragment" alt="badge"></div>'
+    )
+    assert official_en.render(require_one(tree, "div")) == "{Synthetic.BadGe|badge}"
+
+
+@pytest.mark.parametrize("symbol", ["―", "─", "ー", "-"])
+@pytest.mark.parametrize("length", [4, 5])
+def test_section_separator_requires_at_least_five_symbols(
+    symbol: str, length: int
+) -> None:
+    separator = symbol * length
+    raw = page().replace(
+        b"-----<br>Auxiliary<br>------<br>Last",
+        separator.encode() + b"<br>Auxiliary",
+    )
+    record = official_en.extract_card(raw, number="SYNⓈ-01aEN")
+    text = "First {synthetic.badge|[badge]}\nNext"
+    complete = text + "\n" + separator + "\nAuxiliary"
+    assert record.faces[0].raw_text == complete
+    assert official_en.legacy_projection(record).faces[0].text == complete
+    assert record.faces[0].text == (text if length == 5 else complete)
+    assert record.faces[0].sections == (["Auxiliary"] if length == 5 else [])
+
+
+def test_empty_back_face_name_fails_after_valid_front_face() -> None:
+    raw = page(double=True).replace(b">Synthetic back</h1>", b"></h1>")
+    en.parse_card(raw, expected_number="SYNⓈ-01aEN")
+    with pytest.raises(ValidationError, match="Empty EN card name"):
+        official_en.extract_card(raw, number="SYNⓈ-01aEN")
+
+
+def test_back_face_image_without_src_fails_after_valid_front_face() -> None:
+    raw = b"".join(
+        page(double=True).rsplit('src="../exact/SYNⓈ-01aEN.png?v=7"'.encode(), 1)
+    )
+    en.parse_card(raw, expected_number="SYNⓈ-01aEN")
+    with pytest.raises(ValidationError, match="EN card image has no src"):
+        official_en.extract_card(raw, number="SYNⓈ-01aEN")
+
+
 def test_measurement_explicitly_selects_production_adapter() -> None:
     card = compare_en.parse_legacy_card(page(), "SYNⓈ-01aEN")
     assert card.faces[0].text == FULL_TEXT

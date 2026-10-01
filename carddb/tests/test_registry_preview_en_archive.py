@@ -33,6 +33,26 @@ if TYPE_CHECKING:
 NUMBER = "SYNⓈ-01aEN"
 
 
+def test_double_face_rarity_is_read_from_each_face(tmp_path: Path) -> None:
+    raw = b"<dd>GR</dd>".join(page(double=True).rsplit(b"<dd>LG</dd>", 1))
+    store = _store(tmp_path)
+    _put(
+        store,
+        replace(
+            _resource(en.card_url(NUMBER), "raw/card.html", raw, Kind.CARD),
+            region=Region.EN,
+        ),
+        raw,
+    )
+    sealed = seal_batch(store)
+    provider = FrozenEN(
+        store.root, store.store_id, sealed.batch_id, parser_version="en-test"
+    )
+    found = provider.card("en", NUMBER)
+    assert found is not None
+    assert tuple(face.rarity_raw for face in found.faces) == ("LG", "GR")
+
+
 def test_exact_en_source_pins_first_receipt_and_recomputes_both_hashes(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
