@@ -29,7 +29,14 @@ the parser's code/dependency version explicitly.
 Providers must bind extracted observations and face metadata to the actual raw
 source version; they must not echo expected registry hashes. `CardEvidence.from_card`
 computes the original recipe from extracted data. `MemoryEvidence` supports
-synthetic JP/EN sources in tests. A production EN adapter is not implemented here.
+synthetic JP/EN sources in tests. `FrozenEN` uses the same sealed metadata reader
+with the production EN extractor and its measured legacy projection.
+`FrozenRegions(jp=jp_provider, en=en_provider)` composes pinned regional providers
+by explicit region; it never infers counterparts from suffixes. EN exact page
+number, region, descriptor kind, HTML media type and both observation hashes are
+checked. Face rarity/credits come from the original source face index.
+See [offline extraction](../../extract/README.md) for the EN rendering contract.
+Neither provider reads historical JSONL or uses it as source evidence.
 `coverage(hash)` means the **complete historic review input** with that exact hash
 has been independently pinned and verified. A batch of individual HTML sources
 is not that old JSONL input; `FrozenJP.coverage` therefore returns false.
