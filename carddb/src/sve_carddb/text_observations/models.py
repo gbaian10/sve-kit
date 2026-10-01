@@ -72,6 +72,8 @@ class TextCard(RecordData):
         proof = self.effect_presence[index]
         effect = content.effect
         if proof.result.state == "absent":
+            if effect not in {None, ""}:
+                raise ValueError("Absent effect presence contradicts extracted effect")
             effect = ""
         elif proof.result.state == "unknown" and effect in {None, ""}:
             effect = None

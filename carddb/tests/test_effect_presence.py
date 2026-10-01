@@ -11,10 +11,12 @@ from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources import official_en, official_jp
 from sve_carddb.text_observations import FrozenTexts
+from sve_carddb.text_observations import plan as planning
 from sve_carddb.text_observations.archive import verify_card
 from sve_carddb.text_observations.presence import (
     PARSER,
     EffectPresence,
+    PresenceResult,
     detect_presence,
 )
 from sve_carddb.text_observations.report import observation_report
@@ -271,3 +273,168 @@ def test_required_status_is_checked_even_for_existing_empty_container(
     )
     assert proof.result.state == "unknown"
     assert proof.result.reason_code == "incomplete_source"
+
+
+@pytest.mark.parametrize("effect", ["Synthetic rule", " "])
+def test_absent_cannot_erase_nonempty_extractor_effect(
+    tmp_path: Path, effect: str
+) -> None:
+    card = card_from_raw(tmp_path, page("jp"))
+    changed = card.faces[0].model_copy(update={"effect": effect})
+    with pytest.raises(ValueError, match="contradicts extracted effect"):
+        card.model_copy(update={"faces": (changed,)}).projected(0)
+
+
+@pytest.mark.parametrize("effect", [None, ""])
+def test_absent_accepts_only_null_or_empty_effect(
+    tmp_path: Path, effect: str | None
+) -> None:
+    card = card_from_raw(tmp_path, page("jp"))
+    changed = card.faces[0].model_copy(update={"effect": effect})
+    projected = card.model_copy(update={"faces": (changed,)}).projected(0)
+    assert projected.effect is not None
+    assert not projected.effect
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+def test_textless_icon_container_is_present(tmp_path: Path, region: CardRegion) -> None:
+    card = card_from_raw(
+        tmp_path,
+        page(
+            region,
+            '<div class="detail"><img src="/synthetic-icon.png" alt="Synthetic icon"></div>',
+        ),
+        region,
+    )
+    assert card.effect_presence[0].result.state == "present"
+    assert card.effect_presence[0].result.reason_code == "nonempty_container"
+    assert card.projected(0).effect is not None
+
+
+@pytest.mark.parametrize("change", ["stray_text", "terminal_credit"])
+def test_omission_requires_clean_direct_text_and_terminal_credit(
+    tmp_path: Path, change: str
+) -> None:
+    card = card_from_raw(tmp_path, page("jp"))
+    assert card.raw is not None
+    if change == "stray_text":
+        raw = card.raw.replace(
+            b'<div class="txt-Inner">', b'<div class="txt-Inner">Synthetic stray rule'
+        )
+    else:
+        raw = card.raw.replace(
+            b"</span></div></div></div></div>",
+            b'</span></div><div class="speech"></div></div></div></div>',
+        )
+    assert raw != card.raw
+    proof = detect_presence(
+        raw, card.source, region="jp", number="SYN-01", source_index=0
+    )
+    assert proof.result.state == "unknown"
+    assert proof.result.reason_code == "ambiguous_container"
+
+
+@pytest.mark.parametrize("change", ["labels", "Cost", "Power", "Hp", "faces", "detail"])
+def test_each_completeness_constraint_independently_blocks_absence(
+    tmp_path: Path, change: str
+) -> None:
+    card = card_from_raw(tmp_path, page("en", '<div class="detail"></div>'), "en")
+    assert card.raw is not None
+    if change == "labels":
+        raw = card.raw.replace(b"<dt>Rarity</dt>", b"<dt>Synthetic label</dt>")
+    elif change in {"Cost", "Power", "Hp"}:
+        raw = card.raw.replace(
+            f"status-Item-{change}".encode(), b"status-Item-Synthetic"
+        )
+    elif change == "faces":
+        face = card.raw.split(b'<div class="cardlist-Detail">', 1)[1].split(
+            b"</div><!--", 1
+        )[0]
+        raw = card.raw.replace(face, face * 3, 1)
+    else:
+        raw = card.raw.replace(
+            b"</div><!--", b'</div><div class="cardlist-Detail"></div><!--'
+        )
+    assert raw != card.raw
+    proof = detect_presence(
+        raw, card.source, region="en", number="SYN-01", source_index=0
+    )
+    assert proof.result.state == "unknown"
+
+
+@pytest.mark.parametrize(
+    ("state", "reason"),
+    [
+        ("absent", "nonempty_container"),
+        ("present", "empty_container"),
+        ("unknown", "empty_container"),
+    ],
+)
+def test_state_reason_pairs_reject_even_self_consistent_hashes(
+    tmp_path: Path, state: str, reason: str
+) -> None:
+    value = (
+        card_from_raw(tmp_path, page("jp")).effect_presence[0].model_dump(mode="json")
+    )
+    value["result"].update(state=state, reason_code=reason)
+    value["result_hash"] = digest(canonical(value["result"]))
+    with pytest.raises(ValidationError, match="state/reason pair"):
+        EffectPresence.model_validate(value)
+
+
+def test_known_state_requires_template_even_with_matching_hash(tmp_path: Path) -> None:
+    value = (
+        card_from_raw(tmp_path, page("jp"))
+        .effect_presence[0]
+        .result.model_dump(mode="json")
+    )
+    value["template_id"] = None
+    with pytest.raises(ValidationError, match="recognized template"):
+        PresenceResult.model_validate(value)
+
+
+@pytest.mark.parametrize("field", ["effect_presence", "raw_face_hash"])
+def test_configuration_pins_evidence_and_original_face_independently(
+    tmp_path: Path, inputs: Inputs, field: str
+) -> None:
+    case = make_case(tmp_path / "authored", inputs)
+    card = card_from_raw(tmp_path / "sealed", page("jp"))
+    item = case.plan.observations[0].model_copy(
+        update={"card": card, "content": card.projected(0)}
+    )
+    plan = replace(case.plan, observations=(item,))
+    if field == "effect_presence":
+        result = card.effect_presence[0].result.model_copy(
+            update={"reason_code": "empty_container"}
+        )
+        proof = EffectPresence(
+            result=result, result_hash=digest(canonical(result.model_dump(mode="json")))
+        )
+        altered = card.model_copy(update={"effect_presence": (proof,)})
+    else:
+        altered = card.model_copy(
+            update={"faces": (card.faces[0].model_copy(update={"effect": ""}),)}
+        )
+    changed = replace(plan, observations=(item.model_copy(update={"card": altered}),))
+    assert changed.observations[0].content == plan.observations[0].content
+    assert changed.configuration() != plan.configuration()
+
+
+def test_presence_without_frozen_bytes_is_rejected(tmp_path: Path) -> None:
+    card = card_from_raw(tmp_path, page("jp"))
+    with pytest.raises(ValueError, match="no frozen source bytes"):
+        verify_card(card.model_copy(update={"raw": None}))
+
+
+def test_planning_verifies_card_before_processing_evidence(
+    tmp_path: Path, inputs: Inputs, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    case = make_case(tmp_path, inputs)
+
+    def rejected(card: TextCard) -> None:
+        assert card in case.provider.cards.values()
+        raise RuntimeError("first-line verification")
+
+    monkeypatch.setattr(planning, "verify_card", rejected)
+    with pytest.raises(RuntimeError, match="first-line verification"):
+        planning.plan_text_observations(case.identity, case.provider)
