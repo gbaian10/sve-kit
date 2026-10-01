@@ -19,6 +19,7 @@ from sve_carddb.registry.allocation import (
     region_allocations,
 )
 from sve_carddb.registry.inputs import JSON_VALUE, canonical, digest
+from sve_carddb.registry.transitions.files import require_empty_transitions
 from sve_carddb.registry.yaml_reader import parse_yaml
 
 if TYPE_CHECKING:
@@ -169,6 +170,7 @@ class RegistryFiles:
 
 def read_registry_files(root: Path) -> RegistryFiles:
     """Read checked envelopes once, without discarding their source or membership."""
+    require_empty_transitions(root)
     path = root / "ids" / "index.yaml"
     if not path.exists():
         if any((root / "registry").glob("**/*.yaml")) or any(
@@ -384,6 +386,7 @@ def plan_files(
     loaded: tuple[Index, dict[str, Entry]] | None = None,
 ) -> dict[Path, bytes]:
     """Preserve all old entries and shards; only append newly allocated state."""
+    require_empty_transitions(root)
     index, old = load(root) if loaded is None else loaded
     new: dict[tuple[str, str], list[Entry]] = defaultdict(list)
     for entry in entries:
@@ -417,6 +420,7 @@ def relayout(
 
     Only for the one-time pre-publication reshard; normal runs append via plan_files.
     """
+    require_empty_transitions(root)
     groups: dict[tuple[str, str], list[Entry]] = defaultdict(list)
     for entry in entries:
         groups[_area(entry), entry.owner].append(entry)
