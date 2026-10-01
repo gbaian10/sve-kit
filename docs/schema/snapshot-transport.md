@@ -98,6 +98,10 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | 出現位置 | 型別名 | columns（依序） |
 | --- | --- | --- |
 | face.current | Current | region, revision_id, basis |
+| face.wording | WordingView | region, state, display, candidates, undated_printing_ids |
+| WordingView.display | WordingDisplay | revision_id, basis |
+| WordingView.candidates | WordingCandidate | printing_id, revision_id |
+| PrintingFace.observations | ObservedText | revision_id, state, source_url |
 | art.artists | ArtArtist | artist_id, role |
 | PrintingFace.stamps | PrintingStamp | stamp_id, position, color |
 | ErrataVersion.changes | ErrataChange | face_id, field, before, after |
@@ -110,7 +114,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | card_engine_support.overrides | SupportOverride | region, support |
 | card_engine_support.region_blocks | RegionBlock | region, reasons |
 
-每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表格 tuple 中保留的 JSON 值只接受 §3.2 的 `ParameterSchema` 與 §3.3 的 `CorrectionValue`，descriptor 分別用 `{"json":"ParameterSchema"}`／`{"json":"CorrectionValue"}`；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
+每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表記未定新增的 WordingView／WordingDisplay／WordingCandidate／ObservedText 是 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現) 的候選擴充，nullable／enum 依該節，不從 face_current 推斷。face.wording 接在 face.current 之後，PrintingFace.observations 接在 printed_text_state 之後（詳情分片同位置）；實作時須同步現有候選 Schema、types、fragment columns、golden 與 reader，本文件不表示機器契約已更新。表格 tuple 中保留的 JSON 值只接受 §3.2 的 `ParameterSchema` 與 §3.3 的 `CorrectionValue`，descriptor 分別用 `{"json":"ParameterSchema"}`／`{"json":"CorrectionValue"}`；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
 
 `Correction.source_url` 沒有可公開官方頁 URL 時填 null；`card_related.applicable_regions` 非 reskin 時填 null。所有 tuple 仍佔原位置；空字串、缺欄、少一格不等於 null。
 
@@ -204,7 +208,7 @@ role=bootstrap 只能裝 bootstrap fragments，role=text 只裝 detail/history�
 | printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces |
 | PrintingFaceBootstrap | face_id, art_id, frame_code, signed, embellishment_state, stamps |
 | printing/detail | row_index, faces |
-| PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, sections, translations, corrections |
+| PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, observations, sections, translations, corrections |
 | face_revision/bootstrap | id, face_id, region, name_unit_id, class_code, type_code, cost, attack, defense, traits, titles, special_kinds, translations |
 | face_revision/detail | row_index, revision, effective_from, effective_until, temporal_status, change_kind, effect_unit_id, sections, translations, corrections |
 
@@ -212,7 +216,7 @@ printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 Prin
 
 row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。detail 按 row_index 排序，每個 base row 必須且只能有一列 detail，包含文字未知／空陣列的卡，不能藉缺列改變 unknown 語意。printing detail 每列須恰有與 bootstrap 相同的 faces 集合，從 base 的 face_id 連回 face.ordinal 來定位。join 以 base 還原 id／face_id，不輸出 row_index／face_ordinal；translations 按 `(field,ordinal,target_lang)` 合併並拒絕同鍵重複，合併後依該鍵排序（null ordinal 在數字前）。
 
-`current_ref` 只是從所有 face.current.revision_id 推導的去重集合，不是 manifest 欄位、檔案或第 41 個集合。集合內 revision 只用 bootstrap/detail，集合外才用 history；同一 revision 不可同時兩邊出現。current 切換時舊 revision 進 history、新 revision 進 current，仍保留永久 ID。所有分割 join 後必須恰等於公開邏輯投影：無遺失、無重複欄、無額外列。
+`current_ref` 只是從所有 face.current.revision_id 推導的去重集合，不是 manifest 欄位、檔案或第 41 個集合。傳輸分割依 snapshot-format §2.3 的 `display_ref`（current_ref 加暫顯／候選所有非 null revision 的聯集）：聯集內只用 bootstrap/detail，聯集外才用 history；同一 revision 不可同時兩邊出現。current／候選切換時重算 display_ref，未再被它引用的 revision 才進 history，永久 ID 不變；進啟動包不等於成為已採納 current。所有分割 join 後必須恰等於公開邏輯投影：無遺失、無重複欄、無額外列。
 
 例如 base 有依 ID 排序的兩列 revision，detail 的 `[1,...]` 只可指第二列。缺 base hash、hash 指舊片、index=2、重複 index=1、漏 index=0，或 printing 同一 face_ordinal 兩次，都必須拒收，不能 fallback 到最新 bootstrap。
 
