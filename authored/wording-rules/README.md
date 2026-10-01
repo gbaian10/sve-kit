@@ -5,11 +5,18 @@ that decision with day precision. The receipt format was adopted by the
 coordinator under the user's authorization; it is not a separate user review of
 the serialization format.
 
-The policy and approval JSON files are immutable inputs. Their canonical JSON
+The policy and approval YAML files are immutable inputs. Hash the complete
+parsed values with the project's canonical JSON recipe, including conditions,
+exclusions, finite transformations and synthetic examples. Their canonical
 hashes, immutable authored revision and exact file bytes must be pinned before
 use. Changing a matcher or its finite parameters requires a new policy and
 approval, not editing the historical receipt. Policy approval is not a per-card
 human review or an adoption-order answer.
+
+Each matcher version is bound to the policy's fixed positive and negative
+examples; the consumer tests must run and compare those same examples. Example
+parameters are test inputs only, not an expansion of the production reminder or
+term inventory. The complete common boundary is part of the policy hash too.
 
 All matches compare complete content for the same face and region. Name, class,
 type, cost, attack, defense, ordered traits and title must be exact. A null main
