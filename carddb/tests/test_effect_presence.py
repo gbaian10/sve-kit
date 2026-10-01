@@ -6,13 +6,15 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
+from sve_carddb.html import parse as parse_html
+from sve_carddb.html import select_all
 from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.snapshot.values import canonical, digest, parse
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.source_corrections.plan import corrected_observations
 from sve_carddb.sources import official_en, official_jp
-from sve_carddb.text_observations import FrozenTexts
+from sve_carddb.text_observations import FrozenTexts, presence
 from sve_carddb.text_observations import plan as planning
 from sve_carddb.text_observations.archive import verify_card
 from sve_carddb.text_observations.presence import (
@@ -84,6 +86,64 @@ def card_from_raw(
     ).card(region, number)
     assert card is not None
     return card
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "none",
+        "text",
+        "href",
+        "markup",
+        "duplicate",
+        "before_credit",
+        "wrong_credit",
+        "en",
+    ],
+)
+def test_notice_template_accepts_only_pinned_terminal_block_after_valid_credit(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, change: str
+) -> None:
+    notice = '<div class="illustrator"><span><font color="red">Synthetic publication notice <a href="https://example.invalid/notice">Synthetic link</a></font></span></div>'
+    html = parse_html(notice)
+    notice_hash = digest((select_all(html, ".illustrator")[0].html or "").encode())
+    monkeypatch.setattr(presence, "_JP_NOTICE_HASHES", frozenset({notice_hash}))
+    region: CardRegion = "en" if change == "en" else "jp"
+    raw = page(region)
+    if change in {"text", "href", "markup"}:
+        replacements = {
+            "text": ("publication notice", "rule with a different meaning"),
+            "href": ("/notice", "/different"),
+            "markup": ("<span>", '<span class="extra">'),
+        }
+        before, after = replacements[change]
+        notice = notice.replace(before, after)
+    elif change == "duplicate":
+        notice += notice
+    if change == "before_credit":
+        raw = raw.replace(
+            b'<div class="illustrator">',
+            notice.encode() + b'<div class="illustrator">',
+            1,
+        )
+    else:
+        raw = raw.replace(
+            b"</span></div></div></div></div>",
+            b"</span></div>" + notice.encode() + b"</div></div></div>",
+        )
+    if change == "wrong_credit":
+        raw = raw.replace(b"SYN-01", b"SYN-02")
+    card = card_from_raw(tmp_path, raw, region)
+    proof = card.effect_presence[0].result
+    if change == "none":
+        assert proof.state == "absent"
+        assert proof.template_id == "jp-card-detail-notice-v1"
+        assert card.projected(0).effect is not None
+        assert not card.projected(0).effect
+        verify_card(card)
+    else:
+        assert proof.state == "unknown"
+        assert card.projected(0).effect is None
 
 
 @pytest.mark.parametrize("region", ["jp", "en"])

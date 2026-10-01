@@ -396,5 +396,61 @@
       "t:ja:90d435ce36c2c997",
       []
     ]
+  },
+  {
+    "name": "wording-current-cannot-be-null",
+    "schema": "WordingDisplay",
+    "value": [
+      null,
+      "current"
+    ]
+  },
+  {
+    "name": "wording-latest-cannot-be-null",
+    "schema": "WordingDisplay",
+    "value": [
+      null,
+      "latest_known_release"
+    ]
+  },
+  {
+    "name": "wording-candidates-cannot-select-revision",
+    "schema": "WordingDisplay",
+    "value": [
+      "r:a2",
+      "candidates"
+    ]
+  },
+  {
+    "name": "observed-available-cannot-be-null",
+    "schema": "ObservedText",
+    "value": [
+      null,
+      "available",
+      "https://example.invalid/source"
+    ]
+  },
+  {
+    "name": "observed-missing-cannot-borrow-revision",
+    "schema": "ObservedText",
+    "value": [
+      "r:a2",
+      "missing_effect",
+      "https://example.invalid/source"
+    ]
+  },
+  {
+    "name": "pending-candidates-required",
+    "schema": "WordingView",
+    "value": [
+      "jp",
+      "pending",
+      [
+        null,
+        "candidates"
+      ],
+      [],
+      []
+    ]
   }
 ]

@@ -587,5 +587,119 @@
     ],
     "value": "２０２６-09-29",
     "rehash": true
+  },
+  {
+    "name": "pending-cross-face-observation",
+    "target": "detail",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows",
+      0,
+      1,
+      0,
+      5,
+      0,
+      0
+    ],
+    "value": "r:b1",
+    "rehash": true,
+    "error": "Observation revision belongs"
+  },
+  {
+    "name": "pending-candidate-without-own-observation",
+    "target": "bootstrap",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      3,
+      0,
+      1
+    ],
+    "value": "r:a1",
+    "rehash": true,
+    "error": "no printing observation"
+  },
+  {
+    "name": "pending-null-cannot-replace-available-observation",
+    "target": "bootstrap",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      3,
+      0,
+      1
+    ],
+    "value": null,
+    "rehash": true,
+    "error": "no printing observation"
+  },
+  {
+    "name": "pending-undated-inventory-incomplete",
+    "target": "bootstrap",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      4
+    ],
+    "value": [],
+    "rehash": true,
+    "error": "undated wording"
+  },
+  {
+    "name": "pending-preserves-valid-current",
+    "target": "bootstrap",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      null,
+      "candidates"
+    ],
+    "rehash": true,
+    "error": "preserve a valid current"
+  },
+  {
+    "name": "pending-current-display-must-match",
+    "target": "bootstrap",
+    "path": [
+      "tables",
+      "face",
+      0,
+      "rows",
+      0,
+      5,
+      0,
+      2
+    ],
+    "value": [
+      "r:b1",
+      "current"
+    ],
+    "rehash": true,
+    "error": "disagrees with adopted current"
   }
 ]

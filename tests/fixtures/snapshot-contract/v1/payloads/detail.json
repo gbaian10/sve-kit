@@ -147,6 +147,30 @@
         }
       ]
     },
+    "ObservedText": {
+      "columns": [
+        "revision_id",
+        "state",
+        "source_url"
+      ],
+      "items": [
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "enum": [
+            "available",
+            "missing_effect",
+            "correction_conflict"
+          ]
+        },
+        {
+          "scalar": "URL"
+        }
+      ]
+    },
     "PrintingFaceDetail": {
       "columns": [
         "face_ordinal",
@@ -154,6 +178,7 @@
         "printed_effect_unit_id",
         "flavor_unit_id",
         "printed_text_state",
+        "observations",
         "sections",
         "translations",
         "corrections"
@@ -185,6 +210,11 @@
             "unknown",
             "omitted"
           ]
+        },
+        {
+          "array": {
+            "ref": "ObservedText"
+          }
         },
         {
           "array": {
@@ -298,7 +328,7 @@
         "base": {
           "file": {
             "key": "bootstrap",
-            "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a"
+            "sha256": "sha256:5eeccc2d60b6669222cd08acdce8485ec4d7ae9d26bcf7ff71ae32902ee0e288"
           },
           "table": "printing",
           "owner": {
@@ -322,6 +352,13 @@
                 null,
                 null,
                 "unknown",
+                [
+                  [
+                    "r:a2",
+                    "available",
+                    "https://example.invalid/observations/a"
+                  ]
+                ],
                 [],
                 [],
                 []
@@ -332,6 +369,7 @@
                 null,
                 null,
                 "unknown",
+                [],
                 [],
                 [],
                 []
@@ -347,6 +385,7 @@
                 "t:ja:b17a760c59cb19db",
                 null,
                 "verified",
+                [],
                 [
                   [
                     0,
@@ -381,6 +420,7 @@
                 "unknown",
                 [],
                 [],
+                [],
                 []
               ]
             ]
@@ -399,7 +439,7 @@
         "base": {
           "file": {
             "key": "bootstrap",
-            "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a"
+            "sha256": "sha256:5eeccc2d60b6669222cd08acdce8485ec4d7ae9d26bcf7ff71ae32902ee0e288"
           },
           "table": "face_revision",
           "owner": {

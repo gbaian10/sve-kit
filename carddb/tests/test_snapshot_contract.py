@@ -200,7 +200,10 @@ def test_shared_reader_counterexamples(case: JsonValue) -> None:
     if target != "manifest":
         blobs[target] = canonical(value)
         if item["rehash"]:
-            _reseal(manifest, target, blobs[target])
+            if target == "bootstrap":
+                _replace_bootstrap(manifest, blobs, value)
+            else:
+                _reseal(manifest, target, blobs[target])
     with pytest.raises(
         (ValueError, ValidationError, KeyError, TypeError),
         match=string(item["error"]) if "error" in item else None,

@@ -19,6 +19,7 @@
       "c:a",
       0,
       "front",
+      [],
       []
     ]
   },
@@ -559,6 +560,7 @@
       [],
       [],
       [],
+      [],
       []
     ]
   },
@@ -778,6 +780,7 @@
       null,
       null,
       "unknown",
+      [],
       [],
       [],
       []
@@ -1514,6 +1517,74 @@
                     "ref": "Support"
                   }
                 ]
+              },
+              "WordingCandidate": {
+                "columns": [
+                  "printing_id",
+                  "revision_id"
+                ],
+                "items": [
+                  {
+                    "scalar": "ID"
+                  },
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  }
+                ]
+              },
+              "WordingDisplay": {
+                "columns": [
+                  "revision_id",
+                  "basis"
+                ],
+                "items": [
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "current",
+                      "latest_known_release",
+                      "candidates"
+                    ]
+                  }
+                ]
+              },
+              "WordingView": {
+                "columns": [
+                  "region",
+                  "state",
+                  "display",
+                  "candidates",
+                  "undated_printing_ids"
+                ],
+                "items": [
+                  {
+                    "scalar": "Region"
+                  },
+                  {
+                    "enum": [
+                      "pending"
+                    ]
+                  },
+                  {
+                    "ref": "WordingDisplay"
+                  },
+                  {
+                    "array": {
+                      "ref": "WordingCandidate"
+                    }
+                  },
+                  {
+                    "array": {
+                      "scalar": "ID"
+                    }
+                  }
+                ]
               }
             },
             "tables": {
@@ -1577,7 +1648,8 @@
                     "card_id",
                     "ordinal",
                     "side",
-                    "current"
+                    "current",
+                    "wording"
                   ],
                   "rows": [
                     [
@@ -1591,7 +1663,8 @@
                           "r:a2",
                           "latest_adopted_wording"
                         ]
-                      ]
+                      ],
+                      []
                     ],
                     [
                       "f:b",
@@ -1604,7 +1677,8 @@
                           "r:b1",
                           "dated_effective"
                         ]
-                      ]
+                      ],
+                      []
                     ]
                   ]
                 }
@@ -2107,6 +2181,30 @@
                   }
                 ]
               },
+              "ObservedText": {
+                "columns": [
+                  "revision_id",
+                  "state",
+                  "source_url"
+                ],
+                "items": [
+                  {
+                    "nullable": {
+                      "scalar": "ID"
+                    }
+                  },
+                  {
+                    "enum": [
+                      "available",
+                      "missing_effect",
+                      "correction_conflict"
+                    ]
+                  },
+                  {
+                    "scalar": "URL"
+                  }
+                ]
+              },
               "PrintingFaceDetail": {
                 "columns": [
                   "face_ordinal",
@@ -2114,6 +2212,7 @@
                   "printed_effect_unit_id",
                   "flavor_unit_id",
                   "printed_text_state",
+                  "observations",
                   "sections",
                   "translations",
                   "corrections"
@@ -2145,6 +2244,11 @@
                       "unknown",
                       "omitted"
                     ]
+                  },
+                  {
+                    "array": {
+                      "ref": "ObservedText"
+                    }
                   },
                   {
                     "array": {
@@ -2220,6 +2324,7 @@
                           "unknown",
                           [],
                           [],
+                          [],
                           []
                         ],
                         [
@@ -2228,6 +2333,7 @@
                           null,
                           null,
                           "unknown",
+                          [],
                           [],
                           [],
                           []
@@ -2245,6 +2351,7 @@
                           "verified",
                           [],
                           [],
+                          [],
                           []
                         ],
                         [
@@ -2253,6 +2360,7 @@
                           null,
                           null,
                           "unknown",
+                          [],
                           [],
                           [],
                           []
@@ -2720,6 +2828,60 @@
       "unknown",
       null,
       []
+    ]
+  },
+  {
+    "name": "pending-wording-WordingDisplay",
+    "schema": "WordingDisplay",
+    "value": [
+      null,
+      "candidates"
+    ]
+  },
+  {
+    "name": "pending-wording-WordingCandidate",
+    "schema": "WordingCandidate",
+    "value": [
+      "p:a",
+      null
+    ]
+  },
+  {
+    "name": "pending-wording-WordingView",
+    "schema": "WordingView",
+    "value": [
+      "jp",
+      "pending",
+      [
+        null,
+        "candidates"
+      ],
+      [
+        [
+          "p:a",
+          null
+        ]
+      ],
+      [
+        "p:a"
+      ]
+    ]
+  },
+  {
+    "name": "pending-wording-ObservedText",
+    "schema": "ObservedText",
+    "value": [
+      null,
+      "missing_effect",
+      "https://example.invalid/missing"
+    ]
+  },
+  {
+    "schema": "ObservedText",
+    "value": [
+      "r:a2",
+      "correction_conflict",
+      "https://example.invalid/conflict"
     ]
   }
 ]

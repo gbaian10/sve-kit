@@ -25,3 +25,12 @@ must reject for the same reason without copying Python exception wording.
 The golden also contains a product with a null type. Its wire tuple and logical
 object are independently specified; this exercises the candidate nullable product
 contract without relaxing the authored manual product input.
+
+The pending wording extension adds fixed WordingDisplay, WordingCandidate,
+WordingView and ObservedText tuples. The front face retains a valid current while
+listing one available and one unavailable printing candidate; the settled back
+omits wording. Wire tuples and expected logical values remain independently
+specified. New shared negative cases cover display/null pairings, pending
+candidate references, current preservation, source observation scope and unknown
+date inventories. TypeScript consumers must add these descriptors and checks
+before consuming the updated golden.

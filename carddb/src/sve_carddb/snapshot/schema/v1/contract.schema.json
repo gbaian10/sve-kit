@@ -807,6 +807,12 @@
         {
           "type": "array",
           "items": {
+            "$ref": "#/$defs/ObservedText"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
             "$ref": "#/$defs/Section"
           }
         },
@@ -830,8 +836,8 @@
         }
       ],
       "items": false,
-      "minItems": 13,
-      "maxItems": 13,
+      "minItems": 14,
+      "maxItems": 14,
       "x-columns": [
         "face_id",
         "art_id",
@@ -842,6 +848,7 @@
         "printed_effect_unit_id",
         "flavor_unit_id",
         "printed_text_state",
+        "observations",
         "sections",
         "stamps",
         "translations",
@@ -896,6 +903,11 @@
             "unknown",
             "omitted"
           ]
+        },
+        {
+          "array": {
+            "ref": "ObservedText"
+          }
         },
         {
           "array": {
@@ -2140,6 +2152,12 @@
         {
           "type": "array",
           "items": {
+            "$ref": "#/$defs/ObservedText"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
             "$ref": "#/$defs/Section"
           }
         },
@@ -2157,14 +2175,15 @@
         }
       ],
       "items": false,
-      "minItems": 8,
-      "maxItems": 8,
+      "minItems": 9,
+      "maxItems": 9,
       "x-columns": [
         "face_ordinal",
         "printed_name_unit_id",
         "printed_effect_unit_id",
         "flavor_unit_id",
         "printed_text_state",
+        "observations",
         "sections",
         "translations",
         "corrections"
@@ -2196,6 +2215,11 @@
             "unknown",
             "omitted"
           ]
+        },
+        {
+          "array": {
+            "ref": "ObservedText"
+          }
         },
         {
           "array": {
@@ -2295,6 +2319,259 @@
         "id"
       ]
     },
+    "WordingDisplay": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "enum": [
+            "current",
+            "latest_known_release",
+            "candidates"
+          ]
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2,
+      "x-columns": [
+        "revision_id",
+        "basis"
+      ],
+      "x-types": [
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "enum": [
+            "current",
+            "latest_known_release",
+            "candidates"
+          ]
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {
+                "const": "candidates"
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "else": {
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/ID"
+              }
+            ]
+          }
+        }
+      ]
+    },
+    "WordingCandidate": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/ID"
+        },
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      ],
+      "items": false,
+      "minItems": 2,
+      "maxItems": 2,
+      "x-columns": [
+        "printing_id",
+        "revision_id"
+      ],
+      "x-types": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        }
+      ]
+    },
+    "WordingView": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "$ref": "#/$defs/Region"
+        },
+        {
+          "enum": [
+            "pending"
+          ]
+        },
+        {
+          "$ref": "#/$defs/WordingDisplay"
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WordingCandidate"
+          },
+          "minItems": 1
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ID"
+          },
+          "uniqueItems": true
+        }
+      ],
+      "items": false,
+      "minItems": 5,
+      "maxItems": 5,
+      "x-columns": [
+        "region",
+        "state",
+        "display",
+        "candidates",
+        "undated_printing_ids"
+      ],
+      "x-types": [
+        {
+          "scalar": "Region"
+        },
+        {
+          "enum": [
+            "pending"
+          ]
+        },
+        {
+          "ref": "WordingDisplay"
+        },
+        {
+          "array": {
+            "ref": "WordingCandidate"
+          }
+        },
+        {
+          "array": {
+            "scalar": "ID"
+          }
+        }
+      ]
+    },
+    "ObservedText": {
+      "type": "array",
+      "prefixItems": [
+        {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ID"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        {
+          "enum": [
+            "available",
+            "missing_effect",
+            "correction_conflict"
+          ]
+        },
+        {
+          "$ref": "#/$defs/URL"
+        }
+      ],
+      "items": false,
+      "minItems": 3,
+      "maxItems": 3,
+      "x-columns": [
+        "revision_id",
+        "state",
+        "source_url"
+      ],
+      "x-types": [
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "enum": [
+            "available",
+            "missing_effect",
+            "correction_conflict"
+          ]
+        },
+        {
+          "scalar": "URL"
+        }
+      ],
+      "allOf": [
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {
+                "const": "available"
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {
+                "$ref": "#/$defs/ID"
+              }
+            ]
+          }
+        },
+        {
+          "if": {
+            "prefixItems": [
+              {},
+              {
+                "const": "missing_effect"
+              }
+            ]
+          },
+          "then": {
+            "prefixItems": [
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      ]
+    },
     "face": {
       "type": "array",
       "prefixItems": [
@@ -2318,17 +2595,24 @@
           "items": {
             "$ref": "#/$defs/Current"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WordingView"
+          }
         }
       ],
       "items": false,
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "x-columns": [
         "id",
         "card_id",
         "ordinal",
         "side",
-        "current"
+        "current",
+        "wording"
       ],
       "x-types": [
         {
@@ -2349,6 +2633,11 @@
         {
           "array": {
             "ref": "Current"
+          }
+        },
+        {
+          "array": {
+            "ref": "WordingView"
           }
         }
       ],
@@ -6686,17 +6975,24 @@
           "items": {
             "$ref": "#/$defs/Current"
           }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WordingView"
+          }
         }
       ],
       "items": false,
-      "minItems": 5,
-      "maxItems": 5,
+      "minItems": 6,
+      "maxItems": 6,
       "x-columns": [
         "id",
         "card_id",
         "ordinal",
         "side",
-        "current"
+        "current",
+        "wording"
       ],
       "x-types": [
         {
@@ -6717,6 +7013,11 @@
         {
           "array": {
             "ref": "Current"
+          }
+        },
+        {
+          "array": {
+            "ref": "WordingView"
           }
         }
       ]
@@ -6742,7 +7043,8 @@
             "card_id",
             "ordinal",
             "side",
-            "current"
+            "current",
+            "wording"
           ]
         },
         "rows": {
@@ -13395,6 +13697,7 @@
               "printed_effect_unit_id",
               "flavor_unit_id",
               "printed_text_state",
+              "observations",
               "sections",
               "stamps",
               "translations",
@@ -13449,6 +13752,11 @@
                   "unknown",
                   "omitted"
                 ]
+              },
+              {
+                "array": {
+                  "ref": "ObservedText"
+                }
               },
               {
                 "array": {
@@ -13996,6 +14304,7 @@
               "printed_effect_unit_id",
               "flavor_unit_id",
               "printed_text_state",
+              "observations",
               "sections",
               "translations",
               "corrections"
@@ -14030,6 +14339,11 @@
               },
               {
                 "array": {
+                  "ref": "ObservedText"
+                }
+              },
+              {
+                "array": {
                   "ref": "Section"
                 }
               },
@@ -14042,6 +14356,106 @@
                 "array": {
                   "ref": "Correction"
                 }
+              }
+            ]
+          }
+        },
+        "WordingDisplay": {
+          "const": {
+            "columns": [
+              "revision_id",
+              "basis"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "current",
+                  "latest_known_release",
+                  "candidates"
+                ]
+              }
+            ]
+          }
+        },
+        "WordingCandidate": {
+          "const": {
+            "columns": [
+              "printing_id",
+              "revision_id"
+            ],
+            "items": [
+              {
+                "scalar": "ID"
+              },
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          }
+        },
+        "WordingView": {
+          "const": {
+            "columns": [
+              "region",
+              "state",
+              "display",
+              "candidates",
+              "undated_printing_ids"
+            ],
+            "items": [
+              {
+                "scalar": "Region"
+              },
+              {
+                "enum": [
+                  "pending"
+                ]
+              },
+              {
+                "ref": "WordingDisplay"
+              },
+              {
+                "array": {
+                  "ref": "WordingCandidate"
+                }
+              },
+              {
+                "array": {
+                  "scalar": "ID"
+                }
+              }
+            ]
+          }
+        },
+        "ObservedText": {
+          "const": {
+            "columns": [
+              "revision_id",
+              "state",
+              "source_url"
+            ],
+            "items": [
+              {
+                "nullable": {
+                  "scalar": "ID"
+                }
+              },
+              {
+                "enum": [
+                  "available",
+                  "missing_effect",
+                  "correction_conflict"
+                ]
+              },
+              {
+                "scalar": "URL"
               }
             ]
           }
@@ -15750,7 +16164,8 @@
                         "card_id",
                         "ordinal",
                         "side",
-                        "current"
+                        "current",
+                        "wording"
                       ]
                     },
                     "maxItems": 0
@@ -17780,7 +18195,8 @@
                         "card_id",
                         "ordinal",
                         "side",
-                        "current"
+                        "current",
+                        "wording"
                       ]
                     },
                     "minItems": 1,
@@ -19851,7 +20267,8 @@
                         "card_id",
                         "ordinal",
                         "side",
-                        "current"
+                        "current",
+                        "wording"
                       ]
                     },
                     "maxItems": 0

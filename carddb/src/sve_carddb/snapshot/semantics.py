@@ -133,6 +133,9 @@ def _nested(value: JsonValue) -> None:
         ("sections", ["ordinal"]),
         ("regions", ["region"]),
         ("current", ["region"]),
+        ("wording", ["region"]),
+        ("candidates", ["printing_id", "revision_id"]),
+        ("observations", ["source_url", "state", "revision_id"]),
         ("overrides", ["region"]),
         ("region_blocks", ["region"]),
     ]:
@@ -261,6 +264,7 @@ def validate_view(view: View, manifest: Row, fragments: list[Fragment]) -> None:
         _spellings(symbol)
     for ruling in view["ruling_revision"]:
         _hints(ruling)
+    _wording(view)
     if {row["card_id"] for row in view["card_engine_support"]} != {
         row["id"] for row in view["card"]
     }:
@@ -309,3 +313,196 @@ def validate_config(config: Row) -> None:
                 or not url.hostname
             ):
                 raise ValueError("Invalid public URL template")
+
+
+def _physical_observations(
+    view: View, revisions: dict[str, Row]
+) -> dict[tuple[str, str], tuple[str, Row]]:
+    physical: dict[tuple[str, str], tuple[str, Row]] = {}
+    for printing in view["printing"]:
+        for raw in array(printing["faces"]):
+            face = object_value(raw)
+            physical[string(printing["id"]), string(face["face_id"])] = (
+                string(printing["region"]),
+                face,
+            )
+            for raw_observation in array(face["observations"]):
+                observation = object_value(raw_observation)
+                if observation["revision_id"] is not None:
+                    revision = revisions[string(observation["revision_id"])]
+                    if (
+                        revision["face_id"] != face["face_id"]
+                        or revision["region"] != printing["region"]
+                    ):
+                        raise ValueError(
+                            "Observation revision belongs to another face/region"
+                        )
+    return physical
+
+
+def _wording_dates(view: View) -> dict[str, str | None]:
+    products = {string(row["id"]): row for row in view["product"]}
+    dates: dict[str, list[str | None]] = {
+        string(row["id"]): [] for row in view["printing"]
+    }
+    for inclusion in view["printing_product"]:
+        product = products[string(inclusion["product_id"])]
+        precision = inclusion["first_available_precision"]
+        day = inclusion["first_available_on"]
+        if precision is None:
+            precision, day = product["date_precision"], product["released_on"]
+        dates[string(inclusion["printing_id"])].append(
+            string(day) if precision == "day" else None
+        )
+    return {
+        printing: min(day for day in items if day is not None)
+        if items and all(day is not None for day in items)
+        else None
+        for printing, items in dates.items()
+    }
+
+
+def _wording_candidates(
+    face: Row,
+    wording: Row,
+    physical: dict[tuple[str, str], tuple[str, Row]],
+    dates: dict[str, str | None],
+    revisions: dict[str, Row],
+) -> None:
+    candidates = [object_value(item) for item in array(wording["candidates"])]
+    printings = {string(item["printing_id"]) for item in candidates}
+    undated = array(wording["undated_printing_ids"])
+    if undated != sorted(printing for printing in printings if dates[printing] is None):
+        raise ValueError("Invalid undated wording printing inventory")
+    for candidate in candidates:
+        parent = physical.get((string(candidate["printing_id"]), string(face["id"])))
+        if parent is None or parent[0] != wording["region"]:
+            raise ValueError(
+                "Wording candidate belongs to another printing face/region"
+            )
+        observed = [
+            object_value(item)["revision_id"]
+            for item in array(parent[1]["observations"])
+        ]
+        if candidate["revision_id"] not in (observed or [None]):
+            raise ValueError("Wording candidate has no printing observation")
+    display = object_value(wording["display"])
+    if display["basis"] == "latest_known_release":
+        known = {dates[printing] for printing in printings} - {None}
+        if not known:
+            raise ValueError("Latest wording display requires a complete release day")
+        latest = max(day for day in known if day is not None)
+        newest = [
+            item for item in candidates if dates[string(item["printing_id"])] == latest
+        ]
+        if (
+            len(
+                {
+                    canonical(
+                        {
+                            field: revisions[string(item["revision_id"])][field]
+                            for field in (
+                                "name_unit_id",
+                                "effect_unit_id",
+                                "class_code",
+                                "type_code",
+                                "cost",
+                                "attack",
+                                "defense",
+                                "traits",
+                                "titles",
+                                "special_kinds",
+                                "sections",
+                            )
+                        }
+                    )
+                    for item in newest
+                    if item["revision_id"] is not None
+                }
+            )
+            != 1
+            or any(item["revision_id"] is None for item in newest)
+            or any(
+                object_value(observation)["state"] == "correction_conflict"
+                for item in newest
+                for observation in array(
+                    physical[string(item["printing_id"]), string(face["id"])][1][
+                        "observations"
+                    ]
+                )
+            )
+            or display["revision_id"] not in [item["revision_id"] for item in newest]
+        ):
+            raise ValueError(
+                "Latest wording display skips an unavailable/latest printing"
+            )
+
+
+def _wording_display(
+    face: Row,
+    wording: Row,
+    revisions: dict[str, Row],
+    current: dict[str, JsonValue],
+    blocks: dict[str, list[JsonValue]],
+) -> None:
+    region = string(wording["region"])
+    display = object_value(wording["display"])
+    if display["basis"] == "current":
+        if display["revision_id"] != current.get(region):
+            raise ValueError("Pending current display disagrees with adopted current")
+    else:
+        if region in current:
+            raise ValueError("Pending display must preserve a valid current")
+        if "wording_pending" not in blocks.get(region, []):
+            raise ValueError("Missing wording_pending region block")
+        if display["revision_id"] is not None and display["revision_id"] not in [
+            object_value(item)["revision_id"] for item in array(wording["candidates"])
+        ]:
+            raise ValueError("Display is not a pending candidate")
+    if display["revision_id"] is not None:
+        revision = revisions[string(display["revision_id"])]
+        if revision["face_id"] != face["id"] or revision["region"] != region:
+            raise ValueError("Display belongs to another face/region")
+
+
+def _wording(view: View) -> None:
+    revisions = {string(row["id"]): row for row in view["face_revision"]}
+    physical = _physical_observations(view, revisions)
+    dates = _wording_dates(view)
+    blocks = {
+        string(row["card_id"]): {
+            string(object_value(item)["region"]): array(object_value(item)["reasons"])
+            for item in array(row["region_blocks"])
+        }
+        for row in view["card_engine_support"]
+    }
+    for face in view["face"]:
+        current = {
+            string(object_value(item)["region"]): object_value(item)["revision_id"]
+            for item in array(face["current"])
+        }
+        pending = {
+            string(object_value(item)["region"]): object_value(item)
+            for item in array(face["wording"])
+        }
+        required = {
+            region
+            for (_, physical_face), (region, _) in physical.items()
+            if physical_face == face["id"]
+        }
+        if (
+            not required <= current.keys() | pending.keys()
+            or not pending.keys() <= required
+        ):
+            raise ValueError(
+                "Face without current requires pending wording in every region"
+            )
+        for wording in pending.values():
+            _wording_candidates(face, wording, physical, dates, revisions)
+            _wording_display(
+                face,
+                wording,
+                revisions,
+                current,
+                blocks.get(string(face["card_id"]), {}),
+            )

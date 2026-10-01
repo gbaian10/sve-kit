@@ -328,6 +328,74 @@
           "ref": "Support"
         }
       ]
+    },
+    "WordingCandidate": {
+      "columns": [
+        "printing_id",
+        "revision_id"
+      ],
+      "items": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        }
+      ]
+    },
+    "WordingDisplay": {
+      "columns": [
+        "revision_id",
+        "basis"
+      ],
+      "items": [
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "enum": [
+            "current",
+            "latest_known_release",
+            "candidates"
+          ]
+        }
+      ]
+    },
+    "WordingView": {
+      "columns": [
+        "region",
+        "state",
+        "display",
+        "candidates",
+        "undated_printing_ids"
+      ],
+      "items": [
+        {
+          "scalar": "Region"
+        },
+        {
+          "enum": [
+            "pending"
+          ]
+        },
+        {
+          "ref": "WordingDisplay"
+        },
+        {
+          "array": {
+            "ref": "WordingCandidate"
+          }
+        },
+        {
+          "array": {
+            "scalar": "ID"
+          }
+        }
+      ]
     }
   },
   "tables": {
@@ -391,7 +459,8 @@
           "card_id",
           "ordinal",
           "side",
-          "current"
+          "current",
+          "wording"
         ],
         "rows": [
           [
@@ -404,6 +473,30 @@
                 "jp",
                 "r:a2",
                 "latest_adopted_wording"
+              ]
+            ],
+            [
+              [
+                "jp",
+                "pending",
+                [
+                  "r:a2",
+                  "current"
+                ],
+                [
+                  [
+                    "p:a",
+                    "r:a2"
+                  ],
+                  [
+                    "p:b",
+                    null
+                  ]
+                ],
+                [
+                  "p:a",
+                  "p:b"
+                ]
               ]
             ]
           ],
@@ -418,7 +511,8 @@
                 "r:b1",
                 "dated_effective"
               ]
-            ]
+            ],
+            []
           ]
         ]
       }

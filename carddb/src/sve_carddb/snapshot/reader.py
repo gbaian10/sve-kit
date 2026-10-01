@@ -355,6 +355,7 @@ _ARRAY_REFERENCES = {
     "ruling_revision_ids": "ruling_revision",
     "complete_keyword_ids": "keyword",
     "partial_keyword_ids": "keyword",
+    "undated_printing_ids": "printing",
 }
 
 
@@ -419,6 +420,13 @@ def _current(view: View, fragments: list[Fragment]) -> None:
         for row in view["face"]
         for item in array(row["current"])
     }
+    refs |= {
+        string(display["revision_id"])
+        for row in view["face"]
+        for raw in array(row["wording"])
+        for display in (object_value(object_value(raw)["display"]),)
+        if display["revision_id"] is not None
+    }
     current = {
         string(row["id"])
         for f in fragments
@@ -426,7 +434,7 @@ def _current(view: View, fragments: list[Fragment]) -> None:
         for row in f.rows
     }
     if refs != current:
-        raise ValueError("Current/history partition mismatch")
+        raise ValueError("Current/display/history partition mismatch")
     revisions = {string(row["id"]): row for row in view["face_revision"]}
     for face in view["face"]:
         for item in array(face["current"]):

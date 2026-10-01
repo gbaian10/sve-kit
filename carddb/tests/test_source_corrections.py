@@ -311,7 +311,7 @@ def test_pending_wording_remains_in_publication_scope(
     )
     assert case.plan.publication_identity() == case.identity
     assert len(case.plan.publication_identity().included("printing")) == 4
-    assert case.plan.eligible != case.identity
+    assert case.plan.diagnostic_exclusions != case.identity
 
 
 @pytest.mark.parametrize("conflict", [False, True])

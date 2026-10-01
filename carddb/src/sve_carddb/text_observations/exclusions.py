@@ -1,4 +1,4 @@
-"""Diagnose proposed exclusions of staged references pending #143 approval."""
+"""Diagnose a retired text exclusion proposal without deciding publication."""
 
 from typing import TYPE_CHECKING
 
@@ -11,15 +11,15 @@ if TYPE_CHECKING:
     from sve_carddb.text_observations.plan import TextPlan
 
 
-def exclusion_report(
+def diagnostic_exclusion_report(
     db: Database, schema: CompiledSchema, plan: TextPlan
 ) -> dict[str, JsonValue]:
     """Close regional seeds over all enabled DB foreign keys, including optional uses."""
     return {
-        "proposal": "pending-#143",
+        "proposal": "retired-text-exclusion-proposal",
         "publication_gate": False,
         "snapshot_output_authorized": False,
-        **reference_exclusions(db, schema, plan.identity, plan.eligible),
+        **reference_exclusions(db, schema, plan.identity, plan.diagnostic_exclusions),
     }
 
 

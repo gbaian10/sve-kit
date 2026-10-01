@@ -21,9 +21,9 @@
   },
   "files": [
     {
-      "path": "snapshots/blobs/f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a.json",
-      "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a",
-      "bytes": 6208,
+      "path": "snapshots/blobs/5eeccc2d60b6669222cd08acdce8485ec4d7ae9d26bcf7ff71ae32902ee0e288.json",
+      "sha256": "sha256:5eeccc2d60b6669222cd08acdce8485ec4d7ae9d26bcf7ff71ae32902ee0e288",
+      "bytes": 6798,
       "compressed_bytes": {
         "br": null,
         "gzip": null
@@ -148,9 +148,9 @@
       "dependencies": []
     },
     {
-      "path": "snapshots/blobs/cbf862359458dc573221e12df34e89beeaed2eef941cab69d66b93c795782ef4.json",
-      "sha256": "sha256:cbf862359458dc573221e12df34e89beeaed2eef941cab69d66b93c795782ef4",
-      "bytes": 5428,
+      "path": "snapshots/blobs/3bdda6045ba094bcf4819bbb435fa0c7bd20d7959508e724a8823678ce37ed4a.json",
+      "sha256": "sha256:3bdda6045ba094bcf4819bbb435fa0c7bd20d7959508e724a8823678ce37ed4a",
+      "bytes": 5731,
       "compressed_bytes": {
         "br": null,
         "gzip": null
@@ -222,7 +222,7 @@
       "dependencies": [
         {
           "key": "bootstrap",
-          "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a"
+          "sha256": "sha256:5eeccc2d60b6669222cd08acdce8485ec4d7ae9d26bcf7ff71ae32902ee0e288"
         }
       ]
     },
@@ -318,9 +318,9 @@
     "sha256": "sha256:9fb562e3f8f7aaf2e6fb29d213120b1ad2fc751165e2f834bb8ef63666282adc"
   },
   "text_all": {
-    "path": "snapshots/blobs/fa50e7e3772f534dfe8a6eeabc4f6bfeb1e3d549cece9cb5f70b6e9c81f5967f.json",
-    "sha256": "sha256:fa50e7e3772f534dfe8a6eeabc4f6bfeb1e3d549cece9cb5f70b6e9c81f5967f",
-    "bytes": 14215,
+    "path": "snapshots/blobs/e9c86111c4b05895a29d62852713772722322839028f4f58b99549b9b4623871.json",
+    "sha256": "sha256:e9c86111c4b05895a29d62852713772722322839028f4f58b99549b9b4623871",
+    "bytes": 15108,
     "compressed_bytes": {
       "br": null,
       "gzip": null
@@ -328,7 +328,7 @@
     "contains": [
       {
         "key": "bootstrap",
-        "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a"
+        "sha256": "sha256:5eeccc2d60b6669222cd08acdce8485ec4d7ae9d26bcf7ff71ae32902ee0e288"
       },
       {
         "key": "config",
@@ -336,7 +336,7 @@
       },
       {
         "key": "detail",
-        "sha256": "sha256:cbf862359458dc573221e12df34e89beeaed2eef941cab69d66b93c795782ef4"
+        "sha256": "sha256:3bdda6045ba094bcf4819bbb435fa0c7bd20d7959508e724a8823678ce37ed4a"
       },
       {
         "key": "history",

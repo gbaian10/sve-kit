@@ -123,3 +123,11 @@ class FaceObservation(RecordData):
                 "face_index": self.source_index,
             }
         ).decode()
+
+
+def candidate_revision_id(item: FaceObservation) -> str:
+    """Bind a candidate identity to its exact face/region/content, never crawl order."""
+    identity: list[JsonValue] = [item.face_id, item.region, item.content.fingerprint()]
+    if item.correction_keys:
+        identity.extend(item.correction_keys)
+    return "rev:v1:" + digest(canonical(identity)).removeprefix("sha256:")

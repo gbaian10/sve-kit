@@ -2,8 +2,6 @@
 
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue
-
 from sve_carddb.build_inputs import (
     BuildContext,
     InputRecord,
@@ -11,7 +9,7 @@ from sve_carddb.build_inputs import (
     insert_raw_sources,
 )
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import SAFE_INTEGER, canonical, digest, parse
+from sve_carddb.snapshot.values import SAFE_INTEGER, parse
 from sve_carddb.source_corrections.importer import (
     populate_corrections,
     verify_corrections,
@@ -19,7 +17,9 @@ from sve_carddb.source_corrections.importer import (
 from sve_carddb.source_corrections.plan import selected_records
 from sve_carddb.text_observations.configuration import text_configuration
 from sve_carddb.text_observations.intern import TextInterner
+from sve_carddb.text_observations.models import candidate_revision_id
 from sve_carddb.text_observations.plan import verify_plan
+from sve_carddb.text_observations.wording import mark_wording_pending
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -40,11 +40,8 @@ def stat(value: str) -> int | None:
 
 
 def revision_id(item: FaceObservation) -> str:
-    """Bind a candidate identity to its exact face/region/content, never crawl order."""
-    identity: list[JsonValue] = [item.face_id, item.region, item.content.fingerprint()]
-    if item.correction_keys:
-        identity.extend(item.correction_keys)
-    return "rev:v1:" + digest(canonical(identity)).removeprefix("sha256:")
+    """Use the shared content/correction recipe for stored candidate identities."""
+    return candidate_revision_id(item)
 
 
 def _vocabulary(db: Database, texts: TextInterner, vocabulary: Vocabulary) -> None:
@@ -329,6 +326,7 @@ def populate_text_observations(
     populate_corrections(db, plan, texts)
     if plan.corrections is not None:
         verify_corrections(db, plan, vocabulary)
+    mark_wording_pending(db, plan)
     record = input_record(build, expected)
     record.verify(db, build, plan.source_uses(), complete=False)
     return record
