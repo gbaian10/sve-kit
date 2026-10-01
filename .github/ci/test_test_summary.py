@@ -54,7 +54,8 @@ class SummaryTests(unittest.TestCase):
         assert "**91.25%**" in summary
         assert "| tests/test_alpha.py | 2 | 3.000 |" in summary
         assert "| tests/test_beta.py | 3 | 3.500 |" in summary
-        assert summary.index("tests/test_beta.py::test_error") < summary.index(
+        slowest = summary.split("### Slowest 30 cases", 1)[1]
+        assert slowest.index("tests/test_beta.py::test_error") < slowest.index(
             "tests/test_alpha.py::test_fail"
         )
         assert PRIVATE not in summary
@@ -122,11 +123,52 @@ class SummaryTests(unittest.TestCase):
         assert "::test_case_5 | 5.000" in summary
         assert "::test_case_4 |" not in summary
         assert "| tests/test_rank.py | 35 | 595.000 |" in summary
+        assert "### Failed tests\n\nNone reported." in summary
+
+    def test_fast_python_failure_and_error_outside_slowest_thirty(self) -> None:
+        """Failures must be findable even when thirty passing cases are slower."""
+        passed = "".join(
+            f'<testcase classname="tests.test_rank" name="test_pass_{i}" time="10"/>'
+            for i in range(35)
+        )
+        failed = f'<testcase classname="tests.test_fast" name="test_failure[{PRIVATE}]" time="0"><failure message="{PRIVATE}">{PRIVATE}</failure></testcase>'
+        error = f'<testcase classname="tests.test_fast" name="test_error" time="0"><error>{PRIVATE}</error><system-err>{PRIVATE}</system-err></testcase>'
+        (self.folder / "junit.xml").write_text(
+            f"<testsuite>{passed}{failed}{error}</testsuite>", encoding="utf-8"
+        )
+        summary = junit_summary("python", self.folder)
+        failures, slowest = summary.split("### Slowest 30 cases", 1)
+        assert "- `tests/test_fast.py::test_failure`" in failures
+        assert "- `tests/test_fast.py::test_error`" in failures
+        assert "::test_failure" not in slowest
+        assert "::test_error" not in slowest
+        assert PRIVATE not in summary
+
+    def test_fast_web_failure_uses_file_and_ordinal(self) -> None:
+        """A fast Vitest failure stays visible without publishing its description."""
+        passed = "".join(
+            f'<testcase classname="src/slow.test.ts" name="{PRIVATE}" time="10"/>'
+            for _ in range(35)
+        )
+        failed = f'<testcase classname="src/fast.test.tsx" name="{PRIVATE}" time="0"><failure>{PRIVATE}</failure></testcase>'
+        (self.folder / "junit.xml").write_text(
+            f"<testsuite>{passed}{failed}</testsuite>", encoding="utf-8"
+        )
+        summary = junit_summary("web", self.folder)
+        failures, slowest = summary.split("### Slowest 30 cases", 1)
+        assert "- `src/fast.test.tsx::case 36`" in failures
+        assert "::case 36" not in slowest
+        assert PRIVATE not in summary
 
     def test_rust_counts_wall_time_and_missing_coverage(self) -> None:
         """Aggregate multiple binaries and doctests; never include panics or source."""
         (self.folder / "test.log").write_text(
             f"""panic: {PRIVATE}
+test boundaries::test_failure ... FAILED
+test module::r#type::test_error ... FAILED
+test {PRIVATE} ... FAILED
+test [unsafe](https://example.com) ... FAILED
+test boundaries::test_ok ... ok
 test result: ok. 3 passed; 0 failed; 1 ignored; 0 measured; 0 filtered out; finished in 1.20s
 test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.30s
 """,
@@ -145,6 +187,10 @@ test result: FAILED. 1 passed; 2 failed; 0 ignored; 0 measured; 0 filtered out; 
         assert "**12.00 s**" in summary
         assert "**1.50 s**" in summary
         assert "**95.50%**" in summary
+        assert "### Failed tests\n\n- `boundaries::test_failure`" in summary
+        assert "- `module::r#type::test_error`" in summary
+        assert "test_ok" not in summary
+        assert "unsafe" not in summary
         assert PRIVATE not in summary
         (self.folder / "coverage.json").unlink()
         assert "coverage unavailable" in rust_summary(self.folder)

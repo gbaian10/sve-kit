@@ -209,7 +209,7 @@ pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line
 pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI calls the same package scripts in separate steps)
 ```
 
-### CI tests and runner selection
+### CI tests and summaries
 
 CI keeps the existing component jobs and the required `ci-ok` gate. Python lint and types
 run through pre-commit; pytest runs once in its own step with `--cov`, the same combined
@@ -223,6 +223,8 @@ elapsed time and coverage. Python and Web include the slowest 30 cases and count
 source file. Case times include setup/teardown and overlap under parallel execution; they
 are not wall time. Rust reports aggregate test-binary counts/time and build/coverage wall time.
 Rust per-case timings are not collected by the stable libtest reporter.
+The **Failed tests** section lists all reported failures regardless of duration: Python
+file/function with parameters removed, Web file/case ordinal, and Rust libtest test paths.
 
 Raw test output and JUnit may contain official card wording. They stay in runner temporary
 files, are removed after the job and are never uploaded or cached. Summaries omit failure
@@ -230,23 +232,32 @@ messages, captured output, parameter values and arbitrary Web case descriptions;
 safe file/function location (or Web case ordinal) to reproduce failures locally. A missing
 report is reported explicitly and cannot make a failing test step pass.
 
-By default every job uses `ubuntu-latest`. A repository administrator may set `CI_RUNNER_LABELS`
-to a JSON label array for a dedicated private self-hosted runner; only private, same-repository
-work selects it. Delete the variable to return to hosted runners. **Before publishing the
-repository, remove the self-hosted runner registration and its container as well**: an
-external PR can change workflow code, so the expression alone is not an isolation boundary.
-See [GitHub's runner security guidance](https://docs.github.com/en/actions/reference/security/secure-use#hardening-for-self-hosted-runners).
-An offline self-hosted runner queues jobs; it does not automatically fall back to hosted.
-Cancel and rerun queued workflows after changing the variable.
+Every job uses GitHub-hosted `ubuntu-latest`. While the repository is private, a push to
+`main` does not rerun pytest, Rust tests/coverage or Vitest. **Before merging, the PR must
+be rebased onto the latest `main` and its CI must be green.** This is a merge prerequisite,
+not something the cache-maintenance run verifies: its green `ci-ok` means maintenance and
+checks succeeded, not that tests ran again on that commit. The private repository's ruleset
+does not enforce this prerequisite; the maintainer and merge coordinator must check it.
+When the repository becomes public, `github.event.repository.private` automatically restores
+the usual component tests on pushes to `main`, without another workflow edit.
+
+Private `main` retains repository/security and commit checks, Python lint/types, and Rust
+lint/dependency checks. It installs dependencies for the existing caches; when the Rust
+cache has no exact hit, it compiles coverage-instrumented tests with `cargo test --no-run`.
+Web installs dependencies only. Each selected component job still reports its result, and
+`ci-ok` still rejects failed maintenance or an unexpectedly skipped job. The summary labels
+these runs as cache maintenance with tests not rerun.
 
 `CI_PYTEST_WORKERS` is an optional repository variable, default `4`, accepted range `1`–`4`.
 CI never uses `-n auto`; Cargo and Vitest are also limited to four workers. The existing
-jobs are retained rather than adding a job per test step, so hosted fallback does not add
-per-job billing overhead. Concurrency cancels an older run on the same branch/PR.
-Hosted dependency caches retain their existing keys; self-hosted uses container-local uv,
-pre-commit, mise, Bun and Cargo dependency caches without Actions cache transfers. Rust
-build targets and private test reports are not saved to Actions cache. Checkout explicitly
-cleans the workspace so test execution does not depend on a previous job's outputs.
+jobs are retained rather than adding a job per test step, so summaries do not add per-job
+billing overhead. Concurrency cancels older PR runs; `main` runs are never cancelled by a
+newer push. Dependency caches retain their existing keys and only `main` writes them;
+PRs read the default-branch caches. Private `main` still populates uv, pre-commit, mypy,
+mise/Bun and Cargo caches even though full tests are omitted. Rust target caching remains
+enabled: official test data is read at runtime and is not embedded in the compiled tests.
+Private test data, raw reports and output are never cached. Checkout explicitly cleans
+the workspace so test execution does not depend on a previous job's outputs.
 
 When needed and explicitly requested, manually compare the old and new YAML readers with
 `uv --directory carddb run pytest manual_tests/yaml_reader_equivalence.py`; CI never runs this check.

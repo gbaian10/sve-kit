@@ -113,6 +113,17 @@ def coverage_description(folder: Path, *, rust: bool) -> str:
     return f"{label} coverage: **{percent:.2f}%**, required **90%**."
 
 
+def failure_section(locations: list[str]) -> list[str]:
+    """List every safe failure location, independently of the slowest-case cutoff."""
+    return [
+        "",
+        "### Failed tests",
+        "",
+        *(f"- `{location}`" for location in dict.fromkeys(locations)),
+        *([] if locations else ["None reported."]),
+    ]
+
+
 def junit_summary(kind: str, folder: Path) -> str:
     """Render counts, timings and safe locations for Python or Web."""
     cases, elapsed = junit(folder / "junit.xml", python=kind == "python")
@@ -136,6 +147,11 @@ def junit_summary(kind: str, folder: Path) -> str:
         )
     if kind == "python":
         lines.append(coverage_description(folder, rust=False))
+    lines.extend(
+        failure_section(
+            [f"{case.file}::{case.name}" for case in cases if case.state == "failed"]
+        )
+    )
     lines.extend(
         [
             "",
@@ -174,7 +190,8 @@ def rust_summary(folder: Path) -> str:
         r"^test result: (?:ok|FAILED)\. (\d+) passed; (\d+) failed; (\d+) ignored; .*?finished in ([0-9.]+)s$",
         re.MULTILINE,
     )
-    results = pattern.findall((folder / "test.log").read_text(encoding="utf-8"))
+    source = (folder / "test.log").read_text(encoding="utf-8")
+    results = pattern.findall(source)
     if not results:
         msg = "No Rust test result lines"
         raise ValueError(msg)
@@ -184,7 +201,13 @@ def rust_summary(folder: Path) -> str:
     elapsed = number((folder / "elapsed.txt").read_text(encoding="utf-8").strip())
     seconds = sum(number(row[3]) for row in results)
     coverage_line = coverage_description(folder, rust=True)
-    return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{coverage_line}\n"
+    locations = re.findall(
+        r"^test ((?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*) \.\.\. FAILED$",
+        source,
+        re.MULTILINE,
+    )
+    failures = "\n".join(failure_section(locations))
+    return f"## Rust tests\n\nTotal: **{passed + failed + skipped}** · Passed: **{passed}** · Skipped/ignored: **{skipped}** · Failed: **{failed}**\nWall time (including build/coverage): **{elapsed:.2f} s** · Summed test-binary time: **{seconds:.2f} s**\n{coverage_line}\n{failures}\n"
 
 
 def main(argv: list[str]) -> int:

@@ -15,8 +15,7 @@ concurrency:
 
 jobs:
   pr-title:
-    # zizmor: ignore[self-hosted-runner] -- opt-in only for private, same-repository code; remove the variable before publishing.
-    runs-on: ${{ github.event.repository.private && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && vars.CI_RUNNER_LABELS && fromJSON(vars.CI_RUNNER_LABELS) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -25,8 +24,7 @@ jobs:
           clean: true
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
-          enable-cache: ${{ runner.environment != 'self-hosted' }}
-          cache-local-path: ${{ runner.environment == 'self-hosted' && format('{0}/uv-cache', runner.tool_cache) || '' }}
+          enable-cache: true
           save-cache: false # this workflow runs only on PR events
           cache-suffix: ${{ github.job }}
           cache-dependency-glob: carddb/uv.lock
