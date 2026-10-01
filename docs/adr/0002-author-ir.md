@@ -20,7 +20,7 @@ create 列表表示每個名稱各 n，either 表示結算時擇一，choice 表
 
 格式固定 YAML 1.2 core schema。on／n 是字串鍵，yes／no 是字串值；mapping 不接受布林或其他非字串鍵。先拒絕重複鍵、舊版本指示與非 core tag，再依構造登錄表檢查鍵，不能先轉一般 map 而丟掉重複資訊。設計抽驗時以 PyYAML 往返曾將 13 個樣本的 on 變成 true，證明純解析成功不足以驗收。
 
-Python DSL 工具採 ruamel.yaml 純 Python safe 路線，固定 1.2 並關閉重複鍵容忍；另限定 core scalar resolver，避免隱式 timestamp 等擴充。2026-10-01（#140）：`carddb` 的 authored 讀取改採 PyYAML `CSafeLoader` 的 libyaml 事件串流，單趟解析與嚴格語法檢查，沿用原有 1.2 core 純量 resolver 並拒絕重複鍵；不使用 PyYAML 預設 1.1 resolver，缺 C 擴充即明確失敗。ruamel 寫出與後續 strict JSON／canonical 雜湊不變。官方文件指出 pure=True 可避免 C loader 的解析差異。[ruamel.yaml 用法](https://yaml.dev/doc/ruamel.yaml/basicuse/)
+Python DSL 工具採 ruamel.yaml 純 Python safe 路線，固定 1.2 並關閉重複鍵容忍；另限定 core scalar resolver，避免隱式 timestamp 等擴充。2026-10-01（#140）：`carddb` 的 authored 讀取改採 PyYAML `CSafeLoader` 的 libyaml 事件串流，單趟解析與嚴格語法檢查，沿用原有 1.2 core 純量 resolver 並拒絕重複鍵；不使用 PyYAML 預設 1.1 resolver，缺 C 擴充即明確失敗。ruamel 寫出與後續 strict JSON／canonical 雜湊不變。PR #142 審核補上解析前字元邊界：拒絕 raw NEL／LS／PS 與第 0 字元以外的 BOM，避免 libyaml 的 1.1 詞法靜默改寫；依協調者決定同時拒絕所有 raw tab。跳脫字串仍保留原值；完整限制見 [authored 格式 §1](../schema/authored-layout.md#1-路徑與共同格式)。官方文件指出 pure=True 可避免 C loader 的解析差異。[ruamel.yaml 用法](https://yaml.dev/doc/ruamel.yaml/basicuse/)
 
 Rust 選 **saphyr** 作 1.2 解析前端：官方文件明列 YAML 1.2 與 core schema scalar 支援；載入邊界仍須自行拒絕非字串鍵、未知 tag／BadValue、舊版本及重複鍵，不能把函式庫支援格式等同 DSL 合法。本 ADR 只定選型、不新增 Cargo 依賴；接入時釘實際版本並在建 map 前驗證事件／節點，跑與 Python 相同的金絲雀及負例。未完成前不得宣告 Rust 載入器通過。[saphyr 官方文件](https://docs.rs/saphyr/0.1.0/saphyr/)
 

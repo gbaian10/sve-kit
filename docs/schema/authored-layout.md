@@ -26,6 +26,8 @@
 
 YAML 固定 1.2 core schema、單一文件、UTF-8；所有鍵必須是字串，禁止重複鍵、anchor、alias、merge key、顯式 tag、非有限浮點及 YAML 1.1 指示。日期字串須加引號；隱式日期仍是字串，不啟用 timestamp resolver。遵循 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤) 的解析邊界。`carddb` 以 PyYAML `CSafeLoader`（libyaml C 擴充）單趟事件讀取，於組裝資料前拒絕上述語法；純量沿用明確限定的 YAML 1.2 core resolver，不使用 PyYAML 預設的 1.1 resolver。缺少 C 擴充即明確失敗，不靜默退回純 Python。寫出仍使用 `ruamel.yaml`；載入後仍要做 strict JSON、canonical 雜湊、結構與引用檢查。
 
+為避免 libyaml 的 YAML 1.1 字元處理靜默改寫結構或值，`carddb` 在解析前拒絕 raw U+0085（NEL）、U+2028（LS）、U+2029（PS）；raw U+FEFF（BOM）僅允許在解碼後第 0 個字元。依 2026-10-01 的協調者決定，同時拒絕所有 raw tab，含引號、區塊純量與註解內的 tab；雙引號中的 `\t`、`\u0085`、`\u2028`、`\u2029`、`\uFEFF` 等跳脫仍可表達原值。ruamel 寫出會跳脫 tab／BOM，但可能原樣寫出 NEL／LS／PS；後者讀回明確失敗，不允許靜默正規化。未知指示（例如 `%FOO`）由 libyaml 拒絕，保留此較嚴的讀取邊界。數值底線拼法沿舊讀取器的 resolver／去底線行為，例如 `1__0` → 10、`1_` → 1，不直接套用 Python `int()` 的拼法限制。
+
 ## 2. 分片、批次決定與來源
 
 每個身分登錄分片有 `authored_format: 1`（分片格式未變；`ids/index.yaml` 為 2，見下）、`kind: registry_shard`、`default_decision_id`、`records`、`decisions`。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。配號以外，匯入時將封套的 decision 展開成具體資料表 FK，不另建立 subject 真值表。配號分片的 decision 為 null，decisions 為空。
