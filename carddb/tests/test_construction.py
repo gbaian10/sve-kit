@@ -583,6 +583,28 @@ def test_cr_fk_independent_of_clause_gate(db: Database) -> None:
         )
 
 
+def test_confirmed_restriction_without_members_not_ready(db: Database) -> None:
+    staging = plan()
+    with db.transaction():
+        populate_construction(db, staging, build=context(staging))
+    with db.transaction():
+        db.delete(
+            "restriction_member",
+            {
+                "restriction_id": "limit",
+                "rules_name_id": "rules_name",
+                "deck_scope": "all",
+            },
+        )
+    assert db.rows("restriction_member")
+    resolved = resolve_construction(
+        db, "profile", on_date="2026-10-01", as_of="2026-10-02", supported_refs=REFS
+    )
+    assert resolved.inputs_state == "unknown"
+    assert resolved.reasons == ("restriction_members_missing",)
+    assert resolved.legality == "unknown"
+
+
 def test_missing_revision_not_current(db: Database) -> None:
     staging = plan().model_copy(update={"revisions": ()})
     with db.transaction():
