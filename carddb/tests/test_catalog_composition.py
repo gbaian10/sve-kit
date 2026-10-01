@@ -20,9 +20,9 @@ if TYPE_CHECKING:
     from sve_carddb.registry.review import Inputs
 
 
-@pytest.mark.parametrize("broken", [False, True])
+@pytest.mark.parametrize("mode", ["catalog", "broken", "no_catalog"])
 def test_catalog_composes_with_both_regional_sources(
-    tmp_path: Path, inputs: Inputs, broken: bool
+    tmp_path: Path, inputs: Inputs, mode: str
 ) -> None:
     for card in inputs.jp.values():
         card.faces[0].text = "Synthetic unanimous rule."
@@ -33,7 +33,7 @@ def test_catalog_composes_with_both_regional_sources(
         aliases=(
             Alias(
                 kind="type",
-                code="missing" if broken else "follower",
+                code="missing" if mode == "broken" else "follower",
                 lang="ja",
                 text="Alias",
                 normalized="alias",
@@ -62,19 +62,21 @@ def test_catalog_composes_with_both_regional_sources(
                     published=(),
                     languages=LANGUAGES,
                     stores={"test-store": case.store},
-                    catalog_config=config,
+                    catalog_config=None if mode == "no_catalog" else config,
                 )
 
-        if broken:
+        if mode == "broken":
             with pytest.raises(ValueError, match="target"):
                 populate()
             assert not db.rows("card")
             assert not db.rows("source_record")
         else:
             populate()
+            assert len(db.rows("rules_name")) > 0
+            assert len(db.rows("face_rules_name")) > 0
             assert len(db.rows("face_rules_name")) == len(db.rows("face_current"))
             assert {row.values["region"] for row in db.rows("rules_name")} == {
                 "jp",
                 "en",
             }
-            assert len(db.rows("search_alias")) == 1
+            assert len(db.rows("search_alias")) == (0 if mode == "no_catalog" else 1)

@@ -54,6 +54,7 @@ def _insert_exact(
 
 
 def _adopted(db: Database, decision_id: str) -> None:
+    """Fail closed until an adoption loader can prove category, members and freshness."""
     decisions = {row.values["id"]: row.values for row in db.rows("decision")}
     sources = {row.values["id"]: row.values for row in db.rows("source_record")}
     links = [
@@ -69,6 +70,11 @@ def _adopted(db: Database, decision_id: str) -> None:
         raise ValueError("Catalog adoption requires confirmed sourced decision")
     if not any(sources[link["source_id"]]["kind"] == "authored" for link in links):
         raise ValueError("Catalog adoption requires authored evidence")
+    # A sourced confirmed decision alone cannot bind this input to its reviewed bytes.
+    raise ValueError(
+        "Catalog adoption decision cannot verify category, exact members or freshness "
+        "until the adoption contract and loader are finalized"
+    )
 
 
 def populate_catalog(
@@ -78,7 +84,7 @@ def populate_catalog(
     build: BuildContext,
     published: tuple[LocalizedText, ...],
 ) -> None:
-    """Accept supplied adopted inputs; discovery cannot create symbol decisions."""
+    """Project staging inputs; decision-backed adoption remains disabled."""
     catalog = Catalog.model_validate_json(catalog.model_dump_json())
     config = object_value(parse(build.configuration.encode()))
     if any(

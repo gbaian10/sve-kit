@@ -16,13 +16,20 @@ Fixed enum terms use the same typed term input; this API does not assign new
 vocabulary kinds to arbitrary enum columns. UI fallback never changes card
 region or the language of source card text.
 
-These are typed build inputs, not a new authored YAML format. Human adoption
-of vocabulary mappings, localization, and symbol spellings remains a caller
-responsibility. Symbols, authored aliases, and special construction names must
-reference a confirmed decision with authored evidence already loaded in the DB.
-This API does not load authored envelopes or certify their membership/freshness;
-the upstream adoption loader must validate those before supplying the catalog.
-Discovery results are candidates and must not be fed back as adopted inputs.
+These are staging inputs, not a finalized authored YAML format or an adoption
+loader. Decision-backed aliases, symbols and special construction names always
+fail closed, even for a confirmed decision with authored evidence. Such a decision
+could concern another category or member, or stale reviewed inputs. Reopening
+this gate requires a finalized envelope and loader that validate the adoption
+category, complete exact member set and freshness against the pinned inputs.
+There is no caller flag that bypasses this gate. Synthetic tests of downstream
+projection use isolated fixtures; their acceptance is not adoption evidence.
+
+契約與 loader 定案前不經這條路徑放任何真實詞彙／記號／別名／特殊名稱資料。
+
+Terms and aliases without decisions remain staging projections only. Discovery
+results are candidates and must not be fed back as adopted inputs. Automatic
+exact regional names derived from official observations do not use this gate.
 
 `resolve_alias` prefers exact canonical codes and returns every normalized alias
 target, sorted. Multiple results require a choice; they are never selected by
@@ -43,6 +50,7 @@ that name can still form the construction group. Conflicting observed names
 without current remain unresolved. Derived IDs are `rn:v1:` followed by the full
 SHA-256 of canonical `[region, official_name]`; reuse must match exact content.
 No trimming, Unicode folding, translation, card merging, or deck copy counting
-occurs here. Explicit `collab`/`treated_as` bindings require a confirmed authored
-decision and a physical face in that region. Physical double-face counting
-belongs to the pinned construction rules.
+occurs here. The special-name projector requires a physical face in the requested
+region and exact reuse of its decision binding; its decision-backed catalog
+import remains closed as described above. Physical double-face counting belongs
+to the pinned construction rules.

@@ -8,14 +8,12 @@ import pytest
 
 from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.catalog.importer import populate_catalog
 from sve_carddb.catalog.models import NameBinding
-from sve_carddb.catalog.rules_names import populate_rules_names
+from sve_carddb.catalog.rules_names import populate_rules_names, register_name
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.text_observations.intern import TextInterner
 
 from .build_db_fixtures import seed
-from .test_catalog import catalog, context
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -184,33 +182,79 @@ def test_construction_name_hash_collision_is_not_silently_reused(
 
 
 @pytest.mark.parametrize("role", ["collab", "treated_as"])
-def test_special_name_needs_explicit_decision_and_present_region(
+def test_special_name_projection_reuses_exact_binding_and_requires_present_region(
     db: Database, role: Literal["collab", "treated_as"]
 ) -> None:
-    value = catalog().model_copy(
-        update={
-            "names": (
-                NameBinding(
-                    face_id="face",
-                    region="jp",
-                    official_name="Synthetic special name",
-                    role=role,
-                    decision_id="decision",
-                ),
-            )
-        }
+    binding = NameBinding(
+        face_id="face",
+        region="jp",
+        official_name="Synthetic special name",
+        role=role,
+        decision_id="decision",
     )
     with db.transaction():
-        populate_catalog(db, value, build=context(value), published=())
+        register_name(db, binding)
+        register_name(db, binding)
     assert any(
         row.values["role"] == role and row.values["decision_id"] == "decision"
         for row in db.rows("face_rules_name")
     )
-    wrong = value.model_copy(
-        update={"names": (value.names[0].model_copy(update={"region": "en"}),)}
-    )
+    wrong = binding.model_copy(update={"region": "en"})
     with pytest.raises(ValueError, match="face in its region"), db.transaction():
-        populate_catalog(db, wrong, build=context(wrong), published=())
+        register_name(db, wrong)
+
+
+@pytest.mark.parametrize("mutation", ["language", "region", "empty"])
+def test_derived_name_requires_matching_region_language_and_nonempty_text(
+    db: Database, mutation: str
+) -> None:
+    with pytest.raises(ValueError, match=r"mismatch|nonempty"), db.transaction():
+        if mutation == "language":
+            db.insert(
+                "language",
+                {"code": "en", "fallback_order": Json([]), "display_name": "English"},
+            )
+            db.update("text_unit", {"id": "text"}, {"lang": "en"})
+        elif mutation == "region":
+            # Remove the JP observation so its language check cannot mask this mismatch.
+            db.delete(
+                "printing_face_observation",
+                {"printing_id": "printing", "face_id": "face", "source_id": "source"},
+            )
+            db.insert(
+                "language",
+                {"code": "en", "fallback_order": Json([]), "display_name": "English"},
+            )
+            db.update("text_unit", {"id": "text"}, {"lang": "en"})
+            db.update(
+                "face_current", {"face_id": "face", "region": "jp"}, {"region": "en"}
+            )
+        else:
+            db.update("text_unit", {"id": "text"}, {"text": ""})
+        populate_rules_names(db)
+
+
+@pytest.mark.parametrize("role", ["collab", "treated_as"])
+def test_special_name_reuse_cannot_change_its_decision(
+    db: Database, role: Literal["collab", "treated_as"]
+) -> None:
+    binding = NameBinding(
+        face_id="face",
+        region="jp",
+        official_name="Synthetic special name",
+        role=role,
+        decision_id="decision",
+    )
+    with db.transaction():
+        original = dict(db.rows("decision")[0].values)
+        db.insert("decision", original | {"id": "another-decision"})
+        register_name(db, binding)
+    before = db.rows("face_rules_name")
+    with pytest.raises(ValueError, match="Conflicting special"), db.transaction():
+        register_name(
+            db, binding.model_copy(update={"decision_id": "another-decision"})
+        )
+    assert db.rows("face_rules_name") == before
 
 
 def test_existing_primary_cannot_accumulate_a_new_name(db: Database) -> None:

@@ -91,7 +91,22 @@ def test_q_is_literal_and_never_a_public_variable() -> None:
     item = Symbol.model_validate_json(canonical(literal))
     assert parse_symbol((item,), "ja", "Q").raw == "Q"
     assert parse_symbol((item,), "ja", "Q").symbol_id == item.id
+    assert parse_symbol((item,), "ja", "Qextra").symbol_id is None
+    assert parse_symbol((item,), "ja", "Qextra").raw == "Qextra"
     assert parse_symbol((item,), "en", "Q").symbol_id is None
+
+
+@pytest.mark.parametrize("raw", ["[１]", "[٠]", "[0]", "[00]"])
+def test_uint_rejects_non_ascii_and_values_below_positive_minimum(raw: str) -> None:
+    data = symbol().model_dump(mode="json")
+    data["parameter_schema"]["parameters"][0]["uint"] = {"minimum": 1, "maximum": 99}
+    item = Symbol.model_validate_json(canonical(data))
+    assert parse_symbol((item,), "ja", "[1]").parameters == {"value": 1}
+    assert parse_symbol((item,), "ja", "[99]").parameters == {"value": 99}
+    found = parse_symbol((item,), "ja", raw)
+    assert found.symbol_id is None
+    assert found.raw == raw
+    assert found.parameters == {}
 
 
 def test_ambiguous_symbol_never_selects_by_order() -> None:
