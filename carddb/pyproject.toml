@@ -106,12 +106,10 @@ env_files = [
 env_override_existing_values = false
 addopts = [
     "--import-mode=importlib",
-    "-vv",
     "--strict-markers",
     "--maxfail=3",
     # "--durations=5",
     "--emoji",
-    "--cov",
     "--cov-config=pyproject.toml",
     "--cov-report=term-missing",
 ]
