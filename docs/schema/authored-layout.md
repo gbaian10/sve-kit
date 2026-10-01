@@ -209,6 +209,8 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
+**使用者已核可（2026-10-01）**：繁中翻譯以日文卡文為來源；日英身分已確認為同一張卡時一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。來源選擇不取代跨區語義核對；未核對不得先用 EN 另翻來繞過 JP 來源規則。完整封套、持久來源清冊、owner／同字異義／counterpart 例子與失效規則見 [翻譯契約](translation-contract.md)，新增格式與政策仍是提案，待使用者決定；本節早期例子只表示邏輯意圖，不作新版可匯入封套。
+
 `sentence_template` 一個 ID 就是一份不可變內容；既有 prefix+10hex ID 保留、碰撞檢查必做。完整內容 hash 包含 `normalizer_version/parameter_schema/semantic_variant`；變更新增 ID＋supersedes，不設 `template_revision/current` 指標。模板翻譯自身仍可有不可變 revision，不是禁止翻譯修字。
 
 EN 身分確認且文字對照完成，無 divergence 時自動選官方英文、共用 JP 繁中與 DSL。例外格式：

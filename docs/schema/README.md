@@ -6,18 +6,19 @@
 
 ## 文件
 
-| 文件                                      | 內容                                                                              |
-| ----------------------------------------- | --------------------------------------------------------------------------------- |
-| [建置資料庫 schema](build-db.md)          | 建置資料庫 121 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
-| [卡表快照格式](snapshot-format.md)        | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
-| [快照傳輸契約](snapshot-transport.md)     | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
-| [機器契約](snapshot-contract.md)          | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
-| [卡圖衍生檔契約](image-variants.md)       | 直向／橫向五檔 WebP、裁切取整與原圖邊界                                           |
-| [來源歸檔與凍結輸入](source-archive.md)   | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
-| [容量與記憶體預算](size-budget.md)        | 卡表快照的容量門檻、量測方法與目前結論                                            |
-| [建置表實作分期](implementation-tiers.md) | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
-| [身分修復與決定續版](identity-repair.md)  | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
-| [authored 維護方式](authored-layout.md)   | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
+| 文件                                          | 內容                                                                              |
+| --------------------------------------------- | --------------------------------------------------------------------------------- |
+| [建置資料庫 schema](build-db.md)              | 建置資料庫 121 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
+| [卡表快照格式](snapshot-format.md)            | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
+| [快照傳輸契約](snapshot-transport.md)         | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
+| [機器契約](snapshot-contract.md)              | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
+| [卡圖衍生檔契約](image-variants.md)           | 直向／橫向五檔 WebP、裁切取整與原圖邊界                                           |
+| [來源歸檔與凍結輸入](source-archive.md)       | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
+| [容量與記憶體預算](size-budget.md)            | 卡表快照的容量門檻、量測方法與目前結論                                            |
+| [建置表實作分期](implementation-tiers.md)     | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
+| [身分修復與決定續版](identity-repair.md)      | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
+| [authored 維護方式](authored-layout.md)       | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
+| [翻譯與模板採納契約](translation-contract.md) | 已核可的繁中來源規則；封套、持久清冊、跨區核對與修訂失效提案                      |
 
 ## 文件之間的關係
 
