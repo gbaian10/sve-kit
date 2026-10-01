@@ -62,6 +62,7 @@ from sve_carddb.manifest import (
     ExclusiveLock,
     Manifest,
     ManifestError,
+    Region,
 )
 from sve_carddb.source_archive import (
     ArchiveError,
@@ -558,15 +559,19 @@ def archive_extract_cards(
     store_id: Annotated[str, typer.Option(help="Stable archive store name.")],
     batch_id: str,
     dest: Path,
+    region: Region = Region.JP,
 ) -> None:
-    """Extract JP cards solely from one verified sealed input batch."""
+    """Extract JP or EN cards solely from one verified sealed input batch."""
+    if region not in {Region.JP, Region.EN}:
+        console.print("[red]stopped:[/red] Card extraction supports only JP and EN")
+        raise typer.Exit(1)
     try:
         _require_derived_outside_store(store, dest)
         reader = ArchiveReader(store, store_id, batch_id)
         with Manifest.open_snapshot(
             store / "batches" / batch_id.removeprefix("sha256:") / "manifest.sqlite"
         ) as snapshot:
-            report = extract_cards(snapshot, reader, dest)
+            report = extract_cards(snapshot, reader, dest, region=region)
     except (ArchiveError, ManifestError) as exc:
         console.print(f"[red]stopped:[/red] {exc}")
         raise typer.Exit(1) from exc
