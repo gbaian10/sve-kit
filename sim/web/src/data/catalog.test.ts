@@ -95,3 +95,53 @@ describe("catalog", () => {
     expect(catalog.normalizerMatches).toBe(true)
   })
 })
+
+describe("pending display in the list", () => {
+  it.each([true, false])("keeps a pending card visible with display=%s", (available) => {
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "f:bp01-001"
+            ? {
+                ...row,
+                current: [],
+                wording: [
+                  {
+                    region: "jp",
+                    state: "pending",
+                    display: {
+                      revision_id: available
+                        ? (catalog.index.currentRevision("f:bp01-001", "jp")?.["id"] ?? null)
+                        : null,
+                      basis: available ? "latest_known_release" : "candidates",
+                    },
+                    candidates: [],
+                    undated_printing_ids: ["p:bp01-001"],
+                  },
+                ],
+              }
+            : row,
+        ),
+      })),
+    }
+    const pending = createCatalog(revised)
+    expect(pending.index.currentRevision("f:bp01-001", "jp")).toBeUndefined()
+    expect(pending.index.wording("f:bp01-001", "jp")?.["undated_printing_ids"]).toEqual([
+      "p:bp01-001",
+    ])
+    const summary = pending.summary("p:bp01-001")
+    expect(summary).toBeDefined()
+    expect(summary?.name.original.text).toBe(available ? "試作の見習い兵" : "BP01-001")
+    expect(summary?.cost).toBe(available ? 1 : null)
+    expect(
+      pending.results(DEFAULT_QUERY, "jp").some((item) => item.printingId === "p:bp01-001"),
+    ).toBe(true)
+  })
+  it("prefers current over a pending display", () => {
+    const revision = catalog.index.currentRevision("f:bp01-001", "jp")
+    expect(catalog.index.displayRevision("f:bp01-001", "jp")).toEqual(revision)
+    expect(catalog.index.displayRevision("f:nope", "jp")).toBeUndefined()
+  })
+})

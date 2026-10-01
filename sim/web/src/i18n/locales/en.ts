@@ -80,6 +80,10 @@ export default {
     loading: "Loading",
   },
   card: {
+    wordingPending: "Wording awaiting review",
+    candidatesLoading: "Loading candidates",
+    provisionalWording: "Provisional wording, not yet adopted",
+    undatedPrintings: "Printings with unknown dates: {{cardNos}}",
     imageAlt: "{{name}} ({{cardNo}})",
     noImage: "No image yet",
     imagePending: "Image awaiting review",

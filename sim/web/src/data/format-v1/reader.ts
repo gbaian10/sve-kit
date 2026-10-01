@@ -418,6 +418,7 @@ const ARRAY_REFERENCES: Readonly<Record<string, string>> = {
   ruling_revision_ids: "ruling_revision",
   complete_keyword_ids: "keyword",
   partial_keyword_ids: "keyword",
+  undated_printing_ids: "printing",
 }
 
 function walk(value: JsonValue, targets: Map<string, Set<string>>): void {
@@ -479,6 +480,10 @@ function current(view: View, fragments: Fragment[]): void {
   for (const row of view["face"] ?? []) {
     for (const item of arrayValue(row["current"] ?? null))
       refs.add(stringValue(objectValue(item)["revision_id"]))
+    for (const item of arrayValue(row["wording"] ?? [])) {
+      const display = objectValue(objectValue(item)["display"])
+      if (display["revision_id"] !== null) refs.add(stringValue(display["revision_id"]))
+    }
   }
   const currentIds = new Set<string>()
   for (const fragment of fragments) {

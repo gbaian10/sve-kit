@@ -14,6 +14,7 @@ import {
 import type { Fragment, View } from "./reader"
 import { primaryKey } from "./schema"
 import { digest } from "./sha256"
+import { validateWording } from "./wording"
 
 type Row = JsonObject
 
@@ -140,6 +141,9 @@ const NESTED_ORDER: readonly (readonly [string, readonly string[]])[] = [
   ["sections", ["ordinal"]],
   ["regions", ["region"]],
   ["current", ["region"]],
+  ["wording", ["region"]],
+  ["candidates", ["printing_id", "revision_id"]],
+  ["observations", ["source_url", "state", "revision_id"]],
   ["overrides", ["region"]],
   ["region_blocks", ["region"]],
 ]
@@ -299,6 +303,7 @@ function summaries(view: View, manifest: Row): void {
 
 /** Public relationships that need the joined view and the manifest, without any build DB. */
 export function validateView(view: View, manifest: Row, fragments: readonly Fragment[]): void {
+  validateWording(view)
   owners(view, fragments)
   vocabulary(view)
   summaries(view, manifest)

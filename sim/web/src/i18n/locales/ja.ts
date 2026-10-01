@@ -79,6 +79,10 @@ export default {
     loading: "読み込み中",
   },
   card: {
+    wordingPending: "表記は確認待ち",
+    candidatesLoading: "候補を読み込み中",
+    provisionalWording: "仮表示の表記（未採用）",
+    undatedPrintings: "日付未定の版：{{cardNos}}",
     imageAlt: "{{name}}（{{cardNo}}）",
     noImage: "画像なし",
     imagePending: "画像は確認待ち",

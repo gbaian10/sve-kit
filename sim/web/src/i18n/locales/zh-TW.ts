@@ -77,6 +77,10 @@ const zhTW = {
     loading: "載入中",
   },
   card: {
+    wordingPending: "表記待核對",
+    candidatesLoading: "候選載入中",
+    provisionalWording: "暫顯表記，尚未採納",
+    undatedPrintings: "日期未定版次：{{cardNos}}",
     imageAlt: "{{name}}（{{cardNo}}）",
     noImage: "尚無卡圖",
     imagePending: "卡圖待確認",

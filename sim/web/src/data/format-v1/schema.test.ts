@@ -80,8 +80,8 @@ describe("contract schema", () => {
     expect(() => definition("nope")).toThrow("unknown schema definition")
   })
 
-  it("accepts every shared positive example, like ajv", () => {
-    for (const c of valid) expectAccepted(c.schema, c.value, true, c.schema)
+  it.each(valid)("accepts the shared positive $schema, like ajv", (c) => {
+    expectAccepted(c.schema, c.value, true, c.schema)
   })
 
   it("rejects every shared counterexample, like ajv", () => {

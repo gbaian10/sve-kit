@@ -2,6 +2,7 @@
 // their first consumer, so the barrel never carries unused surface.
 export { type CardSummary, type Catalog, catalogOf } from "./catalog"
 export type { LoadedSnapshot, SnapshotClient, SnapshotStatus } from "./client"
+export type { Row } from "./format-v1/decode"
 export { type ImageIndex, imageIndexOf } from "./images"
 export {
   activeSnapshotRoot,
