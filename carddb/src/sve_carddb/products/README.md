@@ -175,23 +175,28 @@ Names/dates can change without changing a link-based permanent identity; a
 source-block identity remains pinned to its exact raw version. New URLs need a
 separately confirmed alias to the existing ID.
 
-This parser recognizes explicit package nouns in the block title: Japanese
-pack/deck/card-set and English pack, named deck/set or bundle forms. These become
-`pack/deck/set/bundle` product types. Explicit packs use `inclusion_kind=pack`;
-observed decks/sets/bundles use `other`, without claiming a box, prize, campaign
-or redemption. Unrecognized or conflicting nouns leave a missing-type/distribution
-diagnostic and exclude those rows. It never derives type or distribution from a
-family, owner, card number or product ID. Unknown dates stay unknown; month/year
-retain raw text with no complete day. All source-only products keep
-`family_id=NULL`; no cross-region family relationship is inferred.
+Product type follows the approved [build DB rule](../../../../docs/schema/build-db.md#32-商品與發行).
+An exact, case-sensitive match between the block's complete expansion code and
+one confirmed family's `public_code` supplies that family's `kind`; `code` is
+not a fallback and compound codes are not split. Missing, ambiguous or unmatched
+codes retain the product with `product_type=NULL` and a `product_type_unknown`
+diagnostic. Proposed families never supply types. Titles, owners and card numbers
+are not type evidence. This lookup establishes no family relationship:
+`family_id` remains NULL. Official inclusions always use `other`, without
+claiming packs, boxes, prizes, campaigns or redemption. Unknown dates remain
+unknown; month/year retain raw text with no complete day. The official
+`ProductData` permits a null type; `AuthoredProductData` in §10 input requires a
+non-null Code. The composed import must use the same catalog that supplied the
+official type lookup.
 
 Products may exist without an eligible printing. Inclusions require the exact
 same-region card number, an included printing in the supplied identity preview
 and matching source metadata. Missing/mismatched EN observations remain excluded
-by that existing gate. `FrozenProducts` provides product evidence; it does not
-provide or authorize a production EN identity adapter. Reports distinguish
-nonblocking diagnostics from exclusions, without claiming complete catalog
-coverage or printing adoption from product identity confirmation.
+by that existing gate. Use `FrozenRegions(jp=FrozenJP(...), en=FrozenEN(...))` from
+[regional identity staging](../registry/preview/README.md) to supply the actual
+sealed JP and EN identity evidence, alongside both `FrozenProducts` batches.
+Product identity confirmation does not adopt a printing. Reports distinguish
+nonblocking diagnostics, including null types, from actual exclusions.
 
 ```python
 identities = load_product_identities(

@@ -6,6 +6,8 @@
 
 公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `1.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
 
+**使用者核可 2026-10-01**：`product.product_type` 的既有 tuple 位置可為 null，與官方商品無 exact confirmed `family.public_code` 型別對應時的 DB 欄位一致；人工 product 輸入仍必填 Code。本候選 format 尚無正式發布快照，直接同步 nullable Schema、type descriptor 與獨立 golden，維持候選 `1.0.0`；正式凍結後的同類相容性變更須另依傳輸契約升版與同步 reader。
+
 ## 資源入口
 
 | `$defs` 名稱 | 用途 |
