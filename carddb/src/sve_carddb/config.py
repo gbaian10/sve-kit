@@ -25,6 +25,10 @@ class Settings(BaseSettings):
     timeout: float = Field(default=30.0, gt=0.0)
     user_agent: str = BROWSER_USER_AGENT
     breaker_threshold: int = Field(default=5, ge=1)
+    archive_root: Path | None = None
+    archive_store_id: str | None = None
+    archive_backup_root: Path | None = None
+    archive_restore_root: Path | None = None
     extra_roots: Annotated[tuple[Path, ...], NoDecode] = ()
     """`SVE_EXTRA_ROOTS`: absolute paths, joined by `os.pathsep`, that symlinks
     under the data root may point into. Only `manifest check` reads through them."""
@@ -34,6 +38,14 @@ class Settings(BaseSettings):
     def _split_roots(cls, value: object) -> object:
         if isinstance(value, str):
             value = [part for part in value.split(os.pathsep) if part]
+        return value
+
+    @field_validator("archive_root", "archive_backup_root", "archive_restore_root")
+    @classmethod
+    def _absolute_archive_path(cls, value: Path | None) -> Path | None:
+        if value is not None and not value.is_absolute():
+            msg = "archive paths must be absolute"
+            raise ValueError(msg)
         return value
 
     @field_validator("extra_roots")

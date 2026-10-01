@@ -610,13 +610,18 @@ def _write_new(path: Path, data: bytes) -> None:
 
 
 def _mkdir_safe(path: Path) -> None:
-    path.mkdir(parents=True, exist_ok=True)
+    missing: list[Path] = []
     current = path
     while current != current.parent:
         if current.is_symlink():
             msg = f"archive path contains a symlink: {current}"
             raise ArchiveError(msg)
+        if not current.exists():
+            missing.append(current)
         current = current.parent
+    for directory in reversed(missing):
+        directory.mkdir(exist_ok=True)
+        _fsync_dir(directory.parent)
 
 
 def _fsync_dir(path: Path) -> None:
@@ -645,12 +650,18 @@ def _load_model[T: _Model](model: type[T], path: Path) -> T:
 
 def _install_bytes(path: Path, data: bytes) -> None:
     _mkdir_safe(path.parent)
+    temporary = path.with_name(f".{path.name}.{uuid.uuid4().hex}.tmp")
     try:
-        _write_new(path, data)
-    except FileExistsError:
-        if path.read_bytes() != data:
-            msg = f"immutable archive metadata differs: {path}"
-            raise ArchiveError(msg) from None
+        _write_new(temporary, data)
+        try:
+            os.link(temporary, path)
+        except FileExistsError:
+            if path.is_symlink() or path.read_bytes() != data:
+                msg = f"immutable archive metadata differs: {path}"
+                raise ArchiveError(msg) from None
+        _fsync_dir(path.parent)
+    finally:
+        temporary.unlink(missing_ok=True)
 
 
 def _install_link(
@@ -896,7 +907,10 @@ def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
     batch = stage / "batch"
     _mkdir_safe(batch)
     final_db = stage / "final.sqlite"
-    _install_link(final_db, batch / "manifest.sqlite")
+    _install_link(
+        store.root / "manifests" / f"{_hex(manifest_sha)}.sqlite",
+        batch / "manifest.sqlite",
+    )
     gaps = [
         Missing(url=url, expected_raw_sha256="sha256:" + raw, reason="missing_history")
         for url, raw in history
@@ -1322,9 +1336,7 @@ def backup_batch(
     ):
         msg = "archive backup must be on a separate device"
         raise ArchiveError(msg)
-    paths = _closure_paths(store.root, batch_id, inventory)
-    for relative in paths:
-        _copy_immutable(store.root / relative, backup_root / relative)
+    _copy_closure(store.root, backup_root, batch_id, inventory)
     verify_batch(backup_root, store.store_id, batch_id)
     receipt_path = backup_root / "backups" / f"{_hex(batch_id)}.json"
     expected_blobs = sorted({item.blob.sha256 for item in inventory.entries})
@@ -1349,6 +1361,23 @@ def backup_batch(
     return receipt
 
 
+def _copy_closure(
+    source_root: Path, destination: Path, batch_id: str, inventory: Inventory
+) -> None:
+    batch_manifest = PurePosixPath("batches", _hex(batch_id), "manifest.sqlite")
+    for relative in _closure_paths(source_root, batch_id, inventory):
+        if relative != batch_manifest:
+            _copy_immutable(source_root / relative, destination / relative)
+    manifest = destination / "manifests" / f"{_hex(inventory.manifest.sha256)}.sqlite"
+    _require_hash(destination, manifest, inventory.manifest.sha256)
+    target = destination / batch_manifest
+    if target.exists() or target.is_symlink():
+        _require_hash(destination, target, inventory.manifest.sha256)
+    else:
+        # Link only within the copied closure; the backup must own independent bytes.
+        _install_link(manifest, target)
+
+
 def restore_backup(
     backup_root: Path, destination: Path, store_id: str, batch_id: str
 ) -> Inventory:
@@ -1370,8 +1399,7 @@ def restore_backup(
         msg = f"restore destination must be empty: {destination}"
         raise ArchiveError(msg)
     _mkdir_safe(destination)
-    for relative in _closure_paths(backup_root, batch_id, inventory):
-        _copy_immutable(backup_root / relative, destination / relative)
+    _copy_closure(backup_root, destination, batch_id, inventory)
     _copy_immutable(receipt_path, destination / "backups" / f"{_hex(batch_id)}.json")
     restored = verify_batch(destination, store_id, batch_id)
     if _hash_file(receipt_path)[0] != receipt_hash:
@@ -1449,6 +1477,9 @@ def _record_restore_check(
 
 def _copy_immutable(source: Path, target: Path) -> None:
     _mkdir_safe(target.parent)
+    if source.is_symlink() or target.is_symlink():
+        msg = "immutable backup files must not be symlinks"
+        raise ArchiveError(msg)
     source_hash = _hash_file(source)
     if target.exists():
         if _hash_file(target) != source_hash:
