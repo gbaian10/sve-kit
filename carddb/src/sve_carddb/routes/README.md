@@ -64,16 +64,22 @@ unrelated dated products exist. The caller supplies the intended display/publica
 subset as build rows; this module does not infer a separate publication policy.
 The inheritance rule follows build-db §3.2 and snapshot-format §8.
 
-The specification has not assigned the general rarity/frame code lists, stamp
-classification source or an authored override-file format. Real imports therefore
-retain honest fallback defaults until those policies and inputs are supplied.
+[Catalog-route adoption §7](../../../../docs/schema/catalog-route-adoption.md#7-預設版次與一般版分類)
+defines the approved general-rarity policy and the evidence required for ordinary
+processing. The classifier supplies that policy from pinned authored/configuration
+inputs; this package does not hardcode its whitelist. Unknown frame or stamp
+evidence remains unknown. Known general rarity with incomplete processing can
+yield `candidate_general`; missing general-rarity evidence yields `fallback`.
+The contract also defines adopted route/default override envelopes in §2–§5.
+Their loaders and freshness checks must validate those inputs before supplying DB
+overrides; accepting supplied rows here does not implement the adoption loader.
 Passing route validation and this selector does not enable the complete routes,
 products or release capabilities; their readiness flags remain unchanged.
 
 Run the independent synthetic counterexamples with:
 
 ```bash
-uv --directory carddb run pytest tests/test_routes.py tests/test_route_defaults.py
+uv --directory carddb run pytest tests/test_routes.py tests/test_route_defaults.py tests/test_routes_defensive.py
 ```
 
 Official card text is not stored in these tests. Frozen production validation
