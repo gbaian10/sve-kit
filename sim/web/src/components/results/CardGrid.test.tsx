@@ -28,7 +28,7 @@ function cell(pending: boolean): GridCell {
 
 describe("visible wording label in card results", () => {
   it.each([
-    ["zh-TW", "表記未定"],
+    ["zh-TW", "卡文未定"],
     ["ja", "表記未定"],
     ["en", "Wording pending"],
   ] as const)("labels a pending summary in %s", async (language, label) => {
@@ -42,6 +42,6 @@ describe("visible wording label in card results", () => {
   })
   it("does not label a settled summary", async () => {
     await renderInRouter(<CardGrid cells={[cell(false)]} images={undefined} onOpen={vi.fn()} />)
-    expect(screen.queryByText("表記未定")).not.toBeInTheDocument()
+    expect(screen.queryByText("卡文未定")).not.toBeInTheDocument()
   })
 })

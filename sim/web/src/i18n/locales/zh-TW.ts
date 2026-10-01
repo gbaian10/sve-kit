@@ -77,7 +77,7 @@ const zhTW = {
     loading: "載入中",
   },
   card: {
-    wordingPending: "表記未定",
+    wordingPending: "卡文未定",
     candidatesUnselected: "有多個候選，尚未選定",
     provisionalWording: "依已知發售日暫顯，尚未採納",
     undatedPrintings: "日期未定版次：",

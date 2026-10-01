@@ -47,11 +47,16 @@ export function CardPage() {
             )}
             {!revision && <p>{t("card.candidatesUnselected")}</p>}
             {undated.length > 0 && (
-              <div className="flex flex-wrap gap-x-2 gap-y-1">
+              <div className="space-y-1">
                 <span>{t("card.undatedPrintings")}</span>
-                <ul className="flex flex-wrap gap-x-2 gap-y-1">
+                <ul
+                  className="grid gap-x-3 gap-y-1 font-mono text-14"
+                  style={{
+                    gridTemplateColumns: `repeat(auto-fill, ${String(Math.max(...undated.map((cardNo) => Array.from(cardNo).length)))}ch)`,
+                  }}
+                >
                   {undated.map((cardNo) => (
-                    <li key={cardNo} className="font-mono text-14 whitespace-nowrap">
+                    <li key={cardNo} className="text-left whitespace-nowrap">
                       {cardNo}
                     </li>
                   ))}

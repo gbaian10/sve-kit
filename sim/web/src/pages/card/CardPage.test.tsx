@@ -8,6 +8,7 @@ const state = vi.hoisted(() => ({
   available: false,
   current: false,
   crossRegion: false,
+  undated: ["PR-SYNTHETIC"],
   wording: vi.fn(),
 }))
 vi.mock("../../app/snapshot", () => {
@@ -35,12 +36,12 @@ vi.mock("../../app/snapshot", () => {
                     ? "latest_known_release"
                     : "candidates",
               },
-              undated_printing_ids: ["p:undated"],
+              undated_printing_ids: state.undated,
             }
           },
           displayRevision: () => (state.available ? { name_unit_id: "t:synthetic" } : undefined),
           textUnit: () => ({ text: "Synthetic presentation name" }),
-          printing: () => ({ card_no: "PR-SYNTHETIC" }),
+          printing: (id: string) => ({ card_no: id }),
         },
       },
     }),
@@ -51,12 +52,13 @@ beforeEach(() => {
   state.available = false
   state.current = false
   state.crossRegion = false
+  state.undated = ["PR-SYNTHETIC"]
   state.wording.mockClear()
 })
 
 describe("pending wording on the card page", () => {
   it.each([
-    ["zh-TW", "表記未定", "依已知發售日暫顯"],
+    ["zh-TW", "卡文未定", "依已知發售日暫顯"],
     ["ja", "表記未定", "既知の発売日に基づく仮表示"],
     ["en", "Wording pending", "Provisional display by known release date"],
   ] as const)(
@@ -94,9 +96,26 @@ describe("pending wording on the card page", () => {
     await renderRoutes([{ path: "/cards/:cardNo", Component: CardPage }], {
       initialEntries: ["/cards/BP-SYNTHETIC"],
     })
-    expect(screen.getByRole("heading", { name: "表記未定" })).toBeVisible()
+    expect(screen.getByRole("heading", { name: "卡文未定" })).toBeVisible()
     expect(screen.queryByText(/依已知發售日暫顯/)).not.toBeInTheDocument()
   })
+  it.each(["zh-TW", "ja", "en"] as const)(
+    "uses equal grid tracks sized by the longest card number in %s",
+    async (language) => {
+      state.undated = ["BP01-002a", "BP01-021S", "BP01-01", "PR-SYNTHETIC"]
+      await renderRoutes([{ path: "/cards/:cardNo", Component: CardPage }], {
+        initialEntries: ["/cards/BP-SYNTHETIC"],
+        language,
+      })
+      const grid = screen.getByRole("list")
+      expect(grid).toHaveClass("grid", "font-mono")
+      expect(grid).toHaveStyle({ gridTemplateColumns: "repeat(auto-fill, 12ch)" })
+      expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(state.undated)
+      for (const item of screen.getAllByRole("listitem")) {
+        expect(item).toHaveClass("text-left", "whitespace-nowrap")
+      }
+    },
+  )
   it.each(["/cards/BP-SYNTHETIC", "/p/42"])(
     "uses the resolved printing's region for %s",
     async (path) => {
