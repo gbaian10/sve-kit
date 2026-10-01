@@ -674,14 +674,13 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
         with db.transaction():
             case.stage(db)
             decision = db.rows("decision")[0].values["id"]
-            db.insert(
-                "card_route",
-                {
-                    "namespace": "official",
-                    "route_key": item.card_no,
-                    "printing_id": item.printing_id,
-                },
+            assert any(
+                row.values["namespace"] == "official"
+                and row.values["route_key"] == item.card_no
+                and row.values["printing_id"] == item.printing_id
+                for row in db.rows("card_route")
             )
+            assert len(db.rows("card_route")) == 4
             db.insert(
                 "card_route_alias",
                 {
@@ -723,12 +722,12 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
         counts = report["excluded_row_counts"]
         assert isinstance(counts, dict)
         for table in (
-            "card_route",
             "card_route_alias",
             "default_printing_override",
             "route_override",
         ):
             assert counts[table] == (1 if conflict else 0)
+        assert counts["card_route"] == (2 if conflict else 0)
         assert counts["printing"] == (2 if conflict else 0)
         assert counts["card"] == 0
         assert counts["face_current"] == 0

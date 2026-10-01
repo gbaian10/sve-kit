@@ -175,21 +175,14 @@ def test_reverse_fk_closure_reaches_alias_through_route_in_adverse_order(
     with create_database(schema) as db:
         with db.transaction():
             case.stage(db)
-            db.insert(
-                "card_route",
-                {
-                    "namespace": "official",
-                    "route_key": "SYN-current",
-                    "printing_id": item.printing_id,
-                },
-            )
+
             db.insert(
                 "card_route_alias",
                 {
                     "namespace": "official",
                     "old_key": "SYN-old",
                     "target_namespace": "official",
-                    "target_key": "SYN-current",
+                    "target_key": item.card_no,
                     "reason": "renumbered",
                     "source_id": item.card.source.id,
                     "decision_id": db.rows("decision")[0].values["id"],
@@ -207,7 +200,7 @@ def test_reverse_fk_closure_reaches_alias_through_route_in_adverse_order(
             "printing": {(item.printing_id,)},
         }
         _close(tables, rows, excluded)
-        assert excluded["card_route"] == {("official", "SYN-current")}
+        assert excluded["card_route"] == {("official", item.card_no)}
         assert excluded["card_route_alias"] == {("official", "SYN-old")}
 
 

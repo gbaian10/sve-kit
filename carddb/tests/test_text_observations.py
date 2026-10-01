@@ -407,13 +407,10 @@ def test_exclusion_closes_routes_aliases_defaults_and_keeps_other_region(
                     "source_id": item.card.source.id,
                 },
             )
-            db.insert(
-                "card_route",
-                {
-                    "namespace": "official",
-                    "route_key": item.card_no,
-                    "printing_id": item.printing_id,
-                },
+            assert any(
+                row.values["route_key"] == item.card_no
+                and row.values["printing_id"] == item.printing_id
+                for row in db.rows("card_route")
             )
             db.insert(
                 "card_route_alias",
@@ -454,7 +451,7 @@ def test_exclusion_closes_routes_aliases_defaults_and_keeps_other_region(
         )
         counts = exclusion_report(db, schema, case.plan)["excluded_row_counts"]
         assert isinstance(counts, dict)
-        assert counts["card_route"] == 1
+        assert counts["card_route"] == 2
         assert counts["card_route_alias"] == 1
         assert counts["route_override"] == 1
         assert counts["default_printing_override"] == 1
