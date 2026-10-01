@@ -161,10 +161,21 @@ class Database:
             f"DELETE FROM {identifier(name)} WHERE {where}", parameters
         )
 
-    def rows(self, name: str) -> tuple[Row, ...]:
-        """Read declared columns in primary-key order and validate every stored value."""
+    def has_table(self, name: str) -> bool:
+        """Report declared capability availability without probing SQLite internals."""
+        return name in self._tables
+
+    def columns(self, name: str) -> tuple[str, ...]:
+        """Expose declaration names, never unvalidated SQLite schema metadata."""
+        return tuple(column.name for column in self._tables[name].columns)
+
+    def select(self, name: str, selected: tuple[str, ...]) -> tuple[Row, ...]:
+        """Read only an explicit column whitelist through the typed boundary."""
         table = self._tables[name]
-        columns = ", ".join(identifier(column.name) for column in table.columns)
+        if not selected or len(selected) != len(set(selected)):
+            raise ValueError("Expected nonempty unique selected columns")
+        declarations = tuple(table.column(column) for column in selected)
+        columns = ", ".join(map(identifier, selected))
         order = ", ".join(map(identifier, table.primary_key))
         raw = self._read(f"SELECT {columns} FROM {identifier(name)} ORDER BY {order}")
         return tuple(
@@ -173,7 +184,7 @@ class Database:
                 MappingProxyType(
                     {
                         column.name: decode(column, value, self._rules)
-                        for column, value in zip(table.columns, row, strict=True)
+                        for column, value in zip(declarations, row, strict=True)
                     }
                 ),
             )
@@ -218,6 +229,10 @@ class Database:
             f"SELECT 1 FROM search_alias AS a LEFT JOIN ({targets}) AS t ON a.kind=t.kind AND a.code=t.code WHERE t.code IS NULL"
         ):
             raise ValueError("Search alias has no valid target")
+
+    def rows(self, name: str) -> tuple[Row, ...]:
+        """Read declared columns in primary-key order and validate every stored value."""
+        return self.select(name, self.columns(name))
 
 
 @contextmanager
