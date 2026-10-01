@@ -92,7 +92,7 @@ class Recipe:
     def definition(self) -> dict[str, object]:
         """Return every setting that can affect the encoded bytes."""
         return {
-            "algorithm": "sve-webp-v1",
+            "algorithm": "sve-webp-v2",
             "pillow": PILLOW_VERSION,
             "libwebp": LIBWEBP_VERSION,
             "littlecms": LITTLECMS_VERSION,
@@ -106,7 +106,16 @@ class Recipe:
             "metadata": "strip-icc-exif-xmp",
             "resize": "lanczos-no-reducing-gap",
             "rounding": "floor-x-plus-half-min-one",
-            "crop": "integer-4x3-v1",
+            "crop": {
+                "algorithm": "integer-4x3-v2",
+                "portrait": {"left_percent": 8, "top_percent": 14, "width_percent": 84},
+                "landscape": {
+                    "left_percent": 17,
+                    "top_percent": 4,
+                    "width_percent": 65,
+                },
+                "override": "source-bound-integer-in-bounds-exact-4x3",
+            },
             "sizes": [asdict(size) for size in SIZES],
             "lossless": False,
             "quality": self.quality,
@@ -360,11 +369,6 @@ def _convert_icc(image: Image.Image, profile: object) -> Image.Image:
 def _crop_box(
     source: ImageSource, width: int, height: int, override: CropOverride | None
 ) -> CropBox | None:
-    if width > height:
-        if override is not None:
-            msg = "landscape images cannot have art crop overrides"
-            raise ImageVariantError(msg)
-        return None
     if override is not None:
         if (
             override.image_id != source.image_id
@@ -389,11 +393,14 @@ def _crop_box(
             msg = "invalid or stale art crop override"
             raise ImageVariantError(msg)
         return CropBox(override.left, override.top, override.width, override.height)
-    left = (8 * width) // 100
-    top = (14 * height) // 100
-    k = min((84 * width) // 400, (width - left) // 4, (height - top) // 3)
+    left_percent, top_percent, width_percent = (
+        (17, 4, 65) if width > height else (8, 14, 84)
+    )
+    left = (left_percent * width) // 100
+    top = (top_percent * height) // 100
+    k = min((width_percent * width) // 400, (width - left) // 4, (height - top) // 3)
     if k <= 0:
-        msg = "portrait source is too small for a 4:3 art crop"
+        msg = "source is too small for a 4:3 art crop"
         raise ImageVariantError(msg)
     return CropBox(left, top, 4 * k, 3 * k)
 

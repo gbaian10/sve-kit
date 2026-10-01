@@ -3,7 +3,7 @@
 import hashlib
 from dataclasses import replace
 from io import BytesIO
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, TypedDict
 
 import pytest
 from PIL import Image, ImageCms, ImageDraw, features
@@ -21,6 +21,17 @@ from sve_carddb.image_variants import (
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+class CropChanges(TypedDict, total=False):
+    image_id: str
+    source_sha256: str
+    reason: str
+    left: int
+    top: int
+    width: int
+    height: int
+
 
 RAW_SRC = "../cards/card image.png?edition=jp"
 
@@ -111,13 +122,15 @@ def test_portrait_sizes_crop_and_content_paths(tmp_path: Path) -> None:
             assert not {"icc_profile", "exif", "xmp"} & decoded.info.keys()
 
 
-def test_landscape_uses_actual_dimensions_without_art(tmp_path: Path) -> None:
+def test_landscape_uses_actual_dimensions_with_art(tmp_path: Path) -> None:
     result = build(source(png(641, 459), image_id="img:spell"), tmp_path)
-    assert result.crop_box is None
+    assert result.crop_box == CropBox(108, 18, 416, 312)
     assert [(v.size_key, v.width, v.height) for v in result.variants] == [
         ("card_s", 179, 128),
         ("card_m", 447, 320),
         ("card_l", 641, 459),
+        ("art_s", 160, 120),
+        ("art_m", 384, 288),
     ]
 
 
@@ -156,7 +169,14 @@ def test_high_resolution_and_small_sources_do_not_upscale(tmp_path: Path) -> Non
 def test_exif_orientation_decides_landscape_after_transpose(tmp_path: Path) -> None:
     result = build(source(png(459, 641, orientation=6)), tmp_path)
     assert (result.source_width, result.source_height) == (641, 459)
-    assert [v.size_key for v in result.variants] == ["card_s", "card_m", "card_l"]
+    assert result.crop_box == CropBox(108, 18, 416, 312)
+    assert [v.size_key for v in result.variants] == [
+        "card_s",
+        "card_m",
+        "card_l",
+        "art_s",
+        "art_m",
+    ]
 
 
 def test_alpha_and_icc_metadata_are_handled_explicitly(tmp_path: Path) -> None:
@@ -305,8 +325,10 @@ def test_crop_override_is_tied_to_source_and_cannot_fallback(tmp_path: Path) -> 
             build(item, root, override=bad)
         assert not (root / "blobs").exists()
     landscape = source(png(140, 100))
-    with pytest.raises(ImageVariantError, match="landscape"):
-        build(landscape, tmp_path / "landscape", override=override)
+    landscape_override = replace(override, source_sha256=landscape.source_sha256)
+    result = build(landscape, tmp_path / "landscape", override=landscape_override)
+    assert result.crop_box == CropBox(4, 10, 64, 48)
+    assert [(v.width, v.height) for v in result.variants[-2:]] == [(64, 48)] * 2
 
 
 def test_bad_images_and_unapproved_sources_write_nothing(tmp_path: Path) -> None:
@@ -353,3 +375,113 @@ def test_existing_corrupt_blob_is_never_overwritten(tmp_path: Path) -> None:
     with pytest.raises(ImageVariantError, match="corrupt"):
         build(item, tmp_path)
     assert path.read_bytes() == b"corrupt"
+
+
+@pytest.mark.parametrize(
+    ("width", "height", "bounds", "cards"),
+    [
+        (459, 640, (36, 89, 420, 377), [(128, 178), (320, 446), (459, 640)]),
+        (460, 643, (36, 90, 420, 378), [(128, 179), (320, 447), (459, 641)]),
+        (744, 1039, (59, 145, 683, 613), [(128, 179), (320, 447), (459, 641)]),
+        (992, 1386, (79, 194, 911, 818), [(128, 179), (320, 447), (459, 641)]),
+        (640, 459, (108, 18, 524, 330), [(179, 128), (447, 321), (640, 459)]),
+        (643, 460, (109, 18, 525, 330), [(179, 128), (447, 320), (641, 459)]),
+        (1039, 744, (176, 29, 848, 533), [(179, 128), (447, 320), (641, 459)]),
+        (1386, 992, (235, 39, 1135, 714), [(179, 128), (447, 320), (641, 459)]),
+        (1000, 10, (170, 0, 182, 9), [(179, 2), (447, 4), (641, 6)]),
+    ],
+)
+def test_integer_geometry_golden_cases(
+    tmp_path: Path,
+    width: int,
+    height: int,
+    bounds: tuple[int, int, int, int],
+    cards: list[tuple[int, int]],
+) -> None:
+    result = build(source(png(width, height)), tmp_path)
+    assert result.crop_box is not None
+    assert result.crop_box.bounds == bounds
+    assert [(v.width, v.height) for v in result.variants[:3]] == cards
+    arts = [(v.width, v.height) for v in result.variants[3:]]
+    assert arts == ([(12, 9)] * 2 if height == 10 else [(160, 120), (384, 288)])
+    assert len(result.variants) == 5
+    for variant in result.variants:
+        with Image.open(tmp_path / "blobs" / variant.path) as decoded:
+            assert decoded.size == (variant.width, variant.height)
+
+
+@pytest.mark.parametrize(("width", "height"), [(1, 1), (3, 4), (4, 3), (100, 1)])
+def test_zero_k_has_diagnostic_before_writing(
+    tmp_path: Path, width: int, height: int
+) -> None:
+    with pytest.raises(ImageVariantError, match="too small for a 4:3 art crop"):
+        build(source(png(width, height)), tmp_path)
+    assert not (tmp_path / "blobs").exists()
+    assert not (tmp_path / "cache").exists()
+
+
+@pytest.mark.parametrize(("width", "height"), [(100, 140), (140, 100)])
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"image_id": "wrong-image"},
+        {"source_sha256": "0" * 64},
+        {"reason": " "},
+        {"left": -1},
+        {"top": -1},
+        {"width": 0},
+        {"height": 0},
+        {"width": 0, "height": 0},
+        {"width": -4, "height": -3},
+        {"width": -4},
+        {"height": -3},
+        {"width": 63},
+        {"left": 80},
+        {"top": 100},
+    ],
+)
+def test_each_invalid_override_constraint_stops_all_output(
+    tmp_path: Path, width: int, height: int, changes: CropChanges
+) -> None:
+    item = source(png(width, height))
+    override = CropOverride(item.image_id, item.source_sha256, 4, 10, 64, 48, "face")
+    with pytest.raises(ImageVariantError, match="invalid or stale art crop override"):
+        build(item, tmp_path, override=replace(override, **changes))
+    assert not (tmp_path / "blobs").exists()
+    assert not (tmp_path / "cache").exists()
+
+
+@pytest.mark.parametrize(("width", "height"), [(100, 140), (140, 100)])
+def test_override_can_touch_bottom_and_right_edges(
+    tmp_path: Path, width: int, height: int
+) -> None:
+    item = source(png(width, height))
+    override = CropOverride(
+        item.image_id, item.source_sha256, width - 64, height - 48, 64, 48, "edge"
+    )
+    result = build(item, tmp_path, override=override)
+    assert result.crop_box == CropBox(width - 64, height - 48, 64, 48)
+    assert [(v.width, v.height) for v in result.variants[3:]] == [(64, 48)] * 2
+
+
+def test_landscape_clean_runs_and_cache_are_identical(tmp_path: Path) -> None:
+    item = source(png(641, 459))
+    first = build(item, tmp_path / "first")
+    clean = build(item, tmp_path / "clean")
+    cached = build(item, tmp_path / "first")
+    assert cached.cache_hit
+    assert first.variants == clean.variants == cached.variants
+    assert len(cached.variants) == 5
+    assert [
+        (tmp_path / "first" / "blobs" / v.path).read_bytes() for v in first.variants
+    ] == [(tmp_path / "clean" / "blobs" / v.path).read_bytes() for v in clean.variants]
+
+
+def test_recipe_pins_both_crop_formulas() -> None:
+    assert DEFAULT_RECIPE.definition()["algorithm"] == "sve-webp-v2"
+    assert DEFAULT_RECIPE.definition()["crop"] == {
+        "algorithm": "integer-4x3-v2",
+        "portrait": {"left_percent": 8, "top_percent": 14, "width_percent": 84},
+        "landscape": {"left_percent": 17, "top_percent": 4, "width_percent": 65},
+        "override": "source-bound-integer-in-bounds-exact-4x3",
+    }
