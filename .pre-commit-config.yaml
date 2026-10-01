@@ -221,7 +221,7 @@ repos:
       - id: pytest
         name: pytest (carddb)
         language: system
-        entry: uv run --directory carddb pytest -n auto
+        entry: uv run --directory carddb pytest -n auto --cov
         pass_filenames: false
         always_run: true
         stages: [manual]
