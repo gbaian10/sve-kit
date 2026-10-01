@@ -90,7 +90,7 @@ def _inventory(root: Path, includes: dict[str, str]) -> list[str]:
     for file in directory.rglob("*"):
         if file.is_symlink():
             raise ValueError("Symlinks are forbidden in identity transition inputs")
-        if file.suffix.lower() in {".yaml", ".yml"} and file != root / INDEX_PATH:
+        if not file.is_dir() and file != root / INDEX_PATH:
             present.add(file.relative_to(root).as_posix())
     if present != set(includes):
         raise ValueError("Identity transition indexed file closure differs from disk")

@@ -10,7 +10,8 @@ import pytest
 from sve_carddb.registry.storage import Index as RegistryIndex
 from sve_carddb.registry.storage import load, plan_files, read_registry_files, relayout
 from sve_carddb.registry.transitions.files import _inventory, read_transition_files
-from sve_carddb.registry.transitions.loader import load_transitions
+from sve_carddb.registry.transitions.loader import _revert, load_transitions
+from sve_carddb.registry.transitions.models import Reference, Shard
 
 from .identity_transition_fixtures import (
     FA,
@@ -20,6 +21,7 @@ from .identity_transition_fixtures import (
     P,
     Q,
     X,
+    Y,
     chain,
     checksum,
     entry,
@@ -176,6 +178,58 @@ def test_file_closure_and_paths(
         ValueError,
         match=r"identity transition|Identity transition|Symlinks|Modified|Unsafe|Duplicate|Route|Invalid",
     ):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize("count", [0, 1])
+@pytest.mark.parametrize(
+    "name",
+    ["003.yaml.tmp-abc", "index.yaml.tmp", ".DS_Store", "README.txt", "nested/raw"],
+)
+def test_every_unindexed_file_is_rejected(
+    tmp_path: Path, merge_record: dict[str, Any], count: int, name: str
+) -> None:
+    write_chain(tmp_path, chain([merge_record] * count))
+    extra = tmp_path / "identity-transitions" / name
+    extra.parent.mkdir(parents=True, exist_ok=True)
+    extra.write_bytes(b"unfinished input")
+    with pytest.raises(ValueError, match="indexed file closure"):
+        load_transitions(tmp_path)
+
+
+def test_sequence_gap_with_exact_file_closure(tmp_path: Path) -> None:
+    directory = tmp_path / "identity-transitions"
+    directory.mkdir()
+    includes = {}
+    for sequence in (1, 3):
+        name = f"identity-transitions/{sequence:03}.yaml"
+        (tmp_path / name).write_bytes(b"{}")
+        includes[name] = checksum({})
+    with pytest.raises(ValueError, match="contiguous from 1"):
+        _inventory(tmp_path, includes)
+
+
+def test_extra_zero_padding_remains_accepted(
+    tmp_path: Path, merge_record: dict[str, Any]
+) -> None:
+    shards = chain([merge_record])
+    write_chain(tmp_path, shards)
+    directory = tmp_path / "identity-transitions"
+    (directory / "001.yaml").rename(directory / "0001.yaml")
+    index_path = directory / "index.yaml"
+    index = json.loads(index_path.read_bytes())
+    index["includes"] = {"identity-transitions/0001.yaml": checksum(shards[0])}
+    index_path.write_bytes(wire(index))
+    assert load_transitions(tmp_path).shards[0].path == "identity-transitions/0001.yaml"
+
+
+def test_after_key_must_match_inner_identity(
+    tmp_path: Path, merge_record: dict[str, Any]
+) -> None:
+    record = copy.deepcopy(merge_record)
+    record["updates"][0]["after"]["data"]["id"] = Y
+    write_chain(tmp_path, chain([record]))
+    with pytest.raises(ValueError, match="Invalid identity transition authored fields"):
         load_transitions(tmp_path)
 
 
@@ -733,6 +787,77 @@ def test_allocation_recipe_and_never_reuse(
     else:
         with pytest.raises(ValueError, match="allocation"):
             load_transitions(tmp_path)
+
+
+def test_allocation_anchor_cannot_be_reused_for_a_different_kind(
+    tmp_path: Path, merge_record: dict[str, Any]
+) -> None:
+    anchor = "shared-synthetic-anchor"
+    card_record = renewal(merge_record)
+    card_record["updates"] = [new_card(anchor)]
+    face_id = (
+        "f:"
+        + uuid5(
+            UUID("e304714a-f18c-5fb6-a987-222988ffbb7a"),
+            "f\0identity-transition-v1\0" + anchor,
+        ).hex
+    )
+    face_record = renewal(merge_record)
+    face = entry("face", face_id, {"card_id": A, "ordinal": 0, "side": "front"})
+    face_record["updates"] = [
+        {
+            "target_key": face["record_key"],
+            "before": None,
+            "after": face,
+            "allocation_anchor": anchor,
+        }
+    ]
+    write_chain(tmp_path, chain([card_record, face_record]))
+    with pytest.raises(ValueError, match="allocation anchor or key cannot be reused"):
+        load_transitions(tmp_path)
+
+
+def test_new_allocation_key_cannot_reuse_a_previously_updated_key(
+    tmp_path: Path, merge_record: dict[str, Any]
+) -> None:
+    allocation = new_card("unused-synthetic-anchor")
+    existing = copy.deepcopy(allocation)
+    existing["allocation_anchor"] = None
+    existing["before"] = {
+        "transition_key": None,
+        "record_key": existing["target_key"],
+        "record_hash": checksum(existing["after"]),
+        "decision_id": "d:" + "0" * 64,
+    }
+    original = renewal(merge_record)
+    original["updates"] = [existing]
+    later = renewal(merge_record)
+    later["updates"] = [allocation]
+    shards = chain([original, later])
+    shards[1]["records"][0]["updates"][0]["before"] = None
+    shards[1] = pack(shards[1]["records"][0])
+    write_chain(tmp_path, shards)
+    with pytest.raises(ValueError, match="allocation anchor or key cannot be reused"):
+        load_transitions(tmp_path)
+
+
+def test_revert_action_guard_independently_of_repairs(
+    merge_record: dict[str, Any],
+) -> None:
+    target = Shard.model_validate_json(wire(pack(merge_record)))
+    # Retain repairs to isolate the action guard from the independent repairs guard.
+    target_record = target.records[0].model_copy(update={"action": "revert"})
+    target = target.model_copy(update={"records": (target_record,)})
+    target_ref = Reference(
+        record_key=target_record.record_key,
+        record_hash=checksum(target_record.model_dump(mode="json")),
+        decision_id=target.decisions[0].id,
+    )
+    revert = target_record.model_copy(update={"repairs": (), "reverts": target_ref})
+    with pytest.raises(
+        ValueError, match="exact earlier, unreverted repair transaction"
+    ):
+        _revert(revert, {target_record.record_key: target}, set())
 
 
 @pytest.mark.parametrize(

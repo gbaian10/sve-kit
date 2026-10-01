@@ -20,7 +20,7 @@ Each loaded shard retains exact YAML bytes and the complete canonical envelope.
 registry, authored file, archive, or source cache is changed. A missing directory
 is supported for legacy checkouts; an existing entrance must have its index.
 An explicit empty index has `includes: {}`. Unindexed files, including interrupted
-writes and `.yml` files, fail closed.
+writes (such as `003.yaml.tmp-abc`), hidden files, and unknown extensions, fail closed.
 
 This stage does **not** verify original registry before refs or append-only Git
 bases, F1 program/dependency/configuration reconstruction, archived evidence,
@@ -30,6 +30,9 @@ receipt means its envelope is valid; it does not mean these claims have been
 verified. The example program in the contract uses illustrative F1 pins; real
 inputs follow `BuildContext` (nonempty dependency pins and canonical JSON text
 configuration), as required by source-archive §2.2.1.
+
+Stage B must address decision/reference hashes currently computed from model
+serialization, checking the original canonical envelopes against any normalization.
 
 Until effective projection is implemented, existing registry readers and append
 planners reject every nonempty transition entrance rather than building from the
