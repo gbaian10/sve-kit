@@ -73,6 +73,23 @@ class FrozenSources:
         )
         return source, raw, descriptor
 
+    def descriptor(self, version: str) -> Descriptor:
+        """Read a hash-verified descriptor for an explicitly pinned inventory member."""
+        entry = self.entries.get(version)
+        if entry is None:
+            raise ArchiveError("Source version is absent from pinned batch")
+        descriptor = Descriptor.model_validate_json(
+            self._bytes(
+                "descriptors/"
+                + entry.descriptor_sha256.removeprefix("sha256:")
+                + ".json",
+                entry.descriptor_sha256,
+            )
+        )
+        if descriptor.id != version or descriptor.raw_sha256 != entry.blob.sha256:
+            raise ArchiveError("Frozen source identity mismatch")
+        return descriptor
+
     def _bytes(self, relative: str, checksum: str) -> bytes:
         data = resolve_within(self.root, PurePosixPath(relative)).read_bytes()
         if digest(data) != checksum:

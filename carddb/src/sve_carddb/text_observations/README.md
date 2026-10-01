@@ -19,11 +19,15 @@ when no texts have been published.
 
 An initial current exists only when every observation of a face-region has one
 identical current-bearing variant and there are no missing sources, identity
-gates, null effects, errata links or source-correction inputs. Differences stay
+gates, null effects, errata links or unresolved source corrections. When an explicit
+image provider is supplied, successful [source corrections](../source_corrections/README.md)
+are applied to separate candidates before comparison; raw observations remain exact.
+Differences stay
 pending, including changes that might eventually prove equivalent. Source dates
 and fetch times never rank variants. Current uses the existing
 `latest_observed_no_errata` basis with no invented decision. Candidate revision
-ordinals enumerate sorted fingerprints; `initial`/`wording` records represent
+ordinals enumerate deterministically sorted revision IDs; raw variants precede
+corrected variants. `initial`/`wording` records represent
 observed candidates, without equivalence, temporal ordering, supersession or
 human adoption claims. Effective dates stay null and temporal status unknown.
 Printed effects and section kinds remain unknown; sections preserve empty strings
@@ -118,6 +122,7 @@ whole graph and leave the destination unpublished. Redacted differences contain
 hashes, byte lengths and character edit offsets, never official card wording.
 
 This segment does not enable semantics tables, create an adoption input format,
-apply corrections, export a public snapshot or declare release readiness. Human
-current adoption, correction processing, errata coverage and publication remain
-separate gates.
+export a public snapshot or declare release readiness. Human current adoption,
+errata coverage and publication remain separate gates. Correction staging is an
+explicit optional input; scoped known corrections require verified image evidence
+before the importer can proceed.
