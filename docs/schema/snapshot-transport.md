@@ -98,6 +98,10 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | 出現位置 | 型別名 | columns（依序） |
 | --- | --- | --- |
 | face.current | Current | region, revision_id, basis |
+| face.wording | WordingView | region, state, display, candidates, undated_printing_ids |
+| WordingView.display | WordingDisplay | revision_id, basis |
+| WordingView.candidates | WordingCandidate | printing_id, revision_id |
+| PrintingFace.observations | ObservedText | revision_id, state, source_url |
 | art.artists | ArtArtist | artist_id, role |
 | PrintingFace.stamps | PrintingStamp | stamp_id, position, color |
 | ErrataVersion.changes | ErrataChange | face_id, field, before, after |
@@ -110,7 +114,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 | card_engine_support.overrides | SupportOverride | region, support |
 | card_engine_support.region_blocks | RegionBlock | region, reasons |
 
-每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表格 tuple 中保留的 JSON 值只接受 §3.2 的 `ParameterSchema` 與 §3.3 的 `CorrectionValue`，descriptor 分別用 `{"json":"ParameterSchema"}`／`{"json":"CorrectionValue"}`；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
+每列的型別、nullable 與 enum 繼承邏輯白名單及建置同名定義。表記未定新增的 WordingView／WordingDisplay／WordingCandidate／ObservedText 是 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現) 經使用者 2026-10-01 核可的公開呈現擴充，nullable／enum 依該節，不從 face_current 推斷。face.wording 接在 face.current 之後，只收 pending 項；settled region 不出項，全部 settled 時該 tuple 位置仍為空陣列，不能縮短欄序。PrintingFace.observations 接在 printed_text_state 之後（詳情分片同位置）；實作時須同步現有候選 Schema、types、fragment columns、golden 與 reader，本文件不表示機器契約已更新。表格 tuple 中保留的 JSON 值只接受 §3.2 的 `ParameterSchema` 與 §3.3 的 `CorrectionValue`，descriptor 分別用 `{"json":"ParameterSchema"}`／`{"json":"CorrectionValue"}`；不能帶建置端欄位或任意 object。DSL 程式包另依 §3.4，不經 tuple 轉換。
 
 `Correction.source_url` 沒有可公開官方頁 URL 時填 null；`card_related.applicable_regions` 非 reskin 時填 null。所有 tuple 仍佔原位置；空字串、缺欄、少一格不等於 null。
 
@@ -191,20 +195,20 @@ format_version=`1.0.0` 的支援 DSL 版本集合固定為空：唯一可接受�
 
 `Fragment = {owner,bucket,partition,base,columns,rows}`。`Owner = {kind:home_set/global,id:ID?}`；home_set 的 id 是永久 product_family ID，global 的 id 固定 null。`Partition = bootstrap/detail/history`。唯一 fragment 身分是 `(table_name,owner.kind,owner.id,bucket,partition)`，同一 manifest 的所有 files 合計不得重複；檔案如何將 fragments 裝在一起不影響這個身分。每表 fragments 依上述身分排序。
 
-role=bootstrap 只能裝 bootstrap fragments，role=text 只裝 detail/history；role=images 的三個影像集合只用 detail 且無欄位分割。歷史 face_revision 才用 history，其他集合內嵌的歷史沿各自完整列出貨。role 不代替 partition，text_all 仍保留原 File 分組。
+role=bootstrap 只能裝 bootstrap fragments，role=text 只裝 detail/history；role=images 的三個影像集合只用 detail 且無欄位分割。display_ref 外的 face_revision（含其餘候選）才用 history，其他集合內嵌的歷史沿各自完整列出貨。role 不代替 partition，text_all 仍保留原 File 分組。
 
-`base` 在 printing/detail 與 current face_revision/detail 必填為 `{file:FileRef,table:Code,owner:Owner,bucket:UInt,partition:"bootstrap"}`；其他 fragment 一律 null。base 指精確檔案與 fragment，不允許指自己或跨 manifest。其 FileRef 必列在該 File.dependencies，owner、bucket、table 與 detail 相同。base 存在 payload 裡，故 bootstrap bytes/hash 變更必使相關 detail bytes/hash 變更，即使 row_index 數值恰好不變。
+`base` 在 printing/detail 與 現行／暫顯 face_revision/detail 必填為 `{file:FileRef,table:Code,owner:Owner,bucket:UInt,partition:"bootstrap"}`；其他 fragment 一律 null。base 指精確檔案與 fragment，不允許指自己或跨 manifest。其 FileRef 必列在該 File.dependencies，owner、bucket、table 與 detail 相同。base 存在 payload 裡，故 bootstrap bytes/hash 變更必使相關 detail bytes/hash 變更，即使 row_index 數值恰好不變。
 
 ### 4.1 完整欄序
 
-一般集合在其允許的 partition 使用 snapshot-format §2 表列的全部欄位，完全照表列順序；省略建置欄位而非任意省略公開欄位。§3.1 中 text_unit/translation 的分割是按列分割，兩側各保留完整 columns。歷史 face_revision 保留完整邏輯列。只有以下欄位分割使用特別欄序：
+一般集合在其允許的 partition 使用 snapshot-format §2 表列的全部欄位，完全照表列順序；省略建置欄位而非任意省略公開欄位。§3.1 中 text_unit/translation 的分割是按列分割，兩側各保留完整 columns。display_ref 外的 face_revision 在 history 保留完整邏輯列。只有以下欄位分割使用特別欄序：
 
 | fragment／巢狀型別 | columns（依序） |
 | --- | --- |
 | printing/bootstrap | id, card_id, region, card_no, card_no_state, catalog_state, listing_confidence, review_level, reference_urls, variant_key, rarity_code, rarity_raw, premium, serial_total, int_id, decklog_available, decklog_verification, decklog_source_url, decklog_checked_on, faces |
 | PrintingFaceBootstrap | face_id, art_id, frame_code, signed, embellishment_state, stamps |
 | printing/detail | row_index, faces |
-| PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, sections, translations, corrections |
+| PrintingFaceDetail | face_ordinal, printed_name_unit_id, printed_effect_unit_id, flavor_unit_id, printed_text_state, observations, sections, translations, corrections |
 | face_revision/bootstrap | id, face_id, region, name_unit_id, class_code, type_code, cost, attack, defense, traits, titles, special_kinds, translations |
 | face_revision/detail | row_index, revision, effective_from, effective_until, temporal_status, change_kind, effect_unit_id, sections, translations, corrections |
 
@@ -212,7 +216,7 @@ printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 Prin
 
 row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。detail 按 row_index 排序，每個 base row 必須且只能有一列 detail，包含文字未知／空陣列的卡，不能藉缺列改變 unknown 語意。printing detail 每列須恰有與 bootstrap 相同的 faces 集合，從 base 的 face_id 連回 face.ordinal 來定位。join 以 base 還原 id／face_id，不輸出 row_index／face_ordinal；translations 按 `(field,ordinal,target_lang)` 合併並拒絕同鍵重複，合併後依該鍵排序（null ordinal 在數字前）。
 
-`current_ref` 只是從所有 face.current.revision_id 推導的去重集合，不是 manifest 欄位、檔案或第 41 個集合。集合內 revision 只用 bootstrap/detail，集合外才用 history；同一 revision 不可同時兩邊出現。current 切換時舊 revision 進 history、新 revision 進 current，仍保留永久 ID。所有分割 join 後必須恰等於公開邏輯投影：無遺失、無重複欄、無額外列。
+`current_ref` 只是從所有 face.current.revision_id 推導的去重集合；`display_ref` 依 snapshot-format §2.3 為 current_ref 加 pending wording.display 非 null revision ID 的聯集，不加入其餘 candidates。兩者都不是 manifest 欄位、檔案或第 41 個集合。display_ref 內只用 bootstrap/detail，每個 pending face-region 最多一筆暫顯的輕量欄位、名稱與可用名稱翻譯閉包進 bootstrap；集合外（含其餘候選）用 history 完整列，role=text、base=null，按需載入。history 不表示年代，其餘候選引用不形成 bootstrap 對 history 的強制下載依賴。候選與現行／暫顯共用 revision 時只沿用其唯一儲存；同一 revision 不可同時兩邊出現。current 或 display 改變時重算分割，永久 ID 不變；所有分割 join 後必須恰等於公開邏輯投影，無遺失、無重複欄、無額外列。#145 須量測 manifest、config 與全部 bootstrap（含暫顯輕量投影、名稱／可用名稱翻譯閉包及稀疏 wording 引用）合計壓縮後 ≤1 MiB，另列其餘按需候選片容量；未載候選的索引與搜尋進度依 snapshot-format §2.3 標示。
 
 例如 base 有依 ID 排序的兩列 revision，detail 的 `[1,...]` 只可指第二列。缺 base hash、hash 指舊片、index=2、重複 index=1、漏 index=0，或 printing 同一 face_ordinal 兩次，都必須拒收，不能 fallback 到最新 bootstrap。
 

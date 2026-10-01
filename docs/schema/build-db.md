@@ -26,20 +26,20 @@ A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合�
 
 `text_unit.lang` 與 `search_alias.lang` 必須以 `FK(lang)→language(code)` 引用已登錄語言，避免文字或搜尋別名缺少對應的語言配置。新增語言先登錄 `language`，不把外鍵限縮成初始三語的 enum；此規則不將其他 Lang 欄或 JSON 成員自動轉成 SQL FK。
 
-record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。
+record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱；其他類別的人工門檻不變。
 
 批次決定以精確 `(record_key,semantic_content_hash)` 成員集合排序後計 `membership_hash`，`sample_ids` 必須是集合子集；不可讓日後新增／修改列繼承舊抽查。各具體表自己的 `decision_id` 是 FK，封套在匯入時展開，不使用可逃避 FK 的 subject 表。證據 source 可多筆。
 
-| 類別                                           | 最低發布要求                                                                | 未達要求                                                     |
-| ---------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| 日英卡片身分對應                               | confirmed；每筆兩端與全部 face 都有人確認，可一次簽整批但須明示全體 checked | EN 可有獨立 provisional card；不合併 JP，不共用譯文/DSL      |
-| 插畫、標誌、數位對應、序號、翻譯               | sampled 或 confirmed，批次模型處理＋人抽查，例外另審                        | `proposed/model_reviewed` 不進已採納功能；顯示未知           |
-| 再錄表記差異                                   | confirmed batch，diff 全體 checked；正規化工具只產候選，不自行宣告語義相同  | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動   |
-| 確認無跨區對應                                 | confirmed，記查核範圍與 `as_of`；這是已查無對應，不是永遠不會發行           | 未查/證據不足維持 unmapped/pending                           |
-| JP 身分初始化                                  | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理     | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
-| 正式勘誤適用範圍、來源更正、身分修復、語義分歧 | confirmed，需精確來源證據                                                   | 隔離衝突；不得自動執行受影響規則                             |
-| 官方頁現行文字、路由、流水配號、預設入口       | 確定性規則與來源可重建，不要求人工 decision                                 | 衝突才交人工                                                 |
-| DSL                                            | §10 的不同作者審核或巨集機械門檻；實跑另判定                                | 卡文可發布，自動能力不放行                                   |
+| 類別                                           | 最低發布要求                                                                                                 | 未達要求                                                     |
+| ---------------------------------------------- | ---------------------------------------------------------------------------                                  | ------------------------------------------------------------ |
+| 日英卡片身分對應                               | confirmed；每筆兩端與全部 face 都有人確認，可一次簽整批但須明示全體 checked                                  | EN 可有獨立 provisional card；不合併 JP，不共用譯文/DSL      |
+| 插畫、標誌、數位對應、序號、翻譯               | sampled 或 confirmed，批次模型處理＋人抽查，例外另審                                                         | `proposed/model_reviewed` 不進已採納功能；顯示未知           |
+| 再錄表記差異                                   | 已核可規則完整涵蓋或 confirmed batch 全體 checked；規則／人工證據依 authored-layout §9.5，工具不擴張規則範圍 | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動   |
+| 確認無跨區對應                                 | confirmed，記查核範圍與 `as_of`；這是已查無對應，不是永遠不會發行                                            | 未查/證據不足維持 unmapped/pending                           |
+| JP 身分初始化                                  | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理                                      | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
+| 正式勘誤適用範圍、來源更正、身分修復、語義分歧 | confirmed，需精確來源證據                                                                                    | 隔離衝突；不得自動執行受影響規則                             |
+| 官方頁現行文字、路由、流水配號、預設入口       | 確定性規則與來源可重建，不要求人工 decision                                                                  | 衝突才交人工                                                 |
+| DSL                                            | §10 的不同作者審核或巨集機械門檻；實跑另判定                                                                 | 卡文可發布，自動能力不放行                                   |
 
 sampled 不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 顯示抽查狀態。confidence 只用於排審優先序。
 
@@ -134,11 +134,19 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 `text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同鍵不同完整內容一律停止發布，不自動加長新舊鍵；歷次已發布文字鍵從永久快照聯集檢碰撞（可重建衍生索引）。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
 
+**使用者 2026-10-01 核可 B**：依 [authored-layout §9.8](authored-layout.md#98-無主文的證據-recipe採用-b) 的 effect-presence-v1，能證明來源版本確定無主文時，以既有 exact 空字串 text_unit 表示；無法證明者保持 null，完整來源與判別結果留 report／F1、明列 deferred，不能借別版文字補 FK。這延續「空字串＝已確定無文字」，不是直接 null→空字串。face_revision.effect_unit_id、printing_face_observation.revision_id、text_unit.text 均維持 NOT NULL；absent 的來源證據不掛在共享空文字上。
+
 type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipment＋token 對應已觀測的イクイップメント・トークン，這是資料分類，不代替 CR 規則。evolve/advance/token 是特殊標記；traits 不切斷〈ジオ・テオゴニア〉。sections 保留順序與分類，unknown 仍顯示完整原文，但不放行 verified DSL。數值 null 不補 Leader 體力 20。
 
 無差異的初始觀測可由工具建立一對一 semantics（保留全部規則），不另要求每卡人工 decision；只有移除提示/重複定義、跨文字認定等義才需已採納正規化政策或 confirmed batch。未知段落保持 unknown 並禁止 verified。
 
-現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，confirmed batch 全體 checked 可採納等義表記。當前選取依可信版次收錄日及來源更新證據選最新已採納表記，`basis=latest_adopted_wording`；日期精度不足/並列則封套明示順序，不能任取最後爬到者。已採納的新表記與舊表記共 `semantic_id` 時，不要求重新驗相同規則的 DSL。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
+現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，使用者核可規則完整涵蓋或 confirmed batch 全體 checked 可採納等義表記；分類類別本身不是等義授權，規則 pin、機械全查與人工收據依 authored-layout §9.5 分開保存。當前選取依可信版次收錄日及來源更新證據選最新已採納表記，`basis=latest_adopted_wording`；日期精度不足/並列則封套明示順序，不能任取最後爬到者。已採納的新表記與舊表記共 `semantic_id` 時，不要求重新驗相同規則的 DSL。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
+
+current／wording 的封套格式見 [authored-layout §9.1–§9.7](authored-layout.md#91-currentwording-採納入口-wording-adoption-v1)，具體格式經使用者 2026-10-01 核可。active 更正先驗再比較投影內容，原始觀測保留，來源更正與表記決定互不代簽。排序依可信發售日／更新證據，未知或並列版本另問使用者、釘精確 reviewed_order，不用 fetched_at、卡號、hash 補順序；人工採納順序只供等義表記選取，basis=reviewed_override，不填官方生效日期。
+
+**使用者 2026-10-01 核可以下暫顯規則**：無新版採納仍保留有效舊 current；沒有可用舊版、觀測有差異時也公開可讀，不因此排除 card／printing。printing 顯示自己的觀測；face／card 依已知完整發售日的最新版次暫顯，同日不同內容／沒有可判日期時列候選，未知日期版本另列待問，全部標「表記未定」。暫顯不建立 face_current 或假 decision；公開欄位與決定演算法依 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。無 current 的區域以 wording_pending 阻止自動操作，但不影響依既有規則建牌與手動。#144 的診斷排除閉包不是發布閘門；真正來源損壞、已知更正／勘誤衝突仍受原本的完整性閘門約束。
+
+等義採納與 DSL 重用仍受 [semantics 能力分期](implementation-tiers.md) 約束；上述未採納觀測的暫顯不使用 semantic_id，無須先啟用 semantics。觀測、暫顯、已採納 current 與 printed 狀態分開，日期排序不填未知規則生效日。輸入 hash 錯或前件缺失為驗證失敗，不降成普通候選。
 
 無差異/勘誤/更正時仍可 `latest_observed_no_errata`，不虛構生效日期。已知官方勘誤按生效區間選；真實不相容、缺句/數值差異或同時互斥的有效來源才進衝突/來源更正/勘誤判讀。JP 內差異不濫用 `region_divergence`，該表只管跨區。未知日期不能回答歷史有效卡文。
 
@@ -424,7 +432,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 `region_text_review` 的規則 hash 在 JP/EN 規則 bundle 變更時失效；純已採納等義表記不失效，卡名/官英顯示選用另檢 exact 名稱來源，沒有 fresh aligned 不能以「沒有 divergence」當核對完成。
 
-建置資料庫開啟 `foreign_keys`，PK/UQ/CHECK、`foreign_key_check/integrity_check` 全過；驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料可隔離，不能假造 FK。
+建置資料庫開啟 `foreign_keys`，PK/UQ/CHECK、`foreign_key_check/integrity_check` 全過；驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料依各自類別處理，不能假造 FK；§4 表記未定的觀測仍公開顯示，不能把診斷隔離集合當整卡排除閘門。
 
 卡表快照由欄位白名單生成，驗 JSON Schema、引用閉包（包括 nested ID）、相容能力、完整文字包/分片等價、row counts/檔 hash、公開欄位無本機路徑/私密資料。不要把建置資料庫的 SQL 表直接 dump。機械驗證通過不表示卡片語意已由人確認；手機解析/常駐/更新峰值須另測。詳見 [snapshot-format.md](snapshot-format.md) 與 [size-budget.md](size-budget.md)。
 
