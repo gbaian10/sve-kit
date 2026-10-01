@@ -63,6 +63,10 @@ def observation_report(item: FaceObservation) -> dict[str, JsonValue]:
         "source_date_raw": item.card.date_raw,
         "has_errata_link": item.card.has_errata_link,
         "content_hash": item.content.fingerprint(),
+        "raw_face_hash": item.card.faces[item.source_index].fingerprint(),
+        "effect_presence": item.card.effect_presence[item.source_index].value()
+        if item.card.effect_presence
+        else None,
         "fields": {
             key: value_summary(value) for key, value in item.content.fields().items()
         },

@@ -8,9 +8,11 @@ from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.registry.inputs import canonical
 from sve_carddb.registry.records import Observation, Region
 from sve_carddb.registry.review import observation
+from sve_carddb.snapshot.values import digest
 from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 from sve_carddb.text_observations.models import FaceContent, TextCard
+from sve_carddb.text_observations.presence import detect_presence
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -45,6 +47,36 @@ def en_face(face: official_en.Face) -> FaceContent:
         title=face.info.get("Universe"),
         flavor=face.speech,
     )
+
+
+def verify_card(card: TextCard) -> None:
+    """Reproduce frozen extraction and every result before accepting projected text."""
+    if card.raw is None:
+        if card.effect_presence:
+            raise ValueError("Effect presence has no frozen source bytes")
+        return
+    region, number = card.observation.region, card.observation.card_no
+    if digest(card.raw) != card.source.sha256:
+        raise ValueError("Effect presence frozen source hash mismatch")
+    faces = (
+        tuple(
+            jp_face(face)
+            for face in official_jp.extract_card(card.raw, number=number).faces
+        )
+        if region == "jp"
+        else tuple(
+            en_face(face)
+            for face in official_en.extract_card(card.raw, number=number).faces
+        )
+    )
+    expected = tuple(
+        detect_presence(
+            card.raw, card.source, region=region, number=number, source_index=index
+        )
+        for index in range(len(faces))
+    )
+    if card.faces != faces or card.effect_presence != expected:
+        raise ValueError("Effect presence/extraction cannot be reproduced")
 
 
 class FrozenTexts:
@@ -100,6 +132,13 @@ class FrozenTexts:
             faces=faces,
             date_raw=date_raw,
             has_errata_link=errata is not None,
+            effect_presence=tuple(
+                detect_presence(
+                    raw, source, region=region, number=card_no, source_index=index
+                )
+                for index in range(len(faces))
+            ),
+            raw=raw,
         )
 
 

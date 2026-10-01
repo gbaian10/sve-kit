@@ -16,6 +16,7 @@ from sve_carddb.source_corrections.plan import (
     verify_applications,
     withheld_regions,
 )
+from sve_carddb.text_observations.archive import verify_card
 from sve_carddb.text_observations.closure import close_preview
 from sve_carddb.text_observations.models import FaceObservation
 from sve_carddb.text_observations.report import comparisons, observation_report
@@ -70,12 +71,38 @@ class TextPlan:
 
     def source_uses(self) -> tuple[SourceUse, ...]:
         """Declare every actual use independently of writes, including null/quarantine."""
+        observation_uses = tuple(
+            SourceUse(source=item.card.source, usage=usage, locator=item.locator())
+            for item in self.observations
+            for usage in ("face_text_observation", "face_current_comparison")
+        )
+        presence_uses = tuple(
+            SourceUse(
+                source=item.card.source.model_copy(
+                    update={"parser_version": proof.result.parser_version}
+                ),
+                usage="effect_presence",
+                locator=canonical(
+                    {
+                        "printing_id": item.printing_id,
+                        "face_id": item.face_id,
+                        "source_index": item.source_index,
+                        "recipe": proof.result.recipe,
+                        "template_id": proof.result.template_id,
+                        "container_locator": proof.result.container_locator,
+                        "state": proof.result.state,
+                        "reason_code": proof.result.reason_code,
+                        "result_hash": proof.result_hash,
+                    }
+                ).decode(),
+            )
+            for item in self.observations
+            if item.card.effect_presence
+            for proof in (item.card.effect_presence[item.source_index],)
+        )
         return (
-            *tuple(
-                SourceUse(source=item.card.source, usage=usage, locator=item.locator())
-                for item in self.observations
-                for usage in ("face_text_observation", "face_current_comparison")
-            ),
+            *observation_uses,
+            *presence_uses,
             *(
                 use
                 for application in self.corrections or ()
@@ -96,6 +123,14 @@ class TextPlan:
                             "printing_id": item.printing_id,
                             "face_id": item.face_id,
                             "content_hash": item.content.fingerprint(),
+                            "raw_face_hash": item.card.faces[
+                                item.source_index
+                            ].fingerprint(),
+                            "effect_presence": item.card.effect_presence[
+                                item.source_index
+                            ].value()
+                            if item.card.effect_presence
+                            else None,
                             "has_errata_link": item.card.has_errata_link,
                         }
                         for item in self.observations
@@ -292,6 +327,7 @@ def plan_text_observations(
         if card is None:
             unavailable.append(data.id)
             continue
+        verify_card(card)
         evidence = preview.evidence.get((data.region, data.card_no))
         if (
             evidence is None
@@ -319,7 +355,7 @@ def plan_text_observations(
                 card_no=data.card_no,
                 source_index=mapping.source_index,
                 card=card,
-                content=card.faces[mapping.source_index],
+                content=card.projected(mapping.source_index),
             )
             for mapping in data.source_face_map
         )
@@ -398,6 +434,7 @@ def _verify_observations(plan: TextPlan) -> None:
 
 
 def _verify_source(plan: TextPlan, item: FaceObservation) -> None:
+    verify_card(item.card)
     evidence = plan.identity.evidence.get((item.region, item.card_no))
     if (
         evidence is None
@@ -407,7 +444,7 @@ def _verify_source(plan: TextPlan, item: FaceObservation) -> None:
         raise ValueError("Text observation source inventory mismatch")
     if (
         not 0 <= item.source_index < len(item.card.faces)
-        or item.content != item.card.faces[item.source_index]
+        or item.content != item.card.projected(item.source_index)
         or item.correction_keys
     ):
         raise ValueError("Text observation content/source face mismatch")

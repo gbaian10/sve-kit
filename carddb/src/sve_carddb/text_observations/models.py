@@ -2,11 +2,13 @@
 
 from typing import Protocol
 
-from pydantic import JsonValue
+from pydantic import Field, JsonValue
 
 from sve_carddb.build_inputs import Source  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves fields at runtime
+from sve_carddb.html import parse, select_all, select_one
 from sve_carddb.registry.records import Observation, RecordData, Region
 from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.text_observations.presence import EffectPresence  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves evidence fields
 
 
 class FaceContent(RecordData):
@@ -26,7 +28,22 @@ class FaceContent(RecordData):
 
     def fingerprint(self) -> str:
         """Hash complete current-bearing content without normalizing wording."""
-        return digest(canonical(self.fields()))
+        return digest(canonical(self.wording_fields()))
+
+    def wording_fields(self) -> dict[str, JsonValue]:
+        """Use the wording-face-v1 field names while preserving extractor values."""
+        return {
+            "name": self.name,
+            "class": self.class_raw,
+            "type": self.type_raw,
+            "cost": self.stats[0],
+            "attack": self.stats[1],
+            "defense": self.stats[2],
+            "traits": list[JsonValue](self.traits),
+            "title": self.title,
+            "text": self.effect,
+            "sections": list[JsonValue](self.sections),
+        }
 
     def possible_no_effect(self) -> bool:
         """Provide a conservative diagnostic hint, never an empty-text inference."""
@@ -44,6 +61,40 @@ class TextCard(RecordData):
     faces: tuple[FaceContent, ...]
     date_raw: str | None = None
     has_errata_link: bool = False
+    effect_presence: tuple[EffectPresence, ...] = ()
+    raw: bytes | None = Field(default=None, exclude=True)
+
+    def projected(self, index: int) -> FaceContent:
+        """Change only proven absence; unknown empty values remain deferred."""
+        content = self.faces[index]
+        if not self.effect_presence:
+            return content
+        proof = self.effect_presence[index]
+        effect = content.effect
+        if proof.result.state == "absent":
+            if effect not in {None, ""}:
+                raise ValueError("Absent effect presence contradicts extracted effect")
+            effect = ""
+        elif proof.result.state == "unknown" and effect in {None, ""}:
+            effect = None
+        elif (
+            proof.result.state == "present"
+            and effect is not None
+            and not effect
+            and not content.sections
+            and self.raw is not None
+        ):
+            face = select_all(parse(self.raw.decode()), ".cardlist-Detail_Box_Inner")[
+                index
+            ]
+            container = select_one(face, ".detail")
+            if (
+                container is not None
+                and container.text()
+                and not container.text().strip()
+            ):
+                effect = container.text()
+        return content.model_copy(update={"effect": effect})
 
 
 class TextProvider(Protocol):

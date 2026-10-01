@@ -126,3 +126,38 @@ export a public snapshot or declare release readiness. Human current adoption,
 errata coverage and publication remain separate gates. Correction staging is an
 explicit optional input; scoped known corrections require verified image evidence
 before the importer can proceed.
+
+## Frozen effect presence
+
+`FrozenTexts` retains extractor faces unchanged and adds `effect-presence-v1`
+results, hashed over every result field. The pinned `detail-v1` recipe requires
+closed body/html boundaries, complete names, images, info, stats and an exact
+physical card-number credit on every face. The omission template additionally
+requires the img/txt/ttl/txt-Inner topology and intact info/status/optional speech/
+terminal illustrator blocks. Duplicate credits or unknown blocks remain unknown.
+An absent `.detail` selector alone proves nothing.
+
+Known empty containers allow only plain div/p/span/br layout nodes. Whitespace is
+present text, and unknown icons, SVG, classes or styles never become empty text.
+The projection converts proven absence to an exact empty string; unproven empty
+values stay null. Sections and the original extractor hash remain unchanged.
+`verify_card` re-extracts the frozen bytes and reproduces all presence results
+before the observation plan can be imported. A self-consistent replacement hash
+cannot substitute for this verification.
+
+Each frozen face contributes a separate F1 `effect_presence` use with the actual
+presence parser, complete reference locator and result hash, including deferred
+faces. Reports and configuration retain complete evidence and both raw and
+projected wording-face-v1 hashes. Shared empty text units carry no source evidence.
+Synthetic/trusted non-HTML providers without presence results retain their explicit
+input values; they cannot attach presence proofs without frozen bytes.
+
+Presence projection precedes source correction: each physical observation keeps
+its untouched extractor face on `card.faces` and its presence-projected content;
+`corrected_observations` applies verified replacements to that projected content.
+Only corrected candidates carry `correction_keys`. Their revisions retain the
+original projected physical revision as `supersedes_id`, with the independent
+correction decision. Presence, correction comparison and image evidence uses all
+remain in F1. Correction reports distinguish `raw_face_hash` from
+`projected_face_hash`; neither a type correction nor its hash may erase the
+verified empty effect. Unknown effects still cannot acquire invented revisions.
