@@ -379,6 +379,10 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 `identity_change` 統一記錄身分修復；`int_id→printing` 永不改，printing 父 card 若原先錯誤以 confirmed 事件修復，所有 face/art 所屬也驗一致。split 多目的必請玩家選，不靜默改牌組；舊 URL 維持 printing 身分，必要時 alias 永久轉址。消費端只出公開修復事實，不出 decision。
 
+上述原則的 authored 封套、完整面／插畫移轉清單、有效投影與決定續版格式見
+[身分修復與決定續版提案](identity-repair.md)。該提案尚待使用者核可，不新增本表欄位或變更既有 DDL；
+不能把格式提案當成已採納的修復資料或已完成發布閘門。
+
 ## 14. 不可變雜湊（僅建置）
 
 canonical-json-v1：null/bool/Unicode string/安全整數/array/object；拒浮點和未配對 surrogate。鍵以 Unicode code point 排序、無空白/BOM、UTF-8；控制字元一律小寫 `\u00xx`，其餘僅跳脫引號/反斜線，不正規化 Unicode。有序 array 不排序，集合依本契約排序。`source_record` 雜湊取 exact raw bytes，不重序列化。
