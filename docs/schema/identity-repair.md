@@ -286,7 +286,8 @@ revert 只從有效集合移除被指名 transaction 的全部邊，不新增 B�
 
 以下 Python 產生完整 **confirmed_none 決定續版**封套與 index（JSON 也是 YAML 1.2 合法輸入），
 不讀資料目錄、不含官方卡文。輸出就是 已核可格式的完整形狀，不是只列欄位差異。
-`0/1/2` 等重複 hex、example store、核對者及空 dependencies 都是合成 pin，不能作真實採納；
+`0/1/2` 等重複 hex、example store、核對者及依賴 hash 都是合成 pin，不能作真實採納；
+context 仍遵守 source-archive §2.2.1：dependencies 非空，configuration 是 canonical JSON 字串。
 真實輸入必須能重建 context／raw 閉包。舊 registry 已另追加第二張 printing，此次重新核對兩張全部觀測。
 
 ```python
@@ -339,9 +340,10 @@ record = {
     "action": "apply", "reverts": None, "routes": [],
     "sequence": 1, "previous": None, "registry_basis": basis,
     "review_context": {
-        "context": {"program_revision": "b" * 40, "dependencies": [],
-                    "configuration": {"registry": basis,
-                                      "observation_recipe": "registry-observation-v1"}},
+        "context": {"program_revision": "b" * 40,
+                    "dependencies": [{"name": "uv.lock", "sha256": "sha256:" + "c" * 64}],
+                    "configuration": canonical({"registry": basis,
+                        "observation_recipe": "registry-observation-v1"}).decode("utf-8")},
         "source_batches": [{"store_id": "example", "batch_id": "sha256:" + "7" * 64}]},
     "updates": [{"target_key": key,
                  "before": {"transition_key": None, "record_key": key,
@@ -376,9 +378,9 @@ print(json.dumps({"old_record": old, "shard": shard, "index": index},
 | --- | --- |
 | old record | `eb2e777e37086e85161fdcf71f90ce6ae30a2705c283f9daa6b64fb63f33d10e` |
 | new record | `b5e9034517d9fd97a48fa3c44482c91dc8c761aa730a276dd70cddfb24d21995` |
-| 完整 transition 成員 | `6ad05198bcb359d369b8f7a52514a9158b63f267f14c43aaeb025fd1b5994979` |
-| membership（亦為 decision.id 的 `d:` 後綴） | `29499e21c636555f224fe2e5d2837c492ae1e8d4bfeba01d1ef776da6448830b` |
-| 完整 shard（index.includes 的值） | `f4fa8b86fd8fa6cf16def554ccb8d6287b7e9eda224d37429256c55111be62f9` |
+| 完整 transition 成員 | `482d7b98a4bbe67d4237e167ea396c5d2198f09b65e805472f889e26bbc3d4cd` |
+| membership（亦為 decision.id 的 `d:` 後綴） | `c55a8be571342ddbb31ab349f50cf9c3efdd54f376b10c16a51378855a807b0f` |
+| 完整 shard（index.includes 的值） | `2744177c0a04e22db2b1124c62bf088d9efe27da86625ec4df7166a33f9d8589` |
 
 此例的 old_record 是重建測試前件，不寫入新分片；舊決定與原 registry 仍需存在於被釘住的輸入。
 下一次新增版次時 sequence=2，previous 釘第一筆 record hash／decision，update.before 指第一筆
@@ -473,11 +475,11 @@ print(json.dumps({"apply": apply_shard, "revert": revert_shard, "index": revert_
 
 | 輸入 | SHA-256（省略 `sha256:`） |
 | --- | --- |
-| apply record | `b92384b4872454b5493ebdece6cebce0e3e9b64560ec72b27e43f9561daaa56a` |
-| apply shard | `04ec824e4eac2906cdc63ac9e814cb3955779d227862365838bec594919ef641` |
-| revert record | `48a7260770247afc62d80fa242c0d4ac332e5eb473a0f0ffdbe6de812b347b8a` |
-| revert membership（新 decision.id 後綴） | `57600d9e1c21e4fc11a2784867eca1527dc6935ab0addb924ca010901d31cc75` |
-| revert shard | `14c786fefc077ddee3db65695f14f156a3b42bb9c0fd733c2ec1277590c800e1` |
+| apply record | `51fdb4f4772fe348c726d37de2a3b69733b2c8f11355e404dc2385ba06ae6907` |
+| apply shard | `dfbaa236078c198d1dfee8b587b15ae2c8757fd33f455a426b662beecab1600b` |
+| revert record | `d5e17d6c5a6b72e2c2efebb62636348e5dade0e877863269bb2c740516e2c420` |
+| revert membership（新 decision.id 後綴） | `463907fb3a4bf74563a86611b04115e6a56bef25bdcb57738e765cdced2046ef` |
+| revert shard | `2f0e2d87a5c0b1d305cbcc71acdeba16181dfb254c2697344148c99e3e1837cf` |
 
 路由有變動時的合成預期另列如下；O／N 均代表同一 printing 的已驗證合法入口，實作測試須提供
 相應已採納路由證據，不能靠此示意修改 card_no。每列都以完整 routes.before／after 參與成員 hash。
