@@ -12,6 +12,7 @@ from typing import TYPE_CHECKING, cast
 from pydantic import JsonValue
 from pydantic import ValidationError as ModelValidationError
 
+from sve_carddb.extract import official_en
 from sve_carddb.fetch.validate import ValidationError, decode_html
 from sve_carddb.fetch.writer import LocalState
 from sve_carddb.html import (
@@ -22,7 +23,7 @@ from sve_carddb.html import (
     select_all,
     select_one,
 )
-from sve_carddb.registry.inputs import Card, canonical, digest, read_cards
+from sve_carddb.registry.inputs import Card, canonical, digest
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.review import observation
 from sve_carddb.registry.snapshot import load_registry
@@ -32,6 +33,8 @@ from sve_carddb.sources import official_jp as jp
 from sve_carddb.sources.official_jp import MIN_PAGE_BYTES
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     from selectolax.lexbor import LexborNode
 
     from sve_carddb.extract.jsonl import RawReader
@@ -202,10 +205,13 @@ def measure(
     expected: list[tuple[str, str, str, str, str | None]],
     legacy: dict[str, Card],
     reader: RawReader,
+    *,
+    parser: Callable[[bytes, str], Card] | None = None,
 ) -> dict[str, object]:
     """Classify each registered EN printing exactly once, with input evidence."""
     rows: list[dict[str, object]] = []
     groups: dict[str, list[dict[str, JsonValue]]] = defaultdict(list)
+    selected_parser = parse_card if parser is None else parser
     for (
         number,
         printing_id,
@@ -244,7 +250,7 @@ def measure(
         else:
             body = reader.read(en.card_url(number))
             try:
-                candidate = parse_card(body, number)
+                candidate = selected_parser(body, number)
             except (
                 ValidationError,
                 MissingElementError,
@@ -329,6 +335,29 @@ def _hash(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
 
 
+def read_legacy(path: Path, checksum: str | None) -> tuple[dict[str, Card], str]:
+    """Verify the exact bytes before parsing; never include card text in errors."""
+    raw = path.read_bytes()
+    actual_hash = "sha256:" + hashlib.sha256(raw).hexdigest()
+    if checksum is not None and actual_hash != checksum:
+        raise ValueError("Legacy input hash mismatch")
+    cards: dict[str, Card] = {}
+    for line in raw.splitlines():
+        try:
+            card = Card.model_validate_json(line)
+        except ModelValidationError:
+            raise ValueError("Invalid legacy EN input") from None
+        if card.number in cards:
+            raise ValueError("Duplicate legacy EN card number")
+        cards[card.number] = card
+    return cards, actual_hash
+
+
+def parse_legacy_card(body: bytes, number: str) -> Card:
+    """Measure the production extractor through its independent legacy projection."""
+    return official_en.legacy_projection(official_en.extract_card(body, number=number))
+
+
 def main() -> None:
     """Measure fixed EN observations without opening latest or live sources."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -338,10 +367,15 @@ def main() -> None:
     parser.add_argument("--store-id", required=True)
     parser.add_argument("--batch-id", required=True)
     parser.add_argument("--output", required=True, type=Path)
+    parser.add_argument(
+        "--parser", choices=("candidate", "legacy"), default="candidate"
+    )
+    parser.add_argument("--legacy-sha256")
     args = parser.parse_args()
     if not args.output.resolve().is_relative_to(Path("/tmp")):  # ruff: ignore[hardcoded-temp-file] -- this one-off report must never enter source roots
         msg = "report must be written under /tmp"
         raise ValueError(msg)
+    legacy, legacy_hash = read_legacy(args.legacy, args.legacy_sha256)
     snapshot = load_registry(args.authored)
     expected = sorted(
         (
@@ -354,9 +388,13 @@ def main() -> None:
         for record in snapshot.records.values()
         if isinstance((data := record.data), PrintingData) and data.region == "en"
     )
-    legacy = read_cards(args.legacy)
     reader = ArchiveReader(args.store, args.store_id, args.batch_id)
-    report = measure(expected, legacy, reader)
+    report = measure(
+        expected,
+        legacy,
+        reader,
+        parser=parse_legacy_card if args.parser == "legacy" else parse_card,
+    )
     batch_dir = args.store / "batches" / args.batch_id.removeprefix("sha256:")
     source_files = [
         Path(__file__),
@@ -368,9 +406,14 @@ def main() -> None:
         Path(observation.__code__.co_filename),
         Path(ArchiveReader.__init__.__code__.co_filename),
     ]
-    parser_hashes = {path.name: _hash(path) for path in source_files}
+    if args.parser == "legacy":
+        source_files.append(Path(official_en.__file__))
+    package_root = Path(__file__).parents[1]
+    parser_hashes = {
+        path.relative_to(package_root).as_posix(): _hash(path) for path in source_files
+    }
     report["inputs"] = {
-        "legacy_sha256": _hash(args.legacy),
+        "legacy_sha256": legacy_hash,
         "archive_inventory_sha256": _hash(batch_dir / "inventory.json"),
         "archive_manifest_sha256": _hash(batch_dir / "manifest.sqlite"),
         "authored_index_sha256": _hash(args.authored / "ids" / "index.yaml"),
@@ -378,6 +421,7 @@ def main() -> None:
         "parser_version_hash": digest(cast("JsonValue", parser_hashes)),
         "store_id": args.store_id,
         "batch_id": args.batch_id,
+        "parser": args.parser,
     }
     args.output.write_text(
         json.dumps(report, ensure_ascii=False, sort_keys=True, indent=2) + "\n",

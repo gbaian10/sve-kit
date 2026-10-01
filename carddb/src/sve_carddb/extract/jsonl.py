@@ -9,10 +9,13 @@ from typing import TYPE_CHECKING, Protocol
 import orjson
 
 from sve_carddb.crawl import card_numbers
+from sve_carddb.extract import official_en
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.fetch.validate import ValidationError
 from sve_carddb.fetch.writer import LocalState
 from sve_carddb.html import MissingElementError
+from sve_carddb.manifest import Region
+from sve_carddb.sources import official_en as en
 from sve_carddb.sources import official_jp as jp
 
 if TYPE_CHECKING:
@@ -40,26 +43,36 @@ class ExtractReport:
     failed: dict[str, str] = field(default_factory=dict)
 
 
-def extract_cards(manifest: Manifest, writer: RawReader, dest: Path) -> ExtractReport:
+def extract_cards(
+    manifest: Manifest, writer: RawReader, dest: Path, *, region: Region = jp.REGION
+) -> ExtractReport:
     """Transcribe every trusted card page of the current lists into `dest`.
 
     `dest` is replaced atomically, so a failed run never leaves half a file.
     """
+    if region not in {Region.JP, Region.EN}:
+        raise ValueError("Card extraction supports only JP and EN")
     report = ExtractReport()
+    catalog = jp if region is Region.JP else en
     dest.parent.mkdir(parents=True, exist_ok=True)
     fd, tmp_name = tempfile.mkstemp(dir=dest.parent, prefix=".tmp-", suffix=".jsonl")
     tmp = Path(tmp_name)
     try:
         with os.fdopen(fd, "wb") as out:
-            for number in card_numbers(manifest):
-                url = jp.card_url(number)
+            for number in card_numbers(manifest, region=region):
+                url = catalog.card_url(number)
                 if writer.local_state(url) is not LocalState.TRUSTED:
                     report.missing.append(number)
                     continue
                 try:
-                    record = extract_card(writer.read(url), number=number)
+                    raw = writer.read(url)
+                    record = (
+                        extract_card(raw, number=number)
+                        if region is Region.JP
+                        else official_en.extract_card(raw, number=number)
+                    )
                 except (ValidationError, MissingElementError) as exc:
-                    report.failed[number] = str(exc)
+                    report.failed[number] = type(exc).__name__
                     continue
                 out.write(orjson.dumps(record, option=orjson.OPT_APPEND_NEWLINE))
                 report.written += 1
