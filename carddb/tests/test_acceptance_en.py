@@ -12,6 +12,7 @@ from sve_carddb.build_inputs import BuildContext, input_record
 from sve_carddb.extract.acceptance_en import acceptance_report, review_queue
 from sve_carddb.extract.official_en import extract_card, legacy_projection
 from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Manifest, Region
 from sve_carddb.products import Language, load_product_identities, load_products
 from sve_carddb.products.official import PARSER, parse_products
@@ -20,11 +21,11 @@ from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
 from sve_carddb.registry.preview import FrozenEN, plan_preview
 from sve_carddb.registry.preview.evidence import MemoryEvidence
-from sve_carddb.registry.records import CorrectionData, CorrectionEvidence
+from sve_carddb.registry.records import CorrectionData, CorrectionEvidence, PrintingData
 from sve_carddb.registry.review import Correction, Inputs, Receipt
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.snapshot.values import canonical, digest
-from sve_carddb.source_archive import seal_batch
+from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.source_corrections.images import evidence_url
 from sve_carddb.sources.official_en import card_url
@@ -47,6 +48,7 @@ from .product_identity_fixtures import (
     identity_record,
     install_identity,
 )
+from .test_effect_presence import page as presence_page
 from .test_source_archive import _put, _resource, _store
 from .text_observation_fixtures import MemoryTexts
 
@@ -119,7 +121,11 @@ def add_correction(store: ArchiveStore, inputs: Inputs) -> str:
 
 
 def make_case(
-    tmp_path: Path, *, correction: bool = False, auxiliary: bool = True
+    tmp_path: Path,
+    *,
+    correction: bool = False,
+    auxiliary: bool = True,
+    include_jp: bool = False,
 ) -> Case:
     root = tmp_path / "checkout/authored"
     raw = page(NUMBER, double=True)
@@ -138,7 +144,9 @@ def make_case(
     batch = seal_batch(store).batch_id
     original = legacy_projection(extract_card(raw, number=NUMBER))
     inputs = Inputs(
-        jp={},
+        jp={"SYN-JP01": original.model_copy(update={"number": "SYN-JP01"})}
+        if include_jp
+        else {},
         en={NUMBER: original},
         mapping=CardMapping(targets={NUMBER: None}, original_art=set(), reskins={}),
         receipt=Receipt(
@@ -155,7 +163,7 @@ def make_case(
     identity = plan_preview(
         root,
         FrozenEN(store.root, store.store_id, batch, parser_version="en-identity-pin"),
-        regions=("en",),
+        regions=("jp", "en") if include_jp else ("en",),
     )
     frozen = FrozenSources(store.root, store.store_id, batch)
     source, verified, _ = frozen.read(
@@ -361,6 +369,17 @@ def test_each_hash_change_queues_every_affected_decision_without_replacing_it(
     }
     assert {row["record_key"] for row in queue if isinstance(row, dict)} == affected
     assert queue
+    decisions = {
+        projection.record_key: projection.decision_id
+        for projection in identity.projections
+        if projection.record_key in affected
+    }
+    assert all(isinstance(value, str) and value for value in decisions.values())
+    assert all(
+        isinstance(row, dict)
+        and row["decision_id"] == decisions[str(row["record_key"])]
+        for row in queue
+    )
     assert all(
         isinstance(row, dict)
         and row["actual_" + field] == "sha256:" + "0" * 64
@@ -445,6 +464,153 @@ def test_real_changed_bytes_are_mismatch_even_when_rules_remain_equal(
         assert old.rules_hash == new.rules_hash
     else:
         assert old.rules_hash != new.rules_hash
+
+
+@pytest.fixture(scope="module")
+def mixed_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
+    return make_case(tmp_path_factory.mktemp("en-acceptance-mixed"), include_jp=True)
+
+
+def test_mixed_regions_report_counts_only_en_printings(mixed_case: Case) -> None:
+    registered = [
+        record.data
+        for record in mixed_case.identity.snapshot.records.values()
+        if isinstance(record.data, PrintingData)
+    ]
+    assert {printing.region for printing in registered} == {"jp", "en"}
+    assert set(mixed_case.identity.regions) == {"jp", "en"}
+    report = mixed_case.report()
+    assert report["denominator"] == 1
+    assert report["counts"] == {"exact": 1, "mismatch": 0, "missing_raw": 0}
+    assert report["rates"] == {
+        "all_registered": {"numerator": 1, "denominator": 1},
+        "comparable": {"numerator": 1, "denominator": 1},
+        "comparable_denominator": 1,
+    }
+    rows = report["printings"]
+    assert isinstance(rows, list)
+    assert [row["card_no"] for row in rows if isinstance(row, dict)] == [NUMBER]
+
+
+def test_proven_absence_keeps_raw_and_projected_effect_separate(
+    mutable_case: Case,
+) -> None:
+    case = mutable_case
+    raw = presence_page("en", double=True).replace(b"SYN-01", NUMBER.encode())
+    _put(
+        case.store,
+        replace(
+            _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD), region=Region.EN
+        ),
+        raw,
+    )
+    batch = seal_batch(case.store).batch_id
+    identity = plan_preview(
+        case.root,
+        FrozenEN(
+            case.store.root,
+            case.store.store_id,
+            batch,
+            parser_version="en-identity-pin",
+        ),
+        regions=("en",),
+    )
+    texts = plan_text_observations(
+        identity,
+        FrozenTexts(
+            case.store.root,
+            case.store.store_id,
+            batch,
+            region="en",
+            parser_version="en-text-pin",
+        ),
+    )
+    card = texts.observations[0].card
+    assert card.faces[0].effect is None
+    assert card.effect_presence[0].result.state == "absent"
+    assert card.projected(0).effect is not None
+    assert not card.projected(0).effect
+    official = plan_official_products(
+        case.official.identities, case.official.pages, identity
+    )
+    report = acceptance_report(texts, official, {case.store.store_id: case.store.root})
+    rows = report["printings"]
+    assert isinstance(rows, list)
+    assert isinstance(rows[0], dict)
+    faces = rows[0]["text_faces"]
+    assert isinstance(faces, list)
+    assert isinstance(faces[0], dict)
+    face = faces[0]
+    assert face["raw_effect_present"] is False
+    assert face["effect_present"] is True
+    assert face["raw_content_hash"] == card.faces[0].fingerprint()
+    assert face["content_hash"] == card.projected(0).fingerprint()
+    assert face["raw_content_hash"] != face["content_hash"]
+    assert face["effect_presence"] == card.effect_presence[0].value()
+    assert report["publication_gate"] is False
+
+
+@pytest.mark.parametrize("stage", ["identity", "text"])
+@pytest.mark.parametrize("failure", ["parse", "archive"])
+def test_invalid_frozen_source_aborts_before_success_report(
+    mutable_case: Case, stage: str, failure: str
+) -> None:
+    case = mutable_case
+    batch = case.batch
+    if failure == "parse":
+        raw = b"<html><!--" + b"x" * 1100 + b"--></html>"
+        _put(
+            case.store,
+            replace(
+                _resource(card_url(NUMBER), "raw/en.html", raw, Kind.CARD),
+                region=Region.EN,
+            ),
+            raw,
+        )
+        batch = seal_batch(case.store).batch_id
+    else:
+        frozen = FrozenSources(case.store.root, case.store.store_id, batch)
+        entry = frozen.inventory.current[0]
+        version = frozen.entries[entry.source_version_id]
+        (case.store.root / version.blob.path).write_bytes(b"Synthetic damaged blob")
+    reports: list[dict[str, JsonValue]] = []
+    before = {path: path.read_bytes() for path in case.root.rglob("*.yaml")}
+
+    def compose_report() -> None:
+        identity = case.identity
+        if stage == "identity":
+            identity = plan_preview(
+                case.root,
+                FrozenEN(
+                    case.store.root,
+                    case.store.store_id,
+                    batch,
+                    parser_version="en-identity-pin",
+                ),
+                regions=("en",),
+            )
+        texts = plan_text_observations(
+            identity,
+            FrozenTexts(
+                case.store.root,
+                case.store.store_id,
+                batch,
+                region="en",
+                parser_version="en-text-pin",
+            ),
+        )
+        official = plan_official_products(
+            case.official.identities, case.official.pages, identity
+        )
+        reports.append(
+            acceptance_report(texts, official, {case.store.store_id: case.store.root})
+        )
+
+    expected_error = MissingElementError if failure == "parse" else ArchiveError
+    with pytest.raises(expected_error):
+        compose_report()
+    assert reports == []
+    assert before == {path: path.read_bytes() for path in before}
 
 
 def test_missing_source_keeps_denominator_and_ids(case: Case) -> None:
