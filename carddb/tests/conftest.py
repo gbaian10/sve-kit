@@ -5,6 +5,13 @@ import pytest
 
 from sve_carddb.manifest import Manifest
 
+from .database_fixtures import (
+    image_parent_database_template as image_parent_database_template,  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+)
+from .database_fixtures import t0_database_template as t0_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .database_fixtures import t1_database_template as t1_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .database_fixtures import t1b_database_template as t1b_database_template  # ruff: ignore[useless-import-alias] -- register shared immutable database template
+from .image_archive_fixtures import image_archive_template as image_archive_template  # ruff: ignore[useless-import-alias] -- register shared synthetic archive template
 from .official_registry_fixtures import load_shared_registry
 from .product_fixtures import product_files as product_files  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .product_identity_fixtures import identity_template as identity_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
