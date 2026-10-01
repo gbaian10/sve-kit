@@ -1,5 +1,6 @@
 """Exporter acceptance uses an independent reader and synthetic logical data."""
 
+import gzip
 from copy import deepcopy
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -12,7 +13,16 @@ if TYPE_CHECKING:
 from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
-from sve_carddb.snapshot.export import Batch, Ownership, Snapshot, export_snapshot
+from sve_carddb.snapshot.export import (
+    Batch,
+    Ownership,
+    Snapshot,
+    _Files,
+    _ordered,
+    export_snapshot,
+)
+from sve_carddb.snapshot.export.compression import compress
+from sve_carddb.snapshot.export.layout import Layout
 from sve_carddb.snapshot.export.measure import measure, update
 from sve_carddb.snapshot.reader import read_text_all
 from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
@@ -341,12 +351,77 @@ def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> N
 
 
 def test_gzip_roundtrip_and_header_are_deterministic(exported: Snapshot) -> None:
-    import gzip  # ruff: ignore[import-outside-top-level] -- tests inspect gzip directly, not through exporter helpers
-
     for blob in [*exported.payloads.values(), exported.text_all]:
         assert gzip.decompress(blob.gzip) == blob.raw
         assert blob.gzip[3] == 0
         assert blob.gzip[4:8] == b"\0\0\0\0"
+
+
+def test_gzip_timestamp_is_fixed_across_seconds(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    real_compress = gzip.compress
+    seconds = (1_735_689_600, 1_735_689_602)
+    clock = iter(seconds)
+    observed: list[int] = []
+
+    # Python defaults vary; require explicit mtime even when omitted means wall-clock time.
+    def wall_clock_compress(
+        data: bytes, compresslevel: int = 9, *, mtime: int | None = None
+    ) -> bytes:
+        now = next(clock)
+        observed.append(now)
+        return real_compress(
+            data, compresslevel=compresslevel, mtime=now if mtime is None else mtime
+        )
+
+    raw = b"synthetic cross-second gzip payload"
+    assert real_compress(raw, mtime=seconds[0]) != real_compress(raw, mtime=seconds[1])
+    monkeypatch.setattr(gzip, "compress", wall_clock_compress)
+    first = compress(raw, None)
+    second = compress(raw, None)
+    assert observed == list(seconds)
+    assert first.gzip == second.gzip
+    assert first.gzip[4:8] == second.gzip[4:8] == b"\0\0\0\0"
+
+
+def test_gzip_bytes_use_level_nine() -> None:
+    raw = b"synthetic repeated gzip payload " * 64
+    expected = gzip.compress(raw, compresslevel=9, mtime=0)
+    assert expected != gzip.compress(raw, compresslevel=6, mtime=0)
+    assert compress(raw, None).gzip == expected
+
+
+@pytest.mark.parametrize("table", ["printing", "printing_product"])
+def test_primary_key_boundary_rejects_duplicates(
+    logical: tuple[Projection, Ownership], table: str
+) -> None:
+    rows = logical[0].tables[table]
+    assert rows
+    with pytest.raises(ValueError, match="Duplicate public primary key"):
+        _ordered(table, [*rows, rows[0].copy()])
+
+
+def test_file_key_collision_preserves_the_first_payload() -> None:
+    files = _Files(None)
+    first = files.add("config", "config", {"synthetic": "first"}, [])
+    original = files.payloads["config"]
+    with pytest.raises(ValueError, match="Duplicate logical file key"):
+        files.add("config", "config", {"synthetic": "replacement"}, [])
+    assert files.files == {"config": first}
+    assert files.payloads == {"config": original}
+
+
+def test_ownership_boundary_rejects_one_missing_printing(
+    logical: tuple[Projection, Ownership],
+) -> None:
+    projection, ownership = cloned(logical)
+    extra = projection.tables["printing"][0].copy()
+    extra["id"] = "p:synthetic-without-owner"
+    projection.tables["printing"].append(extra)
+    assert ownership.printing_home
+    with pytest.raises(ValueError, match="Exact public printing ownership required"):
+        Layout(projection.tables, ownership, 1)
 
 
 def test_explicit_compressor_recipe_and_bytes_are_used(
