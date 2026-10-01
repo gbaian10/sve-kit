@@ -2,7 +2,7 @@
 
 本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入。
 **封套、覆寫格式與展示集合為技術契約；一般版分類等使用政策仍待使用者決定**。
-§1 摘錄既定語意；§2–§6 定義輸入，§7 區分既定選取規則與分類提案，§8 僅列使用者需決定的政策。
+§1 摘錄既定語意；§2–§6 定義輸入，§7 區分既定選取規則與分類提案，§8 分列技術預設與僅剩的兩項使用者政策。
 格式不表示資料已採納；仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
 本契約不以任意 confirmed 決定或 caller 提供的布林值代替採納。
 
@@ -27,9 +27,9 @@
 | 入口／分片 | 完整頂層欄位 |
 | --- | --- |
 | `catalog-adoptions/index.yaml` | `catalog_adoption_format: 1, kind: catalog_adoption_index, includes` |
-| `catalog-adoptions/<area>/<filing_key>/<sequence>.yaml` | `catalog_adoption_format: 1, kind: catalog_adoption_shard, default_decision_id, records, decisions` |
+| `catalog-adoptions/<area>/<filing_key>/<sequence>.yaml` | `catalog_adoption_format: 1, kind: catalog_adoption_shard, review_context, default_decision_id, records, decisions` |
 | `display-overrides/index.yaml` | `display_override_format: 1, kind: display_override_index, includes` |
-| `display-overrides/<area>/<filing_key>/<sequence>.yaml` | `display_override_format: 1, kind: display_override_shard, default_decision_id, records, decisions` |
+| `display-overrides/<area>/<filing_key>/<sequence>.yaml` | `display_override_format: 1, kind: display_override_shard, review_context, default_decision_id, records, decisions` |
 
 catalog 的 area 為 `vocabulary/symbols/aliases/rules-names/languages`；display 的 area 為 `routes/defaults`。
 filing_key 為 `[A-Za-z0-9_-]+`，只作歸檔、不產生商品或地區真值；卡片相關可沿既有 owner，
@@ -42,23 +42,40 @@ includes 映射上述各自分片路徑到**完整解析內容**的 canonical ha
 缺檔、未索引分片、跨入口偷載與 hash 不符。先驗全入口、全區、全部歷史，再投影本次範圍。
 歷史分片與 index 舊 entries 不改；新分片驗妥後原子追加 index。啟用入口時必有 index，空集合明示 includes={}。
 
+每片一份 review_context，沿 authored-layout §9.2 的 `{context,source_batches}`，釘核對時程式、依賴、設定、
+來源及已存在 authored 入口；同片 records 共用，核對背景不同時分片，不在每筆複製完整輸入。
+
 record 恰為 `{record_key,kind,filing_key,data,evidence}`。data 恰為
-`{subject,adoption_no,predecessor,value,review_context,dependencies,reason}`：
+`{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`：
 
 | 欄位 | 定義 |
 | --- | --- |
-| subject | §4／§5 的完整選擇鍵，不含版號；不可於續版換鍵 |
+| subject | §4–§6 的完整選擇鍵，不含版號；不可於續版換鍵 |
 | adoption_no | 同 kind/subject 從 1 起連續只增正整數 |
 | predecessor | 首筆 null；其後 `{record_key,record_hash,decision_id}`，恰指此鏈緊接前件 |
 | value | 該 kind 的完整替代值；null 為明示停止選用，首次不得 null；不是局部 patch |
-| review_context | 沿 authored-layout §9.2 的 `{context,source_batches}`，釘核對時程式、依賴、設定、來源及已存在 authored 入口 |
-| dependencies | 排序唯一的 `{record_key,record_hash,decision_id}` 陣列，指全部人工採納依賴；無依賴為 [] |
+| review_context_hash | H(本片 review_context)，每筆必須相同；以完整 SHA-256 將共享核對背景綁入成員決定，避免換背景卻沿用舊批准 |
+| dependencies | 排序唯一的 `{table,key}` 陣列，指穩定目標與其有效採納；見下文，不釘整筆依賴的修訂 hash；無依賴為 [] |
 | reason | 非空的人寫理由，不含官方卡文、私人路徑或秘密 |
 
 record_key 是 `[kind,subject,adoption_no]` 的 canonical JSON **字串**，全域唯一。
 subject 是物件，鍵排序依同一 canonical recipe，不使用有分隔符碰撞風險的字串拼接。
-review_context 不引用尚未寫出的自身分片；建置再另釘新入口。依賴圖不得循環或自我引用，
-歷史依賴須可重現；當前選用須匹配有效依賴。reason 與 evidence 都參與 record hash。
+review_context 不引用尚未寫出的自身分片；建置再另釘新入口。review_context_hash 只 hash 共享物件，不 hash 封套，
+沒有自我引用。它保存核對時背景，本次建置背景不同本身不使資料 stale；各 kind 的相關內容另依 §2.2 重驗。
+依賴圖不得循環或自我引用；reason、evidence 與 review_context_hash 都參與 record hash。
+
+dependencies.table 白名單為 vocabulary/language/text_symbol/keyword/stamp/product_family/card/face/printing/rules_name，
+key 是該表完整主鍵的物件，欄位恰依 build-db（如 vocabulary 為 `{kind,code}`，language 為 `{code}`，card 為 `{id}`）。
+loader 必須依有效投影解析穩定鍵，驗目標存在、未停用／未退役、具所屬契約要求的有效採納與來源；
+不能只驗 SQL FK 或借任意 confirmed 決定。沒有 active 欄的表，依其正式採納鏈／投影狀態判斷，不自造欄位。
+各 kind 的直接有效實體引用須完整列入 dependencies，重複引用只列一次；review_context、evidence 與
+observations 中僅作歷史核對的引用依當時背景驗回，不要求其來源版次永遠是現行成員。詞彙原值增加、label／譯名修訂而
+目標仍為同概念同鍵時，引用者不需續版。採納概念不可用相同永久鍵偷換，見 §3。
+
+只有真正依賴內容的條件才比相關內容：source_ref 驗 exact 字串，symbol_basis 驗基底與參數，
+candidates_hash 驗競爭集合，特殊名稱的 name_basis_hash 驗名稱集合；不一律比整筆 record_hash。
+predecessor 仍須精確 hash，因其用途是驗續版鏈。歷史解析依核對時 context 可重播；
+本次解析到的完整 record_hash／decision／來源都由工具寫入 F1，不回填 authored 要人重簽。
 
 ### 2.1 決定、成員與 hash
 
@@ -98,15 +115,17 @@ evidence 沿 [translation-contract §2](translation-contract.md#2-人工採納�
 純自撰的 code、別名或介面配置可 evidence=[]，但依賴、核對收據不可缺；聲稱官方原值／名稱／記號者必有來源。
 
 每個實際使用的 source version 都驗 batch/descriptor/receipt/raw 閉包、parser 程式與設定 pin、locator 和 exact bytes。
-人工依賴驗完整 decision/member/hash 與有效鏈；版次依賴驗當前 registry 身分、區域、面、卡號與觀測。
-核對時的 review_context 可重播不代表適用新輸入：本次 source_ref、映射原值、依賴版本或 §5 候選集合改變時，
-舊採納不自動 fresh。新 raw/parser 若 exact 結果相同，只有下述原值映射可重用；其他逐來源採納依各自 freshness 規則。
+人工依賴解析到的有效版本須驗完整 decision/member/hash 與來源，但 hash 改變本身不使引用者 stale。
+版次依賴重驗當前 registry 的相關身分、區域、面與卡號。核對時 context 可重播不代表新輸入必然適用；
+本次相關原值、symbol_basis、name_basis_hash 或 §5 候選集合改變時，按各 kind 的條件停止選用／重新採納。
+新 raw/parser 只要能從當次凍結輸入驗回相同的相關 exact 內容，詞彙映射與 §4.3 名稱可機械重驗，不要求重簽；
+不能據此忽略真正相關的規則依據、身分或來源變化。
 無論是否重用，都須可驗原 recipe 與原來源；不能只換 recipe 名。
 
 詞彙原值映射只授權已核對的 `(kind,region,lang,raw exact bytes)`，可用於本次其他相同原值的觀測，
 但每次都要從當次凍結觀測驗明 exact 相同；不能延伸到新 spelling、被切半的 trait 或新類別。
 來源頁不再存在於本次批次不等於概念被刪除；若該概念與所用映射仍可從釘住證據驗回，穩定 code 可保留。
-rules-name／route/default 等逐目標決定則依各自完整目標集合重驗，不能套用這個原值重用規則。
+route/default 仍依各自完整候選集合重驗；rules-name 依 §4.3 的名稱內容集合與面身分重驗，不把版次數量當名稱變更。
 
 結構／hash／來源損壞是整筆建置交易失敗；來源完好但本次適用性失效列 stale，停止該選用、阻止受影響正式發布，
 不得默默挑回舊採納。preview 可依既有排除閉包規則隔離並如實報告；純推導且無 stale 覆寫者仍可正常推導。
@@ -143,26 +162,27 @@ F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 autho
 | vocabulary_adoption | `{kind,code}` | `{label,raw_mappings,active}`；label 為 TextValue，active 為 Bool |
 | language_adoption | `{code}` | `{display_name,fallback_order}`；非空 Text、排序有意義且無重複的 Lang 陣列 |
 | search_alias_adoption | `{kind,code,lang,text}` | `{normalized,normalizer}`；normalized 為非空 Text，normalizer 見下文 |
-| rules_name_adoption | `{face_id,region,role}` | `{names,identity_ref,observations}`；names 為非空來源型 TextValue 陣列，另兩欄見下文 |
+| rules_name_adoption | `{face_id,region,role}` | `{names,identity_ref,observations,name_basis_hash}`；names 為非空來源型 TextValue 陣列，其餘見下文 |
 
 ### 4.1 詞彙與語言
 
 本版 vocabulary.kind 白名單恰為 class/type/rarity/trait/title/frame/stamp_series。
-其餘既有固定 enum 須先依 P8 明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
+技術預設 P8 先做查卡所需的固定 enum；新增對照須明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
 不能由 caller 在 configuration 填任意 kind 就擴張。keyword/stamp/product_family/card 保留給各自目標表，不能冒充詞彙。
 raw_mappings 是排序唯一的 `{region,lang,raw,source_ref}` 陣列；region 為 jp/en，lang 須與來源一致。
 有效且 active 的映射中，相同 kind/region/lang/raw 同時映射兩個 code 即失敗；
 停用的歷史映射不參與選用，但不可重用其 code 給另一概念。空陣列允許純介面 enum，但不能假稱已涵蓋官方原值。
 來源的未知符號（含 `-`）如何投影 null 須有欄位 recipe，不把它自動採為職業或稀有度 code。
 稀有度／premium 的拆解是釘住 recipe 的來源投影，不能讓 raw_mappings 改寫 premium；未知組合不猜。
+技術預設 P3 分開篩選基礎 rarity 與 premium，顯示可組合；複合顯示別名不建立第二份稀有度真值。
 
 label 只保存一個基底原文／自撰標籤；其他語言由 translation-contract 的 vocabulary_choice 連同
 `(vocabulary_kind,vocabulary_code,lang)` 採納，不能在本檔再放一份三語翻譯表。
 若 trait 同時是 glossary 概念，只有明示同概念關係才可使用既有選詞，不能因字串相同合併概念。
 已核可譯名的數位／社群來源與 machine 標示沿翻譯契約，不重新要求逐卡確認。
 
-language.code 沿 Lang；fallback_order 不含自身、未知語言或重複項；全體 fallback 圖不得成環。
-它是完整依序嘗試清單，不遞迴串接其他語言的清單。ja/en 清單不得含 zh-Hant；
+language.code 沿 Lang；fallback_order 不含自身、未知語言或重複項。
+它是完整依序嘗試清單，不遞迴串接其他語言的清單；ja→en 與 en→ja 可並存，不因互相備援誤判為循環。ja/en 清單不得含 zh-Hant；
 最終基底回退亦不得繞過這項限制，基底為繁中時改用穩定 code。
 原文／固定 code 的最終呈現與缺譯標示見 §8；語言配置修改也需續版，不改卡面地區與卡文來源。
 
@@ -171,6 +191,9 @@ language.code 沿 Lang；fallback_order 不含自身、未知語言或重複項�
 kind→目標表的白名單沿 build-db §15；code 必存在且有效，keyword/stamp 尚未啟用時不得用同名 vocabulary 冒充。
 text 非空、lang 已登錄，同 subject 只有一條鏈；不同目標可有同一別名，多義回全體並讓使用者選，不任取第一。
 canonical code 仍先 exact 查找，正規化只作用別名查找，不修改卡號、構築名稱、存檔原文或 canonical code。
+
+技術預設 P5 的算法為先 NFKC、再 casefold；不 trim／合併空白、不折假名、不去標點。
+Unicode 資料版本隨 normalizer 實作／配置釘住，不使用系統未明示的版本。
 
 normalizer 恰為 `{version,program_revision,code_path,code_hash,config,config_hash}`，釘可重現的版控實作與 canonical 配置。
 loader 重算 normalized，不能信 caller 傳字串；同次查找索引只接受建置配置指定的同一 normalizer pin。
@@ -184,10 +207,17 @@ role 限 collab/treated_as；一般 primary 仍從同區官方 current 名稱推
 有不同名稱則留未定，不藉特殊名稱封套偷選 primary。names 每項語言必與 region 相符（jp→ja，en→en）。
 陣列按 canonical bytes 排序，重建後的 exact 名稱不得重複；它是此 face/region/role 的完整特殊名稱集合。
 
-identity_ref 是 `{face_id,card_id,registry_record_key,record_hash,decision_id}`，引用有效面身分；observations 是
-排序唯一的 `{printing_id,face_id,source_ref}` 陣列，完整列該 face/region 在核對範圍的全部名稱來源，
-printing 必同 card、同區且包含此面。新增／移走版次、面重配或任何名稱來源變更均重驗並需新採納。
-規則依據另列 evidence，不因名稱共現就認定 treated_as；沒有同區版次不能造該區名稱關聯。
+identity_ref 是 `{face_id,card_id}`，引用有效面身分的穩定鍵，實際版本與決定由工具解析並記 F1。
+observations 是排序唯一的 `{printing_id,face_id,source_ref}` 陣列，完整列**採納當時**該 face/region 的名稱來源；
+它保存核對證據，不是永久固定的版次成員集合。printing 必同 card、同區且包含此面。
+name_basis_hash=H(全部 observations 重建的 `{lang,text_hash}` 排序唯一集合)，text_hash 驗 exact UTF-8；
+同名再錄不重複計入，hash 相同仍比 exact bytes，不把碰撞當同名。
+
+每次建置機械重建該面該區目前全部可用名稱觀測，完整驗來源及面對應，再與受審 exact 名稱集合比較。
+新增／移走同名版次、換來源版本但名稱不變，不需重新採納；不改寫舊 observations，當次證據寫 F1。
+來源名稱集合改變、面／card／region 對應改變，或已採納特殊關係的相關規則依據不再適用才使關係 stale；
+來源缺漏則列無法驗證，不能把缺資料當名稱沒變。沒有同區版次也不能保留該區的有效人工關聯。
+規則依據另列 evidence，不因名稱共現就認定 treated_as。
 
 各 name 重建後沿既有 `(region,official_name exact)` 產 rules_name，全部特殊關聯 decision 指本決定。
 新增／移除其中一名也要對完整 names 集合續版，不借另一 role 繞過完整集合核對。
@@ -199,7 +229,7 @@ printing 必同 card、同區且包含此面。新增／移走版次、面重配
 | kind | subject | 非 null value 的完整欄位 |
 | --- | --- | --- |
 | route_override_adoption | `{region,route_key}` | `{printing_id,candidates,candidates_hash}` |
-| default_printing_adoption | `{card_id,region}` | `{printing_id,candidates,candidates_hash,selection_basis}` |
+| default_printing_adoption | `{card_id,region}` | `{printing_id,candidates,candidates_hash}` |
 
 route_key 為原始 official 卡號，不是 URL encoded 字串；route 只解決**同區同 exact 卡號**的多個 variant。
 candidates 必完整列同區該 exact 卡號的全部 official printing，至少兩個；選中 printing_id 必為成員。
@@ -208,18 +238,21 @@ candidates 必完整列同區該 exact 卡號的全部 official printing，至�
 不得擅加 slug／假卡號／provisional 入口替它們補 URL，新增 URL 能力須另定路由契約。
 跨 JP/EN exact 撞號仍是待決 URL 設計，不能把 region 加入此 authored subject 就假裝公開 URL 已隔離。
 
-兩種 candidates 都是按 printing_id 排序唯一的
+route 的 candidates 是按 printing_id 排序唯一的
 `{printing_id,card_id,region,card_no,card_no_state,variant_key,identity_ref}`；identity_ref 恰為
 `{record_key,record_hash,decision_id}`，指有效 printing 身分記錄。candidates_hash=H(完整 candidates)。
 核對範圍由 review_context 的完整 registry 與凍結來源重建，不接受 caller 自選清單；新增 variant 亦使舊決定 stale。
 即使選中者未變，省略競爭者也不能沿用舊採納。
 
-預設覆寫的 candidates 完整列同卡同區、在 selection_basis 指定的展示集合內的版次。
-selection_basis 恰為 `{scope_id,scope_hash,selector_version,policy_hash}`；scope_id 是建置配置的具名展示範圍，
-scope_hash=H(`{scope_id,card_id,region,printing_ids}`)，printing_ids 恰為該範圍中**此卡此區**排序唯一的完整集合；
-selector 與政策 bytes 由 F1 驗回。不是只 hash 選中者，也不把無關卡新增混入此卡的 freshness。覆寫目標須同卡、同區、可展示；Decklog 不可用不等於不可展示。
-此卡此區集合或上述 pins 改變即需重新採納，不把特定 preview 的選擇自動帶到正式全量輸出；
-無關卡新增不使本覆寫失效。
+預設覆寫的 candidates 是本次展示範圍內**同卡同區全部 printing_id** 的排序唯一陣列，
+candidates_hash=H(candidates)。每次重建完整集合並驗各成員的當前歸屬；選中者必仍同卡、同區、可展示。
+集合增減、目標被移到別卡／別區或不再可展示才需重新採納；不能省略競爭者或以 caller 自選清單驗過。
+Decklog 不可用不等於不可展示；同一版次的無關來源修訂不改候選集合，也不使覆寫失效。
+
+不保存 selection_basis 或重複的 scope_hash，不將 selector_version、一般版 policy_hash 或程式版號當 freshness 條件。
+它們只留於核對背景與本次 F1 作可重建追溯；人工選擇是「此卡此區預設這一版」，與機械 selector 怎麼算分開。
+一般版清單核可、selector 修正、無關卡包新增都不要求重簽。preview 轉正式時重驗同卡同區集合與目標可展示性，
+集合相同即可沿用；若本卡新增候選則 stale，不只因展示範圍的名稱改變就失效。
 人工 override 可以選特殊版，不必偽造「一般」證據；投影 method=override，不標 earliest_general。
 
 一般唯一 official 路由仍自動推導，不能為每卡造冗餘 route 決定。
@@ -232,7 +265,7 @@ identity-repair 的完整路由交易中提供前後件與永久入口比較；�
 ## 6. 卡文記號與三語文案
 
 text_symbol_adoption.subject 為 `{id}`；value 恰為
-`{code,parameter_schema,keyword_id,spellings,source_localization,localization_refs}`。
+`{code,parameter_schema,keyword_id,spellings,source_localization}`。
 id 為人工首次指定的永久非空 ID，code 符合 Code；二者全域一對一且續版不改。
 parameter_schema／spellings 沿 [snapshot-transport §3.2](snapshot-transport.md#32-公開參數宣告)
 與 [snapshot-format 的 Spelling](snapshot-format.md#2-公開表完整欄位與玩家用途)，不另定 regex 或參數值域。
@@ -242,14 +275,16 @@ keyword_id 可 null；非 null 須引用已採納 keyword，不能因拼法相�
 
 source_localization 恰為 `{lang,name,tooltip,copy_pattern}`，後三項為 §4 的 TextValue，語言須都等於 lang；
 它是單一基底文案（官方來源引用或自撰說明），不是另一份三語翻譯。
-localization_refs 是按 lang 排序唯一的 `{lang,record_key,record_hash,decision_id}`，引用下述翻譯選詞，
-不得與基底 lang 重複，且全部 refs 都列入 data.dependencies。所有文案與翻譯的 placeholder 必依 parameter_schema 驗證，不能引入新參數或藏執行語言。
+記號封套不存 localization_refs，也不在 dependencies 釘翻譯選詞版本。
+所有文案與翻譯的 placeholder 必依 parameter_schema 驗證，不能引入新參數或藏執行語言。
 三語缺項如實缺譯，不能先填未採納文字湊滿三語；32 是候選觀測數，非格式上限或已核可名單。
 
 **翻譯入口的技術擴充**：在 translations/glossary 入口增加 `symbol_localization_choice`，
 record_key 為 `["symbol_localization_choice",symbol_id,lang,adoption_no]` 的 canonical JSON 字串，
 data 恰為 `{symbol_id,lang,symbol_basis,value,origin,concept_evidence,adoption_no,predecessor}`。
-symbol_basis 釘 `{code,parameter_schema_hash,source_localization_hash}`，均可從上述基底重算；不引用將引用它的 symbol 採納決定，避免循環。
+symbol_basis 釘 `{code,parameter_schema_hash,source_localization_hash}`，均可從上述基底重算；
+parameter_schema_hash=H(parameter_schema)，source_localization_hash=H(重建後的 `{lang,name,tooltip,copy_pattern}` 純字串物件)。
+不 hash 原始 TextValue 的來源 locator 或整筆 symbol record_hash，來源證據補充而文案不變時不使譯本失效。
 value 為 null（撤回），或 `{name,tooltip,copy_pattern}`，各值**直接沿用** translation-contract §5 的 value union，
 採納門檻／來源／續版全部沿該翻譯契約，無模板長尾例外。
 origin／concept_evidence 一律各為以 name/tooltip/copy_pattern 為鍵的完整映射，逐欄沿該契約的 origin enum／證據陣列驗證；
@@ -257,10 +292,15 @@ value=null 時兩者亦為 null。category 固定 symbol_localization_choice、p
 其餘決定與 members/hash 規則沿 translation-contract §2。
 不把 tooltip 或 copy_pattern 偽裝 glossary_term，也不新增公開 translation owner／FieldTranslation enum。
 
-symbol 封套只核對這些已採納翻譯引用及參數相容，不重簽翻譯語義；loader 解析 refs 後產公開 Localization 純字串。
-某 choice 續版或撤回後，要新 symbol 採納版更新精確 refs；舊 ref 不可默默套到新基底／schema。
+建置依 `(symbol_id,lang)` 解析選詞鏈的最後有效版，不按檔案順序或回挑更早版本。
+同語言不得另以 choice 覆蓋基底 source_localization；改基底仍走 symbol 續版。
+choice 必有有效採納、symbol_basis 與目前基底相符、參數相容，才產公開 Localization 純字串；
+文案修訂只新增 choice，工具重建即可，不再新增 symbol 採納決定。撤回或 basis 不匹配則該語言缺譯，
+依技術預設 P7 回原記號並列診斷，不把舊譯文套新基底，也不退回撤回前的舊 choice。
+來源／封套損壞仍是建置錯誤；正常缺譯不阻擋記號啟用。F1 記當次選到的精確 choice hash／decision，
+公開不新增稽核欄位，不在 authored 保存推導選用結果。
 此新增 translation kind 須由 loader 明示支援並驗完整契約；尚未實作的 loader 不得靜默忽略或當作其他 kind。
-固定三語完整度或缺文案策略見 §8，已核可的術語來源優先順序不在此重定。
+技術預設 P7 允許三語尚未齊全的記號啟用，缺譯回原記號；已核可的術語來源優先順序不在此重定。
 
 ## 7. 預設版次與一般版分類的政策提案
 
@@ -271,7 +311,8 @@ build-db §15 已有順序：同卡同區 → confirmed override → card.home_s
 **分類建議（P1，待使用者決定）**：採明示 rarity code／普通 frame code 白名單，
 每個版次必有 premium=false、全部面 signed=false、普通 frame、已採納的無 stamp 證據，才算已證實一般。
 任何一面已知特殊即排除一般；有 null／unreviewed 或缺面則為未知，不當作 false。
-稀有度／卡框／標誌的完整清單須由凍結來源重建後，對 JP／EN 實際值逐項確認；本契約不預配白名單。
+稀有度／卡框／標誌的完整清單須由凍結來源重建後，對 JP／EN 實際值逐項確認；
+候選頁預設勾 BR、SR、GR、LG 供使用者檢視，不代表已採納，不能由這四個顯示值預配英文 code。
 PR、純 premium、未知稀有度或新框型不能自動歸普通。普通框的 code 本文件不預配。
 
 無 stamp 不能由 printing_stamp 空表推導。建議分類事實交後續加工採納契約，至少釘
@@ -306,20 +347,30 @@ printing 取其全部可信 inclusion 的最早已知有效日；任何可能更
 缺卡圖、缺翻譯、表記未定不單獨縮集合；依各既定降級規則顯示。非法／缺引用輸入仍依投影閘門排除或失敗，
 本契約不授權全部 registry 無條件公開。`/sets` 的已核可區域／歸檔過濾仍在查詢端，不改全站 card 區域預設。
 
-## 8. 提案，待使用者決定
+## 8. 技術預設與待決政策
 
-以下選項尚未授權採納真實資料。政策核可記錄與逐筆資料收據分開；不能只引用此提案當核可證據。
+協調者裁定的技術預設如下；格式與預設定案不表示真實資料或使用者偏好已採納。
+
+| 編號 | 定案的技術設計 |
+| --- | --- |
+| P0 | 採獨立入口、精確成員與只增續版，依 §2–§3；共享核對背景與穩定依賴不造成無關續版的連鎖重簽 |
+| P3 | rarity 與 premium 分開篩選、可組合顯示，不另立複合稀有度真值 |
+| P5 | NFKC 後 casefold；不 trim／合併空白、不折假名、不去標點，版本化且多義不任選 |
+| P6 | 使用既有投影允許的完整同區展示集合；人工 default 只比同卡同區 candidates_hash 與目標有效性 |
+| P7 | 記號三語不必齊全，缺譯回原記號；建置自動選有效 choice，不二次簽核記號 |
+| P8 | 首批只做查卡需要的固定 enum 對照，其餘未啟用；不得由 caller 新增任意 kind 或 enum 值 |
+
+P2 的無標誌證據形式與標示門檻留待加工採納入口一起定，不要求使用者現在回答；
+目前沿 §7 已有的未知處理及 sampled/confirmed 邊界，不把缺資料當無加工。
+
+### 8.1 提案，待使用者決定
+
+僅剩兩題；政策核可記錄與逐筆資料收據分開，不以提案當核可證據。
 
 | 編號 | 選項 | 建議及影響 |
 | --- | --- | --- |
-| P1 一般版分類 | A：從實際候選清單逐項確認 rarity／frame／stamp 算一般或特殊；B：先只確認部分，其餘留未知 | 建議 A，以來源重產清單為準，不預填已核可。未知不等於普通；既定選取順序、加工採納門檻與日期規則不重問 |
-| P3 稀有度顯示 | A：基礎 rarity 與 premium 分開篩選，可組合顯示；B：另採複合顯示別名 | 建議 A；DB 已分欄，不重問要不要拆。B 也不得另造重複稀有度真值；完整 code/raw 對照另逐條確認 |
-| P4 介面缺字 | A：zh-Hant→ja→en，ja→en，en→ja；B：zh-Hant→en→ja，ja→en，en→ja | 建議 A，符合日文來源方向。末端回基底原文或穩定 code 並標缺譯，不空白；ja/en 仍不得回繁中。卡文沿翻譯契約，不套此順序 |
-| P5 別名比對 | A：NFKC＋casefold，不 trim／合併空白、不折假名、不去標點；B：只 exact；C：再加空白／假名折疊 | 建議 A 並版本化；只改搜尋比對索引，多義保留。C 需另列轉換順序與碰撞清單後核可，不自動擴充 |
-| P7 記號三語完整度 | A：允許缺譯回原記號；B：每個記號三語齊全才啟用 | 建議 A；沿既有翻譯採納，不複製第二份三語表。name/tooltip/copy_pattern 仍需逐項採納；32 個候選不自動全收 |
-| P8 固定 enum 顯示 | A：所有對使用者展示的既有 enum 明列專用 vocabulary kind/code；B：首批只採查卡需要者 | 建議 B，其餘保持未啟用且不假裝已翻譯；同名 kind 不跨表混用，不新增 enum 值 |
-
-P0（封套）、P6（展示集合）屬技術細節，不送使用者核可；其餘編號保留便於對照。
+| P1 一般版分類 | A：worker 列出來源實際出現的 rarity／frame／stamp，逐項勾一般／特殊；B：先只確認部分，其餘留未知 | 建議 A，候選頁預設勾 BR、SR、GR、LG 供檢視；尚未勾選確認不算採納。未知不等於普通，既定選取與日期順序不重問 |
+| P4 繁中介面缺字 | A：繁中缺譯先日文、再英文；B：先英文、再日文 | 建議 A，符合日文來源方向；日文缺譯用英文、英文缺譯用日文且不回繁中仍是既定規則。末端用允許的原文或 code 並標缺譯，不空白，不套用卡文 |
 
 固定英文 code、官方原值映射、各個記號拼法與文案、實際搜尋別名與特殊構築關係仍需資料採納。
 候選的頻次不是核可；萃取修正後須重產 trait 清單，不能採用被切成半截的複合特性。
@@ -335,30 +386,30 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | 編號 | 單一反例／定向突變 | 必要結果 |
 | --- | --- | --- |
 | C01 | 缺 index／缺分片／未索引／symlink／跨入口／未知欄／重複 YAML key；各移除一個 guard | 各自拒絕，啟用空集合只認明示空 index |
-| C02 | 一筆 value 改一字／新增成員／改 evidence，留舊 hash | 三層重算檢出，不能沿用舊決定 |
+| C02 | 一筆 value 改一字／新增成員／改 evidence／換共享 review_context 卻留舊 hash | 三層重算檢出，不能沿用舊決定 |
 | C03 | confirmed 的 category／policy 換成合法但不適用的其他類別 | 拒絕；即使有 authored source 也不放行 |
 | C04 | 借同 kind 別筆的 decision／漏一成員／多一成員／重複 member | 精確集合驗證拒絕 |
 | C05 | proposed／sampled／空核對者／空時間／checked 少一筆／假 approved_policy | 各自拒絕；本入口 confirmed 全筆 |
 | C06 | 刪 raw／改 parser pin／改 locator／改 text_hash／錯 image face | 來源驗證失敗，不回讀 latest |
 | C07 | 前件 hash 錯／decision 錯／分叉／缺號／停用後重開第 1 版 | 各自拒絕；合法停用與恢復新版本通過 |
-| C08 | 有效依賴續版，選用仍指舊版／依賴自循環 | stale 或結構失敗，不挑舊 approved 值 |
+| C08 | 詞彙補 raw mapping／label 修訂／目標停用或不存在／依賴自循環 | 前兩者引用別名仍有效、不需重簽，後兩者拒絕；有效版本的採納仍完整驗證 |
 | C09 | 相同 raw 跨 kind 借映射／新 spelling 沿舊決定／完整 trait 的 ref 卻填半截 raw | 不匹配；同 kind/region/lang exact 原值重用基例可通過 |
 | C10 | 同一原值兩 code／改 symbol code／譯名改字後重配 code | 衝突或穩定身分檢查拒絕 |
 | C11 | alias 假 keyword 父列／錯語言／未存在目標 | 各自拒絕，不能用 vocabulary 冒充 |
 | C12 | normalized 不可重算／混 normalizer pins／略過 canonical 優先／多義任選 | 前兩拒絕，後兩檢出錯誤解析 |
-| C13 | language 自回退／未知目標／循環／ja 或 en 回 zh-Hant | 各自拒絕，UI 配置不改卡文 |
-| C14 | 特殊名稱跨區／無同區 printing／借舊名稱觀測／剝括號 | 各自拒絕，不合併 card 或 primary |
+| C13 | language 自回退／未知目標／重複 fallback／ja 或 en 回 zh-Hant；ja→en 與 en→ja 並存 | 前四項拒絕，互相備援可通過且不遞迴；UI 配置不改卡文 |
+| C14 | 同名再錄新增／來源換版但 exact 名稱相同／名稱改字／面重配／跨區／缺來源／剝括號 | 前兩者機械驗過仍有效，其餘拒絕或 stale；不合併 card 或 primary |
 | C15 | symbol 多餘尾字／非 ASCII 數字／越界 uint／x 當 X／Q 擴成變數 | 各自不匹配或拒絕，raw 可 roundtrip |
-| C16 | localization 未採納／錯 symbol_basis／新參數／缺譯硬填／舊 ref 假 fresh | 各自拒絕；正常缺譯走核可降級 |
+| C16 | choice 改提示文字／撤回／未採納／錯 symbol_basis／新參數／缺譯硬填 | 修訂自動選用、不重簽 symbol；撤回或 basis 不符回原記號且不挑舊 choice；非法採納／參數拒絕 |
 | C17 | route 候選漏 variant／新增競爭者／target 錯號／provisional／跨區撞號 | 拒絕或 stale，不看 UI 語言選勝者 |
-| C18 | default 跨 card／跨 region／目標不在展示集合／scope_hash 錯 | 各自拒絕；Decklog unavailable 可展示基例不誤擋 |
+| C18 | default 跨 card／跨 region／目標不可展示／漏同卡候選／candidates_hash 錯／僅 selector 或 policy hash 變 | 前五項拒絕或 stale，末項覆寫仍有效；Decklog unavailable 可展示基例不誤擋 |
 | C19 | route 續版改已公開目標卻無 repair／撤回刪舊入口 | 發布拒絕；default 改選不能改 URL |
 | C20 | 未知 premium／signed／frame／stamp 當 false，或漏背面 | 各自不能 earliest_general，依既定未知狀態降級 |
 | C21 | 已知 premium／signed／stamp／特殊框／非白名單 rarity 算一般 | 各自排除一般候選，不受日期早晚影響 |
 | C22 | 無日期覆寫卻不沿商品 day／覆寫 month、year、unknown 卻回商品 day／商品 month 卻補 day／跨區日期／同日反向 ID | 各自檢出；兩商品日分別 2019、2022、無覆寫且晚者 ID 較小時，仍選 2019 |
 | C23 | 只驗勝出者，忽略未知競爭者／忽略 home_set／忽略 override | 各自檢出 method 或選擇錯誤 |
 | C24 | 先濾 JP 再驗 EN 壞分片／半筆失敗仍提交 DB | 全入口失敗且交易回滾 |
-| C25 | YAML 只換排版／輸入檔順序改／無關卡變而原值映射不變 | canonical 決定、詞彙結果與不受影響卡片的 default override 保持有效 |
+| C25 | YAML 只換排版／輸入檔順序改／新卡包僅新增無關卡／重建程式或背景更新但相關內容相同 | canonical 決定不變；詞彙與 default override 保持有效，F1 記新實際輸入 |
 
 驗收須另覆蓋合法的新採納、完整續版、撤回／恢復、literal/uint/variable、雙面與多區互不污染。
-核可 §8 剩餘政策後把相應預期固化，再以 production 凍結來源驗證覆蓋；候選清單、合成成功與格式核可都不等於正式資料可發布。
+核可 §8.1 兩項政策後把相應預期固化，再以 production 凍結來源驗證覆蓋；候選清單、合成成功與格式核可都不等於正式資料可發布。

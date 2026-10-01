@@ -39,7 +39,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 | glossary | glossary_term／id | §5 的永久概念 |
 | glossary | glossary_choice／term_id,lang,adoption_no | 選定譯詞的不可變決定；投影當前 glossary_translation |
 | glossary | vocabulary_choice／vocabulary_kind,vocabulary_code,lang,adoption_no | 介面詞彙標籤的選詞，不假造 glossary_term |
-| glossary | symbol_localization_choice／symbol_id,lang,adoption_no | 記號三語文案的選詞，見下述技術擴充；缺譯啟用政策另定 |
+| glossary | symbol_localization_choice／symbol_id,lang,adoption_no | 記號三語文案的選詞，建置自動選有效譯本，缺譯回原記號 |
 | overrides | context_assignment／owner,field,ordinal,adoption_no | 同字異義的概念／variant 指派 |
 | overrides | template_match／context_key,adoption_no | 精確來源下模板拆分或匹配例外；不是渲染全文 |
 | overrides | translation_override／context_key,lang,adoption_no | 撤回或指定模板譯本／術語 choice；不得逐卡任意改同語義句 |
@@ -57,7 +57,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 
 `evidence` 為 `{source_ref,role}` 去重陣列。source_ref 恰為 `{store_id,batch_id,source_version_id,parser,locator,text_hash}`：parser 為釘住程式與設定的 recipe ID，locator 是該 parser 完整 JSON 投影內的 JSON Pointer，text_hash 驗被定位字串的 exact UTF-8；不是任意可執行查詢。來源歸檔 batch/descriptor/receipt/raw、parser 程式／設定 hash 皆由建置輸入紀錄 F1 驗證。人工純決定可無 raw evidence，但所引用模板、概念、owner 與前件須完整可驗；聲稱官方來源的記錄不可空。author source_record/decision_source 釘完整 commit、index/分片 hash 與原證據，不在 authored 重抄官方原文。
 
-記號的三語 name/tooltip/copy_pattern 沿本入口追加 `symbol_localization_choice`，完整欄位見 [記號文案技術契約](catalog-route-adoption.md#6-卡文記號與三語文案)。其來源、origin 與採納規則沿本契約，詞彙 label 繼續使用既有 vocabulary_choice；新增 kind 須實作完整 loader 驗證後才能載入，不代表三語文案已採納。
+記號的三語 name/tooltip/copy_pattern 沿本入口追加 `symbol_localization_choice`，完整欄位見 [記號文案技術契約](catalog-route-adoption.md#6-卡文記號與三語文案)。其來源、origin 與採納規則沿本契約，詞彙 label 繼續使用既有 vocabulary_choice；新增 kind 須實作完整 loader 驗證後才能載入，不代表三語文案已採納。建置依 symbol_id/lang 取有效 choice、驗 symbol_basis，文案改字不要求記號再簽一次；實際選用的精確 hash／決定留 F1。
 
 ## 3. 模板來源清冊與 ID
 
