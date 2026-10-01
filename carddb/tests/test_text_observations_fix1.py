@@ -28,38 +28,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Value
     from sve_carddb.registry.review import Inputs
 
-
-def test_pending_exclusion_proposal_is_labeled_and_never_filters_staging(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_case(tmp_path / "authored", inputs)
-    diagnostic = {
-        "proposal": "pending-#143",
-        "publication_gate": False,
-        "snapshot_output_authorized": False,
-    }
-    report = case.plan.report()
-    assert report["eligible_identity"] == case.plan.eligible.report()
-    assert report["eligible_identity_diagnostic"] == diagnostic
-    assert any(group.reasons for group in case.plan.groups)
-    schema = compile_build(("en", "related"))
-    with create_database(schema) as db, db.transaction():
-        populate_text_preview(
-            db,
-            case.catalog,
-            case.plan,
-            authored_revision=REVISION,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-            languages=LANGUAGES,
-            stores={"test-store": case.store},
-        )
-        assert len(db.rows("printing")) == 4
-        assert len(db.rows("face_revision")) == 4
-        assert len(db.rows("printing_face_observation")) == 4
-        closure = exclusion_report(db, schema, case.plan)
-        assert {key: closure[key] for key in diagnostic} == diagnostic
+    from .shared_case_fixtures import TextCaseTemplate
 
 
 def test_initial_current_basis_never_claims_authored_adoption(
@@ -141,101 +110,6 @@ def test_related_edge_requires_both_regional_endpoints(
     assert not case.plan.eligible.included("card_related")
 
 
-def test_allocation_projection_follows_excluded_printing_without_db_fk_help(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_case(tmp_path / "authored", inputs)
-    jp_printings = {
-        item.data.id
-        for item in case.identity.included("printing")
-        if isinstance(item.data, PrintingData) and item.data.region == "jp"
-    }
-    assert len(jp_printings) == 2
-    projections = {item.record_key: item for item in case.plan.eligible.projections}
-    allocations = [
-        item
-        for item in case.identity.included("card_int_id")
-        if isinstance(item.data, AllocationData)
-        and item.data.printing_id in jp_printings
-    ]
-    assert len(allocations) == 2
-    for allocation in allocations:
-        projected = projections[allocation.record_key]
-        assert projected.disposition == "excluded"
-        assert projected.regions == ()
-    assert len(case.plan.eligible.included("card_int_id")) == 2
-
-
-def test_reverse_fk_closure_reaches_alias_through_route_in_adverse_order(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_case(tmp_path / "authored", inputs)
-    item = case.plan.observations[0]
-    schema = compile_build(("en", "related"))
-    with create_database(schema) as db:
-        with db.transaction():
-            case.stage(db)
-
-            db.insert(
-                "card_route_alias",
-                {
-                    "namespace": "official",
-                    "old_key": "SYN-old",
-                    "target_namespace": "official",
-                    "target_key": item.card_no,
-                    "reason": "renumbered",
-                    "source_id": item.card.source.id,
-                    "decision_id": db.rows("decision")[0].values["id"],
-                },
-            )
-        # Children before parents force a second pass rather than masking a one-pass bug.
-        tables = {
-            name: next(table for table in schema.tables if table.name == name)
-            for name in ("card_route_alias", "card_route", "printing")
-        }
-        rows = {name: db.rows(name) for name in tables}
-        excluded: dict[str, set[tuple[Value, ...]]] = {
-            "card_route_alias": set(),
-            "card_route": set(),
-            "printing": {(item.printing_id,)},
-        }
-        _close(tables, rows, excluded)
-        assert excluded["card_route"] == {("official", item.card_no)}
-        assert excluded["card_route_alias"] == {("official", "SYN-old")}
-
-
-def test_nonfresh_text_graph_fails_before_any_new_source_write(
-    tmp_path: Path, inputs: Inputs, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    case = make_case(tmp_path / "authored", inputs)
-    schema = compile_build(("en", "related"))
-    with create_database(schema) as db:
-        with db.transaction():
-            case.stage(db)
-        import_text_observations(
-            db,
-            case.plan,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
-        before = {table.name: db.rows(table.name) for table in schema.tables}
-
-        def forbidden(*_args: object, **_kwargs: object) -> None:
-            raise AssertionError("Nonfresh staging must fail before writing sources")
-
-        monkeypatch.setattr(importer, "insert_raw_sources", forbidden)
-        with pytest.raises(ValueError, match="fresh text staging graph"):
-            import_text_observations(
-                db,
-                case.plan,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
-        assert before == {table.name: db.rows(table.name) for table in schema.tables}
-
-
 def test_incomplete_source_face_map_fails_directly_during_planning(
     tmp_path: Path, inputs: Inputs
 ) -> None:
@@ -262,3 +136,136 @@ def test_incomplete_source_face_map_fails_directly_during_planning(
     )
     with pytest.raises(ValueError, match="Text source face map is incomplete"):
         plan_text_observations(identity, case.provider)
+
+
+class TestDefaultTextInputs:
+    def test_pending_exclusion_proposal_is_labeled_and_never_filters_staging(
+        self, tmp_path: Path, default_text_case: TextCaseTemplate
+    ) -> None:
+        case = default_text_case.copy(tmp_path)
+        diagnostic = {
+            "proposal": "pending-#143",
+            "publication_gate": False,
+            "snapshot_output_authorized": False,
+        }
+        report = case.plan.report()
+        assert report["eligible_identity"] == case.plan.eligible.report()
+        assert report["eligible_identity_diagnostic"] == diagnostic
+        assert any(group.reasons for group in case.plan.groups)
+        schema = compile_build(("en", "related"))
+        with create_database(schema) as db, db.transaction():
+            populate_text_preview(
+                db,
+                case.catalog,
+                case.plan,
+                authored_revision=REVISION,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+                languages=LANGUAGES,
+                stores={"test-store": case.store},
+            )
+            assert len(db.rows("printing")) == 4
+            assert len(db.rows("face_revision")) == 4
+            assert len(db.rows("printing_face_observation")) == 4
+            closure = exclusion_report(db, schema, case.plan)
+            assert {key: closure[key] for key in diagnostic} == diagnostic
+
+    def test_allocation_projection_follows_excluded_printing_without_db_fk_help(
+        self, tmp_path: Path, default_text_case: TextCaseTemplate
+    ) -> None:
+        case = default_text_case.copy(tmp_path)
+        jp_printings = {
+            item.data.id
+            for item in case.identity.included("printing")
+            if isinstance(item.data, PrintingData) and item.data.region == "jp"
+        }
+        assert len(jp_printings) == 2
+        projections = {item.record_key: item for item in case.plan.eligible.projections}
+        allocations = [
+            item
+            for item in case.identity.included("card_int_id")
+            if isinstance(item.data, AllocationData)
+            and item.data.printing_id in jp_printings
+        ]
+        assert len(allocations) == 2
+        for allocation in allocations:
+            projected = projections[allocation.record_key]
+            assert projected.disposition == "excluded"
+            assert projected.regions == ()
+        assert len(case.plan.eligible.included("card_int_id")) == 2
+
+    def test_reverse_fk_closure_reaches_alias_through_route_in_adverse_order(
+        self, tmp_path: Path, default_text_case: TextCaseTemplate
+    ) -> None:
+        case = default_text_case.copy(tmp_path)
+        item = case.plan.observations[0]
+        schema = compile_build(("en", "related"))
+        with create_database(schema) as db:
+            with db.transaction():
+                case.stage(db)
+
+                db.insert(
+                    "card_route_alias",
+                    {
+                        "namespace": "official",
+                        "old_key": "SYN-old",
+                        "target_namespace": "official",
+                        "target_key": item.card_no,
+                        "reason": "renumbered",
+                        "source_id": item.card.source.id,
+                        "decision_id": db.rows("decision")[0].values["id"],
+                    },
+                )
+            # Children before parents force a second pass rather than masking a one-pass bug.
+            tables = {
+                name: next(table for table in schema.tables if table.name == name)
+                for name in ("card_route_alias", "card_route", "printing")
+            }
+            rows = {name: db.rows(name) for name in tables}
+            excluded: dict[str, set[tuple[Value, ...]]] = {
+                "card_route_alias": set(),
+                "card_route": set(),
+                "printing": {(item.printing_id,)},
+            }
+            _close(tables, rows, excluded)
+            assert excluded["card_route"] == {("official", item.card_no)}
+            assert excluded["card_route_alias"] == {("official", "SYN-old")}
+
+    def test_nonfresh_text_graph_fails_before_any_new_source_write(
+        self,
+        tmp_path: Path,
+        default_text_case: TextCaseTemplate,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
+        case = default_text_case.copy(tmp_path)
+        schema = compile_build(("en", "related"))
+        with create_database(schema) as db:
+            with db.transaction():
+                case.stage(db)
+            import_text_observations(
+                db,
+                case.plan,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
+            before = {table.name: db.rows(table.name) for table in schema.tables}
+
+            def forbidden(*_args: object, **_kwargs: object) -> None:
+                raise AssertionError(
+                    "Nonfresh staging must fail before writing sources"
+                )
+
+            monkeypatch.setattr(importer, "insert_raw_sources", forbidden)
+            with pytest.raises(ValueError, match="fresh text staging graph"):
+                import_text_observations(
+                    db,
+                    case.plan,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+            assert before == {
+                table.name: db.rows(table.name) for table in schema.tables
+            }
