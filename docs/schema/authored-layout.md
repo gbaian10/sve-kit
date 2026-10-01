@@ -1,6 +1,6 @@
 # authored 維護方式
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01 協調者裁定，技術契約）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 ## 1. 路徑與共同格式
 
@@ -211,9 +211,9 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 **使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文獨有才用英文。EN 卡面在同卡身分確認後先顯示 JP 繁中，文字未核對時加「日英文字尚未核對」標示；核對完成且適用時移除標示，已知 divergence 不共用受影響欄。這不放行未核對的 DSL／機制或官方 counterpart。
 
-**同日已核可的首輪方式**：先翻高頻模板、長尾後補，不按卡包；每個模板由一個模型翻、另一個模型審，使用者抽查前約 100 個高頻模板及所有模型分歧。模型翻譯仍標 machine，實際完成樣本與精確成員才可形成 sampled batch，不預填確認。
+**同日已核可的抽查方式**：先翻高頻模板、長尾後補，不按卡包；每個模板由一個模型翻、另一個模型審，使用者整體只抽查前約 100 個高頻模板及所有模型分歧。實際完成樣本與精確成員才可形成 sampled batch，不預填確認；無分歧長尾可引用首輪抽查決定與核可政策收據，以 confirmed batch 採納，不要求每批另有人類樣本，具體例外見翻譯契約 §2。機器譯文即使使用者親自看過也仍標 machine。
 
-[翻譯契約](translation-contract.md) 定義採納封套、來源清冊、owner／同字異義／counterpart、原文分段與重建規則。依協調者技術裁定，只有人工決定進 authored；context/use/binding、渲染後譯文與 selection 每次建置推導，不逐卡保存或重簽。模板拆分與用途改綁在首版即以重建處理，來源只用既有封存批次，不新增永久物件庫。
+[翻譯契約](translation-contract.md) 定義採納封套、來源清冊、owner／同字異義／counterpart、原文分段與重建規則。只有人工決定及其核可政策下的採納進 authored；context/use/binding、渲染後譯文與 selection 每次建置推導，不逐卡保存或重簽。模板拆分與用途改綁在首版即以重建處理，來源只用既有封存批次，不新增永久物件庫。
 
 sentence_template 的 ID 與完整六欄 payload 不可變；既有 prefix+10hex 保留，新 normalizer/schema/語義需新 ID 與 supersedes。模板譯本有自己的只增 revision。跨區 divergence 的完整封套改由 translation-contract §7 定義，本節不另留一份不相容的舊示意格式。
 

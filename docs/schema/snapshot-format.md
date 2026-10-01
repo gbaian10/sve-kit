@@ -216,7 +216,7 @@ R2 永久保留所有已發布快照清單及其引用的 text/完整文字包/�
 
 機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。此呈現文字與未核對標示並存，不把未核對譯文改成 aligned，也不放行對戰自動能力。
 
-卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，機翻歷史由當時的 F1 輸入／譯本決定與舊快照重現；繁中跟 JP；EN 身分已確認、來源完整且無相關 divergence 時先輸出 shared_jp_unchecked，核對後改 shared_jp。
+卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，機翻歷史由當時的 F1 輸入／譯本決定與舊快照重現；繁中跟 JP；EN 身分已確認、來源完整且無相關 divergence 時可先輸出 shared_jp_unchecked；日英段落數不同的受影響 section／effect 欄不提前共用，不按 ordinal 猜配，缺譯回 EN 原文。核對且適用後改 shared_jp，完整閘門見翻譯契約 §7.1。
 
 | UI      | JP 卡面                                           | EN 卡面                             |
 | ------- | ------------------------------------------------- | ----------------------------------- |

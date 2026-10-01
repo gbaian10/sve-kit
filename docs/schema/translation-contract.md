@@ -1,6 +1,6 @@
 # 翻譯、模板與跨區採納契約
 
-本文件細化 [build-db §9／§14](build-db.md#9-翻譯句型與術語) 與 [authored-layout §6](authored-layout.md#6-模板翻譯與語義例外)。2026-10-01 本機審核修訂：依協調者裁定，人工採納與工具推導分開，binding/use 每次建置重建，不新增永久物件庫。以下為技術契約，尚未實作匯入器；§1 另外記錄使用者已核可的顯示與首輪抽查政策。例子全部自撰，不是真實卡文或採納紀錄。
+本文件細化 [build-db §9／§14](build-db.md#9-翻譯句型與術語) 與 [authored-layout §6](authored-layout.md#6-模板翻譯與語義例外)。人工採納與工具推導分開，binding/use 每次建置重建，不新增永久物件庫。以下為技術契約，尚未實作匯入器；§1 另外記錄使用者已核可的顯示與首輪抽查政策。例子全部自撰，不是真實卡文或採納紀錄。
 
 ## 1. 政策與狀態
 
@@ -14,11 +14,13 @@
 
 首輪依模板出現次數由高到低翻譯，不按卡包排批，長尾後補。頻率在釘住來源清單內按每個版次面欄位的有效觀測計數，相同頁歷史抓取不重複計入；同頻按模板 ID 排序。每個模板由一個模型翻、另一個模型審，保留兩者身分、精確譯本 hash 與分歧；使用者抽查前約 100 個高頻模板，並查看全部模型分歧項。實際抽查集合以使用者看過的 template ID/revision 記錄，不把「約 100」硬寫成已看滿 100 或固定百分比。
 
-核可政策適用精確批次：模型互審及上述人工抽查完成後，以 sampled batch 採納模板譯本，未逐一被使用者查看的成員仍 origin=machine；模型翻的已抽查成員也不漂白成 project。模型分歧未經使用者處理者留候選，不進該已採納批次；沒有真正完成抽查的批次仍停在候選，不能把核可流程當已做完。這沿用 sampled 表示抽查的語意，不讓裸 model_reviewed 自動當人工採納。
+使用者抽查範圍是**整體**的高頻前約 100 個模板與全部模型分歧，不要求每個長尾批次另有人類樣本。首輪完成模型互審與實際人工抽查後，以 sampled batch 採納精確成員；後續無分歧的長尾批次可依 §2 的政策採納例外，引用首輪抽查決定與核可政策收據，完整檢查後採納為 confirmed batch。沒有實際抽查的批次不得標 sampled，也不能把裸 model_reviewed 當採納。模型分歧項仍須使用者處理，未處理者留候選。
+
+政策採納的成員一律 origin=machine；使用者親自看過並認可的機器譯文也仍標 machine，這是沿用既有規則，不因審閱改成 project。
 
 ## 2. 人工採納入口
 
-只有人做的決定進 authored：模板定義與譯本、概念與譯詞、同字異義指派、模板匹配例外、跨區核對／counterpart 採納、來源例外及撤回。context/use/binding、渲染全文、selection **不進 authored**。模板或術語改字後工具重算，無須逐卡重新簽核；人看的是重算批次抽查與失敗清單。
+只有人工決定及其核可政策下的採納進 authored：模板定義與譯本、概念與譯詞、同字異義指派、模板匹配例外、跨區核對／counterpart 採納、來源例外及撤回。context/use/binding、渲染全文、selection **不進 authored**。模板或術語改字後工具重算，無須逐卡重新簽核；人看的是政策要求的抽查與失敗清單。
 
 | 路徑（相對 authored） | 完整頂層欄位 |
 | --- | --- |
@@ -44,7 +46,11 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 | region-reviews | region_text_review／card_id,region,jp_hash,region_hash,adoption_no | §7 的跨區規則與顯示核對，含 counterpart 採納 |
 | region-reviews | region_divergence／card_id,region,field_scope,adoption_no | §7 的明確差異／解除；confirmed |
 
-本文封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體；policy_id 指精確政策，新增／改內容必換決定。
+本文封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體，除下述政策例外外仍須人工核對；policy_id 指精確政策，新增／改內容必換決定。
+
+**長尾模板譯本的政策採納例外**：比照 [authored-layout §9.5](authored-layout.md#95-核可規則confirmed-封套與人工確認) 的 approved_rules，僅 template_translation 可用 `adoption_review.mode=approved_policy`。adoption_review 恰為 `{mode,policy,initial_sample_decisions}`，mode=human/approved_policy；human 的 policy=null、initial_sample_decisions=[]。approved_policy 的 policy 為 `{policy_id,authored_revision,path,hash,approval_receipt_hash}`，釘完整 commit、repo 相對路徑、canonical 政策內容 hash 與核可收據 hash；initial_sample_decisions 是非空、排序唯一的 `{decision_id,membership_hash}` 陣列，引用實際完成首輪高頻抽查的 human sampled 決定。政策與收據須能驗明 §1 的抽查集合、無分歧長尾適用範圍與 machine 標示，不以本文件的核可敘述代替真實首輪收據；相關來源、分片及收據 bytes 全部納入 F1。
+
+兩種 mode 分檔；approved_policy 同檔使用相同 policy 與首輪決定引用，decision.policy_id 必須等於 policy.policy_id。每個成員都須 origin=machine、不同模型對該 exact text_hash 的互審 result=agreed，且完整通過來源、slot、譯本與政策範圍檢查。決定 state=confirmed，sample_ids 恰為全體 checked record_key，表示政策機械全查，**不是此次逐筆人工審閱**；reviewed_by／reviewed_at／reviewed_precision 沿核可收據的人名與時間，note 明示「政策核可」，authored_by／authored_at 記本次套用工具與時間。缺首輪實際抽查、政策／收據 hash 不符或有模型分歧者不得走此例外；分歧項分到 human 批次、由使用者處理並列入實際 sample_ids。後續新增／改字重做互審與當批決定，可在仍符合政策時引用同一首輪收據，不冒稱使用者看過新譯本。報告分開計 human_sampled_rows、approved_policy_rows 及待人工分歧，不把全體 checked 當真人樣本數。
 
 帶 adoption_no 的 data 另含 `{adoption_no,predecessor}`，首筆為 1/null；後續連續只增、完整替代，predecessor 恰為 `{record_key,record_hash,decision_id}`。每一選擇鍵只有一條已採納鏈，拒絕分叉、缺號與錯前件。kind 自定的 null／撤回值才撤回，舊記錄與證據保留。工具依有效鏈推導結果，不拿檔案順序作優先序。
 
@@ -93,7 +99,7 @@ parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,typ
 1. trace 由原文直接取每個 segment 的 raw bytes，連同 layout/reminder/header 按來源位置重組，須逐 byte 等於來源 UTF-8（不依翻譯結果猜回原文）。trace 的 NFKC 對照可多對多；prefix/字數變化不移動原文座標。
 2. 以釘住的分類／normalizer recipe 重算選中 body 等角色，對 literal 段與 slot 的位置、型別、原值、規則分類逐項匹配，產生 normalized 須等於 immutable payload。額外／遺漏參數、未分類片段、無法解析的引用都失敗。第一項防漏原文，第二項防「任意片段都包成 literal」假通過。
 
-template_translation.data 為 `{template_id,lang,revision,text,origin,model_review}`，revision 從 1 只增，origin=project/machine；入口只收已審且 sampled/confirmed 的譯本，投影 status=reviewed。text 使用 `{{slot_name}}`，literal 的反斜線與左右大括號以反斜線跳脫；禁止未知 slot、未閉合括號與未使用的必要 slot，不支援執行運算式。從 slot 的型別與已採納目標語選詞渲染，不用 normalized 中裸 N 當替換語法。
+template_translation.data 為 `{template_id,lang,revision,text,origin,model_review,adoption_review}`，adoption_review 見 §2；revision 從 1 只增，origin=project/machine；入口只收已審且 sampled/confirmed 的譯本，投影 status=reviewed。text 使用 `{{slot_name}}`，literal 的反斜線與左右大括號以反斜線跳脫；禁止未知 slot、未閉合括號與未使用的必要 slot，不支援執行運算式。從 slot 的型別與已採納目標語選詞渲染，不用 normalized 中裸 N 當替換語法。
 
 model_review 在 machine 時必填 `{translated_by,reviewed_by,reviewed_at,text_hash,result,resolution}`，記兩個不同模型及版本，text_hash 驗譯本 exact UTF-8；result=agreed/disputed。disputed 須 resolution={reviewed_by,reviewed_at,note} 記使用者處理，且該模板在 batch 的 sample_ids 中；agreed 的 resolution=null。非模型譯本為 null，人工作者仍由 decision 記錄。所有日期是真實事件，譯本改字須新 revision 並重做互審，不能沿用對另一 text_hash 的意見。
 
@@ -140,7 +146,7 @@ ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital
 
 owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派列失效、不搬到新字串；新原文無歧義則回 default 自動重建，有歧義才等新指派。無例外時選各模板最高已採納譯本與有效術語 choice；pin 是已採納的明示例外。普通機械匹配只選當前有效且可無歧義匹配的模板，superseded 模板保留來源歷史；新分叉未能唯一匹配即列人工失敗清單，不任取 ID 最大者。
 
-**B2 採方案 a：binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
+**binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
 
 歷史人工譯本與決定仍保存；歷史**推導結果**由對應 F1 輸入、演算法版本與舊快照重現，不要求把相互衝突的全部歷史 binding 同時塞進單一當前 DB。當快照需歷史 face_revision 時，為該 exact source 各自推導合法 context/binding。未被本次輸出引用的舊生成譯文不載入當次 DB，也不進 git。
 
@@ -158,6 +164,8 @@ owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派
 | face_semantics | `sem:`＋H(`{recipe:semantics-v1,face_id,region,rule_text,rule_sections,normalizer_version}`)；exact 內容與有序 sections，語義引用閉包另進 rule bundle |
 
 推導 translation.revision 為同一完整 translation hash 的前 13 hex 轉非負整數（52 bit，符合 UInt）；它是穩定內容版本鍵，不表示時間順序。同 `(context_id,target_lang,revision)` 撞不同完整 translation.id 即停止；人工 template_translation.revision 仍是只增修訂序號。translated_by 記釘住的 renderer／人工譯本作者追溯，translated_at 取依賴已採納譯本／核對的最晚時間，不用執行當下時間。生成效果譯文若任一語義模板／選詞來自 machine，origin=machine，否則為 project，authority=unofficial；單一已採納名稱／label 原樣取詞時保留該詞 origin，digital_official 僅對有同概念證據的數位官方名稱／標籤。counterpart 固定 official_sve/sve_official。tokens 首版一律 null：目前沒有獨立公開翻譯 token 契約，不新增假引用。
+
+公開 translation.id 目前沿上述完整 hash 配方；#53 容量驗收時評估縮短，本契約不先改 ID 配方。
 
 ### 6.3 來源 owner 與例子
 
@@ -179,7 +187,7 @@ use 的 owner 是原文引用者，恰一組；context.source_unit 必須等於�
 
 模板譯本或術語 choice 更新後，反查精確依賴、重新渲染、機械驗證並產新 translation ID／selection；成功者自動選用，**不要求每張卡再簽一份 translation/selection**。原文或語義改變時舊產物不適用新 owner/context，仍從新來源重新匹配。機械失敗者列原因、該 context 回原文；缺任一句不能冒稱完整翻譯。模板來源／hash 損壞或引用閉包錯是建置錯誤，不吞成一般缺譯。
 
-新渲染批次必報 generated_rows、changed_rows、failed_rows、sampled_rows 及精確輸入／輸出成員 hash。已有核可抽查政策時依其檢查；首輪照 §1 已核可的高頻模板／模型分歧抽查流程，記實際樣本及核對者，不預填已抽查。抽查失敗隔離受影響批次並修人工來源／匹配規則，不原地修改生成文字。舊生成物可留舊快照／報告作比較，不回填成新來源的 fresh。
+新渲染批次必報 generated_rows、changed_rows、failed_rows、sampled_rows 及精確輸入／輸出成員 hash。已有核可抽查政策時依其檢查；首輪照 §1 已核可的高頻模板／模型分歧抽查流程，記實際樣本及核對者，不預填已抽查。§2 長尾政策採納不另要求每批人工樣本，當批 sampled_rows 可為 0，另報 approved_policy_rows 與引用收據。抽查失敗隔離受影響批次並修人工來源／匹配規則，不原地修改生成文字。舊生成物可留舊快照／報告作比較，不回填成新來源的 fresh。
 
 ## 7. 跨區核對、counterpart 與語義組
 
@@ -189,7 +197,9 @@ display_checks 每項 `{face_id,field,jp_ordinal,region_ordinal,jp_ref,region_re
 
 region_divergence.data 為 `{card_id,region,field_scope,reason,effect,override_dsl_id,resolved,jp_ref,region_ref,adoption_no,predecessor}`，沿 build-db 的 rules/name/all、manual/override_dsl enum；override_dsl 時 ID 必填且可驗。confirmed 決定釘兩端來源與差異，resolved=true 也須新 confirmed 決定與解除證據。投影當前 region_divergence，舊版本留封套。
 
-source_exception.data 為 `{card_id,region,scope,basis,decision_ref,adoption_no,predecessor}`，region=en、scope=rules/name/all；basis=en_only/divergence/default_jp。decision_ref={decision_id,record_key,record_hash}，前兩者指 fresh confirmed_none 或未解 confirmed divergence，default_jp 時 null。各 scope 與證據一致；這是採納英文來源的例外，不豁免文字與翻譯閉包。
+英文獨有由既有 fresh confirmed_none 決定及其查核範圍／as_of 推導，依賴鍵與 F1 釘該決定，不另寫 en_only 的 source_exception 或要求第二次人工確認；查核失效或已有 JP 對應時重新判定，不沿用英文獨有資格。
+
+只有來源例外另寫 source_exception.data，形狀為 `{card_id,region,scope,basis,decision_ref,adoption_no,predecessor}`，region=en、scope=rules/name/all；basis=divergence/default_jp。divergence 的 decision_ref={decision_id,record_key,record_hash} 指 fresh、未解的 confirmed divergence；default_jp 時 null，表示撤回先前例外並重新依預設來源規則推導，不強造缺少的 JP 來源。各 scope 與證據一致；這是採納英文來源的例外，不豁免文字與翻譯閉包。
 
 ### 7.1 counterpart 不占共用 selection
 
@@ -202,6 +212,8 @@ source_exception.data 為 `{card_id,region,scope,basis,decision_ref,adoption_no,
 `shared_jp_unchecked` 僅限 target_lang=zh-Hant、EN 接收端及已確認同 card/face，仍須 JP 譯文 fresh、兩端來源可驗、無相關已知 divergence。它不建立 aligned review，也不影響 DSL/機制的區域阻擋。檢查完成且顯示欄位適用後改為 shared_jp；若核出差異，移除共用、依英文來源例外重算或回 EN 原文。缺來源、身分未確認、表記未定且無可用 current 時不以此例外猜配來源。basis 改變不修改共用 TZ 的內容或 origin。
 
 counterpart 新版到齊時，僅在核對與 freshness 通過後優先於本站選用；失效時回有效本站 selection 或原文，不刪舊機翻歷史，也不令其他 owner 無條件失效。display_checks 驗 exact 字句／版本，rule bundle 則管規則等義，不能互相代替。
+
+日英對應面的段落數不同時，受影響的 section 欄（全部 ordinal）及包含這些段落的 effect 全文均不得 shared_jp_unchecked；回 EN 原文或已採納的 own_source，不按 ordinal 猜配、截短或拼接。此限制不阻擋獨立且符合條件的 name 等欄位。例 D（合成）：JP 有 2 段、EN 有 3 段，即使同卡／面已確認且無已知 divergence，也不能把 JP 第 2 段的繁中放到 EN 第 2 段，或用 JP 效果全文代替 EN 全文；缺譯時各自回 EN 原文。完成 display_checks 採納且適用後，才依精確對照使用 shared_jp。
 
 ### 7.2 semantics 的啟用
 
@@ -238,7 +250,7 @@ rule_hash、references 與 rule-bundle-v2 recipe 沿 build-db §14；unknown 段
 | V15 | 決定續版分叉／錯前件；proposed 入正式分片 | 各自拒絕，候選不占正式鍵 |
 | V16 | 原文改、rule_hash 不變 | 新來源重新匹配，不能沿用舊生成譯文 |
 | V17 | 模板譯字或術語 choice 更新 | 依賴者自動重算選用，不逐卡補簽；失敗列報告 |
-| V18 | 只有 identity confirmed 就 shared_jp | 拒絕冒稱已核對；來源完整且無 divergence 可 shared_jp_unchecked 並強制標示 |
+| V18 | 只有 identity confirmed 就 shared_jp | 拒絕冒稱已核對；通過 §7.1 來源與段落閘門且無 divergence 可 shared_jp_unchecked 並強制標示 |
 | V19 | 只有 aligned 就合併 card/face | 拒絕 |
 | V20 | 缺 JP 或 unmapped 當英文獨有 | 拒絕假例外 |
 | V21 | 日英同卡 aligned 卻另翻 EN 繁中 | 檢出違反 JP 來源，應共用 TZ |
@@ -259,4 +271,6 @@ rule_hash、references 與 rule-bundle-v2 recipe 沿 build-db §14；unknown 段
 | V36 | 參數缺譯卻拼原文名、tokens 填未定義結構 | 不產完整譯文／tokens 首版須 null |
 | V37 | 只有提示行沒有 body、模板成員有／無提示 | 均完整覆蓋，新 reminder 譯本獨立，body payload 不改 |
 | V38 | 未核對 EN 隱去標示／解開 DSL，或有 divergence 仍提前共用 | 各自拒絕；完成核對且適用才移除標示 |
-| V39 | 未做人工樣本就將模型互審批次標 sampled；審過 machine 改 project | 各自拒絕，首輪頻率／實際樣本與分歧處理可驗 |
+| V39 | 未做人工樣本就標 sampled；首輪收據缺失／政策 hash 錯／有分歧仍走 approved_policy；審過 machine 改 project | 各自拒絕；長尾無分歧且收據完整可 confirmed，當批真人樣本為 0 仍可採納 |
+| V40 | JP 2 段、EN 3 段，按相同 ordinal 提前共用或覆蓋 effect 全文 | 受影響欄不得 shared_jp_unchecked，缺譯回 EN 原文；獨立 name 不受阻 |
+| V41 | fresh confirmed_none 無額外 source_exception；改成 stale／已有 JP 對應卻沿用 EN-only | 前者可推導英文獨有來源，後兩者重新判定，不重複要求人工採納 |

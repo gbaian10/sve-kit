@@ -1,6 +1,6 @@
 # ADR-0013：觀測雜湊與規則語義 bundle 的明示遷移
 
-狀態：已採用技術方向（2026-10-01，協調者本機審核裁定），尚未實作。沿 [build-db §14](../schema/build-db.md#14-不可變雜湊僅建置)，不改 DSL Schema 或公開快照 format。
+狀態：已採用技術方向（2026-10-01），尚未實作。沿 [build-db §14](../schema/build-db.md#14-不可變雜湊僅建置)，不改 DSL Schema 或公開快照 format。
 
 ## 背景
 
