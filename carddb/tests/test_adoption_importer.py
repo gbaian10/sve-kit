@@ -10,9 +10,9 @@ import pytest
 from sve_carddb.build_db import CompiledSchema, create_database
 from sve_carddb.build_db.t0 import compile_t0
 from sve_carddb.build_inputs import BuildContext
-from sve_carddb.catalog.adoption_importer import import_adoptions
+from sve_carddb.catalog.adoption_importer import _acyclic, import_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, object_value
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
 from .adoption_fixtures import (
     Case,
@@ -76,10 +76,13 @@ def test_new_adoptions_enter_one_build_with_actual_decisions_and_f1(
         ("normalizer_config", "config hash mismatch"),
         ("normalizer_hash", "program/config hash mismatch"),
         ("normalizer_path", "Pinned immutable dependency unavailable"),
+        ("normalizer_version", "^Unsupported alias normalizer pins$"),
+        ("normalizer_unicode", "^Unsupported alias normalizer pins$"),
         ("dependency_missing", "direct dependency closure"),
         ("dependency_spoof", "direct dependency closure"),
         ("target_missing", "verified effective projection"),
         ("unknown_lang", "verified effective projection"),
+        ("target_kind", "^Unsupported catalog alias target kind$"),
         ("ja_zh", "Traditional Chinese"),
         ("zh_order", "approved UI fallback order"),
         ("fallback_duplicate", "invalid fallback closure"),
@@ -89,7 +92,7 @@ def test_new_adoptions_enter_one_build_with_actual_decisions_and_f1(
         ("symbol_lang", "localization language mismatch"),
     ],
 )
-def test_semantic_failures_roll_back_all_audit_and_rows(  # ruff: ignore[complex-structure,too-many-branches] -- each branch isolates one signed semantic constraint
+def test_semantic_failures_roll_back_all_audit_and_rows(  # ruff: ignore[complex-structure,too-many-branches,too-many-statements] -- each branch isolates one signed semantic constraint
     case: Case, mutation: str, message: str, schema: CompiledSchema
 ) -> None:
     area = (
@@ -100,10 +103,13 @@ def test_semantic_failures_roll_back_all_audit_and_rows(  # ruff: ignore[complex
             "normalizer_config",
             "normalizer_hash",
             "normalizer_path",
+            "normalizer_version",
+            "normalizer_unicode",
             "dependency_missing",
             "dependency_spoof",
             "target_missing",
             "unknown_lang",
+            "target_kind",
         }
         else "symbols"
         if mutation.startswith("symbol_")
@@ -153,6 +159,11 @@ def test_semantic_failures_roll_back_all_audit_and_rows(  # ruff: ignore[complex
             pin["config"] = {"unicode_version": "wrong"}
         elif mutation == "normalizer_hash":
             pin["code_hash"] = "sha256:" + "e" * 64
+        elif mutation == "normalizer_version":
+            pin["version"] = "synthetic-other"
+        elif mutation == "normalizer_unicode":
+            pin["config"] = {"unicode_version": "synthetic-other"}
+            pin["config_hash"] = digest(canonical(pin["config"]))
         else:
             pin["code_path"] = "carddb/src/sve_carddb/routes/other.py"
     elif mutation in {"dependency_missing", "dependency_spoof"}:
@@ -174,6 +185,10 @@ def test_semantic_failures_roll_back_all_audit_and_rows(  # ruff: ignore[complex
             ],
             key=canonical,
         )
+    elif mutation == "target_kind":
+        subject = object_value(data["subject"])
+        subject["kind"] = "unsupported"
+        item["record_key"] = canonical(["search_alias_adoption", subject, 1]).decode()
     else:
         loc = object_value(object_value(data["value"])["source_localization"])
         object_value(loc["tooltip"])["text"] = (
@@ -196,6 +211,26 @@ def test_semantic_failures_roll_back_all_audit_and_rows(  # ruff: ignore[complex
             "text_symbol",
         ):
             assert not db.rows(table)
+
+
+@pytest.mark.parametrize(
+    "cycle", [{b"alias": {b"alias"}}, {b"alias": {b"term"}, b"term": {b"alias"}}]
+)
+def test_dependency_graph_rejects_self_and_indirect_cycles(
+    cycle: dict[bytes, set[bytes]],
+) -> None:
+    _acyclic({b"alias": {b"term"}, b"term": set()})
+    with pytest.raises(
+        ValueError, match=r"^Adoption dependency cycle or self-reference$"
+    ):
+        _acyclic(cycle)
+
+
+def test_authored_revision_requires_full_sha(case: Case) -> None:
+    with pytest.raises(
+        ValueError, match=r"^Adoption authored revision must be a full Git SHA$"
+    ):
+        replace(case.inputs(), authored_revision=case.revision[:8]).load()
 
 
 @pytest.mark.parametrize("mutation", ["configuration", "uncommitted"])

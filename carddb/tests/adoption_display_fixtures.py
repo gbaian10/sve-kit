@@ -113,7 +113,7 @@ class DisplayCase:
                 db.insert(table, fixture[table])
             families = {
                 r.data.model_dump()["home_set_id"]
-                for r in self.plan.eligible.included("card")
+                for r in self.plan.publication_identity().included("card")
             }
             for number, family in enumerate(sorted(families)):
                 db.insert(
@@ -127,13 +127,20 @@ class DisplayCase:
                 )
 
 
-def make_display_case(root: Path, *, variants: bool) -> DisplayCase:  # ruff: ignore[too-many-locals,too-many-statements] -- one module-scoped two-page fixture owns all independent source and registry pins
+def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- one sealed fixture owns the independent source and registry pins
+    root: Path, *, variants: bool, pending: bool = False
+) -> DisplayCase:
     root.mkdir()
     store = _store(root / "source")
     cards = {}
     for number in ("BP01-001", "BP01-002"):
         raw = (
-            page("jp", '<div class="detail">Synthetic relation rule</div>')
+            page(
+                "jp",
+                '<div class="detail">Synthetic alternate rule</div>'
+                if pending and number == "BP01-002"
+                else '<div class="detail">Synthetic relation rule</div>',
+            )
             .replace(b"SYN-01", number.encode())
             .replace(b"/synthetic.png", IMAGE_URL.encode())
         )
@@ -270,10 +277,17 @@ def make_display_case(root: Path, *, variants: bool) -> DisplayCase:  # ruff: ig
     )
     first_observation = plan.observations[0]
     card_id, face_id = first_observation.card_id, first_observation.face_id
-    rule_ref = refs[0] | {
-        "locator": "/faces/0/text",
-        "text_hash": digest(b"Synthetic relation rule"),
-    }
+    rule_refs: list[dict[str, JsonValue]] = []
+    for o, ref in zip(plan.observations, refs, strict=True):
+        effect = o.content.effect
+        assert effect is not None
+        rule_refs.append(
+            ref
+            | {
+                "locator": f"/faces/{o.source_index}/text",
+                "text_hash": digest(effect.encode()),
+            }
+        )
     names = record(
         "rules_name_adoption",
         {"face_id": face_id, "region": "jp", "role": "treated_as"},
@@ -301,7 +315,7 @@ def make_display_case(root: Path, *, variants: bool) -> DisplayCase:  # ruff: ig
     names["evidence"] = sorted(
         [
             {"source_ref": ref, "role": "Synthetic reviewed basis"}
-            for ref in (*{canonical(ref): ref for ref in refs}.values(), rule_ref)
+            for ref in {canonical(ref): ref for ref in (*refs, *rule_refs)}.values()
         ],
         key=canonical,
     )

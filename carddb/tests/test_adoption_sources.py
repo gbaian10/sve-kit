@@ -194,6 +194,11 @@ def test_exact_frozen_field_source_and_f1(
         ("wrong_kind", "source field does not match kind"),
         ("half_raw", "exact raw/region/language mismatch"),
         ("evidence_missing", "mapping lacks approved source evidence"),
+        ("trait", "^Trait mapping adoption awaits compound-trait verification$"),
+        (
+            "disabled_recipe",
+            "^Source-field recipe is not enabled for this vocabulary kind$",
+        ),
     ],
 )
 def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- independent mutations of one tiny sealed-source baseline
@@ -231,8 +236,14 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- inde
                 if object_value(p)["name"] != SOURCE_RUNTIME
             ]
         data["review_context_hash"] = digest(canonical(review))
-    elif mutation == "wrong_kind":
-        object_value(data["subject"])["kind"] = "class"
+    elif mutation in {"wrong_kind", "trait", "disabled_recipe"}:
+        object_value(data["subject"])["kind"] = (
+            "class"
+            if mutation == "wrong_kind"
+            else "trait"
+            if mutation == "trait"
+            else "frame"
+        )
         member["record_key"] = canonical(
             ["vocabulary_adoption", data["subject"], 1]
         ).decode()

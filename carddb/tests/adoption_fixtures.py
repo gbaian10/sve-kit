@@ -28,13 +28,22 @@ CODE = "carddb/src/sve_carddb/routes/codec.py"
 def git(root: Path, *args: str) -> str:
     executable = shutil.which("git")
     assert executable is not None
-    # User hooks, signing policy and bot credentials must stay outside synthetic repositories.
+    # User settings stay outside fixtures; background repacking would race snapshot copies.
     environment = {
         key: value for key, value in os.environ.items() if not key.startswith("GIT_")
     }
     environment.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
     return subprocess.run(
-        [executable, "-C", str(root), *args],
+        [
+            executable,
+            "-c",
+            "maintenance.auto=false",
+            "-c",
+            "gc.auto=0",
+            "-C",
+            str(root),
+            *args,
+        ],
         check=True,
         capture_output=True,
         text=True,

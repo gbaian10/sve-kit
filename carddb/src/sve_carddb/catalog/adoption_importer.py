@@ -330,7 +330,7 @@ def import_adoption_build(
     with db.transaction():
         identity = populate_identity_rows(
             db,
-            text_plan.eligible,
+            text_plan.publication_identity(),
             authored_revision=inputs.authored_revision,
             build=build,
         )
@@ -524,7 +524,7 @@ def _external(
         )
     records = [
         r
-        for r in plan.eligible.included(table)
+        for r in plan.publication_identity().included(table)
         if r.data.model_dump(mode="json").get("id") == key["id"]
     ]
     rows = [r for r in db.rows(table) if r.values["id"] == key["id"]]
@@ -582,7 +582,7 @@ def _default_closure(
     subject = record.data.subject
     expected = sorted(
         str(r.data.model_dump()["id"])
-        for r in plan.eligible.included("printing")
+        for r in plan.publication_identity().included("printing")
         if r.data.model_dump()["card_id"] == subject.card_id
         and r.data.model_dump()["region"] == subject.region
     )

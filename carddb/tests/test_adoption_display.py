@@ -1,7 +1,9 @@
 """Independently sealed sources validate the entire display adoption transaction."""
 
 import copy
+import re
 import shutil
+from dataclasses import fields as dataclass_fields
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -9,10 +11,15 @@ import pytest
 
 from sve_carddb.build_db import CompiledSchema, create_database
 from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.catalog.adoption_importer import import_adoption_build
+from sve_carddb.catalog.adoption_importer import (
+    _route_identity,
+    _verify_identity,
+    import_adoption_build,
+)
 from sve_carddb.catalog.adoption_loader import load_adoptions
-from sve_carddb.catalog.adoption_models import RouteRecord
-from sve_carddb.catalog.adoption_validation import route_value
+from sve_carddb.catalog.adoption_models import NameRecord, RouteRecord
+from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
+from sve_carddb.catalog.adoption_validation import names, route_value
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
@@ -80,6 +87,43 @@ def test_atomic_names_route_override_and_default(
         }
 
 
+@pytest.fixture(
+    scope="module", params=[False, True], ids=["pending-unique", "pending-variants"]
+)
+def pending_case(
+    tmp_path_factory: pytest.TempPathFactory, request: pytest.FixtureRequest
+) -> DisplayCase:
+    return make_display_case(
+        tmp_path_factory.mktemp("pending-wording") / "case",
+        variants=bool(request.param),
+        pending=True,
+    )
+
+
+def test_pending_wording_preserves_publication_and_adoption_dependencies(
+    pending_case: DisplayCase, schema: CompiledSchema
+) -> None:
+    pending = pending_case
+    assert any(group.current() is None for group in pending.plan.groups)
+    published = pending.plan.publication_identity()
+    assert len(published.included("printing")) == len(pending.plan.observations)
+    with create_database(schema) as db:
+        pending.parents(db)
+        _, defaults = import_adoption_build(
+            db,
+            pending.inputs(),
+            build=pending.context(),
+            stores={"test-store": pending.archive},
+            text_plan=pending.plan,
+        )
+        assert len(db.rows("card")) == len(published.included("card"))
+        assert len(db.rows("printing")) == len(pending.plan.observations)
+        assert len(db.rows("card_route")) == 2
+        assert len(db.rows("face_rules_name")) == 1
+        assert len(db.rows("default_printing_override")) == 1
+        assert defaults[0].method == "override"
+
+
 @pytest.mark.parametrize(
     ("area", "mutation", "message"),
     [
@@ -89,10 +133,35 @@ def test_atomic_names_route_override_and_default(
         ("rules-names", "names_duplicate", "exact unique regional strings"),
         ("rules-names", "observation_face", "observation face mismatch"),
         ("rules-names", "observation_source", "printing/face/source mismatch"),
-        ("defaults", "missing_candidate", "candidate closure/hash"),
-        ("defaults", "hash", "candidate closure/hash"),
+        ("rules-names", "identity_face", "^Special name face identity mismatch$"),
+        (
+            "rules-names",
+            "identity_card",
+            "^Special name reviewed face/card/region mismatch$",
+        ),
+        (
+            "defaults",
+            "missing_candidate",
+            "^Reviewed default printing candidate closure/hash mismatch$",
+        ),
+        (
+            "defaults",
+            "hash",
+            "^Reviewed default printing candidate closure/hash mismatch$",
+        ),
+        ("defaults", "order", "^Default candidates must be sorted and unique$"),
         ("defaults", "target", "Reviewed default target is not displayable"),
-        ("routes", "missing_candidate", "candidate closure"),
+        ("routes", "missing_candidate", "^Reviewed route candidate closure mismatch$"),
+        (
+            "routes",
+            "region",
+            "^Reviewed route scope is not same-region official variants$",
+        ),
+        (
+            "routes",
+            "existing_target",
+            "^Route target is not an exact-number candidate$",
+        ),
         ("routes", "hash", "ordering/hash"),
         ("routes", "identity_hash", "identity reference mismatch"),
         ("routes", "identity_state", "Invalid adoption fields"),
@@ -112,6 +181,36 @@ def test_reconstructed_scope_rejects_one_signed_violation(  # ruff: ignore[compl
     value = object_value(data["value"])
     if mutation == "basis":
         value["name_basis_hash"] = "sha256:" + "f" * 64
+    elif mutation in {"identity_face", "identity_card"}:
+        object_value(value["identity_ref"])[
+            "face_id" if mutation == "identity_face" else "card_id"
+        ] = "synthetic:wrong"
+        data["dependencies"] = sorted(
+            [
+                {
+                    "table": "face",
+                    "key": {"id": object_value(value["identity_ref"])["face_id"]},
+                },
+                {
+                    "table": "card",
+                    "key": {"id": object_value(value["identity_ref"])["card_id"]},
+                },
+            ],
+            key=canonical,
+        )
+    elif mutation == "order":
+        value["candidates"] = list(reversed(array(value["candidates"])))
+        value["candidates_hash"] = digest(canonical(value["candidates"]))
+    elif mutation == "region":
+        object_value(data["subject"])["region"] = "en"
+        member["record_key"] = canonical([member["kind"], data["subject"], 1]).decode()
+    elif mutation == "existing_target":
+        value["printing_id"] = next(
+            o.printing_id for o in case.plan.observations if o.card_no != "BP01-001"
+        )
+        data["dependencies"] = [
+            {"table": "printing", "key": {"id": value["printing_id"]}}
+        ]
     elif mutation in {"hash", "missing_candidate"}:
         if mutation == "hash":
             value["candidates_hash"] = "sha256:" + "f" * 64
@@ -196,6 +295,76 @@ def test_reconstructed_scope_rejects_one_signed_violation(  # ruff: ignore[compl
         )
 
 
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("coverage", "Special name current source coverage is incomplete"),
+        ("card", "Stale special name face/card/region"),
+    ],
+)
+def test_special_names_check_independent_current_scope(
+    case: DisplayCase, mutation: str, message: str
+) -> None:
+    snapshot = load_adoptions(case.case.root, entry="catalog-adoptions")
+    shard = next(s.envelope() for s in snapshot.shards if "/rules-names/" in s.path)
+    record = next(r for r in shard.records if isinstance(r, NameRecord))
+    plan = (
+        replace(case.plan, unavailable=(case.plan.observations[0].printing_id,))
+        if mutation == "coverage"
+        else replace(
+            case.plan,
+            observations=tuple(
+                o.model_copy(update={"card_id": "synthetic:wrong"})
+                for o in case.plan.observations
+            ),
+        )
+    )
+    sources = AdoptionSources(
+        {"test-store": case.archive}, PinnedRepository(case.case.repository)
+    )
+    with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+        names(record, shard.review_context, sources, plan, shard.default_decision_id)
+
+
+def test_reviewed_names_require_every_pinned_source_version(
+    case: DisplayCase, tmp_path: Path, schema: CompiledSchema
+) -> None:
+    if (case.case.root / "display-overrides/routes/shared/001.yaml").exists():
+        pytest.skip("Version-change fixture uses unique card numbers")
+    revised = current_case(case, tmp_path / "current")
+    path = "catalog-adoptions/rules-names/shared/001.yaml"
+    shard = object_value(read_yaml(revised.case.root / path))
+    member, data, _ = fields(shard)
+    review = copy.deepcopy(revised.case.review)
+    archive = revised.plan.observations[0].card.source.archive
+    review["source_batches"] = sorted(
+        [
+            *array(review["source_batches"]),
+            {"store_id": archive.store_id, "batch_id": archive.batch_id},
+        ],
+        key=canonical,
+    )
+    data["review_context_hash"] = digest(canonical(review))
+    write(revised.case.root, path, envelope([member], review))
+    index(revised.case.root)
+    revised = replace(
+        revised, case=replace(revised.case, revision=commit(revised.case.repository))
+    )
+    with create_database(schema) as db:
+        revised.parents(db)
+        with pytest.raises(
+            ValueError, match=r"^Special name reviewed source version closure mismatch$"
+        ):
+            import_adoption_build(
+                db,
+                revised.inputs(),
+                build=revised.context(),
+                stores={"test-store": revised.archive},
+                text_plan=revised.plan,
+            )
+        assert not db.rows("card")
+
+
 def test_current_input_pin_is_required(
     case: DisplayCase, schema: CompiledSchema
 ) -> None:
@@ -212,6 +381,67 @@ def test_current_input_pin_is_required(
                 build=context,
                 stores={"test-store": case.archive},
                 text_plan=case.plan,
+            )
+        assert not db.rows("card")
+
+
+@pytest.mark.parametrize(
+    ("raw", "proofs", "message"),
+    [
+        (None, True, "Effect presence has no frozen source bytes"),
+        (None, False, "Adoption identity/text inputs require frozen raw bytes"),
+        (
+            b"Synthetic changed raw",
+            True,
+            "Effect presence frozen source hash mismatch",
+        ),
+    ],
+    ids=["missing", "missing-without-proof", "changed"],
+)
+def test_identity_text_requires_exact_frozen_bytes(
+    case: DisplayCase,
+    schema: CompiledSchema,
+    raw: bytes | None,
+    proofs: bool,
+    message: str,
+) -> None:
+    observations = tuple(
+        o.model_copy(
+            update={
+                "card": o.card.model_copy(
+                    update={
+                        "raw": raw,
+                        "effect_presence": o.card.effect_presence if proofs else (),
+                    }
+                )
+            }
+        )
+        for o in case.plan.observations
+    )
+    by_id = {(o.printing_id, o.source_index): o for o in observations}
+    plan = replace(
+        case.plan,
+        observations=observations,
+        groups=tuple(
+            replace(
+                g,
+                observations=tuple(
+                    by_id[o.printing_id, o.source_index] for o in g.observations
+                ),
+            )
+            for g in case.plan.groups
+        ),
+    )
+    revised = replace(case, plan=plan)
+    with create_database(schema) as db:
+        revised.parents(db)
+        with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+            import_adoption_build(
+                db,
+                revised.inputs(),
+                build=revised.context(),
+                stores={"test-store": revised.archive},
+                text_plan=plan,
             )
         assert not db.rows("card")
 
@@ -369,7 +599,11 @@ def test_caller_cannot_forge_current_physical_rarity(
         plan=replace(
             case.plan,
             identity=identity,
-            eligible=replace(case.plan.eligible, evidence=evidence),
+            **{
+                field.name: replace(getattr(case.plan, field.name), evidence=evidence)
+                for field in dataclass_fields(case.plan)
+                if field.name in {"eligible", "diagnostic_exclusions"}
+            },
         ),
     )
     with create_database(schema) as db:
@@ -383,6 +617,127 @@ def test_caller_cannot_forge_current_physical_rarity(
                 text_plan=revised.plan,
             )
         assert not db.rows("card")
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("files", "Adoption current registry differs from immutable plan"),
+        ("metadata", "Current identity source metadata mismatch"),
+    ],
+)
+def test_identity_boundary_replays_registry_and_source_metadata(
+    case: DisplayCase, mutation: str, message: str
+) -> None:
+    identity = case.plan.identity
+    if mutation == "files":
+        identity = replace(
+            identity,
+            snapshot=replace(
+                identity.snapshot,
+                files=replace(identity.snapshot.files, index_content=b"{}"),
+            ),
+        )
+    else:
+        evidence = dict(identity.evidence)
+        key = next(iter(evidence))
+        evidence[key] = replace(
+            evidence[key],
+            source=evidence[key].source.model_copy(
+                update={"fetched_at": "2026-10-02T00:00:00Z"}
+            ),
+        )
+        identity = replace(identity, evidence=evidence)
+    sources = AdoptionSources(
+        {"test-store": case.archive}, PinnedRepository(case.case.repository)
+    )
+    with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+        _verify_identity(
+            case.inputs(),
+            replace(case.plan, identity=identity),
+            sources,
+            case.context(),
+        )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("region", "Route override requires same-region exact official variants"),
+        ("number", "Stale route variant candidate closure"),
+        ("absent_scope", "Route override requires same-region exact official variants"),
+        ("plan", "Route adoption requires the complete checked registry"),
+        ("reference", "Stale route candidate exact identity reference"),
+    ],
+)
+def test_route_current_scope_and_checked_identity(
+    case: DisplayCase, schema: CompiledSchema, mutation: str, message: str
+) -> None:
+    snapshot = load_adoptions(case.case.root, entry="display-overrides")
+    shards = [s.envelope() for s in snapshot.shards if "/routes/" in s.path]
+    if not shards:
+        pytest.skip("Unique official numbers do not require manual route adoption")
+    record = next(r for r in shards[0].records if isinstance(r, RouteRecord))
+    value = record.data.value
+    assert value is not None
+    if mutation == "plan":
+        with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+            _route_identity(record, None)
+    elif mutation == "reference":
+        first = value.candidates[0]
+        candidate = first.model_copy(
+            update={
+                "identity_ref": first.identity_ref.model_copy(
+                    update={"record_hash": "sha256:" + "f" * 64}
+                )
+            }
+        )
+        changed = record.model_copy(
+            update={
+                "data": record.data.model_copy(
+                    update={
+                        "value": value.model_copy(
+                            update={"candidates": (candidate, *value.candidates[1:])}
+                        )
+                    }
+                )
+            }
+        )
+        with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+            _route_identity(changed, case.plan)
+    else:
+        with create_database(schema) as db:
+            case.parents(db)
+            import_adoption_build(
+                db,
+                case.inputs(),
+                build=case.context(),
+                stores={"test-store": case.archive},
+                text_plan=case.plan,
+            )
+            with db.transaction():
+                if mutation == "absent_scope":
+                    record = record.model_copy(
+                        update={
+                            "data": record.data.model_copy(
+                                update={
+                                    "subject": record.data.subject.model_copy(
+                                        update={"route_key": "BP01-999"}
+                                    )
+                                }
+                            )
+                        }
+                    )
+                else:
+                    db.update(
+                        "printing",
+                        {"id": value.candidates[0].printing_id},
+                        {"region": "en"}
+                        if mutation == "region"
+                        else {"card_no": "BP01-999"},
+                    )
+                with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+                    route_value(record, db)
 
 
 def test_published_route_changes_and_withdrawals_require_repair(

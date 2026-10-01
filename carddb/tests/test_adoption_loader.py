@@ -1,8 +1,9 @@
 """Each mutation changes one signed invariant; no official strings are fixtures."""
 
 import copy
+import re
 import shutil
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pytest
 
@@ -10,10 +11,21 @@ from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
-from .adoption_fixtures import Case, envelope, fields, index, make_case, record, write
+from .adoption_fixtures import (
+    Case,
+    dependency,
+    envelope,
+    fields,
+    index,
+    make_case,
+    record,
+    write,
+)
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from sve_carddb.catalog.adoption_loader import Entry
 
 from pydantic import JsonValue
 
@@ -109,7 +121,7 @@ def test_file_boundary_guards(case: Case, mutation: str, message: str) -> None:
         ("member_extra", "exact decision members"),
         ("member_duplicate", "exact decision members"),
         ("membership_hash", "membership hash"),
-        ("id", "decision ID"),
+        ("id", "Adoption decision ID mismatch"),
         ("default", "default decision ID"),
         ("checked", "checked members"),
         ("proposed", "Invalid adoption fields"),
@@ -170,6 +182,8 @@ def test_exact_member_and_receipt_guards(  # ruff: ignore[complex-structure,too-
         (decision if mutation == "id" else raw)[
             "id" if mutation == "id" else "default_decision_id"
         ] = "d:" + "e" * 64
+        if mutation == "id":
+            raw["default_decision_id"] = decision["id"]
     elif mutation == "checked":
         decision["sample_ids"] = []
     elif mutation in {"proposed", "sampled"}:
@@ -185,6 +199,133 @@ def test_exact_member_and_receipt_guards(  # ruff: ignore[complex-structure,too-
     write(case.root, name, raw)
     index(case.root)
     with pytest.raises(ValueError, match=message):
+        load_adoptions(case.root, entry="catalog-adoptions")
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("hash", "Adoption shard canonical hash mismatch"),
+        ("record_key", "Adoption record key does not match subject/revision"),
+        ("record_order", "Adoption record keys must be sorted and unique"),
+        ("filing", "Adoption kind/filing key does not match path"),
+        ("kind", "Adoption kind/filing key does not match path"),
+        ("dependency_fields", "Adoption dependency primary key fields mismatch"),
+        ("dependency_value", "Adoption dependency keys must be nonempty text"),
+        ("dependency_order", "Adoption array must be sorted and unique"),
+        ("evidence_batch", "Adoption evidence batch absent from review context"),
+        ("duplicate_decision", "Duplicate adoption decision"),
+        ("duplicate_record", "Duplicate adoption record"),
+        ("symbol_owner", "Symbol code/id must be one-to-one across history"),
+        ("alias_pins", "Effective aliases cannot mix normalizer pins"),
+    ],
+)
+def test_review_envelope_single_guard(  # ruff: ignore[complex-structure,too-many-branches] -- each signed mutation isolates one review finding
+    case: Case, mutation: str, message: str
+) -> None:
+    area = (
+        "languages"
+        if mutation == "record_order"
+        else "aliases"
+        if mutation == "alias_pins"
+        else "symbols"
+    )
+    path = f"catalog-adoptions/{area}/shared/001.yaml"
+    raw = object_value(read_yaml(case.root / path))
+    member, data, _ = fields(raw)
+    members = array(raw["records"])
+    if mutation == "hash":
+        indexed = object_value(read_yaml(case.root / "catalog-adoptions/index.yaml"))
+        object_value(indexed["includes"])[path] = "sha256:" + "f" * 64
+        write(case.root, "catalog-adoptions/index.yaml", indexed)
+    elif mutation == "duplicate_decision":
+        write(case.root, "catalog-adoptions/symbols/shared/002.yaml", raw)
+        index(case.root)
+    else:
+        if mutation == "record_key":
+            member["record_key"] = "synthetic:wrong-key"
+        elif mutation == "filing":
+            member["filing_key"] = "other"
+        elif mutation == "kind":
+            path = "catalog-adoptions/languages/shared/001.yaml"
+        elif mutation == "dependency_fields":
+            object_value(object_value(array(data["dependencies"])[0])["key"])[
+                "extra"
+            ] = "unexpected"
+        elif mutation == "dependency_value":
+            object_value(object_value(array(data["dependencies"])[0])["key"])[
+                "code"
+            ] = ""
+        elif mutation == "dependency_order":
+            data["dependencies"] = [
+                dependency("language", code="ja"),
+                dependency("language", code="ja"),
+            ]
+        elif mutation == "evidence_batch":
+            member["evidence"] = [
+                {
+                    "source_ref": {
+                        "store_id": "test-store",
+                        "batch_id": "sha256:" + "a" * 64,
+                        "source_version_id": "src:v1:" + "b" * 64,
+                        "parser": "exact-json-v1",
+                        "locator": "/faces/0/name",
+                        "text_hash": "sha256:" + "c" * 64,
+                    },
+                    "role": "Synthetic evidence",
+                }
+            ]
+        elif mutation in {"duplicate_record", "symbol_owner", "alias_pins"}:
+            extra = copy.deepcopy(member)
+            extra_data = object_value(extra["data"])
+            subject = object_value(extra_data["subject"])
+            subject["text" if mutation == "alias_pins" else "id"] = "synthetic:second"
+            extra["record_key"] = canonical([extra["kind"], subject, 1]).decode()
+            if mutation == "alias_pins":
+                object_value(object_value(extra_data["value"])["normalizer"])[
+                    "version"
+                ] = "synthetic-other"
+            elif mutation == "duplicate_record":
+                object_value(extra_data["value"])["code"] = "another-code"
+                path = "catalog-adoptions/symbols/shared/002.yaml"
+            members.append(extra)
+        rewritten = envelope(members, case.review)
+        if mutation == "kind":
+            decision = object_value(array(rewritten["decisions"])[0])
+            decision["category"] = "language_adoption"
+            decision["policy_id"] = "catalog-language-v1"
+        if mutation == "record_order":
+            rewritten["records"] = list(reversed(array(rewritten["records"])))
+        write(case.root, path, rewritten)
+        index(case.root)
+    with pytest.raises(ValueError, match=rf"^{re.escape(message)}$"):
+        load_adoptions(case.root, entry="catalog-adoptions")
+
+
+def test_unknown_entry(case: Case) -> None:
+    with pytest.raises(ValueError, match=r"^Unknown adoption entry$"):
+        load_adoptions(case.root, entry=cast("Entry", "other"))
+
+
+@pytest.mark.parametrize("indexed", [False, True])
+def test_symlink_entry_and_unindexed_file(case: Case, indexed: bool) -> None:
+    path = (
+        case.root / "catalog-adoptions/index.yaml"
+        if indexed
+        else case.root / "catalog-adoptions/unindexed.txt"
+    )
+    if indexed:
+        path.rename(case.root / "original-index")
+    path.symlink_to(case.root / "original-index")
+    with pytest.raises(ValueError, match=r"^Symlink adoption input$"):
+        load_adoptions(case.root, entry="catalog-adoptions")
+
+
+def test_symlink_parent_directory(case: Case) -> None:
+    target = case.root.with_name("original-authored")
+    case.root.rename(target)
+    case.root.symlink_to(target, target_is_directory=True)
+    with pytest.raises(ValueError, match=r"^Symlink adoption input$"):
         load_adoptions(case.root, entry="catalog-adoptions")
 
 
