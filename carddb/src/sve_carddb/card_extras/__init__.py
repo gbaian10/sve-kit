@@ -2,6 +2,7 @@
 
 from sve_carddb.card_extras.archive import FrozenCardExtras, parse_card_page
 from sve_carddb.card_extras.importer import (
+    CardExtrasRestriction,
     populate_card_extras,
     require_card_extras_ready,
 )
@@ -17,6 +18,7 @@ from sve_carddb.card_extras.plan import ExtrasPlan, plan_card_extras
 from sve_carddb.card_extras.reskin import applicable_reskin_regions
 
 __all__ = [
+    "CardExtrasRestriction",
     "CardPage",
     "ErrataChange",
     "ErrataPage",

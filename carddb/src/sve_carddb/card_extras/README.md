@@ -22,9 +22,22 @@ number. Unknown dates remain raw with parsed dates null.
 Q&A revisions follow observation order (`fetched_at`, immutable source ID,
 block locator), not publication date. Adjacent identical contents share a
 version and union their card IDs; a same-day wording change or reversion creates
-another immutable version. This order records observed versions, not a claimed
+another immutable version. Changes only to `published_on`, `updated_on` or
+`date_raw` do not create a version. The shared version retains the first
+observation's dates; later date metadata remains in the pinned inputs and raw
+sources, without overwriting that version. This order records observed versions, not a claimed
 official effective date. All page/block uses survive in `InputRecord`, including
 sources of deduplicated versions and pages with unknown adopted identities.
+
+Incremental adapters must retain each numbered Q&A's page/block observations:
+the same Q number on different pages can have different wording during one
+crawl. Observation order then produces separate observed versions, even within
+one crawl; it does not prove an official revision or select authoritative current
+wording. Compare cross-page wording and inspect all retained source uses before
+consuming a version as current. Do not collapse a crawl to the last page, infer
+official chronology from fetch time, or discard conflicting pages. A future
+incremental adapter must expose such conflicts for reconciliation; this initial
+import has no crawl-wide reconciliation policy.
 
 `plan_card_extras(db, pages, errata=...)` resolves related targets solely by exact
 `(region, raw card_no)` in the already adopted printing graph. A resolved link
@@ -65,13 +78,27 @@ marked ready merely because this importer or its DDL exists.
 
 A card-page errata reference, or an announcement listing/changing a card, records
 `card_extras:errata_current_pending`. Until separate adjudication has supplied
-valid current evidence, callers must run `require_card_extras_ready(db, scope)`
-for the proposed first-release `(region, card_id)` scope. An unresolved source
+valid current evidence, `require_card_extras_ready(db, scope)` returns typed
+`CardExtrasRestriction` records for the proposed `(region, card_id)` scope.
+Each record identifies the card, regional face IDs, reason and `build_issue` ID
+(whose context retains the source and missing URL). Because an unresolved
+reference does not establish which face is affected, the face list conservatively
+covers that card's adopted faces in that region. An unresolved source
 printing uses `(region, region + ":" + raw_card_no)` as its staging scope key.
-The gate rejects only affected scopes and cannot be satisfied by importing
-fragments or confirming that an old printing was listed. Resolution belongs to
+It has `card_id=None` and an empty face list until identity is adopted.
+
+Following [authored-layout §9.6](../../../../docs/schema/authored-layout.md#96-未採納表記的顯示與來源更正),
+the default never rejects display or removes cards, printings or faces. Callers
+keep readable observations visible, mark wording pending/conflicted as appropriate,
+and limit affected faces to manual use. The function only reports restrictions;
+it does not mark a face as confirmed current or modify display selection.
+For an automatic operation or promotion to confirmed current, explicitly pass
+`strict=True` with the operation's scope; unresolved evidence then raises.
+Never use strict mode as a snapshot/display filter. Importing fragments or
+confirming that an old printing was listed does not clear these restrictions.
+Resolution belongs to
 the subsequent adjudication workflow; this importer does not create a decision
-or clear a blocker. The precise missing announcement URLs remain in staging.
+or clear a restriction. The precise missing announcement URLs remain in staging.
 
 No Q&A/errata `source_coverage` is inferred from card pages. Empty or partial
 cardlist coverage does not prove QA/errata absence, and even complete cardlist

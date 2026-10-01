@@ -1,6 +1,7 @@
 """Compose supplemental evidence atomically without adopting card text or coverage."""
 
 from collections import defaultdict
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_inputs import input_record, insert_raw_sources
@@ -117,8 +118,28 @@ def _questions(db: Database, plan: ExtrasPlan, texts: TextInterner) -> None:
             previous = version.id
 
 
-def require_card_extras_ready(db: Database, scope: tuple[tuple[str, str], ...]) -> None:
-    """Block the specified region/card release scope on known unresolved evidence."""
+@dataclass(frozen=True)
+class CardExtrasRestriction:
+    region: str
+    scope_key: str
+    card_id: str | None
+    face_ids: tuple[str, ...]
+    reason: str
+    issue_id: str
+
+
+def require_card_extras_ready(
+    db: Database, scope: tuple[tuple[str, str], ...], *, strict: bool = False
+) -> tuple[CardExtrasRestriction, ...]:
+    """Report manual-only faces; strict checks reject automation/current adoption."""
+    faces: dict[tuple[str, str], set[str]] = defaultdict(set)
+    printings = {row.values["id"]: row.values for row in db.rows("printing")}
+    for row in db.rows("printing_face"):
+        printing = printings[row.values["printing_id"]]
+        faces[str(printing["region"]), str(printing["card_id"])].add(
+            str(row.values["face_id"])
+        )
+    restrictions = []
     for issue in db.rows("build_issue"):
         if issue.values["category"] not in {
             "card_extras:errata_current_pending",
@@ -128,6 +149,26 @@ def require_card_extras_ready(db: Database, scope: tuple[tuple[str, str], ...]) 
         message = issue.values["message"]
         context = parse(message.encode()) if isinstance(message, str) else None
         if not isinstance(context, dict):
-            raise TypeError("Invalid card extras blocking issue context")
-        if (context["region"], issue.values["entity_id"]) in scope:
-            raise ValueError("Unresolved supplemental evidence blocks release scope")
+            raise TypeError("Invalid card extras pending issue context")
+        region, card_id = context.get("region"), context.get("card_id")
+        if not isinstance(region, str) or not (
+            card_id is None or isinstance(card_id, str)
+        ):
+            raise TypeError("Invalid card extras pending issue identity")
+        scope_key = str(issue.values["entity_id"])
+        if (region, scope_key) in scope:
+            restrictions.append(
+                CardExtrasRestriction(
+                    region=region,
+                    scope_key=scope_key,
+                    card_id=card_id,
+                    face_ids=tuple(sorted(faces[region, scope_key])),
+                    reason=str(issue.values["category"]).removeprefix("card_extras:"),
+                    issue_id=str(issue.values["id"]),
+                )
+            )
+    if strict and restrictions:
+        raise ValueError(
+            "Unresolved supplemental evidence blocks automation or confirmed current"
+        )
+    return tuple(sorted(restrictions, key=lambda restriction: restriction.issue_id))

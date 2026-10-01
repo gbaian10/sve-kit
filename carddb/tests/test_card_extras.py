@@ -112,6 +112,64 @@ def test_unnumbered_key_is_not_an_official_number(db: Database) -> None:
     assert db.rows("qa")[0].values["stable_source_key"] == entry.stable_source_key
 
 
+def test_distinct_unnumbered_blocks_keep_both_questions(db: Database) -> None:
+    first = QAEntry(
+        stable_source_key="synthetic-page#first",
+        locator="first",
+        question="First synthetic question?",
+        answer="First synthetic answer.",
+    )
+    second = first.model_copy(
+        update={
+            "stable_source_key": "synthetic-page#second",
+            "locator": "second",
+            "question": "Second synthetic question?",
+            "answer": "Second synthetic answer.",
+        }
+    )
+    current = page().model_copy(update={"qa": (first, second)})
+    plan = plan_card_extras(db, (current,))
+    with db.transaction():
+        populate_card_extras(db, plan, build=context(plan))
+    assert {row.values["stable_source_key"] for row in db.rows("qa")} == {
+        first.stable_source_key,
+        second.stable_source_key,
+    }
+    assert all(row.values["official_number"] is None for row in db.rows("qa"))
+    versions = db.rows("qa_version")
+    assert len(versions) == 2
+    assert len({row.values["question_unit_id"] for row in versions}) == 2
+    assert len({row.values["answer_unit_id"] for row in versions}) == 2
+    assert len(db.rows("qa_card")) == 2
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("published_on", "2026-10-02"),
+        ("updated_on", "2026-10-02"),
+        ("date_raw", "Synthetic later date"),
+    ],
+)
+def test_date_only_changes_keep_one_qa_version(
+    db: Database, field: str, value: str
+) -> None:
+    first = page()
+    later = page(
+        "TEST-002",
+        hour=1,
+        question=first.qa[0].model_copy(update={field: value}),
+    )
+    plan = plan_card_extras(db, (later, first))
+    with db.transaction():
+        record = populate_card_extras(db, plan, build=context(plan))
+    versions = db.rows("qa_version")
+    assert len(versions) == 1
+    assert versions[0].values[field] == getattr(first.qa[0], field)
+    assert {row.values["card_id"] for row in db.rows("qa_card")} == {"card", "card1"}
+    assert {use.source.id for use in record.uses} == {first.source.id, later.source.id}
+
+
 def test_regional_qa_identity_is_independent(db: Database) -> None:
     plan = plan_card_extras(db, (page(), page(region="en")))
     with db.transaction():
@@ -164,7 +222,9 @@ def test_related_is_exact_regional_printing_without_token_guess(db: Database) ->
     assert relation["dsl_id"] is None
 
 
-def test_errata_reference_blocks_only_affected_scope(db: Database) -> None:
+def test_errata_reference_reports_manual_faces_without_excluding_cards(
+    db: Database,
+) -> None:
     current = page().model_copy(
         update={"errata_urls": ("https://shadowverse-evolve.com/errata/synthetic/",)}
     )
@@ -172,9 +232,25 @@ def test_errata_reference_blocks_only_affected_scope(db: Database) -> None:
     with db.transaction():
         populate_card_extras(db, plan, build=context(plan))
     assert plan.report()["source_windows"] == []
-    require_card_extras_ready(db, (("en", "card"), ("jp", "card1")))
-    with pytest.raises(ValueError, match="blocks release"):
-        require_card_extras_ready(db, (("jp", "card"),))
+    visible = {table: db.rows(table) for table in ("card", "printing", "face")}
+    unaffected = (("en", "card"), ("jp", "card1"))
+    assert require_card_extras_ready(db, unaffected, strict=True) == ()
+    scope = (*unaffected, ("jp", "card"))
+    restrictions = require_card_extras_ready(db, scope)
+    assert len(restrictions) == 1
+    restriction = restrictions[0]
+    assert (restriction.region, restriction.card_id, restriction.scope_key) == (
+        "jp",
+        "card",
+        "card",
+    )
+    assert restriction.face_ids == ("face",)
+    assert restriction.reason == "errata_current_pending"
+    assert restriction.issue_id == db.rows("build_issue")[0].values["id"]
+    with pytest.raises(ValueError, match="blocks automation or confirmed current"):
+        require_card_extras_ready(db, scope, strict=True)
+    assert {table: db.rows(table) for table in visible} == visible
+    assert not db.rows("face_current")
 
 
 def notice() -> ErrataPage:
@@ -213,12 +289,20 @@ def test_errata_dates_fragments_and_listing_are_independent(db: Database) -> Non
     assert not db.rows("face_current")
     assert db.rows("errata_printing")[0].values["scope"] == "listed"
     assert db.rows("errata_printing")[0].values["decision_id"] is None
-    with pytest.raises(ValueError, match="blocks release"):
-        require_card_extras_ready(db, (("jp", "card"),))
+    assert require_card_extras_ready(db, (("jp", "card"),))[0].face_ids == ("face",)
+    with pytest.raises(ValueError, match="blocks automation"):
+        require_card_extras_ready(db, (("jp", "card"),), strict=True)
 
 
 @pytest.mark.parametrize(
-    "fault", ["unknown_printing", "wrong_face", "unconfirmed", "unpinned"]
+    "fault",
+    [
+        "unknown_printing",
+        "wrong_face",
+        "missing_printing_face",
+        "unconfirmed",
+        "unpinned",
+    ],
 )
 def test_errata_rejects_invented_identity_or_confirmation(
     db: Database, fault: str
@@ -234,6 +318,10 @@ def test_errata_rejects_invented_identity_or_confirmation(
                 "changes": (item.changes[0].model_copy(update={"face_id": "face1"}),)
             }
         )
+    elif fault == "missing_printing_face":
+        with db.transaction():
+            db.delete("printing_face", {"printing_id": "printing", "face_id": "face"})
+        assert db.rows("face")[0].values["card_id"] == "card"
     else:
         item = item.model_copy(
             update={
@@ -248,6 +336,15 @@ def test_errata_rejects_invented_identity_or_confirmation(
         )
         if fault == "unconfirmed":
             with db.transaction():
+                db.insert("source_record", item.source.values())
+                db.insert(
+                    "decision_source",
+                    {
+                        "decision_id": "decision",
+                        "source_id": item.source.id,
+                        "role": "errata_applicability",
+                    },
+                )
                 db.update(
                     "decision",
                     {"id": "decision"},
@@ -348,8 +445,13 @@ def test_unknown_source_is_staged_without_inventing_card(db: Database) -> None:
         record = populate_card_extras(db, plan, build=context(plan))
     assert record.uses == plan.source_uses()
     assert not db.rows("qa")
-    with pytest.raises(ValueError, match="blocks release"):
-        require_card_extras_ready(db, (("jp", "jp:UNKNOWN"),))
+    restrictions = require_card_extras_ready(db, (("jp", "jp:UNKNOWN"),))
+    assert len(restrictions) == 1
+    assert restrictions[0].card_id is None
+    assert restrictions[0].face_ids == ()
+    assert restrictions[0].reason == "source_printing_missing"
+    with pytest.raises(ValueError, match="blocks automation"):
+        require_card_extras_ready(db, (("jp", "jp:UNKNOWN"),), strict=True)
 
 
 def test_plan_is_independent_of_page_order(db: Database) -> None:
@@ -397,6 +499,56 @@ def test_errata_same_day_changed_fragment_keeps_both_versions(db: Database) -> N
     assert len(versions) == 2
     assert versions[0]["announced_on"] == versions[1]["announced_on"]
     assert versions[1]["supersedes_id"] == versions[0]["id"]
+
+
+def test_adjacent_identical_notices_share_version_and_keep_sources(
+    db: Database,
+) -> None:
+    first = notice()
+    later = first.model_copy(
+        update={
+            "source": first.source.model_copy(
+                update={
+                    "id": source(hour=1).id,
+                    "fetched_at": source(hour=1).fetched_at,
+                }
+            )
+        }
+    )
+    plan = plan_card_extras(db, (), errata=(later, first))
+    with db.transaction():
+        record = populate_card_extras(db, plan, build=context(plan))
+    assert len(db.rows("errata")) == 1
+    assert len(db.rows("errata_version")) == 1
+    assert db.rows("errata_version")[0].values["source_id"] == first.source.id
+    assert len(db.rows("errata_change")) == 1
+    assert len(db.rows("errata_printing")) == 1
+    assert {use.source.id for use in record.uses} == {first.source.id, later.source.id}
+    assert {row.values["id"] for row in db.rows("source_record")} >= {
+        first.source.id,
+        later.source.id,
+    }
+
+
+@pytest.mark.parametrize(
+    "message", ['"invalid context"', '{"region":1}', '{"region":"jp","card_id":false}']
+)
+def test_pending_issue_requires_valid_identity_context(
+    db: Database, message: str
+) -> None:
+    current = page().model_copy(
+        update={"errata_urls": ("https://shadowverse-evolve.com/errata/synthetic/",)}
+    )
+    plan = plan_card_extras(db, (current,))
+    with db.transaction():
+        populate_card_extras(db, plan, build=context(plan))
+        db.update(
+            "build_issue",
+            {"id": db.rows("build_issue")[0].values["id"]},
+            {"message": message},
+        )
+    with pytest.raises(TypeError, match="Invalid card extras pending issue"):
+        require_card_extras_ready(db, (("jp", "card"),))
 
 
 def test_errata_url_must_match_pinned_source() -> None:
