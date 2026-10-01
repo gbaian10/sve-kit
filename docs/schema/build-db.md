@@ -49,6 +49,8 @@ vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。
 
 **使用者核可（2026-10-01，F1 方案 A）**：raw 來源版本共用一列，parser_version 一律 null；所有實際 parser／用途連同來源歸檔與程式／依賴／設定輸入保存於 DB／report 所附的建置輸入紀錄，輸出前驗完整使用閉包。共用 metadata 取 descriptor 與 first receipt 並逐欄比對，衝突回滾整筆交易，不略過插入錯誤。authored 的 parser_version 維持原封套 recipe。詳見 [來源投影與建置輸入紀錄](source-archive.md#22-建置-source_record-的投影)；不新增資料表或改變來源版本 ID。
 
+**使用者核可（2026-10-01，商品 ID 方案 A）**：官方萃取商品的永久 ID 由 [authored-layout §11](authored-layout.md#11-官方商品身分對照-product-identity-v1) 的獨立商品身分對照提供。建置釘住 authored revision、index／分片 hash；confirmed 只確認 ID 與官方商品的對應，不能用來宣稱名稱、日期或收錄已經人工採納。正式 extractor 以同區可驗商品線索 exact 匹配，零匹配留診斷並排除該商品／依賴收錄，多個不同 ID 匹配或輸入衝突則交易失敗。名稱／日期更正不重配 ID，改址以新決定追加同 ID 的對照，不按 owner、名稱或候選 hash 配號。官方 product／printing_product.source_id 保留內容的 raw 來源，身分決定另由 authored source_record／decision_source 與 F1 完整輸入紀錄追溯；不改 DB DDL、F1 容器或 authored-layout §10 人工商品的 confirmed 語意。
+
 ## 3. 身分、商品與插畫
 
 ### 3.1 永久身分

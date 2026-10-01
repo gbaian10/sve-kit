@@ -13,6 +13,7 @@
 | 定案 | 換皮卡 | `registry/card_related/<owner>/001.yaml` |
 | 定案 | 本批來源更正 | `registry/source_correction/active/<owner>/001.yaml`、`registry/source_correction/needs_review/<owner>/001.yaml` |
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
+| 定案（格式） | 官方商品身分對照 | `product-identities/index.yaml`、`product-identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 提案 | 身分修復、特殊構築 | `overrides/identities/BP01.yaml`、`overrides/deck-roles/BP01.yaml` |
 | 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
@@ -274,6 +275,8 @@ SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；
 
 商品與收錄可依凍結來源中可驗證的線索匯入，供單卡頁顯示；來源明示的欄位與版次收錄不必先寫成人工商品封套，或先取得日英家族串連的決定。下列 product-authored-v1 封套仍用於人工維護的商品／收錄與歸檔類別；只有這些人工輸入需要相應採納決定，不能把官方萃取觀測冒充 confirmed 人工決定。缺少日期或配布方式證據時沿用既有未知／待核對規則，不按 owner 補值。
 
+官方萃取商品的永久 ID 另由 [§11 商品身分對照](#11-官方商品身分對照-product-identity-v1) 取得；確認 ID 對照不等於採納本節的人工商品內容。
+
 ### 10.2 新定的路徑、索引與封套
 
 以下是 **product-authored-v1 新定的格式選擇**；不修改 `ids/index.yaml`、`registry_shard`、永久配號或身分決定的內容。
@@ -324,3 +327,73 @@ confirmed 必須由實際核對者填人名、核對時間，sample_ids 恰為�
 只有 confirmed 的資料可作已採納人工輸入；proposed 僅列候選診斷，不能補 FK 父列。驗證必須逐項檢查 family／product／printing 的引用、printing 與 product 的地區一致性、既有 owner 不變，以及來源與本次主張相符；同主鍵的官方觀測與人工內容衝突需報告，不任取最後一筆。這些檢查不因 SQL FK 通過而省略。
 
 本版定義初次採納與新增記錄；既有採納記錄的續版／替代選用須另定契約，不能覆寫舊決定、悄悄替換既有分片或追加重複主鍵來繞過它。新增資料另建分片及其精確決定，最後更新商品 index。機器產生的候選表不屬此採納輸入，沒有人工確認時不寫成 confirmed。格式文件、候選產生、實際採納與匯入器驗收是各自獨立的完成狀態。
+
+## 11. 官方商品身分對照 product-identity-v1
+
+**使用者核可（2026-10-01，商品 ID 方案 A）**：官方商品首次分配永久 ID，與可驗來源中的商品識別線索一起持久保存於 authored，建置釘住 revision／hash。此對照只確認「這個 ID 對到這個地區的這個官方商品」；名稱、日期、商品型別與收錄仍由正式 extractor 讀凍結 raw，不宣稱已被人工 confirmed。格式定案不代表個別對照已採納。
+
+### 11.1 入口、封套與雜湊
+
+使用獨立入口，避免擴充 §10 的 `product-authored-v1` kind 白名單或把 ID-only 輸入當成人工商品內容；沿用其封套、canonical hash 與全筆 checked 決定機制。
+
+| 路徑（相對 authored 根目錄） | 完整頂層欄位 |
+| --- | --- |
+| `product-identities/index.yaml` | `product_identity_format: 1, kind: product_identity_index, includes` |
+| `product-identities/<region>/<sequence>.yaml` | `product_identity_format: 1, kind: product_identity_shard, default_decision_id, records, decisions` |
+
+region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔大小、YAML 限制、路徑安全、缺檔／未索引檔拒絕及新分片排序沿 §1、§10.2；不改舊分片。includes 只允許本表分片，值是解析後完整分片的 §2 canonical JSON Hash；不納入 `products/index.yaml` 或 `ids/index.yaml`。未知格式／欄位、重複鍵、hash 錯誤均拒絕。先驗完整 index、全區分片、全部決定與證據，再作建置地區投影。
+
+每筆 record 恰有 `record_key, kind, filing_key, data, evidence`；kind 固定 `product_identity`，filing_key 等於路徑與 data.region。data 恰有 `product_id, region, match`；不含 name/date/family_id/product_type 或收錄。record_key 是 `["product_identity",region,match]` 的 §2 canonical JSON **字串**，match 為下節完整物件；不含 product_id，讓同一識別線索不能另配 ID 繞過重複鍵檢查。
+
+同一 `(region,match)` 全域只允許一筆記錄，即使目標 ID 相同也不能重複；同一 product_id 可以有多筆不同 match，但 region 必須一致。product_id 與 §10 人工 product 共用全域身分命名空間：同 ID 必須指同區同商品，不能另作配號池。對照記錄不是 product 父列；沒有正式商品內容與來源仍不得填 FK。
+
+每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位、state、日期精度及 hash 計算完整沿 §10.4，只有 category 固定 `product_identity`、policy_id 固定 `product-identity-v1`。semantic_hash 包含完整 record 與 evidence；members 精確涵蓋本檔全部記錄，membership_hash 與 `d:<64hex>` 可重算。confirmed 須有使用者實際確認的收據、姓名與時間，sample_ids 恰為全部 checked record_key；工具不得自行簽名。proposed 保留空 checked 集合與 null reviewer/time，只作診斷，不參與匹配。既有 family／product_catalog／identity_registry 決定不能代簽商品身分。
+
+### 11.2 永久 ID 與可驗識別線索
+
+product_id 完整比對 §10.3 的 `[a-z][a-z0-9_-]*`。首次**建議**用 region 加官方商品區明示代號的小寫，例如 `jp-bp01`、`jp-csd03a`；這只是方便人工核對的命名，不是 extractor 每次重算的 recipe。地區永遠讀 region，不解析 ID。沒有適合代號時由人選未使用的合法 ID，不用名稱／日期／URL hash、候選 `hint-*` 或當下排序配永久 ID。採納後名稱、日期、URL 或官方代號改動皆不重配 ID；也不重用已採納的 ID。
+
+match 是下表三選一的封閉物件；每種只接受列出的欄位，`?` 欄仍必須存在，可填 null。來源區塊是正式 parser 辨識的單一商品區塊，不能跨區塊拼接線索。
+
+| match.kind | 完整欄位與限制 |
+| --- | --- |
+| `product_link` | `kind, product_url, expansion_code?`；product_url 是區塊中該 region 正式官網商品連結解析後的 URL，expansion_code 是同區塊搜尋連結的官方 expansion 原值；區塊確無該代號才為 null |
+| `expansion_link` | `kind, search_url, expansion_code`；僅供區塊沒有正式站商品連結時使用。search_url 為該 region 官網搜尋連結解析後的完整 URL，expansion_code 為其中非空的官方 expansion 原值 |
+| `source_block` | `kind, source_version_id, product_block_ordinal`；來源版本沿 source-archive，ordinal 為依 HTML 文件順序列出的商品區塊零起算 UInt。僅匹配此版本此區塊，不跨 raw 版本泛化 |
+
+連結先解 HTML attribute entity，再以 descriptor.url 為 base 解析相對 href，保留原 href 作萃取追溯；解析後的字串 exact 比對。不移除 query、不重排 query、不改尾斜線、不將 dev host 改成正式 host；expansion 依 URL query 解碼一次，保留大小寫與完整複合代號，不切 `BP12-BP13`，不由卡號或 owner 補值。parser 必須驗連結用途與地區：JP 正式 host 為 `shadowverse-evolve.com`，EN 為 `en.shadowverse-evolve.com`；正式商品路徑為 `/products/` 下，搜尋路徑分別為 `/cardlist/cardsearch` 與 `/cards/searchresults`。非 HTTPS、其他 host 或用途不符只保留診斷線索，不當正式商品／搜尋 URL。新增來源版型需更新並釘住 parser，不放寬為任意 query 中有 expansion 就算商品證據。
+
+`product_link` 的 URL 與代號兩者都必須相等，null 只匹配缺代號，**不是 wildcard**。因此共用商品頁的 CSD03A／CSD03B 分別有兩筆對照；不得只按 URL 合併。只有 URL 且區塊不能區分多商品時，不採納 URL-only 對照，可用各自 `source_block` 確認該版本的確切區塊，或留待補證據。`expansion_link` 不表示搜尋分類本身就是真實商品；泛用 PR 分類不能建立整批 PR 商品，活動分類／合併名稱的商品邊界不明時仍留診斷。
+
+同一區塊若有多個不同商品 URL／expansion 值，parser 不任選或作笛卡兒積：列出歧義，僅容許經使用者核對的 exact `source_block` 對照辨識該區塊代表的商品；若該區塊其實含數個商品，須先有能分出個別商品的來源及 parser。`source_block` 不用名稱／日期作匹配鍵；raw 改版後即使只是更正名稱，也須為新來源補對照，沿用原 product_id，不能套用舊 ordinal 猜。
+
+evidence 沿 §10.3 的 `{store_id,batch_id,source_version_id,locator,role}`，非空、無重複；每項都須驗 sealed batch／descriptor／first receipt／raw 閉包。至少一項證據的 role 為 `product_identity_match`，locator 為 §2 canonical JSON 字串 `{"product_block_ordinal":0}`（數字依實際區塊），正式 parser 須從該來源重現完整 match 與 region；source_block 還須與 evidence 的版本／ordinal 相同。其他 role 可保留人工判斷所需的來源及非空定位。卡片頁的商品區塊可以證明該頁記載的識別線索；只有商品連結不表示已讀／驗該商品頁內容。
+
+### 11.3 首次採納、重建匹配與改址
+
+首次建立時，工具只產候選 ID、match、完整來源與疑難清單；使用者逐筆確認商品邊界與對應後，才另建 confirmed 分片、更新 index。草稿不直接變成正式輸入，通過格式檢查或來源閉包驗證也不是人工採納。
+
+對每個已驗凍結來源中的商品區塊，正式 extractor 產生可用的 product_link；沒有正式商品 URL 時才產生 expansion_link，另可產生該版本的 source_block。以 region 加完整 match 查找所有 confirmed 對照，不使用 proposed 或 fuzzy 比較：
+
+| 結果 | 建置行為 |
+| --- | --- |
+| 命中一個 product_id（多種 match 同指此 ID 亦可） | 沿用永久 ID；官方內容及收錄仍由 raw 萃取、另驗來源與地區／printing 身分閘門 |
+| 零命中／只有 proposed | 診斷列精確來源、區塊、線索及缺映射原因；不臨時配號，不產該商品與依賴它的收錄列，不影響有獨立有效證據的卡文；報告明列排除，不宣稱商品完整 |
+| 命中多個不同 product_id | 商品身分衝突，整筆匯入交易失敗；不得任選第一筆、較新一筆或較短 ID |
+| 同 match 多記錄、同 ID 跨 region、證據無法重現 match、缺 raw／hash 錯 | 輸入驗證失敗，整筆交易回滾；不能降成「缺映射」後忽略 |
+
+相同 ID 的多次官方觀測可以去重，但名稱、日期、商品型別等內容不一致時依既有商品衝突規則處理，不以身分 confirmed 當作選內容的授權。同名不等於同商品，同代號跨 region 亦不合併；owner 只作歸檔，不能參與商品識別或補收錄。
+
+URL／識別碼改動、相對連結解析結果變更或原本無 URL 後來補 URL 時，舊 match 保留。新線索零匹配即列待確認；使用者確認仍為同商品後，追加一筆指向**原 product_id** 的別名對照及新 evidence／decision，不改舊 record 或決定。別名直接指永久 ID，不指其他 match，沒有 alias chain。僅名稱／日期更正而 match 不變時直接沿用 ID，不要求重新確認內容。URL-only 對照若出現可驗的 URL 重用／不同商品證據，即列衝突，不因字串相同而放行。
+
+本格式只允許首次身分及不同 match 的追加；不提供重新指派已採納 match、刪除舊對照、合併／拆分永久商品 ID 的捷徑。遇到誤配或同一 exact match 被官方重用且無法區分時停止受影響匯入、交使用者決定修復契約，不能自行定義覆蓋優先序。未採納草稿的修正不算永久身分修復。
+
+### 11.4 建置追溯與既有契約邊界
+
+建置明示讀取兩個獨立商品入口；啟用官方商品匯入時不得把缺少 product-identities/index.yaml 當空對照。依 [source-archive §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的既有 F1 context，configuration 的 `product_identity` 項保存 `{authored_revision,index_path,index_hash}`：完整 40 碼 revision、authored 相對入口路徑與 §2 canonical index hash；dependencies 以 repo 相對路徑釘住 index 與所有分片的 exact bytes hash。實際內容須與釘住 revision 相符，不能用 dirty 檔冒稱該 revision。兩種 hash 分別驗實體輸入及封套內容；所有歷史別名分片仍在 includes，不只留最新 match。
+
+每個分片以完整 authored revision、路徑與 canonical hash 建立 authored source_record，parser_version 使用本封套 recipe `product-identity-v1`；decision_source 連回完整封套及全部 evidence 的 raw source_record。這是新增 authored 封套 recipe，不改 F1 raw 共用列的 parser_version=null 規則。官方 product／printing_product.source_id 仍指萃取內容的 raw 來源，不改指身分對照以假裝內容經人工確認；不新增 DB 表或 decision_id 欄。對照到哪個 product_id 可由釘住封套重建。
+
+僅驗證 evidence 閉包的實際使用以 `product_identity_evidence_closure`／`archive-closure-v1` 登錄；為重現 match 而實際解析的使用另以 `official_product_identity`、正式 parser pin 及精確區塊 locator 登錄。官方內容／收錄的 parser 用途仍各自保存；共用 raw 不吞掉不同用途。零匹配、歧義或被 printing 身分閘門排除的區塊也是已讀輸入，仍納實際 uses。輸出前從釘住輸入獨立宣告並驗完整用途閉包，依 F1 保存 DB／inputs／report／seal；來源衝突與失敗不發布半套產物。
+
+商品身分確認不授權更動 family／owner、日期精度、收錄、EN 身分採納或公開快照白名單。家族關係不明可為 null；機器候選鍵只供本機核對。正式匯入器的驗收須包括同 URL 不同代號、無 URL、名稱／日期修正、改址追加、零／多重匹配、錯 region、proposed 不放行、封套／來源 hash 錯及 F1 使用閉包缺漏；不能用本格式文件或候選盤點冒充已完成實作。
