@@ -209,6 +209,9 @@ pre-commit run --hook-stage manual cargo-test   # engine tests with the 90% line
 pre-commit run --hook-stage manual web-test     # sim/web Vitest (CI runs the full `bun run check`)
 ```
 
+When needed and explicitly requested, manually compare the old and new YAML readers with
+`uv --directory carddb run pytest manual_tests/yaml_reader_equivalence.py`; CI never runs this check.
+
 `cargo-test` needs `SVE_TEST_SNAPSHOT` (see Setup); CI gets the same file from a private test-data repository.
 
 Now and then, and before a release, run the mutation test. Every surviving mutant
