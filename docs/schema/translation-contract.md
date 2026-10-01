@@ -1,214 +1,262 @@
 # 翻譯、模板與跨區採納契約
 
-本文件細化 [build-db §9／§14](build-db.md#9-翻譯句型與術語) 與 [authored-layout §6](authored-layout.md#6-模板翻譯與語義例外)。只定義文件契約，不表示已有來源遷入、翻譯採納、DDL 或匯入器。範例全部為合成識別碼與自撰文字，不是真實卡文或審核紀錄。
+本文件細化 [build-db §9／§14](build-db.md#9-翻譯句型與術語) 與 [authored-layout §6](authored-layout.md#6-模板翻譯與語義例外)。2026-10-01 本機審核修訂：依協調者裁定，人工採納與工具推導分開，binding/use 每次建置重建，不新增永久物件庫。以下為技術契約，尚未實作匯入器；§1 另外記錄使用者已核可的顯示與首輪抽查政策。例子全部自撰，不是真實卡文或採納紀錄。
 
-## 1. 核可範圍與來源選擇
+## 1. 政策與狀態
 
-**使用者已核可（2026-10-01）**：繁中翻譯以**日文卡文為來源**；日英身分已確認為同一張卡時一律以日文為來源。只有兩區版本明顯不同、或英文版獨有的卡才以英文為來源。此決定適用卡文翻譯，不改商品、Q&A、CR 各自的原文來源。
+**使用者已核可（2026-10-01）**：繁中翻譯以日文卡文為來源；日英身分已確認同卡一律用日文。只有兩區版本明顯不同、或英文版獨有的卡才用英文。其後同日核可的顯示與抽查方式如下。
 
-來源選擇與跨區適用分開。日英同卡仍從 JP 建立繁中譯文；要把該譯文顯示在 EN，須再通過目前兩端的 `region_text_review=aligned`、面對應與相關 scope 無未解 divergence。未核對不能先從 EN 另翻來繞過 JP 來源規則，也不能把「同卡」寫成「已證明等義」。JP 來源缺失就報缺來源並回 EN 原文，不以資料缺失作 EN 例外。英文獨有需 confirmed_none 的範圍及 as_of 證據；unmapped/pending 不等於獨有。兩區確有差異須 confirmed 的 divergence 證據，按受影響 scope 使用 EN，未受影響欄仍沿 JP。
+**既定限制**：identity confirmed 與 region_text_review aligned 分開；正式 aligned 共用須核對目前兩端、確認面對應且相關 scope 無未解 divergence；下述提前顯示是明示例外，不放行 DSL／機制或官方 counterpart。翻譯最低 sampled/confirmed；機器翻譯審過仍保留 machine。已採納的同概念數位卡名優先 svwb 再 sv1，same_character 或同字串不足以認定同概念。本站效果翻譯為 unofficial，SVE 官方 counterpart 則是有證據的官方原文選用。
 
-沿用既定政策：同語義模板與參數只選一種翻法；翻譯最低 sampled 或 confirmed；machine 審過仍是 machine。數位官方卡名只限已採納的同概念，優先 svwb 再 sv1；same_character、同字串、confidence=high 均不足以套用。本站效果翻譯 authority 永遠 unofficial；直接顯示已核對 SVE 官方 counterpart 是官方原文選用，並非本站翻出的效果。繁中效果不能因用了官方數位卡名而變官方。
+**技術處理**：缺 JP 來源只列缺來源，不能據此聲稱英文獨有。英文來源例外須有 confirmed_none 的查核範圍/as_of，或 confirmed divergence 所指的受影響欄位；未受影響欄沿 JP。這是核可來源政策的實作判定，不冒稱使用者另行核可了每個判定細節。
 
-**以下新增格式、遷移操作與選用細節均為「提案，待使用者決定」**（§2–§8）；其中重述的不可變 ID、引用閉包、來源失效及人工門檻沿既定契約，不因提案狀態放寬。格式核可不等於資料採納。首輪卡包範圍、人工抽查政策與工作量亦須另定，不能預填核可人或把模型審查當人工抽查。
+**使用者已核可（2026-10-01，追加決定）**：日英確認同卡後、文字核對完成前，EN 卡面先顯示 JP 繁中並加「日英文字尚未核對」；核對完成且適用時標示消失。公開以 `FieldTranslation.basis=shared_jp_unchecked` 表示，與既有已核對 `shared_jp` 分開，詳 §7.1；已知 divergence 不使用提前顯示例外。
 
-## 2. 獨立入口、封套與決定續版（提案）
+首輪依模板出現次數由高到低翻譯，不按卡包排批，長尾後補。頻率在釘住來源清單內按每個版次面欄位的有效觀測計數，相同頁歷史抓取不重複計入；同頻按模板 ID 排序。每個模板由一個模型翻、另一個模型審，保留兩者身分、精確譯本 hash 與分歧；使用者抽查前約 100 個高頻模板，並查看全部模型分歧項。實際抽查集合以使用者看過的 template ID/revision 記錄，不把「約 100」硬寫成已看滿 100 或固定百分比。
 
-沿 [authored-layout §1／§2／§10](authored-layout.md#10-商品人工輸入-product-authored-v1) 的 YAML 1.2 解析限制、未知欄拒絕、可空欄明示 null、canonical JSON recipe、完整分片 <1 MiB 與 512 KiB 目標；不擴充身分 registry v1。以下路徑相對 authored 根目錄。
+核可政策適用精確批次：模型互審及上述人工抽查完成後，以 sampled batch 採納模板譯本，未逐一被使用者查看的成員仍 origin=machine；模型翻的已抽查成員也不漂白成 project。模型分歧未經使用者處理者留候選，不進該已採納批次；沒有真正完成抽查的批次仍停在候選，不能把核可流程當已做完。這沿用 sampled 表示抽查的語意，不讓裸 model_reviewed 自動當人工採納。
 
-| 路徑 | 完整頂層欄位 |
+## 2. 人工採納入口
+
+只有人做的決定進 authored：模板定義與譯本、概念與譯詞、同字異義指派、模板匹配例外、跨區核對／counterpart 採納、來源例外及撤回。context/use/binding、渲染全文、selection **不進 authored**。模板或術語改字後工具重算，無須逐卡重新簽核；人看的是重算批次抽查與失敗清單。
+
+| 路徑（相對 authored） | 完整頂層欄位 |
 | --- | --- |
 | `translations/index.yaml` | `translation_authored_format: 1, kind: translation_index, includes, inventories` |
 | `translations/<area>/<filing_key>/<sequence>.yaml` | `translation_authored_format: 1, kind: translation_shard, default_decision_id, records, decisions` |
-| `translations/inventories/<sequence>.yaml` | `translation_inventory_format: 1, kind: translation_inventory, artifacts, templates`，見 §3 |
+| `translations/template-sources/<sequence>.yaml` | `template_source_format: 1, kind: template_source_inventory, recipes, entries` |
 
-area 恰為 `templates/glossary/contexts/uses/translations/selections/semantics/region-reviews`。filing_key 是 `[A-Za-z0-9_-]+`，只分檔、不代表卡片身分或商品收錄；sequence 為只增三位以上十進位序號。includes／inventories 分別映射上述分片／清冊路徑到解析後 canonical Hash；只讀 index 指名項目，拒絕絕對路徑、`..`、symlink、重複及未索引 YAML。先驗全區所有分片、清冊及決定，再作地區／語言投影。啟用時缺 index 是錯誤，空集合明示兩個空映射；新檔驗妥後原子換 index，已登錄分片與清冊不原地修改。
+area 為 `templates/glossary/overrides/region-reviews`。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔；sequence 為只增三位以上十進位序號。includes/inventories 各映射上述分片／清冊到完整解析內容的 canonical hash。沿 [authored-layout §1／§2](authored-layout.md#2-分片批次決定與來源) 的 YAML 邊界、單檔 <1 MiB／512 KiB 目標、安全路徑及全入口驗證；拒絕缺檔、未索引分片、symlink、hash 不符與未知欄位。新分片驗妥後原子更新 index，舊分片不改。啟用時空集合需明示空映射，缺 index 不是空集合。
 
-每筆 record 恰有 `record_key, kind, filing_key, data, evidence`；同一分片只有一種 kind、一個 default_decision_id，decisions 恰含該決定。record_key 是 `[kind,...主鍵]` 的 §2 canonical JSON **字串**，不可用分隔符拼接。主鍵、record_key 全入口唯一；下表的不可變物件以自身主鍵命名，需替換的選擇以 adoption_no 追加，不以重複主鍵或檔案順序覆蓋。
+record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind、一個 default_decision_id，decisions 恰含該決定。候選與模型審查留在 authored 外；入口只接受達該 kind 門檻的 sampled/confirmed 記錄，不讓 proposed 永久占鍵。不可變物件的 record_key 為 `[kind,...主鍵]` 的 canonical JSON 字串，採納選擇另加 adoption_no，見下表。
 
-| area | kind 與 record_key 的主鍵部分 |
-| --- | --- |
-| templates | `sentence_template: [id]`；`template_component: [parent_id,ordinal]`；`template_translation: [template_id,lang,revision]` |
-| glossary | `glossary_term: [id]`；`glossary_choice: [term_id,lang,adoption_no]` |
-| contexts | `translation_context: [id]`；`text_template_binding: [id]` |
-| uses | `translation_use: [id]` |
-| translations | `translation: [id]` |
-| selections | `translation_selection: [context_id,target_lang,adoption_no]` |
-| semantics | `face_semantics: [id]`；`revision_semantics: [revision_id,adoption_no]`；`semantic_reference: [semantic_id,target_face_id,relation]` |
-| region-reviews | `region_text_review: [card_id,region,source_jp_hash,source_region_hash,adoption_no]` |
-
-所有 data 不存本筆自身的 decision_id，由封套展開到 build-db 具體 FK；same_concept 等證據可引用另一筆既有 decision_id；D 表的決定保留於 authored source_record／decision_source，不虛構 DB 欄。decision 欄位與 record/batch 規則沿 authored-layout §2：semantic_content_hash 取完整 record（含 evidence），members 釘 `(record_key,semantic_content_hash)` 排序集合；record scope 三個 batch 欄皆 null，batch 的 membership_hash/policy_id/sample_ids 必填。sampled 必須真人、時間、非空精確樣本子集；confirmed batch 的 checked 集合是全部成員。候選、模型審查不得進已採納投影。採納不得跨越 kind 所需的更嚴門檻：身分、divergence、跨表記等義仍依各自 confirmed／核可規則。
-
-有 adoption_no 的 data 皆加 `adoption_no, predecessor`；從 1 連續只增，首筆 predecessor=null，續筆為 `{record_key, semantic_content_hash, decision_id}`，須精確指向同選擇鍵的唯一有效前件。每筆完整替代、不作局部 patch，拒絕分叉、缺號、循環、錯前件；只有達門檻的新決定推進有效鏈，proposed 不能撤銷已採納選擇，rejected 不等於撤回前件。撤回以新的已採納 selection 指 null（§6）；舊決定、舊譯與舊快照均保留。數位與身分修復仍走其原入口，不藉此續版重配 card/face。
-
-evidence 為去重陣列，每項是兩種具名引用之一：`{kind: raw, store_id, batch_id, source_version_id, locator, role}` 或 `{kind: artifact, artifact_id, locator, role}`。raw 依來源歸檔驗 batch／descriptor／receipt／bytes；artifact 依 §3 驗 bytes。locator 是不可執行的精確定位，role 非空；不得只放 URL 或摘要 hash 冒充可重建內容。決定另外釘完整 authored commit、index／分片 canonical hash；原文不複製到封套。decision_source 指回封套及所有證據。
-
-## 3. 舊 ID、完整內容與持久清冊（提案）
-
-既有分類 ID 是 `T`（sentence）或 `C`（clause）加 SHA-256(normalized UTF-8) 的前 10 小寫 hex。舊產生器先分離提示文再做 NFKC、引號內名稱占位及數字占位；這是候選分組 recipe，**不是可安全刪除所有括號的語義政策**。保留 normalized 的 exact bytes 與產生器版本，不能只保存重跑指令。分類標註或模板共用不等於翻譯／semantics 已採納。
-
-正式 runtime 只讀持久清冊及正式 authored；禁止讀本機研究草稿路徑或 latest cache。清冊保留以下內容：
-
-| 欄位 | 完整內容與檢查 |
-| --- | --- |
-| artifacts | 每項 `{id, kind, object_hash, byte_size, media_type, producer, inputs}`；kind 為 `legacy_templates/legacy_clauses/legacy_members/catalog/glossary/digital_map/normalizer/template_payload/translation_payload`；id 永久，object_hash 驗 exact bytes，producer 為 `{name,version,code_hash,config_hash}`，inputs 是 `{kind: artifact,artifact_id}` 或 §2 raw evidence 引用的去重陣列，閉包完整且無循環 |
-| templates | 每項 `{id, level, legacy_fingerprint, content_hash, payload_ref, normalizer_ref, legacy_refs}`；legacy_fingerprint 為舊 normalized 全 SHA-256，新模板為 null；後三者分別為 artifact 定位引用、產生器 artifact ID、舊資料定位引用陣列 |
-| 定位引用 | `{artifact_id, locator, value_hash}`；locator 以 JSON Pointer 指向 JSON，JSONL 則固定為 `{line: 正整數, pointer: 字串}`；value_hash 驗該值的 canonical-json-v1，缺行、錯型或 hash 不符拒絕 |
-
-artifact bytes 存於 repo 外、內容定址的持久物件庫；清冊只保存邏輯 ID/hash/定位，不放本機絕對路徑。執行時明示 artifact 根目錄映射，按 hash 取物件，禁止聯網補取或向草稿回退。此物件庫與官方 raw 來源歸檔分開，不擅自擴充 source-archive 的來源種類；每次新增須獨立備份並驗還原，任一物件缺失即不能完成依賴它的採納。含官方卡文、normalized 或第三方官方名稱的 payload 不進 git；index/清冊及人工原創譯文可進 authored，完整 hash 不授權複製來源文字。全庫不需重新抓取，但正式採納所依賴的 raw／數位來源與 artifact 必須可驗。
-
-sentence_template 的不可變 payload 恰為 `{level,source_lang,normalized_text,normalizer_version,semantic_variant,parameter_schema}`；content_hash 使用 build-db §14 canonical-json-v1。這與封套的 §2 hash、舊分類 normalized 指紋及 raw bytes hash 是四種不同用途，不能互換。參數宣告須指定型別及引用種類；出現順序由 normalized_text／組件 ordinal 釘住，不依賴 JSON object 的鍵序；沒有 schema 的舊分類不能先補一個猜測的空 schema 並標 reviewed。
-
-初次遷入先保存所有舊 ID 與來源內容，再由核對建立精確 payload；未具備 payload 的 ID 保留於 legacy artifact，**不產可採納 templates 項**。一個 ID 一旦登錄完整 payload，不得改任何欄位。同舊 ID 對到不同 normalized 或不同完整 payload 一律停止該次匯入，不覆蓋、不合併；全 hash 相同也比完整 bytes。normalizer、schema、參數意義、semantic_variant 或文字變動均新配 ID，`supersedes_id` 明示原 ID，禁止 self/cycle；supersedes 不自動改 binding、不繼承舊翻譯決定。多個新語義分叉可各自 supersede 同一舊候選，使用者需精確選 binding，不能靠「最新」挑子孫。
-
-**新 ID 配法提案**：`T`／`C` 加完整 payload hash 的最短可用前綴，從 16 hex 起、每次加 2、最長 64；永久 registry 檢查全部歷史 ID 與內容，交易內分配並記清冊。只加長新鍵，不重配任何舊鍵。已存在同 ID 同 payload 可冪等重用，異內容碰撞不得以覆寫處理；完整 hash 撞異 bytes 則失敗。舊 10 hex 鍵的碰撞在遷入時直接失敗，不能靠更改其中一個歷史 ID 脫困。
-
-## 4. 模板、術語與上下文 data（提案）
-
-下列「完整欄位」加上 §2 指定的續版欄位；`?` 表示明示 null，其他必填。型別與 enum 沿 build-db。`source_ref` 一律 `{unit_id,lang,content_hash,evidence}`，驗 unit exact bytes/hash、語言與來源 evidence 可重建同一值，不在 YAML 重抄原文。
-
-| kind | data 完整欄位 |
-| --- | --- |
-| sentence_template | `id, payload_ref, content_hash, supersedes_id?`；payload 由 §3 解出 DB 欄位，必須與清冊同 ID 相等 |
-| template_component | `parent_id, ordinal, child_id`；ordinal 自 0 連續，父為 sentence、子為 clause，語言相同；子參數為父參數的同名同型子集，不作隱式重新命名，圖無環；完整子清單隨 parent 首次採納封存，增刪／換子亦須新 parent ID，不能在舊父上追加組件 |
-| template_translation | `template_id, lang, revision, text, status, origin`；revision 從 1 只增，status=draft/reviewed；引用正確參數且無遺漏／額外參數；最高已審且採納的精確 template/lang 修訂供新產物使用 |
-| glossary_term | `id, category, source_ref, concept_key`；source_ref.lang=ja，投影 source_ja；concept_key 全域唯一，不能以日文同字串作概念唯一鍵 |
-| glossary_choice | `term_id, lang, value, origin, same_concept?`；value 為 `{kind: authored,text}` 或 `{kind: source,source_ref}`；same_concept 為 `{digital_face_id,lang,name_unit_id,decision_id}`，僅數位官方來源必填，需同概念採納及該語數位原文閉包 |
-| translation_context | `id, source_ref, semantic_variant, reason`；投影 source_unit_id；default 的 reason 可空，非 default 必須採納非空的同字異義理由；`(source_unit_id,semantic_variant)` 唯一 |
-| text_template_binding | `id, context_id, ordinal, template_id, params, source_span`；ordinal 從 0 連續；params 按精確 parameter_schema 驗，card／term ID 驗存在與概念適用 |
-
-source_span 固定 `{start,end}`，以**原文 Unicode code point** 的半開區間 `[start,end)` 計，不是 UTF-8 bytes／JS UTF-16 code units，也不是 normalized 的 offset。每個 context 的頂層 binding 按 ordinal 不重疊、無缺口覆蓋整份來源（含標點、提示與空白）；空字串用空 binding 列表，未知 null 不能代入。拆出的子句透過 template_component 組合，不另放重疊頂層 span。正規化時移出的提示仍須有對應模板，不能消失。單次出現句亦用模板；template 回填 params 後須能以釘住的 span 對照規則驗回來源，不可把正規化碰巧相同當成完整匹配。
-
-template_component 清單另參與 parent 記錄的成員核對；組句器也是 normalizer_version 的一部分，改組合策略須升該版本及新 ID，以維持 build-db 已定的六欄 content_hash recipe；不能為純組件修正捏造同字異義 variant。術語原意改變須新 term/concept，不原地改舊項；只改選定譯詞以 glossary_choice 續版。不同 origin 同字不表示同品質，候選仍各留證據。
-
-## 5. 翻譯用途與完整例子（提案）
-
-translation_use.data 恰為 `id, context_id, owner, field, ordinal`。owner 是下列 tagged union，恰一組，匯入展開 build-db 的 nullable owner 欄，其他皆 null。這個 owner 與 filing_key 不同。use 是不可變的首次綁定；同 owner/field/ordinal 的內容修正不可新增第二筆活躍 use 來繞過唯一約束，見 §6 的修正邊界。owner 必須存在，field 合法，context.source_unit 必須**原樣等於 owner 指定欄位的來源單元**；section/action ordinal 必填且存在，其餘為 null。
-
-| owner.kind／其餘欄位 | 可用 field 與原文 |
-| --- | --- |
-| face_revision／revision_id | name、effect、section；revision 的 name/effect/sections[ordinal] |
-| printing_face／printing_id,face_id | name、effect、flavor、section；該版次的已知 printed 欄、flavor 或 printing_text_section；printed unknown 不冒用 current |
-| qa_version／qa_version_id | question、answer |
-| cr_clause／cr_clause_id | effect（條文正文） |
-| vocabulary／vocabulary_kind,vocabulary_code | label |
-| keyword／keyword_id | label、effect（definition）、action_label（已投影 actions 順序的標籤） |
-| product_family／product_family_id | name |
-| product／product_id | name |
-
-`(owner,field,ordinal)` 條件唯一；不同 owner 相同 source_unit 且同語義共用 context，不每卡另建 variant。無主文的 exact 空字串仍可核一致；缺資料不得用空字串、其他版次或另一區字串填補。
-
-以下為**完整邏輯例子**，U0/U1 等是合成 text_unit 的別名，hash 在實際封套必依內容算出，不能把這些別名當 Hash。各表給齊所示情境的來源 owner、context、selection 與公開結果；共同封套、來源閉包與其他 nullable 欄依 §2，不是可直接匯入的 production YAML。
-
-| 項目 | 例 A：一般 owner | 例 B：同字異義 |
+| area | kind／主鍵 | 採納內容 |
 | --- | --- | --- |
-| 來源單元 | U0=(ja,「試験値を2増やす。」)，由合成 JP revision RJ.effect 引用 | U1=(ja,「星」)，兩個合成 revision RA.name、RB.name 都引用 U1 |
-| context | CX0=(U0,default) | CXA=(U1,character_a)、CXB=(U1,object_b)，各有已採納理由，不能只說「這卡想另翻」 |
-| use | UX0=(CX0,face_revision RJ,effect,null) | UXA=(CXA,face_revision RA,name,null)、UXB=(CXB,face_revision RB,name,null) |
-| binding | B0=(CX0,0,T-new,{count: 2},[0,len(U0.text)))；T-new 的 normalized_text=「試験値を{count}増やす。」、parameter_schema 指 count 為非負整數且禁止額外鍵，zh-Hant revision=1 已審譯本為「測試單位增加{count}」 | BA/BB 各綁不同 semantic_variant 的精確 name 模板／術語；同字 U1 不合併概念 |
-| translation | TR0=(CX0,zh-Hant,1,「測試單位增加2」,project,unofficial,reviewed)，釘 B0 與該模板譯本 | TRA=(CXA,zh-Hant,1,「星角色」)、TRB=(CXB,zh-Hant,1,「星物件」)，皆 project/unofficial/reviewed 且依各自來源及依賴採納 |
-| selection | (CX0,zh-Hant)→TR0 | (CXA,zh-Hant)→TRA、(CXB,zh-Hant)→TRB |
-| FieldTranslation | RJ: `{field: effect, ordinal: null, target_lang: zh-Hant, translation_id: TR0, basis: own_source}` | RA/RB 分別 own_source→TRA/TRB；不能全域依 U1 選唯一譯文 |
+| templates | sentence_template／id | §3 的不可變模板與來源 |
+| templates | template_translation／template_id,lang,revision | §4 的模板譯本；reviewed 且 sampled/confirmed |
+| glossary | glossary_term／id | §5 的永久概念 |
+| glossary | glossary_choice／term_id,lang,adoption_no | 選定譯詞的不可變決定；投影當前 glossary_translation |
+| glossary | vocabulary_choice／vocabulary_kind,vocabulary_code,lang,adoption_no | 介面詞彙標籤的選詞，不假造 glossary_term |
+| overrides | context_assignment／owner,field,ordinal,adoption_no | 同字異義的概念／variant 指派 |
+| overrides | template_match／context_key,adoption_no | 精確來源下模板拆分或匹配例外；不是渲染全文 |
+| overrides | translation_override／context_key,lang,adoption_no | 撤回或指定模板譯本／術語 choice；不得逐卡任意改同語義句 |
+| overrides | source_exception／card_id,region,scope,adoption_no | 繁中 EN 來源例外；confirmed |
+| region-reviews | region_text_review／card_id,region,jp_hash,region_hash,adoption_no | §7 的跨區規則與顯示核對，含 counterpart 採納 |
+| region-reviews | region_divergence／card_id,region,field_scope,adoption_no | §7 的明確差異／解除；confirmed |
 
-### 5.1 官方 counterpart 與共用 JP
+本文封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體；policy_id 指精確政策，新增／改內容必換決定。
 
-合成 card K 的 JP revision RJ 與 EN revision RE 具有已確認的共同 face F；RJ.effect=UJ、RE.effect=UE（兩份各自的官方來源）。CJ=(UJ,default)、CE=(UE,default)，UJ/UE 各有自身 use，不能給 RE 建一筆 context=CJ 的假 use。已採納且 fresh 的規則與 display 核對釘住 RJ/RE；無相關 divergence。
+帶 adoption_no 的 data 另含 `{adoption_no,predecessor}`，首筆為 1/null；後續連續只增、完整替代，predecessor 恰為 `{record_key,record_hash,decision_id}`。每一選擇鍵只有一條已採納鏈，拒絕分叉、缺號與錯前件。kind 自定的 null／撤回值才撤回，舊記錄與證據保留。工具依有效鏈推導結果，不拿檔案順序作優先序。
 
-- JP→繁中：人工／模板產生 TZ，source=context CJ，selection(CJ,zh-Hant)=TZ；JP 顯示 own_source，EN 顯示 shared_jp，兩邊是同一 translation.id，EN 不存另一份繁中效果。
-- JP→英文：建置推導 TO，context CJ、target_lang=en、text 直接引用 RE 的 UE，origin=official_sve、authority=sve_official、status=reviewed；source_hash 仍驗 UJ，另在建置輸入紀錄釘 RE/UE 與跨區核對決定，decision_id 可空（D），不是另造逐句人工 equivalence。selection(CJ,en)=TO；RJ 的 FieldTranslation 為 official_counterpart。
-- EN→日文：對稱推導 context CE、target_lang=ja、text=UJ 的 TOJ；RE 的 FieldTranslation 為 official_counterpart。這個投影重用 JP 的來源 use；CE 不換成 UJ。UI 與原文同語言時不再顯示重複翻譯列。
-- 較晚出現官方 EN，不直接覆寫先前 machine 譯文 TM；保留 TM 歷史，僅在 counterpart 全部門檻通過後改有效 selection。若 RE 改 effect 或核對失效，TO 不再選用；不因 origin=official_sve 跳過 freshness。
-- EN 規則 divergent：停止該 scope 的 shared_jp/counterpart；依 §1 EN 來源例外建立 CE 的新繁中翻譯及 own_source 選用，未完成先顯示 EN 原文。name-only divergence 不自動撤銷獨立且仍有效的效果選用，但影響 rules_names／名稱依賴者須重驗。
+`evidence` 為 `{source_ref,role}` 去重陣列。source_ref 恰為 `{store_id,batch_id,source_version_id,parser,locator,text_hash}`：parser 為釘住程式與設定的 recipe ID，locator 是該 parser 完整 JSON 投影內的 JSON Pointer，text_hash 驗被定位字串的 exact UTF-8；不是任意可執行查詢。來源歸檔 batch/descriptor/receipt/raw、parser 程式／設定 hash 皆由建置輸入紀錄 F1 驗證。人工純決定可無 raw evidence，但所引用模板、概念、owner 與前件須完整可驗；聲稱官方來源的記錄不可空。author source_record/decision_source 釘完整 commit、index/分片 hash 與原證據，不在 authored 重抄官方原文。
 
-## 6. translation、依賴與 selection（提案）
+## 3. 模板來源清冊與 ID
 
-translation.data 恰含 `id, context_id, target_lang, revision, value, tokens, origin, authority, status, source_hash, translated_by, translated_at, bindings, terms`。value 與 glossary_choice 同一 tagged union；tokens 明示 null 或符合公開 token 契約的資料，不能借它執行程式。revision 從 1 只增，`(context_id,target_lang,revision)` 與 id 皆唯一；source_hash 是 context 的 exact 原文 UTF-8 hash，不是模板 hash 或 rule bundle。origin/authority/status 使用 build-db enum；人工寫入允許 draft/reviewed，stale 由驗證推導，不能以手動改回 reviewed 洗去失效。
+不新增物件庫。runtime 從正式清冊指向的**已封存卡頁**、釘住的 extractor/normalizer 重建內容，不讀研究草稿或 latest cache。清冊 recipes 每項 `{id,code_revision,code_path,code_hash,config,config_hash}`；code_path 是 repo 相對檔案，code_revision 為完整 commit，config 為 canonical JSON。缺正式實作或不能重現舊結果時停止遷入，不能拿未版控的腳本路徑作 runtime 依賴。
 
-bindings 是 `{binding_id,template_id,lang,translation_revision}` 去重列表，完整覆蓋 context binding，lang=target_lang，template_id=binding.template_id，binding.context_id=translation.context_id，精確引用 template_translation 的三欄主鍵，投影 translation_binding。terms 是 `{term_id,lang,choice_record_key,choice_content_hash}` 去重列表，列出 params、模板譯本、最終譯文引用的全部概念與選詞，投影 translation_term 並在封套保存不可變依賴版本；不能只記 term_id 而丟失所用譯詞版次。同語義、同參數的新譯須共用有效 context/selection。
+清冊 entries 每項 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash,legacy_fingerprint}`。source_ref 定位完整欄位，line_ordinal 自 0，role=body/reminder/token_header/layout/name/label；新 role 的更細定位由 §4 的確定性分段及模板 source_span 給出。legacy_fingerprint 為舊 normalized 全 SHA-256，新 ID 為 null。完整來源與 recipe 足以重建 exact normalized，normalized_hash 驗證結果。多個來源產相同 ID 仍比完整內容，檢碰撞涵蓋所有歷史清冊，不能只看本批。
 
-人工 template 翻譯須 reviewed 且其決定達採納門檻，最終 translation 亦須通過完整渲染、來源一致、語言與 origin/authority 檢查。official_counterpart 是 §5.1 的推導例外：不拿機器模板重翻官方文字，其完整來源／核對閉包替代 bindings/terms（兩者為空），不允許 authored 自填 official_sve 來免除模板檢查。單字卡名與標籤可由已採納術語的 name/label 模板生成，仍記選詞依賴；official_svwb/sv1 限同概念名稱選用，不可套整段數位效果。
+舊 `T`（sentence）／`C`（clause）＋SHA-256(normalized UTF-8) 前 10 hex 原樣保留。舊分類 recipe 為切行、trim、移出全形括號片段與 token 標頭，再 NFKC、`『…』`→`『X』`、數字串→`N`；此 recipe 只重現分類指紋，**不授權把所有括號當提醒而刪除**。人採納模板前仍要確認提示／規則區分與完整參數位置。
 
-translation_selection.data 恰為 `context_id,target_lang,translation_id?,adoption_no,predecessor`；選中的 translation 必同 context/lang、完整且非 stale，reviewed 與人工採納均滿足。null 明示撤回而非空字串譯文。此入口只存人工選用意圖；實際 DB selection 是 D，先驗人工意圖，再依既定官方 counterpart 優先規則投影，每鍵最多一筆。不能把最新 revision、較新時間、檔案序或 origin 排序當作任意候選的採納決定；沒有可採納譯文時不產 selection。
+sentence_template.data 恰為 `{id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash,supersedes_id}`；inventory_id 指清冊 entry 的 id，source_span 沿 §4，source_lang/level 與來源／entry 相符。normalized_text 從來源重建；完整 content_hash 仍沿 build-db §14 的六欄 `{level,source_lang,normalized_text,normalizer_version,semantic_variant,parameter_schema}`。第一次採納凍結全部內容，不能把舊 10 hex 指紋當完整內容 hash。
 
-**選用失效後的回退提案**：人工意圖選中的版本失效時，取消該選用並列 stale 診斷，不默選較舊人工譯文；新的選用須新決定。官方 counterpart 失效時，僅可回到仍有效、仍通過所有依賴檢查的人工選用意圖，否則回原文。這不變更「官方 counterpart 可用時優先」的既定政策。published 舊快照不回寫，建置 DB 可推導不同有效狀態而保留原 immutable 記錄。
+舊 ID 如能一致重建且具有唯一 slot schema，可直接凍結為可用模板；若同一舊 ID 成員的字面 N／slot 角色不同、語義需拆分，舊 ID 與原 normalized 留清冊，分支各採納新 ID 並 supersedes 舊 ID，不強行給舊分組一個假 schema。supersedes 可指清冊內尚未可翻譯的舊 ID；匯入 sentence_template FK 前須有其已核可完整 payload，未具備時保留清冊中的分叉關係作來源追溯，DB supersedes_id=null，不造假父列。
 
-| 變更或反例 | 失效範圍與修復 |
+新模板 ID 用 T/C＋完整 payload hash 前 16 hex；碰撞只將新鍵逐次加 2 碼至 64，永久登錄配發結果，舊 ID 不變。相同 hash 仍比完整 bytes；舊 10 hex 撞異內容或完整 hash 撞異 bytes 均停止匯入。normalizer、參數 schema、語義或 normalized 變更需新 ID；supersedes 禁自指／循環，不自動繼承舊譯本。來源定位換頁但六欄相同可重用模板，追加來源證據不改模板內容。
+
+## 4. 原文分段、參數與譯本
+
+### 4.1 位置與完整覆蓋
+
+binding 由每次建置產生。source_span 固定 `{role,segments,anchor}`，segments 是排序的 `{start,end}` 非空陣列，按**原文 Unicode code point** 半開區間；role 如 §3，anchor 為所屬 body binding ordinal 或 null。一個 body 可以含多段，不必用一個連續 span 包住句中提示。binding.ordinal 按第一個 segment.start 由 0 連續排序；body/layout/header 的 anchor=null，reminder 只有句中者指向 body。渲染輸出 anchored reminder 後跳過其獨立位置，避免重複；layout 依來源順序保留。每個 context 的所有頂層 segments 恰分割完整原文，不重疊、不漏字；exact 空字串用零 binding，unknown 不轉空字串。
+
+| 原文情況 | 分段與渲染規則 | 獨立反例 |
+| --- | --- | --- |
+| 換行、空白、空行 | 先保留 CRLF/LF 與行首尾空白成 layout；layout 使用固定新模板、literal 參數只允許該來源的空白序列，原樣輸出 | trim 後遺漏空行、CRLF 只覆蓋 LF 均失敗 |
+| 只有提示文的行 | 採納分類後整段（含括號）使用新 reminder 模板；沒有 body 仍必有 binding | 舊分類未給 T ID 就丟掉該行失敗 |
+| 句中提示 | body.segments 排除提示，提示另綁 reminder 並 anchor 到 body；譯文先輸出完整 body，再按原文順序附提示，原文欄保持原位置 | 用單一 body span 包住提示再重疊 reminder 失敗 |
+| 同模板有／無提示 | 同一 body payload，提示屬來源 binding，不灌進 body 模板；未知括號仍作 body 規則或報匹配失敗 | 把條件括號一律當提示，或因有提示覆寫 body payload 失敗 |
+| token 定義標頭 | 保留標頭完整 span，新 token_header 模板釘名稱、職業／特性／種類、可選費用／攻防的 slot；不同形狀用不同 schema | 只翻後續能力而略掉標頭、未知形狀硬套固定費用失敗 |
+| NFKC 改變字元 | trace 保存每一正規化片段對應的 raw 區間與前後 bytes；normalizer 僅做明定轉換，不做逐字可逆的假設 | 把全形標點正規化後位置當原文 offset 失敗 |
+| 裸 N／『X』與原文字面字母 | 舊 normalized 原樣留；schema 以 normalized 的位置指明「哪個 N/X 是哪個 slot」，其餘為 literal | 全域 replace N、把字面 N 當數字 slot 失敗 |
+
+layout 不含待翻語義，可機械生成固定模板；reminder/token_header 是新增句型，須像 body 一樣採納其譯本。版次欄位與 section 的完整覆蓋各自核對，不跨欄偷接；提示分類有疑義則保留原文／失敗清單，不擅自取語義等義。
+
+### 4.2 參數 schema 與驗回來源
+
+parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,type,occurrences,reference_kind,min,max}`。name 為 `[a-z][a-z0-9_]*`，唯一；type=uint/literal/reference，reference_kind 為 card/term/vocabulary 或 null，uint 的 min/max 為安全非負整數，其餘為 null。occurrences 是 normalized_text 的不重疊 `{start,end}` 陣列；同 slot 多次出現值須一致。slot 陣列按首次位置排序。舊 `『X』` 的 slot 只覆蓋中間 X，左右引號仍是 literal；params 的 uint/literal 是整數／字串，reference 為 `{kind:card,id}`、`{kind:term,id}` 或 `{kind:vocabulary,vocabulary_kind,vocabulary_code}`，須符合宣告種類與 FK。數字正規化前的 raw 字串與數值分開保存；reference 綁永久概念 ID，不能靠顯示名猜同卡。literal 僅給已核可的格式片段（例如 layout），不得包住整句外文冒充翻譯。
+
+例（全為自撰）：原文 `N測試２` 重建 normalized=`N測試N`。唯一 uint slot `count` 的 occurrences=[{start:3,end:4}]、min=0、max=9007199254740991；第一個 N 是 literal。若另一成員在位置 0 也是數字，兩者不能共用此 schema，分新模板；不能依候選分組的字串相同合併。
+
+「驗回來源」是兩個獨立檢查，不能只把譯文重跑同一個 normalizer：
+
+1. trace 由原文直接取每個 segment 的 raw bytes，連同 layout/reminder/header 按來源位置重組，須逐 byte 等於來源 UTF-8（不依翻譯結果猜回原文）。trace 的 NFKC 對照可多對多；prefix/字數變化不移動原文座標。
+2. 以釘住的分類／normalizer recipe 重算選中 body 等角色，對 literal 段與 slot 的位置、型別、原值、規則分類逐項匹配，產生 normalized 須等於 immutable payload。額外／遺漏參數、未分類片段、無法解析的引用都失敗。第一項防漏原文，第二項防「任意片段都包成 literal」假通過。
+
+template_translation.data 為 `{template_id,lang,revision,text,origin,model_review}`，revision 從 1 只增，origin=project/machine；入口只收已審且 sampled/confirmed 的譯本，投影 status=reviewed。text 使用 `{{slot_name}}`，literal 的反斜線與左右大括號以反斜線跳脫；禁止未知 slot、未閉合括號與未使用的必要 slot，不支援執行運算式。從 slot 的型別與已採納目標語選詞渲染，不用 normalized 中裸 N 當替換語法。
+
+model_review 在 machine 時必填 `{translated_by,reviewed_by,reviewed_at,text_hash,result,resolution}`，記兩個不同模型及版本，text_hash 驗譯本 exact UTF-8；result=agreed/disputed。disputed 須 resolution={reviewed_by,reviewed_at,note} 記使用者處理，且該模板在 batch 的 sample_ids 中；agreed 的 resolution=null。非模型譯本為 null，人工作者仍由 decision 記錄。所有日期是真實事件，譯本改字須新 revision 並重做互審，不能沿用對另一 text_hash 的意見。
+
+首版在 sentence 層翻譯，含只出現一次者；C ID 保留來源盤點，template_component 暫不啟用拼接。若已有 component 資料只作無環與父子來源一致性檢查，不參與渲染，子譯本修訂不影響父句選用。將來要啟用子句拼接，須先補參數映射／子譯本釘版契約；首版可直接採納完整句子譯本，不需等子句拼接實作；尚未翻到的長尾仍按缺譯處理。
+
+## 5. 概念、選詞與數位證據
+
+glossary_term.data 為 `{id,category,concept_key,source_ref,source_span}`，source_ref 指日文來源欄位，source_span 為 `{start,end}` 或 null（全欄），由 exact 摘錄重建 source_ja 的概念名稱；id=`term:`＋人工首次配發的 concept_key（ASCII `[a-z][a-z0-9_.-]*`）。key 以概念命名，如 `rule.example.a`，不以原文字串當唯一鍵、不隨譯名重算；同字異義需不同 key。source_ref 不要求數位卡片的 name 欄，故原始詞只出現在效果文時也能登錄。
+
+| 草稿分類 | 正式去向 |
 | --- | --- |
-| exact 原文變更但規則等義 | 新 text_unit/context，不搬舊 selection；原 translation 對歷史 owner 可保持有效，對新 owner 不適用，報告列受影響用途待重建；不能因 rule_hash 相同繼承譯句 |
-| normalizer/schema/semantic_variant 或 params 改 | 新 template／binding／translation，反查所有直接與 component 傳遞依賴，舊產物不得用於新組合 |
-| 模板譯本出現更高已審修訂 | 依 binding 反查選用者，舊已生成譯文對當前模板選用 stale；新生成、重驗與採納，不原地換字 |
-| 選定術語修訂，即使文字恰相同 | 按 choice 精確版本反查 translation_term 與參數依賴；舊依賴 stale，重核來源/概念/authority，不能只比輸出字串 |
-| 日英兩端任一規則、名稱或 source 證據變 | 按 §7 scope 重驗，移除不再適用的 shared_jp/counterpart；不必讓 JP 自有且依賴未變的繁中譯文 stale |
-| 同字異義 reason／owner 改、身分修復 | 舊 context/use 不改，新 owner 追加新物件與決定；同一 owner 的改綁依下述修正邊界阻擋，重驗跨區全部端點，不沿用 repair 前的對應 |
-| 只改 YAML 排版或其他不相關卡的譯文 | canonical 內容與依賴都不變，不產假 stale；已釘完整 authored revision 仍另留重建輸入紀錄 |
+| keyword、ability、tribe | glossary category keyword、ability、trait |
+| verb、zone、other | glossary category rule_term；other 須逐概念核對，不機械確定語義 |
+| class、card_type | vocabulary(kind=class/type) 的 label，不建立假的 glossary category |
+| 卡名候選 | glossary category card_name，與 SVE／數位同概念決定分開驗 |
 
-**同一上下文／用途的修正邊界（提案）**：本版 binding/use 首次建立後不可變。模板 supersedes 不自動改既有 binding；舊 template 及其仍有效的譯本可繼續使用。若必須更換同一 `(context,ordinal)` 的模板／參數，或同一 `(owner,field,ordinal)` 的 context，現有 DB 唯一約束無法同時保留兩組歷史引用，不能硬塞第二筆或假造 semantic_variant。提案先列需修正清單並停止受影響選用；啟用此類改綁前須另定 binding/use 版本化契約及 DDL，再恢復選用。新原文產生新 context/new owner 不受此限；模板譯本與術語選詞本身的修訂仍依上表處理。
+glossary_choice.data 為 `{term_id,lang,value,origin,concept_evidence,adoption_no,predecessor}`；vocabulary_choice 將 term_id 換成 `{vocabulary_kind,vocabulary_code}`。value 可為 null，或 `{kind:authored,text}` 或 `{kind:source,source_ref,span}`，span 為 `{start,end}` 或 null（取全字串）。parser 必須提供欄位語言，jp_ref 為 ja、target_ref 與 lang 相同；原文整欄 hash 加 exact span 足以驗摘錄，不要求摘錄等於整份 text_unit。origin 沿 build-db 的 official_svwb/official_sv1/project/community/machine。null value 是明示撤回；有效 glossary_choice 投影為每 `(term_id,lang)` 唯一 glossary_translation，保留其決定與來源；舊 choice 留 authored。vocabulary_choice 則推導 label 的翻譯與 FieldTranslation。
 
-## 7. 語義組、跨區核對與 hash 遷移（提案）
+concept_evidence 是以下 tagged union 的陣列；官方 origin 至少一項且支持同一概念與 value 的 exact 譯詞，不能只證明兩詞曾在同一頁出現：
 
-[ADR-0013](../adr/0013-rule-bundle-migration.md) 記錄遷移步驟；hash recipe 沿 build-db §14，不新增另一種 rule-bundle-v2。未啟用 semantics 時維持原先能力邊界，不回寫首發已有等義證明。首個需要 v2 的跨區共用或等義功能才啟用完整三表與驗證器，不能只建空表稱支援。
-
-semantics data：face_semantics 為 `id,face_id,region,rule_text_ref,rule_section_refs,normalizer_version,rule_hash`；refs 依 §4 source_ref，sections 有序，投影 text IDs。revision_semantics 為 `revision_id,semantic_id,adoption_no,predecessor`；semantic_reference 為 `semantic_id,target_face_id,relation`。同面同區；初始 exact 原文、不省略內容的機械映射可不要求人工 decision（工具推導，不經本人工封套偽造決定）。跨表記、刪提醒／重複 token 等轉換必釘核可政策或 confirmed 全體 checked 與原證據。semantic_reference 的完整清單跟該 semantic 首次封存，修改即新 semantic_id，不在舊 semantic 追加或刪邊。
-
-region_text_review.data 完整欄位如下；保存於 authored，只有 build-db 原有欄投影到該表，其他作決定／F1 證據，不改 DDL。
-
-| 欄位 | 意義 |
+| kind | 其餘完整欄位與核對 |
 | --- | --- |
-| card_id, region | 共同 card 與 target region=en；兩端面對應必經已確認身分登錄 |
-| source_jp_hash, source_region_hash, hash_recipe | 目前兩端精確 bundle；hash_recipe=rule-bundle-v2；不比較 hash 相等來推跨語言等義 |
-| state, checked_at | pending/aligned/divergent，真實核對 UTC 時間；aligned 需 sampled/confirmed 的語義決定 |
-| faces | 按 face_id 排序，每項 `{face_id,jp_revision_id,region_revision_id,jp_semantic_id,region_semantic_id}`；涵蓋全部面，不省背面 |
-| display_checks | 每項 `{face_id,field,ordinal,jp_source_ref,region_source_ref,state,reason}`；field=name/effect/section；ordinal 規則同 §5，state=pending/aligned/divergent，reason 非空；釘 exact 兩端顯示文字、完整段落及語義差異，不能只用 rules hash 通過卡名／提示翻譯 |
-| divergence_refs | 去重的既有 divergence 決定引用；divergent 必須有 confirmed scope 證據才採納 EN 來源例外；pending 只留診斷 |
-| adoption_no, predecessor | 同雙端 hash 鍵的追加決定鏈；兩端 hash 變更則新鍵，不改舊 review |
+| digital_name | `digital_face_id,sve_owner,jp_ref,target_ref,decision_id`；同概念採納連 SVE owner 與數位面，兩 ref 為其語言卡名 |
+| effect_term | `jp_ref,jp_span,target_ref,target_span,concept_note`；對齊效果文中同一術語的摘錄，span 精確；concept_note 寫概念理由，不抄官方卡文 |
+| dictionary_entry | `dictionary_kind,entry_key,jp_ref,target_ref,concept_note`；dictionary_kind=skill_names/tribe_names，entry_key 釘同一官方字典鍵，核對該 key 真正代表的概念 |
 
-aligned 只表示該雙端與已核對 scope 的語義對照；identity confirmed 必須另外存在，不能由 aligned 建共同 card。DB state 管規則對照，display_checks 管逐欄顯示適用，某欄 pending 不可輸出該欄 counterpart。缺整面、未知段落、缺 token 規則目標、未確認面對應或釘 hash 不符均不能產可用 aligned。批次新增成員不得繼承原 sampled；display 檢查雖存在某一欄，不得擴稱其他欄已核。
+ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital_face/name_unit_id，可承接效果文摘錄與官方詞彙字典的證據。既有草稿摘錄缺 raw 版本或精確位置時先重定位、驗來源並採納，不能把草稿當官方證據。
 
-規則 bundle 不含 display revision ID／reminder，故等義表記可重用規則核對；**display_checks 仍驗 exact revision/來源**，換字後重新核對並追加決定，不能自動把舊卡名／提示審查搬過來。這也適用官方 counterpart：卡名核 exact 名稱，效果與 sections 各自驗完整 display scope，不因 rules aligned 就省掉字句／版本核對。
+數位 JSON 的**已封存批次是匯入前提**，本文件不宣稱 sv1/svwb 已有批次；實際 batch ID 到位、閉包驗過才可採納。不用 URL／latest API 回應補缺來源。卡名需 digital_card/face/text 與同概念最小閉包，術語字典僅需相應來源與 parser，不為字典建假數位卡。
 
-## 8. 顯示與發布邊界
+參數所指卡名／術語沒有已採納目標語譯詞時，整個該 context 為缺譯並回原文，列 `missing_term_translation`；不把日文名悄悄嵌在繁中完整譯文中。無法對到 card 的引用名先作待確認的 term 候選，不能猜 card ID；已有原創譯詞並採納後可正常渲染。
 
-沿 [snapshot-format §5](snapshot-format.md#5-語言矩陣與取用)：版次決定卡圖／原文，介面語言決定翻譯列，切語言不暗換 printing。JP 原文＋繁中、EN 原文＋繁中皆保留原文；日／英 UI 不回退繁中。同語原文不重複顯示翻譯；缺繁中明示「尚無繁中，顯示原文」。繁中標「非官方翻譯」，數位官方卡名可另外標明其來源，不能抹去效果非官方標籤。機器翻譯一律標「機器翻譯・非官方」，審核不移除 machine 標示。
+## 6. 推導、穩定 ID 與修訂
 
-官方 EN 尚未到齊時的英譯另標來源狀態；未確認 EN 發行狀態時，不把 unmapped 寫成「尚未發行」。printed 模式只顯示該印刷文字版本適用的 FieldTranslation，未知 printed 不拿 current 譯文冒充。未完成某一句模板不可把半翻結果標完整；pending wording 不授權跨區共用。
+### 6.1 每次建置的資料
 
-公開只投影已選 translation/text 與 FieldTranslation，不出 context、inventory、逐列 hash 或模板依賴。無翻譯時回原文，不阻止查卡／手動；來源損壞、輸入 hash 錯或引用閉包不完整是建置失敗，不能降為「尚無翻譯」吞掉。名稱翻譯納入 bootstrap 及容量驗收，效果等按既有分片規則；不以 docs 範例宣稱雙區三語容量已通過。
+工具依凍結原文、有效人工決定與釘住的推導 recipe，順序產生 context→use/binding→translation→selection。translation.source_hash 驗 context 的 exact 原文 UTF-8；translation_binding 完整列出該 context 的 binding 與精確 template_translation 三欄主鍵，template_id、lang、context 均須吻合。translation_term 列全部直接與參數概念，依賴鍵另釘所用 choice record_hash；不能只記 term_id 丟失選詞修訂。同一 exact source/variant 共用 context，同一模板／參數只用一種有效翻法；新語義需人工 context_assignment，不能每卡自由翻。
+
+| 人工例外的 data（另加 adoption_no/predecessor） | 意義 |
+| --- | --- |
+| context_assignment: `owner,field,ordinal,source_hash,variant,concept_key,reason` | source_hash 精確釘原文；variant=default 或已採納 Code，非 default 需同字異義理由；續版可改回 default |
+| template_match: `context_key,source_hash,matches` | context_key 同下列 `{source_unit_id,variant}`，source_hash 必與該 unit 相符，避免不同語言同 bytes 撞鍵；matches 為 `{template_id,source_span,params}` 陣列；null 撤回例外回機械匹配，否則完整覆蓋且通過 §4；變更 schema／normalizer 需新 template_id |
+| translation_override: `context_key,lang,action,template_revisions,term_choices,reason` | context_key={source_unit_id,variant}；action=suppress/pin/default，後兩陣列在 pin 指定 `{template_id,revision}`／`{term_id,choice_record_key,record_hash}`，其餘為空；只選已採納依賴，不存另寫全文 |
+
+owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派列失效、不搬到新字串；新原文無歧義則回 default 自動重建，有歧義才等新指派。無例外時選各模板最高已採納譯本與有效術語 choice；pin 是已採納的明示例外。普通機械匹配只選當前有效且可無歧義匹配的模板，superseded 模板保留來源歷史；新分叉未能唯一匹配即列人工失敗清單，不任取 ID 最大者。
+
+**B2 採方案 a：binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
+
+歷史人工譯本與決定仍保存；歷史**推導結果**由對應 F1 輸入、演算法版本與舊快照重現，不要求把相互衝突的全部歷史 binding 同時塞進單一當前 DB。當快照需歷史 face_revision 時，為該 exact source 各自推導合法 context/binding。未被本次輸出引用的舊生成譯文不載入當次 DB，也不進 git。
+
+### 6.2 穩定 ID
+
+以下 H 為 build-db §14 canonical-json-v1 的完整 SHA-256（64 小寫 hex）；kind/recipe 字串參與 hash，命中仍比完整輸入。除模板的既定加長政策外，這些完整 hash 碰撞一律停止，不換舊鍵。所有輸入均排除時間、建置次數、路徑和無關卡；集合排序，順序有意義者保留。
+
+| 物件 | ID 與 hash 輸入 |
+| --- | --- |
+| context | `ctx:`＋H(`{recipe:context-v1,source_unit_id,semantic_variant}`) |
+| use | `use:`＋H(`{recipe:use-v1,owner,field,ordinal,context_id}`) |
+| binding | `bind:`＋H(`{recipe:binding-v1,context_id,ordinal,template_id,params,source_span}`) |
+| translation | `tr:`＋H(`{recipe:render-v1,context_id,target_lang,dependency_key,text,origin,authority}`)；dependency_key 釘排序的 binding、精確模板譯本／術語 choice record_hash；counterpart 另釘兩端 owner/ref 與核對決定 |
+| glossary_term | 人工永久 `term:<concept_key>`，見 §5 |
+| face_semantics | `sem:`＋H(`{recipe:semantics-v1,face_id,region,rule_text,rule_sections,normalizer_version}`)；exact 內容與有序 sections，語義引用閉包另進 rule bundle |
+
+推導 translation.revision 為同一完整 translation hash 的前 13 hex 轉非負整數（52 bit，符合 UInt）；它是穩定內容版本鍵，不表示時間順序。同 `(context_id,target_lang,revision)` 撞不同完整 translation.id 即停止；人工 template_translation.revision 仍是只增修訂序號。translated_by 記釘住的 renderer／人工譯本作者追溯，translated_at 取依賴已採納譯本／核對的最晚時間，不用執行當下時間。生成效果譯文若任一語義模板／選詞來自 machine，origin=machine，否則為 project，authority=unofficial；單一已採納名稱／label 原樣取詞時保留該詞 origin，digital_official 僅對有同概念證據的數位官方名稱／標籤。counterpart 固定 official_sve/sve_official。tokens 首版一律 null：目前沒有獨立公開翻譯 token 契約，不新增假引用。
+
+### 6.3 來源 owner 與例子
+
+use 的 owner 是原文引用者，恰一組；context.source_unit 必須等於該 owner 的原文。ordinal 只在 section/action_label 非 null。field 的正式 mapping 如下；商品使用 label，與 snapshot-format 一致。
+
+| owner.kind／鍵 | 合法 field |
+| --- | --- |
+| face_revision／revision_id | name、effect、section |
+| printing_face／printing_id,face_id | name、effect、flavor、section（只用該版已知 printed 字串） |
+| qa_version／qa_version_id；cr_clause／cr_clause_id | 前者 question/answer；後者 effect（條文） |
+| vocabulary／vocabulary_kind,vocabulary_code；product_family／product_family_id；product／product_id | label |
+| keyword／keyword_id | label、effect（definition）、action_label |
+
+例 A（一般 owner）：合成 JP revision RJ.effect=U0，U0.text=`N測試２`。context C0=(U0,default)，use=(RJ,effect,null,C0)，binding 套 §4 的 count=2；已採納譯本 `測試值 {{count}}，符號 N` 產 T0，selection(C0,zh-Hant)=T0，RJ 的 FieldTranslation={field:effect,ordinal:null,target_lang:zh-Hant,translation_id:T0,basis:own_source}。把 count 由 2 改 3 卻沿用 source_hash 或 T0，必失敗。
+
+例 B（同字異義）：RA.name、RB.name 都指 U1=`星`，但人工分別採納角色概念與物件概念，variant=character/object。工具產 CA=(U1,character)、CB=(U1,object)，分別 use→RA/RB，採納選詞與名稱模板產 TA=`星角色`、TB=`星物件`；selection(CA,zh-Hant)=TA、selection(CB,zh-Hant)=TB，兩個 FieldTranslation 各為 own_source。補登 RB 的物件指派後直接重建其 use/binding/TB，無須修改舊 use 或為整卡補一份人工全文。
+
+### 6.4 更新與失效
+
+模板譯本或術語 choice 更新後，反查精確依賴、重新渲染、機械驗證並產新 translation ID／selection；成功者自動選用，**不要求每張卡再簽一份 translation/selection**。原文或語義改變時舊產物不適用新 owner/context，仍從新來源重新匹配。機械失敗者列原因、該 context 回原文；缺任一句不能冒稱完整翻譯。模板來源／hash 損壞或引用閉包錯是建置錯誤，不吞成一般缺譯。
+
+新渲染批次必報 generated_rows、changed_rows、failed_rows、sampled_rows 及精確輸入／輸出成員 hash。已有核可抽查政策時依其檢查；首輪照 §1 已核可的高頻模板／模型分歧抽查流程，記實際樣本及核對者，不預填已抽查。抽查失敗隔離受影響批次並修人工來源／匹配規則，不原地修改生成文字。舊生成物可留舊快照／報告作比較，不回填成新來源的 fresh。
+
+## 7. 跨區核對、counterpart 與語義組
+
+region_text_review.data 恰為 `{card_id,region,jp_hash,region_hash,hash_recipe,faces,display_checks,state,checked_at,adoption_no,predecessor}`。region=en，hash_recipe=rule-bundle-v2；faces 每項 `{face_id,jp_revision_id,region_revision_id,jp_semantic_id,region_semantic_id}`，涵蓋全部面、按 face_id 排序。jp_hash/region_hash 投影 source_jp_hash/source_region_hash；跨語 hash 不要求相等，state=aligned/divergent（pending 留候選）。aligned 需 sampled/confirmed 語義對照決定，兩端身分仍另須 confirmed。
+
+display_checks 每項 `{face_id,field,jp_ordinal,region_ordinal,jp_ref,region_ref,state,reason,counterpart}`，field=name/effect/section/flavor，ref 為 §2 source_ref。預設同面同欄對照由工具列出，採納以雙端精確 hash 的 batch 決定釘住；只有非同欄／跨 ordinal 等例外逐項人工指定。state=aligned/divergent，aligned 的 reason 可空，其他必填；counterpart 為布林，true 僅在 aligned 且該對照已採納時允許。這項決定是 counterpart 原文配對的人工採納，不是把每個推導選用寫進 git。
+
+region_divergence.data 為 `{card_id,region,field_scope,reason,effect,override_dsl_id,resolved,jp_ref,region_ref,adoption_no,predecessor}`，沿 build-db 的 rules/name/all、manual/override_dsl enum；override_dsl 時 ID 必填且可驗。confirmed 決定釘兩端來源與差異，resolved=true 也須新 confirmed 決定與解除證據。投影當前 region_divergence，舊版本留封套。
+
+source_exception.data 為 `{card_id,region,scope,basis,decision_ref,adoption_no,predecessor}`，region=en、scope=rules/name/all；basis=en_only/divergence/default_jp。decision_ref={decision_id,record_key,record_hash}，前兩者指 fresh confirmed_none 或未解 confirmed divergence，default_jp 時 null。各 scope 與證據一致；這是採納英文來源的例外，不豁免文字與翻譯閉包。
+
+### 7.1 counterpart 不占共用 selection
+
+`translation_selection(context,lang)` 僅選本站共用的渲染譯文。官方 counterpart **逐 owner** 推導 translation，FieldTranslation 直接引用，**不寫入共用 selection**。該 translation.context_id 仍是顯示來源 owner 的 context，source_hash 驗該來源；text 取已核對 counterpart 原文，origin=official_sve、authority=sve_official，bindings/terms 空；依賴鍵包含精確兩端 owner/版本／核對決定，所以同 context 可有不同官方 translation ID。derived revision 的碰撞檢查仍照 §6.2。
+
+例 C：K1、K2 的 JP 效果共用 UJ/context CJ，但 EN counterpart 分別為 UEA、UEB；K3 也共用 UJ 卻沒有已核對 EN。K1/K2 分別 own JP use→CJ，建置產 TOA/TOB 並在各自 FieldTranslation 設 official_counterpart；selection(CJ,en) 仍是有效的 project/machine 渲染譯文 TM，K3 用 own_source→TM，缺 TM 就回日文。不能讓 K2 用 TOA 或讓 K3 因同字 UJ 被視為已有官英。
+
+反向 EN→JP 亦按 owner 的已採納 display_checks 直接選官方 JP。JP→繁中 TZ 是共用 selection(CJ,zh-Hant)，已核對 EN 可以 shared_jp→TZ；已確認身分與面對應、文字尚未核對且無已知相關 divergence 時，EN 以 shared_jp_unchecked→TZ 提前顯示並加標示；EN use 仍綁自身 UE/context CE，不能偽造 CE.source=UJ。EN 有相關 divergence 則停止該 scope 的 shared_jp/counterpart，從已採納英文來源例外生成 CE 的 own_source 繁中；name-only 差異不抹掉獨立有效的效果，但規則名稱依賴須重驗。
+
+`shared_jp_unchecked` 僅限 target_lang=zh-Hant、EN 接收端及已確認同 card/face，仍須 JP 譯文 fresh、兩端來源可驗、無相關已知 divergence。它不建立 aligned review，也不影響 DSL/機制的區域阻擋。檢查完成且顯示欄位適用後改為 shared_jp；若核出差異，移除共用、依英文來源例外重算或回 EN 原文。缺來源、身分未確認、表記未定且無可用 current 時不以此例外猜配來源。basis 改變不修改共用 TZ 的內容或 origin。
+
+counterpart 新版到齊時，僅在核對與 freshness 通過後優先於本站選用；失效時回有效本站 selection 或原文，不刪舊機翻歷史，也不令其他 owner 無條件失效。display_checks 驗 exact 字句／版本，rule bundle 則管規則等義，不能互相代替。
+
+### 7.2 semantics 的啟用
+
+語義能力與 [ADR-0013](../adr/0013-rule-bundle-migration.md) 一致：需要 v2 共用時才建立完整 face_semantics/revision_semantics/semantic_reference。初始 exact 原文的機械映射可以推導；跨表記等義／提示或重複 token 移除須釘既有 wording 採納政策／confirmed 決定，不把 identity confirmed 當等義證明。三表從此精確輸入與有效語義決定推導，不新增每卡一份翻譯封套。
+
+rule_hash、references 與 rule-bundle-v2 recipe 沿 build-db §14；unknown 段落、缺同區 token target、漏背面或規則矛盾均不能產可驗 bundle。規則本文、數值、特性、rules_names、normalizer 或 token 規則閉包改就重驗；純已採納表記可共用 semantics，但新 exact 字句的翻譯仍重算。不回寫首發已有等義證明。
+
+## 8. 顯示與發布
+
+沿 [snapshot-format §5](snapshot-format.md#5-語言矩陣與取用)，版次決定原文／卡圖，UI 語言決定翻譯列；日／英 UI 不回退繁中，printed 不冒用 current 譯文。缺繁中明示回原文，機器與非官方來源必有標示，數位官方卡名不把整段繁中效果變官方。標籤文案是呈現方式，不擴張 2026-10-01 來源規則的核可範圍；未核對 EN 提前顯示依 §1 已核可政策；核對完成且適用時改 shared_jp，發現差異則撤下共用並走來源例外。
+
+公開只出選定 translation/text 與 FieldTranslation，不出 context、模板、清冊或稽核 hash。名稱／label 翻譯納入 bootstrap 容量驗收。無翻譯不阻止查卡／手動；本契約不宣稱雙區三語容量或匯入器已驗收。
 
 ## 9. 獨立反例與定向突變驗收
 
-這是後續實作的驗收契約，**不是本文件已執行 production importer 測試的宣稱**。每列由最小合成成功基例只改一件事；驗期望診斷／拒絕或精確選用結果，不以 producer 自己的函式反算當 oracle。成功與失敗數量、真實遷入量及合成突變量分開回報。
+每列以最小合成成功基例只改指定條件，檢查獨立預期；同列多個條件須各跑一例。這是實作驗收規格，不是已實跑 mutant 的宣稱。真實遷入量、合成案例與實跑數分開。
 
-| 編號 | 獨立反例／定向突變 | 預期 |
+| 編號 | 反例／突變 | 預期 |
 | --- | --- | --- |
-| V01 | index 指名分片缺失、未索引分片、../ 或 symlink 各自注入 | 各自拒絕，不掃草稿補來源 |
-| V02 | 修改 record 內容而保留舊 membership_hash；另增樣本集合外項 | 各自拒絕，不能繼承抽查 |
-| V03 | confirmed batch 去掉一個 checked；sampled 清空真人／時間／樣本各一次 | 各自拒絕，不以模型信心代簽 |
-| V04 | source artifact 少一 bytes／缺物件／定位錯行但同 hash 字串 | 各自拒絕，必須驗內容與定位 |
-| V05 | 同 T+10hex 對兩個不同完整內容 | 停止匯入；舊 ID 不重配 |
-| V06 | 保留 ID 只改 normalizer／schema／variant 各一次 | 各自拒絕；新 ID+supersedes 的基例可接受 |
-| V07 | 對新 ID 人為製造短前綴碰撞／全 hash 異 bytes | 前者只加長新鍵，後者拒絕 |
-| V08 | supersedes 自指／成環；component 成環／舊父新增 child 各一次 | 各自拒絕，舊譯不能自動移轉 |
-| V09 | 刪一段 span／重疊一字／用 UTF-16 offset 處理含非 BMP 字元來源 | 各自拒絕；逐 Unicode code point 完整覆蓋 |
-| V10 | 少參數／多參數／card 或 term 懸空各一次 | 各自拒絕 |
-| V11 | use 同時兩 owner／owner 與 source 不同／缺 section ordinal 各一次 | 各自拒絕；EN owner 不可硬綁 JP 字串 |
-| V12 | 把 CXA/CXB 按相同 source_unit 合併，或無理由另建 variant | 前者選譯結果與例 B 不符，後者拒絕 |
-| V13 | binding.context/template/lang 任一與 translation 不符 | 各自拒絕 |
-| V14 | selection 選錯 context／語言、stale 或 draft 各一次 | 各自拒絕，不任取最高 revision |
-| V15 | 選用續版指錯前件／分叉／proposed null 撤回 | 前二拒絕，後者不得改有效選用 |
-| V16 | 只改 exact 原文但維持相同 rule_hash | 新 owner 無舊 translation 選用，舊歷史 owner 可保留 |
-| V17 | 新增更高已審模板譯本／修改 selected term 版本各一次 | 依賴者 stale，無關譯文不變 |
-| V18 | 只有 identity confirmed 卻設 shared_jp | 拒絕；補 fresh aligned 等證據後才可用 |
-| V19 | 只有 aligned 卻未確認 card/face 身分 | 拒絕，不自動配對 |
-| V20 | JP 缺來源便自 EN 翻繁中；把 pending mapping 當 EN-only | 各自拒絕；保持原文回退 |
-| V21 | 同卡 fresh aligned 另建立 EN 繁中重複效果 | 拒絕偏離 JP 來源規則；共用同一 translation.id |
-| V22 | name-only divergence 擴大至全部效果；反向漏擋名稱 | 前者誤失效、後者誤共用均須檢出 |
-| V23 | counterpart 的一端 exact 文字／身分或 bundle 改動 | 受影響投影移除，不能因 official origin 略驗 |
-| V24 | same_character 或同名取代 same_concept；machine 審後改 origin | 各自拒絕；不得漂白來源 |
-| V25 | 把數位官方卡名 authority 套整段繁中效果 | 拒絕；效果仍 unofficial |
-| V26 | v1 receipt 只換 recipe=v2 就沿用 verified | 拒絕，需新語義閉包及重驗收據 |
-| V27 | 刪 token target／漏背面／unknown section 改當 reminder | 各自不得產可驗 v2 bundle |
-| V28 | token target 規則變、規則名稱或數值變各一次 | bundle 變且重驗；純已採納表記則規則 bundle 不變 |
-| V29 | 語言切換換 printing、printed 偷用 current、缺翻譯顯示空白 | 各自不符顯示契約 |
-| V30 | 只調 YAML 排版或無關翻譯也令全部 stale | 檢出過度失效；canonical 與依賴未變者維持 |
-
-V31：在同一 `(context,ordinal)` 新增替代 binding，或在同一 owner/field/ordinal 改用另一 context；首版須拒絕並列需版本化診斷，不更名 variant、覆寫舊引用或默選最後一筆。
+| V01 | 缺分片、未索引、../、symlink 各一次 | 各自拒絕 |
+| V02 | 改 record 留舊 record_hash／新增 batch 成員 | 拒絕沿用決定 |
+| V03 | sampled 缺人／時間／樣本；confirmed 漏 checked | 各自拒絕 |
+| V04 | raw 缺 bytes、parser hash 改、定位錯字串 | 各自失敗，不回讀草稿／latest |
+| V05 | 舊 T+10hex 同鍵異 normalized／payload | 拒絕，不重配舊 ID |
+| V06 | 原 ID 改 normalizer／schema／variant | 拒絕；新 ID 可採納 |
+| V07 | 新短 ID 碰撞／完整 hash 撞異 bytes | 只加長新鍵／停止 |
+| V08 | supersedes 成環；component 子譯本變 | 前者拒絕，首版父句渲染不受後者影響 |
+| V09 | 少換行／空行、句中提示重疊、UTF-16 offset | 各自覆蓋驗證失敗 |
+| V10 | 缺／多參數、字面 N 當 slot、引用懸空 | 各自拒絕 |
+| V11 | use 雙 owner／錯 source／缺 section ordinal | 各自拒絕 |
+| V12 | 同字異義合併，或無理由新增 variant | 檢出錯譯／拒絕例外 |
+| V13 | binding.context/template/lang 不一致 | 各自拒絕 |
+| V14 | selection 指錯 context/lang 或未採納譯本 | 各自拒絕 |
+| V15 | 決定續版分叉／錯前件；proposed 入正式分片 | 各自拒絕，候選不占正式鍵 |
+| V16 | 原文改、rule_hash 不變 | 新來源重新匹配，不能沿用舊生成譯文 |
+| V17 | 模板譯字或術語 choice 更新 | 依賴者自動重算選用，不逐卡補簽；失敗列報告 |
+| V18 | 只有 identity confirmed 就 shared_jp | 拒絕冒稱已核對；來源完整且無 divergence 可 shared_jp_unchecked 並強制標示 |
+| V19 | 只有 aligned 就合併 card/face | 拒絕 |
+| V20 | 缺 JP 或 unmapped 當英文獨有 | 拒絕假例外 |
+| V21 | 日英同卡 aligned 卻另翻 EN 繁中 | 檢出違反 JP 來源，應共用 TZ |
+| V22 | name-only 差異漏擋名稱／誤擋獨立效果 | 各自檢出 |
+| V23 | 一端文字／身分／規則改、counterpart 不變 | 移除受影響選用，其他 owner 不受牽連 |
+| V24 | same_character 代替同概念；machine 改成 project | 各自拒絕 |
+| V25 | 官方卡名使整段繁中效果變官方 | 拒絕 |
+| V26 | v1 證據只改 recipe 名變 verified | 拒絕；沒有實例不造遷移收據 |
+| V27 | 漏 token 標頭、缺 target、漏背面、unknown 當提醒 | 各自失敗 |
+| V28 | token 規則／數值／規則名稱變；純表記變 | 前者 bundle 變重驗，後者規則可不變但翻譯重算 |
+| V29 | 語言切換換 printing、printed 用 current、缺譯空白 | 各自檢出 |
+| V30 | 只改無關卡、執行時間、YAML 排版 | 同輸入 translation ID 不變 |
+| V31 | 拆模板／修 normalizer／補 variant／改商品名 | 新建置合法重建 binding/use，無舊組 FK，首版不阻擋 |
+| V32 | 兩卡同 UJ、不同 EN；第三卡沒 EN | TOA/TOB 各逐 owner，第三卡只用 TM／原文 |
+| V33 | NFKC 前後字數不同仍用 normalized offset | raw roundtrip 失敗；多對多 trace 基例通過 |
+| V34 | 摘錄不是整欄、字典無 digital_face；改一個 span/key | 前者可採納，錯 span/key 拒絕 |
+| V35 | 改建置時間或重排輸入產新 tr ID／revision | 檢出不穩定；全 hash 或 52 bit 衝突須停止 |
+| V36 | 參數缺譯卻拼原文名、tokens 填未定義結構 | 不產完整譯文／tokens 首版須 null |
+| V37 | 只有提示行沒有 body、模板成員有／無提示 | 均完整覆蓋，新 reminder 譯本獨立，body payload 不改 |
+| V38 | 未核對 EN 隱去標示／解開 DSL，或有 divergence 仍提前共用 | 各自拒絕；完成核對且適用才移除標示 |
+| V39 | 未做人工樣本就將模型互審批次標 sampled；審過 machine 改 project | 各自拒絕，首輪頻率／實際樣本與分歧處理可驗 |

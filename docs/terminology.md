@@ -80,8 +80,9 @@
 | --- | --- | --- |
 | **翻譯上下文** | translation context | 原文字單元與已採納語義變體的組合；同字異義可分開選譯文 |
 | **翻譯用途** | translation use | 精確指向原文所屬的引用者、欄位及段落位置，不是檔案的歸檔 owner |
-| **翻譯選用** | translation selection | 每個上下文與目標語言的唯一有效譯文；跨區是否適用另驗證 |
-| **模板來源清冊** | template source inventory | 永久保存模板舊 ID、完整內容及可驗來源的對照，不是可刪的分類暫存 |
+| **翻譯選用** | translation selection | 每個上下文與目標語言的唯一有效本站譯文；官方 counterpart 另按 owner 選用 |
+| **選詞** | glossary choice | 對指定概念與語言採納的一個譯名，變更追加決定，生成譯文自動重算 |
+| **模板來源清冊** | template source inventory | 保存模板舊 ID 與封存來源／normalizer 的對照，可重建完整內容；不另建永久物件庫 |
 
 ## 規則與效果
 

@@ -1,6 +1,6 @@
 # authored 維護方式
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01 協調者裁定，技術契約）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 ## 1. 路徑與共同格式
 
@@ -19,8 +19,8 @@
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/index.yaml`、`identity-transitions/<sequence>.yaml`，見 §12 |
 | 提案 | 特殊構築 | `overrides/deck-roles/BP01.yaml` |
 | 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
-| 提案 | 模板、詞彙、翻譯 | `templates/BP01/001.yaml`、`keywords.yaml`、`translations/zh-Hant/BP01.yaml` 等 |
-| 提案 | 語義差異、DSL、路由、設定 | `divergences/`、`effects/`、`macros/`、`overrides/routes.yaml`、`config/` 等，見後續各節 |
+| 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
+| 提案 | DSL、路由、設定 | `effects/`、`macros/`、`overrides/routes.yaml`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
 
@@ -209,28 +209,15 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-**使用者已核可（2026-10-01）**：繁中翻譯以日文卡文為來源；日英身分已確認為同一張卡時一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。來源選擇不取代跨區語義核對；未核對不得先用 EN 另翻來繞過 JP 來源規則。完整封套、持久來源清冊、owner／同字異義／counterpart 例子與失效規則見 [翻譯契約](translation-contract.md)，新增格式與政策仍是提案，待使用者決定；本節早期例子只表示邏輯意圖，不作新版可匯入封套。
+**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文獨有才用英文。EN 卡面在同卡身分確認後先顯示 JP 繁中，文字未核對時加「日英文字尚未核對」標示；核對完成且適用時移除標示，已知 divergence 不共用受影響欄。這不放行未核對的 DSL／機制或官方 counterpart。
 
-`sentence_template` 一個 ID 就是一份不可變內容；既有 prefix+10hex ID 保留、碰撞檢查必做。完整內容 hash 包含 `normalizer_version/parameter_schema/semantic_variant`；變更新增 ID＋supersedes，不設 `template_revision/current` 指標。模板翻譯自身仍可有不可變 revision，不是禁止翻譯修字。
+**同日已核可的首輪方式**：先翻高頻模板、長尾後補，不按卡包；每個模板由一個模型翻、另一個模型審，使用者抽查前約 100 個高頻模板及所有模型分歧。模型翻譯仍標 machine，實際完成樣本與精確成員才可形成 sampled batch，不預填確認。
 
-EN 身分確認且文字對照完成，無 divergence 時自動選官方英文、共用 JP 繁中與 DSL。例外格式：
+[翻譯契約](translation-contract.md) 定義採納封套、來源清冊、owner／同字異義／counterpart、原文分段與重建規則。依協調者技術裁定，只有人工決定進 authored；context/use/binding、渲染後譯文與 selection 每次建置推導，不逐卡保存或重簽。模板拆分與用途改綁在首版即以重建處理，來源只用既有封存批次，不新增永久物件庫。
 
-```yaml
-authored_format: 1
-kind: region_divergence
-records:
-  - card_id: "c:example"
-    region: en
-    field_scope: rules
-    reason: "英文仍是舊語義，待核對官方更正"
-    effect: manual
-    override_dsl_id: null
-    resolved: false
-    decision_id: example-divergence-review
-    evidence: []
-```
+sentence_template 的 ID 與完整六欄 payload 不可變；既有 prefix+10hex 保留，新 normalizer/schema/語義需新 ID 與 supersedes。模板譯本有自己的只增 revision。跨區 divergence 的完整封套改由 translation-contract §7 定義，本節不另留一份不相容的舊示意格式。
 
-這是例子而非可發布 confirmed 事實。翻譯 origin/authority 分開，效果永遠 unofficial；繁中來源跟 JP，適用 EN 的判斷由建置輸出 FieldTranslation，不在瀏覽器猜。
+origin/authority 分開：本站效果翻譯永遠 unofficial；官方 counterpart 逐 owner 取有證據的官方原文，不占共用 translation_selection。JP 繁中透過 FieldTranslation 選給 EN：已核對為 shared_jp，尚未核對為 shared_jp_unchecked；兩者都不把 EN owner 的原文改成 JP。
 
 ## 7. DSL 與拒絕輸入
 
@@ -254,7 +241,7 @@ route/default 純推導；authored 只寫 alias、variant `route_override`、`de
 
 wording diff 封套可一次簽 confirmed，但 `sample_ids` 必須列全部 checked 成員；不能用抽樣認定整批全都等義。使用者 2026-10-01 核可的規則集可按 §9.5 完整檢查涵蓋差異，須區分政策檢查與逐組人工核對。scope=record 的三個 batch 欄位皆 null。初始 exact 原文/無差異採機械路徑，省略提醒或共用語義才檢正規化政策。保留 `printing_face_observation` 與 `revision_semantics`，最新表記改顯示、等義 bundle 保持；真規則或 token 依賴改動才重驗 DSL。對同一頁不同時間的更新也先分觀測，不一律當互斥衝突。
 
-`translation_context` 預設 `semantic_variant=default`；只有採納的同字異義例外才能另配 variant。`translation_use` 釘具體 owner/field/ordinal，`translation_selection` 依 `context/target_lang` 選同模板同參數唯一翻法。不是每張卡任意自由翻；模板/術語更新仍沿 binding 反查。建置資料庫的上下文關係不出貨，卡表快照的 FieldTranslation 指已選 translation.id。
+`translation_context` 每次建置推導，預設 `semantic_variant=default`；只有採納的同字異義例外才能另配 variant。`translation_use` 釘具體 owner/field/ordinal，`translation_selection` 依 `context/target_lang` 選同模板同參數唯一翻法。不是每張卡任意自由翻；模板/術語更新仍沿 binding 反查。建置資料庫的上下文關係不出貨，卡表快照的 FieldTranslation 指已選 translation.id。
 
 SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；匯入 snc-list 只產候選，不把 high 當 confirmed。最小封套欄位為 `printing_id/card_id/region/card_no/card_no_state/catalog_state/listing_confidence/serial_total`、references（url/role/locator）、inclusions（`product_id/inclusion_kind/date_precision/date_raw/note`）、decision。`normal_counterparts` 全筆確認後才連同 card；無對應可登 `region_mapping_review` 的 `confirmed_none`＋查核範圍/`as_of`。
 

@@ -70,7 +70,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 | WordingView      | `region, state:pending, display:{revision_id?,basis:current/latest_known_release/candidates}, candidates:[{printing_id,revision_id?}], undated_printing_ids:[id]`；暫顯不等於 current，見 §2.3                                                                                                                                         |
 | ObservedText     | `revision_id?, state:available/missing_effect/correction_conflict, source_url`；同版次觀測，不等於 printed，見 §2.3                                                                                                                                                                                                                    |
 | Section          | `ordinal, text_unit_id, kind`                                                                                                                                                                                                                                                                                                          |
-| FieldTranslation | `field:name/effect/flavor/question/answer/section/label/action_label, ordinal?, target_lang, translation_id, basis:own_source/shared_jp/official_counterpart`；逐 card/face/region 選用，不能只以共享文字單元判同語義                                                                                                                  |
+| FieldTranslation | `field:name/effect/flavor/question/answer/section/label/action_label, ordinal?, target_lang, translation_id, basis:own_source/shared_jp/shared_jp_unchecked/official_counterpart`；逐 card/face/region 選用，不能只以共享文字單元判同語義                                                                                              |
 | Correction       | `field, corrected_from:JSON, is_corrected:true, reason, source_url?`；綁引用者，不標污染去重文字單元                                                                                                                                                                                                                                   |
 | ErrataVersion    | `id, revision, announced_on?, effective_on?, date_raw?, reason_unit_id?, exchange_offered?, changes:[{face_id,field,before:JSON,after:JSON}], printings:[{printing_id,scope}]`；版本不可變，`scope=listed/confirmed_applies` 沿建置資料庫範圍，面由 `changes.face_id` 定位                                                             |
 | Evidence         | `qa_version_id?, cr_clause_id?, source_url?, role, quote, locator?`；前三欄恰一；非 QA/CR 的官方來源仍保留 URL/quote                                                                                                                                                                                                                   |
@@ -81,7 +81,7 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 卡表快照的 `card_engine_support.shared` 可以是 `missing_dsl`；EN-only 文件放 overrides；`region_blocks` 至少含未確認對應/語義差異/未有該區來源的理由。消費優先選 region override，否則 shared，最後套 `region_blocks`；block 強制手動且合併 reasons。若選中 `status=engine_passed` 但有 block，該區 `effective_status` 降為 reviewed（顯示「共用實作已審核，此區待核對」），不能在未實作清單顯示此區已通過。其餘四態保留並附區域原因；automatic 恰為 `effective_status=engine_passed`。不得從沒有 override 推斷「英版已確認」；block 完整性是發布閘門。
 
-translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official_sve`），無需人工 equivalence 表。繁中共用的 `source_unit_id` 仍是 JP 來源，`FieldTranslation.basis=shared_jp` 明示；有 divergence 不得輸出該選用。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
+translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen translation 可供多個引用者。官英/官方日文 counterpart 由建置產生選用記錄（`origin=official_sve`），無需人工 equivalence 表。繁中共用的 `source_unit_id` 仍是 JP 來源，`FieldTranslation.basis=shared_jp` 明示已核對，shared_jp_unchecked 明示未完成文字核對；有相關 divergence 不得輸出任一共用選用。官方 counterpart 逐 owner 直接引用，不占共用 translation_selection。詞彙與商品標籤亦在引用者存 FieldTranslation，不以共享 `source_unit` 字串去猜唯一翻法。keyword action 用 `field=action_label`、ordinal 對應 actions 順序；其他標籤 field=label。
 
 `keyword.name_unit_id` 由建置資料庫的 `glossary_term.source_ja` 建文字單元，translations 選同概念多語名稱；`definition_unit_id` 另供說明。relation/action 篩選的三態必合併兩個稀疏集合：指定 relation/action 在 projection 集合內→present；無吻合但 `coverage.complete_all=true` 或 keyword 在依 `complete_mode` 解碼的 complete 集合→absent；否則 unknown。另一 relation 已 present 不能推本項 absent。未列 coverage 等於尚未檢查；`partial_keyword_ids` 不代表完整。只有 fresh 標籤進 projection，universe/source/producer 改版重算 coverage；EN region block 使不適用的 shared 結果 unknown。config.search 的版本必與 reader 能力匹配，normalized 別名與使用者輸入用同一規則。
 
@@ -212,9 +212,11 @@ R2 永久保留所有已發布快照清單及其引用的 text/完整文字包/�
 
 ## 5. 語言矩陣與取用
 
-**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。繁中標「非官方翻譯」，機器翻譯另標「機器翻譯・非官方」；審過仍保留 machine 來源。來源選擇與 shared_jp 適用的區分及修訂失效詳見 [翻譯契約](translation-contract.md)，不新增公開欄位。
+**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。同日追加核可：EN 同卡身分確認後先顯示 JP 繁中，文字未核對時標「日英文字尚未核對」，完成核對且適用後移除；公開以新增 basis 值 shared_jp_unchecked 區分。來源、首輪高頻模板／模型互審與使用者抽查政策詳見 [翻譯契約](translation-contract.md)。
 
-卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊自動優先，機翻歷史留建置資料庫；繁中跟 JP，但 EN divergence 不套用 JP 譯文。
+機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。此呈現文字與未核對標示並存，不把未核對譯文改成 aligned，也不放行對戰自動能力。
+
+卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，機翻歷史由當時的 F1 輸入／譯本決定與舊快照重現；繁中跟 JP；EN 身分已確認、來源完整且無相關 divergence 時先輸出 shared_jp_unchecked，核對後改 shared_jp。
 
 | UI      | JP 卡面                                           | EN 卡面                             |
 | ------- | ------------------------------------------------- | ----------------------------------- |
@@ -256,7 +258,7 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 卡表快照的 `translation.source_unit_id` 由建置資料庫的 `translation.context_id→translation_context.source_unit_id` 投影；context/owner bindings 不出貨。不同 context 選出的 translation.id 可以指相同 `source_unit`，但 FieldTranslation 明確指定所用 translation，不全域依 `source_unit` 找唯一譯文。`stamp.series_code` 指 `vocabulary(kind=stamp_series)`；`search_alias.kind=stamp` 指單一 stamp.code，`kind=stamp_series` 指系列 vocabulary.code。
 
-`shared_jp/official_counterpart` 的 FieldTranslation 從已核對的來源 owner/use 及跨區關係推導，不偽造 EN 欄位擁有 JP 原文字串。只有 `own_source` 才以顯示引用者的原文直接核 `context.source_unit`。這項建置驗證不出貨 dependency 表。
+`shared_jp/official_counterpart` 的 FieldTranslation 從已核對的來源 owner/use 及跨區關係推導；`shared_jp_unchecked` 從已確認同卡同面的 JP use 推導，強制未核對標示且不接受已知相關 divergence，不偽造 EN 欄位擁有 JP 原文字串。只有 `own_source` 才以顯示引用者的原文直接核 `context.source_unit`。這項建置驗證不出貨 dependency 表。
 
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
