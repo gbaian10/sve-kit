@@ -19,6 +19,12 @@ class LocalizedText(RecordData):
     text: str
 
 
+class Language(RecordData):
+    code: Lang
+    fallback_order: tuple[Lang, ...]
+    display_name: Text
+
+
 class FamilyData(RecordData):
     id: Text
     code: Code

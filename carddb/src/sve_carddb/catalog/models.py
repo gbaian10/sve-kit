@@ -1,0 +1,41 @@
+"""Caller-pinned vocabulary inputs, without introducing an authored file format."""
+
+from typing import Literal
+
+# ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves nested models and constrained aliases at runtime
+from sve_carddb.catalog.symbols import Symbol
+from sve_carddb.products.models import Code, Lang, Language, LocalizedText
+from sve_carddb.registry.records import RecordData, Region, Text
+
+
+class Term(RecordData):
+    kind: Code
+    code: Code
+    label: LocalizedText
+    active: bool = True
+
+
+class Alias(RecordData):
+    kind: Code
+    code: Text
+    lang: Lang
+    text: Text
+    normalized: Text
+    decision_id: Text | None = None
+
+
+class NameBinding(RecordData):
+    face_id: Text
+    region: Region
+    official_name: Text
+    role: Literal["collab", "treated_as"]
+    decision_id: Text
+
+
+class Catalog(RecordData):
+    languages: tuple[Language, ...]
+    terms: tuple[Term, ...]
+    aliases: tuple[Alias, ...]
+    symbols: tuple[Symbol, ...]
+    normalizer_version: Text
+    names: tuple[NameBinding, ...] = ()

@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_inputs import input_record
+from sve_carddb.catalog.rules_names import populate_rules_names
 from sve_carddb.products import populate_product_preview, product_preview_uses
 from sve_carddb.text_observations.importer import populate_text_observations
 
@@ -12,6 +13,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext, InputRecord, SourceUse
+    from sve_carddb.catalog.models import Catalog
     from sve_carddb.products import Language
     from sve_carddb.products.loader import ProductSnapshot
     from sve_carddb.products.models import LocalizedText
@@ -46,6 +48,7 @@ def populate_text_preview(  # ruff: ignore[too-many-arguments] -- one transactio
     languages: tuple[Language, ...],
     stores: Mapping[str, Path],
     official: OfficialProducts | None = None,
+    catalog_config: Catalog | None = None,
 ) -> InputRecord:
     """Retain diagnostic parents for quarantined observations inside the bundle transaction."""
     expected = text_preview_uses(catalog, plan, stores, official=official)
@@ -62,6 +65,11 @@ def populate_text_preview(  # ruff: ignore[too-many-arguments] -- one transactio
     texts = populate_text_observations(
         db, plan, build=build, vocabulary=vocabulary, published=published
     )
+    populate_rules_names(db)
+    if catalog_config is not None:
+        from sve_carddb.catalog.importer import populate_catalog  # ruff: ignore[import-outside-top-level] -- the optional catalog importer shares the text interner
+
+        populate_catalog(db, catalog_config, build=build, published=published)
     result = input_record(build, (*identity.uses, *texts.uses))
     result.verify(db, build, expected)
     return result
