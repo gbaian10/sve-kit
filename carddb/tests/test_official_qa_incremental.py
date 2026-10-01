@@ -2,7 +2,7 @@
 
 import asyncio
 import shutil
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from itertools import pairwise
 from typing import TYPE_CHECKING, cast
 
@@ -12,6 +12,7 @@ import pytest
 from sve_carddb.card_extras.generation import root_key
 from sve_carddb.card_extras.incremental import QACrawler
 from sve_carddb.card_extras.qa_archive import FrozenOfficialExtras
+from sve_carddb.config import Settings
 from sve_carddb.fetch.client import FetchError
 from sve_carddb.fetch.refresh import RefreshWriter
 from sve_carddb.fetch.writer import Writer
@@ -83,7 +84,10 @@ def sealed(tmp_path_factory: pytest.TempPathFactory) -> Sealed:
 
         async def run() -> None:
             async with httpx.AsyncClient(
-                transport=httpx.MockTransport(server.respond)
+                transport=httpx.MockTransport(server.respond),
+                headers={
+                    "User-Agent": Settings(data_dir=writer.store.data_root).user_agent
+                },
             ) as http:
                 crawler = QACrawler(
                     http,
@@ -226,7 +230,10 @@ def test_interruption_preserves_partial_and_cannot_reuse_previous_complete(
 
         async def run() -> None:
             async with httpx.AsyncClient(
-                transport=httpx.MockTransport(server.respond)
+                transport=httpx.MockTransport(server.respond),
+                headers={
+                    "User-Agent": Settings(data_dir=writer.store.data_root).user_agent
+                },
             ) as http:
                 crawler = QACrawler(
                     http,
@@ -277,7 +284,10 @@ def test_incomplete_fake_discovery_never_validates(
 
         async def run() -> None:
             async with httpx.AsyncClient(
-                transport=httpx.MockTransport(server.respond)
+                transport=httpx.MockTransport(server.respond),
+                headers={
+                    "User-Agent": Settings(data_dir=writer.store.data_root).user_agent
+                },
             ) as http:
                 crawler = QACrawler(
                     http,
@@ -335,7 +345,10 @@ def test_regional_related_card_incremental_contract(
 
         async def run() -> None:
             async with httpx.AsyncClient(
-                transport=httpx.MockTransport(server.respond)
+                transport=httpx.MockTransport(server.respond),
+                headers={
+                    "User-Agent": Settings(data_dir=writer.store.data_root).user_agent
+                },
             ) as http:
                 crawler = QACrawler(
                     http,
@@ -403,7 +416,10 @@ def test_en_listing_detail_fake_server_contract(tmp_path: Path) -> None:
 
         async def run() -> None:
             async with httpx.AsyncClient(
-                transport=httpx.MockTransport(server.respond)
+                transport=httpx.MockTransport(server.respond),
+                headers={
+                    "User-Agent": Settings(data_dir=writer.store.data_root).user_agent
+                },
             ) as http:
                 crawler = QACrawler(
                     http,
@@ -423,3 +439,172 @@ def test_en_listing_detail_fake_server_contract(tmp_path: Path) -> None:
     assert report["complete"] is True
     assert len(tuple(provider.qa_pages())) == 3
     assert report["conflicts"]
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("link_kind", ["pagination", "detail"])
+@pytest.mark.parametrize(
+    "target_kind", ["foreign_host", "other_region", "outside_namespace"]
+)
+def test_external_discovery_rejected_before_request_even_without_http_filter(
+    tmp_path: Path, region: Region, link_kind: str, target_kind: str
+) -> None:
+    host = official_jp.HOST if region == "jp" else official_en.HOST
+    other = official_en.HOST if region == "jp" else official_jp.HOST
+    root = ROOT.replace(official_jp.HOST, host)
+    pages = {
+        url.replace(official_jp.HOST, host): raw.replace(
+            official_jp.HOST.encode(), host.encode()
+        )
+        for url, raw in bodies().items()
+    }
+    targets = {
+        "foreign_host": "https://example.invalid/qa/synthetic/",
+        "other_region": f"https://{other}/qa/synthetic/",
+        "outside_namespace": f"https://{host}/unrelated/",
+    }
+    target = targets[target_kind] + (
+        "?page=2" if link_kind == "pagination" else "detail/"
+    )
+    old = (SECOND if link_kind == "pagination" else DETAIL).replace(
+        official_jp.HOST, host
+    )
+    raw = pages[root].replace(old.encode(), target.encode())
+    requests: list[str] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        # Record every attempted URL; this fake transport permits even foreign hosts.
+        url = str(request.url)
+        requests.append(url)
+        content = (
+            raw
+            if url == root
+            else pages.get(url, pages[DETAIL.replace(official_jp.HOST, host)])
+        )
+        return httpx.Response(
+            200, headers={"Content-Type": "text/html"}, content=content
+        )
+
+    store = store_at(tmp_path)
+    clock = Clock()
+    with (
+        ExclusiveLock(store.lock_path) as lock,
+        Manifest.open(store.manifest_path) as manifest,
+    ):
+        writer = protected(store, manifest, lock)
+
+        async def run() -> None:
+            async with httpx.AsyncClient(
+                transport=httpx.MockTransport(respond),
+                headers={"User-Agent": Settings(data_dir=store.data_root).user_agent},
+            ) as http:
+                crawler = QACrawler(
+                    http,
+                    writer,
+                    region=region,
+                    run_id="source-boundary",
+                    clock=clock.read,
+                    sleep=clock.sleep,
+                )
+                # Isolate parser rejection from the lower Client/Site allow-list.
+                crawler.crawler.site = replace(
+                    crawler.crawler.site, allowed=lambda _url: True
+                )
+                with pytest.raises(FetchError):
+                    await crawler.collect(root)
+
+        asyncio.run(run())
+        assert requests == [root]
+        assert manifest.resources.get(root) is None
+        latest = manifest.generations.latest(root_key(root, region))
+        assert latest is not None
+        assert latest.status is GenerationStatus.FAILED
+
+
+def test_noncanonical_root_rejected_before_any_request(tmp_path: Path) -> None:
+    requests: list[str] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        requests.append(str(request.url))
+        return httpx.Response(
+            200, headers={"Content-Type": "text/html"}, content=bodies()[ROOT]
+        )
+
+    store = store_at(tmp_path)
+    root = ROOT + "?b=2&a=1"
+    with (
+        ExclusiveLock(store.lock_path) as lock,
+        Manifest.open(store.manifest_path) as manifest,
+    ):
+        writer = protected(store, manifest, lock)
+
+        async def run() -> None:
+            async with httpx.AsyncClient(
+                transport=httpx.MockTransport(respond)
+            ) as http:
+                crawler = QACrawler(http, writer, region="jp", run_id="noncanonical")
+                crawler.crawler.site = replace(
+                    crawler.crawler.site, allowed=lambda _url: True
+                )
+                with pytest.raises(ValueError, match="canonical regional HTTPS URL"):
+                    await crawler.collect(root)
+
+        asyncio.run(run())
+        assert not requests
+        assert manifest.generations.latest(root_key(root, "jp")) is None
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("configured", [False, True])
+def test_qa_and_card_requests_inherit_crawler_settings_user_agent(
+    tmp_path: Path, region: Region, configured: bool
+) -> None:
+    host = official_jp.HOST if region == "jp" else official_en.HOST
+    root = ROOT.replace(official_jp.HOST, host)
+    pages = {
+        url.replace(official_jp.HOST, host): raw.replace(
+            official_jp.HOST.encode(), host.encode()
+        )
+        for url, raw in bodies().items()
+    }
+    adapter = official_jp if region == "jp" else official_en
+    pages[adapter.card_url("TEST-001Ⓢa")] = RAW
+    server = Server(Clock(), pages=pages)
+    received: list[str] = []
+
+    def respond(request: httpx.Request) -> httpx.Response:
+        received.append(request.headers["User-Agent"])
+        return server.respond(request)
+
+    store = store_at(tmp_path)
+    settings = Settings(data_dir=store.data_root)
+    if configured:
+        settings = settings.model_copy(
+            update={"user_agent": "Mozilla/5.0 (synthetic configured browser)"}
+        )
+    with (
+        ExclusiveLock(store.lock_path) as lock,
+        Manifest.open(store.manifest_path) as manifest,
+    ):
+        writer = protected(store, manifest, lock)
+
+        async def run() -> None:
+            async with httpx.AsyncClient(
+                transport=httpx.MockTransport(respond),
+                headers={"User-Agent": settings.user_agent},
+                timeout=settings.timeout,
+            ) as http:
+                crawler = QACrawler(
+                    http,
+                    writer,
+                    region=region,
+                    run_id="configured-ua",
+                    clock=server.clock.read,
+                    sleep=server.clock.sleep,
+                )
+                assert (await crawler.collect(root)).complete
+                await crawler.cards(("TEST-001Ⓢa",))
+
+        asyncio.run(run())
+    assert len(received) == 5
+    assert all(value == settings.user_agent for value in received)

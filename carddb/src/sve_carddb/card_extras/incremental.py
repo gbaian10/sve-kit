@@ -54,7 +54,6 @@ class QACrawler:
             ManifestRegion(region),
             lambda url: allowed(url, region),
             self.path,
-            lambda _url: (("User-Agent", "Mozilla/5.0 (compatible; sve-kit)"),),
         )
         client = Client(
             http,

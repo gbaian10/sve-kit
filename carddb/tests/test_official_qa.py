@@ -455,3 +455,9 @@ def test_association_change_reports_downstream_without_inventing_version(
         "translation": None,
         "card_ids": ["card1"],
     }
+
+
+def test_qa_block_outside_expected_container_is_rejected() -> None:
+    raw = bodies()[ROOT] + block("Q999999").encode()
+    with pytest.raises(ValueError, match="Unrecognized Q&A block layout"):
+        parse_qa(raw, url=ROOT, region="jp", kind="index")

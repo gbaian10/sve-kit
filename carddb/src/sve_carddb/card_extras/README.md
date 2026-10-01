@@ -126,15 +126,18 @@ construction identities are never inherited.
 
 `QACrawler(http, refresh_writer, region=..., run_id=...)` uses the existing
 `Client` / `Crawler` and requires a `RefreshWriter` before any request. It fixes
-the minimum gap at two seconds, sends a browser User-Agent, preserves ETags and
-uses conditional requests. A 304 or byte-identical 200 preserves the source
+the minimum gap at two seconds, preserves ETags and uses conditional requests.
+It inherits the supplied HTTP client's browser User-Agent; configure that client
+from `Settings.user_agent`, as the existing crawler's `cli.make_http(settings)`
+does. This adapter supplies no separate User-Agent or per-request override. A 304 or byte-identical 200 preserves the source
 version; a changed body goes through the protected old-version archival and
 backup protocol before replacement. `collect(root)` discovers explicit listing
 and detail links; `cards(raw_numbers)` refreshes explicitly selected regional
 physical card pages and retains their related hrefs. It never fetches unknown
 related targets automatically. Both checkpoint protected history even after an
-interruption. These are library adapters; no automatic production crawl command
-or official endpoint discovery is enabled here.
+interruption. These are library adapters with no execution entry point: no existing CLI or
+other application code calls them, automatically or manually. Calling them
+requires new code supplying an HTTP client and a configured protected writer.
 
 The pure `sources.official_qa` parser retains every `.qa-List_Item` and its
 original card links. Listings use `.qa-Pager` links with explicit `data-page`
@@ -148,13 +151,29 @@ null. `data-state="withdrawn"` is explicit evidence; absence, a 404 or an
 unfetched detail never manufactures withdrawal. Unanchored unnumbered blocks
 are marked as needing identity reconciliation.
 
-These listing/detail signals are an explicit synthetic adapter contract, tested
-in both regions with invented wording. Actual official listing pagination and
-withdrawal markup have not been validated by this change. Before production
-use, verify the signals against separately pinned frozen source examples.
-Missing declarations remain unknown rather than receiving inferred defaults.
+The listing reader was written against an assumed page layout, tested with
+invented pages. Real official JP/EN Q&A listing and detail pages have not been
+checked. Reading real pages with this assumed layout can fail with an error or
+be reported as incomplete. This fails safely, rather than claiming that the
+real Q&A list was read completely; the adapter is not ready for real-site use.
 EN card-page tests use the existing EN icon renderer's `src` plus `alt` contract;
 they do not establish real EN Q&A listing compatibility.
+
+Before connecting real sources:
+
+1. Obtain the user's authorization to request a small JP/EN sample of listing
+   and detail pages, then archive those samples.
+2. Check pagination, counts, dates and withdrawal signals against the frozen
+   samples and change the reader to match the real layout. If the site does not
+   supply counts or withdrawal evidence, resolve the completeness/withdrawal
+   rules explicitly rather than inventing signals.
+3. Add an execution entry point and operating instructions, supplying the
+   existing configured HTTP client with `Settings.user_agent`.
+4. Complete the #45 archive/backup prerequisites and a small rehearsal before
+   running against real data.
+
+This PR delivers protected history and observation-completeness checks. It can
+reference #46, but does not finish real Q&A source integration or close that issue.
 
 Generation closure requires every page from 1 through the explicit maximum,
 matching declarations and targets, all referenced detail bodies, matching total
