@@ -191,8 +191,43 @@ class IdentityFixture:
         )
 
 
+@dataclass(frozen=True)
+class IdentityTemplate:
+    root: Path
+    store: Path
+    batch: str
+    revision: str
+    pages: tuple[ProductPage, ...]
+    preview: PreviewPlan
+    catalog: ProductSnapshot
+
+    def copy(self, destination: Path) -> IdentityFixture:
+        root = destination / "checkout/authored"
+        store = destination / "archive/archive"
+        # Copies must not share inodes: tests corrupt both authored and sealed bytes.
+        shutil.copytree(self.root.parent, root.parent)
+        shutil.copytree(self.store.parent, store.parent)
+        return IdentityFixture(
+            root,
+            store,
+            self.batch,
+            self.revision,
+            self.pages,
+            self.preview,
+            self.catalog,
+        )
+
+
 @pytest.fixture
-def identity_fixture(tmp_path: Path) -> IdentityFixture:
+def identity_fixture(
+    tmp_path: Path, identity_template: IdentityTemplate
+) -> IdentityFixture:
+    return identity_template.copy(tmp_path)
+
+
+@pytest.fixture(scope="session")
+def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTemplate:
+    tmp_path = tmp_path_factory.mktemp("identity-template")
     root = tmp_path / "checkout/authored"
     root.mkdir(parents=True)
     raw = html()
@@ -230,9 +265,8 @@ def identity_fixture(tmp_path: Path) -> IdentityFixture:
     )
     catalog = load_products(root, registry=load_registry(root))
     install_identity(root, identity_envelope([identity_record(page)]))
-    revision = commit(root)
-    return IdentityFixture(
-        root, store.root, sealed.batch_id, revision, (page,), preview, catalog
+    return IdentityTemplate(
+        root, store.root, sealed.batch_id, commit(root), (page,), preview, catalog
     )
 
 
