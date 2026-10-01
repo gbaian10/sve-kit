@@ -42,8 +42,12 @@ from sve_carddb.registry.storage import (
 )
 from sve_carddb.registry.validate import check_cursors, validate
 
+from .official_registry_fixtures import detached_entries
+
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+    from sve_carddb.registry.snapshot import RegistrySnapshot
 
 
 def card(number: str, name: str, *, english: bool = False, text: str = "Rule.") -> Card:
@@ -300,12 +304,12 @@ def test_receipt_detects_changed_rules_before_allocation(
         read_inputs(paths, receipt, tmp_path)
 
 
-@pytest.fixture(scope="module")
-def official_registry() -> list[Entry]:
+@pytest.fixture
+def official_registry(
+    official_snapshot: RegistrySnapshot, _official_entries: tuple[Entry, ...]
+) -> list[Entry]:
     root = Path(__file__).resolve().parents[2] / "authored"
-    index, entries = load(root)
-    validate(list(entries.values()))
-    check_cursors(index.next_int_id, list(entries.values()))
+    index = official_snapshot.files.index()
     assert index.next_int_id == {"en": 67421, "jp": 27370}
     assert all(
         path.stat().st_size <= TARGET_BYTES
@@ -313,7 +317,7 @@ def official_registry() -> list[Entry]:
         for path in directory.rglob("*.yaml")
     )
     assert [path.name for path in (root / "ids" / "BP01").iterdir()] == ["001.yaml"]
-    return list(entries.values())
+    return detached_entries(_official_entries)
 
 
 def test_official_registry_special_mappings(official_registry: list[Entry]) -> None:
@@ -560,12 +564,16 @@ def test_confirmed_type_projection_has_field_local_badge(inputs: Inputs) -> None
     assert inputs.en["GF01-001EN"].faces[0].info["Card Type"] == "Spell"
 
 
-def test_official_promotions_have_user_confirmed_decisions() -> None:
+def test_official_promotions_have_user_confirmed_decisions(
+    official_snapshot: RegistrySnapshot,
+) -> None:
     root = Path(__file__).resolve().parents[2] / "authored/registry/source_correction"
     assert list((root / "needs_review").rglob("*.yaml")) == []
     promoted = []
+    shards = {shard.path: shard for shard in official_snapshot.files.shards}
     for path in (root / "active").rglob("*.yaml"):
-        shard = Shard.model_validate(read_yaml(path))
+        name = path.relative_to(root.parents[1]).as_posix()
+        shard = shards[name].envelope()
         decision = shard.decisions[0]
         assert decision.state == "confirmed"
         if path.parent.name == "BP07":

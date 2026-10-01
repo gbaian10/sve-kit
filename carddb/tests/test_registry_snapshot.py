@@ -24,6 +24,7 @@ from .registry_snapshot_fixtures import registry_root as registry_root  # ruff: 
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- expose dependency of the synthetic registry fixture
 
 if TYPE_CHECKING:
+    from sve_carddb.registry.snapshot import RegistrySnapshot
     from sve_carddb.registry.storage import Entry
 
 
@@ -198,11 +199,13 @@ def test_allocations_cannot_inherit_decisions(registry_root: Path) -> None:
         load_registry(registry_root)
 
 
-def test_official_snapshot_preserves_all_allocations_and_nine_corrections() -> None:
+def test_official_snapshot_preserves_all_allocations_and_nine_corrections(
+    official_snapshot: RegistrySnapshot,
+) -> None:
     root = Path(__file__).resolve().parents[2] / "authored"
     paths = [p for area in ("ids", "registry") for p in (root / area).rglob("*.yaml")]
     before = {p: hashlib.sha256(p.read_bytes()).digest() for p in paths}
-    snapshot = load_registry(root)
+    snapshot = official_snapshot
     assert (
         len([r for r in snapshot.records.values() if r.kind == "card_int_id"]) == 14789
     )

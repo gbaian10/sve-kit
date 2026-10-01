@@ -1,5 +1,6 @@
 """Strict YAML boundaries and append-only, checksummed registry shards."""
 
+import hashlib
 import io
 import os
 import tempfile
@@ -108,13 +109,16 @@ def yaml_parser() -> YAML:
 
 def read_yaml(path: Path) -> JsonValue:
     """Reject aliases, tags, duplicate keys, non-core values and large files."""
+    return _read_yaml_content(path)[0]
+
+
+def _read_yaml_content(path: Path) -> tuple[JsonValue, bytes]:
     data = path.read_bytes()
     if len(data) >= MAX_BYTES:
         raise ValueError(f"Oversized YAML: {path.name}")
     value = parse_yaml(data)
     result = JSON_VALUE.validate_python(value, strict=True)
-    digest(result)
-    return result
+    return result, canonical(result)
 
 
 def encode(model: BaseModel) -> bytes:
@@ -173,7 +177,7 @@ def read_registry_files(root: Path) -> RegistryFiles:
             raise ValueError("Unindexed registry files; recover before allocating IDs")
         return RegistryFiles(canonical(Index().model_dump(mode="json")), ())
     _safe_file(root, path)
-    raw_index = read_yaml(path)
+    raw_index, index_content = _read_yaml_content(path)
     _wire_fields(
         raw_index,
         2,
@@ -203,8 +207,8 @@ def read_registry_files(root: Path) -> RegistryFiles:
             raise ValueError(f"Unsafe include: {name}")
         file = root / relative
         _safe_file(root, file)
-        raw = read_yaml(file)
-        if digest(raw) != checksum:
+        raw, content = _read_yaml_content(file)
+        if "sha256:" + hashlib.sha256(content).hexdigest() != checksum:
             raise ValueError(f"Modified immutable shard: {name}")
         _wire_fields(
             raw,
@@ -218,11 +222,9 @@ def read_registry_files(root: Path) -> RegistryFiles:
                 raise ValueError(f"Duplicate record: {entry.record_key}")
             keys.add(entry.record_key)
         shards.append(
-            LoadedShard(
-                name, checksum, canonical(raw), shard.model_dump_json().encode()
-            )
+            LoadedShard(name, checksum, content, shard.model_dump_json().encode())
         )
-    return RegistryFiles(canonical(raw_index), tuple(shards))
+    return RegistryFiles(index_content, tuple(shards))
 
 
 def _wire_fields(raw: JsonValue, version: int, fields: set[str]) -> None:

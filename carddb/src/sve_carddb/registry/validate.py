@@ -43,14 +43,17 @@ def validate(entries: list[Entry]) -> None:
     for entry in faces.values():
         if string(entry.data, "card_id") not in kinds["card"]:
             raise ValueError("Orphan face")
+    card_faces: dict[str, dict[str, Entry]] = defaultdict(dict)
+    for identifier, face in faces.items():
+        card_faces[string(face.data, "card_id")][identifier] = face
     printings = kinds["printing"]
     seen: set[tuple[str, str, str]] = set()
     regions: dict[str, set[str]] = defaultdict(set)
     for entry in printings.values():
-        _printing(entry, kinds, seen)
+        _printing(entry, kinds, seen, card_faces)
         regions[string(entry.data, "card_id")].add(string(entry.data, "region"))
     _cross_region(kinds["printing"])
-    _cards(kinds)
+    _cards(kinds, card_faces)
     _allocations(entries, printings)
     _reviews(entries, printings, regions)
     for art in kinds["art"].values():
@@ -119,7 +122,10 @@ def _relations(kinds: dict[str, dict[str, Entry]]) -> None:
 
 
 def _printing(
-    entry: Entry, kinds: dict[str, dict[str, Entry]], seen: set[tuple[str, str, str]]
+    entry: Entry,
+    kinds: dict[str, dict[str, Entry]],
+    seen: set[tuple[str, str, str]],
+    card_faces: dict[str, dict[str, Entry]],
 ) -> None:
     data = entry.data
     key = string(data, "region"), string(data, "card_no"), string(data, "variant_key")
@@ -129,11 +135,7 @@ def _printing(
     card_id = string(data, "card_id")
     if card_id not in kinds["card"]:
         raise ValueError("Orphan printing")
-    expected = {
-        identifier
-        for identifier, face in kinds["face"].items()
-        if face.data["card_id"] == card_id
-    }
+    expected = set(card_faces[card_id])
     maps = data["source_face_map"]
     if not isinstance(maps, list):
         raise TypeError("Invalid source face map")
@@ -146,13 +148,11 @@ def _printing(
         raise ValueError("Incomplete or duplicate face mapping")
 
 
-def _cards(kinds: dict[str, dict[str, Entry]]) -> None:
+def _cards(
+    kinds: dict[str, dict[str, Entry]], card_faces: dict[str, dict[str, Entry]]
+) -> None:
     for identifier, card in kinds["card"].items():
-        faces = [
-            entry.data
-            for entry in kinds["face"].values()
-            if entry.data["card_id"] == identifier
-        ]
+        faces = [entry.data for entry in card_faces[identifier].values()]
         expected = 1 if card.data["layout"] == "single" else 2
         if len(faces) != expected or {
             face["ordinal"] for face in faces if type(face["ordinal"]) is int

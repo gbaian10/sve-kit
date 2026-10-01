@@ -1,11 +1,31 @@
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from sve_carddb.manifest import Manifest
 
+from .official_registry_fixtures import load_shared_registry
+
 if TYPE_CHECKING:
-    from pathlib import Path
+    from sve_carddb.registry.snapshot import RegistrySnapshot
+    from sve_carddb.registry.storage import Entry
+
+
+@pytest.fixture(scope="session")
+def official_snapshot(
+    tmp_path_factory: pytest.TempPathFactory, worker_id: str
+) -> RegistrySnapshot:
+    root = Path(__file__).resolve().parents[2] / "authored"
+    cache_root = tmp_path_factory.getbasetemp()
+    if worker_id != "master":
+        cache_root = cache_root.parent
+    return load_shared_registry(root, cache_root / "official-registry.json")
+
+
+@pytest.fixture(scope="session")
+def _official_entries(official_snapshot: RegistrySnapshot) -> tuple[Entry, ...]:
+    return tuple(record.entry() for record in official_snapshot.records.values())
 
 
 class FakeClock:
