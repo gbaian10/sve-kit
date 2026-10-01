@@ -1,0 +1,826 @@
+rule_policy_format: 1
+kind: wording_rule_policy
+policy_id: wording-rules-145-v1
+rules:
+  - rule_id: wp:draw-plural-v1
+    category: sentence_pattern
+    regions:
+      - en
+    fields:
+      - text
+    matcher_version: draw-single-digit-v1
+    parameters: {}
+    action: classify_only
+    match_condition: EN only. Both entire main texts fullmatch Draw ([1-9]) cards?\., use the same ASCII single-digit N, and differ in content. Ordered sections and protected fields remain exact.
+    exclusions:
+      - JP region, changed N, zero, multiple digits or fullwidth digit.
+      - Added prefix/suffix conditions, missing period, changed sections or protected fields.
+    finite_transform: Only the full named sentence card/cards variation for classification; never generalize the sentence.
+    examples:
+      positive:
+        - case_id: draw-plural
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Draw 1 card.
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Draw 1 cards.
+            sections: []
+          parameters: {}
+      negative:
+        - case_id: draw-number
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Draw 1 card.
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Draw 2 cards.
+            sections: []
+          parameters: {}
+        - case_id: draw-condition
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: If A, Draw 1 card.
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: If A, Draw 1 cards.
+            sections: []
+          parameters: {}
+        - case_id: draw-jp
+          region: jp
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Draw 1 card.
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Draw 1 cards.
+            sections: []
+          parameters: {}
+  - rule_id: wp:eol-v1
+    category: whitespace
+    regions:
+      - jp
+      - en
+    fields:
+      - text
+      - sections
+    matcher_version: crlf-to-lf-v1
+    parameters: {}
+    action: equivalent
+    match_condition: At least one text or same-ordinal section differs, section count is unchanged, and replacing only U+000D U+000A with U+000A in every text/section field makes both sides exact. No standalone U+000D exists in any text/section field.
+    exclusions:
+      - Standalone CR, including unchanged context.
+      - Added or removed LF, changed spaces or punctuation, moved section boundaries.
+      - Null text or any protected-field difference.
+    finite_transform: CRLF to LF for comparison only; no other normalization.
+    examples:
+      positive:
+        - case_id: eol-main
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic\r\nparagraph"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic\nparagraph"
+            sections: []
+          parameters: {}
+        - case_id: eol-section
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - "Synthetic\r\nsection"
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - "Synthetic\nsection"
+          parameters: {}
+      negative:
+        - case_id: standalone-cr
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic\rparagraph"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic\nparagraph"
+            sections: []
+          parameters: {}
+        - case_id: removed-newline
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic\nparagraph"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic paragraph
+            sections: []
+          parameters: {}
+        - case_id: unchanged-cr-context
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "A\rX\r\nB"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "A\rX\nB"
+            sections: []
+          parameters: {}
+  - rule_id: wp:identified-reminder-v1
+    category: reminder
+    regions:
+      - jp
+      - en
+    fields:
+      - sections
+    matcher_version: identified-reminder-v1
+    parameters:
+      ordinals: []
+    action: classify_only
+    match_condition: Main text is exact, section count is unchanged, and at least one section differs. Every changed ordinal belongs to a separately identified, traceable kind=reminder inventory in parameters.ordinals; do not infer kind from parentheses or similarity.
+    exclusions:
+      - Unknown, unidentified or token_definition ordinal.
+      - Changed main text, added/removed sections or protected-field difference.
+    finite_transform: No text transformation; check membership of every differing section ordinal.
+    examples:
+      positive:
+        - case_id: known-reminder
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - Synthetic reminder A
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - Synthetic reminder B
+          parameters:
+            ordinals:
+              - 0
+      negative:
+        - case_id: unknown-reminder
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - Synthetic reminder A
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - Synthetic reminder B
+          parameters:
+            ordinals: []
+        - case_id: reminder-main-changed
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main A
+            sections:
+              - Synthetic reminder A
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main B
+            sections:
+              - Synthetic reminder B
+          parameters:
+            ordinals:
+              - 0
+  - rule_id: wp:layout-space-v1
+    category: whitespace
+    regions:
+      - jp
+      - en
+    fields:
+      - text
+      - sections
+    matcher_version: unicode-whitespace-v1
+    parameters: {}
+    action: classify_only
+    match_condition: At least one text or same-ordinal section differs, section count is unchanged, and removing exactly Unicode code points for which Python str.isspace() is true from each differing field makes both sides exact. The Python/Unicode runtime is pinned by review context.
+    exclusions:
+      - Non-whitespace character difference.
+      - Moved section boundaries, null text or protected-field difference.
+    finite_transform: Remove str.isspace() code points for diagnosis only; preserve published text.
+    examples:
+      positive:
+        - case_id: layout-space
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic  paragraph
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic paragraph
+            sections: []
+          parameters: {}
+        - case_id: unsafe-number-boundary
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: 1 2
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: '12'
+            sections: []
+          parameters: {}
+        - case_id: unsafe-word-boundary
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Alpha Beta
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: AlphaBeta
+            sections: []
+          parameters: {}
+      negative:
+        - case_id: different-word
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic one
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic two
+            sections: []
+          parameters: {}
+  - rule_id: wp:punctuation-v1
+    category: punctuation
+    regions:
+      - jp
+      - en
+    fields:
+      - text
+      - sections
+    matcher_version: finite-punctuation-v1
+    parameters:
+      characters: .。．,，、;；:：()（）[]【】「」『』!！?？
+    action: classify_only
+    match_condition: At least one text or same-ordinal section differs, section count is unchanged, and removing exactly the finite parameters.characters set from every differing field makes both sides exact.
+    exclusions:
+      - Glyph outside the finite set or any other changed character.
+      - Moved section boundaries, null text or protected-field difference.
+    finite_transform: Remove only parameters.characters for diagnosis; never remove published parentheses or conditions.
+    examples:
+      positive:
+        - case_id: punctuation-period
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic paragraph.
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic paragraph。
+            sections: []
+          parameters: {}
+        - case_id: unsafe-parentheses
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: A(B)
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: AB
+            sections: []
+          parameters: {}
+      negative:
+        - case_id: punctuation-word
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic A.
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic B。
+            sections: []
+          parameters: {}
+        - case_id: outside-set
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: A-B
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: AB
+            sections: []
+          parameters: {}
+  - rule_id: wp:repartition-v1
+    category: section_layout
+    regions:
+      - jp
+      - en
+    fields:
+      - text
+      - sections
+    matcher_version: exact-concatenation-v1
+    parameters: {}
+    action: classify_only
+    match_condition: Both main texts are nonnull, ordered section tuples differ, and text + concat(ordered sections) is exact on both sides. All protected fields remain exact; no interpretation of the moved boundary is inferred.
+    exclusions:
+      - Any character missing or changed after concatenation.
+      - Null text or protected-field difference.
+    finite_transform: Concatenate main text and ordered sections for comparison only; retain original boundaries.
+    examples:
+      positive:
+        - case_id: repartition
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic main\nSynthetic tail"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic main\n"
+            sections:
+              - Synthetic tail
+          parameters: {}
+      negative:
+        - case_id: repartition-missing-tail
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic main\nSynthetic tail"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic main\n"
+            sections:
+              - Synthetic
+          parameters: {}
+        - case_id: repartition-missing-lf
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: "Synthetic main\nSynthetic tail"
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic main
+            sections:
+              - Synthetic tail
+          parameters: {}
+  - rule_id: wp:term-token-v1
+    category: terminology
+    regions:
+      - jp
+      - en
+    fields:
+      - text
+    matcher_version: single-finite-term-v1
+    parameters:
+      pairs: []
+    action: classify_only
+    match_condition: Ordered sections are exact. For one explicitly supplied same-region finite (old,new) pair in parameters.pairs, old and new are nonempty and different, old occurs exactly once in before text, and replacing that single exact occurrence makes after text exact. Matching is directional, not cross-region translation.
+    exclusions:
+      - No supplied pair, multiple old occurrences or additional text difference.
+      - Changed sections or protected fields; do not infer term boundaries from substring similarity.
+    finite_transform: One exact replacement from an explicit finite pair, for classification only; no free paraphrase.
+    examples:
+      positive:
+        - case_id: known-term
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic Alpha
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic Beta
+            sections: []
+          parameters:
+            pairs:
+              -   - Alpha
+                  - Beta
+      negative:
+        - case_id: unknown-term
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic Alpha
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Synthetic Beta
+            sections: []
+          parameters:
+            pairs: []
+        - case_id: repeated-term
+          region: en
+          before:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Alpha Alpha
+            sections: []
+          after:
+            name: Synthetic name
+            class: Synthetic class
+            type: Synthetic type
+            cost: '1'
+            attack: '1'
+            defense: '1'
+            traits: []
+            title:
+            text: Beta Beta
+            sections: []
+          parameters:
+            pairs:
+              -   - Alpha
+                  - Beta
+common_boundary:
+  comparison: Same registered face and same region; compare the complete wording-face-v1 after verified absent projection, then all applicable active source corrections.
+  protected_fields:
+    - name
+    - class
+    - type
+    - cost
+    - attack
+    - defense
+    - traits
+    - title
+  protected_condition: All protected fields must be exact, including traits order. Any protected difference makes the entire pair uncovered.
+  missing_text: Either text=null makes the entire pair uncovered; proven absent may use the exact empty string.
+  sections: Except exact-concatenation-v1, section count and ordinals are unchanged; every differing text/section field must match the named matcher.
+  output: Only classify hashes and Unicode code point half-open ranges; never modify raw or published wording. A diagnostic match is not equivalence or an order answer.
+  equivalence: Only an approved equivalent action covering every recomputed diff to the selected observation and nonempty predecessor, without gaps, overlap or conflicts, may support equivalence.
