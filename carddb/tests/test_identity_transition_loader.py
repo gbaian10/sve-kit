@@ -1,0 +1,931 @@
+"""Independent counterexamples for the read-only transition boundary."""
+
+import copy
+import json
+from typing import TYPE_CHECKING, Any
+from uuid import UUID, uuid5
+
+import pytest
+
+from sve_carddb.registry.storage import Index as RegistryIndex
+from sve_carddb.registry.storage import load, plan_files, read_registry_files, relayout
+from sve_carddb.registry.transitions.files import _inventory, read_transition_files
+from sve_carddb.registry.transitions.loader import load_transitions
+
+from .identity_transition_fixtures import (
+    FA,
+    FC,
+    A,
+    C,
+    P,
+    Q,
+    X,
+    chain,
+    checksum,
+    entry,
+    pack,
+    reference,
+    renewal,
+    wire,
+    write_chain,
+)
+from .identity_transition_fixtures import merge_record as merge_record  # ruff: ignore[useless-import-alias] -- expose module-scoped synthetic fixture
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+
+def test_explicit_empty_and_legacy_entrances(tmp_path: Path) -> None:
+    legacy = load_transitions(tmp_path)
+    assert legacy.index() is None
+    assert legacy.index_content is None
+    assert legacy.index_exact_content is None
+    assert legacy.shards == ()
+    assert load(tmp_path) == (RegistryIndex(), {})
+    write_chain(tmp_path, [])
+    explicit = load_transitions(tmp_path)
+    index = explicit.index()
+    assert index is not None
+    assert not index.includes
+    assert explicit.index_content == explicit.index_exact_content
+    assert explicit.shards == ()
+    assert load(tmp_path) == (RegistryIndex(), {})
+
+
+@pytest.mark.parametrize("kind", ["merge", "split", "reassign_printing", "renewal"])
+def test_read_only_supported_shapes(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    kind: str,
+) -> None:
+    record = copy.deepcopy(merge_record)
+    repair = record["repairs"][0]
+    if kind == "renewal":
+        record = renewal(record)
+    else:
+        repair["kind"] = kind
+    if kind == "reassign_printing":
+        repair["retire_old"] = False
+    elif kind == "split":
+        repair["new_card_ids"].append(C)
+        move = copy.deepcopy(repair["printing_moves"][0])
+        move["printing_id"] = Q
+        move["to_card_id"] = C
+        move["faces"][0]["to_face_id"] = FC
+        repair["printing_moves"].append(move)
+        repair["face_moves"][0]["to_face_ids"].append(FC)
+    shards = chain([record])
+    write_chain(tmp_path, shards)
+    paths = list(tmp_path.rglob("*.yaml"))
+    before = {path: path.read_bytes() for path in paths}
+    files = load_transitions(tmp_path)
+    assert files.shards[0].content_hash == checksum(shards[0])
+    assert files.shards[0].content == wire(shards[0])
+    assert files.shards[0].exact_content == wire(shards[0])
+    assert files.shards[0].envelope().model_dump(mode="json") == shards[0]
+    detached = files.shards[0].envelope().records[0].updates[0].after
+    assert detached is not None
+    detached.data.clear()
+    original = files.shards[0].envelope().records[0].updates[0].after
+    assert original is not None
+    assert original.data
+    assert before == {path: path.read_bytes() for path in paths}
+
+
+def test_readers_do_not_silently_ignore_nonempty_transitions(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+) -> None:
+    write_chain(tmp_path, chain([merge_record]))
+    for reader in (load, read_registry_files):
+        with pytest.raises(ValueError, match="effective projection support"):
+            reader(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "missing_index",
+        "missing_shard",
+        "unindexed",
+        "unindexed_yml",
+        "modified",
+        "absolute",
+        "parent",
+        "normalized",
+        "short_sequence",
+        "zero",
+        "gap",
+        "duplicate_sequence",
+        "wrong_sequence",
+    ],
+)
+def test_file_closure_and_paths(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str,
+) -> None:
+    write_chain(tmp_path, chain([merge_record]))
+    directory = tmp_path / "identity-transitions"
+    index_path = directory / "index.yaml"
+    shard_path = directory / "001.yaml"
+    index = json.loads(index_path.read_bytes())
+    if damage == "missing_index":
+        index_path.unlink()
+    elif damage == "missing_shard":
+        shard_path.unlink()
+    elif damage in {"unindexed", "unindexed_yml"}:
+        (
+            directory / ("002.yml" if damage == "unindexed_yml" else "002.yaml")
+        ).write_text("{}")
+    elif damage == "modified":
+        shard_path.write_bytes(
+            shard_path.read_bytes().replace(
+                b"Synthetic receipt only", b"Other receipt only"
+            )
+        )
+    elif damage in {
+        "absolute",
+        "parent",
+        "normalized",
+        "short_sequence",
+        "zero",
+        "gap",
+    }:
+        name = {
+            "absolute": str(shard_path),
+            "parent": "identity-transitions/../001.yaml",
+            "normalized": "identity-transitions//001.yaml",
+            "short_sequence": "identity-transitions/01.yaml",
+            "zero": "identity-transitions/000.yaml",
+            "gap": "identity-transitions/002.yaml",
+        }[damage]
+        index["includes"] = {name: next(iter(index["includes"].values()))}
+        index_path.write_bytes(wire(index))
+    elif damage == "duplicate_sequence":
+        index["includes"]["identity-transitions/0001.yaml"] = next(
+            iter(index["includes"].values())
+        )
+        index_path.write_bytes(wire(index))
+    elif damage == "wrong_sequence":
+        record = copy.deepcopy(merge_record)
+        record["sequence"] = 2
+        record["record_key"] = '["identity_transition",2]'
+        write_chain(tmp_path, [pack(record)])
+    with pytest.raises(
+        ValueError,
+        match=r"identity transition|Identity transition|Symlinks|Modified|Unsafe|Duplicate|Route|Invalid",
+    ):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "damage", ["directory", "file", "index", "broken", "unindexed"]
+)
+def test_all_symlink_inputs_are_rejected(
+    tmp_path: Path, merge_record: dict[str, Any], damage: str
+) -> None:
+    write_chain(tmp_path, chain([merge_record]))
+    directory = tmp_path / "identity-transitions"
+    if damage == "directory":
+        directory.rename(tmp_path / "elsewhere")
+        directory.symlink_to(tmp_path / "elsewhere", target_is_directory=True)
+    elif damage in {"file", "index"}:
+        path = directory / ("index.yaml" if damage == "index" else "001.yaml")
+        backup = tmp_path / "copy"
+        path.rename(backup)
+        path.symlink_to(backup)
+    elif damage == "broken":
+        (directory / "index.yaml").unlink()
+        (directory / "index.yaml").symlink_to(tmp_path / "absent")
+    else:
+        (directory / "extra").symlink_to(tmp_path / "absent")
+    with pytest.raises(ValueError, match="Symlinks"):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        "identity_transition_format: 1\nidentity_transition_format: 1\n",
+        "a: &a 1\nb: *a\n",
+        "a: !!str text\n",
+        "a: 1\n---\nb: 2\n",
+        "a: .nan\n",
+        "a: 1.0\n",
+        "a:\n  <<: {}\n",
+        "a: [\n",
+    ],
+)
+def test_yaml_restrictions_and_sanitized_errors(tmp_path: Path, value: str) -> None:
+    directory = tmp_path / "identity-transitions"
+    directory.mkdir()
+    (directory / "index.yaml").write_text(value)
+    with pytest.raises(ValueError, match="Invalid identity transition"):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize("size", [1_048_575, 1_048_576])
+def test_strict_size_boundary(tmp_path: Path, size: int) -> None:
+    write_chain(tmp_path, [])
+    path = tmp_path / "identity-transitions/index.yaml"
+    content = path.read_bytes()
+    path.write_bytes(content + b" " * (size - len(content)))
+    if size == 1_048_575:
+        assert load_transitions(tmp_path).shards == ()
+    else:
+        with pytest.raises(ValueError, match="smaller than 1 MiB"):
+            load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize("location", ["index", "shard"])
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "missing_format",
+        "bool_format",
+        "float_format",
+        "unknown_format",
+        "missing_kind",
+        "extra",
+    ],
+)
+def test_explicit_envelope_fields(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    location: str,
+    damage: str,
+) -> None:
+    shard = pack(copy.deepcopy(merge_record))
+    write_chain(tmp_path, [shard])
+    path = tmp_path / (
+        "identity-transitions/index.yaml"
+        if location == "index"
+        else "identity-transitions/001.yaml"
+    )
+    raw = json.loads(path.read_bytes())
+    if damage in {"missing_format", "missing_kind"}:
+        raw.pop("identity_transition_format" if damage == "missing_format" else "kind")
+    elif damage == "extra":
+        raw["extra"] = None
+    else:
+        raw["identity_transition_format"] = {
+            "bool_format": True,
+            "float_format": 1.0,
+            "unknown_format": 2,
+        }[damage]
+    if location == "shard":
+        write_chain(tmp_path, [raw])
+    else:
+        path.write_bytes(wire(raw))
+    with pytest.raises(ValueError, match="authored fields"):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "edits",
+    [
+        pytest.param([("decisions.0.members.0.0", "set", "other")], id="members_key"),
+        pytest.param(
+            [("decisions.0.members.0.1", "set", "sha256:" + "0" * 64)],
+            id="members_hash",
+        ),
+        pytest.param(
+            [("decisions.0.membership_hash", "set", "sha256:" + "0" * 64)],
+            id="membership_hash",
+        ),
+        pytest.param([("decisions.0.id", "set", "d:" + "0" * 64)], id="id"),
+        pytest.param([("default_decision_id", "set", "d:" + "0" * 64)], id="default"),
+        pytest.param([("decisions.0.sample_ids", "set", ["other"])], id="sample"),
+        pytest.param([("decisions.0.state", "set", "proposed")], id="proposed"),
+        pytest.param(
+            [("decisions.0.category", "set", "identity_registry")], id="category"
+        ),
+        pytest.param([("decisions.0.policy_id", "set", "other")], id="policy"),
+        pytest.param([("decisions.0.scope", "set", "sample")], id="scope"),
+        pytest.param([("decisions.0.reviewed_by", "set", "   ")], id="reviewer"),
+        pytest.param([("decisions.0.authored_by", "set", "   ")], id="author"),
+        pytest.param(
+            [("decisions.0.reviewed_at", "set", "2026-02-30T00:00:00Z")], id="instant"
+        ),
+        pytest.param(
+            [("decisions.0.reviewed_at", "set", "2026-10-01T00:00:01Z")], id="day_time"
+        ),
+        pytest.param([("decisions.0.note", "delete", None)], id="note"),
+        pytest.param([("records", "duplicate", None)], id="two_records"),
+        pytest.param([("decisions", "duplicate", None)], id="two_decisions"),
+        pytest.param([("records", "set", [])], id="empty_records"),
+        pytest.param([("decisions", "set", [])], id="empty_decisions"),
+    ],
+)
+def test_confirmed_exact_receipts(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    edits: list[tuple[str, str, Any]],
+) -> None:
+    shard = pack(copy.deepcopy(merge_record))
+    mutate(shard, edits)
+    write_chain(tmp_path, [shard])
+    with pytest.raises(ValueError, match=r"authored fields|membership mismatch"):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        ["record_key"],
+        ["kind"],
+        ["action"],
+        ["reverts"],
+        ["sequence"],
+        ["previous"],
+        ["registry_basis"],
+        ["review_context"],
+        ["updates"],
+        ["repairs"],
+        ["routes"],
+        ["evidence"],
+        ["reason"],
+        ["updates", 0, "before"],
+        ["updates", 0, "after"],
+        ["updates", 0, "allocation_anchor"],
+        ["updates", 0, "before", "transition_key"],
+        ["updates", 0, "before", "record_key"],
+        ["repairs", 0, "printing_moves", 0, "faces", 0, "from_art_id"],
+        ["repairs", 0, "printing_moves", 0, "faces", 0, "to_art_id"],
+    ],
+)
+def test_required_nullable_and_complete_record_fields(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    path: list[str | int],
+) -> None:
+    record = copy.deepcopy(merge_record)
+    target: Any = record
+    for component in path[:-1]:
+        target = target[component]
+    del target[path[-1]]
+    shard = pack(merge_record)
+    shard["records"] = [record]
+    write_chain(tmp_path, [shard])
+    with pytest.raises(ValueError, match="authored fields"):
+        load_transitions(tmp_path)
+
+
+def mutate(value: dict[str, Any], edits: list[tuple[str, str, Any]]) -> None:
+    for path, action, replacement in edits:
+        components = [
+            int(part) if part.isdecimal() else part for part in path.split(".")
+        ]
+        target: Any = value
+        for component in components[:-1]:
+            target = target[component]
+        key = components[-1]
+        if action == "set":
+            target[key] = copy.deepcopy(replacement)
+        elif action == "duplicate":
+            target[key].append(copy.deepcopy(target[key][0]))
+        elif action == "append_sorted":
+            target[key].append(copy.deepcopy(replacement))
+            target[key].sort(key=wire)
+        elif action == "append":
+            target[key].append(copy.deepcopy(replacement))
+        elif action == "reverse":
+            target[key].reverse()
+        else:
+            del target[key]
+
+
+@pytest.mark.parametrize(
+    "edits",
+    [
+        pytest.param([("extra", "set", "private input sentinel")], id="unknown_field"),
+        pytest.param([("record_key", "set", '[ "identity_transition", 1 ]')], id="key"),
+        pytest.param([("sequence", "set", True)], id="bool_sequence"),
+        pytest.param([("updates", "set", [])], id="empty_updates"),
+        pytest.param([("updates", "reverse", None)], id="updates_order"),
+        pytest.param([("updates", "duplicate", None)], id="duplicate_update"),
+        pytest.param(
+            [("updates.0.before.record_key", "set", "other")], id="before_key"
+        ),
+        pytest.param(
+            [("updates.0.after.record_key", "set", "card:" + A)], id="after_key"
+        ),
+        pytest.param(
+            [
+                ("updates.3.before", "set", None),
+                ("updates.3.allocation_anchor", "set", "new-printing"),
+            ],
+            id="new_printing",
+        ),
+        pytest.param([("updates.2.after", "set", None)], id="deactivate_card"),
+        pytest.param(
+            [("updates.0.allocation_anchor", "set", "reallocated")],
+            id="existing_anchor",
+        ),
+        pytest.param([("updates.0.before", "set", None)], id="new_no_anchor"),
+        pytest.param([("updates.0.after.data.extra", "set", None)], id="after_extra"),
+        pytest.param(
+            [("updates.0.after.data.classification", "set", "invented")],
+            id="after_bad_enum",
+        ),
+        pytest.param(
+            [
+                (
+                    "reverts",
+                    "set",
+                    {
+                        "record_key": "other",
+                        "record_hash": "sha256:" + "0" * 64,
+                        "decision_id": "d:" + "0" * 64,
+                    },
+                )
+            ],
+            id="apply_reverts",
+        ),
+        pytest.param(
+            [("action", "set", "revert"), ("repairs", "set", [])], id="revert_no_target"
+        ),
+        pytest.param(
+            [
+                ("action", "set", "revert"),
+                (
+                    "reverts",
+                    "set",
+                    {
+                        "record_key": "other",
+                        "record_hash": "sha256:" + "0" * 64,
+                        "decision_id": "d:" + "0" * 64,
+                    },
+                ),
+            ],
+            id="revert_repairs",
+        ),
+        pytest.param([("evidence", "set", [])], id="empty_evidence"),
+        pytest.param([("evidence", "duplicate", None)], id="duplicate_evidence"),
+        pytest.param(
+            [
+                (
+                    "evidence",
+                    "append",
+                    {
+                        "store_id": "example",
+                        "batch_id": "sha256:" + "4" * 64,
+                        "source_version_id": "src:v1:" + "7" * 64,
+                        "locator": "a-first",
+                        "role": "identity_observation",
+                    },
+                )
+            ],
+            id="evidence_order",
+        ),
+        pytest.param(
+            [("evidence.0.batch_id", "set", "sha256:" + "0" * 64)], id="missing_batch"
+        ),
+        pytest.param(
+            [("review_context.source_batches", "duplicate", None)],
+            id="duplicate_batches",
+        ),
+        pytest.param([("evidence.0.store_id", "set", "/private")], id="private_store"),
+        pytest.param(
+            [("review_context.context.dependencies", "set", [])],
+            id="empty_dependencies",
+        ),
+        pytest.param(
+            [("review_context.context.configuration", "set", "{ }")],
+            id="bad_configuration",
+        ),
+        pytest.param([("repairs.0.printing_moves", "set", [])], id="empty_moves"),
+        pytest.param([("repairs.0.retire_old", "set", False)], id="merge_not_retired"),
+        pytest.param([("repairs.0.new_card_ids", "append", C)], id="merge_two_targets"),
+        pytest.param([("repairs.0.kind", "set", "split")], id="split_one_target"),
+        pytest.param(
+            [
+                ("repairs.0.kind", "set", "split"),
+                ("repairs.0.new_card_ids", "append", C),
+                ("repairs.0.retire_old", "set", False),
+            ],
+            id="split_not_retired",
+        ),
+        pytest.param(
+            [
+                ("repairs.0.kind", "set", "split"),
+                ("repairs.0.new_card_ids", "append", C),
+            ],
+            id="split_empty_destination",
+        ),
+        pytest.param(
+            [
+                ("repairs.0.kind", "set", "reassign_printing"),
+                ("repairs.0.printing_moves", "duplicate", None),
+            ],
+            id="reassign_two_printings",
+        ),
+        pytest.param(
+            [("repairs.0.printing_moves.0.from_card_id", "set", C)], id="move_old"
+        ),
+        pytest.param(
+            [("repairs.0.printing_moves.0.to_card_id", "set", C)], id="move_destination"
+        ),
+        pytest.param(
+            [("repairs.0.printing_moves.0.to_card_id", "set", A)], id="move_self"
+        ),
+        pytest.param(
+            [("repairs.0.printing_moves.0.faces.0.to_art_id", "set", None)],
+            id="known_art_null",
+        ),
+        pytest.param(
+            [("repairs.0.printing_moves.0.faces.0.source_index", "set", 1)],
+            id="source_index",
+        ),
+        pytest.param(
+            [("repairs.0.face_moves.0.to_face_ids", "set", [FA])], id="face_self"
+        ),
+        pytest.param(
+            [("repairs.0.face_moves.0.to_face_ids", "duplicate", None)],
+            id="face_duplicate_target",
+        ),
+        pytest.param(
+            [
+                (
+                    "repairs.0.face_moves",
+                    "append_sorted",
+                    {"from_face_id": FA, "to_face_ids": [FC]},
+                )
+            ],
+            id="duplicate_face",
+        ),
+        pytest.param(
+            [
+                (
+                    "repairs.0.art_moves",
+                    "append_sorted",
+                    {"from_art_id": X, "targets": [], "remaining_uses": []},
+                )
+            ],
+            id="duplicate_art",
+        ),
+    ],
+)
+def test_resigned_structural_counterexamples(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    edits: list[tuple[str, str, Any]],
+) -> None:
+    record = copy.deepcopy(merge_record)
+    mutate(record, edits)
+    write_chain(tmp_path, [pack(record)])
+    with pytest.raises(
+        ValueError, match=r"authored fields|Transaction|transfers"
+    ) as caught:
+        load_transitions(tmp_path)
+    assert "private input sentinel" not in str(caught.value)
+
+
+@pytest.mark.parametrize(
+    "damage",
+    ["duplicate_printing", "duplicate_old", "duplicate_repair_id", "repair_order"],
+)
+def test_transaction_uniqueness(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str,
+) -> None:
+    record = copy.deepcopy(merge_record)
+    repair = record["repairs"][0]
+    if damage == "duplicate_printing":
+        move = copy.deepcopy(repair["printing_moves"][0])
+        move["faces"][0]["to_art_id"] = X
+        repair["printing_moves"].append(move)
+        repair["printing_moves"].sort(key=wire)
+    else:
+        extra = copy.deepcopy(repair)
+        if damage == "duplicate_old":
+            extra["id"] = "repair:second"
+        elif damage == "repair_order":
+            extra["id"] = "repair:aaa"
+        record["repairs"].append(extra)
+    write_chain(tmp_path, [pack(record)])
+    with pytest.raises(ValueError, match=r"authored fields|Transaction"):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "damage", ["key", "hash", "decision", "missing", "self", "first"]
+)
+def test_exact_previous_chain(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str,
+) -> None:
+    shards = chain([merge_record, renewal(merge_record)])
+    record = shards[1]["records"][0]
+    if damage == "first":
+        record = shards[0]["records"][0]
+        record["previous"] = reference(shards[1])
+        shards[0] = pack(record)
+    else:
+        if damage == "missing":
+            record["previous"] = None
+        elif damage == "self":
+            record["previous"] = reference(shards[1])
+        else:
+            field = {
+                "key": "record_key",
+                "hash": "record_hash",
+                "decision": "decision_id",
+            }[damage]
+            record["previous"][field] = {
+                "key": "other",
+                "hash": "sha256:" + "0" * 64,
+                "decision": "d:" + "0" * 64,
+            }[damage]
+        shards[1] = pack(record)
+    write_chain(tmp_path, shards)
+    with pytest.raises(ValueError, match="exact chain tail"):
+        load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "damage", ["key", "hash", "decision", "future", "root", "stale"]
+)
+def test_before_matches_latest_exact_producer(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str,
+) -> None:
+    shards = chain([merge_record, renewal(merge_record), renewal(merge_record)])
+    record = shards[2]["records"][0]
+    before = record["updates"][0]["before"]
+    if damage == "stale":
+        record["updates"][0]["before"] = shards[1]["records"][0]["updates"][0]["before"]
+    elif damage == "future":
+        before["transition_key"] = '["identity_transition",4]'
+    elif damage == "root":
+        before["transition_key"] = None
+    else:
+        before[
+            {"key": "transition_key", "hash": "record_hash", "decision": "decision_id"}[
+                damage
+            ]
+        ] = {"key": "other", "hash": "sha256:" + "0" * 64, "decision": "d:" + "0" * 64}[
+            damage
+        ]
+    shards[2] = pack(record)
+    write_chain(tmp_path, shards)
+    with pytest.raises(ValueError, match=r"stale|producer"):
+        load_transitions(tmp_path)
+
+
+def test_repair_id_cannot_be_reused_across_transactions(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+) -> None:
+    write_chain(tmp_path, chain([merge_record, merge_record]))
+    with pytest.raises(ValueError, match="repair ID cannot be reused"):
+        load_transitions(tmp_path)
+
+
+def new_card(anchor: str) -> dict[str, Any]:
+    identifier = (
+        "c:"
+        + uuid5(
+            UUID("e304714a-f18c-5fb6-a987-222988ffbb7a"),
+            "c\0identity-transition-v1\0" + anchor,
+        ).hex
+    )
+    card = entry(
+        "card",
+        identifier,
+        {"layout": "single", "identity_state": "confirmed", "home_set_id": "EXAMPLE"},
+    )
+    return {
+        "target_key": card["record_key"],
+        "before": None,
+        "after": card,
+        "allocation_anchor": anchor,
+    }
+
+
+@pytest.mark.parametrize("damage", [None, "id", "anchor", "key"])
+def test_allocation_recipe_and_never_reuse(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str | None,
+) -> None:
+    record = renewal(merge_record)
+    record["updates"] = [new_card("synthetic-card")]
+    if damage == "id":
+        record["updates"][0]["after"]["data"]["id"] = A
+        record["updates"][0]["after"]["record_key"] = "card:" + A
+        record["updates"][0]["target_key"] = "card:" + A
+    shards = chain([record])
+    if damage in {"anchor", "key"}:
+        later = copy.deepcopy(record)
+        if damage == "key":
+            later["updates"][0]["allocation_anchor"] = "another-anchor"
+        shards = chain([record, later])
+        shards[1]["records"][0]["updates"][0]["before"] = None
+        shards[1] = pack(shards[1]["records"][0])
+    write_chain(tmp_path, shards)
+    if damage is None:
+        assert len(load_transitions(tmp_path).shards) == 1
+    else:
+        with pytest.raises(ValueError, match="allocation"):
+            load_transitions(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [None, "hash", "decision", "future", "renewal", "partial", "twice", "revert"],
+)
+def test_revert_reference_structure_only(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str | None,
+) -> None:
+    original = (
+        renewal(merge_record) if damage == "renewal" else copy.deepcopy(merge_record)
+    )
+    shards = chain([original])
+    revert = renewal(merge_record)
+    revert["action"] = "revert"
+    revert["reverts"] = reference(shards[0])
+    if damage in {"hash", "decision", "future"}:
+        field = {
+            "hash": "record_hash",
+            "decision": "decision_id",
+            "future": "record_key",
+        }[damage]
+        revert["reverts"][field] = {
+            "hash": "sha256:" + "0" * 64,
+            "decision": "d:" + "0" * 64,
+            "future": '["identity_transition",3]',
+        }[damage]
+    elif damage == "partial":
+        revert["updates"].pop()
+    records = [original, revert]
+    if damage in {"twice", "revert"}:
+        later = copy.deepcopy(revert)
+        if damage == "revert":
+            later["reverts"] = reference(chain(records)[1])
+        records.append(later)
+    write_chain(tmp_path, chain(records))
+    if damage is None:
+        assert len(load_transitions(tmp_path).shards) == 2
+    else:
+        with pytest.raises(ValueError, match="Revert"):
+            load_transitions(tmp_path)
+
+
+def route_state(key: str, aliases: list[dict[str, str]]) -> dict[str, Any]:
+    return {
+        "canonical": {"namespace": "official", "route_key": key},
+        "aliases": aliases,
+    }
+
+
+@pytest.mark.parametrize(
+    "damage",
+    [
+        None,
+        "unchanged",
+        "canonical_alias",
+        "repeated_key",
+        "order",
+        "duplicate_printing",
+        "reserved",
+        "provisional",
+        "reason",
+    ],
+)
+def test_complete_route_state_shapes(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    damage: str | None,
+) -> None:
+    record = renewal(merge_record)
+    alias = {
+        "namespace": "official",
+        "route_key": "EXAMPLE-001",
+        "reason": "renumbered",
+    }
+    change: dict[str, Any] = {
+        "printing_id": P,
+        "before": route_state("EXAMPLE-001", []),
+        "after": route_state("EXAMPLE-002", [alias]),
+    }
+    record["routes"] = [change]
+    if damage == "unchanged":
+        change["after"] = copy.deepcopy(change["before"])
+    elif damage == "canonical_alias":
+        alias["route_key"] = "EXAMPLE-002"
+    elif damage == "repeated_key":
+        change["after"]["aliases"].append({**alias, "reason": "merged"})
+        change["after"]["aliases"].sort(key=wire)
+    elif damage == "order":
+        change["after"]["aliases"].append({**alias, "route_key": "EXAMPLE-000"})
+    elif damage == "duplicate_printing":
+        record["routes"].append(
+            {**copy.deepcopy(change), "before": route_state("EXAMPLE-003", [])}
+        )
+        record["routes"].sort(key=wire)
+    elif damage == "reserved":
+        change["after"]["canonical"]["route_key"] = "_provisional"
+    elif damage == "provisional":
+        change["after"]["canonical"] = {"namespace": "provisional", "route_key": "01"}
+    elif damage == "reason":
+        alias["reason"] = "provisional_to_official"
+    write_chain(tmp_path, [pack(record)])
+    if damage is None:
+        loaded = load_transitions(tmp_path).shards[0].envelope().records[0]
+        assert loaded.routes[0].after.aliases[0].reason == "renumbered"
+    else:
+        with pytest.raises(
+            ValueError,
+            match=r"authored fields|Transaction",
+        ):
+            load_transitions(tmp_path)
+
+
+def test_exact_yaml_bytes_are_preserved_separately(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+) -> None:
+    write_chain(tmp_path, [pack(copy.deepcopy(merge_record))])
+    path = tmp_path / "identity-transitions/001.yaml"
+    exact = b"# synthetic comment\n" + path.read_bytes() + b"\n"
+    path.write_bytes(exact)
+    files = read_transition_files(tmp_path)
+    assert files.shards[0].exact_content == exact
+    assert files.shards[0].content != exact
+    assert files.shards[0].content_hash == checksum(pack(merge_record))
+
+
+@pytest.mark.parametrize("planner", ["append", "relayout"])
+def test_legacy_planners_cannot_bypass_guard_with_loaded_inputs(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+    planner: str,
+) -> None:
+    write_chain(tmp_path, [pack(copy.deepcopy(merge_record))])
+    if planner == "append":
+        with pytest.raises(ValueError, match="effective projection support"):
+            plan_files(
+                tmp_path,
+                [],
+                "synthetic-reviewer",
+                "2026-10-01",
+                loaded=(RegistryIndex(), {}),
+            )
+    else:
+        with pytest.raises(ValueError, match="effective projection support"):
+            relayout(tmp_path, [], {})
+
+
+def test_before_can_reference_deactivated_record_hash(
+    tmp_path: Path,
+    merge_record: dict[str, Any],
+) -> None:
+    first = renewal(merge_record)
+    key = "region_mapping_review:" + A
+    first["updates"] = [
+        {
+            "target_key": key,
+            "before": {
+                "transition_key": None,
+                "record_key": key,
+                "record_hash": "sha256:" + "0" * 64,
+                "decision_id": "d:" + "0" * 64,
+            },
+            "after": None,
+            "allocation_anchor": None,
+        }
+    ]
+    shards = chain([first, copy.deepcopy(first)])
+    write_chain(tmp_path, shards)
+    loaded = load_transitions(tmp_path)
+    before = loaded.shards[1].envelope().records[0].updates[0].before
+    assert before is not None
+    assert (
+        before.record_hash
+        == "sha256:74234e98afe7498fb5daf1f36ac2d78acc339464f950703b8c019892f982b90b"
+    )
+
+
+def test_sequence_uses_numeric_order_past_three_digits(
+    tmp_path: Path,
+) -> None:
+    directory = tmp_path / "identity-transitions"
+    directory.mkdir()
+    includes = {}
+    for sequence in range(1, 1002):
+        name = f"identity-transitions/{sequence:03}.yaml"
+        includes[name] = "sha256:" + "0" * 64
+        (tmp_path / name).touch()
+    ordered = _inventory(tmp_path, includes)
+    assert ordered[998:1001] == [
+        "identity-transitions/999.yaml",
+        "identity-transitions/1000.yaml",
+        "identity-transitions/1001.yaml",
+    ]
