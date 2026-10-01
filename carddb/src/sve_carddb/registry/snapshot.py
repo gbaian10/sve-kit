@@ -57,8 +57,10 @@ def load_registry(root: Path) -> RegistrySnapshot:
     files = read_registry_files(root)
     records: dict[str, RegistryRecord] = {}
     decisions: dict[str, BatchDecision] = {}
+    entries: list[Entry] = []
     for loaded in files.shards:
         shard = loaded.envelope()
+        entries.extend(shard.records)
         for decision in shard.decisions:
             checked = _decision(canonical(decision.model_dump(mode="json")))
             if checked.id in decisions:
@@ -74,7 +76,6 @@ def load_registry(root: Path) -> RegistrySnapshot:
                 shard_path=loaded.path,
                 content=canonical(entry.model_dump(mode="json")),
             )
-    entries = [record.entry() for record in records.values()]
     validate(entries)
     check_cursors(files.index().next_int_id, entries)
     _evidence(records)
