@@ -302,3 +302,13 @@ def test_parser_rejects_incorrect_raw_binding_and_parser_pin(
     )
     with pytest.raises(ValueError, match="mismatch"):
         parse_verified_products(html(), source, "jp")
+
+
+def test_formal_product_url_never_also_yields_expansion_link(
+    identity_fixture: IdentityFixture,
+) -> None:
+    page = parse_products(html(), identity_fixture.pages[0].source, "jp")
+    assert [match.kind for match in page.blocks[0].matches] == [
+        "product_link",
+        "source_block",
+    ]

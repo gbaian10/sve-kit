@@ -196,6 +196,8 @@ def product_preview_uses(
         raise ValueError(
             "Official products and identity must use the same preview plan"
         )
+    if official is not None and official.identities.catalog != catalog:
+        raise ValueError("Official product types and families require the same catalog")
     return (
         *product_source_uses(catalog, evidence),
         *plan.source_uses(),

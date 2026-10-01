@@ -270,7 +270,7 @@ TABLES = (
             Column("family_id", Kind.ID, nullable=True),
             Column("product_code", Kind.TEXT, nullable=True),
             Column("name_unit_id", Kind.ID),
-            Column("product_type", Kind.ID),
+            Column("product_type", Kind.ID, nullable=True),
             Column("released_on", Kind.TEXT, nullable=True, pattern=DATE),
             Column(
                 "date_precision", Kind.TEXT, choices=("day", "month", "year", "unknown")

@@ -25,7 +25,7 @@ from sve_carddb.products.archive import FrozenProducts
 from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
-from sve_carddb.registry.preview import plan_preview
+from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
 from sve_carddb.registry.preview.evidence import (
     CardEvidence,
     FaceEvidence,
@@ -127,7 +127,7 @@ def test_complete_graph_keeps_ids_owners_dates_region_and_raw_provenance(
         assert product["source_id"] == fixture.pages[0].source.id
         inclusion = db.rows("printing_product")[0].values
         assert inclusion["source_id"] == product["source_id"]
-        assert inclusion["inclusion_kind"] == "pack"
+        assert inclusion["inclusion_kind"] == "other"
         assert inclusion["first_available_precision"] is None
         assert inclusion["first_available_on"] is None
         assert inclusion["first_available_raw"] is None
@@ -226,18 +226,13 @@ def test_missing_distribution_type_never_comes_from_owner(
     fixture = identity_fixture
     page = changed_page(fixture, html(name=name, date=None))
     official = plan_official_products(fixture.load(), (page,), fixture.preview)
-    assert not official.products
-    assert not official.inclusions
-    assert any(
-        isinstance(item, dict)
-        and item["reason"] == "product_type_or_distribution_unavailable"
-        for item in official.diagnostics
-    )
+    assert len(official.products) == len(official.inclusions) == 1
+    assert official.products[0].data.product_type == "booster"
     with create_database(compile_build()) as db:
         imported(fixture, db, official)
-        assert len(db.rows("printing")) == 1
-        assert not db.rows("product")
-        assert not db.rows("printing_product")
+        assert len(db.rows("printing")) == len(db.rows("product")) == 1
+        assert db.rows("product")[0].values["product_type"] == "booster"
+        assert db.rows("printing_product")[0].values["inclusion_kind"] == "other"
 
 
 def test_zero_match_keeps_every_read_use_without_allocating_product(
@@ -489,7 +484,16 @@ def test_missing_raw_after_planning_publishes_nothing(
     assert not destination.exists()
 
 
-@pytest.mark.parametrize("state", ["matched", "observation_mismatch", "missing_source"])
+@pytest.mark.parametrize(
+    "state",
+    [
+        "matched",
+        "observation_mismatch",
+        "missing_source",
+        "outside_output_regions",
+        "frozen_regions",
+    ],
+)
 def test_english_inclusions_obey_existing_identity_gate(
     identity_fixture: IdentityFixture, state: str
 ) -> None:
@@ -544,9 +548,29 @@ def test_english_inclusions_obey_existing_identity_gate(
         cards["en", en_card.number] = CardEvidence.from_card(
             page.source, "en", en_card, (FaceEvidence("LG", None),)
         )
-    fixture.preview = plan_preview(
-        fixture.root, MemoryEvidence(cards), regions=("jp", "en")
-    )
+    if state == "frozen_regions":
+        assert page.source.archive is not None
+        frozen = FrozenRegions(
+            jp=FrozenJP(
+                fixture.store,
+                "test-store",
+                fixture.batch,
+                parser_version="frozen-jp-test",
+            ),
+            en=FrozenEN(
+                fixture.store,
+                "test-store",
+                page.source.archive.batch_id,
+                parser_version="frozen-en-test",
+            ),
+        )
+        fixture.preview = plan_preview(fixture.root, frozen, regions=("jp", "en"))
+    else:
+        fixture.preview = plan_preview(
+            fixture.root,
+            MemoryEvidence(cards),
+            regions=("jp",) if state == "outside_output_regions" else ("jp", "en"),
+        )
     fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
     install_identity(
         fixture.root,
@@ -557,44 +581,230 @@ def test_english_inclusions_obey_existing_identity_gate(
     fixture.pages = (*fixture.pages, page)
     official = fixture.official()
     en_inclusions = [item for item in official.inclusions if item.page.region == "en"]
-    assert bool(en_inclusions) == (state == "matched")
-    if state != "matched":
+    adopted = state in {"matched", "frozen_regions"}
+    assert bool(en_inclusions) == adopted
+    if state == "outside_output_regions":
+        assert len(official.products) == 1
+        assert any(
+            isinstance(item, dict) and item["reason"] == "outside_output_regions"
+            for item in official.diagnostics
+        )
+    elif not adopted:
         assert any(
             isinstance(item, dict) and item["reason"] == "printing_gate:" + state
             for item in official.diagnostics
         )
     with create_database(compile_build(("art", "en", "related"))) as db:
         record = imported(fixture, db, official)
-        assert len(db.rows("printing_product")) == (2 if state == "matched" else 1)
-        assert len(db.rows("printing")) == (2 if state == "matched" else 1)
+        assert len(db.rows("printing_product")) == (2 if adopted else 1)
+        assert len(db.rows("printing")) == (2 if adopted else 1)
         assert any(
             use.source.id == page.source.id and use.usage == "official_printing_product"
             for use in record.uses
         )
-        assert len(db.rows("product")) == 2
+        assert len(db.rows("product")) == (
+            1 if state == "outside_output_regions" else 2
+        )
+        if state == "frozen_regions":
+            registry_uses = [
+                use for use in record.uses if use.usage == "registry_observation"
+            ]
+            assert {use.source.parser_version for use in registry_uses} == {
+                "frozen-jp-test",
+                "frozen-en-test",
+            }
+            assert all(
+                row.values["parser_version"] is None
+                for row in db.rows("source_record")
+                if row.values["kind"] != "authored"
+            )
+            assert {item.data.inclusion_kind for item in official.inclusions} == {
+                "other"
+            }
 
 
 @pytest.mark.parametrize(
-    ("name", "kind", "distribution"),
-    [
-        ("コラボパック「合成」", "pack", "pack"),
-        ("スペシャルパック「合成」", "pack", "pack"),
-        ("ビギナーデッキ「合成」", "deck", "other"),
-        ("エントリーデッキ「合成」", "deck", "other"),
-        ("プレミアムカードセット「合成」", "set", "other"),
-        ("Booster Set Synthetic", "set", "other"),
-        ("Combined Set Synthetic", "set", "other"),
-        ("Showdown Deck: Synthetic", "deck", "other"),
-        ("Premium Card Set Synthetic", "set", "other"),
-        ("Special Set Synthetic", "set", "other"),
-    ],
+    "kind",
+    ["booster", "promo", "deck", "collaboration", "special", "special_pack", "other"],
 )
-def test_explicit_title_nouns_supply_type_without_using_family(
-    identity_fixture: IdentityFixture, name: str, kind: str, distribution: str
+def test_confirmed_public_code_supplies_type_without_title_or_family_relation(
+    identity_fixture: IdentityFixture, kind: str
 ) -> None:
+    from .product_fixtures import envelope, family, install, obj  # ruff: ignore[import-outside-top-level] -- independent family input signing
+
     fixture = identity_fixture
-    page = changed_page(fixture, html(name=name))
+    record = family("TEST")
+    obj(record["data"]).update(public_code="Test-A", kind=kind)
+    install(fixture.root, "products/family/TEST/001.yaml", envelope([record]))
+    fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
+    fixture.revision = commit(fixture.root)
+    page = changed_page(
+        fixture, html(name="Unrecognized title with Pack Deck Set Bundle")
+    )
     official = plan_official_products(fixture.load(), (page,), fixture.preview)
     assert official.products[0].data.product_type == kind
     assert official.products[0].data.family_id is None
-    assert official.inclusions[0].data.inclusion_kind == distribution
+    assert official.inclusions[0].data.inclusion_kind == "other"
+    with create_database(compile_build()) as db:
+        imported(fixture, db, official)
+        assert db.rows("product")[0].values["product_type"] == kind
+        assert db.rows("product")[0].values["family_id"] is None
+        assert db.rows("printing_product")[0].values["inclusion_kind"] == "other"
+
+
+@pytest.mark.parametrize("public_code", ["test-a", "test", "Test", "BP12-BP13"])
+def test_unmatched_public_code_keeps_product_with_null_type_and_other_inclusion(
+    identity_fixture: IdentityFixture, public_code: str
+) -> None:
+    from .product_fixtures import envelope, family, install, obj  # ruff: ignore[import-outside-top-level] -- independent family input signing
+
+    fixture = identity_fixture
+    record = family("TEST")
+    obj(record["data"])["public_code"] = public_code
+    install(fixture.root, "products/family/TEST/001.yaml", envelope([record]))
+    fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
+    fixture.revision = commit(fixture.root)
+    official = fixture.official()
+    assert len(official.products) == len(official.inclusions) == 1
+    assert official.products[0].data.product_type is None
+    assert official.products[0].data.family_id is None
+    assert any(
+        isinstance(item, dict)
+        and item["reason"] == "product_type_unknown"
+        and item["excludes"] is None
+        for item in official.diagnostics
+    )
+    with create_database(compile_build()) as db:
+        imported(fixture, db, official)
+        assert db.rows("product")[0].values["product_type"] is None
+        assert db.rows("printing_product")[0].values["inclusion_kind"] == "other"
+
+
+def test_product_code_conflict_is_independent_of_same_name_and_date(
+    identity_fixture: IdentityFixture,
+) -> None:
+    fixture = identity_fixture
+    from .product_fixtures import envelope, family, install, obj  # ruff: ignore[import-outside-top-level] -- distinct codes with equal confirmed kind
+
+    second_family = family("OTHER")
+    obj(second_family["data"])["public_code"] = "Other"
+    install(fixture.root, "products/family/OTHER/001.yaml", envelope([second_family]))
+    fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
+    changed = add_page(
+        fixture,
+        html(
+            number="TEST-002",
+            links=("/products/synthetic/", "/cardlist/cardsearch?expansion=Other"),
+        ),
+    )
+    install_identity(
+        fixture.root,
+        identity_envelope([identity_record(changed)]),
+        name="product-identities/jp/002.yaml",
+    )
+    fixture.revision = commit(fixture.root)
+    original = fixture.pages[0]
+    assert original.blocks[0].name == changed.blocks[0].name
+    assert original.blocks[0].date_raw == changed.blocks[0].date_raw
+    for pages in ((original, changed), (changed, original)):
+        with pytest.raises(ValueError, match="Conflicting official product content"):
+            plan_official_products(fixture.load(), pages, fixture.preview)
+
+
+def test_importer_source_guard_does_not_depend_on_planner_guard(
+    identity_fixture: IdentityFixture,
+) -> None:
+    fixture = identity_fixture
+    original = fixture.official()
+    changed = add_page(fixture, html() + b"\n", number="TEST-001")
+    forged = replace(
+        original,
+        pages=(changed,),
+        products=(replace(original.products[0], page=changed),),
+        inclusions=(replace(original.inclusions[0], page=changed),),
+    )
+    with create_database(compile_build()) as db:
+        with pytest.raises(
+            ValueError,
+            match="Official inclusion source differs from adopted printing source",
+        ):
+            imported(fixture, db, forged)
+        assert not db.rows("printing")
+        assert not db.rows("product")
+
+
+def test_importer_authored_revision_must_equal_identity_revision(
+    identity_fixture: IdentityFixture,
+) -> None:
+    fixture = identity_fixture
+    official = fixture.official()
+    with create_database(compile_build()) as db:
+        with pytest.raises(
+            ValueError, match="Product identity authored revision mismatch"
+        ):
+            import_product_preview(
+                db,
+                fixture.catalog,
+                fixture.preview,
+                authored_revision="0" * 40,
+                build=fixture.context(official.identities),
+                languages=LANGUAGES,
+                stores={"test-store": fixture.store},
+                official=official,
+            )
+        assert not db.rows("printing")
+        assert not db.rows("product")
+
+
+def test_proposed_family_does_not_supply_official_product_type(
+    identity_fixture: IdentityFixture,
+) -> None:
+    from .product_fixtures import decision, envelope, family, install, obj, sign  # ruff: ignore[import-outside-top-level] -- valid proposed input keeps the confirmed owner parent
+
+    fixture = identity_fixture
+    confirmed = family("TEST")
+    obj(confirmed["data"])["public_code"] = "Different"
+    install(fixture.root, "products/family/TEST/001.yaml", envelope([confirmed]))
+    proposed = family("PROPOSED")
+    obj(proposed["data"]).update(public_code="Test-A", kind="deck")
+    shard = envelope([proposed])
+    decision(shard).update(
+        state="proposed", reviewed_by=None, reviewed_at=None, reviewed_precision=None
+    )
+    sign(shard)
+    install(fixture.root, "products/family/PROPOSED/001.yaml", shard)
+    fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
+    fixture.revision = commit(fixture.root)
+    official = fixture.official()
+    assert official.products[0].data.product_type is None
+    with create_database(compile_build()) as db:
+        imported(fixture, db, official)
+        assert len(db.rows("product_family")) == 1
+        assert db.rows("product")[0].values["product_type"] is None
+
+
+def test_compound_expansion_is_not_split_to_find_a_family_kind(
+    identity_fixture: IdentityFixture,
+) -> None:
+    from .product_fixtures import envelope, family, install, obj  # ruff: ignore[import-outside-top-level] -- only one component has confirmed family evidence
+
+    fixture = identity_fixture
+    record = family("TEST")
+    obj(record["data"])["public_code"] = "BP12"
+    install(fixture.root, "products/family/TEST/001.yaml", envelope([record]))
+    fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
+    page = changed_page(
+        fixture,
+        html(links=("/products/compound/", "/cardlist/cardsearch?expansion=BP12-BP13")),
+    )
+    install_identity(
+        fixture.root,
+        identity_envelope([identity_record(page)]),
+        name="product-identities/jp/002.yaml",
+    )
+    fixture.revision = commit(fixture.root)
+    official = plan_official_products(fixture.load(), (page,), fixture.preview)
+    assert official.products[0].data.product_code == "BP12-BP13"
+    assert official.products[0].data.product_type is None
+    assert official.products[0].data.family_id is None
+    assert official.inclusions[0].data.inclusion_kind == "other"

@@ -216,7 +216,9 @@ def identity_fixture(tmp_path: Path) -> IdentityFixture:
         ),
     )
     write_files(plan_files(root, build(inputs, {}), "synthetic-reviewer", "2026-09-30"))
-    install(root, "products/family/TEST/001.yaml", envelope([family("TEST")]))
+    family_record = family("TEST")
+    obj(family_record["data"])["public_code"] = "Test-A"
+    install(root, "products/family/TEST/001.yaml", envelope([family_record]))
     observed = CardEvidence.from_card(
         source.model_copy(update={"parser_version": "synthetic-identity-parser-v1"}),
         "jp",

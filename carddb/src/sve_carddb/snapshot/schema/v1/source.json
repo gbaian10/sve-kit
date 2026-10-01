@@ -5353,10 +5353,19 @@
         },
         "product_type": {
           "schema": {
-            "$ref": "#/$defs/Code"
+            "anyOf": [
+              {
+                "$ref": "#/$defs/Code"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "descriptor": {
-            "scalar": "Code"
+            "nullable": {
+              "scalar": "Code"
+            }
           }
         },
         "released_on": {

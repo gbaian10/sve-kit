@@ -1,6 +1,7 @@
 """Each product identity constraint has an independently invalid input."""
 
 import copy
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -15,7 +16,7 @@ from sve_carddb.registry.storage import MAX_BYTES, read_yaml
 from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError
 
-from .product_fixtures import decision, first_record, items, obj, write_yaml
+from .product_fixtures import checksum, decision, first_record, items, obj, write_yaml
 from .product_identity_fixtures import (
     NAME,
     IdentityFixture,
@@ -125,10 +126,37 @@ def test_each_wire_constraint(
         install_identity(
             fixture.root, shard, resign=area in {"record", "data", "match", "evidence"}
         )
-    with pytest.raises(
-        ValueError, match=r"Invalid product authored fields|identity|Identity"
-    ):
+    expected = (
+        "decisions.0.reviewed_precision:literal_error"
+        if area == "decision" and field == "reviewed_precision" and value == "month"
+        else wire_error(area, field)
+    )
+    fixture.revision = commit(fixture.root)
+    with pytest.raises(ValueError, match=re.escape(expected)):
         fixture.load()
+
+
+def wire_error(area: str, field: str) -> str:
+    overrides = {
+        ("record", "filing_key"): "Product identity filing/path/region mismatch",
+        ("record", "record_key"): "Product identity record key mismatch",
+        ("match", "product_url"): "records.0.data:value_error",
+        ("match", "kind"): "records.0.data.match:union_tag_invalid",
+        ("decision", "reviewed_by"): "decisions.0:value_error",
+        ("decision", "reviewed_at"): "decisions.0:value_error",
+        ("decision", "reviewed_precision"): "decisions.0:value_error",
+        ("decision", "authored_by"): "decisions.0:value_error",
+    }
+    prefixes = {
+        "index": "Invalid product identity fields: ",
+        "shard": "Invalid product identity fields: ",
+        "record": "records.0.",
+        "data": "records.0.data.",
+        "match": "records.0.data.match.product_link.",
+        "evidence": "records.0.evidence.0.",
+        "decision": "decisions.0.",
+    }
+    return overrides.get((area, field), prefixes[area] + field + ":")
 
 
 @pytest.mark.parametrize(
@@ -155,9 +183,14 @@ def test_required_nullable_and_nonnullable_fields(
     }[area]
     del target[field]
     install_identity(identity_fixture.root, shard, resign=area != "decision")
-    with pytest.raises(
-        ValueError, match=r"Invalid product authored fields|identity|Identity"
-    ):
+    identity_fixture.revision = commit(identity_fixture.root)
+    prefix = {
+        "record": "records.0.",
+        "data": "records.0.data.",
+        "match": "records.0.data.match.product_link.",
+        "decision": "decisions.0.",
+    }[area]
+    with pytest.raises(ValueError, match=re.escape(prefix + field + ":missing")):
         identity_fixture.load()
 
 
@@ -195,6 +228,7 @@ def test_each_exact_membership_constraint(  # ruff: ignore[complex-structure] --
         review["membership_hash"] = "sha256:" + "0" * 64
     elif constraint == "decision_id":
         review["id"] = "d:" + "0" * 64
+        shard["default_decision_id"] = review["id"]
     elif constraint == "default_decision_id":
         shard["default_decision_id"] = "d:" + "0" * 64
     elif constraint == "samples_missing":
@@ -213,9 +247,22 @@ def test_each_exact_membership_constraint(  # ruff: ignore[complex-structure] --
         shard,
         resign=constraint in {"duplicate_evidence", "missing_match_role"},
     )
-    with pytest.raises(
-        ValueError, match=r"Invalid product authored fields|identity|Identity"
-    ):
+    identity_fixture.revision = commit(identity_fixture.root)
+    message = {
+        "semantic_hash": "Product identity exact members mismatch",
+        "members_missing": "Product identity exact members mismatch",
+        "members_extra": "Product identity exact members mismatch",
+        "members_reordered": "Product identity exact members mismatch",
+        "membership_hash": "Product identity membership hash mismatch",
+        "decision_id": "Product identity decision ID mismatch",
+        "default_decision_id": "Product identity default decision mismatch",
+        "samples_missing": "Product identity requires every exact member checked",
+        "samples_extra": "Product identity requires every exact member checked",
+        "samples_duplicate": "Product identity requires every exact member checked",
+        "duplicate_evidence": "Duplicate product identity evidence",
+        "missing_match_role": "Product identity requires match evidence",
+    }[constraint]
+    with pytest.raises(ValueError, match=message):
         identity_fixture.load()
 
 
@@ -388,7 +435,8 @@ def test_same_match_cannot_be_appended_even_to_same_id(
         obj(read_yaml(fixture.root / NAME)),
         name="product-identities/jp/002.yaml",
     )
-    with pytest.raises(ValueError, match="Duplicate"):
+    fixture.revision = commit(fixture.root)
+    with pytest.raises(ValueError, match="Duplicate product identity decision"):
         fixture.load()
 
 
@@ -587,7 +635,7 @@ def test_source_block_ordinal_is_strict_uint(
     row = identity_record(fixture.pages[0], match_index=-1)
     obj(obj(row["data"])["match"])["product_block_ordinal"] = ordinal
     install_identity(fixture.root, identity_envelope([row]))
-    with pytest.raises(ValueError, match="Invalid product authored fields"):
+    with pytest.raises(ValueError, match="product_block_ordinal:"):
         fixture.load()
 
 
@@ -625,7 +673,7 @@ def test_expansion_match_requires_exact_verified_query(
         "expansion_code": "Test-A",
     }
     install_identity(fixture.root, identity_envelope([row]))
-    with pytest.raises(ValueError, match="Invalid product authored fields"):
+    with pytest.raises(ValueError, match=re.escape("records.0.data:value_error")):
         fixture.load()
 
 
@@ -638,12 +686,24 @@ def test_exact_order_is_checked_independently(
     shard = identity_envelope(
         [identity_record(page), identity_record(page, match_index=-1)]
     )
+    review = decision(shard)
     if target == "records":
         items(shard["records"]).reverse()
+        items(review["members"]).reverse()
+        items(review["sample_ids"]).reverse()
     else:
-        items(decision(shard)["members"]).reverse()
+        items(review["members"]).reverse()
+    review["membership_hash"] = checksum(review["members"])
+    review["id"] = "d:" + str(review["membership_hash"]).removeprefix("sha256:")
+    shard["default_decision_id"] = review["id"]
     install_identity(fixture.root, shard)
-    with pytest.raises(ValueError, match=r"sorted and unique|exact members"):
+    fixture.revision = commit(fixture.root)
+    message = (
+        "Product identity records must be sorted and unique"
+        if target == "records"
+        else "Product identity exact members mismatch"
+    )
+    with pytest.raises(ValueError, match=message):
         fixture.load()
 
 
@@ -684,3 +744,89 @@ def test_ambiguous_block_can_only_use_confirmed_exact_source_block(
     )
     fixture.revision = commit(fixture.root)
     assert fixture.load().match("jp", page.blocks[0].matches) == "permanent-example"
+
+
+def test_proposed_identity_fails_its_state_constraint_with_valid_proposed_metadata(
+    identity_fixture: IdentityFixture,
+) -> None:
+    from pydantic import ValidationError  # ruff: ignore[import-outside-top-level] -- direct wire boundary isolates confirmed-only from membership checks
+
+    from sve_carddb.products.identity_models import IdentityDecision  # ruff: ignore[import-outside-top-level] -- independently test the closed decision state
+
+    shard = obj(read_yaml(identity_fixture.root / NAME))
+    review = decision(shard)
+    review.update(
+        state="proposed",
+        sample_ids=[],
+        reviewed_by=None,
+        reviewed_at=None,
+        reviewed_precision=None,
+    )
+    with pytest.raises(ValidationError, match="Input should be 'confirmed'"):
+        IdentityDecision.model_validate(review)
+
+
+def test_changed_shard_bytes_with_unchanged_pinned_content_hash_fail_only_hash(
+    identity_fixture: IdentityFixture,
+) -> None:
+    fixture = identity_fixture
+    path = fixture.root / NAME
+    original = path.read_bytes()
+    changed = original.replace(b"Synthetic review note", b"Changed review note")
+    assert changed != original
+    path.write_bytes(changed)
+    fixture.revision = commit(fixture.root)
+    with pytest.raises(ValueError, match="Modified immutable product identity shard"):
+        fixture.load()
+
+
+def test_comment_only_bytes_keep_semantic_hash_but_fail_exact_revision(
+    identity_fixture: IdentityFixture,
+) -> None:
+    fixture = identity_fixture
+    path = fixture.root / NAME
+    before = read_yaml(path)
+    path.write_bytes(path.read_bytes() + b"# Physical-only edit\n")
+    assert checksum(read_yaml(path)) == checksum(before)
+    with pytest.raises(ValueError, match="bytes differ from pinned authored revision"):
+        fixture.load()
+
+
+@pytest.mark.parametrize("field", ["source_version_id", "product_block_ordinal"])
+def test_source_block_version_and_ordinal_match_the_evidence_reference(
+    identity_fixture: IdentityFixture, field: str
+) -> None:
+    import json  # ruff: ignore[import-outside-top-level] -- independent canonical match key, not the production helper
+
+    fixture = identity_fixture
+    record = identity_record(fixture.pages[0], match_index=-1)
+    data = obj(record["data"])
+    match = obj(data["match"])
+    match[field] = "src:v1:" + "1" * 64 if field == "source_version_id" else 1
+    record["record_key"] = json.dumps(
+        ["product_identity", "jp", match], sort_keys=True, separators=(",", ":")
+    )
+    install_identity(fixture.root, identity_envelope([record]))
+    fixture.revision = commit(fixture.root)
+    with pytest.raises(
+        ValueError, match="Product identity source block evidence mismatch"
+    ):
+        fixture.load()
+
+
+def test_filing_path_is_checked_independently_of_data_region(
+    identity_fixture: IdentityFixture,
+) -> None:
+    fixture = identity_fixture
+    shard = obj(read_yaml(fixture.root / NAME))
+    (fixture.root / NAME).unlink()
+    index_path = fixture.root / "product-identities/index.yaml"
+    index = obj(read_yaml(index_path))
+    del obj(index["includes"])[NAME]
+    write_yaml(index_path, index)
+    install_identity(fixture.root, shard, name="product-identities/en/001.yaml")
+    fixture.revision = commit(fixture.root)
+    with pytest.raises(
+        ValueError, match="Product identity filing/path/region mismatch"
+    ):
+        fixture.load()

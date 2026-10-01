@@ -54,7 +54,7 @@ class ProductData(RecordData):
     family_id: Text | None
     product_code: str | None
     name: LocalizedText
-    product_type: Code
+    product_type: Code | None
     released_on: Date | None
     date_precision: Precision
     date_raw: str | None
@@ -114,9 +114,13 @@ class FamilyRecord(_Record):
     data: FamilyData
 
 
+class AuthoredProductData(ProductData):
+    product_type: Code
+
+
 class ProductRecord(_Record):
     kind: Literal["product"]
-    data: ProductData
+    data: AuthoredProductData
 
 
 class InclusionRecord(_Record):

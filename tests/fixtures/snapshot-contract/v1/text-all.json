@@ -3,7 +3,7 @@
   "members": [
     {
       "key": "bootstrap",
-      "sha256": "sha256:330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b",
+      "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a",
       "payload": {
         "format_version": "1.0.0",
         "types": {
@@ -774,6 +774,43 @@
                 ]
               ]
             }
+          ],
+          "product": [
+            {
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 0,
+              "partition": "bootstrap",
+              "base": null,
+              "columns": [
+                "id",
+                "family_id",
+                "region",
+                "product_code",
+                "name_unit_id",
+                "product_type",
+                "released_on",
+                "date_precision",
+                "date_raw",
+                "translations"
+              ],
+              "rows": [
+                [
+                  "prod:null",
+                  null,
+                  "jp",
+                  null,
+                  "t:ja:90d435ce36c2c997",
+                  null,
+                  null,
+                  "unknown",
+                  null,
+                  []
+                ]
+              ]
+            }
           ]
         }
       }
@@ -842,7 +879,7 @@
     },
     {
       "key": "detail",
-      "sha256": "sha256:ba787bf47f2a692592f8084909def986133b042069f0cb3b9bb9c0fd6d735eff",
+      "sha256": "sha256:cbf862359458dc573221e12df34e89beeaed2eef941cab69d66b93c795782ef4",
       "payload": {
         "format_version": "1.0.0",
         "types": {
@@ -1143,7 +1180,7 @@
               "base": {
                 "file": {
                   "key": "bootstrap",
-                  "sha256": "sha256:330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b"
+                  "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a"
                 },
                 "table": "printing",
                 "owner": {
@@ -1244,7 +1281,7 @@
               "base": {
                 "file": {
                   "key": "bootstrap",
-                  "sha256": "sha256:330b6d784411114f304bfdc4295a1adf73e1d2637b3763edb5c7bb7cceccec6b"
+                  "sha256": "sha256:f27c227b1bbaf80ddd551c3a8ab341113c792c7fa580cdca9dea4ac63e4ba80a"
                 },
                 "table": "face_revision",
                 "owner": {

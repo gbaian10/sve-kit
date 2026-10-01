@@ -1,14 +1,18 @@
 """Resolve frozen product contents and inclusions through permanent identity gates."""
 
-import re
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse
 from sve_carddb.products.identity_models import ExpansionLink, ProductLink
-from sve_carddb.products.models import InclusionData, LocalizedText, ProductData
+from sve_carddb.products.models import (
+    FamilyRecord,
+    InclusionData,
+    LocalizedText,
+    ProductData,
+)
 from sve_carddb.products.official import date_fields
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.values import canonical
@@ -20,9 +24,6 @@ if TYPE_CHECKING:
     from sve_carddb.products.official import ProductBlock, ProductPage
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.registry.preview.plan import Projection
-
-
-Distribution = Literal["pack", "other"]
 
 
 @dataclass(frozen=True)
@@ -123,38 +124,12 @@ class ProductConflictError(ValueError):
         super().__init__("Conflicting official product content: " + product_id)
 
 
-def _source_type(name: str) -> tuple[str | None, Distribution | None]:
-    # Recognized nouns come from this block's title, never its owner or family kind.
-    labels: tuple[tuple[str, str, Distribution], ...] = (
-        (r"パック|\b(?:Booster|Special) Pack\b", "pack", "pack"),
-        (
-            r"デッキ|\b(?:Starter|Trial|Prebuilt|Showdown) Deck\b",
-            "deck",
-            "other",
-        ),
-        (
-            r"\b(?:Booster|Crossover|Starter|Leader Card|Premium Card|Special|Combined) Set\b|カードセット",
-            "set",
-            "other",
-        ),
-        (r"\bBundle\b", "bundle", "other"),
-    )
-    found = {
-        (kind, inclusion)
-        for pattern, kind, inclusion in labels
-        if re.search(pattern, name) is not None
-    }
-    if len(found) != 1:
-        return None, None
-    return next(iter(found))
-
-
 def _product(
-    identifier: str, page: ProductPage, block: ProductBlock
-) -> tuple[ObservedProduct | None, Distribution | None]:
-    kind, inclusion = _source_type(block.name)
-    if kind is None:
-        return None, None
+    identifier: str,
+    page: ProductPage,
+    block: ProductBlock,
+    family_types: Mapping[str, str],
+) -> ObservedProduct:
     released, precision = date_fields(block.date_raw)
     codes = {
         match.expansion_code
@@ -162,18 +137,19 @@ def _product(
         if isinstance(match, (ProductLink, ExpansionLink))
         and match.expansion_code is not None
     }
+    code = next(iter(codes)) if len(codes) == 1 else None
     data = ProductData(
         id=identifier,
         region=page.region,
         family_id=None,
-        product_code=next(iter(codes)) if len(codes) == 1 else None,
+        product_code=code,
         name=LocalizedText(lang="ja" if page.region == "jp" else "en", text=block.name),
-        product_type=kind,
+        product_type=family_types.get(code) if code is not None else None,
         released_on=released,
         date_precision=precision,
         date_raw=block.date_raw,
     )
-    return ObservedProduct(data, page, block), inclusion
+    return ObservedProduct(data, page, block)
 
 
 def _diagnostic(
@@ -188,7 +164,6 @@ def _diagnostic(
         if reason
         in {
             "missing_product_identity",
-            "product_type_or_distribution_unavailable",
             "outside_output_regions",
         }
         else "inclusion"
@@ -214,6 +189,13 @@ def plan_official_products(
 ) -> OfficialProducts:
     """Select only explicitly observed contents and already eligible exact printings."""
     _check_observation_conflicts(identities, pages)
+    family_types = {
+        record.data.public_code: record.data.kind
+        for shard in identities.catalog.shards
+        if shard.envelope.decisions[0].state == "confirmed"
+        for record in shard.envelope.records
+        if isinstance(record, FamilyRecord)
+    }
     products: dict[str, list[ObservedProduct]] = {}
     inclusions: dict[tuple[str, str], list[ObservedInclusion]] = {}
     diagnostics: list[JsonValue] = []
@@ -234,17 +216,11 @@ def plan_official_products(
             if identifier is None:
                 diagnostics.append(_diagnostic(page, block, "missing_product_identity"))
                 continue
-            observed, inclusion_kind = _product(identifier, page, block)
-            if observed is None or inclusion_kind is None:
+            observed = _product(identifier, page, block, family_types)
+            if observed.data.product_type is None:
                 diagnostics.append(
-                    _diagnostic(
-                        page,
-                        block,
-                        "product_type_or_distribution_unavailable",
-                        identifier,
-                    )
+                    _diagnostic(page, block, "product_type_unknown", identifier)
                 )
-                continue
             if page.region not in preview.regions:
                 diagnostics.append(
                     _diagnostic(page, block, "outside_output_regions", identifier)
@@ -265,7 +241,6 @@ def plan_official_products(
                 page,
                 block,
                 identifier,
-                inclusion_kind,
                 found,
                 projections=projections,
                 inclusions=inclusions,
@@ -286,7 +261,6 @@ def _inclusions(  # ruff: ignore[too-many-arguments] -- shared diagnostic and in
     page: ProductPage,
     block: ProductBlock,
     identifier: str,
-    inclusion_kind: Distribution,
     found: list[PrintingData],
     *,
     projections: Mapping[str, Projection],
@@ -325,7 +299,7 @@ def _inclusions(  # ruff: ignore[too-many-arguments] -- shared diagnostic and in
             first_available_on=None,
             first_available_precision=None,
             first_available_raw=None,
-            inclusion_kind=inclusion_kind,
+            inclusion_kind="other",
             note=None,
         )
         inclusions.setdefault((printing.id, identifier), []).append(

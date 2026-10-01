@@ -2888,7 +2888,14 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "$ref": "#/$defs/Code"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         {
           "anyOf": [
@@ -2961,7 +2968,9 @@
           "scalar": "ID"
         },
         {
-          "scalar": "Code"
+          "nullable": {
+            "scalar": "Code"
+          }
         },
         {
           "nullable": {
@@ -7446,7 +7455,14 @@
           "$ref": "#/$defs/ID"
         },
         {
-          "$ref": "#/$defs/Code"
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Code"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
         {
           "anyOf": [
@@ -7519,7 +7535,9 @@
           "scalar": "ID"
         },
         {
-          "scalar": "Code"
+          "nullable": {
+            "scalar": "Code"
+          }
         },
         {
           "nullable": {

@@ -8,7 +8,7 @@ from pathlib import Path
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.build_inputs import BuildContext, Source, SourceUse
 from sve_carddb.frozen_sources import FrozenSources
@@ -20,10 +20,11 @@ from sve_carddb.products.identity_models import (
     ProductLink,
     SourceBlock,
 )
-from sve_carddb.products.loader import _model, _safe_file
+from sve_carddb.products.loader import _safe_file
 from sve_carddb.products.models import Evidence, ProductRecord
 from sve_carddb.products.official import PARSER, ProductPage, parse_products
 from sve_carddb.registry.inputs import canonical, digest
+from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import digest as digest_bytes
 from sve_carddb.snapshot.values import parse
@@ -63,6 +64,7 @@ class ProductIdentities:
     records: Mapping[str, IdentityRecord]
     evidence: Mapping[Evidence, IdentityEvidence]
     warnings: tuple[JsonValue, ...]
+    catalog: ProductSnapshot
 
     def dependencies(self) -> dict[str, bytes]:
         """Pin every historical alias shard's exact bytes, including the index."""
@@ -182,7 +184,20 @@ def load_product_identities(
         MappingProxyType(records),
         MappingProxyType(pages),
         _warnings(records),
+        catalog,
     )
+
+
+def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
+    try:
+        return model.model_validate_json(canonical(raw))
+    except ValidationError as error:
+        # Paths and error codes identify constraints without exposing input text.
+        details = "; ".join(
+            ".".join(map(str, issue["loc"])) + ":" + issue["type"]
+            for issue in error.errors(include_input=False, include_context=False)
+        )
+        raise ValueError("Invalid product identity fields: " + details) from None
 
 
 def _inventory(root: Path, includes: set[str]) -> None:
@@ -318,6 +333,11 @@ def _evidence(
                     parsed[parse_key] = parse_products(raw, source, record.data.region)
                 page = parsed[parse_key]
                 ordinal = _ordinal(ref.locator)
+                if isinstance(record.data.match, SourceBlock) and (
+                    record.data.match.source_version_id,
+                    record.data.match.product_block_ordinal,
+                ) != (ref.source_version_id, ordinal):
+                    raise ValueError("Product identity source block evidence mismatch")
                 if (
                     ordinal >= len(page.blocks)
                     or record.data.match not in page.blocks[ordinal].matches
@@ -325,11 +345,6 @@ def _evidence(
                     raise ValueError(
                         "Product identity evidence cannot reproduce exact match"
                     )
-                if isinstance(record.data.match, SourceBlock) and (
-                    record.data.match.source_version_id,
-                    record.data.match.product_block_ordinal,
-                ) != (ref.source_version_id, ordinal):
-                    raise ValueError("Product identity source block evidence mismatch")
             pages[ref] = IdentityEvidence(source, page)
     return pages
 
