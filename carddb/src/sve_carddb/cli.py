@@ -65,6 +65,7 @@ from sve_carddb.manifest import (
     ManifestError,
     Region,
 )
+from sve_carddb.snapshot.preview.commands import app as snapshot_app
 from sve_carddb.source_archive import (
     ArchiveError,
     ArchiveReader,
@@ -104,6 +105,7 @@ archive_app = typer.Typer(
     no_args_is_help=True, help="Seal and verify immutable raw sources."
 )
 app.add_typer(archive_app, name="archive")
+app.add_typer(snapshot_app, name="snapshot")
 
 console = Console(soft_wrap=True)
 

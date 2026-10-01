@@ -163,6 +163,7 @@ def project(
     as_of: str,
     settings: Settings,
     decisions: Decisions = Decisions(),
+    publication_printings: frozenset[str] | None = None,
 ) -> Projection:
     """Project verified offline build rows; no filesystem writes or live source access."""
     if (
@@ -175,6 +176,13 @@ def project(
     db.verify()
     source = Source(db)
     view = initial(source)
+    if publication_printings is not None:
+        if not publication_printings <= {row["id"] for row in view["printing"]}:
+            raise ValueError("Publication printing is absent from verified build")
+        # Diagnostic staging retains parents that have not been adopted for publication.
+        view["printing"] = [
+            row for row in view["printing"] if row["id"] in publication_printings
+        ]
     select_regions(view, regions)
     text_records(source, view)
     printing_records(source, view)
