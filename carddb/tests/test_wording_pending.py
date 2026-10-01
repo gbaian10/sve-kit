@@ -16,7 +16,6 @@ from sve_carddb.text_observations import (
     plan_text_observations,
 )
 from sve_carddb.text_observations.wording import (
-    mark_wording_pending,
     printing_dates,
     printing_observed_texts,
     wording_region_blocks,
@@ -288,8 +287,6 @@ def test_unknown_printing_does_not_hide_known_latest_and_block_is_in_support(
         view = pending(db, case.plan)
         assert view.display.basis == "latest_known_release"
         assert len(view.undated_printing_ids) == 1
-        with db.transaction():
-            mark_wording_pending(db, case.plan)
         assert db.rows("card_engine_support")[0].values["reason_codes"] == Json(
             ["no_formal_candidate", "wording_pending"]
         )
@@ -423,6 +420,9 @@ def test_correction_revision_ids_with_exact_same_content_can_share_display(
             v for v in wording_views(db, case.plan)[group.face_id] if v.region == "jp"
         )
         assert len({c.revision_id for c in view.candidates}) == 2
+        assert view.display.revision_id == min(
+            c.revision_id for c in view.candidates if c.revision_id is not None
+        )
         assert view.display.basis == "latest_known_release"
         own = printing_observed_texts(db, case.plan)
         assert {c.revision_id for c in view.candidates} == {

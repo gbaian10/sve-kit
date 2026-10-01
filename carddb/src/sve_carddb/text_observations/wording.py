@@ -311,14 +311,17 @@ def printing_observed_texts(
                 )
             )
     return {
-        key: tuple(
-            sorted(
-                set(items),
-                key=lambda item: (item.source_url, item.state, item.revision_id or ""),
-            )
-        )
-        for key, items in sorted(result.items())
+        key: _canonical_observations(items) for key, items in sorted(result.items())
     }
+
+
+def _canonical_observations(items: list[ObservedText]) -> tuple[ObservedText, ...]:
+    return tuple(
+        sorted(
+            set(items),
+            key=lambda item: (item.source_url, item.state, item.revision_id or ""),
+        )
+    )
 
 
 def mark_wording_pending(db: Database, plan: TextPlan) -> None:

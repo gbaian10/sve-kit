@@ -69,6 +69,13 @@ An unknown main effect is a null revision with `missing_effect`; unavailable
 text positions retain the independently pinned identity source URL. These values
 never fill printed text columns or create an adopted current.
 
+This projector currently produces only `available` and `missing_effect`.
+`correction_conflict` is reserved by the public contract but is not emitted here:
+active conflicts are quarantined by `publication_identity()` before projection.
+A `needs_review` correction leaves the original observation `available`, while
+its face/region remains blocked from provisional display; it does not produce
+a per-observation conflict marker.
+
 `printing_dates(db)` uses formal product/inclusion evidence. A null inclusion
 precision inherits its product date; an explicit unknown overrides it. Every
 inclusion must have a complete day before the minimum proves a printing's first
@@ -90,6 +97,9 @@ Format 1.0.0's candidate schema, descriptors, handwritten shared golden and Pyth
 reader now include `WordingDisplay`, `WordingCandidate`, `WordingView`,
 `ObservedText`, `face.wording`, and `PrintingFace.observations`. Display revisions
 join current revisions in bootstrap; other candidates remain in history/detail.
+The web reader update is reviewed separately and must land before this extension
+of the shared golden. Public inclusion dates use `available_on/date_precision`;
+these are distinct from the build DB columns `first_available_on/first_available_precision`.
 The later complete snapshot projector must apply these values and measure the
 entire dual-region bootstrap with available three-language name closure against
 the 1 MiB compressed budget. This module alone is not a complete snapshot export.

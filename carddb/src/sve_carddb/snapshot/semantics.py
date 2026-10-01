@@ -347,8 +347,8 @@ def _wording_dates(view: View) -> dict[str, str | None]:
     }
     for inclusion in view["printing_product"]:
         product = products[string(inclusion["product_id"])]
-        precision = inclusion["first_available_precision"]
-        day = inclusion["first_available_on"]
+        precision = inclusion["date_precision"]
+        day = inclusion["available_on"]
         if precision is None:
             precision, day = product["date_precision"], product["released_on"]
         dates[string(inclusion["printing_id"])].append(
@@ -498,7 +498,6 @@ def _wording(view: View) -> None:
                 "Face without current requires pending wording in every region"
             )
         for wording in pending.values():
-            _wording_candidates(face, wording, physical, dates, revisions)
             _wording_display(
                 face,
                 wording,
@@ -506,3 +505,4 @@ def _wording(view: View) -> None:
                 current,
                 blocks.get(string(face["card_id"]), {}),
             )
+            _wording_candidates(face, wording, physical, dates, revisions)

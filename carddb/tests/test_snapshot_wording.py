@@ -6,7 +6,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.reader import _container, _current
-from sve_carddb.snapshot.semantics import validate_view
+from sve_carddb.snapshot.semantics import _wording_display, validate_view
 from sve_carddb.snapshot.values import array, object_value, parse, string
 
 from .test_snapshot_contract import fixture, payloads
@@ -41,12 +41,12 @@ def pending_view() -> tuple[View, Row, list[Fragment]]:
         {
             "printing_id": "p:a",
             "product_id": "prod:null",
-            "first_available_on": None,
-            "first_available_precision": None,
-            "first_available_raw": None,
+            "available_on": None,
+            "date_precision": None,
+            "date_raw": None,
             "inclusion_kind": "other",
-            "slot_quantity": None,
-            "slot_precision": "unknown",
+            "note_unit_id": None,
+            "first_inclusion_state": "unknown",
         }
     ]
     view["card_engine_support"][0]["region_blocks"] = [
@@ -87,10 +87,8 @@ def test_pending_display_rejects_independent_public_constraint(
         inclusion = view["printing_product"][0].copy()
         inclusion.update(
             printing_id="p:b",
-            first_available_on="2027-01-01"
-            if change == "latest_missing"
-            else "2026-01-01",
-            first_available_precision="day",
+            available_on="2027-01-01" if change == "latest_missing" else "2026-01-01",
+            date_precision="day",
         )
         view["printing_product"].append(inclusion)
         wording["undated_printing_ids"] = []
@@ -115,7 +113,7 @@ def test_pending_display_rejects_independent_public_constraint(
     elif change == "missing_pending":
         face["wording"] = []
     elif change == "wrong_candidate":
-        object_value(array(wording["candidates"])[0])["revision_id"] = "r:a1"
+        object_value(array(wording["candidates"])[1])["revision_id"] = "r:a1"
     elif change == "wrong_undated":
         wording["undated_printing_ids"] = []
     with pytest.raises(ValueError, match=error):
@@ -149,3 +147,28 @@ def test_same_day_exact_public_content_can_use_distinct_correction_revision_ids(
     }
     original.update(exact)
     validate_view(view, manifest, fragments)
+
+
+@pytest.mark.parametrize("boundary", ["candidate", "face", "region"])
+def test_display_boundary_independently_of_partition_and_observation_checks(
+    boundary: str,
+) -> None:
+    view, _, _ = pending_view()
+    face = view["face"][0]
+    wording = object_value(array(face["wording"])[0])
+    display = object_value(wording["display"])
+    revisions = {string(row["id"]): row for row in view["face_revision"]}
+    current: dict[str, JsonValue] = {}
+    if boundary == "candidate":
+        display["revision_id"] = "r:a1"
+        error = "not a pending candidate"
+    else:
+        display["basis"] = "current"
+        identifier = "r:b1" if boundary == "face" else "r:a2"
+        display["revision_id"] = identifier
+        current["jp"] = identifier
+        if boundary == "region":
+            revisions[identifier]["region"] = "en"
+        error = "another face/region"
+    with pytest.raises(ValueError, match=error):
+        _wording_display(face, wording, revisions, current, {"jp": ["wording_pending"]})
