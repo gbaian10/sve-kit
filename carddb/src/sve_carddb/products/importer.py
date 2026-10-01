@@ -16,6 +16,7 @@ from sve_carddb.build_inputs import (
 )
 from sve_carddb.products.evidence import CheckedSource, resolve_evidence
 from sve_carddb.products.models import Evidence, FamilyRecord, Lang, LocalizedText
+from sve_carddb.products.official_importer import populate_official_products
 from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.preview import populate_preview
 from sve_carddb.registry.records import RecordData
@@ -28,6 +29,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Value
     from sve_carddb.build_db.database import Database
     from sve_carddb.products.loader import ProductSnapshot
+    from sve_carddb.products.plan import OfficialProducts
     from sve_carddb.registry.preview import PreviewPlan
 
 
@@ -181,6 +183,8 @@ def product_preview_uses(
     catalog: ProductSnapshot,
     plan: PreviewPlan,
     stores: Mapping[str, Path],
+    *,
+    official: OfficialProducts | None = None,
 ) -> tuple[SourceUse, ...]:
     """Declare the complete expected source closure independently of database writes."""
     _require_family_catalog(catalog)
@@ -188,7 +192,15 @@ def product_preview_uses(
         tuple(ref for record in catalog.records.values() for ref in record.evidence),
         stores,
     )
-    return (*product_source_uses(catalog, evidence), *plan.source_uses())
+    if official is not None and official.preview != plan:
+        raise ValueError(
+            "Official products and identity must use the same preview plan"
+        )
+    return (
+        *product_source_uses(catalog, evidence),
+        *plan.source_uses(),
+        *(() if official is None else official.source_uses()),
+    )
 
 
 def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose explicit build, authored, language and archive inputs
@@ -200,11 +212,16 @@ def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose exp
     build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
+    official: OfficialProducts | None = None,
 ) -> InputRecord:
     """Compose family and identity writes inside one rebuild/caller transaction."""
     if catalog.registry_index_content != plan.snapshot.files.index_content:
         raise ValueError("Product catalog and preview must use the same registry input")
-    expected = product_preview_uses(catalog, plan, {} if stores is None else stores)
+    if official is not None and official.identities.revision != authored_revision:
+        raise ValueError("Product identity authored revision mismatch")
+    expected = product_preview_uses(
+        catalog, plan, {} if stores is None else stores, official=official
+    )
     family_inputs = populate_families(
         db,
         catalog,
@@ -216,7 +233,16 @@ def populate_product_preview(  # ruff: ignore[too-many-arguments] -- compose exp
     identity_inputs = populate_preview(
         db, plan, authored_revision=authored_revision, build=build
     )
-    inputs = input_record(build, (*family_inputs.uses, *identity_inputs.uses))
+    official_inputs = (
+        ()
+        if official is None
+        else populate_official_products(
+            db, official, build=build, texts=_Texts(db)
+        ).uses
+    )
+    inputs = input_record(
+        build, (*family_inputs.uses, *identity_inputs.uses, *official_inputs)
+    )
     inputs.verify(db, build, expected)
     return inputs
 
@@ -230,6 +256,7 @@ def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction o
     build: BuildContext,
     languages: tuple[Language, ...] = (),
     stores: Mapping[str, Path] | None = None,
+    official: OfficialProducts | None = None,
 ) -> InputRecord:
     """Own one transaction for the complete family/audit/identity graph."""
     with db.transaction():
@@ -241,6 +268,7 @@ def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction o
             build=build,
             languages=languages,
             stores=stores,
+            official=official,
         )
 
 

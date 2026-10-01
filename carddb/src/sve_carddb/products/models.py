@@ -1,6 +1,6 @@
 """Immutable product-authored-v1 wire types, independent of identity envelopes."""
 
-from typing import Annotated, Literal
+from typing import Annotated, Literal, Self
 
 from pydantic import Field, field_validator, model_validator
 
@@ -129,12 +129,10 @@ CatalogRecord = Annotated[
 ]
 
 
-class Decision(RecordData):
+class DecisionMetadata(RecordData):
     id: Annotated[str, Field(pattern=r"^d:[0-9a-f]{64}\Z")]
     state: Literal["proposed", "confirmed"]
     scope: Literal["batch"]
-    category: Literal["product_catalog"]
-    policy_id: Literal["product-authored-v1"]
     membership_hash: Hash
     members: tuple[tuple[Text, Hash], ...]
     sample_ids: tuple[Text, ...]
@@ -146,7 +144,7 @@ class Decision(RecordData):
     note: str
 
     @model_validator(mode="after")
-    def _review(self) -> Decision:
+    def _review(self) -> Self:
         if not self.authored_by.strip():
             raise ValueError("Authored author must be named")
         if self.state == "proposed":
@@ -173,6 +171,11 @@ class Decision(RecordData):
         ):
             raise ValueError("Day review precision requires UTC midnight encoding")
         return self
+
+
+class Decision(DecisionMetadata):
+    category: Literal["product_catalog"]
+    policy_id: Literal["product-authored-v1"]
 
 
 class _Envelope(RecordData):
