@@ -684,6 +684,7 @@ function addFaces(ctx: CardContext): FaceRevisions {
       ordinal,
       side: face.side,
       current: currentByFace.get(face.id) ?? [],
+      wording: [],
     })
     for (const plan of plans) {
       if (!plan.current) continue
@@ -824,6 +825,15 @@ async function addPrintings(ctx: CardContext, faces: FaceRevisions): Promise<voi
         printed_effect_unit_id: revision ? (revision["effect_unit_id"] ?? null) : null,
         flavor_unit_id: face.flavor === undefined ? null : builder.unit(lang, face.flavor),
         printed_text_state: revision ? (index === 0 ? "verified" : "derived_no_errata") : "unknown",
+        observations: revision
+          ? [
+              {
+                revision_id: revisionId ?? null,
+                state: "available",
+                source_url: "https://example.invalid/synthetic-observation",
+              },
+            ]
+          : [],
         sections: revision ? (revision["sections"] ?? []) : [],
         stamps: [],
         translations: [],

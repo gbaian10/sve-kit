@@ -79,6 +79,10 @@ export default {
     loading: "読み込み中",
   },
   card: {
+    wordingPending: "表記未定",
+    candidatesUnselected: "複数の候補があり、まだ選定されていません",
+    provisionalWording: "既知の発売日に基づく仮表示（未採用）",
+    undatedPrintings: "日付未定の版：",
     imageAlt: "{{name}}（{{cardNo}}）",
     noImage: "画像なし",
     imagePending: "画像は確認待ち",

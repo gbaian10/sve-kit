@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest"
 import { READER_ERROR_CODES, type ReaderErrorCode, SnapshotError } from "./errors"
 import { canonical, canonicalText, type JsonObject, type JsonValue, parseStrict } from "./json"
 import { readSnapshot, readTextAll } from "./reader"
+import { columns, descriptor } from "./schema"
 import { digest } from "./sha256"
 
 // Shared handwritten golden (docs/schema/snapshot-contract.md): the same files the Python reader
@@ -61,12 +62,18 @@ function reseal(manifestValue: JsonObject, key: string, data: Uint8Array): void 
       if (ref["key"] === key) ref["sha256"] = hashed
     }
   }
-  if (key === "detail") {
+  if (["bootstrap", "detail", "history", "images"].includes(key)) {
     const decoded = parseStrict(data) as JsonObject
-    for (const count of file["row_counts"] as JsonObject[]) {
-      const fragments = (decoded["tables"] as JsonObject)[count["table"] as string] as JsonObject[]
-      count["count"] = ((fragments[0] as JsonObject)["rows"] as JsonValue[]).length
-    }
+    file["row_counts"] = Object.entries(decoded["tables"] as JsonObject).flatMap(
+      ([table, values]) =>
+        (values as JsonObject[]).map((fragment) => ({
+          table,
+          owner: fragment["owner"] ?? null,
+          bucket: fragment["bucket"] ?? null,
+          partition: fragment["partition"] ?? null,
+          count: (fragment["rows"] as JsonValue[]).length,
+        })),
+    )
   }
 }
 
@@ -118,6 +125,24 @@ const EXPECTED_CODES: Record<string, readonly ReaderErrorCode[]> = {
   "published-hour-25": ["schema"],
   "published-february-30": ["schema"],
   "revision-date-unicode": ["schema"],
+  "pending-cross-face-observation": ["wording-observation-face"],
+  "pending-candidate-without-own-observation": ["wording-candidate-observation"],
+  "pending-null-cannot-replace-available-observation": ["wording-candidate-observation"],
+  "pending-undated-inventory-incomplete": ["wording-undated-inventory"],
+  "pending-preserves-valid-current": ["wording-current-preserved"],
+  "pending-current-display-must-match": ["wording-current-display"],
+  "pending-display-not-candidate": ["wording-display-candidate"],
+  "pending-display-cross-face": ["current-face-mismatch"],
+  "pending-display-cross-region": ["current-face-mismatch"],
+  "pending-latest-without-day": ["wording-latest-date"],
+  "pending-latest-null-candidate": ["wording-latest-candidate"],
+  "pending-display-not-latest": ["wording-latest-candidate"],
+  "pending-region-without-printing": ["wording-region-coverage"],
+  "pending-candidate-cross-region": ["wording-candidate-face"],
+  "pending-observation-cross-region": ["wording-observation-face"],
+  "pending-wording-unsorted": ["rows-unsorted-or-duplicate"],
+  "pending-candidates-unsorted": ["rows-unsorted-or-duplicate"],
+  "pending-observations-unsorted": ["rows-unsorted-or-duplicate"],
 }
 
 describe("snapshot contract golden", () => {
@@ -150,17 +175,44 @@ describe("snapshot contract golden", () => {
 
   it("rejects every shared reader counterexample for its intended reason", () => {
     const cases = fixture("reader-invalid.json") as JsonObject[]
-    expect(cases.length).toBe(34)
+    expect(cases.length).toBeGreaterThan(0)
+    expect(new Set(cases.map((item) => item["name"])).size).toBe(cases.length)
     for (const item of cases) {
       const name = item["name"] as string
       const m = manifest()
       const blobs = payloads()
+      for (const setup of (item["setup"] ?? []) as JsonObject[]) {
+        const key = setup["target"] as string
+        const value = key === "manifest" ? m : parseStrict(blobs.get(key) ?? new Uint8Array())
+        replace(value, setup["path"] as (string | number)[], setup["value"] ?? null)
+        if (key === "bootstrap") replaceBootstrap(m, blobs, value)
+        else if (key !== "manifest") {
+          blobs.set(key, canonical(value))
+          reseal(m, key, blobs.get(key) ?? new Uint8Array())
+        }
+      }
       const target = item["target"] as string
       const value = target === "manifest" ? m : parseStrict(blobs.get(target) ?? new Uint8Array())
-      replace(value, item["path"] as (string | number)[], item["value"] ?? null)
+      // Derive these omissions from the current golden so a new nested tuple column does not
+      // turn their intended positional-join rejection into an unrelated shape failure.
+      let replacement = item["value"] ?? null
+      if (name === "row-index-missing" || name === "face-ordinal-missing") {
+        const fragment = (
+          ((value as JsonObject)["tables"] as JsonObject)["printing"] as JsonObject[]
+        )[0] as JsonObject
+        const rows = fragment["rows"] as JsonValue[][]
+        replacement =
+          name === "row-index-missing"
+            ? rows.slice(0, 1)
+            : (rows[0]?.[1] as JsonValue[]).slice(0, 1)
+      }
+      replace(value, item["path"] as (string | number)[], replacement)
       if (target !== "manifest") {
         blobs.set(target, canonical(value))
-        if (item["rehash"] === true) reseal(m, target, blobs.get(target) ?? new Uint8Array())
+        if (item["rehash"] === true) {
+          if (target === "bootstrap") replaceBootstrap(m, blobs, value)
+          else reseal(m, target, blobs.get(target) ?? new Uint8Array())
+        }
       }
       const code = codeOf(() => readSnapshot(m, blobs))
       const allowed = EXPECTED_CODES[name]
@@ -237,6 +289,50 @@ describe("snapshot contract golden", () => {
     replaceBootstrap(m, blobs, boot)
     expect(codeOf(() => readSnapshot(m, blobs))).toBe("vocabulary-missing")
   })
+
+  it.skipIf(!columns("face").includes("wording"))(
+    "ships a pending display in bootstrap without adopting current",
+    () => {
+      const m = manifest()
+      const blobs = payloads()
+      const boot = parseStrict(blobs.get("bootstrap") ?? new Uint8Array()) as JsonObject
+      const tables = boot["tables"] as JsonObject
+      const front = (
+        (tables["face"] as JsonObject[])[0]?.["rows"] as JsonValue[][]
+      )[0] as JsonValue[]
+      front[4] = []
+      const pending = (front[5] as JsonValue[][])[0] as JsonValue[]
+      pending[2] = ["r:a2", "latest_known_release"]
+      pending[4] = ["p:b"]
+      const product = (
+        (tables["product"] as JsonObject[])[0]?.["rows"] as JsonValue[][]
+      )[0] as JsonValue[]
+      product[6] = "2026-01-01"
+      product[7] = "day"
+      const support = (
+        (tables["card_engine_support"] as JsonObject[])[0]?.["rows"] as JsonValue[][]
+      )[0] as JsonValue[]
+      support[3] = [["jp", ["wording_pending"]]]
+      const type = descriptor("printing_product_bootstrap")
+      tables["printing_product"] = [
+        {
+          owner: { kind: "home_set", id: "set:a" },
+          bucket: 0,
+          partition: "bootstrap",
+          base: null,
+          columns: type["columns"] ?? null,
+          rows: [["p:a", "prod:null", null, null, null, "other", null, "unknown"]],
+        },
+      ]
+      replaceBootstrap(m, blobs, boot)
+      const result = readSnapshot(m, blobs)
+      expect(result["face"]?.[0]?.["current"]).toEqual([])
+      expect((result["face"]?.[0]?.["wording"] as JsonObject[])[0]?.["display"]).toEqual({
+        revision_id: "r:a2",
+        basis: "latest_known_release",
+      })
+    },
+  )
 
   it("does not let text_all silently replace member content", () => {
     const m = manifest()

@@ -30,6 +30,7 @@ export interface CardSummary {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
+  readonly wordingPending?: boolean
 }
 
 export interface Catalog {
@@ -128,11 +129,23 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
       if (!isRegion(region)) continue
       const printingId = view["default_printing_id"]
       if (typeof printingId === "string") defaultPrinting[region] = printingId
-      const revision = index.currentRevision(faceId, region)
-      if (!revision) continue
-      const code = revision["class_code"]
+      const revision = index.displayRevision(faceId, region)
+      const pending = index.wording(faceId, region)
+      if (!revision && !pending) continue
+      const code = revision?.["class_code"]
       if (typeof code === "string") classCode = code
-      const name = nameOf(index, revision)
+      const printing = index.printing(typeof printingId === "string" ? printingId : "")
+      const name = revision
+        ? nameOf(index, revision)
+        : printing
+          ? {
+              original: {
+                lang: region === "jp" ? ("ja" as const) : ("en" as const),
+                text: stringValue(printing["card_no"]),
+              },
+              translations: {},
+            }
+          : undefined
       if (!name) continue
       for (const [lang, text] of [
         [name.original.lang, name.original.text] as const,
@@ -153,9 +166,10 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
           region,
           classCode: typeof code === "string" ? code : null,
           name,
-          cost: nullableInteger(revision["cost"]),
-          attack: nullableInteger(revision["attack"]),
-          defense: nullableInteger(revision["defense"]),
+          cost: nullableInteger(revision?.["cost"]),
+          attack: nullableInteger(revision?.["attack"]),
+          defense: nullableInteger(revision?.["defense"]),
+          wordingPending: pending !== undefined,
         })
       }
     }

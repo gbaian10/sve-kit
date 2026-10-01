@@ -14,6 +14,9 @@ export interface CardIndex {
   readonly printingByCardNo: (region: string, cardNo: string) => Row | undefined
   /** The bootstrap columns of the current revision for one face in one region. */
   readonly currentRevision: (faceId: string, region: string) => Row | undefined
+  /** Current takes precedence; a pending display is only a presentation value. */
+  readonly displayRevision: (faceId: string, region: string) => Row | undefined
+  readonly wording: (faceId: string, region: string) => Row | undefined
   readonly family: (id: string) => Row | undefined
   readonly product: (id: string) => Row | undefined
   readonly vocabulary: (kind: string, code: string) => Row | undefined
@@ -73,6 +76,15 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
   const supportMap = byId(rows("card_engine_support"), "card_id")
   const textMap = byId(rows("text_unit"))
   const translationMap = byId(rows("translation"))
+  const currentRevision = (faceId: string, region: string): Row | undefined => {
+    const face = faceMap.get(faceId)
+    for (const entry of (face?.["current"] ?? []) as Row[]) {
+      if (entry["region"] === region) return revisionMap.get(stringValue(entry["revision_id"]))
+    }
+    return undefined
+  }
+  const wording = (faceId: string, region: string): Row | undefined =>
+    ((faceMap.get(faceId)?.["wording"] ?? []) as Row[]).find((entry) => entry["region"] === region)
   return {
     cards,
     families,
@@ -82,13 +94,15 @@ export function createCardIndex(snapshot: LoadedSnapshot): CardIndex {
     printing: (id) => printingMap.get(id),
     printingsOf: (cardId) => printingsByCard.get(cardId) ?? [],
     printingByCardNo: (region, cardNo) => printingByNo.get(`${region}\u0000${cardNo}`),
-    currentRevision: (faceId, region) => {
-      const face = faceMap.get(faceId)
-      if (!face) return undefined
-      for (const entry of face["current"] as Row[]) {
-        if (entry["region"] === region) return revisionMap.get(stringValue(entry["revision_id"]))
-      }
-      return undefined
+    currentRevision,
+    wording,
+    displayRevision: (faceId, region) => {
+      const current = currentRevision(faceId, region)
+      if (current) return current
+      const display = wording(faceId, region)?.["display"] as Row | undefined
+      return typeof display?.["revision_id"] === "string"
+        ? revisionMap.get(display["revision_id"])
+        : undefined
     },
     family: (id) => familyMap.get(id),
     product: (id) => productMap.get(id),
