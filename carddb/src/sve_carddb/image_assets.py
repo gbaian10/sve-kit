@@ -6,7 +6,6 @@ from io import BytesIO
 from pathlib import Path, PurePosixPath
 from time import perf_counter
 from typing import TYPE_CHECKING
-from urllib.parse import urljoin
 
 from PIL import Image, ImageOps
 from pydantic import JsonValue
@@ -31,7 +30,7 @@ from sve_carddb.image_variants import (
 )
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.values import canonical, digest, parse
-from sve_carddb.sources.official_jp import card_url
+from sve_carddb.sources.official_jp import card_url, image_url
 from sve_carddb.store import resolve_within
 
 if TYPE_CHECKING:
@@ -214,7 +213,7 @@ def plan_jp_images(
                     data.card_no,
                     source,
                     raw_src,
-                    urljoin(source.url, raw_src),
+                    image_url(raw_src, source.url),
                 )
             )
     return tuple(sorted(references, key=lambda ref: (ref.printing_id, ref.face_id)))
@@ -360,7 +359,7 @@ def populate_jp_assets(
         if (
             ref.page.kind != "official_page"
             or ref.page.parser_version != PARSER
-            or ref.source_url != urljoin(ref.page.url, ref.source_src_raw)
+            or ref.source_url != image_url(ref.source_src_raw, ref.page.url)
             or not ref.source_src_raw
         ):
             raise ValueError("Invalid official image binding provenance")

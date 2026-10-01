@@ -19,8 +19,9 @@ cache files enter the asset root. Old immutable blobs remain intact.
 `plan_jp_images` takes an already verified identity `PreviewPlan`, its parent DB
 and an explicitly pinned card-page batch. It uses the adopted `source_face_map`
 to read each face's actual `img src`, preserving its spelling and resolving the
-URL against the archived page. It does not use logical face order to guess source
-order, or card numbers to construct image URLs. The page source metadata, DB
+URL against the archived page using the crawler's existing URL canonicalization
+(including spaces and existing percent escapes). It does not use logical face
+order to guess source order, or card numbers to construct image URLs. The page source metadata, DB
 printing and complete face map must agree.
 
 `populate_jp_assets` composes into the caller's transaction, after checking every

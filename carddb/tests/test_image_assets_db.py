@@ -1,5 +1,6 @@
 """Frozen page face maps, image DB projection and inseparable bundle publication."""
 
+import hashlib
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
@@ -33,6 +34,7 @@ from sve_carddb.sources.official_jp import card_url
 from .build_db_fixtures import rows
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- reuse only synthetic archive fixture
 from .test_image_assets import roots
+from .test_image_variants import png
 from .test_registry_preview_archive import RAW
 from .test_source_archive import _put, _resource
 
@@ -73,6 +75,14 @@ class Staged:
 
 @pytest.fixture
 def staged(tmp_path: Path, frozen: FrozenSources) -> Staged:
+    return make_staged(tmp_path, frozen)
+
+
+def make_staged(
+    tmp_path: Path,
+    frozen: FrozenSources,
+    front_src: bytes = b"/synthetic/0.png",
+) -> Staged:
     data_root = frozen.root.parent / "data"
     store = ArchiveStore(
         data_root,
@@ -81,9 +91,9 @@ def staged(tmp_path: Path, frozen: FrozenSources) -> Staged:
         frozen.root,
         frozen.store_id,
     )
-    front = RAW.replace(b"/synthetic/exact-image.png", b"/synthetic/0.png")
+    front = RAW.replace(b"/synthetic/exact-image.png", front_src)
     back = front.replace(b"Synthetic card", b"Synthetic back").replace(
-        b"/synthetic/0.png", b"/synthetic/1.png"
+        front_src, b"/synthetic/1.png"
     )
     inner = back[
         back.index(b'<div class="cardlist-Detail_Box_Inner">') : back.index(b"\n<!--")
@@ -132,6 +142,55 @@ def refs_for(staged: Staged) -> tuple[ImageReference, ...]:
         with db.transaction():
             staged.parents(db)
         return plan_jp_images(db, staged.plan, staged.cards)
+
+
+@pytest.mark.parametrize(
+    ("raw_src", "resolved"),
+    [
+        ("/synthetic/0 .png", "/synthetic/0%20.png"),
+        ("/synthetic/0%20.png", "/synthetic/0%20.png"),
+        ("/synthetic/Ⓢ .png", "/synthetic/%E2%93%88%20.png"),
+        (
+            "//SHADOWVERSE-EVOLVE.COM:443/synthetic/0 .png?b=2&a=1#image",
+            "/synthetic/0%20.png?a=1&b=2",
+        ),
+    ],
+)
+def test_original_src_and_crawler_url_encoding_bind_the_same_archived_image(
+    tmp_path: Path, frozen: FrozenSources, raw_src: str, resolved: str
+) -> None:
+    staged = make_staged(tmp_path, frozen, raw_src.encode())
+    data_root = frozen.root.parent / "data"
+    store = ArchiveStore(
+        data_root,
+        data_root / "manifest/manifest.sqlite",
+        data_root / "manifest/.lock",
+        frozen.root,
+        frozen.store_id,
+    )
+    source_url = "https://shadowverse-evolve.com" + resolved
+    data = png(80, 112)
+    _put(store, _resource(source_url, "raw/encoded.png", data), data)
+    batch = seal_batch(store, scope=(Scope(provider="jp", kind="image"),))
+    images = FrozenSources(store.root, store.store_id, batch.batch_id)
+    output = roots(tmp_path)
+    encoded = build_jp_assets(images, output)
+    with create_database(compile_build(("images",))) as db:
+        with db.transaction():
+            staged.parents(db)
+        refs = plan_jp_images(db, staged.plan, staged.cards)
+        selected = tuple(ref for ref in refs if ref.source_src_raw == raw_src)
+        assert len(selected) == 2
+        assert {ref.source_url for ref in selected} == {source_url}
+        with db.transaction():
+            populate_jp_assets(db, encoded, selected, output.preview)
+        assert len(db.rows("printing_image")) == 2
+        assert len(db.rows("image_variant")) == 5
+        asset = db.rows("image_asset")[0].values
+        assert asset["source_src_raw"] == raw_src
+        assert asset["source_url"] == source_url
+        assert asset["availability"] == "available"
+        assert asset["content_hash"] == "sha256:" + hashlib.sha256(data).hexdigest()
 
 
 def test_original_src_double_faces_and_five_variants_are_projected(
