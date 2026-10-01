@@ -1,7 +1,7 @@
 # 身分修復與決定續版
 
-**提案，待使用者決定。** 本文件將既有永久身分與不可變決定原則具體化為
-`identity-transition-v1` authored 契約；格式尚未核可，也不表示已有實作或真實資料採納。
+**使用者 2026-10-01 核可**（含指名撤回錯誤修復）。 本文件將既有永久身分與不可變決定原則具體化為
+`identity-transition-v1` authored 契約；格式核可不表示已有實作或真實資料採納。
 已定語意仍以 [build-db §3.1](build-db.md#31-永久身分)、[§13](build-db.md#13-官網更正與身分修復)
 及 [authored-layout §2–§3](authored-layout.md#2-分片批次決定與來源) 為準。
 
@@ -17,7 +17,7 @@
   不改配號格式，不提供商品內容／商品身分對照的續版，亦不替代表記採納或來源更正生命週期。
   商品誤配仍依 [authored-layout §11.3](authored-layout.md#113-首次採納重建匹配與改址) 停止受影響匯入。
 
-## 2. 獨立入口與不可變封套（提案）
+## 2. 獨立入口與不可變封套
 
 | 路徑（相對 authored 根） | 完整頂層欄位 |
 | --- | --- |
@@ -30,12 +30,14 @@ sequence 是從 1 開始、至少三位十進位數字的連續序號；每片�
 禁止絕對路徑、`..`、symlink 逃逸、缺檔、未索引分片、重複鍵與未知欄位。
 includes 釘解析後完整分片的 canonical hash，歷史 entries 只增不改；不納入 ids/index.yaml。
 
-每筆 transition 恰有 `{record_key,kind,sequence,previous,registry_basis,review_context,updates,repairs,evidence,reason}`：
+每筆 transition 恰有 `{record_key,kind,action,reverts,sequence,previous,registry_basis,review_context,updates,repairs,routes,evidence,reason}`：
 
 | 欄位 | 完整定義 |
 | --- | --- |
 | record_key | `["identity_transition",sequence]` 的 canonical JSON 字串，全域唯一 |
 | kind | 固定 `identity_transition` |
+| action, reverts | action 為 `apply/revert`；apply 的 reverts=null，revert 指名 `{record_key,record_hash,decision_id}`，見 §4.2 |
+| routes | 完整路由變動陣列，無變動為 []；見 §4.2，參與本次成員 hash |
 | sequence | 正整數，決定套用順序，不表示官方年代或發布版號 |
 | previous | 首筆 null；其餘為 `{record_key,record_hash,decision_id}`，恰指 sequence−1 的完整 transition 與決定 |
 | registry_basis | `{authored_revision,index_path,index_hash}`；完整 Git commit SHA、固定 `ids/index.yaml`、其 canonical hash，釘核對時原始 registry |
@@ -56,7 +58,7 @@ semantic_hash=H(完整 transition)，membership_hash=H(排序後 members)，deci
 沒有 record 或 decision 自我引用。新的核可必須是新 transition、新 members、新 decision；
 不沿用舊 reviewed_by／時間冒充這次核對。
 
-## 3. 完整替代內容與決定續版（提案）
+## 3. 完整替代內容與決定續版
 
 每個 update 恰有 `{target_key,before,after,allocation_anchor}`。target_key 是原 registry record_key，
 before 為 `{transition_key,record_key,record_hash,decision_id}` 或 null：
@@ -73,7 +75,7 @@ before 為 `{transition_key,record_key,record_hash,decision_id}` 或 null：
 
 after 沿 registry 各 kind 的欄位與證據限制；穩定主鍵、owner 不變。
 既有 card 只允許更改 identity_state；face 的 card_id／ordinal／side 不改；printing 只允許
-card_id／source_face_map（有對應 repair 時）、observation／cross_region_review（重新完整核對時）改變；
+card_id／source_face_map（有對應 repair 或合法 revert 時）、observation／cross_region_review（重新完整核對時）改變；
 art 只更新 uses／observation，不改其 card_id／face_id／classification。
 review 的 card_id／target_region、relation 的 id／兩端／relation 不改；要改關係端點須明示停用舊關係、
 按原 registry 首次採納流程另建新關係，不以續版偷換其永久身分。其他欄位變動超出本格式即拒絕。覆蓋層允許 card.identity_state=retired，
@@ -100,7 +102,7 @@ reskin 同理不產重複／反向關係。失效舊批准不自動恢復；新�
 讀取原始 registry 的結構／hash 驗證與有效集合驗證分兩階段；不得在套用續版前，
 就以舊 review 未涵蓋新 printing 為由否決一筆其實完整的交易，亦不得跳過最後的完整集合檢查。
 
-## 4. merge／split／reassign 的完整移轉（提案）
+## 4. merge／split／reassign 的完整移轉
 
 每個 repair 恰有 `{id,kind,old_card_id,new_card_ids,printing_moves,face_moves,art_moves,retire_old,reason}`。
 id 是首次配發的永久 ID，不由目前排序重算；kind=`merge/split/reassign_printing`。
@@ -113,21 +115,21 @@ new_card_ids 排序唯一，不含 old_card_id。moves 陣列按各自完整 can
 | reassign_printing | 恰一目的 card、恰一 printing；retire_old 只在本 transaction 後 old 無有效 printing 時為 true，否則 false |
 
 每個 printing_move 恰有 `{printing_id,from_card_id,to_card_id,faces}`，from 必須是修復前的 old，
-to 屬 new_card_ids，from≠to。同 transaction 同 printing 只移一次；全域事件有向圖不得有環，
+to 屬 new_card_ids，from≠to。同 transaction 同 printing 只移一次；有效修復有向圖不得有環（撤回依 §4.2 移除原邊），
 每個 old_card_id 在同 transaction 至多一個 repair 群組，避免各自計算 remaining_uses 互相衝突；
 分次移走同 old 的數張 printing 使用連續 transaction，每次以前次結果核對。
-retired ID 不復活或重用。回復曾經錯誤的修復若將成環，隔離並另提政策，不自動繞過無環規則。
+retired ID 不重用；只有 §4.2 指名撤回可恢復被該修復退役的原 card，不是重新配發身分。
 
 faces 恰覆蓋該 printing 全部來源面，每項為 `{source_index,from_face_id,to_face_id,from_art_id,to_art_id}`；
 source_index 沿原 source_face_map，含雙面背面，不以 ordinal、名稱或圖片相似度猜。
 兩個 art 欄必須明示（未知時 null）；不能把已知 art 任意丟成 null。
 printing after.source_face_map 必須與此映射完全相同，after.card_id 必須等於 to。
 
-**face／art ID 政策提案**：舊 face／art 保留原父層，跨 card 不搬動同一 face ID；
+**face／art ID 政策**：舊 face／art 保留原父層，跨 card 不搬動同一 face ID；
 目的 card 使用其既有且人工確認對應的 face，或首次配發新 face。
 舊 art 跨 face 時也使用目的面已有、已確認同圖的 art，否則配新 art ID；
 不能讓一個 art ID 同時屬於兩個 face。這避免覆寫舊 face_revision 與圖像歷史的歸屬，
-代價是同圖因身分修復可能有新 art ID；它是需核可的取捨，不是已定政策。
+代價是同圖因身分修復可能有新 art ID；公開清單依下述現行用途篩選，不重複展示歷史圖。
 
 - face_moves 每項恰為 `{from_face_id,to_face_ids}`；逐 old face（含無 printing use 的面）列一次，
   to_face_ids 為非空排序唯一目的面。與 printing moves 一致；split 可一對多，merge 可多對一。
@@ -137,11 +139,11 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
   remaining_uses 與全部 targets.uses 恰分割修復前 uses（目的 face 以 faces 映射反算比對）。
   無 use 的 art 明列 targets=[]、remaining_uses=[]，原列保留；沒有 art 時整體 art_moves=[]。
 - 所有改變 use 集合的 art 都要有完整 after（舊 art 留 remaining_uses，目的 art 保留原有 uses 加新 uses）；
-  非空 uses 的 observation 必須指該 art 的一個實際 use。歷史 art 的 uses=[] 是本提案新增容許，
+  非空 uses 的 observation 必須指該 art 的一個實際 use。歷史 art 的 uses=[] 是本格式容許，
   僅限移轉後無現行 use 的保留列，其 observation 留歷史證據，不拿來通過現行來源檢查。
 - 新 card／face／art 必須隨 updates 完整建立。為避免拆分時原代表 printing 的 anchor 已被舊 card 佔用，
   新實體以既有固定 namespace、UUIDv5 名稱 `kind + NUL + "identity-transition-v1" + NUL + allocation_anchor`
-  首次配發，保留 anchor 且檢查全域碰撞；只有修復新增實體使用這個提案 recipe，不改任何舊 ID。
+  首次配發，保留 anchor 且檢查全域碰撞；只有修復新增實體使用這個 recipe，不改任何舊 ID。
   存活 card 仍驗 single／double_faced 數量、side、ordinal 唯一；墓碑亦保留原有完整 faces。
 
 完整移轉不限於 printing FK：printing_face、art uses、圖像／標誌、printed observation 等以具體版次來源
@@ -152,7 +154,11 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
 
 墓碑保留 card.id、owner、layout、原 faces，identity_state=retired；不帶有效 printing／current／自動能力，
 原採納與歷史 revisions 可追溯。原 card 未退役時只移指定版次，不能把其餘版次或 defaults 一併丟掉。
-公開 support 與每 card 必有列等限制仍照既有 schema，墓碑不得藉空 FK 或刪父列通過驗證。
+公開墓碑 card 與原 faces 只保留修復事件／歷史引用閉包，不列入一般卡表、搜尋、卡包、
+插畫或繪師瀏覽；support 仍保留 required 列並標未實作，不帶自動能力。
+無現行 printing_face use 的舊 art 不進公開 art 清單，其 art_artist 不投影成公開 art.artists；僅因這些 art 被引用的 artist 亦不出貨；
+仍被其他現行 art 引用的 artist 保留。公開 baseline／巢狀引用不得指向被排除的 art，
+依欄位契約留 null 或移除相應非必填列，不可留下懸空 FK。舊快照閉包完全不改。
 
 ### 4.1 三種修復的合成對照
 
@@ -167,7 +173,52 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
 同圖同框不能省 art 移轉；雙面不能只移正面。純來源 effect 改字而父 card 未變，
 只續版觀測與受影響決定，禁止用空 moves 的 reassign 混入公開修復。
 
-## 5. 有效投影順序與原子性（提案）
+### 4.2 指名撤回修復
+
+**使用者 2026-10-01 核可**：新增 action=revert，指名撤回上一筆或較早的修復 transition。
+reverts 恰有 `{record_key,record_hash,decision_id}`，精確釘住已存在、action=apply 且 repairs 非空的整筆
+transition；不只指 repair.id、日期或最新一筆。不允許部分撤回一個 transaction、重複撤回、指向未來、
+撤回純來源續版，或 revert 指向 revert。若撤回本身判錯，另以新的 apply 重新採納修復，不能復用原事件 ID。
+
+revert 仍在全域 sequence 鏈尾追加，previous 指當前鏈尾（不一定是 reverts）；它本身須有新的 confirmed
+決定、完整 updates／evidence／review_context／routes，repairs=[]。舊 transition、record、decision 及已發布
+事件 bytes 完全不改。reverts 的三個欄位一併參與 record hash；來源與人工核對不是用舊 reviewer 代簽。
+
+**指定較早修復的條件**：重建目標套用前後的完整狀態，並檢查所有後續有效 transition 及 registry 追加。
+目標的每個 update key 必須仍有效指向目標產生的版本；不得有後續改寫、以其產物為證據的採納，或
+新增 printing／use／路由依賴受影響 card／face／art。檢查範圍包含完整移轉與其啟用能力的依賴閉包，
+不只看 key 是否相撞；previous 的順序引用及 F1 對全 registry 的釘選本身不算語義相依。
+後續若已合法撤回且狀態 exact 還原，允許以該撤回產生的最新 before ref 繼續驗證；不能跳過任何歷史。
+無關卡片的後續採納可以保留。存在相依修復時，先按相依的反向順序逐筆撤回；有其他無法撤回的採納
+則拒絕整筆撤回、列精確衝突，不能強制覆蓋。這是避免破壞後續決定的驗證，不限制只能撤回鏈尾。
+
+updates 恰覆蓋目標的全部 update keys：每個 before 指目前有效版本，after 由已驗證的目標前態反算，
+不能任意補修其他問題。原已存在實體恢復完整前態；原 printing 回到原 card、全部原 faces／art，
+原 card 若被目標退役，恢復其原 identity_state。這是 retired 恢復的唯一例外，不重配 ID。
+目標新建的永久實體不刪除：新 card 改 retired、新 face 留原父層、新 art 留 uses=[] 作歷史，
+allocation_anchor=null（不是再次配發）。曾被停用的 review／relation 若恢復，仍以本次決定重驗
+完整觀測與目前 coverage，不自動繼承舊批准；來源已變而無法重現合法前態即拒絕，不能盲目倒退 current。
+DSL、表記與來源更正依其本身 freshness 閘門，不因撤回而恢復已失效能力。
+
+**路由一併還原**：apply／revert 的 routes 都是排序唯一的 `{printing_id,before,after}` 陣列，
+恰列本次路由投影實際改變的 printing。before／after 各為 `{canonical,aliases}`；canonical 是
+`{namespace,route_key}`，aliases 是排序唯一的 `{namespace,route_key,reason}` 陣列，全部直指該 canonical。
+namespace 與 reason 沿 build-db §15。這是已釘住路由規則與來源推導出的完整預期投影，
+不是任意 override 或更改 printing.card_no 的入口；前後狀態及其來源／已採納 route override 必須可重建。
+
+撤回恢復目標前的路由解析結果與必要的原 canonical；移除目標引入的有效轉址，再展平所有舊入口。
+已公開的新入口不能刪：若撤回使其不再 canonical，保留為同 printing 的永久 alias，reason 沿既有
+`merged`（見 §15）；不能把不再為 canonical 誤當刪除 URL 的許可。新增 alias 與 canonical 互斥，
+原 provisional 入口亦永久保留。路由未改的身分修復，apply／revert 都 routes=[]。
+獨立發生的後續改號不倒退，若與恢復衝突則拒絕並列出相依；不能挪用其他 printing 的舊 URL。
+
+**兩張有效圖與歷史分開**：按 sequence 套用 apply 的每一修復邊，以其事件 ID 區分相同端點；
+revert 只從有效集合移除被指名 transaction 的全部邊，不新增 B→A 反向修復邊。
+其他事件的同端點邊不能一併刪掉。每步仍驗有效修復圖無環，撤回後的 card_route_alias 圖也須無環、
+無 alias chain 且每個入口指原 printing。歷史事件含撤回紀錄而不參與有效圖的環檢查，
+不能為通過無環而刪歷史，亦不能把任何反向 apply 冒稱合法撤回。
+
+## 5. 有效投影順序與原子性
 
 1. 釘住本次 authored revision、ids 與 transitions 兩個完整入口。先驗全區所有 index／分片 hash、
    原 registry 決定、配號及歷史 bytes；不是先濾 JP 再重算 members。
@@ -176,32 +227,45 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
    後來新增的 printing 不能倒灌進歷史決定的 checked 集合。
 3. 從該次 review_context 重建原始觀測、target coverage 與 evidence，核對新決定完整集合。
    在暫存投影同時套用該 transaction 的所有 updates／moves；不逐列提交會短暫違反 FK 的半套修復。
-   repairs 必須恰好解釋全部父 card 變更與退役，無多餘／遺漏事件；未列的永久欄位變更拒絕。
+   apply 的 repairs、revert 的精確前件與反算結果必須恰好解釋全部父 card 變更、退役／恢復與路由變動；
+   無多餘／遺漏事件，未列的永久欄位變更拒絕。
 4. 每次驗 face／art 閉包、uses 分割、card layout、confirmed_none／reskin、跨區全部面與唯一性。
-   純來源更新還須確認 card 關係未變；不能透過 after 偷改父層。任何失敗回滾整個候選建置。
+   撤回先停用目標修復邊再驗有效圖無環；純來源更新還須確認 card 關係未變；不能透過 after 偷改父層。任何失敗回滾整個候選建置。
 5. 將歷史鏈套到本次完整 registry，重新比對本次凍結來源與新增版次，計算 freshness；
    歷史成功不代表本次仍適用。來源缺失、hash 不符與非法前件是輸入錯誤；新增未核對觀測列待審，
    不以舊 confirmed 投影受影響關係。再套各能力的來源更正／表記／勘誤政策。
 6. 最後才做 JP／EN 地區投影、DB FK／完整性、公開引用閉包與發布閘門。決定與移轉清單留建置端，
-   不擴充公開欄位白名單；無效閉包不可靠地區過濾藏起來。
+   公開僅依 §6 的白名單（含撤回引用）；無效閉包不可靠地區過濾藏起來。
 
 沿 F1 保存本次兩個入口的 `{authored_revision,index_path,index_hash}` 與全部檔案 exact bytes hashes。
 每片有 authored source_record（parser_version=`identity-transition-v1`），decision_source 連完整封套與
 所有 raw evidence；歷史前件亦納輸入閉包，不只保留最終 after。這是可重建輸入，無須新增泛型 subject DB 表。
 
-寫入沿 registry 全域鎖：先驗完整計畫，寫新 registry／配號分片及新 transition 分片，最後提交入口。
-因 ids 與 transitions 是兩個檔案，不宣稱兩次 rename 等於原子交易：讀寫共用鎖，先持久化恢復紀錄，
-任一入口尚未完成時拒絕所有讀取；恢復須驗全批新舊 hash 後完成或回復兩個入口，保留已配號證據且不重用 ID。
-恢復紀錄不作採納真值；乾淨 checkout 以同一 Git commit 的完整兩入口重建。
-跨入口交易機制與全域單鏈皆為提案；未實作前既有追加拒絕行為不放寬。
+寫入沿 registry 全域鎖，採固定順序而不設恢復紀錄：先驗完整計畫，持久寫入所有新 registry／配號
+與 transition 分片，再原子替換 ids/index.yaml，最後原子替換 transitions/index.yaml；各步成功才做下一步。
+兩次 rename 不是跨檔原子交易，讀寫共用鎖；讀取端驗全部分片納入索引、registry_basis 與有效全集合。
+中斷留下未索引分片、hash／基準不符、或新增版次尚未被 confirmed_none／reskin 涵蓋，立即失敗，
+不使用半套資料。即使只改 transitions，也先持久寫新分片再替換其 index。
+
+所有分片先落地，因此前一入口已換、後一入口未換時，未索引 transition 分片即能攔截，
+不只依賴新版次剛好涉及 confirmed_none／reskin。失敗後依原完整計畫與 Git／備份驗 exact hashes，
+補齊缺失寫入並依同一順序完成入口；同內容已存在可重用，異內容即停。
+不得刪未索引檔後重新猜游標，不回退或重用已配號證據。
+完整但尚未有 transition 分片的新增版次若違反全集合審核，亦由既有閘門拒絕。
+乾淨 checkout 以同一 Git commit 的完整兩入口重建；未實作前既有追加拒絕行為不放寬。
 
 ## 6. 公開事件、墓碑與路由
 
-以下永久相容原則沿既有規格；本提案僅補明映射方式：
+以下永久相容原則沿既有規格；本節補明映射方式與已核可的撤回例外：
 
 - repair 群組在 DB 展開：merge 一列，split 每個目的各一列，reassign 一列且 printing_id 必填；
   其他種類 printing_id=null。事件 ID 以既有 registry 固定 namespace 的 UUIDv5、canonical `[repair.id,new_card_id]`
   首次配發並查碰撞，後續不重算／重用。公開 reason 不能含決定、私密證據或本機路徑。
+- revert 在 DB／公開 identity_change 對目標的每一事件各新增一列 kind=revert、reverts_id 指該事件；
+  old_card_id／new_card_id／printing_id **沿被撤回事件原方向原值**，表示撤回哪一條邊，不是反向移卡指令。
+  事件 ID 以相同固定 namespace、canonical `["identity-revert-v1",transition.record_key,reverts_id]` 的 UUIDv5 配發。
+  apply 事件的 reverts_id=null；revert 必須指先前非 revert 事件，全域唯一且 confirmed，整組事件原子撤回。
+  公開不出私有 transition key／decision，只出公開事件間的 reverts_id；consumer 先解析撤回再計有效圖。
 - data_version 是該事件**首次正式發布**版號。候選建置以目標版號暫填；發布成功後由永久版本索引
   與該版快照固定事件與 data_version，後續重建驗它並沿用，不每版改時間；preview 不登錄首次正式發布。
   無法取得歷史發布證據時拒絕發布，不把舊事件當首次發布。
@@ -213,10 +277,14 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
   已知 int_id 仍解析原 printing 並呈現修復提示。對局／回放仍釘舊 data_version 與快照 hash，
   不把新父 card、面或文字覆寫進舊快照。
 
+公開形狀新增 kind=revert 與 required nullable reverts_id。首次出貨此欄時必須使用新的 format 配置
+（至少升 minor）與 `identity-revert-v1` required capability，並同步最低 reader 版本、Schema、欄序及 golden；
+既有 1.0.0 不可原地加欄或加 enum。尚未完成 reader／匯出器相容實作時不得發布含此格式的快照。
+
 ## 7. 完整封套合成例子與 hash 驗算
 
 以下 Python 產生完整 **confirmed_none 決定續版**封套與 index（JSON 也是 YAML 1.2 合法輸入），
-不讀資料目錄、不含官方卡文。輸出就是 proposed 格式的完整形狀，不是只列欄位差異。
+不讀資料目錄、不含官方卡文。輸出就是 已核可格式的完整形狀，不是只列欄位差異。
 `0/1/2` 等重複 hex、example store、核對者及空 dependencies 都是合成 pin，不能作真實採納；
 真實輸入必須能重建 context／raw 閉包。舊 registry 已另追加第二張 printing，此次重新核對兩張全部觀測。
 
@@ -267,6 +335,7 @@ evidence = [{"store_id": "example", "batch_id": "sha256:" + "7" * 64,
 evidence.sort(key=canonical)
 record = {
     "record_key": '["identity_transition",1]', "kind": "identity_transition",
+    "action": "apply", "reverts": None, "routes": [],
     "sequence": 1, "previous": None, "registry_basis": basis,
     "review_context": {
         "context": {"program_revision": "b" * 40, "dependencies": [],
@@ -306,15 +375,117 @@ print(json.dumps({"old_record": old, "shard": shard, "index": index},
 | --- | --- |
 | old record | `eb2e777e37086e85161fdcf71f90ce6ae30a2705c283f9daa6b64fb63f33d10e` |
 | new record | `b5e9034517d9fd97a48fa3c44482c91dc8c761aa730a276dd70cddfb24d21995` |
-| 完整 transition 成員 | `c957a179eb4b22a34c6bf4a1d5c809fe8ba46fb10c5e10da119954f81879366f` |
-| membership（亦為 decision.id 的 `d:` 後綴） | `079081db5e0a2e82177c95f1f02f5179a50006a5add6c83ddbc3b7f925606473` |
-| 完整 shard（index.includes 的值） | `3d85ba75a2ad775347bd941d05134f4ec9ed99169c799675c109503b12ad0816` |
+| 完整 transition 成員 | `6ad05198bcb359d369b8f7a52514a9158b63f267f14c43aaeb025fd1b5994979` |
+| membership（亦為 decision.id 的 `d:` 後綴） | `29499e21c636555f224fe2e5d2837c492ae1e8d4bfeba01d1ef776da6448830b` |
+| 完整 shard（index.includes 的值） | `f4fa8b86fd8fa6cf16def554ccb8d6287b7e9eda224d37429256c55111be62f9` |
 
 此例的 old_record 是重建測試前件，不寫入新分片；舊決定與原 registry 仍需存在於被釘住的輸入。
 下一次新增版次時 sequence=2，previous 釘第一筆 record hash／decision，update.before 指第一筆
 transition_key、H(new) 與其 decision；after 再列**全部**觀測。不把第一次決定的 members 改成新集合。
 reskin 續版用同封套、after 換完整 card_related record，evidence 同時釘 from／to 兩端全部版次；
 即使新增版次與舊版文字相同也需要新核可。
+
+### 7.1 修復後指名撤回的合成封套
+
+接續上面程式的 canonical／digest 與合成 context（同樣不能作真實來源證據）。這是獨立的兩筆鏈：
+A 原有 P1，B 原有另一 printing，F_A／F_B 是各自既有單面，兩張都沒有已分組 art。
+第一筆錯誤 merge 將 P1 掛到 B 並退役 A；第二筆指名撤回第一筆，恢復 A／P1／F_A。
+沒有改卡號或路由，故 routes=[]，撤回後網址仍解析同一 P1；沒有配發或刪除永久 ID。
+
+```python
+A, B = "c:" + "a" * 32, "c:" + "b" * 32
+FA, FB, P = "f:" + "a" * 32, "f:" + "b" * 32, "p:" + "1" * 32
+root_card = {"record_key": "card:" + A, "kind": "card", "owner": "EXAMPLE",
+             "data": {"id": A, "layout": "single", "identity_state": "confirmed",
+                      "home_set_id": "EXAMPLE"}}
+root_printing = {
+    "record_key": "printing:" + P, "kind": "printing", "owner": "EXAMPLE",
+    "data": {"id": P, "card_id": A, "region": "jp", "card_no": "EXAMPLE-001",
+             "variant_key": "standard", "home_set_id": "EXAMPLE",
+             "source_face_map": [{"source_index": 0, "face_id": FA}],
+             "observation": {**observation("EXAMPLE-001", "1"), "region": "jp"}},
+}
+roots = [root_card, root_printing]
+root_members = [[r["record_key"], digest(r)] for r in roots]
+root_decision = "d:" + digest(root_members).removeprefix("sha256:")
+root_bytes = canonical(roots)
+moved = copy.deepcopy(roots)
+moved[0]["data"]["identity_state"] = "retired"
+moved[1]["data"]["card_id"] = B
+moved[1]["data"]["source_face_map"][0]["face_id"] = FB
+
+
+def ref(record, decision_id):
+    return {"record_key": record["record_key"], "record_hash": digest(record),
+            "decision_id": decision_id}
+
+
+def pack(record):
+    members = [[record["record_key"], digest(record)]]
+    d = {**decision, "members": members, "membership_hash": digest(members),
+         "id": "d:" + digest(members).removeprefix("sha256:"),
+         "sample_ids": [record["record_key"]]}
+    return {"identity_transition_format": 1, "kind": "identity_transition_shard",
+            "default_decision_id": d["id"], "records": [record], "decisions": [d]}
+
+
+apply = {**copy.deepcopy(record), "updates": [
+    {"target_key": before["record_key"],
+     "before": {"transition_key": None, **ref(before, root_decision)},
+     "after": after, "allocation_anchor": None}
+    for before, after in zip(roots, moved, strict=True)],
+    "repairs": [{"id": "repair:example-merge", "kind": "merge", "old_card_id": A,
+                 "new_card_ids": [B], "printing_moves": [
+                     {"printing_id": P, "from_card_id": A, "to_card_id": B,
+                      "faces": [{"source_index": 0, "from_face_id": FA,
+                                 "to_face_id": FB, "from_art_id": None, "to_art_id": None}]}],
+                 "face_moves": [{"from_face_id": FA, "to_face_ids": [FB]}],
+                 "art_moves": [], "retire_old": True, "reason": "合成例：錯誤合併"}],
+    "reason": "合成例：錯誤合併"}
+apply_shard = pack(apply)
+apply_id = apply_shard["default_decision_id"]
+apply_ref = ref(apply, apply_id)
+revert = {**copy.deepcopy(apply), "record_key": '["identity_transition",2]',
+          "sequence": 2, "action": "revert", "previous": apply_ref,
+          "reverts": apply_ref, "repairs": [], "reason": "合成例：指名撤回錯誤合併",
+          "updates": [
+              {"target_key": after["record_key"],
+               "before": {"transition_key": apply["record_key"], **ref(after, apply_id)},
+               "after": before, "allocation_anchor": None}
+              for before, after in zip(roots, moved, strict=True)]}
+revert_shard = pack(revert)
+revert_index = {"identity_transition_format": 1, "kind": "identity_transition_index",
+                "includes": {"identity-transitions/001.yaml": digest(apply_shard),
+                             "identity-transitions/002.yaml": digest(revert_shard)}}
+assert canonical(roots) == root_bytes
+assert [u["after"] for u in revert["updates"]] == roots
+assert apply_id != revert_shard["default_decision_id"]
+active_edges = {"repair:example-merge": (A, B)}
+active_edges.pop(apply["repairs"][0]["id"])
+assert active_edges == {}
+print(json.dumps({"apply": apply_shard, "revert": revert_shard, "index": revert_index},
+                 ensure_ascii=False, indent=2))
+```
+
+上述 context 的 evidence locator 須在真實輸入改為對應 JP 的精確觀測／修復證據，並更新全部 hash；
+這裡沿用合成 pin 只驗封套結構、hash 與狀態反算，並非可通過來源閘門的 fixture。
+
+| 輸入 | SHA-256（省略 `sha256:`） |
+| --- | --- |
+| apply record | `b92384b4872454b5493ebdece6cebce0e3e9b64560ec72b27e43f9561daaa56a` |
+| apply shard | `04ec824e4eac2906cdc63ac9e814cb3955779d227862365838bec594919ef641` |
+| revert record | `48a7260770247afc62d80fa242c0d4ac332e5eb473a0f0ffdbe6de812b347b8a` |
+| revert membership（新 decision.id 後綴） | `57600d9e1c21e4fc11a2784867eca1527dc6935ab0addb924ca010901d31cc75` |
+| revert shard | `14c786fefc077ddee3db65695f14f156a3b42bb9c0fd733c2ec1277590c800e1` |
+
+路由有變動時的合成預期另列如下；O／N 均代表同一 printing 的已驗證合法入口，實作測試須提供
+相應已採納路由證據，不能靠此示意修改 card_no。每列都以完整 routes.before／after 參與成員 hash。
+
+| 狀態 | canonical | alias 與解析 |
+| --- | --- | --- |
+| 修復前 | O | 舊入口 K→O |
+| 錯誤修復後 | N | O→N、K→N |
+| 撤回後 | O | K→O；保留曾公開的 N→O；O 不再是 alias，不能留下 O→N→O |
 
 ## 8. 契約驗收
 
@@ -327,6 +498,8 @@ reskin 續版用同封套、after 換完整 card_related record，evidence 同�
 | 新版次經全集合重審後 confirmed_none／reskin 可投影 | 只簽新增差集、target coverage 缺失、任一端過期、新版次自動繼承批准 |
 | 同父 card 的來源更新沒有 identity_change | 來源改字就建 split、以修復冒充等義、舊 correction／DSL 無條件搬到新面 |
 | 連續改號後所有舊入口仍解析同 printing | alias 指另一 printing、鏈／環、canonical 搶舊路由、split 靜默改牌組 |
+| 指名較早且無相依的修復可撤回；原邊移除，原卡／面／圖恢復 | 循環反向 apply、目標 hash 錯、重複／部分撤回、後續相依被覆蓋、撤回舊核可自動變 fresh |
+| 無現行 use 的 art 留建置歷史；墓碑只供修復引用 | 歷史圖重複進插畫／繪師瀏覽、一般卡表列出墓碑、公開懸空 baseline |
 | 全交易通過才發布，重跑不追加也不改寫 | 更新一個 index 後另一個失敗仍讀半套、發布後改事件 data_version、改舊快照 |
 
-本文件驗收的是可供審核的 docs 契約；匯入器、交易恢復、CLI、DB／快照與上述正反例測試須另行實作。
+本文件記錄已核可的 docs 契約；匯入器、中斷拒讀／續寫、CLI、DB／快照與上述正反例測試須另行實作。

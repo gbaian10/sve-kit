@@ -181,8 +181,14 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 card images 看過快取或已選牌組離線備妥；雙面兩張皆列，追加區只抓玩家實選。音檔與圖片各自狀態，不影響文字完成判定。不預抓隱藏對手的卡，也不把未實作提示洩漏其牌組。
 
 身分修復的永久 printing／int_id、舊 URL、split 玩家選擇與舊快照保留原則，沿 build-db §13／§15；
-建置端的追加封套與首次發布事件映射另見 [身分修復提案 §6](identity-repair.md#6-公開事件墓碑與路由)。
-提案不擴充公開 identity_change 欄位，不將 decision、完整移轉清單或逐列稽核 hash 出貨。
+建置端的追加封套與首次發布事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
+**使用者 2026-10-01 核可**：§2 表格仍列既有 1.0.0 形狀；新的 format 配置將在原欄序尾端
+追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
+一般事件填 null，撤回列指原公開事件並保留原 old/new／printing 欄位，不代表反向邊。
+reader 先移除被指名的有效事件再解析修復圖；原事件與撤回事件皆保留，不改舊快照。
+新欄位／enum 的首次出貨須使用新 format 配置（至少升 minor）、`identity-revert-v1` capability
+及對應 min_reader_version／Schema／golden；未支援的 reader 依 §4 留在最近相容版。
+不將 decision、完整移轉清單或逐列稽核 hash 出貨。
 
 ### 4.1 永久版本索引
 
@@ -252,3 +258,11 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
 withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，variants 為空；UI 顯示撤下原因與來源 hostname/連結，不顯示未出貨的確認日期。舊快照不可變，已下載舊副本不保證立即移除；實際 CDN blob 移除另行處理。`route_override` 僅作用於 official namespace，provisional 路由禁止覆寫。
+
+**使用者 2026-10-01 核可（身分修復投影）**：identity_state=retired 的墓碑 card 與原 faces
+只供 identity_change／歷史引用閉包，不進一般卡表、搜尋、卡包或插畫／繪師瀏覽；support 仍有 required
+列但沒有自動能力。有效 printing_face 沒有引用的歷史 art 不進公開 art，對應 art_artist 不投影成 art.artists，
+僅被排除 art 引用的 artist 不出貨；仍被現行 art 引用的 artist 保留。
+公開 baseline 與其他引用依白名單留 null／省去相應列，不能指向被排除 art。
+判定 uses 僅看此次地區投影的現行 printing_face，不把建置歷史或墓碑當現行用途。
+同圖修復後的新 art 可展示，舊 art 留建置歷史與舊版快照；舊快照的公開閉包永不回寫。

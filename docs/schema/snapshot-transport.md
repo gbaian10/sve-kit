@@ -332,7 +332,7 @@ changes 是一般物件 `{format_version,from_data_version,to_data_version,added
 | added, modified, retired | `{entity:Code,key:{欄名:主鍵值},changed_fields:[Text],reason:Text}`；entity 限公開 40＋3 集合，key 恰含其 PK 欄且型別相同；changed_fields 是排序唯一的公開頂層欄名，modified 非空，added/retired 為 [] |
 | errata | `{errata_id:ID,version_id:ID,card_ids:[ID],reason:Text}`；新公布／改版的 ErrataVersion，不把所有舊公告重列 |
 | new_qa_versions | `{qa_id:ID,version_id:ID,card_ids:[ID]}`；包含新增題與同題新 revision |
-| identity_changes | `{identity_change_id:ID}`；引用既有公開 identity_change，不另定身分修復事件格式 |
+| identity_changes | `{identity_change_id:ID}`；引用本次新增公開 identity_change，包含撤回事件；原事件不重寫，reverts_id 沿 snapshot-format 的新格式白名單 |
 | coverage_changes | `{section:reviews/translations/mechanics/source_windows/restriction_coverage,before:JSON?,after:JSON?,reason:Text}`；JSON 精確為 §6 該 section 的一列，至少一側非 null；兩側都有值時鍵相同，改鍵表示刪舊＋增新 |
 | support_changes | `{card_id:ID,region:Region,before_status:Code?,after_status:Code?,before_reasons:[Code],after_reasons:[Code],reason:Text}`；status 限既有五態，null 表示該區卡尚未／不再出貨；reasons 排序去重，缺側為 [] |
 

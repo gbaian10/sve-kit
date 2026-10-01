@@ -380,8 +380,20 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 `identity_change` 統一記錄身分修復；`int_id→printing` 永不改，printing 父 card 若原先錯誤以 confirmed 事件修復，所有 face/art 所屬也驗一致。split 多目的必請玩家選，不靜默改牌組；舊 URL 維持 printing 身分，必要時 alias 永久轉址。消費端只出公開修復事實，不出 decision。
 
 上述原則的 authored 封套、完整面／插畫移轉清單、有效投影與決定續版格式見
-[身分修復與決定續版提案](identity-repair.md)。該提案尚待使用者核可，不新增本表欄位或變更既有 DDL；
-不能把格式提案當成已採納的修復資料或已完成發布閘門。
+[身分修復與決定續版](identity-repair.md)，**使用者 2026-10-01 核可**。格式核可不表示真實修復已採納或匯入器已實作。
+
+§3.1 表格保留目前已實作 schema 的欄位／enum；以下是已核可、須隨下一個建置 schema 版本
+一併實作的擴充：kind 增加 revert，新增 nullable `reverts_id→identity_change`。
+一般事件 reverts_id=null，且僅 reassign_printing 填 printing_id；merge／split 的 printing_id=null。
+
+撤回以新 confirmed transition 指名原修復，對原 transaction 的每個事件新增 kind=revert、
+reverts_id 指原 identity_change（同一原事件至多一筆，非空 reverts_id 部分 UNIQUE）。
+原事件須較早且不是 revert；撤回列的 old_card_id／new_card_id／printing_id 必須沿原事件原值，
+不新增反向移轉邊。無環約束作用於「全部一般事件扣除已被撤回的事件」的有效圖；
+歷史列只增不改，撤回多目的 split 時必須同 transaction 全部撤回，不得部分停用。
+墓碑可因指名撤回恢復原身分，ID 不重配；前件、後續相依與完整反算依該契約 §4.2 驗證。
+card_route_alias 的有效轉址圖仍無環、展平到同 printing 的 canonical，已公開入口不得刪除。
+新增 enum／自參照 FK／部分 UNIQUE 及撤回驗證須由後續實作同步建置 schema 版本，不把本文視為 DDL 已更新。
 
 ## 14. 不可變雜湊（僅建置）
 
