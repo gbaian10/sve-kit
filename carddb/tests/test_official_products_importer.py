@@ -756,6 +756,35 @@ def test_importer_authored_revision_must_equal_identity_revision(
         assert not db.rows("product")
 
 
+def test_official_type_catalog_must_equal_imported_family_catalog(
+    identity_fixture: IdentityFixture,
+) -> None:
+    from .product_fixtures import envelope, family, install, obj  # ruff: ignore[import-outside-top-level] -- load distinct validated catalogs with different confirmed kinds
+
+    fixture = identity_fixture
+    imported_catalog = fixture.catalog
+    record = family("TEST")
+    obj(record["data"]).update(public_code="Test-A", kind="deck")
+    install(fixture.root, "products/family/TEST/001.yaml", envelope([record]))
+    fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)
+    fixture.revision = commit(fixture.root)
+    official = fixture.official()
+    assert official.identities.catalog == fixture.catalog
+    assert official.identities.catalog != imported_catalog
+    assert official.products[0].data.product_type == "deck"
+    stores = {"test-store": fixture.store}
+    assert product_preview_uses(
+        fixture.catalog, fixture.preview, stores, official=official
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^Official product types and families require the same catalog$",
+    ):
+        product_preview_uses(
+            imported_catalog, fixture.preview, stores, official=official
+        )
+
+
 def test_proposed_family_does_not_supply_official_product_type(
     identity_fixture: IdentityFixture,
 ) -> None:
