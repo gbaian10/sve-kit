@@ -360,3 +360,15 @@ def test_renderer_mismatch_stays_mismatch_in_candidate_report_and_legacy_is_exac
     }
     assert "First" not in json.dumps(candidate)
     assert "Voice" not in json.dumps(legacy)
+
+
+def test_explicit_empty_trait_retains_empty_value_instead_of_failing_or_inventing_dash() -> (
+    None
+):
+    raw = page().replace(b"<dd>Alpha / Beta</dd>", b"<dd></dd>")
+    empty_value = ""
+    record = official_en.extract_card(raw, number="SYNⓈ-01aEN")
+    assert record.faces[0].trait_raw == empty_value
+    assert record.faces[0].traits == []
+    assert record.faces[0].info["Trait"] == empty_value
+    assert official_en.legacy_projection(record).faces[0].info["Trait"] == empty_value

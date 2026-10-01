@@ -124,9 +124,11 @@ def _face(inner: LexborNode) -> Face:
         if not key or key in info:
             raise ValidationError("Missing or duplicate EN info key")
         info[key] = render(require_one(row, "dd"))
-    for key in ("Class", "Card Type", "Trait", "Rarity"):
+    for key in ("Class", "Card Type", "Rarity"):
         if not info.get(key):
             raise ValidationError("Missing required EN info value")
+    if "Trait" not in info:
+        raise ValidationError("Missing required EN trait label")
     name = require_one(inner, ".ttl").text(strip=True)
     if not name:
         raise ValidationError("Empty EN card name")
@@ -149,7 +151,7 @@ def _face(inner: LexborNode) -> Face:
         illustrator=_credit(inner),
         image=image,
         trait_raw=trait_raw,
-        traits=[] if trait_raw == "-" else trait_raw.split(" / "),
+        traits=[] if trait_raw in {"-", ""} else trait_raw.split(" / "),
     )
 
 
