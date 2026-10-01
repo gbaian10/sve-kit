@@ -38,6 +38,8 @@ if TYPE_CHECKING:
     from sve_carddb.registry.storage import Entry
     from sve_carddb.source_corrections.plan import Application
 
+    from .shared_case_fixtures import CorrectionCaseTemplate
+
 
 def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
     tmp_path: Path, inputs: Inputs
@@ -73,79 +75,6 @@ def test_conflict_is_the_only_pending_reason_and_prevents_mechanical_current(
             published=(),
         )
         assert not any(row.values["region"] == "jp" for row in db.rows("face_current"))
-
-
-def test_domain_verifier_rejects_physical_observation_pointing_to_corrected_revision(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_correction_case(tmp_path, inputs).texts
-    assert case.plan.corrections is not None
-    raw = case.plan.corrections[0].observation
-    candidate = next(
-        item for item in case.plan.candidates() if item.printing_id == raw.printing_id
-    )
-    with create_database(compile_build(("en", "related", "correction"))) as db:
-        with db.transaction():
-            case.stage(db)
-        import_text_observations(
-            db,
-            case.plan,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
-        with db.transaction():
-            db.update(
-                "printing_face_observation",
-                {
-                    "printing_id": raw.printing_id,
-                    "face_id": raw.face_id,
-                    "source_id": raw.card.source.id,
-                },
-                {"revision_id": revision_id(candidate)},
-            )
-        with pytest.raises(ValueError, match="original physical observation"):
-            verify_corrections(db, case.plan, case.vocabulary)
-
-
-def test_other_image_provider_cannot_accept_cross_region_evidence(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    fixture = make_correction_case(tmp_path, inputs)
-    case = fixture.texts
-    assert case.plan.corrections is not None
-    source = case.plan.corrections[0].images[0]
-
-    def edit(entry: Entry) -> None:
-        evidence = entry.data["evidence"]
-        assert isinstance(evidence, list)
-        assert isinstance(evidence[0], dict)
-        evidence[0]["region"] = "en"
-        evidence[0]["image_src"] = source.url
-
-    edit_record(case.root, "source_correction", edit)
-    identity = replace(case.identity, snapshot=load_registry(case.root))
-
-    class FixedImages:
-        def image(self, _evidence: CorrectionEvidence) -> Source:
-            return source
-
-    with pytest.raises(ValueError, match="Correction image evidence metadata mismatch"):
-        plan_applications(identity, case.plan.observations, FixedImages())
-
-
-def test_selected_correction_requires_raw_observation_at_planning_boundary(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    fixture = make_correction_case(tmp_path, inputs)
-    case = fixture.texts
-    assert case.plan.corrections is not None
-    target = case.plan.corrections[0].observation
-    remaining = tuple(item for item in case.plan.observations if item != target)
-    with pytest.raises(
-        ValueError, match="Correction requires its raw face observation"
-    ):
-        plan_applications(case.identity, remaining, fixture.images)
 
 
 @pytest.mark.parametrize(
@@ -332,56 +261,6 @@ def test_already_fixed_is_not_reapplied_even_when_old_hash_differs(
         assert correction_references(db, case.plan, case.vocabulary) == ()
 
 
-@pytest.mark.parametrize("field", ["expected_raw_value", "expected_source_hash"])
-def test_each_conflict_pin_independently_blocks_only_affected_region(
-    tmp_path: Path, inputs: Inputs, field: str
-) -> None:
-    fixture = make_correction_case(tmp_path, inputs)
-    case = fixture.texts
-
-    def edit(entry: Entry) -> None:
-        entry.data[field] = (
-            "Different exact value"
-            if field == "expected_raw_value"
-            else "sha256:" + "0" * 64
-        )
-
-    edit_record(case.root, "source_correction", edit)
-    case.identity = replace(case.identity, snapshot=load_registry(case.root))
-    case.catalog = load_products(case.root, registry=case.identity.snapshot)
-    case.plan = plan_text_observations(
-        case.identity, case.provider, images=fixture.images
-    )
-    assert case.plan.corrections is not None
-    assert case.plan.corrections[0].status == "conflict"
-    assert case.plan.candidates() == case.plan.observations
-    output = case.plan.publication_identity()
-    for record in output.included("printing"):
-        assert isinstance(record.data, PrintingData)
-        assert record.data.region == "en"
-    assert len(output.included("card_related")) == 1
-    assert (
-        next(group for group in case.plan.groups if group.region == "jp").current()
-        is None
-    )
-    with create_database(compile_build(("en", "related", "correction"))) as db:
-        with db.transaction():
-            case.stage(db)
-        import_text_observations(
-            db,
-            case.plan,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
-        row = db.rows("correction_application")[0].values
-        assert row["status"] == "conflict"
-        assert row["result_unit_id"] is None
-        assert row["face_revision_id"] is None
-        assert db.rows("source_correction")[0].values["state"] == "needs_review"
-        assert correction_references(db, case.plan, case.vocabulary) == ()
-
-
 def test_changed_source_excludes_correction_parent_without_allowing_sibling_output(
     tmp_path: Path, inputs: Inputs
 ) -> None:
@@ -433,221 +312,6 @@ def test_pending_wording_remains_in_publication_scope(
     assert case.plan.publication_identity() == case.identity
     assert len(case.plan.publication_identity().included("printing")) == 4
     assert case.plan.eligible != case.identity
-
-
-@pytest.mark.parametrize(
-    "problem",
-    [
-        "omitted",
-        "duplicate",
-        "status",
-        "source",
-        "kind",
-        "url",
-        "hash",
-        "region",
-        "decision",
-    ],
-)
-def test_each_altered_application_or_evidence_is_rejected_before_writes(
-    tmp_path: Path, inputs: Inputs, problem: str
-) -> None:
-    case = make_correction_case(tmp_path, inputs).texts
-    assert case.plan.corrections is not None
-    application = case.plan.corrections[0]
-    applications: tuple[Application, ...]
-    if problem == "omitted":
-        applications = ()
-    elif problem == "duplicate":
-        applications = (application, application)
-    elif problem == "status":
-        applications = (replace(application, status="already_fixed"),)
-    elif problem == "source":
-        applications = (replace(application, observation=case.plan.observations[-1]),)
-    elif problem in {"kind", "url", "hash"}:
-        changed = application.images[0].model_copy(
-            update={
-                "kind"
-                if problem == "kind"
-                else "url"
-                if problem == "url"
-                else "sha256": "official_page"
-                if problem == "kind"
-                else "https://example.invalid/wrong"
-                if problem == "url"
-                else "sha256:" + "0" * 64
-            }
-        )
-        applications = (replace(application, images=(changed,)),)
-    elif problem == "region":
-        data = application.data.model_copy(
-            update={
-                "evidence": (
-                    application.data.evidence[0].model_copy(update={"region": "en"}),
-                )
-            }
-        )
-        applications = (
-            replace(application, record=replace(application.record, data=data)),
-        )
-    else:
-        applications = (
-            replace(application, record=replace(application.record, decision_id=None)),
-        )
-    changed_plan = replace(case.plan, corrections=applications)
-    with pytest.raises(ValueError, match="Correction"):
-        verify_plan(changed_plan)
-
-
-@pytest.mark.parametrize("field", ["reason", "corrected_value", "state"])
-def test_correction_change_invalidates_old_candidate_and_configuration(
-    tmp_path: Path, inputs: Inputs, field: str
-) -> None:
-    fixture = make_correction_case(tmp_path, inputs)
-    case = fixture.texts
-    old = case.plan
-    old_configuration = case.context()
-
-    def edit(entry: Entry) -> None:
-        entry.data[field] = "needs_review" if field == "state" else "New exact " + field
-
-    edit_record(case.root, "source_correction", edit)
-    if field == "state":
-        from sve_carddb.registry.storage import Shard, read_yaml  # ruff: ignore[import-outside-top-level] -- only this case changes the independent authored decision envelope
-
-        assert old.corrections is not None
-        path = case.root / old.corrections[0].record.shard_path
-        shard = Shard.model_validate(read_yaml(path))
-        shard.decisions[0].state = "proposed"
-        rewrite(case.root, path, shard, resign=True)
-    case.identity = replace(case.identity, snapshot=load_registry(case.root))
-    case.catalog = load_products(case.root, registry=case.identity.snapshot)
-    case.plan = plan_text_observations(
-        case.identity, case.provider, images=fixture.images
-    )
-    assert case.plan.configuration() != old.configuration()
-    with pytest.raises(ValueError, match="Correction"):
-        verify_plan(replace(old, identity=case.identity))
-    with create_database(compile_build(("en", "related", "correction"))) as db:
-        with db.transaction():
-            case.stage(db)
-        with pytest.raises(ValueError, match="configuration"):
-            import_text_observations(
-                db,
-                case.plan,
-                build=old_configuration,
-                vocabulary=case.vocabulary,
-                published=(),
-            )
-        assert not db.rows("source_correction")
-
-
-@pytest.mark.parametrize(
-    "field",
-    [
-        "result_unit_id",
-        "face_revision_id",
-        "expected_raw_value",
-        "corrected_value",
-        "locator",
-        "effect_unit_id",
-        "type_code",
-    ],
-)
-def test_domain_verifier_rejects_structurally_valid_wrong_database_values(
-    tmp_path: Path, inputs: Inputs, field: str
-) -> None:
-    case = make_correction_case(tmp_path, inputs).texts
-    with create_database(compile_build(("en", "related", "correction"))) as db:
-        with db.transaction():
-            case.stage(db)
-        import_text_observations(
-            db,
-            case.plan,
-            build=case.context(),
-            vocabulary=case.vocabulary,
-            published=(),
-        )
-        row = db.rows("correction_application")[0].values
-        assert case.plan.corrections is not None
-        raw_id = revision_id(case.plan.corrections[0].observation)
-        raw_revision = next(
-            r.values for r in db.rows("face_revision") if r.values["id"] == raw_id
-        )
-        with pytest.raises(ValueError, match="Correction"), db.transaction():  # ruff: ignore[pytest-raises-with-multiple-statements] -- fault injection must remain inside the rolled-back transaction
-            if field in {"result_unit_id", "face_revision_id"}:
-                db.update(
-                    "correction_application",
-                    {
-                        "correction_id": row["correction_id"],
-                        "source_id": row["source_id"],
-                    },
-                    {
-                        field: raw_revision["effect_unit_id"]
-                        if field == "result_unit_id"
-                        else raw_id
-                    },
-                )
-            elif field in {"expected_raw_value", "corrected_value"}:
-                db.update(
-                    "source_correction",
-                    {"id": row["correction_id"]},
-                    {field: Json("Wrong but structurally valid")},
-                )
-            elif field == "locator":
-                evidence = db.rows("correction_evidence")[0].values
-                db.update(
-                    "correction_evidence",
-                    {
-                        key: evidence[key]
-                        for key in ("correction_id", "source_id", "kind")
-                    },
-                    {field: "Wrong locator"},
-                )
-            elif field == "effect_unit_id":
-                db.update(
-                    "face_revision",
-                    {"id": row["face_revision_id"]},
-                    {field: raw_revision["effect_unit_id"]},
-                )
-            else:
-                db.update(
-                    "face_revision",
-                    {"id": row["face_revision_id"]},
-                    {field: "Wrong code"},
-                )
-            verify_corrections(db, case.plan, case.vocabulary)
-
-
-def test_missing_image_pin_cannot_bypass_known_corrections(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_correction_case(tmp_path, inputs).texts
-    plan = plan_text_observations(case.identity, case.provider)
-    with pytest.raises(ValueError, match="pinned image"):
-        plan.publication_identity()
-    with create_database(compile_build(("en", "related", "correction"))) as db:
-        with db.transaction():
-            case.stage(db)
-        with pytest.raises(ValueError, match="pinned image"):
-            import_text_observations(
-                db, plan, build=case.context(), vocabulary=case.vocabulary, published=()
-            )
-        assert not db.rows("face_revision")
-
-
-def test_public_source_url_null_is_present_and_never_substitutes_image_url(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_correction_case(tmp_path, inputs).texts
-    assert case.plan.corrections is not None
-    assert case.plan.corrections[0].marker(None) == {
-        "field": "effect",
-        "corrected_from": "Rule.",
-        "is_corrected": True,
-        "reason": "Synthetic source transcription correction",
-        "source_url": None,
-    }
 
 
 @pytest.mark.parametrize("conflict", [False, True])
@@ -731,3 +395,362 @@ def test_conflict_closure_removes_routes_aliases_and_defaults_but_keeps_pending_
         assert counts["printing"] == (2 if conflict else 0)
         assert counts["card"] == 0
         assert counts["face_current"] == 0
+
+
+class TestDefaultCorrectionInputs:
+    def test_domain_verifier_rejects_physical_observation_pointing_to_corrected_revision(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        case = default_correction_case.copy(tmp_path).texts
+        assert case.plan.corrections is not None
+        raw = case.plan.corrections[0].observation
+        candidate = next(
+            item
+            for item in case.plan.candidates()
+            if item.printing_id == raw.printing_id
+        )
+        with create_database(compile_build(("en", "related", "correction"))) as db:
+            with db.transaction():
+                case.stage(db)
+            import_text_observations(
+                db,
+                case.plan,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
+            with db.transaction():
+                db.update(
+                    "printing_face_observation",
+                    {
+                        "printing_id": raw.printing_id,
+                        "face_id": raw.face_id,
+                        "source_id": raw.card.source.id,
+                    },
+                    {"revision_id": revision_id(candidate)},
+                )
+            with pytest.raises(ValueError, match="original physical observation"):
+                verify_corrections(db, case.plan, case.vocabulary)
+
+    def test_other_image_provider_cannot_accept_cross_region_evidence(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        fixture = default_correction_case.copy(tmp_path)
+        case = fixture.texts
+        assert case.plan.corrections is not None
+        source = case.plan.corrections[0].images[0]
+
+        def edit(entry: Entry) -> None:
+            evidence = entry.data["evidence"]
+            assert isinstance(evidence, list)
+            assert isinstance(evidence[0], dict)
+            evidence[0]["region"] = "en"
+            evidence[0]["image_src"] = source.url
+
+        edit_record(case.root, "source_correction", edit)
+        identity = replace(case.identity, snapshot=load_registry(case.root))
+
+        class FixedImages:
+            def image(self, _evidence: CorrectionEvidence) -> Source:
+                return source
+
+        with pytest.raises(
+            ValueError, match="Correction image evidence metadata mismatch"
+        ):
+            plan_applications(identity, case.plan.observations, FixedImages())
+
+    def test_selected_correction_requires_raw_observation_at_planning_boundary(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        fixture = default_correction_case.copy(tmp_path)
+        case = fixture.texts
+        assert case.plan.corrections is not None
+        target = case.plan.corrections[0].observation
+        remaining = tuple(item for item in case.plan.observations if item != target)
+        with pytest.raises(
+            ValueError, match="Correction requires its raw face observation"
+        ):
+            plan_applications(case.identity, remaining, fixture.images)
+
+    @pytest.mark.parametrize("field", ["expected_raw_value", "expected_source_hash"])
+    def test_each_conflict_pin_independently_blocks_only_affected_region(
+        self,
+        tmp_path: Path,
+        default_correction_case: CorrectionCaseTemplate,
+        field: str,
+    ) -> None:
+        fixture = default_correction_case.copy(tmp_path)
+        case = fixture.texts
+
+        def edit(entry: Entry) -> None:
+            entry.data[field] = (
+                "Different exact value"
+                if field == "expected_raw_value"
+                else "sha256:" + "0" * 64
+            )
+
+        edit_record(case.root, "source_correction", edit)
+        case.identity = replace(case.identity, snapshot=load_registry(case.root))
+        case.catalog = load_products(case.root, registry=case.identity.snapshot)
+        case.plan = plan_text_observations(
+            case.identity, case.provider, images=fixture.images
+        )
+        assert case.plan.corrections is not None
+        assert case.plan.corrections[0].status == "conflict"
+        assert case.plan.candidates() == case.plan.observations
+        output = case.plan.publication_identity()
+        for record in output.included("printing"):
+            assert isinstance(record.data, PrintingData)
+            assert record.data.region == "en"
+        assert len(output.included("card_related")) == 1
+        assert (
+            next(group for group in case.plan.groups if group.region == "jp").current()
+            is None
+        )
+        with create_database(compile_build(("en", "related", "correction"))) as db:
+            with db.transaction():
+                case.stage(db)
+            import_text_observations(
+                db,
+                case.plan,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
+            row = db.rows("correction_application")[0].values
+            assert row["status"] == "conflict"
+            assert row["result_unit_id"] is None
+            assert row["face_revision_id"] is None
+            assert db.rows("source_correction")[0].values["state"] == "needs_review"
+            assert correction_references(db, case.plan, case.vocabulary) == ()
+
+    @pytest.mark.parametrize(
+        "problem",
+        [
+            "omitted",
+            "duplicate",
+            "status",
+            "source",
+            "kind",
+            "url",
+            "hash",
+            "region",
+            "decision",
+        ],
+    )
+    def test_each_altered_application_or_evidence_is_rejected_before_writes(
+        self,
+        tmp_path: Path,
+        default_correction_case: CorrectionCaseTemplate,
+        problem: str,
+    ) -> None:
+        case = default_correction_case.copy(tmp_path).texts
+        assert case.plan.corrections is not None
+        application = case.plan.corrections[0]
+        applications: tuple[Application, ...]
+        if problem == "omitted":
+            applications = ()
+        elif problem == "duplicate":
+            applications = (application, application)
+        elif problem == "status":
+            applications = (replace(application, status="already_fixed"),)
+        elif problem == "source":
+            applications = (
+                replace(application, observation=case.plan.observations[-1]),
+            )
+        elif problem in {"kind", "url", "hash"}:
+            changed = application.images[0].model_copy(
+                update={
+                    "kind"
+                    if problem == "kind"
+                    else "url"
+                    if problem == "url"
+                    else "sha256": "official_page"
+                    if problem == "kind"
+                    else "https://example.invalid/wrong"
+                    if problem == "url"
+                    else "sha256:" + "0" * 64
+                }
+            )
+            applications = (replace(application, images=(changed,)),)
+        elif problem == "region":
+            data = application.data.model_copy(
+                update={
+                    "evidence": (
+                        application.data.evidence[0].model_copy(
+                            update={"region": "en"}
+                        ),
+                    )
+                }
+            )
+            applications = (
+                replace(application, record=replace(application.record, data=data)),
+            )
+        else:
+            applications = (
+                replace(
+                    application, record=replace(application.record, decision_id=None)
+                ),
+            )
+        changed_plan = replace(case.plan, corrections=applications)
+        with pytest.raises(ValueError, match="Correction"):
+            verify_plan(changed_plan)
+
+    @pytest.mark.parametrize("field", ["reason", "corrected_value", "state"])
+    def test_correction_change_invalidates_old_candidate_and_configuration(
+        self,
+        tmp_path: Path,
+        default_correction_case: CorrectionCaseTemplate,
+        field: str,
+    ) -> None:
+        fixture = default_correction_case.copy(tmp_path)
+        case = fixture.texts
+        old = case.plan
+        old_configuration = case.context()
+
+        def edit(entry: Entry) -> None:
+            entry.data[field] = (
+                "needs_review" if field == "state" else "New exact " + field
+            )
+
+        edit_record(case.root, "source_correction", edit)
+        if field == "state":
+            from sve_carddb.registry.storage import Shard, read_yaml  # ruff: ignore[import-outside-top-level] -- only this case changes the independent authored decision envelope
+
+            assert old.corrections is not None
+            path = case.root / old.corrections[0].record.shard_path
+            shard = Shard.model_validate(read_yaml(path))
+            shard.decisions[0].state = "proposed"
+            rewrite(case.root, path, shard, resign=True)
+        case.identity = replace(case.identity, snapshot=load_registry(case.root))
+        case.catalog = load_products(case.root, registry=case.identity.snapshot)
+        case.plan = plan_text_observations(
+            case.identity, case.provider, images=fixture.images
+        )
+        assert case.plan.configuration() != old.configuration()
+        with pytest.raises(ValueError, match="Correction"):
+            verify_plan(replace(old, identity=case.identity))
+        with create_database(compile_build(("en", "related", "correction"))) as db:
+            with db.transaction():
+                case.stage(db)
+            with pytest.raises(ValueError, match="configuration"):
+                import_text_observations(
+                    db,
+                    case.plan,
+                    build=old_configuration,
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+            assert not db.rows("source_correction")
+
+    @pytest.mark.parametrize(
+        "field",
+        [
+            "result_unit_id",
+            "face_revision_id",
+            "expected_raw_value",
+            "corrected_value",
+            "locator",
+            "effect_unit_id",
+            "type_code",
+        ],
+    )
+    def test_domain_verifier_rejects_structurally_valid_wrong_database_values(
+        self,
+        tmp_path: Path,
+        default_correction_case: CorrectionCaseTemplate,
+        field: str,
+    ) -> None:
+        case = default_correction_case.copy(tmp_path).texts
+        with create_database(compile_build(("en", "related", "correction"))) as db:
+            with db.transaction():
+                case.stage(db)
+            import_text_observations(
+                db,
+                case.plan,
+                build=case.context(),
+                vocabulary=case.vocabulary,
+                published=(),
+            )
+            row = db.rows("correction_application")[0].values
+            assert case.plan.corrections is not None
+            raw_id = revision_id(case.plan.corrections[0].observation)
+            raw_revision = next(
+                r.values for r in db.rows("face_revision") if r.values["id"] == raw_id
+            )
+            with pytest.raises(ValueError, match="Correction"), db.transaction():  # ruff: ignore[pytest-raises-with-multiple-statements] -- fault injection must remain inside the rolled-back transaction
+                if field in {"result_unit_id", "face_revision_id"}:
+                    db.update(
+                        "correction_application",
+                        {
+                            "correction_id": row["correction_id"],
+                            "source_id": row["source_id"],
+                        },
+                        {
+                            field: raw_revision["effect_unit_id"]
+                            if field == "result_unit_id"
+                            else raw_id
+                        },
+                    )
+                elif field in {"expected_raw_value", "corrected_value"}:
+                    db.update(
+                        "source_correction",
+                        {"id": row["correction_id"]},
+                        {field: Json("Wrong but structurally valid")},
+                    )
+                elif field == "locator":
+                    evidence = db.rows("correction_evidence")[0].values
+                    db.update(
+                        "correction_evidence",
+                        {
+                            key: evidence[key]
+                            for key in ("correction_id", "source_id", "kind")
+                        },
+                        {field: "Wrong locator"},
+                    )
+                elif field == "effect_unit_id":
+                    db.update(
+                        "face_revision",
+                        {"id": row["face_revision_id"]},
+                        {field: raw_revision["effect_unit_id"]},
+                    )
+                else:
+                    db.update(
+                        "face_revision",
+                        {"id": row["face_revision_id"]},
+                        {field: "Wrong code"},
+                    )
+                verify_corrections(db, case.plan, case.vocabulary)
+
+    def test_missing_image_pin_cannot_bypass_known_corrections(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        case = default_correction_case.copy(tmp_path).texts
+        plan = plan_text_observations(case.identity, case.provider)
+        with pytest.raises(ValueError, match="pinned image"):
+            plan.publication_identity()
+        with create_database(compile_build(("en", "related", "correction"))) as db:
+            with db.transaction():
+                case.stage(db)
+            with pytest.raises(ValueError, match="pinned image"):
+                import_text_observations(
+                    db,
+                    plan,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+            assert not db.rows("face_revision")
+
+    def test_public_source_url_null_is_present_and_never_substitutes_image_url(
+        self, tmp_path: Path, default_correction_case: CorrectionCaseTemplate
+    ) -> None:
+        case = default_correction_case.copy(tmp_path).texts
+        assert case.plan.corrections is not None
+        assert case.plan.corrections[0].marker(None) == {
+            "field": "effect",
+            "corrected_from": "Rule.",
+            "is_corrected": True,
+            "reason": "Synthetic source transcription correction",
+            "source_url": None,
+        }

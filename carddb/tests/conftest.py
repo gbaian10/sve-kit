@@ -16,6 +16,8 @@ from .official_registry_fixtures import load_shared_registry
 from .product_fixtures import product_files as product_files  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .product_identity_fixtures import identity_template as identity_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .registry_snapshot_fixtures import registry_template as registry_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .shared_case_fixtures import default_correction_case as default_correction_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 
 if TYPE_CHECKING:
     from sve_carddb.registry.snapshot import RegistrySnapshot

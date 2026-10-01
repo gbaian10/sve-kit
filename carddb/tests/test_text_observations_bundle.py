@@ -30,6 +30,8 @@ if TYPE_CHECKING:
     from sve_carddb.text_observations.intern import TextInterner
     from sve_carddb.text_observations.models import FaceObservation
 
+    from .shared_case_fixtures import TextCaseTemplate
+
 
 def test_two_clean_bundles_are_identical_and_include_null_effect_uses(
     tmp_path: Path, inputs: Inputs
@@ -147,85 +149,99 @@ def test_each_text_use_corruption_fails_before_publishing(
     assert not destination.exists()
 
 
-@pytest.mark.parametrize(
-    "key", ["text_observations", "text_vocabulary", "published_text_hash"]
-)
-def test_each_configuration_pin_is_independently_required(
-    tmp_path: Path, inputs: Inputs, key: str
-) -> None:
-    case = make_case(tmp_path / "authored", inputs)
-    configuration = parse(case.context().configuration.encode())
-    assert isinstance(configuration, dict)
-    del configuration[key]
-    broken = case.context().model_copy(
-        update={"configuration": canonical(configuration).decode()}
+class TestDefaultTextInputs:
+    @pytest.mark.parametrize(
+        "key", ["text_observations", "text_vocabulary", "published_text_hash"]
     )
-    schema = compile_build(("en", "related"))
-    with create_database(schema) as db:
-        with db.transaction():
-            case.stage(db)
-        before = {table.name: db.rows(table.name) for table in schema.tables}
-        with pytest.raises(ValueError, match="configuration"):
-            import_text_observations(
-                db, case.plan, build=broken, vocabulary=case.vocabulary, published=()
-            )
-        assert before == {table.name: db.rows(table.name) for table in schema.tables}
+    def test_each_configuration_pin_is_independently_required(
+        self, tmp_path: Path, default_text_case: TextCaseTemplate, key: str
+    ) -> None:
+        case = default_text_case.copy(tmp_path)
+        configuration = parse(case.context().configuration.encode())
+        assert isinstance(configuration, dict)
+        del configuration[key]
+        broken = case.context().model_copy(
+            update={"configuration": canonical(configuration).decode()}
+        )
+        schema = compile_build(("en", "related"))
+        with create_database(schema) as db:
+            with db.transaction():
+                case.stage(db)
+            before = {table.name: db.rows(table.name) for table in schema.tables}
+            with pytest.raises(ValueError, match="configuration"):
+                import_text_observations(
+                    db,
+                    case.plan,
+                    build=broken,
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+            assert before == {
+                table.name: db.rows(table.name) for table in schema.tables
+            }
 
+    def test_late_observation_failure_rolls_back_all_new_rows(
+        self,
+        tmp_path: Path,
+        default_text_case: TextCaseTemplate,
+        monkeypatch: pytest.MonkeyPatch,
+    ) -> None:
 
-def test_late_observation_failure_rolls_back_all_new_rows(
-    tmp_path: Path, inputs: Inputs, monkeypatch: pytest.MonkeyPatch
-) -> None:
+        case = default_text_case.copy(tmp_path)
+        schema = compile_build(("en", "related"))
+        original = importer._physical
+        called = 0
 
-    case = make_case(tmp_path / "authored", inputs)
-    schema = compile_build(("en", "related"))
-    original = importer._physical
-    called = 0
+        def fail_late(db: Database, item: FaceObservation, texts: TextInterner) -> None:
+            nonlocal called
+            called += 1
+            original(db, item, texts)
+            if called == 2:
+                raise ValueError("Synthetic late failure")
 
-    def fail_late(db: Database, item: FaceObservation, texts: TextInterner) -> None:
-        nonlocal called
-        called += 1
-        original(db, item, texts)
-        if called == 2:
-            raise ValueError("Synthetic late failure")
+        monkeypatch.setattr(importer, "_physical", fail_late)
+        with create_database(schema) as db:
+            with db.transaction():
+                case.stage(db)
+            before = {table.name: db.rows(table.name) for table in schema.tables}
+            with pytest.raises(ValueError, match="Synthetic late"):
+                import_text_observations(
+                    db,
+                    case.plan,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                )
+            assert called == 2
+            assert before == {
+                table.name: db.rows(table.name) for table in schema.tables
+            }
+            db.verify()
 
-    monkeypatch.setattr(importer, "_physical", fail_late)
-    with create_database(schema) as db:
-        with db.transaction():
-            case.stage(db)
-        before = {table.name: db.rows(table.name) for table in schema.tables}
-        with pytest.raises(ValueError, match="Synthetic late"):
-            import_text_observations(
-                db,
-                case.plan,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-            )
-        assert called == 2
-        assert before == {table.name: db.rows(table.name) for table in schema.tables}
-        db.verify()
-
-
-def test_source_metadata_conflict_rolls_back_the_entire_composer(
-    tmp_path: Path, inputs: Inputs
-) -> None:
-    case = make_case(tmp_path / "authored", inputs)
-    source = case.plan.observations[0].card.source
-    schema = compile_build(("en", "related"))
-    with create_database(schema) as db:
-        with db.transaction():
-            insert_raw_sources(db, (source.model_copy(update={"etag": "conflicting"}),))
-        before = {table.name: db.rows(table.name) for table in schema.tables}
-        with pytest.raises(ValueError, match="metadata"), db.transaction():
-            populate_text_preview(
-                db,
-                case.catalog,
-                case.plan,
-                authored_revision=REVISION,
-                build=case.context(),
-                vocabulary=case.vocabulary,
-                published=(),
-                languages=LANGUAGES,
-                stores={"test-store": case.store},
-            )
-        assert before == {table.name: db.rows(table.name) for table in schema.tables}
+    def test_source_metadata_conflict_rolls_back_the_entire_composer(
+        self, tmp_path: Path, default_text_case: TextCaseTemplate
+    ) -> None:
+        case = default_text_case.copy(tmp_path)
+        source = case.plan.observations[0].card.source
+        schema = compile_build(("en", "related"))
+        with create_database(schema) as db:
+            with db.transaction():
+                insert_raw_sources(
+                    db, (source.model_copy(update={"etag": "conflicting"}),)
+                )
+            before = {table.name: db.rows(table.name) for table in schema.tables}
+            with pytest.raises(ValueError, match="metadata"), db.transaction():
+                populate_text_preview(
+                    db,
+                    case.catalog,
+                    case.plan,
+                    authored_revision=REVISION,
+                    build=case.context(),
+                    vocabulary=case.vocabulary,
+                    published=(),
+                    languages=LANGUAGES,
+                    stores={"test-store": case.store},
+                )
+            assert before == {
+                table.name: db.rows(table.name) for table in schema.tables
+            }
