@@ -1,16 +1,21 @@
 """Each product identity constraint has an independently invalid input."""
 
 import copy
+import json
 import re
 from typing import TYPE_CHECKING
 
 import pytest
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 from ruamel.yaml.error import YAMLError
 
 from sve_carddb.build_inputs import BuildContext
-from sve_carddb.products.identities import load_product_identities
-from sve_carddb.products.identity_models import ProductLink
+from sve_carddb.products.identities import _model, _shard, load_product_identities
+from sve_carddb.products.identity_models import (
+    IdentityIndex,
+    IdentityShard,
+    ProductLink,
+)
 from sve_carddb.products.official import parse_products as parse_verified_products
 from sve_carddb.registry.storage import MAX_BYTES, read_yaml
 from sve_carddb.snapshot.values import digest
@@ -29,6 +34,8 @@ from .product_identity_fixtures import (
 from .product_identity_fixtures import identity_fixture as identity_fixture  # ruff: ignore[useless-import-alias] -- shared fixture
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from sve_carddb.build_inputs import Source
     from sve_carddb.products.official import ProductPage
     from sve_carddb.registry.records import Region
@@ -38,102 +45,6 @@ def parse_products(raw: bytes, source: Source, region: Region) -> ProductPage:
     return parse_verified_products(
         raw, source.model_copy(update={"sha256": digest(raw)}), region
     )
-
-
-@pytest.mark.parametrize(
-    ("area", "field", "value"),
-    [
-        ("index", "product_identity_format", True),
-        ("index", "product_identity_format", 2),
-        ("index", "kind", "product_index"),
-        ("index", "extra", "unexpected"),
-        ("shard", "product_identity_format", True),
-        ("shard", "product_identity_format", 2),
-        ("shard", "kind", "product_shard"),
-        ("shard", "extra", "unexpected"),
-        ("shard", "records", []),
-        ("shard", "decisions", []),
-        ("record", "kind", "product"),
-        ("record", "filing_key", "en"),
-        ("record", "record_key", '["product_identity","jp",{}]'),
-        ("record", "extra", "unexpected"),
-        ("record", "evidence", []),
-        ("data", "product_id", "UPPER"),
-        ("data", "product_id", " leading"),
-        ("data", "product_id", "trailing\n"),
-        ("data", "product_id", "a/../b"),
-        ("data", "product_id", "商品"),
-        ("data", "product_id", 3),
-        ("data", "region", "cn"),
-        ("data", "family_id", "TEST"),
-        ("match", "kind", "fuzzy"),
-        ("match", "product_url", "http://shadowverse-evolve.com/products/synthetic/"),
-        (
-            "match",
-            "product_url",
-            "https://en.shadowverse-evolve.com/products/synthetic/",
-        ),
-        (
-            "match",
-            "product_url",
-            "https://dev.shadowverse-evolve.com/products/synthetic/",
-        ),
-        ("match", "product_url", "https://shadowverse-evolve.com/cardlist/"),
-        ("match", "extra", "unexpected"),
-        ("match", "expansion_code", ""),
-        ("evidence", "store_id", "../unsafe"),
-        ("evidence", "source_version_id", "sha256:" + "1" * 64),
-        ("evidence", "locator", ""),
-        ("evidence", "role", ""),
-        ("evidence", "extra", "unexpected"),
-        ("decision", "state", "proposed"),
-        ("decision", "state", "sampled"),
-        ("decision", "scope", "row"),
-        ("decision", "category", "product_catalog"),
-        ("decision", "category", "identity_registry"),
-        ("decision", "policy_id", "product-authored-v1"),
-        ("decision", "reviewed_by", None),
-        ("decision", "reviewed_by", "  "),
-        ("decision", "reviewed_at", None),
-        ("decision", "reviewed_at", "2026-09-30T12:00:00Z"),
-        ("decision", "reviewed_precision", None),
-        ("decision", "reviewed_precision", "month"),
-        ("decision", "authored_by", " "),
-        ("decision", "authored_at", "not-a-date"),
-        ("decision", "extra", "unexpected"),
-    ],
-)
-def test_each_wire_constraint(
-    identity_fixture: IdentityFixture, area: str, field: str, value: JsonValue
-) -> None:
-    fixture = identity_fixture
-    if area == "index":
-        index = obj(read_yaml(fixture.root / "product-identities/index.yaml"))
-        index[field] = value
-        write_yaml(fixture.root / "product-identities/index.yaml", index)
-    else:
-        shard = obj(read_yaml(fixture.root / NAME))
-        record = first_record(shard)
-        target = {
-            "shard": shard,
-            "record": record,
-            "data": obj(record["data"]),
-            "match": obj(obj(record["data"])["match"]),
-            "evidence": obj(items(record["evidence"])[0]),
-            "decision": decision(shard),
-        }[area]
-        target[field] = value
-        install_identity(
-            fixture.root, shard, resign=area in {"record", "data", "match", "evidence"}
-        )
-    expected = (
-        "decisions.0.reviewed_precision:literal_error"
-        if area == "decision" and field == "reviewed_precision" and value == "month"
-        else wire_error(area, field)
-    )
-    fixture.revision = commit(fixture.root)
-    with pytest.raises(ValueError, match=re.escape(expected)):
-        fixture.load()
 
 
 def wire_error(area: str, field: str) -> str:
@@ -157,113 +68,6 @@ def wire_error(area: str, field: str) -> str:
         "decision": "decisions.0.",
     }
     return overrides.get((area, field), prefixes[area] + field + ":")
-
-
-@pytest.mark.parametrize(
-    ("area", "field"),
-    [
-        ("data", "product_id"),
-        ("data", "region"),
-        ("data", "match"),
-        ("match", "expansion_code"),
-        ("record", "evidence"),
-        ("decision", "reviewed_precision"),
-    ],
-)
-def test_required_nullable_and_nonnullable_fields(
-    identity_fixture: IdentityFixture, area: str, field: str
-) -> None:
-    shard = obj(read_yaml(identity_fixture.root / NAME))
-    record = first_record(shard)
-    target = {
-        "record": record,
-        "data": obj(record["data"]),
-        "match": obj(obj(record["data"])["match"]),
-        "decision": decision(shard),
-    }[area]
-    del target[field]
-    install_identity(identity_fixture.root, shard, resign=area != "decision")
-    identity_fixture.revision = commit(identity_fixture.root)
-    prefix = {
-        "record": "records.0.",
-        "data": "records.0.data.",
-        "match": "records.0.data.match.product_link.",
-        "decision": "decisions.0.",
-    }[area]
-    with pytest.raises(ValueError, match=re.escape(prefix + field + ":missing")):
-        identity_fixture.load()
-
-
-@pytest.mark.parametrize(
-    "constraint",
-    [
-        "semantic_hash",
-        "members_missing",
-        "members_extra",
-        "members_reordered",
-        "membership_hash",
-        "decision_id",
-        "default_decision_id",
-        "samples_missing",
-        "samples_extra",
-        "samples_duplicate",
-        "duplicate_evidence",
-        "missing_match_role",
-    ],
-)
-def test_each_exact_membership_constraint(  # ruff: ignore[complex-structure] -- each independent mutation isolates a different envelope constraint
-    identity_fixture: IdentityFixture, constraint: str
-) -> None:
-    shard = obj(read_yaml(identity_fixture.root / NAME))
-    review = decision(shard)
-    if constraint == "semantic_hash":
-        items(items(review["members"])[0])[1] = "sha256:" + "0" * 64
-    elif constraint == "members_missing":
-        review["members"] = []
-    elif constraint == "members_extra":
-        items(review["members"]).append(["extra", "sha256:" + "0" * 64])
-    elif constraint == "members_reordered":
-        items(review["members"]).insert(0, ["extra", "sha256:" + "0" * 64])
-    elif constraint == "membership_hash":
-        review["membership_hash"] = "sha256:" + "0" * 64
-    elif constraint == "decision_id":
-        review["id"] = "d:" + "0" * 64
-        shard["default_decision_id"] = review["id"]
-    elif constraint == "default_decision_id":
-        shard["default_decision_id"] = "d:" + "0" * 64
-    elif constraint == "samples_missing":
-        review["sample_ids"] = []
-    elif constraint == "samples_extra":
-        items(review["sample_ids"]).append("extra")
-    elif constraint == "samples_duplicate":
-        items(review["sample_ids"]).append(items(review["sample_ids"])[0])
-    elif constraint == "duplicate_evidence":
-        refs = items(first_record(shard)["evidence"])
-        refs.append(copy.deepcopy(refs[0]))
-    else:
-        obj(items(first_record(shard)["evidence"])[0])["role"] = "family"
-    install_identity(
-        identity_fixture.root,
-        shard,
-        resign=constraint in {"duplicate_evidence", "missing_match_role"},
-    )
-    identity_fixture.revision = commit(identity_fixture.root)
-    message = {
-        "semantic_hash": "Product identity exact members mismatch",
-        "members_missing": "Product identity exact members mismatch",
-        "members_extra": "Product identity exact members mismatch",
-        "members_reordered": "Product identity exact members mismatch",
-        "membership_hash": "Product identity membership hash mismatch",
-        "decision_id": "Product identity decision ID mismatch",
-        "default_decision_id": "Product identity default decision mismatch",
-        "samples_missing": "Product identity requires every exact member checked",
-        "samples_extra": "Product identity requires every exact member checked",
-        "samples_duplicate": "Product identity requires every exact member checked",
-        "duplicate_evidence": "Duplicate product identity evidence",
-        "missing_match_role": "Product identity requires match evidence",
-    }[constraint]
-    with pytest.raises(ValueError, match=message):
-        identity_fixture.load()
 
 
 @pytest.mark.parametrize(
@@ -830,3 +634,309 @@ def test_filing_path_is_checked_independently_of_data_region(
         ValueError, match="Product identity filing/path/region mismatch"
     ):
         fixture.load()
+
+
+class TestIdentityWireConstraints:
+    @pytest.fixture(scope="class")
+    def identity_wire(self) -> tuple[bytes, bytes]:
+        match: dict[str, JsonValue] = {
+            "kind": "product_link",
+            "product_url": "https://shadowverse-evolve.com/products/synthetic/",
+            "expansion_code": "Test-A",
+        }
+        record: dict[str, JsonValue] = {
+            "record_key": json.dumps(
+                ["product_identity", "jp", match], sort_keys=True, separators=(",", ":")
+            ),
+            "kind": "product_identity",
+            "filing_key": "jp",
+            "data": {"product_id": "permanent-example", "region": "jp", "match": match},
+            "evidence": [
+                {
+                    "store_id": "test-store",
+                    "batch_id": "sha256:" + "1" * 64,
+                    "source_version_id": "src:v1:" + "2" * 64,
+                    "locator": '{"product_block_ordinal":0}',
+                    "role": "product_identity_match",
+                }
+            ],
+        }
+        shard = identity_envelope([record])
+        index = {
+            "product_identity_format": 1,
+            "kind": "product_identity_index",
+            "includes": {NAME: checksum(shard)},
+        }
+        return json.dumps(index).encode(), json.dumps(shard).encode()
+
+    @pytest.mark.parametrize(
+        ("area", "field", "value"),
+        [
+            ("index", "product_identity_format", True),
+            ("index", "product_identity_format", 2),
+            ("index", "kind", "product_index"),
+            ("index", "extra", "unexpected"),
+            ("shard", "product_identity_format", True),
+            ("shard", "product_identity_format", 2),
+            ("shard", "kind", "product_shard"),
+            ("shard", "extra", "unexpected"),
+            ("shard", "records", []),
+            ("shard", "decisions", []),
+            ("record", "kind", "product"),
+            ("record", "filing_key", "en"),
+            ("record", "record_key", '["product_identity","jp",{}]'),
+            ("record", "extra", "unexpected"),
+            ("record", "evidence", []),
+            ("data", "product_id", "UPPER"),
+            ("data", "product_id", " leading"),
+            ("data", "product_id", "trailing\n"),
+            ("data", "product_id", "a/../b"),
+            ("data", "product_id", "商品"),
+            ("data", "product_id", 3),
+            ("data", "region", "cn"),
+            ("data", "family_id", "TEST"),
+            ("match", "kind", "fuzzy"),
+            (
+                "match",
+                "product_url",
+                "http://shadowverse-evolve.com/products/synthetic/",
+            ),
+            (
+                "match",
+                "product_url",
+                "https://en.shadowverse-evolve.com/products/synthetic/",
+            ),
+            (
+                "match",
+                "product_url",
+                "https://dev.shadowverse-evolve.com/products/synthetic/",
+            ),
+            ("match", "product_url", "https://shadowverse-evolve.com/cardlist/"),
+            ("match", "extra", "unexpected"),
+            ("match", "expansion_code", ""),
+            ("evidence", "store_id", "../unsafe"),
+            ("evidence", "source_version_id", "sha256:" + "1" * 64),
+            ("evidence", "locator", ""),
+            ("evidence", "role", ""),
+            ("evidence", "extra", "unexpected"),
+            ("decision", "state", "proposed"),
+            ("decision", "state", "sampled"),
+            ("decision", "scope", "row"),
+            ("decision", "category", "product_catalog"),
+            ("decision", "category", "identity_registry"),
+            ("decision", "policy_id", "product-authored-v1"),
+            ("decision", "reviewed_by", None),
+            ("decision", "reviewed_by", "  "),
+            ("decision", "reviewed_at", None),
+            ("decision", "reviewed_at", "2026-09-30T12:00:00Z"),
+            ("decision", "reviewed_precision", None),
+            ("decision", "reviewed_precision", "month"),
+            ("decision", "authored_by", " "),
+            ("decision", "authored_at", "not-a-date"),
+            ("decision", "extra", "unexpected"),
+        ],
+    )
+    def test_each_wire_constraint(
+        self,
+        identity_wire: tuple[bytes, bytes],
+        tmp_path: Path,
+        area: str,
+        field: str,
+        value: JsonValue,
+    ) -> None:
+        index = obj(json.loads(identity_wire[0]))
+        shard = obj(json.loads(identity_wire[1]))
+        if area == "index":
+            index[field] = value
+        else:
+            record = first_record(shard)
+            target = {
+                "shard": shard,
+                "record": record,
+                "data": obj(record["data"]),
+                "match": obj(obj(record["data"])["match"]),
+                "evidence": obj(items(record["evidence"])[0]),
+                "decision": decision(shard),
+            }[area]
+            target[field] = value
+        expected = (
+            "decisions.0.reviewed_precision:literal_error"
+            if area == "decision" and field == "reviewed_precision" and value == "month"
+            else wire_error(area, field)
+        )
+        with pytest.raises(ValueError, match=re.escape(expected)):
+            check_wire(tmp_path, index, shard, area, field)
+
+    @pytest.mark.parametrize(
+        ("area", "field"),
+        [
+            ("data", "product_id"),
+            ("data", "region"),
+            ("data", "match"),
+            ("match", "expansion_code"),
+            ("record", "evidence"),
+            ("decision", "reviewed_precision"),
+        ],
+    )
+    def test_required_nullable_and_nonnullable_fields(
+        self, identity_wire: tuple[bytes, bytes], area: str, field: str
+    ) -> None:
+        shard = obj(json.loads(identity_wire[1]))
+        record = first_record(shard)
+        target = {
+            "record": record,
+            "data": obj(record["data"]),
+            "match": obj(obj(record["data"])["match"]),
+            "decision": decision(shard),
+        }[area]
+        del target[field]
+        prefix = {
+            "record": "records.0.",
+            "data": "records.0.data.",
+            "match": "records.0.data.match.product_link.",
+            "decision": "decisions.0.",
+        }[area]
+        with pytest.raises(ValueError, match=re.escape(prefix + field + ":missing")):
+            _model(IdentityShard, shard)
+
+    @pytest.mark.parametrize(
+        "constraint",
+        [
+            "semantic_hash",
+            "members_missing",
+            "members_extra",
+            "members_reordered",
+            "membership_hash",
+            "decision_id",
+            "default_decision_id",
+            "samples_missing",
+            "samples_extra",
+            "samples_duplicate",
+            "duplicate_evidence",
+            "missing_match_role",
+        ],
+    )
+    def test_each_exact_membership_constraint(  # ruff: ignore[complex-structure] -- each independent mutation isolates a different envelope constraint
+        self, identity_wire: tuple[bytes, bytes], tmp_path: Path, constraint: str
+    ) -> None:
+        shard = obj(json.loads(identity_wire[1]))
+        review = decision(shard)
+        if constraint == "semantic_hash":
+            items(items(review["members"])[0])[1] = "sha256:" + "0" * 64
+        elif constraint == "members_missing":
+            review["members"] = []
+        elif constraint == "members_extra":
+            items(review["members"]).append(["extra", "sha256:" + "0" * 64])
+        elif constraint == "members_reordered":
+            items(review["members"]).insert(0, ["extra", "sha256:" + "0" * 64])
+        elif constraint == "membership_hash":
+            review["membership_hash"] = "sha256:" + "0" * 64
+        elif constraint == "decision_id":
+            review["id"] = "d:" + "0" * 64
+            shard["default_decision_id"] = review["id"]
+        elif constraint == "default_decision_id":
+            shard["default_decision_id"] = "d:" + "0" * 64
+        elif constraint == "samples_missing":
+            review["sample_ids"] = []
+        elif constraint == "samples_extra":
+            items(review["sample_ids"]).append("extra")
+        elif constraint == "samples_duplicate":
+            items(review["sample_ids"]).append(items(review["sample_ids"])[0])
+        elif constraint == "duplicate_evidence":
+            refs = items(first_record(shard)["evidence"])
+            refs.append(copy.deepcopy(refs[0]))
+        else:
+            obj(items(first_record(shard)["evidence"])[0])["role"] = "family"
+        write_yaml(tmp_path / NAME, shard)
+        message = {
+            "semantic_hash": "Product identity exact members mismatch",
+            "members_missing": "Product identity exact members mismatch",
+            "members_extra": "Product identity exact members mismatch",
+            "members_reordered": "Product identity exact members mismatch",
+            "membership_hash": "Product identity membership hash mismatch",
+            "decision_id": "Product identity decision ID mismatch",
+            "default_decision_id": "Product identity default decision mismatch",
+            "samples_missing": "Product identity requires every exact member checked",
+            "samples_extra": "Product identity requires every exact member checked",
+            "samples_duplicate": "Product identity requires every exact member checked",
+            "duplicate_evidence": "Duplicate product identity evidence",
+            "missing_match_role": "Product identity requires match evidence",
+        }[constraint]
+        with pytest.raises(ValueError, match=message):
+            _shard(tmp_path, NAME, checksum(shard))
+
+    def test_wire_base_is_valid_and_each_decode_is_private(
+        self, identity_wire: tuple[bytes, bytes], tmp_path: Path
+    ) -> None:
+        index = obj(json.loads(identity_wire[0]))
+        shard = obj(json.loads(identity_wire[1]))
+        _model(IdentityIndex, index)
+        write_yaml(tmp_path / NAME, shard)
+        loaded = _shard(tmp_path, NAME, checksum(shard))
+        first_record(shard)["kind"] = "corrupt"
+        assert (
+            first_record(obj(json.loads(identity_wire[1])))["kind"]
+            == "product_identity"
+        )
+        with pytest.raises(ValidationError, match="frozen"):
+            loaded.envelope.records[0].data.product_id = "changed"  # type: ignore[misc]  # exercise the runtime frozen boundary
+
+
+@pytest.mark.parametrize(
+    "area",
+    ["index", "shard", "record", "data", "match", "evidence", "decision", "membership"],
+)
+def test_loader_runs_each_wire_and_membership_check(
+    identity_fixture: IdentityFixture, area: str
+) -> None:
+    fixture = identity_fixture
+    if area == "index":
+        index = obj(read_yaml(fixture.root / "product-identities/index.yaml"))
+        index["kind"] = "wrong"
+        write_yaml(fixture.root / "product-identities/index.yaml", index)
+        expected = wire_error("index", "kind")
+    else:
+        shard = obj(read_yaml(fixture.root / NAME))
+        record = first_record(shard)
+        target = {
+            "shard": shard,
+            "record": record,
+            "data": obj(record["data"]),
+            "match": obj(obj(record["data"])["match"]),
+            "evidence": obj(items(record["evidence"])[0]),
+            "decision": decision(shard),
+            "membership": decision(shard),
+        }[area]
+        field, value = {
+            "shard": ("kind", "wrong"),
+            "record": ("filing_key", "en"),
+            "data": ("product_id", "UPPER"),
+            "match": ("kind", "wrong"),
+            "evidence": ("role", ""),
+            "decision": ("state", "proposed"),
+            "membership": ("membership_hash", "sha256:" + "0" * 64),
+        }[area]
+        target[field] = value
+        install_identity(
+            fixture.root, shard, resign=area in {"record", "data", "match", "evidence"}
+        )
+        expected = (
+            "Product identity membership hash mismatch"
+            if area == "membership"
+            else wire_error(area, field)
+        )
+    fixture.revision = commit(fixture.root)
+    with pytest.raises(ValueError, match=re.escape(expected)):
+        fixture.load()
+
+
+def check_wire(
+    root: Path, index: JsonValue, shard: JsonValue, area: str, field: str
+) -> None:
+    if area == "index":
+        _model(IdentityIndex, index)
+    elif area == "record" and field in {"filing_key", "record_key"}:
+        write_yaml(root / NAME, shard)
+        _shard(root, NAME, checksum(shard))
+    else:
+        _model(IdentityShard, shard)

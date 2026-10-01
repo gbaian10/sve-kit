@@ -1,6 +1,7 @@
 """Synthetic sealed official HTML, independent envelope hashes and Git inputs."""
 
 import json
+import os
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- isolated test Git repository for revision pin verification
 from dataclasses import dataclass, replace
@@ -79,6 +80,13 @@ def html(
 def commit(root: Path) -> str:
     executable = shutil.which("git")
     assert executable is not None
+    # Synthetic repositories must not inherit a developer's hooks or signing policy.
+    environment = {
+        key: value
+        for key, value in os.environ.items()
+        if not key.startswith("GIT_CONFIG")
+    }
+    environment.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1")
     for args in (
         ("init", "-q"),
         ("add", "authored"),
@@ -95,10 +103,15 @@ def commit(root: Path) -> str:
         ),
     ):
         subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed arguments in an isolated temporary Git repository
-            [executable, "-C", str(root.parent), *args], capture_output=True, check=True
+            [executable, "-C", str(root.parent), *args],
+            capture_output=True,
+            check=True,
+            env=environment,
         )
     return subprocess.check_output(  # ruff: ignore[subprocess-without-shell-equals-true] -- read the isolated fixture commit
-        [executable, "-C", str(root.parent), "rev-parse", "HEAD"], text=True
+        [executable, "-C", str(root.parent), "rev-parse", "HEAD"],
+        text=True,
+        env=environment,
     ).strip()
 
 
