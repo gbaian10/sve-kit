@@ -421,6 +421,8 @@ DSL 撰寫與題本規則來源是 `face_semantics` 的 immutable 規則表示�
 
 ## 15. 網址、搜尋、預設版次與記號
 
+詞彙、記號、別名、特殊構築名稱與 route/default 覆寫的 authored 輸入見 [採納契約](catalog-route-adoption.md)。覆寫格式與展示集合屬技術細節，使用者 2026-10-01 已核可一般版稀有度限 BR/SR/GR/LG（英版 Bronze/Silver/Gold/Legendary），排除 premium、特殊稀有度、PR/Promo 與「-」；繁中介面缺譯先日文再英文，日／英不回繁中。卡框／標誌不在本次核可範圍，缺證據維持未知；日期沿 §3.2 的收錄例外否則商品日期，本節既有順序及未知狀態語意不變。
+
 | 表                          | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                          |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `text_symbol`               | `id:ID PK,code:Code UNIQUE,parameter_schema:Json,keyword_id→keyword?,spellings:Json,localizations:Json,decision_id→decision`；有限 literal/uint/variable 拼法，不執行 regex；localizations 含 `lang/name/tooltip/copy_pattern`；JSON Schema 驗參數與語言                                                                      |
