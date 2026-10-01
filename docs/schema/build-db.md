@@ -134,11 +134,17 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 `text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同鍵不同完整內容一律停止發布，不自動加長新舊鍵；歷次已發布文字鍵從永久快照聯集檢碰撞（可重建衍生索引）。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
 
+現行 `face_revision.effect_unit_id`、`printing_face_observation.revision_id` 與 `text_unit.text` 均為 NOT NULL，因此 extractor 的 null 主文不能直接入上述觀測鏈；也不能借另一來源的文字補 FK。區分「已證實無主文」與「無法判定／缺資料」的三態及 nullable FK 選項見 [authored-layout §9.8](authored-layout.md#98-無主文的狀態與-schema-邊界提案待使用者決定)，**尚待使用者核可，未變更本表約束或公開 schema**。決定前完整來源與 null 觀測留 report／F1、明列 deferred，不以空文字冒充已確認無主文。
+
 type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipment＋token 對應已觀測的イクイップメント・トークン，這是資料分類，不代替 CR 規則。evolve/advance/token 是特殊標記；traits 不切斷〈ジオ・テオゴニア〉。sections 保留順序與分類，unknown 仍顯示完整原文，但不放行 verified DSL。數值 null 不補 Leader 體力 20。
 
 無差異的初始觀測可由工具建立一對一 semantics（保留全部規則），不另要求每卡人工 decision；只有移除提示/重複定義、跨文字認定等義才需已採納正規化政策或 confirmed batch。未知段落保持 unknown 並禁止 verified。
 
 現行文字先區分「觀測差異」與「語義衝突」。不同 printing 或同一 printing 的新觀測，都先保留 `printing_face_observation`，產 `change_kind=wording` 候選；時間變化本身不是衝突。工具列出主文/提示文/token 定義/數值/特性 diff，confirmed batch 全體 checked 可採納等義表記。當前選取依可信版次收錄日及來源更新證據選最新已採納表記，`basis=latest_adopted_wording`；日期精度不足/並列則封套明示順序，不能任取最後爬到者。已採納的新表記與舊表記共 `semantic_id` 時，不要求重新驗相同規則的 DSL。無新版採納時保留舊 current 並顯示有候選；沒有可用舊版仍可讀觀測、手動。
+
+current／wording 的持久採納入口、精確觀測鍵、checked 全集合、明示順序與前件重建依 [authored-layout §9.1–§9.7](authored-layout.md#91-currentwording-採納入口-wording-adoption-v1)。選中觀測須來自完整已核對集合與有證據的末層；缺順序不能以抓取時間補值。active 來源更正先驗並投影，再比較更正後內容，原始觀測仍保留；來源更正與表記採納的決定互不代簽。無採納時保留仍有效且可重建的舊 current；無舊版或舊版已被已知衝突否定時隔離，preview 排除受影響同區卡／版次及必要引用閉包，仍保留本機觀測供核對。輸入 hash 錯或前件缺失為驗證失敗，不降成一般候選。
+
+本入口不變更 semantics 的[能力分期](implementation-tiers.md)：採納等義再錄後的正式投影仍需 semantics 子組；未啟用時 report-only 不使用等義封套替換 current，也不宣稱 DSL 等義重用。日期排序僅選顯示表記，不填未知的規則生效日期或 printed 狀態。
 
 無差異/勘誤/更正時仍可 `latest_observed_no_errata`，不虛構生效日期。已知官方勘誤按生效區間選；真實不相容、缺句/數值差異或同時互斥的有效來源才進衝突/來源更正/勘誤判讀。JP 內差異不濫用 `region_divergence`，該表只管跨區。未知日期不能回答歷史有效卡文。
 
