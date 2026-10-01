@@ -1,0 +1,80 @@
+"""The catalog participates in the existing inseparable text-preview transaction."""
+
+from typing import TYPE_CHECKING
+
+import pytest
+
+from sve_carddb.build_db import create_database
+from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build_inputs import BuildContext
+from sve_carddb.catalog.importer import catalog_configuration
+from sve_carddb.catalog.models import Alias, Catalog
+from sve_carddb.text_observations import populate_text_preview, text_configuration
+
+from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic inputs
+from .text_observation_fixtures import LANGUAGES, make_case
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from sve_carddb.registry.review import Inputs
+
+
+@pytest.mark.parametrize("broken", [False, True])
+def test_catalog_composes_with_both_regional_sources(
+    tmp_path: Path, inputs: Inputs, broken: bool
+) -> None:
+    for card in inputs.jp.values():
+        card.faces[0].text = "Synthetic unanimous rule."
+    case = make_case(tmp_path / "authored", inputs)
+    config = Catalog(
+        languages=LANGUAGES,
+        terms=(),
+        aliases=(
+            Alias(
+                kind="type",
+                code="missing" if broken else "follower",
+                lang="ja",
+                text="Alias",
+                normalized="alias",
+            ),
+        ),
+        symbols=(),
+        normalizer_version="synthetic-v1",
+    )
+    build = BuildContext.from_inputs(
+        "a" * 40,
+        {"synthetic.lock": b"dependencies"},
+        text_configuration(case.plan, case.vocabulary, ())
+        | catalog_configuration(config),
+    )
+    with create_database(compile_build(("en", "related"))) as db:
+
+        def populate() -> None:
+            with db.transaction():
+                populate_text_preview(
+                    db,
+                    case.catalog,
+                    case.plan,
+                    authored_revision="a" * 40,
+                    build=build,
+                    vocabulary=case.vocabulary,
+                    published=(),
+                    languages=LANGUAGES,
+                    stores={"test-store": case.store},
+                    catalog_config=config,
+                )
+
+        if broken:
+            with pytest.raises(ValueError, match="target"):
+                populate()
+            assert not db.rows("card")
+            assert not db.rows("source_record")
+        else:
+            populate()
+            assert len(db.rows("face_rules_name")) == len(db.rows("face_current"))
+            assert {row.values["region"] for row in db.rows("rules_name")} == {
+                "jp",
+                "en",
+            }
+            assert len(db.rows("search_alias")) == 1

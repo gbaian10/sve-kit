@@ -14,12 +14,12 @@ from sve_carddb.build_inputs import (
     input_record,
     insert_raw_sources,
 )
+from sve_carddb.catalog.languages import register_languages
 from sve_carddb.products.evidence import CheckedSource, resolve_evidence
-from sve_carddb.products.models import Evidence, FamilyRecord, Lang, LocalizedText
+from sve_carddb.products.models import Evidence, FamilyRecord, Language, LocalizedText
 from sve_carddb.products.official_importer import populate_official_products
 from sve_carddb.registry.inputs import digest
 from sve_carddb.registry.preview import populate_preview
-from sve_carddb.registry.records import RecordData
 from sve_carddb.snapshot.values import canonical
 
 if TYPE_CHECKING:
@@ -31,12 +31,6 @@ if TYPE_CHECKING:
     from sve_carddb.products.loader import ProductSnapshot
     from sve_carddb.products.plan import OfficialProducts
     from sve_carddb.registry.preview import PreviewPlan
-
-
-class Language(RecordData):
-    code: Lang
-    fallback_order: tuple[Lang, ...]
-    display_name: str
 
 
 def _require_family_catalog(catalog: ProductSnapshot) -> None:
@@ -73,7 +67,7 @@ def populate_families(
     )
     uses: list[SourceUse] = []
     insert_raw_sources(db, (checked.source for checked in evidence.values()))
-    _languages(db, languages)
+    register_languages(db, languages)
     texts = _Texts(db)
     for record in catalog.records.values():
         if (
@@ -272,22 +266,6 @@ def import_product_preview(  # ruff: ignore[too-many-arguments] -- transaction o
             stores=stores,
             official=official,
         )
-
-
-def _languages(db: Database, languages: tuple[Language, ...]) -> None:
-    existing = {row.values["code"]: row.values for row in db.rows("language")}
-    for language in languages:
-        values: dict[str, Value] = {
-            "code": language.code,
-            "fallback_order": Json(list[JsonValue](language.fallback_order)),
-            "display_name": language.display_name,
-        }
-        if language.code in existing:
-            if existing[language.code] != values:
-                raise ValueError("Conflicting language configuration")
-        else:
-            db.insert("language", values)
-            existing[language.code] = values
 
 
 class _Texts:
