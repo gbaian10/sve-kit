@@ -1,7 +1,9 @@
 """Synthetic crash and replacement cases; no live stores or HTTP requests."""
 
 import errno
+import json
 import os
+import shutil
 import sqlite3
 from contextlib import ExitStack
 from dataclasses import replace
@@ -16,8 +18,15 @@ from typer.testing import CliRunner
 from sve_carddb import cli
 from sve_carddb import source_archive as archive
 from sve_carddb.config import Settings
-from sve_carddb.fetch.refresh import RefreshWriter
-from sve_carddb.fetch.writer import DiskFullError, Fetched, Writer, sha256
+from sve_carddb.fetch import refresh
+from sve_carddb.fetch.refresh import RefreshWriter, Replacement
+from sve_carddb.fetch.writer import (
+    DiskFullError,
+    Fetched,
+    PathConflictError,
+    Writer,
+    sha256,
+)
 from sve_carddb.manifest import (
     AlreadyRunningError,
     ExclusiveLock,
@@ -29,6 +38,7 @@ from sve_carddb.manifest import (
     RequestStart,
     Resource,
 )
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import (
     ArchiveError,
     ArchiveRaceError,
@@ -40,7 +50,7 @@ from sve_carddb.source_archive import (
     seal_batch,
     verify_batch,
 )
-from sve_carddb.store import UnsafePathError, compress, decompress
+from sve_carddb.store import UnsafePathError, compress, decompress, resolve_within
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
@@ -78,7 +88,12 @@ def writer(store: ArchiveStore, tmp_path: Path) -> Iterator[RefreshWriter]:
         Manifest.open(store.manifest_path) as manifest,
     ):
         yield RefreshWriter(
-            store, manifest, lock, tmp_path / "backup", require_separate_device=False
+            store,
+            manifest,
+            lock,
+            tmp_path / "backup",
+            restore_root=tmp_path / "restore",
+            require_separate_device=False,
         )
 
 
@@ -104,6 +119,7 @@ def test_a_b_c_versions_and_qa_links_restore_offline(
             request_id=start(writer._manifest),
             in_transaction=partial(links, index=index),
         )
+    writer.checkpoint()
     assert writer.read(URL) == bodies[-1]
     assert len(list((store.root / "versions").glob("*.json"))) == 3
     assert {path.read_bytes() for path in (store.root / "raw").rglob("*.raw")} == set(
@@ -112,6 +128,9 @@ def test_a_b_c_versions_and_qa_links_restore_offline(
     assert len(writer._manifest.links.history(URL)) >= 3
     writer._lock.__exit__(None, None, None)
     result = seal_batch(store)
+    assert (result.path / "manifest.sqlite").samefile(
+        store.root / "manifests" / f"{result.inventory.manifest.sha256[7:]}.sqlite"
+    )
     report = capacity_report(store, result.batch_id)
     assert report.source_versions == 3
     assert report.unique_raw_logical_bytes == sum(map(len, bodies))
@@ -140,6 +159,7 @@ def test_etag_only_304_and_a_b_a_reuse_version(
     writer: RefreshWriter, store: ArchiveStore
 ) -> None:
     write(writer, fetched())
+    writer.checkpoint()
     first_descriptor = next((store.root / "versions").glob("*.json")).read_bytes()
     before = (store.data_root / PATH).stat().st_ino
     result = writer.write(
@@ -154,7 +174,8 @@ def test_etag_only_304_and_a_b_a_reuse_version(
     assert (
         next((store.root / "versions").glob("*.json")).read_bytes() == first_descriptor
     )
-    assert len(list((store.root / "receipts").glob("*.json"))) >= 3
+    writer.checkpoint()
+    assert len(list((store.root / "receipts").glob("*.json"))) == 2
     write(writer, fetched(b"synthetic-B"))
     write(writer, fetched())
     assert len(list((store.root / "versions").glob("*.json"))) == 2
@@ -184,7 +205,7 @@ def test_crash_recovers_committed_hash_only(  # ruff: ignore[complex-structure] 
     assert committed is not None
     original_replace = Path.replace
     original_record = writer._record
-    original_observe = writer._observe
+    original_observe = writer._backup_committed
 
     def crash_replace(path: Path, target: Path) -> Path:
         if str(target) == str(store.data_root / PATH):
@@ -200,10 +221,10 @@ def test_crash_recovers_committed_hash_only(  # ruff: ignore[complex-structure] 
         original_record(resource, request_id, unchanged, None)
         raise KeyboardInterrupt
 
-    def crash_observe(resource: Resource, snapshot: tuple[Path, str]) -> archive.Entry:
+    def crash_observe(resource: Resource, intent_id: str) -> None:
         if resource.sha256 != committed.sha256:
             raise KeyboardInterrupt
-        return original_observe(resource, snapshot)
+        original_observe(resource, intent_id)
 
     def crash_transaction(_resource: Resource) -> None:
         raise KeyboardInterrupt
@@ -213,7 +234,7 @@ def test_crash_recovers_committed_hash_only(  # ruff: ignore[complex-structure] 
     elif point == "after-commit":
         monkeypatch.setattr(writer, "_record", crash_record)
     elif point == "before-receipt":
-        monkeypatch.setattr(writer, "_observe", crash_observe)
+        monkeypatch.setattr(writer, "_backup_committed", crash_observe)
     with pytest.raises(KeyboardInterrupt):
         writer.write(
             fetched(b"synthetic-B"),
@@ -268,6 +289,7 @@ def test_corrupt_latest_blocks_even_with_existing_blob(
     writer: RefreshWriter, store: ArchiveStore
 ) -> None:
     write(writer, fetched())
+    writer.checkpoint()
     (store.data_root / PATH).write_bytes(compress(b"synthetic-X"))
     with pytest.raises(IncompleteBatchError):
         write(writer, fetched(b"synthetic-B"))
@@ -631,19 +653,23 @@ def test_archive_mkdir_does_not_write_through_symlink(tmp_path: Path) -> None:
     assert list(outside.iterdir()) == []
 
 
-@pytest.mark.parametrize("field", ["archive_root", "archive_backup_root"])
+@pytest.mark.parametrize(
+    "field", ["archive_root", "archive_backup_root", "archive_restore_root"]
+)
 def test_archive_settings_require_absolute_paths(tmp_path: Path, field: str) -> None:
     with pytest.raises(ValidationError, match="absolute"):
         Settings.model_validate({"data_dir": tmp_path, field: Path("relative")})
 
 
+@pytest.mark.parametrize("mode", ["refresh", "resume", "repair"])
 def test_configured_cli_refresh_uses_protection_and_finishes_backup(
-    store: ArchiveStore, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    store: ArchiveStore, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
 ) -> None:
     monkeypatch.setenv("SVE_DATA_DIR", str(store.data_root))
     monkeypatch.setenv("SVE_ARCHIVE_ROOT", str(store.root))
     monkeypatch.setenv("SVE_ARCHIVE_STORE_ID", store.store_id)
     monkeypatch.setenv("SVE_ARCHIVE_BACKUP_ROOT", str(tmp_path / "backup"))
+    monkeypatch.setenv("SVE_ARCHIVE_RESTORE_ROOT", str(tmp_path / "restore"))
     original = cli._refresh_writer
 
     def temporary_writer(
@@ -651,7 +677,12 @@ def test_configured_cli_refresh_uses_protection_and_finishes_backup(
     ) -> RefreshWriter:
         del settings
         return RefreshWriter(
-            store, manifest, lock, tmp_path / "backup", require_separate_device=False
+            store,
+            manifest,
+            lock,
+            tmp_path / "backup",
+            restore_root=tmp_path / "restore",
+            require_separate_device=False,
         )
 
     async def fake_crawl(  # ruff: ignore[unused-async] -- matches the CLI async crawl boundary
@@ -671,7 +702,7 @@ def test_configured_cli_refresh_uses_protection_and_finishes_backup(
     monkeypatch.setattr(cli, "_crawl", fake_crawl)
     monkeypatch.setattr(cli, "backup_batch", temporary_backup)
     result = CliRunner().invoke(
-        cli.app, ["crawl", "p2", "--mode", "refresh", "--set", "SYNTHETIC"]
+        cli.app, ["crawl", "p2", "--mode", mode, "--set", "SYNTHETIC"]
     )
     assert result.exit_code == 0, result.output
     assert '"source_versions": 2' in result.output
@@ -701,6 +732,7 @@ def test_same_raw_different_url_has_distinct_source_versions(
         path=PurePosixPath("raw/jp/qa/two.html.zst"),
     )
     writer.write(other, request_id=start(writer._manifest, other.url))
+    writer.checkpoint()
     assert len(list((store.root / "versions").glob("*.json"))) == 2
     assert len(list((store.root / "raw").rglob("*.raw"))) == 1
 
@@ -721,6 +753,7 @@ def test_semantic_hash_does_not_replace_exact_raw_hash(
     assert observation_hashes[0] == observation_hashes[1]
     for body in bodies:
         write(writer, fetched(body))
+    writer.checkpoint()
     assert len(list((store.root / "versions").glob("*.json"))) == 2
     assert {path.read_bytes() for path in (store.root / "raw").rglob("*.raw")} == set(
         bodies
@@ -796,3 +829,559 @@ def test_recovery_preserves_only_copy_when_candidate_blob_is_missing(
     with pytest.raises(ArchiveError, match="missing"):
         writer.recover()
     assert decompress((store.data_root / PATH).read_bytes()) == b"synthetic-B"
+
+
+@pytest.mark.parametrize("damage", ["missing", "corrupt"])
+def test_identical_refetch_repairs_missing_prearchive_version(
+    writer: RefreshWriter, store: ArchiveStore, damage: str
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    target = store.data_root / PATH
+    if damage == "missing":
+        target.unlink()
+    else:
+        target.write_bytes(b"broken-zstd")
+    writer.write(fetched(), request_id=start(writer._manifest))
+    assert writer.read(URL) == b"synthetic-A"
+    assert len(list((store.root / "versions").glob("*.json"))) == 1
+    write(writer, fetched(b"synthetic-B"))
+    writer.checkpoint()
+    assert len(list((store.root / "versions").glob("*.json"))) == 2
+
+
+def test_explicit_gap_keeps_historical_reference_and_reports_missing_history(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    (store.data_root / PATH).unlink()
+    with pytest.raises(IncompleteBatchError):
+        write(writer, fetched(b"synthetic-B"))
+    writer.acknowledge_gap(
+        URL, "sha256:" + sha256(b"synthetic-A"), "independent backups checked"
+    )
+    write(writer, fetched(b"synthetic-B"))
+    writer._lock.__exit__(None, None, None)
+    result = seal_batch(store)
+    assert [
+        (gap.url, gap.expected_raw_sha256) for gap in result.inventory.history_gaps
+    ] == [(URL, "sha256:" + sha256(b"synthetic-A"))]
+    verify_batch(store.root, store.store_id, result.batch_id)
+    assert (URL, sha256(b"synthetic-A")) in writer._manifest.historical_raw_hashes()
+
+
+def test_gap_cannot_override_available_or_already_archived_version(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    write(writer, fetched())
+    with pytest.raises(ArchiveError, match="available"):
+        writer.acknowledge_gap(URL, "sha256:" + sha256(b"synthetic-A"), "operator")
+    writer.checkpoint()
+    (store.data_root / PATH).unlink()
+    with pytest.raises(ArchiveError, match="archived"):
+        writer.acknowledge_gap(URL, "sha256:" + sha256(b"synthetic-A"), "operator")
+
+
+def test_many_urls_share_before_and_final_manifests(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    for index in range(12):
+        item = replace(
+            fetched(),
+            url=f"https://example.invalid/{index}",
+            path=PurePosixPath(f"raw/jp/qa/{index}.html.zst"),
+        )
+        writer.write(item, request_id=start(writer._manifest, item.url))
+    assert len(list((store.root / "manifests").glob("*.sqlite"))) == 1
+    assert len(list((writer.backup_root / "manifests").glob("*.sqlite"))) == 1
+    assert len(list((writer.backup_root / "replacement-commits").glob("*.json"))) == 12
+    writer.checkpoint()
+    assert len(list((store.root / "manifests").glob("*.sqlite"))) == 2
+    assert len(list((writer.backup_root / "manifests").glob("*.sqlite"))) == 2
+    before = len(list((store.root / "manifests").glob("*.sqlite")))
+    for _ in range(12):
+        writer.mark_not_modified(
+            "https://example.invalid/0",
+            request_id=start(writer._manifest, "https://example.invalid/0"),
+        )
+    assert len(list((store.root / "manifests").glob("*.sqlite"))) == before
+
+    assert len(list((store.root / "observations").glob("*.json"))) == 24
+
+
+def test_unarchived_old_urls_share_one_preparation_snapshot(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    items = [
+        replace(
+            fetched(),
+            url=f"https://example.invalid/{index}",
+            path=PurePosixPath(f"raw/jp/qa/{index}.html.zst"),
+        )
+        for index in range(8)
+    ]
+    for item in items:
+        ordinary.write(item, request_id=start(writer._manifest, item.url))
+    for item in items:
+        writer.write(
+            replace(item, body=b"synthetic-B"),
+            request_id=start(writer._manifest, item.url),
+        )
+    assert len(list((store.root / "manifests").glob("*.sqlite"))) == 1
+    writer.checkpoint()
+    assert len(list((store.root / "manifests").glob("*.sqlite"))) == 2
+    assert len(list((store.root / "versions").glob("*.json"))) == 16
+
+
+def test_finish_refresh_ignores_unrelated_missing_scope(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    other = replace(
+        fetched(),
+        region=Region.JP,
+        kind=Kind.IMAGE,
+        url="https://example.invalid/other",
+        path=PurePosixPath("media/other.png"),
+        compressed=False,
+    )
+    ordinary.write(other, request_id=start(writer._manifest, other.url))
+    (store.data_root / other.path).unlink()
+    write(writer, fetched())
+    writer._lock.__exit__(None, None, None)
+    monkeypatch.setattr(
+        cli, "backup_batch", partial(backup_batch, require_separate_device=False)
+    )
+    cli._finish_refresh(writer)
+    batches = list((store.root / "batches").iterdir())
+    assert len(batches) == 1
+    inventory = verify_batch(store.root, store.store_id, "sha256:" + batches[0].name)
+    assert inventory.scope == [archive.Scope(provider="jp", kind="card")]
+    assert [item.url for item in inventory.current] == [URL]
+    assert writer.restore_root is not None
+    assert not list(writer.restore_root.iterdir())
+
+
+def test_restore_low_space_stops_before_copy(
+    writer: RefreshWriter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    writer._lock.__exit__(None, None, None)
+    monkeypatch.setattr(
+        cli, "backup_batch", partial(backup_batch, require_separate_device=False)
+    )
+    assert writer.restore_root is not None
+    usage = shutil.disk_usage(writer.restore_root)
+    monkeypatch.setattr(shutil, "disk_usage", lambda _root: usage._replace(free=0))
+    with pytest.raises(ArchiveError, match="free bytes"):
+        cli._finish_refresh(writer)
+    assert not list((writer.backup_root / "restore-checks").glob("*.json"))
+
+
+def test_restart_remembers_committed_observations_until_batch_is_restored(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    writer.touched.clear()
+    assert writer.recover() == 0
+    assert writer.touched == {("jp", "card")}
+    writer._lock.__exit__(None, None, None)
+    monkeypatch.setattr(
+        cli, "backup_batch", partial(backup_batch, require_separate_device=False)
+    )
+    cli._finish_refresh(writer)
+    assert writer.touched == set()
+    with ExclusiveLock(store.lock_path):
+        writer._unfinished_observations()
+    assert writer.touched == set()
+
+
+def interrupt_before_commit(
+    writer: RefreshWriter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def interrupted(
+        _resource: Resource, _request_id: int, _unchanged: bool, _callback: object
+    ) -> None:
+        raise KeyboardInterrupt
+
+    monkeypatch.setattr(writer, "_record", interrupted)
+    with pytest.raises(KeyboardInterrupt):
+        write(writer, fetched(b"synthetic-B"))
+    monkeypatch.undo()
+
+
+def test_recovery_preserves_unexpected_latest_bytes(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    interrupt_before_commit(writer, monkeypatch)
+    target = store.data_root / PATH
+    target.write_bytes(compress(b"synthetic-UNIQUE"))
+    with pytest.raises(ArchiveError, match="outside the replacement history"):
+        writer.recover()
+    assert decompress(target.read_bytes()) == b"synthetic-UNIQUE"
+
+
+def test_recovery_rejects_unarchived_third_committed_version(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    interrupt_before_commit(writer, monkeypatch)
+    current = writer._manifest.resources.get(URL)
+    assert current is not None
+    raw = b"synthetic-C"
+    target = store.data_root / PATH
+    target.write_bytes(compress(raw))
+    blob = store.root / archive._blob_path("sha256:" + sha256(raw))
+    blob.parent.mkdir(parents=True, exist_ok=True)
+    blob.write_bytes(raw)
+    with writer._manifest.transaction():
+        writer._manifest.resources.put(
+            replace(
+                current,
+                sha256=sha256(raw),
+                raw_bytes=len(raw),
+                stored_bytes=target.stat().st_size,
+            )
+        )
+    with pytest.raises(ArchiveError, match="committed version is outside"):
+        writer.recover()
+    assert decompress(target.read_bytes()) == raw
+
+
+@pytest.mark.parametrize("side", ["source", "target"])
+def test_immutable_backup_rejects_file_symlinks(tmp_path: Path, side: str) -> None:
+    source, target, unrelated = [
+        tmp_path / name for name in ("source", "target", "unrelated")
+    ]
+    unrelated.write_bytes(b"same")
+    source.write_bytes(b"same")
+    alias = source if side == "source" else target
+    alias.unlink(missing_ok=True)
+    alias.symlink_to(unrelated)
+    with pytest.raises(ArchiveError, match="symlink"):
+        archive._copy_immutable(source, target)
+    assert unrelated.read_bytes() == b"same"
+
+
+def test_ordinary_unchanged_200_updates_conditional_headers(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    result = ordinary.write(
+        replace(fetched(), etag="next", last_modified="new-date"),
+        request_id=start(writer._manifest),
+    )
+    assert not result.rewritten
+    assert result.resource.etag == "next"
+    assert result.resource.last_modified == "new-date"
+
+
+def test_final_path_owner_recheck_prevents_collision(
+    writer: RefreshWriter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = writer._manifest.resources.path_owner
+    calls = 0
+
+    def owner(path: PurePosixPath) -> str | None:
+        nonlocal calls
+        calls += 1
+        return original(path) if calls == 1 else "https://example.invalid/other-owner"
+
+    monkeypatch.setattr(writer._manifest.resources, "path_owner", owner)
+    with pytest.raises(PathConflictError, match="already belongs"):
+        write(writer, fetched())
+    assert writer._manifest.resources.get(URL) is None
+
+
+def test_corrupt_reused_candidate_blob_stops_before_commit(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    write(writer, fetched())
+    previous = writer._manifest.resources.get(URL)
+    blob = store.root / archive._blob_path("sha256:" + sha256(b"synthetic-B"))
+    blob.parent.mkdir(parents=True, exist_ok=True)
+    blob.write_bytes(b"synthetic-X")
+    with pytest.raises(ArchiveError):
+        write(writer, fetched(b"synthetic-B"))
+    assert writer._manifest.resources.get(URL) == previous
+
+
+def pending_intent(store: ArchiveStore) -> Path:
+    return next(
+        path
+        for path in (store.root / "replacements").glob("*.json")
+        if not (store.root / "replacement-completions" / path.name).exists()
+    )
+
+
+def rewrite_intent(path: Path, changes: dict[str, object]) -> None:
+    data = json.loads(path.read_bytes())
+    data.update(changes)
+    body = canonical(data)
+    path.with_name(digest(body)[7:] + ".json").write_bytes(body)
+    path.unlink()
+
+
+def test_intent_must_match_previous_snapshot(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    interrupt_before_commit(writer, monkeypatch)
+    path = pending_intent(store)
+    intent = archive._load_model(Replacement, path)
+    assert intent.previous is not None
+    forged = intent.previous.model_dump(mode="json")
+    forged["etag"] = "forged"
+    rewrite_intent(path, {"previous": forged})
+    with pytest.raises(ArchiveError, match="differs from its manifest snapshot"):
+        writer.recover()
+
+
+def test_completed_intent_marker_content_is_checked(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    write(writer, fetched())
+    marker = next((store.root / "replacement-completions").glob("*.json"))
+    marker.write_text('{"replacement_sha256":"wrong"}')
+    with pytest.raises(ArchiveError, match="completion mismatch"):
+        writer.recover()
+
+
+def test_recovery_rechecks_live_manifest_after_preparation(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    interrupt_before_commit(writer, monkeypatch)
+    original = writer._prepare_restore
+
+    def concurrent(current: Resource) -> Path | None:
+        result = original(current)
+        with Manifest.open(store.manifest_path) as live, live.transaction():
+            live.resources.put(replace(current, etag="another-crawler"))
+        return result
+
+    monkeypatch.setattr(writer, "_prepare_restore", concurrent)
+    with pytest.raises(ArchiveRaceError, match="manifest changed during recovery"):
+        writer.recover()
+
+
+def test_final_destination_recheck(
+    writer: RefreshWriter,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = resolve_within
+    calls = 0
+
+    def resolve(root: Path, path: PurePosixPath) -> Path:
+        nonlocal calls
+        calls += 1
+        return original(root, path) if calls == 1 else tmp_path / "unexpected.html.zst"
+
+    monkeypatch.setattr(refresh, "resolve_within", resolve)
+    with pytest.raises(ArchiveRaceError, match="destination changed"):
+        write(writer, fetched())
+    assert writer._manifest.resources.get(URL) is None
+    assert not (tmp_path / "unexpected.html.zst").exists()
+
+
+def test_postcommit_new_raw_is_backed_up_before_return(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    write(writer, fetched())
+    blob = writer.backup_root / archive._blob_path("sha256:" + sha256(b"synthetic-A"))
+    assert blob.read_bytes() == b"synthetic-A"
+    assert list((writer.backup_root / "replacement-commits").glob("*.json"))
+    writer.checkpoint()
+    descriptor = archive._load_model(
+        archive.Descriptor, next((store.root / "versions").glob("*.json"))
+    )
+    entry = archive.Entry(
+        source_version_id=descriptor.id,
+        receipt_id=descriptor.first_receipt_id,
+        descriptor_sha256=digest(archive._canonical_model(descriptor)),
+        blob=archive.Blob(
+            store_id=store.store_id,
+            path=str(archive._blob_path(descriptor.raw_sha256)),
+            sha256=descriptor.raw_sha256,
+            bytes=descriptor.raw_bytes,
+        ),
+    )
+    archive._verify_entry(writer.backup_root, store.store_id, entry, set(), set())
+
+
+def test_backup_entry_is_verified_after_copy(
+    writer: RefreshWriter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    original = archive._copy_immutable
+
+    def corrupt(source: Path, target: Path) -> None:
+        original(source, target)
+        if target.suffix == ".raw":
+            target.write_bytes(b"synthetic-X")
+
+    monkeypatch.setattr(archive, "_copy_immutable", corrupt)
+    with pytest.raises(ArchiveError, match="hash or size mismatch"):
+        writer.checkpoint()
+
+
+def test_legacy_recovery_requires_matching_encoded_length(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    interrupt_before_commit(writer, monkeypatch)
+    rewrite_intent(
+        pending_intent(store),
+        {"previous_stored_sha256": None, "proposed_stored_sha256": None},
+    )
+    monkeypatch.setattr(refresh, "compress", lambda raw: compress(raw) + b"longer")
+    with pytest.raises(ArchiveError, match="encoding differs"):
+        writer.recover()
+
+
+def test_new_recovery_uses_original_encoding_after_codec_changes(
+    writer: RefreshWriter, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    write(writer, fetched())
+    interrupt_before_commit(writer, monkeypatch)
+    monkeypatch.setattr(refresh, "compress", lambda raw: compress(raw) + b"longer")
+    assert writer.recover() == 1
+    assert writer.read(URL) == b"synthetic-A"
+
+
+def test_plain_raw_needs_no_duplicate_encoding(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    item = replace(
+        fetched(),
+        compressed=False,
+        path=PurePosixPath("media/synthetic.png"),
+        kind=Kind.IMAGE,
+    )
+    write(writer, item)
+    writer.checkpoint()
+    result = writer.write(item, request_id=start(writer._manifest))
+    assert not result.changed
+    assert not result.rewritten
+    assert not list((store.root / "encodings").glob("*.bin"))
+
+
+def test_gap_cli_records_exception_with_complete_configuration(
+    writer: RefreshWriter,
+    store: ArchiveStore,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    (store.data_root / PATH).unlink()
+    writer._lock.__exit__(None, None, None)
+    monkeypatch.setenv("SVE_DATA_DIR", str(store.data_root))
+    monkeypatch.setenv("SVE_ARCHIVE_ROOT", str(store.root))
+    monkeypatch.setenv("SVE_ARCHIVE_STORE_ID", store.store_id)
+    monkeypatch.setenv("SVE_ARCHIVE_BACKUP_ROOT", str(tmp_path / "backup"))
+    monkeypatch.setenv("SVE_ARCHIVE_RESTORE_ROOT", str(tmp_path / "restore"))
+
+    def temporary_writer(
+        settings: Settings, manifest: Manifest, lock: ExclusiveLock
+    ) -> RefreshWriter:
+        assert settings.archive_restore_root is not None
+        return RefreshWriter(
+            store,
+            manifest,
+            lock,
+            tmp_path / "backup",
+            restore_root=settings.archive_restore_root,
+            require_separate_device=False,
+        )
+
+    monkeypatch.setattr(cli, "_refresh_writer", temporary_writer)
+    result = CliRunner().invoke(
+        cli.app,
+        [
+            "archive",
+            "acknowledge-gap",
+            URL,
+            "--expected-hash",
+            "sha256:" + sha256(b"synthetic-A"),
+            "--reason",
+            "independent backups checked",
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert "history remains incomplete" in result.output
+    assert len(list((store.root / "history-gaps").glob("*.json"))) == 1
+    assert len(list((tmp_path / "backup/history-gaps").glob("*.json"))) == 1
+
+
+def test_gap_cannot_discard_unreferenced_resource_or_accept_empty_reason(
+    writer: RefreshWriter, store: ArchiveStore
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    result = ordinary.write(fetched(), request_id=start(writer._manifest))
+    (store.data_root / PATH).unlink()
+    with pytest.raises(ArchiveError, match="operator reason"):
+        writer.acknowledge_gap(URL, "sha256:" + result.resource.sha256, "  ")
+    with pytest.raises(ArchiveError, match="does not match"):
+        writer.acknowledge_gap(URL, "sha256:" + sha256(b"synthetic-X"), "operator")
+    other = replace(
+        result.resource,
+        url="https://example.invalid/unreferenced",
+        path=PurePosixPath("raw/unreferenced.zst"),
+    )
+    with writer._manifest.transaction():
+        writer._manifest.resources.put(other)
+    with pytest.raises(ArchiveError, match="persistent manifest reference"):
+        writer.acknowledge_gap(other.url, "sha256:" + other.sha256, "operator")
+
+
+@pytest.mark.parametrize("location", ["latest", "blob"])
+def test_found_old_bytes_override_a_previously_acknowledged_gap(
+    writer: RefreshWriter, store: ArchiveStore, location: str
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    target = store.data_root / PATH
+    target.unlink()
+    writer.acknowledge_gap(
+        URL, "sha256:" + sha256(b"synthetic-A"), "independent backups checked"
+    )
+    if location == "latest":
+        target.write_bytes(compress(b"synthetic-A"))
+    else:
+        blob = store.root / archive._blob_path("sha256:" + sha256(b"synthetic-A"))
+        blob.parent.mkdir(parents=True, exist_ok=True)
+        blob.write_bytes(b"synthetic-A")
+    write(writer, fetched(b"synthetic-B"))
+    writer.checkpoint()
+    assert len(list((store.root / "versions").glob("*.json"))) == 2
+    writer._lock.__exit__(None, None, None)
+    result = seal_batch(store)
+    assert result.inventory.history_gaps == []
+    assert (
+        writer.backup_root / archive._blob_path("sha256:" + sha256(b"synthetic-A"))
+    ).read_bytes() == b"synthetic-A"
+
+
+def test_recovery_uses_actual_old_encoding_after_a_metadata_only_rewrite(
+    writer: RefreshWriter, store: ArchiveStore, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    ordinary = Writer(store.data_root, writer._manifest)
+    ordinary.write(fetched(), request_id=start(writer._manifest))
+    monkeypatch.setattr(refresh, "compress", lambda raw: compress(raw) + compress(b""))
+    writer.write(fetched(), request_id=start(writer._manifest), rewrite=True)
+    rewritten = writer._manifest.resources.get(URL)
+    assert rewritten is not None
+    assert rewritten.stored_bytes > len(compress(b"synthetic-A"))
+    interrupt_before_commit(writer, monkeypatch)
+    monkeypatch.setattr(
+        refresh, "compress", lambda raw: compress(raw) + b"codec-changed"
+    )
+    assert writer.recover() == 1
+    assert writer.read(URL) == b"synthetic-A"
+    assert writer._manifest.resources.get(URL) == rewritten

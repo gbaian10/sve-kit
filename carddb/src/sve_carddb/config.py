@@ -28,6 +28,7 @@ class Settings(BaseSettings):
     archive_root: Path | None = None
     archive_store_id: str | None = None
     archive_backup_root: Path | None = None
+    archive_restore_root: Path | None = None
     extra_roots: Annotated[tuple[Path, ...], NoDecode] = ()
     """`SVE_EXTRA_ROOTS`: absolute paths, joined by `os.pathsep`, that symlinks
     under the data root may point into. Only `manifest check` reads through them."""
@@ -39,7 +40,7 @@ class Settings(BaseSettings):
             value = [part for part in value.split(os.pathsep) if part]
         return value
 
-    @field_validator("archive_root", "archive_backup_root")
+    @field_validator("archive_root", "archive_backup_root", "archive_restore_root")
     @classmethod
     def _absolute_archive_path(cls, value: Path | None) -> Path | None:
         if value is not None and not value.is_absolute():

@@ -907,7 +907,10 @@ def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
     batch = stage / "batch"
     _mkdir_safe(batch)
     final_db = stage / "final.sqlite"
-    _install_link(final_db, batch / "manifest.sqlite")
+    _install_link(
+        store.root / "manifests" / f"{_hex(manifest_sha)}.sqlite",
+        batch / "manifest.sqlite",
+    )
     gaps = [
         Missing(url=url, expected_raw_sha256="sha256:" + raw, reason="missing_history")
         for url, raw in history
