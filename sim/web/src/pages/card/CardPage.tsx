@@ -6,6 +6,14 @@ import type { Row } from "../../data"
 import { usePrefs } from "../../settings"
 import { PageTitle } from "../PageTitle"
 
+function cardNoColumns(cardNo: string): number {
+  // Symbols such as Ⓢ can use wide fallback glyphs despite the monospaced Latin digits.
+  return Array.from(cardNo).reduce(
+    (width, character) => width + (character.charCodeAt(0) <= 0x7f ? 1 : 2),
+    0,
+  )
+}
+
 export function CardPage() {
   const { t } = useTranslation()
   const { cardNo, intId } = useParams()
@@ -52,7 +60,7 @@ export function CardPage() {
                 <ul
                   className="grid gap-x-3 gap-y-1 font-mono text-14"
                   style={{
-                    gridTemplateColumns: `repeat(auto-fill, ${String(Math.max(...undated.map((cardNo) => Array.from(cardNo).length)))}ch)`,
+                    gridTemplateColumns: `repeat(auto-fill, ${String(Math.max(...undated.map(cardNoColumns)))}ch)`,
                   }}
                 >
                   {undated.map((cardNo) => (

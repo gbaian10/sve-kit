@@ -8,7 +8,7 @@ const state = vi.hoisted(() => ({
   available: false,
   current: false,
   crossRegion: false,
-  undated: ["PR-SYNTHETIC"],
+  undated: [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }],
   wording: vi.fn(),
 }))
 vi.mock("../../app/snapshot", () => {
@@ -36,12 +36,15 @@ vi.mock("../../app/snapshot", () => {
                     ? "latest_known_release"
                     : "candidates",
               },
-              undated_printing_ids: state.undated,
+              undated_printing_ids: state.undated.map((printing) => printing.id),
             }
           },
           displayRevision: () => (state.available ? { name_unit_id: "t:synthetic" } : undefined),
           textUnit: () => ({ text: "Synthetic presentation name" }),
-          printing: (id: string) => ({ card_no: id }),
+          printing: (id: string) => {
+            const printing = state.undated.find((printing) => printing.id === id)
+            return printing ? { card_no: printing.cardNo } : undefined
+          },
         },
       },
     }),
@@ -52,7 +55,7 @@ beforeEach(() => {
   state.available = false
   state.current = false
   state.crossRegion = false
-  state.undated = ["PR-SYNTHETIC"]
+  state.undated = [{ id: "p:undated", cardNo: "PR-SYNTHETIC" }]
   state.wording.mockClear()
 })
 
@@ -74,6 +77,7 @@ describe("pending wording on the card page", () => {
       expect(section).toHaveTextContent("Synthetic presentation name")
       expect(screen.getByText(new RegExp(provisional))).toBeVisible()
       expect(screen.getByText("PR-SYNTHETIC")).toHaveClass("whitespace-nowrap")
+      expect(screen.queryByText("p:undated")).not.toBeInTheDocument()
     },
   )
   it.each([
@@ -102,7 +106,12 @@ describe("pending wording on the card page", () => {
   it.each(["zh-TW", "ja", "en"] as const)(
     "uses equal grid tracks sized by the longest card number in %s",
     async (language) => {
-      state.undated = ["BP01-002a", "BP01-021S", "BP01-01", "PR-SYNTHETIC"]
+      state.undated = [
+        { id: "p:suffix-a", cardNo: "BP01-002a" },
+        { id: "p:suffix-s", cardNo: "BP01-021S" },
+        { id: "p:short", cardNo: "BP01-01" },
+        { id: "p:long", cardNo: "PR-SYNTHETIC" },
+      ]
       await renderRoutes([{ path: "/cards/:cardNo", Component: CardPage }], {
         initialEntries: ["/cards/BP-SYNTHETIC"],
         language,
@@ -110,10 +119,34 @@ describe("pending wording on the card page", () => {
       const grid = screen.getByRole("list")
       expect(grid).toHaveClass("grid", "font-mono")
       expect(grid).toHaveStyle({ gridTemplateColumns: "repeat(auto-fill, 12ch)" })
-      expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(state.undated)
+      expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(
+        state.undated.map((printing) => printing.cardNo),
+      )
       for (const item of screen.getAllByRole("listitem")) {
         expect(item).toHaveClass("text-left", "whitespace-nowrap")
       }
+    },
+  )
+  it.each(["zh-TW", "ja", "en"] as const)(
+    "reserves two columns for wide card-number symbols in %s",
+    async (language) => {
+      state.undated = [
+        { id: "p:ascii", cardNo: "BP01-002a" },
+        { id: "p:wide", cardNo: "BP01-021Ⓢ" },
+        { id: "p:short", cardNo: "BP01-01" },
+      ]
+      await renderRoutes([{ path: "/cards/:cardNo", Component: CardPage }], {
+        initialEntries: ["/cards/BP-SYNTHETIC"],
+        language,
+      })
+      expect(screen.getByRole("list")).toHaveStyle({
+        gridTemplateColumns: "repeat(auto-fill, 10ch)",
+      })
+      expect(screen.getAllByRole("listitem").map((item) => item.textContent)).toEqual(
+        state.undated.map((printing) => printing.cardNo),
+      )
+      expect(screen.getByText("BP01-021Ⓢ")).toHaveClass("text-left", "whitespace-nowrap")
+      expect(screen.queryByText("p:wide")).not.toBeInTheDocument()
     },
   )
   it.each(["/cards/BP-SYNTHETIC", "/p/42"])(
