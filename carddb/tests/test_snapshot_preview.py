@@ -371,11 +371,12 @@ def test_review_joins_follow_filtered_primary_keys() -> None:
             populate(db)
             db.insert(
                 "decision",
-                db.rows("decision")[0].values | {"id": "pending", "state": "proposed"},
+                dict(db.rows("decision")[0].values)
+                | {"id": "pending", "state": "proposed"},
             )
             db.insert(
                 "digital_link",
-                db.rows("digital_link")[0].values
+                dict(db.rows("digital_link")[0].values)
                 | {"id": "a-excluded", "decision_id": "pending"},
             )
         source = Source(db)
