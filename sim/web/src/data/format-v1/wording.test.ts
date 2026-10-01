@@ -115,6 +115,68 @@ describe("pending wording relationships", () => {
     delete view["face"]?.[0]?.["wording"]
     validateWording(view)
   })
+  it.each(["unknown", "day"])(
+    "uses the printing's own %s precision over product dates",
+    (precision) => {
+      const view = pending()
+      row(view, "printing_product", 1)["date_precision"] = precision
+      row(view, "printing_product", 1)["available_on"] = precision === "day" ? "2026-03-01" : null
+      if (precision === "unknown") {
+        wording(view)["undated_printing_ids"] = ["p:b"]
+        display(view)["revision_id"] = "r:old"
+      } else row(view, "product", 1)["date_precision"] = "unknown"
+      validateWording(view)
+    },
+  )
+  it("requires every inclusion date to be a complete day", () => {
+    const view = pending()
+    view["printing_product"]?.push({
+      printing_id: "p:b",
+      product_id: "prod:a",
+      available_on: "2026-03",
+      date_precision: "month",
+    })
+    wording(view)["undated_printing_ids"] = ["p:b"]
+    display(view)["revision_id"] = "r:old"
+    validateWording(view)
+  })
+  it("uses the earliest complete day across all inclusions of the same printing", () => {
+    const view = pending()
+    view["printing_product"]?.push({
+      printing_id: "p:a",
+      product_id: "prod:b",
+      available_on: "2026-03-01",
+      date_precision: "day",
+    })
+    validateWording(view)
+  })
+  it.each(["effect_unit_id", "sections"])(
+    "rejects different %s on the same latest day",
+    (field) => {
+      const view = pending()
+      row(view, "product")["released_on"] = "2026-02-01"
+      row(view, "face_revision")["effect_unit_id"] = "t:same"
+      row(view, "face_revision", 1)["effect_unit_id"] = "t:same"
+      row(view, "face_revision")[field] =
+        field === "sections" ? [{ text_unit_id: "t:old" }] : "t:old"
+      row(view, "face_revision", 1)[field] =
+        field === "sections" ? [{ text_unit_id: "t:new" }] : "t:new"
+      expect(rejection(view)).toBe("wording-latest-candidate")
+    },
+  )
+  it("rejects a null observation alongside an available observation on the latest day", () => {
+    const view = pending()
+    row(view, "product")["released_on"] = "2026-02-01"
+    observation(view, 0)["revision_id"] = null
+    candidate(view, 0)["revision_id"] = null
+    expect(rejection(view)).toBe("wording-latest-candidate")
+  })
+  it("rejects an extra pending region while all physical regions already have current", () => {
+    const view = pending()
+    row(view, "face")["current"] = [{ region: "jp", revision_id: "r:old" }]
+    wording(view)["region"] = "en"
+    expect(rejection(view)).toBe("wording-region-coverage")
+  })
   it.each([
     [
       "missing day",

@@ -30,6 +30,7 @@ export interface CardSummary {
   readonly cost: number | null
   readonly attack: number | null
   readonly defense: number | null
+  readonly wordingPending?: boolean
 }
 
 export interface Catalog {
@@ -168,6 +169,7 @@ export function createCatalog(snapshot: LoadedSnapshot): Catalog {
           cost: nullableInteger(revision?.["cost"]),
           attack: nullableInteger(revision?.["attack"]),
           defense: nullableInteger(revision?.["defense"]),
+          wordingPending: pending !== undefined,
         })
       }
     }

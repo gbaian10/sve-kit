@@ -23,7 +23,9 @@ export function CardPage() {
     <>
       <PageTitle>
         {t("pages.card")}
-        <span className="ml-2 font-mono text-16 text-text-2">{cardNo ?? intId}</span>
+        <span className="ml-2 font-mono text-16 whitespace-nowrap text-text-2">
+          {cardNo ?? intId}
+        </span>
       </PageTitle>
       {faces.map((face) => {
         const faceId = face["id"] as string
@@ -38,16 +40,23 @@ export function CardPage() {
         )
         return (
           <section key={faceId} className="mt-4 space-y-2" aria-label={t("card.wordingPending")}>
-            <p>{typeof name === "string" ? name : t("card.candidatesLoading")}</p>
-            <p>
-              {(wording["display"] as Row)["basis"] === "current"
-                ? t("card.wordingPending")
-                : revision
-                  ? t("card.provisionalWording")
-                  : t("card.candidatesLoading")}
-            </p>
+            <h2 className="text-14 font-semibold">{t("card.wordingPending")}</h2>
+            {typeof name === "string" && <p>{name}</p>}
+            {(wording["display"] as Row)["basis"] === "latest_known_release" && revision && (
+              <p>{t("card.provisionalWording")}</p>
+            )}
+            {!revision && <p>{t("card.candidatesUnselected")}</p>}
             {undated.length > 0 && (
-              <p>{t("card.undatedPrintings", { cardNos: undated.join(", ") })}</p>
+              <div className="flex flex-wrap gap-x-2 gap-y-1">
+                <span>{t("card.undatedPrintings")}</span>
+                <ul className="flex flex-wrap gap-x-2 gap-y-1">
+                  {undated.map((cardNo) => (
+                    <li key={cardNo} className="font-mono text-14 whitespace-nowrap">
+                      {cardNo}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </section>
         )

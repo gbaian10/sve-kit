@@ -106,7 +106,9 @@ describe("pending display in the list", () => {
           row["id"] === "f:bp01-001"
             ? {
                 ...row,
-                current: [],
+                current: (row["current"] as { region: string }[]).filter(
+                  (entry) => entry.region !== "jp",
+                ),
                 wording: [
                   {
                     region: "jp",
@@ -135,6 +137,10 @@ describe("pending display in the list", () => {
     expect(summary).toBeDefined()
     expect(summary?.name.original.text).toBe(available ? "試作の見習い兵" : "BP01-001")
     expect(summary?.cost).toBe(available ? 1 : null)
+    expect(summary?.wordingPending).toBe(true)
+    expect(summary?.name.original.lang).toBe("ja")
+    expect(pending.index.wording("f:bp01-001", "en")).toBeUndefined()
+    expect(pending.summary("p:bp01-001-en")?.wordingPending).toBe(false)
     expect(
       pending.results(DEFAULT_QUERY, "jp").some((item) => item.printingId === "p:bp01-001"),
     ).toBe(true)
@@ -143,5 +149,28 @@ describe("pending display in the list", () => {
     const revision = catalog.index.currentRevision("f:bp01-001", "jp")
     expect(catalog.index.displayRevision("f:bp01-001", "jp")).toEqual(revision)
     expect(catalog.index.displayRevision("f:nope", "jp")).toBeUndefined()
+  })
+  it("keeps an English card-number fallback tagged as English", () => {
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) =>
+          row["id"] === "f:bp01-001"
+            ? {
+                ...row,
+                current: (row["current"] as { region: string }[]).filter(
+                  (entry) => entry.region !== "en",
+                ),
+                wording: [{ region: "en", display: { revision_id: null, basis: "candidates" } }],
+              }
+            : row,
+        ),
+      })),
+    }
+    expect(createCatalog(revised).summary("p:bp01-001-en")?.name.original).toEqual({
+      lang: "en",
+      text: "BP01EN-001",
+    })
   })
 })

@@ -90,7 +90,9 @@ function CardCell({
             >
               {cell.name.primary.text}
             </span>
-            <span className="shrink-0 text-11 text-text-3 tabular-nums">{cell.summary.cardNo}</span>
+            <span className="shrink-0 text-11 whitespace-nowrap text-text-3 tabular-nums">
+              {cell.summary.cardNo}
+            </span>
           </span>
           {cell.name.secondary && (
             <span lang={cell.name.secondary.lang} className="truncate text-11 text-text-3">
@@ -99,6 +101,11 @@ function CardCell({
           )}
           {cell.name.missingTranslation && (
             <span className="truncate text-11 text-text-3">{t("card.noTranslation")}</span>
+          )}
+          {cell.summary.wordingPending && (
+            <span className="mt-1 self-start rounded-control border border-border-strong px-1.5 py-0.5 text-11 text-text-2">
+              {t("card.wordingPending")}
+            </span>
           )}
         </span>
       </a>
