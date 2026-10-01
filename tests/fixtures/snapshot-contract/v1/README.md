@@ -21,3 +21,7 @@ Shared negative cases cover calendar/time limits, ASCII numeric syntax, URI
 encoding, undeclared or disabled parameters, and inconsistent hint declarations.
 An optional `error` fragment checks the intended Python failure; other readers
 must reject for the same reason without copying Python exception wording.
+
+The golden also contains a product with a null type. Its wire tuple and logical
+object are independently specified; this exercises the candidate nullable product
+contract without relaxing the authored manual product input.

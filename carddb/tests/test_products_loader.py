@@ -450,6 +450,7 @@ def test_global_products_and_inclusions_are_typed_before_projection(
         ("id", 1),
         ("region", "cn"),
         ("product_type", "Pack"),
+        ("product_type", None),
         ("name", {"lang": "ja", "text": ""}),
         ("released_on", "2026-02-30"),
         ("released_on", "2026-01-01"),
