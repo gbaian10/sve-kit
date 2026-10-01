@@ -341,7 +341,7 @@ record = {
     "sequence": 1, "previous": None, "registry_basis": basis,
     "review_context": {
         "context": {"program_revision": "b" * 40,
-                    "dependencies": [{"name": "uv.lock", "sha256": "sha256:" + "c" * 64}],
+                    "dependencies": [{"name": "carddb/uv.lock", "sha256": "sha256:" + "c" * 64}],
                     "configuration": canonical({"registry": basis,
                         "observation_recipe": "registry-observation-v1"}).decode("utf-8")},
         "source_batches": [{"store_id": "example", "batch_id": "sha256:" + "7" * 64}]},
@@ -378,9 +378,9 @@ print(json.dumps({"old_record": old, "shard": shard, "index": index},
 | --- | --- |
 | old record | `eb2e777e37086e85161fdcf71f90ce6ae30a2705c283f9daa6b64fb63f33d10e` |
 | new record | `b5e9034517d9fd97a48fa3c44482c91dc8c761aa730a276dd70cddfb24d21995` |
-| 完整 transition 成員 | `482d7b98a4bbe67d4237e167ea396c5d2198f09b65e805472f889e26bbc3d4cd` |
-| membership（亦為 decision.id 的 `d:` 後綴） | `c55a8be571342ddbb31ab349f50cf9c3efdd54f376b10c16a51378855a807b0f` |
-| 完整 shard（index.includes 的值） | `2744177c0a04e22db2b1124c62bf088d9efe27da86625ec4df7166a33f9d8589` |
+| 完整 transition 成員 | `99eff6ebf528bbda88624461f10f7920f686013901247bcd389f6146b993eb57` |
+| membership（亦為 decision.id 的 `d:` 後綴） | `5f98b2b63b67f2c7ce756d31883ac1813b9d1cab6c5189027f4870890001af35` |
+| 完整 shard（index.includes 的值） | `583a9737db97404eef0fa42cb90bccad6cc1574efd1f248bf4169e515715208b` |
 
 此例的 old_record 是重建測試前件，不寫入新分片；舊決定與原 registry 仍需存在於被釘住的輸入。
 下一次新增版次時 sequence=2，previous 釘第一筆 record hash／decision，update.before 指第一筆
@@ -475,11 +475,11 @@ print(json.dumps({"apply": apply_shard, "revert": revert_shard, "index": revert_
 
 | 輸入 | SHA-256（省略 `sha256:`） |
 | --- | --- |
-| apply record | `51fdb4f4772fe348c726d37de2a3b69733b2c8f11355e404dc2385ba06ae6907` |
-| apply shard | `dfbaa236078c198d1dfee8b587b15ae2c8757fd33f455a426b662beecab1600b` |
-| revert record | `d5e17d6c5a6b72e2c2efebb62636348e5dade0e877863269bb2c740516e2c420` |
-| revert membership（新 decision.id 後綴） | `463907fb3a4bf74563a86611b04115e6a56bef25bdcb57738e765cdced2046ef` |
-| revert shard | `2f0e2d87a5c0b1d305cbcc71acdeba16181dfb254c2697344148c99e3e1837cf` |
+| apply record | `c9a7621eb744aea49879a1adcdad34604c2b59402d7d320982b4e3e7d54568f8` |
+| apply shard | `f78e35625b10d522fe9c794f365e8dba8480f82b83ad9edbdb254b07eacd29b3` |
+| revert record | `46d0732fb4ab9b6cf1235845e4cfc309fc2337d0b39055e364831b91ef22c40b` |
+| revert membership（新 decision.id 後綴） | `66d78dfb50a9da9720b92215b75f49c73fa0b1c3b9bc89cbca1874c716df5b26` |
+| revert shard | `3d559ba13da6714bc0d05df51b86f631f70a342e0759732cbd8df3c0e0e1f70b` |
 
 路由有變動時的合成預期另列如下；O／N 均代表同一 printing 的已驗證合法入口，實作測試須提供
 相應已採納路由證據，不能靠此示意修改 card_no。每列都以完整 routes.before／after 參與成員 hash。
