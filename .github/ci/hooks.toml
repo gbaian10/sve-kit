@@ -65,12 +65,16 @@ job = "python"
 
 [hooks.pytest]
 job = "python"
+direct = true
 
 [hooks.pyright]
 job = "none"
 reason = "Optional local check run by hand; mypy strict is the CI gate and pyright needs a ~200 MB Node.js runtime."
 
 [hooks.mypy]
+job = "python"
+
+[hooks.mypy-ci]
 job = "python"
 
 [hooks.mypy-schema-er]
@@ -84,6 +88,7 @@ job = "rust"
 
 [hooks.cargo-test]
 job = "rust"
+direct = true
 
 [hooks.cargo-machete]
 job = "rust"
@@ -95,7 +100,7 @@ job = "rust"
 job = "none"
 reason = "Manual-stage mutation test; far too slow for CI."
 
-# The web job runs `bun run check` (package.json scripts) instead of these hooks; they cover the same checks.
+# The web job calls the same package.json scripts in separate steps.
 [hooks.web-prettier]
 job = "web"
 

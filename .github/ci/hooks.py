@@ -44,6 +44,7 @@ class Owner:
 
     job: str
     reason: str
+    direct: bool = False
 
 
 def load_config() -> dict[str, object]:
@@ -70,9 +71,13 @@ def configured_hooks(config: dict[str, object]) -> list[Hook]:
 def owners() -> dict[str, Owner]:
     """Return the CI job (and reason) that owns each hook."""
     table = tomllib.loads((ROOT / ".github/ci/hooks.toml").read_text())
-    hooks = cast("dict[str, dict[str, str]]", table["hooks"])
+    hooks = cast("dict[str, dict[str, object]]", table["hooks"])
     return {
-        hook: Owner(job=entry["job"], reason=entry.get("reason", "").strip())
+        hook: Owner(
+            job=str(entry["job"]),
+            reason=str(entry.get("reason", "")).strip(),
+            direct=bool(entry.get("direct", False)),
+        )
         for hook, entry in hooks.items()
     }
 
@@ -153,7 +158,11 @@ def main(argv: list[str]) -> int:
             sys.stdout.write(" ".join(JOB_STAGES[job]) + "\n")
             return 0
         case ["skip", job] if job in JOBS - {"none"}:
-            skipped = (hook.id for hook in hooks if owned[hook.id].job != job)
+            skipped = (
+                hook.id
+                for hook in hooks
+                if owned[hook.id].job != job or owned[hook.id].direct
+            )
             sys.stdout.write(",".join(skipped) + "\n")
             return 0
         case _:
