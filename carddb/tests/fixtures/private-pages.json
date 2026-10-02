@@ -1,0 +1,7242 @@
+{
+  "version": 1,
+  "commit": "309b766885d49faff9db80f5b97cd56d8601c55b",
+  "cases": [
+    {
+      "id": "F01",
+      "path": "fixtures/carddb/official_en/card_BP01-001EN.html",
+      "sha256": "5d53ee4b4a1820a0fa086aca2cb2f522b3ec5212d2b2db2fa37dbb2c02edbda8",
+      "parser": "en-card",
+      "arguments": {
+        "number": "BP01-001EN"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "995ff7a7ea419cb91c9a3e1ced6d7cb3eb41d20e51ee52bd45fe6234c769e8d9"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "02778015944d6fb464044d6c649018a4f12529ce9067854a49a871e9c268dff8"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "f817bd5f28ef2e5e35a2fa2f681090cc13c298eeb4853c72abb1ff9757600837"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "7f13f05b4b914a59fa6f292f0df269594935d8ed419b97673405dba09556aa7c"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "995ff7a7ea419cb91c9a3e1ced6d7cb3eb41d20e51ee52bd45fe6234c769e8d9"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "02778015944d6fb464044d6c649018a4f12529ce9067854a49a871e9c268dff8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Format"
+          ],
+          "kind": "text",
+          "expected": "2b505597daa736f13c2910c260e8deb1af3b20ffe375eb5e01a003e92f541db9"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Class"
+          ],
+          "kind": "text",
+          "expected": "448db8ea296f4446c8b5835ed9714cf7bd6638923450b09acecd21ffdbe73e9b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Card Type"
+          ],
+          "kind": "text",
+          "expected": "9d949fae9fc7f0eda67e7e657983ec1f99e376190104244a53fc0f250724b14e"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Trait"
+          ],
+          "kind": "text",
+          "expected": "4671cee279d8ca0ba109deb1224d7e1749737c186043d86d19a8ca1ade8916a0"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Rarity"
+          ],
+          "kind": "text",
+          "expected": "c80b041f5d1d11574f40bd79c2ea8f64cfc47a49c6b8846abed3c294931a7946"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Card Set"
+          ],
+          "kind": "text",
+          "expected": "fc7465d72694cab188f9f72623a2e96a30f1dfb1359ae07e91df0deecb89c4ee"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats",
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "2c624232cdd221771294dfbb310aca000a0df6ac8b66b696d90ef06fdefb64a3"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats",
+            "power"
+          ],
+          "kind": "text",
+          "expected": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats",
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "7902699be42c8a8e46fbbb4501726517e86b22c56a189f7625a6da49081b2451"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "f0249e7e47a898be4f6424368c8f629aa4dcdad14a0df077b5325120d2d8b424"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "raw_text"
+          ],
+          "kind": "text",
+          "expected": "f0249e7e47a898be4f6424368c8f629aa4dcdad14a0df077b5325120d2d8b424"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "speech"
+          ],
+          "kind": "text",
+          "expected": "0aa986d93e20bd618f0ba9424e2dd6d244c8c9d40bb87dfb9c6780e0141d0586"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "11b92f3951e4bdca87dd946685046cd9e3d9df5223e3f41af61a0640cdf72a1e"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "7f13f05b4b914a59fa6f292f0df269594935d8ed419b97673405dba09556aa7c"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "4671cee279d8ca0ba109deb1224d7e1749737c186043d86d19a8ca1ade8916a0"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "4671cee279d8ca0ba109deb1224d7e1749737c186043d86d19a8ca1ade8916a0"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F02",
+      "path": "fixtures/carddb/official_en/card_BP18-SP01EN.html",
+      "sha256": "074838d08002c6e936105be1ae9600a5ab43276810a1ad9faf3a5d8fe1ce0302",
+      "parser": "en-card",
+      "arguments": {
+        "number": "BP18-SP01EN"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "ebed1eb2139e17c92f16c34685bf83078d5fab39a3feeaa39a7046f08339b438"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "bf4087f7962c7684d1779816ed7ce5bf4744ba71b53d4551f2da4c1102d6a70d"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "973b4a041c65777e402ab97ac235bd57faee14f145f0e98703538ba79f99ac1c"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "99a973689a400eb2e86e3bf893f4f43ffe3b7366471b519b2e40c765dd25799f"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "ebed1eb2139e17c92f16c34685bf83078d5fab39a3feeaa39a7046f08339b438"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "bf4087f7962c7684d1779816ed7ce5bf4744ba71b53d4551f2da4c1102d6a70d"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Format"
+          ],
+          "kind": "text",
+          "expected": "2b505597daa736f13c2910c260e8deb1af3b20ffe375eb5e01a003e92f541db9"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Class"
+          ],
+          "kind": "text",
+          "expected": "8a73efc49fbdbf9edff79f18c2bbc614d874da781d289b728da62a2454a4c2ba"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Card Type"
+          ],
+          "kind": "text",
+          "expected": "9e8f5b7b02af8a606675c0dcfcd6f32651e16406dc983c03adb05fdb40d93dc8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Trait"
+          ],
+          "kind": "text",
+          "expected": "0b64af5b00b0d967749a450312adaa5b7eb5542a6f1e5f256e8d62f4b314e607"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Rarity"
+          ],
+          "kind": "text",
+          "expected": "997c544f1be0a2dde15ce4e764321511ce9abdb34c7e7c661439e0382191a396"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "info",
+            "Card Set"
+          ],
+          "kind": "text",
+          "expected": "7ca5860e313bd78296a60c249db64ffd44734b50303ddd00f9411daade9d63ee"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats",
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "3973e022e93220f9212c18d0d0c543ae7c309e46640da93a4a0314de999f5112"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats",
+            "power"
+          ],
+          "kind": "text",
+          "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "stats",
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "b32715b71d3ce377f6c3bc6ec2bee6195af5f14d11e68a800e4dbc80e05123d1"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "raw_text"
+          ],
+          "kind": "text",
+          "expected": "b32715b71d3ce377f6c3bc6ec2bee6195af5f14d11e68a800e4dbc80e05123d1"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "speech"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "9b7d1679cf05cef55d9a2d9c85a25c59b7ee122af423902262c2380ff7f38dfd"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "99a973689a400eb2e86e3bf893f4f43ffe3b7366471b519b2e40c765dd25799f"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "0b64af5b00b0d967749a450312adaa5b7eb5542a6f1e5f256e8d62f4b314e607"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "ef177717b2d61a6ac74a239f5c3eae9634b65091e35031cebf5d18f0c17b55b4"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            1
+          ],
+          "kind": "text",
+          "expected": "d0b5bdaf83bc2cff421f80b73dd3b5750f7410304a72ad8d52c10847375cf7ec"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F03",
+      "path": "fixtures/carddb/official_en/list_BP01_1.html",
+      "sha256": "79f442afcfbaf18b2003b6dae7ebf2574cfc4e95459c5034b802f6bf92f6555c",
+      "parser": "sve-list-first",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers"
+          ],
+          "kind": "length",
+          "expected": 15
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            0
+          ],
+          "kind": "text",
+          "expected": "995ff7a7ea419cb91c9a3e1ced6d7cb3eb41d20e51ee52bd45fe6234c769e8d9"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            1
+          ],
+          "kind": "text",
+          "expected": "e291ddff5012e5f346023d84b1b41c074a7c59ca67729e38367467039ee9828e"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            2
+          ],
+          "kind": "text",
+          "expected": "908169b3c051da5bc95d2a29693f1ec56612c8aaf0e66bf5d52f1a10397b4462"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            3
+          ],
+          "kind": "text",
+          "expected": "443961311df01289ce5cca0fc1d11dd644e11ae26923518d825838b42fb49a29"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            4
+          ],
+          "kind": "text",
+          "expected": "ef553473d7cbb559cbcb983c0664d1e268e9d9a943f1693912547a83c0b252b1"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            5
+          ],
+          "kind": "text",
+          "expected": "0890f0f397a42f69b9358016587908447ca65b40094923fd0bc995246011d3ac"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            6
+          ],
+          "kind": "text",
+          "expected": "c745627e4ea279ff27671839c78c696b8fd468b48ebe8f488e83570d149d53c2"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            7
+          ],
+          "kind": "text",
+          "expected": "6f81b695b36eaaf4d419f54292ab732454d510f5f9f816ced1e7ea88fe59c7c1"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            8
+          ],
+          "kind": "text",
+          "expected": "9faf53831c68c613dd8e70fa6b31f7130bb2c39be510816720779413655ae3fe"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            9
+          ],
+          "kind": "text",
+          "expected": "c478443fa2a81ca18ca4d76c390de781c6265ea92a052bb55b5c58a90082b497"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            10
+          ],
+          "kind": "text",
+          "expected": "f465edb32e1acfe72d56615bdcea9de72740f7b5efb6c5b45962cd1a8e455f6e"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            11
+          ],
+          "kind": "text",
+          "expected": "13644c4bed05bba52cfebc5261e879e52ade0110b1cb6afaf9692a2afab87acf"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            12
+          ],
+          "kind": "text",
+          "expected": "f56583d6c88b096deee4fe49c9bf9b35ac3f528f20eacbbb921ab675ebbe843c"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            13
+          ],
+          "kind": "text",
+          "expected": "49f002c5a89c07db64eba7c8d21fb820182494311d9c7653b4d8b5d946c504cc"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            14
+          ],
+          "kind": "text",
+          "expected": "756de0a38f6a3aaa4393a7ec758892c70ec6b6d4b17435d463b0df1e7ec783f6"
+        },
+        {
+          "path": [
+            "page",
+            "max_page"
+          ],
+          "kind": "integer",
+          "expected": 19
+        },
+        {
+          "path": [
+            "page",
+            "total"
+          ],
+          "kind": "integer",
+          "expected": 273
+        }
+      ]
+    },
+    {
+      "id": "F04",
+      "path": "fixtures/carddb/official_en/list_BP01_19.html",
+      "sha256": "b070e0bd80366d38eb747f7bf48f2a1a6bd0b24282b91b9f9e209c562b7923a4",
+      "parser": "sve-list-more",
+      "arguments": {
+        "page": 19,
+        "max_page": 19,
+        "total": 273
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers"
+          ],
+          "kind": "length",
+          "expected": 3
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            0
+          ],
+          "kind": "text",
+          "expected": "5e996280769357e19e6bf62ad4ad3b5840f3b0bfb84bc67af1e512fb763adc08"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            1
+          ],
+          "kind": "text",
+          "expected": "e1cfa9af08f90f49236ef3aa19f3e04772ce71e9b280bb12e0eba2c03ed70f97"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            2
+          ],
+          "kind": "text",
+          "expected": "2e0b94c657a55dce73ceca0493b3a637f1f2d70b510f4e980d481b36e17eabdc"
+        },
+        {
+          "path": [
+            "page",
+            "max_page"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "page",
+            "total"
+          ],
+          "kind": "null"
+        }
+      ]
+    },
+    {
+      "id": "F05",
+      "path": "fixtures/carddb/official_en/list_BP01_2.html",
+      "sha256": "2b7e5cf85efdc12bd9d0fe66fdf8c95458a61753abdd1c0b2070123e5ce9b848",
+      "parser": "sve-list-more",
+      "arguments": {
+        "page": 2,
+        "max_page": 19,
+        "total": 273
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers"
+          ],
+          "kind": "length",
+          "expected": 15
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            0
+          ],
+          "kind": "text",
+          "expected": "6032f42667d442c04f05913d9eba1ab260af0618737fd463622a7e173cc874ed"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            1
+          ],
+          "kind": "text",
+          "expected": "ad895d10c925ca2834a7ca1812011573d2c24a7b0ee34836628935bf02670981"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            2
+          ],
+          "kind": "text",
+          "expected": "0426ca80f883b0a3048063ef09a2677fbdc1c229d3e5066326a42052cd310fe0"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            3
+          ],
+          "kind": "text",
+          "expected": "e9d2e2f033f50b5ffdfa9861e51dd8cddb4319c228c814adcfe2140afc23e1ae"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            4
+          ],
+          "kind": "text",
+          "expected": "b9661000d1e29ae65f82c8e45380cb851624826ca8a9f5cae7f64dc87c5a17ef"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            5
+          ],
+          "kind": "text",
+          "expected": "0f3ff5d069fea737f5b4295211dcd0a02d0a53093839301dca6c268d16637075"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            6
+          ],
+          "kind": "text",
+          "expected": "5ae337194ff52109815ee6dd714f9e2ed21d0eacc3a422d09d3abe55473e3af6"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            7
+          ],
+          "kind": "text",
+          "expected": "0c9cbfdd9ed982cf761682a439d0072973702c4e4b5a514d91bd09585d1b82b4"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            8
+          ],
+          "kind": "text",
+          "expected": "d7d941cf73d9fe3cf40eb6a9a943f1eceee2db3273a102d686b1e4da2441306d"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            9
+          ],
+          "kind": "text",
+          "expected": "a744e46acf9c063544eb1233be66c15d29921529418927afb9225f82982154c5"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            10
+          ],
+          "kind": "text",
+          "expected": "f0e3d1964f2240a920332321ef45a90aba0b6101f07ce97356bbf8f8aed29a68"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            11
+          ],
+          "kind": "text",
+          "expected": "a517cfacfe8b7fec8048522c11e53edfd80d9e00ffb88656da04b10a2c953399"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            12
+          ],
+          "kind": "text",
+          "expected": "73fbd2c51680af8c837b1e4ac0a86d009eb553b36d0505d42f6395be88e633a4"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            13
+          ],
+          "kind": "text",
+          "expected": "65385e90ebb268ea3c6a9d58755ddeb792ff9d8181ce1a6de5cca920eafa92b6"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            14
+          ],
+          "kind": "text",
+          "expected": "9a49fc555642442ee54ed42c232f8095f82c9f60d7c30ad539475fd54593ccf7"
+        },
+        {
+          "path": [
+            "page",
+            "max_page"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "page",
+            "total"
+          ],
+          "kind": "null"
+        }
+      ]
+    },
+    {
+      "id": "F06",
+      "path": "fixtures/carddb/official_en/sets.html",
+      "sha256": "f19fdcb1f23331f971ab39bc63b86e37fa45eb307dbc5b49f66e7dec7f7dd34b",
+      "parser": "sve-sets",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "sets"
+          ],
+          "kind": "length",
+          "expected": 50
+        },
+        {
+          "path": [
+            "sets",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            0,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "baea3e6d02f6dc419f6437e34ab9840366e7ed5180524436d8298659fd532692"
+        },
+        {
+          "path": [
+            "sets",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "77192a83866c7121402a9120d374e1852c91ce73965b309b07ff8eab0914141f"
+        },
+        {
+          "path": [
+            "sets",
+            1
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            1,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c32309ea9ada8d46e2d3ce24d76ebd886f141014dfcbe188df97dd1b96b9a6de"
+        },
+        {
+          "path": [
+            "sets",
+            1,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f5deb4e33d2855b2d48b459ea98e22ff3ca0bc66c462151b972b37c8b9d376c6"
+        },
+        {
+          "path": [
+            "sets",
+            2
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            2,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "8d7426ffc868e0690f8de5509c025806ceef66d2153ca9a9f7404e9e14a93868"
+        },
+        {
+          "path": [
+            "sets",
+            2,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "d1d6cb9c478c7a4d6d50b639dc08ab1d8f5c9a67da7df2b77e58adf73e02f02d"
+        },
+        {
+          "path": [
+            "sets",
+            3
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            3,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "1b7703b41d9395bbdea6462a70f925490b00f24dd8d31e4dcef0e0ece981e31a"
+        },
+        {
+          "path": [
+            "sets",
+            3,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7ca5860e313bd78296a60c249db64ffd44734b50303ddd00f9411daade9d63ee"
+        },
+        {
+          "path": [
+            "sets",
+            4
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            4,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "d02116063d0f362a54cf466707b031fecdbe74d62ee4f7ba91920129c5b40a4c"
+        },
+        {
+          "path": [
+            "sets",
+            4,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "1c121bdad4bc398742f67723568b5b9a1cb0950048945a8060ab89a4fcfeef8d"
+        },
+        {
+          "path": [
+            "sets",
+            5
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            5,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cd3f2b1c799fe4e75a8d2c4a659c6d657a13094ff0860f1d1acb0270a522ca7b"
+        },
+        {
+          "path": [
+            "sets",
+            5,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "346e65a535fd38bb89a1a27e55a664bdfea01a02bd4525aa22a5e7f8059ba501"
+        },
+        {
+          "path": [
+            "sets",
+            6
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            6,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "32541c18071048fae536c0ed29759ff99f52d9a7eaa25d38515f6595c7ed740f"
+        },
+        {
+          "path": [
+            "sets",
+            6,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "8b315c3e2944c8f556d362082d562f0f5a57ce52350703032bcf4b1ebcda3159"
+        },
+        {
+          "path": [
+            "sets",
+            7
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            7,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "62da3023d90e7cbeef118a78d6cf4620f8f68d06a952202f3c3a06e8875230c7"
+        },
+        {
+          "path": [
+            "sets",
+            7,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "ec7eb597b364aadf73ea643e36f27336789f342f68b387a5ff8a7415a5effe65"
+        },
+        {
+          "path": [
+            "sets",
+            8
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            8,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "765ea388fecd9a4e921c2436c749336d51d216d6ce3509a6b8fbd255cea543f6"
+        },
+        {
+          "path": [
+            "sets",
+            8,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "b13b914ffcdf0f2789942105326df125e3e71646f070b7afe74e3c68df69ba44"
+        },
+        {
+          "path": [
+            "sets",
+            9
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            9,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cbcc91fc1a2399d53afd3d00213cde5d5f47ac0e209be9de2c2426de994fa23c"
+        },
+        {
+          "path": [
+            "sets",
+            9,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "334624caf6977a1160e841bab50ca444efc0e4ce5c63a452e50811307ec7d0fa"
+        },
+        {
+          "path": [
+            "sets",
+            10
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            10,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9e9b959bd0a07faf0280f4e22e1909d0b31e6b0c51c3b71e1bb91a5d0b8569a7"
+        },
+        {
+          "path": [
+            "sets",
+            10,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "c3fa062ad6146f73b35db0f35e68acf25dc222eae59fce02f265da390172ee19"
+        },
+        {
+          "path": [
+            "sets",
+            11
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            11,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "97797f2adc99a6fef4073a375657472d9a03230a3a38956c6ff77659298cd455"
+        },
+        {
+          "path": [
+            "sets",
+            11,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "6999fd4ab9ff3cfb13441fe0dfd3294294fbecf2d8eaaef045569760d1f4ae78"
+        },
+        {
+          "path": [
+            "sets",
+            12
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            12,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "ee7725e62a0f3ac3ae19201e652e973dd96ded16d71ba3e9b09b2ef5f2a4fdfd"
+        },
+        {
+          "path": [
+            "sets",
+            12,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9cb5695661dc1653123ffc51bc0f7dab2577c8101c6a1e703206147d4dbf00f3"
+        },
+        {
+          "path": [
+            "sets",
+            13
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            13,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b3803ff13cae355c6c7dac0304d3bdeb8b3dad49ef1f7e14e2a528a2b27038af"
+        },
+        {
+          "path": [
+            "sets",
+            13,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f7d0a26a18ba29127c108d7af8219099457fe1122b01bcf95b8da7c0d779af32"
+        },
+        {
+          "path": [
+            "sets",
+            14
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            14,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9dd7d0f343be7199c6135a87d1839cd1bbf74829c9862bda7394bcac1630bbda"
+        },
+        {
+          "path": [
+            "sets",
+            14,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "5057ffe349006a31c274ec50761492715c8e8d45b9bcef63e87cc953a47cb511"
+        },
+        {
+          "path": [
+            "sets",
+            15
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            15,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "623deee4293740137be1e3184be68356dd185af16f6da09c7e8bb0b10dc9b7e8"
+        },
+        {
+          "path": [
+            "sets",
+            15,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "d91675cc6d067764eb82edd2bd5ac36aa5a3b99edcc02ea7a645e06db4abc684"
+        },
+        {
+          "path": [
+            "sets",
+            16
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            16,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b4205b75566871d2dc50c1cba6d96703401e1f25bddeb2074cdc59214e19dd6a"
+        },
+        {
+          "path": [
+            "sets",
+            16,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "e86353a3acbf0017cb213fc56ee95b4c34320d8d95c4215f6f3577b6fd18a9f3"
+        },
+        {
+          "path": [
+            "sets",
+            17
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            17,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "6c13c0f620f3162e3770cffa6a9fcc02881f17edbad6eb5db40d6bbb8d44f1c0"
+        },
+        {
+          "path": [
+            "sets",
+            17,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "5972734cda0688072a0c771a8afad8b04b5b3f12ed0f8320c630bb4ec539b1ae"
+        },
+        {
+          "path": [
+            "sets",
+            18
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            18,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "51fbdc98fbac782c48423a3e33ae8531a65009cc39c9f48b6c22ad289a7d7043"
+        },
+        {
+          "path": [
+            "sets",
+            18,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "16c94b6a58ab19f61418bc786f42b4bd26089fa2082d6a5df1142014e4258f3e"
+        },
+        {
+          "path": [
+            "sets",
+            19
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            19,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "43039bc1a3033e34709ae9cefeadefcacf9aadef27fd39f63c2b95dfd7a2006c"
+        },
+        {
+          "path": [
+            "sets",
+            19,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "4e38c05feceef736e7a0081cfe83af04968da2822700e612cffc9fe174678579"
+        },
+        {
+          "path": [
+            "sets",
+            20
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            20,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f8165b394722b85ec235421b9af348871f3bbb3ab9dcb14a836554062e0d0c64"
+        },
+        {
+          "path": [
+            "sets",
+            20,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "aaadd5fa95a99c628b1d7045eaa6038f0904ebb6b04ce480b2d756c0bcdbcec3"
+        },
+        {
+          "path": [
+            "sets",
+            21
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            21,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "ca8ea63c14d363629ea9adfed90f98c718fef4f3b2d91775e687d5cf043d7735"
+        },
+        {
+          "path": [
+            "sets",
+            21,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "e2ba6c63a85a0821e9aba04fbcc112c9d0dddf780ad4f3404ceb8d0cfe0b41f1"
+        },
+        {
+          "path": [
+            "sets",
+            22
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            22,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "ea06203458e29f09465929f3ccd433c21c0812cdcc69885ebe72450832609cc2"
+        },
+        {
+          "path": [
+            "sets",
+            22,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7ef3188db1b50b27407ad14b74a1902dd54813207a3ffadca8c5ad2d20817c13"
+        },
+        {
+          "path": [
+            "sets",
+            23
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            23,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "5f199ce48c1a009ef79e5b0d59e3ed175fff3585a23b650a7931025a9fc5456a"
+        },
+        {
+          "path": [
+            "sets",
+            23,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "eb9abe3e8f69e37dd3581a29ddb92f166db2af0e11cd6c9ab3d2cc432f20a6e8"
+        },
+        {
+          "path": [
+            "sets",
+            24
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            24,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f7d4d6bc0aeed5ef328c49b78003b0d77e0d637cc5b7e8124c69ba5d1c7e64b9"
+        },
+        {
+          "path": [
+            "sets",
+            24,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "0db90c78e239dc6fa40de3298456d87b3997064326b8f1229e76b319f99a5bed"
+        },
+        {
+          "path": [
+            "sets",
+            25
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            25,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b89152422b87a2e4596d6fa15eacf6a6ab8cb8dbf2476a6897a3640f5183882a"
+        },
+        {
+          "path": [
+            "sets",
+            25,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "5c8df8e1a3db369b869e7c9612bf328b7e4a5e33022d9daf11b15bfe3196213e"
+        },
+        {
+          "path": [
+            "sets",
+            26
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            26,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "849c0eb360e019eabbab050f98f1912482665ae90c59c5c42432d69de7d330fc"
+        },
+        {
+          "path": [
+            "sets",
+            26,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "b6f64a884042a2e7fb9272ed196c3039db1f3bf568ef83316d636fe886a24ebc"
+        },
+        {
+          "path": [
+            "sets",
+            27
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            27,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "931c1f8946b1c317ce39a0b990dbf25fc36a811810a41dbf552184f5c97b5a7b"
+        },
+        {
+          "path": [
+            "sets",
+            27,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7905664b332435fbc235177e71971bcf30ea4d6c5addcf4fdf491bd9acd3fa36"
+        },
+        {
+          "path": [
+            "sets",
+            28
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            28,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cdf3302d941fd9f193e8e9ea18054e4f3cd8d56695be66d687c7ea9609652060"
+        },
+        {
+          "path": [
+            "sets",
+            28,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "38fba4d9c5b56b645e37f7ce6ebb192acbdaef9240553c10670e94caa42d2617"
+        },
+        {
+          "path": [
+            "sets",
+            29
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            29,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cbe22d2a6109a996f6a13cda5666ce81dd6d2a486e310b3c640c6e8cabbab50e"
+        },
+        {
+          "path": [
+            "sets",
+            29,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "014291d417ff8da28e7e2692464c9a5250abff1eaf97cf174258e72f16f89ea3"
+        },
+        {
+          "path": [
+            "sets",
+            30
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            30,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "2daa508d62c3ef76a39d25c96a17b6fe16ceb9bf8a40f78caef7ffb5bdcc810b"
+        },
+        {
+          "path": [
+            "sets",
+            30,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "04e415d358c963fc56bc7a8c98095f23036a5db4d292850fd9b8609c82f243c3"
+        },
+        {
+          "path": [
+            "sets",
+            31
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            31,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "55386f21de01e0cf959239d8447756e5f90175fbd22a61f932f47cc2e1d66508"
+        },
+        {
+          "path": [
+            "sets",
+            31,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "568716909029abe73bcde3fa51fdb200d49e9c00ec50dd729cc741d53c151674"
+        },
+        {
+          "path": [
+            "sets",
+            32
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            32,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c55343210b1c40cdaaa0edb90c93d36028e6933333bad0ba688c3bc3f2f3a2a3"
+        },
+        {
+          "path": [
+            "sets",
+            32,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "cb16a4fcb4139b3a9b8dd2a8e9a935d590066d938773fc9d488f80b38f653c8d"
+        },
+        {
+          "path": [
+            "sets",
+            33
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            33,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "558971cc344659471200320c8effee7f985df56eb6be5baed55e00646127a77d"
+        },
+        {
+          "path": [
+            "sets",
+            33,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "4e3dd564033108c7371916857a29b99d5721410485b4f77b20db8c4376bf684b"
+        },
+        {
+          "path": [
+            "sets",
+            34
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            34,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "1cf9d4490aaa0a1f027929c9cc55089677fbffe43b455aebf00e088111a5e8d0"
+        },
+        {
+          "path": [
+            "sets",
+            34,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "2e2cb5282c2503a7f40f8f3c9b5c9ccd1bd072a28294e67dfbe9bb6441127f4b"
+        },
+        {
+          "path": [
+            "sets",
+            35
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            35,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b8c1079934c4661cf3466e3fa684c0d881e721dd5bf184161e5ab699fc258456"
+        },
+        {
+          "path": [
+            "sets",
+            35,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "4ae03b35b7382902127b98dd1028b5a85711420bbd675d9e12b98cf9f75d5e8c"
+        },
+        {
+          "path": [
+            "sets",
+            36
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            36,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "15fdbfa1b814ab55acca67cde32277cb844a1bce5cc04231da12a7409cbdaf64"
+        },
+        {
+          "path": [
+            "sets",
+            36,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "a54920df64bc7ada629b1030c83a6fc676c38f22e7d633fc61467a41cfc3b2c3"
+        },
+        {
+          "path": [
+            "sets",
+            37
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            37,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "e0486db4ae43489ef6239fd035309894a0afa703035998bb936833a18613d6e9"
+        },
+        {
+          "path": [
+            "sets",
+            37,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7b3adabd40789744a5af234e00e18c67d8d43f57a44bb67660c135c80440b8b6"
+        },
+        {
+          "path": [
+            "sets",
+            38
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            38,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f8d200eb920c244a55ec5033065a9c7231ebdbea3d78c811374aa5b98c5dfd39"
+        },
+        {
+          "path": [
+            "sets",
+            38,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "09a4b142c3f3f4b12602002d46ca08dcd0c8b67239adccbce9b395e27a9db500"
+        },
+        {
+          "path": [
+            "sets",
+            39
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            39,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "415cc8e8f40e4a05dd5f02a01a79b6fd5ef1e47acf0497c03b397ebd4f1e5755"
+        },
+        {
+          "path": [
+            "sets",
+            39,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "741ee0db0ae6f0560073502670f7efd60df8e6e1af97c78011979c55dc5b1aac"
+        },
+        {
+          "path": [
+            "sets",
+            40
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            40,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "1783a48301846aa3989dbb117068813d9f445beb8116c35f6bbf08cac1730a2e"
+        },
+        {
+          "path": [
+            "sets",
+            40,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "84fc6d22e139bccaeb4160c12e9d1e1697c61662d56e7d2a6411cbcd9e1bdaa9"
+        },
+        {
+          "path": [
+            "sets",
+            41
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            41,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c705a61d0877eeabd635977849075b78f37bf22f6a8f6f1b84fc4feb3c5e44b8"
+        },
+        {
+          "path": [
+            "sets",
+            41,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "fc7465d72694cab188f9f72623a2e96a30f1dfb1359ae07e91df0deecb89c4ee"
+        },
+        {
+          "path": [
+            "sets",
+            42
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            42,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "5b88734f261d144f9a91ab090759379f21c59b9bbe5da933bf69a9ac7f54a615"
+        },
+        {
+          "path": [
+            "sets",
+            42,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "8b31966cac7ef00bd695d6b8ea07d2d4ece84a2297124bb7f548c3ba5d3be0e4"
+        },
+        {
+          "path": [
+            "sets",
+            43
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            43,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "0c5ae90bb621e8130500cd5938dcc875b7bba986edc05c6acfd3ed6ae8be2887"
+        },
+        {
+          "path": [
+            "sets",
+            43,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f3236807e5fd9d80dc97542d0f43c37aae1b5fd4bf39c1231f52ebcdba99df76"
+        },
+        {
+          "path": [
+            "sets",
+            44
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            44,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "939e42d1eab1505aa69494809384859e5530d660622e4c96d90d9e49cbd98d7e"
+        },
+        {
+          "path": [
+            "sets",
+            44,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "77f3f33601f9fd97c30fcf4e97771ca27f8852c19973542b154848d0d3580a40"
+        },
+        {
+          "path": [
+            "sets",
+            45
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            45,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "bacfceb21525e405f4bc41cce1ed32f9b4061507acb15b845f501edbde5a2c56"
+        },
+        {
+          "path": [
+            "sets",
+            45,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "27ba64e7a30c43348fdd3a1ada47f3964171abefc0f28f9a7c7efbd5ee0c998a"
+        },
+        {
+          "path": [
+            "sets",
+            46
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            46,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "84ba810a88374ca5d6f58607c2e2f5e5a3cd4cb1f4546287cbcfa8c95668c483"
+        },
+        {
+          "path": [
+            "sets",
+            46,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "97d3349ec7efc220162582c3c276af2e37b7f706a4965714ba3f20b392a4cf60"
+        },
+        {
+          "path": [
+            "sets",
+            47
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            47,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9008cf5d88b248a587d443bbc2f2bbf138028ac0ddfadeab9c3ded4b72ab9b1d"
+        },
+        {
+          "path": [
+            "sets",
+            47,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "12176cee0fd2dd3112183338a1be830717d9cb829add96762dc2e6d1cb2e2b0b"
+        },
+        {
+          "path": [
+            "sets",
+            48
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            48,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "dc12059682295cf4a2ae4f42fc24606b970e038f1bc009daa47fc185b6147c31"
+        },
+        {
+          "path": [
+            "sets",
+            48,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "fa0d8aff6bd10f5cb9498666fb743f2000b686aab76fc79a7ed550f27b4a5dd3"
+        },
+        {
+          "path": [
+            "sets",
+            49
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            49,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c3972ccd735419073803fcacedfe2ea2c95f6c1df260354e9f83aa1befff1efb"
+        },
+        {
+          "path": [
+            "sets",
+            49,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "04b4e0a0e88114cdffe7cb9cb0e08f98ebf9a1236587c45a39f8ce6bcdbe87e7"
+        }
+      ]
+    },
+    {
+      "id": "F07",
+      "path": "fixtures/carddb/official_jp/card_BP01-003.html",
+      "sha256": "5ebd3d0c644ebacbd50f61d6cbb74135f373eb5816f7149fb3888900796049ff",
+      "parser": "jp-card",
+      "arguments": {
+        "number": "BP01-003"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "a194e73b3ec8cba723b0008c027672fb6822998cf1b8a310326db82f6ce1b2e1"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "c12a485970a4c7274421871f3da3640f8bc0f51c0f012cc5a673409c0e8058c3"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "ce1bbb435fbab08944c4c651d8b4bf1b79dae201946f864da154d3160f74a82b"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "a5d18b8a3280dbb9b6d5c53ac2dbeb0bc572450f500951dbd25f4e19703d3b0a"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "a194e73b3ec8cba723b0008c027672fb6822998cf1b8a310326db82f6ce1b2e1"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "c12a485970a4c7274421871f3da3640f8bc0f51c0f012cc5a673409c0e8058c3"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "916ba150c0487d6a1562b4667af22d231907b04a98949e1e4b7bf030db18be85"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "1af33841003e95ddd9528b6b65425abb83747124997e0ddeed516b250f977c18"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "f72c2e7033e3c256ea99ec7c1f131917366d79b052042fd00db866a572a57aa6"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "b870b7809747623def661ded7b0da0e52beddfc50235bbda65f1e8a34350ff7a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "product"
+          ],
+          "kind": "text",
+          "expected": "deadc20f3bd97a04701fb122a5ac8d2c03aea6984cc8b471d201f1a65368e03a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "3973e022e93220f9212c18d0d0c543ae7c309e46640da93a4a0314de999f5112"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "ef7e2de8437f7a8077e8664fe55fcc692073fc87864b7d5c9a1376e8d4abfa01"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "flavor"
+          ],
+          "kind": "text",
+          "expected": "8517ae6eecb2faa0c45dc1b4597cca6851da50ca5491869cfc8fde137d7e1e0c"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "ea6562db0a46d3a8d6587dbf1654f9e5e3960d87cf78ea3e93879466f6ddef81"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "a5d18b8a3280dbb9b6d5c53ac2dbeb0bc572450f500951dbd25f4e19703d3b0a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "f72c2e7033e3c256ea99ec7c1f131917366d79b052042fd00db866a572a57aa6"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "text",
+          "expected": "6c94a8e8326b35b8d33990dcc1d92e59728d71b1b2da8cfa549cfb699b5f93ce"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "449bb5d006162c34e01b001a8dcf7287b697f99c25eca748476677a1125b3835"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "9965c7c13f4df2ff1fe5b6be7e954dc7ddb543b7a5b57cb6e35e8bf55115517a"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "5d9ef68338d3cb1fad837f01587238e53d9ed2fc2c803692b7c82464b2421b9a"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "e4f2cdf2676736477aaf8d8d066abdd32535db2480999836b0be71063406d70b"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "0b0dbff738f47dde671b8aadf3b408c9193fb57360fb36bb6b83216113c0c5a3"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "9965c7c13f4df2ff1fe5b6be7e954dc7ddb543b7a5b57cb6e35e8bf55115517a"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "786f1fe477dafc59ea0ac63cd47993c60d2666a7f3ceb4c6f417a1f3e588580b"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "e4f2cdf2676736477aaf8d8d066abdd32535db2480999836b0be71063406d70b"
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "deadc20f3bd97a04701fb122a5ac8d2c03aea6984cc8b471d201f1a65368e03a"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "6c94a8e8326b35b8d33990dcc1d92e59728d71b1b2da8cfa549cfb699b5f93ce"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links",
+            0
+          ],
+          "kind": "text",
+          "expected": "09c2a0f74f6df2aa368d2169373bf7b041552660e450f1ff2e881794ac994f0d"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links",
+            1
+          ],
+          "kind": "text",
+          "expected": "d5b2e6ea8689a4217b93857d1d8626710e68692a147955b01389e751e158f366"
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F08",
+      "path": "fixtures/carddb/official_jp/card_BP01-004.html",
+      "sha256": "c39f196b866a1214aeaea5dbf885e06a1498195f853b9228a5093dea78982f27",
+      "parser": "jp-card",
+      "arguments": {
+        "number": "BP01-004"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "9465f0e12d05527f57bf311d488e175764c88bbd0618ff33e1268494419695df"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9232213e7efa985a84e444f36fad92a82074929bb88df271b9e00a1b929cd2ee"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "d0ee8ecaa2ca0ab819721425e9d24ba6c8cd82c1ec9e3327aaec9d92a0235411"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "05b6e439e39a24d8a0c5f3f79b158ce57f410f19a738f602cf7320b4d8131024"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "9465f0e12d05527f57bf311d488e175764c88bbd0618ff33e1268494419695df"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9232213e7efa985a84e444f36fad92a82074929bb88df271b9e00a1b929cd2ee"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "916ba150c0487d6a1562b4667af22d231907b04a98949e1e4b7bf030db18be85"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "3481a937cede8b72cecfa6baf36f26d1997364a71c1b2c89a632760cdd2ca8b8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "438fce45377ed71cfe1ea0c6ab97eeb1de3e4722902168e19afe609a295ea885"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "dca9c14f74cccef65743c5cee8d709ef0fb00ccba9e87c1be6c410feaca32e71"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "product"
+          ],
+          "kind": "text",
+          "expected": "deadc20f3bd97a04701fb122a5ac8d2c03aea6984cc8b471d201f1a65368e03a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "6b86b273ff34fce19d6b804eff5a3f5747ada4eaa22f1d49c01e52ddb7875b4b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "61a0981aad8133c65d4ae204f0e153a1085709eed521559dab788214e7ab3b3a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "flavor"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "c1e87d3599538bb8045162180aa4d3038ebe458cff8741753bf4fd6e8325eca4"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "05b6e439e39a24d8a0c5f3f79b158ce57f410f19a738f602cf7320b4d8131024"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "438fce45377ed71cfe1ea0c6ab97eeb1de3e4722902168e19afe609a295ea885"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "text",
+          "expected": "6c94a8e8326b35b8d33990dcc1d92e59728d71b1b2da8cfa549cfb699b5f93ce"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "text",
+          "expected": "a39c3bc7d08ec71811b8bb8085ca5ddacedcae2fce0860ec992f46ff4443686e"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "notes",
+            0
+          ],
+          "kind": "text",
+          "expected": "f80f6d30b11d76f6915c8cae5220eca3071914cc5e7b4022e6a7595181233b42"
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 3
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "c1fa5154ccb9c8fab8e999f7f76036c9264c60b2a2a1ca6d93a878126d0d67fd"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "2d4c4dfa0b5c806e93f0f91a42698e72dab78da969f3f59548b7edf3fc78ee51"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "b85b01839d8e92f7c8329781582e01c2e66ab145009d828124f240bfe532c46a"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "9ee723a1d51b3fa130219c49b8bb238947306d35d20d3f79612aaf54a1af180c"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "4f3acb14b47c905ec65e4f0e83273f2bdbc1289b3cd8e81acbf1201dae0af088"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "2d4c4dfa0b5c806e93f0f91a42698e72dab78da969f3f59548b7edf3fc78ee51"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "4f4b3e3f91d770e85442c5f920a2daf35894889d6a29b9a3c44ac5f7bf4c2a2f"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "460566939c26e6552ae7630b82f7d5c74aa08f6242b2f2030f8b69eecf54609d"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "94931f3dea96674e19e44a7718c4c6fbdf69de6a4b04297d56aa7929d3a97438"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "9965c7c13f4df2ff1fe5b6be7e954dc7ddb543b7a5b57cb6e35e8bf55115517a"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "6d72d147da67e084d73d13d76209176c0869ea5e10233eb07d2d99fc80c23595"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "ef33c9ab23e2009c62c4c6b81b5708945e1cf30979e1f84198ec8ea7e9b90b1c"
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "deadc20f3bd97a04701fb122a5ac8d2c03aea6984cc8b471d201f1a65368e03a"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "6c94a8e8326b35b8d33990dcc1d92e59728d71b1b2da8cfa549cfb699b5f93ce"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links",
+            0
+          ],
+          "kind": "text",
+          "expected": "09c2a0f74f6df2aa368d2169373bf7b041552660e450f1ff2e881794ac994f0d"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links",
+            1
+          ],
+          "kind": "text",
+          "expected": "d5b2e6ea8689a4217b93857d1d8626710e68692a147955b01389e751e158f366"
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F09",
+      "path": "fixtures/carddb/official_jp/card_BP02-070.html",
+      "sha256": "8d5febd8c101edc3ab273960accc71d5b4f88431b8af4f65e6cf03df271a36fe",
+      "parser": "jp-card",
+      "arguments": {
+        "number": "BP02-070"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "5bf64822d4a27757b88f58669e0e7912fe9e15f2e7e856ac6dd4ddeb2b023d17"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f883cf1429ba11b85f5d947c6b87804e13b5bd30ec52308f79c754f05d986466"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "6c03ca2f94c22b3eecb87d1380838c9e185f489b59246e1f53312052bfd78e95"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "517bfe6f7058951ef6efb9f5a51042937a564308aa8dd58965c34ffb1c7e6d8e"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "5bf64822d4a27757b88f58669e0e7912fe9e15f2e7e856ac6dd4ddeb2b023d17"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f883cf1429ba11b85f5d947c6b87804e13b5bd30ec52308f79c754f05d986466"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "39874e63298fb671264ce2700c984d8426ee47c1f7f1f4fa5b4a496e266682b0"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "3481a937cede8b72cecfa6baf36f26d1997364a71c1b2c89a632760cdd2ca8b8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "0c6918a0198ea2c5747541c636fc3b7ed1e948203bdea5dde31cc4700276f5f8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            1
+          ],
+          "kind": "text",
+          "expected": "d47cdbb80556bf7b12fb7121bce7e49eca008e8fe4a2b31778edde3512097115"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "b870b7809747623def661ded7b0da0e52beddfc50235bbda65f1e8a34350ff7a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "product"
+          ],
+          "kind": "text",
+          "expected": "7cf4c29560d8f313866a705b61267d4c7a054460b5b55b7f25a1c7bef380c37b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "c1bd8c0e54ef57315129fba006d021619e70c6f500dc4de065ecd23436f0f5d4"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "flavor"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "517bfe6f7058951ef6efb9f5a51042937a564308aa8dd58965c34ffb1c7e6d8e"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "882fb718b64344f98379b270cb7cd6d71245fe08c3d440d8be051ed33e617141"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F10",
+      "path": "fixtures/carddb/official_jp/card_BP02-071.html",
+      "sha256": "ffeba6cb97ffc4624e8fe9eb2bc0000836acc2056592f4abd2ad2b569686657b",
+      "parser": "jp-card",
+      "arguments": {
+        "number": "BP02-071"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "5bfccfca71eb0d087a34e17896dfac0efdea9b59f1cadc34917946729672e9a9"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "edb8adbdf0281986589ff4802e078e74c6068fd41eb8d87fb054ec22438855cb"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "76d83e8d7c0269477e797bd5d8ba88f8931f8152e755d060ee1821037d527d9d"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "5892e36c7ac0867bc95528a8fd8ac83a7b08c009d34919c14e5d470ea9110149"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "5bfccfca71eb0d087a34e17896dfac0efdea9b59f1cadc34917946729672e9a9"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "edb8adbdf0281986589ff4802e078e74c6068fd41eb8d87fb054ec22438855cb"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "39874e63298fb671264ce2700c984d8426ee47c1f7f1f4fa5b4a496e266682b0"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "3481a937cede8b72cecfa6baf36f26d1997364a71c1b2c89a632760cdd2ca8b8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "a26bbcd919080da533643c25fd735f43043a6c5a9a625ffed77c1666b42e7c76"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "b870b7809747623def661ded7b0da0e52beddfc50235bbda65f1e8a34350ff7a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "product"
+          ],
+          "kind": "text",
+          "expected": "7cf4c29560d8f313866a705b61267d4c7a054460b5b55b7f25a1c7bef380c37b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "e7f6c011776e8db7cd330b54174fd76f7d0216b612387a5ffcfb81e6f0919683"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "ef2d127de37b942baad06145e54b0c619a1f22327b2ebbcfbec78f5564afe39d"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "20716768952f62714bb86c4897030322b97b743b88388037662d7e92782f0ff4"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "flavor"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "218db1d950a73c5282cde6646b1098f89cbb7ceaa1c0c06287e33c5df52d7bc9"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "5892e36c7ac0867bc95528a8fd8ac83a7b08c009d34919c14e5d470ea9110149"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "a26bbcd919080da533643c25fd735f43043a6c5a9a625ffed77c1666b42e7c76"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F11",
+      "path": "fixtures/carddb/official_jp/card_BP02-SP01.html",
+      "sha256": "f9eb54f08802707ef9d5a9a4f9b76b7028e098d0d8e2c3e5abe020bcc6f1b87e",
+      "parser": "jp-card",
+      "arguments": {
+        "number": "BP02-SP01"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "e3e7c7022aeb98cf3deacb1273c4dfcfe30fd6ba4e81828055e44dd2ceb4e1d8"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f883cf1429ba11b85f5d947c6b87804e13b5bd30ec52308f79c754f05d986466"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "a5cdb6e4bd8eef8c153cfcb4f771b04d6437940927d03cb8079f98875e1b6436"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "7f19cb08b356880e6cce6661695e477949936812bfa64e5090042059736d703a"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "e3e7c7022aeb98cf3deacb1273c4dfcfe30fd6ba4e81828055e44dd2ceb4e1d8"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f883cf1429ba11b85f5d947c6b87804e13b5bd30ec52308f79c754f05d986466"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "39874e63298fb671264ce2700c984d8426ee47c1f7f1f4fa5b4a496e266682b0"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "3481a937cede8b72cecfa6baf36f26d1997364a71c1b2c89a632760cdd2ca8b8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "0c6918a0198ea2c5747541c636fc3b7ed1e948203bdea5dde31cc4700276f5f8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            1
+          ],
+          "kind": "text",
+          "expected": "d47cdbb80556bf7b12fb7121bce7e49eca008e8fe4a2b31778edde3512097115"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "f5aeb0b6798a7470cf56920ff59e499d0e5e8d0eda7049b533a97c5f31c93e8b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "product"
+          ],
+          "kind": "text",
+          "expected": "7cf4c29560d8f313866a705b61267d4c7a054460b5b55b7f25a1c7bef380c37b"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "d4735e3a265e16eee03f59718b9b5d03019c07d8b6c51f90da3a666eec13ab35"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "c1bd8c0e54ef57315129fba006d021619e70c6f500dc4de065ecd23436f0f5d4"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "flavor"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "7f19cb08b356880e6cce6661695e477949936812bfa64e5090042059736d703a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "882fb718b64344f98379b270cb7cd6d71245fe08c3d440d8be051ed33e617141"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F12",
+      "path": "fixtures/carddb/official_jp/card_BP08-003.html",
+      "sha256": "2e055ff6a9ce53c4df32e66ed620968daf4cb96dc4860eb8c11744b27c93826f",
+      "parser": "jp-card",
+      "arguments": {
+        "number": "BP08-003"
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_number"
+          ],
+          "kind": "text",
+          "expected": "20a96335b413bdad9b9bb2551751c01fede3c3f904ec34286756d14d6cc25303"
+        },
+        {
+          "path": [
+            "page",
+            "name"
+          ],
+          "kind": "text",
+          "expected": "41d7af4485461d7df3716d9713219c253b5d673346e0fce0ec601d901e431540"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "0f4953c4cbf754b7126da0504982209415b8fc18c0bd83307dd6dad7b31585b1"
+        },
+        {
+          "path": [
+            "page",
+            "image_urls",
+            1
+          ],
+          "kind": "text",
+          "expected": "0bc5b39432105d6b22accfea660f76fff4029d962056eee8ebeb2fd81ea9cbaa"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "d6cfab0316b170b6a096f1b376b699a369f5251b6de54717c9b459799f7444f8"
+        },
+        {
+          "path": [
+            "page",
+            "image_originals",
+            1
+          ],
+          "kind": "text",
+          "expected": "b3f0c29a13513857d43d764d70f31bf447ffdc72a8b8e04767bc25515eb7a617"
+        },
+        {
+          "path": [
+            "record"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "number"
+          ],
+          "kind": "text",
+          "expected": "20a96335b413bdad9b9bb2551751c01fede3c3f904ec34286756d14d6cc25303"
+        },
+        {
+          "path": [
+            "record",
+            "faces"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "41d7af4485461d7df3716d9713219c253b5d673346e0fce0ec601d901e431540"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "916ba150c0487d6a1562b4667af22d231907b04a98949e1e4b7bf030db18be85"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "1af33841003e95ddd9528b6b65425abb83747124997e0ddeed516b250f977c18"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "8f0298f9c8a835e73f6ec8f040fd778b1b681f776df8d351f95d3ba88c854cc6"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "traits",
+            1
+          ],
+          "kind": "text",
+          "expected": "e77017f434fb18b93eba61d069e5bc1736b65fd3d22689911fa83b77236179f6"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "b870b7809747623def661ded7b0da0e52beddfc50235bbda65f1e8a34350ff7a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "product"
+          ],
+          "kind": "text",
+          "expected": "ddd54beacdf82ace6af216941454ed822969bcd9d96c499b5c65d6393f732e67"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "3973e022e93220f9212c18d0d0c543ae7c309e46640da93a4a0314de999f5112"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "4e07408562bedb8b60ce05c1decfe3ad16b72230967de01f640b7e4729b49fce"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "2952770dae676e4fc454438fa9f19089ce8cf337a8aabde2568112504cdbbd17"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "sections",
+            0
+          ],
+          "kind": "text",
+          "expected": "88f7a542e4a9723e3a28badd919161ee66ae7cae98973a9197e8fefee16a99cb"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "flavor"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "c5b3aee4d1f6f952b07c190c06ac9dc95db460b003a39bdaff0555df9ca5d6ed"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "d6cfab0316b170b6a096f1b376b699a369f5251b6de54717c9b459799f7444f8"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            0,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "b6cdbe8c92bc805fdf3a5d106ef12df94ee3703495cc9c203b81ca236e3e8d40"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "94011bbba77a6d97319496114ae9df27975deb2730e6f6361935b2609dd41528"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "card_class"
+          ],
+          "kind": "text",
+          "expected": "916ba150c0487d6a1562b4667af22d231907b04a98949e1e4b7bf030db18be85"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "card_type"
+          ],
+          "kind": "text",
+          "expected": "1af33841003e95ddd9528b6b65425abb83747124997e0ddeed516b250f977c18"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "traits"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "traits",
+            0
+          ],
+          "kind": "text",
+          "expected": "8f0298f9c8a835e73f6ec8f040fd778b1b681f776df8d351f95d3ba88c854cc6"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "traits",
+            1
+          ],
+          "kind": "text",
+          "expected": "e2f499a91591dd38b9309c79267a97372bd22d82191d9d9f0cab13255a8eaff7"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "rarity"
+          ],
+          "kind": "text",
+          "expected": "b870b7809747623def661ded7b0da0e52beddfc50235bbda65f1e8a34350ff7a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "product"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "title"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "cost"
+          ],
+          "kind": "text",
+          "expected": "3973e022e93220f9212c18d0d0c543ae7c309e46640da93a4a0314de999f5112"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "power"
+          ],
+          "kind": "text",
+          "expected": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "hp"
+          ],
+          "kind": "text",
+          "expected": "4b227777d4dd1fc61c6f884f48641d02b4d121d3fd328cb08b5531fcacdabf8a"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "text"
+          ],
+          "kind": "text",
+          "expected": "ec472e402c9172df5fced62b4975cbc501f184afa447ba1323cd6cf86417ac41"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "sections"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "flavor"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "illustrator"
+          ],
+          "kind": "text",
+          "expected": "c5b3aee4d1f6f952b07c190c06ac9dc95db460b003a39bdaff0555df9ca5d6ed"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "image"
+          ],
+          "kind": "text",
+          "expected": "b3f0c29a13513857d43d764d70f31bf447ffdc72a8b8e04767bc25515eb7a617"
+        },
+        {
+          "path": [
+            "record",
+            "faces",
+            1,
+            "trait_raw"
+          ],
+          "kind": "text",
+          "expected": "1d2e22bcb7539bebb7b28d53c908dd1e01c1b40293f298c69e15265c680db13b"
+        },
+        {
+          "path": [
+            "record",
+            "release_date"
+          ],
+          "kind": "text",
+          "expected": "3683bdf159c4f3511cc51c62f9283e76d19bf049ef2ca1ff8183d472490aeb23"
+        },
+        {
+          "path": [
+            "record",
+            "errata_url"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "record",
+            "notes"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "record",
+            "qa"
+          ],
+          "kind": "length",
+          "expected": 6
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "ac1354d979f537ca08e886f67c05f7170626a0466b443acad1077f3336dfa55e"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "5fd14428a9d76afd82cbf427f66c1bddb7cb741092e6c87e14fae3c3f65a6c45"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "ba6928aa30fbe63cc6dd714f460203ca9fac43a957c89d23a7a07df7e5cb5bce"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            0,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "800b59add20146975943b1c2438d999487bb29d822f14704eb78c184335c08c1"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "ef3c3534981946fd597462ddbef2e905d01793d72d6eff416923c29033d19c26"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "bbb2bc093ba8e98ed51b4dd6c15c35d1098b77c0c0d6d54fc3d2d16d53b3c790"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "094c9ab9c59073cf097937a1c19eb4a439fa72c1ef5c106e3384043caa086343"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            1,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "bfcab52239b490ec072cea817a9b750313bd819a79902d96097ec428ee5761e4"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "5c3ff409a189ae4944733822219f55c10485d279cc3bd5f6ff0f39a03d66496c"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "bbb2bc093ba8e98ed51b4dd6c15c35d1098b77c0c0d6d54fc3d2d16d53b3c790"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "72beade692023b65065bd26a968cbd066082731c10c69086e136d62fd0c47c75"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            2,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "debec692260d7c93cb8684ddf317511ccd801cb8a7ffea3206c984427a9a5fe2"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            3
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            3,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "3e1027499738370060dff34269a2fa63bd2948c875c1ddd1492b7d453c30cebf"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            3,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "bbb2bc093ba8e98ed51b4dd6c15c35d1098b77c0c0d6d54fc3d2d16d53b3c790"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            3,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "4ee6275689aea3e704eb6726718e3364e445642fbd0a7fc911d09a467543927e"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            3,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "85e60f181f8a0ea1bba0bd11f098c8797fea05ac70aa951735a7e954eda76477"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            4
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            4,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "bd9483d1104aa0c8161486f96b951dc153dfdf8d6ca56ec52ffc93fd1df0f7ca"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            4,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "bbb2bc093ba8e98ed51b4dd6c15c35d1098b77c0c0d6d54fc3d2d16d53b3c790"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            4,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "61d561900decbfcb3bde70f3cda14d795fbf8e079df3b1efb51f6a28b434f667"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            4,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "14d5ba0190f467eb2720dd5e4ddca69c2ce1e6907a8be604aa3250e8c1caec86"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            5
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            5,
+            "id"
+          ],
+          "kind": "text",
+          "expected": "f584f7a5d3dbfc6fabab32ae34011acd22cead47abc3c63760aa0d9bafcb8dea"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            5,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "bbb2bc093ba8e98ed51b4dd6c15c35d1098b77c0c0d6d54fc3d2d16d53b3c790"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            5,
+            "question"
+          ],
+          "kind": "text",
+          "expected": "158af2615bb68d389dc5ff3f1cb4242eca3234af3c202b31cab4dc664f6b822c"
+        },
+        {
+          "path": [
+            "record",
+            "qa",
+            5,
+            "answer"
+          ],
+          "kind": "text",
+          "expected": "4f582df6703760db814463845ce7002a55f3d354f9b4d88bfb7f65d8aa1128e4"
+        },
+        {
+          "path": [
+            "record",
+            "products"
+          ],
+          "kind": "length",
+          "expected": 1
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "ddd54beacdf82ace6af216941454ed822969bcd9d96c499b5c65d6393f732e67"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "date"
+          ],
+          "kind": "text",
+          "expected": "3683bdf159c4f3511cc51c62f9283e76d19bf049ef2ca1ff8183d472490aeb23"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links",
+            0
+          ],
+          "kind": "text",
+          "expected": "838eea5cc5913228aac61f4283e423d8d3d6bff7b99070d1c16c62b4c07d03aa"
+        },
+        {
+          "path": [
+            "record",
+            "products",
+            0,
+            "links",
+            1
+          ],
+          "kind": "text",
+          "expected": "3e3841798f8320625a50840d0c365203b577c623257c834ec92dfffa9f306fe1"
+        },
+        {
+          "path": [
+            "record",
+            "related_cards"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F13",
+      "path": "fixtures/carddb/official_jp/list_BP01_1.html",
+      "sha256": "11476cbb134358444b880c4b65991ab53089390e86efcf7ca1514a9fdfe2c503",
+      "parser": "sve-list-first",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers"
+          ],
+          "kind": "length",
+          "expected": 15
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            0
+          ],
+          "kind": "text",
+          "expected": "8ac2e760813419234fdd7a9076cda4892ebc25009ae19d9021f410f524f1d8ed"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            1
+          ],
+          "kind": "text",
+          "expected": "00742e63baf900565e0d5fe9beef2da51a7f73728cd4a63132af37c5e875c9d2"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            2
+          ],
+          "kind": "text",
+          "expected": "a194e73b3ec8cba723b0008c027672fb6822998cf1b8a310326db82f6ce1b2e1"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            3
+          ],
+          "kind": "text",
+          "expected": "9465f0e12d05527f57bf311d488e175764c88bbd0618ff33e1268494419695df"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            4
+          ],
+          "kind": "text",
+          "expected": "ebb4ef9401739171ac2135b1d11512724f2d90a586ca7a90c26b85b8d15c06de"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            5
+          ],
+          "kind": "text",
+          "expected": "f5c2306fbde98fdeafc6bda0402e428e6e70dfbd8e56de6b07d550e541c680f9"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            6
+          ],
+          "kind": "text",
+          "expected": "a627d376e169ca50dbaedd4ff719564078e2069143a38b1c8ab64a695c693d25"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            7
+          ],
+          "kind": "text",
+          "expected": "586607e32154ae1547e2d4ccdce24b832e1df38b3ef1f3347afe997b41bc9a61"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            8
+          ],
+          "kind": "text",
+          "expected": "19a55b238f1419fe65145af495b529011e23c42c02f54bb042ef6b9c2ddb6b29"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            9
+          ],
+          "kind": "text",
+          "expected": "2d78313ac7d6854052e68c9de822c2aa429e58bfb0a5912ca359c62c8eb59065"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            10
+          ],
+          "kind": "text",
+          "expected": "921556d6801a11c654d4cd7fbd71aaeea03572c48ebf31a3bd715bb93cdd17d8"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            11
+          ],
+          "kind": "text",
+          "expected": "d71722469ca9f5b12c7b3dc6e4013979170322280fc4a99e747e1d2e4e5d2b26"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            12
+          ],
+          "kind": "text",
+          "expected": "3d95d3a9a850ce1b5f586ffe33b469c4bee50af0cba1c4f6e66ba22b52f76eb9"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            13
+          ],
+          "kind": "text",
+          "expected": "a654c7eba4d154eeb89dbb29fc362ba3cba2a2b3a62a5a4d4872742e3301f5a9"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            14
+          ],
+          "kind": "text",
+          "expected": "76aa512685f0cb3afeca32cb0835855cfd4d3244541baffbf6f2709a950cf0e0"
+        },
+        {
+          "path": [
+            "page",
+            "max_page"
+          ],
+          "kind": "integer",
+          "expected": 19
+        },
+        {
+          "path": [
+            "page",
+            "total"
+          ],
+          "kind": "integer",
+          "expected": 273
+        }
+      ]
+    },
+    {
+      "id": "F14",
+      "path": "fixtures/carddb/official_jp/list_BP01_18.html",
+      "sha256": "a248a5c6a91b63e859cb6e409289332fc8d2a83dc89b6d3732bd4a387986a960",
+      "parser": "sve-list-more",
+      "arguments": {
+        "page": 18,
+        "max_page": 19,
+        "total": 273
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers"
+          ],
+          "kind": "length",
+          "expected": 15
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            0
+          ],
+          "kind": "text",
+          "expected": "50d23ac86188a808b342c5b9e0bf2959a7d44569aaa168f281fee4110460eae1"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            1
+          ],
+          "kind": "text",
+          "expected": "31d54d3b14709bcdf6624cf261209d3c0d53fb2d8d0b9e37bab32cef9c1e8b8d"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            2
+          ],
+          "kind": "text",
+          "expected": "a80b723d6e618467dac82e9ae4da8116543c28d42597675073e4b5196094aab3"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            3
+          ],
+          "kind": "text",
+          "expected": "11eb43c40d1b086097833afd83671dd80a8427579f69af1388a964e0d5672a01"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            4
+          ],
+          "kind": "text",
+          "expected": "d7a50f3653fe038500f30acfa975fcb0d6e2b7c51f97118233183e2362c66c72"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            5
+          ],
+          "kind": "text",
+          "expected": "83d5d5ec63b2884f1b1410d95436a7ccbc4acb558f3a31dd03939f6b8b1c572a"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            6
+          ],
+          "kind": "text",
+          "expected": "75f1d190d1555be82f8eb6a79f5c7e850745c8f61faa140b61d052c2063be7e4"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            7
+          ],
+          "kind": "text",
+          "expected": "a672b17a47d9ab42de75b44e9982f465f5204a114bb11a7100405f047f4c14db"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            8
+          ],
+          "kind": "text",
+          "expected": "26e38d1d897904ebbb59e7dcc955a5ffc9f18ef06a9d0c5b9d3e3651933decdc"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            9
+          ],
+          "kind": "text",
+          "expected": "0179788b933952ab1e87968c615c2b8ab240af3b78f18d078d0777270bc252da"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            10
+          ],
+          "kind": "text",
+          "expected": "24dc126ce85e3f909f294fba7da4f58fa09696ee97231d661e2c8615e192668f"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            11
+          ],
+          "kind": "text",
+          "expected": "70ad94d638aa5fd63b4e5aa71333ec99793dea40d513ff5ff8acc1e04a28998e"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            12
+          ],
+          "kind": "text",
+          "expected": "02191506d6e225b2a1bb0ebb0120186550f20c32834482adbcd1db2755d60d2d"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            13
+          ],
+          "kind": "text",
+          "expected": "ee1a78da57793cedf8b6e3dd448884f57dc3beb611ef9136c7a6dbfbdea405d7"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            14
+          ],
+          "kind": "text",
+          "expected": "c9a12538de7f3a70a57c3d3f21bd77598eafdee478c6c9bd6a183cee0254b2f7"
+        },
+        {
+          "path": [
+            "page",
+            "max_page"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "page",
+            "total"
+          ],
+          "kind": "null"
+        }
+      ]
+    },
+    {
+      "id": "F15",
+      "path": "fixtures/carddb/official_jp/list_BP01_19.html",
+      "sha256": "21e1663adf417ce1be8e3b65d7bfd1415085821af8bc45e4511096a0b70aa416",
+      "parser": "sve-list-more",
+      "arguments": {
+        "page": 19,
+        "max_page": 19,
+        "total": 273
+      },
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers"
+          ],
+          "kind": "length",
+          "expected": 3
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            0
+          ],
+          "kind": "text",
+          "expected": "6404bd7fb755c16a02acac5fa6b2d22d1c30af01ea494457da761983bb8d2aea"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            1
+          ],
+          "kind": "text",
+          "expected": "ca9a706da5588ace19a7e83653dfbd6ca7b04ae27c99e0685121f8e4a65e7c98"
+        },
+        {
+          "path": [
+            "page",
+            "card_numbers",
+            2
+          ],
+          "kind": "text",
+          "expected": "15ad5c0bd9409a1218b79a579ee07fcbad40247a52b7c000b364a9a7ac67c9ec"
+        },
+        {
+          "path": [
+            "page",
+            "max_page"
+          ],
+          "kind": "null"
+        },
+        {
+          "path": [
+            "page",
+            "total"
+          ],
+          "kind": "null"
+        }
+      ]
+    },
+    {
+      "id": "F16",
+      "path": "fixtures/carddb/official_jp/sets.html",
+      "sha256": "6dadb772be525ddc558bda9d468a782e5cfe685030f54830008d749e1f2bc7e8",
+      "parser": "sve-sets",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "sets"
+          ],
+          "kind": "length",
+          "expected": 55
+        },
+        {
+          "path": [
+            "sets",
+            0
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            0,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "33401291bf746e2ea965c7b20166737b3e99e2ea14f66edf1431bc20e28fb083"
+        },
+        {
+          "path": [
+            "sets",
+            0,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "1008c5581a5232422a1bd5938143691208d0605c3a1e7cbd407c8155e334fb05"
+        },
+        {
+          "path": [
+            "sets",
+            1
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            1,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "a26ec5aeb04bd20f55ae4b10a8d9bdb706c57ebb1fbe32e0ac1224aa91233efd"
+        },
+        {
+          "path": [
+            "sets",
+            1,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "a8fe8676c21d104df90cf3ed4e20347aa6bff688cf234e214103c47b7e9b9044"
+        },
+        {
+          "path": [
+            "sets",
+            2
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            2,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "5ba90d3a806a70fb7d5bb0dd96742fd82e3b22c87710fb22d791bfa815f0b6dd"
+        },
+        {
+          "path": [
+            "sets",
+            2,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "3225e2501c00d65d4109393e857ada1ffbad93042c6dc9edd67c01523405d213"
+        },
+        {
+          "path": [
+            "sets",
+            3
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            3,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "e0f2c0f8e2026f0147a5d3e60110846c6bb29f471bddf9553ab4447a76ff184a"
+        },
+        {
+          "path": [
+            "sets",
+            3,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "185ca8ea72630741cd12bc8c88603b6dad21457041a8605764feed43a6c546f9"
+        },
+        {
+          "path": [
+            "sets",
+            4
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            4,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "4e1b4897e27cf762e9bccb8361368ca8663125a72596dd33cc8cc83b4c0ed726"
+        },
+        {
+          "path": [
+            "sets",
+            4,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "8e8470bb50a79b83a9e0d53020f80324673157e2c52f79e6fe24467ff77ac414"
+        },
+        {
+          "path": [
+            "sets",
+            5
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            5,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "8d7426ffc868e0690f8de5509c025806ceef66d2153ca9a9f7404e9e14a93868"
+        },
+        {
+          "path": [
+            "sets",
+            5,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "ed4211b35110cedfdaa9027e67eadec476933043fccb3310ffafd320b3aeffb0"
+        },
+        {
+          "path": [
+            "sets",
+            6
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            6,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c32309ea9ada8d46e2d3ce24d76ebd886f141014dfcbe188df97dd1b96b9a6de"
+        },
+        {
+          "path": [
+            "sets",
+            6,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "b519cbc1a5d74c2001ebf34821d7ddd89d53ae666128f1f039d32d67467fa179"
+        },
+        {
+          "path": [
+            "sets",
+            7
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            7,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "778e8d6b6c8ffb0ff19cd1f91e05d922f09739690caa61e9e7d5514070172560"
+        },
+        {
+          "path": [
+            "sets",
+            7,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "1fc2b183385b57fe9dab2dac82364f1c1c1eb2f17065cc2b2383794894a2995c"
+        },
+        {
+          "path": [
+            "sets",
+            8
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            8,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "0cf8cb87d45cfc663cba1f2121774cbc441366c64e25cd2d443e6dc01c397c80"
+        },
+        {
+          "path": [
+            "sets",
+            8,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7613184c332ef69c7def453039a519f532174e2149f703ecb450ccc4a55ba430"
+        },
+        {
+          "path": [
+            "sets",
+            9
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            9,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9fe7a1cdf4f5c0fa2e4e1dbbdf35112a8f0de0a3a06da5463a7913a89aee90b6"
+        },
+        {
+          "path": [
+            "sets",
+            9,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f694c14f6e46d7aec46a519497beeac84d76d29047b56285c66cdf8e4e0eea15"
+        },
+        {
+          "path": [
+            "sets",
+            10
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            10,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f3bcb653a0cb987f490b5a984060c7d7684902f5e99f8ba22581014c2400aa69"
+        },
+        {
+          "path": [
+            "sets",
+            10,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f193bee7e4a4da357b1a3cc0311efc20717b01c2e3d4016612f9c0748266e9f9"
+        },
+        {
+          "path": [
+            "sets",
+            11
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            11,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "1b7703b41d9395bbdea6462a70f925490b00f24dd8d31e4dcef0e0ece981e31a"
+        },
+        {
+          "path": [
+            "sets",
+            11,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "d34ec863ae448935c816049a63dd4ab5dd6897347426935a2ac0a77beda3e5fc"
+        },
+        {
+          "path": [
+            "sets",
+            12
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            12,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "d02116063d0f362a54cf466707b031fecdbe74d62ee4f7ba91920129c5b40a4c"
+        },
+        {
+          "path": [
+            "sets",
+            12,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "4c26b4a85be1965d43ab8fd29e205178dac3080f58a439475e42dfbbb7a7fc2b"
+        },
+        {
+          "path": [
+            "sets",
+            13
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            13,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "aceedcdf96967797286096ec4bf089e817b94d042beafc6831b7235d0fb0c772"
+        },
+        {
+          "path": [
+            "sets",
+            13,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "1307d3ababdffc8973361429156a634261ab04748a5fc3f9a4d13a38c42b0e2d"
+        },
+        {
+          "path": [
+            "sets",
+            14
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            14,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cd3f2b1c799fe4e75a8d2c4a659c6d657a13094ff0860f1d1acb0270a522ca7b"
+        },
+        {
+          "path": [
+            "sets",
+            14,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "19dd65bc762f8c4b13b999bd2d728cec9132e4928ef8dfb6bbfc367b594023bf"
+        },
+        {
+          "path": [
+            "sets",
+            15
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            15,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "32541c18071048fae536c0ed29759ff99f52d9a7eaa25d38515f6595c7ed740f"
+        },
+        {
+          "path": [
+            "sets",
+            15,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "3c021da06696b741574bffbc3bc8d64b23e0ccda488d481e1723aa99f79f678a"
+        },
+        {
+          "path": [
+            "sets",
+            16
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            16,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f2e0088170a6bc18a739713105c14ad82ea8dae36ebb6f69d7d5abaee0645643"
+        },
+        {
+          "path": [
+            "sets",
+            16,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "cecf2011df4bafd17e70c1073007a6673c6dafe89dac146c06f5656a935f43ca"
+        },
+        {
+          "path": [
+            "sets",
+            17
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            17,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "fc2b283a235034a29f8f75a0bde5949de8d6922e860f2c34b9e2902068960740"
+        },
+        {
+          "path": [
+            "sets",
+            17,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "b02c997dd19b6cc6440026fe903b56ce02f9dd70bee568ab62f08c4cf6301756"
+        },
+        {
+          "path": [
+            "sets",
+            18
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            18,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "13ef7c7beeeee1b542e1503f54821f0c424740b9f8eb0a6e5832c576ddb060ea"
+        },
+        {
+          "path": [
+            "sets",
+            18,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "5971b373edd56f138e4b4788bed7f992060a8e6474161e782ac00f26b12d54f2"
+        },
+        {
+          "path": [
+            "sets",
+            19
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            19,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "8ff62d35e178c91f3892704d8c456ebcecfde50d0793f193199dd7e91cb9ed77"
+        },
+        {
+          "path": [
+            "sets",
+            19,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "211513aea8e6b11526653f23de5f759106c141596c3c8095b65854a9e35cebaa"
+        },
+        {
+          "path": [
+            "sets",
+            20
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            20,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9dd7d0f343be7199c6135a87d1839cd1bbf74829c9862bda7394bcac1630bbda"
+        },
+        {
+          "path": [
+            "sets",
+            20,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "c25893ebfd80ccf4d452f00b969583aac69d1ce93c3df98c892aa4d4c4d84de6"
+        },
+        {
+          "path": [
+            "sets",
+            21
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            21,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b90eb9f917e7d24a2379be19a410432018bfa8dca6542cacebe18094a17bd43a"
+        },
+        {
+          "path": [
+            "sets",
+            21,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "6774e64ff7d16a0131e88865d8497d846f78639537896dcb083a27e85c3967b6"
+        },
+        {
+          "path": [
+            "sets",
+            22
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            22,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "3785739178f45f014e2a90c119ce81530d4eacad53433698ae029609cf2ca9b5"
+        },
+        {
+          "path": [
+            "sets",
+            22,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "5dcf100d6985982cb6a72d4b396be479158f4cd5f74eabddc24bfed2a8261d14"
+        },
+        {
+          "path": [
+            "sets",
+            23
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            23,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b4205b75566871d2dc50c1cba6d96703401e1f25bddeb2074cdc59214e19dd6a"
+        },
+        {
+          "path": [
+            "sets",
+            23,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "5c00af413e83e3b19e7c0da669f6c7af545a2ce8a174ff4239c4ed2da3aeff9c"
+        },
+        {
+          "path": [
+            "sets",
+            24
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            24,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "6c13c0f620f3162e3770cffa6a9fcc02881f17edbad6eb5db40d6bbb8d44f1c0"
+        },
+        {
+          "path": [
+            "sets",
+            24,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "8eeeffa463e38e47abf404e04c1fcfa263ab2d2b51df763d6dd0d3e66aca52a5"
+        },
+        {
+          "path": [
+            "sets",
+            25
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            25,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "51fbdc98fbac782c48423a3e33ae8531a65009cc39c9f48b6c22ad289a7d7043"
+        },
+        {
+          "path": [
+            "sets",
+            25,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "776767f34175757e472c74f45bebd20f0114a09276e0f92635e290b472def6f8"
+        },
+        {
+          "path": [
+            "sets",
+            26
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            26,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "43039bc1a3033e34709ae9cefeadefcacf9aadef27fd39f63c2b95dfd7a2006c"
+        },
+        {
+          "path": [
+            "sets",
+            26,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "f7b9a4480d03b0f7ceff2954ceab3e3d47358e35bb46cb8189dead9fd8b514c9"
+        },
+        {
+          "path": [
+            "sets",
+            27
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            27,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f8165b394722b85ec235421b9af348871f3bbb3ab9dcb14a836554062e0d0c64"
+        },
+        {
+          "path": [
+            "sets",
+            27,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "e2272fe966ed172fb715b10a5ae94dc2e2405f6ea937cdb2b81e6c4b7e9e71e8"
+        },
+        {
+          "path": [
+            "sets",
+            28
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            28,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "02a49ba5a6ea3a31fa172269054319921b7a50c9f8ac164a272638725fab0597"
+        },
+        {
+          "path": [
+            "sets",
+            28,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "87cafba5339aa432ebadbba5f3e987bba473b0e79b844f85103807323bd271bf"
+        },
+        {
+          "path": [
+            "sets",
+            29
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            29,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b89152422b87a2e4596d6fa15eacf6a6ab8cb8dbf2476a6897a3640f5183882a"
+        },
+        {
+          "path": [
+            "sets",
+            29,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9a7caf5924c10603601e3ac6688a3159c299ef8cf60f9118d4f698d6e42fd9d0"
+        },
+        {
+          "path": [
+            "sets",
+            30
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            30,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "849c0eb360e019eabbab050f98f1912482665ae90c59c5c42432d69de7d330fc"
+        },
+        {
+          "path": [
+            "sets",
+            30,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "15bee321b983750240165288aaaef315c986a3b15a73b9cc997cdeaed4aca99b"
+        },
+        {
+          "path": [
+            "sets",
+            31
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            31,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "931c1f8946b1c317ce39a0b990dbf25fc36a811810a41dbf552184f5c97b5a7b"
+        },
+        {
+          "path": [
+            "sets",
+            31,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "ddd54beacdf82ace6af216941454ed822969bcd9d96c499b5c65d6393f732e67"
+        },
+        {
+          "path": [
+            "sets",
+            32
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            32,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cdf3302d941fd9f193e8e9ea18054e4f3cd8d56695be66d687c7ea9609652060"
+        },
+        {
+          "path": [
+            "sets",
+            32,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "e2a142c266982f50349ab7bd984b12863175238575d9add9f3bf85f6d4b2454c"
+        },
+        {
+          "path": [
+            "sets",
+            33
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            33,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "cbe22d2a6109a996f6a13cda5666ce81dd6d2a486e310b3c640c6e8cabbab50e"
+        },
+        {
+          "path": [
+            "sets",
+            33,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "165ef9d9ff9d2ccff935e869a58e8b2b0760ed49928c32b7a5a2a51a8ed7ca1c"
+        },
+        {
+          "path": [
+            "sets",
+            34
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            34,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "2daa508d62c3ef76a39d25c96a17b6fe16ceb9bf8a40f78caef7ffb5bdcc810b"
+        },
+        {
+          "path": [
+            "sets",
+            34,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9c0c5cbab4d104e771731a132c87ea0110c59d8e77757ccd3abde64f87adb316"
+        },
+        {
+          "path": [
+            "sets",
+            35
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            35,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "55386f21de01e0cf959239d8447756e5f90175fbd22a61f932f47cc2e1d66508"
+        },
+        {
+          "path": [
+            "sets",
+            35,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9db771c2d95f40928ee89865e733062b77a8bf5c0b612cc75ade69d34e5b2f19"
+        },
+        {
+          "path": [
+            "sets",
+            36
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            36,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c55343210b1c40cdaaa0edb90c93d36028e6933333bad0ba688c3bc3f2f3a2a3"
+        },
+        {
+          "path": [
+            "sets",
+            36,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "10b568e3c6839187364dd60b39df316b1714721c3cf648da18b3ac4cbc680ed3"
+        },
+        {
+          "path": [
+            "sets",
+            37
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            37,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "558971cc344659471200320c8effee7f985df56eb6be5baed55e00646127a77d"
+        },
+        {
+          "path": [
+            "sets",
+            37,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "868b4eeb9f15c298650a77d8610360676af1a237b7744bd624871cbc9fc1e073"
+        },
+        {
+          "path": [
+            "sets",
+            38
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            38,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "b8c1079934c4661cf3466e3fa684c0d881e721dd5bf184161e5ab699fc258456"
+        },
+        {
+          "path": [
+            "sets",
+            38,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "525eb5d72a743183fef4d83e6d295d7a9e30d9c363659e5b6963e1b7226649b6"
+        },
+        {
+          "path": [
+            "sets",
+            39
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            39,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "15fdbfa1b814ab55acca67cde32277cb844a1bce5cc04231da12a7409cbdaf64"
+        },
+        {
+          "path": [
+            "sets",
+            39,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9e6d6b702d57dede9dea0f5a76975560a843fafdac73d68c72bbaab638eab8d6"
+        },
+        {
+          "path": [
+            "sets",
+            40
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            40,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "e0486db4ae43489ef6239fd035309894a0afa703035998bb936833a18613d6e9"
+        },
+        {
+          "path": [
+            "sets",
+            40,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "8ca5076d58e839b8ec4e271f748c4fcf476633232c3218518272dc0eb00071a0"
+        },
+        {
+          "path": [
+            "sets",
+            41
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            41,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "86f62c8cbf5b310869701c5a82049519b2d2496053c8394f41be106a430b7a5f"
+        },
+        {
+          "path": [
+            "sets",
+            41,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "9603fe1705d6d59905a1164533cab779c467628b30c140ed136fe24935900dad"
+        },
+        {
+          "path": [
+            "sets",
+            42
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            42,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9e35d61bd1749b885c2bae093c148a7219c65503e966f15b713b1ecb9a85fc64"
+        },
+        {
+          "path": [
+            "sets",
+            42,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "d3bc3b4d9e3fd026ac0353ba03957a0b4831b7374ff68600b19ba5c653920754"
+        },
+        {
+          "path": [
+            "sets",
+            43
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            43,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9c2103009289d1fd7c64334d363e730a659a9ec2eff2c5e82ed2862e9e4e3117"
+        },
+        {
+          "path": [
+            "sets",
+            43,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "4be931e5b648ba768b9e47a47acb3ee1e76e1de078e6a2730db13b1ff7a601df"
+        },
+        {
+          "path": [
+            "sets",
+            44
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            44,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "f8d200eb920c244a55ec5033065a9c7231ebdbea3d78c811374aa5b98c5dfd39"
+        },
+        {
+          "path": [
+            "sets",
+            44,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7265b7643e058d413743a5694e71876bde9e891b89322651985a0322506462d8"
+        },
+        {
+          "path": [
+            "sets",
+            45
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            45,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "415cc8e8f40e4a05dd5f02a01a79b6fd5ef1e47acf0497c03b397ebd4f1e5755"
+        },
+        {
+          "path": [
+            "sets",
+            45,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "ac83721427e58aac16e191fc05681416a1bfd514e1ed8f8e646ef7b03fe4f77b"
+        },
+        {
+          "path": [
+            "sets",
+            46
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            46,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "1783a48301846aa3989dbb117068813d9f445beb8116c35f6bbf08cac1730a2e"
+        },
+        {
+          "path": [
+            "sets",
+            46,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "7cf4c29560d8f313866a705b61267d4c7a054460b5b55b7f25a1c7bef380c37b"
+        },
+        {
+          "path": [
+            "sets",
+            47
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            47,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c705a61d0877eeabd635977849075b78f37bf22f6a8f6f1b84fc4feb3c5e44b8"
+        },
+        {
+          "path": [
+            "sets",
+            47,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "deadc20f3bd97a04701fb122a5ac8d2c03aea6984cc8b471d201f1a65368e03a"
+        },
+        {
+          "path": [
+            "sets",
+            48
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            48,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "5b88734f261d144f9a91ab090759379f21c59b9bbe5da933bf69a9ac7f54a615"
+        },
+        {
+          "path": [
+            "sets",
+            48,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "bb30b6562732303d2f0ce346d93f7cf17a221d708bfb0a0a7fd303d4e099bc85"
+        },
+        {
+          "path": [
+            "sets",
+            49
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            49,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "0c5ae90bb621e8130500cd5938dcc875b7bba986edc05c6acfd3ed6ae8be2887"
+        },
+        {
+          "path": [
+            "sets",
+            49,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "65dfa81c17ff1bd789dac1b975ba4e77c3a91a7e18ad1518211e08a03a9fb66e"
+        },
+        {
+          "path": [
+            "sets",
+            50
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            50,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "939e42d1eab1505aa69494809384859e5530d660622e4c96d90d9e49cbd98d7e"
+        },
+        {
+          "path": [
+            "sets",
+            50,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "2289e5415a3de289244d7ee6ce0313b04e702c6c055c7223fdb57b5ed3d8eb28"
+        },
+        {
+          "path": [
+            "sets",
+            51
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            51,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "bacfceb21525e405f4bc41cce1ed32f9b4061507acb15b845f501edbde5a2c56"
+        },
+        {
+          "path": [
+            "sets",
+            51,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "201efaa66be8a2d377de2eafec167d7307310391721e626754e16b7663a91efb"
+        },
+        {
+          "path": [
+            "sets",
+            52
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            52,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "84ba810a88374ca5d6f58607c2e2f5e5a3cd4cb1f4546287cbcfa8c95668c483"
+        },
+        {
+          "path": [
+            "sets",
+            52,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "1fc4b45f1f377d9243450f3de532a32fba2da89cdebf2594416dfbde4b4d3186"
+        },
+        {
+          "path": [
+            "sets",
+            53
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            53,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "9008cf5d88b248a587d443bbc2f2bbf138028ac0ddfadeab9c3ded4b72ab9b1d"
+        },
+        {
+          "path": [
+            "sets",
+            53,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "44a23ba5385235369c10965375954db371213a601d0d3f09bc652cee825457cd"
+        },
+        {
+          "path": [
+            "sets",
+            54
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "sets",
+            54,
+            "code"
+          ],
+          "kind": "text",
+          "expected": "c3972ccd735419073803fcacedfe2ea2c95f6c1df260354e9f83aa1befff1efb"
+        },
+        {
+          "path": [
+            "sets",
+            54,
+            "name"
+          ],
+          "kind": "text",
+          "expected": "c5ff86398c4c1ebddb57011fa0ec5d091206ca92ff51691cfef9be81e41391c3"
+        }
+      ]
+    },
+    {
+      "id": "F17",
+      "path": "fixtures/carddb/official_sv1/card_100011010.html",
+      "sha256": "3300dbd01240190f8afc89cfe7cad881b06eec4673d076a8775ff164cfd601ed",
+      "parser": "sv1-card",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "images"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "images",
+            "urls"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "images",
+            "urls",
+            0
+          ],
+          "kind": "text",
+          "expected": "fc82ff03543a38e2d9bd0a2cef4deab32b506dbd879ac94c3937bf68020be7e8"
+        },
+        {
+          "path": [
+            "images",
+            "urls",
+            1
+          ],
+          "kind": "text",
+          "expected": "79c007b9efcb94401239422c72f90be75409918e6d152c14d17fd82126e4502f"
+        },
+        {
+          "path": [
+            "images",
+            "originals"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "images",
+            "originals",
+            0
+          ],
+          "kind": "text",
+          "expected": "1dd65e2b9f731ed47a7eba2b027052e02f81869051f5135703545c5758431478"
+        },
+        {
+          "path": [
+            "images",
+            "originals",
+            1
+          ],
+          "kind": "text",
+          "expected": "0b11f58705f6ffbf893d7c1d3745e130a98ff082b9413a45202b26057dae6ae3"
+        }
+      ]
+    },
+    {
+      "id": "F18",
+      "path": "fixtures/carddb/official_sv1/card_930844060_error.html",
+      "sha256": "384fa223449a5d9761b7d907a6aa804bd882db936c9ef1a274dcf12f1d8a8618",
+      "parser": "sv1-card",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "images"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "images",
+            "urls"
+          ],
+          "kind": "length",
+          "expected": 0
+        },
+        {
+          "path": [
+            "images",
+            "originals"
+          ],
+          "kind": "length",
+          "expected": 0
+        }
+      ]
+    },
+    {
+      "id": "F19",
+      "path": "fixtures/carddb/official_svwb/cardlist_ja_offset30_trimmed.json",
+      "sha256": "26f0cf6a39927e4616679fe6096ae64de673aa51616b5dab51da3c2a212f51a8",
+      "parser": "wb-list",
+      "arguments": {},
+      "checks": [
+        {
+          "path": [
+            "page"
+          ],
+          "kind": "mapping"
+        },
+        {
+          "path": [
+            "page",
+            "count"
+          ],
+          "kind": "integer",
+          "expected": 904
+        },
+        {
+          "path": [
+            "page",
+            "card_ids"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "page",
+            "card_ids",
+            0
+          ],
+          "kind": "integer",
+          "expected": 10711310
+        },
+        {
+          "path": [
+            "page",
+            "card_ids",
+            1
+          ],
+          "kind": "integer",
+          "expected": 10712310
+        },
+        {
+          "path": [
+            "image_hashes"
+          ],
+          "kind": "length",
+          "expected": 2
+        },
+        {
+          "path": [
+            "image_hashes",
+            0
+          ],
+          "kind": "text",
+          "expected": "756a7797d82649e7993c3421eaac3a2a656586c22d29530828ce1343a382b0c1"
+        },
+        {
+          "path": [
+            "image_hashes",
+            1
+          ],
+          "kind": "text",
+          "expected": "470e18ad811323f514345bdb1dbf8d1f6911f94f44dee41f24de8b2d784735ac"
+        }
+      ]
+    }
+  ]
+}

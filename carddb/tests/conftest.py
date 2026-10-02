@@ -23,6 +23,8 @@ from .registry_snapshot_fixtures import registry_template as registry_template  
 from .shared_case_fixtures import default_correction_case as default_correction_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 
+pytest_plugins = ("tests.private_pages_plugin",)
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
