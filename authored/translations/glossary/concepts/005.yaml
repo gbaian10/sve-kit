@@ -1,0 +1,1403 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:5c9e32b158d4393e9a093c30650a902bd04e22fdcc2168c13f6c8b3521de0d2e
+records:
+  - record_key: '["glossary_term","term:player.opponent"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:player.opponent
+      category: rule_term
+      concept_key: player.opponent
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2ea3c24c7a68f8b7dd2ced53e934d45469f50f5e2c0af97a854f51bab8dd8f5a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:806ae2cacda46348efa52e5352fc5133ce2805c99f3865083e5452751fadfae4
+      source_span:
+        start: 35
+        end: 37
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:player.self"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:player.self
+      category: rule_term
+      concept_key: player.self
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:1c6191cc955eb23c323d07ab79102e144e70d7da2e99e8f8b889cb02fef0de24
+      source_span:
+        start: 9
+        end: 11
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:quantifier.all"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:quantifier.all
+      category: rule_term
+      concept_key: quantifier.all
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b1c6c86b3779b7a5e4429650c9e5350d70c9f46a67e093cac9c9eef2c7e0a211
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:afadd1a5bdc1b53eea0da452f0875bf8c2d10f8f31ce93d76116a5569887f3ce
+      source_span:
+        start: 66
+        end: 69
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:quantifier.other"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:quantifier.other
+      category: rule_term
+      concept_key: quantifier.other
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 36
+        end: 38
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:resource.ep"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:resource.ep
+      category: rule_term
+      concept_key: resource.ep
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e9f86f40fbe3a92b3c14617b8cc68181dde4f36747277709027866172c66d079
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:eb940ff886654d2be1c9f9f3c33ee5d73a84d56f515d7c3313bfad6c72cc5dc7
+      source_span:
+        start: 30
+        end: 32
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:resource.sep"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:resource.sep
+      category: rule_term
+      concept_key: resource.sep
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:34f1176cb639aaa263b7cf96c43068d7353da4e3ea2255500a41688fa582e9a6
+        parser: translation-jp-v1
+        locator: /faces/0/card_type
+        text_hash: sha256:b6cb1069c3484df57bbf6ca296030eacc3d0d9121da1be9358cb3c92d3257975
+      source_span:
+        start: 0
+        end: 3
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.ability"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.ability
+      category: rule_term
+      concept_key: rule.ability
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:a0300266004f3266c5de69013e88f89063fa5256c595c6d74be2628cd3a062a6
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:dfbc6dfaa9e9cd9ce9113434e3807b41f33ca9751b93370b1f47a66e3942e78b
+      source_span:
+        start: 48
+        end: 50
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.any_order"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.any_order
+      category: rule_term
+      concept_key: rule.any_order
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3690e314b12222339baed8d8bb368e41d409d0bbe9ab54db5a80c743efc1c8f1
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:7c71c9a48f297f70cc8f8a4d69c4c36e33a7c6fbe26e7fe6ea8865ac78c91522
+      source_span:
+        start: 53
+        end: 57
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.can_attack"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.can_attack
+      category: rule_term
+      concept_key: rule.can_attack
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:f56f791e3faaec4dee08a8e42dc44c5821ccfb10b52bd37e526c83f1a21e9155
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:72890a432562b794c8e20f74a4b532d92fc703ebd30d4d9162611ee70023d961
+      source_span:
+        start: 17
+        end: 22
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.cannot_attack"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.cannot_attack
+      category: rule_term
+      concept_key: rule.cannot_attack
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:7a67659843deca97ef2910aec4e6d3ffc8b4e2af566281e87d200866fbf4d409
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:bf46b08f361380f2cba2bdd72774955a8ee92f39de1be033143a44bff20eb1af
+      source_span:
+        start: 11
+        end: 17
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.combat_damage"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.combat_damage
+      category: rule_term
+      concept_key: rule.combat_damage
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:19f9121be510457ecce5f55679e6bb1aa9efb61e9e8256e176dd394b593debe7
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:5ee1c123da525269d37bf6468bbaa8b90c4d190b0390a79bee0c02816e8d9c13
+      source_span:
+        start: 50
+        end: 56
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.cost"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.cost
+      category: rule_term
+      concept_key: rule.cost
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 5
+        end: 8
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.damage"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.damage
+      category: rule_term
+      concept_key: rule.damage
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2ea3c24c7a68f8b7dd2ced53e934d45469f50f5e2c0af97a854f51bab8dd8f5a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:806ae2cacda46348efa52e5352fc5133ce2805c99f3865083e5452751fadfae4
+      source_span:
+        start: 63
+        end: 67
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.has_ability"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.has_ability
+      category: rule_term
+      concept_key: rule.has_ability
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2ea3c24c7a68f8b7dd2ced53e934d45469f50f5e2c0af97a854f51bab8dd8f5a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:806ae2cacda46348efa52e5352fc5133ce2805c99f3865083e5452751fadfae4
+      source_span:
+        start: 28
+        end: 31
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.incoming_damage"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.incoming_damage
+      category: rule_term
+      concept_key: rule.incoming_damage
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:dfb38e8476090b8064d6b795c0ba990198c3631bef119629907173ae9ac1fcc0
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:d4520d9934da0eadf8e7d79d1dae839735eaf02da8cfd6d2cd9ae947caffc8ec
+      source_span:
+        start: 8
+        end: 15
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.indestructible_by_ability"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.indestructible_by_ability
+      category: rule_term
+      concept_key: rule.indestructible_by_ability
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:0f0f6af76cf1d9f35f0a8b60dbe77085a936a6aa4d0a04ba5944f8b9022365d6
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:21a653c3d0e86a2eded4c3fa4efa7ca592c8537c24fc5e9e2c111bff870a21ea
+      source_span:
+        start: 51
+        end: 63
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.instead"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.instead
+      category: rule_term
+      concept_key: rule.instead
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b1c6c86b3779b7a5e4429650c9e5350d70c9f46a67e093cac9c9eef2c7e0a211
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:afadd1a5bdc1b53eea0da452f0875bf8c2d10f8f31ce93d76116a5569887f3ce
+      source_span:
+        start: 53
+        end: 57
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.instead_of"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.instead_of
+      category: rule_term
+      concept_key: rule.instead_of
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:8a2ac759e342b1bac8934a825ea6a44f5f718a140d172a9670be91674e7598e3
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:25d357c7530b92c628991e4c6760a6848d4bf9d28f292b9dd6a6d0b6d63cc5fd
+      source_span:
+        start: 40
+        end: 44
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.necromancer"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.necromancer
+      category: rule_term
+      concept_key: rule.necromancer
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cf70dd1690f705dc816dc9cac2c49cad7f0b5184e14e142d7039da956dde0a1a
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:d39e8e152ecf2b65e4fadf8771a1263d1dc27ad0ae2c9539e4a3f98ebd128f3c
+      source_span:
+        start: 4
+        end: 11
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.nemesis"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.nemesis
+      category: rule_term
+      concept_key: rule.nemesis
+      source_ref:
+      source_span:
+      authored_source_ja: ネメシス
+      missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.original_cost"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.original_cost
+      category: rule_term
+      concept_key: rule.original_cost
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:af9790c8cc77b1f8869ccd174e115a7044bbba356aa349d5ce1806d570bca1a4
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:232e5484ce1e5086f3ae2274d77d1d112b8455391c9f8846af2f6c0c0fd88fef
+      source_span:
+        start: 9
+        end: 14
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.random"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.random
+      category: rule_term
+      concept_key: rule.random
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2adfcbb7fd4290edc8cb3697d1d16310949ecdb51c52f7f2f8bf63bfc6c74c9c
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:46ee455fd4eb8069e4d7787dd649db2c3e97d4ed1f638357a7efcd8a1a788cf6
+      source_span:
+        start: 84
+        end: 88
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.same_name"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.same_name
+      category: rule_term
+      concept_key: rule.same_name
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:64c3aa8e7e37bd3c737c51246656a538140d49f7c14f76d02737e104303fac6a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:81da8f14dadfe3dabe7517aa1dddc524d6c10bd2ba0f6df3c4f07cde04127cf6
+      source_span:
+        start: 35
+        end: 37
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:rule.vampire"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:rule.vampire
+      category: rule_term
+      concept_key: rule.vampire
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:480b0065b4267ea0d886015a6c2f253c84022146b9e99b012e92c2a2683c8776
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:b08a3a675b264743e79c43df445b93efa3b7787136b2cc8bce06aca05364497b
+      source_span:
+        start: 6
+        end: 12
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:player.opponent"]'
+            - '["glossary_term","term:player.self"]'
+            - '["glossary_term","term:quantifier.all"]'
+            - '["glossary_term","term:quantifier.other"]'
+            - '["glossary_term","term:resource.ep"]'
+            - '["glossary_term","term:resource.sep"]'
+            - '["glossary_term","term:rule.ability"]'
+            - '["glossary_term","term:rule.any_order"]'
+            - '["glossary_term","term:rule.can_attack"]'
+            - '["glossary_term","term:rule.cannot_attack"]'
+            - '["glossary_term","term:rule.combat_damage"]'
+            - '["glossary_term","term:rule.cost"]'
+            - '["glossary_term","term:rule.damage"]'
+            - '["glossary_term","term:rule.has_ability"]'
+            - '["glossary_term","term:rule.incoming_damage"]'
+            - '["glossary_term","term:rule.indestructible_by_ability"]'
+            - '["glossary_term","term:rule.instead"]'
+            - '["glossary_term","term:rule.instead_of"]'
+            - '["glossary_term","term:rule.necromancer"]'
+            - '["glossary_term","term:rule.nemesis"]'
+            - '["glossary_term","term:rule.original_cost"]'
+            - '["glossary_term","term:rule.random"]'
+            - '["glossary_term","term:rule.same_name"]'
+            - '["glossary_term","term:rule.vampire"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+decisions:
+  - id: d:5c9e32b158d4393e9a093c30650a902bd04e22fdcc2168c13f6c8b3521de0d2e
+    state: confirmed
+    scope: batch
+    category: glossary_term
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:5c9e32b158d4393e9a093c30650a902bd04e22fdcc2168c13f6c8b3521de0d2e
+    members:
+      -   - '["glossary_term","term:player.opponent"]'
+          - sha256:13617cdaf5e444afff0192d9f7f51f690366cc09f71f5cfc010a83c3483c5ae9
+      -   - '["glossary_term","term:player.self"]'
+          - sha256:6ecd1ba9e2620d37c8c8f64514dc0053e1bb0640a8d68337df01937a3f34564c
+      -   - '["glossary_term","term:quantifier.all"]'
+          - sha256:4d8da74c7883011df04022fcc793c8891c4ec491b8586a84e7669d7e21faf066
+      -   - '["glossary_term","term:quantifier.other"]'
+          - sha256:909c273a59353674067261d26d78fa524daf9bcb132c3cd2a7c02845837b1390
+      -   - '["glossary_term","term:resource.ep"]'
+          - sha256:4747747a6c1e019c85753f24ec3a8776b29944185b842bf765b448cb92369db3
+      -   - '["glossary_term","term:resource.sep"]'
+          - sha256:b0b7327cf953f72a66e30714cc2910c1908a57d93e8123444b2d5ef1b3b6effb
+      -   - '["glossary_term","term:rule.ability"]'
+          - sha256:7684f76fba219769fdedcc553e248d6608abd2fa88cf559b0668630a8855f69a
+      -   - '["glossary_term","term:rule.any_order"]'
+          - sha256:1e7c4a5cdc43637b6a37634aa51d5ffc367da5183808f02b6fc04860574f642f
+      -   - '["glossary_term","term:rule.can_attack"]'
+          - sha256:a4a9b27637da2b4a7cf889f611649cc9d3a2fb88840705ed9a3ef258b7c30786
+      -   - '["glossary_term","term:rule.cannot_attack"]'
+          - sha256:fc8bcb885268b6d0f7775760a9a14d8eba1339c4edb4da23f64f93e426174ccd
+      -   - '["glossary_term","term:rule.combat_damage"]'
+          - sha256:85d2bfd0d2808041ebda4fc3905d4d12aa4c911982d58fc66a62767b495e52f6
+      -   - '["glossary_term","term:rule.cost"]'
+          - sha256:595d07362c42fa7efb766bb98ad0b11a2e3d0eaaccae2381e81cf73c3650b8b8
+      -   - '["glossary_term","term:rule.damage"]'
+          - sha256:720eafc3fa131ed96a9e4c667d4450c88d9daea0a3b4e3a6c37b34dbd1d39d3e
+      -   - '["glossary_term","term:rule.has_ability"]'
+          - sha256:890d5b838cea0af5c50913098fda156ea9cd23b846172c23bf911ff30c900d70
+      -   - '["glossary_term","term:rule.incoming_damage"]'
+          - sha256:68dc29748edcc45c5ae2fd76303ee7707da5059679a01722155ed2e68a468280
+      -   - '["glossary_term","term:rule.indestructible_by_ability"]'
+          - sha256:8808734aa4eddee40d208e20c954019b62b72e746bc0f979b7aa2e270ecd4d93
+      -   - '["glossary_term","term:rule.instead"]'
+          - sha256:96198eb45d8ac76905e2dc891ed83017d50dcdbc78d8549908f916dc8478d20b
+      -   - '["glossary_term","term:rule.instead_of"]'
+          - sha256:914d575f95c980644331b402ee87dee2f8bccd22a3007e18d98ff0b0f0959cb7
+      -   - '["glossary_term","term:rule.necromancer"]'
+          - sha256:e9b6378fd7eaf9c862d5c02ee6e97ccd853b86d388a0de8d07ddf1aa172c8513
+      -   - '["glossary_term","term:rule.nemesis"]'
+          - sha256:f15b37fd97a4568042c3c05d428af771cb05d84aa54f7cf27eb5f125e2508c8e
+      -   - '["glossary_term","term:rule.original_cost"]'
+          - sha256:5fc9d652c6c0ab8349203eaad21698cd9f492f8523cbd1e6a92ad89772f18e4a
+      -   - '["glossary_term","term:rule.random"]'
+          - sha256:6d2bce021daa3b13e57cd91c68276764cb2cfeaef79ea275c68d63b752bb45f6
+      -   - '["glossary_term","term:rule.same_name"]'
+          - sha256:fd6e1372a8c9f526b905fd598bfebdd4927b8e6a3794dbb781ede13a780843a7
+      -   - '["glossary_term","term:rule.vampire"]'
+          - sha256:57250c500b98a66027ce4ab6644ef0004d4031e7b340e42ae5de0322bc0789f3
+    sample_ids:
+      - '["glossary_term","term:player.opponent"]'
+      - '["glossary_term","term:player.self"]'
+      - '["glossary_term","term:quantifier.all"]'
+      - '["glossary_term","term:quantifier.other"]'
+      - '["glossary_term","term:resource.ep"]'
+      - '["glossary_term","term:resource.sep"]'
+      - '["glossary_term","term:rule.ability"]'
+      - '["glossary_term","term:rule.any_order"]'
+      - '["glossary_term","term:rule.can_attack"]'
+      - '["glossary_term","term:rule.cannot_attack"]'
+      - '["glossary_term","term:rule.combat_damage"]'
+      - '["glossary_term","term:rule.cost"]'
+      - '["glossary_term","term:rule.damage"]'
+      - '["glossary_term","term:rule.has_ability"]'
+      - '["glossary_term","term:rule.incoming_damage"]'
+      - '["glossary_term","term:rule.indestructible_by_ability"]'
+      - '["glossary_term","term:rule.instead"]'
+      - '["glossary_term","term:rule.instead_of"]'
+      - '["glossary_term","term:rule.necromancer"]'
+      - '["glossary_term","term:rule.nemesis"]'
+      - '["glossary_term","term:rule.original_cost"]'
+      - '["glossary_term","term:rule.random"]'
+      - '["glossary_term","term:rule.same_name"]'
+      - '["glossary_term","term:rule.vampire"]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。

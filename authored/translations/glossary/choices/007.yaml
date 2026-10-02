@@ -1,0 +1,53 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:336e047ebd477f830686e6e358d527a374b7a8e7bf9eeabfc33d25bdfaab4627
+records:
+  - record_key: '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:zone.evolve_deck
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 進化牌堆
+      origin: project
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 消歧說明：另見「エボルヴ」：卡種與牌組用名詞形
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 エボルヴデッキ → 進化牌堆；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:336e047ebd477f830686e6e358d527a374b7a8e7bf9eeabfc33d25bdfaab4627
+    state: confirmed
+    scope: batch
+    category: glossary_choice
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:336e047ebd477f830686e6e358d527a374b7a8e7bf9eeabfc33d25bdfaab4627
+    members:
+      -   - '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
+          - sha256:92f9509f31aff0836056677737ccb40455177dde07208ffcc1180e36782577cd
+    sample_ids:
+      - '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 エボルヴデッキ → 進化牌堆；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。

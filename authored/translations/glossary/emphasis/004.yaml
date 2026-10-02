@@ -1,0 +1,439 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:1c0a24bfaa21debb895877fa1809e25f9e4bb8c3265eed272c580514784b9ae6
+records:
+  - record_key: '["glossary_emphasis_choice","term:state.engaged",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:state.engaged
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:state.face_down",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:state.face_down
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:state.face_up",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:state.face_up
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.banishment",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.banishment
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.battlefield",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.battlefield
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.cemetery",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.cemetery
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.deck",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.deck
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.deck_bottom
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.deck_top",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.deck_top
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.evolve_deck
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.ex",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.ex
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:zone.hand",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:zone.hand
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:state.engaged",1]'
+            - '["glossary_emphasis_choice","term:state.face_down",1]'
+            - '["glossary_emphasis_choice","term:state.face_up",1]'
+            - '["glossary_emphasis_choice","term:zone.banishment",1]'
+            - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+            - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+            - '["glossary_emphasis_choice","term:zone.deck",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+            - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+            - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+            - '["glossary_emphasis_choice","term:zone.ex",1]'
+            - '["glossary_emphasis_choice","term:zone.hand",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:1c0a24bfaa21debb895877fa1809e25f9e4bb8c3265eed272c580514784b9ae6
+    state: confirmed
+    scope: batch
+    category: glossary_emphasis_choice
+    policy_id: glossary-emphasis-51-v1
+    membership_hash: sha256:1c0a24bfaa21debb895877fa1809e25f9e4bb8c3265eed272c580514784b9ae6
+    members:
+      -   - '["glossary_emphasis_choice","term:state.engaged",1]'
+          - sha256:a1f90b1b99519586aa5c8b64d5a24bf9695abcdb432a496969c10a6b3a3b71d0
+      -   - '["glossary_emphasis_choice","term:state.face_down",1]'
+          - sha256:52b39cee4d6e89774f8128cfcdd9fe79a87be1c0c604ee0ae36c449d5b98334a
+      -   - '["glossary_emphasis_choice","term:state.face_up",1]'
+          - sha256:910273f9dadfe62a51a04a31f9862fe72c7592b05438634f96cb0087b1b073bf
+      -   - '["glossary_emphasis_choice","term:zone.banishment",1]'
+          - sha256:b0adeede2d98aee302f995b4fe6618cffe27b6f4c0b604a1aba2cbfb82ed353f
+      -   - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+          - sha256:cbbb1d06dfe62f6faa55719979a4c9fdabf8e1b9e724cba745338081c2eafb29
+      -   - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+          - sha256:4360243bdb3e2908495dfac5315d6fe0347cceeabb4962dd639002e5df33936e
+      -   - '["glossary_emphasis_choice","term:zone.deck",1]'
+          - sha256:8da9fdfa1b745cbc93ef713bc7e693c19e3e60874016b003ecc560cebe70e0f4
+      -   - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+          - sha256:f22540936f003dc5c9dd0c774741c364ad01c78d0ee75a4ccf089bb47d242d53
+      -   - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+          - sha256:3dc47fa9b4e3ddf33e27c0368b154d57ac9588edb8073673dd14627b5d86ad90
+      -   - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+          - sha256:0cf443e5db93c30ccb7638d681a0a5fe2ba2d22cf14df8a1cfbd7e9215266ba3
+      -   - '["glossary_emphasis_choice","term:zone.ex",1]'
+          - sha256:64aa9e342f0202b280bba0fdd68a4f244c1ef199fff457b7a6382f876f19d275
+      -   - '["glossary_emphasis_choice","term:zone.hand",1]'
+          - sha256:3c7919eb566a6f5c740f72f9e7ea07ed14ba08518ac5fc96d60caaa37e74493b
+    sample_ids:
+      - '["glossary_emphasis_choice","term:state.engaged",1]'
+      - '["glossary_emphasis_choice","term:state.face_down",1]'
+      - '["glossary_emphasis_choice","term:state.face_up",1]'
+      - '["glossary_emphasis_choice","term:zone.banishment",1]'
+      - '["glossary_emphasis_choice","term:zone.battlefield",1]'
+      - '["glossary_emphasis_choice","term:zone.cemetery",1]'
+      - '["glossary_emphasis_choice","term:zone.deck",1]'
+      - '["glossary_emphasis_choice","term:zone.deck_bottom",1]'
+      - '["glossary_emphasis_choice","term:zone.deck_top",1]'
+      - '["glossary_emphasis_choice","term:zone.evolve_deck",1]'
+      - '["glossary_emphasis_choice","term:zone.ex",1]'
+      - '["glossary_emphasis_choice","term:zone.hand",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:51:42Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。

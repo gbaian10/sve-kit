@@ -1,0 +1,1391 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:a07e221090b65b8a0995809ec6750f0fe9f411a27211c243b50d06fb3f06b025
+records:
+  - record_key: '["glossary_term","term:event.turn_end"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.turn_end
+      category: rule_term
+      concept_key: event.turn_end
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:5eb0dc19ed7cff52968f9b6d3992194708438d592b940022cc4b8a925adb5ad7
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:0f31521fe19897f07976cba8895b768cfd1f14ae7024c1bf3a4ca0f12fcb69f1
+      source_span:
+        start: 96
+        end: 102
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.turn_start"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.turn_start
+      category: rule_term
+      concept_key: event.turn_start
+      source_ref:
+      source_span:
+      authored_source_ja: ターン開始時
+      missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.ambush"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.ambush
+      category: keyword
+      concept_key: keyword.ambush
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+        source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+        parser: translation-svwb-v1
+        locator: /data/skill_names/7
+        text_hash: sha256:e6fbf34bb330e3e6fb965602ad6b2172fc79fc5d51acf8009cc948b689b408d9
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.assail"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.assail
+      category: keyword
+      concept_key: keyword.assail
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:444bd00475b0bd3898e9ea12ea79a744186cc19a4d59f66b13788f5faeb246e0
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:6a3a35aa832e26c7ac0df4192b4fc41950b972b291392b9f568716519939faf6
+      source_span:
+        start: 5
+        end: 9
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.aura"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.aura
+      category: keyword
+      concept_key: keyword.aura
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:444bd00475b0bd3898e9ea12ea79a744186cc19a4d59f66b13788f5faeb246e0
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:6a3a35aa832e26c7ac0df4192b4fc41950b972b291392b9f568716519939faf6
+      source_span:
+        start: 74
+        end: 77
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.bane"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.bane
+      category: keyword
+      concept_key: keyword.bane
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b8205245a55eec0b3a376f14d6711e6c61317f4ce2dda81db71df4212435315f
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:d45530fabd473b7a7f8fe14955a80a60287e2438c6ae564fa3849a62fa54374c
+      source_span:
+        start: 7
+        end: 9
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.barrier"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.barrier
+      category: keyword
+      concept_key: keyword.barrier
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+        source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+        parser: translation-svwb-v1
+        locator: /data/skill_names/32
+        text_hash: sha256:b56060ed03bce38cc0d8b6d92bdac3f3ab4513b0c4bbb1121317307988843266
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.drain"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.drain
+      category: keyword
+      concept_key: keyword.drain
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:ea39377d08a9a6478518f0cf64c7dd47eea80afc89bf2d07702a2ffb502a4055
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:600c328dc8e9e22f57b47eb57f60d2d70111a90d040793b44869c7b93bb1ef4d
+      source_span:
+        start: 42
+        end: 46
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.intimidate"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.intimidate
+      category: keyword
+      concept_key: keyword.intimidate
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:21f2070438ac13e42eada4472d609820d4a2c93cff38a3c338a6055cb1e16141
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:fa5de6111a1e58f87b446c532f95fe723dd589cd251bbc074cd9fb1f88220dfe
+      source_span:
+        start: 1
+        end: 3
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.rush"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.rush
+      category: keyword
+      concept_key: keyword.rush
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e7e377d017c534d3c25c9b33796ad140c752ff325ae0eb59583ec108d4d4341d
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:61a0981aad8133c65d4ae204f0e153a1085709eed521559dab788214e7ab3b3a
+      source_span:
+        start: 21
+        end: 23
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.storm"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.storm
+      category: keyword
+      concept_key: keyword.storm
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2ea3c24c7a68f8b7dd2ced53e934d45469f50f5e2c0af97a854f51bab8dd8f5a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:806ae2cacda46348efa52e5352fc5133ce2805c99f3865083e5452751fadfae4
+      source_span:
+        start: 25
+        end: 27
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:keyword.ward"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:keyword.ward
+      category: keyword
+      concept_key: keyword.ward
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 21
+        end: 23
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.advance_marker"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.advance_marker
+      category: rule_term
+      concept_key: object.advance_marker
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:dd2416c9608c17b4b294dcb9c6252d4731b3f120855425b7e3c74b737086dba1
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:29fc990478e3137e2bc327ea0c7238ce156536d4e724c04ec6587edf6c654ff1
+      source_span:
+        start: 0
+        end: 5
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.card"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.card
+      category: rule_term
+      concept_key: object.card
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 38
+        end: 41
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.card_name"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.card_name
+      category: rule_term
+      concept_key: object.card_name
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:ea8bf0af5b72fd146ebc8fd2d39d2549690a5fa3f33cc6135ed5b6eeb93f062c
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:750ea0beff9da629c11c634efe7fa831808950e444c93c3c2bc7928f4a7ff05e
+      source_span:
+        start: 28
+        end: 32
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.combat_opponent"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.combat_opponent
+      category: rule_term
+      concept_key: object.combat_opponent
+      source_ref:
+      source_span:
+      authored_source_ja: 交戦相手
+      missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.counter"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.counter
+      category: rule_term
+      concept_key: object.counter
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:5f35eb98f2e2a20017b5ac9d6a6644a7e4c9aca480223d38a865fec33c17de43
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:e60ea2c18e48a2c0d0fba2db3865369d610b018ca5611f310f3279c3573fb110
+      source_span:
+        start: 21
+        end: 26
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.die"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.die
+      category: rule_term
+      concept_key: object.die
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:1bca999eae93426cde2d912d7b459ed322b922568b20a2e9f67b47edbb16c513
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:d21601603f174af00f4293a807c883e6d9314256899f40490bf646a6c766c324
+      source_span:
+        start: 36
+        end: 40
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.evolve_marker"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.evolve_marker
+      category: rule_term
+      concept_key: object.evolve_marker
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3d9db6aa2826d41cbd7450d30b4a7fb500ab92bf82d4a52573c8af79e3c189ce
+        parser: translation-jp-v1
+        locator: /faces/0/card_type
+        text_hash: sha256:1af33841003e95ddd9528b6b65425abb83747124997e0ddeed516b250f977c18
+      source_span:
+        start: 6
+        end: 10
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.start_amulet"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.start_amulet
+      category: rule_term
+      concept_key: object.start_amulet
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b1b591677da08d1d0b5ae7ad192ba6b59677fcecf0c05c572a9d870ac7f77127
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:37852f0d4e2d58aa2e2c3a34ec978bbf759d52e30581ea6e6ae7be40f234c83a
+      source_span:
+        start: 1
+        end: 11
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:object.token"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:object.token
+      category: rule_term
+      concept_key: object.token
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 77
+        end: 81
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:phase.end"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:phase.end
+      category: rule_term
+      concept_key: phase.end
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:65d50b0635eb6d35870f6ef6ae188a891bfdec0d4a3085e5e1bedaf96928ea38
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:76fca46847f50b54e5eecfa29cf8912ba28a4a35b963c530a12964175cdf6997
+      source_span:
+        start: 54
+        end: 61
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:phase.main"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:phase.main
+      category: rule_term
+      concept_key: phase.main
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:d59390c598f42620a98db26c9fcc45e2888401884e17da29d9dde72987a6669a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:13337dcead500ea07254ee4710eff4bae2546a8d5ec51664e3298547dca20b2f
+      source_span:
+        start: 11
+        end: 18
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:phase.start"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:phase.start
+      category: rule_term
+      concept_key: phase.start
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:969f62e9433deee75a193da5b5f33c8957af0e3f99dd7724d76b01ddcad408dc
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:eff8e399f73b58944915323208b90fc372fc9a57e9ff303c32c625f995afb192
+      source_span:
+        start: 44
+        end: 52
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:event.turn_end"]'
+            - '["glossary_term","term:event.turn_start"]'
+            - '["glossary_term","term:keyword.ambush"]'
+            - '["glossary_term","term:keyword.assail"]'
+            - '["glossary_term","term:keyword.aura"]'
+            - '["glossary_term","term:keyword.bane"]'
+            - '["glossary_term","term:keyword.barrier"]'
+            - '["glossary_term","term:keyword.drain"]'
+            - '["glossary_term","term:keyword.intimidate"]'
+            - '["glossary_term","term:keyword.rush"]'
+            - '["glossary_term","term:keyword.storm"]'
+            - '["glossary_term","term:keyword.ward"]'
+            - '["glossary_term","term:object.advance_marker"]'
+            - '["glossary_term","term:object.card"]'
+            - '["glossary_term","term:object.card_name"]'
+            - '["glossary_term","term:object.combat_opponent"]'
+            - '["glossary_term","term:object.counter"]'
+            - '["glossary_term","term:object.die"]'
+            - '["glossary_term","term:object.evolve_marker"]'
+            - '["glossary_term","term:object.start_amulet"]'
+            - '["glossary_term","term:object.token"]'
+            - '["glossary_term","term:phase.end"]'
+            - '["glossary_term","term:phase.main"]'
+            - '["glossary_term","term:phase.start"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+decisions:
+  - id: d:a07e221090b65b8a0995809ec6750f0fe9f411a27211c243b50d06fb3f06b025
+    state: confirmed
+    scope: batch
+    category: glossary_term
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:a07e221090b65b8a0995809ec6750f0fe9f411a27211c243b50d06fb3f06b025
+    members:
+      -   - '["glossary_term","term:event.turn_end"]'
+          - sha256:6c0ce2ab20cea9418d802befa65ad299f10e604dc4140a275ffb5a502a19e52c
+      -   - '["glossary_term","term:event.turn_start"]'
+          - sha256:0e9671507590edcb171edafb33c576810083e89c56b1e1a6a68e4160e60b485c
+      -   - '["glossary_term","term:keyword.ambush"]'
+          - sha256:9743e3d3aa8c474f1d38822733635aef8e9b0bb6dbb1f18eb9129221bbab8e35
+      -   - '["glossary_term","term:keyword.assail"]'
+          - sha256:f5986ec02fd05fbe25da54f264320c5a5d52a3286fa6f890542815525cc5552a
+      -   - '["glossary_term","term:keyword.aura"]'
+          - sha256:479746316a4335a1decb9cf66fa91d464b561849ac4a2323871a426a83a2f43e
+      -   - '["glossary_term","term:keyword.bane"]'
+          - sha256:80cd118d7f7df66e3352553b282845854cafe4549133d94431f765dafe415dd7
+      -   - '["glossary_term","term:keyword.barrier"]'
+          - sha256:5e49c50ec7606998795d3216b1039b1b08d74fe86f4f58b8b90de046231586a1
+      -   - '["glossary_term","term:keyword.drain"]'
+          - sha256:5fa3a58d45491a1d3dfc0e364fd302042f38a8264a6555b71b57c9bf00b99a76
+      -   - '["glossary_term","term:keyword.intimidate"]'
+          - sha256:a8bcaa42d4d004588d6d713224002ca112d5f97944e4b3c9b78f4e9ea66d71a9
+      -   - '["glossary_term","term:keyword.rush"]'
+          - sha256:365b093aec70d21c4f7f160bd4977b1aaf77bf729f19611f4002ece5402207df
+      -   - '["glossary_term","term:keyword.storm"]'
+          - sha256:7878e2bd975cac606c7d3a83e22248b6f3c9590b51bd6b1e5def16603be82592
+      -   - '["glossary_term","term:keyword.ward"]'
+          - sha256:daea7670263d59c6027febe13514a11bcaf74ce0e21e4d31d6d0b85699e0e30d
+      -   - '["glossary_term","term:object.advance_marker"]'
+          - sha256:ac638d4d1ee81b6764ea630bd265580759a4279da3aae48c0d8cd69a7d6b66dd
+      -   - '["glossary_term","term:object.card"]'
+          - sha256:1102d7155a59974d11657e5d8a77e869774226fab8cadc870a48cbf74e8d17d3
+      -   - '["glossary_term","term:object.card_name"]'
+          - sha256:26c597bed0dd5470c4b988de332127c29bce3f392d5e774fd149602cb2c63f59
+      -   - '["glossary_term","term:object.combat_opponent"]'
+          - sha256:9c543954794b2be72b4950aa5f55026707689138389011aec4111e29f440657f
+      -   - '["glossary_term","term:object.counter"]'
+          - sha256:6918cfc6e7b3ef1338af5c919e40a449df947bebe0dbbc4b81503e7821294b70
+      -   - '["glossary_term","term:object.die"]'
+          - sha256:5d85fddb86519f6d11b1a5d0e813c4c1cf59072852cbf35931fa3cbdb6c876bf
+      -   - '["glossary_term","term:object.evolve_marker"]'
+          - sha256:c1048c491f15638de5e3c55be013ae62902ee2fda7ad3c4dc38de419b0f995e7
+      -   - '["glossary_term","term:object.start_amulet"]'
+          - sha256:052f2ee2a218bd148e23e27577555c515150db3195e0f54e439b671969848af8
+      -   - '["glossary_term","term:object.token"]'
+          - sha256:4e0298b0751a7973316a1960ba362d6a6b3cc8d87e250f4acd7977fd40ac8e4d
+      -   - '["glossary_term","term:phase.end"]'
+          - sha256:48649956b1855306f79e3cdd0c736247f9cc71c105e00fccd38f9a115a76ddc4
+      -   - '["glossary_term","term:phase.main"]'
+          - sha256:3bb1401890a05bf9732edcb6eb085e1eb1642cec6682844176f7ea239eb09d2b
+      -   - '["glossary_term","term:phase.start"]'
+          - sha256:3c07556272c9dff8b68a9d98a8281e2a1368f32b09e53c933069d6f1c9edd81e
+    sample_ids:
+      - '["glossary_term","term:event.turn_end"]'
+      - '["glossary_term","term:event.turn_start"]'
+      - '["glossary_term","term:keyword.ambush"]'
+      - '["glossary_term","term:keyword.assail"]'
+      - '["glossary_term","term:keyword.aura"]'
+      - '["glossary_term","term:keyword.bane"]'
+      - '["glossary_term","term:keyword.barrier"]'
+      - '["glossary_term","term:keyword.drain"]'
+      - '["glossary_term","term:keyword.intimidate"]'
+      - '["glossary_term","term:keyword.rush"]'
+      - '["glossary_term","term:keyword.storm"]'
+      - '["glossary_term","term:keyword.ward"]'
+      - '["glossary_term","term:object.advance_marker"]'
+      - '["glossary_term","term:object.card"]'
+      - '["glossary_term","term:object.card_name"]'
+      - '["glossary_term","term:object.combat_opponent"]'
+      - '["glossary_term","term:object.counter"]'
+      - '["glossary_term","term:object.die"]'
+      - '["glossary_term","term:object.evolve_marker"]'
+      - '["glossary_term","term:object.start_amulet"]'
+      - '["glossary_term","term:object.token"]'
+      - '["glossary_term","term:phase.end"]'
+      - '["glossary_term","term:phase.main"]'
+      - '["glossary_term","term:phase.start"]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。

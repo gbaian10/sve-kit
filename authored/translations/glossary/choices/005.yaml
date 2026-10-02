@@ -1,0 +1,53 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:6278dd83c170b6f9abd836b02aeab6e279358067458ce97489f7610a2c9bbc2a
+records:
+  - record_key: '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:trait.idolatry
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 偶像歌手
+      origin: project
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：Claude 決定：莉榭娜系列（歌聲、獨唱、信徒）的特性；為了讓漢字「偶像」維持原字，這個改成「偶像歌手」 消歧說明：另見種族「偶像」：兩者不同。アイドル出現在巫師職業的卡（與特性「絶傑」一起），不是合作作品；「偶像」出現在主教職業的神像、祭壇類卡片
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 アイドル → 偶像歌手；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。Claude 決定：莉榭娜系列（歌聲、獨唱、信徒）的特性；為了讓漢字「偶像」維持原字，這個改成「偶像歌手」日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:6278dd83c170b6f9abd836b02aeab6e279358067458ce97489f7610a2c9bbc2a
+    state: confirmed
+    scope: batch
+    category: glossary_choice
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:6278dd83c170b6f9abd836b02aeab6e279358067458ce97489f7610a2c9bbc2a
+    members:
+      -   - '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
+          - sha256:def554f65f23192df17af84fdc2c941bbbd8623a0b76c2863ec2a7e48b4d1c31
+    sample_ids:
+      - '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 アイドル → 偶像歌手；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。Claude 決定：莉榭娜系列（歌聲、獨唱、信徒）的特性；為了讓漢字「偶像」維持原字，這個改成「偶像歌手」日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。

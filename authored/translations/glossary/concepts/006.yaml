@@ -1,0 +1,1411 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:2453ea89ce8014ab0932ea08876dbeec22b6a94a21e43eef39351b9d3ae2bf96
+records:
+  - record_key: '["glossary_term","term:stat.attack"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:stat.attack
+      category: rule_term
+      concept_key: stat.attack
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 54
+        end: 57
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:stat.health"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:stat.health
+      category: rule_term
+      concept_key: stat.health
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 62
+        end: 64
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:stat.max_pp"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:stat.max_pp
+      category: rule_term
+      concept_key: stat.max_pp
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:fe0cb93e9d47935a1c37545aefc4795b3a9680b42ca4ef7c31b82d34df9352a0
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:005ac12caa20795cfdf260490e34b4a3972819d42ccf7ac1e5193a2515ec02a4
+      source_span:
+        start: 18
+        end: 23
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:state.engaged"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:state.engaged
+      category: rule_term
+      concept_key: state.engaged
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e5d353a5b18d5a3f8360121a0c021777f1ac150a2ae1693f43c8e5f051a25d42
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:6e364d8bbdb42778898b17e9e7ce3b9422eba9fa52391dcb3d85bd123ae801ba
+      source_span:
+        start: 5
+        end: 10
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:state.face_down"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:state.face_down
+      category: rule_term
+      concept_key: state.face_down
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:670fa0cb38b51a5ea86f9c190c933911fe2c6def0c8aed60408d38adbb88439a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:1d755f0ba010f1995a7efc9738240e1af011a980f93a79452d5a9ee17a5cc667
+      source_span:
+        start: 61
+        end: 64
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:state.face_up"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:state.face_up
+      category: rule_term
+      concept_key: state.face_up
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:670fa0cb38b51a5ea86f9c190c933911fe2c6def0c8aed60408d38adbb88439a
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:1d755f0ba010f1995a7efc9738240e1af011a980f93a79452d5a9ee17a5cc667
+      source_span:
+        start: 28
+        end: 31
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.academic"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.academic
+      category: trait
+      concept_key: trait.academic
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:fa0aa3d95352e6ce3950f6a2fd77eadb2ca9e6648851d36f9f7260b50ee8426c
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:9d6483ef0b05aa5b6e59438e76e4752950c1ed0286f1d582933ee80cbce6bfe9
+      source_span:
+        start: 5
+        end: 7
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.academy"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.academy
+      category: trait
+      concept_key: trait.academy
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3fd6212341800357fe6b4c01c9c11ade48a9c6e2c94d76edbbb3984c41f1218a
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:2de6cc976ee4defb57cb030a2347b6abe6e76290182f0368bb0e727c36c85c39
+      source_span:
+        start: 3
+        end: 5
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.alchemist"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.alchemist
+      category: trait
+      concept_key: trait.alchemist
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:4d5cc8da59be97898f626f71b34bdd12ef1dcf126c5d02e7922e452016d4a2eb
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:5925e5d3c91983d5c0a9703dda39fe4d22c83e6402f1cac3a5e29360cd32b933
+      source_span:
+        start: 0
+        end: 4
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.alter_maiden"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.alter_maiden
+      category: trait
+      concept_key: trait.alter_maiden
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:08ef2ff5051e85c2398282c3a2e5090e14039ff90cd2bf4b10dda2d86e7835a5
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:e72169418420e9dca1612951cd1940c5e0ee3f19793e85886e63486913edf980
+      source_span:
+        start: 5
+        end: 13
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.anathema"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.anathema
+      category: trait
+      concept_key: trait.anathema
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:35667b3cc40ea141833ab2df80240b3e432d8a412e287d03c7ad7257a0e9d47b
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:484f8b389745b33a539c7c5678a492700f0aba99ca1c68fb56406de6798d4ed9
+      source_span:
+        start: 3
+        end: 7
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.angel"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.angel
+      category: trait
+      concept_key: trait.angel
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:95b0becad110164a30047761531d1eb1be4888c55d095662c5114cc015d3dcd8
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:970d69ad21de1cc8915dc4025b619cbd5a1f55b358b73cfa93e044678b8c7b00
+      source_span:
+        start: 0
+        end: 2
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.aqua_force"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.aqua_force
+      category: trait
+      concept_key: trait.aqua_force
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:256685cab320c155512807765bef5303f5d34bd62e939ec91b4ac19c62356201
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:263c9a69432321314a643a91b4d2b779253867496194eeac3a2b5d0f03474c4a
+      source_span:
+        start: 7
+        end: 14
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.arcana"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.arcana
+      category: trait
+      concept_key: trait.arcana
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:d6b48e26110dea0ba7bc69e94eed43ab987192b81b37e4f6376dcd5558947e6b
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:3d5cef1432193fce80d1f26e3a2bf02b02293d1db5668569216f346b1254cf8c
+      source_span:
+        start: 0
+        end: 4
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.arcanaform"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.arcanaform
+      category: trait
+      concept_key: trait.arcanaform
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:551b5fd6a832a006720f862a6f0a38dbd153d66febbca8583ce3087da18c62e3
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:69a7e0550f8fded72319db75c509867000dc7b8fcc8041a8a02479c872481845
+      source_span:
+        start: 0
+        end: 4
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.archfiend"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.archfiend
+      category: trait
+      concept_key: trait.archfiend
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:38823384b9ae83fd24e934de1ac621938300cc12db2a6c6b59c12ce8086bc568
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:be6c90e2b1cb4ea9f9ccf237b14d25c67dad397f4a210ea517ab7cd8bd1f7361
+      source_span:
+        start: 0
+        end: 2
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.arena"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.arena
+      category: trait
+      concept_key: trait.arena
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:156c1b2d81a6ab880572dde772fa52f9806f915887f3249d1b88800fd5e5d46a
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:563219af82497c9e1f0a1e5bc4de036d2feb130172a6e9cbceb0989434401553
+      source_span:
+        start: 0
+        end: 3
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.armed"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.armed
+      category: trait
+      concept_key: trait.armed
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3ee40550e1f41b78bc5011e27ed4637cbc166b64673136e35a0df362f1264fcb
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:0707602c4fb2b06aa4d31aed84ea7b5f041111b6b81eb652198ff59d36c5cf49
+      source_span:
+        start: 0
+        end: 2
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.arthurian"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.arthurian
+      category: trait
+      concept_key: trait.arthurian
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:af245ba53167c9529fc75af98c27ba5df47cf253997a247ddf83a73c430c2573
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:4317e6458ed2994a184264437867864c6f4caebeaa12122a6c40465f4b80a0f0
+      source_span:
+        start: 0
+        end: 2
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.artifact"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.artifact
+      category: trait
+      concept_key: trait.artifact
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b393de33d8937d568857f5c66d66add6092850a4b39c5ff00337b792afd84781
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:6badec23b1bf59d0791578224ee35c13fdc99d6b6b60f51b6ce81cc5d623c7c4
+      source_span:
+        start: 15
+        end: 23
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.assassin"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.assassin
+      category: trait
+      concept_key: trait.assassin
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:7b582f0e07e7fd5b9396c3f611d7e31e02f30f946f83c809dd7f0bbb95add98e
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:e89d7d707fde13001c88e9ea4962c7708b9339fb1e766cb0106253b64017f94f
+      source_span:
+        start: 4
+        end: 7
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.avian"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.avian
+      category: trait
+      concept_key: trait.avian
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e7c830fee317cc60d92d25dd8abd7bbb1cc728bec5b346df0ebb1436b4dbc389
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:c961a47d8f6b698ed399f8d7f0000474a36246bc501a921fd252f3de47afed2a
+      source_span:
+        start: 0
+        end: 2
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.beast"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.beast
+      category: trait
+      concept_key: trait.beast
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:a0300266004f3266c5de69013e88f89063fa5256c595c6d74be2628cd3a062a6
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:e24fa287246b6ad6acc82048763ed5678508edfe281747f9a694c767cbc18ad7
+      source_span:
+        start: 3
+        end: 4
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:trait.bnw"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:trait.bnw
+      category: trait
+      concept_key: trait.bnw
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:58ad417b8f0455a8379cc8b24adb222bd32767f108fce2a2531fd161a8cfd043
+        parser: translation-jp-v1
+        locator: /faces/0/trait_raw
+        text_hash: sha256:874a6cbb0b8fb118d6af94995a830d7449350223d19bca66600da4a20d03fadd
+      source_span:
+        start: 4
+        end: 7
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:stat.attack"]'
+            - '["glossary_term","term:stat.health"]'
+            - '["glossary_term","term:stat.max_pp"]'
+            - '["glossary_term","term:state.engaged"]'
+            - '["glossary_term","term:state.face_down"]'
+            - '["glossary_term","term:state.face_up"]'
+            - '["glossary_term","term:trait.academic"]'
+            - '["glossary_term","term:trait.academy"]'
+            - '["glossary_term","term:trait.alchemist"]'
+            - '["glossary_term","term:trait.alter_maiden"]'
+            - '["glossary_term","term:trait.anathema"]'
+            - '["glossary_term","term:trait.angel"]'
+            - '["glossary_term","term:trait.aqua_force"]'
+            - '["glossary_term","term:trait.arcana"]'
+            - '["glossary_term","term:trait.arcanaform"]'
+            - '["glossary_term","term:trait.archfiend"]'
+            - '["glossary_term","term:trait.arena"]'
+            - '["glossary_term","term:trait.armed"]'
+            - '["glossary_term","term:trait.arthurian"]'
+            - '["glossary_term","term:trait.artifact"]'
+            - '["glossary_term","term:trait.assassin"]'
+            - '["glossary_term","term:trait.avian"]'
+            - '["glossary_term","term:trait.beast"]'
+            - '["glossary_term","term:trait.bnw"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+decisions:
+  - id: d:2453ea89ce8014ab0932ea08876dbeec22b6a94a21e43eef39351b9d3ae2bf96
+    state: confirmed
+    scope: batch
+    category: glossary_term
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:2453ea89ce8014ab0932ea08876dbeec22b6a94a21e43eef39351b9d3ae2bf96
+    members:
+      -   - '["glossary_term","term:stat.attack"]'
+          - sha256:fae541acda04cdfd6e00a2585bfbcc450f4a31cc5a75b6d222f9277346b0b0cf
+      -   - '["glossary_term","term:stat.health"]'
+          - sha256:fd7e25f60249f09b4a29385218e6c7256eda451b428a640e881cb5938bd6966e
+      -   - '["glossary_term","term:stat.max_pp"]'
+          - sha256:5ffe6179cdbe05cc1041fb80d87b093fb61f77c1466257a4d77bc7fc81b03e9e
+      -   - '["glossary_term","term:state.engaged"]'
+          - sha256:c9869592be1c8afa895b6fde0a6b9c960083bc88911c2fdd49cc4db5210a72d4
+      -   - '["glossary_term","term:state.face_down"]'
+          - sha256:0ce297b6eaea531190d727cfaa4fd17f451d5828613b13a4b357d1f1ed604f42
+      -   - '["glossary_term","term:state.face_up"]'
+          - sha256:6bf39ea8828e3628d5d9f8e5a10b45a06efe0e681b829d1e6daf5b1fc28abf94
+      -   - '["glossary_term","term:trait.academic"]'
+          - sha256:34698180292ae96dbb8f8a296c5a4eb15bdd305665f23dfe237d883653db2642
+      -   - '["glossary_term","term:trait.academy"]'
+          - sha256:3e7f4ff1d05d6f422bf39dc0c80283e03e301546a9faedeaaf0d1ebb71970d4b
+      -   - '["glossary_term","term:trait.alchemist"]'
+          - sha256:abb7e15c229d3b1abd4cbd4bc8307200bc8f6b5246b87ea89c2452a1bea599ff
+      -   - '["glossary_term","term:trait.alter_maiden"]'
+          - sha256:4a11ed1b6548e84913b76b8495388d758c1d528c030e1622eb363cb68599e433
+      -   - '["glossary_term","term:trait.anathema"]'
+          - sha256:f2b4594dcb0c416d0d9a93582d4b7d5fcba42ed8a0b0aff0289db3c848bbd28b
+      -   - '["glossary_term","term:trait.angel"]'
+          - sha256:05898b9b1ad8e918d1c29fe4db0a8066c893ac5fd70ae17801eab498ecbdb745
+      -   - '["glossary_term","term:trait.aqua_force"]'
+          - sha256:177184151a72f68dce8d35f9fb93bea9a68ef46efe12574d0b69edf7ab0e0e85
+      -   - '["glossary_term","term:trait.arcana"]'
+          - sha256:397fbbb0d9682d3e80931b86bfe75ae875abd3a947be0b4419dc9fae50411558
+      -   - '["glossary_term","term:trait.arcanaform"]'
+          - sha256:27bf872aa8b2d786988a8aaf3e2332d337aadb76c493b1c51fa0e534332f712e
+      -   - '["glossary_term","term:trait.archfiend"]'
+          - sha256:b1b32eddd80d1bc043dd972402b1773138fe41c8222968cc9cd35235ab72d473
+      -   - '["glossary_term","term:trait.arena"]'
+          - sha256:3018bccfb8f66feb6fdf9a00e60ccb288a7f77328f9ce8f885ce48a0424866d9
+      -   - '["glossary_term","term:trait.armed"]'
+          - sha256:3602950e94a2dd6d541af2f90038aa23c3858eeff4cd1f0d47c885edb25acf0e
+      -   - '["glossary_term","term:trait.arthurian"]'
+          - sha256:31d72876d22772e0395b26c2e2fd165c6256245f9c318dd566476cfd6cb256b1
+      -   - '["glossary_term","term:trait.artifact"]'
+          - sha256:a99c7d810b2bc96b0ae80db97a9c089ef714a0416ad19fa96109d76bcd74bfef
+      -   - '["glossary_term","term:trait.assassin"]'
+          - sha256:94dc2da7142db5ce5f2efde7530c952248a73e56ffbc31444dee2ba9d918efd0
+      -   - '["glossary_term","term:trait.avian"]'
+          - sha256:37fafb2f230a3e73e9e2d2cd0f35d41ec94e49eee3de0f4d3e13f9d1da649140
+      -   - '["glossary_term","term:trait.beast"]'
+          - sha256:7d906966d8af3ce60c2a09f4dba90a28ce4ed2048fad93abb69a0c2743f854bf
+      -   - '["glossary_term","term:trait.bnw"]'
+          - sha256:4608b89cf2b3eca790f0ffda12b570087735f5b2cd07171b57a9544afd8303fe
+    sample_ids:
+      - '["glossary_term","term:stat.attack"]'
+      - '["glossary_term","term:stat.health"]'
+      - '["glossary_term","term:stat.max_pp"]'
+      - '["glossary_term","term:state.engaged"]'
+      - '["glossary_term","term:state.face_down"]'
+      - '["glossary_term","term:state.face_up"]'
+      - '["glossary_term","term:trait.academic"]'
+      - '["glossary_term","term:trait.academy"]'
+      - '["glossary_term","term:trait.alchemist"]'
+      - '["glossary_term","term:trait.alter_maiden"]'
+      - '["glossary_term","term:trait.anathema"]'
+      - '["glossary_term","term:trait.angel"]'
+      - '["glossary_term","term:trait.aqua_force"]'
+      - '["glossary_term","term:trait.arcana"]'
+      - '["glossary_term","term:trait.arcanaform"]'
+      - '["glossary_term","term:trait.archfiend"]'
+      - '["glossary_term","term:trait.arena"]'
+      - '["glossary_term","term:trait.armed"]'
+      - '["glossary_term","term:trait.arthurian"]'
+      - '["glossary_term","term:trait.artifact"]'
+      - '["glossary_term","term:trait.assassin"]'
+      - '["glossary_term","term:trait.avian"]'
+      - '["glossary_term","term:trait.beast"]'
+      - '["glossary_term","term:trait.bnw"]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
