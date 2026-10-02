@@ -24,7 +24,14 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value, p
 from sve_carddb.text_observations import text_configuration
 
 from .adoption_display_fixtures import make_display_case
-from .adoption_fixtures import Case, commit, envelope, index, write
+from .adoption_fixtures import (
+    Case,
+    commit,
+    envelope,
+    index,
+    source_configuration,
+    write,
+)
 from .test_adoption_sources import JSON_CODE, SOURCE_RUNTIME
 from .test_adoption_sources import baseline as baseline  # ruff: ignore[useless-import-alias] -- reuse one tiny sealed source per module
 from .test_catalog_text_composition import adopt_compound
@@ -240,6 +247,7 @@ def test_historical_recipe_itself_checks_immutable_runtime_closure(
     ("change", "message"),
     [
         ("disk", "^Source parser runtime/dependency closure cannot be replayed$"),
+        ("parser_disk", "^Historical recipe implementation cannot be replayed$"),
         ("dependency_hash", "^Review dependency hash mismatch$"),
         (
             "missing_pin",
@@ -251,12 +259,14 @@ def test_current_build_cannot_borrow_historical_runtime_validation(
     case: tuple[Case, Path], schema: CompiledSchema, change: str, message: str
 ) -> None:
     inputs, archive = case
-    if change == "disk":
-        file = inputs.repository / SOURCE_RUNTIME
+    if change in {"disk", "parser_disk"}:
+        file = inputs.repository / (
+            JSON_CODE if change == "parser_disk" else SOURCE_RUNTIME
+        )
         file.write_bytes(file.read_bytes() + b"\n# Unloaded current runtime.\n")
         inputs = replace(inputs, revision=commit(inputs.repository))
     build = inputs.build()
-    if change != "disk":
+    if change not in {"disk", "parser_disk"}:
         pins = tuple(
             p.model_copy(update={"sha256": "sha256:" + "0" * 64})
             if change == "dependency_hash" and p.name == SOURCE_RUNTIME
@@ -428,3 +438,37 @@ def test_historical_projection_still_requires_exact_frozen_field(
                 stores={"test-store": archive},
             )
         assert not db.rows("source_record")
+
+
+def test_current_identity_checks_disk_even_without_source_evidence_adoptions(
+    tmp_path: Path, text_baseline: DisplayCase, schema: CompiledSchema
+) -> None:
+    repository = tmp_path / "repository"
+    shutil.copytree(text_baseline.case.repository, repository)
+    copied = replace(
+        text_baseline.case, repository=repository, root=repository / "authored"
+    )
+    # No receipt evidence can pre-validate the current identity parser on this path.
+    shutil.rmtree(copied.root / "catalog-adoptions")
+    index(copied.root)
+    parser = repository / "carddb/src/sve_carddb/extract/official_jp.py"
+    parser.write_bytes(parser.read_bytes() + b"\n# Unloaded current identity parser.\n")
+    copied = replace(copied, revision=commit(repository))
+    case = replace(text_baseline, case=copied)
+    inputs = copied.inputs()
+    config = source_configuration(copied, inputs.configuration())
+    config["text_observations"] = case.plan.configuration()
+    build = case.context().model_copy(
+        update={"configuration": canonical(config).decode()}
+    )
+    with create_database(schema) as db:
+        with pytest.raises(
+            ValueError, match=r"^Historical recipe implementation cannot be replayed$"
+        ):
+            derive_catalog(
+                db,
+                inputs,
+                build=build,
+                stores={"test-store": case.archive},
+                text_plan=case.plan,
+            )

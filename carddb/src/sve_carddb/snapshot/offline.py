@@ -8,7 +8,7 @@ from pydantic import JsonValue, model_validator
 
 from sve_carddb.build_bundle import publish_bundle
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_minimum
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
 from sve_carddb.build_inputs import BuildContext, Revision, input_record, uses_sorted
 from sve_carddb.card_extras import (
     FrozenCardExtras,
@@ -17,7 +17,11 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
+from sve_carddb.catalog.adoption_sources import (
+    SOURCE_RECIPE_PATHS,
+    AdoptionSources,
+    PinnedRepository,
+)
 from sve_carddb.products import (
     FrozenProducts,
     load_product_identities,
@@ -38,7 +42,7 @@ from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Batch, Ownership
 from sve_carddb.snapshot.preview.build import Built
 from sve_carddb.snapshot.project import Decisions, Settings, project
-from sve_carddb.snapshot.values import array, digest
+from sve_carddb.snapshot.values import array, canonical, digest
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.text_observations import (
     FrozenTexts,
@@ -126,8 +130,29 @@ def _dependencies(repo: Path, identities: ProductIdentities) -> dict[str, bytes]
         for path in (repo / "carddb/src/sve_carddb").rglob("*.py")
         if path.name != "_version.py"
     } | identities.dependencies()
-    dependencies["carddb/uv.lock"] = (repo / "carddb/uv.lock").read_bytes()
+    for name in ("carddb/uv.lock", "carddb/pyproject.toml"):
+        dependencies[name] = (repo / name).read_bytes()
     return dependencies
+
+
+def _catalog_source_recipes(
+    revision: str, dependencies: dict[str, bytes]
+) -> dict[str, JsonValue]:
+    """Pin supported current implementations independently of historical receipts."""
+    recipes: dict[str, JsonValue] = {}
+    for parser, path in SOURCE_RECIPE_PATHS.items():
+        content = dependencies.get(path)
+        if content is None:
+            raise ValueError("Offline catalog parser dependency is absent")
+        recipes[parser] = {
+            "version": parser,
+            "program_revision": revision,
+            "code_path": path,
+            "code_hash": digest(content),
+            "config": {},
+            "config_hash": digest(canonical({})),
+        }
+    return recipes
 
 
 def _derive_adoptions(
@@ -150,7 +175,9 @@ def _adoption_uses(
     inputs: AdoptionInputs, stores: dict[str, Path]
 ) -> tuple[SourceUse, ...]:
     """Replay the complete receipt evidence independently of database insertion."""
-    sources = AdoptionSources(stores, PinnedRepository(inputs.repository))
+    sources = AdoptionSources(
+        stores, PinnedRepository(inputs.repository), historical=True
+    )
     for snapshot in inputs.load():
         for shard in snapshot.shards:
             envelope = shard.envelope()
@@ -266,16 +293,23 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
     )
     dependencies = _dependencies(inputs.repo, identities)
     adoptions = AdoptionInputs(
-        inputs.repo / "authored", inputs.repo, inputs.revision, ("catalog-adoptions",)
+        inputs.repo / "authored",
+        inputs.repo,
+        inputs.revision,
+        ("catalog-adoptions",),
+        include_translations=True,
     )
     configuration = adoptions.configuration() | {
+        "catalog_source_recipes": _catalog_source_recipes(
+            inputs.revision, dependencies
+        ),
         "product_identity": identities.configuration(),
         "offline_recipe": inputs.model_dump(mode="json", exclude={"repo", "archive"}),
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
-    schema = compile_minimum(include_en=True)
+    schema = compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence"))
     derived = _derive_adoptions(adoptions, schema, context, stores)
     vocabulary = derived.vocabulary
     configuration |= text_configuration(texts, vocabulary, ())

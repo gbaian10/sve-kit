@@ -39,6 +39,7 @@ from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
+from .adoption_fixtures import REPO
 from .catalog_vocabulary_fixtures import make_vocabulary_case
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
 from .test_snapshot_preview import EmptySources, prepare_build
@@ -65,6 +66,15 @@ def prepared(
 ) -> tuple[Case, Inputs, tuple[CardPage, ...]]:
     case = default_text_case.copy(tmp_path / "synthetic")
     original = prepare_build(case, tmp_path, monkeypatch)
+    for name in (
+        "carddb/pyproject.toml",
+        "carddb/src/sve_carddb/extract/official_jp.py",
+        "carddb/src/sve_carddb/extract/official_en.py",
+        "carddb/src/sve_carddb/snapshot/values.py",
+    ):
+        target = original.repo / name
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_bytes((REPO / name).read_bytes())
     pins = tuple(
         RegionalInput(
             region=region,
@@ -97,7 +107,7 @@ def prepared(
             return {"synthetic_adoptions": "immutable-receipts"}
 
     monkeypatch.setattr(
-        adoption_importer, "AdoptionInputs", lambda *_args: AdoptedInputs()
+        adoption_importer, "AdoptionInputs", lambda *_args, **_kwargs: AdoptedInputs()
     )
     monkeypatch.setattr(
         adoption_importer,

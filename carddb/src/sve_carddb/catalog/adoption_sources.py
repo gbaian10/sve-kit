@@ -40,6 +40,12 @@ if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_models import Record, ReviewContext, TextValue
     from sve_carddb.registry.snapshot import RegistrySnapshot
 
+SOURCE_RECIPE_PATHS = {
+    "official-jp-exact-v1": "carddb/src/sve_carddb/extract/official_jp.py",
+    "official-en-exact-v1": "carddb/src/sve_carddb/extract/official_en.py",
+    "exact-json-v1": "carddb/src/sve_carddb/snapshot/values.py",
+}
+
 
 class PinnedRepository:
     def __init__(self, root: Path) -> None:
@@ -168,8 +174,11 @@ class AdoptionSources:
 
     def recipe(self, parser: str, context: BuildContext) -> Normalizer:
         """Resolve a fully pinned recipe for historical or current frozen observations."""
-        config = object_value(parse(context.configuration.encode()))
-        recipes = object_value(config.get("catalog_source_recipes"))
+        config = parse(context.configuration.encode())
+        if not isinstance(config, dict) or not isinstance(
+            recipes := config.get("catalog_source_recipes"), dict
+        ):
+            raise ValueError("Catalog source recipes must be an object")  # ruff: ignore[type-check-without-type-error] -- expose a domain refusal at the catalog entry, not an incidental boundary TypeError
         try:
             pin = Normalizer.model_validate_json(canonical(recipes.get(parser)))
         except ValidationError:
@@ -412,6 +421,7 @@ class AdoptionSources:
         return self.cache[key]
 
     def _runtime(self, pin: Normalizer, context: BuildContext) -> None:
+        # Historical recipe closures cannot grow without a new recipe version.
         required = {
             "carddb/uv.lock",
             "carddb/pyproject.toml",
@@ -516,12 +526,7 @@ def pointer(value: JsonValue, locator: str) -> JsonValue:
 def _source_recipe(pin: Normalizer) -> None:
     if pin.config:
         raise ValueError("Unsupported source recipe configuration")
-    paths = {
-        "official-jp-exact-v1": "carddb/src/sve_carddb/extract/official_jp.py",
-        "official-en-exact-v1": "carddb/src/sve_carddb/extract/official_en.py",
-        "exact-json-v1": "carddb/src/sve_carddb/snapshot/values.py",
-    }
-    if paths.get(pin.version) != pin.code_path:
+    if SOURCE_RECIPE_PATHS.get(pin.version) != pin.code_path:
         raise ValueError("Unsupported source parser recipe")
 
 
