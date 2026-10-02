@@ -329,7 +329,12 @@ def test_roots_have_no_defaults() -> None:
     result = CliRunner().invoke(
         app,
         ["snapshot", "export", "--inputs", __file__],
-        env={"SVE_PREVIEW_DIR": "", "SVE_CDN_DIR": ""},
+        env={
+            "SVE_PREVIEW_DIR": "",
+            "SVE_CDN_DIR": "",
+            "NO_COLOR": "1",
+            "TERM": "dumb",
+        },
     )
     assert result.exit_code != 0
     assert "--preview-dir" in result.output
