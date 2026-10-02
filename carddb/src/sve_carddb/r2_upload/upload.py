@@ -34,7 +34,29 @@ def _same(remote: Remote | None, member: Member) -> None:
         )
 
 
-def _immutable(plan: Plan, remote: S3, member: Member) -> bool:
+def _probe(remote: S3, member: Member, raw: bytes, existing: Remote) -> None:
+    etag = existing.headers.get("etag")
+    if not etag:
+        raise UploadError("Conditional-write probe requires an object ETag")
+    # Identical bytes on a verified member avoid introducing a separate public probe object.
+    for condition in (
+        {"if-none-match": "*"},
+        {"if-match": '"' + etag.strip('"') + '-probe"'},
+    ):
+        if remote.put(
+            member.key,
+            raw,
+            condition
+            | {
+                "content-type": member.content_type,
+                "cache-control": member.cache_control,
+                "x-amz-meta-sha256": member.sha256,
+            },
+        ):
+            raise UploadError("R2 did not enforce conditional writes")
+
+
+def _immutable(plan: Plan, remote: S3, member: Member, *, probe: bool = False) -> bool:
     raw = read_member(plan.root, member.key)
     if len(raw) != member.size or digest(raw) != member.sha256:
         raise UploadError("Local public member changed")
@@ -53,6 +75,9 @@ def _immutable(plan: Plan, remote: S3, member: Member) -> bool:
         )
         existing = remote.get(member.key, limit=member.size)
     _same(existing, member)
+    if probe:
+        assert existing is not None
+        _probe(remote, member, raw, existing)
     return created
 
 
@@ -97,9 +122,15 @@ def upload(
         "skipped_files": 0,
         "skipped_bytes": 0,
     }
+    first = True
     for member in plan.members:
         if member.key != POINTER:
-            category = "uploaded" if _immutable(plan, remote, member) else "skipped"
+            category = (
+                "uploaded"
+                if _immutable(plan, remote, member, probe=first)
+                else "skipped"
+            )
+            first = False
             counts[category + "_files"] += 1
             counts[category + "_bytes"] += member.size
     if plan_preview(plan.root, brotli=brotli) != plan:

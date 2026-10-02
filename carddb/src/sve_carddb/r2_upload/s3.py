@@ -4,6 +4,7 @@ import hashlib
 import hmac
 import os
 import re
+import time
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http import HTTPStatus
@@ -35,7 +36,13 @@ class Credentials:
         return cls(access, secret)
 
 
-def sign(request: httpx.Request, credentials: Credentials, now: datetime) -> None:
+def sign(
+    request: httpx.Request,
+    credentials: Credentials,
+    now: datetime,
+    *,
+    region: str = "auto",
+) -> None:
     """Sign the exact conditional headers and payload sent to the R2 S3 endpoint."""
     timestamp = now.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
     day = timestamp[:8]
@@ -58,7 +65,7 @@ def sign(request: httpx.Request, credentials: Credentials, now: datetime) -> Non
             hashed,
         )
     )
-    scope = day + "/auto/s3/aws4_request"
+    scope = day + "/" + region + "/s3/aws4_request"
     signing = "\n".join(
         (
             "AWS4-HMAC-SHA256",
@@ -68,7 +75,7 @@ def sign(request: httpx.Request, credentials: Credentials, now: datetime) -> Non
         )
     )
     key = ("AWS4" + credentials.secret_key).encode()
-    for part in (day, "auto", "s3", "aws4_request"):
+    for part in (day, region, "s3", "aws4_request"):
         key = hmac.digest(key, part.encode(), "sha256")
     signature = hmac.new(key, signing.encode(), "sha256").hexdigest()
     request.headers["authorization"] = (
@@ -100,6 +107,7 @@ class S3:
     credentials: Credentials = field(repr=False)
     client: httpx.Client = field(repr=False)
     clock: Callable[[], datetime] = field(default=lambda: datetime.now(UTC), repr=False)
+    wait: Callable[[float], None] = field(default=time.sleep, repr=False)
 
     def __post_init__(self) -> None:
         """Restrict requests to an explicit account and bucket."""
@@ -131,27 +139,41 @@ class S3:
 
     def get(self, key: str, *, limit: int) -> Remote | None:
         """Read bounded identity bytes; redirects and encoded responses fail closed."""
-        try:
-            response = self.client.send(
-                self._request("GET", key, b"", {}), stream=True, follow_redirects=False
-            )
+        delays = (0.5, 1.0)
+        for attempt in range(3):
             try:
-                if response.status_code == HTTPStatus.NOT_FOUND:
-                    return None
-                if response.status_code != HTTPStatus.OK:
-                    raise UploadError("R2 object read failed")
-                if response.headers.get("content-encoding", "identity") != "identity":
-                    raise UploadError("R2 object has unexpected content encoding")
-                chunks = bytearray()
-                for chunk in response.iter_bytes():
-                    chunks.extend(chunk)
-                    if len(chunks) > limit:
-                        raise UploadError("R2 object exceeds expected size")
-                return Remote(bytes(chunks), response.headers)
-            finally:
-                response.close()
-        except httpx.HTTPError:
-            raise UploadError("R2 transport failed") from None
+                return self._get_once(key, limit=limit)
+            except (
+                httpx.TimeoutException,
+                httpx.NetworkError,
+                httpx.RemoteProtocolError,
+            ):
+                if attempt == len(delays):
+                    break
+                self.wait(delays[attempt])
+            except httpx.HTTPError:
+                break
+        raise UploadError("R2 transport failed") from None
+
+    def _get_once(self, key: str, *, limit: int) -> Remote | None:
+        response = self.client.send(
+            self._request("GET", key, b"", {}), stream=True, follow_redirects=False
+        )
+        try:
+            if response.status_code == HTTPStatus.NOT_FOUND:
+                return None
+            if response.status_code != HTTPStatus.OK:
+                raise UploadError("R2 object read failed")
+            if response.headers.get("content-encoding", "identity") != "identity":
+                raise UploadError("R2 object has unexpected content encoding")
+            chunks = bytearray()
+            for chunk in response.iter_bytes():
+                chunks.extend(chunk)
+                if len(chunks) > limit:
+                    raise UploadError("R2 object exceeds expected size")
+            return Remote(bytes(chunks), response.headers)
+        finally:
+            response.close()
 
     def put(self, key: str, raw: bytes, headers: dict[str, str]) -> bool:
         """Return false only for a failed precondition; never retry a write implicitly."""

@@ -1,5 +1,6 @@
 """Public closure, create-only S3 writes and atomic pointer failure counterexamples."""
 
+import gzip
 import json
 from dataclasses import replace
 from functools import partial
@@ -12,8 +13,8 @@ from typer.testing import CliRunner
 from sve_carddb.cli import app
 from sve_carddb.r2_upload.plan import POINTER, UploadError, pointer_value, read_member
 from sve_carddb.r2_upload.s3 import S3, Credentials, sign
-from sve_carddb.r2_upload.upload import upload
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.r2_upload.upload import _pointer, upload
+from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
 from .r2_upload_fixtures import (
     ACCOUNT,
@@ -54,7 +55,7 @@ def test_first_upload_publishes_complete_members_then_pointer_and_rerun_skips(
     assert first["uploaded_bytes"] == sum(m.size for m in local.members)
     assert first["skipped_files"] == 0
     put_keys = [key for method, key in store.calls if method == "PUT"]
-    assert put_keys == [m.key for m in local.members]
+    assert put_keys == [local.members[0].key] * 3 + [m.key for m in local.members[1:]]
     assert put_keys[-1] == POINTER
     for m in local.members:
         assert store.objects[m.key][0] == read_member(local.root, m.key)
@@ -63,7 +64,9 @@ def test_first_upload_publishes_complete_members_then_pointer_and_rerun_skips(
     assert again["uploaded_files"] == 0
     assert again["skipped_files"] == len(local.members)
     assert again["skipped_bytes"] == first["candidate_bytes"]
-    assert all(method == "GET" for method, _ in store.calls[before:])
+    assert [key for method, key in store.calls[before:] if method == "PUT"] == [
+        local.members[0].key
+    ] * 2
 
 
 @pytest.mark.parametrize(
@@ -278,6 +281,8 @@ def test_missing_credentials_and_representations_do_not_leak(
 ) -> None:
     monkeypatch.delenv("SVE_R2_ACCESS_KEY_ID", raising=False)
     monkeypatch.delenv("SVE_R2_SECRET_ACCESS_KEY", raising=False)
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "synthetic-fallback-access")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "synthetic-fallback-secret")
     with pytest.raises(
         UploadError, match=r"^Explicit local R2 credentials are required$"
     ):
@@ -424,3 +429,143 @@ def test_successful_put_response_without_verified_object_cannot_publish(
         upload(local, store.remote())
     assert POINTER not in store.objects
     assert store.calls[-1] == ("GET", local.members[0].key)
+
+
+def test_local_member_is_rechecked_at_upload_time_before_any_member_put(
+    local: Plan,
+) -> None:
+    store = Store()
+    target = local.members[0].key
+
+    def change(request: httpx.Request, key: str) -> httpx.Response | None:
+        if request.method == "GET" and key == POINTER:
+            (local.root / target).write_bytes(bytes(local.members[0].size))
+        return None
+
+    store.intervene = change
+    with pytest.raises(UploadError, match=r"^Local public member changed$"):
+        upload(local, store.remote())
+    assert store.calls == [("GET", POINTER)]
+    assert store.objects == {}
+
+
+@pytest.mark.parametrize("ignored", ["if-none-match", "if-match"])
+def test_platform_ignoring_conditions_stops_on_probe_before_further_members(
+    local: Plan, ignored: str
+) -> None:
+    store = Store()
+
+    def ignore(request: httpx.Request, key: str) -> httpx.Response | None:
+        if request.method == "PUT" and ignored in request.headers:
+            store.save(
+                key,
+                request.content,
+                {k: request.headers[k] for k in ("content-type", "cache-control")},
+            )
+            return httpx.Response(200)
+        return None
+
+    store.intervene = ignore
+    with pytest.raises(UploadError, match=r"^R2 did not enforce conditional writes$"):
+        upload(local, store.remote())
+    assert set(store.objects) == {local.members[0].key}
+    assert store.objects[local.members[0].key][0] == read_member(
+        local.root, local.members[0].key
+    )
+    assert POINTER not in store.objects
+
+
+def test_remote_pointer_must_have_the_exact_shape_before_member_writes(
+    local: Plan,
+) -> None:
+    store = Store()
+    store.save(
+        POINTER,
+        canonical({"manifest_path": "wrong", "manifest_sha256": "sha256:" + "f" * 64}),
+        {"content-type": "application/json", "cache-control": "no-store"},
+    )
+    with pytest.raises(UploadError, match=r"^Invalid preview pointer$"):
+        upload(local, store.remote())
+    assert store.calls == [("GET", POINTER)]
+
+
+@pytest.mark.parametrize("already_current", [True, False])
+def test_pointer_is_verified_after_publish_or_even_when_already_current(
+    local: Plan, already_current: bool
+) -> None:
+    store = Store()
+    if already_current:
+        seed(store, local)
+    seen = 0
+
+    def corrupt(request: httpx.Request, key: str) -> httpx.Response | None:
+        nonlocal seen
+        if request.method == "GET" and key == POINTER:
+            seen += 1
+            if seen == 2:
+                return httpx.Response(
+                    200,
+                    content=bytes(local.members[-1].size),
+                    headers={
+                        "content-type": "application/json",
+                        "cache-control": "no-store",
+                    },
+                )
+        return None
+
+    store.intervene = corrupt
+    with pytest.raises(
+        UploadError, match=r"^Existing R2 object differs from the local public member$"
+    ):
+        upload(local, store.remote())
+    assert seen == 2
+
+
+def test_valid_new_version_during_upload_still_changes_inventory(local: Plan) -> None:
+    store = Store()
+
+    def add_version(request: httpx.Request, key: str) -> httpx.Response | None:
+        if request.method == "GET" and key == local.members[0].key:
+            old = next(
+                m.key for m in local.members if m.phase == 2 and m.key.endswith(".json")
+            )
+            value = object_value(parse(read_member(local.root, old)))
+            value["data_version"] = "preview-20261002T000002Z-0002"
+            raw = canonical(value)
+            path = "snapshots/manifests/" + digest(raw)[7:] + ".json"
+            (local.root / path).write_bytes(raw)
+            (local.root / (path + ".gz")).write_bytes(gzip.compress(raw, mtime=0))
+            store.intervene = None
+        return None
+
+    store.intervene = add_version
+    with pytest.raises(UploadError, match=r"^Local public inventory changed$"):
+        upload(local, store.remote())
+    assert POINTER not in store.objects
+
+
+def test_pointer_bytes_are_rechecked_at_the_final_write_boundary(local: Plan) -> None:
+    store = Store()
+    pointer = next(m for m in local.members if m.key == POINTER)
+    (local.root / POINTER).write_bytes(b"synthetic changed pointer")
+    with pytest.raises(UploadError, match=r"^Local public member changed$"):
+        _pointer(local, store.remote(), None, pointer)
+    assert store.calls == []
+
+
+def test_conditional_probe_without_a_verified_etag_stops_before_probe_put(
+    local: Plan,
+) -> None:
+    store = Store()
+    first = local.members[0]
+    store.save(
+        first.key,
+        read_member(local.root, first.key),
+        {"content-type": first.content_type, "cache-control": first.cache_control},
+    )
+    store.objects[first.key][1].pop("etag")
+    with pytest.raises(
+        UploadError, match=r"^Conditional-write probe requires an object ETag$"
+    ):
+        upload(local, store.remote())
+    assert store.calls == [("GET", POINTER), ("GET", first.key)]

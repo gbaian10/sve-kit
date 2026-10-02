@@ -1,5 +1,6 @@
 """Explicit producer compression without leaking its stderr or using a new dependency."""
 
+import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- explicitly selected local encoder, never a shell
 from pathlib import Path
 
@@ -14,7 +15,9 @@ def command_brotli(command: Path) -> Brotli:
         executable = str(command.resolve(strict=True))
         version = (
             subprocess.check_output(  # ruff: ignore[subprocess-without-shell-equals-true] -- explicit trusted encoder without a shell
-                [executable, "--version"], stderr=subprocess.DEVNULL
+                [executable, "--version"],
+                stderr=subprocess.DEVNULL,
+                env={"PATH": os.defpath, "LC_ALL": "C", "LANG": "C"},
             )
             .decode()
             .strip()
@@ -26,7 +29,10 @@ def command_brotli(command: Path) -> Brotli:
     def compress(raw: bytes) -> bytes:
         try:
             return subprocess.check_output(  # ruff: ignore[subprocess-without-shell-equals-true] -- pinned local encoder; stderr is discarded
-                [executable, "-q", "11", "-c"], input=raw, stderr=subprocess.DEVNULL
+                [executable, "-q", "11", "-c"],
+                input=raw,
+                stderr=subprocess.DEVNULL,
+                env={"PATH": os.defpath, "LC_ALL": "C", "LANG": "C"},
             )
         except OSError, subprocess.SubprocessError:
             raise UploadError("Explicit Brotli compressor failed") from None

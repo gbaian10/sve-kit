@@ -77,6 +77,7 @@ class Store:
         self.objects[key] = raw, headers | {"etag": f'"generation-{self.generation}"'}
 
     def handle(self, request: httpx.Request) -> httpx.Response:
+        assert request.url.scheme == "https"
         assert request.url.host == ACCOUNT + ".r2.cloudflarestorage.com"
         assert request.headers["accept-encoding"] == "identity"
         verify_signature(request)
@@ -117,6 +118,7 @@ class Store:
             CREDENTIALS,
             httpx.Client(transport=httpx.MockTransport(self.handle)),
             lambda: NOW,
+            lambda _delay: None,
         )
 
 

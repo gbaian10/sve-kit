@@ -306,8 +306,12 @@ def test_local_encoder_protocol_and_redaction(
         argv: list[str],
         *,
         stderr: int,
+        env: dict[str, str],
         input: bytes | None = None,  # ruff: ignore[builtin-argument-shadowing] -- exact subprocess keyword protocol
     ) -> bytes:
+        assert env == {"PATH": os.defpath, "LC_ALL": "C", "LANG": "C"}
+        assert "SVE_R2_SECRET_ACCESS_KEY" not in env
+        assert "AWS_SECRET_ACCESS_KEY" not in env
         assert stderr == subprocess.DEVNULL
         assert argv[0] == str(command)
         if argv[1:] == ["--version"]:
@@ -316,6 +320,9 @@ def test_local_encoder_protocol_and_redaction(
         assert input == b"synthetic input"
         return b"synthetic encoded"
 
+    monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
+    monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "synthetic-aws-secret")
     monkeypatch.setattr(subprocess, "check_output", fake)
     codec = command_brotli(command)
     assert codec.compress(b"synthetic input") == b"synthetic encoded"
