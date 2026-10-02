@@ -1,4 +1,4 @@
-"""JP supplemental parsing uses sealed input only; fixtures contain invented text."""
+"""Regional supplemental parsing uses sealed input; fixtures contain invented text."""
 
 import shutil
 from typing import TYPE_CHECKING
@@ -7,19 +7,23 @@ import httpx
 import pytest
 
 from sve_carddb.card_extras import FrozenCardExtras, parse_card_page
-from sve_carddb.card_extras.archive import PARSER, card_number
+from sve_carddb.card_extras.archive import EN_PARSER, PARSER, card_number
+from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Manifest
 from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.sources import official_jp
 
 from .card_extras_fixtures import source
+from .en_extract_fixtures import page as en_page
 from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.build_inputs import Source
     from sve_carddb.card_extras import CardPage
+    from sve_carddb.registry.records import Region
     from sve_carddb.source_archive import ArchiveStore
 
 
@@ -39,6 +43,164 @@ RAW = (
 </body></html>"""
     + b" " * 3000
 )
+
+EN_RAW = (
+    en_page("TEST-001Ⓢa")
+    .replace(
+        b'<div class="cardlist-Detail_QA">', b'</div><div class="cardlist-Detail_QA">'
+    )
+    .replace(
+        b'</div></div></div><div class="cardlist-Detail_Relation">',
+        b'</div></div><div class="cardlist-Detail_Relation">',
+    )
+    .replace(b"Synthetic QA title", b"Q900001 (Oct. 10, 2026)")
+)
+
+
+def regional_page(region: Region) -> tuple[bytes, Source]:
+    raw = RAW if region == "jp" else EN_RAW
+    pin = source(region=region, raw=raw).model_copy(
+        update={"parser_version": PARSER if region == "jp" else EN_PARSER}
+    )
+    return raw, pin
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+def test_regional_qa_container(region: Region) -> None:
+    raw, pin = regional_page(region)
+    parsed = parse_card_page(raw, pin, region=region)
+    assert parsed.region == region
+    assert parsed.card_no == "TEST-001Ⓢa"
+    assert len(parsed.qa) == (2 if region == "jp" else 1)
+    assert parsed.qa[0].official_number == ("Q900000" if region == "jp" else "Q900001")
+    assert parsed.qa[0].published_on == (
+        "2026-10-01" if region == "jp" else "2026-10-10"
+    )
+    assert parsed.qa[0].question == (
+        "Synthetic question?\nNext {synthetic.icon}" if region == "jp" else "Question"
+    )
+    assert parsed.qa[0].answer == (
+        "Synthetic answer." if region == "jp" else "Answer\nMore"
+    )
+
+
+@pytest.mark.parametrize(
+    ("raw_date", "expected"),
+    [
+        ("Jan. 12, 2026", "2026-01-12"),
+        ("Feb. 12, 2026", "2026-02-12"),
+        ("Mar. 12, 2026", "2026-03-12"),
+        ("Apr. 12, 2026", "2026-04-12"),
+        ("May. 12, 2026", "2026-05-12"),
+        ("Jun. 12, 2026", "2026-06-12"),
+        ("Jul. 12, 2026", "2026-07-12"),
+        ("Aug. 12, 2026", "2026-08-12"),
+        ("Sep. 12, 2026", "2026-09-12"),
+        ("Oct. 12, 2026", "2026-10-12"),
+        ("Nov. 12, 2026", "2026-11-12"),
+        ("Dec. 12, 2026", "2026-12-12"),
+        ("Oct. 1, 2026", "2026-10-01"),
+        ("May 12, 2026", "2026-05-12"),
+        ("Feb. 29, 2024", "2024-02-29"),
+    ],
+)
+def test_en_qa_observed_date_shapes(raw_date: str, expected: str) -> None:
+    raw, pin = regional_page("en")
+    raw = raw.replace(b"Oct. 10, 2026", raw_date.encode())
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    entry = parse_card_page(raw, pin, region="en").qa[0]
+    assert entry.published_on == expected
+    assert entry.date_raw == raw_date
+
+
+@pytest.mark.parametrize(
+    "raw_date",
+    [
+        "May 1, 2026",
+        "October 12, 2026",
+        "Sept. 12, 2026",
+        "Abc. 12, 2026",
+        "oct. 12, 2026",
+        "Oct.  12, 2026",
+        "Oct. 12,26",
+        "Oct. 12, 2026 trailing",
+        "2026/10/1",
+        "Oct. 0, 2026",
+        "Apr. 31, 2026",
+        "Feb. 29, 2025",
+        "Jan. 12, 0000",
+        "Unknown date",
+    ],
+)
+def test_en_qa_unknown_date_remains_raw(raw_date: str) -> None:
+    raw, pin = regional_page("en")
+    raw = raw.replace(b"Oct. 10, 2026", raw_date.encode())
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    entry = parse_card_page(raw, pin, region="en").qa[0]
+    assert entry.published_on is None
+    assert entry.date_raw == raw_date
+
+
+def test_en_qa_absent_date_remains_unknown() -> None:
+    raw, pin = regional_page("en")
+    raw = raw.replace(b" (Oct. 10, 2026)", b"")
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    entry = parse_card_page(raw, pin, region="en").qa[0]
+    assert entry.published_on is None
+    assert entry.date_raw is None
+
+
+def test_jp_does_not_adopt_en_date_format() -> None:
+    raw = RAW.replace(b"2026/10/1", b"Oct. 10, 2026")
+    entry = parse_card_page(raw, source(raw=raw)).qa[0]
+    assert entry.published_on is None
+    assert entry.date_raw == "Oct. 10, 2026"
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("fault", ["container", "stray-block"])
+def test_regional_qa_rejects_unrecognized_layout(region: Region, fault: str) -> None:
+    raw, pin = regional_page(region)
+    if fault == "container":
+        raw = raw.replace(b'class="cardlist-Detail_QA"', b'class="unknown"')
+    else:
+        raw += b'<div class="qa-List_Item">Synthetic unrelated block</div>'
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    with pytest.raises(ValueError, match=r"^Unrecognized card-page Q&A layout$"):
+        parse_card_page(raw, pin, region=region)
+
+
+def test_jp_rejects_en_style_qa_without_jp_wrapper() -> None:
+    raw = RAW.replace(b'class="cardlist-Under"', b'class="synthetic-en-wrapper"')
+    with pytest.raises(ValueError, match=r"^Unrecognized card-page Q&A layout$"):
+        parse_card_page(raw, source(raw=raw))
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("node", ["qa-List_Ttl", "qa-List_Txt-Q", "qa-List_Txt-A"])
+def test_regional_qa_missing_node_is_not_empty(region: Region, node: str) -> None:
+    raw, pin = regional_page(region)
+    raw = raw.replace(f'class="{node}"'.encode(), b'class="missing"')
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    with pytest.raises(MissingElementError, match=f"^no element matches '\\.{node}'$"):
+        parse_card_page(raw, pin, region=region)
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("fault", ["url", "parser"])
+def test_regional_qa_rejects_cross_region_pin(region: Region, fault: str) -> None:
+    raw, pin = regional_page(region)
+    other_region: Region = "en" if region == "jp" else "jp"
+    if fault == "url":
+        pin = pin.model_copy(update={"url": source(region=other_region).url})
+        message = "^Card extras source URL/region/media mismatch$"
+    else:
+        pin = pin.model_copy(
+            update={"parser_version": EN_PARSER if region == "jp" else PARSER}
+        )
+        message = "^Card extras raw hash/parser pin mismatch$"
+    with pytest.raises(ValueError, match=message):
+        parse_card_page(raw, pin, region=region)
 
 
 @pytest.fixture(scope="module")
