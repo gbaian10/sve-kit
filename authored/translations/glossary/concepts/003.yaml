@@ -1,0 +1,1385 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:41c13a1c702134c6efe9e767210df85d53e2bfa62417ccb2333adde742eb376d
+records:
+  - record_key: '["glossary_term","term:action.leave_play"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.leave_play
+      category: rule_term
+      concept_key: action.leave_play
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:5713894ceaec47fa836f6c5490ec5d7f45716a811d77380d4cf9640ae823f0e1
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:2fb9b130f23727137c930365ccd60104ae3cccecdfde75710d282c1deedbff06
+      source_span:
+        start: 60
+        end: 65
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.look"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.look
+      category: rule_term
+      concept_key: action.look
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3690e314b12222339baed8d8bb368e41d409d0bbe9ab54db5a80c743efc1c8f1
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:7c71c9a48f297f70cc8f8a4d69c4c36e33a7c6fbe26e7fe6ea8865ac78c91522
+      source_span:
+        start: 20
+        end: 22
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.lose"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.lose
+      category: rule_term
+      concept_key: action.lose
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:62d10e9fdee7662350d365e1a873a091245d1eb0b0769271f00165693ee4e4f4
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:434a155a1751969d2091a7e43715b095d8ff116ef3275970cf2fce8b3a77d808
+      source_span:
+        start: 51
+        end: 53
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.place"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.place
+      category: rule_term
+      concept_key: action.place
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b1c6c86b3779b7a5e4429650c9e5350d70c9f46a67e093cac9c9eef2c7e0a211
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:afadd1a5bdc1b53eea0da452f0875bf8c2d10f8f31ce93d76116a5569887f3ce
+      source_span:
+        start: 34
+        end: 36
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.play"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.play
+      category: rule_term
+      concept_key: action.play
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e7e377d017c534d3c25c9b33796ad140c752ff325ae0eb59583ec108d4d4341d
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:61a0981aad8133c65d4ae204f0e153a1085709eed521559dab788214e7ab3b3a
+      source_span:
+        start: 67
+        end: 70
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.put_into_play"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.put_into_play
+      category: rule_term
+      concept_key: action.put_into_play
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e982bb3e0bc3298e6b10eb15d675746cbd4617921b973b1378e79c239b1b15cf
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:fbbe6fe7affbf02b01f0416a15eff86222945a965f3399122d48cff14ed8de64
+      source_span:
+        start: 71
+        end: 75
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.restore"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.restore
+      category: rule_term
+      concept_key: action.restore
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:1c6191cc955eb23c323d07ab79102e144e70d7da2e99e8f8b889cb02fef0de24
+      source_span:
+        start: 97
+        end: 99
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.return_to_deck"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.return_to_deck
+      category: rule_term
+      concept_key: action.return_to_deck
+      source_ref:
+      source_span:
+      authored_source_ja: デッキに戻す
+      missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.return_to_hand"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.return_to_hand
+      category: rule_term
+      concept_key: action.return_to_hand
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+      source_span:
+        start: 44
+        end: 49
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.reveal"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.reveal
+      category: rule_term
+      concept_key: action.reveal
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:215d477085345b0444e6ef32d5e808fcca2e3688f3e30975d2c5ca5d6f3bf72b
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:a538db29db6b315cc53a338a956c5bbd67cd5236436451907a07afac4035a2a4
+      source_span:
+        start: 55
+        end: 57
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.search"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.search
+      category: rule_term
+      concept_key: action.search
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:60e70af7b8a8135be60ecb5797284124eebf8bcec26b40ff57b7eac0455d5cff
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:a0af9d6894100573e480f2405770c4566f4daa03f1f5bd1b2a61f4ac9da9e5eb
+      source_span:
+        start: 28
+        end: 30
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.shuffle"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.shuffle
+      category: rule_term
+      concept_key: action.shuffle
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:919c349c2bdfd61b6fec7250f6e5da47b685e9a1bd849c475bf0492546745344
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:a8c97d6e58852e238626b134058637cf94edab02d6cbc159da4965fb1658ea2a
+      source_span:
+        start: 21
+        end: 26
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.stand"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.stand
+      category: rule_term
+      concept_key: action.stand
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:98b295ce52c14b8073976cda859cc8726ba1d341aeeb296ce98f0f0187a1d6ae
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:38f2d215f28ee5135b8ac600814cf181bab583bffc53b89cb8e2034960d46c01
+      source_span:
+        start: 12
+        end: 16
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.super_evolve"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.super_evolve
+      category: rule_term
+      concept_key: action.super_evolve
+      source_ref:
+      source_span:
+      authored_source_ja: 超進化する
+      missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:action.transform"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:action.transform
+      category: rule_term
+      concept_key: action.transform
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:1c6191cc955eb23c323d07ab79102e144e70d7da2e99e8f8b889cb02fef0de24
+      source_span:
+        start: 46
+        end: 48
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:duration.per_turn"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:duration.per_turn
+      category: rule_term
+      concept_key: duration.per_turn
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:a0300266004f3266c5de69013e88f89063fa5256c595c6d74be2628cd3a062a6
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:dfbc6dfaa9e9cd9ce9113434e3807b41f33ca9751b93370b1f47a66e3942e78b
+      source_span:
+        start: 51
+        end: 56
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:duration.this_turn"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:duration.this_turn
+      category: rule_term
+      concept_key: duration.this_turn
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e7e377d017c534d3c25c9b33796ad140c752ff325ae0eb59583ec108d4d4341d
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:61a0981aad8133c65d4ae204f0e153a1085709eed521559dab788214e7ab3b3a
+      source_span:
+        start: 57
+        end: 62
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:duration.until_turn_end"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:duration.until_turn_end
+      category: rule_term
+      concept_key: duration.until_turn_end
+      source_ref:
+      source_span:
+      authored_source_ja: ターン終了まで
+      missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.attack"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.attack
+      category: ability
+      concept_key: event.attack
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:21f2070438ac13e42eada4472d609820d4a2c93cff38a3c338a6055cb1e16141
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:fa5de6111a1e58f87b446c532f95fe723dd589cd251bbc074cd9fb1f88220dfe
+      source_span:
+        start: 6
+        end: 9
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.combat"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.combat
+      category: ability
+      concept_key: event.combat
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+        source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+        parser: translation-svwb-v1
+        locator: /data/skill_names/17
+        text_hash: sha256:98106325662221d932b2e382d782e471eb7d0f11955c2ccf60f5693fc84ab06a
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.enter_play"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.enter_play
+      category: rule_term
+      concept_key: event.enter_play
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:d0072125ba9d87939e12c1d33bd1f9c07bba7b6f7d6cac950e0d3d1995fe9fec
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:16a443db7ff334a7c0715e595e41fb79a4e2c0deb6f48b0e3a99cd032b67fb34
+      source_span:
+        start: 36
+        end: 42
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.evolve"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.evolve
+      category: ability
+      concept_key: event.evolve
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3d9db6aa2826d41cbd7450d30b4a7fb500ab92bf82d4a52573c8af79e3c189ce
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:ef7e2de8437f7a8077e8664fe55fcc692073fc87864b7d5c9a1376e8d4abfa01
+      source_span:
+        start: 6
+        end: 9
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.gain_drive"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.gain_drive
+      category: ability
+      concept_key: event.gain_drive
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:deb24522bb1dcfa7348ac7e05df03b2cfde830aee66c8556e707b0df8801839b
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:14eb2dcafdf2ac50e92478e9e6ba5eff942a5f92ec56229117e98c1dc0b1f146
+      source_span:
+        start: 24
+        end: 31
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+  - record_key: '["glossary_term","term:event.super_evolve"]'
+    kind: glossary_term
+    filing_key: concepts
+    data:
+      id: term:event.super_evolve
+      category: ability
+      concept_key: event.super_evolve
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:c20535e50857a99a82c9a137cee423d219700162fd93269fb30a03cf50c846d6
+        parser: translation-jp-v1
+        locator: /faces/0/text
+        text_hash: sha256:00d10b2721c49771bb348fa76619b67c8e5eed7d89c9d217bf626c46560eb875
+      source_span:
+        start: 22
+        end: 26
+      authored_source_ja:
+      missing_source_reason:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_term","term:action.leave_play"]'
+            - '["glossary_term","term:action.look"]'
+            - '["glossary_term","term:action.lose"]'
+            - '["glossary_term","term:action.place"]'
+            - '["glossary_term","term:action.play"]'
+            - '["glossary_term","term:action.put_into_play"]'
+            - '["glossary_term","term:action.restore"]'
+            - '["glossary_term","term:action.return_to_deck"]'
+            - '["glossary_term","term:action.return_to_hand"]'
+            - '["glossary_term","term:action.reveal"]'
+            - '["glossary_term","term:action.search"]'
+            - '["glossary_term","term:action.shuffle"]'
+            - '["glossary_term","term:action.stand"]'
+            - '["glossary_term","term:action.super_evolve"]'
+            - '["glossary_term","term:action.transform"]'
+            - '["glossary_term","term:duration.per_turn"]'
+            - '["glossary_term","term:duration.this_turn"]'
+            - '["glossary_term","term:duration.until_turn_end"]'
+            - '["glossary_term","term:event.attack"]'
+            - '["glossary_term","term:event.combat"]'
+            - '["glossary_term","term:event.enter_play"]'
+            - '["glossary_term","term:event.evolve"]'
+            - '["glossary_term","term:event.gain_drive"]'
+            - '["glossary_term","term:event.super_evolve"]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+    evidence: []
+decisions:
+  - id: d:41c13a1c702134c6efe9e767210df85d53e2bfa62417ccb2333adde742eb376d
+    state: confirmed
+    scope: batch
+    category: glossary_term
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:41c13a1c702134c6efe9e767210df85d53e2bfa62417ccb2333adde742eb376d
+    members:
+      -   - '["glossary_term","term:action.leave_play"]'
+          - sha256:e9d24bbee58dff8ddc40839bc76682b032bf6d5e3444b4cff3bcaaccdece44c4
+      -   - '["glossary_term","term:action.look"]'
+          - sha256:c946144946902916cf7ac659e18534bc590175bb5ab61b0bd01d6dd29c7845de
+      -   - '["glossary_term","term:action.lose"]'
+          - sha256:bebe2d958bf09fb3d80ad15a9f2bb389238214e8366c4c53d5698403990bd430
+      -   - '["glossary_term","term:action.place"]'
+          - sha256:8b2b09b036effe1f59de38d7a63ae091485ce2ade4d3b730868f6ec44ccc1ece
+      -   - '["glossary_term","term:action.play"]'
+          - sha256:885e089c4bc69905c678d0eb06b3693e72bf020f7351d4e2a770a7850ca4488f
+      -   - '["glossary_term","term:action.put_into_play"]'
+          - sha256:f613799f087bb3f3f51dcfd7aa8c6b5cc1c1de00cfb122a3408aa524325fa1a1
+      -   - '["glossary_term","term:action.restore"]'
+          - sha256:18bceaceedc99cec5a128f1eb6995f264f86bc87e4523e26ab94e824658f0a12
+      -   - '["glossary_term","term:action.return_to_deck"]'
+          - sha256:cdb013b9744da2f4d372631900ab73074c8957a1f19d34201fb8c3fe59c4bc6a
+      -   - '["glossary_term","term:action.return_to_hand"]'
+          - sha256:a7bd816d0c8b04421f6b296053448133e280590e231acd1c89554d670ed05168
+      -   - '["glossary_term","term:action.reveal"]'
+          - sha256:8406ba131dd0d03bb710884a3119386e67cf5ae462a954439d2677acc54f4dd5
+      -   - '["glossary_term","term:action.search"]'
+          - sha256:2338578df496262685d9a149709c31f160529abfad74cbe4716d0ced193fbea5
+      -   - '["glossary_term","term:action.shuffle"]'
+          - sha256:100b2cdbfb179a743540e9569a3d5c078bf0be2f7048db50b19a0a2dcb2c7dcb
+      -   - '["glossary_term","term:action.stand"]'
+          - sha256:ead36ba6e918be3423308b7366798e20717b9792fbd6f35b352232f575d81b67
+      -   - '["glossary_term","term:action.super_evolve"]'
+          - sha256:48997899972b8bde03d724e410031836b0859257c69bad2839f652f14beaf3fe
+      -   - '["glossary_term","term:action.transform"]'
+          - sha256:efce7e3c978540c27f9b6d317e8a4e176e05d46214e110619bd2b366d55b50ae
+      -   - '["glossary_term","term:duration.per_turn"]'
+          - sha256:2385e07dd06fb37150f731aacd2a9a9af16a64215baec372f2fc7b6e895090db
+      -   - '["glossary_term","term:duration.this_turn"]'
+          - sha256:ca8c72e07a00db84b0513c9df26413509083607a5d91cba553ea45c471e10ec0
+      -   - '["glossary_term","term:duration.until_turn_end"]'
+          - sha256:b9987a5204ab87ddeee48ef98301400ca634e1df272703385895b3ac65e344f4
+      -   - '["glossary_term","term:event.attack"]'
+          - sha256:24fc3d001706dd576549f20c8080e1f1619a6fd907faef9aa4a1c549d5763968
+      -   - '["glossary_term","term:event.combat"]'
+          - sha256:067b88fec8dea8ac1ecbdd58ed4985a11faca9d19dd565235d7071873a8921e5
+      -   - '["glossary_term","term:event.enter_play"]'
+          - sha256:5497dab6f6839276c720ae8690a2a6c326dbf9ee9eedc19e8cb160935565d207
+      -   - '["glossary_term","term:event.evolve"]'
+          - sha256:180d688ee0743986b99fd2fa677b8542c327f2912b29771137efa4f19a815254
+      -   - '["glossary_term","term:event.gain_drive"]'
+          - sha256:270885b214698dbb2f5a667ea50e4111256288c2ba9d6d251816dfb4b7bb05d4
+      -   - '["glossary_term","term:event.super_evolve"]'
+          - sha256:48d6b9b27e9731363ddf38d28ab51375ed30a674b1f52e1ff10ba6c56f176439
+    sample_ids:
+      - '["glossary_term","term:action.leave_play"]'
+      - '["glossary_term","term:action.look"]'
+      - '["glossary_term","term:action.lose"]'
+      - '["glossary_term","term:action.place"]'
+      - '["glossary_term","term:action.play"]'
+      - '["glossary_term","term:action.put_into_play"]'
+      - '["glossary_term","term:action.restore"]'
+      - '["glossary_term","term:action.return_to_deck"]'
+      - '["glossary_term","term:action.return_to_hand"]'
+      - '["glossary_term","term:action.reveal"]'
+      - '["glossary_term","term:action.search"]'
+      - '["glossary_term","term:action.shuffle"]'
+      - '["glossary_term","term:action.stand"]'
+      - '["glossary_term","term:action.super_evolve"]'
+      - '["glossary_term","term:action.transform"]'
+      - '["glossary_term","term:duration.per_turn"]'
+      - '["glossary_term","term:duration.this_turn"]'
+      - '["glossary_term","term:duration.until_turn_end"]'
+      - '["glossary_term","term:event.attack"]'
+      - '["glossary_term","term:event.combat"]'
+      - '["glossary_term","term:event.enter_play"]'
+      - '["glossary_term","term:event.evolve"]'
+      - '["glossary_term","term:event.gain_drive"]'
+      - '["glossary_term","term:event.super_evolve"]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。

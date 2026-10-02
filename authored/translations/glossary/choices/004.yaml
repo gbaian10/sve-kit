@@ -1,0 +1,54 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:bcc5ad0de8510fa5b77951c916dcd6e4349a8798516c1b29bab2609154bebeeb
+records:
+  - record_key: '["glossary_choice","term:trait.rage_legion","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:trait.rage_legion
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 憤怒軍團
+      origin: project
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_choice","term:trait.rage_legion","zh-Hant",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 〈レイジ・レギオン〉 → 憤怒軍團；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:bcc5ad0de8510fa5b77951c916dcd6e4349a8798516c1b29bab2609154bebeeb
+    state: confirmed
+    scope: batch
+    category: glossary_choice
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:bcc5ad0de8510fa5b77951c916dcd6e4349a8798516c1b29bab2609154bebeeb
+    members:
+      -   - '["glossary_choice","term:trait.rage_legion","zh-Hant",1]'
+          - sha256:683700c7e95376b8691b409bccd2137e32ff47dee6102f426df7dcce93de9147
+    sample_ids:
+      - '["glossary_choice","term:trait.rage_legion","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 〈レイジ・レギオン〉 → 憤怒軍團；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。

@@ -1,0 +1,53 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:72b8a639d297d23e92080b43b0b7caf2ff723f4a638497c6ec860c9386c0ed6f
+records:
+  - record_key: '["glossary_choice","term:object.card_name","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:object.card_name
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 卡片名稱
+      origin: project
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_choice","term:object.card_name","zh-Hant",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 カード名 → 卡片名稱；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:72b8a639d297d23e92080b43b0b7caf2ff723f4a638497c6ec860c9386c0ed6f
+    state: confirmed
+    scope: batch
+    category: glossary_choice
+    policy_id: glossary-initial-51-v1
+    membership_hash: sha256:72b8a639d297d23e92080b43b0b7caf2ff723f4a638497c6ec860c9386c0ed6f
+    members:
+      -   - '["glossary_choice","term:object.card_name","zh-Hant",1]'
+          - sha256:85adcbec2b45092925d938ae083b48a4d7367ff09f87ca87b256d60afd01f6ed
+    sample_ids:
+      - '["glossary_choice","term:object.card_name","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:39:40Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 カード名 → 卡片名稱；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
