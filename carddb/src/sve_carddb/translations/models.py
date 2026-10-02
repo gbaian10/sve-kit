@@ -3,11 +3,12 @@
 # ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves annotations at runtime
 
 from typing import Annotated, Literal
+from urllib.parse import urlsplit
 
 from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_models import Predecessor, SourceRef, TextEvidence
-from sve_carddb.products.models import Instant, Lang
+from sve_carddb.products.models import Date, Instant, Lang
 from sve_carddb.registry.records import Hash, RecordData, Text
 
 Category = Literal["keyword", "ability", "trait", "rule_term", "card_name"]
@@ -19,12 +20,113 @@ class Span(RecordData):
     end: Annotated[int, Field(gt=0)]
 
 
+class Delegation(RecordData):
+    authorized_by: Text
+    authorization_basis: Text
+    authorization_date: Date
+    scope: Annotated[tuple[Text, ...], Field(min_length=1)]
+    decided_by: Text
+    decided_at: Instant
+    decided_precision: Literal["day", "instant"]
+    decision_basis: Text
+
+    @model_validator(mode="after")
+    def _receipt(self) -> Delegation:
+        if any(
+            not value.strip()
+            for value in (
+                self.authorized_by,
+                self.authorization_basis,
+                self.decided_by,
+                self.decision_basis,
+            )
+        ):
+            raise ValueError("Delegation receipt text must be nonblank")
+        if self.scope != tuple(sorted(set(self.scope))):
+            raise ValueError("Delegation scope must be sorted and unique")
+        if self.decided_precision == "day" and not self.decided_at.endswith(
+            "T00:00:00Z"
+        ):
+            raise ValueError("Delegation day precision must use UTC midnight")
+        return self
+
+
+class AdoptionReview(RecordData):
+    mode: Literal["human", "delegated_glossary"]
+    delegation: Delegation | None
+
+    @model_validator(mode="after")
+    def _mode(self) -> AdoptionReview:
+        if (self.mode == "human") != (self.delegation is None):
+            raise ValueError("Glossary review mode and delegation disagree")
+        return self
+
+
+class SourceClaim(RecordData):
+    source_work: Text | None
+    source_urls: tuple[Text, ...]
+    claimed_source: Text | None
+    note: Text
+
+    @model_validator(mode="after")
+    def _claim(self) -> SourceClaim:
+        if any(
+            value is not None and not value.strip()
+            for value in (self.source_work, self.claimed_source, self.note)
+        ):
+            raise ValueError("Source claim text must be nonblank")
+        if self.source_urls != tuple(sorted(set(self.source_urls))):
+            raise ValueError("Source claim URLs must be sorted and unique")
+        for url in self.source_urls:
+            try:
+                parts = urlsplit(url)
+            except ValueError as error:
+                raise ValueError("Source claim URL must be HTTP or HTTPS") from error
+            if (
+                parts.scheme not in {"http", "https"}
+                or not parts.netloc
+                or any(char.isspace() for char in url)
+            ):
+                raise ValueError("Source claim URL must be HTTP or HTTPS")
+        return self
+
+
 class TermData(RecordData):
     id: Text
     category: Category
     concept_key: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
-    source_ref: SourceRef
+    source_ref: SourceRef | None
     source_span: Span | None
+    authored_source_ja: Text | None
+    missing_source_reason: Text | None
+    adoption_review: AdoptionReview
+
+    @model_validator(mode="after")
+    def _source_mode(self) -> TermData:
+        if self.source_ref is not None:
+            if (
+                self.authored_source_ja is not None
+                or self.missing_source_reason is not None
+            ):
+                raise ValueError(
+                    "Frozen glossary source forbids authored source metadata"
+                )
+        elif (
+            self.source_span is not None
+            or self.authored_source_ja is None
+            or self.missing_source_reason is None
+        ):
+            raise ValueError(
+                "Authored glossary source requires name and reason without span"
+            )
+        elif (
+            not self.authored_source_ja.strip()
+            or not self.missing_source_reason.strip()
+        ):
+            raise ValueError(
+                "Authored glossary source name and reason must be nonblank"
+            )
+        return self
 
 
 class AuthoredValue(RecordData):
@@ -76,6 +178,8 @@ class ChoiceData(RecordData):
     value: Annotated[AuthoredValue | SourceValue, Field(discriminator="kind")] | None
     origin: Origin
     concept_evidence: tuple[ConceptEvidence, ...]
+    source_claim: SourceClaim | None
+    adoption_review: AdoptionReview
     adoption_no: Annotated[int, Field(ge=1)]
     predecessor: Predecessor | None
 
@@ -87,6 +191,8 @@ class VocabularyData(RecordData):
     value: Annotated[AuthoredValue | SourceValue, Field(discriminator="kind")] | None
     origin: Origin
     concept_evidence: tuple[ConceptEvidence, ...]
+    source_claim: SourceClaim | None
+    adoption_review: AdoptionReview
     adoption_no: Annotated[int, Field(ge=1)]
     predecessor: Predecessor | None
 
@@ -115,8 +221,25 @@ class VocabularyRecord(RecordData):
     evidence: tuple[TextEvidence, ...]
 
 
+class EmphasisData(RecordData):
+    term_id: Text
+    value: bool | None
+    adoption_review: AdoptionReview
+    adoption_no: Annotated[int, Field(ge=1)]
+    predecessor: Predecessor | None
+
+
+class EmphasisRecord(RecordData):
+    record_key: Text
+    kind: Literal["glossary_emphasis_choice"]
+    filing_key: Text
+    data: EmphasisData
+    evidence: tuple[TextEvidence, ...]
+
+
 Record = Annotated[
-    TermRecord | ChoiceRecord | VocabularyRecord, Field(discriminator="kind")
+    TermRecord | ChoiceRecord | VocabularyRecord | EmphasisRecord,
+    Field(discriminator="kind"),
 ]
 
 
@@ -133,7 +256,12 @@ class Decision(RecordData):
     reviewed_precision: Literal["day", "instant"]
     note: str
     state: Literal["sampled", "confirmed"]
-    category: Literal["glossary_term", "glossary_choice", "vocabulary_choice"]
+    category: Literal[
+        "glossary_term",
+        "glossary_choice",
+        "vocabulary_choice",
+        "glossary_emphasis_choice",
+    ]
     policy_id: Text
 
     @model_validator(mode="after")

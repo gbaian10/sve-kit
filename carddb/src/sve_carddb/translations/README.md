@@ -51,3 +51,34 @@ the label projection is implemented; this rollback is atomic. The optional schem
 capability does not claim complete importer/validator readiness. Real migration
 counts, missing evidence and contract questions are reported separately in review
 artifacts; synthetic tests are not production adoption receipts.
+
+Glossary adoption format 1 now requires explicit `adoption_review` on all four
+glossary kinds, `source_claim` on choices, and the mutually exclusive frozen
+versus authored Japanese source fields on concepts. Old incomplete payloads are
+rejected; changing required fields under format 1 is only safe before the first
+formal adoption. Project claims retain their stated work/URLs and note in hashed
+authored bytes and never grant official authority or trigger requests.
+
+`delegated_glossary` receipts bind the maintainer delegation, exact record-key
+scope, actual coordinator and event. Shards cannot mix review modes; delegated
+batches must be confirmed with every member checked. All scope members must
+exist in the complete input and carry the same receipt. This exception belongs
+only to glossary records, does not relax other adoption loaders, and contributes
+to `delegated_glossary_rows` rather than `human_sampled_rows`. Receipt contents
+are explicit adoption declarations, not cryptographic proof of a person's
+identity or external authorization.
+
+`glossary_emphasis_choice` is a separate, predecessor-checked history restricted
+to rule terms. `Snapshot.emphasis()` returns the effective Bool or None plus
+its adopted record hash/decision; None means missing emphasis, including
+withdrawal. Display the available text without bold and report missing emphasis;
+it is neither an adopted false nor a reason to fall back an entire context.
+Other glossary categories derive true from the formal type, never from the key
+prefix. Emphasis histories remain auditable in the pinned authored records; no
+new database table or public snapshot field is introduced.
+
+This change supports rawless project concept/choice import and emphasis audit.
+Vocabulary choices still stop at the existing atomic label-projection boundary;
+full label use/binding and public raw/translated spans need the later projection
+work. Loader validation of all entries is not a claim that 279 terms have been
+adopted or projected.

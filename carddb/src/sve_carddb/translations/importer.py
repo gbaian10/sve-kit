@@ -19,6 +19,7 @@ from sve_carddb.translations.models import (
     DictionaryEntry,
     DigitalName,
     EffectTerm,
+    EmphasisRecord,
     Shard,
     SourceValue,
     TermRecord,
@@ -213,7 +214,7 @@ def _digital_evidence(
         raise ValueError("Digital name evidence does not locate the adopted face names")
 
 
-def populate_glossary(  # ruff: ignore[complex-structure] -- histories are validated before any effective choice is inserted
+def populate_glossary(  # ruff: ignore[complex-structure,too-many-branches] -- histories are validated before any effective choice is inserted
     db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
 ) -> InputRecord:
     """Compose with an already verified publication identity and frozen digital closure."""
@@ -228,9 +229,12 @@ def populate_glossary(  # ruff: ignore[complex-structure] -- histories are valid
     originals = {}
     for record, _ in snapshot.records():
         if isinstance(record, TermRecord):
-            lang, text, _ = sources.text(
-                record.data.source_ref, record.data.source_span
-            )
+            if record.data.source_ref is None:
+                lang, text = "ja", record.data.authored_source_ja
+            else:
+                lang, text, _ = sources.text(
+                    record.data.source_ref, record.data.source_span
+                )
             if lang != "ja" or not text:
                 raise ValueError("Glossary concept requires exact Japanese source")
             originals[record.data.id] = text
@@ -238,7 +242,7 @@ def populate_glossary(  # ruff: ignore[complex-structure] -- histories are valid
             sources.text(evidence.source_ref)
     values = {}
     for record, _ in snapshot.records():
-        if not isinstance(record, TermRecord):
+        if isinstance(record, (ChoiceRecord, VocabularyRecord)):
             values[record.record_key] = validate_choice(
                 record,
                 original=originals.get(record.data.term_id)
@@ -261,6 +265,8 @@ def populate_glossary(  # ruff: ignore[complex-structure] -- histories are valid
                     "decision_id": decision,
                 },
             )
+        elif isinstance(record, EmphasisRecord):
+            continue
         elif isinstance(record, ChoiceRecord):
             value = values[record.record_key]
             if value is not None:
