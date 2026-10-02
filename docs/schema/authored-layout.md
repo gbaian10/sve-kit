@@ -235,7 +235,7 @@ card_name_concept 於 translations/overrides 只採納卡／面與 exact 名稱�
 
 模板長尾 `approved_policy` 的正式政策／收據、首輪樣本與唯一索引依 [模板採納政策契約](translation-policy.md)。該入口在 authored 內自行證明有效採納，F1 設定只複核；不借表記政策、glossary 委託或呼叫端同名 pin 放行。
 
-模板數值／術語 slot 的辨識核可另依[模板參數辨識政策契約](template-parameter-policy.md)。獨立 kind 與無索引 policy／approval pair 以 recipe config 的五欄 pin 引用；一個真實整體對話事件可覆蓋明列的 rule_id／condition_hash／matcher_commit，不虛構逐題點擊。頁面例子只作呈現證據，不是 human sample_ids；效果模板定義與譯本仍依各自門檻採納。
+模板數值／術語 slot 的辨識核可另依[模板參數辨識政策契約](template-parameter-policy.md)。獨立 kind 與無索引 policy／approval pair 以 recipe config 的五欄 pin 引用；一個真實整體對話事件可覆蓋明列規則。有 hash 事件驗三元組，沒有條件物件的舊事件保留當時版本／頁面證據，row 另以 presented_in／restriction_ids 明示連到目前三元組與有限限制，不回填原事件或虛構逐題點擊。頁面例子只作呈現證據，不是 human sample_ids；效果模板定義與譯本仍依各自門檻採納。
 
 sentence_template 的 ID 與完整六欄 payload 不可變；既有 prefix+10hex 保留，新 normalizer/schema/語義需新 ID 與 supersedes。模板譯本有自己的只增 revision。跨區 divergence 的完整封套改由 translation-contract §7 定義，本節不另留一份不相容的舊示意格式。
 
