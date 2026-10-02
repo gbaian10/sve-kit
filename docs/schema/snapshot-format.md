@@ -16,6 +16,8 @@ reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；
 
 下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
 
+職業／卡種正式採納不改欄位或格式版本，但公開資料內容會變：class_code／type_code 由暫碼變正式代碼、special_kinds 開始有值、公開 vocabulary 新增 special_kind 類別；資料版本須更新。producer／reader 的引用閉包驗證須涵蓋 vocabulary(kind=special_kind)，不能把新標記當成 type 或忽略未定義引用。
+
 ## 2. 公開表、完整欄位與玩家用途
 
 | 集合                     | 公開欄位                                                                                                                                                                                                                                                                                                                   | 鍵與玩家用途（未註明 PK 者以首欄 `id` 為 PK）                                                                                                                                                                                                                                                           |

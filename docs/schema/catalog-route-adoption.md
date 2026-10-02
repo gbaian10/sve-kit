@@ -1,6 +1,6 @@
 # 詞彙、記號與路由採納契約
 
-本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入。
+本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入，詞彙入口擴充歸屬 #28；繁中 vocabulary_choice 採納歸屬 #51，標籤翻譯選用投影歸屬 #53。
 **封套、覆寫格式與展示集合為技術契約；一般版稀有度白名單與繁中介面缺譯順序經使用者 2026-10-01 核可**。
 §1 摘錄既定語意；§2–§6 定義輸入，§7 區分已核可稀有度與加工證據邊界，§8 分列技術預設與使用者核可政策。
 格式不表示資料已採納；仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
@@ -81,7 +81,9 @@ predecessor 仍須精確 hash，因其用途是驗續版鏈。歷史解析依核
 
 decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sample_ids,authored_by,authored_at,reviewed_by,reviewed_at,reviewed_precision,note`。
 state 固定 confirmed、scope 固定 batch；一筆也是一成員 batch。其他 state 不得進入入口，候選留 authored 外。
-reviewed_by／reviewed_at 須記使用者實際確認者與時間；日精度沿 authored-layout 的 day 編碼，否則 instant。
+reviewed_by／reviewed_at 須記維護者實際確認者與時間；確認者須為本契約在 repo 明列的維護者，
+本版名單恰為 `gbaian10`，按 exact 識別驗證，不由 caller 新增。工具與模型名稱不得出現在 reviewed_by，
+製作者與確認者分開記錄；名單變更須修改受版控契約及本入口驗證。日精度沿 authored-layout 的 day 編碼，否則 instant。
 authored_by／authored_at 記真正製作封套者／時間，不冒充核對者。note 可為空字串。
 
 | record.kind（area） | category | policy_id |
@@ -101,7 +103,9 @@ sample_ids 恰為排序且唯一的全部 checked record_key；缺一、多一�
 核對包含 value、全部受影響目標、來源與依賴，不因外層只有一成員而縮成只看一張卡。
 
 loader 必須重算三層 hash、驗 category/policy/area/kind 與精確成員、checked、人名、時間及實際核對收據。
-本封套就是人工全筆採納收據，不能由工具自行填入人名；規格文件、候選頻率、來源頁或模型審核均不等於使用者確認。
+本封套是維護者全筆採納收據，loader 驗確認者在上述名單內，不能只驗名字非空；
+工具不得捏造確認事件，規格文件、候選頻率、來源頁或模型審核均不等於維護者確認。
+此檢查只屬本契約兩個入口，不修改商品等其他區域共用的決定模型，不設委託模式。
 本版不沿用表記 approved_rules 或模板長尾 approved_policy 例外。
 身分／商品／其他詞彙／舊修訂的 confirmed 決定，即使有 authored source，均不能代簽本筆內容。
 
@@ -166,11 +170,29 @@ F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 autho
 
 ### 4.1 詞彙與語言
 
-本版 vocabulary.kind 白名單恰為 class/type/rarity/trait/title/frame/stamp_series。
+本版 vocabulary.kind 白名單恰為 class/type/special_kind/rarity/trait/title/frame/stamp_series。
+class/type 的首批 code 清單與 preview 對照沿[正式 catalog 輸入](catalog-inputs.md)；
+special_kind 此次限 evolve/advance/token，用於基本卡種的明示特殊標記，不擴充 vocabulary_choice 的翻譯 kind。
 技術預設 P8 先做查卡所需的固定 enum；新增對照須明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
 不能由 caller 在 configuration 填任意 kind 就擴張。keyword/stamp/product_family/card 保留給各自目標表，不能冒充詞彙。
-raw_mappings 是排序唯一的 `{region,lang,raw,source_ref}` 陣列；region 為 jp/en，lang 須與來源一致。
-有效且 active 的映射中，相同 kind/region/lang/raw 同時映射兩個 code 即失敗；
+raw_mappings 是排序唯一的 `{region,lang,raw,source_ref,special_kinds}` 陣列；region 為 jp/en，lang 須與來源一致。
+special_kinds 為必填、按 code 排序唯一的陣列；非 type 必為 []。type 的每個完整 raw 映射到 subject.code
+這個基本卡種及明示標記組合，沒有標記亦明填 []；不把進化／進階／衍生物配成 type。
+標記只允許 evolve/advance/token，每個都須引用有效且 active 的 vocabulary(kind=special_kind,code)，
+直接引用完整列入 dependencies，不能借 glossary、inactive／撤回列或任意同名 code。
+首批 special_kind 是自撰標記定義，raw_mappings=[]；定義標籤不冒稱官方來源，不假造一條 raw binding 來通過驗證。
+
+本次僅新增 raw_mappings 的必填 special_kinds 欄位，仍用 catalog_adoption_format=1，僅因目前尚無正式
+catalog-adoptions 採納分片，才可在首次資料前調整。啟用後不得默補已簽歷史欄位或改舊 bytes，
+須另審格式相容策略；未支援此擴充的 loader 明確拒收，不當作空集合。
+
+每個 raw 保留原欄位的 exact source_ref，type 的 locator 仍指完整 card_type／info/Card Type，不用切片字串假造來源。
+基本卡種＋標記的解讀由完整 value 的適用採納核對，exact 來源證據本身不等於分類核可。
+有效且 active 的映射中，相同 kind/region/lang/raw 必只有一組 `(code,special_kinds)`，
+同 code 卻標記不同、重複同一原值但借不同 ref，亦拒絕；來源證據可另放 evidence，不建立多條衝突映射。
+已驗相同原值的當次觀測只重用這一組，不通用 split、trim 或猜新拼法；未知原值拒絕並列缺項，不產生暫碼。
+建置／更新工具須列出需維護者確認的新完整原值與對應候選，不能只報泛稱錯誤或自動沿舊收據放行。
+
 停用的歷史映射不參與選用，但不可重用其 code 給另一概念。空陣列允許純介面 enum，但不能假稱已涵蓋官方原值。
 來源的未知符號（含 `-`）如何投影 null 須有欄位 recipe，不把它自動採為職業或稀有度 code。
 稀有度／premium 的拆解是釘住 recipe 的來源投影，不能讓 raw_mappings 改寫 premium；未知組合不猜。
@@ -433,6 +455,8 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | C22 | 無日期覆寫卻不沿商品 day／覆寫 month、year、unknown 卻回商品 day／商品 month 卻補 day／跨區日期／同日反向 ID | 各自檢出；兩商品日分別 2019、2022、無覆寫且晚者 ID 較小時，仍選 2019 |
 | C23 | 只驗勝出者，忽略未知競爭者／忽略 home_set／忽略 override | 各自檢出 method 或選擇錯誤 |
 | C24 | 先濾 JP 再驗 EN 壞分片／半筆失敗仍提交 DB | 全入口失敗且交易回滾 |
+| C26 | type 標記缺定義／未採納／停用／重複／非 type 帶標記／漏直接依賴／同 raw 同 code 異標記 | 各自拒絕；JP／EN 完整原值及正確基本卡種＋標記通過 |
+| C27 | reviewed_by 為工具／模型名稱或不在 repo 明列維護者名單內的識別 | 拒絕；名字非空亦不能代替名單檢查 |
 | C25 | YAML 只換排版／輸入檔順序改／新卡包僅新增無關卡／重建程式或背景更新但相關內容相同 | canonical 決定不變；詞彙與 default override 保持有效，F1 記新實際輸入 |
 
 驗收須另覆蓋合法的新採納、完整續版、撤回／恢復、literal/uint/variable、雙面與多區互不污染。
