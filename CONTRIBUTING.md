@@ -201,6 +201,38 @@ that component or a shared input. The Python manual hook enforces 90% combined l
 coverage; Rust tests enforce 90% line coverage. The same thresholds apply locally and in CI.
 Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
 full-suite gate; use the Python manual hook for the complete coverage check.
+
+All carddb tests use a session-wide isolation guard. It supplies a temporary
+`SVE_DATA_DIR` and requires file-backed SQLite databases and source writes to stay
+under the pytest temporary root, including resolved symlink targets. An unset or
+non-temporary `SVE_DATA_DIR` is rejected before data I/O. Each xdist worker permits
+the shared pytest run root for immutable fixture templates. Standard-library
+temporary directories also use this isolated root, rather than the ambient system
+temporary directory. SQLite in-memory
+databases, coverage data files and Python bytecode caches remain available;
+these artifact exceptions do not permit arbitrary manifest files outside the
+temporary root. Bytecode caches under any `__pycache__` directory are allowed,
+including importlib's temporary `.pyc.<id>` files, so a first import of a standard
+library or dependency module can populate its cache.
+
+Use `httpx.MockTransport` or a localhost fake server. Default HTTP transports
+reject external URLs before DNS, and a Python audit hook also rejects external
+DNS, TCP and UDP operations. The audit hook and HTTP patches belong to the test
+session, so an individual test's `monkeypatch.undo()` cannot remove them. The
+guard checks both UDP `sendto` and `sendmsg`; filesystem Unix sockets are allowed
+only under the pytest temporary root, including at bind time. Abstract Unix
+socket addresses are outside the supported scope. Do not modify the session
+guard's private state or remove its session patches.
+
+Known limits: SQLite `ATTACH` and `VACUUM INTO` bypass the connection audit;
+`os.mkfifo` has no covered audit event; and an `open` audit event omits `dir_fd`,
+so relative open paths are checked against the current working directory.
+Tests must not use these operations to access paths outside the temporary root.
+Already-open file descriptors are not revalidated for each write. The
+guard covers Python I/O in each pytest worker; it is not an operating-system
+sandbox for subprocesses. Existing Git fixture subprocesses operate offline on
+synthetic repositories. Do not add tests that invoke external network tools.
+
 Run them yourself when you change the code they cover:
 
 ```bash
