@@ -56,6 +56,13 @@ def test_v2_preserves_every_baseline_state_and_separates_recipe(
     )
     assert result.result.recipe == "effect-presence-v2"
     assert result.result.parser_version == "effect-presence-v2/detail-v2"
+    assert (
+        result.result.template_id
+        == {
+            "jp": "jp-card-detail-v2",
+            "en": "en-card-detail-v2",
+        }[region]
+    )
     assert previous.result.recipe == "effect-presence-v1"
     assert previous.result.parser_version == "effect-presence-v1/detail-v1"
     assert result.result_hash == digest(
@@ -94,10 +101,16 @@ def test_back_artist_or_omitted_credit_requires_a_valid_front_and_nonempty_back(
 
 @pytest.mark.parametrize("credit", [ARTIST, ""])
 @pytest.mark.parametrize("effect", ["", '<div class="detail"></div>'])
+@pytest.mark.parametrize("front_present", [False, True])
 def test_new_back_variants_do_not_prove_additional_absence(
-    source: Source, credit: str, effect: str
+    source: Source, credit: str, effect: str, front_present: bool
 ) -> None:
-    raw = back_page(credit, effect=effect)
+    if front_present:
+        raw = back_page(credit)
+        before, after = raw.rsplit(b'<div class="detail">Synthetic rule</div>', 1)
+        raw = before + effect.encode() + after
+    else:
+        raw = back_page(credit, effect=effect)
     for index in (0, 1):
         assert (
             presence_v2.detect_presence(
@@ -105,6 +118,133 @@ def test_new_back_variants_do_not_prove_additional_absence(
             ).result.state
             == "unknown"
         )
+
+
+@pytest.mark.parametrize("variant", ["notice", "artist_back", "omitted_back"])
+@pytest.mark.parametrize(
+    "effect",
+    [
+        "",
+        '<div class="detail"></div>',
+        '<div class="detail"><span class="unknown">Synthetic rule</span></div>',
+    ],
+)
+def test_new_variants_cannot_prove_absence_or_change_an_unknown_front_reason(
+    source: Source, monkeypatch: pytest.MonkeyPatch, variant: str, effect: str
+) -> None:
+    if variant == "notice":
+        node = select_all(parse(NOTICE), ".illustrator")[0]
+        monkeypatch.setattr(
+            presence_v2,
+            "NOTICE_HASHES",
+            frozenset({digest((node.html or "").encode())}),
+        )
+        raw = page("jp", effect).replace(CREDIT.encode(), (CREDIT + NOTICE).encode())
+    else:
+        raw = back_page(ARTIST if variant == "artist_back" else "")
+        raw = raw.replace(
+            b'<div class="detail">Synthetic rule</div>', effect.encode(), 1
+        )
+        back = presence_v2.detect_presence(
+            raw, source, region="jp", number="SYN-01", source_index=1
+        )
+        assert (back.result.state, back.result.reason_code) == (
+            "present",
+            "nonempty_container",
+        )
+    previous = presence.detect_presence(
+        raw, source, region="jp", number="SYN-01", source_index=0
+    )
+    proof = presence_v2.detect_presence(
+        raw, source, region="jp", number="SYN-01", source_index=0
+    )
+    assert (previous.result.state, previous.result.reason_code) == (
+        "unknown",
+        "incomplete_source",
+    )
+    assert (proof.result.state, proof.result.reason_code) == (
+        "unknown",
+        "incomplete_source",
+    )
+    assert proof.result.template_id == "jp-card-detail-v2"
+
+
+@pytest.mark.parametrize("credit", [ARTIST, ""])
+@pytest.mark.parametrize(
+    "change", ["missing_label", "missing_stat", "empty_title", "duplicate_title"]
+)
+def test_only_front_damage_blocks_a_complete_new_back_variant(
+    source: Source, credit: str, change: str
+) -> None:
+    raw = back_page(credit)
+    title = b'<h1 class="ttl">Synthetic name</h1>'
+    changes = {
+        "missing_label": ("<dt>クラス</dt>".encode(), b""),
+        "missing_stat": (
+            b'<span class="status-Item status-Item-Cost"><span class="heading">Cost</span>1</span>',
+            b"",
+        ),
+        "empty_title": (b"Synthetic name", b""),
+        "duplicate_title": (title, title * 2),
+    }
+    before, after = changes[change]
+    raw = raw.replace(before, after, 1)
+    for index in (0, 1):
+        result = presence_v2.detect_presence(
+            raw, source, region="jp", number="SYN-01", source_index=index
+        ).result
+        assert (result.state, result.reason_code) == (
+            "unknown",
+            "incomplete_source",
+        )
+
+
+@pytest.mark.parametrize(
+    "credit",
+    [
+        ARTIST.replace("<span", "<p").replace("</span>", "</p>"),
+        ARTIST.replace('class="heading"', 'class="other"'),
+        ARTIST.replace('class="heading"', 'class="heading other"'),
+    ],
+)
+def test_back_artist_requires_a_span_with_exact_heading_class(
+    source: Source, credit: str
+) -> None:
+    raw = back_page(credit)
+    for index in (0, 1):
+        result = presence_v2.detect_presence(
+            raw, source, region="jp", number="SYN-01", source_index=index
+        ).result
+        assert (result.state, result.reason_code) == (
+            "unknown",
+            "incomplete_source",
+        )
+
+
+@pytest.mark.parametrize(
+    "effect",
+    ["", '<div class="detail"></div>', '<div class="detail">Synthetic rule</div>'],
+)
+def test_known_v1_notice_preserves_its_conclusion_and_versions_template_id(
+    source: Source, monkeypatch: pytest.MonkeyPatch, effect: str
+) -> None:
+    node = select_all(parse(NOTICE), ".illustrator")[0]
+    monkeypatch.setattr(
+        presence, "_JP_NOTICE_HASHES", frozenset({digest((node.html or "").encode())})
+    )
+    raw = page("jp", effect).replace(CREDIT.encode(), (CREDIT + NOTICE).encode())
+    previous = presence.detect_presence(
+        raw, source, region="jp", number="SYN-01", source_index=0
+    )
+    proof = presence_v2.detect_presence(
+        raw, source, region="jp", number="SYN-01", source_index=0
+    )
+    assert previous.result.template_id == "jp-card-detail-notice-v1"
+    assert proof.result.template_id == "jp-card-detail-notice-v2"
+    assert (proof.result.state, proof.result.reason_code) == (
+        previous.result.state,
+        previous.result.reason_code,
+    )
 
 
 @pytest.mark.parametrize(
@@ -222,6 +362,7 @@ def test_credit_variants_never_waive_page_or_identity_guards(
         "before_credit",
         "after_other_sibling",
         "has_name",
+        "has_heading",
         "wrong_number",
     ],
 )
@@ -243,8 +384,9 @@ def test_new_notice_requires_exact_hash_position_and_real_credit(
         monkeypatch.setattr(presence_v2, "NOTICE_HASHES", frozenset())
     elif change == "duplicate":
         notice *= 2
-    elif change == "has_name":
-        notice = notice.replace("<span>", '<span class="name">')
+    elif change in {"has_name", "has_heading"}:
+        marker = "name" if change == "has_name" else "heading"
+        notice = notice.replace("<span>", f'<span class="{marker}">')
         node = select_all(parse(notice), ".illustrator")[0]
         monkeypatch.setattr(
             presence_v2,

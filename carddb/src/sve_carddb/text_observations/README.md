@@ -223,7 +223,11 @@ Only the second face may omit its credit or contain an artist-only heading.
 It must have a nonempty recognized ability container, complete info/stats and
 bounded wrapper children. Artist-only credit is terminal and contains one plain
 heading of letters/spaces; a different card number cannot masquerade as an artist.
-These back variants never prove additional absence. Known v1 present/absent
-results retain their state and reason; new recipe/parser/template identities
-intentionally produce new evidence hashes. The upgrade must be checked against
-every frozen JP face, including all previously proven absent faces, before use.
+Every newly recognized variant, including notices and the front of a two-face
+page, can only prove presence. A non-present container result retains the
+original unknown/incomplete_source conclusion and does not acquire the new
+credit template. These variants never prove additional absence. Known v1
+present/absent results retain their state and reason; new recipe/parser/template
+identities intentionally produce new evidence hashes. The upgrade must be
+checked against every frozen JP face, including all previously proven absent
+faces, before use.

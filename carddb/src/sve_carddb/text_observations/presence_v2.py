@@ -192,8 +192,11 @@ def detect_presence(
                 for index, face in enumerate(faces)
             )
         ):
-            state, reason = v1._container_state(faces[source_index])
-            template = "jp-card-detail-credit-v2"
+            candidate_state, candidate_reason = v1._container_state(faces[source_index])
+            # New page variants may prove presence, never additional absence.
+            if candidate_state == "present":
+                state, reason = candidate_state, candidate_reason
+                template = "jp-card-detail-credit-v2"
     if template is not None and template.endswith("-v1"):
         template = template[:-3] + "-v2"
     if reason == "unrecognized_template":
