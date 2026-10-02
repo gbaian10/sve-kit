@@ -56,6 +56,8 @@ policy_id 是 `[a-z][a-z0-9_-]*` 的永久版本 key；政策／收據的 ID、�
 | normalizer_versions | 非空排序唯一 Code 陣列，恰列已支持且釘版的 recipe，不允許 wildcard；flavor 恰為 flavor-exact-v1 |
 | semantic_variants | 非空排序唯一 Code 陣列，恰列 default／已實際採納的語義 variant；不得因 owner／檔案名自行擴張 |
 
+flavor 的 domain、role 與 exact recipe 定義在 #195（1/3）；**1/3 合併前，本文件的 flavor 部分（含譯本政策）不可使用**。
+
 符合 scope 只是必要條件。loader 逐筆經 template_id／inventory_id 解析核可模板及完整清冊，
 檢查來源語言、role、recipe、語義與來源／span／ID／引用閉包；不以 filing_key、ID 前綴、confidence 或宣告的 domain 替代。
 flavor 定義另驗 sentence、完整整欄 `[0,L)`／anchor=null、零參數、exact recipe，
