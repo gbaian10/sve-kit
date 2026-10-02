@@ -96,6 +96,16 @@ def rebuild_raw_scope(
     )
     if not printings or any(printing.card_id != face.card_id for printing in printings):
         raise ValueError("Historical wording printing/card/face scope mismatch")
+    required = {"card:" + face.card_id, "face:" + face.id} | {
+        "printing:" + p.id for p in printings
+    }
+    if any(
+        registry.records[key].decision_id is None
+        or registry.decisions[registry.records[key].decision_id or ""].state
+        != "confirmed"
+        for key in required
+    ):
+        raise ValueError("Historical wording identity scope is not confirmed")
     observations: list[FaceObservation] = []
     uses: list[SourceUse] = []
     for printing in printings:
@@ -138,7 +148,11 @@ def rebuild_raw_scope(
                                 "printing_id": printing.id,
                                 "face_id": face.id,
                                 "source_index": item.source_index,
-                                "result": proof.result.model_dump(mode="json"),
+                                "recipe": proof.result.recipe,
+                                "template_id": proof.result.template_id,
+                                "container_locator": proof.result.container_locator,
+                                "state": proof.result.state,
+                                "reason_code": proof.result.reason_code,
                                 "result_hash": proof.result_hash,
                             }
                         ).decode(),

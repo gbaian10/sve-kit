@@ -123,7 +123,7 @@ def test_bad_scope_inputs_fail_without_borrowing_another_source(
 ) -> None:
     case = historical_case
     provider = case.provider(case.batches[1])
-    providers = (provider,)
+    providers: tuple[FrozenTexts, ...] = (provider,)
     registry = case.registry
     if change in {"identity", "map", "raw", "overlap"}:
         original = provider.version

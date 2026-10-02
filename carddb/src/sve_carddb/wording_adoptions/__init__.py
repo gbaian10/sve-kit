@@ -1,1 +1,1 @@
-"""Receipt parsing and proposal-only wording diagnostics."""
+"""Immutable wording receipts, independent replay and transactional adoption."""

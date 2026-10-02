@@ -142,6 +142,9 @@ def _layout_matches(before: FaceContent, after: FaceContent) -> list[str]:
         and b is not None
         and a.replace("\r\n", "\n") == b.replace("\r\n", "\n")
         for a, b in changes
+    ) and all(
+        value is not None and "\r" not in value.replace("\r\n", "\n")
+        for value in (*old.values(), *new.values())
     ):
         rules.append("wp:eol-v1")
     if all(

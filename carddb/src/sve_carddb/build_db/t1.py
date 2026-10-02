@@ -10,6 +10,7 @@ from sve_carddb.build_db import (
     t1_json,
     t1_qa,
     t1_related,
+    t2_semantics,
     translation_evidence,
 )
 from sve_carddb.build_db.compiler import CompiledSchema, compile_schema
@@ -30,7 +31,7 @@ TABLES = (
     *translation_evidence.TABLES,
 )
 REGISTRY = Registry(
-    tables=(*t0.TABLES, *TABLES),
+    tables=(*t0.TABLES, *TABLES, *t2_semantics.TABLES),
     capabilities=(
         Capability("t0", tuple(table.name for table in t0.TABLES)),
         Capability("images", tuple(table.name for table in t1_images.TABLES)),
@@ -42,6 +43,11 @@ REGISTRY = Registry(
         Capability(
             "translation_evidence",
             tuple(table.name for table in translation_evidence.TABLES),
+        ),
+        Capability(
+            "semantics",
+            tuple(table.name for table in t2_semantics.TABLES),
+            requires=("t0",),
         ),
         Capability("art", ("art",)),
         Capability(
@@ -63,7 +69,15 @@ def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
     return compile_schema(
         REGISTRY,
         requested,
-        schemas() | t1_json.schemas() | {"TranslationTokens": {"type": "null"}},
+        schemas()
+        | t1_json.schemas()
+        | {
+            "TranslationTokens": {"type": "null"},
+            "semantic_sections": {
+                "type": "array",
+                "items": {"type": "string", "minLength": 1},
+            },
+        },
         version=SCHEMA_VERSION,
     )
 
