@@ -500,10 +500,14 @@ def test_cli_passes_confirmed_images_to_writer(
     sentinel = object()
     monkeypatch.setattr(cli_module, "FrozenSources", lambda *_args: sentinel)
     image_build = SimpleNamespace(images=(), elapsed_seconds=0)
+    crop_inputs = object()
+    monkeypatch.setattr(
+        cli_module, "load_image_crops", lambda *_args, **_kwargs: crop_inputs
+    )
 
     def assets(source: object, _roots: object, **kwargs: object) -> object:
         assert source is sentinel
-        assert kwargs == {"workers": 4, "reuse_only": True}
+        assert kwargs == {"workers": 4, "reuse_only": True, "crops": crop_inputs}
         return image_build
 
     def build(_recipe: object, **kwargs: object) -> Built:

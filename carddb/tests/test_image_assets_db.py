@@ -20,6 +20,7 @@ from sve_carddb.image_assets import (
     publish_jp_image_bundle,
     reference_uses,
 )
+from sve_carddb.image_crops import load_image_crops
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.build import build
@@ -28,10 +29,13 @@ from sve_carddb.registry.preview import FrozenJP, plan_preview, populate_preview
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.review import Inputs, Receipt
 from sve_carddb.registry.storage import plan_files, write_files
+from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.source_archive import ArchiveStore, Scope, seal_batch
 from sve_carddb.sources.official_jp import card_url
 
 from .build_db_fixtures import rows
+from .image_crop_fixtures import initialize, install
+from .image_crop_fixtures import record as crop_record
 from .test_image_assets import frozen as frozen  # ruff: ignore[useless-import-alias] -- reuse only synthetic archive fixture
 from .test_image_assets import roots
 from .test_image_variants import png
@@ -380,6 +384,92 @@ def test_complete_bundle_binds_source_uses_after_blobs_and_is_immutable(
             stores=stores,
         )
     assert before == {path: path.read_bytes() for path in destination.iterdir()}
+
+
+def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
+    tmp_path: Path, frozen: FrozenSources, staged: Staged
+) -> None:
+    repo = tmp_path / "crop-repo"
+    descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
+    install(repo / "authored", [crop_record(descriptor)])
+    crops = load_image_crops(repo / "authored", authored_revision=initialize(repo))
+    context = BuildContext.from_inputs(
+        REVISION,
+        {"synthetic.lock": b"synthetic"} | crops.dependencies(),
+        {
+            "image_recipe": DEFAULT_RECIPE.version,
+            "image_crop_overrides": crops.configuration(),
+        },
+    )
+    output = roots(tmp_path)
+    original = build_jp_assets(frozen, output)
+    refs = refs_for(staged)
+    schema = compile_build(("images",))
+    stores = {frozen.store_id: frozen.root}
+
+    def parents(db: Database) -> InputRecord:
+        parent = staged.parents(db)
+        return input_record(context, parent.uses)
+
+    destination = tmp_path / "crop-bundle"
+    with pytest.raises(
+        ValueError, match=r"^Build context requires adopted image crop inputs$"
+    ):
+        publish_jp_image_bundle(
+            schema,
+            destination,
+            context,
+            parents,
+            original,
+            refs,
+            output,
+            parent_uses=staged.plan.source_uses(),
+            stores=stores,
+        )
+    with pytest.raises(
+        ValueError, match=r"^Image crop box differs from adopted source crop$"
+    ):
+        publish_jp_image_bundle(
+            schema,
+            destination,
+            context,
+            parents,
+            original,
+            refs,
+            output,
+            parent_uses=staged.plan.source_uses(),
+            stores=stores,
+            crops=crops,
+        )
+    assert not destination.exists()
+    adopted = build_jp_assets(frozen, output, crops=crops)
+    published = publish_jp_image_bundle(
+        schema,
+        destination,
+        context,
+        parents,
+        adopted,
+        refs,
+        output,
+        parent_uses=staged.plan.source_uses(),
+        stores=stores,
+        crops=crops,
+    )
+    assert published == verify_bundle(
+        schema,
+        destination,
+        context,
+        uses_sorted(
+            (*staged.plan.source_uses(), *adopted.source_uses(), *reference_uses(refs))
+        ),
+        stores=stores,
+    )
+    envelope = object_value(parse((destination / "report.json").read_bytes()))
+    report = object_value(envelope["report"])
+    crop_report = object_value(report["crop_overrides"])
+    assert crop_report["applied_source_images"] == 1
+    assert crop_report["unused"] == []
+    assert crop_report["art_webp_review"] == "pending_coordinator_review"
 
 
 @pytest.mark.parametrize("case", ["raw-bytes", "source-width"])

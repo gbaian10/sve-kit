@@ -5,6 +5,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import JsonValue
 
 import sve_carddb.snapshot.preview.build as build_module
 from sve_carddb.build_inputs import InputRecord
@@ -16,12 +17,22 @@ from sve_carddb.image_assets import (
     build_jp_assets,
     populate_jp_assets,
 )
+from sve_carddb.image_crops import load_image_crops
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.preview.build import build
-from sve_carddb.snapshot.values import array, digest, integer, object_value, string
+from sve_carddb.snapshot.values import (
+    array,
+    digest,
+    integer,
+    object_value,
+    parse,
+    string,
+)
 
+from .adoption_fixtures import commit
+from .image_crop_fixtures import RECEIPT, initialize, install, record
 from .shared_case_fixtures import TextCaseTemplate
 from .test_registry import make_inputs
 from .test_snapshot_preview import prepare_build
@@ -68,9 +79,14 @@ def prepared_image_build(
     case = double_text_case.copy(tmp_path / "synthetic")
     shutil.copytree(image_archive_template[0], case.store, dirs_exist_ok=True)
     images, image_roots = encoded_images
-    recipe = prepare_build(case, tmp_path, monkeypatch)
+    repo = tmp_path / "repo"
+    repo.mkdir()
+    (repo / "keep").write_text("synthetic")
+    revision = initialize(repo)
+    recipe = prepare_build(case, tmp_path, monkeypatch, revision=revision)
     recipe = recipe.model_copy(
         update={
+            "revision": revision,
             "image_batch": image_archive_template[2],
             "card_batch": next(
                 iter(case.identity.evidence.values())
@@ -192,3 +208,108 @@ def test_build_rejects_missing_image_source_use_after_real_population(
         ValueError, match=r"^Build input use closure or context mismatch$"
     ):
         build(recipe, images=images, image_root=image_roots.preview)
+
+
+def crop_recipe(
+    case: Case,
+    recipe: Inputs,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    rows: list[dict[str, JsonValue]],
+) -> Inputs:
+    install(recipe.repo / "authored", rows)
+    revision = commit(recipe.repo)
+    return prepare_build(case, tmp_path, monkeypatch, revision=revision).model_copy(
+        update={"image_batch": recipe.image_batch, "card_batch": recipe.card_batch}
+    )
+
+
+def test_adopted_preview_pins_receipts_unused_en_and_real_box(
+    prepared_image_build: tuple[
+        Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
+    ],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    case, recipe, _, _, _ = prepared_image_build
+    frozen = FrozenSources(recipe.archive, recipe.store_id, recipe.image_batch)
+    row = record(frozen.descriptor(frozen.inventory.current[0].source_version_id))
+    recipe = crop_recipe(
+        case,
+        recipe,
+        tmp_path,
+        monkeypatch,
+        [
+            row,
+            row
+            | {
+                "region": "en",
+                "card_no": "TEST-EN",
+                "source_key": "sha256:" + "e" * 64,
+            },
+        ],
+    )
+    crops = load_image_crops(
+        recipe.repo / "authored", authored_revision=recipe.revision
+    )
+    roots = PreviewRoots(
+        tmp_path / "adopted-assets", tmp_path / "cdn", tmp_path / "adopted-cache"
+    )
+    images = build_jp_assets(frozen, roots, crops=crops)
+    result = build(recipe, images=images, image_root=roots.preview)
+    inputs = InputRecord.model_validate_json(result.input_content)
+    crops.verify_context(inputs.context)
+    assert {
+        pin.name
+        for pin in inputs.context.dependencies
+        if pin.name.startswith("authored/image-crops/")
+    } == set(crops.dependencies())
+    report = object_value(object_value(result.report["image_assets"])["crop_overrides"])
+    assert report["applied_source_images"] == 1
+    assert object_value(array(report["unused"])[0])["region"] == "en"
+    assert result.projection.tables["image_variant"]
+
+
+def test_preview_consumer_rejects_old_box_and_dirty_receipt(
+    prepared_image_build: tuple[
+        Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
+    ],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    case, recipe, images, roots, _ = prepared_image_build
+    frozen = FrozenSources(recipe.archive, recipe.store_id, recipe.image_batch)
+    row = record(frozen.descriptor(frozen.inventory.current[0].source_version_id))
+    recipe = crop_recipe(case, recipe, tmp_path, monkeypatch, [row])
+    with pytest.raises(
+        ValueError, match=r"^Image crop box differs from adopted source crop$"
+    ):
+        build(recipe, images=images, image_root=roots.preview)
+    receipt = recipe.repo / "authored" / RECEIPT
+    receipt.write_bytes(receipt.read_bytes() + b"\n")
+    with pytest.raises(
+        ValueError, match=r"^Image crop bytes differ from pinned authored revision$"
+    ):
+        build(recipe, images=images, image_root=roots.preview)
+
+
+def test_text_only_preview_does_not_depend_on_crop_data(
+    prepared_image_build: tuple[
+        Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
+    ],
+) -> None:
+    _, recipe, _, _, _ = prepared_image_build
+    before = build(recipe)
+    invalid = recipe.repo / "authored/image-crops/TEST/001.yaml"
+    invalid.parent.mkdir(parents=True)
+    invalid.write_bytes(b"not even valid crop data")
+    after = build(recipe)
+    assert before.input_content == after.input_content
+    config = object_value(
+        parse(
+            InputRecord.model_validate_json(
+                after.input_content
+            ).context.configuration.encode()
+        )
+    )
+    assert "image_crop_overrides" not in config

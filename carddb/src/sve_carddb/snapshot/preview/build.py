@@ -16,6 +16,8 @@ from sve_carddb.image_assets import (
     reference_uses,
     verify_asset_sources,
 )
+from sve_carddb.image_crop_report import crop_report
+from sve_carddb.image_crops import load_image_crops
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
     FrozenProducts,
@@ -45,6 +47,7 @@ from sve_carddb.text_observations.wording import printing_observed_texts, wordin
 
 if TYPE_CHECKING:
     from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
 
 
@@ -102,6 +105,22 @@ def exclusions(plan: PreviewPlan) -> list[JsonValue]:
     return result
 
 
+def _image_crops(inputs: Inputs, images: ImageBuild | None) -> ImageCrops | None:
+    if images is not None:
+        crops = load_image_crops(
+            inputs.repo / "authored", authored_revision=inputs.revision
+        )
+        if any(
+            (item.source.archive.store_id, item.source.archive.batch_id)
+            != (inputs.store_id, inputs.image_batch)
+            for item in images.images
+        ):
+            raise ValueError("Preview images differ from the pinned image batch")
+        verify_asset_sources(images, {inputs.store_id: inputs.archive}, crops=crops)
+        return crops
+    return None
+
+
 def build(  # ruff: ignore[too-many-locals] -- one offline transaction binds the independently verified source plans
     inputs: Inputs, *, images: ImageBuild | None = None, image_root: Path | None = None
 ) -> Built:
@@ -136,14 +155,7 @@ def build(  # ruff: ignore[too-many-locals] -- one offline transaction binds the
     stores = {inputs.store_id: inputs.archive}
     if (images is None) != (image_root is None):
         raise ValueError("Image build and asset root must be provided together")
-    if images is not None:
-        if any(
-            (item.source.archive.store_id, item.source.archive.batch_id)
-            != (inputs.store_id, inputs.image_batch)
-            for item in images.images
-        ):
-            raise ValueError("Preview images differ from the pinned image batch")
-        verify_asset_sources(images, stores)
+    crops = _image_crops(inputs, images)
     identities = load_product_identities(
         inputs.repo / "authored",
         authored_revision=inputs.revision,
@@ -173,9 +185,14 @@ def build(  # ruff: ignore[too-many-locals] -- one offline transaction binds the
         "selected_regions": ["jp"],
         "published_history": "explicit-empty-no-releases",
     }
+    if crops is not None:
+        dependencies.update(crops.dependencies())
+        configuration["image_crop_overrides"] = crops.configuration()
     if images is not None:
         configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
+    if crops is not None:
+        crops.verify_context(context)
     # Adopted JP art can use the shared art DDL; DDL capability is not region coverage.
     with create_database(compile_minimum(include_en=True)) as db:
         with db.transaction():
@@ -209,6 +226,10 @@ def build(  # ruff: ignore[too-many-locals] -- one offline transaction binds the
                     for key, value in images.report(references).items()
                     if key not in {"elapsed_milliseconds", "cache_hits"}
                 }
+                if crops is not None:
+                    image_report["crop_overrides"] = crop_report(
+                        crops, images, references, db
+                    )
         decisions = Decisions().with_text_views(
             wording_views(db, plan), printing_observed_texts(db, plan)
         )

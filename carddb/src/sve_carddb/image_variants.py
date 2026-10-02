@@ -195,7 +195,7 @@ def build_variants(
     _validate_source(source)
     _validate_recipe(recipe)
     image = _decode(source.source_bytes)
-    crop = _crop_box(source, image.width, image.height, override)
+    crop = crop_box(source, image.width, image.height, override)
     cache_key = hashlib.sha256(
         _canonical(
             {
@@ -369,9 +369,10 @@ def _convert_icc(image: Image.Image, profile: object) -> Image.Image:
     return converted
 
 
-def _crop_box(
+def crop_box(
     source: ImageSource, width: int, height: int, override: CropOverride | None
 ) -> CropBox | None:
+    """Use the same geometry at encoding and independently verified consumption."""
     if override is not None:
         if (
             override.image_id != source.image_id
