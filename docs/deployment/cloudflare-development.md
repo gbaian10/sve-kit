@@ -1,174 +1,279 @@
 # Cloudflare 開發環境設定與 preview 上傳
 
-這份清單供維護者親手操作，agent 與 CI 不取得 Cloudflare 憑證。設定清單與上傳工具
-不代表環境已上線；以下驗收全部完成後才可提供開發資料。此處未登入或查詢 Cloudflare，
-控制台選項名稱與可用方案須由維護者依當下介面及官方文件確認。
+前端使用 **Workers 靜態資源**，建置與部署為 Vite build → Wrangler deploy。
+本清單由維護者親手操作；agent、CI 不取得 Cloudflare 憑證，不執行真實部署或上傳。
+資料契約見 [preview 建置與接線](../schema/preview-handoff.md)。
 
-既有資料契約見 [preview 建置與接線](../schema/preview-handoff.md)。工具只上傳
-JP preview，沒有正式發布、正式 index 或日英首發放行功能。
+本文未連外查證。下列 Cloudflare 控制台、Wrangler 設定語法、Access／網域／預覽與
+R2 的平台行為均為 **未驗證，需維護者實測**；範例是設定與驗收方案，不是已部署配置。
+官方連結供維護者查核，不代表本輪重新確認了當下的功能、方案或費率。
 
-## 1. 先填環境表
+## 1. 先決定資料入口，再填環境表
 
-下列開發名稱是建議，維護者可在設定前替換；正式名稱只先保留，不上傳資料。
+開發資料入口有兩案，**待維護者決定**。不要同時啟用兩案留下未受保護的入口。
+正式 `cdn.svekit.app` 保留作獨立 CDN；這個開發選擇不變更正式架構。
 
-| 項目 | 開發 | 正式 |
+| 方案 | 必要設定 | 風險與驗收 |
+| --- | --- | --- |
+| A：同網域、同一 Worker 綁 R2 | 前端為 `dev.svekit.app`，同 Worker 在 `/cdn-preview/` 提供桶內白名單物件；bucket 不開公開網域，Worker 綁定開發桶，資料路徑先走 handler | 沒有跨來源 cookie／CORS 配置，但需審核讀取 handler、登入與 host gate；避免資料路徑誤套 SPA fallback、任意 key 存取或 cache 洩漏；Worker 轉送可能增加請求／CPU 成本。平台行為未驗證，需維護者實測。 |
+| B：獨立開發 CDN | 前端為 `dev.svekit.app`，開發桶另連 `cdn-dev.svekit.app`，兩個 host 各自設 Access；前端明確選遠端 preview base | 兩個 host 的 Access 登入與跨來源 cookie、fetch credentials、CORS／preflight 必須配合。Cookie 或登入流程可能不能直接跨域使用，未驗證，需維護者實測；不可用放行匿名 GET 的 Bypass 解決。 |
+
+| 項目 | 開發 | 正式保留 |
 | --- | --- | --- |
 | 前端 | `dev.svekit.app` | `svekit.app` |
-| 公開物件入口 | `cdn-dev.svekit.app` | `cdn.svekit.app` |
+| 資料入口 | A：同源 `/cdn-preview/`；B：`cdn-dev.svekit.app` | `cdn.svekit.app` |
 | R2 bucket | `svekit-dev` | `svekit-prod` |
-| Pages project | `svekit-dev` | `svekit-prod` |
-| 存取 | Access 指定人員，預設拒絕 | 公開前另行確認 |
-| token | 只限開發 bucket | 不共用開發 token |
+| 前端 Worker | `svekit-web-dev` | `svekit-web-prod` |
+| 存取 | 指定人員、預設拒絕 | 公開前另行確認 |
+| 寫入 token | 只限開發桶 | 另建，不共用開發 token |
 
-主站使用 `svekit.app`，查卡、建牌、對戰共用前端與路徑，不另建查卡網站。
-`svekit.com` 保留到正式主站就緒後才設定轉址；本輪不建立轉址或對戰伺服器。
+這些開發名稱可在設定前替換。主站使用 `svekit.app`；查卡、建牌、對戰共用前端與路徑，
+前端與對戰服務分開部署。`svekit.com` 待正式主站就緒後轉址，本清單不啟用轉址或對戰後端。
 
-維護者記下 account ID、bucket、project 及核准登入人員；秘密只在本人本機。
-不要把 token、S3 key、登入 cookie、私人建置路徑寫進 repo、PR、CI 或分享的報告。
+## 2. 維護者建立 R2
 
-## 2. 維護者建立 R2 與網域
+1. 登入啟用 MFA 的 Cloudflare 帳號，確認 account 與 `svekit.app` zone。
+2. 建立不同的開發／正式 bucket，資料與寫入 token 分離；本輪不上傳正式桶。
+3. 關閉開發桶的公開 `r2.dev` 入口，記下控制台顯示的完整 URL（若有），不由 account ID 猜 URL。
+4. 選 A：保持 bucket 無任何公開 custom domain；由第 5 節 Worker 的 R2 binding 讀取。
+5. 選 B：先設好第 4 節保護，再將 `cdn-dev.svekit.app` 連接開發桶，依介面核對 DNS／TLS。
+   若當下平台不能在此入口確實執行 Access，須另用受審的 Worker gate 或改選 A；不得先公開資料。
+6. 正式桶保持未發布，`cdn.svekit.app` 的公開操作另行安排。檢查沒有其他 public URL／Worker 可繞過保護。
 
-1. 登入已啟用 MFA 的 Cloudflare 帳號，確認 `svekit.app` zone 及 account。
-2. 在 R2 建立兩個不同 bucket，分開保存開發 preview 與未來正式產物。
-   開發資料不得先放入正式 bucket；兩者不得共用寫入 token。
-3. 關閉開發 bucket 的公開 `r2.dev` 存取，不建立其他未受保護的公開入口。
-4. **先完成第 4 節 Access 規則，再連接開發 custom domain。** 將
-   `cdn-dev.svekit.app` 綁定開發 bucket，依控制台指示建立或核對 zone DNS，等待 TLS 生效。
-   不自行把 S3 account endpoint 當作 CDN，不另開繞過 Access 的 Worker 或網域。
-5. 正式 bucket 先保持無公開入口；`cdn.svekit.app` 的公開設定與正式發布另行執行。
+Custom domain、同帳號 zone、r2.dev 關閉後的回應與 Access 接點，均未驗證，需維護者實測。
+參考 [R2 public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/)。
 
-參考 [R2 custom domains](https://developers.cloudflare.com/r2/buckets/public-buckets/)。
-驗收時必須檢查 `r2.dev` 與所有已綁定入口，不能只檢查預期的 CDN 名稱。
+## 3. 維護者建立單桶 token 與本機 shell
 
-## 3. 維護者建立單 bucket token
+1. 在 R2 token 管理入口選 Object Read & Write，只包含開發桶，不選全部 bucket／帳號管理。
+   讀取權限用來驗回 bytes／hash／metadata。控制台權限項目與限制能力未驗證，需維護者實測。
+2. 保存產生的 S3 access key ID 與 secret access key；與 account ID、Wrangler 部署登入分開。
+   工具不使用 Cloudflare Bearer token，也不讀 AWS profile 或秘密檔。
+3. key pair 只留本人本機，不進 git、CI、shell 設定檔、`mise.local.toml`、前端或分享記錄。
+   到期／撤銷由維護者設定。平台 Object Write 可能包含刪除與覆寫，未驗證，需維護者實測；
+   **create-only 是工具的條件寫入保證**，不是 token 自身的權限模型。
 
-1. 在 R2 的 API token 管理入口建立供本機上傳的 token，選擇 Object Read & Write，
-   範圍只包含開發 bucket；不選全部 bucket 或管理帳號的權限。
-2. 保存該 token 產生的 S3 access key ID 與 secret access key，與 account ID 分開辨識。
-   上傳工具使用 S3 相容 API 的 key pair，不使用一般 Cloudflare Bearer token。
-3. token 只留維護者本機的私人儲存，不進 git、不交給 agent、不設定成 CI secret。
-   正式 bucket 要另建 token，不用本輪 key 操作。
-4. 每次執行只把 key pair 載入當次本機 shell 的 `SVE_R2_ACCESS_KEY_ID` 與
-   `SVE_R2_SECRET_ACCESS_KEY`；使用不回顯的輸入或本機秘密管理工具，勿將字面值打進歷史。
-   結束後 unset 兩個變數。
-
-參考 [R2 tokens](https://developers.cloudflare.com/r2/api/s3/tokens/)。讀取權限是逐物件
-驗 hash、bytes 與 metadata 所需。平台的寫入權限可能同時允許刪除或覆寫；**create-only
-是工具的條件寫入契約**，不宣稱 API token 自身能禁止所有覆寫。工具沒有 delete 操作。
-維護者須確認 token 不能操作正式 bucket，並設定適合的到期／撤銷方式。
-
-## 4. 維護者設定 Access 與跨來源存取
-
-1. 在 Zero Trust 設定本人要用的登入方式，例如一次性登入碼或既有身分提供者。
-2. 為開發前端及開發 CDN 建立涵蓋全路徑的 Access application，Allow 規則只包含
-   維護者列明的 email／群組。未命中者預設拒絕，不設 Everyone 或任意 Bypass。
-3. 不建立給 agent 或 CI 的 service token；R2 S3 API 上傳仍使用第 3 節的單桶 key pair。
-4. 建立 Pages 後，逐一檢查 project 的 `pages.dev`、branch alias、每個 deployment/hash
-   URL。只保護 custom domain **不足以證明其他別名被保護**。若平台能全面保護就啟用；
-   若不能，須先有獨立前端／Function／Worker 的 host 拒絕保護，涵蓋靜態路徑與所有入口，
-   並實測無登入回應，完成前不可放開發卡片資料。
-5. R2 CORS 只允許開發前端的精確 HTTPS origin，方法限 GET、HEAD、OPTIONS；不允許
-   萬用來源配合 cookie，也不開啟瀏覽器 PUT／DELETE。若驗 hash 的 reader 需要讀 ETag，
-   將 ETag 列入 expose headers。CDN 與前端的 Access 登入、cookie、fetch credentials
-   及跨來源回應須共同驗證。
-6. 若 Access 擋住瀏覽器 preflight，依當下官方功能設定 OPTIONS 處理；不以放行
-   GET 或整個 CDN 的 Bypass 解決。登出後 GET 仍須拒絕，登入後真實跨來源讀取須成功。
-
-參考 [Access self-hosted applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/)
-與 [R2 CORS](https://developers.cloudflare.com/r2/buckets/cors/)。
-
-Access 與 CORS 控制不同事情。CORS 不會使未登入的直接下載者失去存取權；所有別名與
-public bucket URL 都須另驗拒絕。也不能只看到登入頁就宣稱前端能載入 CDN。
-
-## 5. 維護者建立 Pages project
-
-1. 建立獨立開發 Pages project；可先使用本機建置後的 Direct Upload，避免把 R2 token
-   放入建置 pipeline。Pages 建置本身不需要 R2 上傳 key。
-2. 前端產物由 repo 根執行既有建置指令產生：
-
-   ```bash
-   mise exec -- bun run --cwd sim/web build
-   ```
-
-3. 本機產物檢查通過後，由維護者親手依 Pages 上傳介面部署 `sim/web/dist`。
-   不把 preview root、來源庫、private/ 或 reports/ 塞進前端產物。
-4. 在第 4 節保護全部入口後，連接 `dev.svekit.app`，核對 DNS 與 TLS，驗證登入與登出。
-   正式 project 的發布與 `svekit.app`／`.com` 轉址另行安排。
-
-**目前上線前置缺口：** `sim/web` 的 preview base 固定 `/cdn-preview`，該路徑由本機
-Vite middleware 提供，Pages 靜態產物沒有這個服務。遠端 preview base、開發切換及所有
-Pages alias 的 host gate 必須另作 `sim/web` 元件變更並審核；不能用不存在的環境變數
-假稱已接通。既有正式 CDN 設定不等於 preview 接點。可建立空 project，完成前勿部署
-會暴露真實資料的產物，也不宣稱 #200 完整上線。
-
-## 6. 維護者先做本機離線對帳
-
-來源是含 `snapshots/` 與 `images/` 的 preview root，須為絕對且無 symlink 的路徑。
-工具不用 `SVE_DATA_DIR`、不開 live manifest、不抓官網，也不修改 preview。
+參考 [R2 S3 tokens](https://developers.cloudflare.com/r2/api/s3/tokens/)。
+在沒有啟動 agent、沒有除錯 trace 或終端轉錄的本機終端操作以下 Bash 指令。
+不同終端不是同一 OS 使用者之間的安全邊界；不要在執行上傳時讓 agent 讀取進程環境。
 
 ```bash
-uv --directory carddb run sve-carddb r2 upload-preview \
-  --preview-dir /explicit/preview --dry-run
+bash --noprofile --norc
+set +x
+IFS= read -r -s -p 'R2 access key ID: ' SVE_R2_ACCESS_KEY_ID
+printf '\n'
+IFS= read -r -s -p 'R2 secret access key: ' SVE_R2_SECRET_ACCESS_KEY
+printf '\n'
+export SVE_R2_ACCESS_KEY_ID SVE_R2_SECRET_ACCESS_KEY
+trap 'unset SVE_R2_ACCESS_KEY_ID SVE_R2_SECRET_ACCESS_KEY' EXIT
+IFS= read -r -p 'R2 account ID: ' R2_ACCOUNT_ID
+IFS= read -r -p 'Development bucket: ' R2_DEV_BUCKET
 ```
 
-有 `.br` 時加 `--brotli-command /explicit/trusted-encoder`，使用 producer 已選用且
-支援 `--version`、`-q 11 -c` 的可信任離線程式。未提供或重新壓縮的 bytes 不同即停止；
-不得刪掉 `.br` 或改配方讓驗證放行。沒有 `.br` 時只需既有 Python 依賴。
+貼上秘密只發生在不回顯的 read 提示，不打進指令或歷史。不要 `env`、`set` 或 trace 輸出值。
+作業結束執行 `unset SVE_R2_ACCESS_KEY_ID SVE_R2_SECRET_ACCESS_KEY` 再 `exit`。
+工具給外部 Brotli 子行程的環境只含固定 PATH／LANG／LC_ALL，不傳憑證或代理設定。
 
-核對 `candidate_files`、`candidate_bytes` 與 `files_by_kind`／`bytes_by_kind`，再核對
-manifest pin 是否為要發布的 preview。`private/`、`reports/` 明示排除且不讀內容。
-遠端存在與新增上傳量在離線模式未知，不能將 candidate 數字稱作遠端新增量。
-PNG、未知檔案、未引用資產、私有欄位／配方、本機路徑、壞 hash／壓縮／圖片尺寸均停止。
+## 4. 維護者設定 Access 與所有入口保護
 
-## 7. 維護者驗條件寫入後，當次授權上傳
+1. 選用本人要用的登入方式，建立精確 email／群組 Allow 規則，未命中者預設拒絕。
+   不設 Everyone 或匿名 GET Bypass，不建立給 agent／CI 的 service token。
+2. 保護開發前端全路徑。A 的 `/cdn-preview/*` 也須受同一入口保護；B 額外保護 CDN 全路徑。
+3. 關閉開發 Worker 的 `workers.dev` 與每版 preview URL。若保留任何別名，必須逐一保護，
+   並在 handler／靜態路徑都驗收；僅 custom domain 的 Access 不能當作別名安全證明。
+4. 關閉或全面保護的設定、既有部署別名是否仍可取用，未驗證，需維護者實測。
+   無法證明保護時，使用受審的全路由 host gate，讓別名回 403／404；未通過前不部署真實資料。
+5. A：handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images key，
+   不列桶、不提供任意 pathname、private／reports／PNG；缺物件回 404，不能回 SPA HTML。
+6. B：CORS 只允許開發前端精確 HTTPS origin，限 GET／HEAD／OPTIONS；需要時 expose ETag。
+   帶 cookie 的 fetch、Access cookie 與 CORS credentials 要一起驗；不用萬用 origin。
+   preflight 若被擋，只調整 OPTIONS 處理，不放開匿名 GET。平台行為未驗證，需維護者實測。
 
-任何真實請求都由維護者當次同意後親手執行；本機測試只用了合成資料與 MockTransport，
-尚未驗證真實 R2。先以**合成 preview 與開發 bucket**驗首次寫入、相同內容重跑、
-既有物件不同內容拒絕、If-None-Match 與 If-Match 競爭。先證明平台支持所需條件寫入；
-失敗就停，不加強制覆寫或改用通用 sync。使用同一公開布局，勿往同桶混入無關測試物件。
+參考 [Access HTTP applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/)
+及 [R2 CORS](https://developers.cloudflare.com/r2/buckets/cors/)。CORS 不代替存取控制。
 
-核對本機對帳、目標桶、單桶 key 及當次授權後，才可上傳真實 preview：
+## 5. Workers 靜態資源與 Wrangler 配置
+
+Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另放
+`sim/web/wrangler.prod.jsonc`，不同 Worker／桶／網域，不共用開發部署配置。
+部署設定及 A 的 handler 屬 `sim/web` 元件，須以該元件的 PR 納入與審核；這份 docs 清單
+不夾帶配置或程式。執行前須已有包含此工具的 carddb 版次、核可的 Wrangler 版本與配置。
+新增 Wrangler 依賴須依專案規則另作依賴 PR，不用會臨時下載任意最新版的命令。
+
+以下為 B 的 assets-only 配置示意，所有選項語法與行為未驗證，需維護者以已核可的 Wrangler
+schema／官方文件核對並實測；不得直接視為已通過部署驗證：
+
+```jsonc
+{
+  "name": "svekit-web-dev",
+  "compatibility_date": "2026-10-02",
+  "workers_dev": false,
+  "preview_urls": false,
+  "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
+  "assets": {
+    "directory": "./dist",
+    "not_found_handling": "single-page-application"
+  }
+}
+```
+
+A 還需 `main` 指向受審的 Worker entrypoint，例如 `src/cloudflare/worker.ts`，R2 binding
+`PREVIEW_BUCKET` 指向開發桶、assets binding `ASSETS`，並讓資料路徑在 SPA fallback 之前
+交給 Worker。可評估 `assets.run_worker_first: true`，handler 驗 host／授權後，資料讀 R2、
+其餘委派 `ASSETS.fetch`；這樣所有靜態路徑亦會經過 Worker，可能有額外計費。
+選項與執行順序未驗證，需維護者實測；不得讓缺少資料 handler 的 SPA 回 index.html 假稱資料可用。
+
+維護者以本機 Wrangler 登入或最小部署權限操作，登入方式／權限需依當下官方介面核對，
+未驗證，需維護者實測。部署登入只留本人本機，不把 R2 key pair 當部署 token，不交 CI／agent。
+確認前端型別、測試與建置檢查後，在 repo 根執行：
+
+```bash
+mise exec -- bun run --cwd sim/web build
+cd sim/web
+wrangler deploy --config wrangler.dev.jsonc
+```
+
+既有 build script 呼叫 Vite；`dist` 只含前端程式與介面資源，不混 preview root、來源庫、
+卡圖、private 或 reports。SPA 要設定未找到靜態檔案回 index.html；維護者登入後用
+`/cards` 及一條未對應實體檔的前端路由驗證 HTML／導航。資料路徑另驗 JSON、WebP 與缺件 404，
+不能拿 SPA fallback 當上傳成功證據。Wrangler deploy 不能替代本機型別或測試檢查。
+
+參考 [Workers 靜態資源](https://developers.cloudflare.com/workers/static-assets/)、
+[SPA routing](https://developers.cloudflare.com/workers/static-assets/routing/single-page-application/)、
+[Wrangler configuration](https://developers.cloudflare.com/workers/wrangler/configuration/)、
+[Workers 前端部署方向](https://blog.cloudflare.com/full-stack-development-on-cloudflare-workers/)
+及 [從 Pages 遷移](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)。
+本文不依賴 Pages project、Pages Functions 或 pages.dev 別名。
+
+## 6. 可執行的 Brotli 包裝程式與離線對帳
+
+從 repo 根先依既有 setup 準備 carddb `.venv`，再使用版控內的協定入口：
+
+```bash
+uv --directory carddb sync --all-groups
+carddb/tools/brotli-preview --version
+uv --directory carddb run sve-carddb r2 upload-preview \
+  --preview-dir /explicit/preview --dry-run \
+  --brotli-command "$PWD/carddb/tools/brotli-preview"
+```
+
+`carddb/tools/brotli-preview` 使用本專案 Python，呼叫系統既有 `libbrotlienc.so.1`，
+固定檢查 **libbrotli 1.0.9、generic mode、quality 11、lgwin 22**。本機實測的 203 個 br
+逐份重壓皆相同。其他版本或缺函式庫即停止，不自動安裝或降級；維護者另安排環境準備。
+工具接受 `--version`、`-q 11 -c`（stdin／stdout bytes），預覽來源保持唯讀。
+
+直接安裝官方 brotli CLI 是否採相同預設視窗 **未驗證**；可能不相符，不能以「同樣 q11」
+推定 byte 相同。只在重新比對全部 br 都相同後才改用別的 encoder，不能刪 br 讓驗證放行。
+沒有 br 時可不提供 encoder。工具的 dry-run 不讀憑證或建立 HTTP client；明示 encoder
+會執行本機子行程，但該程式不連網、不抓來源或開 live manifest。
+
+核對 candidate_files／candidate_bytes、各類 totals 與 manifest pin。private／reports
+不遍歷、不讀、不傳；公開樹的未知檔案、PNG、未引用資產、私有配方／欄位、本機路徑、壞
+hash／壓縮／圖片即停止。離線數字是本機候選，遠端是否存在／實際新增量未知。
+
+## 7. 當次授權與條件上傳
+
+所有真實 Cloudflare 請求都由維護者當次同意後親手執行，agent 與 CI 不代跑。
+先以合成 preview 在開發桶實測條件寫入、重跑與兩案的存取控制；這次合成測試沒有
+建立真實 Cloudflare 可用性的證據，平台行為未驗證，需維護者實測。
+
+核對目標桶、當次 key pair、授權與離線數字後，從 repo 根執行：
 
 ```bash
 uv --directory carddb run sve-carddb r2 upload-preview \
   --preview-dir /explicit/preview \
-  --account-id "<32-lowercase-hex-account-id>" --bucket "<development-bucket>" \
+  --brotli-command "$PWD/carddb/tools/brotli-preview" \
+  --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
   --execute --confirm-maintainer-authorization
 ```
 
-有 `.br` 再加明示 encoder。尖括號參數須替換，key 只由當次環境變數取得。
-不要向 agent 貼 token 或執行帶 token 的除錯 trace。
+先圖、再 blobs、再 manifests 的不可變版本集合，最後才更新 preview/current.json。
+不另造版本目錄，不寫正式 versions/index、不刪遠端物件。既有物件須內容／metadata
+一致才 skip，差異停；新物件用 If-None-Match。指標用舊 ETag 的 If-Match，首次用 If-None-Match。
 
-工具保留 #190 布局，不另造 `versions/<version>/`：卡圖為
-`images/sha256/<前兩碼>/<64hex>.webp`；快照先傳內容定址 `snapshots/blobs/`，
-再傳 `snapshots/manifests/` 的不可變版本集合。圖片與這些成員都只新增，不覆寫。
-既有物件必須 bytes、hash、content type、cache control 相同才 skip。
+每次執行先驗回第一個不可變成員，再以**同一份 bytes**做已存在鍵的 If-None-Match 及
+錯誤 ETag 的 If-Match 探測，兩者都須回 412。若平台回成功就停止，不傳其餘成員或指標。
+探測無額外 key、無 delete；壞平台可能對此鍵重寫相同 bytes，不能聲稱平台未寫入。
+這是當次最低限度檢查，不代替真正的競爭與權限驗收。
 
-全部成員逐一確認且本機清單再次驗證後，最後用舊 ETag 的 If-Match 更新
-`snapshots/preview/current.json`；第一次用 If-None-Match。指標競爭就停。
-不寫正式 `snapshots/versions/index.json`，不刪遠端物件。
+GET 只對 timeout、network error、remote protocol error 重試，總共最多 3 次，退避
+0.5／1 秒。HTTP 狀態錯誤、驗證錯誤、local protocol error 不重試。PUT 每次只送一次，
+不變更條件、不改成無條件寫；回應遺失停止，由維護者核對後重跑。沒有隱含無限 retry。
 
-原 JSON 為 `application/json`，WebP 為 `image/webp`；gzip／br sibling 是獨立 key，
-用 `application/octet-stream` 且沒有 Content-Encoding，不當作 CDN 自動解壓回應。
-開發不可變成員用 `private, max-age=31536000, immutable`，指標用 `no-store`。
+原 JSON 為 application/json，WebP 為 image/webp；gzip／br 是各自 key 的 octet-stream，
+沒有 Content-Encoding。開發不可變成員用 private／一年／immutable，指標 no-store；
+A 的 handler 必須保留 bytes／metadata，B 必須驗 CDN 行為，不能自動解壓後繞過 hash 驗證。
 
-## 8. 中斷、恢復與最後驗收
+## 8. 執行時間與重跑成本
 
-任何異常先停止，由維護者核對記錄。已完成的不可變物件可以留在桶中；用同一份凍結
-preview 再次離線核對，重新取得當次授權後重跑，匹配物件會 skip，指標仍在最後更新。
-不要清桶、改既有物件、強制更新指標或用一般目錄同步工具繞過驗證。執行期間凍結本機
-preview，避免本機修改及並行發布。若指標 PUT 已完成但回應遺失，指標仍只指向先前
-已驗完整成員；重跑會再次確認。不同既有物件或指標競爭需查原因，不盲目覆寫。
+以這批 33,863 檔／1,121,058,055 bytes、203 個 br 為例，本機 CLI 一次完整離線驗證約
+5–7 分鐘（不同負載會變）。execute 做三次完整本機驗證，約 15–21 分鐘只花在本機；
+不是整次上傳時間預估。先凍結本機 preview，不並行修改或發布。
 
-維護者完成以下實際檢查後才可稱開發環境可用：
+| 情境 | 不含重試的請求數／成本 |
+| --- | --- |
+| 首次全部新增 | 約 101,591 次循序請求：每個不可變成員 GET／PUT／GET，加指標與兩次探測；另上傳約 1.12 GB，驗回也需下載約 1.12 GB |
+| 全部已一致的重跑 | 約 33,866 次循序請求；沒有新增 PUT，但有兩次預期 412 的探測 PUT；仍下載約 1.12 GB 完整核對，且再做三次本機驗證 |
+| 途中出錯重跑 | 已一致成員 skip，未完成成員續傳；不從上次序號盲目跳過驗證，前面物件仍重新完整 GET |
 
-- 未登入：開發前端、CDN 全路徑、pages.dev／branch／deployment aliases、r2.dev
-  及其他綁定入口皆無法取得卡片資料；正式桶亦未暴露開發資料。
-- 已登入：前端能跨來源讀取指標、清單、分片與卡圖；hash 驗證、缺圖占位、pending
-  標記正常，登出後不能繼續取得新資料。檢查 Access、CORS 與 cache headers。
-- 首次及重跑：報告的 uploaded/skipped 檔數與 bytes 對得上 candidate，重跑不 PUT
-  已匹配物件；前端 pin 是本次完整 manifest。中斷後舊完整版本仍可用。
-- key pair 已從當次 shell 清除，沒有進入 repo／CI／前端產物／分享的記錄。
+HTTP client 每段 I/O timeout 為 30 秒，GET retry 額外等待最多 1.5 秒／操作；沒有全程
+wall-time deadline。真實網路速度／Class A、B 計費與 cache 行為未驗證，需維護者實測；
+可能遠超本機時間，不在網路中斷後立刻反覆重跑約 1.12 GB 的核對。
 
-本清單及工具不完成 region_text_review、正式 manifest、正式 CDN 發布或正式 Access
-政策；這些仍走各自的資料放行與維護者部署決定。
+任何錯誤先停，由維護者核對原因與授權。已完成不可變物件可留桶中，用同一凍結 preview
+重新離線對帳、重新取得當次授權後重跑。不同既有內容、探測失敗或指標競爭，不用強制覆寫、
+清桶或通用 sync 繞過。指標 PUT 已完成而回應遺失時，指標仍只指已驗完整版本。
+
+## 9. 每個入口的未登入驗法與預期結果
+
+由維護者在不帶登入 cookie 的本機終端驗證。`curl -q` 不讀 curlrc，不加 `-L`、Cookie、
+Authorization 或憑證選項；body 丟到 /dev/null，不印官方內容。取**已知存在**的路徑，
+登入後確認同一路徑可取，不能把物件不存在的 404 當作保護證據。
+
+先填入控制台記錄的 Worker URL／實際部署版本 URL；下面的尖括號須替換：
+
+```bash
+DEV_URL='https://dev.svekit.app'
+CDN_URL='https://cdn-dev.svekit.app'
+WORKERS_URL='https://<worker>.<subdomain>.workers.dev'
+WORKER_PREVIEW_URL='https://<version-preview-host-from-dashboard>'
+R2_DEV_URL='https://<full-r2.dev-host-from-dashboard>'
+```
+
+| 入口 | 命令的 URL 參數 | 預期／通過條件（平台回應未驗證，需維護者實測） |
+| --- | --- | --- |
+| 開發前端 | "$DEV_URL/cards" | 401／403 或導向已核對 Access 登入的 302；不能匿名回 200 的開發 UI |
+| A 同源資料 | "$DEV_URL/cdn-preview/snapshots/preview/current.json" | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON |
+| B CDN | "$CDN_URL/snapshots/preview/current.json" | 同上；登入、CORS、cookie 另外用瀏覽器驗，不能只看到登入頁便算前端接通 |
+| workers.dev 前端 | "$WORKERS_URL/cards" | 已關閉者拒絕／不可用；若保留，須同樣受 Access 或 host gate 拒絕，不能 200 |
+| workers.dev 資料（A） | "$WORKERS_URL/cdn-preview/snapshots/preview/current.json" | 已關閉或 gate 拒絕，不能 200／206 |
+| 每個 preview URL | "$WORKER_PREVIEW_URL/cards"；A 再驗其 /cdn-preview/snapshots/preview/current.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain |
+| r2.dev | "$R2_DEV_URL/snapshots/preview/current.json" | 先確認控制台關閉，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
+| 其他綁定網域／既有預覽版本 | 依控制台列的完整 host，同樣測 /cards 及資料路徑 | 都要關閉或拒絕；新舊部署不能留下未受保護入口 |
+
+每個表格 URL 都執行一次以下命令，例如：
+
+```bash
+curl -q --max-time 20 --silent --show-error --output /dev/null \
+  --write-out '%{http_code} %{redirect_url}\n' "$DEV_URL/cards"
+curl -q --max-time 20 --silent --show-error --output /dev/null \
+  --write-out '%{http_code} %{redirect_url}\n' "$DEV_URL/cdn-preview/snapshots/preview/current.json"
+curl -q --max-time 20 --silent --show-error --output /dev/null \
+  --write-out '%{http_code} %{redirect_url}\n' "$CDN_URL/snapshots/preview/current.json"
+curl -q --max-time 20 --silent --show-error --output /dev/null \
+  --write-out '%{http_code} %{redirect_url}\n' "$WORKERS_URL/cards"
+curl -q --max-time 20 --silent --show-error --output /dev/null \
+  --write-out '%{http_code} %{redirect_url}\n' "$WORKER_PREVIEW_URL/cards"
+curl -q --max-time 20 --silent --show-error --output /dev/null \
+  --write-out '%{http_code} %{redirect_url}\n' "$R2_DEV_URL/snapshots/preview/current.json"
+```
+
+只測已選方案及確有記錄的 URL，A 不建立 CDN；A 對 workers.dev／每個 preview URL 再測資料路徑。
+302 必須是已核對的 Access 登入入口；其他資料 host 的轉址或不明 404 不能冒充拒絕保護。
+任何入口匿名回傳 200／206 都停止，先查設定。別名關閉／Access 設定的有效性不由程式假定。
+
+維護者最後用全新瀏覽器 profile 確認未登入拒絕；登入後可讀指標／清單／分片／WebP、
+hash 驗證與 pending 標記正確，缺資料路徑是 404 而非 SPA，登出後不能取得新資料。
+不宣稱可以收回已授權下載的 browser cache。key pair 清除後才結束作業。
+
+此清單不放行 region_text_review、不產正式 manifest，不完成日英首發或正式 CDN 發布。

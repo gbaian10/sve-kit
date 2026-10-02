@@ -81,6 +81,9 @@ preview 根下的 `private/` 與 `reports/` 不屬於公開內容；正式上傳
 append-only index 屬 #34，目前命令在正式版號下也會停止；改掉前綴不能把 preview
 直接升為正式發布，正式批次須重新建置並通過完整發布閘門。
 
+Cloudflare 開發部署、公開目錄上傳與未登入入口驗收，見
+[Cloudflare 開發環境設定清單](../deployment/cloudflare-development.md)。
+
 ## M3 載入
 
 ```bash
