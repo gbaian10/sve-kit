@@ -8,6 +8,7 @@ Usage:
   uv run .github/ci/hooks.py check
   uv run .github/ci/hooks.py skip JOB     # SKIP value for `pre-commit run` in that job
   uv run .github/ci/hooks.py stages JOB   # hook stages that job runs
+  uv run .github/ci/hooks.py install-config JOB  # emit config for cache-only environment installation
 """
 
 import sys
@@ -140,6 +141,23 @@ def workflow_problems(workflow: dict[str, object]) -> list[str]:
     return []
 
 
+def install_config(
+    config: dict[str, object], owned: dict[str, Owner], job: str
+) -> dict[str, object]:
+    """Keep the same environment definitions while excluding other jobs and manual tools."""
+    repos: list[dict[str, object]] = []
+    for repo in cast("list[dict[str, object]]", config["repos"]):
+        selected = [
+            hook
+            for hook in cast("list[dict[str, object]]", repo["hooks"])
+            if owned[str(hook.get("alias", hook["id"]))].job == job
+            and not owned[str(hook.get("alias", hook["id"]))].direct
+        ]
+        if selected:
+            repos.append({**repo, "hooks": selected})
+    return {**config, "repos": repos}
+
+
 def main(argv: list[str]) -> int:
     """Run the subcommand in argv and return the exit status."""
     config = load_config()
@@ -156,6 +174,11 @@ def main(argv: list[str]) -> int:
             return 0
         case ["stages", job] if job in JOB_STAGES:
             sys.stdout.write(" ".join(JOB_STAGES[job]) + "\n")
+            return 0
+        case ["install-config", job] if job in JOB_STAGES:
+            sys.stdout.write(
+                yaml.safe_dump(install_config(config, owned, job), sort_keys=False)
+            )
             return 0
         case ["skip", job] if job in JOBS - {"none"}:
             skipped = (

@@ -1,4 +1,4 @@
-# One workflow for every PR and push to main. Private main only warms caches and runs checks;
+# One workflow for every PR and push to main. Private main warms caches in ci-ok only;
 # `ci-ok` is the single required check, so skipping a component never leaves a check pending.
 name: ci
 
@@ -21,6 +21,7 @@ env:
 
 jobs:
   changes:
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -30,7 +31,6 @@ jobs:
       python: ${{ steps.filter.outputs.python == 'true' || steps.filter.outputs.shared == 'true' }}
       rust: ${{ steps.filter.outputs.rust == 'true' || steps.filter.outputs.shared == 'true' }}
       web: ${{ steps.filter.outputs.web == 'true' || steps.filter.outputs.shared == 'true' }}
-      full-tests: ${{ github.event_name != 'push' || github.ref != 'refs/heads/main' || !github.event.repository.private }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -69,6 +69,7 @@ jobs:
               - 'carddb/src/sve_carddb/snapshot/schema/**' # the web reader validates against the published schema
 
   repo:
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -115,7 +116,7 @@ jobs:
 
   python:
     needs: changes
-    if: needs.changes.outputs.python == 'true'
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.python == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -163,7 +164,6 @@ jobs:
           done
       - name: pytest (combined line and branch coverage >= 90%)
         id: tests
-        if: needs.changes.outputs.full-tests != 'false'
         env:
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
@@ -191,9 +191,6 @@ jobs:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
         run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache
-      - name: Private main cache maintenance
-        if: needs.changes.outputs.full-tests == 'false'
-        run: echo '## Python cache maintenance — tests not rerun on private main' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:
@@ -207,7 +204,7 @@ jobs:
 
   rust:
     needs: changes
-    if: needs.changes.outputs.rust == 'true'
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.rust == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -219,7 +216,6 @@ jobs:
           clean: true
       - name: Read the test data pin
         id: pin
-        if: needs.changes.outputs.full-tests != 'false'
         run: |
           python3 - <<'PY' >> "$GITHUB_OUTPUT"
           import tomllib
@@ -230,7 +226,6 @@ jobs:
           PY
       # Private card text for the engine tests; a missing key or hash mismatch fails the job.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: needs.changes.outputs.full-tests != 'false'
         with:
           repository: ${{ steps.pin.outputs.repo }}
           ref: ${{ steps.pin.outputs.commit }}
@@ -239,7 +234,6 @@ jobs:
           persist-credentials: false
           clean: true
       - name: Verify the test data
-        if: needs.changes.outputs.full-tests != 'false'
         env:
           SNAPSHOT: .testdata/${{ steps.pin.outputs.snapshot_path }}
           EXPECTED: ${{ steps.pin.outputs.snapshot_sha256 }}
@@ -287,7 +281,6 @@ jobs:
           done
       - name: Rust tests (line coverage >= 90%)
         id: tests
-        if: needs.changes.outputs.full-tests != 'false'
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
         run: |
@@ -301,16 +294,6 @@ jobs:
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "cargo llvm-cov exit status: $status (statistics in the next step; raw output stays private)"
           exit "$status"
-      - name: Compile coverage tests for a missing main cache (without running them)
-        if: needs.changes.outputs.full-tests == 'false' && steps.rust-cache.outputs.cache-hit != 'true'
-        run: |
-          coverage_env=$(cargo llvm-cov show-env --sh)
-          eval "$coverage_env"
-          # Match llvm-cov's test directory; show-env defaults to the ordinary target/.
-          cargo test --locked --workspace -j 4 --target-dir "${GITHUB_WORKSPACE}/target/llvm-cov-target" --no-run
-      - name: Private main cache maintenance
-        if: needs.changes.outputs.full-tests == 'false'
-        run: echo '## Rust cache maintenance — tests not rerun on private main' >> "$GITHUB_STEP_SUMMARY"
       - name: Rust test summary
         if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
         env:
@@ -329,7 +312,7 @@ jobs:
 
   web:
     needs: changes
-    if: needs.changes.outputs.web == 'true'
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -352,11 +335,9 @@ jobs:
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
       - name: Web formatting, lint, types and unused dependencies
-        if: needs.changes.outputs.full-tests != 'false'
         run: bun run format:check && bun run lint && bun run typecheck && bun run knip
       - name: Vitest
         id: tests
-        if: needs.changes.outputs.full-tests != 'false'
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: |
@@ -381,11 +362,7 @@ jobs:
           REPORT_DIR: ${{ runner.temp }}/sve-web-reports
         run: rm -rf "$REPORT_DIR"
       - name: Web build
-        if: needs.changes.outputs.full-tests != 'false'
         run: bun run build
-      - name: Private main cache maintenance
-        if: needs.changes.outputs.full-tests == 'false'
-        run: echo '## Web cache maintenance — tests not rerun on private main' >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
@@ -393,8 +370,9 @@ jobs:
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   # Every commit that reaches the base branch must follow the commitizen format (.cz.toml), gitmoji included.
-  # Runs on every event regardless of paths; the PR title has its own workflow (pr-title.yml).
+  # PRs and public main run this regardless of paths; the PR title has its own workflow.
   commit:
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -422,9 +400,12 @@ jobs:
     if: always()
     needs: [changes, repo, python, rust, web, commit]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && 20 || 5 }}
+    env:
+      MAIN_MAINTENANCE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true }}
     steps:
       - name: Every job that had to run succeeded
+        if: env.MAIN_MAINTENANCE != 'true'
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
@@ -443,3 +424,11 @@ jobs:
             fi
           done
           exit "$status"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.MAIN_MAINTENANCE == 'true'
+        with:
+          persist-credentials: false
+          clean: true
+      - name: Private main cache maintenance (same ci-ok check)
+        if: env.MAIN_MAINTENANCE == 'true'
+        uses: ./.github/actions/main-maintenance # zizmor: ignore[self-repository] -- defer tool preparation until private-main checkout; PR gate stays lightweight

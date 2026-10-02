@@ -235,26 +235,31 @@ report is reported explicitly and cannot make a failing test step pass.
 Every job uses GitHub-hosted `ubuntu-latest`. While the repository is private, a push to
 `main` does not rerun pytest, Rust tests/coverage or Vitest. **Before merging, the PR must
 be rebased onto the latest `main` and its CI must be green.** This is a merge prerequisite,
-not something the cache-maintenance run verifies: its green `ci-ok` means maintenance and
-checks succeeded, not that tests ran again on that commit. The private repository's ruleset
+not something the cache-maintenance run verifies: its green `ci-ok` means maintenance
+succeeded, not that checks or tests ran again on that commit. The private repository's ruleset
 does not enforce this prerequisite; the maintainer and merge coordinator must check it.
 When the repository becomes public, `github.event.repository.private` automatically restores
 the usual component tests on pushes to `main`, without another workflow edit.
 
-Private `main` retains repository/security and commit checks, Python lint/types, and Rust
-lint/dependency checks. It installs dependencies for the existing caches; when the Rust
-cache has no exact hit, it compiles coverage-instrumented tests with `cargo test --no-run`.
-Web installs dependencies only. Each selected component job still reports its result, and
-`ci-ok` still rejects failed maintenance or an unexpectedly skipped job. The summary labels
-these runs as cache maintenance with tests not rerun.
+Private `main` starts only the existing `ci-ok` job. The other six jobs are skipped at job
+level. In `ci-ok`, a guarded local composite action installs Python dependencies and hook
+environments without running hooks, retains existing mypy data without running type checks,
+compiles coverage-instrumented Rust tests with `cargo test --no-run` only on a cache miss,
+and installs Web dependencies. Its final gate rejects failed, cancelled or incomplete
+maintenance. The job keeps the exact required-check name `ci-ok`; on PRs and public `main`
+it still aggregates the usual checks. No second maintenance gate job is started.
 
 `CI_PYTEST_WORKERS` is an optional repository variable, default `4`, accepted range `1`–`4`.
 CI never uses `-n auto`; Cargo and Vitest are also limited to four workers. The existing
 jobs are retained rather than adding a job per test step, so summaries do not add per-job
 billing overhead. Concurrency cancels older PR runs; `main` runs are never cancelled by a
 newer push. Dependency caches retain their existing keys and only `main` writes them;
-PRs read the default-branch caches. Private `main` still populates uv, pre-commit, mypy,
-mise/Bun and Cargo caches even though full tests are omitted. Rust target caching remains
+PRs read the default-branch caches. Private `main` populates uv, pre-commit, mise/Bun and
+Cargo caches under the unchanged component cache keys. Each hook cache is restored,
+prepared and saved separately to avoid mixing pre-commit databases. Existing mypy data
+is carried forward; PR mypy still validates source hashes and checks changed modules,
+so a retained cache is never proof that current types passed. This does not refresh mypy
+data for changed code until a full `main` check runs after publication. Rust target caching remains
 enabled: official test data is read at runtime and is not embedded in the compiled tests.
 Private test data, raw reports and output are never cached. Checkout explicitly cleans
 the workspace so test execution does not depend on a previous job's outputs.

@@ -103,28 +103,40 @@ class DirectTestTests(unittest.TestCase):
             == "${{ github.event_name == 'pull_request' }}"
         )
 
-    def test_full_test_policy_for_private_and_public_events(self) -> None:
-        """Evaluate the actual policy for PRs, private main and public main."""
+    def test_private_main_only_starts_ci_ok_and_missing_flag_runs_full_path(
+        self,
+    ) -> None:
+        """Evaluate job guards, including absent privacy data, before any runner starts."""
         workflow = cast(
             "dict[str, object]",
             yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
         )
         jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
-        outputs = cast("dict[str, str]", jobs["changes"]["outputs"])
-        expression = outputs["full-tests"].removeprefix("${{ ").removesuffix(" }}")
-        expression = (
-            expression.replace("!github.event.repository.private", '"$PRIVATE" != true')
-            .replace("github.event_name", '"$EVENT_NAME"')
-            .replace("github.ref", '"$REF"')
-        )
         for event, private, expected in (
-            ("pull_request", "true", 0),
-            ("pull_request", "false", 0),
-            ("push", "true", 1),
-            ("push", "false", 0),
+            ("pull_request", "true", set(jobs)),
+            ("pull_request", "false", set(jobs)),
+            ("push", "true", {"ci-ok"}),
+            ("push", "false", set(jobs)),
+            ("push", "", set(jobs)),
+            ("pull_request", "", set(jobs)),
         ):
-            with self.subTest(event=event, private=private):
-                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- only the real policy and fixed synthetic context
+            selected = {"ci-ok"}
+            for name, job in jobs.items():
+                if name == "ci-ok":
+                    assert job["if"] == "always()"
+                    continue
+                expression = str(job["if"]).removeprefix("${{ ").removesuffix(" }}")
+                expression = (
+                    expression.replace("github.event.repository.private", '"$PRIVATE"')
+                    .replace("github.event_name", '"$EVENT_NAME"')
+                    .replace("github.ref", '"$REF"')
+                    .replace("!(", "! (")
+                )
+                for component in ("python", "rust", "web"):
+                    expression = expression.replace(
+                        f"needs.changes.outputs.{component}", "'true'"
+                    )
+                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- real guards with fixed synthetic context
                     [shutil.which("bash") or "bash", "-c", f"[[ {expression} ]]"],
                     env={
                         **os.environ,
@@ -135,34 +147,31 @@ class DirectTestTests(unittest.TestCase):
                     capture_output=True,
                     check=False,
                 )
-                assert result.returncode == expected
+                assert result.returncode in {0, 1}
+                if result.returncode == 0:
+                    selected.add(name)
+            with self.subTest(event=event, private=private):
+                assert selected == expected
+        ci_steps = cast("list[dict[str, object]]", jobs["ci-ok"]["steps"])
+        assert ci_steps[0]["if"] == "env.MAIN_MAINTENANCE != 'true'"
+        maintenance = next(
+            step
+            for step in ci_steps
+            if step.get("uses") == "./.github/actions/main-maintenance"
+        )
+        assert maintenance["if"] == "env.MAIN_MAINTENANCE == 'true'"
+        mode = cast("dict[str, str]", jobs["ci-ok"]["env"])["MAIN_MAINTENANCE"]
+        assert (
+            mode
+            == "${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true }}"
+        )
         for component in ("python", "rust", "web"):
-            steps = cast("list[dict[str, object]]", jobs[component]["steps"])
-            test = next(step for step in steps if step.get("id") == "tests")
-            assert test["if"] == "needs.changes.outputs.full-tests != 'false'"
-            assert (
-                jobs[component]["if"] == f"needs.changes.outputs.{component} == 'true'"
-            )
-            note = next(
+            test = next(
                 step
-                for step in steps
-                if step.get("name") == "Private main cache maintenance"
+                for step in cast("list[dict[str, object]]", jobs[component]["steps"])
+                if step.get("id") == "tests"
             )
-            assert note["if"] == "needs.changes.outputs.full-tests == 'false'"
-            assert "tests not rerun" in str(note["run"])
-        for step in cast("list[dict[str, object]]", jobs["rust"]["steps"]):
-            if (
-                step.get("id") == "pin"
-                or "TESTDATA_DEPLOY_KEY" in str(step)
-                or step.get("name") == "Verify the test data"
-            ):
-                assert step["if"] == "needs.changes.outputs.full-tests != 'false'"
-        for step in cast("list[dict[str, object]]", jobs["web"]["steps"]):
-            if step.get("name") in {
-                "Web formatting, lint, types and unused dependencies",
-                "Web build",
-            }:
-                assert step["if"] == "needs.changes.outputs.full-tests != 'false'"
+            assert "if" not in test
 
     def test_cache_keys_targets_and_main_writers_are_preserved(self) -> None:
         """Main maintenance keeps cache writers and preserves the existing Rust prefix."""
@@ -240,21 +249,18 @@ class DirectTestTests(unittest.TestCase):
 
     def test_rust_cache_warming_compiles_only_and_preserves_failure(self) -> None:
         """The real cache step uses coverage flags, never executes tests, and fails closed."""
-        workflow = cast(
+        action = cast(
             "dict[str, object]",
-            yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text()),
+            yaml.safe_load(
+                (ROOT / ".github/actions/main-maintenance/action.yml").read_text()
+            ),
         )
-        jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
-        steps = cast("list[dict[str, object]]", jobs["rust"]["steps"])
-        step = next(
-            step
-            for step in steps
-            if str(step.get("name", "")).startswith("Compile coverage")
+        steps = cast(
+            "list[dict[str, object]]",
+            cast("dict[str, object]", action["runs"])["steps"],
         )
-        assert (
-            step["if"]
-            == "needs.changes.outputs.full-tests == 'false' && steps.rust-cache.outputs.cache-hit != 'true'"
-        )
+        step = next(step for step in steps if step.get("id") == "rust-compile")
+        assert step["if"] == "steps.rust-cache.outputs.cache-hit != 'true'"
         with tempfile.TemporaryDirectory() as folder:
             root = Path(folder)
             tool = root / "cargo"
@@ -262,6 +268,8 @@ class DirectTestTests(unittest.TestCase):
                 '#!/bin/bash\nif [[ "$*" == "llvm-cov show-env --sh" ]]; then\n'
                 '  [[ "$FAKE_STATUS" == env-fail ]] && exit 7\n'
                 '  echo "export CARGO_LLVM_COV=1"\n'
+                'elif [[ "$*" == "test --locked --workspace -j 4 --no-run" ]]; then\n'
+                '  [[ "$FAKE_STATUS" == build-fail ]] && exit 8\n'
                 "else\n"
                 '  [[ "$CARGO_LLVM_COV" == 1 && "$*" == "test --locked --workspace -j 4 --target-dir $GITHUB_WORKSPACE/target/llvm-cov-target --no-run" ]] || exit 9\n'
                 '  [[ "$FAKE_STATUS" == build-fail ]] && exit 8\n'

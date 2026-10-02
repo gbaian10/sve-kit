@@ -52,23 +52,6 @@ class WorkflowGateTests(unittest.TestCase):
         """All component jobs may skip when only docs changed."""
         assert self.run_gate() == 0
 
-    def test_private_main_maintenance_results(self) -> None:
-        """Cache-only component jobs still count as required successes, not skipped tests."""
-        self.outputs.update(dict.fromkeys(("python", "rust", "web"), "true"))
-        self.outputs["full-tests"] = "false"
-        for job in ("python", "rust", "web"):
-            self.needs[job] = {"result": "success"}
-        assert self.run_gate() == 0
-        for job, result in (
-            ("python", "failure"),
-            ("rust", "skipped"),
-            ("web", "cancelled"),
-        ):
-            with self.subTest(job=job, result=result):
-                self.needs[job] = {"result": result}
-                assert self.run_gate() != 0
-            self.needs[job] = {"result": "success"}
-
     def test_component_results(self) -> None:
         """Failure, cancellation and unexpected skipping must block every component."""
         for component, jobs in {
