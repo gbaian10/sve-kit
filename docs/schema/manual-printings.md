@@ -53,7 +53,9 @@ manual_printing.value 恰有以下欄位；可空欄仍須明示 null。
 
 `counterpart=null` 時使用獨立 identity_state=provisional 的 card／face，仍有非空 printing.card_id 與完整 printing_face；每個 face 的 layout／ordinal／side 依人工核對實體面登錄，不由進化角色或樣圖順位猜。官方文字未知時不造 face_revision／face_current／printing_face_observation／source_face_map；printed_name_unit_id／printed_effect_unit_id／flavor_unit_id 為 null，printed_text_state=unknown、observations=[]。這表示未知，不表示無能力；不把人工卡名當原文。圖像仍可由 #210 掛在精確 printing／face 的 printing_image，依獨立來源／逐圖核可，不需要虛構卡文才能掛圖。
 
-counterpart 非 null 時 identity 的 card／所有 face 必精確等於經逐張、全體面核對的一般版。同區可讀其有效 current，序號卡自身 printed_text_state 仍 unknown，不假裝有官方卡頁；沒有 current 時按表記未定規則。一般進化前後仍是不同 card，樣圖是哪一面須核對。已先建 provisional card 者，後續確認對應要走既有 identity-transition 完整面／插畫移轉與墓碑收據，不在續版裡默默改 card_id；printing ID／int_id 不變。
+人工入口首次建立的 provisional card／face 依 [authored-layout §3.1](authored-layout.md#31-id-與身分) 的同一 UUIDv5 namespace 與 kind／NUL recipe 配發：card anchor 使用此版次的首次 initial_anchor（exact `region:card_no`），face anchor 使用該 card ID 與固定 source ordinal。只在首次配發時產生；已有永久 ID 優先，補正卡號或後續確認對應不重算。
+
+counterpart 非 null 時 identity 的 card／所有 face 必精確等於經逐張、全體面核對的一般版。同區可讀其有效 current，序號卡自身 printed_text_state 仍 unknown，不假裝有官方卡頁；沒有 current 時按表記未定規則。一般進化前後仍是不同 card，樣圖是哪一面須核對。已先建 provisional card 者，後續確認對應要走既有 identity-transition 完整面／插畫移轉與墓碑收據，不在續版裡默默改 card_id；printing ID／int_id 不變。後續 carddb PR 須將身分修復的查核與重播擴充至「官方 registry＋完整 manual-printings 歷史」的聯集，涵蓋人工入口建立的 card／face／printing 及其插畫關聯，與下述整數配號的 lookup 邊界一致；不能只查 registry 而漏掉人工 provisional card。此擴充須同步 identity-repair 的入口範圍與來源／前件釘版，未實作前不得宣稱人工條目已有身分修復能力。
 
 引用另一區時不允許直接填 counterpart；日英同卡仍另走既有全體面身分採納。補正卡號或歸屬不重算 initial_anchor／printing_id／int_id；暫定路由直接依 [build-db §15](build-db.md#15-網址搜尋預設版次與記號) 的 `/cards/_provisional/{int_id}` 與 provisional_corrected 永久 alias 規則，禁止劫持現役官方鍵，不另定另一套入口。後續官方卡表出現此版次須採明示身分／路由修復並保留原 printing ID，不能以新的號碼 recipe 重建第二筆。
 
@@ -72,7 +74,7 @@ reference 恰為 `{source_class,url,roles,locator,source_ref,checked_on,distribu
 | official_archived | 官方網域的頁面／PDF／圖片必有原始封存版本與 hash。source_ref 必釘 `{store_id,batch_id,source_version_id,descriptor_sha256,first_receipt_id,raw_hash,parser_version,locator,result_hash}`；文字／結構結果用實際 recipe，單純原圖核對用受版控圖像核對 recipe。驗 descriptor、receipt、raw bytes 與完整 F1 用途閉包 |
 | third_party_url | 第三方店家頁只留 URL、人工定位及 checked_on，不封存頁面；source_ref 必為 null。此類的 reference URL 才可不同於 authored source_record.url（後者通常 null）。沒有 fetched_at／ETag／HTML hash，不能宣稱可重播第三方內容 |
 
-來源類別按後續 carddb PR 放在 `carddb/src/sve_carddb/manual_printings/policy.py` 的受版控精確 host 白名單核驗（資料 caller 不能擴張）；初版官方 host 恰為 shadowverse-evolve.com／en.shadowverse-evolve.com；同根網域的未知子網域須先更新白名單並審核，不能自動改列第三方。不能由 caller 把官方 URL 標為 third_party_url 來避過歸檔。官方 image 與頁面均受 raw 保存規則；official 網域樣圖不因不在 cardlist 就變成第三方圖，但是否可發布、含哪些樣張標示留 #210 逐圖核對。source_ref 的 parser/locator/result_hash 表示此用途結果，不能取代 raw_hash；純來源閉包核對的 recipe 固定 archive-closure-v1，result_hash 為 H(來源 descriptor)，不是卡片語義判定。其他 image 核對／結構 recipe 要有受版控定義並釘實際程式與設定，未支援的 recipe 拒絕。
+來源類別按後續 carddb PR 放在 `carddb/src/sve_carddb/manual_printings/policy.py` 的受版控精確 host 白名單核驗（資料 caller 不能擴張）。依協調者核定的實際證據頁，初版官方 host 恰為 `shadowverse-evolve.com`、`en.shadowverse-evolve.com`、`products.shadowverse-evolve.com`（周年頁）與 `campaign.shadowverse-wb.com`（數位版活動頁）。以完整主機名比對，不含子網域萬用或同根網域推定；其他網域一律第三方，新增官方 host 須先修改受版控名單並審核。不能由 caller 把名單內的官方 URL 標為 third_party_url 來避過歸檔。官方 image 與頁面均受 raw 保存規則；official 網域樣圖不因不在 cardlist 就變成第三方圖，但是否可發布、含哪些樣張標示留 #210 逐圖核對。source_ref 的 parser/locator/result_hash 表示此用途結果，不能取代 raw_hash；純來源閉包核對的 recipe 固定 archive-closure-v1，result_hash 為 H(來源 descriptor)，不是卡片語義判定。其他 image 核對／結構 recipe 要有受版控定義並釘實際程式與設定，未支援的 recipe 拒絕。
 
 每筆 evidence 恰為排序去重的 `{reference_url,role}`，必解到同筆 references 的 URL／role；採納號碼、分母、對應或配送值必有適用的 evidence，不能僅有無關連結。third_party_url 的人工核對與採納只證明維護者確認了當時記錄的值／不確定程度，不證明頁面目前未變；本入口不探測、不抓第三方頁。
 
@@ -89,6 +91,8 @@ serial_total 的語意是**卡面分母**，不等於每種實際製造張數或
 review_context 釘完整核對背景，dependencies 釘相關已採納 family、商品、版次身分／面與同區 current 依據；不能只看 context hash 換了就 stale，也不能忽略相關內容變化。每次重建驗原始封套／來源及當前相關依賴。來源完好而對應身分、面、號碼證據或其語義基礎變動時停止套用、列 stale，須續版重新核對；禁止退回更舊的採納假裝有效。來源損壞或不完整是整次交易失敗。第三方 URL 不具可機械驗新的頁面內容，保留 checked_on／查證限制，不自動更新或升級信心。
 
 無一般版對應的 unlisted printing 仍引用 provisional card／face，僅顯示卡號、人工名稱、公開來源與狀態／信心，不顯示卡文。人工名稱 text_unit 的來源為 authored，不能作 official_name、printed_name、翻譯 own_source、構築 rules_name 或 DSL 的來源。搜尋可用人工名稱且標示來源；卡種／數值／效果未知，不以空字串宣稱無能力。confirmed counterpart 才由其同區 card／face 讀可用文字；官方 PR 的 card／current 不受此限制。
+
+完全沒有文字、current 與觀測的面，其公開端表示留待後續格式 PR 定義；在那之前這類條目不能出貨。現行格式要求無 current 的面提供「表記未定」項目，且其中的候選須連回該版次面的觀測，observations=[] 目前無法同時滿足這兩項要求。不得偽造觀測／候選、借用人工卡名或略過表記未定項目來通過出貨檢查；內部 provisional 身分與卡圖登錄不等於可發布。
 
 **待實作欄位方案，不改本次公開白名單／欄序**：公開 printing 擬新增末尾 nullable `manual_metadata`，其具名 tuple ManualPrintingMetadata 恰有 `manual_name_unit_id?,serial_note_unit_id?,references,distribution`；references 為 `{url,source_class,checked_on,roles,locator?}` 的排序陣列，distribution 為 `{source_url,inclusion_kind,date_precision,date_raw?,available_on?,note_unit_id}` 陣列。每筆來源公開官方／第三方類別及人工查核日，不能只出 URL 而隱藏未封存的限制；official URL 仍等於 frozen URL。正常官方列 manual_metadata=null；官方 supplement 可以有序號註記／來源，但 manual_name 為 null。manual_metadata 擬由 bootstrap 主儲存，需連同人工名稱／註記閉包量測啟動預算；其餘印刷原文欄仍沿原來 fragment。
 
