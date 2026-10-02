@@ -1,5 +1,8 @@
 # 查卡網站（`sim/web`）架構
 
+引用與授權：商品例與卡文渲染記號中沿用的官方名稱、原文片段不在本專案授權內；
+介面、路由與渲染設計屬專案內容。見[文件引用說明](../quotations.md)。
+
 版本：**v1**，2026-09-28 定案。用語依 [`docs/terminology.md`](../terminology.md)；
 資料契約以 [`docs/schema/snapshot-format.md`](../schema/snapshot-format.md) 為準。設計稿（顏色、字級、間距、圓角、各畫面規格）
 不在 repo，本文只寫規則與命名，數值以「見設計交接」帶過。

@@ -1,5 +1,9 @@
 # 載入期拒絕的 YAML
 
+引用與授權：拒絕原因中 BP10-T09 的日文卡文片段是官方引用，不在本專案授權內；卡號保留作來源定位。
+其餘載入檢查、程式欄位與拒絕訊息是專案說明，不能視為官方裁定。
+來源、版本與權利界線見[文件引用說明](../quotations.md)。
+
 `Catalog` 載入 `authored/` 時，除了 JSON Schema，還會用 `sim/engine/src/catalog/semantics.rs`
 檢查每張卡。不通過的卡記在 `Catalog::rejections()`（`檔案:行: 訊息`），**永不執行**：
 任何用到它的操作都回 `Unsupported("card program rejected at load: …")`。

@@ -1,5 +1,8 @@
 # 建置資料庫 schema v1
 
+引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
+專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
+
 建置資料庫的完整邏輯契約，共 121 表；這是設計規格，不是 migration。卡表快照的公開欄位見 [snapshot-format.md](snapshot-format.md)。DSL 語法只以 `dsl/` 的 JSON Schema 為權威。
 
 ## 1. 兩層與範圍
