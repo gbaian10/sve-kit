@@ -71,6 +71,7 @@ def prepared(
         "carddb/src/sve_carddb/extract/official_jp.py",
         "carddb/src/sve_carddb/extract/official_en.py",
         "carddb/src/sve_carddb/snapshot/values.py",
+        "carddb/src/sve_carddb/translations/sources.py",
     ):
         target = original.repo / name
         target.parent.mkdir(parents=True, exist_ok=True)
@@ -103,6 +104,9 @@ def prepared(
     original.vocabulary.unlink()
 
     class AdoptedInputs:
+        def translation_inputs(self) -> None:
+            return None
+
         def configuration(self) -> dict[str, str]:
             return {"synthetic_adoptions": "immutable-receipts"}
 
