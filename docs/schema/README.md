@@ -25,6 +25,7 @@
 | [翻譯與模板採納契約](translation-contract.md) | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約                        |
 | [卡名概念與身分關聯](card-name-concepts.md)   | exact 名稱自動推導與人工例外、預設選面及修復後重驗                                |
 | [模板採納政策與收據](translation-policy.md)   | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包                         |
+| [風味文字整段翻譯](flavor-translation.md)     | 零參數模板、完整段落 span、獨立 recipe／新 ID 與譯本採納政策                      |
 
 ## 文件之間的關係
 
