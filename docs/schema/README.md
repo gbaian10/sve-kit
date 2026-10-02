@@ -6,28 +6,29 @@
 
 ## 文件
 
-| 文件                                          | 內容                                                                              |
-| --------------------------------------------- | --------------------------------------------------------------------------------- |
-| [建置資料庫 schema](build-db.md)              | 建置資料庫 121 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
-| [卡表快照格式](snapshot-format.md)            | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
-| [快照傳輸契約](snapshot-transport.md)         | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
-| [機器契約](snapshot-contract.md)              | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
-| [卡圖衍生檔契約](image-variants.md)           | 直向／橫向五檔 WebP、裁切取整與原圖邊界                                           |
-| [插畫裁切覆寫](image-crop-overrides.md)       | 來源鍵與 raw hash、無索引分片、輕量核可收據、建置端框比對與重印診斷               |
-| [來源歸檔與凍結輸入](source-archive.md)       | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
-| [容量與記憶體預算](size-budget.md)            | 卡表快照的容量門檻、量測方法與目前結論                                            |
-| [建置表實作分期](implementation-tiers.md)     | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
-| [身分修復與決定續版](identity-repair.md)      | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
-| [authored 維護方式](authored-layout.md)       | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
-| [詞彙與路由契約](catalog-route-adoption.md)   | 採納封套與覆寫；已核可稀有度白名單及繁中缺譯順序                                  |
-| [正式 catalog 輸入](catalog-inputs.md)        | 職業／基本卡種永久 code、YAML caller 資料、JP／EN binding 與 preview 重建         |
-| [術語採納與加粗](glossary-adoption.md)        | 概念引用、來源主張／委託收據、可修訂加粗與公開格式擴充影響                        |
-| [數位對應採納契約](digital-link-adoption.md)  | 待審的 link／coverage 入口、人工續版、凍結名稱與逐 owner 使用條件；尚未實作       |
-| [翻譯與模板採納契約](translation-contract.md) | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約                        |
-| [卡名概念與身分關聯](card-name-concepts.md)   | exact 名稱自動推導與人工例外、預設選面及修復後重驗                                |
-| [模板採納政策與收據](translation-policy.md)   | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包                         |
-| [風味文字整段翻譯](flavor-translation.md)     | 零參數模板、完整段落 span、獨立 recipe／新 ID 與譯本採納政策                      |
-| [人工限量序號版次](manual-printings.md)       | 獨立入口、官方封存／第三方 URL、SNC／WB 歸屬、序號補充及人工名稱邊界              |
+| 文件                                           | 內容                                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------------------- |
+| [建置資料庫 schema](build-db.md)               | 建置資料庫 121 表的完整邏輯契約：欄位、鍵、約束、採納政策、雜湊與發布閘門         |
+| [卡表快照格式](snapshot-format.md)             | 發布給使用者的 40 個文字集合與 3 個影像集合的欄位白名單、快照清單、分片與更新規則 |
+| [快照傳輸契約](snapshot-transport.md)          | manifest、config、tuple descriptor、fragment 身分與欄序、版本及變動摘要           |
+| [機器契約](snapshot-contract.md)               | Schema 資源、候選格式配置、Python reader 與 TS 驗收清單                           |
+| [卡圖衍生檔契約](image-variants.md)            | 直向／橫向五檔 WebP、裁切取整與原圖邊界                                           |
+| [插畫裁切覆寫](image-crop-overrides.md)        | 來源鍵與 raw hash、無索引分片、輕量核可收據、建置端框比對與重印診斷               |
+| [來源歸檔與凍結輸入](source-archive.md)        | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
+| [構築規則與禁限採納](construction-adoption.md) | Standard 專用封套、來源登錄、有限 ref／CR 引用與 coverage／unknown 邊界           |
+| [容量與記憶體預算](size-budget.md)             | 卡表快照的容量門檻、量測方法與目前結論                                            |
+| [建置表實作分期](implementation-tiers.md)      | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
+| [身分修復與決定續版](identity-repair.md)       | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
+| [authored 維護方式](authored-layout.md)        | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
+| [詞彙與路由契約](catalog-route-adoption.md)    | 採納封套與覆寫；已核可稀有度白名單及繁中缺譯順序                                  |
+| [正式 catalog 輸入](catalog-inputs.md)         | 職業／基本卡種永久 code、YAML caller 資料、JP／EN binding 與 preview 重建         |
+| [術語採納與加粗](glossary-adoption.md)         | 概念引用、來源主張／委託收據、可修訂加粗與公開格式擴充影響                        |
+| [數位對應採納契約](digital-link-adoption.md)   | 待審的 link／coverage 入口、人工續版、凍結名稱與逐 owner 使用條件；尚未實作       |
+| [翻譯與模板採納契約](translation-contract.md)  | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約                        |
+| [卡名概念與身分關聯](card-name-concepts.md)    | exact 名稱自動推導與人工例外、預設選面及修復後重驗                                |
+| [模板採納政策與收據](translation-policy.md)    | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包                         |
+| [風味文字整段翻譯](flavor-translation.md)      | 零參數模板、完整段落 span、獨立 recipe／新 ID 與譯本採納政策                      |
+| [人工限量序號版次](manual-printings.md)        | 獨立入口、官方封存／第三方 URL、SNC／WB 歸屬、序號補充及人工名稱邊界              |
 
 ## 文件之間的關係
 
