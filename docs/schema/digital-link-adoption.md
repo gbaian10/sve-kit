@@ -149,6 +149,8 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 
 ## 7. 草稿遷入前置與反例驗收
 
+正式採納資料的核對背景必須在程式擠壓合併後，用 **main 歷史中保留的完整 40 碼 commit** 產生；背景的 program_revision、依賴與 parser recipe pins 都須能由保留的不可變版本驗回。不要使用擠壓合併後不會留在 main 歷史的功能分支 commit，也不能只替換 SHA 而沿用未重驗的 hash。候選工具在功能分支產生的測試背景不因此取得正式採納資格；實際採納前須以 main 的版本重建核對背景，再依真人事件產生成員與收據。
+
 研究資料只提供候選與先前比對線索。正式遷入須核對每個 SVE 永久 ID／面、數位 official_id／phase、凍結兩端名字、實際採納者／時間／checked 範圍；缺來源、面定位或真人事件就列待件。`needs_decision=false` 不自動生成 confirmed 或 sampled；自譯卡名的 glossary 委託不授權數位同卡關係。首批只遷 link，coverage 依 §4 留未知。風味文字、單卡自由覆寫與其他 intake 不在本契約範圍。
 
 ### 7.1 連結分兩層採納
