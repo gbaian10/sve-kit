@@ -7,10 +7,10 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
+from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.catalog.adoption_sources import PinnedRepository
-from sve_carddb.catalog.importer import _insert_exact
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.translations.loader import Snapshot, load_glossary
 from sve_carddb.translations.models import (
@@ -316,7 +316,7 @@ def _audit(db: Database, snapshot: Snapshot, revision: str, sources: Sources) ->
         identifier = "authored:translations:" + digest(
             canonical([revision, path, digest(exact)])
         ).removeprefix("sha256:")
-        _insert_exact(
+        insert_exact(
             db,
             "source_record",
             {
@@ -342,8 +342,8 @@ def _audit(db: Database, snapshot: Snapshot, revision: str, sources: Sources) ->
                 if isinstance(v, str) or v is None
             }
             values["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
-            _insert_exact(db, "decision", values, ("id",))
-            _insert_exact(
+            insert_exact(db, "decision", values, ("id",))
+            insert_exact(
                 db,
                 "decision_source",
                 {
@@ -366,7 +366,7 @@ def _audit(db: Database, snapshot: Snapshot, revision: str, sources: Sources) ->
                 role = "translation_evidence:" + digest(
                     canonical([use.source.id, use.locator])
                 ).removeprefix("sha256:")
-                _insert_exact(
+                insert_exact(
                     db,
                     "decision_source",
                     {

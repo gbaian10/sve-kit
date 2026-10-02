@@ -3,9 +3,9 @@
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import Json
+from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import SourceUse, insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
-from sve_carddb.catalog.importer import _insert_exact
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.digital import _phases, select_name
 
@@ -165,7 +165,7 @@ def populate_name_translation(  # ruff: ignore[too-many-locals,complex-structure
             )
         )[7:]
     )
-    _insert_exact(
+    insert_exact(
         db,
         "translation_context",
         {
@@ -217,5 +217,5 @@ def populate_name_translation(  # ruff: ignore[too-many-locals,complex-structure
         "translated_at": decision["reviewed_at"],
         "decision_id": decision_id,
     }
-    _insert_exact(db, "translation", values, ("id",))
+    insert_exact(db, "translation", values, ("id",))
     return "tr:" + checksum

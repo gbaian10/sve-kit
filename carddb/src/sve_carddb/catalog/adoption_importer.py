@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
+from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.catalog import adoption_validation as validate
 from sve_carddb.catalog.adoption_loader import AdoptionSnapshot, load_adoptions
@@ -22,7 +23,6 @@ from sve_carddb.catalog.adoption_models import (
     VocabularyRecord,
 )
 from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
-from sve_carddb.catalog.importer import _insert_exact
 from sve_carddb.catalog.languages import register_languages
 from sve_carddb.catalog.projection import CatalogProjection, project_catalog
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
@@ -416,7 +416,7 @@ def _retained_vocabulary(
         original = max(previous, key=lambda r: r.data.adoption_no)
         term = validate.term(original, reviews[original.record_key], sources)
         assert term is not None
-        _insert_exact(
+        insert_exact(
             db,
             "vocabulary",
             {
@@ -797,7 +797,7 @@ def _audit(
             source = "authored:catalog:" + digest(
                 canonical([revision, path, digest(content)])
             ).removeprefix("sha256:")
-            _insert_exact(
+            insert_exact(
                 db,
                 "source_record",
                 {
@@ -829,8 +829,8 @@ def _audit(
                 }
                 values["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
                 values["confidence"] = None
-                _insert_exact(db, "decision", values, ("id",))
-                _insert_exact(
+                insert_exact(db, "decision", values, ("id",))
+                insert_exact(
                     db,
                     "decision_source",
                     {
@@ -860,7 +860,7 @@ def _audit_evidence(
                     role = "catalog_evidence:" + digest(
                         canonical(evidence.model_dump(mode="json"))
                     ).removeprefix("sha256:")
-                    _insert_exact(
+                    insert_exact(
                         db,
                         "decision_source",
                         {
@@ -900,7 +900,7 @@ def _project(  # ruff: ignore[too-many-arguments,too-many-positional-arguments,c
                     "vocabulary", record.data.subject.model_dump(), {"active": False}
                 )
             return
-        _insert_exact(
+        insert_exact(
             db,
             "vocabulary",
             {
@@ -916,7 +916,7 @@ def _project(  # ruff: ignore[too-many-arguments,too-many-positional-arguments,c
         if item_alias is not None:
             value = record.data.value
             assert value is not None
-            _insert_exact(
+            insert_exact(
                 db,
                 "search_alias",
                 item_alias.model_dump()
@@ -930,7 +930,7 @@ def _project(  # ruff: ignore[too-many-arguments,too-many-positional-arguments,c
         item_symbol = validate.symbol(record, review, sources, decision)
         if item_symbol is not None:
             data = item_symbol.model_dump(mode="json")
-            _insert_exact(
+            insert_exact(
                 db,
                 "text_symbol",
                 {
@@ -951,7 +951,7 @@ def _project(  # ruff: ignore[too-many-arguments,too-many-positional-arguments,c
     elif isinstance(record, RouteRecord):
         pid = validate.route_value(record, db)
         if pid is not None:
-            _insert_exact(
+            insert_exact(
                 db,
                 "route_override",
                 {
@@ -965,7 +965,7 @@ def _project(  # ruff: ignore[too-many-arguments,too-many-positional-arguments,c
     elif isinstance(record, DefaultRecord):
         pid = validate.default_value(record, db)
         if pid is not None:
-            _insert_exact(
+            insert_exact(
                 db,
                 "default_printing_override",
                 {

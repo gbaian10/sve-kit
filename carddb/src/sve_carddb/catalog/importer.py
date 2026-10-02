@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
+from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.catalog.languages import register_languages
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
@@ -12,7 +13,7 @@ from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext
     from sve_carddb.products.models import LocalizedText
 
@@ -36,21 +37,6 @@ def catalog_configuration(
             )
         ),
     }
-
-
-def _insert_exact(
-    db: Database, table: str, values: dict[str, Value], keys: tuple[str, ...]
-) -> None:
-    previous = [
-        row.values
-        for row in db.rows(table)
-        if all(row.values[key] == values[key] for key in keys)
-    ]
-    if previous:
-        if previous != [values]:
-            raise ValueError("Conflicting catalog row")
-    else:
-        db.insert(table, values)
 
 
 def _adopted(db: Database, decision_id: str) -> None:
@@ -95,7 +81,7 @@ def populate_catalog(
     register_languages(db, catalog.languages)
     texts = TextInterner(db, published=published)
     for term in catalog.terms:
-        _insert_exact(
+        insert_exact(
             db,
             "vocabulary",
             {
@@ -109,7 +95,7 @@ def populate_catalog(
     for alias in catalog.aliases:
         if alias.decision_id is not None:
             _adopted(db, alias.decision_id)
-        _insert_exact(
+        insert_exact(
             db,
             "search_alias",
             {
@@ -131,7 +117,7 @@ def populate_catalog(
         ):
             raise ValueError("Symbol language is not registered")
         data = symbol.model_dump(mode="json")
-        _insert_exact(
+        insert_exact(
             db,
             "text_symbol",
             {
