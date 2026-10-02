@@ -6,10 +6,16 @@ from typing import TYPE_CHECKING, Any
 from uuid import UUID, uuid5
 
 import pytest
+from pydantic import field_validator
 
+from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import Index as RegistryIndex
 from sve_carddb.registry.storage import load, plan_files, read_registry_files, relayout
-from sve_carddb.registry.transitions.files import _inventory, read_transition_files
+from sve_carddb.registry.transitions.files import (
+    _inventory,
+    checked_model,
+    read_transition_files,
+)
 from sve_carddb.registry.transitions.loader import _revert, load_transitions
 from sve_carddb.registry.transitions.models import Reference, Shard
 
@@ -1054,3 +1060,18 @@ def test_sequence_uses_numeric_order_past_three_digits(
         "identity-transitions/1000.yaml",
         "identity-transitions/1001.yaml",
     ]
+
+
+def test_checked_model_cannot_normalize_canonical_input() -> None:
+
+    class NormalizingRecord(RecordData):
+        value: str
+
+        @field_validator("value")
+        @classmethod
+        def normalize(cls, value: str) -> str:
+            return value.strip()
+
+    with pytest.raises(ValueError, match="normalization changed canonical input"):
+        checked_model(NormalizingRecord, {"value": " synthetic "})
+    assert checked_model(NormalizingRecord, {"value": "synthetic"}).value == "synthetic"

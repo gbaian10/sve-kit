@@ -152,6 +152,7 @@ class LoadedShard:
     content_hash: str
     content: bytes
     _ordered_content: bytes
+    exact_content: bytes
 
     def envelope(self) -> Shard:
         """Return a detached copy; canonical input remains immutable."""
@@ -171,6 +172,15 @@ class RegistryFiles:
 def read_registry_files(root: Path) -> RegistryFiles:
     """Read checked envelopes once, without discarding their source or membership."""
     require_empty_transitions(root)
+    return read_base_files(root)
+
+
+def read_base_files(root: Path) -> RegistryFiles:
+    """Read original envelopes for replay only; this is not an effective registry.
+
+    Consumers must use load_registry or the transition replay boundary. Reading
+    these files alone does not validate or apply the independent transition log.
+    """
     path = root / "ids" / "index.yaml"
     if not path.exists():
         if any((root / "registry").glob("**/*.yaml")) or any(
@@ -224,7 +234,13 @@ def read_registry_files(root: Path) -> RegistryFiles:
                 raise ValueError(f"Duplicate record: {entry.record_key}")
             keys.add(entry.record_key)
         shards.append(
-            LoadedShard(name, checksum, content, shard.model_dump_json().encode())
+            LoadedShard(
+                name,
+                checksum,
+                content,
+                shard.model_dump_json().encode(),
+                file.read_bytes(),
+            )
         )
     return RegistryFiles(index_content, tuple(shards))
 

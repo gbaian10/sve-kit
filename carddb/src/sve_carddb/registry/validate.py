@@ -21,6 +21,12 @@ if TYPE_CHECKING:
 
 def validate(entries: list[Entry]) -> None:
     """Reject duplicate identities, dangling faces, incomplete mappings and IDs."""
+    validate_structure(entries)
+    validate_collections(entries)
+
+
+def validate_structure(entries: list[Entry], *, historical_art: bool = False) -> None:
+    """Check stable identities before review/relation closure is renewed by replay."""
     records = {entry.record_key: entry for entry in entries}
     if len(records) != len(entries):
         raise ValueError("Duplicate record keys")
@@ -55,9 +61,20 @@ def validate(entries: list[Entry]) -> None:
     _cross_region(kinds["printing"])
     _cards(kinds, card_faces)
     _allocations(entries, printings)
-    _reviews(entries, printings, regions)
     for art in kinds["art"].values():
-        _art(art, kinds)
+        _art(art, kinds, historical=historical_art)
+
+
+def validate_collections(entries: list[Entry]) -> None:
+    """Require complete review/relation sets after every atomic transition."""
+    kinds: dict[str, dict[str, Entry]] = defaultdict(dict)
+    regions: dict[str, set[str]] = defaultdict(set)
+    for entry in entries:
+        if "id" in entry.data:
+            kinds[entry.kind][string(entry.data, "id")] = entry
+        if entry.kind == "printing":
+            regions[string(entry.data, "card_id")].add(string(entry.data, "region"))
+    _reviews(entries, kinds["printing"], regions)
     _relations(kinds)
 
 
@@ -103,6 +120,8 @@ def _relations(kinds: dict[str, dict[str, Entry]]) -> None:
             or source in targets
         ):
             raise ValueError("Invalid or repeated reskin relation")
+        if targets.get(target) == source:
+            raise ValueError("Reverse reskin relationship")
         targets[source] = target
         evidence: list[JsonValue] = []
         for printing in printings.values():
@@ -193,12 +212,14 @@ def check_cursors(next_int_id: dict[str, int], entries: list[Entry]) -> None:
         raise ValueError("Allocation high-water mark mismatch")
 
 
-def _art(entry: Entry, kinds: dict[str, dict[str, Entry]]) -> None:
+def _art(
+    entry: Entry, kinds: dict[str, dict[str, Entry]], *, historical: bool = False
+) -> None:
     face = kinds["face"][string(entry.data, "face_id")]
     if face.data["card_id"] != entry.data["card_id"]:
         raise ValueError("Art face ownership mismatch")
     uses: JsonValue = entry.data["uses"]
-    if not isinstance(uses, list) or not uses:
+    if not isinstance(uses, list) or (not uses and not historical):
         raise ValueError("Art must have reviewed printing uses")
     for use in uses:
         if not isinstance(use, dict):
