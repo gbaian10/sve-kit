@@ -290,6 +290,22 @@ def _region_reasons(
         reasons.add("wording_pending")
     if _divergent(source, card["id"], code):
         reasons.add("region_divergence")
+    reasons.update(_supplemental_reasons(card, code, decisions))
+    return reasons
+
+
+def _supplemental_reasons(card: Record, code: str, decisions: Decisions) -> set[str]:
+    reasons: set[str] = set()
+    for restriction in decisions.supplemental_restrictions:
+        if restriction.reason not in {
+            "errata_current_pending",
+            "source_printing_missing",
+        }:
+            raise ValueError("Unknown supplemental restriction reason")
+        if (restriction.card_id, restriction.region) == (card["id"], code):
+            reasons.add(restriction.reason)
+            if restriction.announcement_available is False:
+                reasons.add("errata_source_missing")
     return reasons
 
 

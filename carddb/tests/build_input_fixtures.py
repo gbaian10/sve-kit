@@ -15,6 +15,7 @@ from sve_carddb.registry.preview.evidence import (
 )
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.source_archive import seal_batch
+from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import card_url
 
 from .product_fixtures import first_record, install, obj
@@ -38,11 +39,7 @@ def frozen_provider(inputs: Inputs, temporary: Path) -> tuple[MemoryEvidence, Pa
     cards.update({("en", item.number): item for item in inputs.en.values()})
     for (region, number), card in cards.items():
         raw = b"<html>" + card.model_dump_json().encode() + b"</html>"
-        url = (
-            card_url(number)
-            if region == "jp"
-            else f"https://example.invalid/en/{number}"
-        )
+        url = card_url(number) if region == "jp" else official_en.card_url(number)
         _put(
             store,
             replace(

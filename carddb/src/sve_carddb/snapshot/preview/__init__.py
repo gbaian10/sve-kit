@@ -87,7 +87,7 @@ def _write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
         Path(temporary).unlink(missing_ok=True)
 
 
-def write_preview(
+def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary binds explicit region, roots, codec and image provenance
     snapshot: Snapshot,
     roots: Roots,
     provenance: dict[str, JsonValue],
@@ -95,10 +95,11 @@ def write_preview(
     brotli: Brotli | None = None,
     image_source: Path | None = None,
     confirmed_images: frozenset[str] = frozenset(),
+    regions: tuple[str, ...] = ("jp",),
 ) -> dict[str, JsonValue]:
     """Seal content-addressed transport and atomically switch only preview/current."""
     roots.verify()
-    require_preview(snapshot.manifest)
+    require_preview(snapshot.manifest, regions=regions)
     roots.verify_image_source(image_source)
     joined = read_snapshot(
         snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}

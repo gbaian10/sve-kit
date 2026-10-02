@@ -8,6 +8,7 @@ from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.card_extras.errata import populate_errata
 from sve_carddb.card_extras.models import key
 from sve_carddb.card_extras.plan import plan_card_extras
+from sve_carddb.card_extras.readiness import confirmed
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import canonical, parse
 from sve_carddb.text_observations.intern import TextInterner
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext, InputRecord
     from sve_carddb.card_extras.plan import ExtrasPlan, QAVersion
+    from sve_carddb.card_extras.readiness import ErrataConfirmation
 
 
 def populate_card_extras(
@@ -128,10 +130,15 @@ class CardExtrasRestriction:
     face_ids: tuple[str, ...]
     reason: str
     issue_id: str
+    announcement_available: bool | None = None
 
 
 def require_card_extras_ready(
-    db: Database, scope: tuple[tuple[str, str], ...], *, strict: bool = False
+    db: Database,
+    scope: tuple[tuple[str, str], ...],
+    *,
+    strict: bool = False,
+    confirmations: tuple[ErrataConfirmation, ...] = (),
 ) -> tuple[CardExtrasRestriction, ...]:
     """Report manual-only faces; strict checks reject automation/current adoption."""
     faces: dict[tuple[str, str], set[str]] = defaultdict(set)
@@ -142,6 +149,14 @@ def require_card_extras_ready(
             str(row.values["face_id"])
         )
     restrictions = []
+    announcements = (
+        {
+            (row.values["region"], row.values["official_url"])
+            for row in db.rows("errata")
+        }
+        if db.has_table("errata")
+        else set()
+    )
     for issue in db.rows("build_issue"):
         if issue.values["category"] not in {
             "card_extras:errata_current_pending",
@@ -153,10 +168,13 @@ def require_card_extras_ready(
         if not isinstance(context, dict):
             raise TypeError("Invalid card extras pending issue context")
         region, card_id = context.get("region"), context.get("card_id")
+        target = context.get("target")
         if not isinstance(region, str) or not (
             card_id is None or isinstance(card_id, str)
         ):
             raise TypeError("Invalid card extras pending issue identity")
+        if target is not None and not isinstance(target, str):
+            raise TypeError("Invalid card extras pending issue target")
         scope_key = str(issue.values["entity_id"])
         if (region, scope_key) in scope:
             restrictions.append(
@@ -167,8 +185,16 @@ def require_card_extras_ready(
                     face_ids=tuple(sorted(faces[region, scope_key])),
                     reason=str(issue.values["category"]).removeprefix("card_extras:"),
                     issue_id=str(issue.values["id"]),
+                    announcement_available=(region, target) in announcements
+                    if issue.values["category"] == "card_extras:errata_current_pending"
+                    else None,
                 )
             )
+    if len({item.issue_id for item in confirmations}) != len(confirmations):
+        raise ValueError("Duplicate errata confirmation issue")
+    restrictions = [
+        item for item in restrictions if not confirmed(db, item, confirmations)
+    ]
     if strict and restrictions:
         raise ValueError(
             "Unresolved supplemental evidence blocks automation or confirmed current"

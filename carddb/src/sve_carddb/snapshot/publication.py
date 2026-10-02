@@ -13,10 +13,18 @@ def require_formal(manifest: dict[str, JsonValue]) -> None:
         raise ValueError("Formal publish refuses preview artifacts")
 
 
-def require_preview(manifest: dict[str, JsonValue]) -> None:
+def require_preview(
+    manifest: dict[str, JsonValue], *, regions: tuple[str, ...] = ("jp",)
+) -> None:
     """Keep the isolated preview writer from accepting formal or regional releases."""
     validate("Manifest", manifest)
     if not string(manifest["data_version"]).startswith("preview-"):
         raise ValueError("Preview requires a preview- data version")
-    if manifest["regions"] != ["jp"]:
-        raise ValueError("Preview requires exactly the JP region")
+    if regions not in {("jp",), ("en", "jp")}:
+        raise ValueError("Unsupported preview recipe regions")
+    if manifest["regions"] != list(regions):
+        raise ValueError(
+            "Preview requires exactly the JP region"
+            if regions == ("jp",)
+            else "Offline preview requires exactly EN and JP regions"
+        )

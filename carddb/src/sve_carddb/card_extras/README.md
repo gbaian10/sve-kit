@@ -215,3 +215,14 @@ Missing inventory returns null for those categories, never an empty list that
 claims no references. Provided records must refer to versions in the previous
 DB. Confirming inventory completeness belongs to those producers; this adapter
 does not invent dependencies or implement their schemas.
+
+## Offline launch composition
+
+`FrozenCardExtras(..., region="jp"|"en")` streams the selected sealed card batch,
+using the matching parser pin and rejecting opposite-region descriptors. The
+snapshot [offline recipe](../snapshot/OFFLINE.md) composes these pages with typed
+identity/text/product parents, preserves complete source uses and projects
+supplemental restrictions even when an older current exists. The old JP-only
+preview recipe retains its stricter ancillary-data prohibition. Announcement
+HTML parsing remains a separate adapter; card-page references alone never create
+formal errata or prove corrected wording.

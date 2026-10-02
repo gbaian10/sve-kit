@@ -161,19 +161,25 @@ def _en_date(raw: str | None) -> str | None:
 
 
 class FrozenCardExtras:
-    def __init__(self, root: Path, store_id: str, batch_id: str) -> None:
+    def __init__(
+        self, root: Path, store_id: str, batch_id: str, *, region: Region = "jp"
+    ) -> None:
+        if region not in {"jp", "en"}:
+            raise ValueError("Card extras require an explicit JP or EN region")
         self.sources = FrozenSources(root, store_id, batch_id)
+        self.region = region
 
     def pages(self) -> Iterator[CardPage]:
-        """Stream current JP pages once; each access rechecks raw and metadata hashes."""
+        """Stream one explicit region; each access rechecks raw and metadata hashes."""
         for entry in self.sources.inventory.current:
             source, raw, descriptor = self.sources.read(
-                entry.source_version_id, parser_version=PARSER
+                entry.source_version_id,
+                parser_version=PARSER if self.region == "jp" else EN_PARSER,
             )
             if (descriptor.provider, descriptor.kind, descriptor.url) != (
-                "jp",
+                self.region,
                 "card",
                 entry.url,
             ):
                 raise ValueError("Card extras batch source identity mismatch")
-            yield parse_card_page(raw, source)
+            yield parse_card_page(raw, source, region=self.region)
