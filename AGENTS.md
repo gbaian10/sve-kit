@@ -11,7 +11,7 @@
 Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，一人專案。
 
 - **卡表**：爬日文與英文官網，合併人工資料，匯出有版號的 JSON 快照
-- **模擬器**：網頁版對戰（之後可能打包成 PWA、Tauri）
+- **模擬器**：已有引擎原型、scenario runner 與 Web 用戶端；完整網頁對戰服務仍在開發（之後可能打包成 PWA、Tauri）
 
 不是官方產品，名稱與內容都不要使用 `shadowverse` 當專案名。
 
@@ -22,7 +22,7 @@ Shadowverse: EVOLVE（實體卡牌遊戲，簡稱 SVE）的非官方工具組，
 | `carddb/`   | 爬取、解析、合併 `authored/`、建置 SQLite、匯出 JSON 快照                         | Python、uv  |
 | `authored/` | 人寫的資料：跨地區卡片 ID 對應、繁中翻譯、效果 DSL 資料、裁定登錄                 | YAML        |
 | `dsl/`      | 效果 DSL 的 JSON Schema，**語法的唯一權威**                                       | JSON Schema |
-| `sim/`      | 模擬器（尚未開始）：之後會有 `engine/`、`server/`、`web/`                         | Rust、TS    |
+| `sim/`      | 模擬器：`engine/`、`scenario-runner/`、`web/`；`server/` 尚未建立                 | Rust、TS    |
 | `docs/`     | 進版控的正式文件：ADR（`docs/adr/`）、DSL 規格（`docs/dsl/`）、schema、mermaid 圖 | Markdown    |
 
 專案用語（卡表快照、啟動包、分片、版次等）以 `docs/terminology.md` 為準，新名詞先加進那份。
@@ -60,7 +60,9 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
 `authored/` 依卡包切檔（例如 `authored/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
 
-測試用官方卡文存於專用私有 GitHub testdata repo，只放測試需要的卡表輸入（目前是完整的日文卡表 JSONL）與來源說明，不放卡圖或憑證；卡文不進 `sve-kit`，不用 R2。
+測試用官方卡文存於專用私有 GitHub testdata repo，只放測試需要的卡表輸入（目前是完整的日文卡表 JSONL）與來源說明，不放卡圖或憑證，不用 R2。
+目前 `sve-kit` 仍有待 #228 替換的裁剪官方測試頁與真實卡文斷言，以及待另行移除的題庫原稿；
+這些官方內容不在本專案授權內，範圍見 [LICENSING.md](LICENSING.md)。
 `sve-kit` 只保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
 更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。
 主分支與專案自己的 PR 跑完整測試：Rust 行覆蓋率門檻為 90%，Python 行與分支覆蓋率合計門檻為 90%（本機 pytest hook 與 CI 相同）；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
@@ -128,3 +130,32 @@ ADR 與設計文件用繁體中文、commit 格式由 commitizen 檢查。
 
 - 介面語言：繁中、日文、英文，之後可擴充
 - **卡面語言與介面語言分開設定**；某語言缺翻譯時要有退回規則，不能顯示空白
+
+## AI 貢獻與審查
+
+- 在 PR 描述中列出使用的 AI 工具與模型版本、負責提交者，以及已知來源。
+  產生的內容必須經過審查；不要公開私人提示詞或秘密。AI 產生內容或專案接受內容，
+  都不能證明擁有權利，也不代表已取得原作的使用授權。
+- 維護者執行的 AI 模型透過維護者持有的 bot 帳號提交。
+  推送與建立 PR 前，AI 審查必須先在本機分支通過；之後由審核者在 PR
+  發布一則涵蓋所有審查輪次、修正與驗證的總結。
+- 使用下表的 trailer 記錄每位真人或 AI 貢獻者與審核者。不要捏造過去的核可；
+  `Acked-by` 只用於維護者確實親自核可該變更的情況。
+  這些紀錄不構成法律上的作者認定、權利移轉或 DCO 聲明。
+- bot 提交 PR 時，權利聲明的勾選框保持未勾選，並註明維護者須確認該 PR 的來源與授權範圍。
+  不得因專案採用 Apache-2.0 或 CC0 就推定已完成確認，也不得代替真人聲明權利或核可。
+  若維護者已在別處明確確認，應連到該紀錄，不得宣稱是 bot 代真人作出的確認。
+- 每個授權相關 PR 都必須通過審查，並在合併前給維護者看過。
+  政策定案不能取代對實際 PR 的審閱。
+
+PR 採 squash merge；合併後的 commit 訊息在正文與 issue 參照之後空一行，
+再依下列順序記錄 trailer：
+
+| Trailer | 記錄對象 | Example |
+| --- | --- | --- |
+| `Co-Authored-By` | 每位撰寫部分變更的真人或 AI 模型 | `Co-Authored-By: Codex gpt-6-sol <noreply@openai.com>` |
+| `Reviewed-by` | 每位核可最終版本的真人或 AI 審核者 | `Reviewed-by: Claude Opus 5.5 <noreply@anthropic.com>` |
+| `Acked-by` | 維護者，僅限確實親自核可該變更時 | `Acked-by: Maintainer Name <maintainer@example.com>` |
+
+AI 模型以產品名稱與版本標示，維護者則使用 `git log` 中的姓名與電子郵件地址。
+不要捏造身分，也不要將私人聯絡資訊加入公開文件。
