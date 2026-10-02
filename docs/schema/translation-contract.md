@@ -117,7 +117,7 @@ glossary_term.data 為 `{id,category,concept_key,source_ref,source_span,authored
 | --- | --- |
 | keyword、ability、tribe | glossary category keyword、ability、trait |
 | verb、zone、other | glossary category rule_term；other 須逐概念核對，不機械確定語義 |
-| class、card_type | vocabulary(kind=class/type) 的 label，不建立假的 glossary category |
+| class、card_type | 既有實體卡 vocabulary(kind=class/type) 的 label；不存在的職業／卡種與泛稱走 glossary rule_term，不增代碼，見術語採納擴充 §1 |
 | 卡名候選 | glossary category card_name，與 SVE／數位同概念決定分開驗 |
 
 glossary_choice.data 為 `{term_id,lang,value,origin,concept_evidence,source_claim,adoption_review,adoption_no,predecessor}`；vocabulary_choice 將 term_id 換成 `{vocabulary_kind,vocabulary_code}`。source_claim／adoption_review 依 [術語採納擴充 §3／§4](glossary-adoption.md#3-選詞的主張來源與-origin)；未驗出處先有效採納 project，另記主張來源，不新增半官方 origin。value 可為 null，或 `{kind:authored,text}` 或 `{kind:source,source_ref,span}`，span 為 `{start,end}` 或 null（取全字串）。parser 必須提供欄位語言，jp_ref 為 ja、target_ref 與 lang 相同；原文整欄 hash 加 exact span 足以驗摘錄，不要求摘錄等於整份 text_unit。origin 沿 build-db 的 official_svwb/official_sv1/project/community/machine。null value 是明示撤回；有效 glossary_choice 投影為每 `(term_id,lang)` 唯一 glossary_translation，保留其決定與來源；舊 choice 留 authored。vocabulary_choice 則推導 label 的翻譯與 FieldTranslation。

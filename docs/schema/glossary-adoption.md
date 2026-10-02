@@ -4,7 +4,9 @@
 
 ## 1. 永久概念與引用
 
-概念仍不可變，`id=term:<concept_key>`。key 以英文概念命名，前綴使用穩定的大類，例如 `keyword.storm`、`action.draw`、`zone.cemetery`、`resource.ep`、`trait.spirit`；不用草稿列序、譯名字串或可能重分類的 `rule_term` 當前綴。草稿分類調整或譯名改字不能據此重配永久 key；正式概念 payload 仍不可改。配發前先審對照表，再由獲委託的協調者明示核可配發；提案不算已配發。借英文卡面的種族名稱命名 key 僅為內部識別，不等於採納 EN 譯詞或跨區語義。
+概念仍不可變，`id=term:<concept_key>`。key 以英文概念命名，前綴使用穩定的大類，例如 `keyword.storm`、`action.draw`、`zone.cemetery`、`resource.ep`、`trait.fae_touched`；不用草稿列序、譯名字串或可能重分類的 `rule_term` 當前綴。草稿分類調整或譯名改字不能據此重配永久 key；正式概念 payload 仍不可改。配發前先審對照表，再由獲委託的協調者明示核可配發；提案不算已配發。借英文卡面的種族名稱命名 key 僅為內部識別，不等於採納 EN 譯詞或跨區語義。
+
+前綴只是方便記憶的命名；程式不得從 key 前綴推導分類、加粗或行為，必須讀取正式型別、有效採納值及相應契約。
 
 統一的引用值 `TermReference` 恰為 `{kind,key}`：
 
@@ -13,7 +15,7 @@
 | glossary | `term:<concept_key>` 字串 | glossary_term.id |
 | vocabulary | `[vocabulary_kind,vocabulary_code]`，兩個字串 | vocabulary 的 `(kind,code)`；本入口 kind=class/type |
 
-class／card_type 仍走 vocabulary，不建立假的 glossary category。EP／SEP 資源與 EP／SEP 卡種分別定位 glossary 與 vocabulary:type；エルフ 職業與 精霊 種族分別定位 vocabulary:class 與 glossary:trait。譯名相同不合併 key，不拿顯示名查概念。
+草稿 class／card_type 只在對應既有實體卡 vocabulary 時走該入口，不新增假的職業／卡種代碼；其餘一般術語走 glossary rule_term。實體卡職業只有六職業加中立，ヴァンパイア／ネクロマンサー／ネメシス 不進 class；カード 是泛稱，スタートアミュレット 不進 type；evolve／advance／token 依建置契約是特殊標記，本次亦作一般術語，不配成 type。EP／SEP 已有 type；其餘詞彙以已採納 catalog 核對，不從草稿分類猜代碼。EP／SEP 資源與 EP／SEP 卡種分別定位 glossary 與 vocabulary:type；エルフ 職業與 精霊 種族分別定位 vocabulary:class 與 glossary:trait。譯名相同不合併 key，不拿顯示名查概念。
 
 這個引用值供概念定位；現有模板 `parameter_schema.reference_kind` 與 `params` 的公開形狀不在此悄悄更換。建置可把既有 `{kind:term,id}`／`{kind:vocabulary,vocabulary_kind,vocabulary_code}` 無損轉成 TermReference；若日後要更改既有傳輸形狀，先走 §6 的格式審核。
 
@@ -46,7 +48,7 @@ source_claim 為 null，或恰為 `{source_work,source_urls,claimed_source,note}
 
 ## 4. 實際人工或委託採納
 
-本節的四種 glossary kind（glossary_term／glossary_choice／vocabulary_choice／glossary_emphasis_choice）各 data 帶 `adoption_review`，恰為 `{mode,delegation}`。mode=human/delegated_glossary。human 的 delegation=null，維持實際人員／日期／sampled 或 confirmed checked 集的要求。不同 mode 分批；delegated_glossary 不用模板的 approved_policy 例外，也不讓裸 model_reviewed 升級。
+本節的四種 glossary kind（glossary_term／glossary_choice／vocabulary_choice／glossary_emphasis_choice）各 data 帶 `adoption_review`，恰為 `{mode,delegation}`。mode=human/delegated_glossary。human 的 delegation=null，維持實際人員／日期／sampled 或 confirmed checked 集的要求。不同 mode 分批；此 confirmed＋AI 審核者例外僅適用上述四種 glossary kind，其他區域不得沿用 delegated_glossary 或省略其既有真人核對要求。delegated_glossary 不用模板的 approved_policy 例外，也不讓裸 model_reviewed 升級。
 
 delegated_glossary 的 delegation 恰為：
 
@@ -69,7 +71,7 @@ delegated_glossary 的 delegation 恰為：
 
 新增 glossary area 的 `glossary_emphasis_choice`，主鍵為 `(term_id,adoption_no)`，record_key 是其 canonical JSON 陣列。data 恰為 `{term_id,value,adoption_review,adoption_no,predecessor}`。value 是 Bool 或 null；非 Bool 的 0／1／字串不接受。只有 glossary_term.category=rule_term 可寫此 kind，其餘概念拒收冗餘覆寫。
 
-採納／分片封套／全 record hash／決定門檻／連續鏈沿翻譯契約 §2。首筆 adoption_no=1、predecessor=null；後續指正確前件，不改舊值、不重配概念 ID。null 表示明示撤回；rule_term 撤回後是 missing_emphasis，不猜 false，也不由草稿分類回補。建置以完整歷史的末筆有效值推導，未採納或模型信心不能決定它。
+採納／分片封套／全 record hash／決定門檻／連續鏈沿翻譯契約 §2。首筆 adoption_no=1、predecessor=null；後續指正確前件，不改舊值、不重配概念 ID。null 表示明示撤回；rule_term 撤回後是 missing_emphasis，不猜 false，也不由草稿分類回補。建置以完整歷史的末筆有效值推導，未採納或模型信心不能決定它。missing_emphasis 時顯示端照常顯示已選譯文與原文、不加粗，並列入報告；這是缺少呈現資料，不是有效 false，也不是整個 context 回原文的理由。首批資料驗收仍要求補齊有效 Bool。
 
 | 正式型別 | 有效加粗 |
 | --- | --- |
@@ -93,6 +95,8 @@ rule_term 逐筆區分名詞與一般敘述：區域名／資源名／聯名專�
 
 建議的最小法（**待獨立格式審核，不是現在的白名單**）：在公開 translation 末尾新增一個 `term_spans` 欄，為帶 TermReference、原文／譯文 Unicode span 陣列與 bold 的具名註記陣列。用已存在的 source_unit_id／text_unit_id 取原文與譯文，不另出全份 glossary 清冊、所有 choice／delegation 收據或新的詞庫附件。沒有術語引用的譯文用空陣列；詳細 tuple 名稱、欄序、跨行／多次引用與 span 覆蓋須和位置契約一起定案，不能先使用任意 JSON。
 
+**公開格式審核必答題**：日文／英文介面只顯示原文、沒有繁中 translation 列時，原文術語位置放在哪裡？原文位置必須跟著原文本身，或至少不依賴任何譯文列存在；格式審核須定出原文位置與 TermReference／bold 的承載、引用閉包及無譯文時的下載／取用，並以日文／英文只看原文的情境驗收。僅在繁中 translation 上附 term_spans 尚不能滿足這項要求，因此下述單欄方向不是完整定案。
+
 本提案不出全份 glossary 表，所以 glossary key 是註記內的自描述概念識別，不冒稱有公開全庫 FK；producer 仍須驗私有建置概念閉包，reader 驗註記與同列原文／譯文 span 的完整性。vocabulary reference 可沿既有公開 vocabulary 驗 `(kind,code)`。若格式審核要求公開 glossary FK，則須另定僅出已使用概念的 descriptor 及其容量，不能讓 reader 向外查最新詞庫補洞。
 
 原文 span 必須綁該 translation.source_unit_id 的 exact 文字。EN 提前顯示共用 JP 繁中時，對照來源仍為 JP；沒有 EN 位置對齊不能宣稱在 EN 原文同位置加粗。同一顯示名字若是不同 glossary／vocabulary，註記 reference 仍不同。前端可關閉視覺加粗，但不得改存放的概念／位置；開關政策沿既有介面決定。
@@ -105,10 +109,10 @@ rule_term 逐筆區分名詞與一般敘述：區域名／資源名／聯名專�
 | producer／projection／引用閉包 | 只出已選譯文註記；span 的原文／譯文存在、Codepoint 範圍、不重疊／多次引用與 reference 目標按新規格驗；不夾帶來源收據／建置 hash |
 | 分片／容量／離線更新 | 名稱及 label 仍在 bootstrap、效果在原分片；註記跟選中 translation 同片。不把全術語註記都塞啟動包；重新量測名稱類增加量、1 MiB 啟動包門檻、全文／text_all 聯集與 cache 更新 |
 
-替代方案若另做旁表／附件，會新增集合、join／索引／下載與容器完整性規則，須比較容量；不是零格式變更。本輪推薦單一註記欄以減少新增容器，但**不自行修改**已合併的快照白名單、Schema、tuple、reader 或公開格式版本。核可與實作前只能出現有純字串，不能宣稱位置加粗／一對一原文對照已上線。
+替代方案若另做旁表／附件，會新增集合、join／索引／下載與容器完整性規則，須比較容量；不是零格式變更。本輪推薦單一註記欄以減少新增容器，但**不自行修改**已合併的快照白名單、Schema、tuple、reader 或公開格式版本。原文單獨顯示的承載未定前，不得把此單欄方向直接視為可實作的完整格式。核可與實作前只能出現有純字串，不能宣稱位置加粗／一對一原文對照已上線。
 
 ## 7. 實作邊界與反例
 
-新增 kind／data 欄位保持 translation_authored_format=1 的 index／分片封套與既定 hash recipe；有完整 loader 支援後才載入，未支援時明確拒收，不當作空集合或默默忽略。沒有增添數位 link/coverage 的 authored 入口，也沒有 EN 術語採納；兩者另案，英文此階段只盤點。
+新增 kind／data 欄位保持 translation_authored_format=1 的 index／分片封套與既定 hash recipe，僅因目前沒有任何正式翻譯採納紀錄，才可在首次採納前安全調整必填欄位；不是可沿用同編號任意改契約的先例。已有正式採納紀錄後須另審格式版本與相容／遷移策略；有完整 loader 支援後才載入，未支援時明確拒收，不當作空集合或默默忽略。沒有增添數位 link/coverage 的 authored 入口，也沒有 EN 術語採納；兩者另案，英文此階段只盤點。
 
-獨立反例至少包括：rule_term 缺值／非 Bool／錯前件／withdrawal；非 rule_term 寫 emphasis；同名不同 reference；收據缺具體委託／scope 不含成員／實際決定者或日期不符／新增詞沿用舊委託；缺 JA 只填 null 或假 locator；來源主張誤升官方、官方 choice 無真 frozen concept evidence；23 vocabulary 有缺譯；加粗改版未重新推導顯示。這些是驗收要求，不是已實跑結果。公開註記的反例隨格式審核另加，不用修改現有快照讓本文件通過。
+獨立反例至少包括：rule_term 缺值／非 Bool／錯前件／withdrawal；非 rule_term 寫 emphasis；同名不同 reference；收據缺具體委託／scope 不含成員／實際決定者或日期不符／新增詞沿用舊委託；缺 JA 只填 null 或假 locator；來源主張誤升官方、官方 choice 無真 frozen concept evidence；有效 vocabulary 引用有缺譯；加粗改版未重新推導顯示。這些是驗收要求，不是已實跑結果。公開註記的反例隨格式審核另加，不用修改現有快照讓本文件通過。
