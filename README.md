@@ -62,11 +62,15 @@ $SVE_DATA_DIR/
 
 ## Development
 
-### Adding reviewed JP errata sources
+### Adding reviewed JP and EN errata sources
 
 `crawl errata-new --urls reviewed-errata-urls.json` accepts a JSON array of exact
-HTTPS announcement URLs on `shadowverse-evolve.com/errata/<slug>`. Validate the
-selection with `--dry-run` first; live fetching requires the maintainer's separate
+HTTPS announcement URLs on `shadowverse-evolve.com/errata/<slug>` (JP) or
+`en.shadowverse-evolve.com/errata/<slug>` (EN). The entire selection must pass
+validation before a manifest is opened or a request is made. Preserve original
+card-page hrefs when preparing the selection; reject unexpected hosts, path
+shapes or trailing junk, and report them for maintainer review instead of
+guessing or silently repairing URLs. Validate the selection with `--dry-run` first; live fetching requires the maintainer's separate
 authorization. This entry point adds sources only: it skips trusted existing
 sources without changing their metadata and stops on damaged, missing, archived,
 or conflicting existing destinations. It never repairs or overwrites them.
@@ -78,19 +82,35 @@ the circuit breaker, and **any redirect** stop the run. A redirect to another
 selected URL also stops: review its destination before changing the selection;
 trailing slashes are not inferred. Page links and images are never fetched.
 
-Bodies require HTTP 200, HTML media type, valid UTF-8, a nonempty title and a
-nonempty `main`, `article`, or `.entry-content` container. This is a conservative
-structural check, not verification of a correction or its dates. The command
-stores exact body bytes under `raw/jp/errata/` with manifest kind `errata`; it
-prints metadata only and does not import formal errata or change card text.
+Bodies require HTTP 200, HTML media type, valid UTF-8 and a nonempty `title`.
+The exact layout chain is
+`div.st-Container > div.st-Container_Inner > div.sw-Lower > div.sw-Lower_Wrapper`,
+with a direct `div.sw-Lower_Heading > h1.sw-Ttl` and `div.sw-Lower_Container`.
+JP requires the container's direct
+`div.eratta-Detail > div.eratta-Detail_Inner`; EN uses
+`div.errata-Detail > div.errata-Detail_Inner`. Inside that detail, both a direct
+`div.heading > h1.ttl` and `div.contents.sw-Txtarea` must have nonempty text.
+The JP `eratta` spelling is intentional. Shared layout alone, generic
+`main`/`article`/`.entry-content`, index tables and error pages do not qualify.
+This validates structure only, not a correction's meaning, dates or card scope.
+The command stores exact body bytes under `raw/jp/errata/` or `raw/en/errata/`,
+with the URL's corresponding manifest region and kind `errata`. It prints
+metadata only, does not discover links, import formal errata or change card text.
 
-The container selectors have not been verified against a saved official JP
-errata/news page. Once live fetching is authorized, first dry-run the reviewed
-selection, then fetch **one** of the 16 approved URLs. Check its stored raw,
-manifest metadata and body structure offline, seal and independently back up
-that pilot batch, and pass its restore check before fetching the other 15 URLs.
-If the pilot fails or redirects, stop and report metadata only; do not loosen
-validation or retry the rest. A rejected body is not saved by this command.
+The JP detail selector was checked offline against a saved research detail
+page, while saved JP index/404 and EN index pages are rejected. This does not
+verify the current live JP page. **No saved EN detail page was available:**
+EN's detail class names are inferred from the EN index's corresponding
+`errata-*` template and remain unverified. Once live fetching is separately
+authorized, first dry-run each reviewed regional selection, then fetch **one**
+JP URL and, independently, **one** EN URL in separate pilot runs. Check stored
+raw, manifest metadata and structure offline, seal and independently back up
+each regional pilot batch, and pass its restore check before fetching that
+region's remaining URLs. If a pilot fails or redirects, stop and report
+metadata only; do not loosen validation or retry the rest. A rejected body is
+not saved by this command. Retain failed fetch logs and backups: a reviewed
+fix can append a new attempt for a still-new URL; it never edits the failed
+observation or treats it as an unfinished request.
 
 This entry point holds the shared manifest lock and refuses unfinished requests,
 raw temporary files, or configured archive work. It never runs general crawl
@@ -114,7 +134,7 @@ requires evidence preservation, synthetic rehearsal and explicit maintainer
 approval before any recovery writes.
 
 The operator must back up the manifest before and after the run, then seal the
-reviewed `jp:errata` scope, back up its closure and verify this batch with
+reviewed `jp:errata` and/or `en:errata` scopes, back up its closure and verify this batch with
 `archive restore-check`; these operations are explicit and are not performed by
 `errata-new`. See [source archive](docs/schema/source-archive.md) and
 [protected fetching](docs/schema/refresh-operation.md). Official bodies stay

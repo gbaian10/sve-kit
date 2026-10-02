@@ -21,6 +21,7 @@ from sve_carddb.errata_fetch import (
     fetch_new,
     load_urls,
     raw_path,
+    url_region,
     validate_urls,
 )
 from sve_carddb.fetch.client import (
@@ -58,14 +59,35 @@ if TYPE_CHECKING:
 HOST = "https://shadowverse-evolve.com"
 URL = f"{HOST}/errata/synthetic-one/"
 OTHER = f"{HOST}/errata/synthetic-two/"
-BODY = b"<html><head><title>Synthetic notice</title></head><body><main>Test correction<a href='/rules/'>Other source</a><img src='/image.png'></main></body></html>"
+EN_HOST = "https://en.shadowverse-evolve.com"
+EN_URL = f"{EN_HOST}/errata/synthetic-one/"
+EN_OTHER = f"{EN_HOST}/errata/synthetic-two/"
+
+
+def notice_body(region: Region = Region.JP) -> bytes:
+    prefix = "eratta" if region is Region.JP else "errata"
+    return (
+        "<html><head><title>Synthetic notice</title></head><body>"
+        '<div class="st-Container"><div class="st-Container_Inner">'
+        '<div class="sw-Lower"><div class="sw-Lower_Wrapper">'
+        '<div class="sw-Lower_Heading"><h1 class="sw-Ttl">Synthetic errata</h1></div>'
+        f'<div class="sw-Lower_Container"><div class="{prefix}-Detail">'
+        f'<div class="{prefix}-Detail_Inner"><div class="heading">'
+        '<h1 class="ttl">Synthetic correction</h1></div>'
+        '<div class="contents sw-Txtarea">Synthetic body'
+        '<a href="/rules/">Unselected source</a><img src="/image.png"></div>'
+        "</div></div></div></div></div></div></div></body></html>"
+    ).encode()
+
+
+BODY = notice_body()
 runner = CliRunner()
 
 
-def ok() -> httpx.Response:
+def ok(region: Region = Region.JP) -> httpx.Response:
     return httpx.Response(
         200,
-        content=BODY,
+        content=notice_body(region),
         headers={
             "content-type": "text/html; charset=utf-8",
             "etag": '"synthetic"',
@@ -82,7 +104,11 @@ class FakeServer:
 
     def __call__(self, request: httpx.Request) -> httpx.Response:
         self.calls.append((self.clock.now, request))
-        response = self.responses.pop(0) if self.responses else ok()
+        response = (
+            self.responses.pop(0)
+            if self.responses
+            else ok(url_region(str(request.url)))
+        )
         if isinstance(response, BaseException):
             raise response
         return response
@@ -177,12 +203,13 @@ def test_entire_selection_rejected_before_network_or_manifest(
 
 
 @pytest.mark.parametrize("section", ["rules", "news"])
+@pytest.mark.parametrize("host", [HOST, EN_HOST])
 def test_other_official_sections_with_a_single_slug_are_rejected(
-    case: Case, section: str
+    case: Case, section: str, host: str
 ) -> None:
-    selection = (URL, f"{HOST}/{section}/x/")
+    selection = (URL, f"{host}/{section}/x/")
     with pytest.raises(
-        ErrataInputError, match=r"^selection contains a non-JP-errata URL$"
+        ErrataInputError, match=r"^selection contains a non-official-errata URL$"
     ):
         validate_urls(selection)
     result = case.invoke(selection)
@@ -220,6 +247,169 @@ def test_dedup_preserves_percent_encoding_and_trailing_slash_distinction(
         URL,
         URL.rstrip("/"),
     ]
+
+
+@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+def test_detail_template_requires_the_full_announcement_structure(
+    region: Region,
+) -> None:
+    url = URL if region is Region.JP else EN_URL
+    _validate_body(Response(1, url, 200, "text/html", None, None, notice_body(region)))
+
+
+@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+@pytest.mark.parametrize(
+    "damage",
+    [
+        "outer-chain",
+        "layout-heading",
+        "notice-title",
+        "contents",
+        "inner",
+        "index",
+        "404",
+        "home",
+        "misplaced-detail",
+        "empty-notice",
+        "empty-contents",
+        "other-region-template",
+    ],
+)
+def test_shared_layout_and_generic_containers_cannot_pass_as_a_notice(
+    case: Case, region: Region, damage: str
+) -> None:
+    url = URL if region is Region.JP else EN_URL
+    body = notice_body(region)
+    prefix = b"eratta" if region is Region.JP else b"errata"
+    replacements = {
+        "outer-chain": (b"st-Container_Inner", b"st-Other"),
+        "layout-heading": (b"sw-Lower_Heading", b"sw-Other"),
+        "notice-title": (b'class="ttl"', b'class="other"'),
+        "contents": (b"contents sw-Txtarea", b"contents"),
+        "inner": (prefix + b"-Detail_Inner", prefix + b"-Other_Inner"),
+        "index": (prefix + b"-Detail", prefix + b"-List"),
+        "404": (prefix + b"-Detail", b"err_Txt"),
+        "home": (b"sw-Lower", b"sw-Home"),
+        "empty-notice": (b"Synthetic correction", b" \n "),
+        "empty-contents": (b"Synthetic body", b" "),
+        "other-region-template": (
+            prefix,
+            b"errata" if region is Region.JP else b"eratta",
+        ),
+    }
+    if damage == "misplaced-detail":
+        body = body.replace(b'class="sw-Lower_Container"', b'class="other"')
+        body = body.replace(
+            b"</body>", b'<div class="sw-Lower_Container">Unrelated</div></body>'
+        )
+    else:
+        old, new = replacements[damage]
+        body = body.replace(old, new)
+    if damage == "empty-contents":
+        body = re.sub(rb"<a .*?</a>", b"", body)
+    # A generic container must not rescue an index/error or a malformed detail.
+    body = body.replace(
+        b"</body>",
+        b'<main>Generic content</main><article>Generic</article><div class="entry-content">Generic</div></body>',
+    )
+    with pytest.raises(
+        ValidationError, match=r"^HTML lacks a title or announcement body container$"
+    ):
+        _validate_body(Response(1, url, 200, "text/html", None, None, body))
+    case.server.responses = [
+        httpx.Response(200, content=body, headers={"content-type": "text/html"})
+    ]
+    result = case.invoke((url,))
+    assert result.exit_code == 1
+    assert len(case.server.calls) == 1
+    assert not (case.root / raw_path(url)).exists()
+    assert body.decode() not in result.output
+    with case.manifest() as manifest:
+        assert manifest.resources.get(url) is None
+        assert manifest.requests.outcomes(url) == [Outcome.FAILED]
+
+
+def test_mixed_selection_keeps_exact_urls_and_region_specific_raw(case: Case) -> None:
+    result = case.invoke((URL, EN_URL))
+    assert result.exit_code == 0, result.output
+    assert [str(r.url) for _, r in case.server.calls] == [URL, EN_URL]
+    assert all(b[0] - a[0] >= 2.5 for a, b in pairwise(case.server.calls))
+    with case.manifest() as manifest:
+        for url, region in ((URL, Region.JP), (EN_URL, Region.EN)):
+            resource = manifest.resources.get(url)
+            assert resource is not None
+            assert resource.region is region
+            assert resource.kind is Kind.ERRATA
+            assert resource.path.parts[:3] == ("raw", region.value, "errata")
+            assert resource.path == raw_path(url)
+            assert decompress((case.root / resource.path).read_bytes()) == notice_body(
+                region
+            )
+            assert resource.sha256 == sha256(notice_body(region))
+            assert resource.etag == '"synthetic"'
+            assert manifest.links.current(url) == []
+            assert manifest.requests.outcomes(url) == [Outcome.CHANGED]
+    before = {u: (case.root / raw_path(u)).stat() for u in (URL, EN_URL)}
+    assert case.invoke((URL, EN_URL)).exit_code == 0
+    assert len(case.server.calls) == 2
+    assert {u: (case.root / raw_path(u)).stat() for u in (URL, EN_URL)} == before
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        f"{EN_HOST}/errata/",
+        f"{EN_HOST}/errata/x/extra/",
+        f"{EN_HOST}/errata/x/?",
+        f"{EN_HOST}/errata/%2f/",
+        f"{EN_HOST}/errata/%2e%2e/",
+        "https://en.shadowverse-evolve.com:443/errata/x/",
+        "http://en.shadowverse-evolve.com/errata/x/",
+        "https://user@en.shadowverse-evolve.com/errata/x/",
+        "https://en.shadowverse-evolve.com.invalid/errata/x/",
+    ],
+)
+def test_en_selection_is_not_a_broad_host_or_path_allowlist(
+    case: Case, url: str
+) -> None:
+    result = case.invoke((EN_URL, url))
+    assert result.exit_code == 1
+    assert case.server.calls == []
+    assert not case.root.exists()
+
+
+def test_en_original_href_with_trailing_junk_is_rejected_without_repair(
+    case: Case,
+) -> None:
+    malformed = EN_URL + '"'
+    with pytest.raises(
+        ErrataInputError, match=r"^selection contains a non-official-errata URL$"
+    ):
+        validate_urls((EN_URL, malformed))
+    case.urls_file.write_text(json.dumps([EN_URL, malformed]))
+    with pytest.raises(
+        ErrataInputError, match=r"^selection contains a non-official-errata URL$"
+    ):
+        load_urls(case.urls_file)
+    assert case.invoke((EN_URL, malformed)).exit_code == 1
+    assert case.server.calls == []
+    assert not case.root.exists()
+
+
+@pytest.mark.parametrize("region", [Region.JP, Region.EN])
+def test_same_slug_and_raw_region_never_imply_cross_region_trust(
+    case: Case, region: Region
+) -> None:
+    url = URL if region is Region.JP else EN_URL
+    assert case.invoke((url,)).exit_code == 0
+    with case.manifest() as manifest, manifest.transaction():
+        resource = manifest.resources.get(url)
+        assert resource is not None
+        manifest.resources.put(
+            replace(resource, region=Region.EN if region is Region.JP else Region.JP)
+        )
+    assert case.invoke((url,)).exit_code == 1
+    assert len(case.server.calls) == 1
 
 
 def test_success_has_exact_raw_metadata_no_discovery_and_trusted_skip(
@@ -275,18 +465,19 @@ def test_success_has_exact_raw_metadata_no_discovery_and_trusted_skip(
         URL,
     ],
 )
+@pytest.mark.parametrize("source", [URL, EN_URL])
 def test_all_redirects_stop_without_contacting_target_or_next_source(
-    case: Case, destination: str
+    case: Case, destination: str, source: str
 ) -> None:
     case.server.responses = [httpx.Response(302, headers={"location": destination})]
-    result = case.invoke((URL, OTHER))
+    result = case.invoke((source, OTHER))
     assert result.exit_code == 1, result.output
     assert "redirect refused" in result.output
     assert len(case.server.calls) == 1
-    assert not (case.root / raw_path(URL)).exists()
+    assert not (case.root / raw_path(source)).exists()
     with case.manifest() as manifest:
         assert list(manifest.resources.all()) == []
-        assert manifest.requests.outcomes(URL) == [Outcome.REDIRECTED]
+        assert manifest.requests.outcomes(source) == [Outcome.REDIRECTED]
 
 
 @pytest.mark.parametrize(
@@ -297,23 +488,25 @@ def test_all_redirects_stop_without_contacting_target_or_next_source(
         httpx.ConnectError("synthetic connection"),
     ],
 )
+@pytest.mark.parametrize("region", [Region.JP, Region.EN])
 def test_only_three_attempts_then_continue_next_url(
-    case: Case, failure: httpx.Response | BaseException
+    case: Case, failure: httpx.Response | BaseException, region: Region
 ) -> None:
-    case.server.responses = [failure] * 3 + [ok()]
-    result = case.invoke((URL, OTHER))
+    url, other = (URL, OTHER) if region is Region.JP else (EN_URL, EN_OTHER)
+    case.server.responses = [failure] * 3 + [ok(region)]
+    result = case.invoke((url, other))
     assert result.exit_code == 1, result.output
     assert [str(request.url) for _, request in case.server.calls] == [
-        URL,
-        URL,
-        URL,
-        OTHER,
+        url,
+        url,
+        url,
+        other,
     ]
     assert all(b[0] - a[0] >= 2.5 for a, b in pairwise(case.server.calls))
     with case.manifest() as manifest:
-        assert manifest.resources.get(URL) is None
-        assert manifest.resources.get(OTHER) is not None
-        assert manifest.requests.outcomes(URL) == [Outcome.FAILED] * 3
+        assert manifest.resources.get(url) is None
+        assert manifest.resources.get(other) is not None
+        assert manifest.requests.outcomes(url) == [Outcome.FAILED] * 3
 
 
 def test_success_on_third_attempt(case: Case) -> None:
@@ -323,8 +516,9 @@ def test_success_on_third_attempt(case: Case) -> None:
     assert len(case.server.calls) == 3
 
 
+@pytest.mark.parametrize("source", [URL, EN_URL])
 def test_cli_total_budget_stops_an_adapter_before_a_fourth_request(
-    case: Case, monkeypatch: pytest.MonkeyPatch
+    case: Case, monkeypatch: pytest.MonkeyPatch, source: str
 ) -> None:
     async def probe(
         selection: tuple[str, ...],
@@ -349,13 +543,13 @@ def test_cli_total_budget_stops_an_adapter_before_a_fourth_request(
         return 0
 
     monkeypatch.setattr(cli, "fetch_new", probe)
-    result = case.invoke()
+    result = case.invoke((source,))
     assert result.exit_code == 0, result.output
     assert len(case.server.calls) == 3
-    assert all(str(request.url) == URL for _, request in case.server.calls)
+    assert all(str(request.url) == source for _, request in case.server.calls)
     with case.manifest() as manifest:
-        assert manifest.requests.outcomes(URL) == [Outcome.FAILED] * 3
-        assert manifest.resources.get(URL) is None
+        assert manifest.requests.outcomes(source) == [Outcome.FAILED] * 3
+        assert manifest.resources.get(source) is None
 
 
 @pytest.mark.parametrize(
@@ -395,9 +589,7 @@ def test_invalid_response_records_failure_without_saving_body(
     ids=["absent", "empty", "whitespace"],
 )
 def test_notice_requires_a_nonempty_title(case: Case, title: bytes) -> None:
-    body = (
-        b"<html><head>" + title + b"</head><body><main>Synthetic</main></body></html>"
-    )
+    body = BODY.replace(b"<title>Synthetic notice</title>", title)
     response = Response(1, URL, 200, "text/html", None, None, body)
     with pytest.raises(
         ValidationError, match=r"^HTML lacks a title or announcement body container$"
@@ -416,10 +608,11 @@ def test_notice_requires_a_nonempty_title(case: Case, title: bytes) -> None:
 
 
 @pytest.mark.parametrize("state", ["file", "directory", "symlink", "dangling"])
+@pytest.mark.parametrize("source", [URL, EN_URL])
 def test_any_preexisting_destination_stops_before_network(
-    case: Case, tmp_path: Path, state: str
+    case: Case, tmp_path: Path, state: str, source: str
 ) -> None:
-    path = case.root / raw_path(URL)
+    path = case.root / raw_path(source)
     path.parent.mkdir(parents=True)
     original = b"untracked raw must survive"
     outside = tmp_path / "outside"
@@ -430,7 +623,7 @@ def test_any_preexisting_destination_stops_before_network(
         path.mkdir()
     else:
         path.symlink_to(outside if state == "symlink" else tmp_path / "missing")
-    result = case.invoke((OTHER, URL))
+    result = case.invoke((OTHER, source))
     assert result.exit_code == 1, result.output
     assert case.server.calls == []
     assert outside.read_bytes() == original
@@ -439,24 +632,26 @@ def test_any_preexisting_destination_stops_before_network(
         assert path.read_bytes() == original
 
 
+@pytest.mark.parametrize("source", [URL, EN_URL])
 def test_symlink_parent_inside_data_root_is_rejected_before_requests(
     case: Case,
+    source: str,
 ) -> None:
     redirect = case.root / "alternate-errata"
     redirect.mkdir(parents=True)
     sentinel = redirect / "sentinel"
     sentinel.write_bytes(b"other task must survive")
-    parent = case.root / "raw/jp/errata"
+    parent = case.root / raw_path(source).parent
     parent.parent.mkdir(parents=True)
     parent.symlink_to(redirect, target_is_directory=True)
     with case.manifest() as manifest:
         writer = Writer(case.root, manifest, create_only=True)
         message = re.escape(
-            f"new-only destination traverses a symlink: {raw_path(URL)}"
+            f"new-only destination traverses a symlink: {raw_path(source)}"
         )
         with pytest.raises(UnsafePathError, match=f"^{message}$"):
-            writer.check_new(URL, raw_path(URL))
-    result = case.invoke()
+            writer.check_new(URL, raw_path(source))
+    result = case.invoke((source,))
     assert result.exit_code == 1
     assert case.server.calls == []
     assert list(redirect.iterdir()) == [sentinel]
@@ -514,39 +709,43 @@ def test_file_appearing_during_publication_cannot_be_overwritten(
 @pytest.mark.parametrize(
     "error", [KeyboardInterrupt(), OSError(errno.ENOSPC, "synthetic disk full")]
 )
+@pytest.mark.parametrize("source", [URL, EN_URL])
 def test_interruption_before_publish_leaves_no_partial_raw_or_own_temp(
-    case: Case, monkeypatch: pytest.MonkeyPatch, error: BaseException
+    case: Case, monkeypatch: pytest.MonkeyPatch, error: BaseException, source: str
 ) -> None:
     def fail(_fd: int) -> None:
         raise error
 
     with monkeypatch.context() as failure_patch:
         failure_patch.setattr(os, "fsync", fail)
-        result = case.invoke()
+        result = case.invoke((source,))
     assert result.exit_code != 0
-    assert not (case.root / raw_path(URL)).exists()
+    assert not (case.root / raw_path(source)).exists()
     assert list(case.root.rglob("*.tmp-*")) == []
     with case.manifest() as manifest:
-        assert manifest.resources.get(URL) is None
-        assert manifest.requests.outcomes(URL) == [Outcome.STARTED]
-    again = case.invoke()
+        assert manifest.resources.get(source) is None
+        assert manifest.requests.outcomes(source) == [Outcome.STARTED]
+    again = case.invoke((source,))
     assert again.exit_code == 1
     assert len(case.server.calls) == 1
 
 
+@pytest.mark.parametrize("source", [URL, EN_URL])
 def test_interruption_after_publish_preserves_complete_unregistered_raw(
-    case: Case, monkeypatch: pytest.MonkeyPatch
+    case: Case, monkeypatch: pytest.MonkeyPatch, source: str
 ) -> None:
     def fail_record(*_args: object) -> None:
         raise KeyboardInterrupt
 
     monkeypatch.setattr(Writer, "_record", fail_record)
-    result = case.invoke()
+    result = case.invoke((source,))
     assert result.exit_code != 0
-    assert decompress((case.root / raw_path(URL)).read_bytes()) == BODY
+    assert decompress((case.root / raw_path(source)).read_bytes()) == notice_body(
+        url_region(source)
+    )
     assert list(case.root.rglob("*.tmp-*")) == []
     with case.manifest() as manifest:
-        assert manifest.resources.get(URL) is None
+        assert manifest.resources.get(source) is None
 
 
 def test_unrelated_interrupted_requests_are_not_recovered(case: Case) -> None:
@@ -597,7 +796,10 @@ def test_create_only_writer_cannot_update_existing_resource(case: Case) -> None:
             writer.check_new(URL, raw_path(URL))
 
 
-async def test_fetch_new_rejects_an_ordinary_writer_before_requests(case: Case) -> None:
+@pytest.mark.parametrize("source", [URL, EN_URL])
+async def test_fetch_new_rejects_an_ordinary_writer_before_requests(
+    case: Case, source: str
+) -> None:
     reports: list[ErrataResult] = []
     with case.manifest() as manifest:
         async with httpx.AsyncClient(
@@ -615,15 +817,15 @@ async def test_fetch_new_rejects_an_ordinary_writer_before_requests(case: Case) 
                 StopCrawlError, match=r"^errata fetch requires a create-only writer$"
             ):
                 await fetch_new(
-                    (URL,),
+                    (source,),
                     client,
                     Writer(case.root, manifest),
                     CircuitBreaker(5),
                     reports.append,
                 )
             assert client.requests_sent == 0
-            assert manifest.requests.outcomes(URL) == []
-            assert manifest.resources.get(URL) is None
+            assert manifest.requests.outcomes(source) == []
+            assert manifest.resources.get(source) is None
     assert case.server.calls == []
     assert reports == []
     assert not (case.root / "raw").exists()

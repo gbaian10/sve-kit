@@ -213,11 +213,11 @@ DryRunOption = Annotated[
 @crawl_app.command("errata-new")
 def crawl_errata_new(
     urls: Annotated[
-        Path, typer.Option(help="Reviewed JSON array of exact JP errata URLs.")
+        Path, typer.Option(help="Reviewed JSON array of exact JP/EN errata URLs.")
     ],
     dry_run: DryRunOption = False,
 ) -> None:
-    """Add JP errata bodies only; no overwrites, redirects, recovery, or archive changes."""
+    """Add JP/EN errata bodies; no overwrites, redirects, recovery, or archive changes."""
     try:
         selection = load_urls(urls)
         settings = _settings()
