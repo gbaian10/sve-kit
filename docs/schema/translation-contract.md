@@ -6,7 +6,7 @@
 
 **使用者已核可（2026-10-01）**：繁中翻譯以日文卡文為來源；日英身分已確認同卡一律用日文。只有兩區版本明顯不同、或英文版獨有的卡才用英文。其後同日核可的顯示與抽查方式如下。
 
-**既定限制**：identity confirmed 與 region_text_review aligned 分開；正式 aligned 共用須核對目前兩端、確認面對應且相關 scope 無未解 divergence；下述提前顯示是明示例外，不放行 DSL／機制或官方 counterpart。翻譯最低 sampled/confirmed；機器翻譯審過仍保留 machine。已採納的同概念數位卡名優先 svwb 再 sv1，same_character 或同字串不足以認定同概念。本站效果翻譯為 unofficial，SVE 官方 counterpart 則是有證據的官方原文選用。
+**既定限制**：identity confirmed 與 region_text_review aligned 分開；正式 aligned 共用須核對目前兩端、確認面對應且相關 scope 無未解 divergence；下述提前顯示是明示例外，不放行 DSL／機制或官方 counterpart。翻譯最低 sampled/confirmed；機器翻譯審過仍保留 machine。官方數位卡名按獨立核可的名字政策或自己有效真人同卡證據取詞，兩者共用 sv1→svwb；same_character 或同字串仍不足以認定同概念。名字政策及 same_name 瀏覽政策各自成檔核可，依 [數位名字政策](digital-name-policy.md)，不把規則連結當真人同卡證據。本站效果翻譯為 unofficial，SVE 官方 counterpart 則是有證據的官方原文選用。
 
 **技術處理**：缺 JP 來源只列缺來源，不能據此聲稱英文獨有。英文來源例外須有 confirmed_none 的查核範圍/as_of，或 confirmed divergence 所指的受影響欄位；未受影響欄沿 JP。這是核可來源政策的實作判定，不冒稱使用者另行核可了每個判定細節。
 
@@ -163,7 +163,7 @@ ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital
 
 owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派列失效、不搬到新字串；新原文無歧義則回 default 自動重建，有歧義才等新指派。無例外時選各模板最高已採納譯本與有效術語 choice；pin 是已採納的明示例外。普通機械匹配只選當前有效且可無歧義匹配的模板，superseded 模板保留來源歷史；新分叉未能唯一匹配即列人工失敗清單，不任取 ID 最大者。
 
-名稱的預設推導以 `(來源語言,完整 exact 名稱)` 唯一對到已採納 card_name 概念；不需逐卡關聯紀錄。無概念、多概念或 owner 官方名稱與概念譯名衝突時回原文等人工；精確規則與例外依 [卡名概念關聯契約 §3](card-name-concepts.md#3-名稱-owner-的預設綁定)。
+名稱的概念推導以 `(來源語言,完整 exact 名稱)` 唯一對到已採納 card_name 概念；不需逐卡關聯紀錄。直接名字可另依有效 [數位名字政策](digital-name-policy.md) 取詞，無概念不阻擋該名字；概念／效果引用仍依 [卡名概念關聯契約 §3](card-name-concepts.md#3-名稱-owner-的預設綁定) 驗自己的語義。直接名稱依真人實看選詞、政策官名、必要的自己真人同卡官名、其他合法詞、原文的順序；單純譯名字串差異選勝出詞並報差異，不回原文。真正同字異義、錯來源／指派仍消歧或拒絕；sampled 非樣本不算本人實看，保持真實 origin。
 
 **binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
 
@@ -182,7 +182,7 @@ owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派
 | glossary_term | 人工永久 `term:<concept_key>`，見 §5 |
 | face_semantics | `sem:`＋H(`{recipe:semantics-v1,face_id,region,rule_text,rule_sections,normalizer_version}`)；exact 內容與有序 sections，語義引用閉包另進 rule bundle |
 
-推導 translation.revision 為同一完整 translation hash 的前 13 hex 轉非負整數（52 bit，符合 UInt）；它是穩定內容版本鍵，不表示時間順序。同 `(context_id,target_lang,revision)` 撞不同完整 translation.id 即停止；人工 template_translation.revision 仍是只增修訂序號。translated_by 記釘住的 renderer／人工譯本作者追溯，translated_at 取依賴已採納譯本／核對的最晚時間，不用執行當下時間。生成效果譯文若任一語義模板／選詞來自 machine，origin=machine，否則為 project，authority=unofficial；單一已採納名稱／label 原樣取詞時保留該詞 origin，digital_official 僅對有同概念證據的數位官方名稱／標籤。counterpart 固定 official_sve/sve_official。tokens 首版一律 null：目前沒有獨立公開翻譯 token 契約，不新增假引用。
+推導 translation.revision 為同一完整 translation hash 的前 13 hex 轉非負整數（52 bit，符合 UInt）；它是穩定內容版本鍵，不表示時間順序。同 `(context_id,target_lang,revision)` 撞不同完整 translation.id 即停止；人工 template_translation.revision 仍是只增修訂序號。translated_by 記釘住的 renderer／人工譯本作者追溯，translated_at 取依賴已採納譯本／核對的最晚時間，不用執行當下時間。生成效果譯文若任一語義模板／選詞來自 machine，origin=machine，否則為 project，authority=unofficial；單一已採納名稱／label 原樣取詞時保留該詞 origin，digital_official 對有效獨立名字政策或真人同概念證據取得的數位官方名稱；標籤仍驗原同概念證據。名字政策與 same_name 不授予效果或 glossary 官方概念權威。counterpart 固定 official_sve/sve_official。tokens 首版一律 null：目前沒有獨立公開翻譯 token 契約，不新增假引用。
 
 公開 translation.id 目前沿上述完整 hash 配方；#53 容量驗收時評估縮短，本契約不先改 ID 配方。
 
@@ -293,3 +293,11 @@ rule_hash、references 與 rule-bundle-v2 recipe 沿 build-db §14；unknown 段
 | V39 | 未做人工樣本就標 sampled；首輪收據缺失／政策 hash 錯／有分歧仍走 approved_policy；審過 machine 改 project | 各自拒絕；長尾無分歧且收據完整可 confirmed，當批真人樣本為 0 仍可採納 |
 | V40 | JP 2 段、EN 3 段，按相同 ordinal 提前共用或覆蓋 effect 全文 | 受影響欄不得 shared_jp_unchecked，缺譯回 EN 原文；獨立 name 不受阻 |
 | V41 | fresh confirmed_none 無額外 source_exception；改成 stale／已有 JP 對應卻沿用 EN-only | 前者可推導英文獨有來源，後兩者重新判定，不重複要求人工採納 |
+
+### 9.1 獨立名字與同名連結政策的接線
+
+新政策入口、核可文件／操作政策兩種 hash、真人與規則界線依 [數位名字政策](digital-name-policy.md)。
+不混入既有 glossary／模板封套或39分片，不借模板首輪樣本、wording核可或委託事件。
+直接政策名字的 render-v1 詞彙依賴不含後補概念、owner、政策／清單版本或整批目錄；完整來源與採納留F1。
+真正效果引用依賴自己的概念／choice，名字先可用不表示整段引用已完整；#53接同一resolver，#196仍守原委託。
+政策核可與樣本數分開報，coverage不採納，未知保持未知。

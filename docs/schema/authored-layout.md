@@ -20,10 +20,11 @@
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/index.yaml`、`identity-transitions/<sequence>.yaml`，見 §12 |
 | 待審技術契約 | Standard 構築／禁限／角色與必要 CR 引用 | `construction-adoptions/index.yaml`、`construction-adoptions/<area>/<region>/standard/<sequence>.yaml`，roles／cr 為 `<area>/<region>/<sequence>.yaml` 整區共用；見[構築採納契約](construction-adoption.md)，尚無正式採納資料 |
 | 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
-| 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，尚無入口實作或遷入資料 |
+| 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，真人link入口已實作、尚無逐卡正式遷入；coverage未實作 |
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
+| 定案（技術契約） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`、政策／核可收據配對、`digital-name-exclusions/`；依[數位名字政策](digital-name-policy.md)，實際政策核可不是真人同卡樣本，未支援完整能力不得套用 |
 | 定案（技術契約） | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`、`image-crops/receipts/<receipt_id>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
@@ -207,7 +208,7 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 確定性項目全自動：官方來源欄位、`face_current` 無衝突預設、`rules_name`、`deck_role`、route、default printing、int 配號、模板套用、projection/coverage 報告。
 
-人處理：新句型/語義衝突、JP 身分歧義、數位/異畫/標誌批次抽查、新卡名/譯文抽查、EN 身分逐筆確認、必要裁定與手動 override。正常 JP 包不要求為每張卡寫 current/default/route/decision 四份檔；封套＋工具結果可一次審閱。
+人處理：新句型/語義衝突、JP 身分歧義、非規則數位/異畫/標誌批次抽查；獨立核可同名規則按完整條件產卡層same_name、不造真人樣本、新卡名/譯文抽查、EN 身分逐筆確認、必要裁定與手動 override。正常 JP 包不要求為每張卡寫 current/default/route/decision 四份檔；封套＋工具結果可一次審閱。
 
 度量不是把人工語義壓到固定數量：每次報 `generated_rows`、`explicit_overrides`、`sampled_rows`、`individually_checked_rows`、新句型數、人工作業時間。200 個版次的普通 JP 包，以「0 筆手寫 route/current/default/int decision、策展按包批次、只有例外覆寫」為驗收。可把 `explicit_overrides`≤新卡數當觀察目標，超出要找自動化缺口，但不可因此略掉有必要的確認。EN 對應的全筆檢查單獨計，不能用 JP 指標減掉。
 
@@ -607,3 +608,10 @@ confirmed_none／reskin 續版及有效投影順序見 [身分修復與決定續
 後續實作完成前既有工具的拒絕行為不變。
 此獨立入口僅處理卡片 registry，不授權 §10 商品內容、§11 商品身分誤配的續版；
 §9 表記採納仍使用其已核可的獨立鏈。
+
+## 13. 數位名字與同名瀏覽政策
+
+[digital-name-policy-v1](digital-name-policy.md) 沿§9.5政策／核可配對與不可變pin，
+但兩政策各自有真實全文核可事件，不能借wording／glossary／模板事件。
+卡名取詞與同名瀏覽不混入身分／真人digital-links封套，不記官方原文或平行卡名詞庫。
+政策資料、收據與清單存在不表示新loader、正式build或發布已驗收；格式未知拒絕，coverage首批不採納。

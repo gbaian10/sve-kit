@@ -273,3 +273,8 @@ authored_by／authored_at 是此次工具與時間，不改譯本 machine origin
 | P23 | 已看分歧的兩個 outcome 或四欄 decision_ref 不一致各一次 | 各自拒絕，以 sampled_items 為主也不能忽略矛盾 |
 
 政策的實際支援、真實頻率／來源完整性與採納量各自驗收；未有完整 loader／validator 不宣稱本格式可正式套用。
+
+## 與名字政策的授權邊界
+
+獨立[數位名字政策](digital-name-policy.md)及same_name瀏覽不授權effect／flavor定義或譯本、首輪抽查／概念／語音。
+本契約原封閉scope／kind、樣本與核可事件要求不變，不能因共用context借用另一份政策。
