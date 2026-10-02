@@ -1,12 +1,14 @@
 """Replay signed synthetic glossary choices from a shared sealed API fixture."""
 
 import shutil
+import sqlite3
 from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.build_db.database import Row
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.frozen_sources import FrozenSources
@@ -15,22 +17,29 @@ from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.translations.digital import configuration, import_digital
-from sve_carddb.translations.importer import Inputs, import_glossary, validate_choice
-from sve_carddb.translations.models import ChoiceRecord
-from sve_carddb.translations.names import populate_name_translation
+from sve_carddb.translations.digital import _phases, configuration, import_digital
+from sve_carddb.translations.importer import (
+    Inputs,
+    _digital_evidence,
+    _digital_location,
+    import_glossary,
+    validate_choice,
+)
+from sve_carddb.translations.models import ChoiceRecord, DigitalName
+from sve_carddb.translations.names import _proof, populate_name_translation
 from sve_carddb.translations.sources import CODE_PATH, RUNTIME, Sources
 
 from .adoption_fixtures import commit, git
+from .database_fixtures import DatabaseTemplate
 from .test_source_archive import _put, _resource, _store
 from .translation_fixtures import choice, envelope, template, term, write
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
+    from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import Source
-
-    from .database_fixtures import DatabaseTemplate
+    from sve_carddb.source_archive import Descriptor
 
 
 @dataclass(frozen=True)
@@ -311,7 +320,20 @@ def test_source_and_concept_guards_are_independent(
         elif fault == "dictionary_key":
             evidence["entry_key"] = "2"
     invalid = ChoiceRecord.model_validate_json(canonical(content))
-    with importer_template.copy() as db, pytest.raises((ValueError, ArchiveError)):
+    messages = {
+        "missing_version": "^Source version is absent from pinned batch$",
+        "field_hash": "^Evidence must locate exact hash-verified text$",
+        "pointer": "^Evidence JSON Pointer is absent$",
+        "target_language": "^Concept evidence language/exact target mismatch$",
+        "dictionary_key": "^Official dictionary concept/key mismatch$",
+        "same_concept": "^Official choice lacks same-concept evidence$",
+        "provider": "^Official origin differs from evidence provider$",
+        "missing_runtime": "^Translation runtime/dependency closure cannot be replayed$",
+    }
+    with (
+        importer_template.copy() as db,
+        pytest.raises((ValueError, ArchiveError), match=messages[fault]),
+    ):
         validate_choice(
             invalid, original="合成甲", sources=frozen.sources(build=build), db=db
         )
@@ -399,7 +421,14 @@ def test_digital_name_requires_exact_adopted_face(
             assert selected is not None
             assert selected[0] == "Synthetic cht"
         else:
-            with pytest.raises(ValueError, match=r"Same-character|locator"):
+            with pytest.raises(
+                ValueError,
+                match={
+                    "same_character": "^Same-character/name-only is not same-concept name evidence$",
+                    "wrong_face": "^Same-character/name-only is not same-concept name evidence$",
+                    "alias_field": "^Digital name locator points to another card or field$",
+                }[fault],
+            ):
                 validate_choice(
                     record, original="Synthetic ja", sources=frozen.sources(), db=db
                 )
@@ -455,7 +484,14 @@ def test_effect_excerpt_has_exact_role_and_concept(
             assert selected is not None
             assert selected[0] == "合成乙"
         else:
-            with pytest.raises(ValueError, match=r"field|Japanese term|span"):
+            with pytest.raises(
+                ValueError,
+                match={
+                    "dictionary_field": "^Effect-term evidence must locate an effect field$",
+                    "original": "^Concept evidence differs from adopted Japanese term$",
+                    "outside_span": "^Invalid exact source span$",
+                }[fault],
+            ):
                 validate_choice(
                     record,
                     original="其他合成" if fault == "original" else "合成甲",
@@ -606,3 +642,530 @@ def test_name_translation_preserves_origin_and_stable_revision(
                 )
                 assert "lang=cht" in str(source["url"])
                 assert not db.has_table("translation_selection")
+
+
+def changed_build(frozen: Fixture, config: dict[str, JsonValue]) -> BuildContext:
+    return BuildContext.from_inputs(
+        frozen.program,
+        {name: (frozen.root / name).read_bytes() for name in RUNTIME},
+        config,
+    )
+
+
+@pytest.mark.parametrize(
+    "fault", ["revision", "bytes", "configuration", "japanese", "vocabulary"]
+)
+def test_immutable_authored_and_atomic_projection(
+    frozen: Fixture, importer_template: DatabaseTemplate, tmp_path: Path, fault: str
+) -> None:
+    repository = tmp_path / "repository"
+    shutil.copytree(frozen.root, repository)
+    inputs = Inputs(repository / "authored", repository, frozen.authored)
+    config = object_value(parse(frozen.build.configuration.encode()))
+    message = ""
+    exception: type[Exception] = ValueError
+    if fault == "revision":
+        inputs = replace(inputs, authored_revision=frozen.authored[:7])
+        message = "Translation authored revision must be a full Git SHA"
+    elif fault == "bytes":
+        index = repository / "authored/translations/index.yaml"
+        index.write_bytes(index.read_bytes() + b"\n")
+        message = "Translation bytes differ from immutable authored revision"
+    elif fault == "configuration":
+        config.pop("translation_authored")
+        message = "Build configuration does not pin translation authored bytes"
+    else:
+        snapshot = inputs.load()
+        shards = {
+            name: object_value(parse(content)) for name, _, content in snapshot.shards
+        }
+        if fault == "japanese":
+            name = "translations/glossary/concepts/001.yaml"
+            record = object_value(array(shards[name]["records"])[0])
+            object_value(record["data"])["source_ref"] = frozen.refs[1].model_dump(
+                mode="json"
+            )
+            shards[name] = envelope([record])
+            message = "Glossary concept requires exact Japanese source"
+        else:
+            record = choice()
+            record["kind"] = "vocabulary_choice"
+            record["filing_key"] = "vocabulary"
+            record["record_key"] = canonical(
+                ["vocabulary_choice", "class", "elf", "zh-Hant", 1]
+            ).decode()
+            data = object_value(record["data"])
+            data.pop("term_id")
+            data.update({"vocabulary_kind": "class", "vocabulary_code": "elf"})
+            shards["translations/glossary/vocabulary/001.yaml"] = envelope([record])
+            exception = TypeError
+            message = (
+                "Vocabulary label projection belongs to #53; glossary import is atomic"
+            )
+        write(repository / "authored", shards)
+        inputs = replace(inputs, authored_revision=commit(repository))
+        config.update(inputs.configuration())
+    with importer_template.copy() as db:
+        before = {name: db.rows(name) for name in db._tables}
+        with pytest.raises(exception, match="^" + message + "$"):
+            import_glossary(
+                db,
+                inputs,
+                build=changed_build(frozen, config),
+                stores={"test-store": frozen.store},
+            )
+        assert {name: db.rows(name) for name in db._tables} == before
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("language", "Choice source language mismatch"),
+        ("outside_evidence", "Official source value is outside its concept evidence"),
+        ("japanese_evidence", "Concept evidence language/exact target mismatch"),
+    ],
+)
+def test_choice_source_matches_adopted_evidence(
+    frozen: Fixture, importer_template: DatabaseTemplate, fault: str, message: str
+) -> None:
+    record = next(
+        r
+        for r, _ in Inputs(frozen.root / "authored", frozen.root, frozen.authored)
+        .load()
+        .records()
+        if isinstance(r, ChoiceRecord)
+    )
+    content = record.model_dump(mode="json")
+    data = object_value(content["data"])
+    ref = frozen.refs[1]
+    if fault == "language":
+        ref = frozen.refs[0]
+    elif fault == "outside_evidence":
+        # The same target word in another exact field does not prove this value's concept.
+        ref = ref.model_copy(
+            update={
+                "locator": "/data/card_details/22345678/common/skill_text",
+                "text_hash": digest("x合成乙x".encode()),
+            }
+        )
+    else:
+        object_value(array(data["concept_evidence"])[0])["jp_ref"] = frozen.refs[
+            1
+        ].model_dump(mode="json")
+    data["value"] = {
+        "kind": "source",
+        "source_ref": ref.model_dump(mode="json"),
+        "span": {"start": 1, "end": 4} if fault == "outside_evidence" else None,
+    }
+    with (
+        importer_template.copy() as db,
+        pytest.raises(ValueError, match="^" + message + "$"),
+    ):
+        validate_choice(
+            ChoiceRecord.model_validate_json(canonical(content)),
+            original="合成甲",
+            sources=frozen.sources(),
+            db=db,
+        )
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("char_type", "Invalid sv1 character type"),
+        ("extra", "Unrecognized extra digital face requires parser verification"),
+        ("evolved", "Invalid svwb evolved face"),
+    ],
+)
+def test_recognized_face_layouts_only(fault: str, message: str) -> None:
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        _phases(
+            "sv1" if fault == "char_type" else "svwb",
+            {"char_type": True},
+            {"super_evo": {}}
+            if fault == "extra"
+            else {"evo": "synthetic invalid face"},
+        )
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("pins", "Build configuration does not pin digital inputs"),
+        ("provider", "Digital closure requires frozen API sources"),
+        ("id_type", "Digital card lacks an official integer ID"),
+        ("conflict", "Conflicting frozen digital card versions"),
+        ("width", "Digital official ID width mismatch"),
+        ("missing", "Requested digital card has no frozen Japanese source"),
+        ("parent_missing", "Requested digital card has no frozen Japanese source"),
+        ("parent_type", "Invalid digital parent ID"),
+        ("token", "Invalid digital token flag"),
+        ("localized_faces", "Digital localized face closure mismatch"),
+    ],
+)
+def test_digital_input_closure_refusals(  # ruff: ignore[complex-structure] -- mutate one API projection while preserving all lower frozen checks
+    frozen: Fixture,
+    importer_template: DatabaseTemplate,
+    monkeypatch: pytest.MonkeyPatch,
+    fault: str,
+    message: str,
+) -> None:
+    sources = frozen.sources()
+    refs = frozen.refs
+    targets = (("svwb", "22345678"),)
+    if fault == "width":
+        targets = (("svwb", "2234567"),)
+    elif fault == "missing":
+        targets = (("svwb", "32345678"),)
+    elif fault == "provider":
+        refs = (refs[0].model_copy(update={"parser": "translation-jp-v1"}),)
+    elif fault == "conflict":
+        refs = (
+            *refs,
+            refs[0].model_copy(update={"locator": "/synthetic-conflicting-version"}),
+        )
+    config = object_value(parse(frozen.build.configuration.encode()))
+    config.update(configuration(refs, targets))
+    if fault == "pins":
+        config.pop("digital_evidence")
+    sources.build = changed_build(frozen, config)
+    document = sources.document
+
+    def projected(ref: SourceRef) -> tuple[str, JsonValue, Source]:
+        real = ref.model_copy(update={"parser": "translation-svwb-v1"})
+        lang, original, source = document(real)
+        value = parse(canonical(original))
+        item = object_value(object_value(object_value(value)["data"])["card_details"])[
+            "22345678"
+        ]
+        common = object_value(object_value(item)["common"])
+        if fault == "id_type":
+            common["card_id"] = "22345678"
+        elif fault == "conflict" and ref.locator == "/synthetic-conflicting-version":
+            common["name"] = "Conflicting synthetic version"
+        elif fault == "parent_type":
+            common["base_card_id"] = "32345678"
+        elif fault == "parent_missing":
+            common["original_card_id"] = 32345678
+        elif fault == "token":
+            common["is_token"] = 1
+        elif fault == "localized_faces" and lang == "zh-Hant":
+            object_value(item)["evo"] = []
+        return lang, value, source
+
+    monkeypatch.setattr(sources, "document", projected)
+    with importer_template.copy() as db:
+        with pytest.raises(ValueError, match="^" + message + "$"), db.transaction():
+            import_digital(db, sources, refs, targets)
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("recipe", "Unsupported translation source recipe"),
+        ("provider", "Translation recipe/provider mismatch"),
+        ("descriptor_provider", "Frozen evidence provider/kind mismatch"),
+        ("descriptor_kind", "Frozen evidence provider/kind mismatch"),
+    ],
+)
+def test_source_recipe_and_descriptor_refusals(
+    frozen: Fixture, monkeypatch: pytest.MonkeyPatch, fault: str, message: str
+) -> None:
+    config = object_value(parse(frozen.build.configuration.encode()))
+    recipe = object_value(
+        object_value(config["translation_recipes"])["translation-svwb-v1"]
+    )
+    if fault == "recipe":
+        recipe["version"] = "unsupported-v1"
+    elif fault == "provider":
+        recipe["config"] = {"provider": "sv1"}
+        recipe["config_hash"] = digest(canonical(recipe["config"]))
+    sources = frozen.sources(build=changed_build(frozen, config))
+    if fault.startswith("descriptor"):
+        read = FrozenSources.read
+
+        def inconsistent_descriptor(
+            self: FrozenSources, version: str, *, parser_version: str
+        ) -> tuple[Source, bytes, Descriptor]:
+            source, raw, descriptor = read(self, version, parser_version=parser_version)
+            descriptor = descriptor.model_copy(
+                update={"provider": "jp"}
+                if fault == "descriptor_provider"
+                else {"kind": "card"}
+            )
+            return source, raw, descriptor
+
+        monkeypatch.setattr(FrozenSources, "read", inconsistent_descriptor)
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        sources.document(frozen.refs[0])
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("provider", "Digital name locator provider mismatch"),
+        ("field", "Digital name locator must reference a card name"),
+        ("card", "Digital name locator points to another card"),
+        ("decision", "Digital same-concept decision is unadopted"),
+        ("names", "Digital name evidence does not locate the adopted face names"),
+    ],
+)
+def test_digital_concept_location_guards(
+    frozen: Fixture,
+    importer_template: DatabaseTemplate,
+    monkeypatch: pytest.MonkeyPatch,
+    fault: str,
+    message: str,
+) -> None:
+    ref = frozen.refs[0]
+    face = "sv1:normal" if fault in {"provider", "field", "card"} else "svwb:normal"
+    evidence = DigitalName(
+        kind="digital_name",
+        digital_face_id=face,
+        sve_owner="front",
+        jp_ref=ref,
+        target_ref=frozen.refs[1],
+        decision_id="absent" if fault == "decision" else "decision",
+    )
+    sources = frozen.sources()
+    if fault in {"field", "card"}:
+        source = sources.document(ref)[2]
+        ref = ref.model_copy(
+            update={
+                "parser": "translation-sv1-v1",
+                "locator": "/data/cards/0/alias"
+                if fault == "field"
+                else "/data/cards/0/card_name",
+            }
+        )
+        monkeypatch.setattr(
+            sources,
+            "document",
+            lambda _ref: (
+                "ja",
+                {"data": {"cards": [{"card_id": 987654321, "card_name": "Synthetic"}]}},
+                source,
+            ),
+        )
+    with (  # ruff: ignore[pytest-raises-with-multiple-statements] -- test either independent location or concept boundary
+        importer_template.copy() as db,
+        pytest.raises(ValueError, match="^" + message + "$"),
+    ):
+        if fault in {"decision", "names"}:
+            _digital_evidence(
+                evidence, "Wrong synthetic name", "svwb:normal zh-Hant", "zh-Hant", db
+            )
+        else:
+            _digital_location(evidence, ref, sources, db)
+
+
+@pytest.fixture(scope="module")
+def name_template(
+    frozen: Fixture, importer_template: DatabaseTemplate
+) -> DatabaseTemplate:
+    with importer_template.copy() as db:
+        with db.transaction():
+            for identifier in ("svwb:normal", "sv1:normal"):
+                db.delete("digital_link", {"id": identifier})
+            import_digital(db, frozen.sources(), frozen.refs, (("svwb", "22345678"),))
+            db.insert(
+                "digital_link",
+                {
+                    "id": "new-link",
+                    "card_id": "card",
+                    "face_id": "front",
+                    "digital_card_id": "digital:svwb:22345678",
+                    "digital_face_id": "digital:svwb:22345678:normal",
+                    "relation": "same_card",
+                    "decision_id": "decision",
+                },
+            )
+            original = TextInterner(db).intern(
+                LocalizedText(lang="ja", text="Original synthetic name")
+            )
+            db.insert(
+                "vocabulary",
+                {
+                    "kind": "type",
+                    "code": "follower",
+                    "label_unit_id": original,
+                    "active": True,
+                },
+            )
+            db.insert(
+                "face_revision",
+                {
+                    "id": "revision",
+                    "face_id": "front",
+                    "region": "jp",
+                    "revision": 1,
+                    "temporal_status": "unknown",
+                    "observed_at": "2026-10-02T00:00:00Z",
+                    "change_kind": "initial",
+                    "name_unit_id": original,
+                    "effect_unit_id": original,
+                    "type_code": "follower",
+                    "source_id": "source",
+                },
+            )
+        return DatabaseTemplate(importer_template.schema, db._connection.serialize())
+
+
+def add_same_name_owner(db: Database) -> None:
+    db.insert(
+        "card",
+        {
+            "id": "other-card",
+            "layout": "single",
+            "identity_state": "provisional",
+            "home_set_id": "synthetic",
+        },
+    )
+    db.insert(
+        "face",
+        {"id": "other-face", "card_id": "other-card", "ordinal": 0, "side": "front"},
+    )
+    revision = dict(db.rows("face_revision")[0].values)
+    revision.update({"id": "other-revision", "face_id": "other-face"})
+    db.insert("face_revision", revision)
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        (
+            "region",
+            "Name evidence import requires JP to Traditional Chinese; regional selection belongs to #53",
+        ),
+        (
+            "target_language",
+            "Name evidence import requires JP to Traditional Chinese; regional selection belongs to #53",
+        ),
+        ("source_language", "JP name source language mismatch"),
+        ("source_hash", "Source name exact hash mismatch"),
+        ("review_date", "Adopted name decision lacks its actual review date"),
+        ("ambiguous", "Ambiguous source name requires adopted context assignment"),
+        ("empty_links", "Selected digital name lacks an eligible owner link"),
+    ],
+)
+def test_name_materialization_refusals(
+    frozen: Fixture,
+    name_template: DatabaseTemplate,
+    monkeypatch: pytest.MonkeyPatch,
+    fault: str,
+    message: str,
+) -> None:
+    with name_template.copy() as db:
+        with (  # ruff: ignore[pytest-raises-with-multiple-statements] -- check pre-commit guards on one corrupt owner graph, then roll back
+            pytest.raises(ValueError, match="^" + message + "$"),
+            db.transaction(),
+        ):
+            revision = db.rows("face_revision")[0].values
+            if fault == "region":
+                db.update("face_revision", {"id": "revision"}, {"region": "en"})
+            elif fault == "source_language":
+                db.update("text_unit", {"id": revision["name_unit_id"]}, {"lang": "en"})
+            elif fault == "source_hash":
+                db.update(
+                    "text_unit",
+                    {"id": revision["name_unit_id"]},
+                    {"content_hash": digest(b"wrong")},
+                )
+            elif fault == "review_date":
+                # SQLite normally rejects this; isolate the defensive reader guard.
+                rows = db.rows
+
+                def missing_date(name: str) -> tuple[Row, ...]:
+                    return tuple(
+                        Row(row.table, {**row.values, "reviewed_at": None})
+                        if name == "decision" and row.values["id"] == "decision"
+                        else row
+                        for row in rows(name)
+                    )
+
+                monkeypatch.setattr(db, "rows", missing_date)
+            elif fault == "ambiguous":
+                add_same_name_owner(db)
+                db.insert(
+                    "digital_link",
+                    {
+                        "id": "other-link",
+                        "card_id": "other-card",
+                        "face_id": "other-face",
+                        "digital_card_id": "svwb",
+                        "digital_face_id": "svwb:evolved",
+                        "relation": "same_card",
+                        "decision_id": "decision",
+                    },
+                )
+            elif fault == "empty_links":
+                # A stale/inconsistent selector must fail explicitly at this boundary.
+                monkeypatch.setattr(
+                    "sve_carddb.translations.names.select_name",
+                    lambda *_args, **_kwargs: (
+                        "Synthetic cht",
+                        "official_sv1",
+                        "decision",
+                    ),
+                )
+            populate_name_translation(
+                db,
+                frozen.sources(),
+                revision_id="revision",
+                lang="en" if fault == "target_language" else "zh-Hant",
+            )
+
+
+@pytest.mark.parametrize(
+    ("phase", "lang", "message"),
+    [
+        ("super", "zh-Hant", "Selected digital face is absent from frozen source"),
+        ("normal", "en", "Selected digital name lacks frozen language evidence"),
+    ],
+)
+def test_name_has_frozen_phase_and_language(
+    frozen: Fixture, phase: str, lang: str, message: str
+) -> None:
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        _proof(frozen.sources(), "svwb", "22345678", phase, lang, "Synthetic cht")
+
+
+def test_context_hit_does_not_adopt_another_same_name_owner(
+    frozen: Fixture, name_template: DatabaseTemplate
+) -> None:
+    with name_template.copy() as db, db.transaction():
+        add_same_name_owner(db)
+        revisions = {r.values["id"]: r.values for r in db.rows("face_revision")}
+        assert (
+            revisions["revision"]["name_unit_id"]
+            == revisions["other-revision"]["name_unit_id"]
+        )
+        sources = frozen.sources()
+        adopted = populate_name_translation(
+            db, sources, revision_id="revision", lang="zh-Hant"
+        )
+        assert adopted is not None
+        context = db.rows("translation_context")[0].values
+        assert context["source_unit_id"] == revisions["other-revision"]["name_unit_id"]
+        before = db.rows("translation")
+        assert (
+            populate_name_translation(
+                db, sources, revision_id="other-revision", lang="zh-Hant"
+            )
+            is None
+        )
+        assert db.rows("translation") == before
+        assert len(db.rows("translation_context")) == 1
+
+
+def test_adopted_review_date_is_required_before_name_reader(
+    name_template: DatabaseTemplate,
+) -> None:
+    with name_template.copy() as db:
+        with (
+            pytest.raises(
+                sqlite3.IntegrityError, match="CHECK constraint failed: state NOT IN"
+            ),
+            db.transaction(),
+        ):
+            db.update("decision", {"id": "decision"}, {"reviewed_at": None})

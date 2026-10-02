@@ -36,6 +36,14 @@ translation. Ambiguous source names require an adopted context assignment. No
 `current` or wording-ready filter discards published identity; callers compose with
 `TextPlan.publication_identity()`, including pending wording and errata observations.
 
+Context IDs describe source text and semantic variants, not owner eligibility.
+A context hit does not make a digital translation usable for another card or face.
+The #53 use/binding layer must revalidate the owner's adopted same-card, exact-face
+link and frozen name evidence (through `populate_name_translation()`), then bind
+only its returned translation ID to that owner. It must not select official names
+by context alone or decode ownership from a render hash. Same-name owners without
+an eligible link return no translation even when that context already has one.
+
 Template rendering, regional source exceptions, binding/use, selection, public
 export and English term adoption belong to later work. Vocabulary choices are
 recognized by the strict wire/loader but glossary population rejects them until

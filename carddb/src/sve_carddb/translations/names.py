@@ -119,6 +119,8 @@ def populate_name_translation(  # ruff: ignore[too-many-locals] -- owner, raw pr
         and cards[r.values["digital_card_id"]]["game"]
         == origin.removeprefix("official_")
     ]
+    if not links:
+        raise ValueError("Selected digital name lacks an eligible owner link")
     link = min(links, key=lambda row: str(row["id"]))
     card = cards[link["digital_card_id"]]
     digital_faces = {r.values["id"]: r.values for r in db.rows("digital_face")}

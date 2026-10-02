@@ -5,14 +5,13 @@ import sqlite3
 from typing import TYPE_CHECKING
 
 import pytest
-from pydantic import ValidationError
 
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.digital import select_name
 from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.models import Span
+from sve_carddb.translations.models import Decision, Span
 from sve_carddb.translations.sources import excerpt, pointer, project
 
 from .translation_fixtures import choice, envelope, template, term, write
@@ -156,7 +155,7 @@ def test_every_unindexed_file_is_rejected(
         "format",
     ],
 )
-def test_independent_glossary_boundary(  # ruff: ignore[complex-structure,too-many-branches] -- each signed guard is mutated independently
+def test_independent_glossary_boundary(  # ruff: ignore[complex-structure,too-many-branches,too-many-statements] -- each signed guard is mutated independently
     glossary: tuple[Path, dict[str, dict[str, JsonValue]]], fault: str
 ) -> None:
     root, shards = glossary
@@ -207,7 +206,22 @@ def test_independent_glossary_boundary(  # ruff: ignore[complex-structure,too-ma
         if fault in {"key", "id", "unknown"}:
             shards[name] = envelope([record])
         write(root, shards)
-    with pytest.raises((ValueError, ValidationError)):
+    messages = {
+        "missing": "^Translation indexed file closure differs from disk$",
+        "hash": "^Translation shard hash mismatch$",
+        "gap": "^Translation shard sequence gap$",
+        "symlink": "^Symlink translation input$",
+        "unknown": "Extra inputs are not permitted",
+        "candidate": "Input should be 'sampled' or 'confirmed'",
+        "key": "^Translation record kind/key/filing mismatch$",
+        "id": "^Permanent term ID differs from concept key$",
+        "members": "^Translation decision exact membership mismatch$",
+        "checked": "^Translation decision requires actual checked members$",
+        "human": "String should have at least 1 character",
+        "sample": "^Translation decision requires actual checked members$",
+        "format": "Translation format must be integer one",
+    }
+    with pytest.raises(ValueError, match=messages[fault]):
         load_glossary(root)
 
 
@@ -241,7 +255,16 @@ def test_choice_history_cannot_reuse_a_decision(
         ] = "sha256:" + "0" * 64 if fault == "wrong_hash" else "other"
     shards["translations/glossary/choices/002.yaml"] = envelope([second])
     write(root, shards)
-    with pytest.raises(ValueError, match=r"Duplicate|gap|fork|predecessor"):
+    with pytest.raises(
+        ValueError,
+        match={
+            "fork": "^Duplicate immutable translation record$",
+            "gap": "^Translation adoption sequence gap or fork$",
+            "wrong_hash": "^Translation predecessor mismatch$",
+            "wrong_key": "^Translation predecessor mismatch$",
+            "wrong_decision": "^Translation predecessor mismatch$",
+        }[fault],
+    ):
         load_glossary(root)
 
 
@@ -347,16 +370,27 @@ def test_unlocated_digital_face_is_missing_translation(
 def test_exact_codepoint_span_rejects_invalid_and_utf16_offsets(
     span: tuple[int, int],
 ) -> None:
-    with pytest.raises(ValueError, match=r"span|validation"):
+    with pytest.raises(ValueError, match=r"^Invalid exact source span$"):
         excerpt("😀甲", Span(start=span[0], end=span[1]))
 
 
 def test_exact_span_and_pointer() -> None:
     assert excerpt("😀甲乙", Span(start=1, end=2)) == "甲"
     assert pointer({"a/b": ["synthetic"]}, "/a~1b/0") == "synthetic"
-    for locator in ("/a~2b", "/a~1b/00", "/a~1b/2", "query"):
-        with pytest.raises(ValueError, match=r"Pointer|absent"):
-            pointer({"a/b": ["synthetic"]}, locator)
+
+
+@pytest.mark.parametrize(
+    ("locator", "message"),
+    [
+        ("/a~2b", "Noncanonical JSON Pointer"),
+        ("/a~1b/00", "Evidence JSON Pointer is absent"),
+        ("/a~1b/2", "Evidence JSON Pointer is absent"),
+        ("query", "Evidence locator must be a JSON Pointer"),
+    ],
+)
+def test_pointer_rejection_is_specific(locator: str, message: str) -> None:
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        pointer({"a/b": ["synthetic"]}, locator)
 
 
 def test_source_requires_official_endpoint_and_language() -> None:
@@ -365,13 +399,28 @@ def test_source_requires_official_endpoint_and_language() -> None:
         project(raw, "https://shadowverse-portal.com/api/v1/cards?lang=zh-tw", "sv1")[0]
         == "zh-Hant"
     )
-    for url in (
-        "https://example.invalid/api/v1/cards?lang=ja",
-        "https://shadowverse-portal.com/api/v1/cards?lang=ja&lang=en",
-        "https://shadowverse-portal.com/api/v1/cards?lang=fr",
-    ):
-        with pytest.raises(ValueError, match=r"source URL|language"):
-            project(raw, url, "sv1")
+
+
+@pytest.mark.parametrize(
+    ("url", "message"),
+    [
+        (
+            "https://example.invalid/api/v1/cards?lang=ja",
+            "Digital evidence source URL mismatch",
+        ),
+        (
+            "https://shadowverse-portal.com/api/v1/cards?lang=ja&lang=en",
+            "Digital evidence source URL mismatch",
+        ),
+        (
+            "https://shadowverse-portal.com/api/v1/cards?lang=fr",
+            "Unsupported digital source language",
+        ),
+    ],
+)
+def test_source_endpoint_rejection_is_specific(url: str, message: str) -> None:
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        project(canonical({"data": {"errors": []}}), url, "sv1")
 
 
 @pytest.mark.parametrize(
@@ -429,8 +478,175 @@ def test_database_rejects_unadopted_translation_evidence(
         with (
             pytest.raises(
                 sqlite3.IntegrityError,
-                match=r"glossary_.*_adopted|digital_coverage_adopted",
+                match={
+                    "glossary_term": "glossary_term_adopted",
+                    "glossary_translation": "glossary_translation_adopted",
+                    "digital_link_coverage": "digital_coverage_adopted",
+                }[table],
             ),
             db.transaction(),
         ):
             db.insert(table, {**values, "decision_id": "unadopted"})
+
+
+@pytest.mark.parametrize("mode", ["absent", "file_link", "parent_link"])
+def test_index_must_be_regular_input(tmp_path: Path, mode: str) -> None:
+    root = tmp_path / "authored"
+    if mode != "absent":
+        target = tmp_path / "target"
+        write(target, {})
+        root.mkdir()
+        if mode == "file_link":
+            (root / "translations").mkdir()
+            (root / "translations/index.yaml").symlink_to(
+                target / "translations/index.yaml"
+            )
+        else:
+            (root / "translations").symlink_to(
+                target / "translations", target_is_directory=True
+            )
+    with pytest.raises(ValueError, match=r"^Missing or symlink translation input$"):
+        load_glossary(root)
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("inventory", "Template inventories require the #52 loader"),
+        ("include", "Unsafe or unsupported translation include"),
+        ("unsorted", "Translation members must be sorted and unique"),
+        ("duplicate", "Translation members must be sorted and unique"),
+        ("partial_confirmed", "Confirmed translation must check every member"),
+        ("first_predecessor", "Initial choice must have no predecessor"),
+        ("unadopted_term", "Glossary choice references an unadopted concept"),
+        ("concept_reuse", "Duplicate immutable translation record"),
+    ],
+)
+def test_glossary_inventory_counterexamples(
+    tmp_path: Path, fault: str, message: str
+) -> None:
+    definitions = [term(), term("rule.second")]
+    selected = choice()
+    if fault == "first_predecessor":
+        object_value(selected["data"])["predecessor"] = {
+            "record_key": "prior",
+            "record_hash": digest(b"prior"),
+            "decision_id": "prior",
+        }
+    if fault == "unadopted_term":
+        selected = choice("rule.absent")
+    concept_shard = envelope(definitions)
+    if fault == "unsorted":
+        concept_shard["records"] = list(reversed(array(concept_shard["records"])))
+    elif fault == "duplicate":
+        concept_shard["records"] = [definitions[0], definitions[0]]
+    elif fault == "partial_confirmed":
+        object_value(array(concept_shard["decisions"])[0])["sample_ids"] = [
+            definitions[0]["record_key"]
+        ]
+    shards = {
+        "translations/glossary/concepts/001.yaml": concept_shard,
+        "translations/glossary/choices/001.yaml": envelope([selected]),
+    }
+    if fault == "concept_reuse":
+        shards["translations/glossary/concepts/002.yaml"] = envelope([term()])
+    if fault == "include":
+        shards["translations/unsupported.yaml"] = shards.pop(
+            "translations/glossary/concepts/001.yaml"
+        )
+    write(tmp_path, shards)
+    if fault == "inventory":
+        path = tmp_path / "translations/index.yaml"
+        index = object_value(parse(path.read_bytes()))
+        index["inventories"] = {"templates": digest(b"synthetic")}
+        path.write_bytes(canonical(index))
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        load_glossary(tmp_path)
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("authored_by", " ", "Adopted glossary requires author and human reviewer"),
+        ("reviewed_by", "\t", "Adopted glossary requires author and human reviewer"),
+        (
+            "reviewed_at",
+            "2026-10-02T12:00:00Z",
+            "Day precision must use UTC midnight encoding",
+        ),
+    ],
+)
+def test_actual_review_receipt_fields(field: str, value: str, message: str) -> None:
+    data = object_value(array(envelope([term()])["decisions"])[0])
+    data[field] = value
+    with pytest.raises(ValueError, match=message):
+        Decision.model_validate_json(canonical(data))
+
+
+@pytest.mark.parametrize(
+    ("game", "raw", "url", "message"),
+    [
+        (
+            "sv1",
+            {"data": {"errors": ["Synthetic failure"]}},
+            "https://shadowverse-portal.com/api/v1/cards?lang=ja",
+            "Frozen sv1 API reports errors",
+        ),
+        (
+            "svwb",
+            {"data_headers": {"result_code": 0}},
+            "https://shadowverse-wb.com/web/CardList/cardList?lang=ja",
+            "Frozen svwb API reports errors",
+        ),
+        (
+            "jp",
+            {},
+            "https://example.invalid/cardlist/?cardno=SYNTHETIC",
+            "JP glossary source URL mismatch",
+        ),
+    ],
+)
+def test_frozen_endpoint_failure(
+    game: str, raw: JsonValue, url: str, message: str
+) -> None:
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        project(canonical(raw), url, game)
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("owner", "Name owner/card mismatch"),
+        ("parent", "Digital link parent mismatch"),
+        ("language", "Digital name language mismatch"),
+        ("ambiguous", "Ambiguous adopted digital names"),
+    ],
+)
+def test_selection_rejects_inconsistent_owner_evidence(
+    digital_template: DatabaseTemplate, fault: str, message: str
+) -> None:
+    with digital_template.copy() as db:
+        with (  # ruff: ignore[pytest-raises-with-multiple-statements] -- inspect corrupt graph before commit-time constraints and roll back on refusal
+            pytest.raises(ValueError, match="^" + message + "$"),
+            db.transaction(),
+        ):
+            if fault == "parent":
+                db.update(
+                    "digital_link",
+                    {"id": "svwb:normal"},
+                    {"digital_face_id": "sv1:normal"},
+                )
+            elif fault == "language":
+                db.update(
+                    "digital_text",
+                    {"digital_face_id": "svwb:normal", "lang": "zh-Hant"},
+                    {"name_unit_id": "svwb:normal:ja"},
+                )
+            elif fault == "ambiguous":
+                db.update("digital_link", {"id": "svwb:evolved"}, {"face_id": "front"})
+            select_name(
+                db,
+                card_id="other" if fault == "owner" else "card",
+                face_id="front",
+                lang="zh-Hant",
+            )
