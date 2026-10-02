@@ -116,6 +116,8 @@ model_review 在 machine 時必填 `{translated_by,reviewed_by,reviewed_at,text_
 
 card／face 身分與 exact 名稱到 card_name term 的自動推導與人工例外關聯、預設選面、printed／current 區分及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。該入口重用採納封套與 context_assignment，不改 glossary 的永久 key 或既有 data；官方名稱仍須逐 owner 驗數位同卡／同面證據，不能從共享 context 借資格。
 
+digital_link／coverage 的獨立 authored 入口、續版與逐 owner 凍結名稱重驗另見[數位對應採納契約](digital-link-adoption.md)，尚待審核與實作；不修改本 translations 封套或既有 glossary 必填欄位。
+
 glossary_term.data 為 `{id,category,concept_key,source_ref,source_span,authored_source_ja,missing_source_reason,adoption_review}`；有 frozen 日文欄位時用 source_ref／source_span exact 摘錄重建 source_ja，其餘兩個來源欄為 null；無 raw 的專案概念允許 ref／span 為 null，但名稱與理由必填。互斥模式與委託收據依 [術語採納擴充 §2／§4](glossary-adoption.md#2-專案概念可沒有-raw-locator)，不能用假 locator 或空字串。id=`term:`＋人工首次配發的 concept_key（ASCII `[a-z][a-z0-9_.-]*`）。key 以英文概念命名，如 `action.draw`，不以草稿流水號或原文字串當唯一鍵、不隨譯名重算；同字異義需不同 key。前綴用穩定大類，提案審核後可由獲維護者委託的協調者核可配發；借 EN 名命名不算採納英文。source_ref 不要求數位卡片的 name 欄，故原始詞只出現在效果文時也能登錄。
 
 | 草稿分類 | 正式去向 |

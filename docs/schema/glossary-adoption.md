@@ -113,6 +113,6 @@ rule_term 逐筆區分名詞與一般敘述：區域名／資源名／聯名專�
 
 ## 7. 實作邊界與反例
 
-新增 kind／data 欄位保持 translation_authored_format=1 的 index／分片封套與既定 hash recipe，僅因目前沒有任何正式翻譯採納紀錄，才可在首次採納前安全調整必填欄位；不是可沿用同編號任意改契約的先例。已有正式採納紀錄後須另審格式版本與相容／遷移策略；有完整 loader 支援後才載入，未支援時明確拒收，不當作空集合或默默忽略。沒有增添數位 link/coverage 的 authored 入口，也沒有 EN 術語採納；兩者另案，英文此階段只盤點。
+新增 kind／data 欄位保持 translation_authored_format=1 的 index／分片封套與既定 hash recipe，僅因制定本擴充時尚無正式翻譯採納紀錄，才可在首次採納前安全調整必填欄位；不是可沿用同編號任意改契約的先例。已有正式採納紀錄後須另審格式版本與相容／遷移策略；有完整 loader 支援後才載入，未支援時明確拒收，不當作空集合或默默忽略。數位 link/coverage 另見[待審的獨立入口契約](digital-link-adoption.md)，不擴充本 glossary 格式，也不宣稱已實作；本文件沒有 EN 術語採納，英文此階段只盤點。
 
 獨立反例至少包括：rule_term 缺值／非 Bool／錯前件／withdrawal；非 rule_term 寫 emphasis；同名不同 reference；收據缺具體委託／scope 不含成員／實際決定者或日期不符／新增詞沿用舊委託；缺 JA 只填 null 或假 locator；來源主張誤升官方、官方 choice 無真 frozen concept evidence；有效 vocabulary 引用有缺譯；加粗改版未重新推導顯示。這些是驗收要求，不是已實跑結果。公開註記的反例隨格式審核另加，不用修改現有快照讓本文件通過。

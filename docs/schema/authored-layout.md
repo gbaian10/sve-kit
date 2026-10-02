@@ -18,7 +18,8 @@
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/index.yaml`、`identity-transitions/<sequence>.yaml`，見 §12 |
 | 提案 | 特殊構築 | `overrides/deck-roles/BP01.yaml` |
-| 提案 | 其他策展、數位、標誌 | `curation/BP01/001.yaml` |
+| 提案 | 其他策展、標誌 | `curation/BP01/001.yaml` |
+| 待審（技術契約） | 數位對應與查核覆蓋採納 | `digital-links/index.yaml`、`digital-links/{links,coverage}/<filing_key>/<sequence>.yaml`；見[數位對應採納契約](digital-link-adoption.md)，尚無入口實作或遷入資料 |
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
