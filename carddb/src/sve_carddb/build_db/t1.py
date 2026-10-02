@@ -10,6 +10,7 @@ from sve_carddb.build_db import (
     t1_json,
     t1_qa,
     t1_related,
+    translation_evidence,
 )
 from sve_carddb.build_db.compiler import CompiledSchema, compile_schema
 from sve_carddb.build_db.model import Capability
@@ -26,6 +27,7 @@ TABLES = (
     *t1_qa.TABLES,
     *t1_related.TABLES,
     *t1_en.TABLES,
+    *translation_evidence.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES),
@@ -37,6 +39,10 @@ REGISTRY = Registry(
         Capability("correction", tuple(table.name for table in t1_correction.TABLES)),
         Capability("qa", tuple(table.name for table in t1_qa.TABLES)),
         Capability("related", tuple(table.name for table in t1_related.TABLES)),
+        Capability(
+            "translation_evidence",
+            tuple(table.name for table in translation_evidence.TABLES),
+        ),
         Capability("art", ("art",)),
         Capability(
             "en",
@@ -55,7 +61,10 @@ REGISTRY = Registry(
 def compile_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchema:
     """Compile only selected DDL groups and dependencies, without enabling a pipeline."""
     return compile_schema(
-        REGISTRY, requested, schemas() | t1_json.schemas(), version=SCHEMA_VERSION
+        REGISTRY,
+        requested,
+        schemas() | t1_json.schemas() | {"TranslationTokens": {"type": "null"}},
+        version=SCHEMA_VERSION,
     )
 
 
