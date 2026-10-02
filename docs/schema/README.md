@@ -22,6 +22,7 @@
 | [術語採納與加粗](glossary-adoption.md)        | 概念引用、來源主張／委託收據、可修訂加粗與公開格式擴充影響                        |
 | [翻譯與模板採納契約](translation-contract.md) | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約                        |
 | [卡名概念與身分關聯](card-name-concepts.md)   | exact 名稱自動推導與人工例外、預設選面及修復後重驗                                |
+| [模板採納政策與收據](translation-policy.md)   | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包                         |
 
 ## 文件之間的關係
 
