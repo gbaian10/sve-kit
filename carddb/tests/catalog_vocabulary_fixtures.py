@@ -21,6 +21,7 @@ from .adoption_fixtures import (
     index,
     make_case,
     record,
+    source_configuration,
     write,
 )
 from .test_source_archive import _put, _resource, _store
@@ -48,7 +49,7 @@ class VocabularyCase:
         return BuildContext.from_inputs(
             self.case.revision,
             {name: (self.case.repository / name).read_bytes() for name in RUNTIME},
-            self.case.inputs().configuration(),
+            source_configuration(self.case, self.case.inputs().configuration()),
         )
 
 

@@ -20,7 +20,7 @@ from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.review import Correction, Inputs, Receipt
 from sve_carddb.registry.storage import Entry, plan_files, read_yaml, write_files
 from sve_carddb.routes.rarity_policy import APPROVED_GENERAL_RARITIES
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.sources.official_jp import card_url
@@ -36,6 +36,7 @@ from .adoption_fixtures import (
     index,
     make_case,
     record,
+    source_configuration,
     write,
 )
 from .build_db_fixtures import rows
@@ -84,12 +85,7 @@ class DisplayCase:
             self.inputs().configuration() | APPROVED_GENERAL_RARITIES.configuration()
         )
         config["text_observations"] = self.plan.configuration()
-        reviewed = object_value(
-            parse(
-                str(object_value(self.case.review["context"])["configuration"]).encode()
-            )
-        )
-        config["catalog_source_recipes"] = reviewed["catalog_source_recipes"]
+        config = source_configuration(self.case, config)
         return BuildContext.from_inputs(
             self.case.revision,
             {path: (self.case.repository / path).read_bytes() for path in RUNTIME},

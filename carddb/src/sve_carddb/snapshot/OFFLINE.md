@@ -13,8 +13,16 @@ The recipe is JSON matching `sve_carddb.snapshot.offline.Inputs`: `repo`, `archi
 `authored/catalog-adoptions` entry at the pinned revision by `derive_catalog`.
 No caller vocabulary JSON or language settings are accepted. Adopted EN and JA
 languages are required; immutable receipts, source evidence and their complete
-source-use closure are checked and included in the build. Missing trait/title or
-other raw-field adoptions fail closed rather than generating codes.
+source-use closure are checked and included in the build. The complete existing `authored/translations` entry is explicitly enabled,
+with the glossary evidence tables compiled. Catalog receipt evidence uses its
+historical immutable Git background; glossary evidence uses the current build
+runtime. The build itself pins `catalog_source_recipes`, `translation_recipes`,
+all package Python dependencies except generated `_version.py`, `uv.lock` and
+`pyproject.toml`. Translation recipes cover JP, sv1 and svwb frozen projections;
+they do not grant digital same-card eligibility. Expected glossary source uses
+are independently replayed from every historical member, including superseded
+and withdrawn records, rather than copied from the import result. Missing
+trait/title or other raw-field adoptions fail closed rather than generating codes.
 Image batches verify authored correction evidence, rather than publishing assets.
 
 ```bash
@@ -76,3 +84,14 @@ The report uses counts and identifiers rather than official text. Unknown
 coverage and pending checks are not a claim that there is no erratum. Real
 publication requires complete adopted raw-field vocabulary, C's per-card corrected-text checks,
 formal release gates and the separate Web consumer acceptance.
+
+## Validation boundary
+
+The synthetic CLI replay tests exercise sealed catalog and glossary evidence,
+current recipe pins, immutable receipts and the complete source-use verification
+through preview and bundle output. Their physical card inventory is empty.
+Supplemental tests exercise card observations with mocked catalog composition.
+Neither test group claims complete real-card, catalog and translation acceptance.
+When real raw-field adoptions block the build, later-stage diagnostic runs must
+be identified separately; an empty substitute for a blocked phase does not
+prove the original phase or authorize a candidate for publication.

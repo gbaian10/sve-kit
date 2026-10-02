@@ -154,10 +154,16 @@ def _prepare_adoptions(  # ruff: ignore[complex-structure] -- validate complete 
         configuration.get(key) != value for key, value in inputs.configuration().items()
     ):
         raise ValueError("Build configuration does not pin adoption inputs")
-    sources = AdoptionSources(stores, PinnedRepository(inputs.repository))
+    repository = PinnedRepository(inputs.repository)
+    repository.context(build)
+    current = AdoptionSources(stores, repository)
+    _current_recipes(snapshots, current, build)
+    sources = AdoptionSources(stores, repository, historical=True)
+    sources.batches = current.batches
+    sources.uses = current.uses
     if text_plan is not None:
         verify_plan(text_plan)
-        _verify_identity(inputs, text_plan, sources, build)
+        _verify_identity(inputs, text_plan, current, build)
         if any(item.card.raw is None for item in text_plan.observations):
             raise ValueError("Adoption identity/text inputs require frozen raw bytes")
         for item in text_plan.observations:
@@ -213,6 +219,29 @@ def _prepare_adoptions(  # ruff: ignore[complex-structure] -- validate complete 
     _dependencies(effective, db, text_plan)
     _freshness(effective, reviews, sources, db, text_plan)
     return PreparedAdoptions(snapshots, sources, effective, reviews)
+
+
+def _current_recipes(
+    snapshots: tuple[AdoptionSnapshot, ...],
+    sources: AdoptionSources,
+    build: BuildContext,
+) -> None:
+    """Include reviewed image/identity recipes even when no text ref names the parser."""
+    parsers = {
+        evidence.source_ref.parser
+        for snapshot in snapshots
+        for record, _ in snapshot.records()
+        for evidence in record.evidence
+        if isinstance(evidence, TextEvidence)
+    }
+    for snapshot in snapshots:
+        for shard in snapshot.shards:
+            reviewed = object_value(
+                parse(shard.envelope().review_context.context.configuration.encode())
+            )
+            parsers.update(object_value(reviewed.get("catalog_source_recipes", {})))
+    for parser in sorted(parsers):
+        sources.recipe(parser, build)
 
 
 def derive_catalog(

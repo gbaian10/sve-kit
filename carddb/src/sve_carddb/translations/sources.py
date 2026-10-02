@@ -176,8 +176,11 @@ class Sources:
         self, store_id: str, batch_id: str, version: str, parser: str
     ) -> tuple[str, JsonValue, Source]:
         """Replay a complete page without inventing a text locator or text hash."""
-        config = object_value(parse(self.build.configuration.encode()))
-        recipes = object_value(config.get("translation_recipes"))
+        config = parse(self.build.configuration.encode())
+        if not isinstance(config, dict) or not isinstance(
+            recipes := config.get("translation_recipes"), dict
+        ):
+            raise ValueError("Translation source recipes must be an object")  # ruff: ignore[type-check-without-type-error] -- a malformed build recipe is a domain refusal rather than an incidental boundary TypeError
         pin = Normalizer.model_validate_json(canonical(recipes.get(parser)))
         if (
             pin.version != parser

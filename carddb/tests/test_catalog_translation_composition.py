@@ -19,7 +19,7 @@ from sve_carddb.source_archive import seal_batch
 from sve_carddb.translations.sources import CODE_PATH
 from sve_carddb.translations.sources import RUNTIME as TRANSLATION_RUNTIME
 
-from .adoption_fixtures import REPO, commit
+from .adoption_fixtures import REPO, commit, source_configuration
 from .catalog_vocabulary_fixtures import RUNTIME, VocabularyCase, make_vocabulary_case
 from .test_glossary_adoption import authored
 from .test_source_archive import _put, _resource, _store
@@ -75,7 +75,7 @@ def context(case: VocabularyCase, inputs: AdoptionInputs) -> BuildContext:
             name: (case.case.repository / name).read_bytes()
             for name in {*RUNTIME, *TRANSLATION_RUNTIME}
         },
-        inputs.configuration(),
+        source_configuration(case.case, inputs.configuration()),
     )
 
 
