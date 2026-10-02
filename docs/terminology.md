@@ -86,6 +86,9 @@
 | **翻譯用途** | translation use | 精確指向原文所屬的引用者、欄位及段落位置，不是檔案的歸檔 owner |
 | **翻譯選用** | translation selection | 每個上下文與目標語言的唯一有效本站譯文；官方 counterpart 另按 owner 選用 |
 | **選詞** | glossary choice | 對指定概念與語言採納的一個譯名，變更追加決定，生成譯文自動重算 |
+| **術語引用** | term reference | 以 kind/key 定位 glossary 永久概念或 vocabulary 詞彙，與顯示名分開 |
+| **加粗選擇** | glossary emphasis choice | rule_term 的可修訂加粗採納紀錄；其他術語由型別推導 |
+| **委託採納收據** | delegated adoption receipt | 保存具體委託範圍、實際協調者與決定事件，不算維護者親自核可 |
 | **模板來源清冊** | template source inventory | 保存模板舊 ID 與封存來源／normalizer 的對照，可重建完整內容；不另建永久物件庫 |
 
 ## 規則與效果

@@ -283,6 +283,8 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 `translation_use` 的 owner 是翻譯**來源**欄位，`context.source_unit` 必須等於該 owner 的原文。EN 的 `FieldTranslation.basis=shared_jp` 由 JP owner 的 use＋已確認面對應/語義核對推導；shared_jp_unchecked 則僅放寬尚未完成語義核對的顯示，仍須來源完整、已確認身分且無已知相關 divergence，不把 JP `source_unit` 硬綁成 EN owner 的原文；`official_counterpart` 亦由已核對 counterpart 原文產生選用。這些投影只重用可驗來源，不能繞過 owner/context 一致性檢查。counterpart 逐 owner 直接供 FieldTranslation 引用，不占 `(context,target_lang)` 的共用 selection；同原文的不同卡可以有各自官英用字。推導 translation.id/revision 採內容定址，細節依翻譯契約 §6.2，不按執行時間配號。
 
+術語來源主張、無 raw 的專案概念與委託歸因依 [術語採納擴充](glossary-adoption.md)；未驗官方出處的詞先有效採納 project，不改 origin 列舉。rule_term 加粗從獨立 glossary_emphasis_choice 歷史推導，其他型別依固定規則；不在不可變 glossary_term 加欄、不把 translation.tokens 當已核可的公開標記。位置／加粗要出貨仍需該文件 §6 所列的獨立格式審核。
+
 卡名官方數位譯名限確認同概念，優先 svwb 再 sv1；效果翻譯永遠 unofficial。machine 審過仍 origin=machine。缺任一句模板不能把混合未翻段落標完整翻譯。來源更新與參數/術語改版反查後自動重算，失敗列清單，舊譯文不可當新語義版本；不要求逐卡重新採納生成全文，批次人工抽查仍驗實際成員與政策；完整取用矩陣在快照 §5。
 
 ## 10. DSL、驗證與未實作卡片頁
