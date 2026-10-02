@@ -1,0 +1,23 @@
+image_crop_format: 1
+kind: crop_override_shard
+records:
+  - source_key: sha256:0b36d852c26cfac222e85672b1e9ce5a6716a07959977441bea714fbb38c1479
+    source_sha256: e436df17a284b8b51fab418959cde08b8addf22557c24354467aee59ad58d61a
+    left: 36
+    top: 256
+    width: 384
+    height: 288
+    reason: 倒吊版型的插畫框下移以保留臉部，維持原方向。
+    receipt_id: hanged-art-crop-v1
+    region: en
+    card_no: BP15-PR01EN
+  - source_key: sha256:bb37a6c14905ac97f292799712afc78cadb6d59e7aacffc9c372eae0ac0df87d
+    source_sha256: be4a2b6e77847dcd428adc061e91f31113743f584a07ad6daf7f5e9a85cbcdb8
+    left: 36
+    top: 256
+    width: 384
+    height: 288
+    reason: 倒吊版型的插畫框下移以保留臉部，維持原方向。
+    receipt_id: hanged-art-crop-v1
+    region: jp
+    card_no: BP15-PR01
