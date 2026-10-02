@@ -1,6 +1,6 @@
 # 詞彙、記號與路由採納契約
 
-本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入。
+本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入，詞彙入口擴充歸屬 #28；繁中 vocabulary_choice 採納歸屬 #51，標籤翻譯選用投影歸屬 #53。
 **封套、覆寫格式與展示集合為技術契約；一般版稀有度白名單與繁中介面缺譯順序經使用者 2026-10-01 核可**。
 §1 摘錄既定語意；§2–§6 定義輸入，§7 區分已核可稀有度與加工證據邊界，§8 分列技術預設與使用者核可政策。
 格式不表示資料已採納；仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
@@ -46,8 +46,7 @@ includes 映射上述各自分片路徑到**完整解析內容**的 canonical ha
 來源及已存在 authored 入口；同片 records 共用，核對背景不同時分片，不在每筆複製完整輸入。
 
 record 恰為 `{record_key,kind,filing_key,data,evidence}`。data 恰為
-`{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`；
-vocabulary_adoption 的 data 另必填 `adoption_review`（§2.1.1），其餘 kind 不增加此欄：
+`{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`：
 
 | 欄位 | 定義 |
 | --- | --- |
@@ -82,8 +81,9 @@ predecessor 仍須精確 hash，因其用途是驗續版鏈。歷史解析依核
 
 decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sample_ids,authored_by,authored_at,reviewed_by,reviewed_at,reviewed_precision,note`。
 state 固定 confirmed、scope 固定 batch；一筆也是一成員 batch。其他 state 不得進入入口，候選留 authored 外。
-human 模式的 reviewed_by／reviewed_at 須記實際真人確認者與時間；只有 §2.1.1 明示的委託模式可記協調者。
-日精度沿 authored-layout 的 day 編碼，否則 instant。
+reviewed_by／reviewed_at 須記維護者實際確認者與時間；確認者須為本契約在 repo 明列的維護者，
+本版名單恰為 `gbaian10`，按 exact 識別驗證，不由 caller 新增。工具與模型名稱不得出現在 reviewed_by，
+製作者與確認者分開記錄；名單變更須修改受版控契約及本入口驗證。日精度沿 authored-layout 的 day 編碼，否則 instant。
 authored_by／authored_at 記真正製作封套者／時間，不冒充核對者。note 可為空字串。
 
 | record.kind（area） | category | policy_id |
@@ -103,30 +103,11 @@ sample_ids 恰為排序且唯一的全部 checked record_key；缺一、多一�
 核對包含 value、全部受影響目標、來源與依賴，不因外層只有一成員而縮成只看一張卡。
 
 loader 必須重算三層 hash、驗 category/policy/area/kind 與精確成員、checked、人名、時間及實際核對收據。
-human 封套就是人工全筆採納收據，須驗實際真人，不能只驗名字非空或由工具自行填入人名；
-規格文件、候選頻率、來源頁或模型審核均不等於使用者確認。委託依下節，不能冒算維護者親自核可。
+本封套是維護者全筆採納收據，loader 驗確認者在上述名單內，不能只驗名字非空；
+工具不得捏造確認事件，規格文件、候選頻率、來源頁或模型審核均不等於維護者確認。
+此檢查只屬本契約兩個入口，不修改商品等其他區域共用的決定模型，不設委託模式。
 本版不沿用表記 approved_rules 或模板長尾 approved_policy 例外。
 身分／商品／其他詞彙／舊修訂的 confirmed 決定，即使有 authored source，均不能代簽本筆內容。
-
-### 2.1.1 詞彙配發與委託收據
-
-僅 vocabulary_adoption 的 data 帶 `adoption_review={mode,delegation}`，包含續版／撤回。
-mode=human 時 delegation=null，沿 §2.1 的真人全筆確認。mode=delegated_catalog 時只允許
-class/type/special_kind；不同 mode 分片，不沿用 delegated_glossary／approved_policy，也不授權語言、別名、
-記號、路由、預設版次、其他 vocabulary kind 或任何翻譯。代碼、完整 label／raw_mappings／active
-均須在具體委託內，首次 code 核可不能代簽未核對的來源映射或後續修訂。
-
-delegation 恰為 `{authorized_by,authorization_basis,authorization_date,scope,decided_by,decided_at,decided_precision,decision_basis}`：
-
-- authorized_by 是實際委託的維護者真人；authorization_basis／decision_basis 是非空文字，保存可核對的正式紀錄出處／委託原意與此次事件，不只寫一般代決權限，不存私人路徑。
-- authorization_date 為真實 Date；decided_by 是實際協調者；decided_at 為 Instant、decided_precision 為 day/instant，day 必用 UTC 午夜，不捏造時分秒。
-- scope 是非空、排序唯一的完整 record_key 陣列，含當前成員。先驗完整入口，所有 scope 成員須存在、帶相同收據及相符 mode；每片 checked/members 仍恰覆蓋本片。新 spelling、修訂或新配發要新採納／收據，不借舊事件日期或擴張 scope。
-- decision.state=confirmed；reviewed_by／reviewed_at／reviewed_precision 恰等於此次 decided_*；note 明示「維護者委託；協調者決定；不是維護者親自核可」。委託列另計，不混入維護者確認數；工具製作者仍記 authored_by／authored_at。
-- 收據在 data 中參與完整 record_hash／members／membership_hash；修改授權、決定或範圍不能沿用舊決定。F1 保存完整歷史與當次所用收據，來源及依賴要求不因委託而放寬。
-
-本次必填欄位與 §4.1 的特殊標記擴充仍用 catalog_adoption_format=1，僅因尚無任何正式 catalog-adoptions
-採納分片，才可在首次資料前調整；啟用後不能沿同編號改既有歷史 bytes／默補新欄位，須另審格式相容策略。
-未支援擴充的 loader 必須拒收，不當作空集合。此文件定格式，不代替任何具體授權與資料收據。
 
 ### 2.2 來源與 freshness
 
@@ -201,11 +182,16 @@ special_kinds 為必填、按 code 排序唯一的陣列；非 type 必為 []。
 直接引用完整列入 dependencies，不能借 glossary、inactive／撤回列或任意同名 code。
 首批 special_kind 是自撰標記定義，raw_mappings=[]；定義標籤不冒稱官方來源，不假造一條 raw binding 來通過驗證。
 
+本次僅新增 raw_mappings 的必填 special_kinds 欄位，仍用 catalog_adoption_format=1，僅因目前尚無正式
+catalog-adoptions 採納分片，才可在首次資料前調整。啟用後不得默補已簽歷史欄位或改舊 bytes，
+須另審格式相容策略；未支援此擴充的 loader 明確拒收，不當作空集合。
+
 每個 raw 保留原欄位的 exact source_ref，type 的 locator 仍指完整 card_type／info/Card Type，不用切片字串假造來源。
 基本卡種＋標記的解讀由完整 value 的適用採納核對，exact 來源證據本身不等於分類核可。
 有效且 active 的映射中，相同 kind/region/lang/raw 必只有一組 `(code,special_kinds)`，
 同 code 卻標記不同、重複同一原值但借不同 ref，亦拒絕；來源證據可另放 evidence，不建立多條衝突映射。
 已驗相同原值的當次觀測只重用這一組，不通用 split、trim 或猜新拼法；未知原值拒絕並列缺項，不產生暫碼。
+建置／更新工具須列出需維護者確認的新完整原值與對應候選，不能只報泛稱錯誤或自動沿舊收據放行。
 
 停用的歷史映射不參與選用，但不可重用其 code 給另一概念。空陣列允許純介面 enum，但不能假稱已涵蓋官方原值。
 來源的未知符號（含 `-`）如何投影 null 須有欄位 recipe，不把它自動採為職業或稀有度 code。
@@ -470,7 +456,7 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | C23 | 只驗勝出者，忽略未知競爭者／忽略 home_set／忽略 override | 各自檢出 method 或選擇錯誤 |
 | C24 | 先濾 JP 再驗 EN 壞分片／半筆失敗仍提交 DB | 全入口失敗且交易回滾 |
 | C26 | type 標記缺定義／未採納／停用／重複／非 type 帶標記／漏直接依賴／同 raw 同 code 異標記 | 各自拒絕；JP／EN 完整原值及正確基本卡種＋標記通過 |
-| C27 | 委託缺具體依據／scope 漏成員或含不存在成員／借舊收據／decided_* 與 decision 不符／他 kind 借模式／human 填 AI | 各自拒絕；精確委託全筆核對通過且不算維護者確認 |
+| C27 | reviewed_by 為工具／模型名稱或不在 repo 明列維護者名單內的識別 | 拒絕；名字非空亦不能代替名單檢查 |
 | C25 | YAML 只換排版／輸入檔順序改／新卡包僅新增無關卡／重建程式或背景更新但相關內容相同 | canonical 決定不變；詞彙與 default override 保持有效，F1 記新實際輸入 |
 
 驗收須另覆蓋合法的新採納、完整續版、撤回／恢復、literal/uint/variable、雙面與多區互不污染。
