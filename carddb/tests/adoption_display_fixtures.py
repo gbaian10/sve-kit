@@ -135,6 +135,7 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
     pending: bool = False,
     raw_type: str = "Synthetic type",
     correction: bool = False,
+    raw_class: str = "-",
 ) -> DisplayCase:
     root.mkdir()
     store = _store(root / "source")
@@ -150,6 +151,7 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
             .replace(b"SYN-01", number.encode())
             .replace(b"/synthetic.png", IMAGE_URL.encode())
             .replace(b"Synthetic type", raw_type.encode())
+            .replace(b"<dd>-</dd>", b"<dd>" + raw_class.encode() + b"</dd>", 1)
         )
         _put(
             store,

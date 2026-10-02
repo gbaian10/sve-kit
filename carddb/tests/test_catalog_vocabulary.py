@@ -89,6 +89,31 @@ def test_effective_receipts_derive_bilingual_bindings_and_empty_marker_definitio
         assert {u.source.id for u in result.uses}
 
 
+def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
+    case: VocabularyCase, schema: CompiledSchema
+) -> None:
+    case = save(
+        case,
+        [
+            vocabulary_record(case, "type", "follower", []),
+            vocabulary_record(case, "type", "spell", [mapping(case)], active=False),
+        ],
+    )
+    with create_database(schema) as db:
+        derived = derive_catalog(
+            db,
+            case.case.inputs(),
+            build=case.build(),
+            stores={"test-store": case.archive},
+        )
+        inactive = next(t for t in derived.catalog.terms if t.code == "spell")
+        assert not inactive.active
+        assert not derived.vocabulary.bindings
+        message = "Missing or ambiguous explicit vocabulary binding: kind='type', region='jp', raw='Synthetic type', candidates=[]; new spellings require maintainer confirmation"
+        with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
+            derived.vocabulary.lookup("jp", "type", "Synthetic type")
+
+
 @pytest.mark.parametrize(
     "reviewer",
     ["Claude Opus", "Codex", "sve-kit-sol[bot]", "Synthetic human", "gbaian10 "],

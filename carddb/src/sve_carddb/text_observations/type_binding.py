@@ -14,8 +14,14 @@ def type_binding(
     plan: TextPlan, item: FaceObservation, vocabulary: Vocabulary
 ) -> tuple[Binding, str | None]:
     """Retain the raw revision while attributing its code to the actual type correction."""
+    raw, decision = type_spelling(plan, item)
+    return vocabulary.lookup(item.region, "type", raw), decision
+
+
+def type_spelling(plan: TextPlan, item: FaceObservation) -> tuple[str, str | None]:
+    """Resolve missing source types before checking any vocabulary correspondence."""
     if item.content.type_raw != "-":
-        return vocabulary.lookup(item.region, "type", item.content.type_raw), None
+        return item.content.type_raw, None
     applications = [
         application
         for application in plan.corrections or ()
@@ -29,6 +35,5 @@ def type_binding(
         )
     application = applications[0]
     verify_application(plan.identity.snapshot, application)
-    binding = vocabulary.lookup(item.region, "type", application.data.corrected_value)
     assert application.record.decision_id is not None
-    return binding, application.record.decision_id
+    return application.data.corrected_value, application.record.decision_id

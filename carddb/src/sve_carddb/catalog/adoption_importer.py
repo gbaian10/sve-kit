@@ -45,7 +45,7 @@ from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.text_observations.importer import populate_text_observations
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.plan import verify_plan
-from sve_carddb.text_observations.type_binding import type_binding
+from sve_carddb.text_observations.type_binding import type_spelling
 from sve_carddb.translations.importer import Inputs as TranslationInputs
 from sve_carddb.translations.importer import populate_glossary
 
@@ -227,16 +227,49 @@ def derive_catalog(
     prepared = _prepare_adoptions(
         db, inputs, build=build, stores=stores, text_plan=text_plan
     )
+    return _derive_prepared(prepared, text_plan)
+
+
+def _derive_prepared(
+    prepared: PreparedAdoptions, text_plan: TextPlan | None
+) -> CatalogProjection:
     projection = project_catalog(
         prepared.effective, prepared.reviews, prepared.sources, text_plan
     )
     if text_plan is not None:
+        required = set()
         for item in (*text_plan.observations, *text_plan.candidates()):
-            type_binding(text_plan, item, projection.vocabulary)
+            raw, _ = type_spelling(text_plan, item)
+            required.add((item.region, "type", raw))
             if item.content.class_raw != "-":
-                projection.vocabulary.lookup(
-                    item.region, "class", item.content.class_raw
-                )
+                required.add((item.region, "class", item.content.class_raw))
+        known = {
+            (binding.region, binding.kind, binding.raw)
+            for binding in projection.vocabulary.bindings
+        }
+        missing: list[JsonValue] = [
+            {
+                "region": region,
+                "kind": kind,
+                "raw": raw,
+                "candidates": list[JsonValue](
+                    sorted(
+                        {
+                            b.code
+                            for b in projection.vocabulary.bindings
+                            if b.kind == kind
+                        }
+                    )
+                ),
+            }
+            for region, kind, raw in sorted(required - known)
+        ]
+        if missing:
+            raise ValueError(
+                "Unadopted vocabulary spellings: "
+                + canonical(missing).decode()
+                + "; new spellings require maintainer confirmation"
+            )
     return projection
 
 
@@ -252,6 +285,20 @@ def populate_adoptions(
     prepared = _prepare_adoptions(
         db, inputs, build=build, stores=stores, text_plan=text_plan
     )
+    return _populate_prepared(
+        db, inputs, prepared, build=build, stores=stores, text_plan=text_plan
+    )
+
+
+def _populate_prepared(
+    db: Database,
+    inputs: AdoptionInputs,
+    prepared: PreparedAdoptions,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    text_plan: TextPlan | None,
+) -> InputRecord:
     snapshots, sources = prepared.snapshots, prepared.sources
     effective, reviews = prepared.effective, prepared.reviews
     _audit(snapshots, db, inputs.authored_revision)
@@ -414,11 +461,12 @@ def import_adopted_text(
             authored_revision=inputs.authored_revision,
             build=build,
         )
-        projection = derive_catalog(
+        prepared = _prepare_adoptions(
             db, inputs, build=build, stores=stores, text_plan=text_plan
         )
-        adoption = populate_adoptions(
-            db, inputs, build=build, stores=stores, text_plan=text_plan
+        projection = _derive_prepared(prepared, text_plan)
+        adoption = _populate_prepared(
+            db, inputs, prepared, build=build, stores=stores, text_plan=text_plan
         )
         observations = populate_text_observations(
             db,
