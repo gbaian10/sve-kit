@@ -1,4 +1,4 @@
-"""Fetch a reviewed JP errata URL selection without replacing or recovering sources."""
+"""Fetch reviewed JP/EN errata URLs without replacing or recovering sources."""
 
 import json
 import re
@@ -23,11 +23,18 @@ if TYPE_CHECKING:
     from sve_carddb.fetch.throttle import CircuitBreaker
 
 _ANNOUNCEMENT = re.compile(r"/errata/([^/]+)/?\Z")
+_REGIONS = {
+    "shadowverse-evolve.com": Region.JP,
+    "en.shadowverse-evolve.com": Region.EN,
+}
+_WRAPPER = (
+    "div.st-Container > div.st-Container_Inner > div.sw-Lower > div.sw-Lower_Wrapper"
+)
 _OK = 200
 
 
 class ErrataInputError(ValueError):
-    """The selection is not an explicit list of safe JP errata URLs."""
+    """The selection is not an explicit list of safe official errata URLs."""
 
 
 def validate_urls(values: Sequence[str]) -> tuple[str, ...]:
@@ -40,11 +47,12 @@ def validate_urls(values: Sequence[str]) -> tuple[str, ...]:
         match = _ANNOUNCEMENT.fullmatch(parts.path)
         if (
             any(not char.isprintable() or char.isspace() for char in value)
-            or (parts.scheme, parts.netloc) != ("https", "shadowverse-evolve.com")
+            or parts.scheme != "https"
+            or parts.netloc not in _REGIONS
             or any(delimiter in value for delimiter in "?#")
             or match is None
         ):
-            raise ErrataInputError("selection contains a non-JP-errata URL")
+            raise ErrataInputError("selection contains a non-official-errata URL")
         slug = unquote(match[1], errors="strict")
         if slug in {".", ".."} or any(
             not char.isprintable() or char.isspace() or char in "/\\" for char in slug
@@ -64,7 +72,15 @@ def load_urls(path: Path) -> tuple[str, ...]:
 
 def raw_path(url: str) -> PurePosixPath:
     """Use a canonical URL digest, avoiding slug-derived filenames and collisions."""
-    return PurePosixPath("raw", "jp", "errata", f"{sha256(url.encode())}.html.zst")
+    return PurePosixPath(
+        "raw", url_region(url).value, "errata", f"{sha256(url.encode())}.html.zst"
+    )
+
+
+def url_region(url: str) -> Region:
+    """Derive region only from the validated exact official host."""
+    validate_urls((url,))
+    return _REGIONS[urlsplit(url).netloc]
 
 
 def require_quiet(settings: Settings, manifest: Manifest) -> None:
@@ -97,7 +113,7 @@ def pending_urls(writer: Writer, urls: Sequence[str]) -> tuple[str, ...]:
         resource = writer.manifest.resources.get(url)
         if resource is not None:
             if (
-                resource.region is not Region.JP
+                resource.region is not url_region(url)
                 or resource.kind is not Kind.ERRATA
                 or writer.local_state(url) is not LocalState.TRUSTED
             ):
@@ -112,12 +128,18 @@ def _validate_body(response: Response) -> None:
     require_media_type(response.content_type, "text/html")
     document = parse(response.body.decode("utf-8"))
     title = select_one(document, "title")
-    body = select_one(document, "main, article, .entry-content")
-    if (
-        title is None
-        or not title.text().strip()
-        or body is None
-        or not body.text().strip()
+    # JP's misspelling is observed; EN's corresponding detail class needs a pilot.
+    prefix = "eratta" if url_region(response.url) is Region.JP else "errata"
+    detail = (
+        _WRAPPER
+        + f" > div.sw-Lower_Container > div.{prefix}-Detail > div.{prefix}-Detail_Inner"
+    )
+    heading = select_one(document, _WRAPPER + " > div.sw-Lower_Heading > h1.sw-Ttl")
+    notice = select_one(document, detail + " > div.heading > h1.ttl")
+    body = select_one(document, detail + " > div.contents.sw-Txtarea")
+    if any(
+        node is None or not node.text().strip()
+        for node in (title, heading, notice, body)
     ):
         raise ValidationError("HTML lacks a title or announcement body container")
 
@@ -166,7 +188,7 @@ async def fetch_new(
         result = writer.write(
             Fetched(
                 url=url,
-                region=Region.JP,
+                region=url_region(url),
                 kind=Kind.ERRATA,
                 path=raw_path(url),
                 body=response.body,
