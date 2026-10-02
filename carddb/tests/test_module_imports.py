@@ -1,4 +1,7 @@
-"""Each first import must succeed without help from pytest's collection order."""
+"""Expose cycles without pytest's warmed imports.
+
+One fresh process per module makes startup cost grow linearly with module count.
+"""
 
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- a fresh interpreter must exclude pytest's preloaded package modules
 import sys

@@ -9,10 +9,10 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json
+from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import InputRecord, input_record, insert_raw_sources
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
 from sve_carddb.catalog.adoption_sources import PinnedRepository
-from sve_carddb.catalog.importer import _insert_exact
 from sve_carddb.digital_links.evidence import (
     Evidence,
     batch_refs,
@@ -313,9 +313,7 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
     insert_raw_sources(db, (use.source for use in current.uses))
     _audit(db, snapshot, inputs, resolved)
     for record, decision, value in fresh:
-        _insert_exact(
-            db, "digital_link", _link_values(record, decision, value), ("id",)
-        )
+        insert_exact(db, "digital_link", _link_values(record, decision, value), ("id",))
     uses = tuple(use for _, sources in resolved for use in sources.uses) + tuple(
         current.uses
     )
@@ -357,7 +355,7 @@ def _audit(
             )
         )[7:]
     )
-    _insert_exact(
+    insert_exact(
         db,
         "source_record",
         {
@@ -382,7 +380,7 @@ def _audit(
             "authored:digital-links:"
             + digest(canonical([inputs.authored_revision, path, digest(exact)]))[7:]
         )
-        _insert_exact(
+        insert_exact(
             db,
             "source_record",
             {
@@ -410,7 +408,7 @@ def _audit(
         }
         values["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
         values["confidence"] = None
-        _insert_exact(db, "decision", values, ("id",))
+        insert_exact(db, "decision", values, ("id",))
         registry_sources = _registry_audit(db, sources)
         for source_id, locator, role in [
             *registry_sources,
@@ -426,7 +424,7 @@ def _audit(
                 for use in sources.uses
             ),
         ]:
-            _insert_exact(
+            insert_exact(
                 db,
                 "decision_source",
                 {
@@ -454,7 +452,7 @@ def _registry_audit(db: Database, sources: Sources) -> list[tuple[str, str, str]
             "authored:digital-registry:"
             + digest(canonical([revision, path, digest(raw)]))[7:]
         )
-        _insert_exact(
+        insert_exact(
             db,
             "source_record",
             {
