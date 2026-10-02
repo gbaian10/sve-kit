@@ -1,0 +1,321 @@
+"""Conservative slot proposals, with exact literal positions and unresolved semantic roles."""
+
+import re
+import unicodedata
+from dataclasses import dataclass, replace
+from typing import TYPE_CHECKING
+
+from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.template_parameters.models import (
+    Candidate,
+    Hint,
+    LiteralTrace,
+    Range,
+    Schema,
+    Slot,
+)
+from sve_carddb.template_parameters.provenance import Unit, merged, trace
+from sve_carddb.template_sources.normalizer import DIGITS, TOKEN_HEADER, VERSION
+
+if TYPE_CHECKING:
+    from pydantic import JsonValue
+
+    from sve_carddb.template_parameters.references import References
+    from sve_carddb.template_parameters.spans import Located
+    from sve_carddb.template_sources.models import Entry
+    from sve_carddb.template_sources.normalizer import Part
+
+VERSION_PARAMETERS = "template-parameters-jp-candidate-v1"
+SAFE_INTEGER = 9007199254740991
+NUMERIC_SUFFIX = re.compile(r"^(?:枚|体|点|回|ターン|PP)(?![A-Za-z0-9_])")
+NUMERIC_PREFIX = re.compile(r"(?:コスト|攻撃力|体力|PP|レベル)[=:：]?$")
+BRACED = re.compile(r"\{([^{}]+)\}")
+
+
+@dataclass(frozen=True)
+class Position:
+    start: int
+    end: int
+    transformation: str
+    semantic_role: str
+
+
+def prepared(text: str, part: Part) -> tuple[Part, tuple[Unit, ...]]:
+    """Keep legacy inventory hashes intact; one new fixed layout payload has a whitespace parameter."""
+    if part.role == "layout":
+        origins = tuple(Range(start=s.start, end=s.end) for s in part.segments)
+        raw = "".join(text[s.start : s.end] for s in origins)
+        if not raw.isspace():
+            raise ValueError(
+                "Fixed layout recipe requires exact nonempty source whitespace"
+            )
+        return replace(part, normalized="W"), (Unit("W", origins),)
+    return part, trace(text, part)
+
+
+def positions(
+    text: str, part: Part, units: tuple[Unit, ...], refs: References
+) -> tuple[Position, ...]:
+    """Identify replacements from provenance; header roles come only from named grammar groups."""
+    if part.role == "layout":
+        return (Position(0, len(units), "whitespace", "layout"),)
+    if part.role == "token_header":
+        match = TOKEN_HEADER.fullmatch(part.normalized)
+        if match is None:
+            raise ValueError(
+                "Token header candidate must match the complete legacy header grammar"
+            )
+        groups = {
+            "name": "card_name",
+            "cls": "class",
+            "kind": "type",
+            "cost": "cost",
+            "atk": "attack",
+            "hp": "health",
+        }
+        return tuple(
+            Position(match.start(group), match.end(group), "header", role)
+            for group, role in groups.items()
+            if match[group] is not None and match.start(group) < match.end(group)
+        )
+    result = [
+        Position(
+            index,
+            index + 1,
+            unit.transformation,
+            "numeric" if unit.transformation == "digits" else "quoted_reference",
+        )
+        for index, unit in enumerate(units)
+        if unit.transformation != "literal"
+    ]
+    if part.role == "reminder":
+        quoted = tuple(re.finditer(r"『[^』]+』", part.normalized))
+        result.extend(
+            Position(m.start() + 1, m.end() - 1, "quoted", "quoted_reference")
+            for m in quoted
+        )
+        result.extend(
+            Position(m.start(), m.end(), "digits", "numeric")
+            for m in DIGITS.finditer(part.normalized)
+            if not any(q.start() <= m.start() < q.end() for q in quoted)
+        )
+    occupied = {i for item in result for i in range(item.start, item.end)}
+    for match in BRACED.finditer(part.normalized):
+        if any(i in occupied for i in range(match.start(1), match.end(1))):
+            continue
+        origins = merged(
+            tuple(s for u in units[match.start(1) : match.end(1)] for s in u.origins)
+        )
+        raw = "".join(text[s.start : s.end] for s in origins)
+        found = {
+            b.kind
+            for b in (() if refs.vocabulary is None else refs.vocabulary.bindings)
+            if b.region == "jp" and b.raw == raw and b.kind in {"class", "type"}
+        }
+        if len(found) == 1:
+            result.append(
+                Position(match.start(1), match.end(1), "braced", next(iter(found)))
+            )
+        elif raw in refs.terms:
+            result.append(Position(match.start(1), match.end(1), "braced", "term"))
+    return tuple(sorted(result, key=lambda item: item.start))
+
+
+def unsigned(raw: str) -> int | None:
+    """Compatibility numerals outside decimal ASCII/fullwidth digits are not authorized values."""
+    if DIGITS.fullmatch(raw) is None:
+        return None
+    value = int(unicodedata.normalize("NFKC", raw))
+    return value if value <= SAFE_INTEGER else None
+
+
+def numeric_role(normalized: str, position: Position) -> tuple[str, ...]:
+    """Unit/prefix grammar excludes signs, ASCII identifiers and undecided bare numbers."""
+    before = normalized[: position.start]
+    after = normalized[position.end :]
+    if before.endswith(("-", "+", "−")):
+        return ("signed_numeric_requires_review",)
+    if (
+        (before and re.search(r"[A-Za-z0-9_]$", before))
+        or re.match(r"^[A-Za-z0-9_]", after)
+    ) and not (NUMERIC_PREFIX.search(before) or after.startswith("PP")):
+        return ("numeric_identifier_requires_review",)
+    if NUMERIC_SUFFIX.match(after) or NUMERIC_PREFIX.search(before):
+        return ()
+    return ("numeric_role_requires_review",)
+
+
+def hint(
+    text: str,
+    part: Part,
+    units: tuple[Unit, ...],
+    position: Position,
+    index: int,
+    refs: References,
+) -> Hint:
+    """Keep raw spelling hashes distinct from integer values and proposed reference targets."""
+    selected = units[position.start : position.end]
+    origins = merged(tuple(s for unit in selected for s in unit.origins))
+    raw = "".join(text[s.start : s.end] for s in origins)
+    normalized = part.normalized[position.start : position.end]
+    common = {
+        "name": f"slot_{index}",
+        "occurrence": Range(start=position.start, end=position.end),
+        "source_segments": origins,
+        "transformation": position.transformation,
+        "semantic_role": position.semantic_role,
+        "raw_hash": digest(raw.encode()),
+        "normalized_hash": digest(normalized.encode()),
+    }
+    if position.semantic_role == "layout":
+        return Hint.model_validate(
+            dict(
+                common,
+                type="literal",
+                reference_kind=None,
+                value=None,
+                target=None,
+                issues=() if raw.isspace() else ("literal_requires_source_whitespace",),
+            )
+        )
+    if position.semantic_role in {"numeric", "cost", "attack", "health"}:
+        value = unsigned(raw)
+        issues: tuple[str, ...] = (
+            ("invalid_safe_unsigned_decimal",) if value is None else ()
+        )
+        if position.semantic_role == "numeric":
+            issues += numeric_role(part.normalized, position)
+        return Hint.model_validate(
+            dict(
+                common,
+                type="uint",
+                reference_kind=None,
+                value=value,
+                target=None,
+                issues=issues,
+            )
+        )
+    if position.semantic_role in {"class", "type"}:
+        resolution = refs.proposed_vocabulary(position.semantic_role, raw)
+    elif position.semantic_role == "term":
+        resolution = refs.braced_term(raw)
+    else:
+        resolution = refs.quoted(raw)
+    kind = None if resolution.target is None else resolution.target["kind"]
+    return Hint.model_validate(
+        dict(
+            common,
+            type="reference",
+            reference_kind=kind,
+            value=None,
+            target=resolution.target,
+            issues=resolution.issues,
+        )
+    )
+
+
+def schema(hints: tuple[Hint, ...]) -> Schema | None:
+    """A pending or composite reference cannot masquerade as a complete slot schema."""
+    if any(item.issues or item.type is None for item in hints):
+        return None
+    return Schema(
+        slots=tuple(
+            Slot.model_validate(
+                {
+                    "name": h.name,
+                    "type": h.type,
+                    "occurrences": (h.occurrence,),
+                    "reference_kind": h.reference_kind,
+                    "min": 0 if h.type == "uint" else None,
+                    "max": SAFE_INTEGER if h.type == "uint" else None,
+                }
+            )
+            for h in hints
+        )
+    )
+
+
+def literals(
+    text: str, units: tuple[Unit, ...], hints: tuple[Hint, ...]
+) -> tuple[LiteralTrace, ...]:
+    """Fixed text is provenance, never a literal parameter that bypasses translation."""
+    occupied = {i for h in hints for i in range(h.occurrence.start, h.occurrence.end)}
+    result = []
+    start = 0
+    while start < len(units):
+        if start in occupied:
+            start += 1
+            continue
+        end = start + 1
+        while end < len(units) and end not in occupied:
+            end += 1
+        selected = units[start:end]
+        origins = merged(tuple(s for u in selected for s in u.origins))
+        result.append(
+            LiteralTrace(
+                occurrence=Range(start=start, end=end),
+                source_segments=origins,
+                raw_hash=digest(
+                    "".join(text[s.start : s.end] for s in origins).encode()
+                ),
+                normalized_hash=digest("".join(u.text for u in selected).encode()),
+            )
+        )
+        start = end
+    return tuple(result)
+
+
+def analyze(
+    text: str, part: Part, item: Entry, located: Located, refs: References
+) -> Candidate:
+    """A full payload is still a proposal, without permanent IDs or fake approved parents."""
+    template_part, units = prepared(text, part)
+    hints = tuple(
+        hint(text, template_part, units, position, index, refs)
+        for index, position in enumerate(positions(text, template_part, units, refs))
+    )
+    shape: JsonValue = [
+        [
+            h.occurrence.model_dump(mode="json"),
+            h.type,
+            h.reference_kind,
+            h.semantic_role,
+            list(h.issues),
+        ]
+        for h in hints
+    ]
+    parameter_schema = schema(hints)
+    payload_hash = None
+    if parameter_schema is not None:
+        payload_hash = digest(
+            canonical(
+                {
+                    "level": "sentence",
+                    "source_lang": "ja",
+                    "normalized_text": template_part.normalized,
+                    "normalizer_version": VERSION_PARAMETERS,
+                    "semantic_variant": "default",
+                    "parameter_schema": parameter_schema.model_dump(mode="json"),
+                }
+            )
+        )
+    issues = tuple(sorted({reason for h in hints for reason in h.issues}))
+    if part.role == "reminder":
+        issues += ("legacy_parenthesis_classification_requires_review",)
+    return Candidate(
+        inventory_id=item.id,
+        ordinal=located.ordinal,
+        line_ordinal=located.line_ordinal,
+        source_span=located.source_span,
+        normalizer_id=VERSION,
+        normalized_hash=part.normalized_hash,
+        parameter_normalizer_id=VERSION_PARAMETERS,
+        template_normalized_hash=template_part.normalized_hash,
+        legacy_id=part.template,
+        parameter_schema=parameter_schema,
+        slots=hints,
+        literal_trace=literals(text, units, hints),
+        issues=issues,
+        signature_hash=digest(canonical(shape)),
+        payload_hash=payload_hash,
+    )
