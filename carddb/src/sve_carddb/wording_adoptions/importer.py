@@ -58,6 +58,7 @@ class AdoptionInputs(TypedDict):
     vocabulary: Vocabulary
     published: tuple[LocalizedText, ...]
     current_review: ReviewContext
+    regions: tuple[Region, ...]
 
 
 def adoption_dependencies(
@@ -108,6 +109,8 @@ def adoption_configuration(
     replayed: tuple[ReplayedAdoption, ...],
     vocabulary: Vocabulary,
     published: tuple[LocalizedText, ...],
+    *,
+    regions: tuple[Region, ...],
 ) -> dict[str, JsonValue]:
     """Keep contexts explicit so qualified dependency names remain independently replayable."""
     contexts = {
@@ -126,6 +129,7 @@ def adoption_configuration(
         }
     )
     return {
+        "wording_adoption_regions": list[JsonValue](regions),
         "wording_adoption": {
             "authored_revision": snapshot.authored_revision,
             "index_path": "authored/" + INDEX_PATH,
@@ -368,12 +372,25 @@ class PreparedAdoptions:
     current_scopes: Mapping[tuple[str, Region], ReconstructedScope]
     uses: tuple[SourceUse, ...]
 
+    def projected(self) -> tuple[ReplayedAdoption, ...]:
+        """Validation covers the full history; only current scopes are materialized."""
+        return tuple(
+            i
+            for i in self.replayed
+            if (i.record.data.face_id, i.record.data.region) in self.current_scopes
+        )
+
 
 def prepare_adoptions(inputs: AdoptionInputs) -> PreparedAdoptions:
     """Independently enumerate expected sources before building or verifying a bundle."""
     registry = inputs["registry"]
     stores, build = inputs["stores"], inputs["build"]
     current_review = inputs["current_review"]
+    regions = inputs["regions"]
+    if regions not in {("jp",), ("en",), ("en", "jp")}:
+        raise ValueError(
+            "Adoption projection regions must be sorted, unique and nonempty"
+        )
     snapshot = load_adoptions(
         inputs["authored_root"],
         authored_revision=inputs["authored_revision"],
@@ -387,10 +404,11 @@ def prepare_adoptions(inputs: AdoptionInputs) -> PreparedAdoptions:
             current_review, i.record.data.face_id, i.record.data.region
         )
         for i in replayed
+        if i.record.data.region in regions
     }
     config = object_value(parse(build.configuration.encode()))
     required = adoption_configuration(
-        snapshot, replayed, inputs["vocabulary"], inputs["published"]
+        snapshot, replayed, inputs["vocabulary"], inputs["published"], regions=regions
     )
     required["wording_current_review"] = current_review.model_dump(mode="json")
     declared = {pin.name: pin.sha256 for pin in build.dependencies}
@@ -482,6 +500,9 @@ def ordering_uses(
 def adoption_report(prepared: PreparedAdoptions) -> dict[str, JsonValue]:
     """Describe the exact selection and unchecked inventory without official wording."""
     return {
+        "validated_wording_adoption_keys": [
+            i.record.record_key for i in prepared.replayed
+        ],
         "wording_adoptions": [
             {
                 "record_key": i.record.record_key,
@@ -503,21 +524,21 @@ def adoption_report(prepared: PreparedAdoptions) -> dict[str, JsonValue]:
                     )
                 ),
             }
-            for i in prepared.replayed
-        ]
+            for i in prepared.projected()
+        ],
     }
 
 
 def populate_adoptions(db: Database, **inputs: Unpack[AdoptionInputs]) -> InputRecord:
     """Reload and replay immutable inputs inside the complete caller transaction."""
     prepared = prepare_adoptions(inputs)
-    if prepared.replayed and not db.has_table("face_semantics"):
+    if prepared.projected() and not db.has_table("face_semantics"):
         raise ValueError("Wording adoption requires enabled semantics capability")
     insert_raw_sources(db, (u.source for u in prepared.uses))
     _envelopes(db, prepared.snapshot)
     texts = TextInterner(db, published=inputs["published"])
     populate_vocabulary(db, texts, inputs["vocabulary"])
-    for adoption in prepared.replayed:
+    for adoption in prepared.projected():
         _populate_record(db, adoption, texts, inputs["vocabulary"])
         _correction_history(db, adoption.scope, texts)
         if adoption.predecessor_scope is not None:
@@ -707,7 +728,7 @@ def _freshness(
 ) -> None:
     receipts: dict[tuple[str, Value], list[JsonValue]] = defaultdict(list)
     latest = {
-        (i.record.data.face_id, i.record.data.region): i for i in prepared.replayed
+        (i.record.data.face_id, i.record.data.region): i for i in prepared.projected()
     }
     for key, adoption in latest.items():
         scope = prepared.current_scopes[key]

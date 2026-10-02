@@ -45,7 +45,10 @@ unknown and incomplete catalog evidence cannot establish official order.
 
 `import_adoptions(db, **AdoptionInputs)` reloads and replays inputs within one
 transaction. `populate_adoptions` composes within a caller-owned transaction.
-Nonempty imports require the opt-in `semantics` capability and its T0 dependency.
+Every indexed regional history is validated before the explicit build `regions`
+projection. A bad EN receipt blocks a JP-only build; valid EN history and source
+provenance are retained without materializing EN revisions in that build.
+Nonempty projected imports require the opt-in `semantics` capability and its T0 dependency.
 The three semantic tables preserve the predecessor's complete rule text and
 ordered sections with an independently checked immutable hash. Only checked
 revisions share semantics. Unknown sections remain unknown and prevent DSL reuse;
@@ -62,6 +65,8 @@ and pending candidates separate; a known correction change invalidates it.
 `adoption_dependencies` and `adoption_configuration` preserve every historical
 receipt, reviewed context and policy pin under portable qualified names. The
 current review context and its qualified dependencies must also be supplied.
+The producing build's program revision and unqualified runtime/lock bytes are
+verified independently, and its configuration pins the regional projection.
 Compose returned uses with the identity/product/text inputs and validate the
 complete union with `build_bundle.publish_bundle` / `verify_bundle`.
 `adoption_report` records selections, predecessors and unchecked keys without

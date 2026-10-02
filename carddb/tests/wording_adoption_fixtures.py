@@ -98,7 +98,7 @@ class AdoptionCase:
             }
         )
         configuration = adoption_configuration(
-            self.snapshot, self.replayed, self.vocabulary, ()
+            self.snapshot, self.replayed, self.vocabulary, (), regions=("jp",)
         )
         configuration["wording_current_review"] = review.model_dump(mode="json")
         build = BuildContext.from_inputs(
@@ -114,6 +114,7 @@ class AdoptionCase:
             vocabulary=self.vocabulary,
             published=(),
             current_review=review,
+            regions=("jp",),
         )
 
         self.inputs_cache[newer] = result
@@ -413,7 +414,11 @@ def make_adoption_case(root: Path, *, human: bool = False) -> AdoptionCase:  # r
 
 
 def install_adoptions(
-    root: Path, records: list[AdoptionRecord], *, sequence: str = "001"
+    root: Path,
+    records: list[AdoptionRecord],
+    *,
+    sequence: str = "001",
+    region: str = "jp",
 ) -> None:
     ordered = sorted(records, key=lambda r: r.record_key)
     wire: list[JsonValue] = [r.model_dump(mode="json") for r in ordered]
@@ -446,13 +451,15 @@ def install_adoptions(
             }
         ],
     }
-    directory = root / "wording-adoptions/jp"
+    directory = root / "wording-adoptions" / region
     directory.mkdir(parents=True, exist_ok=True)
     (directory / (sequence + ".yaml")).write_bytes(canonical(shard))
     index = directory.parent / "index.yaml"
     includes = {} if not index.exists() else object_value(read_yaml(index))["includes"]
     assert isinstance(includes, dict)
-    includes["wording-adoptions/jp/" + sequence + ".yaml"] = digest(canonical(shard))
+    includes["wording-adoptions/" + region + "/" + sequence + ".yaml"] = digest(
+        canonical(shard)
+    )
     (directory.parent / "index.yaml").write_bytes(
         canonical(
             {
