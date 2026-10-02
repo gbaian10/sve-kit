@@ -24,6 +24,13 @@
 目的地與裝置由維護者配置；正式文件不記私人儲存路徑。配置後的 resume、repair 與 refresh 都使用受保護 Writer。
 `--dry-run` 不產生來源版本或備份。
 
+`crawl errata-new --urls <已核對的 JSON 清單>` 是獨立的只新增入口，沒有 resume／repair／refresh 模式。
+它不啟動受保護替換 Writer，不處理其他任務的恢復或收尾；已有可信來源只跳過，不改 metadata，
+既有不可信來源、目的檔案或未完成任務則停止。即使四項設定完整，也不自動封存或備份；
+部分配置仍在開啟 manifest、連網前拒絕非 dry-run 執行。真實抓取須另獲維護者授權，
+操作方須在抓取前後備份 manifest，抓取後明確 seal 對應 scope、獨立 backup 與本批 restore-check。
+URL、轉址、重試與中斷限制見 [README](../../README.md#adding-reviewed-jp-errata-sources)。
+
 ## 收尾與容量
 
 替換前驗證舊 raw、descriptor、正式收據與獨立備份。已封存舊版重用既有閉包，304 不新增更新前 DB。

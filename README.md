@@ -62,6 +62,45 @@ $SVE_DATA_DIR/
 
 ## Development
 
+### Adding reviewed JP errata sources
+
+`crawl errata-new --urls reviewed-errata-urls.json` accepts a JSON array of exact
+HTTPS announcement URLs on `shadowverse-evolve.com/errata/<slug>`. Validate the
+selection with `--dry-run` first; live fetching requires the maintainer's separate
+authorization. This entry point adds sources only: it skips trusted existing
+sources without changing their metadata and stops on damaged, missing, archived,
+or conflicting existing destinations. It never repairs or overwrites them.
+
+Every request uses the configured browser User-Agent and a gap of at least two
+seconds. Retryable failures get at most three attempts, then that URL is reported
+as failed and the next selected URL is tried. Access denial, repeated rate limits,
+the circuit breaker, and **any redirect** stop the run. A redirect to another
+selected URL also stops: review its destination before changing the selection;
+trailing slashes are not inferred. Page links and images are never fetched.
+
+Bodies require HTTP 200, HTML media type, valid UTF-8, a nonempty title and a
+nonempty `main`, `article`, or `.entry-content` container. This is a conservative
+structural check, not verification of a correction or its dates. The command
+stores exact body bytes under `raw/jp/errata/` with manifest kind `errata`; it
+prints metadata only and does not import formal errata or change card text.
+
+This entry point holds the shared manifest lock and refuses unfinished requests,
+raw temporary files, or configured archive work. It never runs general crawl
+recovery or archive cleanup. Before publication, caught interruptions clean only
+the temporary file created by this write. Published raw files are complete and
+installed without replacing any existing destination. A hard process kill can
+leave a private temporary file; an interruption between publication and manifest
+commit can leave a complete unregistered raw. The next run refuses these states
+and requires a separately reviewed recovery, rather than deleting or overwriting
+them.
+
+The operator must back up the manifest before and after the run, then seal the
+reviewed `jp:errata` scope, back up its closure and verify this batch with
+`archive restore-check`; these operations are explicit and are not performed by
+`errata-new`. See [source archive](docs/schema/source-archive.md) and
+[protected fetching](docs/schema/refresh-operation.md). Official bodies stay
+outside git, tests, reports and public snapshots.
+
 ```bash
 uv --directory carddb sync          # install dependencies
 uv --directory carddb run pytest    # test

@@ -398,6 +398,13 @@ class RequestLog(_Store):
             ),
         )
 
+    def has_started(self) -> bool:
+        """Detect unfinished requests without marking or recovering another run."""
+        row = self._conn.execute(
+            "SELECT COUNT(*) FROM fetch_log WHERE outcome = ?", (Outcome.STARTED.value,)
+        ).fetchone()
+        return _int(row[0]) > 0
+
     def mark_interrupted(self) -> int:
         """Turn leftover `started` rows into `unknown`; return how many."""
         cursor = self._conn.execute(

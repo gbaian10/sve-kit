@@ -89,6 +89,8 @@ class ClientPolicy:
     """Seconds to wait after a 429 whose Retry-After is missing or invalid."""
     max_requests: int | None = None
     """Hard cap on actual HTTP requests in this run, retries and redirects included."""
+    stop_on_redirect: bool = False
+    """For reviewed exact-URL batches, reject all redirects before contacting a target."""
 
 
 def retry_after_seconds(value: str | None, now: datetime, default: float) -> float:
@@ -197,6 +199,9 @@ class Client:
                     body=response.content,
                 )
             location = response.headers.get("location")
+            if status in _REDIRECT_STATUS and self._policy.stop_on_redirect:
+                self._finish(request_id, Outcome.REDIRECTED, status=status)
+                raise StopCrawlError(f"{request.url}: HTTP {status} redirect refused")
             if status in _REDIRECT_STATUS and location:
                 self._finish(request_id, Outcome.REDIRECTED, status=status)
                 url = canonicalize(urljoin(url, location))
