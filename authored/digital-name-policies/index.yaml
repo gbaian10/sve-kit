@@ -1,0 +1,19 @@
+digital_name_policy_index_format: 1
+kind: digital_name_policy_index
+policies:
+  digital-name-links-v1:
+    - version: 1
+      path: digital-name-policies/digital-name-links-v1/001.policy.yaml
+      hash: sha256:6d752c9f50170e2d2dc236d2c5f1a6bb255b09c229b6946b99d85f8ca46d40e5
+      approval_receipt_hash: sha256:b1ba6c901a6e5d92ba5e98fcf92244f129cac18cdb498abde36f2d46b32159fa
+      exclusions_path: digital-name-exclusions/digital-name-links-v1/001.yaml
+      exclusions_hash: sha256:62845487cd435b85000a2398d1edb925e71f59e72b35cdd690b983bd2742dcfc
+      predecessor:
+  draft-i51-names-v1:
+    - version: 1
+      path: digital-name-policies/draft-i51-names-v1/001.policy.yaml
+      hash: sha256:16d6f2f8fe23dd435fad9d1f436e35379c10d857b88ec766ce4c5c31089fe576
+      approval_receipt_hash: sha256:96ae0305bd71e907e5956eb2f1c9dfe91c74b2d49290911c4ada8f4235561a14
+      exclusions_path: digital-name-exclusions/draft-i51-names-v1/001.yaml
+      exclusions_hash: sha256:ff111346ce206466cf07b073293ddbaea6ebce4ad902e13f54e2813ac19545a9
+      predecessor:
