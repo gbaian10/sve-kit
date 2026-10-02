@@ -1,15 +1,18 @@
 # 風味文字的整段模板與譯本採納
 
-本文件補充 [翻譯契約](translation-contract.md) 的 flavor 路徑。**維護者 2026-10-02 決定**：
-風味文字採整段對譯與較寬鬆的譯本門檻；效果文字仍維持同語意同譯，不新增單卡自由譯文。
-以下固定技術格式與驗收規則，不把這個政策決定當成已完成首輪抽查或逐筆採納。
+本文件補充 [翻譯契約](translation-contract.md) 的 flavor 路徑。**維護者 2026-10-02 同意寬鬆方向**：
+協調者提議「兩個模型無分歧就採納、維護者抽查 30–50 段」並建議整段對譯，維護者回覆「可以寬鬆」。
+本契約依該提議採整段技術方案；實際抽查數量與集合之後由維護者決定，不記為逐條核可所有細節。
+效果文字維持同語意同譯，單卡自由譯文先不做。
+以下固定技術格式與驗收規則，不把方向核可當成已完成首輪抽查或逐筆採納。
+**§4 的 flavor 模板定義政策採納放寬既有門檻，待維護者確認後才能合併**；方向核可不含這項新增例外。
 這是 docs 契約；模板清冊／匯入由 #52、渲染／選用／正式建置入口由 #53 提供，資料入庫由 #197 處理。
 
 ## 1. 重用的載體與來源
 
 風味文字使用既有 `sentence_template` 與 `template_translation`，沿用 templates 分片、清冊、
 `context→use/binding→translation→selection`、不可變修訂與批次決定，不增設自由譯文 kind 或第二套 renderer。
-模板定義與譯本是兩種 kind、分檔採納；採納譯本不能代簽定義。
+模板定義與譯本是兩種 kind、分檔採納；即使共用政策，也須各自有完整機械全查與決定，譯本不能代簽定義。
 
 來源 owner 恰為 `printing_face` 的 `(printing_id,face_id)`，`field=flavor`、`ordinal=null`。
 `context.source_unit_id` 必須等於這個 owner 的 `flavor_unit_id`。不能從 `face_revision`、另一版次、
@@ -25,19 +28,26 @@
 ## 2. 整段分段與清冊
 
 翻譯契約清冊及 `source_span.role` 新增 `flavor`。**只有此 owner／field 可使用**，不套到 effect、
-section、name 或 label。一個非空 flavor 欄位是一段，不以換行、空行、標點或括號再切段。
+section、name 或 label。除下述只有空白的欄位外，一個非空 flavor 欄位是一段，不以換行、空行、標點或括號再切段。
 
 | 項目 | 確定規則 |
 | --- | --- |
 | 清冊 entry | 沿既有八欄；`level=sentence`、`line_ordinal=0`、`role=flavor`、`legacy_fingerprint=null`。0 表示整欄唯一段落，不表示第一行 |
 | source_span | `{role:flavor,segments:[{start:0,end:L}],anchor:null}`，L 是整欄 Unicode code point 數；非 UTF-8 byte 數或 UTF-16 code unit 數 |
-| binding | 非空欄恰一筆，`ordinal=0`、`params={}`；段落內含 CRLF／LF、行首尾空白、空行、括號與引號，沒有附加 layout／reminder／token_header binding |
+| binding | 進入翻譯的非空敘事欄恰一筆，`ordinal=0`、`params={}`；段落內含 CRLF／LF、行首尾空白、空行、括號與引號，沒有附加 layout／reminder／token_header binding |
 | 驗回來源 | trace 取唯一 raw 區間，重組後 UTF-8 bytes 必須等於整欄來源；另以釘住的 flavor recipe 重算 normalized、payload 與清冊 hash |
 | 譯文 | 一個已採納譯本可跨行重組語序；譯文換行由譯本本身決定，不能再額外貼回原文 layout |
 
 這是翻譯契約 §4.1 的**flavor 專屬整段例外**：該節的一般卡文規則仍先分出 layout／提示文。
-風味文字中的括號一律是敘事內容，不靠形狀分類為規則提醒；即使全段只有空白，非空字串仍沿整段規則，
-不得 trim 成空。清冊來源 span 和所有實際使用處的 span 都須各自對完整來源驗證；不能只驗代表來源。
+風味文字中的括號一律是敘事內容，不靠形狀分類為規則提醒；不得 trim 原文。
+清冊來源 span 和所有實際使用處的 span 都須各自對完整來源驗證；不能只驗代表來源。
+
+**只有空白的已知非空欄位**原樣顯示，不進翻譯清冊、不配模板／context／use／譯文，也不列缺譯。
+其原始 text_unit、exact bytes、來源與 owner 仍保留，不能改成空字串或 null；報告另列 whitespace_only_rows。
+判定集合固定為 Unicode White_Space 的以下 code points：U+0009–000D、0020、0085、00A0、1680、
+2000–200A、2028、2029、202F、205F、3000；每個字元均在此集合才屬只有空白。
+不依執行環境未釘版的字元分類猜測，U+200B 等集合外字元不能被當空白丟棄。
+因該欄沒有翻譯 context，不是在非空 context 裡用零 binding 假裝覆蓋成功；混有任何敘事字元則整欄照前表驗證。
 
 未知與 exact 空字串分開：`flavor_unit_id=null` 不建假來源、模板、use 或空譯文，列缺來源；
 已知 exact `""` 保留其文字單元，沿通則用零 binding，不配 `T` ID、不憑空產生非空譯文。
@@ -73,16 +83,25 @@ section、name 或 label。一個非空 flavor 欄位是一段，不以換行、
 
 零參數 schema **不綁人名、卡名、數字或術語引用**；這是風味文字專屬取捨，不放寬效果模板的引用要求。
 譯本仍使用既有 text 語法：literal 反斜線與左右大括號須跳脫，不能把文字 `{{...}}` 當未知 slot。
+風味譯文只用 LF，不得含 CR、首尾空白或結尾換行；各非空行不得以上述 White_Space 字元結尾，
+內部空行可保留。驗跳脫後正式 text 與解碼後顯示字串，禁止在審核後偷偷正規化。
+候選不符合規則時先改成最終合法譯本，再互審；兩模型意見須對相同 bytes。
 互審的 `text_hash` 驗跳脫後正式 `template_translation.text` 的 exact UTF-8 bytes，
 不是草稿、解碼後顯示文字或 YAML 排版 bytes。人名改譯等任何 text 變動須新 revision、重做互審與採納，
 不得批次替換既有分片；工具可另列受影響候選。
 
 ## 4. 譯本政策與歸因
 
-維護者核可的較寬鬆門檻不豁免來源、span、ID、譯本語法與採納閉包。
+維護者同意的寬鬆方向不豁免來源、span、ID、譯本語法與採納閉包。
 
-1. 模板**定義**仍以 human `sampled` 批次採納：機械驗證全體，維護者實際核對非空樣本。
-   樣本需包含整段覆蓋／特殊空白等邊界；精確 members 與實際 sample_ids 分開記。
+1. 模板**定義**若尚無有效風味政策，仍須 human `sampled` 批次採納，先建立首輪譯本需要的定義。
+   **新增、待維護者確認的例外**：只有 role=flavor、flavor-exact-v1、sentence、零參數、完整整欄且符合本文件的定義，
+   可逐筆機械全查後引用同一份有效風味政策採納，不要求每包另做真人樣本。
+   這不是效果模板定義、概念或一般分類的例外；任何非 exact recipe／額外 slot／未知角色均拒絕政策路徑。
+   機械採納為 category=sentence_template 的 confirmed batch，全 members checked，reviewer／時間沿政策收據，
+   note 明示「政策核可」，工具作者／套用時間另記。定義沒有譯文 origin 或 model_review，不能偽填兩模型審過定義。
+   不改既有九欄 data；decision.policy_id 在 F1 configuration.translation_policies 中唯一解析到既有五欄 policy pin，
+   政策、收據及真實首輪 flavor 譯本 human sampled 決定均驗回；缺 pin 或格式／loader 支援時不得機械採納。
 2. 模板**譯本**由一個模型翻、另一個不同模型及版本審，對最終 bytes 記 `model_review`。
    `origin=machine`，互審同意時 `result=agreed`、`resolution=null`。
 3. 另立風味譯本政策，與效果長尾政策區分 policy_id／範圍。首輪抽查數量由維護者實際選定，
@@ -90,10 +109,17 @@ section、name 或 label。一個非空 flavor 欄位是一段，不以換行、
    初輪已看譯本用 `adoption_review.mode=human`、真正的 `sampled` 決定，保存精確 template ID／revision。
 4. 首輪完成、有實際政策核可收據後，其餘無分歧譯本才用翻譯契約 §2 的 `approved_policy`。
    五欄 policy pin 與非空 initial_sample_decisions 不變；政策只覆蓋 flavor 模板譯本、目標語 zh-Hant，
-   不給 sentence_template、glossary 或 catalog 代簽。政策檔／收據另有專用格式，不沿用 wording-rules 的核可。
+   只按核可 kind 及逐筆 role 開放 flavor 定義／譯本，不給效果 sentence_template、glossary 或 catalog 代簽。
+   政策檔／收據另有專用格式，不沿用 wording-rules 的核可。
 5. 政策批次為 `confirmed`，全 members 完整機械 checked；reviewer／時間沿真實政策收據，note 明示「政策核可」。
    工具作者／時間另記；這個全查集合不是維護者逐筆人工樣本。報告分開列 human_sampled_rows、
-   approved_policy_rows、待人工分歧與缺譯，不把品質門檻較寬鬆改成「已逐筆人工確認」。
+   approved_policy_rows（譯本）、approved_flavor_definition_rows（定義）、待人工分歧與缺譯，
+   不把品質門檻較寬鬆改成「已逐筆人工確認」。
+
+**#195（3/3）政策格式合併且完整 loader 支援前，風味譯本不得以政策採納**；
+定義的上述例外另須維護者明示確認。loader 必須逐筆經 template_id 解析到已驗清冊，
+檢查整個政策批次的 role 都是 flavor，並核對 recipe／零參數／完整段落，不能只看 filing_key 或 policy_id。
+同一政策可以授權兩種 kind，但定義與譯本仍分批、分開計數，任何效果成員混入都拒絕。
 
 有分歧或仍待處理的低信心候選留 authored 外並回原文，不用政策填滿覆蓋率。
 若維護者實際處理某分歧，沿 human 批次、resolution 與 sample_ids 規則採納；
@@ -101,6 +127,15 @@ section、name 或 label。一個非空 flavor 欄位是一段，不以換行、
 風味缺譯不阻擋核心查卡發布，也不阻擋獨立有效的名稱／效果欄位。
 
 ## 5. 格式相容、實作與發布
+
+**context 不含欄位**：build-db §9／目前 DDL 的唯一鍵是 `(source_unit_id,semantic_variant)`，
+同語言同 bytes 的 flavor、name 或 effect 可能共用 context；模板 payload 的 normalizer 不同不能分開 context。
+由 flavor 模板產生的譯文只可被 field=flavor 的 use 選用，flavor use 也不可選 name／effect 譯文；
+須沿精確 binding／模板清冊 role 驗證，不能只驗 context 命中、來源 hash 或 target_lang。
+本限制由 #53 的建置選用與投影在輸出前完整驗證，不宣稱現有共用 selection 已有欄位資格檢查。
+若一個 context 的混合用途不能以現有唯一 selection／binding 同時合法表示，列 incompatible_translation_uses，
+隔離不適用選用、回各自原文；不把 flavor 選用散播到全部 use，也不因欄位不同虛造語義 variant 或改 context-v1 配方。
+真正同字異義可走已採納 context_assignment；其他需要的選用擴充由 #53 另審，不以本文件偷偷改 DDL／公開格式。
 
 `translation_authored_format=1`、`template_source_format=1`、record／decision／hash recipe 與既有 glossary 必填欄位不變。
 新增的是清冊／span 的 role 值與對應嚴格驗證，不修改已採納分片 bytes、索引舊 hash 或舊模板 ID。
@@ -138,10 +173,15 @@ tokens 維持 null，風味及其譯文留詳情分片。不增集合、tuple �
 | F11 | 同 ID 改敘事／recipe，完整 hash 撞異 bytes | 各自拒絕；合法改版需新 ID，不自動繼承譯本 |
 | F12 | 零參數譯本多 slot、未跳脫大括號、字改後沿用舊 review hash | 各自拒絕；最終 bytes 重審不能省略 |
 | F13 | 未做初輪抽查、借效果政策、借 wording 收據、分歧仍走政策、machine 改 project | 各自拒絕假採納／錯範圍／錯歸因 |
-| F14 | 模板定義套 approved_policy，或同檔混定義／譯本／review mode | 各自拒絕，不以譯本核可代簽定義 |
+| F14 | 效果定義借風味政策、風味定義缺 pin／尚未取得維護者確認，或同檔混定義／譯本／review mode | 各自拒絕；核可且逐筆全查的 flavor 定義可引用同一風味政策，譯本不能代簽定義 |
 | F15 | 單筆加封套恰為 1 MiB，或只測 text 大小 | 拒絕寫出；清冊／分片均測完整 bytes |
 | F16 | 敘事人名改譯，只改已核可分片或沿用舊 revision／互審 | 各自拒絕；新譯本 revision 與採納可重建 |
 | F17 | EN 同卡但該版 flavor 已知不同，仍顯示 JP 譯文 | 不共用此欄；獨立名稱／效果按各自閘門判斷 |
+| F18 | 只有 `空格+CRLF+全形空白` 的已知欄位；加入 U+200B 或敘事字各一次 | 前者原樣顯示、另計 whitespace_only、不造翻譯也不報缺譯；後兩者不能當空白跳過 |
+| F19 | JP／EN 各有自撰同一字串，所有來源 pin 合法 | source_lang 不同，兩個模板／context，不因同 bytes 合併 |
+| F20 | 同語言同字串同時作 flavor／name／effect，故同 default context；各方向錯借譯文一次 | 不得互相選用；混合用途不能合法表示就隔離並回各自原文，不能只憑 context 命中 |
+| F21 | 一個政策譯本批次混 flavor／effect；定義批次混角色；只按 filing_key 放行各一次 | 逐筆清冊 role 檢查拒絕；3/3 或 loader 未到位也不得政策採納 |
+| F22 | 正式 text 含 CRLF、行尾空格／tab／全形空白、首尾空白、結尾 LF 各一次 | 各自拒絕；改成合法最終 bytes 後重審，不在審核後正規化 |
 
 實作驗收另核對重跑冪等、完整 F1 閉包、交易失敗無半套產物與公開白名單；
 真實入庫量、來源覆蓋與人工事件另報，不以這份清單宣稱完成 #197 或 #53。
