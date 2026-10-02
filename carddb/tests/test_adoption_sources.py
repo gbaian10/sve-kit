@@ -195,7 +195,7 @@ def test_exact_frozen_field_source_and_f1(
         ("wrong_kind", "source field does not match kind"),
         ("half_raw", "exact raw/region/language mismatch"),
         ("evidence_missing", "mapping lacks approved source evidence"),
-        ("trait", "^Trait mapping adoption awaits compound-trait verification$"),
+        ("trait", "^Vocabulary mapping source field does not match kind$"),
         (
             "disabled_recipe",
             "^Source-field recipe is not enabled for this vocabulary kind$",
