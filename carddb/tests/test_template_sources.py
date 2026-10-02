@@ -30,6 +30,9 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.template_sources.inventory import Scan
+    from sve_carddb.template_sources.models import Recipe
+
     from .template_source_fixtures import Case
 
 
@@ -373,6 +376,75 @@ def test_expected_legacy_count_is_explicit(template_case: Case, tmp_path: Path) 
         match=r"\ALegacy template count differs from the explicit checkpoint expectation\Z",
     ):
         command.run(args)
+
+
+def test_comparison_file_hash_pins_the_bytes_actually_compared(
+    template_case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = template_case.legacy_path.read_bytes()
+    path = tmp_path / "legacy.jsonl"
+    path.write_bytes(original)
+    args = arguments(template_case, tmp_path / "output")
+    args.legacy = path
+
+    def scan_then_change(
+        _sources: FrozenSources, *, repository: Path, pins: tuple[Recipe, ...]
+    ) -> Scan:
+        assert repository == template_case.repository
+        assert pins == template_case.pins
+        path.write_bytes(b"Synthetic changed comparison input")
+        return template_case.scan
+
+    monkeypatch.setattr(command, "scan_batch", scan_then_change)
+    assert command.run(args)["legacy_file_hash"] == digest(original)
+
+
+def test_oversized_recipe_envelope_fails_and_cleans_partial_output(
+    template_case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(output, "MAX_BYTES", 1)
+    with pytest.raises(
+        ValueError,
+        match=r"\ATemplate inventory envelope exceeds the authored size limit\Z",
+    ):
+        output.write(
+            tmp_path / "result",
+            template_case.scan,
+            {},
+            inputs=(
+                template_case.repository,
+                template_case.store,
+                template_case.legacy_path,
+            ),
+        )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_size_splitter_measures_each_final_recipe_envelope(
+    template_case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(output, "TARGET_BYTES", 1)
+    chunks = list(
+        output._chunks(template_case.pins, tuple(template_case.scan.entries[:4]))
+    )
+    assert len(chunks) == 4
+    assert all(len(raw) < MAX_BYTES for raw, _ in chunks)
+
+
+def test_runtime_modules_must_not_be_symlinks(
+    template_case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    root = tmp_path / "runtime"
+    modules = root / "carddb/src/sve_carddb"
+    modules.mkdir(parents=True)
+    (modules / "changed.py").symlink_to(
+        template_case.repository / "carddb/src/sve_carddb/html.py"
+    )
+    monkeypatch.setattr(pins, "RUNTIME", root)
+    with pytest.raises(
+        ValueError, match=r"\ATemplate runtime cannot contain symlinked modules\Z"
+    ):
+        pins.recipes(template_case.repository, template_case.revision)
 
 
 def test_nonability_projection_and_missing_faces_are_not_sources() -> None:

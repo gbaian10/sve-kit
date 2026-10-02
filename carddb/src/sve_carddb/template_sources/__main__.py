@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.snapshot.values import canonical, digest, object_value
 from sve_carddb.source_archive import ArchiveError
-from sve_carddb.template_sources.checkpoint import compare, read_legacy
+from sve_carddb.template_sources.checkpoint import compare, parse_legacy
 from sve_carddb.template_sources.inventory import coverage, scan_batch
 from sve_carddb.template_sources.output import write
 from sve_carddb.template_sources.pins import recipes
@@ -21,7 +21,8 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
     """Generate source candidates first; consult the draft only for comparison."""
     sources = FrozenSources(args.store, args.store_id, args.batch_id)
     pins = recipes(args.repository, args.code_revision)
-    legacy = read_legacy(args.legacy)
+    legacy_content = args.legacy.read_bytes()
+    legacy = parse_legacy(legacy_content)
     if len(legacy) != args.expected_templates:
         raise ValueError(
             "Legacy template count differs from the explicit checkpoint expectation"
@@ -34,7 +35,7 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
         "store_id": args.store_id,
         "batch_id": args.batch_id,
         "code_revision": args.code_revision,
-        "legacy_file_hash": digest(args.legacy.read_bytes()),
+        "legacy_file_hash": digest(legacy_content),
         "source_coverage": coverage(scan),
         **compare(scan, legacy),
     }

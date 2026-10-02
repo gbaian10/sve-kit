@@ -107,6 +107,61 @@ def test_every_unreproduced_template_has_its_own_reason(template_case: Case) -> 
 @pytest.mark.parametrize(
     "change",
     [
+        "entry_field",
+        "entry_hash",
+        "proof_gap",
+        "proof_overlap",
+        "proof_bad_pair",
+        "proof_noninteger",
+        "proof_duplicate",
+        "proof_tail",
+    ],
+)
+def test_field_hash_and_original_partition_are_verified_independently(
+    template_case: Case, change: str
+) -> None:
+    scan = copy.deepcopy(template_case.scan)
+    if change.startswith("entry"):
+        first = scan.entries[0]
+        ref = first.source_ref.model_copy(
+            update={"locator": "/faces/0/name"}
+            if change == "entry_field"
+            else {"text_hash": digest(b"wrong")}
+        )
+        scan.entries[0] = first.model_copy(update={"source_ref": ref})
+    else:
+        proof = next(proof for proof in scan.fields if proof["state"] == "text")
+        segments = array(proof["segments"])
+        if change == "proof_duplicate":
+            segments.append(segments[0])
+        elif change == "proof_tail":
+            proof["code_points"] = 999
+        else:
+            span = array(array(object_value(segments[0])["ranges"])[0])
+            if change == "proof_gap":
+                span[0] = 1
+            elif change == "proof_overlap":
+                span[0] = -1
+            elif change == "proof_bad_pair":
+                span.pop()
+            else:
+                span[0] = True
+    assert coverage(scan)["complete"] is False
+    assert coverage(scan)["trace_complete"] is False
+
+
+def test_unknown_page_presence_does_not_hide_successful_trace_accounting(
+    template_case: Case,
+) -> None:
+    scan = copy.deepcopy(template_case.scan)
+    scan.failures.append({"reason": "unknown_effect_presence"})
+    assert coverage(scan)["complete"] is False
+    assert coverage(scan)["trace_complete"] is True
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
         "page",
         "duplicate_page",
         "field",

@@ -105,8 +105,13 @@ def _field(
         return
     try:
         parts = partition(text, section=section)
-    except ValueError:
-        scan.failures.append({**proof, "reason": "unrecognized_token_header"})
+    except ValueError as error:
+        reason = (
+            "unrecognized_token_header"
+            if str(error) == "Unrecognized legacy token header"
+            else "legacy_partition_failed"
+        )
+        scan.failures.append({**proof, "reason": reason})
         scan.fields.append(proof)
         return
     verify_partition(text, parts)
@@ -262,7 +267,11 @@ def coverage(scan: Scan) -> dict[str, JsonValue]:
     proof_entries = [_proof_entries(proof) for proof in scan.fields]
     expected_entries = set().union(*(identifiers for identifiers, _ in proof_entries))
     actual_entries = [item.id for item in scan.entries]
-    complete = (
+    field_hashes = {
+        (str(proof["source_version_id"]), str(proof["locator"])): proof["text_hash"]
+        for proof in scan.fields
+    }
+    trace_complete = (
         len(actual) == len(set(actual))
         and set(actual) == set(scan.expected_versions)
         and len(actual_fields) == len(set(actual_fields))
@@ -271,10 +280,17 @@ def coverage(scan: Scan) -> dict[str, JsonValue]:
         and set(actual_entries) == expected_entries
         and all(valid for _, valid in proof_entries)
         and all(proof["covered"] is True for proof in scan.fields)
-        and not scan.failures
+        and all(
+            field_hashes.get(
+                (item.source_ref.source_version_id, item.source_ref.locator)
+            )
+            == item.source_ref.text_hash
+            for item in scan.entries
+        )
     )
     return {
-        "complete": complete,
+        "complete": trace_complete and not scan.failures,
+        "trace_complete": trace_complete,
         "expected_pages": len(scan.expected_versions),
         "parsed_pages": len(actual),
         "expected_fields": len(expected_fields),

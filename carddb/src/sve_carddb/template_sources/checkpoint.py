@@ -43,10 +43,10 @@ def _legacy(row: bytes) -> LegacyTemplate:
     return LegacyTemplate(identifier, normalized, tuple(str(m) for m in members))
 
 
-def read_legacy(path: Path) -> tuple[LegacyTemplate, ...]:
+def parse_legacy(content: bytes) -> tuple[LegacyTemplate, ...]:
     """Draft text is comparison input only; errors never include its contents."""
     result = []
-    for row in path.read_bytes().splitlines():
+    for row in content.splitlines():
         if not row.strip():
             continue
         try:
@@ -61,6 +61,11 @@ def read_legacy(path: Path) -> tuple[LegacyTemplate, ...]:
     if len(set(members)) != len(members):
         raise ValueError("Legacy template members must be globally unique")
     return tuple(result)
+
+
+def read_legacy(path: Path) -> tuple[LegacyTemplate, ...]:
+    """Read once so a checkpoint's comparison and file hash use identical bytes."""
+    return parse_legacy(path.read_bytes())
 
 
 def compare(scan: Scan, legacy: tuple[LegacyTemplate, ...]) -> dict[str, JsonValue]:

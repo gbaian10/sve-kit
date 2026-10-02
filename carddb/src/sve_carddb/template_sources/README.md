@@ -7,7 +7,7 @@ infer slot types, create database tables, render translations, update an authore
 index, or connect to a build/preview application.
 
 ```bash
-uv --directory carddb run python -m sve_carddb.template_sources \
+uv --offline --directory carddb run --locked python -m sve_carddb.template_sources \
   --store /read-only/archive --store-id STORE_ID --batch-id sha256:BATCH_HEX \
   --repository /checkout --code-revision FULL_40_HEX \
   --legacy /private/templates.jsonl --expected-templates 3669 \
@@ -63,6 +63,9 @@ alignment and the semantic classification required by §4 remain later work.
   fields independently from the template groups. Existing effect-presence
   evidence proves absence; unknown presence and parse failures fail coverage.
   Exact empty strings and proven absence have separate states.
+  `trace_complete` reports field/byte accounting separately from the additional
+  full-page presence guard. Unknown presence can fail the latter even when a
+  nonempty field was transcribed; this tool does not widen the existing detector.
 - `legacy_member_coverage`: every old use must match, even when another use of
   the same template already reproduced its fingerprint. Missing and changed
   uses are listed individually by member hash, without token names.
