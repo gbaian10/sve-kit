@@ -16,7 +16,7 @@ from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_importer import AdoptionInputs
 from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_loader import Entry
@@ -184,9 +184,33 @@ class Case:
     def build(self) -> BuildContext:
         return BuildContext.from_inputs(
             self.revision,
-            {CODE: (self.repository / CODE).read_bytes()},
-            self.inputs().configuration(),
+            {
+                str(object_value(pin)["name"]): (
+                    self.repository / str(object_value(pin)["name"])
+                ).read_bytes()
+                for pin in array(object_value(self.review["context"])["dependencies"])
+            },
+            source_configuration(self, self.inputs().configuration()),
         )
+
+
+def source_configuration(
+    case: Case, config: dict[str, JsonValue]
+) -> dict[str, JsonValue]:
+    """Give the build its own current recipes without touching signed historical context."""
+    reviewed = object_value(
+        parse(str(object_value(case.review["context"])["configuration"]).encode())
+    )
+    if "catalog_source_recipes" not in reviewed:
+        return config
+    recipes = object_value(reviewed["catalog_source_recipes"])
+    for value in recipes.values():
+        recipe = object_value(value)
+        recipe["program_revision"] = case.revision
+        recipe["code_hash"] = digest(
+            (case.repository / str(recipe["code_path"])).read_bytes()
+        )
+    return config | {"catalog_source_recipes": recipes}
 
 
 def make_case(root: Path) -> Case:

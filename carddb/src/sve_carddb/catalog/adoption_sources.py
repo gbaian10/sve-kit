@@ -152,10 +152,15 @@ class PinnedRepository:
 
 class AdoptionSources:
     def __init__(
-        self, stores: Mapping[str, Path], repository: PinnedRepository
+        self,
+        stores: Mapping[str, Path],
+        repository: PinnedRepository,
+        *,
+        historical: bool = False,
     ) -> None:
         self.stores = dict(stores)
         self.repository = repository
+        self.historical = historical
         self.batches: dict[tuple[str, str], FrozenSources] = {}
         self.uses: list[SourceUse] = []
         self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
@@ -171,7 +176,10 @@ class AdoptionSources:
             raise ValueError("Invalid pinned source recipe fields") from None
         if pin.version != parser:
             raise ValueError("Source parser recipe ID mismatch")
-        self.repository.implementation(pin, context)
+        _source_recipe(pin)
+        self.repository.implementation(
+            pin, context, current_runtime=not self.historical
+        )
         self._runtime(pin, context)
         return pin
 
@@ -280,7 +288,9 @@ class AdoptionSources:
             raise ValueError("Reviewed printing recipe is absent") from None
         if pin.version != parser:
             raise ValueError("Reviewed printing recipe ID mismatch")
-        self.repository.implementation(pin, review.context)
+        self.repository.implementation(
+            pin, review.context, current_runtime=not self.historical
+        )
         self._runtime(pin, review.context)
         for batch in review.source_batches:
             frozen = self.batch(batch.store_id, batch.batch_id)
@@ -378,7 +388,9 @@ class AdoptionSources:
                 raise ValueError("Invalid pinned source recipe fields") from None
             if pin.version != ref.parser:
                 raise ValueError("Source parser recipe ID mismatch")
-            self.repository.implementation(pin, review.context)
+            self.repository.implementation(
+                pin, review.context, current_runtime=not self.historical
+            )
             self._runtime(pin, review.context)
             source, raw, descriptor = self.batch(ref.store_id, ref.batch_id).read(
                 ref.source_version_id,
@@ -399,8 +411,7 @@ class AdoptionSources:
             self._use(source, "catalog_exact_text", ref.model_dump(mode="json"))
         return self.cache[key]
 
-    @staticmethod
-    def _runtime(pin: Normalizer, context: BuildContext) -> None:
+    def _runtime(self, pin: Normalizer, context: BuildContext) -> None:
         required = {
             "carddb/uv.lock",
             "carddb/pyproject.toml",
@@ -420,10 +431,27 @@ class AdoptionSources:
             )
         if pin.version == "official-en-exact-v1":
             required.add("carddb/src/sve_carddb/sources/official_en.py")
+        required.add(pin.code_path)
         dependencies = {p.name: p.sha256 for p in context.dependencies}
+        if self.historical:
+            if not required <= dependencies.keys():
+                raise ValueError(
+                    "Source parser runtime/dependency closure cannot be replayed"
+                )
+            files = self.repository.read_many(
+                context.program_revision, tuple(sorted(required))
+            )
+            if any(dependencies[name] != digest(raw) for name, raw in files.items()):
+                raise ValueError("Review dependency hash mismatch")
+            return
         runtime = Path(__file__).resolve().parents[4]
         for name in required:
-            if dependencies.get(name) != digest((runtime / name).read_bytes()):
+            path = runtime / name
+            if (
+                path.is_symlink()
+                or not path.is_file()
+                or dependencies.get(name) != digest(path.read_bytes())
+            ):
                 raise ValueError(
                     "Source parser runtime/dependency closure cannot be replayed"
                 )
@@ -485,7 +513,7 @@ def pointer(value: JsonValue, locator: str) -> JsonValue:
     return value
 
 
-def _projection(pin: Normalizer, raw: bytes, url: str) -> JsonValue:
+def _source_recipe(pin: Normalizer) -> None:
     if pin.config:
         raise ValueError("Unsupported source recipe configuration")
     paths = {
@@ -495,6 +523,10 @@ def _projection(pin: Normalizer, raw: bytes, url: str) -> JsonValue:
     }
     if paths.get(pin.version) != pin.code_path:
         raise ValueError("Unsupported source parser recipe")
+
+
+def _projection(pin: Normalizer, raw: bytes, url: str) -> JsonValue:
+    _source_recipe(pin)
     if pin.version == "exact-json-v1":
         return parse(raw)
     number = parse_qs(urlsplit(url).query).get("cardno", [])
