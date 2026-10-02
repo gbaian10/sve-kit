@@ -8,7 +8,6 @@ from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.card_extras.errata import populate_errata
 from sve_carddb.card_extras.models import key
 from sve_carddb.card_extras.plan import plan_card_extras
-from sve_carddb.card_extras.readiness import confirmed
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import canonical, parse
 from sve_carddb.text_observations.intern import TextInterner
@@ -17,7 +16,6 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext, InputRecord
     from sve_carddb.card_extras.plan import ExtrasPlan, QAVersion
-    from sve_carddb.card_extras.readiness import ErrataConfirmation
 
 
 def populate_card_extras(
@@ -138,7 +136,6 @@ def require_card_extras_ready(
     scope: tuple[tuple[str, str], ...],
     *,
     strict: bool = False,
-    confirmations: tuple[ErrataConfirmation, ...] = (),
 ) -> tuple[CardExtrasRestriction, ...]:
     """Report manual-only faces; strict checks reject automation/current adoption."""
     faces: dict[tuple[str, str], set[str]] = defaultdict(set)
@@ -190,11 +187,6 @@ def require_card_extras_ready(
                     else None,
                 )
             )
-    if len({item.issue_id for item in confirmations}) != len(confirmations):
-        raise ValueError("Duplicate errata confirmation issue")
-    restrictions = [
-        item for item in restrictions if not confirmed(db, item, confirmations)
-    ]
     if strict and restrictions:
         raise ValueError(
             "Unresolved supplemental evidence blocks automation or confirmed current"

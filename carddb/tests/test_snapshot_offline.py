@@ -6,7 +6,8 @@ from typing import TYPE_CHECKING
 import pytest
 from typer.testing import CliRunner
 
-from sve_carddb.build_inputs import InputRecord
+from sve_carddb.build_db.t1 import compile_minimum
+from sve_carddb.build_inputs import InputRecord, SourceUse, input_record
 from sve_carddb.card_extras import (
     CardPage,
     ErrataChange,
@@ -17,6 +18,10 @@ from sve_carddb.card_extras import (
     populate_card_extras,
 )
 from sve_carddb.card_extras.archive import EN_PARSER, PARSER
+from sve_carddb.card_extras.importer import CardExtrasRestriction
+from sve_carddb.catalog import adoption_importer
+from sve_carddb.catalog.models import Catalog
+from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.cli import app
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
@@ -29,11 +34,16 @@ from sve_carddb.snapshot.offline import (
     require_offline_coverage,
 )
 from sve_carddb.snapshot.preview import Roots, require_unknown_coverage, write_preview
+from sve_carddb.snapshot.project import project
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
 
+from .catalog_vocabulary_fixtures import make_vocabulary_case
+from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
 from .test_snapshot_preview import EmptySources, prepare_build
+from .test_snapshot_preview import logical as logical  # ruff: ignore[useless-import-alias] -- register the export fixture parent
+from .text_observation_fixtures import LANGUAGES
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -41,7 +51,10 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext
     from sve_carddb.card_extras import ExtrasPlan
+    from sve_carddb.snapshot.export import Snapshot
+    from sve_carddb.snapshot.project import Decisions, Projection, Settings
 
+    from .catalog_vocabulary_fixtures import VocabularyCase
     from .shared_case_fixtures import TextCaseTemplate
     from .text_observation_fixtures import Case
 
@@ -66,8 +79,52 @@ def prepared(
         for region in ("en", "jp")
     )
     recipe = Inputs(
-        **original.model_dump(exclude={"card_batch", "image_batch", "parser_version"}),
+        **original.model_dump(
+            exclude={
+                "card_batch",
+                "image_batch",
+                "parser_version",
+                "vocabulary",
+                "languages",
+            }
+        ),
         sources=pins,
+    )
+    original.vocabulary.unlink()
+
+    class AdoptedInputs:
+        def configuration(self) -> dict[str, str]:
+            return {"synthetic_adoptions": "immutable-receipts"}
+
+    monkeypatch.setattr(
+        adoption_importer, "AdoptionInputs", lambda *_args: AdoptedInputs()
+    )
+    monkeypatch.setattr(
+        adoption_importer,
+        "derive_catalog",
+        lambda *_args, **_kwargs: CatalogProjection(
+            Catalog(
+                languages=LANGUAGES,
+                terms=(),
+                aliases=(),
+                symbols=(),
+                normalizer_version="nfkc-casefold-v1",
+            ),
+            case.vocabulary,
+        ),
+    )
+    adoption_uses = (
+        SourceUse(
+            source=next(iter(case.provider.cards.values())).source,
+            usage="catalog_exact_text",
+            locator="synthetic-adoption-field",
+        ),
+    )
+    monkeypatch.setattr(offline, "_adoption_uses", lambda *_args: adoption_uses)
+    monkeypatch.setattr(
+        adoption_importer,
+        "populate_adoptions",
+        lambda _db, _inputs, *, build, **_kwargs: input_record(build, adoption_uses),
     )
     identities = ProductIdentities(
         recipe.revision, digest(b"{}"), b"{}", (), {}, {}, (), case.catalog
@@ -419,7 +476,7 @@ def test_offline_requires_explicit_dual_region_pins(
         Inputs.model_validate_json(canonical(values))
 
 
-@pytest.mark.parametrize("field", ["data_version", "languages"])
+@pytest.mark.parametrize("field", ["data_version"])
 def test_offline_rejects_formal_version_or_missing_language_before_io(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]], field: str
 ) -> None:
@@ -428,13 +485,13 @@ def test_offline_rejects_formal_version_or_missing_language_before_io(
     message = (
         "Offline composition requires a preview- data version"
         if field == "data_version"
-        else "Offline launch inputs require EN and JA languages"
+        else "Offline launch requires adopted EN and JA languages"
     )
     with pytest.raises(ValueError, match=message):
         Inputs.model_validate_json(canonical(values))
 
 
-@pytest.mark.parametrize("protected", ["repo", "archive", "vocabulary"])
+@pytest.mark.parametrize("protected", ["repo", "archive"])
 def test_api_bundle_cannot_write_inside_immutable_input(
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]], protected: str
 ) -> None:
@@ -486,3 +543,198 @@ def test_cli_cannot_write_bundle_into_protected_roots(
         == "Offline bundle must be disjoint from protected inputs and formal output"
     )
     assert not (tmp_path / "preview").exists()
+
+
+@pytest.mark.parametrize(
+    "regions", [(), ("en",), ("jp", "en"), ("jp", "jp"), ("en", "jp", "en")]
+)
+def test_unsupported_preview_region_combination_is_rejected(
+    exported: Snapshot, regions: tuple[str, ...]
+) -> None:
+    with pytest.raises(ValueError, match=r"^Unsupported preview recipe regions$"):
+        require_preview(exported.manifest, regions=regions)
+
+
+def test_unknown_supplemental_reason_fails_in_projection(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        offline,
+        "require_card_extras_ready",
+        lambda *_args, **_kwargs: (
+            CardExtrasRestriction("en", "card", "card", (), "invented", "issue"),
+        ),
+    )
+    with pytest.raises(ValueError, match=r"^Unknown supplemental restriction reason$"):
+        build(prepared[1])
+
+
+@pytest.mark.parametrize(
+    "field",
+    ["source_windows", "restriction_coverage", "cr_version", "restriction", "errata"],
+)
+def test_composer_checks_coverage_before_returning_or_publishing(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    field: str,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    def poisoned(
+        db: Database,
+        *,
+        regions: tuple[str, ...],
+        as_of: str,
+        settings: Settings,
+        decisions: Decisions,
+        publication_printings: frozenset[str] | None = None,
+    ) -> Projection:
+        projection = project(
+            db,
+            regions=regions,
+            as_of=as_of,
+            settings=settings,
+            decisions=decisions,
+            publication_printings=publication_printings,
+        )
+        if field in {"source_windows", "restriction_coverage"}:
+            return replace(
+                projection,
+                metadata=projection.metadata | {field: [{"state": "complete"}]},
+            )
+        return replace(
+            projection, tables=projection.tables | {field: [{"id": "invented"}]}
+        )
+
+    monkeypatch.setattr(offline, "project", poisoned)
+    message = (
+        "Uncovered sources must remain empty windows / unknown"
+        if field in {"source_windows", "restriction_coverage"}
+        else "Unrequested ancillary sources cannot become public facts"
+    )
+    output = tmp_path / "bundle"
+    with pytest.raises(ValueError, match=r"^" + message + "$"):
+        build(prepared[1], bundle_dir=output)
+    assert not output.exists()
+
+
+def test_cli_preview_cannot_contain_its_recipe(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    tmp_path: Path,
+) -> None:
+    path = tmp_path / "preview" / "inputs.json"
+    path.parent.mkdir()
+    content = canonical(prepared[1].model_dump(mode="json"))
+    path.write_bytes(content)
+    result = CliRunner().invoke(
+        app,
+        [
+            "snapshot",
+            "export-offline",
+            "--inputs",
+            str(path),
+            "--preview-dir",
+            str(path.parent),
+            "--cdn-dir",
+            str(tmp_path / "formal"),
+            "--bundle-dir",
+            str(tmp_path / "bundle"),
+        ],
+    )
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception) == "Offline preview must be disjoint from recipe"
+    assert path.read_bytes() == content
+    assert not (tmp_path / "bundle").exists()
+
+
+def test_recipe_cannot_supply_private_vocabulary_or_languages(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+) -> None:
+    for name in ("vocabulary", "languages"):
+        values = prepared[1].model_dump(mode="json") | {name: "invented"}
+        with pytest.raises(ValueError, match="Extra inputs are not permitted"):
+            Inputs.model_validate_json(canonical(values))
+
+
+def test_missing_adopted_language_fails_before_population(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        adoption_importer,
+        "derive_catalog",
+        lambda *_args, **_kwargs: CatalogProjection(
+            Catalog(
+                languages=(LANGUAGES[0],),
+                terms=(),
+                aliases=(),
+                symbols=(),
+                normalizer_version="nfkc-casefold-v1",
+            ),
+            prepared[0].vocabulary,
+        ),
+    )
+    with pytest.raises(
+        ValueError, match=r"^Offline launch requires adopted EN and JA languages$"
+    ):
+        build(prepared[1])
+
+
+def test_lost_adoption_evidence_is_rejected_by_complete_closure(
+    prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setattr(
+        adoption_importer,
+        "populate_adoptions",
+        lambda _db, _inputs, *, build, **_kwargs: input_record(build, ()),
+    )
+    with pytest.raises(
+        ValueError, match=r"^Build input use closure or context mismatch$"
+    ):
+        build(prepared[1])
+
+
+@pytest.fixture(scope="module")
+def immutable_adoptions(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
+    return make_vocabulary_case(tmp_path_factory.mktemp("offline-adoptions"))
+
+
+def test_offline_adapter_uses_real_checked_bilingual_adoptions(
+    immutable_adoptions: VocabularyCase,
+) -> None:
+    case = immutable_adoptions
+    derived = offline._derive_adoptions(
+        case.case.inputs(),
+        compile_minimum(include_en=True),
+        case.build(),
+        {"test-store": case.archive},
+    )
+    assert {item.code for item in derived.catalog.languages} == {"en", "ja", "zh-Hant"}
+    for region in ("en", "jp"):
+        binding = derived.vocabulary.lookup(region, "type", "Synthetic type")
+        assert binding.code == "follower"
+        assert binding.special_kinds == ("evolve",)
+    uses = offline._adoption_uses(case.case.inputs(), {"test-store": case.archive})
+    assert uses
+    assert {use.usage for use in uses} == {"catalog_exact_text"}
+    assert {use.source.url for use in uses} == {
+        "https://example.invalid/en",
+        "https://example.invalid/jp",
+    }
+    assert derived.catalog.terms[0].label.text != "Synthetic type"
+
+
+def test_adoption_adapter_rejects_an_unpinned_configuration(
+    immutable_adoptions: VocabularyCase,
+) -> None:
+    case = immutable_adoptions
+    build = case.build().model_copy(update={"configuration": "{}"})
+    with pytest.raises(
+        ValueError, match=r"^Build configuration does not pin adoption inputs$"
+    ):
+        offline._derive_adoptions(
+            case.case.inputs(),
+            compile_minimum(include_en=True),
+            build,
+            {"test-store": case.archive},
+        )

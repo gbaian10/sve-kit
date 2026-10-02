@@ -2,7 +2,7 @@
 
 import shutil
 from dataclasses import replace
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import httpx
 import pytest
@@ -358,3 +358,12 @@ def test_frozen_jp_does_not_accept_en_scope(sealed: tuple[ArchiveStore, str]) ->
         ValueError, match=r"^Card extras batch source identity mismatch$"
     ):
         tuple(FrozenCardExtras(store.root, store.store_id, batch, region="en").pages())
+
+
+def test_archive_requires_an_explicit_supported_region(tmp_path: Path) -> None:
+    with pytest.raises(
+        ValueError, match=r"^Card extras require an explicit JP or EN region$"
+    ):
+        FrozenCardExtras(
+            tmp_path, "unused", "sha256:" + "a" * 64, region=cast("Region", "invented")
+        )

@@ -17,9 +17,9 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
+from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
 from sve_carddb.products import (
     FrozenProducts,
-    Language,
     load_product_identities,
     load_products,
     plan_official_products,
@@ -43,7 +43,6 @@ from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.text_observations import (
     FrozenTexts,
     RegionalTexts,
-    Vocabulary,
     plan_text_observations,
     populate_text_preview,
     text_configuration,
@@ -52,10 +51,12 @@ from sve_carddb.text_observations.composition import text_preview_uses
 from sve_carddb.text_observations.wording import printing_observed_texts, wording_views
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import Database
-    from sve_carddb.build_inputs import InputRecord, Source
+    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build_inputs import InputRecord, Source, SourceUse
     from sve_carddb.card_extras import ErrataPage, ExtrasPlan
-    from sve_carddb.card_extras.readiness import ErrataConfirmation
+    from sve_carddb.catalog.adoption_importer import AdoptionInputs
+    from sve_carddb.catalog.projection import CatalogProjection
+    from sve_carddb.products import ProductIdentities
     from sve_carddb.registry.records import CorrectionEvidence
     from sve_carddb.snapshot.project import Projection
 
@@ -73,8 +74,6 @@ class Inputs(RecordData):
     store_id: Text
     sources: tuple[RegionalInput, ...]
     revision: Revision
-    vocabulary: Path
-    languages: tuple[Language, ...]
     as_of: Date
     data_version: Text
     published_at: Instant
@@ -87,8 +86,6 @@ class Inputs(RecordData):
         """Require both launch regions and their languages, without implicit defaults."""
         if tuple(pin.region for pin in self.sources) != ("en", "jp"):
             raise ValueError("Offline launch inputs require sorted EN and JP pins")
-        if not {"en", "ja"} <= {language.code for language in self.languages}:
-            raise ValueError("Offline launch inputs require EN and JA languages")
         validate("DataVersion", self.data_version)
         if not self.data_version.startswith("preview-"):
             raise ValueError("Offline composition requires a preview- data version")
@@ -123,6 +120,45 @@ def require_offline_coverage(projection: Projection, *, errata: bool) -> None:
         raise ValueError("Unrequested ancillary sources cannot become public facts")
 
 
+def _dependencies(repo: Path, identities: ProductIdentities) -> dict[str, bytes]:
+    dependencies = {
+        path.relative_to(repo).as_posix(): path.read_bytes()
+        for path in (repo / "carddb/src/sve_carddb").rglob("*.py")
+        if path.name != "_version.py"
+    } | identities.dependencies()
+    dependencies["carddb/uv.lock"] = (repo / "carddb/uv.lock").read_bytes()
+    return dependencies
+
+
+def _derive_adoptions(
+    inputs: AdoptionInputs,
+    schema: CompiledSchema,
+    context: BuildContext,
+    stores: dict[str, Path],
+) -> CatalogProjection:
+    """Derive only from checked receipts before any candidate text is written."""
+    from sve_carddb.catalog.adoption_importer import derive_catalog  # ruff: ignore[import-outside-top-level] -- load after the text interner to avoid the catalog/text package import cycle
+
+    with create_database(schema) as probe:
+        derived = derive_catalog(probe, inputs, build=context, stores=stores)
+    if not {"en", "ja"} <= {language.code for language in derived.catalog.languages}:
+        raise ValueError("Offline launch requires adopted EN and JA languages")
+    return derived
+
+
+def _adoption_uses(
+    inputs: AdoptionInputs, stores: dict[str, Path]
+) -> tuple[SourceUse, ...]:
+    """Replay the complete receipt evidence independently of database insertion."""
+    sources = AdoptionSources(stores, PinnedRepository(inputs.repository))
+    for snapshot in inputs.load():
+        for shard in snapshot.shards:
+            envelope = shard.envelope()
+            for record in envelope.records:
+                sources.verify(record, envelope.review_context)
+    return uses_sorted(sources.uses)
+
+
 def _source_gaps(db: Database, extras: ExtrasPlan) -> list[JsonValue]:
     printing_index = {
         (row.values["region"], row.values["card_no"]): str(row.values["id"])
@@ -149,12 +185,13 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
     inputs: Inputs,
     *,
     errata: tuple[ErrataPage, ...] = (),
-    confirmations: tuple[ErrataConfirmation, ...] = (),
     bundle_dir: Path | None = None,
 ) -> Built:
     """Build both regions from sealed sources, retaining every diagnostic source use."""
+    from sve_carddb.catalog.adoption_importer import AdoptionInputs, populate_adoptions  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
+
     if bundle_dir is not None:
-        for protected in (inputs.repo, inputs.archive, inputs.vocabulary):
+        for protected in (inputs.repo, inputs.archive):
             output, source = bundle_dir.resolve(), protected.resolve()
             if output.is_relative_to(source) or source.is_relative_to(output):
                 raise ValueError(
@@ -227,24 +264,23 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
             inputs.archive, inputs.store_id, pin.card_batch, region=pin.region
         ).pages()
     )
-    vocabulary = Vocabulary.model_validate_json(inputs.vocabulary.read_bytes())
-    vocabulary.verify()
-    dependencies = {
-        path.relative_to(inputs.repo).as_posix(): path.read_bytes()
-        for path in (inputs.repo / "carddb/src/sve_carddb").rglob("*.py")
-        if path.name != "_version.py"
-    } | identities.dependencies()
-    dependencies["carddb/uv.lock"] = (inputs.repo / "carddb/uv.lock").read_bytes()
-    configuration = text_configuration(texts, vocabulary, ()) | {
+    dependencies = _dependencies(inputs.repo, identities)
+    adoptions = AdoptionInputs(
+        inputs.repo / "authored", inputs.repo, inputs.revision, ("catalog-adoptions",)
+    )
+    configuration = adoptions.configuration() | {
         "product_identity": identities.configuration(),
-        "offline_recipe": inputs.model_dump(
-            mode="json", exclude={"repo", "archive", "vocabulary"}
-        ),
+        "offline_recipe": inputs.model_dump(mode="json", exclude={"repo", "archive"}),
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     schema = compile_minimum(include_en=True)
+    derived = _derive_adoptions(adoptions, schema, context, stores)
+    vocabulary = derived.vocabulary
+    configuration |= text_configuration(texts, vocabulary, ())
+    context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
+    adoption_uses = _adoption_uses(adoptions, stores)
     with create_database(schema) as db:
         with db.transaction():
             parents = populate_text_preview(
@@ -255,10 +291,11 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                 build=context,
                 vocabulary=vocabulary,
                 published=(),
-                languages=inputs.languages,
+                languages=derived.catalog.languages,
                 stores=stores,
                 official=official,
             )
+            adopted = populate_adoptions(db, adoptions, build=context, stores=stores)
             extras = plan_card_extras(db, pages, errata=errata)
             # The parent record is private staging; only the complete context is emitted.
             context = BuildContext.from_inputs(
@@ -267,9 +304,6 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                 configuration
                 | {
                     "card_extras": extras.configuration(),
-                    "errata_confirmations": [
-                        item.model_dump(mode="json") for item in confirmations
-                    ],
                 },
             )
             added = populate_card_extras(db, extras, build=context)
@@ -277,9 +311,10 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                 (
                     *text_preview_uses(catalog, texts, stores, official=official),
                     *extras.source_uses(),
+                    *adoption_uses,
                 )
             )
-            record = input_record(context, (*parents.uses, *added.uses))
+            record = input_record(context, (*parents.uses, *added.uses, *adopted.uses))
             record.verify(db, context, expected)
         restrictions = require_card_extras_ready(
             db,
@@ -292,7 +327,6 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                     }
                 )
             ),
-            confirmations=confirmations,
         )
         decisions = replace(
             Decisions(),
@@ -315,6 +349,11 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
     content = record.content()
     report: dict[str, JsonValue] = {
         "input_sha256": digest(content),
+        "adopted_vocabulary": {
+            "terms": len(vocabulary.terms),
+            "bindings": len(vocabulary.bindings),
+            "languages": [item.code for item in derived.catalog.languages],
+        },
         "regions": ["en", "jp"],
         "counts": {table: len(rows) for table, rows in projection.tables.items()},
         "card_extras": extras.report(),
@@ -380,12 +419,18 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                 build=context,
                 vocabulary=vocabulary,
                 published=(),
-                languages=inputs.languages,
+                languages=derived.catalog.languages,
                 stores=stores,
                 official=official,
             )
+            adoption_record = populate_adoptions(
+                target, adoptions, build=context, stores=stores
+            )
             extras_record = populate_card_extras(target, extras, build=context)
-            return input_record(context, (*parent_record.uses, *extras_record.uses))
+            return input_record(
+                context,
+                (*parent_record.uses, *extras_record.uses, *adoption_record.uses),
+            )
 
         publish_bundle(
             schema, bundle_dir, context, expected, populate, report, stores=stores

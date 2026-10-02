@@ -7,10 +7,14 @@ manually adopted. Raw card numbers are matched only within their own region.
 
 The recipe is JSON matching `sve_carddb.snapshot.offline.Inputs`: `repo`, `archive`,
 `store_id`, sorted `sources` for `en` then `jp` (each has `region`, `card_batch`,
-`image_batch`, `parser_version`), `revision`, `vocabulary`, `languages`, `as_of`,
+`image_batch`, `parser_version`), `revision`, `as_of`,
 `data_version`, `published_at`, `feedback_url`, `grammar_version` and
-`normalizer_version`. EN and JA languages are required. Vocabulary is an explicit
-verified input; this recipe does not invent production vocabulary mappings.
+`normalizer_version`. Vocabulary and UI languages are derived from the complete
+`authored/catalog-adoptions` entry at the pinned revision by `derive_catalog`.
+No caller vocabulary JSON or language settings are accepted. Adopted EN and JA
+languages are required; immutable receipts, source evidence and their complete
+source-use closure are checked and included in the build. Missing trait/title or
+other raw-field adoptions fail closed rather than generating codes.
 Image batches verify authored correction evidence, rather than publishing assets.
 
 ```bash
@@ -62,22 +66,13 @@ announcement URL; each version keeps `announced_on` nullable and each change kee
 all announcements. Date absence does not authorize substitution by fetch time,
 effective date or an inferred year. No original printing text is reconstructed.
 
-`ErrataConfirmation` is a private consumption boundary for later reviewed checks,
-not an adoption loader or permission to create a confirmed current. A check binds
-one `issue_id`, confirmed `decision_id` and `context_hash` from `review_context`.
-The context requires an exact same-region announcement linked to the card,
-complete current faces and physical observations. It hashes source metadata,
-printings, observed/current revisions, text units, rules memberships and all
-announcement versions/changes. Each required source must be linked under
-`errata_current_evidence`; announcement sources must also carry an
-`errata_current_checked` locator of canonical
-`{"context_hash":"sha256:…","issue_id":"…"}`. Absent, stale or incomplete checks
-retain the block. Duplicate issue checks fail. Confirmation clears only that issue;
-other announcements or source problems continue to block. The eventual C/authored
-producer must validate the semantic correction and review provenance before
-creating these receipts. This PR creates no real confirmations or adoptions.
+This recipe only reports pending errata restrictions; it has no confirmation input
+or mechanism to clear them. PR C must first define the confirmation contract,
+authorized maintainer, decision category/policy, complete correction scope and
+freshness, together with its producer and consumer. Importing an announcement
+alone does not approve current wording or clear any restriction.
 
 The report uses counts and identifiers rather than official text. Unknown
 coverage and pending checks are not a claim that there is no erratum. Real
-publication requires production vocabulary, C's per-card corrected-text checks,
+publication requires complete adopted raw-field vocabulary, C's per-card corrected-text checks,
 formal release gates and the separate Web consumer acceptance.
