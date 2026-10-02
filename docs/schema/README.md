@@ -19,6 +19,7 @@
 | [身分修復與決定續版](identity-repair.md)      | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |
 | [authored 維護方式](authored-layout.md)       | `authored/` 已定案身分登錄、其餘配置提案與批次決定封套                            |
 | [詞彙與路由契約](catalog-route-adoption.md)   | 採納封套與覆寫；已核可稀有度白名單及繁中缺譯順序                                  |
+| [術語採納與加粗](glossary-adoption.md)        | 概念引用、來源主張／委託收據、可修訂加粗與公開格式擴充影響                        |
 | [翻譯與模板採納契約](translation-contract.md) | 已核可的來源／抽查／提前顯示；人工採納、推導重建與跨區契約                        |
 
 ## 文件之間的關係

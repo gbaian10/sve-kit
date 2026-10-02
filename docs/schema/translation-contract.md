@@ -1,6 +1,6 @@
 # 翻譯、模板與跨區採納契約
 
-本文件細化 [build-db §9／§14](build-db.md#9-翻譯句型與術語) 與 [authored-layout §6](authored-layout.md#6-模板翻譯與語義例外)。人工採納與工具推導分開，binding/use 每次建置重建，不新增永久物件庫。以下為技術契約，尚未實作匯入器；§1 另外記錄使用者已核可的顯示與首輪抽查政策。例子全部自撰，不是真實卡文或採納紀錄。
+本文件細化 [build-db §9／§14](build-db.md#9-翻譯句型與術語) 與 [authored-layout §6](authored-layout.md#6-模板翻譯與語義例外)。人工採納與工具推導分開，binding/use 每次建置重建，不新增永久物件庫。以下為技術契約，尚未實作匯入器；§1 另外記錄使用者已核可的顯示與首輪抽查政策。例子全部自撰，不是真實卡文或採納紀錄。術語的委託採納、未驗來源主張及可修訂加粗由 [術語採納擴充](glossary-adoption.md) 細化；該擴充為 2026-10-02 協調者在維護者委託下的決定，不記為使用者親自核可。
 
 ## 1. 政策與狀態
 
@@ -38,6 +38,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 | templates | template_translation／template_id,lang,revision | §4 的模板譯本；reviewed 且 sampled/confirmed |
 | glossary | glossary_term／id | §5 的永久概念 |
 | glossary | glossary_choice／term_id,lang,adoption_no | 選定譯詞的不可變決定；投影當前 glossary_translation |
+| glossary | glossary_emphasis_choice／term_id,adoption_no | rule_term 的可修訂加粗；其餘由型別推導，見術語採納擴充 §5 |
 | glossary | vocabulary_choice／vocabulary_kind,vocabulary_code,lang,adoption_no | 介面詞彙標籤的選詞，不假造 glossary_term |
 | glossary | symbol_localization_choice／symbol_id,lang,adoption_no | 記號三語文案的選詞，建置自動選有效譯本，缺譯回原記號 |
 | overrides | context_assignment／owner,field,ordinal,adoption_no | 同字異義的概念／variant 指派 |
@@ -47,7 +48,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 | region-reviews | region_text_review／card_id,region,jp_hash,region_hash,adoption_no | §7 的跨區規則與顯示核對，含 counterpart 採納 |
 | region-reviews | region_divergence／card_id,region,field_scope,adoption_no | §7 的明確差異／解除；confirmed |
 
-本文封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體，除下述政策例外外仍須人工核對；policy_id 指精確政策，新增／改內容必換決定。
+本文封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體，除下述模板政策例外及 [glossary 委託收據](glossary-adoption.md#4-實際人工或委託採納) 外仍須人工核對；glossary 委託決定記實際協調者與事件、不計維護者親自審閱。policy_id 指精確政策，新增／改內容必換決定。
 
 **長尾模板譯本的政策採納例外**：比照 [authored-layout §9.5](authored-layout.md#95-核可規則confirmed-封套與人工確認) 的 approved_rules，僅 template_translation 可用 `adoption_review.mode=approved_policy`。adoption_review 恰為 `{mode,policy,initial_sample_decisions}`，mode=human/approved_policy；human 的 policy=null、initial_sample_decisions=[]。approved_policy 的 policy 為 `{policy_id,authored_revision,path,hash,approval_receipt_hash}`，釘完整 commit、repo 相對路徑、canonical 政策內容 hash 與核可收據 hash；initial_sample_decisions 是非空、排序唯一的 `{decision_id,membership_hash}` 陣列，引用實際完成首輪高頻抽查的 human sampled 決定。政策與收據須能驗明 §1 的抽查集合、無分歧長尾適用範圍與 machine 標示，不以本文件的核可敘述代替真實首輪收據；相關來源、分片及收據 bytes 全部納入 F1。
 
@@ -110,16 +111,16 @@ model_review 在 machine 時必填 `{translated_by,reviewed_by,reviewed_at,text_
 
 ## 5. 概念、選詞與數位證據
 
-glossary_term.data 為 `{id,category,concept_key,source_ref,source_span}`，source_ref 指日文來源欄位，source_span 為 `{start,end}` 或 null（全欄），由 exact 摘錄重建 source_ja 的概念名稱；id=`term:`＋人工首次配發的 concept_key（ASCII `[a-z][a-z0-9_.-]*`）。key 以概念命名，如 `rule.example.a`，不以原文字串當唯一鍵、不隨譯名重算；同字異義需不同 key。source_ref 不要求數位卡片的 name 欄，故原始詞只出現在效果文時也能登錄。
+glossary_term.data 為 `{id,category,concept_key,source_ref,source_span,authored_source_ja,missing_source_reason,adoption_review}`；有 frozen 日文欄位時用 source_ref／source_span exact 摘錄重建 source_ja，其餘兩個來源欄為 null；無 raw 的專案概念允許 ref／span 為 null，但名稱與理由必填。互斥模式與委託收據依 [術語採納擴充 §2／§4](glossary-adoption.md#2-專案概念可沒有-raw-locator)，不能用假 locator 或空字串。id=`term:`＋人工首次配發的 concept_key（ASCII `[a-z][a-z0-9_.-]*`）。key 以英文概念命名，如 `action.draw`，不以草稿流水號或原文字串當唯一鍵、不隨譯名重算；同字異義需不同 key。前綴用穩定大類，提案審核後可由獲維護者委託的協調者核可配發；借 EN 名命名不算採納英文。source_ref 不要求數位卡片的 name 欄，故原始詞只出現在效果文時也能登錄。
 
 | 草稿分類 | 正式去向 |
 | --- | --- |
 | keyword、ability、tribe | glossary category keyword、ability、trait |
 | verb、zone、other | glossary category rule_term；other 須逐概念核對，不機械確定語義 |
-| class、card_type | vocabulary(kind=class/type) 的 label，不建立假的 glossary category |
+| class、card_type | 既有實體卡 vocabulary(kind=class/type) 的 label；不存在的職業／卡種與泛稱走 glossary rule_term，不增代碼，見術語採納擴充 §1 |
 | 卡名候選 | glossary category card_name，與 SVE／數位同概念決定分開驗 |
 
-glossary_choice.data 為 `{term_id,lang,value,origin,concept_evidence,adoption_no,predecessor}`；vocabulary_choice 將 term_id 換成 `{vocabulary_kind,vocabulary_code}`。value 可為 null，或 `{kind:authored,text}` 或 `{kind:source,source_ref,span}`，span 為 `{start,end}` 或 null（取全字串）。parser 必須提供欄位語言，jp_ref 為 ja、target_ref 與 lang 相同；原文整欄 hash 加 exact span 足以驗摘錄，不要求摘錄等於整份 text_unit。origin 沿 build-db 的 official_svwb/official_sv1/project/community/machine。null value 是明示撤回；有效 glossary_choice 投影為每 `(term_id,lang)` 唯一 glossary_translation，保留其決定與來源；舊 choice 留 authored。vocabulary_choice 則推導 label 的翻譯與 FieldTranslation。
+glossary_choice.data 為 `{term_id,lang,value,origin,concept_evidence,source_claim,adoption_review,adoption_no,predecessor}`；vocabulary_choice 將 term_id 換成 `{vocabulary_kind,vocabulary_code}`。source_claim／adoption_review 依 [術語採納擴充 §3／§4](glossary-adoption.md#3-選詞的主張來源與-origin)；未驗出處先有效採納 project，另記主張來源，不新增半官方 origin。value 可為 null，或 `{kind:authored,text}` 或 `{kind:source,source_ref,span}`，span 為 `{start,end}` 或 null（取全字串）。parser 必須提供欄位語言，jp_ref 為 ja、target_ref 與 lang 相同；原文整欄 hash 加 exact span 足以驗摘錄，不要求摘錄等於整份 text_unit。origin 沿 build-db 的 official_svwb/official_sv1/project/community/machine。null value 是明示撤回；有效 glossary_choice 投影為每 `(term_id,lang)` 唯一 glossary_translation，保留其決定與來源；舊 choice 留 authored。vocabulary_choice 則推導 label 的翻譯與 FieldTranslation。
 
 concept_evidence 是以下 tagged union 的陣列；官方 origin 至少一項且支持同一概念與 value 的 exact 譯詞，不能只證明兩詞曾在同一頁出現：
 
@@ -129,7 +130,7 @@ concept_evidence 是以下 tagged union 的陣列；官方 origin 至少一項�
 | effect_term | `jp_ref,jp_span,target_ref,target_span,concept_note`；對齊效果文中同一術語的摘錄，span 精確；concept_note 寫概念理由，不抄官方卡文 |
 | dictionary_entry | `dictionary_kind,entry_key,jp_ref,target_ref,concept_note`；dictionary_kind=skill_names/tribe_names，entry_key 釘同一官方字典鍵，核對該 key 真正代表的概念 |
 
-ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital_face/name_unit_id，可承接效果文摘錄與官方詞彙字典的證據。既有草稿摘錄缺 raw 版本或精確位置時先重定位、驗來源並採納，不能把草稿當官方證據。
+ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital_face/name_unit_id，可承接效果文摘錄與官方詞彙字典的證據。既有草稿摘錄缺 raw 版本或精確位置時不能把草稿當官方證據；可先以 project 有效採納、主張來源另記，補到證據後追加下一個 adoption 升級，見術語採納擴充 §3。
 
 數位 JSON 的**已封存批次是匯入前提**，本文件不宣稱 sv1/svwb 已有批次；實際 batch ID 到位、閉包驗過才可採納。不用 URL／latest API 回應補缺來源。卡名需 digital_card/face/text 與同概念最小閉包，術語字典僅需相應來源與 parser，不為字典建假數位卡。
 
@@ -228,7 +229,7 @@ rule_hash、references 與 rule-bundle-v2 recipe 沿 build-db §14；unknown 段
 
 沿 [snapshot-format §5](snapshot-format.md#5-語言矩陣與取用)，版次決定原文／卡圖，UI 語言決定翻譯列；日／英 UI 不回退繁中，printed 不冒用 current 譯文。缺繁中明示回原文，機器與非官方來源必有標示，數位官方卡名不把整段繁中效果變官方。標籤文案是呈現方式，不擴張 2026-10-01 來源規則的核可範圍；未核對 EN 提前顯示依 §1 已核可政策；核對完成且適用時改 shared_jp，發現差異則撤下共用並走來源例外。
 
-公開只出選定 translation/text 與 FieldTranslation，不出 context、模板、清冊或稽核 hash。名稱／label 翻譯納入 bootstrap 容量驗收。無翻譯不阻止查卡／手動；本契約不宣稱雙區三語容量或匯入器已驗收。
+現有公開格式只出選定 translation/text 與 FieldTranslation，不出 context、模板、清冊或稽核 hash。glossary 的有效加粗由獨立採納鏈／型別推導；原文與譯文位置的公開承載須另審格式，[術語採納擴充 §6](glossary-adoption.md#6-公開快照影響與最小擴充提案) 列出最小提案及影響，不擅改現有白名單或啟用 translation.tokens。名稱／label 翻譯納入 bootstrap 容量驗收。無翻譯不阻止查卡／手動；本契約不宣稱雙區三語容量或匯入器已驗收。
 
 ## 9. 獨立反例與定向突變驗收
 
