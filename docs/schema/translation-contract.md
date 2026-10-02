@@ -59,7 +59,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 
 兩種 mode 分檔；approved_policy 同檔使用相同 policy 與首輪決定引用，decision.policy_id 必須等於 policy.policy_id。每個成員都須 origin=machine、不同模型對該 exact text_hash 的互審 result=agreed，且完整通過來源、slot、譯本與政策範圍檢查。決定 state=confirmed，sample_ids 恰為全體 checked record_key，表示政策機械全查，**不是此次逐筆人工審閱**；reviewed_by／reviewed_at／reviewed_precision 沿核可收據的人名與時間，note 明示「政策核可」，authored_by／authored_at 記本次套用工具與時間。缺首輪實際抽查、政策／收據 hash 不符或有模型分歧者不得走此例外；分歧項分到 human 批次、由使用者處理並列入實際 sample_ids。後續新增／改字重做互審與當批決定，可在仍符合政策時引用同一首輪收據，不冒稱使用者看過新譯本。報告分開計 human_sampled_rows、approved_policy_rows 及待人工分歧，不把全體 checked 當真人樣本數。
 
-**待維護者確認才可合併的 flavor 定義例外**：僅符合 [風味整段契約 §4](flavor-translation.md#4-譯本政策與歸因) 的 sentence_template 可引用同一份風味政策機械全查後 confirmed；不改九欄 data，decision.policy_id 由 F1 configuration.translation_policies 解析成完整五欄 pin。這不使用譯本的 adoption_review 欄位，也不授權效果定義；初輪與政策格式／loader 支援要求仍須驗回。此例外尚未取得維護者確認，其餘 kind 仍按上述門檻。
+**待維護者確認才可合併的 flavor 定義例外**：僅符合 [風味整段契約 §4](flavor-translation.md#4-譯本政策與歸因) 的 sentence_template 可引用同一份風味政策機械全查後 confirmed；不改九欄 data，decision.policy_id 由 authored 內唯一、已索引且釘 hash 的政策檔與核可收據解析，正式位置依 #195（3/3）；author source／decision_source 保留完整 commit、政策索引與檔案 bytes。F1 configuration 的五欄 pin 僅複核，不能取代 authored 的有效採納。這不使用譯本的 adoption_review 欄位，也不授權效果定義；初輪與政策格式／loader 支援要求仍須驗回。此例外尚未取得維護者確認，其餘 kind 仍按上述門檻。
 
 帶 adoption_no 的 data 另含 `{adoption_no,predecessor}`，首筆為 1/null；後續連續只增、完整替代，predecessor 恰為 `{record_key,record_hash,decision_id}`。每一選擇鍵只有一條已採納鏈，拒絕分叉、缺號與錯前件。kind 自定的 null／撤回值才撤回，舊記錄與證據保留。工具依有效鏈推導結果，不拿檔案順序作優先序。
 

@@ -93,6 +93,8 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
 ## 4. 譯本政策與歸因
 
 維護者同意的寬鬆方向不豁免來源、span、ID、譯本語法與採納閉包。
+初始化順序為：先 human sampled 採納首輪定義，再取得其最終譯本的真實 human sampled 抽查，
+最後建立政策與核可收據。之後新增風味定義／無分歧譯本才可引用該政策，沒有首輪譯本反過來代簽未採納定義的循環。
 
 1. 模板**定義**若尚無有效風味政策，仍須 human `sampled` 批次採納，先建立首輪譯本需要的定義。
    **新增、待維護者確認的例外**：只有 role=flavor、flavor-exact-v1、sentence、零參數、完整整欄且符合本文件的定義，
@@ -100,8 +102,11 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
    這不是效果模板定義、概念或一般分類的例外；任何非 exact recipe／額外 slot／未知角色均拒絕政策路徑。
    機械採納為 category=sentence_template 的 confirmed batch，全 members checked，reviewer／時間沿政策收據，
    note 明示「政策核可」，工具作者／套用時間另記。定義沒有譯文 origin 或 model_review，不能偽填兩模型審過定義。
-   不改既有九欄 data；decision.policy_id 在 F1 configuration.translation_policies 中唯一解析到既有五欄 policy pin，
-   政策、收據及真實首輪 flavor 譯本 human sampled 決定均驗回；缺 pin 或格式／loader 支援時不得機械採納。
+   不改既有九欄 data；decision.policy_id 必須在 authored 內唯一對到**已索引且釘完整 hash 的政策檔與核可收據**，
+   正式位置與索引由 #195（3/3）固定，歷史 policy_id 不可換內容或換收據。author source_record／decision_source
+   釘完整 authored commit、政策索引與檔案／收據 bytes，政策、收據及真實首輪 flavor 譯本 human sampled 決定均驗回。
+   F1 configuration 可另列完整五欄 pin，僅複核上述 authored 有效採納，不能由呼叫端提供另一份同名政策。
+   缺唯一索引／hash／收據、建置設定不符或格式／loader 未支援時不得機械採納。
 2. 模板**譯本**由一個模型翻、另一個不同模型及版本審，對最終 bytes 記 `model_review`。
    `origin=machine`，互審同意時 `result=agreed`、`resolution=null`。
 3. 另立風味譯本政策，與效果長尾政策區分 policy_id／範圍。首輪抽查數量由維護者實際選定，
@@ -134,7 +139,10 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
 須沿精確 binding／模板清冊 role 驗證，不能只驗 context 命中、來源 hash 或 target_lang。
 本限制由 #53 的建置選用與投影在輸出前完整驗證，不宣稱現有共用 selection 已有欄位資格檢查。
 若一個 context 的混合用途不能以現有唯一 selection／binding 同時合法表示，列 incompatible_translation_uses，
-隔離不適用選用、回各自原文；不把 flavor 選用散播到全部 use，也不因欄位不同虛造語義 variant 或改 context-v1 配方。
+**名稱與卡文優先，只有衝突的風味側回原文**；保留其原本合法的名稱／卡文（含逐 owner 已驗官方名）選用。
+由 #53 在報告列 flavor_context_conflict_rows 與對應 owner／context／理由，不讀官方全文估算或隱藏計數。
+優先序不授權壞來源／錯 owner 的名稱或卡文；仍先通過原有資格檢查。
+不把 flavor 選用散播到全部 use，也不因欄位不同虛造語義 variant 或改 context-v1 配方。
 真正同字異義可走已採納 context_assignment；其他需要的選用擴充由 #53 另審，不以本文件偷偷改 DDL／公開格式。
 
 `translation_authored_format=1`、`template_source_format=1`、record／decision／hash recipe 與既有 glossary 必填欄位不變。
@@ -179,7 +187,7 @@ tokens 維持 null，風味及其譯文留詳情分片。不增集合、tuple �
 | F17 | EN 同卡但該版 flavor 已知不同，仍顯示 JP 譯文 | 不共用此欄；獨立名稱／效果按各自閘門判斷 |
 | F18 | 只有 `空格+CRLF+全形空白` 的已知欄位；加入 U+200B 或敘事字各一次 | 前者原樣顯示、另計 whitespace_only、不造翻譯也不報缺譯；後兩者不能當空白跳過 |
 | F19 | JP／EN 各有自撰同一字串，所有來源 pin 合法 | source_lang 不同，兩個模板／context，不因同 bytes 合併 |
-| F20 | 同語言同字串同時作 flavor／name／effect，故同 default context；各方向錯借譯文一次 | 不得互相選用；混合用途不能合法表示就隔離並回各自原文，不能只憑 context 命中 |
+| F20 | 同語言同字串同時作 flavor／name／effect，故同 default context；各方向錯借譯文一次 | 不得互相選用；混合用途只能表示一種時，保留合法名稱／卡文，風味回原文並計數，不只憑 context 命中 |
 | F21 | 一個政策譯本批次混 flavor／effect；定義批次混角色；只按 filing_key 放行各一次 | 逐筆清冊 role 檢查拒絕；3/3 或 loader 未到位也不得政策採納 |
 | F22 | 正式 text 含 CRLF、行尾空格／tab／全形空白、首尾空白、結尾 LF 各一次 | 各自拒絕；改成合法最終 bytes 後重審，不在審核後正規化 |
 
