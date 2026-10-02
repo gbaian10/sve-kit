@@ -12,7 +12,9 @@ from sve_carddb.template_parameters.analysis import (
     NUMERIC_RULES,
     analyze,
 )
+from sve_carddb.template_parameters.candidate_matching import recognize
 from sve_carddb.template_parameters.numeric_rules import configuration
+from sve_carddb.template_parameters.rule_candidates import selection
 from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_parameters.verification import verify_candidate
 from sve_carddb.template_sources.inventory import entry, fields, replay
@@ -35,6 +37,8 @@ class Candidates:
     entries: list[Candidate] = field(default_factory=list)
     mentions: list[dict[str, JsonValue]] = field(default_factory=list)
     field_proofs: list[dict[str, JsonValue]] = field(default_factory=list)
+    rule_matches: list[dict[str, JsonValue]] = field(default_factory=list)
+    enabled_rules: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
@@ -47,9 +51,15 @@ class Field:
     document: JsonValue
 
 
-def build(sources: FrozenSources, scan: Scan, refs: References) -> Candidates:
+def build(
+    sources: FrozenSources,
+    scan: Scan,
+    refs: References,
+    *,
+    enabled_rules: tuple[str, ...] = (),
+) -> Candidates:
     """Every first-checkpoint entry must reappear; null fields are never coerced to empty."""
-    result = Candidates()
+    result = Candidates(enabled_rules=selection(enabled_rules))
     by_field: dict[tuple[str, str], list[Entry]] = defaultdict(list)
     for item in scan.entries:
         by_field[item.source_ref.source_version_id, item.source_ref.locator].append(
@@ -111,6 +121,9 @@ def _candidate(
     candidate = analyze(context.text, part, item, position, refs)
     verify_candidate(context.text, part, item, position, refs, candidate)
     result.entries.append(candidate)
+    result.rule_matches.extend(
+        recognize(context.text, part, candidate, refs, result.enabled_rules)
+    )
     selected = "".join(context.text[s.start : s.end] for s in part.segments)
     mentions = refs.term_mentions(selected)
     if mentions:
@@ -231,6 +244,30 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
             for rule in NUMERIC_RULES
         },
         "inactive_numeric_rule_candidates": inactive_rules(candidates),
+        "candidate_rule_counts": {
+            rule: {
+                "positions": sum(m["rule_id"] == rule for m in candidates.rule_matches),
+                "uses": len(
+                    {
+                        m["inventory_id"]
+                        for m in candidates.rule_matches
+                        if m["rule_id"] == rule
+                    }
+                ),
+                "body_positions": sum(
+                    m["rule_id"] == rule and m["role"] == "body"
+                    for m in candidates.rule_matches
+                ),
+                "body_uses": len(
+                    {
+                        m["inventory_id"]
+                        for m in candidates.rule_matches
+                        if m["rule_id"] == rule and m["role"] == "body"
+                    }
+                ),
+            }
+            for rule in candidates.enabled_rules
+        },
         "unresolved_reasons": dict(
             Counter(reason for m in candidates.entries for reason in m.issues)
         ),

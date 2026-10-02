@@ -3,7 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
-from sve_carddb.snapshot.values import array, canonical, object_value
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.template_parameters.analysis import NUMERIC_RULE_PENDING, NUMERIC_SUFFIX
 from sve_carddb.template_parameters.inventory import Candidates, summary
 from sve_carddb.template_parameters.models import Hint
@@ -106,7 +106,7 @@ def test_vetoed_slots_and_literal_provenance_cannot_disappear_from_summary() -> 
 
 def test_diagnostic_definitions_are_fixed_ascii_and_never_active_rule_ids() -> None:
     config = configuration()
-    assert config["version"] == "numeric-rule-proposals-v2"
+    assert config["version"] == "numeric-rule-proposals-v3"
     assert config["guard_order"] == [
         "sign",
         "ascii_identifier",
@@ -146,3 +146,29 @@ def test_excluded_matchers_are_anchored_at_the_position_and_not_general_substrin
     assert candidate("試験２枚の回復目").slots[0].numeric_rule == "suffix_unit_cards"
     assert candidate("試験２回に目").slots[0].numeric_rule == "suffix_unit_times"
     assert candidate("試験２ターンに目").slots[0].numeric_rule == "suffix_unit_turns"
+
+
+EXPECTED_EXISTING_CONDITION_HASHES = {
+    "prefix_field_cost": "sha256:1622b3de948695bfa5470bc78fad9766148ffdcd8fcc27ce2bdd0b0f939e944c",
+    "suffix_unit_cards": "sha256:5ae7c9361ad9d4e0b866609be9846822474979c894486b2e77bc7df2d98ac7ee",
+    "suffix_unit_entities": "sha256:42529ca9aa528d6fa7f0c7c93b09f26cc8d9f4369aa53b8eec6cbc270892548e",
+    "suffix_unit_times": "sha256:634d0a8b9b7b9178e6a47014d7dd12791f72fd66e332127d3dad05d844074ec5",
+    "suffix_unit_turns": "sha256:2111bfea1ec41357eda5f4a25a956895b7bcb50698279ca0daa5e4e5a201578a",
+    "prefix_field_health": "sha256:2e38b9db593cfbf06fb4534d034807660859a3bc5b780b00379f571982b47f82",
+    "prefix_field_attack": "sha256:bacd0862b5b550e569539c19547e499a517ddaa2f40d138248c45bebd37d0c48",
+    "suffix_unit_pp": "sha256:1ff95fd5a859140ff12088271d30036fea6d917580bfca142548703526d79b0d",
+}
+
+
+def test_existing_eight_export_matching_conditions_from_the_repository_program() -> (
+    None
+):
+    rows = {
+        str(object_value(row)["id"]): object_value(row)
+        for row in array(configuration()["rules"])
+    }
+    for identifier, expected in EXPECTED_EXISTING_CONDITION_HASHES.items():
+        wire = rows[identifier]
+        assert wire["condition_hash"] == expected
+        assert digest(canonical(wire["match_conditions"])) == expected
+        assert "status" not in object_value(wire["match_conditions"])

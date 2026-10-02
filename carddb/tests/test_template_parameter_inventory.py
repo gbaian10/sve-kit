@@ -4,24 +4,28 @@ import argparse
 import copy
 import json
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import pytest
 
+import sve_carddb.template_parameters.__main__ as cli
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.registry.storage import encode
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
-from sve_carddb.template_parameters import __main__ as cli
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
 from sve_carddb.template_parameters.models import Candidate
 from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.output import write
 from sve_carddb.template_parameters.references import References
-from sve_carddb.translations.models import Index
+from sve_carddb.template_parameters.rule_candidates import BY_ID
+from sve_carddb.template_parameters.rule_candidates import (
+    configuration as candidate_configuration,
+)
 
+from .adoption_fixtures import commit
 from .template_source_fixtures import template_case as template_case  # ruff: ignore[useless-import-alias] -- reusable immutable offline Git/archive fixture
 
 if TYPE_CHECKING:
@@ -31,6 +35,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.template_parameters.inventory import Field
     from sve_carddb.template_parameters.spans import Located
+    from sve_carddb.template_sources.inventory import Scan
     from sve_carddb.template_sources.normalizer import Part
 
     from .template_source_fixtures import Case
@@ -47,18 +52,7 @@ def parameter_result(
     template_case: Case, tmp_path_factory: pytest.TempPathFactory
 ) -> Result:
     root = tmp_path_factory.mktemp("parameter-candidates")
-    authored = root / "authored"
-    (authored / "translations").mkdir(parents=True)
-    (authored / "translations/index.yaml").write_bytes(
-        encode(
-            Index(
-                translation_authored_format=1,
-                kind="translation_index",
-                includes={},
-                inventories={},
-            )
-        )
-    )
+    authored = template_case.repository / "authored"
     proposals = root / "proposals.json"
     proposals.write_bytes(canonical({"bindings": []}))
     basis = root / "basis.md"
@@ -98,6 +92,44 @@ def test_candidate_inventory_replays_every_first_checkpoint_entry_and_field(
     assert object_value(report["legacy_member_coverage"])["complete"] is True
     config = object_value(object_value(report["parameter_recipe"])["config"])
     assert config["numeric_classifier"] == configuration()
+    assert config["candidate_classifier"] == candidate_configuration()
+    glossary = object_value(object_value(config["references"])["glossary"])
+    assert glossary["authored_revision"] == template_case.revision
+    assert glossary["index_hash"] == digest(
+        (template_case.repository / "authored/translations/index.yaml").read_bytes()
+    )
+    assert (parameter_result.args.output / "rule-candidates.jsonl").read_bytes() == b""
+
+
+def test_cli_passes_the_exact_opt_in_set_without_changing_the_original_candidates(
+    parameter_result: Result, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    args = copy.copy(parameter_result.args)
+    args.enable_candidate_rule = list(BY_ID)
+    args.output = tmp_path / "enabled"
+    original = inventory.build
+    seen: list[tuple[str, ...]] = []
+
+    def record(
+        sources: FrozenSources,
+        scan: Scan,
+        refs: References,
+        *,
+        enabled_rules: tuple[str, ...] = (),
+    ) -> Candidates:
+        seen.append(enabled_rules)
+        return original(sources, scan, refs, enabled_rules=enabled_rules)
+
+    monkeypatch.setattr(cli, "build", record)
+    report = cli.run(args)
+    assert seen == [tuple(sorted(BY_ID))]
+    config = object_value(object_value(report["parameter_recipe"])["config"])
+    assert config["candidate_classifier"] == candidate_configuration(tuple(BY_ID))
+    assert report["complete"] is False
+    for name in ("candidates.jsonl", "legacy-lineage.jsonl", "field-spans.jsonl"):
+        assert (args.output / name).read_bytes() == (
+            parameter_result.args.output / name
+        ).read_bytes()
 
 
 def test_outputs_have_only_hashes_ranges_schemas_and_fixed_reasons(
@@ -161,6 +193,23 @@ def test_inventory_cannot_shrink_or_duplicate_first_checkpoint_inputs(
             scan,
             References(),
         )
+
+
+def test_glossary_revision_cannot_be_a_label_for_different_exact_bytes(
+    parameter_result: Result, tmp_path: Path
+) -> None:
+    args = copy.copy(parameter_result.args)
+    args.authored = tmp_path / "authored"
+    shutil.copytree(parameter_result.args.authored, args.authored)
+    index = args.authored / "translations/index.yaml"
+    index.write_bytes(index.read_bytes() + b"\n")
+    args.output = tmp_path / "result"
+    with pytest.raises(
+        ValueError,
+        match=r"\ACandidate glossary inputs must match their exact Git revision\Z",
+    ):
+        cli.run(args)
+    assert not args.output.exists()
 
 
 @pytest.mark.parametrize("location", ["existing", "inside", "symlink"])
@@ -350,3 +399,96 @@ def test_legacy_normalized_replay_cannot_be_replaced_with_a_different_value(
             template_case.scan,
             References(),
         )
+
+
+def test_glossary_shard_cannot_borrow_a_git_revision_even_when_index_is_unchanged(
+    parameter_result: Result, tmp_path: Path
+) -> None:
+    args = copy.copy(parameter_result.args)
+    args.authored = tmp_path / "authored"
+    shutil.copytree(parameter_result.args.authored, args.authored)
+    shard = args.authored / "translations/glossary/concepts/001.yaml"
+    shard.write_bytes(shard.read_bytes() + b"\n")
+    args.output = tmp_path / "result"
+    with pytest.raises(
+        ValueError,
+        match=r"\ACandidate glossary inputs must match their exact Git revision\Z",
+    ):
+        cli.run(args)
+    assert not args.output.exists()
+
+
+@pytest.fixture(scope="module")
+def glossary_history(
+    parameter_result: Result, tmp_path_factory: pytest.TempPathFactory
+) -> tuple[Path, str]:
+    root = tmp_path_factory.mktemp("glossary-pin-history")
+    repo = root / "repository"
+    shutil.copytree(parameter_result.args.repository, repo)
+    shard = repo / "authored/translations/glossary/concepts/001.yaml"
+    shard.write_bytes(shard.read_bytes() + b"\n")
+    return repo, commit(repo)
+
+
+@pytest.mark.parametrize("matching_revision", [True, False])
+def test_explicit_glossary_revision_verifies_the_selected_tree(
+    parameter_result: Result,
+    glossary_history: tuple[Path, str],
+    tmp_path: Path,
+    matching_revision: bool,
+) -> None:
+    repo, revision = glossary_history
+    args = copy.copy(parameter_result.args)
+    args.repository = repo
+    args.authored = repo / "authored"
+    args.glossary_revision = revision if matching_revision else args.code_revision
+    args.output = tmp_path / "result"
+    if matching_revision:
+        report = cli.run(args)
+        config = object_value(object_value(report["parameter_recipe"])["config"])
+        glossary = object_value(object_value(config["references"])["glossary"])
+        assert glossary["authored_revision"] == revision
+        assert args.glossary_revision != args.code_revision
+        assert len(array(glossary["shards"])) == 1
+    else:
+        with pytest.raises(
+            ValueError,
+            match=r"\ACandidate glossary inputs must match their exact Git revision\Z",
+        ):
+            cli.run(args)
+        assert not args.output.exists()
+
+
+def test_cli_preserves_the_explicit_glossary_revision_argument(
+    parameter_result: Result,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    seen: list[str] = []
+
+    def record(args: argparse.Namespace) -> dict[str, JsonValue]:
+        seen.append(args.glossary_revision)
+        return parameter_result.report
+
+    monkeypatch.setattr(cli, "run", record)
+    revision = "c" * 40
+    args = parameter_result.args
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "parameters",
+            *[
+                v
+                for name, value in vars(args).items()
+                for v in ("--" + name.replace("_", "-"), str(value))
+            ],
+            "--glossary-revision",
+            revision,
+        ],
+    )
+    with pytest.raises(SystemExit) as raised:
+        cli.main()
+    assert raised.value.code == 1
+    assert seen == [revision]
+    assert json.loads(capsys.readouterr().out)["complete"] is False

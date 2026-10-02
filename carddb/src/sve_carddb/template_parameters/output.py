@@ -66,6 +66,9 @@ def write(
             "field-spans.jsonl": _lines(
                 staging / "field-spans.jsonl", candidates.field_proofs
             ),
+            "rule-candidates.jsonl": _lines(
+                staging / "rule-candidates.jsonl", candidates.rule_matches
+            ),
         }
         report["files"] = files
         (staging / "report.json").write_bytes(canonical(report) + b"\n")

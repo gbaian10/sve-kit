@@ -17,7 +17,17 @@ from sve_carddb.template_parameters.models import (
     Schema,
     Slot,
 )
-from sve_carddb.template_parameters.numeric_rules import excluded
+from sve_carddb.template_parameters.numeric_rules import (
+    ASCII_AFTER,
+    ASCII_BEFORE,
+    NUMERIC_PREFIX,
+    NUMERIC_RULE_PENDING,
+    NUMERIC_RULES,
+    NUMERIC_SUFFIX,
+    RESOURCE_PREFIX_EXCEPTION,
+    SIGNS,
+    excluded,
+)
 from sve_carddb.template_parameters.provenance import Unit, merged, trace
 from sve_carddb.template_sources.normalizer import (
     DIGITS,
@@ -34,32 +44,10 @@ if TYPE_CHECKING:
     from sve_carddb.template_sources.models import Entry
     from sve_carddb.template_sources.normalizer import Part
 
+__all__ = ("NUMERIC_PREFIX", "NUMERIC_RULES", "NUMERIC_RULE_PENDING", "NUMERIC_SUFFIX")
+
 VERSION_PARAMETERS = "template-parameters-jp-candidate-v1"
 SAFE_INTEGER = 9007199254740991
-NUMERIC_SUFFIX = re.compile(
-    r"^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|"
-    r"(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|"
-    r"(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])"
-)
-NUMERIC_PREFIX = re.compile(
-    r"(?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|"
-    r"(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|"
-    r"(?P<prefix_field_level>レベル))[=:：]?$"
-)
-NUMERIC_RULES: tuple[NumericRule, ...] = (
-    "suffix_unit_cards",
-    "suffix_unit_entities",
-    "suffix_unit_points",
-    "suffix_unit_times",
-    "suffix_unit_turns",
-    "suffix_unit_pp",
-    "prefix_field_cost",
-    "prefix_field_attack",
-    "prefix_field_health",
-    "prefix_field_pp",
-    "prefix_field_level",
-)
-NUMERIC_RULE_PENDING = "numeric_rule_pending_approval"
 BRACED = re.compile(r"\{([^{}]+)\}")
 
 
@@ -188,12 +176,13 @@ def numeric_role(
     """Unit/prefix grammar excludes signs, ASCII identifiers and undecided bare numbers."""
     before = normalized[: position.start]
     after = normalized[position.end :]
-    if before.endswith(("-", "+", "−")):
+    if before.endswith(SIGNS):
         return None, ("signed_numeric_requires_review",)
     if (
-        (before and re.search(r"[A-Za-z0-9_]$", before))
-        or re.match(r"^[A-Za-z0-9_]", after)
-    ) and not (NUMERIC_PREFIX.search(before) or after.startswith("PP")):
+        (before and re.search(ASCII_BEFORE, before)) or re.match(ASCII_AFTER, after)
+    ) and not (
+        NUMERIC_PREFIX.search(before) or after.startswith(RESOURCE_PREFIX_EXCEPTION)
+    ):
         return None, ("numeric_identifier_requires_review",)
     if (reason := excluded(after)) is not None:
         return None, (reason,)
