@@ -332,3 +332,60 @@ def test_interrupted_conversion_resumes_complete_blobs(
     assert hits >= 1
     assert all(p.read_bytes() == data for p, data in before.items())
     assert len(resumed.images) == 3
+
+
+@pytest.fixture(scope="module")
+def readonly_images(
+    tmp_path_factory: pytest.TempPathFactory,
+    image_archive_template: tuple[Path, str, str],
+) -> tuple[FrozenSources, PreviewRoots]:
+    root, store_id, batch = image_archive_template
+    output = roots(tmp_path_factory.mktemp("readonly-images"))
+    source = FrozenSources(root, store_id, batch)
+    build_jp_assets(source, output)
+    return source, output
+
+
+@pytest.mark.parametrize("case", ["hit", "no-cache", "bad-cache", "no-blob"])
+def test_readonly_reuse_never_encodes_or_repairs_inputs(
+    readonly_images: tuple[FrozenSources, PreviewRoots],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    case: str,
+) -> None:
+    frozen, base = readonly_images
+    output = roots(tmp_path)
+    shutil.copytree(base.preview, output.preview)
+    shutil.copytree(base.cache, output.cache)
+    if case == "no-cache":
+        next(output.cache.rglob("*.json")).unlink()
+    elif case == "bad-cache":
+        next(output.cache.rglob("*.json")).write_bytes(b"{}")
+    elif case == "no-blob":
+        next(output.preview.rglob("*.webp")).unlink()
+    before = {
+        p: p.read_bytes()
+        for root in (frozen.root, output.preview, output.cache)
+        for p in root.rglob("*")
+        if p.is_file()
+    }
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        pytest.fail("read-only image reuse cannot encode or write")
+
+    monkeypatch.setattr(image_variants, "_encode", forbidden)
+    monkeypatch.setattr(image_variants, "_write_blob", forbidden)
+    monkeypatch.setattr(image_variants, "_write_cache", forbidden)
+    if case == "hit":
+        build = build_jp_assets(frozen, output, workers=4, reuse_only=True)
+        assert build.report()["cache_hits"] == len(build.images)
+    else:
+        with pytest.raises(ValueError, match="cache is incomplete"):
+            build_jp_assets(frozen, output, workers=4, reuse_only=True)
+    assert before == {
+        p: p.read_bytes()
+        for root in (frozen.root, output.preview, output.cache)
+        for p in root.rglob("*")
+        if p.is_file()
+    }
+    assert not output.cdn.exists()

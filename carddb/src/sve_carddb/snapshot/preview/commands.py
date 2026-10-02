@@ -6,6 +6,8 @@ from typing import Annotated
 
 import typer
 
+from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.image_assets import PreviewRoots, build_jp_assets
 from sve_carddb.snapshot.export import Brotli, export_snapshot
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.build import Inputs, build
@@ -46,13 +48,41 @@ def export_command(
     brotli_command: Annotated[
         Path | None, typer.Option(exists=True, dir_okay=False)
     ] = None,
+    image_assets_dir: Annotated[
+        Path | None, typer.Option(exists=True, file_okay=False)
+    ] = None,
+    image_cache_dir: Annotated[
+        Path | None, typer.Option(exists=True, file_okay=False)
+    ] = None,
 ) -> None:
     """Require explicit roots and pins; write no formal index, active state or cache."""
-    recipe = Inputs.model_validate_json(inputs.read_bytes())
     roots = Roots(preview_dir, cdn_dir)
+    roots.verify()
+    recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
     codec = None if brotli_command is None else command_brotli(brotli_command)
-    built = build(recipe)
+    if (image_assets_dir is None) != (image_cache_dir is None):
+        raise typer.BadParameter(
+            "Image asset and cache roots must be provided together"
+        )
+    image_execution: dict[str, int] | None = None
+    if image_assets_dir is None or image_cache_dir is None:
+        built = build(recipe)
+    else:
+        image_roots = PreviewRoots(image_assets_dir, cdn_dir, image_cache_dir)
+        image_roots.validate((recipe.archive, recipe.repo, preview_dir))
+        images = build_jp_assets(
+            FrozenSources(recipe.archive, recipe.store_id, recipe.image_batch),
+            image_roots,
+            workers=4,
+            reuse_only=True,
+        )
+        built = build(recipe, images=images, image_root=image_assets_dir)
+        image_execution = {
+            "reuse_milliseconds": round(images.elapsed_seconds * 1000),
+            "cache_hits": sum(item.result.cache_hit for item in images.images),
+            "new_encoding_milliseconds": 0,
+        }
     snapshot = export_snapshot(
         built.projection, built.ownership, recipe.batch(), brotli=codec
     )
@@ -63,7 +93,16 @@ def export_command(
         built.input_content,
         immutable=True,
     )
-    report = write_preview(snapshot, roots, built.report, brotli=codec)
+    report = write_preview(
+        snapshot,
+        roots,
+        built.report,
+        brotli=codec,
+        image_source=image_assets_dir,
+        confirmed_images=built.confirmed_images,
+    )
+    if image_execution is not None:
+        report["image_execution"] = dict(image_execution)
     typer.echo(canonical(report).decode())
 
 

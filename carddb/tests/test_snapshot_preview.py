@@ -52,7 +52,7 @@ from .registry_snapshot_fixtures import edit_record
 from .snapshot_project_fixtures import SETTINGS, populate, schema
 from .test_snapshot_export import BATCH
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared module fixture
-from .test_snapshot_export import logical as logical  # ruff: ignore[useless-import-alias] -- register shared module fixture
+from .test_snapshot_project import projected
 from .text_observation_fixtures import LANGUAGES
 
 if TYPE_CHECKING:
@@ -64,6 +64,26 @@ if TYPE_CHECKING:
 
     from .shared_case_fixtures import CorrectionCaseTemplate, TextCaseTemplate
     from .text_observation_fixtures import Case
+
+
+@pytest.fixture(scope="module")
+def logical() -> tuple[Projection, Ownership]:
+    with create_database(schema()) as db:
+        with db.transaction():
+            populate(db)
+        projection = projected(db)
+        projection = replace(
+            projection,
+            tables=projection.tables
+            | {
+                "image_asset": [
+                    row | {"availability": "unfetched", "publication_state": "pending"}
+                    for row in projection.tables["image_asset"]
+                ],
+                "image_variant": [],
+            },
+        )
+        return projection, Ownership.from_database(db, projection)
 
 
 @pytest.fixture(params=["formal_version", "en_region"])
