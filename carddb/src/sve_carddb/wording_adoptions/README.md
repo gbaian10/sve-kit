@@ -71,3 +71,11 @@ Compose returned uses with the identity/product/text inputs and validate the
 complete union with `build_bundle.publish_bundle` / `verify_bundle`.
 `adoption_report` records selections, predecessors and unchecked keys without
 official wording. No entry point writes production authored receipts.
+
+Before wiring this API into a build or preview, commit an explicit
+`authored/wording-adoptions/index.yaml` with format 1, kind
+`wording_adoption_index`, and `includes: {}`. A missing entry point is an error,
+not an empty inventory. The wiring PR must also add CI validation that loads and
+replays the complete real authored inventory across both regions against its
+pinned frozen inputs. This rejects a bad EN receipt before it reaches main and
+blocks a JP build. Synthetic tests do not replace that production-input check.
