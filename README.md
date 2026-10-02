@@ -84,6 +84,14 @@ structural check, not verification of a correction or its dates. The command
 stores exact body bytes under `raw/jp/errata/` with manifest kind `errata`; it
 prints metadata only and does not import formal errata or change card text.
 
+The container selectors have not been verified against a saved official JP
+errata/news page. Once live fetching is authorized, first dry-run the reviewed
+selection, then fetch **one** of the 16 approved URLs. Check its stored raw,
+manifest metadata and body structure offline, seal and independently back up
+that pilot batch, and pass its restore check before fetching the other 15 URLs.
+If the pilot fails or redirects, stop and report metadata only; do not loosen
+validation or retry the rest. A rejected body is not saved by this command.
+
 This entry point holds the shared manifest lock and refuses unfinished requests,
 raw temporary files, or configured archive work. It never runs general crawl
 recovery or archive cleanup. Before publication, caught interruptions clean only
@@ -93,6 +101,17 @@ leave a private temporary file; an interruption between publication and manifest
 commit can leave a complete unregistered raw. The next run refuses these states
 and requires a separately reviewed recovery, rather than deleting or overwriting
 them.
+
+Recovery belongs to the maintainer or a named operator under a separately
+reviewed plan. There is currently **no scoped errata recovery command**. Do not
+run ordinary `crawl` (including resume/repair) or `refresh` to clear the blockage,
+delete a lock, remove raw files, or restore an older manifest over the live one.
+Preserve the interrupted state, create a new locked manifest backup, inspect
+the closed backup and affected files offline, then request a recovery tool
+limited to the reviewed request IDs, URLs, paths and hashes. The detailed
+[recovery procedure](docs/schema/refresh-operation.md#勘誤新增入口中斷後的處置)
+requires evidence preservation, synthetic rehearsal and explicit maintainer
+approval before any recovery writes.
 
 The operator must back up the manifest before and after the run, then seal the
 reviewed `jp:errata` scope, back up its closure and verify this batch with

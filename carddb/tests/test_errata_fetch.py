@@ -1,6 +1,7 @@
 import errno
 import json
 import os
+import re
 from dataclasses import dataclass, field, replace
 from functools import partial
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
@@ -14,8 +15,23 @@ import stamina
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.errata_fetch import ErrataInputError, load_urls, raw_path, validate_urls
-from sve_carddb.fetch.throttle import Throttle
+from sve_carddb.errata_fetch import (
+    ErrataInputError,
+    _validate_body,
+    fetch_new,
+    load_urls,
+    raw_path,
+    validate_urls,
+)
+from sve_carddb.fetch.client import (
+    BudgetExhaustedError,
+    Client,
+    Request,
+    Response,
+    StopCrawlError,
+)
+from sve_carddb.fetch.throttle import CircuitBreaker, Throttle
+from sve_carddb.fetch.validate import ValidationError
 from sve_carddb.fetch.writer import PathConflictError, Writer, sha256
 from sve_carddb.manifest import (
     ExclusiveLock,
@@ -23,19 +39,21 @@ from sve_carddb.manifest import (
     Manifest,
     Outcome,
     Region,
+    RequestResult,
     RequestStart,
 )
-from sve_carddb.store import decompress
+from sve_carddb.store import UnsafePathError, decompress
 
 from .conftest import FakeClock
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Callable, Iterator
     from pathlib import Path
 
     from typer.testing import Result
 
     from sve_carddb.config import Settings
+    from sve_carddb.errata_fetch import ErrataResult
 
 HOST = "https://shadowverse-evolve.com"
 URL = f"{HOST}/errata/synthetic-one/"
@@ -158,10 +176,34 @@ def test_entire_selection_rejected_before_network_or_manifest(
     assert not case.root.exists()
 
 
-@pytest.mark.parametrize("value", [[], {}, "URL", [1], [URL, None]])
-def test_invalid_selection_file(case: Case, value: object) -> None:
+@pytest.mark.parametrize("section", ["rules", "news"])
+def test_other_official_sections_with_a_single_slug_are_rejected(
+    case: Case, section: str
+) -> None:
+    selection = (URL, f"{HOST}/{section}/x/")
+    with pytest.raises(
+        ErrataInputError, match=r"^selection contains a non-JP-errata URL$"
+    ):
+        validate_urls(selection)
+    result = case.invoke(selection)
+    assert result.exit_code == 1
+    assert case.server.calls == []
+    assert not case.root.exists()
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    [
+        ([], "errata URL selection is empty"),
+        ({}, "errata URL file must be a JSON array of strings"),
+        ("URL", "errata URL file must be a JSON array of strings"),
+        ([1], "errata URL file must be a JSON array of strings"),
+        ([URL, None], "errata URL file must be a JSON array of strings"),
+    ],
+)
+def test_invalid_selection_file(case: Case, value: object, message: str) -> None:
     case.urls_file.write_text(json.dumps(value))
-    with pytest.raises(ErrataInputError):
+    with pytest.raises(ErrataInputError, match=f"^{re.escape(message)}$"):
         load_urls(case.urls_file)
 
 
@@ -281,6 +323,41 @@ def test_success_on_third_attempt(case: Case) -> None:
     assert len(case.server.calls) == 3
 
 
+def test_cli_total_budget_stops_an_adapter_before_a_fourth_request(
+    case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    async def probe(
+        selection: tuple[str, ...],
+        client: Client,
+        writer: Writer,
+        _breaker: CircuitBreaker,
+        _report: Callable[[ErrataResult], None],
+    ) -> int:
+        request = Request(selection[0], allowed=selection.__contains__)
+        # Force successful extra requests independently of the per-URL retry limit.
+        for _ in range(3):
+            response = await client.get(request)
+            with writer.manifest.transaction():
+                writer.manifest.requests.finish(
+                    response.request_id,
+                    RequestResult(Outcome.FAILED, validation_error="synthetic probe"),
+                )
+        with pytest.raises(
+            BudgetExhaustedError, match=r"^request budget of 3 reached$"
+        ):
+            await client.get(request)
+        return 0
+
+    monkeypatch.setattr(cli, "fetch_new", probe)
+    result = case.invoke()
+    assert result.exit_code == 0, result.output
+    assert len(case.server.calls) == 3
+    assert all(str(request.url) == URL for _, request in case.server.calls)
+    with case.manifest() as manifest:
+        assert manifest.requests.outcomes(URL) == [Outcome.FAILED] * 3
+        assert manifest.resources.get(URL) is None
+
+
 @pytest.mark.parametrize(
     ("status", "body", "content_type"),
     [
@@ -312,6 +389,32 @@ def test_invalid_response_records_failure_without_saving_body(
         assert manifest.requests.outcomes(URL) == [Outcome.FAILED]
 
 
+@pytest.mark.parametrize(
+    "title",
+    [b"", b"<title></title>", b"<title> \n\t </title>"],
+    ids=["absent", "empty", "whitespace"],
+)
+def test_notice_requires_a_nonempty_title(case: Case, title: bytes) -> None:
+    body = (
+        b"<html><head>" + title + b"</head><body><main>Synthetic</main></body></html>"
+    )
+    response = Response(1, URL, 200, "text/html", None, None, body)
+    with pytest.raises(
+        ValidationError, match=r"^HTML lacks a title or announcement body container$"
+    ):
+        _validate_body(response)
+    case.server.responses = [
+        httpx.Response(200, content=body, headers={"content-type": "text/html"})
+    ]
+    result = case.invoke()
+    assert result.exit_code == 1
+    assert len(case.server.calls) == 1
+    assert not (case.root / raw_path(URL)).exists()
+    with case.manifest() as manifest:
+        assert manifest.resources.get(URL) is None
+        assert manifest.requests.outcomes(URL) == [Outcome.FAILED]
+
+
 @pytest.mark.parametrize("state", ["file", "directory", "symlink", "dangling"])
 def test_any_preexisting_destination_stops_before_network(
     case: Case, tmp_path: Path, state: str
@@ -334,6 +437,31 @@ def test_any_preexisting_destination_stops_before_network(
     assert path.is_symlink() if state in {"symlink", "dangling"} else path.exists()
     if state == "file":
         assert path.read_bytes() == original
+
+
+def test_symlink_parent_inside_data_root_is_rejected_before_requests(
+    case: Case,
+) -> None:
+    redirect = case.root / "alternate-errata"
+    redirect.mkdir(parents=True)
+    sentinel = redirect / "sentinel"
+    sentinel.write_bytes(b"other task must survive")
+    parent = case.root / "raw/jp/errata"
+    parent.parent.mkdir(parents=True)
+    parent.symlink_to(redirect, target_is_directory=True)
+    with case.manifest() as manifest:
+        writer = Writer(case.root, manifest, create_only=True)
+        message = re.escape(
+            f"new-only destination traverses a symlink: {raw_path(URL)}"
+        )
+        with pytest.raises(UnsafePathError, match=f"^{message}$"):
+            writer.check_new(URL, raw_path(URL))
+    result = case.invoke()
+    assert result.exit_code == 1
+    assert case.server.calls == []
+    assert list(redirect.iterdir()) == [sentinel]
+    assert sentinel.read_bytes() == b"other task must survive"
+    assert parent.is_symlink()
 
 
 @pytest.mark.parametrize(
@@ -464,8 +592,41 @@ def test_create_only_writer_cannot_update_existing_resource(case: Case) -> None:
     assert case.invoke().exit_code == 0
     with case.manifest() as manifest:
         writer = Writer(case.root, manifest, create_only=True)
-        with pytest.raises(PathConflictError, match="already recorded"):
+        message = re.escape(f"new-only source already recorded: {URL}")
+        with pytest.raises(PathConflictError, match=f"^{message}$"):
             writer.check_new(URL, raw_path(URL))
+
+
+async def test_fetch_new_rejects_an_ordinary_writer_before_requests(case: Case) -> None:
+    reports: list[ErrataResult] = []
+    with case.manifest() as manifest:
+        async with httpx.AsyncClient(
+            transport=httpx.MockTransport(case.server)
+        ) as http:
+            client = Client(
+                http,
+                Throttle(
+                    2.5, 0, clock=case.server.clock, sleep=case.server.clock.sleep
+                ),
+                manifest,
+                run_id="synthetic-create-only-probe",
+            )
+            with pytest.raises(
+                StopCrawlError, match=r"^errata fetch requires a create-only writer$"
+            ):
+                await fetch_new(
+                    (URL,),
+                    client,
+                    Writer(case.root, manifest),
+                    CircuitBreaker(5),
+                    reports.append,
+                )
+            assert client.requests_sent == 0
+            assert manifest.requests.outcomes(URL) == []
+            assert manifest.resources.get(URL) is None
+    assert case.server.calls == []
+    assert reports == []
+    assert not (case.root / "raw").exists()
 
 
 def configure_archive(case: Case, monkeypatch: pytest.MonkeyPatch) -> Path:
