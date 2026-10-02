@@ -225,6 +225,8 @@ def build(  # ruff: ignore[too-many-locals] -- one offline transaction binds the
         require_unknown_coverage(projection)
         ownership = Ownership.from_database(db, projection)
         public_images = {row["id"] for row in projection.tables["image_asset"]}
+        # project() runs db.verify(): third-party approval requires confirmed review and matching source evidence.
+        # This set carries that DB guarantee; the writer does not audit private review decisions.
         confirmed_images = frozenset(
             string(row["id"])
             for row in Source(db).rows("image_asset", "id,origin,publication_state")

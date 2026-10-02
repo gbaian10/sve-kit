@@ -3,6 +3,7 @@
 import shutil
 from copy import deepcopy
 from dataclasses import dataclass, replace
+from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
@@ -35,8 +36,6 @@ from .test_snapshot_preview import cli_recipe
 from .test_snapshot_project import projected
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.snapshot.export import Snapshot
     from sve_carddb.snapshot.project import Projection
     from sve_carddb.snapshot.project.source import Record
@@ -222,8 +221,6 @@ def test_third_party_approval_requires_each_image_confirmed(
     "case",
     [
         "source",
-        "bytes",
-        "dimensions",
         "format",
         "prefix",
         "path",
@@ -237,8 +234,6 @@ def test_public_asset_validation_counterexamples(
     tables = images.tables()
     variant = tables["image_variant"][0]
     changes: dict[str, Record] = {
-        "bytes": {"bytes": integer(variant["bytes"]) + 1},
-        "dimensions": {"width": integer(variant["width"]) + 1},
         "format": {"format": "png"},
         "prefix": {
             "path": "images/sha256/00/" + string(variant["path"]).split("/")[-1]
@@ -253,8 +248,56 @@ def test_public_asset_validation_counterexamples(
         tables["image_variant"].append(
             variant | {"width": integer(variant["width"]) + 1}
         )
-    with pytest.raises(ValueError, match=r"Preview image|Only approved|Shared image"):
+    message = {
+        "source": "Preview images require an explicit asset source",
+        "digital": "Only approved available printing images can be published",
+        "shared-metadata": "Shared image blob metadata disagrees",
+    }.get(case, "Preview image requires a content-addressed WebP path")
+    with pytest.raises(ValueError, match=f"^{message}$"):
         list(image_blobs(tables, None if case == "source" else images.library))
+
+
+@pytest.mark.parametrize("field", ["width", "height", "bytes"])
+def test_valid_webp_must_match_manifest_dimensions_and_bytes(
+    images: PublicImages, field: str
+) -> None:
+    tables = images.tables()
+    variant = tables["image_variant"][0]
+    path = string(variant["path"])
+    raw = (images.library / path).read_bytes()
+    assert digest(raw)[7:] == Path(path).stem
+    assert len(raw) == integer(variant["bytes"])
+    # Shared hashes must keep consistent metadata so the decoded/file-size guard is reached.
+    for row in tables["image_variant"]:
+        if row["path"] == path:
+            row[field] = integer(row[field]) + 1
+    message = (
+        "Preview image hash or bytes mismatch"
+        if field == "bytes"
+        else "Preview image decoded format or dimensions mismatch"
+    )
+    with pytest.raises(ValueError, match=f"^{message}$"):
+        list(image_blobs(tables, images.library))
+
+
+@pytest.mark.parametrize("kind", ["relative", "symlink"])
+def test_image_input_root_requires_absolute_non_symlink_path(
+    images: PublicImages,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    kind: str,
+) -> None:
+    if kind == "relative":
+        monkeypatch.chdir(images.library.parent)
+        root = Path(images.library.name)
+    else:
+        root = tmp_path / "linked-library"
+        root.symlink_to(images.library, target_is_directory=True)
+    assert root.is_dir()
+    with pytest.raises(
+        ValueError, match=r"^Preview image input must be an absolute non-symlink root$"
+    ):
+        list(image_blobs(images.projection.tables, root))
 
 
 @pytest.mark.parametrize("case", ["corrupt", "missing", "symlink", "png"])
@@ -373,6 +416,45 @@ def test_cli_requires_both_readonly_image_roots(tmp_path: Path, option: str) -> 
     assert result.exit_code != 0
     assert "provided together" in result.output
     assert not (tmp_path / "preview").exists()
+
+
+def test_cli_rejects_relative_preview_before_reading_recipe(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    path = tmp_path / "inputs.json"
+    path.write_bytes(b"not a recipe")
+    result = CliRunner().invoke(
+        app,
+        [
+            "snapshot",
+            "export",
+            "--inputs",
+            str(path),
+            "--preview-dir",
+            "relative-preview",
+            "--cdn-dir",
+            str(tmp_path / "formal"),
+        ],
+    )
+    assert result.exit_code != 0
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception) == "Preview root must be an absolute path"
+    assert list(tmp_path.iterdir()) == [path]
+
+
+def test_writer_rejects_relative_preview_before_writes(
+    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValueError, match=r"^Preview root must be an absolute path$"):
+        write_preview(
+            images.snapshot(),
+            Roots(Path("relative-preview"), tmp_path / "formal"),
+            {},
+            image_source=images.library,
+        )
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_cli_passes_confirmed_images_to_writer(

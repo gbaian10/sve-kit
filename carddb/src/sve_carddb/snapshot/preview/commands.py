@@ -56,8 +56,9 @@ def export_command(
     ] = None,
 ) -> None:
     """Require explicit roots and pins; write no formal index, active state or cache."""
-    recipe = Inputs.model_validate_json(inputs.read_bytes())
     roots = Roots(preview_dir, cdn_dir)
+    roots.verify()
+    recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
     codec = None if brotli_command is None else command_brotli(brotli_command)
     if (image_assets_dir is None) != (image_cache_dir is None):

@@ -14,6 +14,7 @@ from sve_carddb.image_assets import (
     ImageReference,
     PreviewRoots,
     build_jp_assets,
+    populate_jp_assets,
 )
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.export import export_snapshot
@@ -29,6 +30,13 @@ from .text_observation_fixtures import make_case
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.build_db import Database
+    from sve_carddb.build_inputs import SourceUse
+    from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.snapshot.preview.build import Inputs
+
+    from .text_observation_fixtures import Case
+
 
 @pytest.fixture(scope="module")
 def double_text_case(tmp_path_factory: pytest.TempPathFactory) -> TextCaseTemplate:
@@ -39,25 +47,31 @@ def double_text_case(tmp_path_factory: pytest.TempPathFactory) -> TextCaseTempla
     return TextCaseTemplate.capture(make_case(base / "authored", inputs), base)
 
 
-def test_build_mounts_images_with_exact_source_closure_and_two_faces(
+@pytest.fixture(scope="module")
+def encoded_images(
+    image_archive_template: tuple[Path, str, str],
+    tmp_path_factory: pytest.TempPathFactory,
+) -> tuple[ImageBuild, PreviewRoots]:
+    root = tmp_path_factory.mktemp("encoded-preview-images")
+    roots = PreviewRoots(root / "library", root / "formal", root / "cache")
+    return build_jp_assets(FrozenSources(*image_archive_template), roots), roots
+
+
+@pytest.fixture
+def prepared_image_build(
     double_text_case: TextCaseTemplate,
     image_archive_template: tuple[Path, str, str],
+    encoded_images: tuple[ImageBuild, PreviewRoots],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-) -> None:
+) -> tuple[Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]]:
     case = double_text_case.copy(tmp_path / "synthetic")
     shutil.copytree(image_archive_template[0], case.store, dirs_exist_ok=True)
-    frozen = FrozenSources(
-        case.store, image_archive_template[1], image_archive_template[2]
-    )
-    image_roots = PreviewRoots(
-        tmp_path / "library", tmp_path / "formal", tmp_path / "cache"
-    )
-    images = build_jp_assets(frozen, image_roots)
+    images, image_roots = encoded_images
     recipe = prepare_build(case, tmp_path, monkeypatch)
     recipe = recipe.model_copy(
         update={
-            "image_batch": frozen.batch_id,
+            "image_batch": image_archive_template[2],
             "card_batch": next(
                 iter(case.identity.evidence.values())
             ).source.archive.batch_id,
@@ -83,6 +97,16 @@ def test_build_mounts_images_with_exact_source_closure_and_two_faces(
     assert any(ref.source_src_raw == "/synthetic/1.png" for ref in references)
     # TextCase has synthetic JSON pages; exercise the real importer after its HTML boundary.
     monkeypatch.setattr(build_module, "plan_jp_images", lambda *_args: references)
+    return case, recipe, images, image_roots, references
+
+
+def test_build_mounts_images_with_exact_source_closure_and_two_faces(
+    prepared_image_build: tuple[
+        Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
+    ],
+    tmp_path: Path,
+) -> None:
+    case, recipe, images, image_roots, references = prepared_image_build
     built = build(recipe, images=images, image_root=image_roots.preview)
     tables = built.projection.tables
     assert len(tables["printing_image"]) == len(references)
@@ -140,3 +164,31 @@ def test_build_mounts_images_with_exact_source_closure_and_two_faces(
     )
     with pytest.raises(ValueError, match="source bytes"):
         build(recipe, images=forged, image_root=image_roots.preview)
+
+
+@pytest.mark.parametrize("usage", ["jp_image_link", "jp_image_variant"])
+def test_build_rejects_missing_image_source_use_after_real_population(
+    prepared_image_build: tuple[
+        Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+    usage: str,
+) -> None:
+    _, recipe, images, image_roots, _ = prepared_image_build
+
+    def omit_use(
+        db: Database,
+        images: ImageBuild,
+        references: tuple[ImageReference, ...],
+        root: Path,
+    ) -> tuple[SourceUse, ...]:
+        uses = populate_jp_assets(db, images, references, root)
+        omitted = next(use for use in uses if use.usage == usage)
+        # Keep the real DB graph intact while corrupting only the returned input record.
+        return tuple(use for use in uses if use != omitted)
+
+    monkeypatch.setattr(build_module, "populate_jp_assets", omit_use)
+    with pytest.raises(
+        ValueError, match=r"^Build input use closure or context mismatch$"
+    ):
+        build(recipe, images=images, image_root=image_roots.preview)

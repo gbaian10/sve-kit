@@ -23,6 +23,7 @@ PATH = re.compile(r"images/sha256/([0-9a-f]{2})/([0-9a-f]{64})\.webp\Z")
 def _members(
     tables: dict[str, list[Record]], confirmed_images: frozenset[str]
 ) -> dict[str, Record]:
+    """Require the caller's DB-verified review set, not an independent review audit."""
     assets = {string(row["id"]): row for row in tables["image_asset"]}
     for identifier, asset in assets.items():
         if (

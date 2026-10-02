@@ -28,6 +28,8 @@ class Roots:
 
     def verify(self) -> None:
         """Resolve symlinks before checking both containment directions."""
+        if not self.preview.is_absolute():
+            raise ValueError("Preview root must be an absolute path")
         preview, formal = self.preview.resolve(), self.formal.resolve()
         if preview.is_relative_to(formal) or formal.is_relative_to(preview):
             raise ValueError("Preview and formal roots must be disjoint")
