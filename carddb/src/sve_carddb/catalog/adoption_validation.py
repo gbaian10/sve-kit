@@ -1,7 +1,10 @@
 """Semantic validation over checked envelopes and independently rebuilt source content."""
 
+import re
 import unicodedata
 from typing import TYPE_CHECKING
+
+from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_loader import ordered
 from sve_carddb.catalog.adoption_models import (
@@ -179,12 +182,24 @@ def term(
             for e in record.evidence
         ):
             raise ValueError("Vocabulary raw mapping lacks approved source evidence")
-        text, _, _ = sources.text(mapping.source_ref, review)
+        if (
+            kind == "trait"
+            and re.fullmatch(
+                r"/faces/(0|[1-9][0-9]*)/traits/(0|[1-9][0-9]*)",
+                mapping.source_ref.locator,
+            )
+            is None
+        ):
+            raise ValueError("Vocabulary mapping source field does not match kind")
+        text, _, projection = sources.text(mapping.source_ref, review)
         if (text.lang, text.text) != (mapping.lang, mapping.raw) or mapping.lang != (
             "ja" if mapping.region == "jp" else "en"
         ):
             raise ValueError("Vocabulary mapping exact raw/region/language mismatch")
-        expected = _mapping_locator(record.data.subject.kind, mapping.region)
+        if kind == "trait":
+            _trait_components(mapping, projection)
+            continue
+        expected = _mapping_locator(kind, mapping.region)
         parts = mapping.source_ref.locator.split("/")
         if (
             len(parts) < _FIELD_PARTS
@@ -199,6 +214,45 @@ def term(
         label=sources.value(value.label, record, review),
         active=value.active,
     )
+
+
+def _trait_components(mapping: RawMapping, projection: JsonValue) -> None:
+    """Reject split or malformed components even when their exact hash is valid."""
+    parts = mapping.source_ref.locator.split("/")
+    faces = projection.get("faces") if isinstance(projection, dict) else None
+    face_index = int(parts[2])
+    if (
+        not isinstance(faces, list)
+        or face_index >= len(faces)
+        or not isinstance(face := faces[face_index], dict)
+    ):
+        raise ValueError("Trait source projection lacks the mapped face")
+    traits, raw = face.get("traits"), face.get("trait_raw")
+    if not isinstance(traits, list):
+        raise ValueError(  # ruff: ignore[type-check-without-type-error] -- recipe shape mismatches are domain refusals at this adoption boundary
+            "Trait source components cannot reconstruct the exact raw field"
+        )
+    components = [part for part in traits if isinstance(part, str) and part]
+    separator = "・" if mapping.region == "jp" else " / "
+    if (
+        not components
+        or len(components) != len(traits)
+        or separator.join(components) != raw
+    ):
+        raise ValueError(
+            "Trait source components cannot reconstruct the exact raw field"
+        )
+    for component in components:
+        bracketed = "〈" in component or "〉" in component
+        if bracketed and not (
+            component.startswith("〈")
+            and component.endswith("〉")
+            and component.count("〈") == 1
+            and component.count("〉") == 1
+        ):
+            raise ValueError("Trait source component has incomplete enclosing brackets")
+        if separator in component and (mapping.region == "en" or not bracketed):
+            raise ValueError("Trait source component contains an unprotected separator")
 
 
 def _mapping_metadata(kind: str, mapping: RawMapping) -> None:
@@ -230,9 +284,6 @@ def _mapping_locator(kind: str, region: str) -> set[str]:
             "title": "info/Universe",
         }
     )
-    if kind == "trait":
-        # Until the compound-trait migration is independently verified, no candidate is adopted.
-        raise ValueError("Trait mapping adoption awaits compound-trait verification")
     if kind not in fields:
         raise ValueError("Source-field recipe is not enabled for this vocabulary kind")
     return {fields[kind]}
