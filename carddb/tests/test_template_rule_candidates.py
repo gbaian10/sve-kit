@@ -477,3 +477,24 @@ def test_even_overlapping_proposals_cannot_share_a_position(
             References(),
             ("suffix_unit_items", "suffix_damage_amount"),
         )
+
+
+def test_adjacent_ascii_resource_prefix_stays_pending_even_after_lexical_veto() -> None:
+    assert candidate("PP２回復").slots[0].issues == (
+        "numeric_recovery_amount_requires_review",
+    )
+    assert matches("PP２回復", "suffix_recovery_amount") == ()
+
+
+def test_mismatched_source_decimal_and_candidate_value_cannot_be_emitted() -> None:
+    text = "試験２ダメージ"
+    value = candidate(text)
+    damaged = value.model_copy(
+        update={"slots": (value.slots[0].model_copy(update={"value": 3}),)}
+    )
+    assert (
+        recognize(
+            text, partition(text)[0], damaged, References(), ("suffix_damage_amount",)
+        )
+        == ()
+    )
