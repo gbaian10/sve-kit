@@ -90,6 +90,7 @@ from sve_carddb.source_archive import (
     seal_batch,
     verify_batch,
 )
+from sve_carddb.source_import.commands import app as source_import_app
 from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
 from sve_carddb.sources.official_jp import parse_list_first
@@ -118,6 +119,7 @@ archive_app = typer.Typer(
 app.add_typer(archive_app, name="archive")
 app.add_typer(snapshot_app, name="snapshot")
 app.add_typer(r2_app, name="r2")
+app.add_typer(source_import_app, name="source-import")
 
 console = Console(soft_wrap=True)
 

@@ -17,7 +17,7 @@ from pydantic import BaseModel, ConfigDict, ValidationError
 
 from sve_carddb.fetch.writer import LocalState
 from sve_carddb.manifest import (
-    SCHEMA_VERSION,
+    READABLE_SCHEMA_VERSIONS,
     ExclusiveLock,
     Kind,
     Manifest,
@@ -352,14 +352,18 @@ def _seal_attempt(  # ruff: ignore[complex-structure, too-many-branches, too-man
                 _prepare(pin)
             except ArchiveRaceError:
                 raise
-            except (CorruptDataError, FileNotFoundError, UnsafePathError) as exc:
+            except (
+                CorruptDataError,
+                FileNotFoundError,
+                UnsafePathError,
+            ) as prepared_error:
                 prepared_reason: Literal[
                     "missing_raw", "hash_mismatch", "unsafe_path"
                 ] = (
                     "unsafe_path"
-                    if isinstance(exc, UnsafePathError)
+                    if isinstance(prepared_error, UnsafePathError)
                     else "hash_mismatch"
-                    if isinstance(exc, CorruptDataError)
+                    if isinstance(prepared_error, CorruptDataError)
                     else "missing_raw"
                 )
                 missing.append(
@@ -918,12 +922,14 @@ def _publish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments]
         and len(raw) == _HEX_LENGTH
         and not set(raw) - _HEX
     ]
+    with Manifest.open_snapshot(final_db) as frozen:
+        schema_version = frozen.schema_version
     inventory = Inventory(
         created_at=datetime.now(UTC).isoformat(),
         manifest=ManifestPointer(
             sha256=manifest_sha,
             bytes=final_db.stat().st_size,
-            schema_version=SCHEMA_VERSION,
+            schema_version=schema_version,
         ),
         scope=[Scope(provider=provider, kind=kind) for provider, kind in sorted(scope)],
         current=sorted(metadata.current, key=lambda item: item.url),
@@ -1006,10 +1012,14 @@ def verify_batch(root: Path, store_id: str, batch_id: str) -> Inventory:
     _require_hash(
         root, manifest_path, inventory.manifest.sha256, inventory.manifest.bytes
     )
-    if inventory.manifest.schema_version != SCHEMA_VERSION:
+    if inventory.manifest.schema_version not in READABLE_SCHEMA_VERSIONS:
         msg = "sealed manifest schema is not supported"
         raise ArchiveError(msg)
     with Manifest.open_snapshot(manifest_path) as snapshot:
+        if snapshot.schema_version != inventory.manifest.schema_version:
+            raise ArchiveError(
+                "Inventory manifest version differs from its frozen database"
+            )
         if snapshot.integrity_check() != "ok":
             msg = "sealed manifest failed integrity_check"
             raise ArchiveError(msg)
