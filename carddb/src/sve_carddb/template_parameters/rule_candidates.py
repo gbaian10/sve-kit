@@ -195,7 +195,7 @@ def definition(rule: Rule) -> dict[str, JsonValue]:
         "reference_evidence": "exact raw name, one adopted concept, closed ID set, record hash; rule_term for stats and ability for all others",
         "braced_shape": "complete nonnested left/right braces; name-only slot and exact target kind/id/hash agree",
         "keyword_shape": "complete left bracket, exact name, ASCII underscore, unsigned threshold, right bracket; name remains literal",
-        "choice_evidence": "same full field body spans only; earlier introduction, complete contiguous 1..k label group with at least two items; slot covers only label digits",
+        "choice_evidence": "same full field unquoted body spans only; earlier introduction, complete contiguous 1..k label group with at least two items; slot covers only label digits",
         "status": "pending_approval",
     }
 

@@ -18,7 +18,7 @@ from sve_carddb.template_parameters.rule_candidates import (
     definition,
     selection,
 )
-from sve_carddb.template_sources.normalizer import partition
+from sve_carddb.template_sources.normalizer import QUOTED, partition
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -64,9 +64,12 @@ def _origins(units: tuple[Unit, ...], start: int, end: int) -> tuple[Range, ...]
 def _choice(text: str, hint: Hint) -> Match | None:
     parts = partition(text)
     body = tuple(s for p in parts if p.role == "body" for s in p.segments)
+    quoted = tuple(QUOTED.finditer(text))
 
     def in_body(start: int, end: int) -> bool:
-        return any(s.start <= start < end <= s.end for s in body)
+        return any(s.start <= start < end <= s.end for s in body) and not any(
+            q.start() < end and start < q.end() for q in quoted
+        )
 
     introductions = [m for m in INTRO.finditer(text) if in_body(m.start(), m.end())]
     labels = [m for m in LABEL.finditer(text) if in_body(m.start(), m.end())]

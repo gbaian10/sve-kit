@@ -130,6 +130,14 @@ def test_signed_roles_keep_sign_literal_and_magnitude_unsigned(
     original = value.model_dump()
     rows = matches(text, rule, refs)
     assert len(rows) == 1
+    assert (
+        rows[0]["proposed_role"]
+        == {
+            "prefix_attack_delta": "attack_delta_magnitude",
+            "prefix_health_delta": "health_delta_magnitude",
+            "prefix_cost_delta": "cost_delta_magnitude",
+        }[rule]
+    )
     assert rows[0]["value"] == 2
     assert rows[0]["source_segments"] == [
         {"start": len(marker) + 1, "end": len(marker) + 2}
@@ -160,12 +168,30 @@ def test_each_threshold_requires_complete_exact_unique_adopted_concept(
     rule: str,
 ) -> None:
     identifier = BY_ID[rule].targets[0]
+    assert (
+        identifier
+        == {
+            "keyword_threshold_combo": "term:ability.combo",
+            "keyword_threshold_lesson": "term:ability.lesson",
+            "keyword_threshold_necrocharge": "term:ability.necrocharge",
+            "keyword_threshold_spell_chain": "term:ability.spell_chain",
+        }[rule]
+    )
     refs = References(terms={"SyntheticAbility": [(identifier, "ability", HASH)]})
     text = "【SyntheticAbility_２】"
     rows = matches(text, rule, refs)
     assert len(rows) == 1
     assert rows[0]["target_id"] == identifier
     assert rows[0]["target_hash"] == HASH
+    assert (
+        rows[0]["proposed_role"]
+        == {
+            "keyword_threshold_combo": "combo_threshold",
+            "keyword_threshold_lesson": "lesson_threshold",
+            "keyword_threshold_necrocharge": "necrocharge_threshold",
+            "keyword_threshold_spell_chain": "spell_chain_threshold",
+        }[rule]
+    )
     for negative in (
         "SyntheticAbility_２】",
         "【SyntheticAbility２】",
@@ -302,6 +328,7 @@ def test_choice_requires_same_field_earlier_body_introduction_and_all_option_lab
         "２つチョイス【０】仮【１】例",
         "（２つチョイス）【１】仮【２】例",
         "ID_２つチョイス【１】仮【２】例",
+        "『２つチョイス』【１】仮【２】例",
     ):
         assert matches(bad, "bracket_choice_index") == ()
 
@@ -351,6 +378,21 @@ def test_registry_is_closed_default_off_and_not_an_approval_receipt() -> None:
     assert config["recognition_policy"] is None
     assert config["status"] == "pending_approval"
     assert all("earth_rite" not in rule for rule in BY_ID)
+    assert BY_ID["braced_stat_reference"].targets == (
+        "term:stat.attack",
+        "term:stat.health",
+    )
+    assert set(BY_ID["braced_ability_reference"].targets) == {
+        "term:ability.fanfare",
+        "term:ability.activation",
+        "term:ability.last_words",
+        "term:ability.feed",
+        "term:ability.union_burst",
+        "term:ability.quick",
+        "term:ability.possession",
+        "term:ability.advance_activation",
+    }
+    assert BY_ID["braced_action_engage_reference"].targets == ("term:action.engage",)
     assert configuration(("suffix_damage_amount",))["enabled"] == [
         "suffix_damage_amount"
     ]

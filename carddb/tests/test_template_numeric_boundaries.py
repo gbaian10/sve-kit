@@ -106,7 +106,7 @@ def test_vetoed_slots_and_literal_provenance_cannot_disappear_from_summary() -> 
 
 def test_diagnostic_definitions_are_fixed_ascii_and_never_active_rule_ids() -> None:
     config = configuration()
-    assert config["version"] == "numeric-rule-proposals-v2"
+    assert config["version"] == "numeric-rule-proposals-v3"
     assert config["guard_order"] == [
         "sign",
         "ascii_identifier",
