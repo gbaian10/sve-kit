@@ -1,7 +1,6 @@
 """Synthetic immutable Git, frozen HTML and exact approved-rule receipts."""
 
 import shutil
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- build isolated immutable Git fixtures
 import sys
 import unicodedata
 from dataclasses import dataclass, field, replace
@@ -34,6 +33,7 @@ from sve_carddb.wording_adoptions.reconstruction import (
 )
 from sve_carddb.wording_adoptions.replay import ReplayedAdoption, replay_adoptions
 
+from .adoption_fixtures import git as git  # ruff: ignore[useless-import-alias] -- share the isolated synthetic Git boundary
 from .test_effect_presence import page
 from .test_registry import make_inputs
 from .test_source_archive import _put, _resource, _store
@@ -43,20 +43,18 @@ if TYPE_CHECKING:
     from sve_carddb.text_observations import Vocabulary
 
 
-def git(root: Path, *arguments: str) -> str:
-    executable = shutil.which("git")
-    assert executable is not None
-    return subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git process and validated synthetic fixture paths
-        [executable, "-C", str(root), *arguments],
-        check=True,
-        capture_output=True,
-        text=True,
-    ).stdout.strip()
-
-
 def commit(root: Path) -> str:
     git(root, "add", ".")
-    git(root, "commit", "-m", "Synthetic immutable wording inputs")
+    git(
+        root,
+        "-c",
+        "user.name=Synthetic Reviewer",
+        "-c",
+        "user.email=synthetic@example.invalid",
+        "commit",
+        "-m",
+        "Synthetic immutable wording inputs",
+    )
     return git(root, "rev-parse", "HEAD")
 
 

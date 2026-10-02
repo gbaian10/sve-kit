@@ -1,7 +1,5 @@
 """Inventory and immutable byte checks are independent of current selection."""
 
-import shutil
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- synthetic immutable Git inputs are part of the receipt boundary
 from typing import TYPE_CHECKING
 
 import pytest
@@ -12,6 +10,8 @@ from sve_carddb.wording_adoptions.loader import load_adoptions
 
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic registry
 from .text_observation_fixtures import make_case
+from .wording_adoption_fixtures import commit as commit_wording_inputs
+from .wording_adoption_fixtures import git
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -20,24 +20,8 @@ if TYPE_CHECKING:
 
 
 def commit(root: Path) -> str:
-    executable = shutil.which("git")
-    assert executable is not None
-    for command in (
-        [executable, "init", str(root)],
-        [executable, "-C", str(root), "add", "authored"],
-        [
-            executable,
-            "-C",
-            str(root),
-            "commit",
-            "-m",
-            "Synthetic immutable adoption inputs",
-        ],
-    ):
-        subprocess.run(command, check=True, capture_output=True)  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed commands only, without a shell
-    return subprocess.check_output(  # ruff: ignore[subprocess-without-shell-equals-true] -- read the synthetic immutable revision
-        [executable, "-C", str(root), "rev-parse", "HEAD"], text=True
-    ).strip()
+    git(root, "init")
+    return commit_wording_inputs(root)
 
 
 @pytest.mark.parametrize(
