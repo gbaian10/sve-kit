@@ -87,7 +87,9 @@ projection_recipe 恰為 `approved-digital-name-document-v1`，content **逐欄�
 只省略既有文件的呈現題目／草案狀態／歷史流程／本機背景路徑等非操作欄；完整已核可文件留私人持久證據。
 採納當下先驗其 canonical、真正呈現白話全文、頁面與按鍵，逐欄驗投影；不能藉新封套／recipe 添加新授權。
 之後 build／CI 驗 authored 內已驗的操作政策、收據與來源閉包，不重讀未入庫的私人核可頁；
-不聲稱重新驗了原頁，也不因私人頁不在 CI 而使真實採納失效。缺 supported projection recipe 即拒絕使用。
+不聲稱重新驗了原頁，也不因私人頁不在 CI 而使真實採納失效。CI／build 無法重新驗證 content 是否確為核可文件的逐欄投影，也無法重驗 evidence_hashes 所指的私人檔案；這兩項由採納審核者在採納當下核對並留審核紀錄。缺 supported projection recipe 即拒絕使用。
+
+content 保留核可當時的文件原文，包含「本次答案尚待最終政策核可」「本次不生成收據」及 proposed_…_not_merged 等歷史措辭；不為消除這些字句而改寫投影。實際核可狀態以對應 `.approval.yaml` 為準，條文是否已合併以正式 docs 為準，不能僅靠 content 的呈現狀態判定。
 任何操作文字、matcher、枚舉、scope 或來源語意改變須另核可；來源／清單有限續版依 §5，不借純 metadata 投影改規則。
 
 ## 4. 真實核可與初始清單
@@ -99,19 +101,31 @@ message 的 uuid 是真實訊息 ID，value=null，source_hash 釘不可變事�
 按鍵必驗 policy_hash=approved_document_hash、text_sha256=presented_text_hash、value=agree；拒絕背景／作答紀錄代替明示核可。
 evidence_hashes 是不可變來源檔名 → exact bytes hash 映射，只含 basename／安全相對路徑，不存私人絕對路徑、憑證或官方名稱。
 政策／規則文本不是官方卡文，可入 git；完整官方目錄／卡名表與私人頁面不進 git。
+首批 evidence_hashes 的鍵沿既有收據，私人證據根是保存事件檔與 final-approval-page 的同一目錄；
+重驗時恰依下表定位，不搜尋其他同名檔，也不更改已採納鍵名。後續若需新的鍵路徑約定，另定新格式，不回寫舊收據。
 
-卡名收據必須同時引用政策按鍵與真實口頭同意訊息；連結收據引用自己的按鍵。
-disclosed_changes 是恰含 `{rule_id,removed,added,disclosed_at,accepted_message_uuid}` 的排序陣列：
-卡名第8條少「不因報告另擋發布」、第13條少「未來另審格式」且加「本卡名政策」限定，
-是已逐句揭露並接受的刻意差異，不還原、不重算原核可 hash。disclosed_at 指按鍵前的真正揭露時間；
-兩筆 accepted_message_uuid 均指收據內口頭同意訊息。連結沒有此差異，陣列空。
-note 明示政策核可、無逐筆／抽樣樣本；不引用其他政策來補假樣本。
+| 鍵 | 相對私人證據根的定位 |
+| --- | --- |
+| `events-card-names-5.md`／`events-card-names-5-supplement.md` | 同名不可變事件檔 |
+| `name-final.html` | `final-approval-page/name-final.html` |
+| `name2_policy/<purpose>.json` | `final-approval-page/saved/name2_policy/<purpose>.json` |
+| `<purpose>-policy.parsed.json`／`<purpose>-policy.canonical.json`／`<purpose>-policy.plain.md`／`<purpose>-final-exclusions.json` | `final-approval-page/final-approval-data/` 下同名檔 |
 
-初始排除 entries 恰等於已核可文件的完整最終清單；本批 names／link name／card_target 三類均空。
+disclosed_changes 是恰含 `{rule_id,removed,added,disclosed_at,accepted_message_uuid}` 的排序陣列，依 rule_id 排序。若有已揭露並接受的刻意差異，disclosed_at 指真正揭露時間，accepted_message_uuid 指收據內接受差異的真實訊息；沒有差異時陣列空。note 明示政策核可、無逐筆／抽樣樣本；不引用其他政策來補假樣本。
+
+初始排除 entries 恰等於已核可文件的完整最終清單。
 approved_list_hash 釘原最終清單 canonical；initial_exclusions_hash 釘本表可攜清單完整解析值的 canonical。
 names entry 為 `{source_lang,source_name_hash,reason}`；links entry 為
 `{kind:name,source_lang,source_name_hash,reason}` 或 `{kind:card_target,card_id,game,official_id,reason}`。
 完整鍵排序唯一，理由非空；清單可以空但必明示，不為空清單另造操作事件。
+
+### 4.1 首批實際核可
+
+本批卡名收據同時引用政策按鍵與真實口頭同意訊息；連結收據引用自己的按鍵。
+卡名第8條少「不因報告另擋發布」、第13條少「未來另審格式」且加「本卡名政策」限定，
+是已逐句揭露並接受的刻意差異，不還原、不重算原核可 hash。disclosed_at 指按鍵前的真正揭露時間；
+兩筆 accepted_message_uuid 均指收據內口頭同意訊息。連結沒有此差異，陣列空。
+本批 names／link name／card_target 三類初始排除均空。這些是首批事實，不將後續其他政策一律要求成相同差異或口頭事件。
 
 ## 5. 續版與排除
 

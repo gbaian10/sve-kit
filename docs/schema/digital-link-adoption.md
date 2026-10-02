@@ -4,7 +4,7 @@
 
 ## 1. 範圍與既有接點
 
-只收已採納的 SVE↔數位關係與查核覆蓋，不收數位卡文、圖片、語音或未決候選。`same_card` 指同一改編卡片概念，不要求兩遊戲效果一致；`effect_similarity` 與 relation 正交。`same_character`／`name_only` 可作瀏覽對應，但不能靠該關係直接套官方數位卡名；owner 另有有效獨立名字政策時依該政策取名。相同日文、角色、畫師、圖或信心分數均不是同概念採納。
+只收已採納的 SVE↔數位關係與查核覆蓋，不收數位卡文、圖片、語音或未決候選。`same_card` 指同一改編卡片概念，不要求兩遊戲效果一致；`effect_similarity` 與 relation 正交。`same_character`／`name_only` 可作瀏覽對應，但不能直接套官方數位卡名。owner 另有符合獨立名字政策的有效依據時，可依該政策取名，不以這些關係供名。相同日文、角色、畫師、圖或信心分數均不是同概念採納。
 
 另有獨立已核可的 [名字／同名瀏覽政策](digital-name-policy.md)：卡名只採用合格官方字串；同名連結另產卡層級 same_name，依規則先視為同卡但未逐筆確認，只作瀏覽，不作同概念、效果、圖或語音證據。新能力未實作前不能套入現行真人分片。
 
@@ -53,7 +53,7 @@ decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sampl
 | digital_link_adoption（links） | digital_link | digital-link-v1 | sampled／confirmed |
 | digital_link_coverage_adoption（coverage） | digital_link_coverage | digital-link-coverage-v1 | sampled／confirmed |
 
-sampled 須有實際真人審核者、時間及非空 checked 成員子集；confirmed 的 sample_ids 恰為全部 checked 成員。集合均排序唯一，不得有非成員。reviewed_precision=day 用 UTC 午夜編碼實際日期，不捏造時分秒；authored 身分／時間與審核事件分開。此門檻沿既有數位政策；不套 glossary 的 delegated_glossary 或模板的 approved_policy 例外。confidence、auto_ok、模型審查、來源官方及規格通過不代替真人事件。兩層採納的確認者均須是本契約明列的維護者，現行名單僅 `gbaian10`，reviewed_by 逐字比對，不 trim、不接受工具或模型名稱；新增／變更名單須維護者確認後修改契約與驗證器。具名欄位不等於已發生審核，sample_ids 與時間仍須忠實反映實際真人事件。
+sampled 須有實際真人審核者、時間及非空 checked 成員子集；confirmed 的 sample_ids 恰為全部 checked 成員。集合均排序唯一，不得有非成員。reviewed_precision=day 用 UTC 午夜編碼實際日期，不捏造時分秒；authored 身分／時間與審核事件分開。此門檻沿既有數位政策；不套 glossary 的 delegated_glossary 或模板的 approved_policy 例外。新增 same_name 的政策入口另依 [數位名字政策](digital-name-policy.md#2-同名規則瀏覽連結)，僅限該獨立核可規則與完整能力的卡層級瀏覽，不放寬本入口真人 same_card 門檻。confidence、auto_ok、模型審查、來源官方及規格通過不代替真人事件。兩層採納的確認者均須是本契約明列的維護者，現行名單僅 `gbaian10`，reviewed_by 逐字比對，不 trim、不接受工具或模型名稱；新增／變更名單須維護者確認後修改契約與驗證器。具名欄位不等於已發生審核，sample_ids 與時間仍須忠實反映實際真人事件。
 
 令 H 為 authored-layout 的完整 SHA-256 canonical JSON recipe，Hash 帶 `sha256:`。`record_hash=H(完整 record)`，包含 evidence、review_context_hash 與 reason；members 恰為全部 `[record_key,record_hash]` 按 key 排序，membership_hash=H(members)，decision.id=`d:`＋membership_hash 的 64 hex。review 欄仍須依真實事件驗證，不能因 ID 相同就接受互相矛盾的收據。
 
@@ -134,13 +134,13 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 
 ## 6. 每個名稱 owner 的使用閘門
 
-關係採納不是 context 級別的永久名稱授權。後續 #53 對每個 `face_revision.name`／`printing_face.name` 都要重驗以下條件，再產生或引用 translation：
+關係採納不是 context 級別的永久名稱授權。後續 #53 對每個 `face_revision.name`／`printing_face.name` 都要重驗以下條件，再產生或引用 translation：獨立名字政策先依第1步驗 owner、再驗政策完整目錄資格；下列第2至4步只在第5步允許的真人供名路徑使用，不是合格政策名字必須先有 link 的條件。
 
 1. 取得 owner 自己的實際原文、source_unit／hash 與凍結來源；由 registry/source_face_map 驗同 card／同 face。face_revision 用該 revision 的來源；printing_face 只用該版已知 printed 字串與它的印刷依據，unknown 直接缺譯，不以 current 填補。
 2. 找到本次 fresh、sampled/confirmed、relation=same_card 且精確兩面皆有值的 link。它的 card_id／face_id 必與此 owner 相同；digital_face 必屬宣告 digital_card。不同版次可共用同永久 card/face 的 link，但仍各自驗自己的來源，不能用另一張卡同名當身分證據。
 3. 重播 link 的 SVE 名稱依據與 owner 自己的凍結名稱。owner 的完整 exact 名稱必等於此同 card/face 的至少一項已採納 sve_names；可由同卡同面再錄的另一來源證明相同名字，不要求原 raw 頁永不更新，但不能只比共用 context／顯示名。印刷名與 current 不同時，印刷名須有自己的已採納名稱依據，不能繼承 current 的結果。
 4. 重播該 link 的 digital_names：同 game／official_id／phase 的 ja 及目標語名字須與本次數位 DB 完整字串相符；目標語缺少仍缺少。digital ja 與 SVE ja 不必相等，但這一對 exact 名稱必在同概念人工核對依據內。不得借另一數位面、base 卡或另一語言的名字。
-5. 對此 owner **已合格的候選**沿 `select_name()` 的 sv1→svwb 共用規則取詞，重用 `populate_name_translation()` 的凍結名稱證據、origin/authority 與穩定 ID 配方。sv1 沒有合格目標語名可退 svwb；兩者皆缺則 pending／回原文。同 provider 有不同有效候選仍拒絕歧義，不按 ID、hash 或 confidence 任取。
+5. 先取此 owner 符合獨立名字政策的官方名；政策因目錄同名異譯／缺譯而不合格時，才驗前述自己的真人同卡精確面證據與必要語義指派。逐名排除不得借任何真人 link 繞回自動官方名。兩條供名路徑沿 `select_name()` 的 sv1→svwb 共用 resolver，重用 `populate_name_translation()` 的凍結名稱證據、origin/authority 與穩定 ID 配方；政策路徑只有一代完全無此名才直接用二代，真人路徑沒有合格一代候選才退合格二代。純譯名字串差異按總順位取勝出名字並報差異，不退回原文；真正語義歧義仍須指派，不按 ID、hash 或 confidence 任取。兩條皆無合法來源才走其他合法選詞或 pending／原文；完整順位依 [數位名字政策 §1](digital-name-policy.md#1-名稱採用與關係分開)。
 6. 只有此 owner 的產生呼叫返回的 translation 才可建立 use／FieldTranslation；不能先有 translation_selection 就跳過前五步。即使其他 owner 共用 source_unit/context 且已有官方譯文，沒有自己有效政策證明或真人 link 的第三張卡仍缺譯。
 
 **現有函式的界線**：`select_name()` 只接 card/face，不接 owner 原文；`populate_name_translation()` 只接 JP revision，沒有本契約的 sve_names 入口，也沒有 printed/context_assignment 支援。實作本入口時先把 fresh 證據與 DB 關係接好；#53 的 owner-aware 接線必須在既有選詞／名稱產生路徑增加上述條件，不另實作一套排序，也不能把全域 DB 暫改後假裝只剩某 owner 的合格候選。入口匯入通過不能宣稱所有 owner 已可用。
@@ -195,7 +195,7 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 
 第一層先機械全查，保存完整候選／正式成員對照、檢查 recipe／設定、目錄範圍與結果 hash；機械分層背景納入 review_context，不新增封套欄位。草稿 hash／待決狀態與轉換結果留遷入稽核，正式建置仍只讀採納記錄與 frozen 證據，不把研究草稿變成 runtime 來源。維護者親自看非空樣本、確認該批同卡關係後，整批以 sampled 採納；樣本數由他決定，工具不得預填 30／50 或假稱看滿固定數量。sample_ids 只列他實際看過的正式 record_key；工具可按穩定排序提供抽樣候選，最後集合／數量與事件依實際審核紀錄，不由模型代看。實際抽樣前只留候選，不能先寫 sampled。這一批可共用一次真實抽樣事件；因分片大小拆成多個成員決定時，各 sampled 決定仍須有其成員的實看非空樣本，不借另一片樣本，也不縮減／複製 checked 集合冒充。分片與樣本範圍一起安排，未涵蓋的分片先留候選；工具不能為填滿每片而擅增維護者決定的整體抽樣數。
 
-第二層為任一條件不成立或無法驗證者，包含 232 筆待決、same_character、mixed、name_only／僅同名、兩端名字不同、職業／卡種不符或同名異譯。逐筆交維護者確認才採納，或先擱置；逐筆確認的正式成員全列 checked（可分 confirmed batch），未決的不進正式入口。擱置只表示暫無該真人關係來源資格；不阻擋owner另符合獨立名字政策取得官名，可顯示另行已採納的自譯名或原文，不影響其他卡的抽樣採納與發布。relation 仍依實際判斷，same_character／name_only 即使已確認也不能經該關係供官方名；獨立名字政策另驗；mixed 必須拆成明確的各遊戲／目標判斷，不能寫入 DB enum 或整列升 same_card。
+第二層為任一條件不成立或無法驗證者，包含 232 筆待決、same_character、mixed、name_only／僅同名、兩端名字不同、職業／卡種不符或同名異譯。逐筆交維護者確認才採納，或先擱置；逐筆確認的正式成員全列 checked（可分 confirmed batch），未決的不進正式入口。擱置只表示暫無此來源的官方譯名，可顯示另行已採納的自譯名或原文，不影響其他卡的抽樣採納與發布。relation 仍依實際判斷，same_character／name_only 即使已確認也不能供官方名；mixed 必須拆成明確的各遊戲／目標判斷，不能寫入 DB enum 或整列升 same_card。擱置與該關係不阻止 owner 另符合獨立名字政策取名，該政策的資格須獨立驗回。
 
 工具產生的 reason 如實寫「名稱／職業／卡種機械相符、同遊戲完整目錄繁中名唯一、原候選未標待決；隨批次真人抽樣採納」及可核對的 recipe／結果依據，不說「已逐筆人工確認」。是否實際樣本以 sample_ids 為準，source_ref／reason／review_context_hash 都參與成員 hash；抽樣不免除逐 owner 的 §6 重驗。分層筆數只報數字，不附官方名字／卡文；另註明計數單位及重疊項，不拿草稿行數冒充已採納 link 數。
 
