@@ -16,7 +16,7 @@ maintainer's direction. Our grants cover only rights that exist and that we can
 grant. The current site logo is cropped from an official character illustration,
 not an original project logo; it and the official class icons and text symbols
 are excluded from our grants. Official material in previous revisions is likewise
-excluded. Question originals and source-derived test fixtures currently remain
+excluded. Source-derived test fixtures currently remain
 in the tree; their cleanup is separate from this licensing change.
 
 The [website's legal page](https://svekit.app/legal) is planned to carry card-image
