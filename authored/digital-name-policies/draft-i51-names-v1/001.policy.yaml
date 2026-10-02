@@ -1,0 +1,395 @@
+digital_name_policy_format: 1
+kind: digital_name_policy
+policy_id: draft-i51-names-v1
+version: 1
+purpose: names
+approved_document_hash: sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3
+projection_recipe: approved-digital-name-document-v1
+content:
+  policy_id: draft-i51-names-v1
+  actual_answers:
+    Q1: agree
+    Q2: agree
+    Q3: agree
+    Q4: 乙
+    Q5: agree
+  normative_rules:
+    - id: name-scope
+      text: 只處理JP實體面自己的完整日文名稱到繁中名字；不單獨採納卡關係、效果／圖／語音或coverage。same_name連結另依獨立政策，不當真正人工同卡證據；非政策same_card維持真人門檻。
+      title: 只採用卡名字串
+    - id: exact-owner
+      text: 每個face_revision.name／已知printing_face.name驗自己的有效永久卡／面、registry/transition/source_face_map、凍結來源、語言、完整名字hash。hash命中仍比完整字串，不trim/NFKC/casefold/刪字。背面不借正面，印刷名不借current；unknown缺譯，錯證據／閉包停止建置。
+      title: 自己的來源，逐字相同
+    - id: full-catalogue
+      text: A只讀政策釘住的整份凍結數位目錄，查所有同exact日文名ID／實際phase。每項有非null、非空、非純White_Space、無固定假名表的繁中，全體exact目標字串只有一個才合格。多ID／phase同譯可用；任一有名缺譯／異譯使該名該遊戲不合格。JA等於繁中而全漢字仍可用。完整語言、count/offset/ID/phase閉包須驗，WB用card_details；草稿、子集、latest/live不能證明唯一。
+      title: 同遊戲完整目錄唯一合格繁中
+    - id: game-order
+      text: A先sv1；只有一代沒有exact日文名才用svwb。一代有名但A因目錄缺譯／異譯不合格，不直接借二代合格目錄。B只對owner自己合格候選取名，sv1優先，沒有合格sv1才svwb。四份條文依附表替代，same_character/name_only不能靠B供名，另有A可用；效果仍unofficial。
+      title: A與B共用一代優先
+    - id: human-link-exception
+      text: A因合法完整目錄同名異譯／缺譯不合格，owner自己fresh同card/face、合格phase／目標語且該link成員真人確認（confirmed在checked，或sampled在sample_ids）可沿B供名，加必要同字異義指派；日文名不同的既有B仍沿原門檻。無指派拒歧義、第三張無自己B不借名。一代A不合格但有真正確認的二代合格link、無合格一代B可用二代；來源損壞／錯面／壞hash不能用B吞掉。 新same_name卡層連結永遠不能作此真正人工精確面例外。
+      title: 真人同卡連結可以解目錄歧義，不繞排除
+    - id: display-order
+      text: 順位1：有效human/gbaian10 choice，confirmed本筆在checked或sampled本筆在sample_ids。順位2：合格A；順位3：必要時自己的有效B；順位4：其餘合法選詞，含sampled非樣本，保留真實origin；順位5：原文。只差譯文字串取勝出名並報差異，不回原文；真同字異義／壞指派仍消歧或拒絕。機器詞即使本人看過仍machine。
+      title: 本人實看選詞先，差異不退原文
+    - id: exclusions
+      text: 最終排除名單按完整名字hash＋人寫理由排序，空清單也明示。hash在釘目錄／JP都找不到就拒。排除阻止此名任何A/B自動數位官名，不撤B關係／既有卡頁，本人有效選詞仍可用。當場勾選後重新呈現最終全文／清單／hash再核可；以後只改清單需核可完整新清單／差異，規則／目錄不變則不重核全文規則。新版本只增不改，精確前件；撤回不恢復舊版，分叉／缺號拒。 此清單不移除獨立規則連結，規則連結也不能供名繞排除；連結排除只增log不納入本卡名hash。
+      title: 逐名勾選排除與有限續版
+    - id: new-jp
+      text: Q3實際答案agree：新JP凍結批次中的owner符合核可取名規則／釘住目錄即可沿用，不限首批再錄、不逐包重簽。每批相對前批列新增名稱hash／卡號／owner／條件，受控私有頁顯示來源名，供事後看／排除；不冒稱真人看過。共用Q3也適用連結，但本份只授權自己的名字條件；本次答案尚待最終政策核可。
+      title: 新實體卡包直接沿用與事後報告
+    - id: catalogue-update
+      text: Q4實際答案乙（兩份共用）：A只讀有效政策版本釘住的數位批次；較新建置批次只出差異，舊結果不stale、不撤、不auto-upgrade。只有純新增、完整閉包與自己的規則條件全符，舊JA／繁中名稱、資格、所選遊戲及既有連結／對應未變，且無新增兩代異譯、排除或真人決定衝突，才允許機械續版並明示釘住新版目錄。兩代異譯、譯名改變、失去資格、既有對應變動、目標消失仍列出由維護者實看明示同意後才生效。封閉格式／loader未完成不啟用自動新增；不授權新規則／遊戲，亦不代核連結政策。
+      title: 數位目錄有限新增沿用，實際Q4乙
+    - id: name-versus-concept
+      text: A直接name不需先配glossary概念；概念／效果引用仍需自己的有效採納與選面。直接名字與term引用可能暫時不同，差異要處理：精確委託scope內choice只增續版對齊、origin照實project/machine，本人詞／未解語義交維護者，超範圍補授權。A不能當glossary_choice.digital_name官方同概念證據，不擴約960名字的委託。
+      title: 名字與效果引用、委託範圍分開
+    - id: evidence-and-history
+      text: 歷史核對背景從宣告的不可變Git commit驗，不比現在磁碟runtime；本次runtime另釘完整依賴。正式背景用squash後main保留commit。A回傳typed frozen NamePolicyResult，不塞假digital_link；raw/使用進source_record/F1，名字走既有translation/use/FieldTranslation，decision_id可null。完整record.verify complete閉包須完成。純A無獨立數位採納時公開digital_card/art/link空，DB仍有名字證據。
+      title: 只釘來源與語意，不因程式改版重簽
+    - id: stable-id
+      text: A直接名字ID沿render-v1，依game、JAhash、繁中hash、詞彙recipe／context；不加term/concept，後配概念不改它。概念/choice只有實際效果引用時進該效果依賴。owner/ref、政策/收據、整批目錄、資格checker/runtime留完整F1，不造成整批名字換ID；取名recipe真語意變更引起ID更換是預期並需量測。
+      title: 名字ID與概念配發分開
+    - id: label-and-authority
+      text: Q5實際答案agree：標示「數位版官方卡名」，只說官方數位來源字串，不表示SVE官方繁中或已確認同卡。公開origin/authority/status照真實來源與政策檢查，不用reviewed暗示本人逐字看過；本卡名政策不加公開枚舉／欄位。
+      title: 畫面數位版官方卡名
+    - id: approval-is-future
+      text: 卡名Q1/Q2/Q3/Q5實際agree、Q4乙，名字排除空，已記2026-10-02T20:16:13.546Z送出；這只是作答。卡名最終全文／hash與空清單須另行明示同意，不代簽連結政策；兩份hash／核可事件各自有效。policy_approval_event與authorization_basis仍null；背景不是核可或樣本，本次不生成收據。
+      title: 實際答案已記，最終全文仍待核可
+  plain_language_rules:
+    - id: name-scope
+      text: 這份只決定怎麼採用卡名，不單獨確認兩張卡相同、不授權數位卡頁連結、效果、圖或語音。連結另用一份規則與核可。
+      title: 這份只處理卡名
+    - id: exact-owner
+      text: 只看這張卡、這個面的自己的已知名字與來源。日文一字不差，不刪空白、不改標點或全半形。背面不借正面，印刷名不借現行名；不知道的就保留缺譯。壞來源不放行。
+      title: 名字一字不差，而且是這張、這面的名字
+    - id: full-catalogue
+      text: 查指定遊戲整份凍結目錄，不只草稿選的卡。同名卡的繁中名字都要有內容、不是純空白或固定假名佔位，而且完整字串只有一種；任一缺譯或異譯就不能自動取。
+      title: 查完整目錄，不只看草稿那張卡
+    - id: game-order
+      text: 先一代，一代完全沒有該日文名才直接用二代；一代有名但缺譯或異譯，不直接借二代目錄。真正人工確認的對應也先取有資格的一代，再二代。效果仍非官方翻譯。
+      title: 卡名先用一代
+    - id: human-link-exception
+      text: 自動取名因同名異譯或缺譯不合格時，你自己真正確認過這張、這面的數位對應，並已把名字相同、意思不同的卡分開記錄，可以照原條件供名；沒確認的第三張卡不能借名。只是名字規則產生的連結不算這種證據。
+      title: 自己的真人同卡確認可以解目錄歧義
+    - id: display-order
+      text: 你本人實際看過並確認的有效選詞最先；接著是合格官方名字，必要時自己真正確認的數位對應；再來其他合法譯名與原文。抽查未抽到的成員不算你親自選過。譯名不同就顯示勝出的詞並報差異，不因此退回日文。
+      title: 你本人實際確認的選詞最先
+    - id: exclusions
+      text: 你勾掉的名字不從任何數位對應自動取名，自己實際採納的選詞仍可用。卡名與連結排除分開；改卡名清單另記明示同意、只增版本與前件，不改舊記錄。
+      title: 可以逐名排除，不借連結繞過
+    - id: new-jp
+      text: 你第三題已選同意：新實體卡包自己的來源可驗、符合這份取名規則與指定目錄，就沿用；逐批列新增名字供事後看或排除，不假稱你看過每張。這項授權仍等你明示同意這份最終政策才生效。
+      title: 新實體卡包沿用既有規則
+    - id: catalogue-update
+      text: 數位目錄更新採你第四題選的乙：單純新增、完整符合各自規則，而且舊名字、原來取名用的一代或二代、舊連結都沒改，也沒有新增兩代譯名衝突、排除或既有人工判斷衝突，就可以沿用。兩代異譯、譯名改變、失去資格、既有對應變動或目標消失，仍先列出，讓你實際看過同意才生效。兩份規則各自使用明確指定的凍結目錄；有較新建置來源只列差異，不偷偷換目錄。符合乙的新增仍要完整檢查並記下新版目錄與來源；工具與紀錄格式完成前不啟用自動新增。這個答案同時套用卡名與連結，但各自只授權自己規則內的條件。
+      title: 數位目錄單純新增沿用，其他變動先看
+    - id: name-versus-concept
+      text: 卡片自己的名字可先譯，效果中引用與同字異義仍驗自己的概念與授權。這份不擴大原本約960名字的委託，不把官方名字當作整段效果的官方翻譯。
+      title: 名字可以先顯示，效果引用另驗
+    - id: evidence-and-history
+      text: 保留真實核可、來源與之後仍能找到的當時程式版本。改程式註解或重構不讓舊採納失效；壞來源仍停止。另一份連結排除變動不要求這份卡名規則重新核可。
+      title: 核可有可追溯版本，不因程式重構失效
+    - id: stable-id
+      text: 未改的名字不因連結或概念補配而整批換編號。取名規則的真正語意或輸出改了，才依既有名字編號辦法與差異報告處理。
+      title: 沒改的名字不整批換編號
+    - id: label-and-authority
+      text: 這類名字標「數位版官方卡名」，表示來源是數位遊戲官方，不表示有官方實體繁中版，也不表示真人確認同卡。
+      title: 畫面標『數位版官方卡名』
+    - id: approval-is-future
+      text: 你五題已作答：官方卡名、先用一代、新卡包沿用與來源標示都同意；第四題選乙。最終卡名排除清單為空。現在請另外看過這份全文、空清單與雜湊值，明示同意這份卡名規則才算核可；不代簽連結規則。本次尚無核可或收據。
+      title: 最終全文與清單看過同意，才算核可
+  catalogue_pins:
+    approved_coverage_claim: false
+    candidate_counts:
+      original_second_tier: 398
+      partitions:
+        both_different: 3
+        both_same: 48
+        only_sv1: 1816
+        only_svwb: 174
+      previous_not_same_card: 93
+      previously_pending: 232
+      proposed_excluded: 0
+      rows: 2041
+      rows_with_extra_guard_flags: 0
+      selected_games:
+        sv1: 1867
+        svwb: 174
+    count_replay_main_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+    extra_unicode_scan_hash: sha256:791433c12078d7053ac603292b579252bb6cf530e218e4fc1e80bb473a4f9404
+    parser_and_registry_configuration:
+      catalog_registry:
+        authored_revision: a229bee79af50375030f4552d1d63964f44db50f
+        index_hash: sha256:02bb114a3892144aa2c47811f1d6ab205d372113cca17e75040c596c3358d7f1
+        index_path: authored/ids/index.yaml
+      digital_link_sources:
+        - batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          store_id: gbaian10-home
+        - batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+          store_id: gbaian10-home
+        - batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+          store_id: gbaian10-home
+      translation_recipes:
+        translation-jp-v1:
+          code_hash: sha256:f2e762008e9ffb4a9a84542a84fbb1ab7b2c4a87c4c5b6388194aea0c638d838
+          code_path: carddb/src/sve_carddb/translations/sources.py
+          config:
+            provider: jp
+          config_hash: sha256:dff233276584668b5219922b6bacd4d89d315b0c049ce0e54f2cdd47a39853df
+          program_revision: a229bee79af50375030f4552d1d63964f44db50f
+          version: translation-jp-v1
+        translation-sv1-v1:
+          code_hash: sha256:f2e762008e9ffb4a9a84542a84fbb1ab7b2c4a87c4c5b6388194aea0c638d838
+          code_path: carddb/src/sve_carddb/translations/sources.py
+          config:
+            provider: sv1
+          config_hash: sha256:d4969b2a5e6d43cec1cb67c22412d5f00068b10b9b2e67061726b18152ecfe0a
+          program_revision: a229bee79af50375030f4552d1d63964f44db50f
+          version: translation-sv1-v1
+        translation-svwb-v1:
+          code_hash: sha256:f2e762008e9ffb4a9a84542a84fbb1ab7b2c4a87c4c5b6388194aea0c638d838
+          code_path: carddb/src/sve_carddb/translations/sources.py
+          config:
+            provider: svwb
+          config_hash: sha256:65aac4e181026a4fce4ed91e3680a281a75f8a393d6f41e4de1cfdb106d74b6d
+          program_revision: a229bee79af50375030f4552d1d63964f44db50f
+          version: translation-svwb-v1
+    private_name_list_hash: sha256:617f3f9ebc8977032678684da2624164d90e6095a32d9f3d50909bf1724dff27
+    r2_inventory_evidence_hash: sha256:b03966346d3a15a697b28cf2fa7271f6303cb435ddd830856ce1d2dbce3c90ee
+    source_batches:
+      - batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+        store_id: gbaian10-home
+      - batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        store_id: gbaian10-home
+      - batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+        store_id: gbaian10-home
+    store_id: gbaian10-home
+  scope:
+    field: name
+    owners:
+      - face_revision.name
+      - known_printing_face.name
+    region: jp
+    source_lang: ja
+    target_lang: zh-Hant
+  game_priority:
+    - sv1
+    - svwb
+  target_minimum_check:
+    kana_ranges:
+      -   - 12353
+          - 12438
+      -   - 12441
+          - 12447
+      -   - 12449
+          - 12538
+      -   - 12540
+          - 12543
+      -   - 12784
+          - 12799
+      -   - 65382
+          - 65439
+      -   - 110592
+          - 110847
+      -   - 110848
+          - 110895
+      -   - 110896
+          - 110959
+    known_limits:
+      kana_extended_b_not_in_existing_matcher:
+        - 110576
+        - 110591
+      measurement_does_not_silently_change_reviewed_matcher: true
+      observed_extra_flags_all_zero: true
+      variation_selectors_not_removed_or_normalized: true
+      zero_width_not_rejected_by_existing_matcher:
+        - 847
+        - 6158
+        - 8203
+        - 8204
+        - 8205
+        - 8288
+        - 65279
+        - 173
+        - 1564
+        - 8206
+        - 8207
+        - 8234
+        - 8235
+        - 8236
+        - 8237
+        - 8238
+        - 8289
+        - 8290
+        - 8291
+        - 8292
+        - 8293
+        - 8294
+        - 8295
+        - 8296
+        - 8297
+        - 8298
+        - 8299
+        - 8300
+        - 8301
+        - 8302
+        - 8303
+    trim_or_normalize: false
+    whitespace_codepoints:
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 32
+      - 133
+      - 160
+      - 5760
+      - 8192
+      - 8193
+      - 8194
+      - 8195
+      - 8196
+      - 8197
+      - 8198
+      - 8199
+      - 8200
+      - 8201
+      - 8202
+      - 8232
+      - 8233
+      - 8239
+      - 8287
+      - 12288
+  display_label: 數位版官方卡名
+  excluded_names: []
+  visible_notices:
+    - 你本人實際看過並確認的有效譯名最優先，再用符合條件的數位官方卡名，之後才是其他合法譯名與原文。批次抽查沒抽到的那張，不算你親自選過；機器翻譯即使你看過，來源仍標機器。譯名不同會保留勝出的名字並列差異，不只因此退回日文。
+    - 卡片自己的名字可以先顯示繁中；別張卡效果提到它的整段可能暫時仍是日文，直到引用與概念資料完整。同名連結只用來看數位卡頁，不保證效果、圖或語音相同。
+    - 上次「全放過」沒有補記成真人同卡樣本。這次若核可名字相同的連結規則，就會出現數位卡頁連結，依你選的遊戲與93個警訊處理方式顯示，標明未逐筆確認。名字與連結可分開排除；之後只要明確告訴我們排哪個名字或哪一對卡，我們記下你的訊息與時間即可，不必每次重看整份規則。排除只移除按名字產生的連結，真正人工採納照原決定顯示；重疊只列報告，要撤真人結果則另作撤回。舊快照不回寫。
+  shared_answer_bindings:
+    Q3:
+      answer_key: Q3
+      single_answer: true
+      applies_to:
+        - names
+        - links
+      actual_answer: agree
+    Q4:
+      answer_key: Q4
+      single_answer: true
+      applies_to:
+        - names
+        - links
+      actual_answer: 乙
+  shared_future_scope_rules:
+    shared_answers:
+      Q3: agree
+      Q4: 乙
+    new_jp_packages: continue_if_own_policy_conditions_pass_report_added_owners
+    catalogue_updates: pure_additions_only_may_continue_other_changes_need_actual_maintainer_review
+    pure_addition_checks:
+      - complete_frozen_catalogues_and_owner_proof_closure_pass_own_policy_checks
+      - all_existing_ja_and_hant_names_qualifications_and_selected_name_games_unchanged
+      - all_existing_link_targets_relations_and_mappings_unchanged
+      - no_new_cross_game_translation_difference
+      - no_active_exclusion_or_unresolved_human_decision_conflict
+    requires_actual_review_before_activation:
+      - cross_game_translation_differences
+      - hant_name_changes
+      - loss_of_qualification
+      - changes_to_existing_mappings_or_link_targets
+      - removed_targets
+    newer_build_catalogue_alone: report_only_do_not_replace_policy_pins_or_stale_prior_results
+    allowed_additions_require_pinned_new_version_and_full_proof: true
+    requires_closed_format_and_loader_before_automatic_additions: true
+    does_not_authorize_new_rules_games_or_other_policy: true
+  final_exclusions_hash: sha256:84c73230ca178ee586547465ff5cd441c17ec9c530900d2830c4d73497383e66
+  proposed_clause_replacements:
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 數位官方卡名可由有效的名字政策 A，或此 owner 自己已採納的同卡證據 B 供詞；兩者共用一代 sv1→二代 svwb 的 resolver。A 僅重用 exact 同名的官方字串，不宣稱同概念／同卡；same_character 或同字串本身仍不能採納 B。本人實看選詞、A、必要時有效 B、其他合法選詞與原文依名字政策總順序取用。
+      old_text: 已採納的同概念數位卡名優先 svwb 再 sv1，same_character 或同字串不足以認定同概念。
+      path: docs/schema/translation-contract.md
+      section: §1
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 明示核可的新卡名來源與共同遊戲順位；保留字串或same_character不等於真正同概念採納的限制。
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 此限制針對由該關係直接供名；owner另有完整有效的獨立名字政策時，可按該政策重用官方字串，仍不採納same_card、不授權語音或數位卡頁。
+      old_text: '`same_character`／`name_only` 可作瀏覽對應，但不能直接套官方數位卡名。'
+      path: docs/schema/digital-link-adoption.md
+      section: §1：關係與名字資格
+      status: proposed_replacement_not_merged
+      operation: append_scoped_rule
+      retain_original: true
+      old_text_role: retained_anchor_not_deleted
+      new_text_only_added_rule: true
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: select_name()／populate_name_translation() 的同一取名路徑擴充接收型別化 A 凍結名字證明與 B 採納結果，排序統一 sv1→svwb；未完成接線驗收前不宣稱程式已提供新政策。
+      old_text: '`select_name()` 可篩已採納的同卡同面關係並依 svwb→sv1 選詞。'
+      path: docs/schema/digital-link-adoption.md
+      section: §1：select_name 描述
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 更新既有同一resolver的取詞順序與新增名稱證明入口，不放寬人審精確面證據。
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 5. 先取 owner 合格 A 官名；A 因目錄同名異譯／缺譯不合格，或兩端日文名不同時，再驗此 owner 自己的 B。目錄異譯／缺譯例外須 link 成員真正人工確認並具必要語義指派。合格 B 候選 sv1 優先，沒有合格 sv1 可取 svwb；逐名排除不借任何 B。來源損壞、錯 owner/phase/語言不可降為例外；同 provider 仍歧義不任取 ID。名字只差譯文字串不退原文，完整順序依名字政策。
+      old_text: 5. 對此 owner **已合格的候選**沿 `select_name()` 的 svwb→sv1 規則取詞，重用 `populate_name_translation()` 的凍結名稱證據、origin/authority 與穩定 ID 配方。svwb 沒有合格目標語名可退 sv1；兩者皆缺則 pending／回原文。同 provider 有不同有效候選仍拒絕歧義，不按 ID、hash 或 confidence 任取。
+      path: docs/schema/digital-link-adoption.md
+      section: §6 第5步
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 依已審名字政策改取詞順序與真人缺譯／異譯例外；錯來源／面與provider歧義仍拒絕。
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 擱置人審關係不阻止owner另外符合獨立名字政策；新政策自己驗名字資格，不改草稿relation或真人門檻。
+      old_text: 擱置只表示暫無此來源的官方譯名，可顯示另行已採納的自譯名或原文，不影響其他卡的抽樣採納與發布。relation 仍依實際判斷，same_character／name_only 即使已確認也不能供官方名；
+      path: docs/schema/digital-link-adoption.md
+      section: §7.1 第二層
+      status: proposed_replacement_not_merged
+      operation: append_scoped_rule
+      retain_original: true
+      old_text_role: retained_anchor_not_deleted
+      new_text_only_added_rule: true
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: B 不捏造語言：有合格 sv1 先 sv1，沒有才用合格 svwb，兩者皆缺才合法其他選詞／原文。A 一代有名不合格不能直接借二代目錄；自己有真正人工確認的合格二代同卡連結且無合格一代 B 時，可沿 B 供名；逐名排除仍不借 B。
+      old_text: 不捏造語言；sv1 合格時按既有優先序退到 sv1，皆無則缺譯／回原文
+      path: docs/schema/digital-link-adoption.md
+      section: §7.2 D04 預期
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 同步一代優先與真正人審例外的反例預期，不捏造缺語言。
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 同一 resolver 接 A 型別化凍結名字證明／B 自己有效的 same-card 同面證據，統一 SV1 優先 SVWB；沒有 A 的真實來源或有效 B 不借別人 context 官名，不另建永久名字庫
+      old_text: 重用已採納 same-card、同數位面與凍結語言證據，SVWB 優先 SV1；不另建平行官方名稱詞庫
+      path: docs/schema/card-name-concepts.md
+      section: §1 既有入口表
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 名稱入口說明增獨立名字證明與一代優先，不增加平行名字庫。
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 名字若另有完整有效的獨立名稱政策，可由該政策重用字串；這不是由same_character關係取得名稱資格，也不授權語音。
+      old_text: '`same_character` 不能直接套用官方數位譯名或 battle 語音。'
+      path: docs/schema/build-db.md
+      section: §8 same_character
+      status: proposed_replacement_not_merged
+      operation: append_scoped_rule
+      retain_original: true
+      old_text_role: retained_anchor_not_deleted
+      new_text_only_added_rule: true
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 卡名可由有效 A 名稱重用政策或 owner 自己有效的 B 同卡證據供名；A 不需同概念連結，A/B 同一 resolver 一代優先。字串取詞不等於 SVE 官方繁中／同卡，效果翻譯仍 unofficial；公開關係與建置端名字證據分開。
+      old_text: 卡名官方數位譯名限確認同概念，優先 svwb 再 sv1；效果翻譯永遠 unofficial。
+      path: docs/schema/build-db.md
+      section: §9 官方名字
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 明示改名字來源與一代優先；仍不升整段效果權威。
+    - base_revision: 5d0873e97ca50f18a3cc682b552fe7cde55144cc
+      new_text: 缺／歧義概念仍阻擋概念引用，不一律阻擋直接 A 名稱。純譯文字串差異依本人實看選詞>A>必要時有效B>其他合法選詞>原文的順序取詞並報差異，不回原文；真正語義矛盾或壞證據仍消歧／拒絕；
+      old_text: 無概念、多概念或 owner 官方名稱與概念譯名衝突時回原文等人工；
+      path: docs/schema/translation-contract.md
+      section: §6.1 名稱 fallback
+      status: proposed_replacement_not_merged
+      operation: replace_excerpt
+      replacement_reason: 依已審政策改純譯詞差異的fallback，不豁免真正語義歧義或壞證據。

@@ -1,0 +1,51 @@
+digital_name_approval_format: 1
+kind: digital_name_policy_approval
+policy_id: draft-i51-names-v1
+version: 1
+policy_hash: sha256:16d6f2f8fe23dd435fad9d1f436e35379c10d857b88ec766ce4c5c31089fe576
+approved_document_hash: sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3
+presented_text_hash: sha256:4dc2396f7547c9b50668d4268dd150dab762290828b665fd04540409eeb897d2
+reviewed_by: gbaian10
+reviewed_at: '2026-10-02T20:32:22.779Z'
+reviewed_precision: instant
+approval_events:
+  - kind: page_button
+    at: '2026-10-02T20:32:22.779Z'
+    uuid:
+    source_hash: sha256:731555992588fc88f51783560ff7a1b29372bd88f7922f7039134918de396569
+    locator: name2_policy/names.json
+    value:
+      at: '2026-10-02T20:32:22.779Z'
+      id: names
+      note: ''
+      policy_hash: sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3
+      text_sha256: sha256:4dc2396f7547c9b50668d4268dd150dab762290828b665fd04540409eeb897d2
+      value: agree
+  - kind: message
+    at: '2026-10-02T20:33:39.423Z'
+    uuid: b5d164b7-8e06-4336-af4e-de21f0306da4
+    source_hash: sha256:1e0dd571cbc2fa5ac6741fe41eb3d1bc287f32b757ec272d1484a6bb0f3d4dbf
+    locator: b5d164b7-8e06-4336-af4e-de21f0306da4
+    value:
+evidence_hashes:
+  events-card-names-5-supplement.md: sha256:1e0dd571cbc2fa5ac6741fe41eb3d1bc287f32b757ec272d1484a6bb0f3d4dbf
+  events-card-names-5.md: sha256:0786356d9941f33239d6b4c534b39109bb301100954d3ea8e5d3732a8d6b4830
+  name-final.html: sha256:1cbe80563a984b7c172b39bf9b94f49dfd079a5f2cc111e5728d309b46125bec
+  name2_policy/names.json: sha256:731555992588fc88f51783560ff7a1b29372bd88f7922f7039134918de396569
+  names-final-exclusions.json: sha256:f5085baba6039f615f139d7f211787da0642ebdf2063994b10cdc1931b61a5f0
+  names-policy.canonical.json: sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3
+  names-policy.parsed.json: sha256:986b8806a5dd9653a954a49bb01e50f00db1b1338b03eb8ff6a6f30035084bf3
+  names-policy.plain.md: sha256:4dc2396f7547c9b50668d4268dd150dab762290828b665fd04540409eeb897d2
+initial_exclusions_hash: sha256:ff111346ce206466cf07b073293ddbaea6ebce4ad902e13f54e2813ac19545a9
+disclosed_changes:
+  - rule_id: label-and-authority
+    removed: 未來另審格式
+    added: 本卡名政策
+    disclosed_at: '2026-10-02T20:31:57.023Z'
+    accepted_message_uuid: b5d164b7-8e06-4336-af4e-de21f0306da4
+  - rule_id: new-jp
+    removed: 不因報告另擋發布
+    added:
+    disclosed_at: '2026-10-02T20:31:57.023Z'
+    accepted_message_uuid: b5d164b7-8e06-4336-af4e-de21f0306da4
+note: 維護者明示核可本份最終規則與空初始排除清單；政策核可不是逐卡人工確認，沒有抽樣或逐筆樣本。操作文件只做固定欄位投影，不修改被核可的原全文。 卡名第8、13條差異已於按鍵前逐句揭露，並由真實口頭同意訊息接受；刻意保留核可版本。
