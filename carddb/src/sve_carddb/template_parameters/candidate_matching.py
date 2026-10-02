@@ -4,18 +4,26 @@ import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import digest
 from sve_carddb.template_parameters.analysis import prepared, unsigned
 from sve_carddb.template_parameters.models import Range
+from sve_carddb.template_parameters.numeric_rules import (
+    ASCII_AFTER,
+    ASCII_BEFORE,
+    SIGNS,
+)
 from sve_carddb.template_parameters.provenance import merged
 from sve_carddb.template_parameters.rule_candidates import (
     BY_ID,
     INTRO_PATTERN,
+    KEYWORD_PATTERN,
     LABEL_PATTERN,
+    MIN_OPTIONS,
     SIGNED,
+    STAT_CATEGORIES,
     SUFFIXES,
     VERSION,
-    definition,
+    condition_hash,
     selection,
 )
 from sve_carddb.template_sources.normalizer import QUOTED, partition
@@ -31,8 +39,7 @@ if TYPE_CHECKING:
 
 INTRO = re.compile(INTRO_PATTERN)
 LABEL = re.compile(LABEL_PATTERN)
-ASCII = re.compile(r"^[A-Za-z0-9_]")
-MIN_OPTIONS = 2
+ASCII = re.compile(ASCII_AFTER)
 
 
 @dataclass(frozen=True)
@@ -53,7 +60,7 @@ def _exact_target(
     if len(found) != 1 or found[0][0] not in targets:
         return None
     identifier, category, checksum = found[0]
-    expected = "rule_term" if identifier.startswith("term:stat.") else "ability"
+    expected = STAT_CATEGORIES.get(identifier, "ability")
     return (identifier, checksum) if category == expected else None
 
 
@@ -113,9 +120,7 @@ def _braced(
 
 
 def _suffix(rule: Rule, hint: Hint, before: str, after: str) -> Match | None:
-    if before.endswith(("+", "-", "−", "＋", "－")) or (
-        before and re.search(r"[A-Za-z0-9_]$", before)
-    ):
+    if before.endswith(SIGNS) or (before and re.search(ASCII_BEFORE, before)):
         return None
     if hint.value == 0 and rule.id.startswith("suffix_ordinal_"):
         return None
@@ -154,7 +159,7 @@ def _threshold(
     edges: tuple[str, str],
 ) -> Match | None:
     before, after = edges
-    match = re.search(r"【([^【】]+)_$", before)
+    match = re.search(KEYWORD_PATTERN, before)
     if match is None or not after.startswith("】"):
         return None
     spans = _origins(units, match.start(1), match.end(1))
@@ -227,7 +232,7 @@ def recognize(
                     "slot": hint.name,
                     "rule_id": identifier,
                     "matcher_version": VERSION + ":" + identifier,
-                    "condition_hash": digest(canonical(definition(rule))),
+                    "condition_hash": condition_hash(rule),
                     "proposed_role": rule.role,
                     "original_reason": rule.reason,
                     "status": "pending_approval",

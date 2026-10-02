@@ -4,6 +4,11 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.template_parameters.numeric_rules import (
+    ASCII_AFTER,
+    ASCII_BEFORE,
+    SIGNS,
+)
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -24,6 +29,9 @@ SIGNED = {
 }
 INTRO_PATTERN = r"(?<![A-Za-z0-9_０-９])[0-9０-９]+つ(?:まで)?チョイス"
 LABEL_PATTERN = r"【([0-9０-９]+)】"
+KEYWORD_PATTERN = r"【([^【】]+)_$"
+MIN_OPTIONS = 2
+STAT_CATEGORIES = {"term:stat.attack": "rule_term", "term:stat.health": "rule_term"}
 
 
 @dataclass(frozen=True)
@@ -82,14 +90,14 @@ RULES = (
         "prefix_attack_delta",
         "attack_delta_magnitude",
         "signed_numeric_requires_review",
-        "complete braced attack marker immediately followed by ASCII sign and unsigned magnitude; no separator",
+        "adjacent braced attack marker immediately followed by ASCII sign and unsigned magnitude; no separator",
         ("term:stat.attack",),
     ),
     Rule(
         "prefix_health_delta",
         "health_delta_magnitude",
         "signed_numeric_requires_review",
-        "complete braced health marker immediately followed by ASCII sign and unsigned magnitude; no separator",
+        "adjacent braced health marker immediately followed by ASCII sign and unsigned magnitude; no separator",
         ("term:stat.health",),
     ),
     Rule(
@@ -102,42 +110,42 @@ RULES = (
         "keyword_threshold_combo",
         "combo_threshold",
         "numeric_identifier_requires_review",
-        "complete named ability bracket with ASCII underscore and unsigned threshold",
+        "named ability prefix with ASCII underscore, unsigned threshold and adjacent closing bracket",
         ("term:ability.combo",),
     ),
     Rule(
         "keyword_threshold_lesson",
         "lesson_threshold",
         "numeric_identifier_requires_review",
-        "complete named ability bracket with ASCII underscore and unsigned threshold",
+        "named ability prefix with ASCII underscore, unsigned threshold and adjacent closing bracket",
         ("term:ability.lesson",),
     ),
     Rule(
         "keyword_threshold_necrocharge",
         "necrocharge_threshold",
         "numeric_identifier_requires_review",
-        "complete named ability bracket with ASCII underscore and unsigned threshold",
+        "named ability prefix with ASCII underscore, unsigned threshold and adjacent closing bracket",
         ("term:ability.necrocharge",),
     ),
     Rule(
         "keyword_threshold_spell_chain",
         "spell_chain_threshold",
         "numeric_identifier_requires_review",
-        "complete named ability bracket with ASCII underscore and unsigned threshold",
+        "named ability prefix with ASCII underscore, unsigned threshold and adjacent closing bracket",
         ("term:ability.spell_chain",),
     ),
     Rule(
         "braced_stat_reference",
         "stat_marker_reference",
         "term_role_requires_review",
-        "complete braces around exact unique adopted stat name",
+        "adjacent braces with balanced left prefix around exact unique adopted stat name",
         ("term:stat.attack", "term:stat.health"),
     ),
     Rule(
         "braced_ability_reference",
         "ability_marker_reference",
         "term_role_requires_review",
-        "complete braces around exact unique adopted ability name in closed set",
+        "adjacent braces with balanced left prefix around exact unique adopted ability name in closed set",
         (
             "term:ability.fanfare",
             "term:ability.activation",
@@ -153,7 +161,7 @@ RULES = (
         "braced_action_engage_reference",
         "action_marker_reference",
         "term_role_requires_review",
-        "complete braces around exact unique adopted engage name; category is verified from record",
+        "adjacent braces with balanced left prefix around exact unique adopted engage name; category is verified from record",
         ("term:action.engage",),
     ),
 )
@@ -169,33 +177,88 @@ def selection(enabled: tuple[str, ...]) -> tuple[str, ...]:
     return tuple(sorted(enabled))
 
 
+def conditions(rule: Rule) -> dict[str, JsonValue]:
+    """Only matching inputs and role evidence belong to the maintainer condition hash."""
+    result: dict[str, JsonValue] = {
+        "required_issue": rule.reason,
+        "proposed_role": rule.role,
+        "scope": {
+            "region": "jp",
+            "roles": ["body"]
+            if rule.id == "bracket_choice_index"
+            else ["body", "reminder"],
+        },
+        "context": {"body_nfkc": True, "reminder_nfkc": False},
+        "existing_numeric_rule": False,
+        "invalid_safe_unsigned_decimal": False,
+    }
+    if rule.targets:
+        result["reference_evidence"] = {
+            "raw_name_exact": True,
+            "adopted_count": 1,
+            "targets": list(rule.targets),
+            "categories": {
+                target: STAT_CATEGORIES.get(target, "ability")
+                for target in rule.targets
+            },
+            "record_hash": True,
+        }
+    if rule.id.startswith("braced_"):
+        result["braced_evidence"] = {
+            "before_ends_with": "{",
+            "after_starts_with": "}",
+            "left_prefix_brace_balance": 1,
+            "hint_target_equals_adopted": True,
+        }
+        return result
+    result["exact_raw_safe_unsigned_decimal_equals_value"] = True
+    if rule.id in SUFFIXES:
+        result["suffix_pattern"] = SUFFIXES[rule.id]
+        result["preceding_sign_exclusion"] = list(SIGNS)
+        result["ascii_before_exclusion"] = ASCII_BEFORE
+        if rule.id.startswith("suffix_ordinal_"):
+            result["zero_excluded"] = True
+    elif rule.id in SIGNED:
+        result["prefix_pattern"] = SIGNED[rule.id]
+        result["ascii_after_exclusion"] = ASCII_AFTER
+        result["sign_remains_literal"] = True
+    elif rule.id.startswith("keyword_threshold_"):
+        result["keyword_pattern"] = KEYWORD_PATTERN
+        result["after_starts_with"] = "】"
+        result["name_remains_literal"] = True
+    else:
+        result["choice_evidence"] = {
+            "before_ends_with": "【",
+            "after_starts_with": "】",
+            "introduction_pattern": INTRO_PATTERN,
+            "label_pattern": LABEL_PATTERN,
+            "minimum_options": MIN_OPTIONS,
+            "same_full_field": True,
+            "body_only": True,
+            "quoted_spans_excluded": True,
+            "introduction_precedes_labels": True,
+            "stop_at_next_introduction": True,
+            "ordered_indices": "1..k",
+            "slot_is_exact_label_digits": True,
+        }
+    return result
+
+
+def condition_hash(rule: Rule) -> str:
+    """Descriptions, publication status and matcher version do not alter lexical conditions."""
+    return digest(canonical(conditions(rule)))
+
+
 def definition(rule: Rule) -> dict[str, JsonValue]:
-    """Condition hashes bind exact syntax as well as the non-regex evidence requirements."""
+    """Keep display metadata separate from the exact matching contract."""
     return {
         "id": rule.id,
         "matcher_version": VERSION + ":" + rule.id,
         "proposed_role": rule.role,
         "original_reason": rule.reason,
         "condition": rule.condition,
-        "suffix_pattern": SUFFIXES.get(rule.id),
-        "prefix_pattern": SIGNED.get(rule.id),
-        "keyword_pattern": r"【([^【】]+)_$"
-        if rule.id.startswith("keyword_threshold_")
-        else None,
-        "choice_introduction": INTRO_PATTERN
-        if rule.id == "bracket_choice_index"
-        else None,
-        "choice_label": LABEL_PATTERN if rule.id == "bracket_choice_index" else None,
-        "targets": list(rule.targets),
-        "scope": {"region": "jp", "roles": ["body", "reminder"]},
-        "ownership": "only pending original_reason slots; never any existing numeric_rule",
-        "decimal_evidence": "exact ASCII/fullwidth decimal source spelling, safe unsigned value; ordinal zero excluded",
-        "suffix_guards": "no preceding +,-,U+2212,fullwidth plus/minus or ASCII letter/digit/underscore",
-        "signs": "ASCII plus/minus after original body NFKC or unchanged reminder; sign remains literal; no optional separator",
-        "reference_evidence": "exact raw name, one adopted concept, closed ID set, record hash; rule_term for stats and ability for all others",
-        "braced_shape": "complete nonnested left/right braces; name-only slot and exact target kind/id/hash agree",
-        "keyword_shape": "complete left bracket, exact name, ASCII underscore, unsigned threshold, right bracket; name remains literal",
-        "choice_evidence": "same full field unquoted body spans only; earlier introduction, complete contiguous 1..k label group with at least two items; slot covers only label digits",
+        "match_conditions": conditions(rule),
+        "condition_hash": condition_hash(rule),
         "status": "pending_approval",
     }
 
@@ -210,8 +273,5 @@ def configuration(enabled: tuple[str, ...] = ()) -> dict[str, JsonValue]:
         "status": "pending_approval",
         "region": "jp",
         "roles": ["body", "reminder"],
-        "rules": [
-            {**definition(rule), "condition_hash": digest(canonical(definition(rule)))}
-            for rule in RULES
-        ],
+        "rules": [definition(rule) for rule in RULES],
     }

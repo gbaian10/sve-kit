@@ -10,18 +10,17 @@ from pydantic import JsonValue
 
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import Kind
-from sve_carddb.registry.storage import encode
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import canonical, digest, object_value
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_sources.checkpoint import LegacyTemplate, read_legacy
 from sve_carddb.template_sources.inventory import Scan, scan_batch
 from sve_carddb.template_sources.pins import recipes
-from sve_carddb.translations.models import Index
 
 from .adoption_fixtures import commit, git
 from .test_effect_presence import page
 from .test_source_archive import _put, _resource, _store
+from .translation_fixtures import envelope, term, write
 
 if TYPE_CHECKING:
     from sve_carddb.template_sources.models import Recipe
@@ -51,17 +50,16 @@ def template_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
     )
     for name in ("carddb/uv.lock", "carddb/pyproject.toml"):
         shutil.copyfile(runtime / name, repository / name)
-    authored = repository / "authored/translations"
-    authored.mkdir(parents=True)
-    (authored / "index.yaml").write_bytes(
-        encode(
-            Index(
-                translation_authored_format=1,
-                kind="translation_index",
-                includes={},
-                inventories={},
-            )
-        )
+    concept = term()
+    data = object_value(concept["data"])
+    data.update(
+        source_ref=None,
+        authored_source_ja="SyntheticTerm",
+        missing_source_reason="Synthetic unavailable source",
+    )
+    write(
+        repository / "authored",
+        {"translations/glossary/concepts/001.yaml": envelope([concept])},
     )
     git(repository, "init")
     revision = commit(repository)

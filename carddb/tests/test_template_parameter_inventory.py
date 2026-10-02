@@ -13,7 +13,7 @@ import pytest
 
 import sve_carddb.template_parameters.__main__ as cli
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
 from sve_carddb.template_parameters.models import Candidate
@@ -25,6 +25,7 @@ from sve_carddb.template_parameters.rule_candidates import (
     configuration as candidate_configuration,
 )
 
+from .adoption_fixtures import commit
 from .template_source_fixtures import template_case as template_case  # ruff: ignore[useless-import-alias] -- reusable immutable offline Git/archive fixture
 
 if TYPE_CHECKING:
@@ -398,3 +399,96 @@ def test_legacy_normalized_replay_cannot_be_replaced_with_a_different_value(
             template_case.scan,
             References(),
         )
+
+
+def test_glossary_shard_cannot_borrow_a_git_revision_even_when_index_is_unchanged(
+    parameter_result: Result, tmp_path: Path
+) -> None:
+    args = copy.copy(parameter_result.args)
+    args.authored = tmp_path / "authored"
+    shutil.copytree(parameter_result.args.authored, args.authored)
+    shard = args.authored / "translations/glossary/concepts/001.yaml"
+    shard.write_bytes(shard.read_bytes() + b"\n")
+    args.output = tmp_path / "result"
+    with pytest.raises(
+        ValueError,
+        match=r"\ACandidate glossary inputs must match their exact Git revision\Z",
+    ):
+        cli.run(args)
+    assert not args.output.exists()
+
+
+@pytest.fixture(scope="module")
+def glossary_history(
+    parameter_result: Result, tmp_path_factory: pytest.TempPathFactory
+) -> tuple[Path, str]:
+    root = tmp_path_factory.mktemp("glossary-pin-history")
+    repo = root / "repository"
+    shutil.copytree(parameter_result.args.repository, repo)
+    shard = repo / "authored/translations/glossary/concepts/001.yaml"
+    shard.write_bytes(shard.read_bytes() + b"\n")
+    return repo, commit(repo)
+
+
+@pytest.mark.parametrize("matching_revision", [True, False])
+def test_explicit_glossary_revision_verifies_the_selected_tree(
+    parameter_result: Result,
+    glossary_history: tuple[Path, str],
+    tmp_path: Path,
+    matching_revision: bool,
+) -> None:
+    repo, revision = glossary_history
+    args = copy.copy(parameter_result.args)
+    args.repository = repo
+    args.authored = repo / "authored"
+    args.glossary_revision = revision if matching_revision else args.code_revision
+    args.output = tmp_path / "result"
+    if matching_revision:
+        report = cli.run(args)
+        config = object_value(object_value(report["parameter_recipe"])["config"])
+        glossary = object_value(object_value(config["references"])["glossary"])
+        assert glossary["authored_revision"] == revision
+        assert args.glossary_revision != args.code_revision
+        assert len(array(glossary["shards"])) == 1
+    else:
+        with pytest.raises(
+            ValueError,
+            match=r"\ACandidate glossary inputs must match their exact Git revision\Z",
+        ):
+            cli.run(args)
+        assert not args.output.exists()
+
+
+def test_cli_preserves_the_explicit_glossary_revision_argument(
+    parameter_result: Result,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    seen: list[str] = []
+
+    def record(args: argparse.Namespace) -> dict[str, JsonValue]:
+        seen.append(args.glossary_revision)
+        return parameter_result.report
+
+    monkeypatch.setattr(cli, "run", record)
+    revision = "c" * 40
+    args = parameter_result.args
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "parameters",
+            *[
+                v
+                for name, value in vars(args).items()
+                for v in ("--" + name.replace("_", "-"), str(value))
+            ],
+            "--glossary-revision",
+            revision,
+        ],
+    )
+    with pytest.raises(SystemExit) as raised:
+        cli.main()
+    assert raised.value.code == 1
+    assert seen == [revision]
+    assert json.loads(capsys.readouterr().out)["complete"] is False

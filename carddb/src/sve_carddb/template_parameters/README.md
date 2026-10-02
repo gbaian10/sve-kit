@@ -148,8 +148,19 @@ positions and distinct uses separately for the whole batch and body role.
 | Stat magnitudes with literal sign | `prefix_attack_delta`, `prefix_health_delta` |
 
 Precise regexes, exclusions, concept sets and non-regex evidence requirements are
-in `rule_candidates.definition`; synthetic positive/negative cases are in
-`test_template_rule_candidates.py`. Every new match must concern an originally
+in each rule's `match_conditions`, exported by `rule_candidates.definition`; synthetic positive/negative cases are in
+`test_template_rule_candidates.py`. The canonical condition hash covers only
+`match_conditions`: display descriptions, status and matcher version are outside
+that hash. Each family includes only its own matching constraints, and the
+matcher shares the actual regex/guard constants with these definitions. All 17
+expected hashes are pinned in tests; changed conditions require an explicit
+reviewed diff before a confirmation page is regenerated.
+
+The earlier numeric rules export their conditions and hashes from
+`numeric_rules.configuration().rules` in the program's report, including the
+three zero-use rules. Confirmation preparation selects the earlier eight from
+that output; it does not invent conditions in a private script. These remain
+proposal definitions and supply no policy or adoption receipt. Every new match must concern an originally
 unowned pending slot. New rules never take over any existing `numeric_rule`.
 On upgrades, manually replay the frozen batch and compare every old position's
 inventory/slot/span/value/raw hash/rule, not only the 14,782-position count.
