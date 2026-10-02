@@ -200,3 +200,34 @@ correction decision. Presence, correction comparison and image evidence uses all
 remain in F1. Correction reports distinguish `raw_face_hash` from
 `projected_face_hash`; neither a type correction nor its hash may erase the
 verified empty effect. Unknown effects still cannot acquire invented revisions.
+
+### Explicit presence v2 matcher
+
+`presence_v2.detect_presence` produces separate `effect-presence-v2` evidence
+with parser `effect-presence-v2/detail-v2`. The v1 module and evidence types stay
+unchanged. This is an opt-in matcher API: existing `FrozenTexts`, wording review
+receipts, build and preview consumers continue using v1. V2 evidence is rejected
+by the v1 model and cannot silently replace an old adoption's pinned observation.
+A caller selecting v2 must pin this module and its v1/helper dependencies, verify
+the frozen source closure, and replay the complete result rather than trusting
+its self-consistent hash. No adoption record is migrated by this change.
+
+The new JP variants require the whole HTML tail, a unique detail root, one or two
+complete faces and a numbered front credit. A terminal notice must follow the
+physical credit directly, have no name/heading, and match its exact serialized
+HTML hash. Twenty additional frozen notice hashes are recognized; these are
+source evidence, not adopted corrections or copied notice prose. Changed notice
+text, links, markup or position remain unknown.
+
+Only the second face may omit its credit or contain an artist-only heading.
+It must have a nonempty recognized ability container, complete info/stats and
+bounded wrapper children. Artist-only credit is terminal and contains one plain
+heading of letters/spaces; a different card number cannot masquerade as an artist.
+Every newly recognized variant, including notices and the front of a two-face
+page, can only prove presence. A non-present container result retains the
+original unknown/incomplete_source conclusion and does not acquire the new
+credit template. These variants never prove additional absence. Known v1
+present/absent results retain their state and reason; new recipe/parser/template
+identities intentionally produce new evidence hashes. The upgrade must be
+checked against every frozen JP face, including all previously proven absent
+faces, before use.
