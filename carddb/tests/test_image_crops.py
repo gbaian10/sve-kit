@@ -116,6 +116,7 @@ def test_empty_directory_is_pinned_not_a_missing_input_shortcut(tmp_path: Path) 
         ("git-symlink", "Image crop Git inputs must be regular files"),
         ("yml", "Unsafe image crop input path"),
         ("index", "Unsafe image crop input path"),
+        ("receipt-shard", "Unsafe image crop input path"),
         ("kind", "Invalid image crop fields: kind:literal_error"),
         ("duplicate", "Duplicate global image crop key"),
         ("receipt-name", "Crop receipt ID differs from filename"),
@@ -153,6 +154,8 @@ def test_complete_inventory_and_receipt_guards(  # ruff: ignore[complex-structur
         shard.rename(shard.with_suffix(".yml"))
     elif case == "index":
         shard.rename(root / "image-crops/index.yaml")
+    elif case == "receipt-shard":
+        shard.rename(root / "image-crops/receipts/001.yaml")
     elif case == "kind":
         data["kind"] = "crop_approval"
         write(shard, data)

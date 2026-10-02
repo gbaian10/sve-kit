@@ -49,19 +49,18 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import Source
     from sve_carddb.image_assets import ImageReference
+    from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
     from sve_carddb.source_archive import Descriptor
 
 REVISION = "a" * 40
-CONTEXT = BuildContext.from_inputs(
-    REVISION, {"synthetic.lock": b"synthetic"}, {"image_recipe": DEFAULT_RECIPE.version}
-)
 
 
 @dataclass
 class Staged:
     cards: FrozenSources
     plan: PreviewPlan
+    context: BuildContext
 
     def parents(self, db: Database) -> InputRecord:
         values = rows()
@@ -75,19 +74,21 @@ class Staged:
         for family in required:
             db.insert("product_family", values["product_family"] | {"id": family})
         return populate_preview(
-            db, self.plan, authored_revision=REVISION, build=CONTEXT
+            db, self.plan, authored_revision=REVISION, build=self.context
         )
 
 
 @pytest.fixture
-def staged(tmp_path: Path, frozen: FrozenSources) -> Staged:
-    return make_staged(tmp_path, frozen)
+def staged(tmp_path: Path, frozen: FrozenSources, empty_crops: ImageCrops) -> Staged:
+    return make_staged(tmp_path, frozen, crops=empty_crops)
 
 
 def make_staged(
     tmp_path: Path,
     frozen: FrozenSources,
     front_src: bytes = b"/synthetic/0.png",
+    *,
+    crops: ImageCrops,
 ) -> Staged:
     data_root = frozen.root.parent / "data"
     store = ArchiveStore(
@@ -140,7 +141,15 @@ def make_staged(
     )
     plan = plan_preview(authored, provider, regions=("jp",))
     assert len(plan.included("printing")) == 2
-    return Staged(frozen_cards, plan)
+    context = BuildContext.from_inputs(
+        REVISION,
+        {"synthetic.lock": b"synthetic"} | crops.dependencies(),
+        {
+            "image_recipe": DEFAULT_RECIPE.version,
+            "image_crop_overrides": crops.configuration(),
+        },
+    )
+    return Staged(frozen_cards, plan, context)
 
 
 def refs_for(staged: Staged) -> tuple[ImageReference, ...]:
@@ -163,9 +172,13 @@ def refs_for(staged: Staged) -> tuple[ImageReference, ...]:
     ],
 )
 def test_original_src_and_crawler_url_encoding_bind_the_same_archived_image(
-    tmp_path: Path, frozen: FrozenSources, raw_src: str, resolved: str
+    empty_crops: ImageCrops,
+    tmp_path: Path,
+    frozen: FrozenSources,
+    raw_src: str,
+    resolved: str,
 ) -> None:
-    staged = make_staged(tmp_path, frozen, raw_src.encode())
+    staged = make_staged(tmp_path, frozen, raw_src.encode(), crops=empty_crops)
     data_root = frozen.root.parent / "data"
     store = ArchiveStore(
         data_root,
@@ -180,7 +193,7 @@ def test_original_src_and_crawler_url_encoding_bind_the_same_archived_image(
     batch = seal_batch(store, scope=(Scope(provider="jp", kind="image"),))
     images = FrozenSources(store.root, store.store_id, batch.batch_id)
     output = roots(tmp_path)
-    encoded = build_jp_assets(images, output)
+    encoded = build_jp_assets(images, output, crops=empty_crops)
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
@@ -200,10 +213,10 @@ def test_original_src_and_crawler_url_encoding_bind_the_same_archived_image(
 
 
 def test_original_src_double_faces_and_five_variants_are_projected(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged
+    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     with create_database(compile_build(("images",))) as db:
         with db.transaction():
             staged.parents(db)
@@ -273,10 +286,14 @@ def test_adopted_source_map_is_used_instead_of_logical_face_order(
     "field", ["source_url", "source_src_raw", "card_no", "printing_id", "face_id"]
 )
 def test_each_binding_provenance_constraint_rolls_back(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged, field: str
+    empty_crops: ImageCrops,
+    tmp_path: Path,
+    frozen: FrozenSources,
+    staged: Staged,
+    field: str,
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     refs = refs_for(staged)
     ref = refs[0]
     bad = {
@@ -297,10 +314,10 @@ def test_each_binding_provenance_constraint_rolls_back(
 
 
 def test_absent_source_has_metadata_without_fake_path(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged
+    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     refs = refs_for(staged)
     ref = replace(
         refs[0],
@@ -322,10 +339,10 @@ def test_absent_source_has_metadata_without_fake_path(
 
 
 def test_shared_url_with_different_original_spelling_keeps_both(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged
+    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     refs = refs_for(staged)
     ref = next(ref for ref in refs if ref.source_src_raw == "/synthetic/0.png")
     other = next(
@@ -344,10 +361,10 @@ def test_shared_url_with_different_original_spelling_keeps_both(
 
 
 def test_complete_bundle_binds_source_uses_after_blobs_and_is_immutable(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged
+    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     refs = refs_for(staged)
     expected = uses_sorted(
         (*staged.plan.source_uses(), *encoded.source_uses(), *reference_uses(refs))
@@ -358,16 +375,17 @@ def test_complete_bundle_binds_source_uses_after_blobs_and_is_immutable(
     record = publish_jp_image_bundle(
         schema,
         destination,
-        CONTEXT,
+        staged.context,
         staged.parents,
         encoded,
         refs,
         output,
         parent_uses=staged.plan.source_uses(),
         stores=stores,
+        crops=empty_crops,
     )
     assert record == verify_bundle(
-        schema, destination, CONTEXT, expected, stores=stores
+        schema, destination, staged.context, expected, stores=stores
     )
     before = {path: path.read_bytes() for path in destination.iterdir()}
     assert b"Synthetic rule" not in before[destination / "report.json"]
@@ -375,19 +393,20 @@ def test_complete_bundle_binds_source_uses_after_blobs_and_is_immutable(
         publish_jp_image_bundle(
             schema,
             destination,
-            CONTEXT,
+            staged.context,
             staged.parents,
             encoded,
             refs,
             output,
             parent_uses=staged.plan.source_uses(),
             stores=stores,
+            crops=empty_crops,
         )
     assert before == {path: path.read_bytes() for path in destination.iterdir()}
 
 
 def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged
+    empty_crops: ImageCrops, tmp_path: Path, frozen: FrozenSources, staged: Staged
 ) -> None:
     repo = tmp_path / "crop-repo"
     descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
@@ -402,7 +421,7 @@ def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
         },
     )
     output = roots(tmp_path)
-    original = build_jp_assets(frozen, output)
+    original = build_jp_assets(frozen, output, crops=empty_crops)
     refs = refs_for(staged)
     schema = compile_build(("images",))
     stores = {frozen.store_id: frozen.root}
@@ -412,9 +431,7 @@ def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
         return input_record(context, parent.uses)
 
     destination = tmp_path / "crop-bundle"
-    with pytest.raises(
-        ValueError, match=r"^Build context requires adopted image crop inputs$"
-    ):
+    with pytest.raises(ValueError, match=r"^Image crop configuration pin mismatch$"):
         publish_jp_image_bundle(
             schema,
             destination,
@@ -425,6 +442,7 @@ def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
             output,
             parent_uses=staged.plan.source_uses(),
             stores=stores,
+            crops=empty_crops,
         )
     with pytest.raises(
         ValueError, match=r"^Image crop box differs from adopted source crop$"
@@ -472,12 +490,51 @@ def test_bundle_requires_authored_crop_pins_and_seals_diagnostics(
     assert crop_report["art_webp_review"] == "pending_coordinator_review"
 
 
+def test_bundle_rejects_adopted_crops_without_context_pins(
+    tmp_path: Path, frozen: FrozenSources, staged: Staged
+) -> None:
+    repo = tmp_path / "crop-repo"
+    descriptor = frozen.descriptor(frozen.inventory.current[0].source_version_id)
+    install(repo / "authored", [crop_record(descriptor)])
+    crops = load_image_crops(repo / "authored", authored_revision=initialize(repo))
+    output = roots(tmp_path)
+    encoded = build_jp_assets(frozen, output, crops=crops)
+    context = BuildContext.from_inputs(
+        REVISION,
+        {"synthetic.lock": b"synthetic"},
+        {"image_recipe": DEFAULT_RECIPE.version},
+    )
+
+    def parents(db: Database) -> InputRecord:
+        return input_record(context, staged.parents(db).uses)
+
+    destination = tmp_path / "unadopted-bundle"
+    with pytest.raises(ValueError, match=r"^Image crop configuration pin mismatch$"):
+        publish_jp_image_bundle(
+            compile_build(("images",)),
+            destination,
+            context,
+            parents,
+            encoded,
+            refs_for(staged),
+            output,
+            parent_uses=staged.plan.source_uses(),
+            stores={frozen.store_id: frozen.root},
+            crops=crops,
+        )
+    assert not destination.exists()
+
+
 @pytest.mark.parametrize("case", ["raw-bytes", "source-width"])
 def test_publication_rechecks_frozen_source_metadata(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged, case: str
+    empty_crops: ImageCrops,
+    tmp_path: Path,
+    frozen: FrozenSources,
+    staged: Staged,
+    case: str,
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     item = encoded.images[0]
     if case == "raw-bytes":
         item = replace(item, raw_bytes=item.raw_bytes + 1)
@@ -493,13 +550,14 @@ def test_publication_rechecks_frozen_source_metadata(
         publish_jp_image_bundle(
             compile_build(("images",)),
             destination,
-            CONTEXT,
+            staged.context,
             staged.parents,
             encoded,
             refs_for(staged),
             output,
             parent_uses=staged.plan.source_uses(),
             stores={frozen.store_id: frozen.root},
+            crops=empty_crops,
         )
     assert not destination.exists()
 
@@ -578,12 +636,16 @@ def test_each_page_source_gate_has_an_independent_counterexample(
     ],
 )
 def test_publication_failure_keeps_existing_bundle(
-    tmp_path: Path, frozen: FrozenSources, staged: Staged, case: str
+    empty_crops: ImageCrops,
+    tmp_path: Path,
+    frozen: FrozenSources,
+    staged: Staged,
+    case: str,
 ) -> None:
     output = roots(tmp_path)
-    encoded = build_jp_assets(frozen, output)
+    encoded = build_jp_assets(frozen, output, crops=empty_crops)
     refs = refs_for(staged)
-    context = CONTEXT
+    context = staged.context
     destination = tmp_path / "failed-bundle"
     populate: Callable[[Database], InputRecord] = staged.parents
     if case == "blob-missing":
@@ -619,6 +681,7 @@ def test_publication_failure_keeps_existing_bundle(
             output,
             parent_uses=staged.plan.source_uses(),
             stores={frozen.store_id: frozen.root},
+            crops=empty_crops,
         )
     assert not destination.exists()
     assert not list(tmp_path.glob(".build-bundle-*"))

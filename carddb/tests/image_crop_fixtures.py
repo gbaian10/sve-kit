@@ -3,6 +3,9 @@
 import json
 from typing import TYPE_CHECKING
 
+import pytest
+
+from sve_carddb.image_crops import load_image_crops
 from sve_carddb.snapshot.values import canonical, digest
 
 from .adoption_fixtures import commit, git
@@ -12,10 +15,18 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.image_crops import ImageCrops
     from sve_carddb.source_archive import Descriptor
 
 SHARD = "image-crops/TEST/001.yaml"
 RECEIPT = "image-crops/receipts/synthetic.yaml"
+
+
+@pytest.fixture(scope="session")
+def empty_crops(tmp_path_factory: pytest.TempPathFactory) -> ImageCrops:
+    repo = tmp_path_factory.mktemp("empty-crop-adoptions")
+    (repo / "keep").write_text("Synthetic empty crop closure\n", encoding="utf-8")
+    return load_image_crops(repo / "authored", authored_revision=initialize(repo))
 
 
 def write(path: Path, value: object) -> None:

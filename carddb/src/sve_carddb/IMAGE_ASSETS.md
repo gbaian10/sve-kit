@@ -16,7 +16,8 @@ geometry and existing blobs before reuse, so rerunning after interruption keeps
 complete blobs and resumes unfinished work. Neither original PNGs nor SQLite or
 cache files enter the asset root. Old immutable blobs remain intact.
 
-For adopted crops, first call `image_crops.load_image_crops(authored_root,
+Both image APIs require an explicit adopted crop collection, even when empty.
+First call `image_crops.load_image_crops(authored_root,
 authored_revision=<full Git SHA>)` and pass its result as `crops=` to
 `build_jp_assets` and `publish_jp_image_bundle`. The loader reads all shards and
 receipts in `authored/image-crops/`, without an index, and checks their complete
@@ -57,7 +58,7 @@ size and oriented dimensions, writes assets first, validates all source uses and
 DB constraints, then publishes a complete immutable bundle. Failures leave an
 existing bundle intact. A new build uses a new bundle destination.
 
-When passing `crops=`, include `crops.dependencies()` in the build inputs and
+Include `crops.dependencies()` in the build inputs and
 `{"image_crop_overrides": crops.configuration()}` in the configuration, alongside
 the recipe pin. The bundle consumer rechecks these pins and independently
 compares each source's actual `VariantSet.crop_box` with its adopted or default

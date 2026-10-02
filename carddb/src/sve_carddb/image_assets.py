@@ -22,7 +22,7 @@ from sve_carddb.build_inputs import (
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_crop_report import crop_report
-from sve_carddb.image_crops import PREFIX, conversion_image_id
+from sve_carddb.image_crops import conversion_image_id
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
     SIZES,
@@ -246,9 +246,9 @@ def build_jp_assets(
     images: FrozenSources,
     roots: PreviewRoots,
     *,
+    crops: ImageCrops,
     workers: int = 1,
     reuse_only: bool = False,
-    crops: ImageCrops | None = None,
 ) -> ImageBuild:
     """Convert every current JP image before any DB or public manifest is written."""
     roots.validate((images.root,))
@@ -271,7 +271,7 @@ def build_jp_assets(
         ):
             raise ValueError("JP image batch contains another provider or source kind")
         image_id = conversion_image_id(source.id)
-        override = None if crops is None else crops.override(descriptor)
+        override = crops.override(descriptor)
         # Conversion only knows the resource URL; HTML src enters the DB from verified bindings.
         result = build_variants(
             ImageSource(
@@ -526,7 +526,7 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
     *,
     parent_uses: tuple[SourceUse, ...],
     stores: Mapping[str, Path],
-    crops: ImageCrops | None = None,
+    crops: ImageCrops,
 ) -> InputRecord:
     """Save a complete DB/input/report seal after immutable image assets are verified."""
     roots.validate(stores.values())
@@ -545,12 +545,7 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
         or config.get("image_recipe") != DEFAULT_RECIPE.version
     ):
         raise ValueError("Build context must pin the exact image recipe")
-    if crops is not None:
-        crops.verify_context(context)
-    elif "image_crop_overrides" in config or any(
-        pin.name.startswith(PREFIX) for pin in context.dependencies
-    ):
-        raise ValueError("Build context requires adopted image crop inputs")
+    crops.verify_context(context)
     report = build.report(references)
     expected = uses_sorted(
         (*parent_uses, *build.source_uses(), *reference_uses(references))
@@ -560,8 +555,7 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
         parent_record = populate_parents(db)
         parent_record.verify(db, context, parent_uses)
         uses = populate_jp_assets(db, build, references, roots.preview)
-        if crops is not None:
-            report["crop_overrides"] = crop_report(crops, build, references, db)
+        report["crop_overrides"] = crop_report(crops, build, references, db)
         return input_record(context, (*parent_record.uses, *uses))
 
     return publish_bundle(

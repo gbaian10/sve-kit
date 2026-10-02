@@ -34,6 +34,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def crop_assets(
+    empty_crops: ImageCrops,
     tmp_path_factory: pytest.TempPathFactory,
     image_archive_template: tuple[Path, str, str],
 ) -> tuple[
@@ -55,7 +56,7 @@ def crop_assets(
     override_roots = PreviewRoots(
         base / "override", base / "cdn", base / "override-cache"
     )
-    default = build_jp_assets(frozen, default_roots)
+    default = build_jp_assets(frozen, default_roots, crops=empty_crops)
     overridden = build_jp_assets(frozen, override_roots, crops=crops, workers=2)
     return frozen, crops, default, overridden, default_roots, override_roots
 
@@ -255,3 +256,86 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
         reported = crop_report(wrong, images, refs, db)
     assert len(array(reported["annotation_mismatches"])) == 1
     assert reported["reprint_candidates"] == result["reprint_candidates"]
+
+
+def _diagnostics(
+    crops: ImageCrops,
+    images: ImageBuild,
+    bindings: tuple[tuple[int, str, str], ...],
+    monkeypatch: pytest.MonkeyPatch,
+) -> dict[str, object]:
+    refs = tuple(
+        ImageReference(
+            printing,
+            "front",
+            "TEST-001",
+            images.images[index].source,
+            images.images[index].source.url,
+            images.images[index].source.url,
+        )
+        for index, printing, _card in bindings
+    )
+
+    class Owners:
+        def rows(self, *_args: object) -> list[dict[str, str]]:
+            return [
+                {"id": printing, "card_id": card} for _index, printing, card in bindings
+            ]
+
+    monkeypatch.setattr(report_module, "Source", lambda _db: Owners())
+    with create_database(compile_build(("images",))) as db:
+        return dict(crop_report(crops, images, refs, db))
+
+
+def test_two_adopted_printings_do_not_warn_about_each_other(
+    crop_assets: tuple[
+        FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
+    ],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    frozen, _, _, images, _, _ = crop_assets
+    rows = [record(frozen.descriptor(item.source.id)) for item in images.images[:2]]
+    install(tmp_path / "authored", rows)
+    crops = load_image_crops(
+        tmp_path / "authored", authored_revision=initialize(tmp_path)
+    )
+    report = _diagnostics(
+        crops,
+        images,
+        ((0, "first", "same-card"), (1, "reprint", "same-card")),
+        monkeypatch,
+    )
+    assert report["applied_source_images"] == 2
+    assert report["reprint_candidates"] == []
+
+
+def test_other_cards_adopted_printing_does_not_affect_this_card(
+    crop_assets: tuple[
+        FrozenSources, ImageCrops, ImageBuild, ImageBuild, PreviewRoots, PreviewRoots
+    ],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    _, crops, _, images, _, _ = crop_assets
+    selected = next(
+        index
+        for index, item in enumerate(images.images)
+        if item.result.image_id in {r.image_id for r in crops.records.values()}
+    )
+    plain = next(index for index, item in enumerate(images.images) if index != selected)
+    report = _diagnostics(
+        crops,
+        images,
+        (
+            (selected, "adopted", "other-card"),
+            (plain, "unrelated", "this-card"),
+            (plain, "other-reprint", "other-card"),
+        ),
+        monkeypatch,
+    )
+    candidates = report["reprint_candidates"]
+    assert isinstance(candidates, list)
+    assert [
+        (object_value(item)["printing_id"], object_value(item)["card_id"])
+        for item in candidates
+    ] == [("other-reprint", "other-card")]

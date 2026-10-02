@@ -44,6 +44,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import SourceUse
     from sve_carddb.image_assets import ImageBuild
+    from sve_carddb.image_crops import ImageCrops
     from sve_carddb.snapshot.preview.build import Inputs
 
     from .text_observation_fixtures import Case
@@ -60,12 +61,15 @@ def double_text_case(tmp_path_factory: pytest.TempPathFactory) -> TextCaseTempla
 
 @pytest.fixture(scope="module")
 def encoded_images(
+    empty_crops: ImageCrops,
     image_archive_template: tuple[Path, str, str],
     tmp_path_factory: pytest.TempPathFactory,
 ) -> tuple[ImageBuild, PreviewRoots]:
     root = tmp_path_factory.mktemp("encoded-preview-images")
     roots = PreviewRoots(root / "library", root / "formal", root / "cache")
-    return build_jp_assets(FrozenSources(*image_archive_template), roots), roots
+    return build_jp_assets(
+        FrozenSources(*image_archive_template), roots, crops=empty_crops
+    ), roots
 
 
 @pytest.fixture
