@@ -9,6 +9,7 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.registry.inputs import canonical
+from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.transitions.models import (
     ArtTransfer,
     Repair,
@@ -17,9 +18,11 @@ from sve_carddb.registry.transitions.models import (
 )
 from sve_carddb.registry.transitions.ownership import (
     _art_uses,
+    _faces,
     _repair,
     _targets,
     _transfer_arts,
+    typed,
 )
 from sve_carddb.registry.transitions.replay import (
     _append,
@@ -42,7 +45,7 @@ from .identity_replay_fixtures import (
 )
 from .identity_transition_fixtures import FA, FB, FC, A, B, C, P, Q, X, Y, chain, entry
 from .identity_transition_fixtures import merge_record as merge_record  # ruff: ignore[useless-import-alias] -- share immutable synthetic receipt
-from .test_identity_replay import copy_base
+from .test_identity_replay import copy_base, renewal_record
 from .test_identity_replay import replay_base as replay_base  # ruff: ignore[useless-import-alias] -- share immutable synthetic base
 from .test_identity_replay_history import double_base as double_base  # ruff: ignore[useless-import-alias] -- share complete double-face synthetic base
 from .test_identity_replay_history import effective_state, fix_root_refs
@@ -505,3 +508,91 @@ def test_public_repair_must_list_every_old_face(
         ValueError, match=r"^Repair must list every old face, including unused faces$"
     ):
         replay(tmp_path, inputs)
+
+
+def test_undeclared_printing_cannot_change_face_mapping(
+    tmp_path: Path,
+    double_base: RegistryFiles,
+    merge_record: dict[str, Any],
+) -> None:
+    copy_base(double_base, tmp_path)
+    record = renewal_record(transaction(merge_record, double_base), double_base)
+    record["updates"][0]["after"]["data"]["source_face_map"] = [
+        {"source_index": 0, "face_id": FA[:-1] + "0"},
+        {"source_index": 1, "face_id": FA},
+    ]
+    with pytest.raises(
+        ValueError,
+        match=r"^Face mapping change requires a printing parent repair$",
+    ):
+        replay(tmp_path, write_scenario(tmp_path, double_base, [record]))
+
+
+@pytest.mark.parametrize("side", ["source", "destination"])
+def test_printing_move_parents_match_effective_records(
+    move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
+    side: str,
+) -> None:
+    before, after, record = move_state
+    old_printings, new_printings = (
+        typed(before, PrintingData),
+        typed(after, PrintingData),
+    )
+    printings = old_printings if side == "source" else new_printings
+    printings["printing:" + P] = printings["printing:" + P].model_copy(
+        update={"card_id": C}
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^Printing move parents disagree with effective records$",
+    ):
+        _faces(after, record.repairs[0], old_printings, new_printings)
+
+
+@pytest.mark.parametrize("damage", ["parent", "missing"])
+def test_face_transfer_destination_has_parent_and_declaration(
+    move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
+    damage: str,
+) -> None:
+    before, after, record = move_state
+    repair = record.repairs[0]
+    if damage == "parent":
+        after = change(after, "face:" + FB, card_id=C)
+    else:
+        raw = repair.model_dump(mode="json")
+        raw["face_moves"][0]["to_face_ids"] = [FC]
+        repair = Repair.model_validate_json(canonical(raw))
+    with pytest.raises(
+        ValueError,
+        match=r"^Face transfer destination has wrong parent or is missing$",
+    ):
+        _faces(after, repair, typed(before, PrintingData), typed(after, PrintingData))
+
+
+def test_face_transfer_cannot_list_unused_destination(
+    move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
+) -> None:
+    before, after, record = move_state
+    raw = record.repairs[0].model_dump(mode="json")
+    raw["face_moves"][0]["to_face_ids"] = sorted([FB, FC])
+    repair = Repair.model_validate_json(canonical(raw))
+    with pytest.raises(
+        ValueError,
+        match=r"^Face transfer contains unused or missing destinations$",
+    ):
+        _faces(after, repair, typed(before, PrintingData), typed(after, PrintingData))
+
+
+def test_unused_face_transfer_stays_within_repair_cards(
+    move_state: tuple[dict[str, Entity], dict[str, Entity], Transition],
+) -> None:
+    before, after, record = move_state
+    raw = record.repairs[0].model_dump(mode="json")
+    raw["face_moves"].append({"from_face_id": FC, "to_face_ids": [FA]})
+    raw["face_moves"].sort(key=canonical)
+    repair = Repair.model_validate_json(canonical(raw))
+    with pytest.raises(
+        ValueError,
+        match=r"^Face transfer destination is outside repair cards$",
+    ):
+        _faces(after, repair, typed(before, PrintingData), typed(after, PrintingData))
