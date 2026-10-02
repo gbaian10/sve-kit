@@ -57,7 +57,41 @@ including its embedded-separator exceptions, and require a unique exact adopted
 trait concept. Unknown trait layouts remain unresolved. Other numbers require a bounded unit or prefix
 grammar; signs, ASCII identifiers, compatibility numerals and unclassified bare
 numbers remain unresolved. This conservative classifier is a proposal, not a
-maintainer-approved semantic rule. Each occurrence has its own slot; grouping
+maintainer-approved semantic rule. Each such numeric occurrence records a closed
+ASCII `numeric_rule` ID and `numeric_rule_pending_approval`; its schema and payload
+hash stay null until a future approval-aware workflow supplies approved evidence.
+Header numeric roles and unresolved numbers have `numeric_rule=null`. Signed and
+identifier exclusions precede rule matching; the suffix takes precedence if both
+suffix and prefix match. The pinned classifier defines these proposed rules:
+
+| Rule ID | Exact context after/before the numeric occurrence |
+| --- | --- |
+| `suffix_unit_cards` | after: 枚 |
+| `suffix_unit_entities` | after: 体 |
+| `suffix_unit_points` | after: 点 |
+| `suffix_unit_times` | after: 回 |
+| `suffix_unit_turns` | after: ターン |
+| `suffix_unit_pp` | after: PP |
+| `prefix_field_cost` | before: コスト |
+| `prefix_field_attack` | before: 攻撃力 |
+| `prefix_field_health` | before: 体力 |
+| `prefix_field_pp` | before: PP |
+| `prefix_field_level` | before: レベル |
+
+A suffix must be immediately adjacent and must not be followed by an ASCII
+letter, digit or underscore. A prefix must be immediately adjacent, optionally
+separated from the number by one `=`, `:` or `：`. Context is the normalized body
+or the unchanged reminder. The IDs are provenance for proposals, not approval
+receipts. `numeric_rule_counts` counts positions, including zero-count rules;
+`unresolved_reasons` counts affected candidates once per reason. For each role,
+`complete_without_numeric_rule_approval` counts issue-free schemas and
+`complete_after_numeric_rule_approval` counts candidates whose **only** remaining
+reason is numeric rule approval. The latter do not count as `complete_schemas`.
+These counts do not constitute template adoption. Candidate uint bounds are
+0 through the JavaScript safe integer maximum; adoption must determine bounds
+from approved rules rather than copy these permissive defaults.
+
+Each occurrence has its own slot; grouping
 multiple occurrences additionally requires equal values.
 
 Quoted references can resolve to a unique exact adopted Japanese `card_name`
@@ -69,7 +103,11 @@ Braced adopted terms are candidates pending semantic role review; ordinary
 glossary substring mentions are separate diagnostics and never bindings.
 Header/braced class/type references use explicit proposed vocabulary mappings,
 preserve special flags, and remain unresolved until an adopted catalog adapter
-exists. Composite types require separate slots rather than discarding flags.
+exists. The formal catalog derivation entry added by #209 should replace the
+private proposal/basis inputs when formal vocabulary adoption records are
+available. Only replayed adopted catalog evidence may remove the pending reason;
+this checkpoint does not wire that future adapter in. Composite types require
+separate slots rather than discarding flags.
 Mechanical fullwidth-parenthesis extraction remains pending classification review.
 
 `candidates.jsonl` lists every source entry, including null schemas and individual

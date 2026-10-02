@@ -7,6 +7,7 @@ from dataclasses import replace
 import pytest
 
 from sve_carddb.template_parameters import provenance, spans
+from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_sources.normalizer import partition
 
 
@@ -207,3 +208,53 @@ def test_provenance_refuses_a_normalized_payload_that_does_not_replay() -> None:
         match=r"\ANFKC provenance requires one position per raw code point\Z",
     ):
         provenance.nfkc(text, ())
+
+
+def test_utf8_roundtrip_rejects_a_valid_prefix_with_the_final_character_missing() -> (
+    None
+):
+    text = "試験"
+    located = spans.locate(text, partition(text))
+    shortened = replace(
+        located[0],
+        source_span=located[0].source_span.model_copy(
+            update={"segments": (Range(start=0, end=1),)}
+        ),
+    )
+    with pytest.raises(
+        ValueError, match=r"\ASource bindings must roundtrip exact field UTF-8 bytes\Z"
+    ):
+        spans.verify(text, (shortened,))
+
+
+def test_one_line_cannot_produce_two_body_candidates() -> None:
+    parts = partition("A B")
+    with pytest.raises(
+        ValueError, match=r"\AA source line must not contain multiple body candidates\Z"
+    ):
+        spans.locate("A B", (parts[0], parts[0]))
+
+
+def test_whole_nfkc_provenance_must_agree_with_prefix_normalization(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls = iter(("A", "B"))
+    with monkeypatch.context() as patch:
+        patch.setattr(unicodedata, "normalize", lambda *_: next(calls))
+        with pytest.raises(
+            ValueError,
+            match=r"\ANFKC provenance differs from whole-string normalization\Z",
+        ):
+            provenance.nfkc("A", (0,))
+
+
+def test_matching_normalized_bytes_do_not_hide_a_lost_source_position(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    part = partition("A")[0]
+    monkeypatch.setattr(provenance, "nfkc", lambda *_: (provenance.Unit("A", ()),))
+    with pytest.raises(
+        ValueError,
+        match=r"\AParameter provenance must retain every selected raw position\Z",
+    ):
+        provenance.trace("A", part)

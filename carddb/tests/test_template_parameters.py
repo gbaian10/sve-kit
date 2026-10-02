@@ -9,7 +9,13 @@ from pydantic import ValidationError
 
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.snapshot.values import digest, object_value
-from sve_carddb.template_parameters.analysis import SAFE_INTEGER, analyze, unsigned
+from sve_carddb.template_parameters.analysis import (
+    NUMERIC_RULE_PENDING,
+    SAFE_INTEGER,
+    analyze,
+    schema,
+    unsigned,
+)
 from sve_carddb.template_parameters.inventory import Candidates, lineage, summary
 from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
 from sve_carddb.template_parameters.references import References
@@ -21,7 +27,7 @@ from sve_carddb.template_sources.pins import PARSER
 from sve_carddb.text_observations.vocabulary import Binding, Vocabulary
 
 if TYPE_CHECKING:
-    from sve_carddb.template_parameters.models import Candidate
+    from sve_carddb.template_parameters.models import Candidate, Hint
 
 HASH = "sha256:" + "a" * 64
 
@@ -47,12 +53,22 @@ def candidate(
     return result
 
 
+def numeric_fixture(text: str) -> tuple[Schema, tuple[Hint, ...]]:
+    """Supply synthetic resolved hints only to isolate downstream value-verifier guards."""
+    hints = tuple(h.model_copy(update={"issues": ()}) for h in candidate(text).slots)
+    assert all(h.issues == (NUMERIC_RULE_PENDING,) for h in candidate(text).slots)
+    shape = schema(hints)
+    assert shape is not None
+    return shape, hints
+
+
 def test_numeric_slot_has_safe_value_raw_spelling_and_only_its_true_occurrence() -> (
     None
 ):
     result = candidate("N試験２枚 X")
-    assert result.parameter_schema is not None
-    slot = result.parameter_schema.slots[0]
+    assert result.parameter_schema is None
+    shape, _ = numeric_fixture("N試験２枚 X")
+    slot = shape.slots[0]
     assert (slot.type, slot.min, slot.max) == ("uint", 0, SAFE_INTEGER)
     assert slot.occurrences == (Range(start=3, end=4),)
     assert result.slots[0].value == 2
@@ -60,8 +76,10 @@ def test_numeric_slot_has_safe_value_raw_spelling_and_only_its_true_occurrence()
     assert result.slots[0].normalized_hash == digest(b"N")
     assert result.literal_trace[0].occurrence == Range(start=0, end=3)
     assert result.literal_trace[-1].occurrence == Range(start=4, end=7)
-    assert result.payload_hash is not None
-    assert candidate("N試験３枚 X").payload_hash == result.payload_hash
+    assert result.slots[0].numeric_rule == "suffix_unit_cards"
+    assert result.issues == (NUMERIC_RULE_PENDING,)
+    assert result.payload_hash is None
+    assert candidate("N試験３枚 X").issues == result.issues
     assert unsigned("0002") == 2
 
 
@@ -312,10 +330,7 @@ def test_literal_n_and_numeric_n_force_fork_without_fake_parent_payload() -> Non
 def test_slot_verifier_rejects_single_damage_with_one_complete_message(
     change: str, message: str
 ) -> None:
-    result = candidate("試験２枚")
-    assert result.parameter_schema is not None
-    hints = result.slots
-    schema = result.parameter_schema
+    schema, hints = numeric_fixture("試験２枚")
     updates: dict[str, object] = (
         {"value": 8}
         if change == "value"
@@ -336,9 +351,8 @@ def test_slot_verifier_rejects_single_damage_with_one_complete_message(
 
 
 def test_repeated_slot_values_must_be_equal_and_slot_positions_cannot_overlap() -> None:
-    result = candidate("試験２枚／３枚")
-    assert result.parameter_schema is not None
-    hints = tuple(h.model_copy(update={"name": "count"}) for h in result.slots)
+    original_schema, original_hints = numeric_fixture("試験２枚／３枚")
+    hints = tuple(h.model_copy(update={"name": "count"}) for h in original_hints)
     schema = Schema(
         slots=(
             Slot(
@@ -359,9 +373,9 @@ def test_repeated_slot_values_must_be_equal_and_slot_positions_cannot_overlap() 
     with pytest.raises(ValidationError) as raised:
         Schema(
             slots=(
-                result.parameter_schema.slots[0],
-                result.parameter_schema.slots[1].model_copy(
-                    update={"occurrences": result.parameter_schema.slots[0].occurrences}
+                original_schema.slots[0],
+                original_schema.slots[1].model_copy(
+                    update={"occurrences": original_schema.slots[0].occurrences}
                 ),
             )
         )
@@ -382,8 +396,7 @@ def test_repeated_slot_values_must_be_equal_and_slot_positions_cannot_overlap() 
 def test_schema_guards_uint_bounds_and_reference_kind(
     update: dict[str, object], message: str
 ) -> None:
-    schema = candidate("試験２枚").parameter_schema
-    assert schema is not None
+    schema, _ = numeric_fixture("試験２枚")
     data = dict(schema.slots[0].model_dump(), **update)
     with pytest.raises(ValidationError) as raised:
         Slot.model_validate(data)
@@ -435,3 +448,120 @@ def test_candidate_replay_rejects_changed_literal_positions_and_missing_slots() 
             References(),
             result,
         )
+
+
+@pytest.mark.parametrize(
+    ("text", "rule"),
+    [
+        ("試験２枚", "suffix_unit_cards"),
+        ("試験２体", "suffix_unit_entities"),
+        ("試験２点", "suffix_unit_points"),
+        ("試験２回", "suffix_unit_times"),
+        ("試験２ターン", "suffix_unit_turns"),
+        ("試験２PP", "suffix_unit_pp"),
+        ("コスト２", "prefix_field_cost"),
+        ("攻撃力=２", "prefix_field_attack"),
+        ("体力:２", "prefix_field_health"),
+        ("PP：２", "prefix_field_pp"),
+        ("レベル２", "prefix_field_level"),
+        ("コスト２枚", "suffix_unit_cards"),
+    ],
+)
+def test_each_proposed_numeric_rule_is_pinned_and_requires_approval(
+    text: str, rule: str
+) -> None:
+    result = candidate(text)
+    assert result.slots[0].numeric_rule == rule
+    assert result.slots[0].issues == (NUMERIC_RULE_PENDING,)
+    assert result.issues == (NUMERIC_RULE_PENDING,)
+    assert result.parameter_schema is None
+    assert result.payload_hash is None
+    assert result.slots[0].value == 2
+    assert rule.isascii()
+
+
+@pytest.mark.parametrize("text", ["-２枚", "SYN２枚", "試験２", "試験２PPa"])
+def test_rejected_numeric_contexts_have_no_proposed_rule(text: str) -> None:
+    assert candidate(text).slots[0].numeric_rule is None
+
+
+def test_header_numeric_roles_do_not_inherit_body_rule_approval() -> None:
+    result = candidate(
+        "『Name』{Synthetic}フォロワー{コスト２}{攻撃力}１/{体力}３", section=0
+    )
+    numeric = [h for h in result.slots if h.type == "uint"]
+    assert len(numeric) == 3
+    assert all(h.numeric_rule is None and not h.issues for h in numeric)
+
+
+def test_rule_counts_and_conditional_completion_are_distinct_from_complete_schemas() -> (
+    None
+):
+    entries = [
+        candidate("試験"),
+        candidate("試験２枚／３枚"),
+        candidate("コスト２"),
+        candidate("試験２枚／３"),
+        candidate("試験２枚『Synthetic』"),
+    ]
+    report = summary(Candidates(entries=entries))
+    rules = object_value(report["numeric_rule_counts"])
+    assert rules["suffix_unit_cards"] == 4
+    assert rules["prefix_field_cost"] == 1
+    assert sum(v for v in rules.values() if isinstance(v, int)) == 5
+    assert len(rules) == 11
+    assert rules["prefix_field_level"] == 0
+    body = object_value(object_value(report["roles"])["body"])
+    assert body["complete_schemas"] == 1
+    assert body["complete_without_numeric_rule_approval"] == 1
+    assert body["complete_after_numeric_rule_approval"] == 2
+    assert body["review_required"] == 4
+    assert report["parameter_complete"] is False
+    assert object_value(report["unresolved_reasons"])[NUMERIC_RULE_PENDING] == 4
+    assert summary(Candidates(entries=[entries[1]]))["parameter_complete"] is False
+
+
+def test_rule_identifier_and_pending_reason_are_part_of_exact_candidate_replay() -> (
+    None
+):
+    text = "試験２枚"
+    part = partition(text)[0]
+    located = locate(text, (part,))[0]
+    result = candidate(text)
+    ref = SourceRef(
+        store_id="synthetic",
+        batch_id=HASH,
+        source_version_id="src:v1:" + "b" * 64,
+        parser=PARSER,
+        locator="/faces/0/text",
+        text_hash=digest(text.encode()),
+    )
+    item = entry(ref, part, VERSION)
+    for updates in ({"numeric_rule": "suffix_unit_times"}, {"issues": ()}):
+        damaged = result.model_copy(
+            update={"slots": (result.slots[0].model_copy(update=updates),)}
+        )
+        with pytest.raises(
+            ValueError,
+            match=r"\AParameter candidate must replay exact spans roles and semantic evidence\Z",
+        ):
+            verify_candidate(text, part, item, located, References(), damaged)
+
+
+def test_numeric_rule_is_in_schema_signature_even_when_slot_shapes_match() -> None:
+    cards = candidate("試験２枚")
+    entities = candidate("試験２体")
+    assert cards.slots[0].occurrence == entities.slots[0].occurrence
+    assert cards.signature_hash != entities.signature_hash
+    assert cards.signature_hash == candidate("試験３枚").signature_hash
+
+
+def test_rule_match_does_not_make_an_unsafe_value_conditionally_complete() -> None:
+    result = candidate("９００７１９９２５４７４０９９２枚")
+    assert result.slots[0].numeric_rule == "suffix_unit_cards"
+    report = summary(Candidates(entries=[result]))
+    body = object_value(object_value(report["roles"])["body"])
+    assert body["complete_schemas"] == 0
+    assert body["complete_without_numeric_rule_approval"] == 0
+    assert body["complete_after_numeric_rule_approval"] == 0
+    assert object_value(report["numeric_rule_counts"])["suffix_unit_cards"] == 1

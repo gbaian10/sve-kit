@@ -14,6 +14,7 @@ from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.registry.storage import encode
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.template_parameters import __main__ as cli
+from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
 from sve_carddb.template_parameters.models import Candidate
 from sve_carddb.template_parameters.output import write
@@ -26,6 +27,10 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from pydantic import JsonValue
+
+    from sve_carddb.template_parameters.inventory import Field
+    from sve_carddb.template_parameters.spans import Located
+    from sve_carddb.template_sources.normalizer import Part
 
     from .template_source_fixtures import Case
 
@@ -284,3 +289,61 @@ def test_cli_error_output_never_prints_source_or_validation_details(
         output.err
         == "Template parameter candidates failed; immutable inputs or evidence could not be verified\n"
     )
+
+
+@pytest.mark.parametrize("change", ["missing", "extra", "duplicate"])
+def test_candidate_output_must_cover_all_and_only_first_checkpoint_entries(
+    template_case: Case, monkeypatch: pytest.MonkeyPatch, change: str
+) -> None:
+    original = inventory._candidate
+
+    def damaged(
+        result: Candidates,
+        context: Field,
+        part: Part,
+        position: Located,
+        refs: References,
+    ) -> None:
+        original(result, context, part, position, refs)
+        if change == "missing":
+            result.entries.pop()
+        elif change == "extra":
+            result.entries.append(
+                result.entries[-1].model_copy(update={"inventory_id": "invented-entry"})
+            )
+        else:
+            result.entries.append(result.entries[-1])
+
+    monkeypatch.setattr(inventory, "_candidate", damaged)
+    with pytest.raises(
+        ValueError,
+        match=r"\AParameter candidates must cover all and only first-checkpoint entries\Z",
+    ):
+        build(
+            FrozenSources(
+                template_case.store,
+                template_case.scan.entries[0].source_ref.store_id,
+                template_case.batch,
+            ),
+            template_case.scan,
+            References(),
+        )
+
+
+def test_legacy_normalized_replay_cannot_be_replaced_with_a_different_value(
+    template_case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(inventory, "replay", lambda *_: "Synthetic wrong replay")
+    with pytest.raises(
+        ValueError,
+        match=r"\AParameter source recipe must reproduce exact legacy normalized bytes\Z",
+    ):
+        build(
+            FrozenSources(
+                template_case.store,
+                template_case.scan.entries[0].source_ref.store_id,
+                template_case.batch,
+            ),
+            template_case.scan,
+            References(),
+        )

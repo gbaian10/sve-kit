@@ -7,20 +7,20 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import ValidationError
 
+from sve_carddb.build_inputs import ArchivePin, Source
 from sve_carddb.snapshot.values import canonical, digest, object_value
-from sve_carddb.template_parameters.analysis import prepared
+from sve_carddb.template_parameters.analysis import header_positions, prepared
 from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
 from sve_carddb.template_parameters.references import References, adopted
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.normalizer import partition
 
-from .test_template_parameters import HASH, candidate
+from .test_template_parameters import HASH, candidate, numeric_fixture
 from .translation_fixtures import envelope, term, write
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.registry.records import RecordData
 
@@ -101,9 +101,8 @@ def test_closed_models_reject_one_specific_invalid_shape(
 def test_schema_slot_names_and_first_occurrence_order_are_independently_checked() -> (
     None
 ):
-    result = candidate("試験２枚／３枚")
-    assert result.parameter_schema is not None
-    slots = result.parameter_schema.slots
+    shape, _ = numeric_fixture("試験２枚／３枚")
+    slots = shape.slots
     for damaged, message in (
         (
             (slots[0], slots[1].model_copy(update={"name": slots[0].name})),
@@ -116,17 +115,10 @@ def test_schema_slot_names_and_first_occurrence_order_are_independently_checked(
 
 
 def test_parameter_occurrence_cannot_extend_past_the_normalized_payload() -> None:
-    result = candidate("試験２枚")
-    assert result.parameter_schema is not None
+    shape, original_hints = numeric_fixture("試験２枚")
     span = Range(start=2, end=99)
-    hints = (result.slots[0].model_copy(update={"occurrence": span}),)
-    schema = Schema(
-        slots=(
-            result.parameter_schema.slots[0].model_copy(
-                update={"occurrences": (span,)}
-            ),
-        )
-    )
+    hints = (original_hints[0].model_copy(update={"occurrence": span}),)
+    schema = Schema(slots=(shape.slots[0].model_copy(update={"occurrences": (span,)}),))
     with pytest.raises(
         ValueError, match=r"\AParameter occurrence must be inside normalized text\Z"
     ):
@@ -229,3 +221,65 @@ def test_adopted_exact_authored_concepts_reuse_the_full_glossary_loader(
     assert len(refs.term_mentions("Synthetic")) == len(records)
     assert "glossary" in refs.pins
     assert canonical(refs.pins)
+
+
+def test_header_candidate_must_match_the_entire_legacy_grammar() -> None:
+    with pytest.raises(
+        ValueError,
+        match=r"\AToken header candidate must match the complete legacy header grammar\Z",
+    ):
+        header_positions("Synthetic invalid header")
+
+
+@pytest.mark.parametrize("damage", ["unmatched", "duplicate_hint", "omitted", "reused"])
+def test_schema_covers_each_hint_once_at_each_independent_guard(damage: str) -> None:
+    shape, hints = numeric_fixture("試験２枚／２枚")
+    if damage == "unmatched":
+        shape = Schema(slots=(shape.slots[0].model_copy(update={"name": "other"}),))
+    elif damage == "duplicate_hint":
+        hints = (hints[0], hints[0], hints[1])
+    elif damage == "omitted":
+        shape = Schema(slots=shape.slots[:1])
+    else:
+        # Validated Schema rejects overlap first; simulate a broken internal producer.
+        shape = Schema.model_construct(
+            slots=(shape.slots[0], shape.slots[0], shape.slots[1])
+        )
+    with pytest.raises(
+        ValueError,
+        match=r"\AParameter schema must cover every classified hint exactly once\Z",
+    ):
+        verify_values("試験２枚／２枚", "試験N枚／N枚", shape, hints)
+
+
+@pytest.mark.parametrize("lang", ["en", "ja"])
+def test_adopted_concept_requires_japanese_and_nonempty_exact_frozen_text(
+    tmp_path: Path, lang: str
+) -> None:
+    write(tmp_path, {"translations/glossary/concepts/001.yaml": envelope([term()])})
+
+    class Sources:
+        def text(self, ref: SourceRef) -> tuple[str, str, Source]:
+            source = Source(
+                id=ref.source_version_id,
+                sha256=HASH,
+                raw_locator="synthetic/raw",
+                parser_version=ref.parser,
+                archive=ArchivePin(
+                    store_id=ref.store_id,
+                    batch_id=ref.batch_id,
+                    descriptor_sha256=HASH,
+                    first_receipt_id=HASH,
+                ),
+                url="https://synthetic.invalid/card",
+                fetched_at="2026-10-02T00:00:00Z",
+            )
+            return lang, "Synthetic" if lang == "en" else "", source
+
+    message = (
+        "Parameter concepts require exact Japanese source names"
+        if lang == "en"
+        else "Parameter concept source must be nonempty exact text"
+    )
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
+        adopted(tmp_path, Sources())

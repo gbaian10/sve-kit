@@ -12,6 +12,7 @@ from sve_carddb.template_parameters.models import (
     Candidate,
     Hint,
     LiteralTrace,
+    NumericRule,
     Range,
     Schema,
     Slot,
@@ -34,8 +35,30 @@ if TYPE_CHECKING:
 
 VERSION_PARAMETERS = "template-parameters-jp-candidate-v1"
 SAFE_INTEGER = 9007199254740991
-NUMERIC_SUFFIX = re.compile(r"^(?:枚|体|点|回|ターン|PP)(?![A-Za-z0-9_])")
-NUMERIC_PREFIX = re.compile(r"(?:コスト|攻撃力|体力|PP|レベル)[=:：]?$")
+NUMERIC_SUFFIX = re.compile(
+    r"^(?:(?P<suffix_unit_cards>枚)|(?P<suffix_unit_entities>体)|"
+    r"(?P<suffix_unit_points>点)|(?P<suffix_unit_times>回)|"
+    r"(?P<suffix_unit_turns>ターン)|(?P<suffix_unit_pp>PP))(?![A-Za-z0-9_])"
+)
+NUMERIC_PREFIX = re.compile(
+    r"(?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|"
+    r"(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|"
+    r"(?P<prefix_field_level>レベル))[=:：]?$"
+)
+NUMERIC_RULES: tuple[NumericRule, ...] = (
+    "suffix_unit_cards",
+    "suffix_unit_entities",
+    "suffix_unit_points",
+    "suffix_unit_times",
+    "suffix_unit_turns",
+    "suffix_unit_pp",
+    "prefix_field_cost",
+    "prefix_field_attack",
+    "prefix_field_health",
+    "prefix_field_pp",
+    "prefix_field_level",
+)
+NUMERIC_RULE_PENDING = "numeric_rule_pending_approval"
 BRACED = re.compile(r"\{([^{}]+)\}")
 
 
@@ -158,20 +181,25 @@ def unsigned(raw: str) -> int | None:
     return value if value <= SAFE_INTEGER else None
 
 
-def numeric_role(normalized: str, position: Position) -> tuple[str, ...]:
+def numeric_role(
+    normalized: str, position: Position
+) -> tuple[NumericRule | None, tuple[str, ...]]:
     """Unit/prefix grammar excludes signs, ASCII identifiers and undecided bare numbers."""
     before = normalized[: position.start]
     after = normalized[position.end :]
     if before.endswith(("-", "+", "−")):
-        return ("signed_numeric_requires_review",)
+        return None, ("signed_numeric_requires_review",)
     if (
         (before and re.search(r"[A-Za-z0-9_]$", before))
         or re.match(r"^[A-Za-z0-9_]", after)
     ) and not (NUMERIC_PREFIX.search(before) or after.startswith("PP")):
-        return ("numeric_identifier_requires_review",)
-    if NUMERIC_SUFFIX.match(after) or NUMERIC_PREFIX.search(before):
-        return ()
-    return ("numeric_role_requires_review",)
+        return None, ("numeric_identifier_requires_review",)
+    # A suffix wins when both grammars match, so each position counts exactly once.
+    match = NUMERIC_SUFFIX.match(after) or NUMERIC_PREFIX.search(before)
+    if match is not None:
+        rule = next(rule for rule in NUMERIC_RULES if rule == match.lastgroup)
+        return rule, (NUMERIC_RULE_PENDING,)
+    return None, ("numeric_role_requires_review",)
 
 
 def hint(
@@ -193,6 +221,7 @@ def hint(
         "source_segments": origins,
         "transformation": position.transformation,
         "semantic_role": position.semantic_role,
+        "numeric_rule": None,
         "raw_hash": digest(raw.encode()),
         "normalized_hash": digest(normalized.encode()),
     }
@@ -213,7 +242,9 @@ def hint(
             ("invalid_safe_unsigned_decimal",) if value is None else ()
         )
         if position.semantic_role == "numeric":
-            issues += numeric_role(part.normalized, position)
+            rule, pending = numeric_role(part.normalized, position)
+            common["numeric_rule"] = rule
+            issues += pending
         return Hint.model_validate(
             dict(
                 common,
@@ -313,6 +344,7 @@ def analyze(
             h.type,
             h.reference_kind,
             h.semantic_role,
+            h.numeric_rule,
             list(h.issues),
         ]
         for h in hints

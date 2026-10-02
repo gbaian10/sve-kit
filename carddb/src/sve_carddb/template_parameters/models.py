@@ -10,6 +10,20 @@ from pydantic import Field, JsonValue, field_validator, model_validator
 from sve_carddb.registry.records import Hash, RecordData, Text, UInt
 from sve_carddb.template_sources.normalizer import Role
 
+NumericRule = Literal[
+    "suffix_unit_cards",
+    "suffix_unit_entities",
+    "suffix_unit_points",
+    "suffix_unit_times",
+    "suffix_unit_turns",
+    "suffix_unit_pp",
+    "prefix_field_cost",
+    "prefix_field_attack",
+    "prefix_field_health",
+    "prefix_field_pp",
+    "prefix_field_level",
+]
+
 
 class Range(RecordData):
     start: UInt
@@ -97,6 +111,7 @@ class Hint(RecordData):
     source_segments: tuple[Range, ...]
     transformation: Text
     semantic_role: Text
+    numeric_rule: NumericRule | None
     type: Literal["uint", "literal", "reference"] | None
     reference_kind: Literal["card", "term", "vocabulary"] | None
     raw_hash: Hash

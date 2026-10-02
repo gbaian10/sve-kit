@@ -7,7 +7,11 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.values import canonical, digest
-from sve_carddb.template_parameters.analysis import analyze
+from sve_carddb.template_parameters.analysis import (
+    NUMERIC_RULE_PENDING,
+    NUMERIC_RULES,
+    analyze,
+)
 from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_parameters.verification import verify_candidate
 from sve_carddb.template_sources.inventory import entry, fields, replay
@@ -194,6 +198,12 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
                 {m.payload_hash for m in members if m.payload_hash is not None}
             ),
             "complete_schemas": sum(m.parameter_schema is not None for m in members),
+            "complete_without_numeric_rule_approval": sum(
+                m.parameter_schema is not None and not m.issues for m in members
+            ),
+            "complete_after_numeric_rule_approval": sum(
+                set(m.issues) == {NUMERIC_RULE_PENDING} for m in members
+            ),
             "review_required": sum(bool(m.issues) for m in members),
         }
     return {
@@ -213,6 +223,12 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
         "slot_counts": dict(
             Counter(h.semantic_role for m in candidates.entries for h in m.slots)
         ),
+        "numeric_rule_counts": {
+            rule: sum(
+                h.numeric_rule == rule for m in candidates.entries for h in m.slots
+            )
+            for rule in NUMERIC_RULES
+        },
         "unresolved_reasons": dict(
             Counter(reason for m in candidates.entries for reason in m.issues)
         ),
