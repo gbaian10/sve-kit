@@ -9,36 +9,24 @@ is unclear, just ask in an issue. Conventions for code and docs are listed under
 
 ## Ways to contribute
 
-You do not need to write code. Many of the most useful contributions only need you to
-know the game:
+Use the [issue forms](https://github.com/gbaian10/sve-kit/issues/new/choose) to
+report card data, mapping, translation or rule problems, or suggest features.
+You do not need to write code, and any language is welcome. Include the card
+number, region and official source URL where relevant.
 
-Use the issue forms to report problems or suggest features; you can write in any language.
+For data contribution formats, see [authored layout](docs/schema/authored-layout.md).
 
-| Contribution                                    | What you need                                                 |
-| ----------------------------------------------- | ------------------------------------------------------------- |
-| **Report wrong card data** (text, stats, links) | The card number and a link to the official card page          |
-| **Check Japanese-English card mappings**        | Links to both official card pages and what you noticed        |
-| **Fix or improve translations and terms**       | Read Traditional Chinese; cite the Japanese or English source |
-| Annotate card effects                           | Know the rules                                                |
-| Report rule or simulator bugs                   | Know the rules; steps to reproduce                            |
-| Fix typos and docs                              | Anything                                                      |
+## Contribution licenses and sources
 
-Card data and translations are the easiest places for mistakes to slip in —
-card numbers do not line up across regions, and there is no official Traditional Chinese
-edition — so these reports are especially valuable. The maintainer confirms every
-cross-region mapping by hand, so a report does not need to be certain.
-
-**Always say where it comes from:**
-
-- Card data: card number, region (Japanese or English), and the official card page.
-- Translations: say whether it is your own translation, an official name from the digital
-  Shadowverse games (with a link), or a community term.
-- Do not paste card lists, images or translations copied from other sites, and do not
-  upload card image files — link to the official page instead.
-
-Data contributions are plain YAML files under `authored/`, split per card set.
-The identity registry format is defined in [authored layout](docs/schema/authored-layout.md);
-other data layouts remain proposed.
+- Material you intentionally submit for inclusion through a PR or issue uses its
+  destination path's terms in [LICENSING.md](LICENSING.md). Your own translation
+  contributions use CC0; rights in the official source text remain unchanged.
+  You offer only rights you hold and can grant. No separate copyright assignment,
+  CLA or DCO sign-off is required.
+- Distinguish your own suggestions from official or community wording. Cite the
+  source and its date or version where known. Link to sources instead of copying
+  full pages, card lists, images or other people's translations; a source link
+  is not permission to relicense them.
 
 ## Languages
 
@@ -89,26 +77,10 @@ The gitmoji, type and scope are fixed tokens and do not count.
 
 ### Trailers
 
-Pull requests are squash-merged, so the squash commit records who worked on the change.
-Its message ends with these trailers, in this order, after a blank line that follows the body
-and any issue references:
-
-| Trailer          | Add one for                                                         | Example                                                |
-| ---------------- | ------------------------------------------------------------------- | ------------------------------------------------------ |
-| `Co-Authored-By` | every person or AI model that wrote part of the change              | `Co-Authored-By: Codex gpt-6-sol <noreply@openai.com>` |
-| `Reviewed-by`    | every reviewer, person or AI model, who approved the final revision | `Reviewed-by: Claude Opus 5.5 <noreply@anthropic.com>` |
-| `Acked-by`       | the maintainer, only when they approved this change themselves      | `Acked-by: Maintainer Name <maintainer@example.com>`   |
-
-Name an AI model by its product and version, and the maintainer by the name and email in
-`git log`. A change merged under the standing review rules, without the maintainer looking at it,
-has no `Acked-by`. If you open a pull request, list everyone and every AI model that wrote part
-of it in the description, so the maintainer can credit them in the squash commit.
-
-Some changes are written and reviewed by AI models run by the maintainer. Their pull requests
-are opened by bot accounts owned by the maintainer (`…[bot]`). AI review must pass on the local
-branch before pushing and opening the pull request; the reviewer then posts one summary of all
-rounds' findings, fixes and validation on the pull request. The trailers above record which models
-wrote and reviewed the change, and whether the maintainer approved it personally.
+Credit authors and reviewers in the PR description so their contributions can be
+recorded in the squash commit. Use `Acked-by` only when the maintainer personally
+approved that change. See [AGENTS.md](AGENTS.md) for automated contribution and
+review procedures.
 
 ## Code comments
 
