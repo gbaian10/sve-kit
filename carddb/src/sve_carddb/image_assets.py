@@ -21,12 +21,15 @@ from sve_carddb.build_inputs import (
 )
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.image_crop_report import crop_report
+from sve_carddb.image_crops import conversion_image_id
 from sve_carddb.image_variants import (
     DEFAULT_RECIPE,
     SIZES,
     ImageSource,
     VariantSet,
     build_variants,
+    crop_box,
 )
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.values import canonical, digest, parse
@@ -38,6 +41,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import CompiledSchema, Database, Row, Value
     from sve_carddb.build_inputs import BuildContext
+    from sve_carddb.image_crops import ImageCrops
     from sve_carddb.registry.preview import PreviewPlan
 
 PARSER = "jp-image-links-v1"
@@ -242,6 +246,7 @@ def build_jp_assets(
     images: FrozenSources,
     roots: PreviewRoots,
     *,
+    crops: ImageCrops,
     workers: int = 1,
     reuse_only: bool = False,
 ) -> ImageBuild:
@@ -265,9 +270,8 @@ def build_jp_assets(
             "image",
         ):
             raise ValueError("JP image batch contains another provider or source kind")
-        image_id = "img:v1:" + digest(canonical({"source_id": source.id})).removeprefix(
-            "sha256:"
-        )
+        image_id = conversion_image_id(source.id)
+        override = crops.override(descriptor)
         # Conversion only knows the resource URL; HTML src enters the DB from verified bindings.
         result = build_variants(
             ImageSource(
@@ -283,6 +287,7 @@ def build_jp_assets(
             blob_root=roots.preview,
             cache_root=roots.cache,
             reuse_only=reuse_only,
+            override=override,
         )
         return EncodedImage(source, descriptor.raw_bytes, result)
 
@@ -464,7 +469,9 @@ def _variants(db: Database, result: VariantSet, image_id: str) -> None:
         )
 
 
-def verify_asset_sources(build: ImageBuild, stores: Mapping[str, Path]) -> None:
+def verify_asset_sources(
+    build: ImageBuild, stores: Mapping[str, Path], *, crops: ImageCrops | None = None
+) -> None:
     """Compare retained source size and oriented dimensions with the sealed PNGs."""
     batches: dict[tuple[str, str], FrozenSources] = {}
     for item in build.images:
@@ -489,6 +496,23 @@ def verify_asset_sources(build: ImageBuild, stores: Mapping[str, Path]) -> None:
             or dimensions != (item.result.source_width, item.result.source_height)
         ):
             raise ValueError("Image source bytes or oriented dimensions mismatch")
+        override = None if crops is None else crops.override(descriptor)
+        expected = crop_box(
+            ImageSource(
+                conversion_image_id(source.id),
+                raw,
+                source.sha256[7:],
+                source.url,
+                "sve_card",
+                "official",
+                "approved",
+                "available",
+            ),
+            *dimensions,
+            override,
+        )
+        if item.result.crop_box != expected:
+            raise ValueError("Image crop box differs from adopted source crop")
 
 
 def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- bind schema, inputs, assets, destinations and the caller-owned parent transaction
@@ -502,6 +526,7 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
     *,
     parent_uses: tuple[SourceUse, ...],
     stores: Mapping[str, Path],
+    crops: ImageCrops,
 ) -> InputRecord:
     """Save a complete DB/input/report seal after immutable image assets are verified."""
     roots.validate(stores.values())
@@ -513,13 +538,15 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
         raise ValueError(
             "Private image build bundle must be isolated from asset and source roots"
         )
-    verify_asset_sources(build, stores)
+    verify_asset_sources(build, stores, crops=crops)
     config = parse(context.configuration.encode())
     if (
         not isinstance(config, dict)
         or config.get("image_recipe") != DEFAULT_RECIPE.version
     ):
         raise ValueError("Build context must pin the exact image recipe")
+    crops.verify_context(context)
+    report = build.report(references)
     expected = uses_sorted(
         (*parent_uses, *build.source_uses(), *reference_uses(references))
     )
@@ -528,6 +555,7 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
         parent_record = populate_parents(db)
         parent_record.verify(db, context, parent_uses)
         uses = populate_jp_assets(db, build, references, roots.preview)
+        report["crop_overrides"] = crop_report(crops, build, references, db)
         return input_record(context, (*parent_record.uses, *uses))
 
     return publish_bundle(
@@ -536,6 +564,6 @@ def publish_jp_image_bundle(  # ruff: ignore[too-many-arguments, too-many-positi
         context,
         expected,
         populate,
-        build.report(references),
+        report,
         stores=stores,
     )

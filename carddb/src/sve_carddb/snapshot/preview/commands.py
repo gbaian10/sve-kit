@@ -8,6 +8,7 @@ import typer
 
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import PreviewRoots, build_jp_assets
+from sve_carddb.image_crops import load_image_crops
 from sve_carddb.snapshot.export import Brotli, export_snapshot
 from sve_carddb.snapshot.offline import Inputs as OfflineInputs
 from sve_carddb.snapshot.offline import build as build_offline
@@ -73,11 +74,15 @@ def export_command(
     else:
         image_roots = PreviewRoots(image_assets_dir, cdn_dir, image_cache_dir)
         image_roots.validate((recipe.archive, recipe.repo, preview_dir))
+        crops = load_image_crops(
+            recipe.repo / "authored", authored_revision=recipe.revision
+        )
         images = build_jp_assets(
             FrozenSources(recipe.archive, recipe.store_id, recipe.image_batch),
             image_roots,
             workers=4,
             reuse_only=True,
+            crops=crops,
         )
         built = build(recipe, images=images, image_root=image_assets_dir)
         image_execution = {

@@ -401,10 +401,14 @@ def test_build_keeps_errata_pending_and_filters_diagnostic_identity(
 
 
 def prepare_build(
-    case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    case: Case,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    *,
+    revision: str = "a" * 40,
 ) -> Inputs:
     repo = tmp_path / "repo"
-    (repo / "carddb/src/sve_carddb").mkdir(parents=True)
+    (repo / "carddb/src/sve_carddb").mkdir(parents=True, exist_ok=True)
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
     vocabulary = tmp_path / "vocabulary.json"
     vocabulary.write_bytes(canonical(case.vocabulary.model_dump(mode="json")))
@@ -414,7 +418,7 @@ def prepare_build(
         store_id="test-store",
         card_batch="sha256:" + "a" * 64,
         image_batch="sha256:" + "b" * 64,
-        revision="a" * 40,
+        revision=revision,
         parser_version="synthetic-v1",
         vocabulary=vocabulary,
         languages=LANGUAGES,
