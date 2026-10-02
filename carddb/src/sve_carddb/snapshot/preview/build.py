@@ -8,7 +8,15 @@ from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_minimum
-from sve_carddb.build_inputs import BuildContext, Revision
+from sve_carddb.build_inputs import BuildContext, Revision, input_record, uses_sorted
+from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.image_assets import (
+    plan_jp_images,
+    populate_jp_assets,
+    reference_uses,
+    verify_asset_sources,
+)
+from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
     FrozenProducts,
     Language,
@@ -22,7 +30,8 @@ from sve_carddb.registry.records import Hash, Instant, PrintingData, RecordData,
 from sve_carddb.snapshot.export import Batch, Ownership
 from sve_carddb.snapshot.preview import require_unknown_coverage
 from sve_carddb.snapshot.project import Decisions, Projection, Settings, project
-from sve_carddb.snapshot.values import array, digest
+from sve_carddb.snapshot.project.source import Source
+from sve_carddb.snapshot.values import array, digest, string
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.text_observations import (
     FrozenTexts,
@@ -35,6 +44,7 @@ from sve_carddb.text_observations import (
 from sve_carddb.text_observations.wording import printing_observed_texts, wording_views
 
 if TYPE_CHECKING:
+    from sve_carddb.image_assets import ImageBuild
     from sve_carddb.registry.preview import PreviewPlan
 
 
@@ -66,6 +76,7 @@ class Built:
     ownership: Ownership
     input_content: bytes
     report: dict[str, JsonValue]
+    confirmed_images: frozenset[str] = frozenset()
 
 
 def publication_printings(plan: PreviewPlan) -> frozenset[str]:
@@ -91,7 +102,9 @@ def exclusions(plan: PreviewPlan) -> list[JsonValue]:
     return result
 
 
-def build(inputs: Inputs) -> Built:  # ruff: ignore[too-many-locals] -- one offline transaction binds the independently verified source plans
+def build(  # ruff: ignore[too-many-locals] -- one offline transaction binds the independently verified source plans
+    inputs: Inputs, *, images: ImageBuild | None = None, image_root: Path | None = None
+) -> Built:
     """Use archived identity/text/image evidence and repo authored, entirely read-only."""
     identity = plan_preview(
         inputs.repo / "authored",
@@ -121,6 +134,16 @@ def build(inputs: Inputs) -> Built:  # ruff: ignore[too-many-locals] -- one offl
     publication = plan.publication_identity()
     catalog = load_products(inputs.repo / "authored", registry=identity.snapshot)
     stores = {inputs.store_id: inputs.archive}
+    if (images is None) != (image_root is None):
+        raise ValueError("Image build and asset root must be provided together")
+    if images is not None:
+        if any(
+            (item.source.archive.store_id, item.source.archive.batch_id)
+            != (inputs.store_id, inputs.image_batch)
+            for item in images.images
+        ):
+            raise ValueError("Preview images differ from the pinned image batch")
+        verify_asset_sources(images, stores)
     identities = load_product_identities(
         inputs.repo / "authored",
         authored_revision=inputs.revision,
@@ -150,6 +173,8 @@ def build(inputs: Inputs) -> Built:  # ruff: ignore[too-many-locals] -- one offl
         "selected_regions": ["jp"],
         "published_history": "explicit-empty-no-releases",
     }
+    if images is not None:
+        configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     # Adopted JP art can use the shared art DDL; DDL capability is not region coverage.
     with create_database(compile_minimum(include_en=True)) as db:
@@ -166,6 +191,24 @@ def build(inputs: Inputs) -> Built:  # ruff: ignore[too-many-locals] -- one offl
                 stores=stores,
                 official=official,
             )
+            image_report: dict[str, JsonValue] | None = None
+            if images is not None and image_root is not None:
+                references = plan_jp_images(
+                    db,
+                    identity,
+                    FrozenSources(inputs.archive, inputs.store_id, inputs.card_batch),
+                )
+                expected = uses_sorted(
+                    (*record.uses, *images.source_uses(), *reference_uses(references))
+                )
+                added = populate_jp_assets(db, images, references, image_root)
+                record = input_record(context, (*record.uses, *added))
+                record.verify(db, context, expected)
+                image_report = {
+                    key: value
+                    for key, value in images.report(references).items()
+                    if key not in {"elapsed_milliseconds", "cache_hits"}
+                }
         decisions = Decisions().with_text_views(
             wording_views(db, plan), printing_observed_texts(db, plan)
         )
@@ -181,6 +224,14 @@ def build(inputs: Inputs) -> Built:  # ruff: ignore[too-many-locals] -- one offl
         )
         require_unknown_coverage(projection)
         ownership = Ownership.from_database(db, projection)
+        public_images = {row["id"] for row in projection.tables["image_asset"]}
+        confirmed_images = frozenset(
+            string(row["id"])
+            for row in Source(db).rows("image_asset", "id,origin,publication_state")
+            if row["id"] in public_images
+            and row["origin"] == "third_party"
+            and row["publication_state"] == "approved"
+        )
     content = record.content()
     report: dict[str, JsonValue] = {
         "input_sha256": digest(content),
@@ -211,4 +262,11 @@ def build(inputs: Inputs) -> Built:  # ruff: ignore[too-many-locals] -- one offl
             "M3 browser acceptance",
         ],
     }
-    return Built(projection, ownership, content, report)
+    if image_report is not None:
+        report["image_assets"] = image_report
+        report["incomplete_formal_gates"] = [
+            item
+            for item in array(report["incomplete_formal_gates"])
+            if item != "image manifest integration (#35)"
+        ]
+    return Built(projection, ownership, content, report, confirmed_images)

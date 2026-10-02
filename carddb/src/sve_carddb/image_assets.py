@@ -239,7 +239,11 @@ def reference_uses(references: tuple[ImageReference, ...]) -> tuple[SourceUse, .
 
 
 def build_jp_assets(
-    images: FrozenSources, roots: PreviewRoots, *, workers: int = 1
+    images: FrozenSources,
+    roots: PreviewRoots,
+    *,
+    workers: int = 1,
+    reuse_only: bool = False,
 ) -> ImageBuild:
     """Convert every current JP image before any DB or public manifest is written."""
     roots.validate((images.root,))
@@ -278,6 +282,7 @@ def build_jp_assets(
             ),
             blob_root=roots.preview,
             cache_root=roots.cache,
+            reuse_only=reuse_only,
         )
         return EncodedImage(source, descriptor.raw_bytes, result)
 

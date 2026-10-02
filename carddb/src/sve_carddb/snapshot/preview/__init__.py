@@ -10,6 +10,7 @@ from pydantic import JsonValue
 
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
+from sve_carddb.snapshot.preview.images import image_blobs, verify_images
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, string
@@ -17,6 +18,7 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value, s
 if TYPE_CHECKING:
     from sve_carddb.snapshot.export import Brotli, Snapshot
     from sve_carddb.snapshot.project import Projection
+    from sve_carddb.snapshot.project.source import Record
 
 
 @dataclass(frozen=True)
@@ -38,6 +40,17 @@ class Roots:
         if not target.resolve().is_relative_to(root):
             raise ValueError("Preview destination escapes its root")
         return target
+
+    def verify_image_source(self, source: Path | None) -> None:
+        """A copied library must never become an output or formal asset directory."""
+        if source is None:
+            return
+        for output in (self.preview.resolve(), self.formal.resolve()):
+            root = source.resolve()
+            if output.is_relative_to(root) or root.is_relative_to(output):
+                raise ValueError(
+                    "Preview image input and output roots must be disjoint"
+                )
 
 
 def require_unknown_coverage(projection: Projection) -> None:
@@ -78,10 +91,13 @@ def write_preview(
     provenance: dict[str, JsonValue],
     *,
     brotli: Brotli | None = None,
+    image_source: Path | None = None,
+    confirmed_images: frozenset[str] = frozenset(),
 ) -> dict[str, JsonValue]:
     """Seal content-addressed transport and atomically switch only preview/current."""
     roots.verify()
     require_preview(snapshot.manifest)
+    roots.verify_image_source(image_source)
     joined = read_snapshot(
         snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
     )
@@ -106,6 +122,7 @@ def write_preview(
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
     }
+    image_report = _write_images(joined, roots, image_source, confirmed_images)
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
         if path != "snapshots/blobs/" + digest(blob.raw)[7:] + ".json":
@@ -141,7 +158,23 @@ def write_preview(
         "pointer": pointer,
         "capacity": measure(snapshot, brotli=brotli),
         "compression_recipe": dict(snapshot.compression_recipe),
+        "images": image_report,
     }
     _write(roots, "reports/" + hashed[7:] + ".json", canonical(report), immutable=True)
+    verify_images(joined, roots.preview, confirmed_images)
     _write(roots, "snapshots/preview/current.json", canonical(pointer), immutable=False)
     return report
+
+
+def _write_images(
+    tables: dict[str, list[Record]],
+    roots: Roots,
+    image_source: Path | None,
+    confirmed_images: frozenset[str],
+) -> dict[str, JsonValue]:
+    image_files, image_bytes = 0, 0
+    for path, raw in image_blobs(tables, image_source, confirmed_images):
+        _write(roots, path, raw, immutable=True)
+        image_files += 1
+        image_bytes += len(raw)
+    return {"unique_files": image_files, "unique_bytes": image_bytes}

@@ -189,6 +189,7 @@ def build_variants(
     cache_root: Path,
     override: CropOverride | None = None,
     recipe: Recipe = DEFAULT_RECIPE,
+    reuse_only: bool = False,
 ) -> VariantSet:
     """Build or reuse WebP variants without reading any project data directory."""
     _validate_source(source)
@@ -208,6 +209,8 @@ def build_variants(
     cached = _read_cache(cache_path, source, image, crop, recipe, blob_root)
     if cached is not None:
         return cached
+    if reuse_only:
+        raise ImageVariantError("Verified image recipe cache is incomplete")
 
     generated: list[ImageVariant] = []
     for size in SIZES:
