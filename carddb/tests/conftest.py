@@ -50,7 +50,7 @@ def test_isolation_guard(
         try:
             yield guard
         finally:
-            guard.active = False
+            guard._active = False
 
 
 @pytest.fixture(scope="session")

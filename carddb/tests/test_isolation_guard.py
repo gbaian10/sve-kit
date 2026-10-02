@@ -1,9 +1,11 @@
+import importlib.util
 import os
 import socket
 import sqlite3
 import sys
 import tempfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from threading import Thread
 from typing import TYPE_CHECKING, override
 
@@ -17,13 +19,11 @@ from sve_carddb.fetch.writer import Fetched, Writer
 from sve_carddb.manifest import Kind, Manifest, Region, RequestStart
 from sve_carddb.store import relpath
 
+from .isolation_guard import IsolationGuard
 from .isolation_guard import TestIsolationError as IsolationError
 
 if TYPE_CHECKING:
     from collections.abc import Iterator
-    from pathlib import Path
-
-    from .isolation_guard import IsolationGuard
 
 URL = "https://example.invalid/test-only"
 
@@ -269,7 +269,6 @@ def test_mock_transport_remains_available() -> None:
         ("socket.gethostbyname", ("example.invalid",)),
         ("socket.gethostbyaddr", ("203.0.113.1",)),
         ("socket.connect", (None, ("203.0.113.1", 443))),
-        ("socket.sendto", (None, b"synthetic", ("203.0.113.1", 53))),
     ],
 )
 def test_native_network_audit_events_stay_blocked_after_undo(
@@ -295,6 +294,127 @@ def test_real_external_socket_connect_is_blocked_before_system_call() -> None:
 def test_real_external_dns_is_blocked_before_resolution() -> None:
     with pytest.raises(IsolationError, match="external name"):
         socket.getaddrinfo("example.invalid", 443)
+
+
+@pytest.mark.parametrize("method", ["sendto", "sendmsg", "connected-sendmsg"])
+def test_real_udp_loopback_delivery_is_allowed(method: str) -> None:
+    with (
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver,
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender,
+    ):
+        receiver.bind(("127.0.0.1", 0))
+        receiver.settimeout(1)
+        address = receiver.getsockname()
+        if method == "sendto":
+            sent = sender.sendto(b"synthetic", address)
+        elif method == "sendmsg":
+            sent = sender.sendmsg([b"synthetic"], [], 0, address)
+        else:
+            sender.connect(address)
+            sent = sender.sendmsg([b"synthetic"])
+        assert sent == len(b"synthetic")
+        assert receiver.recv(32) == b"synthetic"
+
+
+@pytest.mark.parametrize("method", ["sendto", "sendmsg"])
+def test_real_udp_non_loopback_is_blocked(method: str) -> None:
+    with (
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as receiver,
+        socket.socket(socket.AF_INET, socket.SOCK_DGRAM) as sender,
+    ):
+        receiver.bind(("127.0.0.1", 0))
+        # Linux routes this wildcard destination locally even if the guard regresses.
+        address = ("0.0.0.0", receiver.getsockname()[1])  # ruff: ignore[hardcoded-bind-all-interfaces] -- destination only, routed locally on Linux
+
+        def attempt() -> None:
+            if method == "sendto":
+                sender.sendto(b"synthetic", address)
+            else:
+                sender.sendmsg([b"synthetic"], [], 0, address)
+
+        with pytest.raises(IsolationError, match="external socket"):
+            attempt()
+
+
+def test_unix_stream_socket_in_temporary_root_is_allowed(tmp_path: Path) -> None:
+    address = str(tmp_path / "stream.sock")
+    with (
+        socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as listener,
+        socket.socket(socket.AF_UNIX, socket.SOCK_STREAM) as client,
+    ):
+        listener.bind(address)
+        listener.listen(1)
+        listener.settimeout(1)
+        client.connect(address)
+        with listener.accept()[0] as peer:
+            peer.settimeout(1)
+            client.sendmsg([b"synthetic"])
+            assert peer.recv(32) == b"synthetic"
+
+
+def test_unix_datagram_socket_in_temporary_root_is_allowed(tmp_path: Path) -> None:
+    address = str(tmp_path / "datagram.sock")
+    with (
+        socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as receiver,
+        socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as sender,
+    ):
+        receiver.bind(address)
+        receiver.settimeout(1)
+        sender.sendto(b"sendto", address)
+        assert receiver.recv(32) == b"sendto"
+        sender.sendmsg([b"sendmsg"], [], 0, address)
+        assert receiver.recv(32) == b"sendmsg"
+
+
+@pytest.mark.parametrize("operation", ["bind", "connect", "sendto", "sendmsg"])
+def test_unix_socket_outside_temporary_root_is_blocked(
+    test_isolation_guard: IsolationGuard, tmp_path: Path, operation: str
+) -> None:
+    address = str(forbidden_root(test_isolation_guard, tmp_path) / "outside.sock")
+    with socket.socket(socket.AF_UNIX, socket.SOCK_DGRAM) as connection:
+
+        def attempt() -> None:
+            if operation == "bind":
+                connection.bind(address)
+            elif operation == "connect":
+                connection.connect(address)
+            elif operation == "sendto":
+                connection.sendto(b"synthetic", address)
+            else:
+                connection.sendmsg([b"synthetic"], [], 0, address)
+
+        with pytest.raises(IsolationError, match="outside the pytest temporary root"):
+            attempt()
+
+
+def test_cold_import_outside_data_root_can_create_bytecode(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    source = tmp_path / "external-module.py"
+    source.write_text("SYNTHETIC = True\n", encoding="utf-8")
+    assert not (source.parent / "__pycache__").exists()
+    approved = tmp_path / "data"
+    approved.mkdir()
+    monkeypatch.setenv("SVE_DATA_DIR", str(approved))
+    guard = IsolationGuard(approved, tmp_path / "coverage")
+    # A narrower nested guard reproduces a cold external import without touching real files.
+    sys.addaudithook(guard.audit)
+    try:
+        spec = importlib.util.spec_from_file_location("guard_cold_import", source)
+        assert spec is not None
+        assert spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        assert module.SYNTHETIC is True
+        assert spec.cached is not None
+        assert source.parent / "__pycache__" in Path(spec.cached).parents
+        assert Path(spec.cached).is_file()
+        with pytest.raises(IsolationError):
+            (source.parent / "__pycache__" / "manifest.sqlite").write_bytes(
+                b"synthetic"
+            )
+    finally:
+        guard._active = False
 
 
 class LocalHandler(BaseHTTPRequestHandler):

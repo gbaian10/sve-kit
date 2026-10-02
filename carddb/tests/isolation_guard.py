@@ -2,6 +2,7 @@
 
 import ipaddress
 import os
+import socket
 from pathlib import Path
 from typing import TYPE_CHECKING
 from urllib.parse import unquote, urlsplit
@@ -41,7 +42,7 @@ class IsolationGuard:
     def __init__(self, temporary_root: Path, coverage_root: Path) -> None:
         self.temporary_root = temporary_root.resolve()
         self.coverage_root = coverage_root.resolve()
-        self.active = True
+        self._active = True
 
     def _path(
         self, value: object, dir_fd: object = None, *, entry: bool = False
@@ -76,11 +77,11 @@ class IsolationGuard:
             path.parent == self.coverage_root and path.name.startswith(".coverage")
         ):
             return
-        if (
-            path.is_relative_to(self.coverage_root.parent)
-            and "__pycache__" in path.parts
-            and (path.name == "__pycache__" or ".pyc" in path.name)
-        ):
+        # Importlib atomically writes cache.pyc.<id> before replacing cache.pyc.
+        bytecode = path.name.endswith(".pyc") or (
+            ".pyc." in path.name and path.name.rsplit(".pyc.", 1)[1].isdecimal()
+        )
+        if "__pycache__" in path.parts and (path.name == "__pycache__" or bytecode):
             return
         self._environment()
         if not path.is_relative_to(self.temporary_root):
@@ -149,7 +150,7 @@ class IsolationGuard:
 
     def audit(self, event: str, args: tuple[object, ...]) -> None:  # ruff: ignore[complex-structure] -- native event shapes are kept together for review
         """Reject I/O before the native SQLite, filesystem or socket operation occurs."""
-        if not self.active:
+        if not self._active:
             return
         if event == "sqlite3.connect":
             self._database(args[0])
@@ -175,10 +176,12 @@ class IsolationGuard:
             self._write_path(args[1], args[-1], entry=True)
             if event != "os.symlink":
                 self._write_path(args[0], args[2], entry=True)
-        elif event == "socket.connect":
-            self._address(args[1])
-        elif event == "socket.sendto":
-            self._address(args[2])
+        elif event in {"socket.connect", "socket.sendto", "socket.sendmsg"} or (
+            event == "socket.bind"
+            and isinstance(args[0], socket.socket)
+            and args[0].family == socket.AF_UNIX
+        ):
+            self._address(args[0], args[1])
         elif event in {
             "socket.getaddrinfo",
             "socket.gethostbyname",
@@ -188,8 +191,28 @@ class IsolationGuard:
                 "test isolation: external name resolution is forbidden"
             )
 
-    @staticmethod
-    def _address(address: object) -> None:
+    def _address(self, connection: object, address: object) -> None:
+        connected = address is None and isinstance(connection, socket.socket)
+        if connected:
+            assert isinstance(connection, socket.socket)
+            address = connection.getpeername()
+        if (
+            isinstance(connection, socket.socket)
+            and connection.family == socket.AF_UNIX
+        ):
+            # Unnamed socketpair peers are local and have no filesystem destination.
+            if connected and address in {"", b""}:
+                return
+            if (
+                not isinstance(address, str | bytes)
+                or not address
+                or "\0" in os.fsdecode(address)
+            ):
+                raise TestIsolationError(
+                    "test isolation: unsupported Unix socket address"
+                )
+            self._source_path(Path(os.fsdecode(address)))
+            return
         if not isinstance(address, tuple) or not address or not _loopback(address[0]):
             raise TestIsolationError(
                 "test isolation: external socket connections are forbidden"
