@@ -158,10 +158,34 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 第一層須原候選為 same_card，且每個納入此候選的 SVE／數位面全部通過：
 
 1. 兩端完整 JP 名稱 exact UTF-8 相等，不 trim／NFKC。
-2. 職業相同，以明示、可重播的遊戲 enum 對照驗證；未知或不能證明相同就不通過，不能將不同職業合併來增加第一層。
+2. 職業相同，以本節經維護者確認的明示 enum 表，將數位職業映射到 SVE class code 後比較；表內沒有、明示無對應或不能驗回來源代碼就不通過。不依名稱相似或工具自行推導新增對照。
 3. 基本卡種相同（follower／spell／amulet）；進化／token 標記另驗，不能用卡種推面或 phase。未知代碼／其他卡種不通過。
 4. 該 JP 名稱在**同遊戲完整凍結目錄**僅對到一個非空 zh-Hant 名稱。查全部 ID／面，包含其他候選之外的同名卡；有第二個譯名或未取得目標語的同名項，都不通過。目錄須驗全部頁及來源閉包，不能只取草稿 sources 或已對應卡的子集。
 5. 原比對未標待確認；232 筆先前待決不得因重算條件通過而自動移入第一層。
+
+職業對照表如下；數位代碼是凍結 API 的 sv1 `clan`／svwb `class` 值，非 SVE 永久 ID。SVE code 沿[正式 catalog 契約](catalog-inputs.md#2-永久代碼)，本表只判分層條件，不代替 catalog 的有效採納／來源重驗。`無對應` 必須判失敗，不能以兩端 null 當相同。
+
+| 遊戲 | 數位代碼 | 數位職業識別 | 對應 SVE class code |
+| --- | --- | --- | --- |
+| sv1 | 0 | neutral | neutral |
+| sv1 | 1 | elf | elf |
+| sv1 | 2 | royal | royal |
+| sv1 | 3 | witch | witch |
+| sv1 | 4 | dragon | dragon |
+| sv1 | 5 | necromancer | nightmare |
+| sv1 | 6 | vampire | nightmare |
+| sv1 | 7 | bishop | bishop |
+| sv1 | 8 | nemesis | 無對應 |
+| svwb | 0 | neutral | neutral |
+| svwb | 1 | elf | elf |
+| svwb | 2 | royal | royal |
+| svwb | 3 | witch | witch |
+| svwb | 4 | dragon | dragon |
+| svwb | 5 | nightmare | nightmare |
+| svwb | 6 | bishop | bishop |
+| svwb | 7 | nemesis | 無對應 |
+
+維護者於 2026-10-02T17:33:18+08:00 經協調者對話確認：比對數位對應時，sv1 的 necromancer／vampire 各自對到 SVE nightmare。這是多對一的比較規則，不把兩個數位職業互相視為相同，也**不代表任何一筆 link 已採納**；其餘四個條件及實際真人 sampled／confirmed 門檻照常。新增或變更本表任何對照須維護者確認，進版控並釘入分層 recipe／設定及 review_context，不由工具沿新枚舉猜對照。
 
 第一層先機械全查，保存完整候選／正式成員對照、檢查 recipe／設定、目錄範圍與結果 hash；機械分層背景納入 review_context，不新增封套欄位。草稿 hash／待決狀態與轉換結果留遷入稽核，正式建置仍只讀採納記錄與 frozen 證據，不把研究草稿變成 runtime 來源。維護者親自看非空樣本、確認該批同卡關係後，整批以 sampled 採納；樣本數由他決定，工具不得預填 30／50 或假稱看滿固定數量。sample_ids 只列他實際看過的正式 record_key；工具可按穩定排序提供抽樣候選，最後集合／數量與事件依實際審核紀錄，不由模型代看。實際抽樣前只留候選，不能先寫 sampled。這一批可共用一次真實抽樣事件；因分片大小拆成多個成員決定時，各 sampled 決定仍須有其成員的實看非空樣本，不借另一片樣本，也不縮減／複製 checked 集合冒充。分片與樣本範圍一起安排，未涵蓋的分片先留候選；工具不能為填滿每片而擅增維護者決定的整體抽樣數。
 
@@ -192,5 +216,6 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 | D15／I | 草稿所選同名卡只有一個繁中名，但完整目錄另有同名不同譯名／缺繁中項 | 第一層不通過，留第二層逐筆確認／擱置，不以子集的唯一結果分批採納 |
 | D16／I | 五個機械條件通過但未實際抽樣，或樣本來自另一分片 | 不產生 sampled 決定；reason 不假稱逐筆確認，checked 集合須有該片實際樣本 |
 | D17／I、N | fresh 已採納 link 與名稱證據完整，但完全沒有 coverage 紀錄 | 官方名不因缺 coverage 被拒；公開 required coverage 集合為 []／未知，不補造決定；其他發布閘門照常驗證 |
+| D18／I | sv1 代碼 5／6 對 SVE nightmare；另對照未列的新代碼、nemesis 或對到 SVE 其他職業 | 前者僅通過職業分層條件，仍驗其餘條件與真人採納；後者不通過，不由工具補表或以 null 相等放行 |
 
 docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易、來源重播、閉包及名稱呼叫接線。真實遷入另報能重驗的採納數、232 筆待決及新增待件、覆蓋範圍／as_of，不用合成測試數或草稿信心當人工採納數。
