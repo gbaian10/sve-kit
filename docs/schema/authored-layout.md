@@ -22,6 +22,7 @@
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
+| 定案（技術契約） | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`；首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
@@ -220,6 +221,8 @@ card_name_concept 於 translations/overrides 只採納卡／面與 exact 名稱�
 **同日已核可的抽查方式**：先翻高頻模板、長尾後補，不按卡包；每個模板由一個模型翻、另一個模型審，使用者整體只抽查前約 100 個高頻模板及所有模型分歧。實際完成樣本與精確成員才可形成 sampled batch，不預填確認；無分歧長尾可引用首輪抽查決定與核可政策收據，以 confirmed batch 採納，不要求每批另有人類樣本，具體例外見翻譯契約 §2。機器譯文即使使用者親自看過也仍標 machine。
 
 [翻譯契約](translation-contract.md) 定義採納封套、來源清冊、owner／同字異義／counterpart、原文分段與重建規則。只有人工決定及其核可政策下的採納進 authored；context/use/binding、渲染後譯文與 selection 每次建置推導，不逐卡保存或重簽。模板拆分與用途改綁在首版即以重建處理，來源只用既有封存批次，不新增永久物件庫。
+
+模板長尾 `approved_policy` 的正式政策／收據、首輪樣本與唯一索引依 [模板採納政策契約](translation-policy.md)。該入口在 authored 內自行證明有效採納，F1 設定只複核；不借表記政策、glossary 委託或呼叫端同名 pin 放行。
 
 sentence_template 的 ID 與完整六欄 payload 不可變；既有 prefix+10hex 保留，新 normalizer/schema/語義需新 ID 與 supersedes。模板譯本有自己的只增 revision。跨區 divergence 的完整封套改由 translation-contract §7 定義，本節不另留一份不相容的舊示意格式。
 
