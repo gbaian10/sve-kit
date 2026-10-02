@@ -79,3 +79,10 @@ not an empty inventory. The wiring PR must also add CI validation that loads and
 replays the complete real authored inventory across both regions against its
 pinned frozen inputs. This rejects a bad EN receipt before it reaches main and
 blocks a JP build. Synthetic tests do not replace that production-input check.
+
+The pending-view lookup assumes a database produced by the transactional importer.
+For each projected latest face/region, `_current` writes its current and
+`_freshness` writes the corresponding checked inventory under the same decision.
+Both operations commit together; a failed freshness check rolls back the current.
+The lookup's `next` therefore has a matching item for each importer-produced
+current. This invariant does not validate arbitrary manually edited audit locators.
