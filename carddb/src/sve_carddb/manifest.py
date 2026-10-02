@@ -15,11 +15,17 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Self
 
+from sve_carddb.manifest_schema_v2 import SCHEMA_SQL as _SCHEMA_V2
+
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterator, Sequence
     from types import TracebackType
 
+    from sve_carddb.source_import.models import Content
+
 SCHEMA_VERSION = 1
+IMPORT_SCHEMA_VERSION = 2
+READABLE_SCHEMA_VERSIONS = frozenset({SCHEMA_VERSION, IMPORT_SCHEMA_VERSION})
 
 _SCHEMA = """
 CREATE TABLE IF NOT EXISTS resource (
@@ -121,6 +127,16 @@ CREATE TABLE IF NOT EXISTS generation_edge (
         REFERENCES generation_page (generation_id, page_url)
 ) STRICT;
 """
+
+
+@dataclass(frozen=True, slots=True)
+class SourceImportReceipt:
+    """Validated acquisition provenance retained inside the sealed SQLite closure."""
+
+    receipt_id: str
+    index_bytes: bytes
+    content: Content
+    registered_at: datetime
 
 
 class Region(StrEnum):
@@ -615,9 +631,12 @@ class GenerationStore(_Store):
 class Manifest:
     """Typed access to the manifest database."""
 
-    def __init__(self, conn: sqlite3.Connection) -> None:
+    def __init__(
+        self, conn: sqlite3.Connection, schema_version: int = SCHEMA_VERSION
+    ) -> None:
         """Wrap an open connection; use `Manifest.open` instead."""
         self._conn = conn
+        self.schema_version = schema_version
         self.resources = ResourceStore(conn, self.transaction)
         self.requests = RequestLog(conn, self.transaction)
         self.links = LinkStore(conn, self.transaction)
@@ -631,12 +650,15 @@ class Manifest:
         # everything up in autocommit mode and switch to explicit transactions after.
         conn = sqlite3.connect(path, autocommit=True)
         conn.execute("PRAGMA foreign_keys = ON")
-        conn.execute("PRAGMA journal_mode = WAL")
         version = _int(conn.execute("PRAGMA user_version").fetchone()[0])
         if version not in {0, SCHEMA_VERSION}:
             conn.close()
             msg = f"manifest schema {version} is not supported (expected {SCHEMA_VERSION})"
             raise ManifestError(msg)
+        if _has_import_table(conn):
+            conn.close()
+            raise ManifestError("Import manifests cannot be opened by the crawl writer")
+        conn.execute("PRAGMA journal_mode = WAL")
         conn.executescript(_SCHEMA)
         conn.execute(f"PRAGMA user_version = {SCHEMA_VERSION}")
         conn.autocommit = False
@@ -676,14 +698,76 @@ class Manifest:
         except BaseException:
             conn.close()
             raise
-        if version != SCHEMA_VERSION:
+        if version not in READABLE_SCHEMA_VERSIONS:
             conn.close()
             msg = (
                 f"manifest schema {version} is not supported "
-                f"(expected {SCHEMA_VERSION}); run a writing command to migrate it"
+                f"(expected one of {sorted(READABLE_SCHEMA_VERSIONS)})"
             )
             raise ManifestError(msg)
-        return cls(conn)
+        if version == SCHEMA_VERSION and _has_import_table(conn):
+            conn.close()
+            raise ManifestError("Import receipt requires manifest schema 2")
+        result = cls(conn, version)
+        try:
+            if version == IMPORT_SCHEMA_VERSION:
+                result.source_import_receipt()
+        except BaseException:
+            conn.close()
+            raise
+        return result
+
+    @classmethod
+    def create_import(cls, path: Path, index: bytes, content: Content) -> Self:
+        """Initialize only a new isolated v2 database, without touching a v1 manifest."""
+        from sve_carddb.snapshot.values import canonical, digest  # ruff: ignore[import-outside-top-level] -- Load build-layer validation only for explicit v2 operations.
+        from sve_carddb.source_import.models import Content, receipt_id  # ruff: ignore[import-outside-top-level] -- Keep v1 manifest imports independent of build-layer models.
+
+        content = Content.model_validate_json(content.model_dump_json())
+        resources = _import_resources(index, content)
+        fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
+        os.close(fd)
+        conn = sqlite3.connect(path, autocommit=True)
+        try:
+            conn.executescript(_SCHEMA_V2)
+            conn.execute(f"PRAGMA user_version = {IMPORT_SCHEMA_VERSION}")
+            conn.autocommit = False
+            result = cls(conn, IMPORT_SCHEMA_VERSION)
+            with result.transaction():
+                for resource in resources:
+                    result.resources.put(resource)
+                conn.execute(
+                    "INSERT INTO source_import_receipt VALUES (?, ?, ?, ?, ?)",
+                    (
+                        receipt_id(index, content),
+                        index,
+                        digest(index),
+                        canonical(content.model_dump(mode="json")),
+                        utcnow().isoformat(),
+                    ),
+                )
+            result.source_import_receipt()
+        except BaseException:
+            conn.close()
+            path.unlink()
+            raise
+        return result
+
+    def source_import_receipt(self) -> SourceImportReceipt | None:
+        """Reject incomplete v2 schema or provenance instead of repairing a frozen DB."""
+        if self.schema_version == SCHEMA_VERSION:
+            return None
+        try:
+            receipt = _decode_import_receipt(self._conn)
+            _validate_import_manifest(self._conn, receipt, tuple(self.resources.all()))
+        except ManifestError:
+            raise
+        except (sqlite3.Error, ValueError, TypeError, IndexError) as exc:
+            raise ManifestError(
+                "Import manifest has invalid schema or provenance"
+            ) from exc
+        else:
+            return receipt
 
     def close(self) -> None:
         """Close the connection."""
@@ -810,6 +894,90 @@ class ExclusiveLock:
 
 
 # --- row conversion -----------------------------------------------------
+
+
+def _has_import_table(conn: sqlite3.Connection) -> bool:
+    row = conn.execute(
+        "SELECT count(*) FROM sqlite_master WHERE name='source_import_receipt'"
+    ).fetchone()
+    return _int(row[0]) != 0
+
+
+def _decode_import_receipt(conn: sqlite3.Connection) -> SourceImportReceipt:
+    from sve_carddb.snapshot.values import canonical, digest, parse  # ruff: ignore[import-outside-top-level] -- Defer build-layer validation until a v2 reader is requested.
+    from sve_carddb.source_import.models import Content, receipt_id, timestamp  # ruff: ignore[import-outside-top-level] -- Avoid a build-layer dependency at v1 module import.
+
+    with sqlite3.connect(":memory:") as expected:
+        expected.executescript(_SCHEMA_V2)
+        if _schema_signature(conn) != _schema_signature(expected):
+            raise ManifestError("Import manifest schema differs from version 2")
+    rows = conn.execute("SELECT * FROM source_import_receipt").fetchall()
+    if len(rows) != 1:
+        raise ManifestError("Import manifest requires exactly one complete receipt")
+    row = rows[0]
+    if not isinstance(row[1], bytes) or not isinstance(row[3], bytes):
+        raise ManifestError("Import receipt index and content must be bytes")
+    index = row[1]
+    content = Content.model_validate_json(canonical(parse(row[3])))
+    if canonical(content.model_dump(mode="json")) != row[3]:
+        raise ManifestError("Import receipt content must be canonical JSON")
+    if digest(index) != _str(row[2]) or receipt_id(index, content) != _str(row[0]):
+        raise ManifestError("Import receipt hash differs from its complete inputs")
+    registered = timestamp(_str(row[4]))
+    if registered.utcoffset() != UTC.utcoffset(None):
+        raise ManifestError("Import registration time must be UTC")
+    return SourceImportReceipt(_str(row[0]), index, content, registered)
+
+
+def _validate_import_manifest(
+    conn: sqlite3.Connection,
+    receipt: SourceImportReceipt,
+    resources: tuple[Resource, ...],
+) -> None:
+    if resources != _import_resources(receipt.index_bytes, receipt.content):
+        raise ManifestError("Import resources differ from the complete receipt")
+    invented = conn.execute(
+        "SELECT EXISTS(SELECT 1 FROM fetch_log) OR EXISTS(SELECT 1 FROM link) "
+        "OR EXISTS(SELECT 1 FROM link_log) OR EXISTS(SELECT 1 FROM discovery_generation) "
+        "OR EXISTS(SELECT 1 FROM generation_page) OR EXISTS(SELECT 1 FROM generation_edge)"
+    ).fetchone()
+    if _int(invented[0]):
+        raise ManifestError("Import manifest cannot invent HTTP or discovery events")
+
+
+def _schema_signature(conn: sqlite3.Connection) -> tuple[tuple[str, str, str], ...]:
+    rows = conn.execute(
+        "SELECT type, name, sql FROM sqlite_master "
+        "WHERE name NOT LIKE 'sqlite_%' ORDER BY type, name"
+    ).fetchall()
+    return tuple((_str(row[0]), _str(row[1]), _str(row[2])) for row in rows)
+
+
+def _import_resources(index: bytes, content: Content) -> tuple[Resource, ...]:
+    from sve_carddb.source_import.models import timestamp, validate_content  # ruff: ignore[import-outside-top-level] -- v1 imports must not initialize pydantic or build models.
+
+    observations = validate_content(index, content)
+    return tuple(
+        Resource(
+            url=mapping.url,
+            region=Region(mapping.provider),
+            kind=Kind(mapping.kind),
+            path=PurePosixPath(mapping.path),
+            sha256=observation.sha256,
+            raw_bytes=observation.bytes,
+            stored_bytes=observation.bytes,
+            content_type=observation.content_type,
+            etag=observation.etag,
+            last_modified=observation.last_modified,
+            first_fetched_at=timestamp(observation.fetched_at),
+            last_checked_at=timestamp(observation.fetched_at),
+            last_changed_at=timestamp(observation.fetched_at),
+            archived_at=None,
+        )
+        for mapping, observation in zip(
+            content.source_mappings, observations, strict=True
+        )
+    )
 
 
 def _str(value: object) -> str:
