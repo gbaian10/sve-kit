@@ -2,6 +2,7 @@
 
 from typing import TYPE_CHECKING
 
+from sve_carddb.snapshot.contract import definition
 from sve_carddb.snapshot.project.source import Record, Source, json_list, pick
 from sve_carddb.snapshot.values import array, integer, object_value, string
 
@@ -275,8 +276,13 @@ def art_records(source: Source, view: dict[str, list[Record]]) -> None:
     view["artist"] = [row for row in view["artist"] if row["id"] in artists]
     for table in ("stamp", "digital_link", "digital_art_link"):
         fields = SCALARS[table] + ",decision_id"
-        decisions_by_key = source.rows(table, fields)
-        for row, raw in zip(view[table], decisions_by_key, strict=True):
+        keys = [string(key) for key in array(definition(table)["x-primary-key"])]
+        decisions_by_key = {
+            tuple(raw[key] for key in keys): raw for raw in source.rows(table, fields)
+        }
+        # Publication filtering can remove rows; position is not an identity join.
+        for row in view[table]:
+            raw = decisions_by_key[tuple(row[key] for key in keys)]
             row["review_level"] = source.review(raw["decision_id"])
 
 
