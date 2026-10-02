@@ -68,6 +68,8 @@ gzip。若提供 `--brotli-command /explicit/compressor`，該程式須接受 `-
 
 `reports/<manifest-hash>.json` 保存輸入 hash、JP 範圍、逐表數量、真正排除清單、
 未定卡文數、容量及未完成的正式閘門；輸入記錄留在 `private/inputs/<input-hash>.json`。
+preview 根下的 `private/` 與 `reports/` 不屬於公開內容；正式上傳只傳 `snapshots/` 與
+`images/`，不可把整個 preview 根直接上傳。
 含圖建置另記 `image_assets` 的來源／綁定／變體數，以及 `images` 的公開去重檔數／bytes。
 實際執行時間與快取命中數放在命令 stdout 的 `image_execution`，不混入不可變清單或
 報告，確保相同輸入重建的逐檔 bytes 一致；唯讀重用的新轉檔時間為 0。
@@ -108,6 +110,8 @@ M3 畫面驗收與其餘正式閘門應分別確認，不因成功載入 preview
 公開變體。第三方 approved 圖片須通過 DB 的逐圖片 confirmed 審核與來源證據閘門；
 writer 必須拿到該圖片的已驗證審核集合，不能拿另一張的審核替代。官方來源的核可
 不等同於第三方審核，且 preview 不能繞過既有資料完整性規則。
+此集合由 builder 在 `project()` 完成 DB 驗證後取得；writer 只核對集合成員，
+不會獨立查核私人審核決定或來源證據。
 
 M3 可直接選 `purpose=art` 的 `art_s`／`art_m`（上限 160×120／384×288，實際維持
 4:3，配方為 integer-4x3-v2），改用 producer 提供的 path，無須再套用前端裁切公式。
