@@ -17,6 +17,7 @@ from sve_carddb.template_parameters.models import (
     Schema,
     Slot,
 )
+from sve_carddb.template_parameters.numeric_rules import excluded
 from sve_carddb.template_parameters.provenance import Unit, merged, trace
 from sve_carddb.template_sources.normalizer import (
     DIGITS,
@@ -36,9 +37,9 @@ if TYPE_CHECKING:
 VERSION_PARAMETERS = "template-parameters-jp-candidate-v1"
 SAFE_INTEGER = 9007199254740991
 NUMERIC_SUFFIX = re.compile(
-    r"^(?:(?P<suffix_unit_cards>枚)|(?P<suffix_unit_entities>体)|"
-    r"(?P<suffix_unit_points>点)|(?P<suffix_unit_times>回)|"
-    r"(?P<suffix_unit_turns>ターン)|(?P<suffix_unit_pp>PP))(?![A-Za-z0-9_])"
+    r"^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|"
+    r"(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|"
+    r"(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])"
 )
 NUMERIC_PREFIX = re.compile(
     r"(?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|"
@@ -194,6 +195,8 @@ def numeric_role(
         or re.match(r"^[A-Za-z0-9_]", after)
     ) and not (NUMERIC_PREFIX.search(before) or after.startswith("PP")):
         return None, ("numeric_identifier_requires_review",)
+    if (reason := excluded(after)) is not None:
+        return None, (reason,)
     # A suffix wins when both grammars match, so each position counts exactly once.
     match = NUMERIC_SUFFIX.match(after) or NUMERIC_PREFIX.search(before)
     if match is not None:

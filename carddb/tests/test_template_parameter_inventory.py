@@ -17,6 +17,7 @@ from sve_carddb.template_parameters import __main__ as cli
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
 from sve_carddb.template_parameters.models import Candidate
+from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.output import write
 from sve_carddb.template_parameters.references import References
 from sve_carddb.translations.models import Index
@@ -95,6 +96,8 @@ def test_candidate_inventory_replays_every_first_checkpoint_entry_and_field(
     )
     assert object_value(report["fingerprints"])["complete"] is True
     assert object_value(report["legacy_member_coverage"])["complete"] is True
+    config = object_value(object_value(report["parameter_recipe"])["config"])
+    assert config["numeric_classifier"] == configuration()
 
 
 def test_outputs_have_only_hashes_ranges_schemas_and_fixed_reasons(

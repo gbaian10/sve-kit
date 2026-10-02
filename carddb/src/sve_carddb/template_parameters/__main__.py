@@ -12,6 +12,7 @@ from sve_carddb.snapshot.values import canonical, digest, object_value
 from sve_carddb.source_archive import ArchiveError
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
 from sve_carddb.template_parameters.inventory import build, summary
+from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.output import write
 from sve_carddb.template_parameters.references import adopted
 from sve_carddb.template_sources.checkpoint import compare, parse_legacy
@@ -59,6 +60,7 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
     config: dict[str, JsonValue] = {
         "source_recipes": [p.model_dump(mode="json") for p in pins],
         "references": refs.pins,
+        "numeric_classifier": configuration(),
         "adoption_status": "candidate_only",
     }
     code_path = "carddb/src/sve_carddb/template_parameters/analysis.py"
