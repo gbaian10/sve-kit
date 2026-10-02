@@ -66,12 +66,12 @@ suffix and prefix match. The pinned classifier defines these proposed rules:
 
 | Rule ID | Exact context after/before the numeric occurrence |
 | --- | --- |
-| `suffix_unit_cards` | after: 枚 |
-| `suffix_unit_entities` | after: 体 |
-| `suffix_unit_points` | after: 点 |
-| `suffix_unit_times` | after: 回 |
-| `suffix_unit_turns` | after: ターン |
-| `suffix_unit_pp` | after: PP |
+| `suffix_unit_cards` | after: 枚, not followed by 目 |
+| `suffix_unit_entities` | after: 体, not followed by 目 |
+| `suffix_unit_points` | after: 点, not followed by 目 |
+| `suffix_unit_times` | after: 回, not followed by 復 or 目 |
+| `suffix_unit_turns` | after: ターン, not followed by 目 |
+| `suffix_unit_pp` | after: PP, not followed by 目 |
 | `prefix_field_cost` | before: コスト |
 | `prefix_field_attack` | before: 攻撃力 |
 | `prefix_field_health` | before: 体力 |
@@ -90,6 +90,33 @@ reason is numeric rule approval. The latter do not count as `complete_schemas`.
 These counts do not constitute template adoption. Candidate uint bounds are
 0 through the JavaScript safe integer maximum; adoption must determine bounds
 from approved rules rather than copy these permissive defaults.
+
+The recipe separately pins `numeric_classifier.version=numeric-rule-proposals-v2`
+and its diagnostic definitions. This does not change the legacy text normalizer,
+source partitions, parameter text-normalizer ID, or old fingerprints. Each recipe
+still pins its exact Git revision and full runtime; older evidence is never
+reinterpreted with the new classifier. After sign and ASCII-identifier guards,
+recovery and ordinal lexical vetoes precede both suffix and prefix matching.
+Excluded positions remain uint hints with exact raw values/spans, a null active
+rule, and `numeric_recovery_amount_requires_review` or
+`numeric_ordinal_requires_review`. A matching prefix cannot assign them an
+incorrect fallback role. They never count as conditionally complete schemas.
+
+`inactive_numeric_rule_candidates` lists two **disabled** proposals, including
+their exact ASCII-escaped suffix patterns, position/member counts and locators:
+
+| Proposal ID | Immediate normalized context after the number | Status |
+| --- | --- | --- |
+| `candidate_recovery_amount` | 回復 | proposal only; recovery quantity requires review |
+| `candidate_ordinal` | one of 枚/体/点/回/ターン/PP followed by 目 | proposal only; ordinal role and lower bound require review |
+
+These lists include only positions passing the preceding sign/identifier guards.
+Exact raw decimal/safe-value checks remain independent; a lexical diagnostic does
+not authorize an invalid value. Body normalization and unchanged-reminder rules
+remain distinct. Neither proposal is an active `numeric_rule` value, nor do these
+diagnostics supply a schema, payload, approval policy or adoption receipt. Other
+quantity contexts (including per-turn frequency, separated card quantities and
+unclassified `つ` quantities) are unchanged pending their existing semantic review.
 
 Each occurrence has its own slot; grouping
 multiple occurrences additionally requires equal values.

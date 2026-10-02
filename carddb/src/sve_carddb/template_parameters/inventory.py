@@ -6,12 +6,13 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.template_parameters.analysis import (
     NUMERIC_RULE_PENDING,
     NUMERIC_RULES,
     analyze,
 )
+from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.spans import locate
 from sve_carddb.template_parameters.verification import verify_candidate
 from sve_carddb.template_sources.inventory import entry, fields, replay
@@ -229,6 +230,7 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
             )
             for rule in NUMERIC_RULES
         },
+        "inactive_numeric_rule_candidates": inactive_rules(candidates),
         "unresolved_reasons": dict(
             Counter(reason for m in candidates.entries for reason in m.issues)
         ),
@@ -236,3 +238,40 @@ def summary(candidates: Candidates) -> dict[str, JsonValue]:
         "parameter_complete": not any(m.issues for m in candidates.entries),
         "term_mentions_are_bindings": False,
     }
+
+
+def inactive_rules(candidates: Candidates) -> list[JsonValue]:
+    """List lexical evidence without inserting a disabled ID into a candidate's active rules."""
+    result: list[JsonValue] = []
+    for value in array(configuration()["proposals"]):
+        proposal = object_value(value)
+        selected = [
+            (candidate, hint)
+            for candidate in candidates.entries
+            for hint in candidate.slots
+            if proposal["reason"] in hint.issues
+        ]
+        body = [(c, h) for c, h in selected if c.source_span.role == "body"]
+        result.append(
+            {
+                **proposal,
+                "positions": len(selected),
+                "uses": len({c.inventory_id for c, _ in selected}),
+                "body_positions": len(body),
+                "body_uses": len({c.inventory_id for c, _ in body}),
+                "members": [
+                    {
+                        "inventory_id": c.inventory_id,
+                        "slot": h.name,
+                        "source_segments": [
+                            s.model_dump(mode="json") for s in h.source_segments
+                        ],
+                        "normalized_occurrence": h.occurrence.model_dump(mode="json"),
+                    }
+                    for c, h in sorted(
+                        selected, key=lambda pair: (pair[0].inventory_id, pair[1].name)
+                    )
+                ],
+            }
+        )
+    return result
