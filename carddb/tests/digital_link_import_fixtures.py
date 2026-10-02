@@ -528,3 +528,81 @@ def current_api(  # ruff: ignore[too-many-locals] -- synthetic resealing preserv
     return replace(
         fixture, store=store.root, refs=tuple(refs), build=fixture.changed(config)
     )
+
+
+def catalogue_fixture(
+    fixture: Fixture,
+    *,
+    game: str = "svwb",
+    query: str = "",
+    languages: tuple[str, ...] = ("ja", "cht"),
+    transform: Callable[[dict[str, JsonValue], str], None] | None = None,
+) -> Fixture:
+    """Reseal complete synthetic API pages, preserving the adopted old batch."""
+    store = _store(fixture.root / "catalogue-store")
+    shutil.copytree(fixture.store, store.root, dirs_exist_ok=True)
+    _put(store, _resource(card_url("SYN-001"), "raw/jp.html", RAW, Kind.CARD), RAW)
+    for index, language in enumerate(languages):
+        name = "Synthetic card" if language == "ja" else "合成測試名"
+        if game == "sv1":
+            data: dict[str, JsonValue] = {
+                "errors": [],
+                "cards": [
+                    {
+                        "card_id": 123456789,
+                        "card_name": name,
+                        "char_type": 1,
+                        "clan": 1,
+                    },
+                ],
+            }
+            url = (
+                "https://shadowverse-portal.com/api/v1/cards?format=json&lang="
+                + language
+            )
+            region = Region.SV1
+            document: dict[str, JsonValue] = {"data": data}
+        else:
+            data = {
+                "count": 1,
+                "card_details": {
+                    "22345678": {
+                        "common": {
+                            "card_id": 22345678,
+                            "name": name,
+                            "class": 1,
+                            "type": 1,
+                        },
+                        "evo": {},
+                    }
+                },
+            }
+            url = (
+                "https://shadowverse-wb.com/web/CardList/cardList?"
+                "include_token=1&offset=0&lang=" + language
+            )
+            region = Region.SVWB
+            document = {"data_headers": {"result_code": 1}, "data": data}
+        if transform is not None:
+            transform(data, language)
+        raw = canonical(document)
+        resource = replace(
+            _resource(url + query, f"raw/catalogue-{index}.json", raw, Kind.API),
+            region=region,
+            content_type="application/json",
+        )
+        _put(store, resource, raw)
+    batch = seal_batch(store)
+    config = object_value(parse(fixture.build.configuration.encode()))
+    config["digital_link_sources"] = [
+        {"store_id": "test-store", "batch_id": batch.batch_id}
+    ]
+    recipes = object_value(config["translation_recipes"])
+    recipe = object_value(parse(canonical(recipes["translation-svwb-v1"])))
+    recipe.update(
+        version="translation-" + game + "-v1",
+        config={"provider": game},
+        config_hash=digest(canonical({"provider": game})),
+    )
+    recipes["translation-" + game + "-v1"] = recipe
+    return replace(fixture, store=store.root, build=fixture.changed(config))

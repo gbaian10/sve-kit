@@ -8,11 +8,25 @@ from pydantic import JsonValue
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.digital_links.candidates import CLASSES, generate
+from sve_carddb.digital_links.candidates import (
+    CLASSES,
+    complete_inventory,
+    generate,
+    read_draft,
+    sve_inventory,
+)
 from sve_carddb.digital_links.commands import output_path
+from sve_carddb.digital_links.evidence import batch_refs, inventory
+from sve_carddb.digital_links.importer import review_context
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
-from .digital_link_import_fixtures import Fixture, copied, current_api, make_fixture
+from .digital_link_import_fixtures import (
+    Fixture,
+    catalogue_fixture,
+    copied,
+    current_api,
+    make_fixture,
+)
 
 
 @pytest.fixture(scope="module")
@@ -225,3 +239,218 @@ def test_output_refusal(tmp_path: Path, fault: str, message: str) -> None:
         output = protected / "report.json"
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         output_path(output, (protected,))
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        {"ja": 1},
+        {"needs_decision": "yes"},
+        {"relation": False},
+        {"sve_numbers": []},
+        {"relation_by_source": {"svwb": 1}},
+        {"sources": [{"source": "svwb", "card_id": "22345678", "zh": "合成測試名"}]},
+    ],
+)
+def test_malformed_private_draft(change: dict[str, JsonValue]) -> None:
+
+    with pytest.raises(ValueError, match=r"^Invalid digital-link research draft$"):
+        read_draft(draft(**change))
+
+
+def test_catalogue_cannot_be_absent(baseline: Fixture) -> None:
+
+    sources = baseline.sources()
+    with pytest.raises(ValueError, match=r"^Digital candidate catalogue is absent$"):
+        complete_inventory(sources, review_context(sources), "sv1")
+
+
+@pytest.mark.parametrize("game", ["sv1", "svwb"])
+def test_catalogue_cannot_use_filtered_url(
+    baseline: Fixture,
+    tmp_path: Path,
+    game: str,
+) -> None:
+
+    fixture = catalogue_fixture(
+        copied(baseline, tmp_path / "repo"),
+        game=game,
+        languages=("ja",),
+        query="&synthetic_filter=1",
+    )
+    sources = fixture.sources()
+    with pytest.raises(
+        ValueError, match=r"^Digital candidate catalogue uses filtered URL$"
+    ):
+        complete_inventory(sources, review_context(sources), game)
+
+
+def test_catalogue_pagination_requires_integer_count(
+    baseline: Fixture,
+    tmp_path: Path,
+) -> None:
+
+    def transform(data: dict[str, JsonValue], _language: str) -> None:
+        data["count"] = "1"
+
+    fixture = catalogue_fixture(
+        copied(baseline, tmp_path / "repo"), transform=transform
+    )
+    sources = fixture.sources()
+    with pytest.raises(
+        ValueError, match=r"^Digital candidate catalogue pagination is invalid$"
+    ):
+        complete_inventory(sources, review_context(sources), "svwb")
+
+
+def test_catalogue_requires_japanese(
+    baseline: Fixture,
+    tmp_path: Path,
+) -> None:
+
+    fixture = catalogue_fixture(copied(baseline, tmp_path / "repo"), languages=("cht",))
+    sources = fixture.sources()
+    with pytest.raises(
+        ValueError, match=r"^Digital candidate catalogue lacks Japanese$"
+    ):
+        complete_inventory(sources, review_context(sources), "svwb")
+
+
+@pytest.mark.parametrize("consumer", ["sve", "digital"])
+def test_catalogue_requires_declared_store(baseline: Fixture, consumer: str) -> None:
+
+    sources = baseline.sources()
+    sources.stores.clear()
+    review = review_context(sources)
+
+    def check() -> None:
+        if consumer == "sve":
+            sve_inventory(sources, review)
+        else:
+            batch_refs(sources, review.source_batches, "svwb")
+
+    with pytest.raises(
+        ValueError, match=r"^Digital-link source store is not declared$"
+    ):
+        check()
+
+
+@pytest.mark.parametrize("fault", ["language", "name"])
+def test_sve_projection_boundary_refusals(baseline: Fixture, fault: str) -> None:
+
+    sources = baseline.sources()
+    ref = baseline.jp
+    lang, document, source = sources.document(ref)
+    if fault == "language":
+        lang = "en"
+        message = "Digital candidate SVE language mismatch"
+    else:
+        object_value(array(object_value(document)["faces"])[0])["name"] = ""
+        message = "Digital candidate SVE name is absent"
+    sources.cache[ref.store_id, ref.batch_id, ref.source_version_id, ref.parser] = (
+        lang,
+        document,
+        source,
+    )
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        sve_inventory(sources, review_context(sources))
+
+
+@pytest.mark.parametrize(
+    "stores",
+    [
+        ["test-store"],
+        ["=absolute"],
+        ["test-store=relative"],
+        ["test-store=/absolute", "test-store=/another"],
+    ],
+)
+def test_cli_rejects_invalid_store_before_input_io(
+    tmp_path: Path,
+    stores: list[str],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.setenv("TERM", "xterm-256color")
+    path = tmp_path / "unread.json"
+    path.write_text("{}")
+    options = [value for store in stores for value in ("--store", store)]
+    result = CliRunner().invoke(
+        app,
+        [
+            "digital-links",
+            "candidates",
+            "--draft",
+            str(path),
+            "--context",
+            str(path),
+            "--repository",
+            str(tmp_path),
+            "--output",
+            str(tmp_path / "report.json"),
+            *options,
+        ],
+    )
+    assert result.exit_code == 1
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception) == "Candidate store must be unique id=absolute_path"
+    assert not (tmp_path / "report.json").exists()
+
+
+def test_name_inventory_rejects_physical_page(baseline: Fixture) -> None:
+
+    with pytest.raises(ValueError, match=r"^Digital inventory requires API evidence$"):
+        inventory(baseline.sources(), (baseline.jp,))
+
+
+@pytest.mark.parametrize(
+    ("fault", "message"),
+    [
+        ("id_type", "Digital inventory requires official integer IDs"),
+        ("id_width", "Digital inventory official ID width mismatch"),
+        ("id_key", "Digital inventory key differs from official ID"),
+        ("name_type", "Digital inventory name must be text"),
+        ("conflict", "Conflicting frozen digital name inventory"),
+    ],
+)
+def test_name_inventory_validates_all_frozen_rows(
+    baseline: Fixture,
+    tmp_path: Path,
+    fault: str,
+    message: str,
+) -> None:
+
+    def transform(data: dict[str, JsonValue], _language: str) -> None:
+        if fault == "conflict":
+            cards = array(data["cards"])
+            other = object_value(parse(canonical(cards[0])))
+            other["card_name"] = "Synthetix card"
+            cards.append(other)
+            return
+        details = object_value(data["card_details"])
+        common = object_value(object_value(details["22345678"])["common"])
+        if fault == "id_type":
+            common["card_id"] = "22345678"
+        elif fault == "id_width":
+            common["card_id"] = 123
+        elif fault == "id_key":
+            common["card_id"] = 22345679
+        else:
+            common["name"] = 123
+            other = object_value(parse(canonical(details["22345678"])))
+            object_value(other["common"]).update(
+                card_id=22345679, name="Synthetic other"
+            )
+            details["22345679"] = other
+
+    game = "sv1" if fault == "conflict" else "svwb"
+    fixture = catalogue_fixture(
+        copied(baseline, tmp_path / "repo"),
+        game=game,
+        languages=("ja",),
+        transform=transform,
+    )
+    sources = fixture.sources()
+    refs = batch_refs(sources, review_context(sources).source_batches, game)
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        inventory(sources, refs)

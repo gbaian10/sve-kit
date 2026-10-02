@@ -140,17 +140,23 @@ def project(raw: bytes, url: str, provider: str) -> tuple[str, JsonValue]:
 
 class Sources:
     def __init__(
-        self, stores: dict[str, Path], repository: Path, build: BuildContext
+        self,
+        stores: dict[str, Path],
+        repository: Path,
+        build: BuildContext,
+        *,
+        historical: bool = False,
     ) -> None:
         self.stores = stores
         self.repository = PinnedRepository(repository)
         self.build = build
+        self.historical = historical
         self.repository.context(build)
         self.identities = AdoptionSources(stores, self.repository)
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
         runtime = Path(__file__).resolve().parents[4]
-        for name in RUNTIME:
+        for name in () if historical else RUNTIME:
             file = runtime / name
             if file.is_symlink() or dependencies.get(name) != digest(file.read_bytes()):
                 raise ValueError(
@@ -179,7 +185,9 @@ class Sources:
             or set(pin.config) != {"provider"}
         ):
             raise ValueError("Unsupported translation source recipe")
-        self.repository.implementation(pin, self.build)
+        self.repository.implementation(
+            pin, self.build, current_runtime=not self.historical
+        )
         provider = pin.config["provider"]
         if not isinstance(provider, str) or parser != "translation-" + provider + "-v1":
             raise ValueError("Translation recipe/provider mismatch")

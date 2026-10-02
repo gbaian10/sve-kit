@@ -95,7 +95,7 @@ def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
                 "sample_ids": [records[0]["record_key"]],
                 "authored_by": "Synthetic tool",
                 "authored_at": INSTANT,
-                "reviewed_by": "Synthetic human",
+                "reviewed_by": "gbaian10",
                 "reviewed_at": INSTANT,
                 "reviewed_precision": "day",
                 "note": "Synthetic actual sample.",

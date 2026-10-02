@@ -297,3 +297,63 @@ def test_predecessor_is_exact(tmp_path: Path, fault: str) -> None:
     )
     with pytest.raises(ValueError, match=r"^Digital-link predecessor mismatch$"):
         load_links(tmp_path)
+
+
+@pytest.mark.parametrize("field", ["authored_by", "reviewed_by"])
+def test_blank_human_receipt_reaches_validator(tmp_path: Path, field: str) -> None:
+    shard = envelope([record()])
+    decision(shard)[field] = "   "
+    write(tmp_path, {SHARD: shard})
+    with pytest.raises(ValueError, match=r"^Invalid digital-link fields$"):
+        load_links(tmp_path)
+
+
+@pytest.mark.parametrize(
+    "reviewer", ["Codex gpt-6.1-sol", "Synthetic tool", " gbaian10"]
+)
+def test_confirmer_is_exact_listed_maintainer(tmp_path: Path, reviewer: str) -> None:
+    shard = envelope([record()])
+    decision(shard)["reviewed_by"] = reviewer
+    write(tmp_path, {SHARD: shard})
+    with pytest.raises(
+        ValueError,
+        match=r"^Digital-link confirmer must be a repository-listed maintainer$",
+    ):
+        load_links(tmp_path)
+
+
+@pytest.mark.parametrize("fault", ["index", "parent"])
+def test_index_symlink_rejected_before_directory_scan(
+    tmp_path: Path, fault: str
+) -> None:
+    root = tmp_path / "authored"
+    write(root, {SHARD: envelope([record()])})
+    if fault == "index":
+        path = root / "digital-links/index.yaml"
+        target = tmp_path / "index-target.yaml"
+        path.rename(target)
+        path.symlink_to(target)
+        target.write_text("{")
+    else:
+        linked = tmp_path / "linked-authored"
+        linked.symlink_to(root, target_is_directory=True)
+        root = linked
+    with pytest.raises(ValueError, match=r"^Symlink digital-link input$"):
+        load_links(root)
+
+
+def test_duplicate_record_across_separately_valid_shards(tmp_path: Path) -> None:
+    shard = envelope([record()])
+    write(tmp_path, {SHARD: shard, "digital-links/links/synthetic/002.yaml": shard})
+    with pytest.raises(ValueError, match=r"^Duplicate digital-link record$"):
+        load_links(tmp_path)
+
+
+def test_withdrawal_cannot_carry_name_evidence(tmp_path: Path) -> None:
+    r = record()
+    object_value(r["data"])["value"] = None
+    write(tmp_path, {SHARD: envelope([r])})
+    with pytest.raises(
+        ValueError, match=r"^Withdrawn digital link must have empty evidence$"
+    ):
+        load_links(tmp_path)

@@ -21,6 +21,7 @@ from sve_carddb.digital_links.evidence import (
 )
 from sve_carddb.digital_links.loader import Snapshot, link_id, load_links
 from sve_carddb.digital_links.models import Record, Shard, SveName
+from sve_carddb.digital_links.models import Value as LinkValue
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
@@ -150,7 +151,7 @@ class Result:
             ):
                 continue
             if actual.get(link_id(record)) != _link_values(
-                record, decisions[record.record_key]
+                record, decisions[record.record_key], value
             ):
                 raise ValueError(
                     "Digital-link materialized relation differs from adoption"
@@ -234,7 +235,10 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
     history: dict[str, dict[tuple[str, str], str]] = {}
     resolved = []
     for shard in snapshot.envelopes():
-        sources = Sources(stores, inputs.repository, shard.review_context.context)
+        # Historical pins prove the review; current code revalidates its frozen evidence.
+        sources = Sources(
+            stores, inputs.repository, shard.review_context.context, historical=True
+        )
         evidence = Evidence(sources)
         for record in shard.records:
             history[record.record_key] = evidence.validate(record, shard.review_context)
@@ -296,9 +300,9 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
                 (record.record_key, "digital_names_changed_or_removed")
             )
             continue
-        fresh.append((record, decision))
+        fresh.append((record, decision, value))
     targets = tuple(
-        sorted({(r.data.subject.game, r.data.subject.official_id) for r, _ in fresh})
+        sorted({(r.data.subject.game, r.data.subject.official_id) for r, _, _ in fresh})
     )
     if targets:
         import_digital(
@@ -308,8 +312,10 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
         insert_raw_sources(db, (use.source for use in sources.uses))
     insert_raw_sources(db, (use.source for use in current.uses))
     _audit(db, snapshot, inputs, resolved)
-    for record, decision in fresh:
-        _insert_exact(db, "digital_link", _link_values(record, decision), ("id",))
+    for record, decision, value in fresh:
+        _insert_exact(
+            db, "digital_link", _link_values(record, decision, value), ("id",)
+        )
     uses = tuple(use for _, sources in resolved for use in sources.uses) + tuple(
         current.uses
     )
@@ -317,10 +323,10 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
     result.verify(db, build, uses, complete=False)
     return Result(
         result,
-        tuple(canonical(record.model_dump(mode="json")) for record, _ in fresh),
+        tuple(canonical(record.model_dump(mode="json")) for record, _, _ in fresh),
         tuple(sorted(stale)),
         tuple(sorted(withdrawn)),
-        tuple((record.record_key, decision) for record, decision in fresh),
+        tuple((record.record_key, decision) for record, decision, _ in fresh),
         tuple(sorted(stale_reasons)),
     )
 
@@ -472,10 +478,8 @@ def _registry_audit(db: Database, sources: Sources) -> list[tuple[str, str, str]
     return result
 
 
-def _link_values(record: Record, decision: str) -> dict[str, Value]:
-    subject, value = record.data.subject, record.data.value
-    if value is None:
-        raise ValueError("Withdrawn relation cannot be materialized")
+def _link_values(record: Record, decision: str, value: LinkValue) -> dict[str, Value]:
+    subject = record.data.subject
     digital = f"digital:{subject.game}:{subject.official_id}"
     return {
         "id": link_id(record),

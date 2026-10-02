@@ -7,17 +7,25 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
+import sve_carddb.catalog.adoption_sources as pinned_module
 import sve_carddb.digital_links.importer as importer_module
+import sve_carddb.translations.sources as sources_module
 from sve_carddb.build_inputs import BuildContext
-from sve_carddb.digital_links.evidence import Evidence
+from sve_carddb.digital_links.evidence import (
+    Evidence,
+    RegistryIndex,
+    batch_refs,
+    inventory,
+)
 from sve_carddb.digital_links.importer import Inputs, import_links, review_context
+from sve_carddb.digital_links.models import Record, SveName
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.records import EnglishPrintingData
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_archive import ArchiveError
 from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.translations.digital import configuration, select_name
+from sve_carddb.translations.digital import configuration, import_digital, select_name
 from sve_carddb.translations.names import populate_name_translation
 from sve_carddb.translations.sources import Sources
 
@@ -36,6 +44,7 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_db import Database
+    from sve_carddb.catalog.adoption_models import ReviewContext
     from sve_carddb.digital_links.loader import Snapshot
     from sve_carddb.digital_links.models import Shard
 
@@ -773,3 +782,297 @@ def test_card_level_relation_is_browsable_but_never_supplies_owner_name(
             )
             is None
         )
+
+
+@pytest.mark.parametrize("name", ["commands.py", "sources.py"])
+def test_historical_review_survives_new_runtime(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    name: str,
+) -> None:
+
+    fixture = copied(baseline, tmp_path / "repo")
+    relative = (
+        "carddb/src/sve_carddb/digital_links/commands.py"
+        if name == "commands.py"
+        else "carddb/src/sve_carddb/translations/sources.py"
+    )
+    path = fixture.root / relative
+    path.write_bytes(path.read_bytes() + b"\n# Synthetic later runtime revision.\n")
+    program = commit(fixture.root)
+    config = object_value(parse(fixture.build.configuration.encode()))
+    for recipe in object_value(config["translation_recipes"]).values():
+        pin = object_value(recipe)
+        pin["program_revision"] = program
+        pin["code_hash"] = digest((fixture.root / str(pin["code_path"])).read_bytes())
+    fixture = replace(fixture, program=program)
+    fixture = replace(fixture, build=fixture.changed(config))
+    monkeypatch.setattr(
+        sources_module,
+        "__file__",
+        str(fixture.root / "carddb/src/sve_carddb/translations/sources.py"),
+    )
+    monkeypatch.setattr(
+        pinned_module,
+        "__file__",
+        str(fixture.root / "carddb/src/sve_carddb/catalog/adoption_sources.py"),
+    )
+    with database.copy() as db:
+        fixture.publish(db)
+        result = import_links(
+            db,
+            fixture.inputs(),
+            build=fixture.build,
+            stores={"test-store": fixture.store},
+        )
+        assert len(result.fresh) == 1
+        assert result.stale == result.withdrawn == ()
+        assert result.eligible(db, fixture.sources(), "link-revision")
+    assert fixture.inputs().load().shards == baseline.inputs().load().shards
+
+
+def test_authored_revision_must_be_full_sha(baseline: Fixture) -> None:
+    inputs = replace(baseline.inputs(), authored_revision=baseline.authored[:7])
+    with pytest.raises(
+        ValueError, match=r"^Digital-link authored revision must be full Git SHA$"
+    ):
+        inputs.load()
+
+
+@pytest.mark.parametrize("fault", ["missing", "changed"])
+def test_composer_requires_exact_authored_configuration(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+    fault: str,
+) -> None:
+    config = object_value(parse(baseline.build.configuration.encode()))
+    if fault == "missing":
+        config.pop("digital_link_authored")
+    else:
+        object_value(config["digital_link_authored"])["index_hash"] = digest(b"other")
+    with database.copy() as db:
+        baseline.publish(db)
+        before = db.rows("digital_link")
+        with pytest.raises(
+            ValueError,
+            match=r"^Build configuration does not pin digital-link authored bytes$",
+        ):
+            import_links(
+                db,
+                baseline.inputs(),
+                build=baseline.changed(config),
+                stores={"test-store": baseline.store},
+            )
+        assert db.rows("digital_link") == before
+
+
+def test_declared_batches_must_be_unique(baseline: Fixture) -> None:
+    config = object_value(parse(baseline.build.configuration.encode()))
+    config["digital_link_sources"] = array(config["digital_link_sources"]) * 2
+    sources = Sources(
+        {"test-store": baseline.store}, baseline.root, baseline.changed(config)
+    )
+    with pytest.raises(
+        ValueError, match=r"^Digital-link build batches must be sorted and unique$"
+    ):
+        review_context(sources)
+
+
+def test_owner_requires_same_build_context(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+) -> None:
+    with database.copy() as db:
+        baseline.publish(db)
+        result = import_links(
+            db,
+            baseline.inputs(),
+            build=baseline.build,
+            stores={"test-store": baseline.store},
+        )
+        config = object_value(parse(baseline.build.configuration.encode()))
+        config["synthetic_changed_background"] = True
+        sources = Sources(
+            {"test-store": baseline.store}, baseline.root, baseline.changed(config)
+        )
+        with pytest.raises(
+            ValueError, match=r"^Digital-link name proof uses another build context$"
+        ):
+            result.eligible(db, sources, "link-revision")
+
+
+def test_owner_requires_japanese_name(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+) -> None:
+    with database.copy() as db:
+        baseline.publish(db)
+        result = import_links(
+            db,
+            baseline.inputs(),
+            build=baseline.build,
+            stores={"test-store": baseline.store},
+        )
+        with db.transaction():
+            unit = TextInterner(db).intern(
+                LocalizedText(lang="en", text="Synthetic card")
+            )
+            db.update("face_revision", {"id": "link-revision"}, {"name_unit_id": unit})
+        with pytest.raises(
+            ValueError, match=r"^Digital-link owner requires exact Japanese name$"
+        ):
+            result.eligible(db, baseline.sources(), "link-revision")
+
+
+def test_evidence_resolver_requires_same_review(baseline: Fixture) -> None:
+
+    config = object_value(parse(baseline.build.configuration.encode()))
+    config["synthetic_changed_background"] = True
+    sources = Sources(
+        {"test-store": baseline.store}, baseline.root, baseline.changed(config)
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^Digital-link evidence resolver differs from review context$",
+    ):
+        Evidence(sources).validate(
+            Record.model_validate_json(baseline.record),
+            review_context(baseline.sources()),
+        )
+
+
+def test_sve_evidence_must_belong_to_same_card(dual: Fixture) -> None:
+
+    record = Record.model_validate_json(dual.record)
+    other_card, other_face, other_printing, other_ref = dual.others[0]
+    assert other_card.id != record.data.subject.card_id
+    evidence = Evidence(dual.sources())
+    with pytest.raises(
+        ValueError, match=r"^Digital-link SVE evidence belongs to another card$"
+    ):
+        evidence.sve(
+            SveName(
+                printing_id=other_printing.id, face_id=other_face.id, name_ref=other_ref
+            ),
+            record,
+            review_context(dual.sources()),
+        )
+
+
+def test_digital_locator_cannot_borrow_other_identical_name(dual: Fixture) -> None:
+
+    record = Record.model_validate_json(dual.record)
+    assert record.data.value is not None
+    name = next(n for n in record.data.value.digital_names if n.lang == "ja")
+    ref = name.name_ref.model_copy(
+        update={"locator": "/data/card_details/22345679/common/name"}
+    )
+    sources = dual.sources()
+    names = inventory(
+        sources, batch_refs(sources, review_context(sources).source_batches, "svwb")
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^Digital-link name locator belongs to another target or field$",
+    ):
+        Evidence(sources).digital(
+            name.model_copy(update={"name_ref": ref}), record, names
+        )
+
+
+def test_digital_name_must_equal_supplied_frozen_inventory(baseline: Fixture) -> None:
+
+    record = Record.model_validate_json(baseline.record)
+    assert record.data.value is not None
+    name = next(n for n in record.data.value.digital_names if n.lang == "ja")
+    sources = baseline.sources()
+    names = inventory(
+        sources, batch_refs(sources, review_context(sources).source_batches, "svwb")
+    )
+    key = ("svwb", "22345678", "normal", "ja")
+    names[key] = replace(names[key], text="Synthetix card")
+    with pytest.raises(
+        ValueError, match=r"^Digital-link name differs from frozen inventory$"
+    ):
+        Evidence(sources).digital(name, record, names)
+
+
+def test_current_registry_cannot_omit_adopted_card(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    original = Evidence.index
+    historical = object_value(parse(baseline.shard))["review_context"]
+
+    def index(self: Evidence, review: ReviewContext) -> RegistryIndex:
+
+        result = original(self, review)
+        if review.model_dump(mode="json") != historical:
+            return replace(result, cards={})
+        return result
+
+    monkeypatch.setattr(Evidence, "index", index)
+    with database.copy() as db:
+        baseline.publish(db)
+        before = db.rows("digital_link")
+        with pytest.raises(
+            ValueError, match=r"^Digital-link current registry card is unknown$"
+        ):
+            import_links(
+                db,
+                baseline.inputs(),
+                build=baseline.build,
+                stores={"test-store": baseline.store},
+            )
+        assert db.rows("digital_link") == before
+
+
+def test_legacy_digital_import_does_not_allow_declared_target_superset(
+    baseline: Fixture,
+    database: DatabaseTemplate,
+) -> None:
+    config = object_value(parse(baseline.build.configuration.encode()))
+    config.update(
+        configuration(baseline.refs, (("svwb", "22345678"), ("svwb", "22345679")))
+    )
+    sources = Sources(
+        {"test-store": baseline.store}, baseline.root, baseline.changed(config)
+    )
+    with database.copy() as db:
+        with pytest.raises(
+            ValueError, match=r"^Build configuration does not pin digital inputs$"
+        ):
+            import_digital(db, sources, baseline.refs, (("svwb", "22345678"),))
+
+
+@pytest.mark.parametrize("fault", ["dependency", "recipe"])
+def test_historical_mode_still_checks_immutable_git_pins(
+    baseline: Fixture, fault: str
+) -> None:
+    config = object_value(parse(baseline.build.configuration.encode()))
+    build = baseline.build
+    if fault == "recipe":
+        recipe = object_value(
+            object_value(config["translation_recipes"])["translation-jp-v1"]
+        )
+        recipe["code_hash"] = digest(b"Synthetic wrong old parser")
+        build = baseline.changed(config)
+        sources = Sources(
+            {"test-store": baseline.store}, baseline.root, build, historical=True
+        )
+        with pytest.raises(ValueError, match=r"^Recipe program/config hash mismatch$"):
+            sources.text(baseline.jp)
+    else:
+        pin = build.dependencies[0].model_copy(
+            update={"sha256": digest(b"Synthetic wrong old dependency")}
+        )
+        build = build.model_copy(
+            update={"dependencies": (pin, *build.dependencies[1:])}
+        )
+        with pytest.raises(ValueError, match=r"^Review dependency hash mismatch$"):
+            Sources(
+                {"test-store": baseline.store}, baseline.root, build, historical=True
+            )
