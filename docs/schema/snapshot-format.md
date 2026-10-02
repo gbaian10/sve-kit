@@ -290,4 +290,4 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 
 ### Standard 構築資料與固定引用的實作邊界
 
-[construction-adoption-v1](construction-adoption.md) 定義首批 JP／EN Standard 的來源、採納與必要 CR 引用，不承諾整副牌合法性。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。
+[construction-adoption-v1](construction-adoption.md) 定義首批 JP／EN Standard 的來源、兩模型核對採納與後續必要 CR 引用，不承諾整副牌合法性。首發先上禁限資料，CR 條文引用等 #48；其間 cr_version_id／construction_rules_ref 可為 null，固定 ref 尚未兌現，介面如實標示。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。

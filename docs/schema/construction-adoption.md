@@ -1,6 +1,6 @@
 # 構築規則與禁限採納：construction-adoption-v1
 
-本文件為 [#40](https://github.com/gbaian10/sve-kit/issues/40) PR A 的待審技術契約，細化 [build-db §6／§7](build-db.md#7-禁限與構築)。維護者 2026-10-03 決定首批只做 **JP Standard、EN Standard**；交付可查、可追溯的 profile／禁限資料與固定 ref。其他賽制保持 unknown；整副牌合法性檢查留後續建牌器。契約、來源封存、逐筆採納、資料能力與算法能力是分開的門檻。
+本文件為 [#40](https://github.com/gbaian10/sve-kit/issues/40) 的構築採納技術契約，細化 [build-db §6／§7](build-db.md#7-禁限與構築)。維護者 2026-10-03 決定首批只做 **JP Standard、EN Standard**；首發先交付可查、可追溯的 profile／禁限資料，CR 條文引用等 #48；這段期間固定 ref 尚未兌現，必須明示未確認，不能當作原承諾已完成。其他賽制保持 unknown；整副牌合法性檢查留後續建牌器。契約、來源封存、逐筆採納、資料能力與算法能力是分開的門檻。
 
 本文不提供來源抓取指令、不採納規則數值／公告內容。官方 HTML／PDF、CR 全文與轉錄結果留 repo 外；研究樣本不是正式證據，不能複製進 authored 或用它們的 hash 代替正式原檔。已獲同意抓回的原檔仍須完成 §2 登錄／封存，才能供正式採納。
 
@@ -10,12 +10,13 @@
 | --- | --- |
 | `construction-adoptions/index.yaml` | `construction_adoption_format:1, kind:construction_adoption_index, includes` |
 | `construction-adoptions/<area>/<region>/standard/<sequence>.yaml` | `construction_adoption_format:1, kind:construction_adoption_shard, review_context, default_decision_id, records, decisions` |
+| `construction-adoptions/<area>/<region>/<sequence>.yaml` | 同上，僅供整區共用的 roles／cr |
 
-area 恰為 profiles／revisions／refs／restrictions／coverage／roles／cr；region 恰為 jp/en。sequence 按 area／region 從 001 起連續只增，至少三位十進位；一片非空、單一 kind／核對背景／決定。首批格式拒絕其他 format_code，不把 Crossover、Cross Craft、Gloryfinder 併成 Standard 或填合法。擴大 scope 須改契約與驗證，再採納真實資料。
+area 恰為 profiles／revisions／refs／restrictions／coverage／roles／cr；region 恰為 jp/en。roles／cr 是整區共用實體，不帶賽制目錄：角色沿既有 `PK(card_id,region)`，CR 可供裁定及多個賽制引用，不為每個賽制重建一列。其餘五個 area 帶 standard；sequence 按 area／region／賽制（共用 area 無賽制）從 001 起連續只增，至少三位十進位；一片非空、單一 kind／核對背景／決定。首批拒絕其他 format_code，不把 Crossover、Cross Craft、Gloryfinder 併成 Standard 或填合法；共用角色的覆寫不得假裝能表達賽制專屬差異，遇此需求先改契約。擴大 scope 須改契約與驗證，再採納真實資料。
 
 共用 [catalog 採納 §2–§2.1](catalog-route-adoption.md#2-入口分片與封套) 的嚴格 YAML 1.2、單檔 <1 MiB／512 KiB 目標、canonical H、index 與安全路徑、review_context 及完整 decision 欄位。includes 值為分片解析後的完整 canonical hash；本次建置另釘完整 immutable authored revision、index／所有歷史分片的 exact bytes hash。啟用入口缺 index 拒絕，空集合須明示 includes={}；未知欄位／格式、重複鍵、symlink、跨入口引用、未索引檔、缺檔或 hash 不符皆拒絕。先驗全部地區與歷史再投影，不能縮小決定成員。
 
-record 恰為 `{record_key,kind,filing_key,data,evidence}`；filing_key 固定 `region:standard`。data 恰有 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`，subject 依下表；record_key 為 `[kind,subject,adoption_no]` 的 canonical JSON 字串。每個 subject 的 adoption_no 從 1 起連續增加；predecessor 首筆 null，後筆 `{record_key,record_hash,decision_id}` 必指前一採納。value 完整替換，不作 patch；續版 null 明示撤回。有效值先按全歷史續版解出，再匯入一份新的建置 DB，不把前版主鍵內容直接覆寫；相同列僅可逐欄 exact 重用。不能原地修改歷史／重用原決定，同一主體不得分成多條互相搶值的鏈。
+record 恰為 `{record_key,kind,filing_key,data,evidence,review}`；filing_key 在賽制 area 為 `jp-standard`／`en-standard`，整區共用 area 為 `jp`／`en`，均符合共用 `[A-Za-z0-9_-]+`，不使用冒號。data 恰有 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`，subject 依下表；record_key 為 `[kind,subject,adoption_no]` 的 canonical JSON 字串。每個 subject 的 adoption_no 從 1 起連續增加；predecessor 首筆 null，後筆 `{record_key,record_hash,decision_id}` 必指前一採納。value 完整替換，不作 patch；續版 null 明示撤回。有效值先按全歷史續版解出，再匯入一份新的建置 DB，不把前版主鍵內容直接覆寫；相同列僅可逐欄 exact 重用。不能原地修改歷史／重用原決定，同一主體不得分成多條互相搶值的鏈。
 
 | area／kind | subject（完整欄位） | value 範圍 | category／policy_id |
 | --- | --- | --- | --- |
@@ -27,11 +28,25 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`；filing_key 固定 `
 | roles／construction_role | `{card_id,region}` | `{role,basis}`，basis 是 H(§6 card 的全部實體面 typed projection)，不得用一面代表整卡 | construction_role／construction-role-v1 |
 | cr／construction_cr | `{cr_version_id}` | `{region,version,published_on,effective_on,source_version_id,clauses}`，見 §3 | construction_cr／construction-cr-v1 |
 
-record_hash=H(完整 record)，members 恰為整片 `[record_key,record_hash]` 的排序唯一集合，membership_hash=H(members)，decision.id=`d:`＋完整 64 hex。sample_ids 恰列全部 checked 成員；少一、多一、重複、抽樣代簽均拒絕，一筆也是 batch。決定必為 confirmed／batch，本版 reviewed_by 恰為維護者 gbaian10，真實時間及 day／instant 精度沿共用封套；製作者／確認者分開。不接受 identity／catalog／其他區域／前版決定代簽，不借用 approved_rules／approved_policy，不設略過來源／freshness 的旗標。
+record_hash=H(完整 record)，members 恰為整片 `[record_key,record_hash]` 的排序唯一集合，membership_hash=H(members)，decision.id=`d:`＋完整 64 hex。members 涵蓋全部採納成員，一筆也是 batch。本入口專用驗證以每筆 review 的兩模型／分歧收據驗全成員，不沿用共用入口「sample_ids 恰列全部成員」的真人全查門檻；其他入口不受此差異影響。sample_ids 僅列維護者實際抽查／處理分歧且核可的成員，允許無真人逐筆核對的無分歧集合為 []，不把模型核對冒充真人抽樣。決定必為 confirmed／batch，製作者／模型核對者／維護者事件分開。不接受 identity／catalog／其他區域／前版決定代簽，不借用翻譯的決定或政策收據，不設略過來源／freshness 的旗標。
 
-每筆 profile／CR／ref 的 region、所有引用 profile 與依賴地區必等於路徑 region，format_code 必為 standard；跨區／跨格式釘錯直接拒絕，不靠 URL／官版號猜。profile 的 name 只供介面，不是官方規則引文。default_copy_limit 是同名一般上限，不能把主牌上限塞進此欄。日期均為來源明示的完整生效日，半開 `[from,until)`，未知不以抓取日、公告日或第一天補值。revisions 同 profile 不重疊；coverage 同 profile 不重疊，相鄰可接。修正舊期間須續版原主體；新的生效期間使用新的 revision_id／coverage subject，舊資料與採納收據保留。
+### 1.1 兩模型核對與維護者決定
 
-restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期，與封套 confirmed 人工核對正交：可核對「尚未實施」或「已撤回」，不能因此視為 active。copy_limit 恰填 max_copies（0 表示禁止），choice_group 恰填 max_selected_groups；另一欄 null。members 是非空、去重的 `{rules_name_id,choice_option,deck_scope}` 陣列，同 profile 地區，deck_scope=main/evolve/all。copy_limit 的 choice_option 固定 0；choice_group 的 option 使用連續 0 起編號，每組至少一成員，max_selected_groups 為正整數且小於選項數。選中一組指該 deck_scope 內任成員數量>0，限制的是選中幾組，不是所有張數之和。不同 printing 先按 card／構築名稱合計，雙面實物只算一次；不同卡名的同效果卡不自動合計。
+維護者 2026-10-03 定案的確認方式為**兩個不同模型各自對照官方來源核對、互審**，無分歧採用，有分歧才交維護者；維護者另行抽查，不要求逐筆真人確認。loader 與真實採納須釘本入口專用的 construction-two-models-v1 政策及維護者真實授權事件，不能引用翻譯政策 ID 當本入口授權。此文件記錄政策，不捏造已發生的資料核對。
+
+每筆 review 恰為 `{basis_hash,model_reviews,maintainer_resolution,maintainer_samples}`。basis_hash=H(本 record 的 `{record_key,kind,filing_key,data,evidence}`)，不含 review，避免循環；model_reviews 恰有兩項 `{model,version,reviewed_at,basis_hash,outcome,report_hash}`，按 model／version 排序。兩個 model 身分須不同（同一模型兩個 session 或僅版本不同不算），各有真實核對時間與報告 hash，basis_hash 都必等於最終資料；outcome 只允許 agreed／disputed。完整報告留 repo 外並釘入核對輸入，authored 不轉錄公告原文。任何模型更改值後，兩方都須核對最終 basis，不沿用初稿通過的 hash。
+
+兩項均 agreed 且沒有分歧才可直接採用，maintainer_resolution=null；任一 disputed 必有維護者真實確認最終 basis 的 `{reviewed_by,reviewed_at,reviewed_precision,basis_hash,outcome,note}`，outcome=adopted 才能成為有效成員，declined／deferred 留候選與診斷、不寫正式 proposed 分片。maintainer_samples 是同形狀的實際抽查事件陣列；沒有抽查則 []，不得填虛構日期或默認已抽查。分歧／抽查中被拒或待處理的項目不能因模型 agreed 而放行。decision.reviewed_by／時間記真正彙整並形成政策採納決定的協調者事件，不冒稱維護者逐筆核可；sample_ids 恰等於該批 resolution／samples 真正核可的成員集合。政策核可與全批 models／最終值／來源／依賴的 hash 都納入不可變核對背景；工具不能只驗兩個模型名字與 confirmed 布林。
+
+來源探索可補抓授權範圍的 JP 新聞分頁；已取得的頁數與時間範圍放登錄／探索收據，不用固定頁數當 coverage 規則。每次出新卡包時重抓入口與新聞並重核，得知新公告時亦可另行授權重核；資料只保證到最近核對且有來源支撐的日期，不把排程當延長 as_of。每次真實抓取仍須當次明示範圍與授權，本文件不授權 worker 連網。
+
+首發**不在 #40 做 PDF 條文萃取，也不新增 PDF 依賴**；官版 PDF 可先按 §2 歸檔留存，條文實體與固定 ref 等 #48。其未就緒時，具備來源與上述核對的 profile revision／禁限可以先供查詢，cr_version_id／construction_rules_ref 留 null、inputs_state=unknown，公開明示「CR 引用未完成、固定 ref 尚未兌現」。不得把資料可查等同 ready／牌組合法，或填虛構引用掩蓋未交付。§3–§4 定義後續 #48 接入的契約，不是首發 PDF 實作授權。
+
+每筆 profile／CR／ref 的 region、所有引用 profile 與依賴地區必等於路徑 region；profile／ref 的 format_code 必為 standard，整區共用 CR 不虛構 format_code 欄位；跨區／跨格式釘錯直接拒絕，不靠 URL／官版號猜。profile 的 name 只供介面，不是官方規則引文。default_copy_limit 是同名一般上限，不能把主牌上限塞進此欄。日期均為來源明示的完整生效日，半開 `[from,until)`，未知不以抓取日、公告日或第一天補值。revisions 同 profile 不重疊；coverage 同 profile 不重疊，相鄰可接。修正舊期間須續版原主體；新的生效期間使用新的 revision_id／coverage subject，舊資料與採納收據保留。
+
+restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期，與封套 confirmed 人工核對正交：可核對「尚未實施」或「已撤回」，不能因此視為 active。copy_limit 恰填 max_copies（0 表示禁止），choice_group 恰填 max_selected_groups；另一欄 null。members 是非空 `{rules_name_id,choice_option,deck_scope}` 陣列，按 `(rules_name_id,deck_scope)` 唯一；改 choice_option 不能讓同一名稱／scope 重複，與 DB 主鍵及 staging 一致。同 profile 地區，deck_scope=main/evolve/all。copy_limit 的 choice_option 固定 0；choice_group 的 option 使用連續 0 起編號，每組至少一成員，max_selected_groups 為正整數且小於選項數。選中一組指該 deck_scope 內任成員數量>0，限制的是選中幾組，不是所有張數之和。不同 printing 先按 card／構築名稱合計，雙面實物只算一次；不同卡名的同效果卡不自動合計。
+
+來源未明示完整生效日的限制，不填猜測日期、不偽裝 active，也不丟掉已知公告：保留 evidence 與 reconciliation 的 conflict／unresolved、可查「生效日未確認」的候選及原始官方來源。此候選不是正式 restriction 列，coverage 不得 complete，日期查詢仍 unknown；後續補得正式日期與核對收據才匯入。候選查詢介面屬後續投影能力，未實作時至少由私有診斷列出缺口，不能宣稱已完整可查。
 
 ## 2. 一次性抓回原檔如何正式登錄與釘版
 
@@ -39,11 +54,15 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 1. 唯讀驗完整 index 與全部 raw：唯一 canonical requested URL、200 成功狀態、原始 URL／最終 URL／chain 一致、HTTPS／官方 host、有效 UTC 時間、media type、exact raw hash／bytes。禁止 symlink 越界、未知欄位、缺檔、重複衝突、未結束鏈及不符合用途的 HTML／PDF。URL 只沿既有 canonicalizer，不推測 PDF 版號或用來源路徑配 region。把來源清單、原 index exact hash、原 metadata 與本次用途分類釘在獨立登錄收據；它留來源歸檔 metadata 閉包，不進 git。
 2. 建立**全新的隔離 manifest／staging**，不複製或接管 live manifest。provider 依核對後來源用途明示 jp/en（EN PDF 即使由共享官方 host 供應仍是 en）；抓取 kind 使用現有 rules（規則入口／CR PDF）、limit（禁限入口）、news（新聞索引／公告），不把 PDF 虛構成 card。Resource.url 取 canonical requested URL；final_url／chain 保留登錄收據，不能把兩者互換或默默合併別的 URL 身分。
-3. Resource 的 hash／raw_bytes／content_type／標頭沿原紀錄；path 為隔離目錄中的安全相對 raw path。first_fetched_at／last_checked_at／last_changed_at 使用唯一這次已知 fetched_at，不冒稱官方首次發布或更早抓取，archived_at 在封存前為 null。raw 不轉碼、不正規化。只登錄既有來源觀測，不造未實際發生的 HTTP fetch_log、重試、歷史或爬取 generation。重複匯入同收據可重用，衝突停止，不覆寫。
+3. Resource 的 hash／raw_bytes／content_type／標頭沿原紀錄；stored_bytes 等於這份未壓縮 raw 的實際 bytes，並與 raw_bytes 相同。path 為隔離目錄中的安全相對 path（HTML 用 `.html`，PDF 用 `.pdf`），不得用 `.zst` 假稱壓縮，避免既有封存器依副檔名誤解壓。first_fetched_at／last_checked_at／last_changed_at 使用唯一這次已知 fetched_at，不冒稱官方首次發布或更早抓取，archived_at 在封存前為 null。raw 不轉碼、不正規化；原 ETag／Last-Modified 缺值留 null，缺用途所需 metadata 則拒絕，不自行補造。只登錄既有來源觀測，不造未實際發生的 HTTP fetch_log、重試、歷史或爬取 generation。重複匯入同收據可重用，衝突停止，不覆寫。
 4. 使用 [source-archive §2／§3](source-archive.md#2-內容來源版本與-inventory) 的既有 raw blob／source_key／source_version_id／descriptor／receipt／inventory／seal 格式，來源版本身份仍是 `{provider,kind,url}`＋raw hash，不能新增另一套「研究來源」ID。inventory 必帶隔離 manifest 的 SQLite backup API 自足副本，其 metadata 閉包含上述登錄收據。準備／重驗／fsync／最後原子發布 seal；沒有 seal 或任一 missing 不能當正式批次。
 5. **備份並 restore-check 通過**才交付正式 batch pin／原 index hash／登錄收據 hash／用途分類／數量與 bytes 對帳給協調者。異常停止，原輸入與失敗收據保留，不以重抓／crawl／refresh 修補、不清理其他任務狀態。真實執行由協調者在工具審核／合併且確認當次範圍後操作；本輪只定契約。
 
 隔離 manifest 新增 `source_import_receipt` 登錄紀錄，與 fetch_log 分開：保存原 index exact bytes（BLOB）、index_sha256、canonical `{source_mappings,program_revision,dependencies}`、該內容的 receipt_id 與 registered_at；此收據不是 archive observation receipt，不能代替 descriptor.first_receipt_id。source_mappings 恰列每個 canonical URL／provider／kind／raw hash／安全相對 path，原 final_url／chain／抓取 metadata 由 index bytes 保留。receipt_id 對 index_sha256 與 canonical 登錄內容計 H，不以私人路徑或時間配號；相同收據重跑保留原 registered_at、逐欄比對，不覆寫。此表由隔離 manifest 的 SQLite backup hash 一起釘住，故可驗原 index 與 raw 的登錄關係，不向 inventory／Resource 塞未知欄位。後續 carddb 必提供相應 manifest schema／reader 驗證；只有舊 seal 工具或多放一個未被 hash 引用的旁檔不算完成此邊界。
+
+此隔離格式使用 manifest `PRAGMA user_version=2`，inventory.manifest.schema_version 亦為 2；不是在版本 1 偷加一張表。現行僅支援版本 1 的 reader 會明確拒絕 2，後續 reader 須分版本驗表／欄位／約束、收據與完整 source_mappings：版本 2 缺表、缺欄、缺收據或 Resource 無對應均拒絕，不以 CREATE IF NOT EXISTS 修補已釘副本。後續工具保留版本 1 的讀取／live 寫入能力，來源登錄的版本 2 writer 僅用於全新隔離 DB；本功能不自動升 live，也不遷移／重寫已 sealed 的版本 1 批次。兩種版本的副本都用唯讀 open_snapshot 驗證，不能只把全域 SCHEMA_VERSION 換成 2 而丟掉舊批次相容性。
+
+seal、獨立備份及 restore-check 通過後，已引用的隔離 manifest backup、index／登錄收據與 raw 閉包永久保留；工作 manifest／其 sidecars 與原一次性輸入不自動刪除。只有協調者確認全部引用已在獨立備份可驗回、沒有未完成或失敗工作後，才可另行授權清理未被引用的工作複本，不能刪 sealed 副本／歷史收據。
 
 被核可的新抓取原檔與舊研究樣本是兩類輸入；不能把「本機有 PDF」當可採納。相同官方 CR 版號、不同 raw hash 是不同 source_version／cr_version_id，歷史保留；同一內容不同 URL 亦依既有 source_key 分開。既有 manifest 格式或 reader 不支援這種登錄收據時直接停止，不能手改資料庫或略過驗證。抓取時間不代替 published_on／effective_on。
 
@@ -51,7 +70,9 @@ restriction.state 的 confirmed／announced／withdrawn 是限制的生命周期
 
 ## 3. 原始來源、CR 實體與必要引用閉包
 
-evidence 是排序去重的 `{role,use}` 陣列；use 恰為既有 `SourceUse {source,usage,locator}`，source.kind 只允許 official_page／official_api／official_pdf，source.archive 帶 store_id／batch_id／descriptor_sha256／first_receipt_id。source.id 是真實 source_version_id，raw hash 是原 bytes；每片 review_context.source_batches 必涵蓋全部用到的 sealed 批次。禁止第三方 URL-only、研究 hash、未封存檔、本機絕對路徑或 caller 自稱 verified。角色 role 僅允許 profile／rule／restriction／coverage／role／cr／clause／reconciliation，須與記錄實際值相關。
+evidence 是排序去重的 `{role,primary,use}` 陣列，primary 為布林；use 恰為既有 `SourceUse {source,usage,locator}`，source.kind 只允許 official_page／official_api／official_pdf，source.archive 帶 store_id／batch_id／descriptor_sha256／first_receipt_id。source.id 是真實 source_version_id，raw hash 是原 bytes；每片 review_context.source_batches 必涵蓋全部用到的 sealed 批次。禁止第三方 URL-only、研究 hash、未封存檔、本機絕對路徑或 caller 自稱 verified。角色 role 僅允許 profile／rule／restriction／coverage／role／cr／clause／reconciliation，須與記錄實際值相關。
+
+每筆非撤回記錄恰一項 primary=true；其餘 false，不按陣列第一筆猜。profile／revision 選直接支持該設定／期間的規則來源，restriction 選直接建立或更改本次限制的公告／基線，CR 選該版 PDF，coverage 選其基線（缺基線的 partial 選直接說明缺口的官方入口），ref／role 選直接支持其主張的來源。source_id 為 primary.use.source.id；既有單值 source_url 等於該 frozen descriptor 的 URL，不造假的多來源 source_record。其他 evidence 全列 decision_source 與 F1，後續 source_urls 投影為全部適用 frozen URL 的排序去重集合；入口落後時 restriction 不選該入口當主要證據。primary 不代表其他證據可省略，也不以單值 URL 聲稱 coverage 證明完整。
 
 usage 為 construction_profile／construction_revision／construction_ref／construction_restriction／construction_coverage／construction_role／construction_cr／cr_clause；各用途釘非空實際 parser pin。locator 是 canonical JSON 的 `{record_key,field,context_key,number,location,result_hash}`，可空欄明示 null；location 恰為 `{kind:projection_pointer,pointer,page_numbers}`，pointer 是在該受版控 parser 結果中的 JSON Pointer，PDF page_numbers 非空、排序唯一且從 1 起，HTML 則為 []。result_hash 對該 pointer 的 typed 結果計 H；逐字條文取 UTF-8 exact text hash，與 raw hash 分開。實際重播必驗 pointer 內容、格式上下文、原檔頁面／區塊及全部相關 fields，不能只驗 hash 字串看似有效。
 
@@ -59,12 +80,18 @@ construction_cr 的 clauses 恰為非空、排序的 `{id,number,context_key,loc
 
 CR 的重複條號不跨上下文覆寫：後續 cr_clause 欄位方案新增 context_key，唯一鍵擬為 `(cr_version_id,context_key,number)`；機器契約實作後公開亦保留 context_key。同上下文重複而無可驗定位的結果拒絕。JP／EN 各用自己的原檔／版本／條文；不能用 JP CR、舊研究版或一段同號附加規則補 EN Standard 的缺口。
 
+CR ID 共用固定 recipe：`cr_version.id="crv:v1:"+hex(H({recipe:"cr-version-v1",region,version,source_version_id}))`；`cr_clause.id="crc:v1:"+hex(H({recipe:"cr-clause-v1",cr_version_id,context_key,number}))`。hex 為完整 64 小寫 hex，version／number 保留官版原樣字串；不含採納時間、parser 版本、條文集合大小或排序。cr_version 的 source_id 即 source_version_id，既有 `UQ(region,version,source_id)` 保持：#48 首次必要閉包與後續完整萃取重用同一列／ID；其他已配 CR 實體也須按原登錄沿用，#48 只增補缺條文，不能重新配號。相同 clause ID 必須對到相同 exact 文字與上下文；衝突先停下修復，不能因換 parser 就覆寫已引用實體。新官版或同官版換 raw 產新 source_version／cr_version，舊 ref 仍能追回原列。
+
+目前 `UQ(cr_version_id,number)` 尚不能容納不同上下文的同號；啟用本 recipe 前，實作 PR 須一起更新 DDL、權威列、驗證及公開機器契約為含 context_key 的唯一鍵，#48 沿用此鍵與 recipe，不另做賽制專屬 ID。不能把上下文偷偷拼入官方 number 避過現行 UQ，也不能用新 schema 回寫舊凍結輸入。recipe／context 分類後續若需更正，須保留已配 ID 並明示修復／版本遷移，不能靜默重新計算既有引用。
+
 每個 ref 的 required_clause_ids 必為有限、非空、排序去重集合，涵蓋以下最低 Standard 查核集合與所有實際依賴：
 
-- Standard 構築根節及九個子節。調查列出的 `6.1.1` 與 `6.1.1.1` 至 `6.1.1.9` 是首批核對的十個標記；正式兩區資料須從**已封存的當區官版 Standard 上下文**確認完整集合，不能由研究版字串自動產生引用。若官版重編、缺節或適用範圍不同，先明示改版查核集合並審核，不任找十段湊數。
-- 這些條文實際引用的名稱／卡種定義、雙面／特殊角色／職業／作品條件與適用例外。referenced_clause_ids 列適用引用，以已走訪 ID 集合求有限閉包；允許條文互引，但未解引用不能跳過。每個具體規則欄位都須能連到必要集合的逐字依據或另釘的官方補充規則頁；後者不能假造 CR 條號，單純列十個無關條號不合格。
+- Standard 根節及其**全部下層子節（含巢狀）**，集合與數量以已封存的當區官版 Standard 上下文為準，不展開成固定連號，也不由研究版產正式引用。文末可能另有同號區塊，須由 context_key 區分；不能借同號補缺。若官版重編、缺節或適用範圍不同，先明示改版查核集合並審核，不任找固定數目的段落湊數。
+- 這些條文實際引用的名稱／卡種定義、雙面／特殊角色／職業／作品條件與適用例外。referenced_clause_ids 列適用引用，以已走訪 ID 集合求有限閉包；允許條文互引，但未解引用不能跳過。每個具體規則欄位都須能連到必要集合的逐字依據或另釘的官方補充規則頁；後者不能假造 CR 條號，單純列無關條號不合格。
 
-required_clause_ids 中每個 ID 必在本次 DB／快照具有同 cr_version_id 的實體 cr_clause，且由該版本 frozen evidence 驗回。僅有一條任意 clause／懸空 CR 字串／缺 parent／缺一子節／錯 context／缺例外，一律回 unknown 並列缺口。#40 只承諾此必要閉包，不能把部分輸入宣稱完整現行 CR；完整 PDF 萃取、歷史引用與換版影響留 #48。手工核對可確認選定區塊，但只有手寫 text_hash／locator 不能替代可重播的萃取；未支援 recipe 或無法重驗逐字結果時，該資料不放行。
+「適用」須由 construction-two-models-v1 政策所授權的核對者依該區官版 Standard 範圍、每個 descriptor 欄位與實際條文引用判定，不由 parser 猜。釘住 configuration 的 clause_scope 為排序唯一 `{cr_clause_id,state,reason,evidence}`，state 為 required／out_of_scope；從根節走訪遇到的每個引用都必解到實體，out_of_scope 亦須有完整採納收據與官方範圍依據，不能以未讀／尚未萃取為排除理由。required 對象的引用繼續走訪；未分類／無證據／循環中的缺節均為未解。若必要閉包實際擴大到大部分或全部 CR，就等待萃取完成而回 unknown，不設深度／數量截斷來湊首批範圍。
+
+required_clause_ids 中每個 ID 必在本次 DB／快照具有同 cr_version_id 的實體 cr_clause，且由該版本 frozen evidence 驗回。僅有一條任意 clause／懸空 CR 字串／缺 parent／缺一子節／錯 context／缺例外，一律回 unknown 並列缺口。此必要閉包是後續固定 ref 的最低條件，首發 #40 不萃取、不宣稱已交付；PDF 萃取、歷史引用與換版影響留 #48。不能把部分輸入宣稱完整現行 CR。手工核對可確認選定區塊，但只有手寫 text_hash／locator 不能替代可重播的萃取；未支援 recipe 或無法重驗逐字結果時，該資料不放行。
 
 ## 4. 有限的 Standard 規則 ref
 
@@ -85,23 +112,32 @@ bounds、copy limit、基準與例外的**真實值**要逐區逐版核對，本
 
 ref descriptor 保存在已釘建置 configuration 的 construction_refs（恰為排序的 `{ref,descriptor}` 陣列），待機器契約實作後公開投影到 `config.construction_refs:[{ref,descriptor}]`，按 ref 排序。所含 CR／clause／code 引用全在同快照可達，不出 raw locator、source hash、決定或私有配方。建置端另由本採納封套與 F1 原始 evidence 追回內容 hash／來源；不能只信公開 descriptor 自己宣告的 hash。profile revision 引用其中一個 ref，default_copy_limit 必等於其 default_limit，region／format／cr_version_id 亦一致，缺定義或不一致不得 ready。
 
-資料 reader 只需能解本版的有限結構，可顯示 profile／數值／禁限與來源；算法 evaluator 的 supported_refs 另須確認確有實作。資料可查不代表算法已支援；不能為了讓 resolver 回 ready 而把每個取得的 ref 自動塞進 supported_refs。
+資料 reader 只需能解本版的有限結構，可顯示 profile／數值／禁限與來源；算法 evaluator 的 supported_refs 另須確認確有實作。現有 resolver 接受 exact ref 集合，本契約不改此 API。未來 evaluator 可以先驗 descriptor 的版本、hash、引用與所有有限語義／例外，再為真正支援的內容產生 exact refs 集合；因此單純 CR 版號改變但規則語義仍完整受支援，不必只為列舉新 hash 發版。這是後續 evaluator 的驗證能力，不能只認 sve-standard-v1 字首就自動支援任意值／例外；未知語義仍 unknown。資料可查不代表算法已支援，不得將每個取得的 ref 自動塞進 supported_refs。
 
 ## 5. 來源集合、入口漏公告與 coverage
 
-coverage.value.source_set 恰為 `{baseline,notices,discovery,excluded}`：前三欄是排序去重的 source_version_id 陣列，baseline 為完整現行限制基線或可重建起點，notices 為所有適用變更公告，discovery 為取得它們的入口／新聞索引；excluded 是 `{source_version_id,reason}` 的排序集合，reason 僅 unrelated_format／unrelated_topic／superseded。每個來源均有 evidence、sealed pin 與核對理由；三組集合互斥、excluded 不與前三組重複；列 excluded 不可刪 raw 或隱藏尚未判定的公告。
+coverage.value.source_set 恰為 `{baseline,notices,discovery,excluded}`：前三欄是排序去重的 source_version_id 陣列，baseline 為完整現行限制基線或可重建起點，notices 為所有適用變更公告，discovery 為取得它們的入口／新聞索引；excluded 是 `{source_version_id,reason}` 的排序集合，reason 僅 unrelated_format／unrelated_topic／superseded。四組互斥；每項有 evidence、sealed pin 與核對理由，不刪 raw 或隱藏尚未判定的來源。
 
-reconciliation 恰有 `{knowledge_cutoff,missing_urls,unresolved_source_ids,decisions}`：cutoff 是所核對來源集合截至的 UTC Instant，不以 snapshot 發布時間偽造更新；missing_urls 是明示需要但未取得的公開 URL，unresolved_source_ids 是尚未解決的來源；decisions 為 `{source_version_id,status,restriction_ids,reason}` 的排序集合，status=baseline/applied/no_change/conflict，每個 baseline／notice 都必有一項。補登來源不自動採納，公告解除／更正亦必核對確切目標及期間；已撤回不是刪掉舊公告。
+**來源全集由程式獨立重建**：從 review_context 指定全部 sealed 批次的 inventory／descriptor 取得同區 provider、kind=limit/news 的全部來源版本，再加入本 coverage 實際使用的其他來源；不能由 caller 自選「相關公告」作分母。全集必恰屬四組之一；缺列的 ID 自動進 unresolved_source_ids 並使 complete 失敗，多列不存在的 ID／重複分組則輸入錯誤。已封存但入口未連結的公告同樣在分母內。來源全集完整只證明已取原檔都被分類，不能證明網路上沒有漏取，還須以下探索範圍與 href 閉包。
 
-complete 必同時有維護者全量核對收據、有效 baseline、可證明的**適用公告集合閉包**、全部生效／解除／更正已統整、無 missing／unresolved／conflict；不得把數個禁限正例當「其他全部沒有」。as_of 是核對知識截至日，不能晚於 knowledge_cutoff 的 UTC 日，也不能早於 from_date；請求日不證明此前或此後所有來源。until=null 只是沒有已知結束日，讀取最多到 min(coverage.as_of,snapshot.as_of)，未來一律 unknown。complete 也不代表完整歷史；只能支持已核可、可證明的窄期間。
+reconciliation 恰有 `{knowledge_cutoff,region_date_zone,baseline_through,discovery_ranges,discovered_urls,missing_urls,unresolved_source_ids,decisions}`：
 
-來源缺口的判準：
+- knowledge_cutoff 為核對知識截至的 UTC Instant，不用 snapshot／人審時間偽造更新；不得晚於本次 coverage 使用的 baseline、discovery 成功觀測時刻的**最早值**，尤其不能晚於最早 discovery 的成功觀測。一次性 index 用實際 fetched_at；後續重核若沿用同一 raw，須釘本批選定且可驗的成功 200／可信 304 觀測收據與 last_checked_at，不能拿 URL 首次抓取、descriptor.first_receipt 的舊內容時間、歸檔 observed_at 或無內容驗證的檢查時間補值。歷史 notices 的取得時間不拿來延長知識期限，也不迫使重抓未變動的歷史正文。
+- region_date_zone 為有官方來源或明示核可依據的 IANA zone。官方完整生效日保留該公告所屬日期語意，JP 以 Asia/Tokyo；EN 須由來源與核對確認，不猜整個地區等於某個美洲時區。跨來源時區不一致須明示轉換；不明則 partial／unknown，不能自行套 UTC 當官方日期。
+- baseline_through 為已證明基線完整的 UTC Instant，須由 baseline 的實際最後更新／適用日期與該區時區驗回；只有日精度時用該日開始，不補假時間。未知為 null，不得 complete。
+- discovery_ranges 是排序唯一 `{source_version_id,from_instant,until_instant,locator,complete_listing}` 陣列，closed interval、from≤until≤該來源依上述規則驗回的成功觀測時刻，每筆必對 discovery 來源。locator 釘 parser 的範圍／列表投影與邊界證據，complete_listing 是已依兩模型政策確認列表在此範圍沒有省略頁／同日條目，不是 parser 看到最舊標題就自動 true。頁面分頁鏈、重複邊界與日期精度須驗回；只知月份、同日界線不完整或標題不足判適用者，不宣稱範圍完整。
+- discovered_urls 是 parser 從所有 discovery 結果獨立重建的原樣公告 href（沿既有 URL canonicalizer 後去重）之完整分類，恰為 `{url,source_version_id,state,reason,locator}`。state=required/excluded/unresolved；locator 釘原列表項目。required 必解析到已封存且納入 source_set 的同區公告，否則 URL 恰列 missing_urls；unresolved 一律保留缺口。無關賽制／主題可由兩模型依官方標題與明示範圍核對後 excluded，無法從標題確定的公告須列 required／unresolved，不猜內文。沒有原檔者 source_version_id=null；缺 href 的入口不憑空造網址，也不能當公告探索完整證據。
+- missing_urls／unresolved_source_ids 是排序唯一的完整缺口，須包含上述機械重建結果，不接受 caller 清空以湊 complete。decisions 是 `{source_version_id,status,restriction_ids,superseded_by,reason}` 的排序集合，status=baseline/applied/no_change/conflict/discovery/excluded，恰覆蓋四組全集；所有值與對應限制／期間／evidence 可重播。除 superseded 的 excluded 項外 superseded_by=[]。
 
-- **JP 入口落後公告**：入口內容不是優先真值；適用期間需將入口尚未列的 `post-554` 納入 source_set／reconciliation 與限制續版，按公告明示日期處理。封存入口加八則舊公告不構成完整當前限制；不能因新公告在頁外就忽略，也不能不看區域／Standard 適用性就機械套用。入口與公告衝突未解則 partial。
-- **EN 入口無個別公告連結**：沒有 href 不等於沒有限制或已查完公告。入口可作 current baseline，前提是完整內容／生效日期經核對；`post-167` 另作適用公告，不把 JP 結果套入 EN。缺公告歷史時不宣稱歷史完整；若無法證明本次日期所需的完整基線／變更集合，就 partial，即使入口與一則新聞都取得 200。
-- **只取得 news 第一頁**：必須核對其可證明的時間範圍與較早基線的銜接；未取得後續分頁、其他被引用必要公告或無法證明沒有漏列時，缺口留 missing／unresolved、coverage=partial。整批原檔 hash 正確只證明取得完整性，不能單憑檔數／備份／封存把它轉為 complete。後續取得缺漏仍需當次授權。
+被 superseded 排除的來源必有 reconciliation 決定：superseded_by 非空且每筆為 `{source_version_id,restriction_ids,locator}`，指有效 baseline 或已 applied 的替代公告，核對原限制及**全部解除／更正／生效期間**確已反映。僅版號新、日期晚或內容看似重複不足；找不到替代證據就 conflict／unresolved，不得排除。無關賽制／主題亦要核對分類，不能把「未讀」當 unrelated。
 
-如果能以正式的完整當前基線與變更核對證明首發窄日期，才可為該日期採 complete；更早／未證明期間保留 partial 或無 coverage。未查別的賽制不推定其沒有禁限。profile 有資料但 coverage partial 時仍可查已知限制與缺口，不能回傳「無禁限／合法」。
+complete 必有完整兩模型核對及已解分歧、有效 baseline、四組分割與 href 分類全過、所有解除／更正統整、無 missing／unresolved／conflict。把 complete_listing=true 的 discovery 範圍按起點排序合併，必無縫涵蓋 `[baseline_through,knowledge_cutoff]`；範圍不銜接、必要後續分頁未取或公告日期邊界無法證明時為 partial。baseline_through 晚於 cutoff 或無範圍證據亦拒絕 complete；不以人寫「閉包完整」取代上述計算。原檔 hash 正確與來源數量只證明取得完整性，不能把數個正例推成「其他全部沒有」。
+
+as_of 是已核對且來源能支撐的日期，保守上限為 min(knowledge_cutoff 的 UTC 日、knowledge_cutoff 在 region_date_zone 的當地日)，且不早於 from_date；不得用公告在 UTC 之後的當地日期擴大範圍。即時查詢能力若尚未實作，不能宣稱有時間粒度保證；後續支援時另不得超過精確 cutoff；日期型查詢只聲稱該日截止已核對的資料，不保證抓取後同一天也沒有新公告，介面須顯示 cutoff。until=null 只表示沒有已知結束日，讀取最多到 min(coverage.as_of,snapshot.as_of)，超出知識日期一律 unknown；每逢新卡包重核的排程不會自動延長保證。
+
+來源缺口按通則判斷：入口落後於公告時，公告須納入 source_set／reconciliation，入口不作優先真值；無個別公告 href 時，可以經核對的完整入口作 baseline，但仍須另證適用期間的探索閉包。只有新聞第一頁而其最舊日期晚於基線時，範圍銜接失敗就是 partial；必要補抓須另有當次授權。已取得多頁且時間能銜接，也只具備核對條件，不能僅依標題判讀或頁數自動 complete。
+
+complete 只支持可證明且已採納的窄期間，不代表完整歷史。更早／未證明期間保留 partial 或無 coverage；未查其他賽制不推定沒有禁限。profile 有資料而 coverage partial 時仍可查已知限制與缺口，不能回傳「無禁限／合法」。資料只保證到最近核對且來源所支撐日期，之後的日期標「未確認」。
 
 ## 6. Freshness、建置追溯與 unknown
 
@@ -125,10 +161,12 @@ Decklog 可用性與 profile／禁限正交，沿 regional_decklog 的版次目�
 
 ## 7. 邏輯擴充、後續單位與反例驗收
 
-**待實作欄位方案只留本文件，不改現有權威表格／公開欄序**：cr_clause 擬新增 context_key 與其唯一鍵／公開欄位；restriction_coverage 擬新增 as_of／decision_id；config 擬新增 construction_refs；profile revision／restriction 擬新增公開 source_urls。不新增表，不改已有原始來源 ID recipe。正式欄位改動須與程式表定義在同一 carddb PR 更新 build-db 權威列，並同步 snapshot-format／snapshot-transport／Schema／types／golden／producer／reader，禁止 docs-only 先改欄位造成 CI 對照失敗。公開 tuple 擬在末尾追加 context_key／source_urls，不中間插欄；新增 config 與 coverage 欄位的機器形狀也須整套審核。格式未首發時依候選流程；已發布後 tuple 形狀改動升 major、設最低 reader 與 construction-ref-v1 required capability，舊 reader 留最近相容快照，不猜新欄。維護者真實規則數值／適用期間／逐筆採納不在這個 PR。
+**待實作欄位方案只留本文件，不改現有權威表格／公開欄序**：cr_clause 擬新增 context_key 與其唯一鍵／公開欄位；restriction_coverage 擬新增 as_of／decision_id；config 擬新增 construction_refs；profile revision／restriction 擬新增公開 source_urls。不新增建置資料庫的表，不改已有原始來源 ID recipe（隔離 manifest 的新收據表見 §2）。正式欄位改動須與程式表定義在同一 carddb PR 更新 build-db 權威列，並同步 snapshot-format／snapshot-transport／Schema／types／golden／producer／reader，禁止 docs-only 先改欄位造成 CI 對照失敗。公開 tuple 擬在末尾追加 context_key／source_urls，不中間插欄；新增 config 與 coverage 欄位的機器形狀也須整套審核。格式未首發時依候選流程；已發布後 tuple 形狀改動升 major、設最低 reader 與 construction-ref-v1 required capability，舊 reader 留最近相容快照，不猜新欄。維護者真實規則數值／適用期間／逐筆採納不在這個 PR。
 
-後續 B carddb 做 strict loader、隔離來源登錄、封存／重播、交易與既有 staging／resolver 接線；C authored 放維護者核對的結構值／source pins／決定，官方全文仍 repo 外；D carddb 接雙區離線建置與公開投影。必要的 sim/web reader／整副牌 evaluator 各自拆單位。#48 做完整 CR 萃取／版本更新，#49 做完整限制事件／歷史 adapter；不要求它們全部完成才能核對首發必要閉包，也不宣稱 #40 已完成它們。
+實作依元件分 PR，次序與進度留 issue：carddb 的入口／隔離來源登錄／交易／staging 接線是一個單位；authored 真實結構值、source pins 與兩模型／維護者決定另作單位；離線建置／公開投影另作 carddb 單位。來源型別、schema 版本與 reader 接線必在啟用前完成，不以 docs 合併當能力已實作。必要的 sim/web reader／整副牌 evaluator 分開，不在本入口偷偷補算法。
 
-反例須覆蓋：非構築 category／錯全成員／其他人名／少 source use；隔離登錄碰 live、原 hash／時間／redirect／media 不符、少一 raw、重複收據衝突、seal／backup／restore 缺一步；CR 空／少一子節／錯上下文／跨區／同官版換 raw；ref 任意 URL／未定義／內容 hash 不符／少依據／未知例外／與 profile 不合；限制空 members／選項缺成員／混區／兩種 max 同填／日期重疊；JP 新公告不在入口卻被丟掉、EN 沒鏈接被當無限制、只讀 news 首頁便 complete、解除未統整、as_of 之外；名稱／型別更正後照套舊決定；以及「資料 ready 等於合法」的錯誤。全部用合成資料／MockTransport／localhost，不依賴正式原檔，不把一次性全量比對放進每次測試。
+本件的受版控 parser 放 `carddb/src/sve_carddb/construction/projection.py`，在 carddb 來源投影單位實作通用 HTML 區塊→exact 文字／欄位／日期／href 與探索範圍投影、可重播 locator 與結果 hash；語意主張由兩模型對照原公告採納，不是完整事件 adapter。重用既有 HTML 依賴，這輪不加 PDF 套件。PDF 頁／條文區塊、context 分辨、引用圖與必要 Standard 閉包均留 #48 的 carddb 萃取單位；如需 PDF 套件，先另開只改依賴的小 PR，再做萃取 PR。#48 須沿 §3 的 CR ID／UQ／recipe 與本來源 pin，不能重配既有實體。#49 做完整禁限語意事件與歷史 adapter，重用相同 frozen 投影與 ID，不把 #40 人工首批分類當完整歷史。#40 可在 ref／CR 為 null、能力 unknown 的狀態先交付已核對禁限，故不以 PDF 萃取阻擋 #40，也不形成 #40／#48 循環依賴；固定 ref 仍是未兌現交付，需 #48 接入後另驗。
+
+反例須覆蓋：非構築 category／錯全成員／兩次同模型或不同最終 basis／未解分歧／冒充真人抽查／少 source use；隔離登錄碰 live、原 hash／時間／redirect／media 不符、少一 raw、重複收據衝突、seal／backup／restore 缺一步；CR 空／少一子節／錯上下文／跨區／同官版換 raw；ref 任意 URL／未定義／內容 hash 不符／少依據／未知例外／與 profile 不合；限制空 members／選項缺成員／混區／兩種 max 同填／日期重疊；JP 新公告不在入口卻被丟掉、EN 沒鏈接被當無限制、只讀 news 首頁便 complete、解除未統整、來源全集少列／探索範圍有洞／cutoff 超過觀測／superseded 無替代證據／成員同名 scope 重複／as_of 之外；名稱／型別更正後照套舊決定；以及「資料 ready 等於合法」的錯誤。全部用合成資料／MockTransport／localhost，不依賴正式原檔，不把一次性全量比對放進每次測試。
 
 目前程式的 decision-backed 匯入仍 fail-closed；本契約合併不會自動放行、不授權本 worker 執行來源登錄／抓取／正式建置。沒有實作／來源／採納就如實回 unknown。

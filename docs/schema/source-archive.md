@@ -159,6 +159,8 @@ raw 歷史 logical bytes 為 `Σ(size(hash))`，只加總所有保留版本引�
 
 [manual-printings-v1](manual-printings.md#4-來源類別日期與取得方式) 的 third_party_url 只保存第三方店家 URL、人工定位與查核收據，沒有消費第三方 raw，不產 source_version／receipt 或 ArchiveSourceUse。其 printing_reference.source_id 指完整 authored 封套，source_record.sha256 是該分片 exact bytes，不能以 H(URL) 或 canonical 記錄 hash 假裝第三方頁面 raw hash。此例外不適用官方來源、圖像鏡像、人工商品 evidence 或構築證據；已使用官方 raw 仍必驗歸檔完整閉包，完整 authored index／分片仍釘不可變 revision／bytes hash。URL-only 不能宣稱第三方內容可重播或仍為現行。
 
-## 已取得規則原檔的離線登錄
+## 7. 已取得規則原檔的離線登錄
 
-一次性取得、已有 URL／HTTP metadata／時間／內容 hash 的官方 HTML／PDF，依 [構築採納 §2](construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版) 登錄：原 index／raw 唯讀驗證，在全新隔離 manifest 保存專用匯入收據，不開 live manifest、不造 HTTP fetch_log，再用本契約既有來源版本／inventory／seal 格式封存、備份與 restore-check。登錄收據由隔離 manifest 的 backup hash 納入 metadata 閉包；未實作該格式的 reader 直接拒絕，不能手工補一個未被釘住的旁檔冒充完成。正式批次／逐筆採納完成前，研究樣本或成功抓取 log 均不能成為構築 SourceUse。入口落後公告或沒有個別公告連結，只影響知識覆蓋，不影響原檔的不可變留存；seal 成功不等於 restriction_coverage=complete。
+一次性取得、已有 URL／HTTP metadata／時間／內容 hash 的官方 HTML／PDF，依 [構築採納 §2](construction-adoption.md#2-一次性抓回原檔如何正式登錄與釘版) 登錄：原 index／raw 唯讀驗證，在全新隔離 manifest 保存專用匯入收據，不開 live manifest、不造 HTTP fetch_log，再用本契約既有來源版本／inventory／seal 格式封存、備份與 restore-check。隔離格式擬使用 PRAGMA user_version=2，inventory 記同版號；版本 1 的舊 reader 必須拒絕，支援新版的 reader 另驗完整表／欄位／Resource 與收據閉包，不能只新增表卻仍宣稱版本 1。live 及已封存的版本 1 批次不自動升版、仍須支援唯讀重建。未壓縮來源用實際 raw／stored bytes 與 `.html`／`.pdf` path，不假用 `.zst`；缺 metadata 不補造。上述 schema／reader 能力尚待 carddb 實作。
+
+登錄收據由隔離 manifest 的 backup hash 納入 metadata 閉包；不能手工補一個未被釘住的旁檔冒充完成。seal＋獨立備份＋restore-check 後，已引用的 DB 副本／收據／raw 永久保留，工作副本也不自動清理；未引用工作檔的回收須另行核對全部引用與授權。正式批次／政策核對採納完成前，研究樣本或成功抓取 log 均不能成為構築 SourceUse。入口落後公告或沒有個別公告連結，只影響知識覆蓋，不影響原檔的不可變留存；seal 成功不等於 restriction_coverage=complete。
