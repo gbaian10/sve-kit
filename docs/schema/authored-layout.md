@@ -26,6 +26,7 @@
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
 | 定案（技術契約） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`、政策／核可收據配對、`digital-name-exclusions/`；依[數位名字政策](digital-name-policy.md)，實際政策核可不是真人同卡樣本，未支援完整能力不得套用 |
 | 定案（技術契約） | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
+| 定案（技術契約） | 模板參數辨識政策／核可收據 | `template-parameter-rules/<policy_id>.policy.yaml`／`.approval.yaml`；無 index，單一真實事件可涵蓋明列規則，依[辨識政策契約](template-parameter-policy.md)，不授權模板定義／譯本採納 |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`、`image-crops/receipts/<receipt_id>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
@@ -234,6 +235,8 @@ card_name_concept 於 translations/overrides 只採納卡／面與 exact 名稱�
 
 模板長尾 `approved_policy` 的正式政策／收據、首輪樣本與唯一索引依 [模板採納政策契約](translation-policy.md)。該入口在 authored 內自行證明有效採納，F1 設定只複核；不借表記政策、glossary 委託或呼叫端同名 pin 放行。
 
+模板數值／術語 slot 的辨識核可另依[模板參數辨識政策契約](template-parameter-policy.md)。獨立 kind 與無索引 policy／approval pair 以 recipe config 的五欄 pin 引用；一個真實整體對話事件可覆蓋明列的 rule_id／condition_hash／matcher_commit，不虛構逐題點擊。頁面例子只作呈現證據，不是 human sample_ids；效果模板定義與譯本仍依各自門檻採納。
+
 sentence_template 的 ID 與完整六欄 payload 不可變；既有 prefix+10hex 保留，新 normalizer/schema/語義需新 ID 與 supersedes。模板譯本有自己的只增 revision。跨區 divergence 的完整封套改由 translation-contract §7 定義，本節不另留一份不相容的舊示意格式。
 
 origin/authority 分開：本站效果翻譯永遠 unofficial；官方 counterpart 逐 owner 取有證據的官方原文，不占共用 translation_selection。JP 繁中透過 FieldTranslation 選給 EN：已核對為 shared_jp，尚未核對為 shared_jp_unchecked；兩者都不把 EN owner 的原文改成 JP。
@@ -351,6 +354,8 @@ previous_order 恰有 `{basis,evidence_indexes,review_receipt}`，basis 為 `sam
 新的建置先重建既有採納，再比對本次全部觀測。新增版本不繼承 checked；即使 raw 內容相同，新來源鍵仍是未核對候選。原收據保留為歷史 confirmed；沒有新採納時保留仍有效的舊 current 並報候選。前件依賴缺失／hash 不符是不可重建錯誤，不能退回任取現存觀測；已知更正／勘誤或身分衝突使舊 current 不再有效時也不能繼續當確定事實。
 
 ### 9.5 核可規則、confirmed 封套與人工確認
+
+本節的 wording 等義授權不替代[模板參數辨識政策](template-parameter-policy.md)；兩者重用 canonical／不可變 pin 做法，但 kind、收據與授權範圍各自獨立。
 
 **使用者 2026-10-01 核可**：空白、標點、提醒文、句型等差異由程式分類，具體規則清單核可一次後，僅對規則完整涵蓋的差異套用；其餘群組在 Artifact 確認頁逐組確認，也可對同一變更型態明示批次確認。下表定義分類邊界，**不是已核可的替換／等義規則清單**；具體 matcher、反例與適用範圍由 #145 提交使用者核可。
 
