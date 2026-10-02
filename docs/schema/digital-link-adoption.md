@@ -1,12 +1,12 @@
 # 數位對應採納與名稱證據入口
 
-本文件細化 [build-db §8](build-db.md#8-數位對應與語音) 的 `digital_link`／`digital_link_coverage` 人工入口，及 [翻譯契約 §5／§6](translation-contract.md#5-概念選詞與數位證據) 的名稱使用條件。這是待審技術契約，**尚未實作入口、匯入器或遷入資料**；不代表維護者已核可任何新關係。永久身分、數位建置表及公開欄位沿既有契約，不增設平行卡名詞典。本文名稱與驗收情境皆為合成資料。
+本文件細化 [build-db §8](build-db.md#8-數位對應與語音) 的 `digital_link`／`digital_link_coverage` 人工入口，及 [翻譯契約 §5／§6](translation-contract.md#5-概念選詞與數位證據) 的名稱使用條件。入口與離線候選工具的實作邊界見 §8；**尚未遷入正式採納資料**，不代表維護者已核可任何新關係。永久身分、數位建置表及公開欄位沿既有契約，不增設平行卡名詞典。本文名稱與驗收情境皆為合成資料。
 
 ## 1. 範圍與既有接點
 
 只收已採納的 SVE↔數位關係與查核覆蓋，不收數位卡文、圖片、語音或未決候選。`same_card` 指同一改編卡片概念，不要求兩遊戲效果一致；`effect_similarity` 與 relation 正交。`same_character`／`name_only` 可作瀏覽對應，但不能直接套官方數位卡名。相同日文、角色、畫師、圖或信心分數均不是同概念採納。
 
-現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包；`select_name()` 可篩已採納的同卡同面關係並依 svwb→sv1 選詞。`translations/names.py` 的 `populate_name_translation()` 可產生 JP→zh-Hant 的 translation 列，尚未支援語義指派、printed owner、use／selection。`translations/importer.py` 已能驗 glossary 的 `digital_name` 證據，但只讀 DB 關係，不建立它們。**這些函式目前都不是本入口的呼叫端**。
+現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包；`select_name()` 可篩已採納的同卡同面關係並依 svwb→sv1 選詞。`translations/names.py` 的 `populate_name_translation()` 可產生 JP→zh-Hant 的 translation 列，尚未支援語義指派、printed owner、use／selection。`translations/importer.py` 已能驗 glossary 的 `digital_name` 證據，但只讀 DB 關係，不建立它們。本入口的 composer 重用數位閉包與名稱選取，名稱產生者另外要求逐 owner 的採納結果，見 §8。
 
 registry 固定永久身分；`curation/` 尚無格式／loader。已正式採納的 glossary format 1 及其全入口 loader 不能直接混入新 kind。本契約採獨立入口，共用既有 YAML、canonical hash、batch 決定、predecessor、SourceRef、凍結 parser 與 F1，不改 glossary 必填欄位或重寫舊分片。
 
@@ -23,7 +23,7 @@ area 只有 `links`／`coverage`。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔�
 
 沿 [authored-layout §1／§2](authored-layout.md#2-分片批次決定與來源) 的嚴格 YAML 1.2、canonical recipe、單檔 <1 MiB／512 KiB 目標。includes 映射完整分片路徑到**解析後 canonical 內容 hash**；完整 index／分片原始 bytes 另釘 F1。拒絕缺檔、hash 不符、重複 key、symlink、絕對路徑、`..`、跨入口引用及未索引檔案。先驗全入口／全部歷史，再按公開範圍投影；不能先濾 JP 或改決定成員。啟用此能力時缺 index 必須失敗，空集合只能明示 includes={}；未支援的新格式不能當空集合。
 
-review_context 沿 [採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) 的 `{context,source_batches}`，保存核對時的程式、依賴、設定與來源批次。核對背景不同須分片；它不引用尚未產生的自身分片。每筆 data 的 review_context_hash 綁共享背景，避免換背景沿用成員 hash。建置另外釘本次入口與來源；背景換版本身不使關係失效，相關內容依 §5 重驗。
+review_context 沿 [採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) 的 `{context,source_batches}`，保存核對時的程式、依賴、設定與來源批次。核對背景不同須分片；它不引用尚未產生的自身分片。每筆 data 的 review_context_hash 綁共享背景，避免換背景沿用成員 hash。建置另外釘本次入口與來源；背景換版本身不使關係失效，相關內容依 §5 重驗。歷史背景宣告的程式／依賴及 parser recipe hash 由不可變 Git 版本驗，不與目前磁碟檔案比較；它證明當時核對依據，不要求執行舊程式。目前建置另釘並驗載入的執行期，使用目前解析器重驗歷史凍結證據與本次相關內容；來源驗證失敗仍整次拒絕，名稱內容改變依 §5 列 stale。
 
 record 恰為 `{record_key,kind,filing_key,data,evidence}`；data 恰為：
 
@@ -51,7 +51,7 @@ decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sampl
 | digital_link_adoption（links） | digital_link | digital-link-v1 | sampled／confirmed |
 | digital_link_coverage_adoption（coverage） | digital_link_coverage | digital-link-coverage-v1 | sampled／confirmed |
 
-sampled 須有實際真人審核者、時間及非空 checked 成員子集；confirmed 的 sample_ids 恰為全部 checked 成員。集合均排序唯一，不得有非成員。reviewed_precision=day 用 UTC 午夜編碼實際日期，不捏造時分秒；authored 身分／時間與審核事件分開。此門檻沿既有數位政策；不套 glossary 的 delegated_glossary 或模板的 approved_policy 例外。confidence、auto_ok、模型審查、來源官方及規格通過不代替真人事件。
+sampled 須有實際真人審核者、時間及非空 checked 成員子集；confirmed 的 sample_ids 恰為全部 checked 成員。集合均排序唯一，不得有非成員。reviewed_precision=day 用 UTC 午夜編碼實際日期，不捏造時分秒；authored 身分／時間與審核事件分開。此門檻沿既有數位政策；不套 glossary 的 delegated_glossary 或模板的 approved_policy 例外。confidence、auto_ok、模型審查、來源官方及規格通過不代替真人事件。兩層採納的確認者均須是本契約明列的維護者，現行名單僅 `gbaian10`，reviewed_by 逐字比對，不 trim、不接受工具或模型名稱；新增／變更名單須維護者確認後修改契約與驗證器。具名欄位不等於已發生審核，sample_ids 與時間仍須忠實反映實際真人事件。
 
 令 H 為 authored-layout 的完整 SHA-256 canonical JSON recipe，Hash 帶 `sha256:`。`record_hash=H(完整 record)`，包含 evidence、review_context_hash 與 reason；members 恰為全部 `[record_key,record_hash]` 按 key 排序，membership_hash=H(members)，decision.id=`d:`＋membership_hash 的 64 hex。review 欄仍須依真實事件驗證，不能因 ID 相同就接受互相矛盾的收據。
 
@@ -115,7 +115,7 @@ SVE 新面／相異名稱 hash 或數位目錄成員／名稱 hash 變動、link
 
 ## 5. 匯入順序、來源與原子性
 
-本節規定後續實作的 composer，不聲稱已存在 CLI。
+本節規定 composer；§8 已實作 link 匯入 API，coverage 與完整發布 CLI 仍未實作。
 
 1. 驗完整入口、不可變 bytes／commit、決定與全歷史續版鏈；由 review_context 重播歷史來源。缺 raw／批次／recipe／hash、錯 locator／語言／父層或來源歸屬均是輸入錯誤，整次失敗，不把失敗行藏成 unknown。
 2. 用既有 registry／TextPlan 的公開身分與名稱觀測解析 SVE 卡／面／版次，包含 pending wording；不因 current 尚未決定丟掉 identity。歷史目標合法退役或相關名稱／目標來源變動屬 freshness 問題，不能轉移到猜出的替代卡。
@@ -148,6 +148,8 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 單一名稱保留 official_svwb／official_sv1、digital_official；效果翻譯仍 unofficial，取了官方卡名不升整段效果權威。缺官方候選可走另外已採納的專案選詞或明示 pending／原文，不自動採納草稿譯名。printed 的缺譯也不回用 current 譯文。
 
 ## 7. 草稿遷入前置與反例驗收
+
+正式採納資料的核對背景必須在程式擠壓合併後，用 **main 歷史中保留的完整 40 碼 commit** 產生；背景的 program_revision、依賴與 parser recipe pins 都須能由保留的不可變版本驗回。不要使用擠壓合併後不會留在 main 歷史的功能分支 commit，也不能只替換 SHA 而沿用未重驗的 hash。候選工具在功能分支產生的測試背景不因此取得正式採納資格；實際採納前須以 main 的版本重建核對背景，再依真人事件產生成員與收據。
 
 研究資料只提供候選與先前比對線索。正式遷入須核對每個 SVE 永久 ID／面、數位 official_id／phase、凍結兩端名字、實際採納者／時間／checked 範圍；缺來源、面定位或真人事件就列待件。`needs_decision=false` 不自動生成 confirmed 或 sampled；自譯卡名的 glossary 委託不授權數位同卡關係。首批只遷 link，coverage 依 §4 留未知。風味文字、單卡自由覆寫與其他 intake 不在本契約範圍。
 
@@ -219,3 +221,34 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 | D18／I | sv1 代碼 5／6 對 SVE nightmare；另對照未列的新代碼、nemesis 或對到 SVE 其他職業 | 前者僅通過職業分層條件，仍驗其餘條件與真人採納；後者不通過，不由工具補表或以 null 相等放行 |
 
 docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易、來源重播、閉包及名稱呼叫接線。真實遷入另報能重驗的採納數、232 筆待決及新增待件、覆蓋範圍／as_of，不用合成測試數或草稿信心當人工採納數。
+
+## 8. 實作入口與離線候選報告
+
+`digital_links.loader.load_links(authored_root)` 驗全入口並返回不可變 snapshot；每次取封套得到獨立的型別化值。第一版只接受 links，coverage 路徑／kind 明確拒絕，沒有紀錄即未知。`digital_links.importer.Inputs` 驗本機入口 bytes 與明示 authored commit 完全相同，再把 index／分片 exact 與 canonical hash 納入 `digital_link_authored` 設定。不以目前 working tree 或單一分片代替全入口。
+
+建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{store_id,batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 沿既有 registry pin；`translation_recipes` 沿既有凍結 parser pin。`digital_evidence` 沿既有 `translations.digital.configuration()`，列明示 API refs 與 targets。歷史封套的 review_context 分別由不可變 Git 驗程式／依賴與 recipe，使用目前解析器重驗凍結證據；目前建置才驗載入的執行期；本次來源另驗全部名稱閉包，不能只交目標語或已選目標的子集。
+
+在 caller-owned transaction 內先呼叫 `populate_links()`，再交結果給 `populate_name_translation(..., links=result)`。獨立的 `import_links()` 包裝才開 transaction。結果含 fresh records、stale／withdrawn record keys、決定對照及 F1 input record。它按 card／face 索引已驗的 terminal records；`result.eligible(db, sources, revision_id)` 每次仍驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision。`select_name(..., eligible_links=...)` 是此證據範圍內的 DB 選詞工具，不另建名稱算法。
+
+啟用 `digital_link_authored` 的名稱匯入缺 result 即拒絕。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時仍拒絕歧義。pending wording 的 JP revision 同樣可驗；printed owner、語義指派、translation use／selection 仍由 #53 接續，不能用本 API 宣稱已完成它們。匯入器只做 partial F1 verify；完整建置必須把 result.record.uses、逐 owner 的 sources.uses 及其他階段使用合併，用 `input_record(...).verify(..., complete=True)` 驗實際 DB raw source 閉包後才輸出。
+
+### 8.1 候選工具
+
+`sve-carddb digital-links candidates` 只讀私人研究草稿與明示凍結來源：
+
+```bash
+sve-carddb digital-links candidates \
+  --draft /absolute/private/research.json \
+  --context /absolute/private/context.json \
+  --repository /absolute/repository \
+  --store declared-store=/absolute/archive \
+  --output /absolute/private/candidates.json
+```
+
+context 是既有 BuildContext JSON，含上述來源批次、registry 與 translation recipes；程式與新增 runtime 依賴都須釘住。候選模式不要求正式 digital-links 入口，正式匯入不讀研究草稿。store 可重複指定不同 ID，不開 live manifest、不抓網路。output 必須絕對、非 symlink 且與 repo／來源／草稿／context 隔離；暫存完整寫好才替換報告，不寫 authored 或採納決定。
+
+工具重播同遊戲全部凍結 API 頁，sv1 限完整 cards URL，svwb 限 include_token=1 的未篩選頁，驗 count／offset／card_details 閉包。不用 data.cards 的稀疏索引代替內容。完整目錄中另有同名異譯或缺目標語會使第一層失敗；未知職業／卡種也不能當相同。候選卡種目前以複合原文分隔後的基本標籤做固定表比較，僅是機械分層啟發式，不是正式詞彙採納；正式分類沿已採納詞彙，後續候選工具應接其推導結果，不能由切字結果授權採納。SVE 頁只沿 registry 明示 face map 配面，所有命中名稱的版次／面都比較。數位實際 phase 列作 possible_phase，仍需真人明示配面，不能由順位替他決定。
+
+報告不含名稱／卡文，只有草稿行號、ID、name_ref/hash、可能的面及機械失敗條件。summary 的 row 是草稿行，source_occurrences 是來源關係出現次數；by_game 的 tier 是承襲整列分層，local_failures 只計該遊戲，whole_row_failures 包含其他遊戲影響。失敗條件有重疊，不能直接相加。原待決、mixed 或任一條件不成立均留第二層；confidence 不提高門檻，也不寫 sampled／confirmed 或 checked 集合。reason 只說機械比較，沒有真人採納事件。
+
+報告保存 draft_hash、完整 F1 使用、職業表 mapping_hash、result_hash 與 adoption_background。result_hash 是加入 result_hash／adoption_background 前的 canonical 報告 hash；adoption_background 把 recipe／草稿／結果／對照表 hash 放入 review_context 設定，移除尚未產生的本入口 pin。後續採納仍需維護者實際抽樣／逐筆確認、明示 card／face／phase 及來源，再另產生正式 record 和收據；候選 hash 與分層通過不代表關係已採納。
