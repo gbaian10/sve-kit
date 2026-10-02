@@ -15,6 +15,7 @@
 | [卡圖衍生檔契約](image-variants.md)           | 直向／橫向五檔 WebP、裁切取整與原圖邊界                                           |
 | [插畫裁切覆寫](image-crop-overrides.md)       | 來源鍵與 raw hash、無索引分片、輕量核可收據、建置端框比對與重印診斷               |
 | [來源歸檔與凍結輸入](source-archive.md)       | raw 歷史、版本 inventory、鎖與一致副本、保留及備份恢復                            |
+| [構築規則與禁限採納](construction-adoption.md) | Standard 專用封套、來源登錄、有限 ref／CR 引用與 coverage／unknown 邊界 |
 | [容量與記憶體預算](size-budget.md)            | 卡表快照的容量門檻、量測方法與目前結論                                            |
 | [建置表實作分期](implementation-tiers.md)     | 121 表各自的實作 tier（T0～T3）與首發必要集合                                     |
 | [身分修復與決定續版](identity-repair.md)      | 已核可的不可變續版、指名撤回、完整面／插畫移轉與有效投影                          |

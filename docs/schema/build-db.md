@@ -240,6 +240,8 @@ ruling 無 current 反向 FK；只有唯一 current 可自動選，若多筆 cur
 
 `deck_role` 是建置推導：token/ep/sep→extra，evolve/advance→evolve，leader→leader，其他→main；魔法のアイテム等例外用 `deck_role_override`。雙面以卡片 layout/構築規則決定整卡角色，不逐面塞不同區；衝突交人工。
 
+構築人工採納入口、凍結來源、必要 CR 閉包、有限 ref 與日期／unknown 邊界見 [construction-adoption-v1](construction-adoption.md)。首批只採日英 Standard 的可查 profile／禁限資料，其他賽制保持 unknown；資料 ready 不代表整副牌合法。一次性抓回原檔須先離線正式登錄／seal／備份驗回，不能用研究樣本或入口漏公告的清單宣稱 complete。該契約的 CR context／coverage as_of 等欄位方案尚待 carddb 表定義與機器契約一起實作，本 docs 單位不改上列權威欄位。
+
 ## 8. 數位對應與語音
 
 | 表                      | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                          |

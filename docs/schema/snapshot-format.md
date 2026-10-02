@@ -287,3 +287,7 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 勘誤巢狀 `versions[].changes[]` 的 `before`／`after` 是公告提供的逐欄位變更片段，消費端須明示是片段，不補全文或還原舊版次印刷文字。保留同一卡全部已知公告；`announced_on` 為 null 時省略日期，不能拿抓取／生效時間代填。只有引用時保留能力限制，不造空公告，也不將其列入正式 `errata_card_ids`。
 
 逐區 reskin 在實際來源、current 與人工證據入庫後重新計算，透過 `Decisions.related_regions` 發布。只有一區成立時只公開該區關係，不繼承 DSL 或建牌身分。本離線入口只輸出勘誤待核對限制，沒有確認或解除接點；確認契約與核對結果另行接入，不建立新的 current 採納。
+
+### Standard 構築資料與固定引用的實作邊界
+
+[construction-adoption-v1](construction-adoption.md) 定義首批 JP／EN Standard 的來源、採納與必要 CR 引用，不承諾整副牌合法性。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。
