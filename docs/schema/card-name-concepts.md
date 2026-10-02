@@ -16,14 +16,16 @@ SVE 永久 card／face 身分及 exact 名稱如何對到已採納的 `category=
 | rules_name／face_rules_name | 構築計數的同名單位及特殊規則名稱，不是 card_name glossary 關聯；不能把構築同名當同概念 |
 | identity-transition-v1 | 沿有效身分重播驗永久鍵與父卡；不能從 URL alias、舊牌組提示或同名字串推譯名關聯 |
 
-`context_assignment` 的鍵是來源 owner／field／ordinal，而非永久 card／face；既有 data 也沒有核對時
-registry／transition 基準，不能單靠它替 `{kind:card,id}` 選面或證明修復後仍是同概念。
-因此新增**獨立關聯 kind**，只記身分與名稱概念的人工關聯；語義 variant、glossary、數位對應與選用仍各走原入口。
+`context_assignment` 的名稱 owner 是面修訂，修訂 ID 已包含永久 face／地區／內容指紋，
+並非沒有綁定永久面。它也會隨卡文勘誤換 ID，即使名稱不變；例外關聯以永久卡／面與 exact 名稱
+為鍵，避免因此失去已採納的同概念證據。它不取代語義 Code 的人工採納或官方同卡證據。
+因此新增**例外關聯 kind**，只記同字異義、改名／別名及 EN 獨有等需要人工證明的例外；
+預設按 §3 自動推導，不需要關聯紀錄。語義 variant、glossary、數位對應與選用仍各走原入口。
 不在 glossary_term 塞 card_id／face_id，不以永久卡 ID 作 concept_key，不重算已採納 key。
 
 ## 2. card_name_concept 採納格式
 
-新 kind `card_name_concept` 歸 `translations/overrides/<filing_key>/<sequence>.yaml`，
+新 kind `card_name_concept` **只記例外**，歸 `translations/overrides/<filing_key>/<sequence>.yaml`，
 沿翻譯契約 §2 的 index、分片五欄、完整 record 五欄、單 kind／單 decision、全入口驗證、
 排序成員與 canonical hash。filing_key 只歸檔，例如 `name-concepts`，沒有選用優先序。
 不新增永久庫、公開表或新的 index；`translation_authored_format=1` 的既有 glossary record 不加欄。
@@ -49,10 +51,12 @@ data **恰為** `{subject,term_id,source_ref,identity_basis,reason,adoption_no,p
 核對時由 source_ref 的凍結卡頁來源、原樣 region／card_no、parser source_index 與基準的
 source_face_map **共同**驗 `(card_id,face_id)`，不得僅驗外鍵、依面 ordinal 猜對應或依名字找卡。
 原始 registry 的每筆 observation／cross-region 證據及所有相關 transition／來源均須可驗。
-概念的 exact `source_ja` 與 SVE JA 名稱相同時仍要有這份身分關聯，不把字串相等當人工採納。
+概念的 exact `source_ja` 與 SVE JA 名稱相同且唯一時，依 §3 推導即可，**不得要求另簽關聯**。
+同字異義需要指定不同概念時才記例外；預設推導不新增譯詞或人工採納決定。
 名稱不同但確屬同概念（別名／改名）或 EN 名稱，reason、來源證據與人工核對必須支持此關聯；
 不要求 EN 字串等於 source_ja，不以已存在 JA 關聯自動擴張 EN 範圍。
 
+下列門檻**僅適用例外關聯**，不適用每個卡名或每個新卡包的機械推導。
 decision 沿翻譯契約的完整封套：scope=batch、category=card_name_concept、
 policy_id=card-name-concept-v1、state=sampled/confirmed，採**實際人工**核對。
 sampled 需非空真人樣本；confirmed 的 sample_ids 為全體 checked 成員。關聯與 context_assignment 各自成批。
@@ -62,29 +66,49 @@ sampled 需非空真人樣本；confirmed 的 sample_ids 為全體 checked 成�
 ## 3. 名稱 owner 的預設綁定
 
 名稱來源 owner 仍只有 `face_revision.name`、以及實際已知的 `printing_face.name`，
-field=name、ordinal=null。工具依**實際選中原文**的永久 card／face、語言與 exact hash 查有效關聯，
-唯一命中時得到 term_id；缺關聯／已撤回則列 `missing_name_concept`，不靠全 glossary 搜同字補洞。
-同一選擇鍵只允許一條採納鏈，不能同時指兩個概念。
+field=name、ordinal=null。每次建置依真正選中來源的有效永久 card／face、語言及 exact 名稱重算，
+**預設不寫任何 authored 關聯**，也不因新卡包、再錄或無關身分追加要求真人抽查。
 
-一般關聯的預設為 `variant=default`。已有 context_assignment 時，source_hash 必須吻合實際 owner，
-concept_key 必須等於關聯 term 的 **concept_key**（不是帶 term: 前綴的 id），variant 依該採納指派。
-指派與關聯矛盾是建置錯誤，不能以檔案順序取其中一份。
+先驗所有採納入口的完整歷史／hash／來源閉包，然後按以下順序解析：
 
-同語言、同 exact 原文若被採納為不同概念，不能全塞 default context；須為各語義有理由地採納
-context_assignment，再各自用 `(source_unit_id,variant)`。未完成消歧時列
-`ambiguous_name_concept`，受影響名稱／引用回原文，不任取一個譯詞或以 card_id 機械生成 variant。
-同字且同概念則共用同一 term／variant，不因 owner 或官方資格不同就開新語義。
-不存在人工指派時 default 只在已驗無歧義的集合可用；新 owner 加入使集合歧義須重驗舊用途。
+1. 查該 `(card_id,face_id,source_lang,source_hash)` 的有效例外關聯。唯一且非 null 時使用它的
+   term_id；同鍵只能有一條鏈。撤回或沒有例外時回預設推導，不把撤回當永久缺譯。
+2. 預設以 **`(來源語言,完整 exact 名稱字串)`** 對已採納 `category=card_name` 概念的原文：
+   frozen_source 依凍結引用／span 重建，authored_concept 依已採納人工原文；不修剪、正規化、
+   模糊比對或依譯文合併。恰好一個 term 才使用，default context 依既有 recipe 重建。
+   現行 glossary 概念原文語言為 ja，不能把 source_ja 當 en，不能拿數位英文名猜同概念。
+   EN 獨有／別名須走有證據的例外；JP／EN 的來源選擇仍先遵守既有契約，不借此放寬。
+3. 在未有有效人工消歧時，以下三種情況停止該名稱的推導、回原文並列待人工報告：
+
+| 報告 reason | 機械條件 | 後續處理 |
+| --- | --- | --- |
+| ambiguous_name_concept | 同語言、同 exact 名稱對到兩個以上已採納 card_name 概念 | 人工確認概念與語義分支，採納例外關聯／必要的 context_assignment |
+| missing_name_concept | 沒有任何概念對得上 | 新卡先採納概念／choice；已存在概念的改名、別名或 EN 特例才採納關聯 |
+| conflicting_official_name | 該 owner 自己有效同卡連結所得官方譯名，與候選概念的有效目標語 choice 不同 | 列衝突等人工消歧，不以來源優先序蓋過、不借其他 owner 官名 |
+
+第三項沿 `names.py` 已有的同原文不同官方名稱歧義防線，#53 並須在概念選詞與該 owner 的
+官方 API 結果之間作同等檢查；現有 API 尚未包含這個 glossary 對照，不能宣稱已完整接入。
+有效例外或指派仍須與自己的官方證據相容，錯配不能藉例外豁免。
+報告逐 owner 列永久 card／face、owner ID、語言、source_hash、候選 term_id、reason，
+並分別彙總三類 owner 筆數，不輸出原文／譯文。壞外鍵、hash、歷史鏈則建置失敗，不冒充待人工。
+
+有效 context_assignment 的 source_hash 必須吻合實際 owner；concept_key 必須等於選中 term 的
+**concept_key**（不是 term: 前綴的 id），矛盾是建置錯誤。人工指派能消歧時照它的已採納 variant
+推導；例外關聯只證明概念，不自行配發 variant Code。同原文選不同概念仍須有理由的人工語義
+分支，未具足時列 ambiguous_name_concept，不以 card_id 生 variant 或把兩個概念塞同 default。
+同字且同概念則共用 term／variant，不因 owner 或官方資格不同就開新語義。
+新 owner 加入使集合歧義時須重驗舊用途。
 
 取該 term 的有效 target_lang choice，未採納／已撤回列 `missing_term_translation`。
 單一名稱原樣取詞沿既有名稱推導路徑：不新增任意全文 kind、不假造 literal slot；
-translation_term 記概念，dependency_key 釘有效關聯、語義指派、精確 choice record_hash／decision 與來源，
+translation_term 記概念，dependency_key 釘當次推導 recipe／概念來源、實際用到的例外關聯／語義指派、
+精確 choice record_hash／decision 與來源，
 生成 ID／revision／source_hash 沿翻譯契約 §6。將來 renderer 應保留引用追蹤，不從純字串猜加粗位置。
 context/use／selection 仍是每次建置的產物，不寫入 authored。
 
 `printed.name` 先要求該 printing_face 的 printed_text_state 與 exact 名稱可驗，
-再以該版次的原文查關聯，不從 current 填 unknown。
-同一 card／face 的不同歷史名稱是不同 source_hash 鍵，各自可採納到同概念或不同概念；
+再以該版次的原文依本節推導／查例外，不從 current 填 unknown。
+同一 card／face 的不同歷史名稱是不同 source_hash 鍵，各自推導，必要時可採納例外到同概念或不同概念；
 current 改名不搬移舊指派，printed 的有效舊名不因 current 改字被覆寫。
 表記／效果採納仍 pending 時，已知身分及該名稱來源照常參與判斷，不整卡排除。
 
@@ -95,7 +119,7 @@ current 改名不搬移舊指派，printed 的有效舊名不因 current 改字�
 數位 normal／evolved 或第一個 SQL row。雙面卡的 back 不冒充 front；一般進化前後是不同 card，
 不能把前後兩卡以 face 規則合成一張。
 
-解析 card 引用前須有已採納的身分引用，選面後依同區、真正選中名稱來源查 §3 的關聯與 choice。
+解析 card 引用前須有已採納的身分引用，選面後依同區、真正選中名稱來源依 §3 推導概念與 choice，必要時查例外。
 名稱可用來源遵守翻譯契約既有 JP／EN 政策，不以缺 JP 就猜 EN-only，不靠 frozen 名稱字串猜 card_id。
 若規則引用明確指背面／其他名稱，既有 card 參數不足以表達這個選面，
 改用已採納 `card_name` 概念的 `{kind:term,id}` 與 `reference_kind=term`，
@@ -104,7 +128,7 @@ schema 換種類須新模板 ID、重驗 raw span／引用與譯本，不能原�
 沒有足夠證據的引用留待確認，不猜對應；既有「無法對到 card 的名稱可採納原創 term」途徑仍可用，
 但那不宣稱已建立 SVE 身分關聯。
 
-引用缺有效關聯、語義未解、選詞缺譯或目標退役時，整個效果 context 回原文並列原因，
+引用缺可推導概念、語義未解、選詞缺譯或目標退役時，整個效果 context 回原文並列原因，
 不混入未翻卡名後標完整譯文。明確的壞外鍵／hash／閉包則是建置失敗，不吞成缺譯。
 translation_term／dependency_key 保留實際使用的 term、關聯及精確選詞 hash；
 term 的字改由 choice 續版帶動重新渲染，不逐卡重簽關聯。
@@ -112,7 +136,7 @@ term 的字改由 choice 續版帶動重新渲染，不逐卡重簽關聯。
 ## 5. 數位官方名稱不能從共用 context 借資格
 
 官方名稱重用 `select_name()`／`populate_name_translation()` 的 same-card／同面／目標語／frozen 名稱證據。
-本關聯與 glossary 官方 choice 只是必要採納資料，**不是 owner 的 digital_link**。
+例外關聯不是預設必填資料；它與 glossary 官方 choice 均**不是 owner 的 digital_link**。
 每個 revision／printing owner 仍須重驗當下有效 card／face、已採納 link 與 exact 名稱；
 same_character、同字、數位前後面名一樣、同 context 或已有官方 translation 均不足。
 printed 名稱與凍結的可用官方名不符時不可借 current；第三張無 link 的同名卡不得借前兩張的官名。
@@ -129,11 +153,15 @@ SVWB／SV1、machine／project 與 authority 的既有標示不變，數位官�
 
 ## 6. 身分修復、保留與相容
 
-載入先驗歷史 identity_basis 與關聯當時成立，再對本次有效身分／來源驗適用性。
+預設推導每次建置重算，身分修復後自動反映有效 card／face 與真正選中來源，不搬舊資格。
+例外載入先驗歷史 identity_basis 與關聯當時成立，再對本次有效身分／來源驗適用性。
 卡／面永久鍵不得重配，退役原卡的關聯留歷史，不當作新卡的名稱關聯。
-merge／split／reassign 後，printing 移到新 card／face 須新選擇鍵、新關聯與人工核對；
+merge／split／reassign 後，printing 移到新 card／face，預設仍重新機械推導；
+若仍需人工例外，須新選擇鍵、新關聯與人工核對；
 不得沿修復路由搬 term、僅換 parent 或繼承原卡的名稱／官方資格。
 分拆不能猜哪個新卡承接卡名概念；概念本身仍可在真正確認同概念後被新關聯引用，不改舊 term。
+卡文勘誤換面修訂 ID，但 card／face、語言、名稱 hash 未變時，例外關聯仍有效；
+use／binding 依新 owner 重建，owner 指派的適用性仍依 §3 重驗，不冒用舊修訂的 context_assignment。
 同 subject 仍成立的無關身分追加不要求重簽，F1 另釘本次有效內容；撤回修復也不能使舊翻譯資格自動恢復，
 須重驗有效父卡、來源與指派。若重播能力尚未支援該 transition，建置應拒絕，而不是跳過。
 
@@ -146,30 +174,44 @@ merge／split／reassign 後，printing 移到新 card／face 須新選擇鍵、
 公開仍出實際選中的名稱文字與來源標示，名字在 bootstrap 閉包內；
 無格式升版，公開加粗位置仍由獨立契約處理。
 
-## 7. 合成驗收清單
+## 7. 新卡名概念永久 key 的配發建議
+
+沿術語採納契約的手配英文概念 key，建議 card_name 使用穩定大類 `name.<english_concept_slug>`，
+例如合成概念 `name.test_star`；同字異義加英文語義限定，不能用卡 ID、日文／譯名字串、
+草稿列序或譯文 hash 配 key。英文來源可輔助命名，但不等於採納 EN 譯詞或跨區關係。
+現有 264 概念及 39 分片的 key／hash 一律保留；名稱改字或再錄也不重配。
+
+這是給協調者決定的提案，不表示 3,010 筆候選的永久 key 已配發。配發前列候選→概念的完整對照表，
+由獲委託的協調者依既有收據範圍核可；重名／既有 key 碰撞須人工解決，不自動加序號。
+無法確定英文概念命名的候選保持未配發，亦不另造委託格式。
+
+## 8. 合成驗收清單
 
 名稱 `測試星`／`測試月` 等均自撰；ID、hash、收據亦用合成資料。下列是後續實作驗收，非已執行測試。
 每條拒絕從已合法、可達該層的成功基例單獨改一個條件。
 
 | 編號 | 合成案例／最小變更 | 預期 |
 | --- | --- | --- |
-| N01 | confirmed 單面卡、凍結 `測試星`、human 關聯、已採納 machine 卡名 choice | default name use 可推導，保留 machine／unofficial |
-| N02 | 兩個 owner 同原文／同概念；再錄增加，相關原文與身分不變 | 共用 term／variant，無需每 owner 新 key 或每次重簽 |
+| N01 | confirmed 單面卡、凍結 `測試星` 唯一對到已採納概念與 machine choice；沒有任何關聯紀錄 | default name use 可推導，保留 machine／unofficial |
+| N02 | 兩個 owner 同原文唯一對到同概念，無關聯紀錄；再錄增加 | 共用 term／variant，無需每 owner 新 key 或每次重簽 |
 | N03 | 同字不同概念，兩份有理由的 context_assignment | 不同語義 context；人工採納不由 card_id 自動替代 |
 | N04 | 雙面前後名稱不同，card 引用與明確 back 的 term 引用各一例 | card 選 front；back 走 term，二者不混；不改參數形狀 |
-| N05 | printed 舊名／current 新名，各有 exact 關聯 | 各自取詞，current 改字不冒用於 printed |
-| N06 | 首筆、連續改 term 的下一筆、null 撤回各一例 | 正確鏈可驗；撤回後缺關聯，不搜索同名回補 |
-| N07 | 缺／多關聯、同鍵分叉、前件 hash 錯、term 非 card_name 或未採納各一次 | 各自拒絕；真正未採納關聯列 missing，壞閉包為建置錯誤 |
+| N05 | printed 舊名／current 新名，各自唯一對到已採納概念，或各有合法例外 | 各自取詞，current 改字不冒用於 printed |
+| N06 | 首筆、連續改 term 的下一筆、null 撤回各一例 | 正確鏈可驗；撤回後重新預設推導，仍歧義則待人工 |
+| N07 | 同鍵多鏈／分叉、前件 hash 錯、term 非 card_name 或未採納各一次 | 各自建置拒絕，不能靜默改走預設 |
 | N08 | 凍結 name hash 改、ref 指效果／另一來源面、identity_basis hash 錯各一次 | 各自拒絕，不只驗外鍵或字串 |
 | N09 | EN 字串不等於 JA 但已人工證明同概念；缺 EN parser pin 的相同案例 | 前者在已支援能力中可用；後者能力拒絕，不偷偷用 JP ref |
 | N10 | 同字不同概念卻無語義指派；指派 source_hash 改；concept_key 與關聯矛盾各一次 | 分別待消歧／舊指派失效／建置錯誤；不得任取譯詞 |
 | N11 | template card 參數加 face_id、依 SQL 首列選 back、卡名猜 card_id 各一次 | 各自拒絕，背面用已採納 term／新 schema |
 | N12 | 兩張同名有不同有效 digital 名稱、第三張無 link | 每 owner 只可用自己的已驗名稱；第三張不借官方 context |
 | N13 | same_character、錯數位面、缺 zh-Hant、已失效 link、printed 名不符各一次 | 各自不能用該官方名稱，原文／可用專案詞仍可顯示 |
-| N14 | split 後新 card／face、merge 退役原卡、reassign 面對應變更各一次 | 舊關聯不搬移；新 exact subject 需新採納，term key 保留 |
-| N15 | 普通 choice 改字；只改無關身分；source 原文換字各一次 | 依賴者重渲染／關聯仍有效／新 source_hash 另採納，不重配 term |
+| N14 | split 後新 card／face、merge 退役原卡、reassign 面對應變更各一次 | 預設重算；舊例外不搬移，新 subject 需例外時才新採納；term key 保留 |
+| N15 | 普通 choice 改字；只改無關身分；source 原文換字各一次 | 依賴者重渲染／關聯仍有效／新 source_hash 回預設、仍需例外才另採納，不重配 term |
 | N16 | 關聯用 delegated_glossary、approved_policy、wording 核可各一次 | 各自拒絕，例外不跨 kind 代簽 |
 | N17 | glossary 加 card_id／改已入庫 record_hash／未知 kind 靜默忽略各一次 | 各自拒絕；新關聯不用改舊 39 分片 |
+| N18 | 無例外／指派，同語言同字串對到兩個已採納概念；移除所有概念各一例 | 分別 ambiguous_name_concept／missing_name_concept，回原文並計數 |
+| N19 | 唯一概念 choice 與 owner 自己已驗同卡連結的官方譯名不同 | conflicting_official_name，回原文等消歧；不能任選較優先來源 |
+| N20 | 已採納同字異義例外，卡文勘誤換 revision ID，但名稱及永久卡／面不變 | 例外仍有效、不重簽；新 owner 的語義指派另驗，壞舊指派不沿用 |
 
 後續 #51／#196 的正式資料、#52／#53 的載入與選用、#37 的有效身分能力須各自驗收；
 本文件不宣稱數位同卡證據、真實委託收據或 repaired registry 已可發布。

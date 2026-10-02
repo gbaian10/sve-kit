@@ -42,7 +42,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 | glossary | vocabulary_choice／vocabulary_kind,vocabulary_code,lang,adoption_no | 介面詞彙標籤的選詞，不假造 glossary_term |
 | glossary | symbol_localization_choice／symbol_id,lang,adoption_no | 記號三語文案的選詞，建置自動選有效譯本，缺譯回原記號 |
 | overrides | context_assignment／owner,field,ordinal,adoption_no | 同字異義的概念／variant 指派 |
-| overrides | card_name_concept／subject,adoption_no | 卡／面與 exact 名稱到已採納 card_name 概念的關聯；subject 與身分基準依卡名關聯契約 |
+| overrides | card_name_concept／subject,adoption_no | 卡／面與 exact 名稱到已採納 card_name 概念的人工例外關聯；subject 與身分基準依卡名關聯契約 |
 | overrides | template_match／context_key,adoption_no | 精確來源下模板拆分或匹配例外；不是渲染全文 |
 | overrides | translation_override／context_key,lang,adoption_no | 撤回或指定模板譯本／術語 choice；不得逐卡任意改同語義句 |
 | overrides | source_exception／card_id,region,scope,adoption_no | 繁中 EN 來源例外；confirmed |
@@ -112,7 +112,7 @@ model_review 在 machine 時必填 `{translated_by,reviewed_by,reviewed_at,text_
 
 ## 5. 概念、選詞與數位證據
 
-card／face 身分與 exact 名稱到 card_name term 的關聯、預設選面、printed／current 區分及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。該入口重用採納封套與 context_assignment，不改 glossary 的永久 key 或既有 data；官方名稱仍須逐 owner 驗數位同卡／同面證據，不能從共享 context 借資格。
+card／face 身分與 exact 名稱到 card_name term 的自動推導與人工例外關聯、預設選面、printed／current 區分及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。該入口重用採納封套與 context_assignment，不改 glossary 的永久 key 或既有 data；官方名稱仍須逐 owner 驗數位同卡／同面證據，不能從共享 context 借資格。
 
 glossary_term.data 為 `{id,category,concept_key,source_ref,source_span,authored_source_ja,missing_source_reason,adoption_review}`；有 frozen 日文欄位時用 source_ref／source_span exact 摘錄重建 source_ja，其餘兩個來源欄為 null；無 raw 的專案概念允許 ref／span 為 null，但名稱與理由必填。互斥模式與委託收據依 [術語採納擴充 §2／§4](glossary-adoption.md#2-專案概念可沒有-raw-locator)，不能用假 locator 或空字串。id=`term:`＋人工首次配發的 concept_key（ASCII `[a-z][a-z0-9_.-]*`）。key 以英文概念命名，如 `action.draw`，不以草稿流水號或原文字串當唯一鍵、不隨譯名重算；同字異義需不同 key。前綴用穩定大類，提案審核後可由獲維護者委託的協調者核可配發；借 EN 名命名不算採納英文。source_ref 不要求數位卡片的 name 欄，故原始詞只出現在效果文時也能登錄。
 
@@ -152,6 +152,8 @@ ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital
 | translation_override: `context_key,lang,action,template_revisions,term_choices,reason` | context_key={source_unit_id,variant}；action=suppress/pin/default，後兩陣列在 pin 指定 `{template_id,revision}`／`{term_id,choice_record_key,record_hash}`，其餘為空；只選已採納依賴，不存另寫全文 |
 
 owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派列失效、不搬到新字串；新原文無歧義則回 default 自動重建，有歧義才等新指派。無例外時選各模板最高已採納譯本與有效術語 choice；pin 是已採納的明示例外。普通機械匹配只選當前有效且可無歧義匹配的模板，superseded 模板保留來源歷史；新分叉未能唯一匹配即列人工失敗清單，不任取 ID 最大者。
+
+名稱的預設推導以 `(來源語言,完整 exact 名稱)` 唯一對到已採納 card_name 概念；不需逐卡關聯紀錄。無概念、多概念或 owner 官方名稱與概念譯名衝突時回原文等人工；精確規則與例外依 [卡名概念關聯契約 §3](card-name-concepts.md#3-名稱-owner-的預設綁定)。
 
 **binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
 

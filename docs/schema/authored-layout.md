@@ -211,7 +211,7 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-card_name_concept 於 translations/overrides 採納卡／面與 exact 名稱到 glossary 概念的關聯；來源 hash、身分基準、預設名稱面及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。不更改已採納 glossary 分片，也不以此關聯替代數位 same-card link。
+card_name_concept 於 translations/overrides 只採納卡／面與 exact 名稱到 glossary 概念的人工例外；預設唯一 exact 名稱匹配每次建置自動重算，不寫關聯紀錄。來源 hash、身分基準、預設名稱面及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。不更改已採納 glossary 分片，也不以此關聯替代數位 same-card link。
 
 術語的 2026-10-02 擴充見 [術語採納、委託收據與加粗](glossary-adoption.md)：這是維護者委託下的協調者決定，不記為使用者親自核可。採納入口保留真實決定者、未驗主張來源與連續加粗選擇；class／card_type 仍走 vocabulary。公開位置／加粗格式擴充只列影響提案，沒有更改現有快照。
 
