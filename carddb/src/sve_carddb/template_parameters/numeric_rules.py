@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-VERSION = "numeric-rule-proposals-v2"
+VERSION = "numeric-rule-proposals-v3"
 RECOVERY_PENDING = "numeric_recovery_amount_requires_review"
 ORDINAL_PENDING = "numeric_ordinal_requires_review"
 RECOVERY = re.compile(r"^\u56de\u5fa9")

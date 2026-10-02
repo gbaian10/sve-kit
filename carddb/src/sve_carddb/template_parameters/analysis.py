@@ -188,7 +188,7 @@ def numeric_role(
     """Unit/prefix grammar excludes signs, ASCII identifiers and undecided bare numbers."""
     before = normalized[: position.start]
     after = normalized[position.end :]
-    if before.endswith(("-", "+", "−")):
+    if before.endswith(("-", "+", "−", "＋", "－")):
         return None, ("signed_numeric_requires_review",)
     if (
         (before and re.search(r"[A-Za-z0-9_]$", before))

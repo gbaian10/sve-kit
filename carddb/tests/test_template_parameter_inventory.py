@@ -10,16 +10,20 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+import sve_carddb.template_parameters.__main__ as cli
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.registry.storage import encode
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
-from sve_carddb.template_parameters import __main__ as cli
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
 from sve_carddb.template_parameters.models import Candidate
 from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.output import write
 from sve_carddb.template_parameters.references import References
+from sve_carddb.template_parameters.rule_candidates import BY_ID
+from sve_carddb.template_parameters.rule_candidates import (
+    configuration as candidate_configuration,
+)
 from sve_carddb.translations.models import Index
 
 from .template_source_fixtures import template_case as template_case  # ruff: ignore[useless-import-alias] -- reusable immutable offline Git/archive fixture
@@ -31,6 +35,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.template_parameters.inventory import Field
     from sve_carddb.template_parameters.spans import Located
+    from sve_carddb.template_sources.inventory import Scan
     from sve_carddb.template_sources.normalizer import Part
 
     from .template_source_fixtures import Case
@@ -98,6 +103,39 @@ def test_candidate_inventory_replays_every_first_checkpoint_entry_and_field(
     assert object_value(report["legacy_member_coverage"])["complete"] is True
     config = object_value(object_value(report["parameter_recipe"])["config"])
     assert config["numeric_classifier"] == configuration()
+    assert config["candidate_classifier"] == candidate_configuration()
+    assert (parameter_result.args.output / "rule-candidates.jsonl").read_bytes() == b""
+
+
+def test_cli_passes_the_exact_opt_in_set_without_changing_the_original_candidates(
+    parameter_result: Result, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    args = copy.copy(parameter_result.args)
+    args.enable_candidate_rule = list(BY_ID)
+    args.output = tmp_path / "enabled"
+    original = inventory.build
+    seen: list[tuple[str, ...]] = []
+
+    def record(
+        sources: FrozenSources,
+        scan: Scan,
+        refs: References,
+        *,
+        enabled_rules: tuple[str, ...] = (),
+    ) -> Candidates:
+        seen.append(enabled_rules)
+        return original(sources, scan, refs, enabled_rules=enabled_rules)
+
+    monkeypatch.setattr(cli, "build", record)
+    report = cli.run(args)
+    assert seen == [tuple(sorted(BY_ID))]
+    config = object_value(object_value(report["parameter_recipe"])["config"])
+    assert config["candidate_classifier"] == candidate_configuration(tuple(BY_ID))
+    assert report["complete"] is False
+    for name in ("candidates.jsonl", "legacy-lineage.jsonl", "field-spans.jsonl"):
+        assert (args.output / name).read_bytes() == (
+            parameter_result.args.output / name
+        ).read_bytes()
 
 
 def test_outputs_have_only_hashes_ranges_schemas_and_fixed_reasons(

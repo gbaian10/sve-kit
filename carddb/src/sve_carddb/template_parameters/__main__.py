@@ -15,6 +15,10 @@ from sve_carddb.template_parameters.inventory import build, summary
 from sve_carddb.template_parameters.numeric_rules import configuration
 from sve_carddb.template_parameters.output import write
 from sve_carddb.template_parameters.references import adopted
+from sve_carddb.template_parameters.rule_candidates import BY_ID, selection
+from sve_carddb.template_parameters.rule_candidates import (
+    configuration as candidate_configuration,
+)
 from sve_carddb.template_sources.checkpoint import compare, parse_legacy
 from sve_carddb.template_sources.inventory import coverage, scan_batch
 from sve_carddb.template_sources.models import Recipe
@@ -50,6 +54,7 @@ def _evidence(args: argparse.Namespace) -> Sources:
 def run(args: argparse.Namespace) -> dict[str, JsonValue]:
     """Pin full first-party code, exact adopted concept closure and proposed vocabulary inputs."""
     pins = recipes(args.repository, args.code_revision)
+    enabled = selection(tuple(getattr(args, "enable_candidate_rule", ())))
     sources = FrozenSources(args.store, args.store_id, args.batch_id)
     refs = adopted(args.authored, _evidence(args))
     proposal_bytes = args.vocabulary_proposals.read_bytes()
@@ -61,6 +66,7 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
         "source_recipes": [p.model_dump(mode="json") for p in pins],
         "references": refs.pins,
         "numeric_classifier": configuration(),
+        "candidate_classifier": candidate_configuration(enabled),
         "adoption_status": "candidate_only",
     }
     code_path = "carddb/src/sve_carddb/template_parameters/analysis.py"
@@ -76,7 +82,7 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
         config_hash=digest(canonical(config)),
     )
     scan = scan_batch(sources, repository=args.repository, pins=pins)
-    candidates = build(sources, scan, refs)
+    candidates = build(sources, scan, refs, enabled_rules=enabled)
     legacy_bytes = args.legacy.read_bytes()
     report: dict[str, JsonValue] = {
         "parameter_candidates_format": 1,
@@ -126,6 +132,13 @@ def main() -> None:
         parser.add_argument("--" + name, required=True, type=Path)
     for name in ("store-id", "batch-id", "code-revision"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument(
+        "--enable-candidate-rule",
+        action="append",
+        choices=sorted(BY_ID),
+        default=[],
+        help="Emit a pending recognition proposal; this switch grants no approval",
+    )
     args = parser.parse_args()
     try:
         report = run(args)
