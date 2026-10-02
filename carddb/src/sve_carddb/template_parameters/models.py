@@ -5,7 +5,7 @@
 from itertools import pairwise
 from typing import Annotated, Literal, Self
 
-from pydantic import Field, JsonValue, model_validator
+from pydantic import Field, JsonValue, field_validator, model_validator
 
 from sve_carddb.registry.records import Hash, RecordData, Text, UInt
 from sve_carddb.template_sources.normalizer import Role
@@ -64,6 +64,14 @@ class Slot(RecordData):
 class Schema(RecordData):
     format: Literal[1] = 1
     slots: tuple[Slot, ...]
+
+    @field_validator("format", mode="before")
+    @classmethod
+    def integer(cls, value: object) -> object:
+        """Literal validation would otherwise coerce bool/float into an integer version tag."""
+        if type(value) is not int:
+            raise ValueError("Parameter schema format must be integer one")
+        return value
 
     @model_validator(mode="after")
     def ordered(self) -> Self:

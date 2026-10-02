@@ -37,6 +37,17 @@ def checked(model: type[RecordData], data: dict[str, object]) -> None:
         ) from error
 
 
+@pytest.mark.parametrize("value", [True, 1.0, "1", None])
+def test_parameter_format_is_exact_integer_not_a_coercible_literal(
+    value: object,
+) -> None:
+    with pytest.raises(
+        ValueError, match=r"\AParameter schema format must be integer one\Z"
+    ):
+        checked(Schema, {"format": value, "slots": ()})
+    assert Schema(format=1, slots=()).format == 1
+
+
 @pytest.mark.parametrize(
     ("model", "data", "message"),
     [

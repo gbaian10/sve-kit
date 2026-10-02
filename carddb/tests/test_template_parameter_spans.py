@@ -42,6 +42,49 @@ def test_token_header_is_a_separate_unanchored_binding() -> None:
     spans.verify(text, located)
 
 
+@pytest.mark.parametrize(
+    "change", ["wrong_role", "other_line", "unanchored", "reordered"]
+)
+def test_anchor_target_and_first_position_order_are_independent_guards(
+    change: str,
+) -> None:
+    text = "A（Synthetic）B\nC"
+    located = spans.locate(text, partition(text))
+    if change == "reordered":
+        damaged = tuple(
+            replace(item, ordinal=index) for index, item in enumerate(reversed(located))
+        )
+        message = "Source bindings must follow their first source position"
+    else:
+        reminder = next(item for item in located if item.source_span.role == "reminder")
+        target = (
+            reminder.ordinal
+            if change == "wrong_role"
+            else next(
+                item.ordinal
+                for item in located
+                if item.source_span.role == "body" and item.line_ordinal == 1
+            )
+            if change == "other_line"
+            else None
+        )
+        damaged = tuple(
+            replace(
+                item, source_span=item.source_span.model_copy(update={"anchor": target})
+            )
+            if item == reminder
+            else item
+            for item in located
+        )
+        message = (
+            "Inline reminder must anchor to its source-line body"
+            if change == "unanchored"
+            else "Reminder anchor must locate a body in the same line"
+        )
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
+        spans.verify(text, damaged)
+
+
 @pytest.mark.parametrize("change", ["newline", "anchor", "line", "order", "literal"])
 def test_span_verifier_rejects_independently_damaged_coverage_and_anchors(
     change: str,
