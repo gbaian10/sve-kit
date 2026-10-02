@@ -29,10 +29,11 @@
 | `translations/index.yaml` | `translation_authored_format: 1, kind: translation_index, includes, inventories` |
 | `translations/<area>/<filing_key>/<sequence>.yaml` | `translation_authored_format: 1, kind: translation_shard, default_decision_id, records, decisions` |
 | `translations/template-sources/<sequence>.yaml` | `template_source_format: 1, kind: template_source_inventory, recipes, entries` |
+| `template-parameter-rules/<policy_id>.policy.yaml`／`.approval.yaml` | 獨立 `template_parameter_rule_policy`／`template_parameter_rule_approval` 封套；完整欄位見[辨識政策契約](template-parameter-policy.md#1-獨立入口配對與不可變)，不進 translations 的 includes |
 
 area 為 `templates/glossary/overrides/region-reviews`。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔；sequence 為只增三位以上十進位序號。includes/inventories 各映射上述分片／清冊到完整解析內容的 canonical hash。沿 [authored-layout §1／§2](authored-layout.md#2-分片批次決定與來源) 的 YAML 邊界、單檔 <1 MiB／512 KiB 目標、安全路徑及全入口驗證；拒絕缺檔、未索引分片、symlink、hash 不符與未知欄位。新分片驗妥後原子更新 index，舊分片不改。啟用時空集合需明示空映射，缺 index 不是空集合。
 
-record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind、一個 default_decision_id，decisions 恰含該決定。候選與模型審查留在 authored 外；入口只接受達該 kind 門檻的 sampled/confirmed 記錄，不讓 proposed 永久占鍵。不可變物件的 record_key 為 `[kind,...主鍵]` 的 canonical JSON 字串，採納選擇另加 adoption_no，見下表。
+下述 translation_shard 的 record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind、一個 default_decision_id，decisions 恰含該決定。候選與模型審查留在 authored 外；入口只接受達該 kind 門檻的 sampled/confirmed 記錄，不讓 proposed 永久占鍵。不可變物件的 record_key 為 `[kind,...主鍵]` 的 canonical JSON 字串，採納選擇另加 adoption_no，見下表。辨識 policy／approval 是獨立入口，不混進 record kind 清單或此分片決定。
 
 | area | kind／主鍵 | 採納內容 |
 | --- | --- | --- |
@@ -51,7 +52,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 | region-reviews | region_text_review／card_id,region,jp_hash,region_hash,adoption_no | §7 的跨區規則與顯示核對，含 counterpart 採納 |
 | region-reviews | region_divergence／card_id,region,field_scope,adoption_no | §7 的明確差異／解除；confirmed |
 
-本文封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體，除下述模板政策例外及 [glossary 委託收據](glossary-adoption.md#4-實際人工或委託採納) 外仍須人工核對；glossary 委託決定記實際協調者與事件、不計維護者親自審閱。policy_id 指精確政策，新增／改內容必換決定。
+translation_shard 的決定封套一律 **scope=batch**，單筆也是一成員 batch，無 record-scope 決定 ID 的另一配法。用 authored-layout §2 的 canonical recipe 計完整 record 的 `record_hash`（含 evidence），members 為排序的 `[record_key,record_hash]`，membership_hash 為該陣列 hash，decision.id=`d:`＋完整 membership hash 的 64 hex。這裡的 record_hash 就是既有文獻的 semantic hash，不另創 recipe。sampled 需真人、時間、非空樣本子集；confirmed 的 checked 集合覆蓋全體，除下述模板政策例外及 [glossary 委託收據](glossary-adoption.md#4-實際人工或委託採納) 外仍須人工核對；glossary 委託決定記實際協調者與事件、不計維護者親自審閱。policy_id 指精確政策，新增／改內容必換決定。
 
 **長尾模板譯本的政策採納例外**：比照 [authored-layout §9.5](authored-layout.md#95-核可規則confirmed-封套與人工確認) 的 approved_rules，僅 template_translation 可用 `adoption_review.mode=approved_policy`。adoption_review 恰為 `{mode,policy,initial_sample_decisions}`，mode=human/approved_policy；human 的 policy=null、initial_sample_decisions=[]。approved_policy 的 policy 為 `{policy_id,authored_revision,path,hash,approval_receipt_hash}`，釘完整 commit、repo 相對路徑、canonical 政策內容 hash 與核可收據 hash；initial_sample_decisions 是非空、排序唯一的 `{decision_id,membership_hash}` 陣列，引用實際完成首輪高頻抽查的 human sampled 決定。政策與收據須能驗明 §1 的抽查集合、無分歧長尾適用範圍與 machine 標示，不以本文件的核可敘述代替真實首輪收據；相關來源、分片及收據 bytes 全部納入 F1。
 
@@ -70,6 +71,10 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 ## 3. 模板來源清冊與 ID
 
 不新增物件庫。runtime 從正式清冊指向的**已封存卡頁**、釘住的 extractor/normalizer 重建內容，不讀研究草稿或 latest cache。清冊 recipes 每項 `{id,code_revision,code_path,code_hash,config,config_hash}`；code_path 是 repo 相對檔案，code_revision 為完整 commit，config 為 canonical JSON。缺正式實作或不能重現舊結果時停止遷入，不能拿未版控的腳本路徑作 runtime 依賴。
+
+啟用辨識政策的分類／參數 recipe.config 明示 `recognition_policy=null` 或 `{policy_id,authored_revision,path,hash,approval_receipt_hash}` 五欄 pin，完整納入 config_hash；載體與驗證依[辨識政策契約 §4](template-parameter-policy.md#4-五欄-pin引用與-f1)。政策尚未被完整 loader 支援時只能留候選，不以開關或文字表態清除待審原因。歷史清冊的 config／pin 保留原值，不原地補欄或改標新 matcher commit。
+
+術語辨識的 recipe config 另釘 references.glossary 的 authored_revision、index_hash 與全部分片 exact bytes hashes；升術語 pin 也須完整重播原位置比對，不能把新同名歧義改選另一概念當成功。辨識核可不是清冊、來源覆蓋、模板定義或譯本採納，四者各自驗收。
 
 清冊 entries 每項 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash,legacy_fingerprint}`。source_ref 定位完整欄位，line_ordinal 自 0，role=body/reminder/token_header/layout/name/label/flavor；各 role 的更細定位由 §4 的確定性分段及模板 source_span 給出。flavor 的行序 0 代表完整段落，限 printing_face.flavor，沿 [風味整段規則](flavor-translation.md#2-整段分段與清冊)。legacy_fingerprint 為舊 normalized 全 SHA-256，新 ID 為 null。完整來源與 recipe 足以重建 exact normalized，normalized_hash 驗證結果。多個來源產相同 ID 仍比完整內容，檢碰撞涵蓋所有歷史清冊，不能只看本批。
 
@@ -104,6 +109,10 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 ### 4.2 參數 schema 與驗回來源
 
 parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,type,occurrences,reference_kind,min,max}`。name 為 `[a-z][a-z0-9_]*`，唯一；type=uint/literal/reference，reference_kind 為 card/term/vocabulary 或 null，uint 的 min/max 為安全非負整數，其餘為 null。occurrences 是 normalized_text 的不重疊 `{start,end}` 陣列；同 slot 多次出現值須一致。slot 陣列按首次位置排序。舊 `『X』` 的 slot 只覆蓋中間 X，左右引號仍是 literal；params 的 uint/literal 是整數／字串，reference 為 `{kind:card,id}`、`{kind:term,id}` 或 `{kind:vocabulary,vocabulary_kind,vocabulary_code}`，須符合宣告種類與 FK。數字正規化前的 raw 字串與數值分開保存；reference 綁永久概念 ID，不能靠顯示名猜同卡。literal 僅給已核可的格式片段（例如 layout），不得包住整句外文冒充翻譯。
+
+術語引用 slot 可覆蓋 normalized_text 中原樣保留的名稱，不必換成佔位符；該模板的名稱固定、大括號仍 literal，舊指紋不變。只以唯一 exact 已採納概念／category／record_hash 綁定，完整術語入口 pin 與升版重播依辨識政策契約。四條能力門檻規則（combo／lesson／necrocharge／spell_chain）只將數字作 uint slot，已採納名稱只供 context 檢查、仍為 literal；不借此核可中文譯名或新增名稱引用。
+
+數量／增減幅度的 schema 界值為 0..9007199254740991，序數為 1..9007199254740991；此為協調者依授權採用的技術界值，不寫進辨識政策的語義授權。原樣十進位／safe unsigned／序數非零等匹配條件仍須釘住；正負號留 literal，只以非負幅度綁 slot。完整欄位依賴（例如選項引導與全部標號）按各來源重播，不從同一舊 ID 的其他成員借證據。
 
 例（全為自撰）：原文 `N測試２` 重建 normalized=`N測試N`。唯一 uint slot `count` 的 occurrences=[{start:3,end:4}]、min=0、max=9007199254740991；第一個 N 是 literal。若另一成員在位置 0 也是數字，兩者不能共用此 schema，分新模板；不能依候選分組的字串相同合併。
 

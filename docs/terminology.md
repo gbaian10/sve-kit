@@ -96,6 +96,7 @@
 | **加粗選擇** | glossary emphasis choice | rule_term 的可修訂加粗採納紀錄；其他術語由型別推導 |
 | **委託採納收據** | delegated adoption receipt | 保存具體委託範圍、實際協調者與決定事件，不算維護者親自核可 |
 | **模板來源清冊** | template source inventory | 保存模板舊 ID 與封存來源／normalizer 的對照，可重建完整內容；不另建永久物件庫 |
+| **參數辨識政策** | parameter recognition policy | 核可精確來源位置的數值／引用角色；以條件 hash、matcher 與真實事件釘住，獨立於模板定義及譯本採納 |
 
 ## 規則與效果
 

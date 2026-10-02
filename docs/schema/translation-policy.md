@@ -16,6 +16,8 @@
 matcher 授權仍屬表記，不是翻譯核可收據；不呼叫 wording 的固定 hash 白名單來放行翻譯。
 glossary delegation／catalog 的真人確認也不借用本例外。
 
+模板參數角色辨識另有[獨立政策／收據契約](template-parameter-policy.md)，其整體對話核可與呈現例子只證明辨識規則授權，不是本文件的首輪 human sampled、模板定義或譯本核可；兩種 policy pin 不能互換。
+
 新增獨立入口，路徑均相對 authored 根：
 
 | 路徑 | 完整頂層欄位 |
