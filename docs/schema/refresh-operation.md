@@ -29,22 +29,39 @@
 既有不可信來源、目的檔案或未完成任務則停止。即使四項設定完整，也不自動封存或備份；
 部分配置仍在開啟 manifest、連網前拒絕非 dry-run 執行。真實抓取須另獲維護者授權，
 操作方須在抓取前後備份 manifest，抓取後明確 seal 對應 scope、獨立 backup 與本批 restore-check。
-URL、轉址、重試與中斷限制見 [README](../../README.md#adding-reviewed-jp-errata-sources)。
+URL、轉址、重試與中斷限制見 [README](../../README.md#adding-reviewed-jp-and-en-errata-sources)。
 
 ### 勘誤新增入口的單一 URL 試跑
 
-`main`／`article`／`.entry-content` 是暫定的保守內容容器條件；目前沒有已保存的官方 JP
-errata／news 頁面可據以確認它們適用於真實勘誤正文。程式合併不取代這項驗證，也不授權試抓。
-維護者另行通知可以抓取後，由指定操作者依序執行：
+入口接受 JP／EN 兩個官方 host 的精確正文 URL 清單，region 與 raw 根依 host 決定；
+JP 存 `raw/jp/errata/`，EN 存 `raw/en/errata/`，kind 均為 `errata`。
+製作清單時保留卡頁原始 href，先離線驗 host／路徑；有尾端雜字、其他路徑或不合規 host 就列出並交維護者處理，
+不猜 slug、不剝除字元、不靜默替換。清單中任何一則不合規，整份清單在開啟 manifest 與發請求前拒絕；
+不得把未經核准修正的 URL 混入正式抓取清單。維護者確認授權後，另建只含已確認精確 URL 的執行清單，
+仍保留原始 href 清單與確認依據。
 
-1. 對已核可的 16 URL 清單做 `crawl errata-new --urls <清單> --dry-run`，確認目的地與資料根沒有 symlink、沒有未完成任務。先取得新的受鎖 manifest 備份。
-2. 從這 16 URL 中選一個，另建只含它的清單，再執行 `crawl errata-new --urls <單一 URL 清單>`。不先對其餘 URL 發出任何請求。
-3. 命令成功後做 after 備份，從關閉副本與已保存 raw 唯讀核對 URL、hash、大小、HTTP metadata 與非空 title／正文容器。只回報 URL、hash、數量與結構旗標，不複製正文、不解析成正式勘誤。
-4. 先 seal 試跑來源的 `jp:errata` scope、獨立 backup 並通過本批 restore-check，再對其餘 15 URL 的獨立清單執行相同備份→抓取→seal→backup→restore-check 流程。成功試跑的 URL 不再重抓；後一批 scope 仍須包含已知試跑版本的閉包。
+正文須符合 `st-Container` → `st-Container_Inner` → `sw-Lower` → `sw-Lower_Wrapper` 的直接子節點鏈，
+具有非空 `sw-Lower_Heading > h1.sw-Ttl`，及直接 `sw-Lower_Container` 內的正文 detail／inner：
+JP 是 `eratta-Detail > eratta-Detail_Inner`（拼字依已保存樣本），EN 暫採同系列的 `errata-Detail > errata-Detail_Inner`。
+inner 內須有非空的直接 `heading > h1.ttl` 與 `contents.sw-Txtarea`；`title` 亦須非空。
+共享外框或一般 `main`／`article`／`.entry-content` 不足以放行索引、首頁或錯誤頁。
 
-試跑出現轉址、驗證失敗、中斷或任何不確定即停止，不執行其餘 15 URL，也不先放寬驗證。
-驗證失敗的 body 不會被本入口保存，不能宣稱已對照其結構；要取得不同的診斷證據或修改選擇器，須另行提出、審核工具及授權範圍。
+JP 選擇器已唯讀比對一份研究正文 HTML；研究 JP 索引／404 與 EN 索引均被拒絕。
+這不是對當前官網頁面的驗證。**EN 沒有本機正文樣本**，detail 類別名由 EN 索引的同系列命名推定，
+尚未驗證。兩個地區都須先單一 URL 試跑，JP 通過不代替 EN 的試跑。
+程式與文件合併不等於授權抓取；維護者明示允許本次範圍後，由指定操作者分地區依序執行：
+
+1. 對該地區已核可且全數通過離線 URL 檢查的精確清單做 `crawl errata-new --urls <清單> --dry-run`，確認目的地與資料根沒有 symlink、沒有未完成任務。先取得新的受鎖 manifest 備份。原始引用有異常的清單不得直接執行。
+2. 從該清單選一個 URL，另建只含它的清單，再執行 `crawl errata-new --urls <單一 URL 清單>`。不先對任何其餘 URL 發出請求；JP 與 EN 各自試跑。
+3. 命令成功後做 after 備份，從關閉副本與已保存 raw 唯讀核對 URL、region、kind、hash、大小、HTTP metadata 與非空 title／正文容器。只回報 URL、hash、數量與結構旗標，不複製正文、不解析成正式勘誤。
+4. 先 seal 該試跑來源的 `jp:errata` 或 `en:errata` scope、獨立 backup 並通過本批 restore-check，再對同地區其餘 URL 的獨立清單執行相同備份→抓取→seal→backup→restore-check 流程。成功試跑 URL 不重抓；後一批 scope 仍須包含已知試跑版本的閉包。若兩個地區都新增，兩個 scope 的閉包及還原驗證都不能漏掉。
+
+試跑出現轉址、驗證失敗、中斷或任何不確定即停止，不執行該地區其餘 URL，也不先放寬驗證。
+驗證失敗的 body 不會被本入口保存，不能宣稱已對照該次回應結構；要取得不同的診斷證據或修改選擇器，須另行提出、審核工具及授權範圍。
 單一頁面通過亦不證明其餘頁面結構一致，其餘 URL 仍逐則接受相同驗證。
+已結束的 `failed-validation` 觀測與相關前後備份一律保留，不刪不改；沒有 Resource、raw 或未完成請求時，
+該 URL 仍是 new。工具修正審核合併且收到重試通知後，操作者取得新的 before 備份再試單一 URL，
+新嘗試新增 fetch_log，不把既有 FAILED 改成成功，也不將它當成 STARTED 來恢復。
 
 ### 勘誤新增入口中斷後的處置
 
