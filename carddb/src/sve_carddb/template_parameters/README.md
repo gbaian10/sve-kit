@@ -125,7 +125,9 @@ Repeat `--enable-candidate-rule RULE_ID` to emit a pending recognition proposal
 from the closed `parameter-rule-candidates-v1` registry. All 17 rules default off.
 Unknown and duplicate IDs fail; selecting a family is not an implicit switch.
 The recipe pins every condition and its canonical hash, the exact enabled set,
-and `recognition_policy=null`. No policy loader or adoption authority is supplied.
+and `recognition_policy=null`. This candidate command does not load approval policies. The separate
+[recognition policy loader](../template_parameter_rules/README.md) validates
+paired receipts and source replay; it grants no template adoption authority.
 Eight earlier numeric grammars have a maintainer statement; this command does
 not interpret that statement as an approval receipt or remove their pending flag.
 
@@ -195,8 +197,8 @@ missing or duplicate labels cannot supply context. Their exact context spans and
 hash travel with each proposal, including when the introduction is on a prior
 line. This is evidence-dependent matching, not a global property of a legacy ID.
 
-The candidate tool and private confirmation-page data are separate from future
-docs, policy loader and authored policy PRs. A confirmation page must bind each
+The candidate tool and private confirmation-page data are separate from
+the recognition loader and future authored policy PRs. A confirmation page must bind each
 rule's condition hash to the eventual merged matcher commit before review.
 No live source, receipt, translation or build/preview integration is introduced.
 
