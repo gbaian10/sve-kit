@@ -1,0 +1,1147 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:430e87873e7339584ebd5b8763f7927159ec0f46b459506f7066dca6b294495f
+records:
+  - record_key: '["glossary_emphasis_choice","term:quantifier.other",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:quantifier.other
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:resource.ep",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:resource.ep
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:resource.sep",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:resource.sep
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.ability",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.ability
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.any_order",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.any_order
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.can_attack",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.can_attack
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.cannot_attack
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.combat_damage
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.cost",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.cost
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.damage",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.damage
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.has_ability",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.has_ability
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.incoming_damage
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.indestructible_by_ability
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.instead",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.instead
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.instead_of",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.instead_of
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.necromancer",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.necromancer
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.nemesis",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.nemesis
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.original_cost",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.original_cost
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.random",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.random
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.same_name",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.same_name
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:rule.vampire",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:rule.vampire
+      value: true
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:stat.attack",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:stat.attack
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:stat.health",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:stat.health
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+  - record_key: '["glossary_emphasis_choice","term:stat.max_pp",1]'
+    kind: glossary_emphasis_choice
+    filing_key: emphasis
+    data:
+      term_id: term:stat.max_pp
+      value: false
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
+          authorization_date: '2026-10-02'
+          scope:
+            - '["glossary_emphasis_choice","term:quantifier.other",1]'
+            - '["glossary_emphasis_choice","term:resource.ep",1]'
+            - '["glossary_emphasis_choice","term:resource.sep",1]'
+            - '["glossary_emphasis_choice","term:rule.ability",1]'
+            - '["glossary_emphasis_choice","term:rule.any_order",1]'
+            - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+            - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.cost",1]'
+            - '["glossary_emphasis_choice","term:rule.damage",1]'
+            - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+            - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+            - '["glossary_emphasis_choice","term:rule.instead",1]'
+            - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+            - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+            - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+            - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+            - '["glossary_emphasis_choice","term:rule.random",1]'
+            - '["glossary_emphasis_choice","term:rule.same_name",1]'
+            - '["glossary_emphasis_choice","term:rule.vampire",1]'
+            - '["glossary_emphasis_choice","term:stat.attack",1]'
+            - '["glossary_emphasis_choice","term:stat.health",1]'
+            - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          decided_by: Claude（協調者，維護者委託）
+          decided_at: '2026-10-02T00:00:00Z'
+          decided_precision: day
+          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:430e87873e7339584ebd5b8763f7927159ec0f46b459506f7066dca6b294495f
+    state: confirmed
+    scope: batch
+    category: glossary_emphasis_choice
+    policy_id: glossary-emphasis-51-v1
+    membership_hash: sha256:430e87873e7339584ebd5b8763f7927159ec0f46b459506f7066dca6b294495f
+    members:
+      -   - '["glossary_emphasis_choice","term:quantifier.other",1]'
+          - sha256:2f62c684a3791b9d3071f3339af6f4e3d0dfa1022e262ef9ef210ba3ea453d08
+      -   - '["glossary_emphasis_choice","term:resource.ep",1]'
+          - sha256:1ae3a6d54d395c44cea8d13a73a60492cae32982e9a3f878842607f8f3217d53
+      -   - '["glossary_emphasis_choice","term:resource.sep",1]'
+          - sha256:da9faf039a4f07e6da2d366d3fe9f947188fc2f24884af16f5d37c90ef97522a
+      -   - '["glossary_emphasis_choice","term:rule.ability",1]'
+          - sha256:a6b8d5ef199130bdd8c0a70695dbc085e3e647e67355b9c1e63ffa283d4e1347
+      -   - '["glossary_emphasis_choice","term:rule.any_order",1]'
+          - sha256:7bdd1cb078b601d3cd1b68cc46afc51da46e477e46f072f84edac2a2b42afd6d
+      -   - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+          - sha256:ff4be431bf6756870595861f738a80cd91b75a60a0640f324b27e99ae500d361
+      -   - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+          - sha256:e48452f87ed1f9ffb2809c77f9ac59e676f2b0673ef958a45545067ff8b828da
+      -   - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+          - sha256:2ff3984eae25deb31c6f1549c88b2aef5138efd097bfd322bc47c428db925381
+      -   - '["glossary_emphasis_choice","term:rule.cost",1]'
+          - sha256:b13804a19bcb9a144f0ed8c978a372e49b7a2e9f812d8291312bb56d6e0521ff
+      -   - '["glossary_emphasis_choice","term:rule.damage",1]'
+          - sha256:5e0d94fe2f6be8ef8635010742ba521fe3f2cd3774d4bd813ea65b3b1eace948
+      -   - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+          - sha256:ca12cf8f4ecbf099b86a55af9df5bae4c92be931908287cf2cddd53232a93c26
+      -   - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+          - sha256:b288e3f84dc35879fad20e07fa21dec5b5ba143b67c388a88e5db6c2e53a1bb6
+      -   - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+          - sha256:0b858d4334fcbad394cec2b5d2b9f64a7088be3b1dab5102d91c7acecd48ffbc
+      -   - '["glossary_emphasis_choice","term:rule.instead",1]'
+          - sha256:4b2741a159b4b0dce75b479b5c9f20c6b69ed4d91a578063b00851da75ac0603
+      -   - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+          - sha256:bc2847203e6aff4ce7df3131f83549d0a3d92fe84d685e2859ed79602a3696e4
+      -   - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+          - sha256:7c620d9502643b323c407ab1255c33fe3de09ba170d217c826f8d7d2f3d5c68a
+      -   - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+          - sha256:2e371ad13d5f575cfcc9e96178844a4317f5afd25462900fb56f5e2bad298916
+      -   - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+          - sha256:23deb5496f3e8969f89101fe596c99d8f28ebfb5ba1ac781e1169b3e158912f8
+      -   - '["glossary_emphasis_choice","term:rule.random",1]'
+          - sha256:1f0aed0b309f4e352b244cd103893e8d65459ddf25e7b25332287cd9134a4f1f
+      -   - '["glossary_emphasis_choice","term:rule.same_name",1]'
+          - sha256:83288294283a55e17d4110d0b033db1c4f1f5a89a478069c4fffca4260251075
+      -   - '["glossary_emphasis_choice","term:rule.vampire",1]'
+          - sha256:ac766c314b0da195f5e3ccfdb59a044af4e3fdb445772526277b1c6d82eba64d
+      -   - '["glossary_emphasis_choice","term:stat.attack",1]'
+          - sha256:410f9f061fbe886fd0ed0f7c95b5b8b75ecc75b7e2e7555e880eb24026ade83e
+      -   - '["glossary_emphasis_choice","term:stat.health",1]'
+          - sha256:d2b109e1bcc9f37c49a5b7b38e23c5ed2b1c67bba7ffc5fc584512760f14a91a
+      -   - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+          - sha256:bb002cbea2c559d3a86c2ab15c97ed9274891e26679645ec5c139998c021cbf3
+    sample_ids:
+      - '["glossary_emphasis_choice","term:quantifier.other",1]'
+      - '["glossary_emphasis_choice","term:resource.ep",1]'
+      - '["glossary_emphasis_choice","term:resource.sep",1]'
+      - '["glossary_emphasis_choice","term:rule.ability",1]'
+      - '["glossary_emphasis_choice","term:rule.any_order",1]'
+      - '["glossary_emphasis_choice","term:rule.can_attack",1]'
+      - '["glossary_emphasis_choice","term:rule.cannot_attack",1]'
+      - '["glossary_emphasis_choice","term:rule.combat_damage",1]'
+      - '["glossary_emphasis_choice","term:rule.cost",1]'
+      - '["glossary_emphasis_choice","term:rule.damage",1]'
+      - '["glossary_emphasis_choice","term:rule.has_ability",1]'
+      - '["glossary_emphasis_choice","term:rule.incoming_damage",1]'
+      - '["glossary_emphasis_choice","term:rule.indestructible_by_ability",1]'
+      - '["glossary_emphasis_choice","term:rule.instead",1]'
+      - '["glossary_emphasis_choice","term:rule.instead_of",1]'
+      - '["glossary_emphasis_choice","term:rule.necromancer",1]'
+      - '["glossary_emphasis_choice","term:rule.nemesis",1]'
+      - '["glossary_emphasis_choice","term:rule.original_cost",1]'
+      - '["glossary_emphasis_choice","term:rule.random",1]'
+      - '["glossary_emphasis_choice","term:rule.same_name",1]'
+      - '["glossary_emphasis_choice","term:rule.vampire",1]'
+      - '["glossary_emphasis_choice","term:stat.attack",1]'
+      - '["glossary_emphasis_choice","term:stat.health",1]'
+      - '["glossary_emphasis_choice","term:stat.max_pp",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-02T04:51:42Z'
+    reviewed_by: Claude（協調者，維護者委託）
+    reviewed_at: '2026-10-02T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
