@@ -95,6 +95,23 @@ class FrozenTexts:
         self.current = {
             item.url: item.source_version_id for item in self.sources.inventory.current
         }
+        self._versions: dict[str, tuple[str, ...]] | None = None
+
+    def versions(self, region: Region, card_no: str) -> tuple[str, ...]:
+        """Include historical entries even when the batch's current selection changed."""
+        if region != self.region:
+            return ()
+        url = (jp if region == "jp" else en).card_url(card_no)
+        if self._versions is None:
+            by_url: dict[str, list[str]] = {}
+            for entry in self.sources.inventory.entries:
+                descriptor = self.sources.descriptor(entry.source_version_id)
+                if (descriptor.provider, descriptor.kind) == (self.region, "card"):
+                    by_url.setdefault(descriptor.url, []).append(descriptor.id)
+            self._versions = {
+                key: tuple(sorted(values)) for key, values in by_url.items()
+            }
+        return self._versions.get(url, ())
 
     def card(self, region: Region, card_no: str) -> TextCard | None:
         """Recheck raw/version/receipt pins on each read; never visit live or latest."""
@@ -104,6 +121,13 @@ class FrozenTexts:
         version = self.current.get(url)
         if version is None:
             return None
+        return self.version(region, card_no, version)
+
+    def version(self, region: Region, card_no: str, version: str) -> TextCard:
+        """Read a specified historical version inside this exact sealed batch."""
+        if region != self.region:
+            raise ValueError("Frozen historical text region mismatch")
+        url = (jp if region == "jp" else en).card_url(card_no)
         source, raw, descriptor = self.sources.read(
             version, parser_version=self.parser_version
         )

@@ -74,6 +74,52 @@ class PinnedRepository:
             self.cache[key] = result.stdout
         return self.cache[key]
 
+    def read_many(self, revision: str, names: tuple[str, ...]) -> dict[str, bytes]:
+        """Read a dependency closure in one Git process, without extracting archive paths."""
+        import io  # ruff: ignore[import-outside-top-level] -- batch framing is only needed by complete dependency replay
+
+        if re.fullmatch(r"[0-9a-f]{40}", revision) is None:
+            raise ValueError("Immutable batch revision must be a full Git SHA")
+        missing = tuple(name for name in names if (revision, name) not in self.cache)
+        for name in missing:
+            path = PurePosixPath(name)
+            if (
+                path.is_absolute()
+                or ".." in path.parts
+                or path.as_posix() != name
+                or any(c in name for c in "\r\n\x00")
+            ):
+                raise ValueError("Unsafe batch dependency path")
+        if missing:
+            result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed Git batch process; immutable object names are validated
+                [self.executable, "-C", str(self.root), "cat-file", "--batch"],
+                input="".join(f"{revision}:{name}\n" for name in missing).encode(),
+                check=False,
+                capture_output=True,
+            )
+            if result.returncode:
+                raise ValueError("Immutable dependency batch is unavailable")
+            stream = io.BytesIO(result.stdout)
+            content = {}
+            for name in missing:
+                header = stream.readline().rstrip(b"\n").split(b" ")
+                if (
+                    len(header) != len(("oid", "kind", "size"))
+                    or header[1] != b"blob"
+                    or not header[2].isdigit()
+                ):
+                    raise ValueError(
+                        "Immutable dependency batch contains a missing/non-blob object"
+                    )
+                raw = stream.read(int(header[2]))
+                if len(raw) != int(header[2]) or stream.read(1) != b"\n":
+                    raise ValueError("Invalid immutable Git batch framing")
+                content[revision, name] = raw
+            if stream.read():
+                raise ValueError("Unexpected immutable Git batch output")
+            self.cache.update(content)
+        return {name: self.cache[revision, name] for name in names}
+
     def context(self, context: BuildContext) -> None:
         """Verify every explicitly declared program/dependency byte pin."""
         for pin in context.dependencies:

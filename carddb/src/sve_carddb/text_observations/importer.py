@@ -44,7 +44,10 @@ def revision_id(item: FaceObservation) -> str:
     return candidate_revision_id(item)
 
 
-def _vocabulary(db: Database, texts: TextInterner, vocabulary: Vocabulary) -> None:
+def populate_vocabulary(
+    db: Database, texts: TextInterner, vocabulary: Vocabulary
+) -> None:
+    """Register the explicit raw-to-code bindings without guessing source types."""
     vocabulary.verify()
     existing = {
         (r.values["kind"], r.values["code"]): r.values for r in db.rows("vocabulary")
@@ -84,7 +87,7 @@ def _vocabulary(db: Database, texts: TextInterner, vocabulary: Vocabulary) -> No
         existing[key] = values
 
 
-def _revision(  # ruff: ignore[too-many-arguments] -- the original and corrected variants share one writer with explicit adoption provenance
+def populate_revision(  # ruff: ignore[too-many-arguments] -- the original and corrected variants share one writer with explicit adoption provenance
     db: Database,
     item: FaceObservation,
     ordinal: int,
@@ -94,6 +97,7 @@ def _revision(  # ruff: ignore[too-many-arguments] -- the original and corrected
     decision_id: str | None = None,
     supersedes_id: str | None = None,
 ) -> None:
+    """Store exact candidate content with explicit provenance inside a transaction."""
     content = item.content
     assert content.effect is not None
     language = "ja" if item.region == "jp" else "en"
@@ -246,7 +250,7 @@ def _groups_to_database(
             original = next(
                 source for source in raw if source.printing_id == item.printing_id
             )
-            _revision(
+            populate_revision(
                 db,
                 item,
                 ordinal,
@@ -297,7 +301,7 @@ def populate_text_observations(
     expected = plan.source_uses()
     insert_raw_sources(db, (use.source for use in expected))
     texts = TextInterner(db, published=published)
-    _vocabulary(db, texts, vocabulary)
+    populate_vocabulary(db, texts, vocabulary)
     _intern_observations(texts, plan)
     printings = {row.values["id"]: row.values for row in db.rows("printing")}
     for item in plan.materialized():

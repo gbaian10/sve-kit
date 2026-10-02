@@ -14,7 +14,7 @@ from sve_carddb.source_corrections.images import evidence_url
 if TYPE_CHECKING:
     from sve_carddb.build_inputs import Source
     from sve_carddb.registry.preview import PreviewPlan
-    from sve_carddb.registry.snapshot import RegistryRecord
+    from sve_carddb.registry.snapshot import RegistryRecord, RegistrySnapshot
     from sve_carddb.source_corrections.images import ImageProvider
     from sve_carddb.text_observations.models import FaceObservation
 
@@ -112,11 +112,16 @@ def _status(data: CorrectionData, item: FaceObservation) -> Status | None:
 
 
 def _verify_application(preview: PreviewPlan, application: Application) -> None:
+    verify_application(preview.snapshot, application)
+
+
+def verify_application(registry: RegistrySnapshot, application: Application) -> None:
+    """Verify one historical version without collapsing its printing/face inventory."""
     data = application.data
     item = application.observation
     if (data.printing_id, data.face_id) != (item.printing_id, item.face_id):
         raise ValueError("Correction observation scope mismatch")
-    record = preview.snapshot.records.get(application.record.record_key)
+    record = registry.records.get(application.record.record_key)
     if record != application.record or application.status != _status(data, item):
         raise ValueError("Correction record or application status mismatch")
     if (
@@ -124,7 +129,7 @@ def _verify_application(preview: PreviewPlan, application: Application) -> None:
         != data
     ):
         raise ValueError("Correction typed data differs from its exact authored record")
-    decision = preview.snapshot.decisions.get(application.record.decision_id or "")
+    decision = registry.decisions.get(application.record.decision_id or "")
     if decision is None or (data.state == "active" and decision.state != "confirmed"):
         raise ValueError("Correction adoption decision is not confirmed")
     if (application.record.record_key, application.key()) not in decision.members:
@@ -138,6 +143,25 @@ def _verify_application(preview: PreviewPlan, application: Application) -> None:
             source.sha256,
         ) != ("image", evidence_url(evidence), evidence.sha256):
             raise ValueError("Correction image evidence metadata mismatch")
+
+
+def historical_application(
+    registry: RegistrySnapshot,
+    record: RegistryRecord,
+    item: FaceObservation,
+    images: ImageProvider,
+) -> Application:
+    """Apply the existing absent-then-correction contract to an explicit raw version."""
+    if not isinstance(record.data, CorrectionData):
+        raise TypeError("Historical correction requires a correction record")
+    application = Application(
+        record,
+        item,
+        tuple(images.image(e) for e in record.data.evidence),
+        _status(record.data, item),
+    )
+    verify_application(registry, application)
+    return application
 
 
 def selected_records(preview: PreviewPlan) -> tuple[RegistryRecord, ...]:
