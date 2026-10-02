@@ -3,11 +3,13 @@
 import shutil
 from copy import deepcopy
 from dataclasses import dataclass, replace
+from io import BytesIO
 from pathlib import Path
 from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
+from PIL import Image
 from typer.testing import CliRunner
 
 import sve_carddb.snapshot.preview as writer_module
@@ -333,6 +335,27 @@ def test_actual_image_bytes_must_match_webp_metadata(
         blob.write_bytes(raw)
     with pytest.raises((ValueError, FileNotFoundError)):
         list(image_blobs(tables, library))
+
+
+def test_equal_length_webp_tamper_requires_content_hash(
+    images: PublicImages, tmp_path: Path
+) -> None:
+    library = tmp_path / "library"
+    shutil.copytree(images.library, library)
+    variant = images.projection.tables["image_variant"][0]
+    blob = library / string(variant["path"])
+    raw = blob.read_bytes()
+    changed = raw[:-1] + bytes([raw[-1] ^ 1])
+    assert len(changed) == integer(variant["bytes"])
+    assert digest(changed) != digest(raw)
+    # The size/decoder guards must accept the tamper to isolate the hash requirement.
+    with Image.open(BytesIO(changed)) as decoded:
+        decoded.load()
+        assert decoded.format == "WEBP"
+        assert decoded.size == (integer(variant["width"]), integer(variant["height"]))
+    blob.write_bytes(changed)
+    with pytest.raises(ValueError, match=r"^Preview image hash or bytes mismatch$"):
+        list(image_blobs(images.projection.tables, library))
 
 
 @pytest.mark.parametrize("failure", ["image", "manifest", "late-tamper"])
