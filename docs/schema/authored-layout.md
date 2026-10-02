@@ -1,6 +1,6 @@
 # authored 維護方式
 
-身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；來源綁定的插畫裁切覆寫見[覆寫契約](image-crop-overrides.md)（技術契約，不表示 loader 或資料已完成）；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
+身分登錄格式 **v1，2026-09-28 定案**。本文件定案的範圍為永久 card／face／printing、printing 整數編號（`int_id`，依地區分段配號）、日英對應、無對應審核、英文原創插畫、換皮卡，以及本批來源更正。商品人工輸入格式另定為 **product-authored-v1**（§10），不擴充既有身分登錄格式；current／wording 採納輸入 **wording-adoption-v1，使用者 2026-10-01 核可具體格式**（§9.1–§9.7）；§9.5、§9.6、§9.8 分別記載 2026-10-01 已核可的處理政策；身分修復與決定續版 **identity-transition-v1，使用者 2026-10-01 核可**（§12）；翻譯／模板格式與推導邊界見 §6（2026-10-01，技術契約）；詞彙與顯示覆寫封套見 §8（技術契約，稀有度白名單與繁中缺譯順序於 2026-10-01 核可）；來源綁定的插畫裁切覆寫見[覆寫契約](image-crop-overrides.md)（技術契約，不表示 loader 或資料已完成）；人工限量序號版次另定待審技術契約 [manual-printings-v1](manual-printings.md)，收錄政策依維護者 2026-10-03 最新更正；其餘類別仍是提案。建置資料庫語意以 [build-db.md](build-db.md) 為準；已核可的表記未定顯示擴充另見 [snapshot-format §2.3](snapshot-format.md#23-表記未定的公開呈現)。
 
 ## 1. 路徑與共同格式
 
@@ -15,6 +15,7 @@
 | 定案（格式） | 歸檔類別、人工商品與收錄 | `products/index.yaml`、`products/{family,product,inclusion}/<filing_key>/001.yaml`，見 §10；不表示已有採納資料或匯入器 |
 | 定案（格式） | 官方商品身分對照 | `product-identities/index.yaml`、`product-identities/<region>/001.yaml`，見 §11；獨立於商品內容採納 |
 | 定案（格式） | current／wording 表記採納 | `wording-adoptions/index.yaml`、`wording-adoptions/<region>/001.yaml`，見 §9.1–§9.7；使用者 2026-10-01 核可格式與處理政策，不表示已採納任何群組 |
+| 待審技術契約 | 人工序號版次／官方序號補充 | `manual-printings/index.yaml`、`manual-printings/{printings,serials}/<filing_key>/<sequence>.yaml`，見 manual-printings-v1；不表示已有採納資料 |
 | 已定案（ADR-0011） | 裁定 | `rulings/R-0001.yaml`，維持原格式 |
 | 定案（格式） | 身分修復與決定續版 | `identity-transitions/index.yaml`、`identity-transitions/<sequence>.yaml`，見 §12 |
 | 提案 | 特殊構築 | `overrides/deck-roles/BP01.yaml` |
@@ -34,6 +35,8 @@
 YAML 固定 1.2 core schema、單一文件、UTF-8；所有鍵必須是字串，禁止重複鍵、anchor、alias、merge key、顯式 tag、非有限浮點及 YAML 1.1 指示。日期字串須加引號；隱式日期仍是字串，不啟用 timestamp resolver。遵循 [DSL 1.0 §11](../dsl/author-syntax-1.0.md#11-載入與錯誤) 的解析邊界。`carddb` 以 PyYAML `CSafeLoader`（libyaml C 擴充）單趟事件讀取，於組裝資料前拒絕上述語法；純量沿用明確限定的 YAML 1.2 core resolver，不使用 PyYAML 預設的 1.1 resolver。缺少 C 擴充即明確失敗，不靜默退回純 Python。寫出仍使用 `ruamel.yaml`；載入後仍要做 strict JSON、canonical 雜湊、結構與引用檢查。
 
 為避免 libyaml 的 YAML 1.1 字元處理靜默改寫結構或值，`carddb` 在解析前拒絕 raw U+0085（NEL）、U+2028（LS）、U+2029（PS）；raw U+FEFF（BOM）僅允許在解碼後第 0 個字元。依 2026-10-01 的協調者決定，同時拒絕所有 raw tab，含引號、區塊純量與註解內的 tab；雙引號中的 `\t`、`\u0085`、`\u2028`、`\u2029`、`\uFEFF` 等跳脫仍可表達原值。ruamel 寫出會跳脫 tab／BOM，但可能原樣寫出 NEL／LS／PS；後者讀回明確失敗，不允許靜默正規化。未知指示（例如 `%FOO`）由 libyaml 拒絕，保留此較嚴的讀取邊界。數值底線拼法沿舊讀取器的 resolver／去底線行為，例如 `1__0` → 10、`1_` → 1，不直接套用 Python `int()` 的拼法限制。
+
+人工限量序號版次的獨立入口為 `manual-printings/index.yaml` 與 `manual-printings/<area>/<filing_key>/<sequence>.yaml`；完整欄位、來源類別及續版以 [manual-printings-v1](manual-printings.md#2-入口封套決定與續版) 為準，不加入身分 registry v1。
 
 ## 2. 分片、批次決定與來源
 
@@ -258,9 +261,9 @@ wording diff 封套可一次簽 confirmed，但 `sample_ids` 必須列全部 che
 
 `translation_context` 每次建置推導，預設 `semantic_variant=default`；只有採納的同字異義例外才能另配 variant。`translation_use` 釘具體 owner/field/ordinal，`translation_selection` 依 `context/target_lang` 選同模板同參數唯一翻法。不是每張卡任意自由翻；模板/術語更新仍沿 binding 反查。建置資料庫的上下文關係不出貨，卡表快照的 FieldTranslation 指已選 translation.id。
 
-SNC 另用 `manual-printings/SNC/001.yaml` 路徑提案，仍受單檔 <1 MiB；匯入 snc-list 只產候選，不把 high 當 confirmed。最小封套欄位為 `printing_id/card_id/region/card_no/card_no_state/catalog_state/listing_confidence/serial_total`、references（url/role/locator）、inclusions（`product_id/inclusion_kind/date_precision/date_raw/note`）、decision。`normal_counterparts` 全筆確認後才連同 card；無對應可登 `region_mapping_review` 的 `confirmed_none`＋查核範圍/`as_of`。
+人工限量序號版次使用獨立 [manual-printings-v1](manual-printings.md) 封套：new unlisted printing 與官方版次的 serial_supplement 分開；不造官方 observation／source_face_map。候選不自動 confirmed，信心不代替逐筆人審。官方來源封存釘版，第三方店家只留 URL；後者來源 FK 指完整 authored 封套，不捏造第三方內容 hash。未收錄且未確認一般版對應者只顯示卡號、人工名稱、來源，沒有卡文；既有官方 PR（含 PR-442）照常顯示官方卡文。
 
-例如 BP20-SNC01（ANV，4 周年，初版限定 n/10）的 10 可寫 `serial_total` 候選；卡號是否真的印於卡面仍依來源核對，不能因本文件提到就改 official。PR-350/PR-442 上限 150、PR-544 上限 500 為已知的維護需求，仍留下原證據/欄位來源。月年日期原樣保存，不補完整日期；QR 兌換與初版限定用 `inclusion_kind` 區分。unlisted 公開頁有「非官方整理，可能不完整」、來源/信心/回報入口。
+維護者 2026-10-03 最新更正：SNC 周年（日英、含 BP20-SNC01）歸 SNC，WB 三張歸 WB，PR-350／PR-442／PR-544 留 PR 且只補序號資料。ANV 等稀有度照卡面原樣存，不作歸檔家族。serial_total 為卡面分母；EN 一周年填 10、註記實際每種一張。無實體商品不造 product，只留 distribution 參考與註記；月年精度保留原樣，不補完整日期。圖片與額外張數／EN 查證各屬 #210／#211。
 
 暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都依其地區號段追加分配（§3.2）。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。每張第三方圖以 `review_decision_id` 連到 confirmed 的來源/圖片確認，保存 `source_url`、內容 hash、確認者 `reviewed_by` 與時間 `reviewed_at`；換圖/換來源須重新確認，抽樣不代替逐圖確認。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
 

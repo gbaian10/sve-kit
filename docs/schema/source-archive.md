@@ -154,3 +154,7 @@ raw 歷史 logical bytes 為 `Σ(size(hash))`，只加總所有保留版本引�
 4. 演練來源在兩段鎖之間替換、鎖衝突、原子 replace 後尚未 commit、中途磁碟滿及備份中斷；不得發布不一致批次、覆寫已封存版本或清除仍有引用的 blob。
 
 同一次首輪歸檔即須完成此備份／restore 驗收；raw 歷史不是等到整個里程碑結束才備份。restore 報告列已驗批次及缺失，不能以「檔案已複製」代替閉包與 hash 驗證。
+
+## 人工版次的 URL-only 參考邊界
+
+[manual-printings-v1](manual-printings.md#4-來源類別日期與取得方式) 的 third_party_url 只保存第三方店家 URL、人工定位與查核收據，沒有消費第三方 raw，不產 source_version／receipt 或 ArchiveSourceUse。其 printing_reference.source_id 指完整 authored 封套，source_record.sha256 是該分片 exact bytes，不能以 H(URL) 或 canonical 記錄 hash 假裝第三方頁面 raw hash。此例外不適用官方來源、圖像鏡像、人工商品 evidence 或構築證據；已使用官方 raw 仍必驗歸檔完整閉包，完整 authored index／分片仍釘不可變 revision／bytes hash。URL-only 不能宣稱第三方內容可重播或仍為現行。

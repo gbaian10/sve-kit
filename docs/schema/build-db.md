@@ -116,6 +116,8 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 `credit_raw` 留每版次每面原始繪師字串，`art_artist` 只存採納的關係；來源誤植不建立假 artist。`series_code` 是 `vocabulary(kind=stamp_series)` 的穩定英文 code（如 gcs/grandprix/championship），具固定 kind 複合 FK。kind=stamp 的 alias 指具體 stamp.code（含年份），`kind=stamp_series` 指系列；查系列按字段，不剝 code 前綴。標誌年不取版權年。`stamp/printing_stamp` 供依大賽系列標誌列卡；缺場次證據只稱「含此標誌」，不能宣稱某場獎卡全集。`event/printing_event`、`signature/printing_signature`、`artist_link/art_post` 延後，不為未知資料建空的公開表。所有衍生面級表以 `FK(printing_id,face_id)→printing_face` 約束；不必再重複 `card_id`。
 
+人工限量序號版次的獨立封套見 [manual-printings-v1](manual-printings.md)：無一般版對應時沿用 provisional card／face，未知原文不造 revision。official 卡號至少要有已封存的官方頁／官方卡圖號碼證據，只有第三方店家 URL 者仍 provisional。新增參考 URL／來源類別、人工名稱與配送註記的欄位方案只在該契約列為待實作，權威表格欄位與現有 DDL 不在 docs-only PR 修改。官方序號補充不改原 PR 歸屬、身分或卡文。
+
 ## 4. 文字、現行版本與印刷原文
 
 | 表                          | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
