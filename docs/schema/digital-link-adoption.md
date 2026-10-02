@@ -86,7 +86,7 @@ name_ref 就是 SourceRef，locator 定位完整 name 欄，text_hash 驗 exact 
 
 subject 恰為 `{card_id,game}`；非 null value 恰為 `{state,as_of,sve_names,catalogues,links}`。as_of 為實際查核範圍截止 Date，不由建置日、latest cache 或沒有 link 推出；不得晚於真實審核日期。state 沿既有 unreviewed/partial/reviewed_none/reviewed_matches，不是關係的 review_level。
 
-sve_names 沿 §3 的形狀／來源驗證，保存實際搜索的 SVE 面與名稱範圍。catalogues 為排序唯一的**完整凍結目錄引用**，每項恰為：
+coverage 的 sve_names 恰為排序唯一的 `{face_id,name_ref}` 陣列，保存各永久面出現過的相異完整名稱，不含 printing_id；link 的 sve_names 仍沿 §3 的版次／面證據形狀。每個 `(face_id,name_ref.text_hash)` 只留一項可重播的代表來源，按此鍵排序；不同面同名不合併。由核對時 registry/source_face_map 驗來源面的 card／face 歸屬，不能以去掉 printing_id 免掉來源驗證。catalogues 為排序唯一的**完整凍結目錄引用**，每項恰為：
 
 ```text
 {store_id,batch_id,source_version_id,parser,inventory_hash}
@@ -105,11 +105,13 @@ links 為排序唯一的 `{record_key,record_hash,decision_id}` 陣列，恰指�
 | reviewed_none | 實際完整查核；sve_names/catalogues 非空且通過完整範圍重驗，links=[]，該範圍沒有任何有效 relation |
 | reviewed_matches | 同樣完成完整查核；links 非空並恰等於全部有效 relation，不表示每張有官方譯名 |
 
-完整 SVE 範圍含該 card 的所有永久面，以及本次建置具有公開 identity 的 JP 版次之全部凍結 name 觀測；wording 未定／勘誤觀測仍納入，不能只看 current 或只查正面。工具用實際來源及 publication identity 重算排序去重的 `(printing_id,face_id,exact name hash)` 集合，與 sve_names 重播的集合完整比較；同名的不同 raw 版本不重複算範圍，但版次／面不合併。缺某面 JP 名稱、漏版次／不同名字觀測、尚有未決候選，都不能宣稱完成。printed 名稱 unknown 不捏造成 current 名稱；未知印刷資料也不被這份查核宣布為已知。完整查核只對列出的凍結觀測成立。
+完整 SVE 範圍含該 card 的所有永久面，在釘住的凍結輸入中各面出現過的相異 JP 完整名稱；wording 未定／勘誤及歷史名稱觀測仍納入，不能只看 current 或只查正面。工具以實際來源與 registry 面對應重算排序去重的 `(face_id,exact name hash)` 集合，與 sve_names 重播的集合完整比較；不以版次為範圍或計數單位。同卡同面同名再錄、另一 raw 版本或換代表來源不增加集合，無須重簽；但每次仍驗新來源與面歸屬。缺某面 JP 名稱、漏相異名字或尚有未決候選，都不能宣稱完成。printed 名稱 unknown 不捏造成 current 名稱；未知印刷資料也不被這份查核宣布為已知。完整查核只對已知凍結名稱集合成立，不聲稱未知資料查完。
 
 完整數位範圍要能依核對時 review_context 重播所有 catalogues，檢查每個 SVE 面／名稱，並保存真人完成範圍的事件。目錄中某 phase 的 JA 名稱 unknown 時，本版名稱查核不能宣稱完整，維持 partial；不能略去該項縮小目錄。批次 sampled 不能把沒查過的 card 升成 reviewed_none；模型 confidence／漏列候選也不能證明完整。無 coverage 紀錄、撤回或對本次範圍 stale 時，公開只呈現缺少覆蓋／unknown，不能合成帶真人 decision 的 reviewed_none。
 
-SVE 面／版次／名稱 hash 範圍或數位目錄成員／名稱 hash 變動、link 續版／新增／撤回使原 links 精確集合不再相符時，舊完整 coverage 不適用本次範圍；保留歷史、列 stale 原因，不自動改寫成 partial／none 或沿用舊決定。名稱集合與目錄相關內容都未變時，僅 raw 頁其他欄或建置程式版本改變不要求重新簽 coverage；本次來源仍完整驗回並納入 F1。重新查核後追加 coverage adoption。as_of 不保證其後新卡仍查完；sv1 仍 frozen，svwb 新來源只用另行封存的明示輸入，不在匯入時連外。
+SVE 新面／相異名稱 hash 或數位目錄成員／名稱 hash 變動、link 續版／新增／撤回使原 links 精確集合不再相符時，舊完整 coverage 不適用本次範圍；保留歷史、列 stale 原因，不自動改寫成 partial／none 或沿用舊決定。名稱集合、目錄相關內容及 link 集合都未變時，新增同名再錄版次、raw 頁其他欄或建置程式版本改變不要求重新簽 coverage；本次來源仍完整驗回並納入 F1。重新查核後追加 coverage adoption。as_of 不保證其後新卡仍查完；sv1 仍 frozen，svwb 新來源只用另行封存的明示輸入，不在匯入時連外。
+
+**首批只遷 link，不採納 coverage**，入口不產生 coverage 分片，不為每個 card/game 填 unreviewed 決定。沒有紀錄即未知；官方名稱的選取依 §6 的 fresh link，不以 coverage 是否存在／完成為前提。公開 required 集合仍輸出 `digital_link_coverage=[]`。發布按 [build-db §16／§18](build-db.md#16-發布閘門與投影邊界) 與 [snapshot-format §7](snapshot-format.md#7-發布閘門與變動報告) 驗已啟用能力、已有列及非空引用閉包，不要求每個 card/game 都有 coverage 紀錄。日後若要採納覆蓋，仍沿本節真人門檻；不先放寬 reviewed_none 成純機械採納。
 
 ## 5. 匯入順序、來源與原子性
 
@@ -147,7 +149,27 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 
 ## 7. 草稿遷入前置與反例驗收
 
-研究資料只提供候選與已記錄的人工判斷線索。正式遷入須核對每個 SVE 永久 ID／面、數位 official_id／phase、凍結兩端名字、實際採納者／時間／checked 範圍；來源或真人事件無法恢復就列待件。232 筆待確認關係仍留候選；`needs_decision=false` 也不自動生成 confirmed 或 sampled。自譯卡名的 glossary 委託不授權數位同卡關係或完整 coverage。風味文字、單卡自由覆寫與其他 intake 不在本契約範圍。
+研究資料只提供候選與先前比對線索。正式遷入須核對每個 SVE 永久 ID／面、數位 official_id／phase、凍結兩端名字、實際採納者／時間／checked 範圍；缺來源、面定位或真人事件就列待件。`needs_decision=false` 不自動生成 confirmed 或 sampled；自譯卡名的 glossary 委託不授權數位同卡關係。首批只遷 link，coverage 依 §4 留未知。風味文字、單卡自由覆寫與其他 intake 不在本契約範圍。
+
+### 7.1 連結分兩層採納
+
+分層只決定抽樣批次／逐筆確認的範圍，**不改真人 sampled／confirmed 門檻**，也不將同名機械結果當已確認同卡。先通過 §2／§3 的入口、身分、面、來源與閉包硬檢查；工具以釘住的凍結來源重算下列條件，不直接採信草稿文字或 confidence。
+
+第一層須原候選為 same_card，且每個納入此候選的 SVE／數位面全部通過：
+
+1. 兩端完整 JP 名稱 exact UTF-8 相等，不 trim／NFKC。
+2. 職業相同，以明示、可重播的遊戲 enum 對照驗證；未知或不能證明相同就不通過，不能將不同職業合併來增加第一層。
+3. 基本卡種相同（follower／spell／amulet）；進化／token 標記另驗，不能用卡種推面或 phase。未知代碼／其他卡種不通過。
+4. 該 JP 名稱在**同遊戲完整凍結目錄**僅對到一個非空 zh-Hant 名稱。查全部 ID／面，包含其他候選之外的同名卡；有第二個譯名或未取得目標語的同名項，都不通過。目錄須驗全部頁及來源閉包，不能只取草稿 sources 或已對應卡的子集。
+5. 原比對未標待確認；232 筆先前待決不得因重算條件通過而自動移入第一層。
+
+第一層先機械全查，保存完整候選／正式成員對照、檢查 recipe／設定、目錄範圍與結果 hash；機械分層背景納入 review_context，不新增封套欄位。草稿 hash／待決狀態與轉換結果留遷入稽核，正式建置仍只讀採納記錄與 frozen 證據，不把研究草稿變成 runtime 來源。維護者親自看非空樣本、確認該批同卡關係後，整批以 sampled 採納；樣本數由他決定，工具不得預填 30／50 或假稱看滿固定數量。sample_ids 只列他實際看過的正式 record_key；工具可按穩定排序提供抽樣候選，最後集合／數量與事件依實際審核紀錄，不由模型代看。實際抽樣前只留候選，不能先寫 sampled。這一批可共用一次真實抽樣事件；因分片大小拆成多個成員決定時，各 sampled 決定仍須有其成員的實看非空樣本，不借另一片樣本，也不縮減／複製 checked 集合冒充。分片與樣本範圍一起安排，未涵蓋的分片先留候選；工具不能為填滿每片而擅增維護者決定的整體抽樣數。
+
+第二層為任一條件不成立或無法驗證者，包含 232 筆待決、same_character、mixed、name_only／僅同名、兩端名字不同、職業／卡種不符或同名異譯。逐筆交維護者確認才採納，或先擱置；逐筆確認的正式成員全列 checked（可分 confirmed batch），未決的不進正式入口。擱置只表示暫無此來源的官方譯名，可顯示另行已採納的自譯名或原文，不影響其他卡的抽樣採納與發布。relation 仍依實際判斷，same_character／name_only 即使已確認也不能供官方名；mixed 必須拆成明確的各遊戲／目標判斷，不能寫入 DB enum 或整列升 same_card。
+
+工具產生的 reason 如實寫「名稱／職業／卡種機械相符、同遊戲完整目錄繁中名唯一、原候選未標待決；隨批次真人抽樣採納」及可核對的 recipe／結果依據，不說「已逐筆人工確認」。是否實際樣本以 sample_ids 為準，source_ref／reason／review_context_hash 都參與成員 hash；抽樣不免除逐 owner 的 §6 重驗。分層筆數只報數字，不附官方名字／卡文；另註明計數單位及重疊項，不拿草稿行數冒充已採納 link 數。
+
+### 7.2 最小反例
 
 下面是**後續實作必備的合成反例，不是已跑測試結果**。I 為本入口匯入驗收；N 為名稱/use 接線驗收，含 #53 尚未實作部分；兩者須分別報告，不用 I 通過宣稱 N 完成。
 
@@ -163,9 +185,12 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 | D08／I、N | link 指 A 的 face，但 SVE frozen 名稱證據／名稱 owner 實為 B；或 digital 名稱屬另一 official_id／phase／語言 | 來源歸屬／父層錯誤在匯入或使用時拒絕，不只檢查字串／FK |
 | D09／I | 沒有 link／只有待決候選，卻填 reviewed_none；或 coverage 只查正面、局部數位清單 | 無實際完整範圍／事件拒絕；有效 partial 或缺覆蓋維持 unknown，不偽裝已查無 |
 | D10／I | coverage links 漏列一個 same_character、指舊前件或多列一個他卡 link | 完整集合／精確採納引用驗證失敗；不得因名稱不可用就不計該關係 |
-| D11／I | 新增版次／背面名稱觀測／目錄成員後仍沿用舊完整 coverage | 標 stale、不 materialize 舊完整結果；不能只改 as_of 或自動造 partial 決定 |
+| D11／I | 新增同卡同面同名再錄；另對照新增相異名稱／背面／目錄成員 | 同名再錄不使 coverage stale、仍重驗來源；相異名稱／新面／目錄變更依 §4 標 stale，不改 as_of 或自動造 partial 決定 |
 | D12／I | 缺 predecessor、分叉、錯 record_hash、改 review_context 未改 hash、未索引分片 | 全入口拒絕；失敗交易不留半批 DB 寫入 |
 | D13／I | 只改 frozen 名稱一個字但維持長度、錯 parser／batch，或刪掉某來源 usage | exact 名稱／來源 pin／完整 F1 使用閉包必須抓到，不以 byte 長度或子匯入器 verify 取代 |
 | D14／I | needs_decision=true、confidence=high 或 model_reviewed 被工具直接寫成採納 | 缺實際真人採納收據拒絕；待決候選不取得永久採納 key／官方名 |
+| D15／I | 草稿所選同名卡只有一個繁中名，但完整目錄另有同名不同譯名／缺繁中項 | 第一層不通過，留第二層逐筆確認／擱置，不以子集的唯一結果分批採納 |
+| D16／I | 五個機械條件通過但未實際抽樣，或樣本來自另一分片 | 不產生 sampled 決定；reason 不假稱逐筆確認，checked 集合須有該片實際樣本 |
+| D17／I、N | fresh 已採納 link 與名稱證據完整，但完全沒有 coverage 紀錄 | 官方名不因缺 coverage 被拒；公開 required coverage 集合為 []／未知，不補造決定；其他發布閘門照常驗證 |
 
 docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易、來源重播、閉包及名稱呼叫接線。真實遷入另報能重驗的採納數、232 筆待決及新增待件、覆蓋範圍／as_of，不用合成測試數或草稿信心當人工採納數。
