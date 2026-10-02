@@ -1,4 +1,4 @@
-"""JP supplemental parsing uses sealed input only; fixtures contain invented text."""
+"""Regional supplemental parsing uses sealed input; fixtures contain invented text."""
 
 import shutil
 from typing import TYPE_CHECKING
@@ -7,19 +7,23 @@ import httpx
 import pytest
 
 from sve_carddb.card_extras import FrozenCardExtras, parse_card_page
-from sve_carddb.card_extras.archive import PARSER, card_number
+from sve_carddb.card_extras.archive import EN_PARSER, PARSER, card_number
+from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Manifest
 from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
 from sve_carddb.sources import official_jp
 
 from .card_extras_fixtures import source
+from .en_extract_fixtures import page as en_page
 from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.build_inputs import Source
     from sve_carddb.card_extras import CardPage
+    from sve_carddb.registry.records import Region
     from sve_carddb.source_archive import ArchiveStore
 
 
@@ -39,6 +43,83 @@ RAW = (
 </body></html>"""
     + b" " * 3000
 )
+
+EN_RAW = (
+    en_page("TEST-001Ⓢa")
+    .replace(b'class="cardlist-Under"', b'class="synthetic-en-wrapper"')
+    .replace(b"Synthetic QA title", b"Q900001 (2026/10/1)")
+)
+
+
+def regional_page(region: Region) -> tuple[bytes, Source]:
+    raw = RAW if region == "jp" else EN_RAW
+    pin = source(region=region, raw=raw).model_copy(
+        update={"parser_version": PARSER if region == "jp" else EN_PARSER}
+    )
+    return raw, pin
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+def test_regional_qa_container(region: Region) -> None:
+    raw, pin = regional_page(region)
+    parsed = parse_card_page(raw, pin, region=region)
+    assert parsed.region == region
+    assert parsed.card_no == "TEST-001Ⓢa"
+    assert len(parsed.qa) == (2 if region == "jp" else 1)
+    assert parsed.qa[0].official_number == ("Q900000" if region == "jp" else "Q900001")
+    assert parsed.qa[0].published_on == "2026-10-01"
+    assert parsed.qa[0].question == (
+        "Synthetic question?\nNext {synthetic.icon}" if region == "jp" else "Question"
+    )
+    assert parsed.qa[0].answer == (
+        "Synthetic answer." if region == "jp" else "Answer\nMore"
+    )
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("fault", ["container", "stray-block"])
+def test_regional_qa_rejects_unrecognized_layout(region: Region, fault: str) -> None:
+    raw, pin = regional_page(region)
+    if fault == "container":
+        raw = raw.replace(b'class="cardlist-Detail_QA"', b'class="unknown"')
+    else:
+        raw += b'<div class="qa-List_Item">Synthetic unrelated block</div>'
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    with pytest.raises(ValueError, match=r"^Unrecognized card-page Q&A layout$"):
+        parse_card_page(raw, pin, region=region)
+
+
+def test_jp_rejects_en_style_qa_without_jp_wrapper() -> None:
+    raw = RAW.replace(b'class="cardlist-Under"', b'class="synthetic-en-wrapper"')
+    with pytest.raises(ValueError, match=r"^Unrecognized card-page Q&A layout$"):
+        parse_card_page(raw, source(raw=raw))
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("node", ["qa-List_Ttl", "qa-List_Txt-Q", "qa-List_Txt-A"])
+def test_regional_qa_missing_node_is_not_empty(region: Region, node: str) -> None:
+    raw, pin = regional_page(region)
+    raw = raw.replace(f'class="{node}"'.encode(), b'class="missing"')
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    with pytest.raises(MissingElementError, match=f"^no element matches '\\.{node}'$"):
+        parse_card_page(raw, pin, region=region)
+
+
+@pytest.mark.parametrize("region", ["jp", "en"])
+@pytest.mark.parametrize("fault", ["url", "parser"])
+def test_regional_qa_rejects_cross_region_pin(region: Region, fault: str) -> None:
+    raw, pin = regional_page(region)
+    other_region: Region = "en" if region == "jp" else "jp"
+    if fault == "url":
+        pin = pin.model_copy(update={"url": source(region=other_region).url})
+        message = "^Card extras source URL/region/media mismatch$"
+    else:
+        pin = pin.model_copy(
+            update={"parser_version": EN_PARSER if region == "jp" else PARSER}
+        )
+        message = "^Card extras raw hash/parser pin mismatch$"
+    with pytest.raises(ValueError, match=message):
+        parse_card_page(raw, pin, region=region)
 
 
 @pytest.fixture(scope="module")

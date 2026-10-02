@@ -65,7 +65,12 @@ def parse_card_page(raw: bytes, source: Source, *, region: Region = "jp") -> Car
         raise ValueError("Card extras source URL/region/media mismatch")
     adapter.parse_card(raw, expected_number=number)
     tree = parse(decode_html(raw, min_bytes=official_jp.MIN_PAGE_BYTES))
-    nodes = select_all(tree, ".cardlist-Under .cardlist-Detail_QA .qa-List_Item")
+    nodes = select_all(
+        tree,
+        ".cardlist-Under .cardlist-Detail_QA .qa-List_Item"
+        if region == "jp"
+        else ".cardlist-Detail_QA .qa-List_Item",
+    )
     if len(nodes) != len(select_all(tree, ".qa-List_Item")):
         raise ValueError("Unrecognized card-page Q&A layout")
     questions: list[QAEntry] = []
