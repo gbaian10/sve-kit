@@ -85,3 +85,9 @@ M3 的 TS reader／harness 使用相同資源和樣本，不建立第二份 gold
 - 個別下載與 text_all 都恰等於 expected-logical；完整遍歷 43 集合，不忽略空集合、null 或巢狀陣列次序。對替代容器另驗 contains／members／依賴閉包，不能拿聯集逃避單檔 hash 驗證。
 
 CI 路徑分流須讓 `carddb/src/sve_carddb/snapshot/schema/**` 觸發 web 契約測試，讓 `tests/fixtures/snapshot-contract/**` 觸發 Python 與 web 共用契約測試；這些路徑亦供引擎測試接線使用。TS 實作與 CI job 的接線由各元件維護，這份文件只固定共用入口及驗收責任。
+
+## 數位名字政策的准入邊界
+
+名字依獨立核可政策取詞仍走既有translation／FieldTranslation；same_name瀏覽是另一個需明示能力與reader升級的路徑。
+兩份核可與初始清單依[digital-name-policy](digital-name-policy.md)，不因名字可用就推導真人same_card、coverage或圖／語音。
+新relation與機械／真人review的投影須同步producer／reader，未實作不發布、不略去不認識的能力。

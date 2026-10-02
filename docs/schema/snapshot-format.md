@@ -291,3 +291,13 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 ### Standard 構築資料與固定引用的實作邊界
 
 [construction-adoption-v1](construction-adoption.md) 定義首批 JP／EN Standard 的來源、兩模型核對採納與後續必要 CR 引用，不承諾整副牌合法性。首發先上禁限資料，CR 條文引用等 #48；其間 cr_version_id／construction_rules_ref 可為 null，固定 ref 尚未兌現，介面如實標示。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。
+
+## 9. 同名規則連結的待啟用格式擴充
+
+[數位名字政策](digital-name-policy.md) 核可same_name卡層瀏覽；本次保留§2現行公開權威列／欄序與§8四種review_level。
+程式啟用時須同步新增relation值same_name，固定face_id／digital_face_id皆null、effect_similarity=null、review_level=unreviewed，
+畫面「同名規則視為同卡，未逐筆確認」；不改全域Source.review映射，不新增policy_checked或政策／收據公開欄。
+採minor版本＋required capability digital-same-name-links-v1／min_reader拒絕舊讀者，改tuple／原有意義則major。
+所有同名card/game/ID列出、wire依既有id，UI兩代全列先一代再二代；真人有效關係優先、同組規則不重複。
+純名字政策只出既有translation/FieldTranslation，數位卡／圖／link是否出貨依獨立實際能力，coverage缺紀錄仍未知。
+未啟用前不把核可當已出貨；正式容量與變動報告依實際所選版本量測，舊快照不回寫。

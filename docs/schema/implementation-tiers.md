@@ -152,3 +152,10 @@ T0 的構築子組為 `rules_profile`、`rules_profile_revision`、restriction�
 | `search_alias`                 | T0   |
 
 未建表的後續範圍：`event/printing_event`、`signature/printing_signature`、`artist_link/art_post`、`query_alias`、Decklog adapter。已有建置表但沒有資料的 conditional 組不需先造空的公開資料集內容；公開列集合可以空、相關 coverage 必須 unknown/partial。本表與 build-db 的表集合必須完全一致（每表恰一次），由驗證工具核對，不靠手寫表數維持一致。
+
+## 已核可同名瀏覽的條件組
+
+不改首發57最低集合或逐表權威tier列。發布 [same_name規則瀏覽](digital-name-policy.md) 時，
+另啟用digital_card／digital_face／digital_text／digital_link／digital_endpoint五表及實際非空依賴：
+57＋5＝62，含EN的61＋5＝66；不是每批無條件需要62表。純名字政策不由此要求公開數位庫，翻譯依自己的閉包。
+程式PR才同步枚舉、DDL與公開reader，並跑test_build_db_t0_inventory等實際能力測試；docs-only不改逐表分期。

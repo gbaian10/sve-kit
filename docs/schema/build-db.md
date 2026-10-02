@@ -47,6 +47,8 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 
 sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。confidence 只用於排審優先序。
 
+獨立 same_name 政策的待啟用投影另依 [數位名字政策](digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替政策依據；內部 confirmed 只表示完整 checked_by_rules，sample_ids=[] 刻意不同於模板／wording 格式，不改其原樣本語意。
+
 vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。實作複合 FK 時，子欄另加普通 TEXT kind 欄、DEFAULT 與 CHECK 固定值，例如 `class_kind='class'`，`FK(class_kind,class_code)→vocabulary(kind,code)`。不依賴尚未實測的 generated column。全文邏輯表省略這些固定欄，DDL 產生器必須展開；可空 code 仍要 kind 非空且固定。
 
 爬取來源的 `source_record.id`／`raw_locator` 從 [來源歸檔版本](source-archive.md#2-內容來源版本與-inventory) 投影；同 URL 換內容不覆寫來源版本，manifest 最新狀態與 raw 歷史分開保存。
@@ -260,7 +262,7 @@ ruling 無 current 反向 FK；只有唯一 current 可自動選，若多筆 cur
 | `voice`                 | `id:ID PK,digital_card_id→digital_card,digital_face_id→digital_face?,provider:svgdb\|wbgdb,source_key:Text,lang:Lang,kind_code:Code,variant:Text?,interaction_target_id→digital_card?,label_raw:Text?,source_url:Text,source_id→source_record,asset_path:Text?,sha256:Hash?,mime:Text?,bytes:UInt?,duration_ms:UInt?,availability:remote_only\|mirrored\|unavailable,last_checked_at:Instant?`；C，`UQ(provider,source_key,lang)`，mirrored 必須 `asset_path/hash/bytes/mime` |
 | `card_voice`            | `card_id→card,voice_id→voice,digital_link_id→digital_link,decision_id→decision,usage:browse\|battle` `PK(card_id,voice_id,usage)`；A／D；選用關係必須符合 §2 的採納要求且屬同 card，battle 另須確認 SVE 場景適用                                                                                                                                                                                                                                                              |
 
-卡表快照只出 SVE 關聯閉包中的數位資訊，`digital_face` 的 phase 併入 `digital_art`；`digital_text` 僅當建置翻譯術語來源。`same_card` 是改編來源，與 `effect_similarity` 正交；close/partial/redesigned 未審不硬轉。`same_character` 不能直接套用官方數位譯名或 battle 語音。採納政策見 §2，`card_voice` browse 接 sampled/confirmed；battle 還須場景適用確認。`digital_link`／`digital_link_coverage` 的獨立 authored 入口、續版與逐 owner 名稱重驗另見[待審技術契約](digital-link-adoption.md)，不代表已實作或已有資料。
+卡表快照只出 SVE 關聯閉包中的數位資訊，`digital_face` 的 phase 併入 `digital_art`；`digital_text` 僅當建置翻譯術語來源。`same_card` 是改編來源，與 `effect_similarity` 正交；close/partial/redesigned 未審不硬轉。`same_character` 不能經該關係直接套用官方數位譯名或 battle 語音；owner 另有有效獨立名字政策時可依該政策供名，但不授語音。採納政策見 §2，`card_voice` browse 接 sampled/confirmed；battle 還須場景適用確認。`digital_link`／`digital_link_coverage` 的獨立 authored 入口、續版與逐 owner 名稱重驗另見[待審技術契約](digital-link-adoption.md)，不代表已實作或已有資料。
 
 sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `https://shadowverse-portal.com/card/{official_id}?lang={provider_lang}`（繁中 zh-tw），svwb `https://shadowverse-wb.com/{provider_lang}/deck/cardslist/card/?card_id={official_id}`（繁中 cht）。只記輸入來源版本，不宣稱已探查線上服務。sv1 frozen，svwb 隨新 SVE 包更新。
 
@@ -295,7 +297,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 術語來源主張、無 raw 的專案概念與委託歸因依 [術語採納擴充](glossary-adoption.md)；未驗官方出處的詞先有效採納 project，不改 origin 列舉。rule_term 加粗從獨立 glossary_emphasis_choice 歷史推導，其他型別依固定規則；不在不可變 glossary_term 加欄、不把 translation.tokens 當已核可的公開標記。位置／加粗要出貨仍需該文件 §6 所列的獨立格式審核。
 
-卡名官方數位譯名限確認同概念，優先 svwb 再 sv1；效果翻譯永遠 unofficial。machine 審過仍 origin=machine。缺任一句模板不能把混合未翻段落標完整翻譯。來源更新與參數/術語改版反查後自動重算，失敗列清單，舊譯文不可當新語義版本；不要求逐卡重新採納生成全文，批次人工抽查仍驗實際成員與政策；完整取用矩陣在快照 §5。
+卡名官方數位譯名可由獨立核可的名字政策或自己的真人同卡精確面證據供名，兩者共用 sv1→svwb；效果翻譯永遠 unofficial。machine 審過仍 origin=machine。缺任一句模板不能把混合未翻段落標完整翻譯。來源更新與參數/術語改版反查後自動重算，失敗列清單，舊譯文不可當新語義版本；不要求逐卡重新採納生成全文，批次人工抽查仍驗實際成員與政策；完整取用矩陣在快照 §5。
 
 ## 10. DSL、驗證與未實作卡片頁
 
@@ -509,3 +511,14 @@ SNC 最低資料仍為 `catalog_state`、`card_no_state`、`serial_total`、`lis
 DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態；能力可用須在完整依賴閉包內同時具備後兩者。跨表驗證查詢引用的表也屬必要依賴。只有 DDL 的能力不能列為預覽快照已啟用能力，更不能用空表數量代替正式首發 57 表及條件組的可用性驗收。
 
 建置 SQLite 的 `PRAGMA user_version` 記錄實作宣告版號，與本文件的邏輯契約 v1、抓取 manifest schema、快照 format／data_version 分開。相同宣告版號仍可依能力選擇不同表集合。啟用新組或升版時，正常路徑是從釘住的輸入全量建置新檔，套用新 FK、CHECK 與跨表驗證，成功提交並關閉後才替換舊的建置產物；不複製未驗證的舊列，也不關閉 FK 作為升版捷徑。建立／匯入／驗證／替換失敗保留舊產物；呼叫端必須獨占離線目標並關閉所有連線，不對帶 SQLite sidecar 的目標替換。此流程不處理來源歸檔，也不代替正式發布交易。
+
+## 19. 數位名字政策的能力同步
+
+[數位名字政策](digital-name-policy.md) 的卡名與same_name瀏覽各自核可，不改§8現行權威欄位／枚舉表。
+same_character/name_only不能**經該關係**直接供官方名或battle語音；自己獨立名字政策可供名，不授語音。
+政策same_name屬待啟用新relation，固定卡層級兩面null、effect_similarity=null，公開unreviewed；
+內部approved_rules application的confirmed僅表示完整checked_by_rules，不代表真人。sample_ids=[]是本新格式刻意規定，
+不改模板／wording以全機械成員列samples的既有格式。其餘review映射不變；政策與真人統計分開，coverage不能代policy basis。
+啟用前須程式PR同步DDL／schema／projector／reader與反例；卡名typed證明走既有翻譯表與source_record/F1，不造same_card。
+digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，不因新relation放行。
+發布按§16／§18驗實際能力與非空引用閉包，不要求card/game都有coverage；unknown不當已查無。

@@ -339,3 +339,9 @@ changes 是一般物件 `{format_version,from_data_version,to_data_version,added
 added/modified 的 key 必存在新快照；retired 指前版存在而新版不存在的公開列，不代表撤銷永久身分或刪掉永久 registry。陣列按 entity＋canonical key／各元素 ID 排序，coverage_changes 按 section＋其列鍵排序，support_changes 按 card_id/region 排序；不得重複。before／after 的來源版本要與 from／to 一致。QA／errata card_ids 排序去重且須與對應新版本的關聯一致。
 
 support_changes 比較套用 override/block 後的有效狀態；同狀態但 reasons 或 manifest engine_support_target 改變也列出受影響卡區，reason 明示目標變動。changes_ref 為 null 不宣稱「無變更」。ETag／抓取時間改變但公開投影不變不列 modified；coverage 的查核日期變動屬公開投影變動。完整發布閘門仍驗兩版實際差異，摘要不能代替資料閉包驗證。
+
+## 數位同名規則的版本准入
+
+[數位名字政策](digital-name-policy.md) 的same_name枚舉能力須在producer／reader同步實作後才啟用。
+未支持digital-same-name-links-v1或min_reader不足的reader拒絕該快照，不把規則unreviewed誤看成裸候選或真人確認。
+政策與收據不出貨，不追加公開tuple欄位；枚舉新增minor、既有欄序／語意更換major，沿既有快照准入與完整引用閉包。

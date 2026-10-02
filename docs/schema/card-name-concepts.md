@@ -12,7 +12,7 @@ SVE 永久 card／face 身分及 exact 名稱如何對到已採納的 `category=
 | --- | --- |
 | glossary_term／glossary_choice | 概念與譯詞沿用原格式；`id=term:<concept_key>`、手配英文 key、不可變概念與選詞續版均不改 |
 | context_assignment.concept_key | 重用於 exact 名稱 owner 的概念／語義指派；非 default 仍只處理真實同字異義，不是讓不同卡任意換翻法 |
-| select_name／populate_name_translation | 重用已採納 same-card、同數位面與凍結語言證據，SVWB 優先 SV1；不另建平行官方名稱詞庫 |
+| select_name／populate_name_translation | 接獨立typed名字政策及自己真人 same-card／同面證據，共用SV1→SVWB resolver；same_name瀏覽不供名，不另建詞庫 |
 | rules_name／face_rules_name | 構築計數的同名單位及特殊規則名稱，不是 card_name glossary 關聯；不能把構築同名當同概念 |
 | identity-transition-v1 | 沿有效身分重播驗永久鍵與父卡；不能從 URL alias、舊牌組提示或同名字串推譯名關聯 |
 
@@ -82,13 +82,13 @@ field=name、ordinal=null。每次建置依真正選中來源的有效永久 car
    列缺概念、顯示原文。別名、改名及個別英文特例才走有證據的例外；
    後續另開契約修訂，歸 #195 後續或 EN 術語採納另案由協調者決定。
    JP／EN 的來源選擇仍先遵守既有契約，不借此放寬。
-3. 在未有有效人工消歧時，以下三種情況停止該名稱的推導、回原文並列待人工報告：
+3. 在未有有效人工消歧時，以下三種情況停止未解概念的推導並列待人工報告；直接名字另依有效名字政策／自己的真人供名與總順位，不因概念待件一律回原文：
 
 | 報告 reason | 機械條件 | 後續處理 |
 | --- | --- | --- |
 | ambiguous_name_concept | 同語言、同 exact 名稱對到兩個以上已採納 card_name 概念 | 人工確認概念與語義分支，採納例外關聯／必要的 context_assignment |
-| missing_name_concept | 沒有任何概念對得上 | 新卡先採納概念／choice；已存在概念的改名、別名或 EN 特例才採納關聯 |
-| conflicting_official_name | 該 owner 自己有效同卡連結所得官方譯名，與候選概念的有效目標語 choice 不同 | 列衝突等人工消歧，不以來源優先序蓋過、不借其他 owner 官名 |
+| missing_name_concept | 沒有任何概念對得上 | 直接名字另驗有效名字政策；效果引用需概念／choice；改名、別名或 EN 特例仍依關聯 |
+| conflicting_official_name | 該 owner 自己有效同卡連結所得官方譯名，與候選概念的有效目標語 choice 不同 | 純譯名字串差異按總順位顯示勝出名字並報差異；真正語義衝突仍消歧，不借其他 owner 官名 |
 
 第三項沿 `names.py` 已有的同原文不同官方名稱歧義防線，#53 並須在概念選詞與該 owner 的
 官方 API 結果之間作同等檢查；現有 API 尚未包含這個 glossary 對照，不能宣稱已完整接入。
@@ -139,11 +139,11 @@ term 的字改由 choice 續版帶動重新渲染，不逐卡重簽關聯。
 
 ## 5. 數位官方名稱不能從共用 context 借資格
 
-官方名稱重用 `select_name()`／`populate_name_translation()` 的 same-card／同面／目標語／frozen 名稱證據。
+官方名稱走同一 `select_name()`／`populate_name_translation()` 路徑，明示接獨立typed名字政策結果及自己有效真人same-card／同面／目標語證據；依 [數位名字政策](digital-name-policy.md) 一代優先。不得為相容舊API塞假digital_link。
 例外關聯不是預設必填資料；它與 glossary 官方 choice 均**不是 owner 的 digital_link**。
-每個 revision／printing owner 仍須重驗當下有效 card／face、已採納 link 與 exact 名稱；
+每個 revision／printing owner 仍須重驗自己有效 card／face、完整exact名稱及所用政策或自己真人link證據；
 same_character、同字、數位前後面名一樣、同 context 或已有官方 translation 均不足。
-printed 名稱與凍結的可用官方名不符時不可借 current；第三張無 link 的同名卡不得借前兩張的官名。
+printed 名稱與凍結的可用官方名不符時不可借 current；第三張無link但有自己合法政策證明可供名；政策異譯／缺譯又無自己真人link才不得借前兩張官名。逐名排除維持不能借任何link繞回自動官名。
 
 既有名稱 API 目前只產 JP→zh-Hant、default context 的證據列，不建立 use／selection；
 非 default、印刷模式及 EN 等能力由 #53 擴充同一路徑，而不是繞過現有拒絕或另造名稱詞庫。
@@ -222,14 +222,14 @@ key 是內部識別，不顯示給使用者，只要求唯一、穩定、能核�
 | N09 | EN 字串不等於 JA 但已人工證明同概念；缺 EN parser pin 的相同案例 | 前者在已支援能力中可用；後者能力拒絕，不偷偷用 JP ref |
 | N10 | 同字不同概念卻無語義指派；指派 source_hash 改；concept_key 與關聯矛盾各一次 | 分別待消歧／舊指派失效／建置錯誤；不得任取譯詞 |
 | N11 | template card 參數加 face_id、依 SQL 首列選 back、卡名猜 card_id 各一次 | 各自拒絕，背面用已採納 term／新 schema |
-| N12 | 兩張同名有不同有效 digital 名稱、第三張無 link | 每 owner 只可用自己的已驗名稱；第三張不借官方 context |
-| N13 | same_character、錯數位面、缺 zh-Hant、已失效 link、printed 名不符各一次 | 各自不能用該官方名稱，原文／可用專案詞仍可顯示 |
+| N12 | 兩張同名有不同有效 digital 名稱、第三張無 link | 政策目錄同名異譯時，前兩張有自己真人 B＋必要指派才各取自己的名；第三張無 B 不借。若另有合法政策名字則驗自己資格 |
+| N13 | same_character、錯數位面、缺 zh-Hant、已失效 link、printed 名不符各一次 | 各自不能靠該真人關係供官名；自己的獨立名字政策另驗，原文／可用專案詞仍可顯示 |
 | N14 | split 後新 card／face、merge 退役原卡、reassign 面對應變更各一次 | 預設重算；舊例外不搬移，新 subject 需例外時才新採納；term key 保留 |
 | N15 | 普通 choice 改字；只改無關身分；source 原文換字各一次 | 依賴者重渲染／關聯仍有效／新 source_hash 回預設、仍需例外才另採納，不重配 term |
 | N16 | 關聯用 delegated_glossary、approved_policy、wording 核可各一次 | 各自拒絕，例外不跨 kind 代簽 |
 | N17 | glossary 加 card_id／改已入庫 record_hash／未知 kind 靜默忽略各一次 | 各自拒絕；新關聯不用改舊 39 分片 |
-| N18 | 無例外／指派，同語言同字串對到兩個已採納概念；移除所有概念各一例 | 分別 ambiguous_name_concept／missing_name_concept，回原文並計數 |
-| N19 | 唯一概念 choice 與 owner 自己已驗同卡連結的官方譯名不同 | conflicting_official_name，回原文等消歧；不能任選較優先來源 |
+| N18 | 無例外／指派，同語言同字串對到兩個已採納概念；移除所有概念各一例 | 分別 ambiguous_name_concept／missing_name_concept，概念引用待件並計數；直接名字另驗自己的名字政策，不一律回原文 |
+| N19 | 唯一概念 choice 與 owner 自己已驗同卡連結的官方譯名不同 | 純譯名字串差異按實看選詞／政策／必要真人供名／其他詞順位顯示勝出名並報差異；真語義歧義仍需指派，不任取概念 |
 | N20 | 已採納同字異義例外，卡文勘誤換 revision ID，但名稱及永久卡／面不變 | 例外仍有效、不重簽；新 owner 的語義指派另驗，壞舊指派不沿用 |
 | N21 | 缺 SVE／數位英文名的合成候選；模型提羅馬字 slug、協調者核可 | 可配永久 key，不因無現成英文名缺概念／譯名 |
 | N22 | slug 含非 ASCII／首尾底線、key 超 96 bytes、跨分片撞既有 key 各一次 | 配發前全體檢查拒絕，改候選後重驗，不加流水號 |
