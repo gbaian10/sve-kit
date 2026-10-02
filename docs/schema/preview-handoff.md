@@ -15,6 +15,7 @@ uv --directory carddb run sve-carddb snapshot export --inputs /private/jp-inputs
 ```
 
 也可用 `--preview-dir`、`--cdn-dir` 明確指定；兩者都必填，preview 沒有預設位置。
+`SVE_PREVIEW_DIR` 指到含 `snapshots/` 的那一層，而非 `snapshots/` 或 `snapshots/preview/`。
 解析 symlink 後，兩個 root 不得相同或互相包含；preview 亦不得與輸入 repo／封存庫
 相同或互相包含。root 內的輸出 symlink 不得逸出 preview root。
 
@@ -71,12 +72,14 @@ SVE_PREVIEW_DIR=/explicit/isolated/preview \
 mise exec -- bun run --cwd sim/web dev
 ```
 
-前端 dev server 以 `/cdn-preview` 提供唯讀檔案。開啟查卡畫面，用開發 preview 切換
+前端 dev server 以 `/cdn-preview` 提供唯讀檔案。開啟查卡畫面，用前端開發徽章內的 preview 切換
 選擇該 root；client 讀 `snapshots/preview/current.json`，驗清單 hash，載入 config 與
 bootstrap，卡片詳情再取 detail。preview 切換使用獨立 client 與記憶體狀態，不修改
 正式選版、永久分享或回放 pin。正式 CDN 可以仍指向合成 fixture。
 
 卡文未定會有候選／展示文字與 pending 狀態，不能把顯示文字當現行已確認卡文。
+`errata_card_ids`／`qa_card_ids` 為空不代表沒有勘誤／問答；應以 `source_windows` 為空
+判讀來源覆蓋為 unknown，不可將稀疏卡號清單當作完整性證明。
 M3 畫面驗收與其餘正式閘門應分別確認，不因成功載入 preview 宣稱完成正式資料驗收。
 
 ## 卡圖接點
