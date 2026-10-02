@@ -174,6 +174,22 @@ def test_unavailable_or_unapproved_images_have_metadata_only(
         list(image_blobs(tables, images.library))
 
 
+@pytest.mark.parametrize("missing", ["all", "art_s", "card_l"])
+def test_writer_refuses_incomplete_available_image_closure(
+    images: PublicImages, tmp_path: Path, missing: str
+) -> None:
+    tables = images.tables()
+    tables["image_variant"] = [
+        row
+        for row in tables["image_variant"]
+        if missing != "all" and row["size_key"] != missing
+    ]
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    with pytest.raises(ValueError, match="all five sizes"):
+        write_preview(images.snapshot(tables), roots, {}, image_source=images.library)
+    assert not roots.preview.exists()
+
+
 @pytest.mark.parametrize("state", ["missing-proof", "other-image-proof", "confirmed"])
 def test_third_party_approval_requires_each_image_confirmed(
     images: PublicImages, tmp_path: Path, state: str
@@ -283,6 +299,9 @@ def test_interruption_keeps_old_complete_preview(
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
     tables = images.tables()
     tables["image_variant"] = []
+    tables["image_asset"][0].update(
+        {"availability": "unfetched", "publication_state": "pending"}
+    )
     write_preview(images.snapshot(tables), roots, {})
     old = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
     calls = 0

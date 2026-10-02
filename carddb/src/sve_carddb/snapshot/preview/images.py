@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from PIL import Image
 
+from sve_carddb.image_variants import SIZES
 from sve_carddb.snapshot.values import digest, integer, string
 from sve_carddb.store import resolve_within
 
@@ -32,7 +33,7 @@ def _members(
             raise ValueError(
                 "Third-party preview image needs individual confirmed review"
             )
-    bound = {row["image_id"] for row in tables["printing_image"]}
+    bound = {string(row["image_id"]) for row in tables["printing_image"]}
     members: dict[str, Record] = {}
     for variant in tables["image_variant"]:
         asset = assets[string(variant["image_id"])]
@@ -52,7 +53,28 @@ def _members(
         ):
             raise ValueError("Shared image blob metadata disagrees")
         members[path] = variant
+    _require_sizes(assets, bound, tables["image_variant"])
     return members
+
+
+def _require_sizes(
+    assets: dict[str, Record], bound: set[str], variants: list[Record]
+) -> None:
+    """Text-only or unapproved metadata must not claim a complete image result."""
+    sizes: dict[str, set[str]] = {}
+    for variant in variants:
+        sizes.setdefault(string(variant["image_id"]), set()).add(
+            string(variant["size_key"])
+        )
+    expected = {size.key for size in SIZES}
+    for identifier in bound:
+        asset = assets[identifier]
+        if (
+            asset["availability"] == "available"
+            and asset["publication_state"] == "approved"
+            and sizes.get(identifier, set()) != expected
+        ):
+            raise ValueError("Available preview printing image requires all five sizes")
 
 
 def image_blobs(
