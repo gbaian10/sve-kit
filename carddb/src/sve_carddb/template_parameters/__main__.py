@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.source_archive import ArchiveError
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
 from sve_carddb.template_parameters.inventory import build, summary
@@ -28,6 +28,8 @@ from sve_carddb.translations.sources import CODE_PATH, RUNTIME, Sources
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+
+    from sve_carddb.template_parameters.references import References
 
 
 def _evidence(args: argparse.Namespace) -> Sources:
@@ -51,12 +53,36 @@ def _evidence(args: argparse.Namespace) -> Sources:
     return Sources({args.store_id: args.store}, args.repository, context)
 
 
+def _pin_glossary(args: argparse.Namespace, refs: References) -> None:
+    """A revision label must verify input bytes, not merely accompany local glossary hashes."""
+    glossary = object_value(refs.pins["glossary"])
+    glossary_revision = getattr(args, "glossary_revision", None) or args.code_revision
+    expected = {
+        "authored/translations/index.yaml": glossary["index_hash"],
+        **{
+            "authored/" + str(object_value(shard)["path"]): object_value(shard)[
+                "exact_hash"
+            ]
+            for shard in array(glossary["shards"])
+        },
+    }
+    pinned = PinnedRepository(args.repository).read_many(
+        glossary_revision, tuple(expected)
+    )
+    if any(digest(pinned[path]) != checksum for path, checksum in expected.items()):
+        raise ValueError(
+            "Candidate glossary inputs must match their exact Git revision"
+        )
+    refs.pins["glossary"] = {**glossary, "authored_revision": glossary_revision}
+
+
 def run(args: argparse.Namespace) -> dict[str, JsonValue]:
     """Pin full first-party code, exact adopted concept closure and proposed vocabulary inputs."""
     pins = recipes(args.repository, args.code_revision)
     enabled = selection(tuple(getattr(args, "enable_candidate_rule", ())))
     sources = FrozenSources(args.store, args.store_id, args.batch_id)
     refs = adopted(args.authored, _evidence(args))
+    _pin_glossary(args, refs)
     proposal_bytes = args.vocabulary_proposals.read_bytes()
     refs.vocabulary = Vocabulary.model_validate_json(proposal_bytes)
     refs.vocabulary.verify()
@@ -132,6 +158,10 @@ def main() -> None:
         parser.add_argument("--" + name, required=True, type=Path)
     for name in ("store-id", "batch-id", "code-revision"):
         parser.add_argument("--" + name, required=True)
+    parser.add_argument(
+        "--glossary-revision",
+        help="Immutable glossary commit; defaults to code revision",
+    )
     parser.add_argument(
         "--enable-candidate-rule",
         action="append",

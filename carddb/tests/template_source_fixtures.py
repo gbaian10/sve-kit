@@ -10,12 +10,14 @@ from pydantic import JsonValue
 
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import Kind
+from sve_carddb.registry.storage import encode
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_sources.checkpoint import LegacyTemplate, read_legacy
 from sve_carddb.template_sources.inventory import Scan, scan_batch
 from sve_carddb.template_sources.pins import recipes
+from sve_carddb.translations.models import Index
 
 from .adoption_fixtures import commit, git
 from .test_effect_presence import page
@@ -49,6 +51,18 @@ def template_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
     )
     for name in ("carddb/uv.lock", "carddb/pyproject.toml"):
         shutil.copyfile(runtime / name, repository / name)
+    authored = repository / "authored/translations"
+    authored.mkdir(parents=True)
+    (authored / "index.yaml").write_bytes(
+        encode(
+            Index(
+                translation_authored_format=1,
+                kind="translation_index",
+                includes={},
+                inventories={},
+            )
+        )
+    )
     git(repository, "init")
     revision = commit(repository)
     pins = recipes(repository, revision)

@@ -167,7 +167,10 @@ literal, while only unsigned magnitudes receive slots.
 
 Braced reference slots cover the original exact name, not a substituted
 placeholder; their fixed per-template value leaves old fingerprints unchanged.
-The recipe already pins glossary revision and index hash in `references`.
+The recipe pins glossary `authored_revision` and exact index/shard hashes in
+`references`. `--glossary-revision` defaults to the program revision; the tool
+checks every input file against that immutable Git tree before matching. A
+different local glossary cannot borrow the revision label.
 Only the closed 11 adopted IDs are recognized, with exact unique raw spelling,
 record category and record hash. This recognizes a word, not its translation or
 effect. An ability threshold similarly verifies its exact adopted name as

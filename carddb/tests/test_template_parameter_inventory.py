@@ -4,6 +4,7 @@ import argparse
 import copy
 import json
 import re
+import shutil
 import sys
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -12,7 +13,6 @@ import pytest
 
 import sve_carddb.template_parameters.__main__ as cli
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.registry.storage import encode
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.template_parameters import inventory
 from sve_carddb.template_parameters.inventory import Candidates, build, summary
@@ -24,7 +24,6 @@ from sve_carddb.template_parameters.rule_candidates import BY_ID
 from sve_carddb.template_parameters.rule_candidates import (
     configuration as candidate_configuration,
 )
-from sve_carddb.translations.models import Index
 
 from .template_source_fixtures import template_case as template_case  # ruff: ignore[useless-import-alias] -- reusable immutable offline Git/archive fixture
 
@@ -52,18 +51,7 @@ def parameter_result(
     template_case: Case, tmp_path_factory: pytest.TempPathFactory
 ) -> Result:
     root = tmp_path_factory.mktemp("parameter-candidates")
-    authored = root / "authored"
-    (authored / "translations").mkdir(parents=True)
-    (authored / "translations/index.yaml").write_bytes(
-        encode(
-            Index(
-                translation_authored_format=1,
-                kind="translation_index",
-                includes={},
-                inventories={},
-            )
-        )
-    )
+    authored = template_case.repository / "authored"
     proposals = root / "proposals.json"
     proposals.write_bytes(canonical({"bindings": []}))
     basis = root / "basis.md"
@@ -104,6 +92,11 @@ def test_candidate_inventory_replays_every_first_checkpoint_entry_and_field(
     config = object_value(object_value(report["parameter_recipe"])["config"])
     assert config["numeric_classifier"] == configuration()
     assert config["candidate_classifier"] == candidate_configuration()
+    glossary = object_value(object_value(config["references"])["glossary"])
+    assert glossary["authored_revision"] == template_case.revision
+    assert glossary["index_hash"] == digest(
+        (template_case.repository / "authored/translations/index.yaml").read_bytes()
+    )
     assert (parameter_result.args.output / "rule-candidates.jsonl").read_bytes() == b""
 
 
@@ -199,6 +192,23 @@ def test_inventory_cannot_shrink_or_duplicate_first_checkpoint_inputs(
             scan,
             References(),
         )
+
+
+def test_glossary_revision_cannot_be_a_label_for_different_exact_bytes(
+    parameter_result: Result, tmp_path: Path
+) -> None:
+    args = copy.copy(parameter_result.args)
+    args.authored = tmp_path / "authored"
+    shutil.copytree(parameter_result.args.authored, args.authored)
+    index = args.authored / "translations/index.yaml"
+    index.write_bytes(index.read_bytes() + b"\n")
+    args.output = tmp_path / "result"
+    with pytest.raises(
+        ValueError,
+        match=r"\ACandidate glossary inputs must match their exact Git revision\Z",
+    ):
+        cli.run(args)
+    assert not args.output.exists()
 
 
 @pytest.mark.parametrize("location", ["existing", "inside", "symlink"])
