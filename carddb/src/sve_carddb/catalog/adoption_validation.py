@@ -11,6 +11,7 @@ from sve_carddb.catalog.adoption_models import (
     ImageEvidence,
     LanguageRecord,
     NameRecord,
+    RawMapping,
     RouteRecord,
     SymbolRecord,
     TextEvidence,
@@ -49,6 +50,7 @@ def target(kind: str, code: str) -> tuple[str, dict[str, str]]:
         if kind not in {
             "class",
             "type",
+            "special_kind",
             "rarity",
             "trait",
             "title",
@@ -77,6 +79,11 @@ def direct_dependencies(  # ruff: ignore[complex-structure] -- exhaustive direct
         elif source_lang is not None:
             result.append(("language", {"code": source_lang}))
         result.extend(("language", {"code": m.lang}) for m in vocab.raw_mappings)
+        result.extend(
+            ("vocabulary", {"kind": "special_kind", "code": code})
+            for mapping in vocab.raw_mappings
+            for code in mapping.special_kinds
+        )
     elif isinstance(record, LanguageRecord):
         lang_value = record.data.value
         assert lang_value is not None
@@ -156,7 +163,17 @@ def term(
     if value is None:
         return None
     ordered(value.raw_mappings)
+    kind = record.data.subject.kind
+    if kind == "special_kind" and record.data.subject.code not in {
+        "evolve",
+        "advance",
+        "token",
+    }:
+        raise ValueError("Unsupported adopted special-kind code")
+    if kind == "special_kind" and value.raw_mappings:
+        raise ValueError("Special-kind definitions cannot declare raw mappings")
     for mapping in value.raw_mappings:
+        _mapping_metadata(kind, mapping)
         if not any(
             isinstance(e, TextEvidence) and e.source_ref == mapping.source_ref
             for e in record.evidence
@@ -182,6 +199,19 @@ def term(
         label=sources.value(value.label, record, review),
         active=value.active,
     )
+
+
+def _mapping_metadata(kind: str, mapping: RawMapping) -> None:
+    if kind != "type" and mapping.special_kinds:
+        raise ValueError("Only type raw mappings can declare special kinds")
+    if mapping.special_kinds != tuple(sorted(set(mapping.special_kinds))):
+        raise ValueError("Adopted special kinds must be sorted and unique")
+    if set(mapping.special_kinds) - {"evolve", "advance", "token"}:
+        raise ValueError("Unsupported adopted type special kind")
+    if kind == "class" and mapping.raw == "-":
+        raise ValueError("Missing class value cannot be adopted as a code")
+    if kind == "type" and mapping.raw == "-":
+        raise ValueError("Missing type value cannot be adopted as a code")
 
 
 def _mapping_locator(kind: str, region: str) -> set[str]:

@@ -1,4 +1,4 @@
-"""Caller-pinned vocabulary inputs, without introducing an authored file format."""
+"""Memory catalog projections for checked adoptions and explicit synthetic staging."""
 
 from typing import Literal
 

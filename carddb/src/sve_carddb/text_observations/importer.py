@@ -8,6 +8,7 @@ from sve_carddb.build_inputs import (
     input_record,
     insert_raw_sources,
 )
+from sve_carddb.catalog.importer import _insert_exact
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import SAFE_INTEGER, parse
 from sve_carddb.source_corrections.importer import (
@@ -19,6 +20,7 @@ from sve_carddb.text_observations.configuration import text_configuration
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.models import candidate_revision_id
 from sve_carddb.text_observations.plan import verify_plan
+from sve_carddb.text_observations.type_binding import type_binding
 from sve_carddb.text_observations.wording import mark_wording_pending
 
 if TYPE_CHECKING:
@@ -49,6 +51,20 @@ def populate_vocabulary(
 ) -> None:
     """Register the explicit raw-to-code bindings without guessing source types."""
     vocabulary.verify()
+    if vocabulary.terms:
+        for term in vocabulary.terms:
+            _insert_exact(
+                db,
+                "vocabulary",
+                {
+                    "kind": term.kind,
+                    "code": term.code,
+                    "active": term.active,
+                    "label_unit_id": texts.intern(term.label),
+                },
+                ("kind", "code"),
+            )
+        return
     existing = {
         (r.values["kind"], r.values["code"]): r.values for r in db.rows("vocabulary")
     }
@@ -96,12 +112,17 @@ def populate_revision(  # ruff: ignore[too-many-arguments] -- the original and c
     *,
     decision_id: str | None = None,
     supersedes_id: str | None = None,
+    plan: TextPlan | None = None,
 ) -> None:
     """Store exact candidate content with explicit provenance inside a transaction."""
     content = item.content
     assert content.effect is not None
     language = "ja" if item.region == "jp" else "en"
-    kind = vocabulary.lookup(item.region, "type", content.type_raw)
+    if plan is None:
+        kind = vocabulary.lookup(item.region, "type", content.type_raw)
+    else:
+        kind, classification_decision = type_binding(plan, item, vocabulary)
+        decision_id = decision_id or classification_decision
     card_class = (
         None
         if content.class_raw == "-"
@@ -260,6 +281,7 @@ def _groups_to_database(
                 if item.correction_keys
                 else None,
                 supersedes_id=revision_id(original) if item.correction_keys else None,
+                plan=plan,
             )
         current = group.current()
         if current is not None:

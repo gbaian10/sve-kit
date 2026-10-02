@@ -21,7 +21,7 @@ Kind = Literal[
     "default_printing_adoption",
 ]
 VocabularyKind = Literal[
-    "class", "type", "rarity", "trait", "title", "frame", "stamp_series"
+    "class", "type", "special_kind", "rarity", "trait", "title", "frame", "stamp_series"
 ]
 
 
@@ -116,6 +116,7 @@ class RawMapping(RecordData):
     lang: Lang
     raw: Text
     source_ref: SourceRef
+    special_kinds: tuple[Code, ...]
 
 
 class VocabularyValue(RecordData):
