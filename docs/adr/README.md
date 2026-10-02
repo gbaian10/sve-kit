@@ -18,6 +18,7 @@
 | [ADR-0011](0011-rulings-evidence.md)      | 裁定登錄、證據強度與輔助提示         | 已採用 | 2026-09-28 |
 | [ADR-0012](0012-version-meta.md)          | DSL 主次版與每卡 meta                | 已採用 | 2026-09-28 |
 | [ADR-0013](0013-rule-bundle-migration.md) | 觀測雜湊與規則語義 bundle 的明示遷移 | 已採用 | 2026-10-01 |
+| [ADR-0014](0014-license-policy.md)        | 程式與資料的路徑授權及第三方內容排除 | 已採用 | 2026-10-03 |
 
 ADR-0001～0012 是效果 DSL 1.0 的設計決定，規格本文見 [`docs/dsl/`](../dsl/README.md)；
 裁定登錄見 `authored/rulings/`。
