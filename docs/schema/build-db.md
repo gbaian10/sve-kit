@@ -138,6 +138,8 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 
 **使用者 2026-10-01 核可 B**：依 [authored-layout §9.8](authored-layout.md#98-無主文的證據-recipe採用-b) 的 effect-presence-v1，能證明來源版本確定無主文時，以既有 exact 空字串 text_unit 表示；無法證明者保持 null，完整來源與判別結果留 report／F1、明列 deferred，不能借別版文字補 FK。這延續「空字串＝已確定無文字」，不是直接 null→空字串。face_revision.effect_unit_id、printing_face_observation.revision_id、text_unit.text 均維持 NOT NULL；absent 的來源證據不掛在共享空文字上。
 
+`face_special_kind.special_kind_code` 以固定 `special_kind` 複合 FK 指向有效的 `vocabulary(kind=special_kind,code)`；標記由已採納的完整原值映射推導，契約見 [catalog-route-adoption §4.1](catalog-route-adoption.md#41-詞彙與語言)。
+
 type 明確包含 follower/spell/amulet/crest/equipment/leader/ep/sep；equipment＋token 對應已觀測的イクイップメント・トークン，這是資料分類，不代替 CR 規則。evolve/advance/token 是特殊標記；traits 不切斷〈ジオ・テオゴニア〉。sections 保留順序與分類，unknown 仍顯示完整原文，但不放行 verified DSL。數值 null 不補 Leader 體力 20。
 
 無差異的初始觀測可由工具建立一對一 semantics（保留全部規則），不另要求每卡人工 decision；只有移除提示/重複定義、跨文字認定等義才需已採納正規化政策或 confirmed batch。未知段落保持 unknown 並禁止 verified。
