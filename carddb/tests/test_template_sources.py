@@ -1,9 +1,11 @@
 """Sealed source, immutable recipe, replay and output-boundary counterexamples."""
 
 import argparse
+import copy
 import re
 import shutil
 import sys
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -12,7 +14,7 @@ from pydantic import JsonValue
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.storage import MAX_BYTES, read_yaml
-from sve_carddb.snapshot.values import canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.source_archive import ArchiveError, Scope, seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_sources import __main__ as command
@@ -30,8 +32,10 @@ from .test_source_archive import _put, _resource, _store
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.template_sources.inventory import Scan
-    from sve_carddb.template_sources.models import Recipe
+    from sve_carddb.template_sources.models import Entry, Recipe
+    from sve_carddb.template_sources.normalizer import Part
 
     from .template_source_fixtures import Case
 
@@ -509,3 +513,130 @@ def test_cli_exit_and_redacted_output_are_stable_with_color_enabled(
         if failed
         else '{"fingerprints":true,"legacy_member_coverage":true,"source_coverage":true}\n'
     )
+
+
+@pytest.mark.parametrize(
+    "failure", ["none", "source_coverage", "legacy_member_coverage", "fingerprints"]
+)
+def test_cli_persists_each_independent_failure_and_exits_one(
+    template_case: Case,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    failure: str,
+) -> None:
+    scan = copy.deepcopy(template_case.scan)
+    if failure == "source_coverage":
+        scan.failures.append({"reason": "unknown_effect_presence"})
+    elif failure == "legacy_member_coverage":
+        scan.occurrences = [
+            item
+            for item in scan.occurrences
+            if item.member_hash != digest(b"SYN-02#1/text/0")
+        ]
+    elif failure == "fingerprints":
+        scan.occurrences = [
+            item
+            for item in scan.occurrences
+            if item.template != template_case.legacy[1].identifier
+        ]
+
+    def selected_scan(
+        _sources: FrozenSources, *, repository: Path, pins: tuple[Recipe, ...]
+    ) -> Scan:
+        assert repository == template_case.repository
+        assert pins == template_case.pins
+        return scan
+
+    args = arguments(template_case, tmp_path / "result")
+
+    def selected_args(_parser: argparse.ArgumentParser) -> argparse.Namespace:
+        return args
+
+    monkeypatch.setattr(command, "scan_batch", selected_scan)
+    monkeypatch.setattr(argparse.ArgumentParser, "parse_args", selected_args)
+    with pytest.raises(SystemExit) as outcome:
+        command.main()
+    assert outcome.value.code == (0 if failure == "none" else 1)
+    report = object_value(parse((args.output / "checkpoint.json").read_bytes()))
+    assert report["complete"] is (failure == "none")
+    statuses: dict[str, JsonValue] = {
+        "fingerprints": failure != "fingerprints",
+        "source_coverage": failure != "source_coverage",
+        "legacy_member_coverage": failure
+        not in {"fingerprints", "legacy_member_coverage"},
+    }
+    assert {key: object_value(report[key])["complete"] for key in statuses} == statuses
+    captured = capsys.readouterr()
+    assert not captured.err
+    assert captured.out == canonical(statuses).decode() + "\n"
+
+
+def test_jp_card_batch_with_nonpage_media_is_refused(
+    template_case: Case, tmp_path: Path
+) -> None:
+    store = _store(tmp_path / "source")
+    raw = page("jp", '<div class="detail">Synthetic２</div>')
+    resource = replace(
+        _resource(card_url("SYN-01"), "raw/card.html", raw, Kind.CARD),
+        content_type="image/png",
+    )
+    _put(store, resource, raw)
+    batch = seal_batch(store)
+    with pytest.raises(
+        ValueError, match=r"\ATemplate frozen source identity or media mismatch\Z"
+    ):
+        scan_batch(
+            FrozenSources(store.root, store.store_id, batch.batch_id),
+            repository=template_case.repository,
+            pins=template_case.pins,
+        )
+
+
+def test_candidate_id_collision_is_refused_before_publication(
+    template_case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = inventory.entry
+
+    def colliding_entry(ref: SourceRef, part: Part, normalizer_id: str) -> Entry:
+        return original(ref, part, normalizer_id).model_copy(
+            update={"id": "inv:synthetic-collision"}
+        )
+
+    monkeypatch.setattr(inventory, "entry", colliding_entry)
+    with pytest.raises(
+        ValueError, match=r"\ATemplate inventory entry IDs must be unique\Z"
+    ):
+        scan_batch(
+            FrozenSources(template_case.store, "test-store", template_case.batch),
+            repository=template_case.repository,
+            pins=template_case.pins,
+        )
+
+
+def test_projection_number_type_is_checked_at_the_boundary(
+    template_case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def malformed_project(
+        _raw: bytes, _url: str, _provider: str
+    ) -> tuple[str, JsonValue]:
+        return "ja", {"number": 3, "faces": [{"text": "Synthetic", "sections": []}]}
+
+    monkeypatch.setattr(inventory, "project", malformed_project)
+    with pytest.raises(TypeError, match=r"\ATemplate projection lacks a card number\Z"):
+        scan_batch(
+            FrozenSources(template_case.store, "test-store", template_case.batch),
+            repository=template_case.repository,
+            pins=template_case.pins,
+        )
+
+
+def test_section_count_type_is_checked_before_computing_expected_fields(
+    template_case: Case,
+) -> None:
+    scan = copy.deepcopy(template_case.scan)
+    scan.pages[0]["section_counts"] = ["1"]
+    with pytest.raises(
+        TypeError, match=r"\ATemplate coverage section count must be an integer\Z"
+    ):
+        coverage(scan)

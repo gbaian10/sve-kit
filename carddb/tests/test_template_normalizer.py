@@ -28,6 +28,7 @@ def bodies(text: str, *, section: int | None = None) -> list[str]:
         (" \u3000（Synthetic only）\t\n", []),
         ("A（outer（inner）tail）B", ["A(outertail)B"]),
         ("A（one） B（two）C", ["A BC"]),
+        ("A(Synthetic note)２", ["A(Synthetic note)N"]),
         ("（one）  Body２  （two）", ["BodyN"]),
         ("Ｎ９『Name１２』⑧", ["NN『X』N"]),
         ("literalN『X』", ["literalN『X』"]),

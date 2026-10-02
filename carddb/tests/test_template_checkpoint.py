@@ -245,6 +245,7 @@ def test_hash_collisions_and_duplicate_use_ids_are_rejected(
         "empty",
         "id",
         "normalized",
+        "empty_normalized",
         "lines",
         "bool_lines",
         "members",
@@ -286,6 +287,11 @@ def test_legacy_catalog_is_validated_without_echoing_draft_text(
     if change == "duplicate_member":
         value["members"], value["lines"] = ["one", "one"], 2
     raw = canonical(value) + b"\n"
+    if change == "empty_normalized":
+        raw = (
+            canonical({**value, "normalized": "", "template": "T" + digest(b"")[7:17]})
+            + b"\n"
+        )
     message = "Invalid legacy template fingerprint or member set"
     if change in {"empty", "duplicate_id"}:
         raw = b"" if change == "empty" else raw * 2
