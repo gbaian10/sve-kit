@@ -6,10 +6,10 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_inputs import SourceUse
+from sve_carddb.build_inputs import SourceUse, Version
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.registry.records import CardData, FaceData, PrintingData
+from sve_carddb.registry.records import CardData, FaceData, PrintingData, Text
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.digital import _phases
@@ -35,13 +35,20 @@ class Name:
     common: dict[str, JsonValue]
 
 
+class PageRef(Batch):
+    source_version_id: Version
+    parser: Text
+
+
 def inventory(  # ruff: ignore[complex-structure,too-many-locals] -- both API layouts need complete target and language inventories
-    sources: Sources, refs: tuple[SourceRef, ...]
+    sources: Sources, refs: tuple[SourceRef | PageRef, ...]
 ) -> dict[tuple[str, str, str, str], Name]:
     """Index exact names by game, target, phase and language without normalization."""
     result: dict[tuple[str, str, str, str], Name] = {}
     for ref in refs:
-        lang, document, source = sources.document(ref)
+        lang, document, source = sources.projection(
+            ref.store_id, ref.batch_id, ref.source_version_id, ref.parser
+        )
         sources.uses.append(
             SourceUse(source=source, usage="digital_name_inventory", locator="/data")
         )
@@ -76,11 +83,13 @@ def inventory(  # ruff: ignore[complex-structure,too-many-locals] -- both API la
                 raise ValueError("Digital inventory name must be text")
             locator = base + ("/" if game == "sv1" else "/common/") + field
             for phase in phases:
-                exact = ref.model_copy(
-                    update={
-                        "locator": locator,
-                        "text_hash": digest((text or "").encode()),
-                    }
+                exact = SourceRef(
+                    store_id=ref.store_id,
+                    batch_id=ref.batch_id,
+                    source_version_id=ref.source_version_id,
+                    parser=ref.parser,
+                    locator=locator,
+                    text_hash=digest((text or "").encode()),
                 )
                 name = Name(
                     game, official, phase, lang, text or "", exact, source, common

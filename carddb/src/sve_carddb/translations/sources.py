@@ -42,6 +42,7 @@ RUNTIME = (
     "carddb/src/sve_carddb/text_observations/intern.py",
     "carddb/src/sve_carddb/catalog/importer.py",
     "carddb/src/sve_carddb/digital_links/candidates.py",
+    "carddb/src/sve_carddb/digital_links/catalogue.py",
     "carddb/src/sve_carddb/digital_links/commands.py",
     "carddb/src/sve_carddb/catalog/adoption_models.py",
     "carddb/src/sve_carddb/catalog/adoption_loader.py",
