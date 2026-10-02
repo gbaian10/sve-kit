@@ -138,7 +138,7 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
 由 flavor 模板產生的譯文只可被 field=flavor 的 use 選用，flavor use 也不可選 name／effect 譯文；
 須沿精確 binding／模板清冊 role 驗證，不能只驗 context 命中、來源 hash 或 target_lang。
 本限制由 #53 的建置選用與投影在輸出前完整驗證，不宣稱現有共用 selection 已有欄位資格檢查。
-若一個 context 的混合用途不能以現有唯一 selection／binding 同時合法表示，列 incompatible_translation_uses，
+若一個 context 的混合用途不能以現有唯一 selection／binding 同時合法表示，計入 flavor_context_conflict_rows，
 **名稱與卡文優先，只有衝突的風味側回原文**；保留其原本合法的名稱／卡文（含逐 owner 已驗官方名）選用。
 由 #53 在報告列 flavor_context_conflict_rows 與對應 owner／context／理由，不讀官方全文估算或隱藏計數。
 優先序不授權壞來源／錯 owner 的名稱或卡文；仍先通過原有資格檢查。
