@@ -12,6 +12,8 @@ from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, parse
 from sve_carddb.translations.models import (
     ChoiceRecord,
+    Decision,
+    EmphasisRecord,
     Index,
     Record,
     Shard,
@@ -32,6 +34,8 @@ def key(record: Record) -> str:
     """Use explicit primary keys rather than names, translated text or file order."""
     if isinstance(record, TermRecord):
         fields: list[JsonValue] = [record.kind, record.data.id]
+    elif isinstance(record, EmphasisRecord):
+        fields = [record.kind, record.data.term_id]
     elif isinstance(record, ChoiceRecord):
         fields = [record.kind, record.data.term_id, record.data.lang]
     else:
@@ -44,6 +48,13 @@ def key(record: Record) -> str:
     if not isinstance(record, TermRecord):
         fields.append(record.data.adoption_no)
     return canonical(fields).decode()
+
+
+@dataclass(frozen=True)
+class Emphasis:
+    bold: bool | None
+    record_hash: str | None
+    decision_id: str | None
 
 
 @dataclass(frozen=True)
@@ -79,6 +90,28 @@ class Snapshot:
             ):
                 latest[subject] = record, decision
         return tuple(latest[name] for name in sorted(latest))
+
+    def emphasis(self, term_id: str) -> Emphasis:
+        """Separate missing presentation metadata from false or missing translation."""
+        terms = {r.data.id: r for r, _ in self.effective() if isinstance(r, TermRecord)}
+        if term_id not in terms:
+            raise ValueError("Emphasis references an unadopted concept")
+        if terms[term_id].data.category != "rule_term":
+            return Emphasis(True, None, None)
+        for record, decision in self.effective():
+            if isinstance(record, EmphasisRecord) and record.data.term_id == term_id:
+                return Emphasis(record.data.value, record_hash(record), decision)
+        return Emphasis(None, None, None)
+
+    def review_counts(self) -> dict[str, int]:
+        """Count delegated checks separately from actual human sample declarations."""
+        human = delegated = 0
+        for shard in self.envelopes():
+            if shard.records[0].data.adoption_review.mode == "human":
+                human += len(shard.decisions[0].sample_ids)
+            else:
+                delegated += len(shard.records)
+        return {"human_sampled_rows": human, "delegated_glossary_rows": delegated}
 
     def pins(self) -> dict[str, JsonValue]:
         """Distinguish exact YAML inputs from canonical membership hashes."""
@@ -167,6 +200,9 @@ def _envelope(shard: Shard, filing: str) -> None:
         raise ValueError("Translation decision requires actual checked members")
     if decision.state == "confirmed" and decision.sample_ids != tuple(keys):
         raise ValueError("Confirmed translation must check every member")
+    modes = {record.data.adoption_review.mode for record in shard.records}
+    if len(modes) != 1:
+        raise ValueError("Glossary review modes must be uniform within a shard")
     for record in shard.records:
         if (
             record.kind != decision.category
@@ -174,6 +210,7 @@ def _envelope(shard: Shard, filing: str) -> None:
             or record.record_key != key(record)
         ):
             raise ValueError("Translation record kind/key/filing mismatch")
+        _delegated(record, decision)
         ordered(record.evidence)
         if (
             isinstance(record, TermRecord)
@@ -182,12 +219,30 @@ def _envelope(shard: Shard, filing: str) -> None:
             raise ValueError("Permanent term ID differs from concept key")
 
 
-def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure] -- immutable allocations and revision chains share one complete inventory
+def _delegated(record: Record, decision: Decision) -> None:
+    review = record.data.adoption_review
+    if review.delegation is not None:
+        receipt = review.delegation
+        if decision.state != "confirmed":
+            raise ValueError("Delegated glossary requires confirmed full checks")
+        if (
+            decision.reviewed_by,
+            decision.reviewed_at,
+            decision.reviewed_precision,
+        ) != (receipt.decided_by, receipt.decided_at, receipt.decided_precision):
+            raise ValueError("Delegated glossary decision differs from receipt event")
+        if "維護者委託；協調者決定；不是維護者親自核可" not in decision.note:
+            raise ValueError("Delegated glossary note must identify delegated approval")
+        if record.record_key not in receipt.scope:
+            raise ValueError("Delegation scope excludes current glossary record")
+
+
+def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure,too-many-branches] -- immutable allocations and revision chains share one complete inventory
     seen: dict[str, tuple[Record, str]] = {}
     concepts = set()
-    chains: dict[str, list[tuple[ChoiceRecord | VocabularyRecord, str]]] = defaultdict(
-        list
-    )
+    chains: dict[
+        str, list[tuple[ChoiceRecord | VocabularyRecord | EmphasisRecord, str]]
+    ] = defaultdict(list)
     for record, decision in snapshot.records():
         if record.record_key in seen:
             raise ValueError("Duplicate immutable translation record")
@@ -199,6 +254,17 @@ def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure] -- 
         else:
             subject = canonical(array(parse(record.record_key.encode()))[:-1]).decode()
             chains[subject].append((record, decision))
+    for record, _ in snapshot.records():
+        receipt = record.data.adoption_review.delegation
+        if receipt is not None:
+            for member in receipt.scope:
+                scoped = seen.get(member)
+                if scoped is None:
+                    raise ValueError(
+                        "Delegation scope references absent glossary record"
+                    )
+                if scoped[0].data.adoption_review.delegation != receipt:
+                    raise ValueError("Delegation scope member has a different receipt")
     for chain in chains.values():
         chain.sort(key=lambda item: item[0].data.adoption_no)
         previous = None
@@ -222,3 +288,15 @@ def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure] -- 
         for r, _ in snapshot.records()
     ):
         raise ValueError("Glossary choice references an unadopted concept")
+
+    categories = {
+        r.data.id: r.data.category
+        for r, _ in snapshot.records()
+        if isinstance(r, TermRecord)
+    }
+    for record, _ in snapshot.records():
+        if isinstance(record, EmphasisRecord):
+            if record.data.term_id not in categories:
+                raise ValueError("Emphasis references an unadopted concept")
+            if categories[record.data.term_id] != "rule_term":
+                raise ValueError("Only rule terms accept emphasis choices")

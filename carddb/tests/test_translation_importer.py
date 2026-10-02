@@ -1169,3 +1169,52 @@ def test_adopted_review_date_is_required_before_name_reader(
             db.transaction(),
         ):
             db.update("decision", {"id": "decision"}, {"reviewed_at": None})
+
+
+@pytest.mark.parametrize("bold", [True, False, None])
+def test_project_receipt_and_rawless_concept_import_atomically(
+    frozen: Fixture,
+    importer_template: DatabaseTemplate,
+    tmp_path: Path,
+    bold: bool | None,
+) -> None:
+    from .test_glossary_adoption import authored, claim, delegated, emphasis  # ruff: ignore[import-outside-top-level] -- share only small envelope builders, not another frozen fixture
+
+    repository = tmp_path / "project-repository"
+    shutil.copytree(frozen.root, repository)
+    definition = authored()
+    selected = choice(value="合成專案譯名")
+    object_value(selected["data"])["source_claim"] = claim()
+    records = {
+        "translations/glossary/concepts/001.yaml": delegated([definition]),
+        "translations/glossary/choices/001.yaml": delegated([selected]),
+        "translations/glossary/emphasis/001.yaml": delegated([emphasis(value=bold)]),
+    }
+    write(repository / "authored", records)
+    inputs = Inputs(repository / "authored", repository, commit(repository))
+    config = object_value(parse(frozen.build.configuration.encode()))
+    config.update(inputs.configuration())
+    with importer_template.copy() as db:
+        imported = import_glossary(
+            db, inputs, build=changed_build(frozen, config), stores={}
+        )
+        assert imported is not None
+        assert db.rows("glossary_term")[0].values["source_ja"] == "合成名"
+        assert db.rows("glossary_translation")[0].values["origin"] == "project"
+        assert db.rows("glossary_translation")[0].values["text"] == "合成專案譯名"
+        assert inputs.load().emphasis("term:rule.test").bold is bold
+        assert inputs.load().review_counts()["human_sampled_rows"] == 0
+        decisions = [
+            row
+            for row in db.rows("decision")
+            if row.values["category"] == "glossary_emphasis_choice"
+        ]
+        assert len(decisions) == 1
+        assert decisions[0].values["reviewed_by"] == "Synthetic coordinator AI"
+        audit = [
+            row
+            for row in db.rows("source_record")
+            if row.values["authored_path"] is not None
+        ]
+        assert len(audit) == 4
+        assert all(row.values["kind"] == "authored" for row in audit)

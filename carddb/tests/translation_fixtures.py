@@ -43,6 +43,9 @@ def term(
             "concept_key": identifier,
             "source_ref": reference(),
             "source_span": None,
+            "authored_source_ja": None,
+            "missing_source_reason": None,
+            "adoption_review": {"mode": "human", "delegation": None},
         },
         "evidence": [],
     }
@@ -67,6 +70,8 @@ def choice(
             "value": None if value is None else {"kind": "authored", "text": value},
             "origin": "project",
             "concept_evidence": [],
+            "source_claim": None,
+            "adoption_review": {"mode": "human", "delegation": None},
             "adoption_no": number,
             "predecessor": predecessor,
         },
