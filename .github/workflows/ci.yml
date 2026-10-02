@@ -1,4 +1,4 @@
-# One workflow for every PR and push to main. `changes` decides which component jobs run;
+# One workflow for every PR and push to main. Private main warms caches in ci-ok only;
 # `ci-ok` is the single required check, so skipping a component never leaves a check pending.
 name: ci
 
@@ -11,11 +11,17 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  # A unique main group also prevents pending runs from replacing each other.
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  CARGO_BUILD_JOBS: '4'
+  PYTEST_WORKERS: ${{ vars.CI_PYTEST_WORKERS || '4' }}
 
 jobs:
   changes:
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -30,6 +36,7 @@ jobs:
         with:
           fetch-depth: 0 # push events diff against the previous commit with git
           persist-credentials: false
+          clean: true
       - uses: dorny/paths-filter@ceb8a2b8f2d89434be7ff52d3de7ec3738c5cc9d # v4.0.3
         id: filter
         with:
@@ -62,6 +69,7 @@ jobs:
               - 'carddb/src/sve_carddb/snapshot/schema/**' # the web reader validates against the published schema
 
   repo:
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -69,6 +77,7 @@ jobs:
         with:
           fetch-depth: 0 # gitleaks-range scans the whole pushed commit range
           persist-credentials: false
+          clean: true
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -90,7 +99,7 @@ jobs:
       - name: Every hook has a CI owner and every job reaches ci-ok
         run: |
           uv run .github/ci/hooks.py check
-          uv run --project carddb --locked --no-default-groups --group dev python -m unittest discover -s .github/ci -p 'test_hooks.py'
+          uv run --project carddb --locked --no-default-groups --group dev python -m unittest discover -s .github/ci -p 'test_*.py'
       - name: pre-commit (repo-wide hooks, including the gitleaks commit-range scan)
         env:
           BASE: ${{ github.event_name == 'pull_request' && github.event.pull_request.base.sha || github.event.before }}
@@ -107,13 +116,14 @@ jobs:
 
   python:
     needs: changes
-    if: needs.changes.outputs.python == 'true'
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.python == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          clean: true
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -142,7 +152,7 @@ jobs:
             mypy-${{ runner.os }}-py3.14-
       - name: Runner CPU count
         run: nproc
-      # ruff, mypy (carddb and the ER generator) and pytest, through the same hooks as local runs.
+      # Test hooks are owned by this job but run directly below.
       - name: pre-commit (python hooks)
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip python)"
@@ -152,6 +162,35 @@ jobs:
             uv run --project carddb --locked pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
+      - name: pytest (combined line and branch coverage >= 90%)
+        id: tests
+        env:
+          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+        run: |
+          umask 077
+          rm -rf "$REPORT_DIR" "$SVE_DATA_DIR"
+          mkdir -p "$REPORT_DIR"
+          start=$SECONDS
+          [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
+          status=0
+          uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
+            --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
+            > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
+          echo "pytest exit status: $status (statistics in the next step; raw output stays private)"
+          exit "$status"
+      - name: Python test summary
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+        run: python3 .github/ci/test_summary.py python "$REPORT_DIR"
+      - name: Remove private Python reports and test data
+        if: always()
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-python-reports
+          SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
+        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:
@@ -165,7 +204,7 @@ jobs:
 
   rust:
     needs: changes
-    if: needs.changes.outputs.rust == 'true'
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.rust == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
@@ -174,6 +213,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          clean: true
       - name: Read the test data pin
         id: pin
         run: |
@@ -192,6 +232,7 @@ jobs:
           ssh-key: ${{ secrets.TESTDATA_DEPLOY_KEY }}
           path: .testdata
           persist-credentials: false
+          clean: true
       - name: Verify the test data
         env:
           SNAPSHOT: .testdata/${{ steps.pin.outputs.snapshot_path }}
@@ -204,6 +245,7 @@ jobs:
       - name: Install the pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
+        id: rust-cache
         with:
           save-if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       - uses: taiki-e/install-action@4cef1412cce204788f482e778a0b9187f9626a29 # v2.87.21
@@ -227,7 +269,7 @@ jobs:
           # partial cache that the others hit exactly and then could never update.
           key: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-${{ hashFiles('.pre-commit-config.yaml', '.github/ci/hooks.toml') }}
           restore-keys: pre-commit-${{ github.job }}-${{ runner.os }}-py3.14-
-      # fmt, clippy, tests with the 90% line-coverage gate, deny and machete, through the local hooks.
+      # The coverage test hook runs directly below; the other checks keep their local hooks.
       - name: pre-commit (rust hooks)
         run: |
           SKIP="$(uv run .github/ci/hooks.py skip rust)"
@@ -237,6 +279,31 @@ jobs:
             uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
+      - name: Rust tests (line coverage >= 90%)
+        id: tests
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
+        run: |
+          umask 077
+          rm -rf "$REPORT_DIR"
+          mkdir -p "$REPORT_DIR"
+          start=$SECONDS
+          status=0
+          cargo llvm-cov --locked --workspace -j 4 --summary-only --fail-under-lines 90 \
+            --json --output-path "$REPORT_DIR/coverage.json" > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
+          echo "cargo llvm-cov exit status: $status (statistics in the next step; raw output stays private)"
+          exit "$status"
+      - name: Rust test summary
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
+        run: python3 .github/ci/test_summary.py rust "$REPORT_DIR"
+      - name: Remove private Rust reports and test data
+        if: always()
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
+        run: rm -rf "$REPORT_DIR" .testdata
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
@@ -245,7 +312,7 @@ jobs:
 
   web:
     needs: changes
-    if: needs.changes.outputs.web == 'true'
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.web == 'true' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
@@ -255,9 +322,11 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+          clean: true
       # Bun and Node versions come from mise.toml.
       - uses: jdx/mise-action@c2a87611a18de5b3828c5652fe268e992400cb5c # v4.3.0
         with:
+          cache: true
           cache_save: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
       - uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         id: hook-cache
@@ -265,8 +334,35 @@ jobs:
           path: ~/.bun/install/cache
           key: bun-${{ runner.os }}-${{ hashFiles('sim/web/bun.lock') }}
       - run: bun install --frozen-lockfile
-      # package.json scripts are the single entry point: Prettier, ESLint, Stylelint, tsc -b, Vitest and the build.
-      - run: bun run check
+      - name: Web formatting, lint, types and unused dependencies
+        run: bun run format:check && bun run lint && bun run typecheck && bun run knip
+      - name: Vitest
+        id: tests
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-web-reports
+        run: |
+          umask 077
+          rm -rf "$REPORT_DIR"
+          mkdir -p "$REPORT_DIR"
+          status=0
+          start=$SECONDS
+          bun run test --maxWorkers=4 --reporter=junit --outputFile="$REPORT_DIR/junit.xml" \
+            > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
+          echo "vitest exit status: $status (statistics in the next step; raw output stays private)"
+          exit "$status"
+      - name: Web test summary
+        if: ${{ !cancelled() && (steps.tests.outcome == 'success' || steps.tests.outcome == 'failure') }}
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-web-reports
+        run: python3 ../../.github/ci/test_summary.py web "$REPORT_DIR"
+      - name: Remove private Web reports
+        if: always()
+        env:
+          REPORT_DIR: ${{ runner.temp }}/sve-web-reports
+        run: rm -rf "$REPORT_DIR"
+      - name: Web build
+        run: bun run build
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.hook-cache.outputs.cache-hit != 'true'
         with:
@@ -274,8 +370,9 @@ jobs:
           key: ${{ steps.hook-cache.outputs.cache-primary-key }}
 
   # Every commit that reaches the base branch must follow the commitizen format (.cz.toml), gitmoji included.
-  # Runs on every event regardless of paths; the PR title has its own workflow (pr-title.yml).
+  # PRs and public main run this regardless of paths; the PR title has its own workflow.
   commit:
+    if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -283,6 +380,7 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: false
+          clean: true
       - uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
         with:
           enable-cache: true
@@ -302,9 +400,12 @@ jobs:
     if: always()
     needs: [changes, repo, python, rust, web, commit]
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && 20 || 5 }}
+    env:
+      MAIN_MAINTENANCE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true }}
     steps:
       - name: Every job that had to run succeeded
+        if: env.MAIN_MAINTENANCE != 'true'
         env:
           NEEDS: ${{ toJSON(needs) }}
         run: |
@@ -323,3 +424,11 @@ jobs:
             fi
           done
           exit "$status"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: env.MAIN_MAINTENANCE == 'true'
+        with:
+          persist-credentials: false
+          clean: true
+      - name: Private main cache maintenance (same ci-ok check)
+        if: env.MAIN_MAINTENANCE == 'true'
+        uses: ./.github/actions/main-maintenance # zizmor: ignore[self-repository] -- defer tool preparation until private-main checkout; PR gate stays lightweight

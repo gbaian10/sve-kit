@@ -8,6 +8,7 @@ Usage:
   uv run .github/ci/hooks.py check
   uv run .github/ci/hooks.py skip JOB     # SKIP value for `pre-commit run` in that job
   uv run .github/ci/hooks.py stages JOB   # hook stages that job runs
+  uv run .github/ci/hooks.py install-config JOB  # emit config for cache-only environment installation
 """
 
 import sys
@@ -44,6 +45,7 @@ class Owner:
 
     job: str
     reason: str
+    direct: bool = False
 
 
 def load_config() -> dict[str, object]:
@@ -70,9 +72,13 @@ def configured_hooks(config: dict[str, object]) -> list[Hook]:
 def owners() -> dict[str, Owner]:
     """Return the CI job (and reason) that owns each hook."""
     table = tomllib.loads((ROOT / ".github/ci/hooks.toml").read_text())
-    hooks = cast("dict[str, dict[str, str]]", table["hooks"])
+    hooks = cast("dict[str, dict[str, object]]", table["hooks"])
     return {
-        hook: Owner(job=entry["job"], reason=entry.get("reason", "").strip())
+        hook: Owner(
+            job=str(entry["job"]),
+            reason=str(entry.get("reason", "")).strip(),
+            direct=bool(entry.get("direct", False)),
+        )
         for hook, entry in hooks.items()
     }
 
@@ -135,6 +141,23 @@ def workflow_problems(workflow: dict[str, object]) -> list[str]:
     return []
 
 
+def install_config(
+    config: dict[str, object], owned: dict[str, Owner], job: str
+) -> dict[str, object]:
+    """Keep the same environment definitions while excluding other jobs and manual tools."""
+    repos: list[dict[str, object]] = []
+    for repo in cast("list[dict[str, object]]", config["repos"]):
+        selected = [
+            hook
+            for hook in cast("list[dict[str, object]]", repo["hooks"])
+            if owned[str(hook.get("alias", hook["id"]))].job == job
+            and not owned[str(hook.get("alias", hook["id"]))].direct
+        ]
+        if selected:
+            repos.append({**repo, "hooks": selected})
+    return {**config, "repos": repos}
+
+
 def main(argv: list[str]) -> int:
     """Run the subcommand in argv and return the exit status."""
     config = load_config()
@@ -152,8 +175,17 @@ def main(argv: list[str]) -> int:
         case ["stages", job] if job in JOB_STAGES:
             sys.stdout.write(" ".join(JOB_STAGES[job]) + "\n")
             return 0
+        case ["install-config", job] if job in JOB_STAGES:
+            sys.stdout.write(
+                yaml.safe_dump(install_config(config, owned, job), sort_keys=False)
+            )
+            return 0
         case ["skip", job] if job in JOBS - {"none"}:
-            skipped = (hook.id for hook in hooks if owned[hook.id].job != job)
+            skipped = (
+                hook.id
+                for hook in hooks
+                if owned[hook.id].job != job or owned[hook.id].direct
+            )
             sys.stdout.write(",".join(skipped) + "\n")
             return 0
         case _:

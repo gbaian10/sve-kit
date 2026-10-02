@@ -1,2 +1,5 @@
 # Same rules as carddb; this directory holds standalone CI scripts, not part of the carddb package.
 extend = "../../carddb/pyproject.toml"
+
+# Rust/Web summaries use the Ubuntu system Python; their jobs do not install Python 3.14.
+target-version = "py312"
