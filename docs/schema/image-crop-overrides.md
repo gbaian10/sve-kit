@@ -1,6 +1,6 @@
 # 插畫裁切覆寫契約
 
-本文件定義來源綁定的覆寫採納輸入 **image-crop-overrides-v1**，沿用[卡圖衍生檔契約](image-variants.md)的整數框、五檔 WebP 與既有 `CropOverride`，不新增影像表或快照欄位。這是 loader 與建置接線的技術契約，不表示入口已實作或覆寫資料已入庫；未支援完整契約的建置不得聲稱已套用這批採納。
+本文件定義來源綁定的覆寫採納輸入 **`image_crop_format: 1`**，沿用[卡圖衍生檔契約](image-variants.md)的整數框、五檔 WebP 與既有 `CropOverride`，不新增影像表或快照欄位。這是 loader 與建置接線的技術契約，不表示入口已實作或覆寫資料已入庫；未支援完整契約的建置不得聲稱已套用這批採納。
 
 ## 1. 鍵與兩種 image ID
 
@@ -39,7 +39,7 @@ loader 由覆寫列的兩個鍵值算出 `conversion_image_id`，選中凍結來
 
 **不設 index.yaml。** loader 在釘住的完整 authored Git revision 下，載入 `image-crops/` 中全部分片與收據 `.yaml`，以相對路徑排序；不接受符號連結或越界路徑。分片位置與封套 kind 必須相符，未知格式／kind／欄位拒絕。全體檔案一併驗證，不因本次僅建 JP 而跳過 EN 列。完整檔案集合與 exact bytes 依 §4 進 F1，缺檔或多檔不得當成正常空集合。
 
-覆寫分片封套恰有 `authored_format: image-crop-overrides-v1`、`kind: crop_override_shard`、非空 `records` 陣列。每列恰有下列欄位：
+覆寫分片封套恰有 `image_crop_format: 1`、`kind: crop_override_shard`、非空 `records` 陣列。每列恰有下列欄位：
 
 | 欄位 | 型別與用途 |
 | --- | --- |
@@ -64,7 +64,7 @@ region／card_no 不參與來源查找、hash 推導、跨區配對或採納判�
 
 | 欄位 | 型別與用途 |
 | --- | --- |
-| authored_format | 固定 `image-crop-overrides-v1` |
+| image_crop_format | 真整數，固定 `1` |
 | kind | 固定 `crop_approval` |
 | receipt_id | `[a-z][a-z0-9_-]{0,63}`，與檔名 stem 相同，全體唯一 |
 | approved_at | 加引號、以 `Z` 結尾的 UTC RFC 3339 字串，保留真實事件精度，不代填零時 |
@@ -84,12 +84,12 @@ RGB 裁切核可不等於上傳或公開授權。實際產圖後協調者另檢�
 選框解析是共用、不分地區的函式，輸入已驗證的凍結 descriptor（kind=image）、來源 bytes 與完整採納集合：
 
 1. 全體沒有該 source_key：依既有直向／橫向整數公式用預設框。
-2. 有該 source_key，但新 raw hash 沒有有效採納：停止本批產圖，錯誤列出 source_key、新 hash 與已有 hash；不套舊框、不退回預設。
+2. 有該 source_key，但新 raw hash 沒有有效採納：停止本批產圖，錯誤列出 source_key、新 hash 與已有 hash；不套舊框、不退回預設。同網址換圖且新版改回標準版型時，仍須重新核可並新增該 hash 的一列，座標填依新版尺寸算出的預設框。
 3. 有完全相符的鍵：核對收據、來源版本與框內約束，推導產圖 ID 並傳入既有 `build_variants(override=…)`。任何失敗均停止，不跳過該列充作完成。
 
 先完整驗證採納集合，再大量轉檔；未選中的列列為未使用，不是錯誤。JP 產圖入口仍只接受 JP batch，共用 resolver 不代表 EN pipeline 已接通。首次資料採納須將已核可的 JP 六列與 EN 六列一併入庫，使用同一份 12 成員收據；JP-only 建置會報告未用到的 EN 六列。
 
-F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使用閉包)釘完整 authored revision、所有覆寫分片與收據的排序相對路徑和 exact bytes hash。`configuration.image_crop_overrides` 保存 `{format,authored_revision,files}`，format 為 `image-crop-overrides-v1`，revision 為完整 40 碼 Git SHA，files 為按 name 排序的 `{name,sha256}` 清單，name 是 checkout 相對路徑（`authored/image-crops/...`），sha256 為 `sha256:<64 小寫 hex>`；內容須與 dependencies 與該 revision 的目錄集合相符。呼叫端 pin 只作複核，不能代替 authored 收據；無目錄的 revision 是明示的空集合，不能把本應存在的檔案遺失當空集合。
+F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使用閉包)釘完整 authored revision、所有覆寫分片與收據的排序相對路徑和 exact bytes hash。`configuration.image_crop_overrides` 保存 `{image_crop_format,authored_revision,files}`，image_crop_format 為整數 `1`，revision 為完整 40 碼 Git SHA，files 為按 name 排序的 `{name,sha256}` 清單，name 是 checkout 相對路徑（`authored/image-crops/...`），sha256 為 `sha256:<64 小寫 hex>`；內容須與 dependencies 與該 revision 的目錄集合相符。呼叫端 pin 只作複核，不能代替 authored 收據；無目錄的 revision 是明示的空集合，不能把本應存在的檔案遺失當空集合。
 
 只有帶影像的建置納入上述裁切 dependencies／configuration，與 `image_recipe` 一致；純文字建置不因裁切資料變動而換 input fingerprint。`build()` 消費外部傳入的 `ImageBuild` 時，必須從自身釘住的採納輸入重算每個來源應用的框（覆寫或預設），與 `VariantSet.crop_box` 比對後才可填 DB／輸出公開清單。僅在 `build_jp_assets` 產圖側驗證不夠；來源、recipe、五檔 hash 都有效但仍使用舊框的結果也必須拒絕。
 
@@ -114,10 +114,10 @@ F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使�
 
 調查對凍結的 JP 7,383 張與 EN 7,437 張卡圖驗 hash／decode，再以字形及水平底帶判定篩選標準框附近的文字，補掃中下段。**程式篩選後由模型看縮圖總覽**；不是使用者逐張複核全圖庫。調查支持這批來源中倒吊版型為唯一須下移的一組，使用者另看過並同意上述 12 張實際大小的最終 RGB 裁切結果。畫內標誌／簽名的 13 張已決定不處理、保持標準框，不列待決事項。
 
-掃描是啟發式篩選，不是全圖庫無漏檢的證明：
+掃描是啟發式篩選，不是全圖庫無漏檢的證明；以下門檻與分數出自不在 repo 的一次性本機分析：
 
 - 門檻只用同一角色的十張上置效果框校準，對未見版型沒有召回率保證。
-- 字形門檻為 80，JP 已知例的分數為 147–194，EN 為 355 以上；日文的餘裕較小，底帶更淡的版型可能只被一套判定抓到。
+- 字形門檻為 80，JP 已知例的分數為 147–194，EN 約 355；日文的餘裕較小，底帶更淡的版型可能只被一套判定抓到。
 - 字形判定只找淺色字，底帶只掃到 y=233；y=233 以下的淺底深字框可能兩套都漏。日後發現其他例外仍須按來源採納，不擴大本次同意。
 
 ## 6. 變體、快照與上傳的版本策略
