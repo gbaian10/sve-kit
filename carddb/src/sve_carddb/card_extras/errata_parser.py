@@ -6,7 +6,7 @@ from datetime import date
 from typing import TYPE_CHECKING
 from urllib.parse import urljoin, urlsplit
 
-from sve_carddb.card_extras.archive import _en_date
+from sve_carddb.card_extras.dates import parse_en_date
 from sve_carddb.card_extras.errata_markup import NoticeMarkup, Piece, lines
 from sve_carddb.html import attribute, parse, select_all
 from sve_carddb.snapshot.values import digest
@@ -29,17 +29,9 @@ _PAIR = {
 }
 _FIELD_LABELS = {
     "Card Name": "name",
-    "Effect": "effect",
-    "Cost": "cost",
-    "Attack": "attack",
-    "Defense": "defense",
-    "Traits": "traits",
     "カード名": "name",
-    "能力": "effect",
-    "コスト": "cost",
-    "攻撃力": "attack",
-    "体力": "defense",
-    "タイプ": "card_type",
+    "タイプ": "traits",
+    "カード種類": "card_type",
 }
 _FIELD_PREFIX = re.compile(
     r"^(" + "|".join(map(re.escape, _FIELD_LABELS)) + r")[：:][ \t]*"
@@ -66,6 +58,7 @@ class ChangeBlock:
     before: Fragment
     after: Fragment
     context: tuple[str, ...] = field(repr=False)
+    end_basis: str
 
 
 @dataclass(frozen=True)
@@ -84,6 +77,7 @@ class StagedNotice:
     heading_date: str | None
     issues: tuple[str, ...]
     images: tuple[tuple[str, str], ...] = field(repr=False)
+    unused_trailing_lines: int
 
 
 @dataclass(frozen=True)
@@ -103,26 +97,26 @@ class Associations:
 def associate_blocks(notice: StagedNotice, names: dict[str, str]) -> Associations:
     """Use explicit context before inspecting any corrected card wording."""
     matched: list[BlockAssociation] = []
-    for block in notice.blocks:
+    for block in () if notice.issues else notice.blocks:
         last = block.context[-1].strip() if block.context else ""
         explicit = [number for number in notice.listed.numbers if last == number]
         named = [
-            number for number in notice.listed.numbers if names.get(number) == last
+            number
+            for number in notice.listed.numbers
+            if last and names.get(number) == last
         ]
         if explicit:
             targets, basis = explicit, "explicit_number"
         elif len(named) == 1:
             targets, basis = named, "explicit_name"
         elif named:
-            targets, basis = [], "ambiguous_name"
-        elif (
-            len(notice.blocks) == 1
-            and not notice.issues
-            and last in ({"▼修正内容"} if notice.region == "jp" else {"Changes"})
+            continue
+        elif len(notice.blocks) == 1 and last in (
+            {"▼修正内容"} if notice.region == "jp" else {"Changes"}
         ):
             targets, basis = list(notice.listed.numbers), "single_shared_block"
         else:
-            targets, basis = [], "unknown"
+            continue
         matched.extend(
             BlockAssociation(number, block.ordinal, basis) for number in targets
         )
@@ -184,7 +178,8 @@ class _Pairs:
         self.block_context: tuple[str, ...] = ()
         self.arrows = 0
 
-    def finish(self) -> None:
+    def finish(self, end_basis: str) -> None:
+        had_pair = self.phase != "outside"
         if self.phase == "after":
             if self.arrows != 1:
                 raise ValueError("Errata pair requires exactly one change arrow")
@@ -193,22 +188,28 @@ class _Pairs:
             if before.field_label != after.field_label:
                 self.issues.add("inconsistent_field_label")
             self.result.append(
-                ChangeBlock(len(self.result), before, after, self.block_context)
+                ChangeBlock(
+                    len(self.result), before, after, self.block_context, end_basis
+                )
             )
         elif self.phase == "before":
             self.issues.add("missing_correct_marker")
         self.phase = "outside"
         self.before, self.after = [], []
         self.arrows = 0
+        if had_pair:
+            self.context = []
 
     def marker(self, marker: str) -> None:
         if marker == "before":
-            self.finish()
+            if self.phase != "outside":
+                self.issues.add("pair_truncated_by_incorrect_marker")
+            self.finish("next_incorrect_marker")
             self.phase = "before"
             self.block_context = tuple(self.context)
         elif self.phase != "before":
             self.issues.add("orphan_correct_marker")
-            self.phase = "outside"
+            self.finish("orphan_correct_marker")
         else:
             self.phase = "after"
 
@@ -216,7 +217,7 @@ class _Pairs:
         value = "".join(piece.value for piece in line).strip()
         has_image = any(piece.kind == "image" for piece in line)
         if line[0].kind == "heading" or value.startswith("▼"):
-            self.finish()
+            self.finish("heading")
             self.context = [value] if value else []
         elif not value and not has_image:
             if (
@@ -224,7 +225,7 @@ class _Pairs:
                 and _content(self.after)
                 and any("\xa0" in piece.value for piece in line)
             ):
-                self.finish()
+                self.finish("nbsp_separator")
         elif (marker := _PAIR[self.region].get(value)) is not None:
             self.marker(marker)
         elif value == "↓":
@@ -247,14 +248,14 @@ def _content(pieces: list[Piece]) -> bool:
 
 def _blocks(
     markup: NoticeMarkup, region: Region
-) -> tuple[tuple[ChangeBlock, ...], tuple[str, ...]]:
+) -> tuple[tuple[ChangeBlock, ...], tuple[str, ...], int]:
     pairs = _Pairs(markup, region)
     for line in lines(markup.pieces):
         pairs.accept(line)
-    pairs.finish()
+    pairs.finish("end_of_document")
     if not pairs.result:
         pairs.issues.add("no_paired_changes")
-    return tuple(pairs.result), tuple(sorted(pairs.issues))
+    return tuple(pairs.result), tuple(sorted(pairs.issues)), len(pairs.context)
 
 
 def _cards(inner: LexborNode, region: Region) -> ListedCards:
@@ -293,7 +294,7 @@ def _heading_date(inner: LexborNode, region: Region) -> tuple[str | None, str | 
     raw = times[0].text()
     value = raw.strip()
     if region == "en":
-        return raw, _en_date(value)
+        return raw, parse_en_date(value)
     match = re.fullmatch(r"([0-9]{4})\.([0-9]{2})\.([0-9]{2})", value)
     if match is None:
         return raw, None
@@ -320,13 +321,12 @@ def parse_notice(raw: bytes, source: Source, *, region: Region) -> StagedNotice:
     ):
         raise ValueError("Errata source URL/region/media mismatch")
     html = raw.decode("utf-8")
-    tree = parse(html)
     prefix = "eratta" if region == "jp" else "errata"
     selector = (
         _WRAPPER
         + f" > div.sw-Lower_Container > div.{prefix}-Detail > div.{prefix}-Detail_Inner"
     )
-    roots = select_all(tree, selector)
+    roots = select_all(parse(html), selector)
     if len(roots) != 1:
         raise ValueError("Errata announcement container is missing or ambiguous")
     inner = roots[0]
@@ -337,7 +337,7 @@ def parse_notice(raw: bytes, source: Source, *, region: Region) -> StagedNotice:
     markup.close()
     if markup.bodies != 1:
         raise ValueError("Errata raw body container is ambiguous")
-    blocks, issues = _blocks(markup, region)
+    blocks, issues, unused_trailing_lines = _blocks(markup, region)
     images = tuple(
         sorted(
             {
@@ -357,4 +357,5 @@ def parse_notice(raw: bytes, source: Source, *, region: Region) -> StagedNotice:
         parsed_date,
         issues,
         images,
+        unused_trailing_lines,
     )

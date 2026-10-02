@@ -28,10 +28,9 @@ class FrozenErrataNotices:
             source, raw, descriptor = self.sources.read(
                 entry.source_version_id, parser_version=PARSER
             )
-            if (descriptor.provider, descriptor.kind, descriptor.url) != (
+            if (descriptor.provider, descriptor.kind) != (
                 self.region,
                 "errata",
-                source.url,
             ):
                 raise ValueError("Errata batch source identity mismatch")
             yield parse_notice(raw, source, region=self.region)

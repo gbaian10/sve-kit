@@ -5,6 +5,7 @@ from datetime import date
 from typing import TYPE_CHECKING
 from urllib.parse import parse_qsl, urljoin, urlsplit
 
+from sve_carddb.card_extras.dates import parse_en_date
 from sve_carddb.card_extras.models import CardPage, QAEntry, RelatedLink
 from sve_carddb.extract.official_en import _qa_text as _en_qa_text
 from sve_carddb.extract.official_jp import _qa_text
@@ -25,27 +26,6 @@ PARSER = "official-card-extras-jp-v1"
 EN_PARSER = "official-card-extras-en-v1"
 _TITLE = re.compile(r"^(Q\d+)\s*(?:[（(]([^）)]+)[）)])?$")
 _DATE = re.compile(r"^(\d{4})[/-](\d{1,2})[/-](\d{1,2})$")
-_EN_DATE = re.compile(r"([A-Z][a-z]{2})(?:\. ([0-9]{1,2})| ([0-9]{2})), ([0-9]{4})")
-_EN_MONTHS = {
-    month: number
-    for number, month in enumerate(
-        (
-            "Jan",
-            "Feb",
-            "Mar",
-            "Apr",
-            "May",
-            "Jun",
-            "Jul",
-            "Aug",
-            "Sep",
-            "Oct",
-            "Nov",
-            "Dec",
-        ),
-        start=1,
-    )
-}
 
 
 def card_number(url: str, region: Region) -> str | None:
@@ -101,7 +81,7 @@ def parse_card_page(raw: bytes, source: Source, *, region: Region = "jp") -> Car
         official_number, raw_date = (
             (match[1], match[2]) if match else (None, title or None)
         )
-        parsed = _date(raw_date) if region == "jp" else _en_date(raw_date)
+        parsed = _date(raw_date) if region == "jp" else parse_en_date(raw_date)
         locator = f"qa-block:{ordinal}"
         anchor = attribute(node, "id")
         questions.append(
@@ -146,16 +126,6 @@ def _date(raw: str | None) -> str | None:
         return None
     try:
         return date(*map(int, match.groups())).isoformat()
-    except ValueError:
-        return None
-
-
-def _en_date(raw: str | None) -> str | None:
-    match = _EN_DATE.fullmatch(raw or "")
-    if match is None or (month := _EN_MONTHS.get(match[1])) is None:
-        return None
-    try:
-        return date(int(match[4]), month, int(match[2] or match[3])).isoformat()
     except ValueError:
         return None
 

@@ -77,7 +77,22 @@ class NoticeMarkup(HTMLParser):
             )
         if tag == "br":
             self.emit("break")
-        if tag not in {"img", "br", "hr", "meta", "link", "input", "wbr"}:
+        if tag not in {
+            "area",
+            "base",
+            "br",
+            "col",
+            "embed",
+            "hr",
+            "img",
+            "input",
+            "link",
+            "meta",
+            "param",
+            "source",
+            "track",
+            "wbr",
+        }:
             self.stack.append((tag, dict(attrs), self.position()))
 
     @override

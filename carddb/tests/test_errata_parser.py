@@ -67,8 +67,15 @@ def test_notice_raw_evidence_and_scope(region: Region) -> None:
     block = notice.blocks[0]
     assert "Unrelated" not in "".join(piece.value for piece in block.after.pieces)
     assert any(piece.spans for piece in block.after.pieces)
-    for fragment in (block.before, block.after):
-        assert digest(raw[fragment.raw.start : fragment.raw.end]) == fragment.raw.sha256
+    expected = (
+        b"Earlier synthetic text.",
+        "Correct synthetic <span style='color:red'>文字 &amp; text</span>.".encode(),
+    )
+    for fragment, content in zip((block.before, block.after), expected, strict=True):
+        assert raw[fragment.raw.start : fragment.raw.end] == content
+        assert fragment.raw.sha256 == digest(content)
+    assert block.end_basis == "nbsp_separator"
+    assert notice.unused_trailing_lines == 1
     assert "Correct synthetic" not in repr(notice)
     associations = associate_blocks(notice, {})
     assert [(item.card_no, item.basis) for item in associations.matched] == [
@@ -310,7 +317,7 @@ def test_ambiguous_or_missing_metadata_is_rejected(
 
 def test_no_heading_date_and_script_markers_are_not_guessed() -> None:
     raw, pin = page(
-        content="<script>(Incorrect)</script><style>(Correct)</style><p>↓</p>"
+        content="<p><script>(Incorrect)</script></p><p>Old synthetic.</p><p>↓</p><p><style>(Correct)</style></p><p>New synthetic.</p>"
     )
     raw = raw.replace(b"<time class='time Sans'>Oct. 03, 2026</time>", b"")
     notice = parse_notice(
@@ -324,12 +331,16 @@ def test_no_heading_date_and_script_markers_are_not_guessed() -> None:
 def test_original_unicode_byte_ranges_survive_dom_repair_and_unrelated_dates() -> None:
     raw, pin = page(
         "jp",
-        content="<p>▼修正内容</p><p>（誤）<br>合成旧值。</p><div><p>↓<br>（正）<br>合成新值。&#x21;<img src='/icon.png' alt='Synthetic'/></div>",
+        content="<p>▼修正内容</p><p>（誤）<br>合成旧值。</p><div><p>↓<br>（正）<br>合成<span>新值。</span>&#x21;<img src='/icon.png' alt='Synthetic'/></div>",
         date="2026.10.03",
     )
     notice = parse_notice(raw, pin, region="jp")
     fragment = notice.blocks[0].after
-    assert digest(raw[fragment.raw.start : fragment.raw.end]) == fragment.raw.sha256
+    expected = (
+        "合成<span>新值。</span>&#x21;<img src='/icon.png' alt='Synthetic'/>".encode()
+    )
+    assert raw[fragment.raw.start : fragment.raw.end] == expected
+    assert fragment.raw.sha256 == digest(expected)
     changed = raw.replace(b"2026.10.03", b"2026.10.04")
     again = parse_notice(
         changed, pin.model_copy(update={"sha256": digest(changed)}), region="jp"
@@ -340,15 +351,17 @@ def test_original_unicode_byte_ranges_survive_dom_repair_and_unrelated_dates() -
 
 def test_only_lf_advances_html_parser_line_positions() -> None:
     raw, pin = page(
-        content="<section class=inh1>Changes</section><p>\r\v\f</p><p>(Incorrect)</p><p>Old synthetic.</p><p>↓</p><p>(Correct)</p><p>New synthetic.</p>"
+        content="<section class=inh1>Changes</section>\r\n<p>\r\v\f</p>\r\n<p>(Incorrect)</p><p>Old synthetic.</p><p>↓</p><p>(Correct)</p><p>New synthetic.</p>"
     )
     notice = parse_notice(raw, pin, region="en")
     for fragment in (notice.blocks[0].before, notice.blocks[0].after):
-        assert digest(raw[fragment.raw.start : fragment.raw.end]) == fragment.raw.sha256
-        assert raw[fragment.raw.start : fragment.raw.end] in {
-            b"Old synthetic.",
-            b"New synthetic.",
-        }
+        expected = (
+            b"Old synthetic."
+            if fragment is notice.blocks[0].before
+            else b"New synthetic."
+        )
+        assert raw[fragment.raw.start : fragment.raw.end] == expected
+        assert fragment.raw.sha256 == digest(expected)
 
 
 @pytest.mark.parametrize("reference", ["&amp", "&#33"])
@@ -357,8 +370,6 @@ def test_unterminated_reference_does_not_hash_the_following_tag(reference: str) 
         content=f"<section class=inh1>Changes</section><p>(Incorrect)</p><p>Old synthetic.</p><p>↓</p><p>(Correct)</p><p>New synthetic {reference}</p>"
     )
     fragment = parse_notice(raw, pin, region="en").blocks[0].after
-    assert (
-        raw[fragment.raw.start : fragment.raw.end]
-        == ("New synthetic " + reference).encode()
-    )
-    assert digest(raw[fragment.raw.start : fragment.raw.end]) == fragment.raw.sha256
+    expected = ("New synthetic " + reference).encode()
+    assert raw[fragment.raw.start : fragment.raw.end] == expected
+    assert fragment.raw.sha256 == digest(expected)
