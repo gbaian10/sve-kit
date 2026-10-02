@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- exercise collection in a fresh synthetic pytest project
@@ -13,6 +14,7 @@ from .private_pages_support import (
     Case,
     Check,
     Index,
+    PrivateInputs,
     PrivatePageError,
     check_projection,
     load_index,
@@ -34,6 +36,19 @@ CASE = Case(
     None,
     (Check(("name",), "text", EMPTY_HASH),),
 )
+
+
+def test_public_index_needs_no_private_checkout() -> None:
+    index = load_index()
+    assert index.commit == "309b766885d49faff9db80f5b97cd56d8601c55b"
+    assert len(index.cases) == 19
+    assert len({case.sha256 for case in index.cases}) == 19
+
+
+def test_private_fixture_representation_is_safe() -> None:
+    inputs = PrivateInputs({"F01": b"SVE-KIT synthetic private sentinel"})
+    assert repr(inputs) == "<private inputs>"
+    assert inputs["F01"] == b"SVE-KIT synthetic private sentinel"
 
 
 def index_document() -> dict[str, object]:
@@ -272,6 +287,103 @@ def test_parser_error_does_not_quote_private_input() -> None:
     with pytest.raises(PrivatePageError) as failure:
         project(CASE, b"SVE-KIT synthetic private sentinel")
     assert str(failure.value) == "F01: parser rejected fixture"
+
+
+@pytest.fixture(scope="module")
+def private_failure_project(tmp_path_factory: pytest.TempPathFactory) -> Path:
+    root = tmp_path_factory.mktemp("private-failure-project")
+    carddb = Path(__file__).resolve().parents[1]
+    body = (
+        "<!DOCTYPE html><!--SVE-KIT PRIVATE HEAD--><html><body>"
+        '<div class="cardlist-Detail"><div class="cardlist-Detail_Box_Inner">'
+        '<p class="ttl">SVE-KIT synthetic card</p><div class="info">'
+        "<dl><dt>クラス</dt><dd>ニュートラル</dd></dl>"
+        "<dl><dt>カード種類</dt><dd>フォロワー</dd></dl>"
+        "<dl><dt>タイプ</dt><dd>-</dd></dl>"
+        "<dl><dt>レアリティ</dt><dd>BR</dd></dl></div>"
+        '<div class="status-Item status-Item-Cost"><span class="heading">コスト</span>1</div>'
+        '<div class="status-Item status-Item-Power"><span class="heading">攻撃力</span>1</div>'
+        '<div class="status-Item status-Item-Hp"><span class="heading">体力</span>1</div>'
+        '<div class="img"><img src="/wp-content/images/cardlist/SYN01-001.png"></div>'
+        '<div class="illustrator"><span class="name">SYN01-001</span>'
+        '<span class="heading">SVE-KIT synthetic illustrator</span></div>'
+        '<div class="detail"><p>SVE-KIT PRIVATE WORDING</p></div>'
+        "</div></div><div>SVE-KIT synthetic layout padding "
+        + "layout " * 80
+        + "</div><!--SVE-KIT PRIVATE TAIL--></body></html>"
+    ).encode()
+    document = index_document()
+    cases = document["cases"]
+    assert isinstance(cases, list)
+    cases[0].update(
+        sha256=hashlib.sha256(body).hexdigest(),
+        parser="jp-card",
+        arguments={"number": "SYN01-001"},
+        checks=[
+            {
+                "path": ["record", "faces", 0, "text"],
+                "kind": "text",
+                "expected": EMPTY_HASH,
+            }
+        ],
+    )
+    write_index(root, document)
+    write_fixture(root, body)
+    (root / "pytest.ini").write_text("[pytest]\n")
+    (root / "conftest.py").write_text(
+        f"import sys\nsys.path.insert(0, {str(carddb)!r})\npytest_plugins = ('tests.private_pages_plugin',)\n"
+    )
+    (root / "test_mismatch.py").write_text(
+        "import os\nfrom dataclasses import replace\nfrom pathlib import Path\n"
+        "from tests.private_pages_support import load_index\n"
+        "from tests import test_private_official_pages as private\n"
+        "private.INDEX = load_index(Path('index.json'))\n"
+        "if os.environ['SVE_KIT_TEST_FAILURE'] == 'parser':\n"
+        "    private.INDEX = replace(private.INDEX, cases=(replace(private.INDEX.cases[0], number='SYN01-999'),))\n"
+        "private_inputs = private.private_inputs\n"
+        "def test_mismatch(private_inputs):\n"
+        "    private.test_private_page(private.INDEX.cases[0], private_inputs)\n"
+    )
+    return root
+
+
+@pytest.mark.parametrize(
+    ("failure", "message"),
+    [
+        ("field", "F01: record.faces.0.text: text mismatch"),
+        ("parser", "F01: parser rejected fixture"),
+    ],
+)
+@pytest.mark.parametrize("plugins", ["core", "default"])
+def test_pytest_failure_traceback_hides_private_page(
+    private_failure_project: Path, failure: str, message: str, plugins: str
+) -> None:
+    environment = dict(os.environ) | {
+        MODE_ENV: "required",
+        DIRECTORY_ENV: str(private_failure_project),
+        "SVE_KIT_TEST_FAILURE": failure,
+    }
+    environment.pop("PYTEST_DISABLE_PLUGIN_AUTOLOAD", None)
+    if plugins == "core":
+        environment["PYTEST_DISABLE_PLUGIN_AUTOLOAD"] = "1"
+    result = subprocess.run(
+        [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+        cwd=private_failure_project,
+        env=environment,
+        capture_output=True,
+        text=True,
+        check=False,
+    )
+    output = result.stdout + result.stderr
+    assert result.returncode == 1
+    assert "1 failed" in output
+    assert message in output
+    assert "<private inputs>" in output
+    assert "b'<" not in output
+    assert "SVE-KIT PRIVATE HEAD" not in output
+    assert "SVE-KIT PRIVATE TAIL" not in output
+    assert "SVE-KIT PRIVATE WORDING" not in output
+    assert repr((private_failure_project / CASE.path).read_bytes()) not in output
 
 
 @pytest.fixture(scope="module")

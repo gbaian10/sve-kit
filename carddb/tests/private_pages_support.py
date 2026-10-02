@@ -2,6 +2,7 @@
 
 Text checks hash UTF-8 exactly; nulls and list lengths are separate checks.
 Mapping checks allow new output fields. Local verification never consults Git.
+Do not use --showlocals/-l: intermediate parsed values contain private text.
 """
 
 import hashlib
@@ -9,7 +10,7 @@ import json
 import re
 from dataclasses import asdict, dataclass
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, override
 
 from sve_carddb.extract import official_en as extract_en
 from sve_carddb.extract import official_jp as extract_jp
@@ -42,6 +43,20 @@ _PARSERS = frozenset(
 
 class PrivatePageError(ValueError):
     """A safe failure location, without private values or parser diagnostics."""
+
+
+@dataclass(frozen=True, repr=False)
+class PrivateInputs:
+    """Keep fixture arguments safe in pytest's default traceback."""
+
+    _bodies: dict[str, bytes]
+
+    def __getitem__(self, identity: str) -> bytes:
+        return self._bodies[identity]
+
+    @override
+    def __repr__(self) -> str:
+        return "<private inputs>"
 
 
 @dataclass(frozen=True)
@@ -229,6 +244,7 @@ def read_inputs(index: Index, directory: Path) -> dict[str, bytes]:
 
 
 def project(case: Case, body: bytes) -> dict[str, object]:
+    __tracebackhide__ = True  # Pytest must not render private argument values.
     try:
         if case.parser in {"jp-card", "en-card"} and case.number is not None:
             source = en if case.parser == "en-card" else jp
@@ -291,6 +307,7 @@ def _matches(check: Check, value: object) -> bool:
 
 
 def check_projection(case: Case, projection: dict[str, object]) -> None:
+    __tracebackhide__ = True  # Parsed text is private even when its hash is public.
     for check in case.checks:
         value: object = projection
         location = ".".join(str(part) for part in check.path)
