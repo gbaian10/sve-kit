@@ -22,7 +22,7 @@
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
-| 定案（技術契約） | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`；首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
+| 定案（技術契約） | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
 `owner` 是首次歸檔代號，保留大小寫（例如 BP01、DSD01a、PR），不是商品收錄證據。card 採首次配發代表版次的 owner；printing 與配號按自身 owner，跨包外鍵允許。檔名為只增序號，不因新增較早排序的卡而重新分片。每檔 **小於 1,048,576 bytes**，以 512 KiB（524,288 bytes）為目標：以**寫出後的完整分片 YAML**（含封套、decision 的 members／sample_ids）量測，依序裝入不超過目標的最多筆數；單筆就使分片達 1 MiB 時直接報錯。PR 同樣切序號檔，不造單一大檔。
