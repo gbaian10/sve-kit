@@ -275,3 +275,13 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 公開 baseline 與其他引用依白名單留 null／省去相應列，不能指向被排除 art。
 判定 uses 僅看此次地區投影的現行 printing_face，不把建置歷史或墓碑當現行用途。
 同圖修復後的新 art 可展示，舊 art 留建置歷史與舊版快照；舊快照的公開閉包永不回寫。
+
+### 卡片頁補充資料的離線投影
+
+雙區離線候選 recipe 明確釘 JP／EN 卡片與更正證據圖片批次，重用同一套身分、文字及商品匯入，再加入卡片頁內 Q&A／相關卡；原 JP preview recipe 仍禁止未請求的補充資料。Q&A 依 `(region, official_number)` 分隔，去重保留所有卡片關聯及私有來源用途。卡片頁沒有 Q&A 或只有勘誤引用，不表示該類來源已完整；`source_windows` 與禁限覆蓋仍未知。
+
+`Decisions.supplemental_restrictions` 由 `require_card_extras_ready` 的已驗 DB 結果提供；公開 `card_engine_support.region_blocks` 合併 `errata_current_pending`／`source_printing_missing` 與既有原因。尚未接入正式公告證據時另加 `errata_source_missing`；已接入公告但文字未核對則保留 `errata_current_pending`，兩者不表示封存庫是否已有 raw。限制以卡片／區域阻止自動操作，即使仍有舊 current 也成立；不刪卡、面、路由、已採納版次或預設候選。受影響面與精確來源缺口在私有報告，不公開 issue／decision／來源 hash。
+
+勘誤巢狀 `versions[].changes[]` 的 `before`／`after` 是公告提供的逐欄位變更片段，消費端須明示是片段，不補全文或還原舊版次印刷文字。保留同一卡全部已知公告；`announced_on` 為 null 時省略日期，不能拿抓取／生效時間代填。只有引用時保留能力限制，不造空公告，也不將其列入正式 `errata_card_ids`。
+
+逐區 reskin 在實際來源、current 與人工證據入庫後重新計算，透過 `Decisions.related_regions` 發布。只有一區成立時只公開該區關係，不繼承 DSL 或建牌身分。本離線入口只輸出勘誤待核對限制，沒有確認或解除接點；確認契約與核對結果另行接入，不建立新的 current 採納。
