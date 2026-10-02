@@ -24,7 +24,13 @@ from sve_carddb.manifest import (
     Resource,
     utcnow,
 )
-from sve_carddb.store import CorruptDataError, compress, decompress, resolve_within
+from sve_carddb.store import (
+    CorruptDataError,
+    UnsafePathError,
+    compress,
+    decompress,
+    resolve_within,
+)
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Sequence
@@ -93,6 +99,7 @@ class Writer:
         *,
         read_roots: Sequence[Path] = (),
         protect_history: bool = False,
+        create_only: bool = False,
     ) -> None:
         """Write under `root`, recording into `manifest`.
 
@@ -102,11 +109,17 @@ class Writer:
         self._manifest = manifest
         self._read_roots = tuple(read_roots)
         self._protect_history = protect_history
+        self._create_only = create_only
 
     @property
     def manifest(self) -> Manifest:
         """Expose the typed boundary used by protected source adapters."""
         return self._manifest
+
+    @property
+    def create_only(self) -> bool:
+        """Whether this writer refuses existing resources and destination files."""
+        return self._create_only
 
     def check_path(self, url: str, path: PurePosixPath) -> None:
         """Raise `PathConflictError` if another URL owns `path`. Call before downloading."""
@@ -139,6 +152,21 @@ class Writer:
             else LocalState.UNTRUSTED
         )
 
+    def check_new(self, url: str, path: PurePosixPath) -> None:
+        """Refuse recorded sources and any existing destination, without repairing them."""
+        self.check_path(url, path)
+        if self._manifest.resources.get(url) is not None:
+            raise PathConflictError(f"new-only source already recorded: {url}")
+        target = self._new_target(path)
+        if target.exists() or target.is_symlink():
+            raise PathConflictError(f"new-only destination already exists: {path}")
+
+    def _new_target(self, path: PurePosixPath) -> Path:
+        target = resolve_within(self._root, path)
+        if target != (self._root / path).absolute():
+            raise UnsafePathError(f"new-only destination traverses a symlink: {path}")
+        return target
+
     def read(self, url: str) -> bytes:
         """Return the stored content of a trusted local copy, decompressed."""
         resource = self._manifest.resources.get(url)
@@ -162,6 +190,8 @@ class Writer:
         (repair mode) writes the file even when the hash matches.
         """
         self.check_path(fetched.url, fetched.path)
+        if self._create_only:
+            self.check_new(fetched.url, fetched.path)
         now = utcnow()
         digest = sha256(fetched.body)
         previous = self._manifest.resources.get(fetched.url)
@@ -249,27 +279,40 @@ class Writer:
         return resolve_within(self._root, path, also_allowed=self._read_roots)
 
     def _write_file(self, fetched: Fetched) -> int:
-        target = resolve_within(self._root, fetched.path)
+        target = (
+            self._new_target(fetched.path)
+            if self._create_only
+            else resolve_within(self._root, fetched.path)
+        )
         data = compress(fetched.body) if fetched.compressed else fetched.body
         if fetched.compressed and decompress(data) != fetched.body:
             msg = f"compression round trip failed for {fetched.url}"
             raise CorruptDataError(msg)
         target.parent.mkdir(parents=True, exist_ok=True)
         temp = target.with_name(f"{target.name}{_TEMP_MARKER}{secrets.token_hex(4)}")
+        created = False
         try:
             with temp.open("xb") as file:
+                created = True
                 file.write(data)
                 file.flush()
                 os.fsync(file.fileno())
             _require_size(temp, len(data))
-            temp.replace(target)
+            if self._create_only:
+                # link publishes complete bytes atomically and cannot replace a raced-in file.
+                self.check_new(fetched.url, fetched.path)
+                os.link(temp, target, follow_symlinks=False)
+            else:
+                temp.replace(target)
             _fsync_dir(target.parent)
         except OSError as exc:
-            temp.unlink(missing_ok=True)
             if exc.errno == errno.ENOSPC:
                 msg = f"disk full while writing {fetched.path}"
                 raise DiskFullError(errno.ENOSPC, msg) from exc
             raise
+        finally:
+            if created:
+                temp.unlink(missing_ok=True)
         return len(data)
 
 

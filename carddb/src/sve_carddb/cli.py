@@ -41,6 +41,13 @@ from sve_carddb.crawl_sv1 import (
 from sve_carddb.crawl_svwb import SVWB_SITE
 from sve_carddb.crawl_svwb import cards as svwb_cards
 from sve_carddb.crawl_svwb import stored_image_urls as svwb_image_urls
+from sve_carddb.errata_fetch import (
+    ErrataResult,
+    fetch_new,
+    load_urls,
+    pending_urls,
+    require_quiet,
+)
 from sve_carddb.extract.jsonl import extract_cards
 from sve_carddb.fetch.client import (
     BudgetExhaustedError,
@@ -54,6 +61,7 @@ from sve_carddb.fetch.throttle import CircuitBreaker, CircuitOpenError, Throttle
 from sve_carddb.fetch.writer import (
     DiskFullError,
     LocalState,
+    PathConflictError,
     RefreshProtectionError,
     Writer,
     remove_temp_files,
@@ -119,6 +127,7 @@ _FATAL = (
     StopCrawlError,
     CircuitOpenError,
     DiskFullError,
+    PathConflictError,
     RefreshProtectionError,
     ArchiveError,
     UnsafePathError,
@@ -199,6 +208,85 @@ DryRunOption = Annotated[
         "unavailable while a crawler runs."
     ),
 ]
+
+
+@crawl_app.command("errata-new")
+def crawl_errata_new(
+    urls: Annotated[
+        Path, typer.Option(help="Reviewed JSON array of exact JP errata URLs.")
+    ],
+    dry_run: DryRunOption = False,
+) -> None:
+    """Add JP errata bodies only; no overwrites, redirects, recovery, or archive changes."""
+    try:
+        selection = load_urls(urls)
+        settings = _settings()
+        archive_settings = (
+            settings.archive_root,
+            settings.archive_store_id,
+            settings.archive_backup_root,
+            settings.archive_restore_root,
+        )
+        if any(archive_settings) and not all(archive_settings) and not dry_run:
+            raise StopCrawlError("incomplete archive configuration")
+        with ExclusiveLock(settings.lock_path):
+            source = (
+                Manifest.open_live(settings.manifest_path)
+                if dry_run and settings.manifest_path.exists()
+                else Manifest.open_empty()
+                if dry_run
+                else Manifest.open(settings.manifest_path)
+            )
+            with source as manifest:
+                require_quiet(settings, manifest)
+                writer = Writer(settings.data_dir, manifest, create_only=True)
+                pending = pending_urls(writer, selection)
+                if dry_run:
+                    for url in selection:
+                        console.print(
+                            f"{'new' if url in pending else 'existing-trusted'}: {url}"
+                        )
+                    return
+                failures = asyncio.run(_errata_fetch(settings, selection, writer))
+    except (*_FATAL, ValueError) as exc:
+        console.print(f"[red]stopped:[/red] {exc}")
+        raise typer.Exit(1) from exc
+    if failures:
+        raise typer.Exit(1)
+
+
+async def _errata_fetch(
+    settings: Settings, selection: tuple[str, ...], writer: Writer
+) -> int:
+    async with http_factory(settings) as http:
+        client = Client(
+            http,
+            Throttle(settings.interval, settings.jitter),
+            writer.manifest,
+            run_id=uuid.uuid4().hex,
+            policy=ClientPolicy(
+                attempts=3, max_requests=3 * len(selection), stop_on_redirect=True
+            ),
+        )
+        try:
+            return await fetch_new(
+                selection,
+                client,
+                writer,
+                CircuitBreaker(settings.breaker_threshold),
+                _report_errata,
+            )
+        finally:
+            console.print(f"HTTP requests sent: {client.requests_sent}")
+
+
+def _report_errata(result: ErrataResult) -> None:
+    metadata = (
+        f" sha256:{result.raw_sha256} {result.raw_bytes} bytes"
+        if result.raw_sha256 is not None
+        else ""
+    )
+    console.print(f"{result.outcome}: {result.url}{metadata}")
 
 
 @crawl_app.command("p0")
