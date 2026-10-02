@@ -209,7 +209,11 @@ def test_double_face_coverage_and_unknown_art(
         ]
     else:
         with pytest.raises(
-            ValueError, match=r"complete source face|Unknown art cannot become known"
+            ValueError,
+            match={
+                "omit_back": "^Printing move must cover exact complete source face maps$",
+                "unknown_to_known": "^Unknown art cannot become known through an identity move$",
+            }[damage],
         ):
             replay(tmp_path, inputs)
 

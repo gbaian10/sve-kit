@@ -83,6 +83,8 @@ identity view: consumers of the text pipeline still use `publication_identity()`
 to preserve known identity when wording is pending. `resolve_int_id(value)` keeps
 the original printing and supplies repair hints; a split returns `choice_required`
 and the destination choices instead of silently selecting or replacing a printing.
+After a split, a later explicit reassign conservatively keeps `choice_required`;
+retired destinations are removed from the remaining choices.
 It is a consumer hint, not a deck rewrite operation.
 
 Route facts explicitly distinguish official, provisional and unknown numbers;
@@ -125,5 +127,5 @@ files of any extension (including temporary and hidden files) remain rejected.
 Synthetic acceptance and counterexamples:
 
 ```bash
-uv --directory carddb run pytest tests/test_identity_replay.py tests/test_identity_replay_history.py tests/test_identity_transition_loader.py --durations=20
+uv --directory carddb run pytest tests/test_identity_replay.py tests/test_identity_replay_history.py tests/test_identity_replay_rejections.py tests/test_identity_transition_loader.py --durations=20
 ```

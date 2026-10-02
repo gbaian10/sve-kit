@@ -145,7 +145,12 @@ def test_original_before_refs_are_exact(
         record["updates"].sort(key=operator.itemgetter("target_key"))
     with pytest.raises(
         ValueError,
-        match=r"[Ii]nvalid|[Tt]ransition|[Rr]epair|[Aa]rt|[Cc]ard|[Ee]nglish|[Ff]ace|[Ii]ncomplete|[Ee]vidence",
+        match={
+            "hash": "^Transition before must match exact effective registry reference$",
+            "decision": "^Transition before must match exact effective registry reference$",
+            "key": "^Invalid identity transition authored fields$",
+            "missing": "^Transition before must match exact effective registry reference$",
+        }[damage],
     ):
         replay(root, write_scenario(root, files, [record]))
 
@@ -215,7 +220,17 @@ def test_permanent_fields_and_allocations_never_change(
         record["updates"].sort(key=operator.itemgetter("target_key"))
     with pytest.raises(
         ValueError,
-        match=r"[Ii]nvalid|[Tt]ransition|[Rr]epair|[Aa]rt|[Cc]ard|[Ee]nglish|[Ff]ace|[Ii]ncomplete|[Ee]vidence",
+        match={
+            "owner": "^Transition cannot change stable record key, kind or owner$",
+            "region": "^Invalid identity transition authored fields$",
+            "number": "^Transition changes a permanent field outside its contract$",
+            "variant": "^Transition changes a permanent field outside its contract$",
+            "face_parent": "^Transition changes a permanent field outside its contract$",
+            "art_parent": "^Transition changes a permanent field outside its contract$",
+            "art_class": "^Transition changes a permanent field outside its contract$",
+            "card_layout": "^Transition changes a permanent field outside its contract$",
+            "int_id": "^Invalid identity transition authored fields$",
+        }[damage],
     ):
         replay(root, write_scenario(root, files, [record]))
 
@@ -255,7 +270,21 @@ def test_complete_ownership_is_required(
         damage_ownership(record, damage)
     with pytest.raises(
         ValueError,
-        match=r"[Ii]nvalid|[Tt]ransition|[Rr]epair|[Aa]rt|[Cc]ard|[Ee]nglish|[Ff]ace|[Ii]ncomplete|[Ee]vidence",
+        match={
+            "no_repairs": "^Repairs must exactly explain every changed printing parent$",
+            "missing_printing": "^Repairs must exactly explain every changed printing parent$",
+            "missing_face": "^Invalid identity transition authored fields$",
+            "wrong_face": "^Invalid identity transition authored fields$",
+            "missing_art": "^Repair must list all old art, including unused candidates$",
+            "discard_art": "^Invalid identity transition authored fields$",
+            "wrong_art": "^Invalid identity transition authored fields$",
+            "art_partition": "^Art transfer targets and remaining uses must partition old uses$",
+            "old_use": "^English original art attached to the wrong printing$",
+            "target_use": "^Art observation must refer to one actual current use$",
+            "retirement": "^Repairs must exactly explain card retirement$",
+            "missing_after": "^Art uses change is not exactly explained by transfers$",
+            "confirmed_none": "^Printing evidence coverage mismatch; requires re\\-review: versioned review/relation decisions are not supported$",
+        }[damage],
     ):
         replay(root, write_scenario(root, files, [record]))
 
@@ -266,11 +295,20 @@ def test_legacy_entry_points_still_refuse_nonempty(
     root, files, record = scenario
     write_scenario(root, files, [record])
     for reader in (load, read_registry_files):
-        with pytest.raises(ValueError, match="effective projection support"):
+        with pytest.raises(
+            ValueError,
+            match=r"^Nonempty identity transitions require effective projection support$",
+        ):
             reader(root)
-    with pytest.raises(ValueError, match="effective projection support"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Nonempty identity transitions require effective projection support$",
+    ):
         plan_files(root, [], "reviewer", "2026-10-01", loaded=(files.index(), {}))
-    with pytest.raises(ValueError, match="effective projection support"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Nonempty identity transitions require effective projection support$",
+    ):
         relayout(root, [], {})
 
 
@@ -427,7 +465,20 @@ def test_routes_require_independent_sources_and_permanent_keys(
         )
     elif damage == "uncovered":
         inputs.frames[2] = inputs.frames[2][1:]
-    with pytest.raises(ValueError, match=r"routes|Route|route|Unknown"):
+    with pytest.raises(
+        ValueError,
+        match={
+            "missing_alias": "^Transition routes differ from complete source\\-derived changes$",
+            "foreign_alias": "^Transition routes differ from complete source\\-derived changes$",
+            "wrong_before": "^Transition routes differ from complete source\\-derived changes$",
+            "omitted": "^Transition routes differ from complete source\\-derived changes$",
+            "unrequested": "^Transition routes differ from complete source\\-derived changes$",
+            "unknown": "^Unknown route source cannot prove an official number$",
+            "foreign_source": "^Route sources must be pinned in transition evidence$",
+            "source_collision": "^Exact route collision requires a confirmed route override$",
+            "uncovered": "^Route source facts must cover each printing exactly once$",
+        }[damage],
+    ):
         replay(root, inputs)
 
 
@@ -436,7 +487,9 @@ def test_basis_hash_and_exact_original_bytes(
 ) -> None:
     root, files, record = scenario
     record["registry_basis"]["index_hash"] = "sha256:" + "0" * 64
-    with pytest.raises(ValueError, match="basis index hash"):
+    with pytest.raises(
+        ValueError, match=r"^Historical registry basis index hash mismatch$"
+    ):
         replay(root, write_scenario(root, files, [record]))
     record["registry_basis"]["index_hash"] = checksum(
         files.index().model_dump(mode="json")
@@ -444,7 +497,10 @@ def test_basis_hash_and_exact_original_bytes(
     inputs = write_scenario(root, files, [record])
     path = root / files.shards[0].path
     path.write_bytes(b"# changed original bytes\n" + path.read_bytes())
-    with pytest.raises(ValueError, match="exact old shards"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Registry bases must retain exact old shards and decisions$",
+    ):
         replay(root, inputs)
 
 
@@ -454,7 +510,10 @@ def test_unknown_art_cannot_be_inferred(
     root, files, record = scenario
     record["repairs"][0]["printing_moves"][0]["faces"][0]["from_art_id"] = None
     record["repairs"][0]["printing_moves"].sort(key=wire)
-    with pytest.raises(ValueError, match="actual old use"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Printing move art does not match actual old use$",
+    ):
         replay(root, write_scenario(root, files, [record]))
 
 
@@ -490,7 +549,10 @@ def test_unconfirmed_dependency_cannot_be_inferred(
     for loaded_shard in unconfirmed.shards:
         (root / loaded_shard.path).write_bytes(loaded_shard.exact_content)
     record["registry_basis"]["index_hash"] = checksum(index.model_dump(mode="json"))
-    with pytest.raises(ValueError, match="Unconfirmed dependency"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Unconfirmed dependency cannot become a confirmed repair$",
+    ):
         replay(root, write_scenario(root, unconfirmed, [record]))
 
 
@@ -526,7 +588,10 @@ def test_original_id_allocation_collision(
         collision_files.index().model_dump(mode="json")
     )
     collision_update(record, aid, collision_files)
-    with pytest.raises(ValueError, match="Permanent ID cannot reuse"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Permanent ID cannot reuse original or historical allocation$",
+    ):
         replay(root, write_scenario(root, collision_files, [record]))
 
 
@@ -631,7 +696,10 @@ def test_original_int_id_mapping_cannot_be_rewritten(
             index["includes"][loaded.path] = checksum(raw)
             (root / "ids/index.yaml").write_bytes(wire(index))
             break
-    with pytest.raises(ValueError, match="exact old shards"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Registry bases must retain exact old shards and decisions$",
+    ):
         replay(root, inputs)
 
 
@@ -656,7 +724,10 @@ def test_canonical_cannot_hijack_another_printings_old_alias(
         replace(f, card_no="TEST-01EN") if f.printing_id == Q else f
         for f in inputs.frames[1]
     )
-    with pytest.raises(ValueError, match="cannot hijack a permanent entry"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Route canonical/alias cannot hijack a permanent entry$",
+    ):
         replay(root, inputs)
 
 
@@ -700,5 +771,8 @@ def test_official_cannot_be_replaced_with_provisional_by_apply(
         replace(f, state="provisional", card_no=None) if f.printing_id == P else f
         for f in inputs.frames[1]
     )
-    with pytest.raises(ValueError, match="official route with provisional"):
+    with pytest.raises(
+        ValueError,
+        match=r"^Apply cannot replace an official route with provisional$",
+    ):
         replay(root, inputs)
