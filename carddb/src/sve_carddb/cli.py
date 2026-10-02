@@ -74,6 +74,7 @@ from sve_carddb.manifest import (
     ManifestError,
     Region,
 )
+from sve_carddb.r2_upload.commands import app as r2_app
 from sve_carddb.snapshot.preview.commands import app as snapshot_app
 from sve_carddb.source_archive import (
     ArchiveError,
@@ -116,6 +117,7 @@ archive_app = typer.Typer(
 )
 app.add_typer(archive_app, name="archive")
 app.add_typer(snapshot_app, name="snapshot")
+app.add_typer(r2_app, name="r2")
 
 console = Console(soft_wrap=True)
 
