@@ -9,12 +9,14 @@ import typer
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_assets import PreviewRoots, build_jp_assets
 from sve_carddb.snapshot.export import Brotli, export_snapshot
+from sve_carddb.snapshot.offline import Inputs as OfflineInputs
+from sve_carddb.snapshot.offline import build as build_offline
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.build import Inputs, build
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
-app = typer.Typer(no_args_is_help=True, help="Export isolated offline JP previews.")
+app = typer.Typer(no_args_is_help=True, help="Export isolated offline previews.")
 
 
 def command_brotli(command: Path) -> Brotli:
@@ -29,7 +31,7 @@ def command_brotli(command: Path) -> Brotli:
     return Brotli(pin, compress)
 
 
-def verify_inputs(roots: Roots, inputs: Inputs) -> None:
+def verify_inputs(roots: Roots, inputs: Inputs | OfflineInputs) -> None:
     """No output may modify the input repo or archived immutable evidence."""
     roots.verify()
     for protected in (inputs.repo, inputs.archive):
@@ -103,6 +105,39 @@ def export_command(
     )
     if image_execution is not None:
         report["image_execution"] = dict(image_execution)
+    typer.echo(canonical(report).decode())
+
+
+@app.command("export-offline")
+def export_offline_command(
+    inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
+    preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
+    cdn_dir: Annotated[Path, typer.Option(envvar="SVE_CDN_DIR")],
+    bundle_dir: Annotated[Path, typer.Option()],
+    brotli_command: Annotated[
+        Path | None, typer.Option(exists=True, dir_okay=False)
+    ] = None,
+) -> None:
+    """Export both launch regions to an isolated preview plus a verified private DB bundle."""
+    roots = Roots(preview_dir, cdn_dir)
+    recipe = OfflineInputs.model_validate_json(inputs.read_bytes())
+    verify_inputs(roots, recipe)
+    for protected in (recipe.repo, recipe.archive, cdn_dir, inputs):
+        output, source = bundle_dir.resolve(), protected.resolve()
+        if output.is_relative_to(source) or source.is_relative_to(output):
+            raise ValueError(
+                "Offline bundle must be disjoint from protected inputs and formal output"
+            )
+    if inputs.resolve().is_relative_to(preview_dir.resolve()):
+        raise ValueError("Offline preview must be disjoint from recipe")
+    codec = None if brotli_command is None else command_brotli(brotli_command)
+    built = build_offline(recipe, bundle_dir=bundle_dir)
+    snapshot = export_snapshot(
+        built.projection, built.ownership, recipe.batch(), brotli=codec
+    )
+    report = write_preview(
+        snapshot, roots, built.report, brotli=codec, regions=("en", "jp")
+    )
     typer.echo(canonical(report).decode())
 
 

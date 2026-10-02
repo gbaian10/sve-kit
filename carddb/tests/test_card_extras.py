@@ -4,7 +4,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
-from pydantic import ValidationError
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
@@ -756,3 +756,42 @@ def test_en_errata_keeps_unknown_dates_and_exact_regional_scope(db: Database) ->
     assert reason["lang"] == "en"
     assert db.rows("errata_change")[0].values["face_id"] == "face2"
     assert db.rows("errata_printing")[0].values["printing_id"] == "printing2"
+
+
+@pytest.mark.parametrize("field", ["context", "identity", "target"])
+def test_pending_issue_context_is_checked_at_the_boundary(
+    db: Database, field: str
+) -> None:
+    plan = plan_card_extras(
+        db,
+        (
+            page().model_copy(
+                update={
+                    "errata_urls": ("https://shadowverse-evolve.com/errata/synthetic/",)
+                }
+            ),
+        ),
+    )
+    with db.transaction():
+        populate_card_extras(db, plan, build=context(plan))
+        issue = next(
+            row.values
+            for row in db.rows("build_issue")
+            if row.values["category"] == "card_extras:errata_current_pending"
+        )
+        invalid: JsonValue = (
+            None
+            if field == "context"
+            else {
+                "region": 42 if field == "identity" else "jp",
+                "card_id": "card",
+                "target": [] if field == "target" else "synthetic",
+            }
+        )
+        db.update(
+            "build_issue", {"id": issue["id"]}, {"message": canonical(invalid).decode()}
+        )
+    with pytest.raises(
+        TypeError, match=r"^Invalid card extras pending issue " + field + "$"
+    ):
+        require_card_extras_ready(db, (("jp", "card"),))

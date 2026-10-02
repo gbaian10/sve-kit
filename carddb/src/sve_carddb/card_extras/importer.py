@@ -128,10 +128,14 @@ class CardExtrasRestriction:
     face_ids: tuple[str, ...]
     reason: str
     issue_id: str
+    announcement_available: bool | None = None
 
 
 def require_card_extras_ready(
-    db: Database, scope: tuple[tuple[str, str], ...], *, strict: bool = False
+    db: Database,
+    scope: tuple[tuple[str, str], ...],
+    *,
+    strict: bool = False,
 ) -> tuple[CardExtrasRestriction, ...]:
     """Report manual-only faces; strict checks reject automation/current adoption."""
     faces: dict[tuple[str, str], set[str]] = defaultdict(set)
@@ -142,6 +146,14 @@ def require_card_extras_ready(
             str(row.values["face_id"])
         )
     restrictions = []
+    announcements = (
+        {
+            (row.values["region"], row.values["official_url"])
+            for row in db.rows("errata")
+        }
+        if db.has_table("errata")
+        else set()
+    )
     for issue in db.rows("build_issue"):
         if issue.values["category"] not in {
             "card_extras:errata_current_pending",
@@ -153,10 +165,13 @@ def require_card_extras_ready(
         if not isinstance(context, dict):
             raise TypeError("Invalid card extras pending issue context")
         region, card_id = context.get("region"), context.get("card_id")
+        target = context.get("target")
         if not isinstance(region, str) or not (
             card_id is None or isinstance(card_id, str)
         ):
             raise TypeError("Invalid card extras pending issue identity")
+        if target is not None and not isinstance(target, str):
+            raise TypeError("Invalid card extras pending issue target")
         scope_key = str(issue.values["entity_id"])
         if (region, scope_key) in scope:
             restrictions.append(
@@ -167,6 +182,9 @@ def require_card_extras_ready(
                     face_ids=tuple(sorted(faces[region, scope_key])),
                     reason=str(issue.values["category"]).removeprefix("card_extras:"),
                     issue_id=str(issue.values["id"]),
+                    announcement_available=(region, target) in announcements
+                    if issue.values["category"] == "card_extras:errata_current_pending"
+                    else None,
                 )
             )
     if strict and restrictions:

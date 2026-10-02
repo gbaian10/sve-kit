@@ -1,7 +1,8 @@
 """Regional supplemental parsing uses sealed input; fixtures contain invented text."""
 
 import shutil
-from typing import TYPE_CHECKING
+from dataclasses import replace
+from typing import TYPE_CHECKING, cast
 
 import httpx
 import pytest
@@ -10,9 +11,10 @@ from sve_carddb.card_extras import FrozenCardExtras, parse_card_page
 from sve_carddb.card_extras.archive import EN_PARSER, PARSER, card_number
 from sve_carddb.html import MissingElementError
 from sve_carddb.manifest import Kind, Manifest
+from sve_carddb.manifest import Region as ManifestRegion
 from sve_carddb.snapshot.values import digest
 from sve_carddb.source_archive import ArchiveError, seal_batch
-from sve_carddb.sources import official_jp
+from sve_carddb.sources import official_en, official_jp
 
 from .card_extras_fixtures import source
 from .en_extract_fixtures import page as en_page
@@ -314,3 +316,54 @@ def test_corrupt_copy_of_sealed_input_is_rejected(
     )
     with pytest.raises(ArchiveError, match="hash"):
         tuple(provider.pages())
+
+
+@pytest.fixture(scope="module")
+def sealed_en(tmp_path_factory: pytest.TempPathFactory) -> tuple[ArchiveStore, str]:
+    store = _store(tmp_path_factory.mktemp("extras-en-sealed"))
+    resource = replace(
+        _resource(official_en.card_url("TEST-001Ⓢa"), "raw/en.html", EN_RAW, Kind.CARD),
+        region=ManifestRegion.EN,
+    )
+    _put(store, resource, EN_RAW)
+    return store, seal_batch(store).batch_id
+
+
+def test_frozen_en_region_and_parser_are_explicit(
+    sealed_en: tuple[ArchiveStore, str], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store, batch = sealed_en
+
+    def forbidden(*_args: object, **_kwargs: object) -> None:
+        raise AssertionError("No live access permitted")
+
+    monkeypatch.setattr(Manifest, "open", forbidden)
+    monkeypatch.setattr(Manifest, "open_live", forbidden)
+    pages = tuple(
+        FrozenCardExtras(store.root, store.store_id, batch, region="en").pages()
+    )
+    assert len(pages) == 1
+    assert pages[0].region == "en"
+    assert pages[0].source.parser_version == EN_PARSER
+    assert pages[0].qa[0].published_on == "2026-10-10"
+    with pytest.raises(
+        ValueError, match=r"^Card extras batch source identity mismatch$"
+    ):
+        tuple(FrozenCardExtras(store.root, store.store_id, batch).pages())
+
+
+def test_frozen_jp_does_not_accept_en_scope(sealed: tuple[ArchiveStore, str]) -> None:
+    store, batch = sealed
+    with pytest.raises(
+        ValueError, match=r"^Card extras batch source identity mismatch$"
+    ):
+        tuple(FrozenCardExtras(store.root, store.store_id, batch, region="en").pages())
+
+
+def test_archive_requires_an_explicit_supported_region(tmp_path: Path) -> None:
+    with pytest.raises(
+        ValueError, match=r"^Card extras require an explicit JP or EN region$"
+    ):
+        FrozenCardExtras(
+            tmp_path, "unused", "sha256:" + "a" * 64, region=cast("Region", "invented")
+        )
