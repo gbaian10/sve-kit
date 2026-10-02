@@ -211,6 +211,8 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
+card_name_concept 於 translations/overrides 採納卡／面與 exact 名稱到 glossary 概念的關聯；來源 hash、身分基準、預設名稱面及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。不更改已採納 glossary 分片，也不以此關聯替代數位 same-card link。
+
 術語的 2026-10-02 擴充見 [術語採納、委託收據與加粗](glossary-adoption.md)：這是維護者委託下的協調者決定，不記為使用者親自核可。採納入口保留真實決定者、未驗主張來源與連續加粗選擇；class／card_type 仍走 vocabulary。公開位置／加粗格式擴充只列影響提案，沒有更改現有快照。
 
 **使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文獨有才用英文。EN 卡面在同卡身分確認後先顯示 JP 繁中，文字未核對時加「日英文字尚未核對」標示；核對完成且適用時移除標示，已知 divergence 不共用受影響欄。這不放行未核對的 DSL／機制或官方 counterpart。
