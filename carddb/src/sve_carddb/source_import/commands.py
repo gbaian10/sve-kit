@@ -5,9 +5,11 @@ from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] --
 from typing import Annotated
 
 import typer
+from pydantic import ValidationError
 
 from sve_carddb.manifest import ManifestError
 from sve_carddb.source_import.importer import (
+    SourceImportError,
     check_destination,
     prepare,
     register,
@@ -38,7 +40,27 @@ def register_command(
             verify_program(plan, program_root)
             report = plan.report() | {"state": "checked"}
         typer.echo(json.dumps(report, sort_keys=True, separators=(",", ":")))
-    except OSError, ValueError, ManifestError:
+    except ValidationError as exc:
+        fields = sorted(
+            {
+                ".".join(str(part) for part in error["loc"]) + ":" + error["type"]
+                for error in exc.errors(include_url=False, include_input=False)
+                if all(
+                    isinstance(part, int) or str(part).isidentifier()
+                    for part in error["loc"]
+                )
+            }
+        )
+        raise typer.BadParameter(
+            "Invalid source import fields: " + ", ".join(fields)
+        ) from None
+    except (SourceImportError, ManifestError) as exc:
+        raise typer.BadParameter(str(exc)) from None
+    except OSError as exc:
+        raise typer.BadParameter(
+            "Offline source import I/O failed: " + type(exc).__name__
+        ) from None
+    except ValueError:
         raise typer.BadParameter(
             "Offline source import verification failed; no recovery was attempted"
         ) from None

@@ -8,7 +8,7 @@ coverage, extract CR clauses, or replace sealing and independent backup checks.
 
 ## Inputs and program pins
 
-The input directory contains exactly `index.jsonl` and content-addressed raw files
+The input directory must include `index.jsonl` and content-addressed raw files
 under `raw/<64 lowercase hex>`. Each JSONL observation has exactly these fields:
 `url`, `final_url`, `status`, `sha256`, `bytes`, `fetched_at`, `content_type`, `etag`,
 `last_modified`, `chain`. Each chain hop has `url`, `status`, `location`.
@@ -67,9 +67,11 @@ PY
 ```
 
 Keep acquisition data and these task selections outside Git. The registrar verifies
-every dependency against its **executing** bytes and the pinned Git blobs, and
+the listed dependency files against their **executing** bytes and pinned Git blobs, and
 requires the supplied repository HEAD to equal `program_revision`. Changed or
-incomplete code pins fail before publication. No new third-party dependency is used.
+incomplete listed pins fail before publication. This is a fixed file list, not the
+complete transitive import or execution closure; changes outside that list are not
+checked by this boundary. No new third-party dependency is used.
 
 ## Check, register and retain
 
@@ -84,6 +86,8 @@ uv run --directory carddb sve-carddb source-import register \
 The default is `--check`: validate the input, destination and code pins, and print
 only file count, total raw bytes and receipt identity. It creates no dataset or
 manifest. Execute only an authorized offline registration by adding `--execute`.
+Failures report fixed import/manifest reasons, validation field locations and types,
+or I/O exception classes; they do not print input values or private filesystem paths.
 The output must be an absolute path without symlinks or traversal, outside the
 input set, selection file and configured `SVE_DATA_DIR`. Do not point
 `SVE_DATA_DIR` at the output while registering or rerunning registration.
@@ -112,6 +116,9 @@ This command performs none of those operations automatically. Readers validate
 the complete v2 schema, receipt and Resource correspondence. The crawl writer
 continues supporting v1 only and refuses v2; existing sealed v1 batches remain
 readable. Inventory format and raw/source/version ID recipes are unchanged.
+The complete v2 DDL is frozen separately in `manifest_schema_v2.py`; live v1 schema
+evolution does not redefine it. Golden tests pin its canonical schema signature and
+the receipt identity recipe independently of the executing checkout.
 
 Tests use tiny synthetic HTML/PDF and an immutable module-scoped synthetic program
 repository. They exercise isolation, conflicting writes, interruption, v1/v2

@@ -15,17 +15,13 @@ from enum import StrEnum
 from pathlib import Path, PurePosixPath
 from typing import IO, TYPE_CHECKING, Self
 
-from sve_carddb.snapshot.values import canonical, digest, parse
-from sve_carddb.source_import.models import (
-    Content,
-    receipt_id,
-    timestamp,
-    validate_content,
-)
+from sve_carddb.manifest_schema_v2 import SCHEMA_SQL as _SCHEMA_V2
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Generator, Iterator, Sequence
     from types import TracebackType
+
+    from sve_carddb.source_import.models import Content
 
 SCHEMA_VERSION = 1
 IMPORT_SCHEMA_VERSION = 2
@@ -129,17 +125,6 @@ CREATE TABLE IF NOT EXISTS generation_edge (
     PRIMARY KEY (generation_id, from_url, to_kind, position),
     FOREIGN KEY (generation_id, from_url)
         REFERENCES generation_page (generation_id, page_url)
-) STRICT;
-"""
-
-
-_IMPORT_SCHEMA = """
-CREATE TABLE source_import_receipt (
-    receipt_id     TEXT PRIMARY KEY,
-    index_bytes    BLOB NOT NULL,
-    index_sha256   TEXT NOT NULL,
-    content        BLOB NOT NULL,
-    registered_at  TEXT NOT NULL
 ) STRICT;
 """
 
@@ -735,13 +720,16 @@ class Manifest:
     @classmethod
     def create_import(cls, path: Path, index: bytes, content: Content) -> Self:
         """Initialize only a new isolated v2 database, without touching a v1 manifest."""
+        from sve_carddb.snapshot.values import canonical, digest  # ruff: ignore[import-outside-top-level] -- Load build-layer validation only for explicit v2 operations.
+        from sve_carddb.source_import.models import Content, receipt_id  # ruff: ignore[import-outside-top-level] -- Keep v1 manifest imports independent of build-layer models.
+
         content = Content.model_validate_json(content.model_dump_json())
         resources = _import_resources(index, content)
         fd = os.open(path, os.O_WRONLY | os.O_CREAT | os.O_EXCL, 0o600)
         os.close(fd)
         conn = sqlite3.connect(path, autocommit=True)
         try:
-            conn.executescript(_SCHEMA + _IMPORT_SCHEMA)
+            conn.executescript(_SCHEMA_V2)
             conn.execute(f"PRAGMA user_version = {IMPORT_SCHEMA_VERSION}")
             conn.autocommit = False
             result = cls(conn, IMPORT_SCHEMA_VERSION)
@@ -916,8 +904,11 @@ def _has_import_table(conn: sqlite3.Connection) -> bool:
 
 
 def _decode_import_receipt(conn: sqlite3.Connection) -> SourceImportReceipt:
+    from sve_carddb.snapshot.values import canonical, digest, parse  # ruff: ignore[import-outside-top-level] -- Defer build-layer validation until a v2 reader is requested.
+    from sve_carddb.source_import.models import Content, receipt_id, timestamp  # ruff: ignore[import-outside-top-level] -- Avoid a build-layer dependency at v1 module import.
+
     with sqlite3.connect(":memory:") as expected:
-        expected.executescript(_SCHEMA + _IMPORT_SCHEMA)
+        expected.executescript(_SCHEMA_V2)
         if _schema_signature(conn) != _schema_signature(expected):
             raise ManifestError("Import manifest schema differs from version 2")
     rows = conn.execute("SELECT * FROM source_import_receipt").fetchall()
@@ -963,6 +954,8 @@ def _schema_signature(conn: sqlite3.Connection) -> tuple[tuple[str, str, str], .
 
 
 def _import_resources(index: bytes, content: Content) -> tuple[Resource, ...]:
+    from sve_carddb.source_import.models import timestamp, validate_content  # ruff: ignore[import-outside-top-level] -- v1 imports must not initialize pydantic or build models.
+
     observations = validate_content(index, content)
     return tuple(
         Resource(

@@ -11,7 +11,7 @@ import uuid
 from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, ValidationError
 
@@ -356,14 +356,15 @@ def _seal_attempt(  # ruff: ignore[complex-structure, too-many-branches, too-man
                 CorruptDataError,
                 FileNotFoundError,
                 UnsafePathError,
-            ) as prepared_error:
+            ) as exc:
+                # Mypy carries narrowing of the reused except binding across loops.
                 prepared_reason: Literal[
                     "missing_raw", "hash_mismatch", "unsafe_path"
                 ] = (
                     "unsafe_path"
-                    if isinstance(prepared_error, UnsafePathError)
+                    if isinstance(cast("object", exc), UnsafePathError)
                     else "hash_mismatch"
-                    if isinstance(prepared_error, CorruptDataError)
+                    if isinstance(cast("object", exc), CorruptDataError)
                     else "missing_raw"
                 )
                 missing.append(

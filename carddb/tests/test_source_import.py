@@ -13,6 +13,7 @@ if TYPE_CHECKING:
 from pydantic import ValidationError
 from typer.testing import CliRunner
 
+from sve_carddb import manifest as manifest_module
 from sve_carddb import source_archive as archive
 from sve_carddb.cli import app
 from sve_carddb.manifest import Manifest, ManifestError
@@ -425,11 +426,16 @@ def test_unlisted_raw_refuses_without_cleaning(inputs: Inputs) -> None:
 
 
 def test_inputs_changed_between_prepare_and_publish(
-    inputs: Inputs, tmp_path: Path
+    inputs: Inputs, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     plan = prepare(inputs.input_dir, inputs.selection)
     path = inputs.input_dir / "index.jsonl"
     path.write_bytes(path.read_bytes().replace(b'"url":', b'"url" :', 1))
+
+    def refuse(*_args: object) -> None:
+        pytest.fail("Changed preparation must be rejected before staging writes")
+
+    monkeypatch.setattr(importer, "_write", refuse)
     with pytest.raises(
         SourceImportError,
         match=r"^Source import inputs changed after preparation$",
@@ -612,4 +618,139 @@ def test_program_dependency_closure_is_checked(
             tmp_path / "isolated",
             inputs.program,
         )
+    assert not (tmp_path / "isolated").exists()
+
+
+def test_news_path_on_wrong_regional_host_is_rejected(inputs: Inputs) -> None:
+    selection = json.loads(inputs.selection.read_bytes())
+    selection["sources"][1]["provider"] = "en"
+    inputs.selection.write_text(json.dumps(selection))
+    with pytest.raises(
+        SourceImportError,
+        match=r"^HTML source import URL does not match its explicit purpose$",
+    ):
+        prepare(inputs.input_dir, inputs.selection)
+
+
+def test_inputs_changed_during_staging_never_publish(
+    inputs: Inputs, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = importer._write
+    changed = False
+
+    def changing(path: Path, raw: bytes) -> None:
+        nonlocal changed
+        original(path, raw)
+        if not changed:
+            index = inputs.input_dir / "index.jsonl"
+            index.write_bytes(index.read_bytes().replace(b'"url":', b'"url" :', 1))
+            changed = True
+
+    monkeypatch.setattr(importer, "_write", changing)
+    with pytest.raises(
+        SourceImportError, match=r"^Source import inputs changed after preparation$"
+    ):
+        _register(inputs, tmp_path)
+    assert changed
+    assert not (tmp_path / "isolated").exists()
+    assert not list(tmp_path.glob(".source-import-*"))
+
+
+def test_create_import_failure_removes_only_its_new_database(
+    inputs: Inputs, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    plan = prepare(inputs.input_dir, inputs.selection)
+    path = tmp_path / "new.sqlite"
+
+    def failing(_self: Manifest) -> None:
+        raise ManifestError("Synthetic receipt failure")
+
+    monkeypatch.setattr(Manifest, "source_import_receipt", failing)
+    with pytest.raises(ManifestError, match=r"^Synthetic receipt failure$"):
+        Manifest.create_import(path, plan.index, plan.content)
+    assert not path.exists()
+    path.write_bytes(b"Existing state")
+    with pytest.raises(FileExistsError):
+        Manifest.create_import(path, plan.index, plan.content)
+    assert path.read_bytes() == b"Existing state"
+
+
+def test_non_utc_registration_time_is_rejected(inputs: Inputs, tmp_path: Path) -> None:
+    output = _register(inputs, tmp_path)
+    db = output / "manifest/manifest.sqlite"
+    with sqlite3.connect(db) as conn:
+        conn.execute(
+            "UPDATE source_import_receipt SET registered_at='2020-01-02T04:04:05+01:00'"
+        )
+    with pytest.raises(ManifestError, match=r"^Import registration time must be UTC$"):
+        Manifest.open_snapshot(db)
+
+
+@pytest.mark.parametrize("column", ["index_bytes", "content"])
+def test_receipt_bytes_boundary_rejects_non_bytes(
+    inputs: Inputs, tmp_path: Path, column: str
+) -> None:
+    output = _register(inputs, tmp_path)
+    db = output / "manifest/manifest.sqlite"
+    position = 1 if column == "index_bytes" else 3
+
+    def non_bytes_row(
+        _cursor: sqlite3.Cursor, row: tuple[object, ...]
+    ) -> tuple[object, ...]:
+        # STRICT persisted rows are bytes; exercise the independent library boundary.
+        if len(row) == 5:
+            values = list(row)
+            values[position] = "Synthetic non-bytes SQLite result"
+            return tuple(values)
+        return row
+
+    with sqlite3.connect(db) as conn:
+        conn.row_factory = non_bytes_row
+        with pytest.raises(
+            ManifestError, match=r"^Import receipt index and content must be bytes$"
+        ):
+            manifest_module._decode_import_receipt(conn)
+    with Manifest.open_snapshot(db):
+        pass
+
+
+@pytest.mark.parametrize("change", ["pin", "classification", "fields", "missing"])
+def test_cli_diagnostic_is_specific_without_input_values(
+    inputs: Inputs, tmp_path: Path, change: str
+) -> None:
+    value = json.loads(inputs.selection.read_bytes())
+    if change == "pin":
+        value["dependencies"][0]["sha256"] = "sha256:" + "0" * 64
+        expected = "Source import program dependency differs from executing code"
+    elif change == "classification":
+        value["sources"][1]["provider"] = "en"
+        expected = "HTML source import URL does not match its explicit purpose"
+    elif change == "fields":
+        value["sources"][0]["provider"] = "PRIVATE_INPUT_VALUE_DO_NOT_PRINT"
+        expected = "sources.0.provider:literal_error"
+    else:
+        inputs.selection.unlink()
+        expected = "Offline source import I/O failed: FileNotFoundError"
+    if change != "missing":
+        inputs.selection.write_text(json.dumps(value))
+    result = CliRunner().invoke(
+        app,
+        [
+            "source-import",
+            "register",
+            "--input-dir",
+            str(inputs.input_dir),
+            "--selection",
+            str(inputs.selection),
+            "--program-root",
+            str(inputs.program),
+            "--output",
+            str(tmp_path / "isolated"),
+        ],
+        env={"FORCE_COLOR": None, "NO_COLOR": "1", "TERM": "dumb"},
+    )
+    assert result.exit_code == 2
+    assert expected in result.output
+    assert "PRIVATE_INPUT_VALUE_DO_NOT_PRINT" not in result.output
+    assert str(inputs.input_dir) not in result.output
     assert not (tmp_path / "isolated").exists()

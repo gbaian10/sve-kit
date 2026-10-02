@@ -39,6 +39,7 @@ PROGRAM_FILES = (
     "carddb/src/sve_carddb/cli.py",
     "carddb/src/sve_carddb/html.py",
     "carddb/src/sve_carddb/manifest.py",
+    "carddb/src/sve_carddb/manifest_schema_v2.py",
     "carddb/src/sve_carddb/registry/records.py",
     "carddb/src/sve_carddb/snapshot/values.py",
     "carddb/src/sve_carddb/source_archive.py",
@@ -167,7 +168,10 @@ def prepare(input_dir: Path, selection_path: Path) -> Plan:
     for url in sorted(purposes):
         observation = observations[url]
         purpose = purposes[url]
-        check_purpose(purpose, observation)
+        try:
+            check_purpose(purpose, observation)
+        except ValueError as exc:
+            raise SourceImportError(str(exc)) from exc
         raw = read_regular(input_dir / "raw" / observation.sha256, _RAW_LIMIT)
         _body(raw, observation)
         mappings.append(
@@ -206,7 +210,7 @@ def _git(root: Path, *args: str) -> bytes:
 
 
 def verify_program(plan: Plan, root: Path) -> None:
-    """Pin actual executing code and lockfiles, not just caller-supplied hash strings."""
+    """Verify the listed code and lockfile pins against executing bytes and Git blobs."""
     if (
         _git(root, "rev-parse", "HEAD").decode().strip()
         != plan.content.program_revision
