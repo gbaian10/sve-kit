@@ -46,8 +46,14 @@ RAW = (
 
 EN_RAW = (
     en_page("TEST-001Ⓢa")
-    .replace(b'class="cardlist-Under"', b'class="synthetic-en-wrapper"')
-    .replace(b"Synthetic QA title", b"Q900001 (2026/10/1)")
+    .replace(
+        b'<div class="cardlist-Detail_QA">', b'</div><div class="cardlist-Detail_QA">'
+    )
+    .replace(
+        b'</div></div></div><div class="cardlist-Detail_Relation">',
+        b'</div></div><div class="cardlist-Detail_Relation">',
+    )
+    .replace(b"Synthetic QA title", b"Q900001 (Oct. 10, 2026)")
 )
 
 
@@ -67,13 +73,88 @@ def test_regional_qa_container(region: Region) -> None:
     assert parsed.card_no == "TEST-001Ⓢa"
     assert len(parsed.qa) == (2 if region == "jp" else 1)
     assert parsed.qa[0].official_number == ("Q900000" if region == "jp" else "Q900001")
-    assert parsed.qa[0].published_on == "2026-10-01"
+    assert parsed.qa[0].published_on == (
+        "2026-10-01" if region == "jp" else "2026-10-10"
+    )
     assert parsed.qa[0].question == (
         "Synthetic question?\nNext {synthetic.icon}" if region == "jp" else "Question"
     )
     assert parsed.qa[0].answer == (
         "Synthetic answer." if region == "jp" else "Answer\nMore"
     )
+
+
+@pytest.mark.parametrize(
+    ("raw_date", "expected"),
+    [
+        ("Jan. 12, 2026", "2026-01-12"),
+        ("Feb. 12, 2026", "2026-02-12"),
+        ("Mar. 12, 2026", "2026-03-12"),
+        ("Apr. 12, 2026", "2026-04-12"),
+        ("May. 12, 2026", "2026-05-12"),
+        ("Jun. 12, 2026", "2026-06-12"),
+        ("Jul. 12, 2026", "2026-07-12"),
+        ("Aug. 12, 2026", "2026-08-12"),
+        ("Sep. 12, 2026", "2026-09-12"),
+        ("Oct. 12, 2026", "2026-10-12"),
+        ("Nov. 12, 2026", "2026-11-12"),
+        ("Dec. 12, 2026", "2026-12-12"),
+        ("Oct. 1, 2026", "2026-10-01"),
+        ("May 12, 2026", "2026-05-12"),
+        ("Feb. 29, 2024", "2024-02-29"),
+    ],
+)
+def test_en_qa_observed_date_shapes(raw_date: str, expected: str) -> None:
+    raw, pin = regional_page("en")
+    raw = raw.replace(b"Oct. 10, 2026", raw_date.encode())
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    entry = parse_card_page(raw, pin, region="en").qa[0]
+    assert entry.published_on == expected
+    assert entry.date_raw == raw_date
+
+
+@pytest.mark.parametrize(
+    "raw_date",
+    [
+        "May 1, 2026",
+        "October 12, 2026",
+        "Sept. 12, 2026",
+        "Abc. 12, 2026",
+        "oct. 12, 2026",
+        "Oct.  12, 2026",
+        "Oct. 12,26",
+        "Oct. 12, 2026 trailing",
+        "2026/10/1",
+        "Oct. 0, 2026",
+        "Apr. 31, 2026",
+        "Feb. 29, 2025",
+        "Jan. 12, 0000",
+        "Unknown date",
+    ],
+)
+def test_en_qa_unknown_date_remains_raw(raw_date: str) -> None:
+    raw, pin = regional_page("en")
+    raw = raw.replace(b"Oct. 10, 2026", raw_date.encode())
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    entry = parse_card_page(raw, pin, region="en").qa[0]
+    assert entry.published_on is None
+    assert entry.date_raw == raw_date
+
+
+def test_en_qa_absent_date_remains_unknown() -> None:
+    raw, pin = regional_page("en")
+    raw = raw.replace(b" (Oct. 10, 2026)", b"")
+    pin = pin.model_copy(update={"sha256": digest(raw)})
+    entry = parse_card_page(raw, pin, region="en").qa[0]
+    assert entry.published_on is None
+    assert entry.date_raw is None
+
+
+def test_jp_does_not_adopt_en_date_format() -> None:
+    raw = RAW.replace(b"2026/10/1", b"Oct. 10, 2026")
+    entry = parse_card_page(raw, source(raw=raw)).qa[0]
+    assert entry.published_on is None
+    assert entry.date_raw == "Oct. 10, 2026"
 
 
 @pytest.mark.parametrize("region", ["jp", "en"])
