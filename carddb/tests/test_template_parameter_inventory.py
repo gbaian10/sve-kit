@@ -233,3 +233,54 @@ def test_cli_exit_is_not_success_when_only_one_independent_gate_passes(
 def test_term_diagnostics_do_not_turn_into_bindings_or_false_completion() -> None:
     result = summary(Candidates())
     assert result["term_mentions_are_bindings"] is False
+
+
+def test_run_cannot_ignore_failed_source_coverage_even_when_parameters_are_complete(
+    template_case: Case,
+    parameter_result: Result,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
+) -> None:
+    scan = copy.deepcopy(template_case.scan)
+    scan.failures.append({"reason": "unknown_effect_presence"})
+    monkeypatch.setattr(cli, "scan_batch", lambda *_args, **_kwargs: scan)
+    monkeypatch.setattr(cli, "summary", lambda _: {"parameter_complete": True})
+    args = copy.copy(parameter_result.args)
+    args.output = tmp_path / "result"
+    report = cli.run(args)
+    assert object_value(report["source_coverage"])["complete"] is False
+    assert object_value(report["parameters"])["parameter_complete"] is True
+    assert report["complete"] is False
+
+
+def test_cli_error_output_never_prints_source_or_validation_details(
+    parameter_result: Result,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    def invalid(_: argparse.Namespace) -> None:
+        raise ValueError("Synthetic forbidden source detail")
+
+    monkeypatch.setattr(cli, "run", invalid)
+    args = parameter_result.args
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "parameters",
+            *[
+                v
+                for name, value in vars(args).items()
+                for v in ("--" + name.replace("_", "-"), str(value))
+            ],
+        ],
+    )
+    with pytest.raises(SystemExit) as raised:
+        cli.main()
+    assert raised.value.code == 2
+    output = capsys.readouterr()
+    assert not output.out
+    assert (
+        output.err
+        == "Template parameter candidates failed; immutable inputs or evidence could not be verified\n"
+    )

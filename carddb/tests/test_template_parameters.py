@@ -208,6 +208,59 @@ def test_composite_vocabulary_retains_special_flags_and_requires_separate_slots(
     assert candidate("試験Composite", refs).slots == ()
 
 
+def test_header_traits_use_the_existing_separator_exceptions_and_exact_adopted_category() -> (
+    None
+):
+    refs = References(
+        terms={
+            "〈Synthetic・Composite〉": [("term:trait.synthetic", "trait", HASH)],
+            "Other": [("term:trait.other", "trait", HASH)],
+        },
+        vocabulary=Vocabulary(
+            bindings=(
+                Binding(region="jp", kind="type", raw="フォロワー", code="follower"),
+            )
+        ),
+    )
+    result = candidate(
+        "『Name』{Synthetic}〈Synthetic・Composite〉・Other・フォロワー",
+        refs,
+        section=0,
+    )
+    assert [h.semantic_role for h in result.slots] == [
+        "card_name",
+        "class",
+        "trait",
+        "trait",
+        "type",
+    ]
+    assert [
+        h.target["id"]
+        for h in result.slots
+        if h.semantic_role == "trait" and h.target is not None
+    ] == ["term:trait.synthetic", "term:trait.other"]
+    assert result.slots[-1].target is not None
+    assert result.slots[-1].target["vocabulary_code"] == "follower"
+    assert all(not h.issues for h in result.slots if h.semantic_role == "trait")
+    refs.terms["Other"] = [("term:ability.other", "ability", HASH)]
+    assert (
+        "unknown_or_ambiguous_header_trait"
+        in candidate("『Name』{Synthetic}Other・フォロワー", refs, section=0).issues
+    )
+    assert (
+        "unrecognized_header_trait_layout"
+        in candidate("『Name』{Synthetic}Otherフォロワー", refs, section=0).issues
+    )
+    assert (
+        "unrecognized_header_trait_layout"
+        in candidate("『Name』{Synthetic}Other・・フォロワー", refs, section=0).issues
+    )
+    assert (
+        "header_empty_numeric_requires_review"
+        in candidate("『Name』{Synthetic}フォロワー{コスト}", refs, section=0).issues
+    )
+
+
 def test_layout_is_exact_whitespace_literal_and_reminders_are_not_approved_rules() -> (
     None
 ):
@@ -303,7 +356,7 @@ def test_repeated_slot_values_must_be_equal_and_slot_positions_cannot_overlap() 
         match=r"\ARepeated parameter occurrences must have identical values\Z",
     ):
         verify_values("試験２枚／３枚", "試験N枚／N枚", schema, hints)
-    with pytest.raises(ValidationError, match="Parameter occurrences must not overlap"):
+    with pytest.raises(ValidationError) as raised:
         Schema(
             slots=(
                 result.parameter_schema.slots[0],
@@ -312,6 +365,10 @@ def test_repeated_slot_values_must_be_equal_and_slot_positions_cannot_overlap() 
                 ),
             )
         )
+
+    assert [e["msg"] for e in raised.value.errors()] == [
+        "Value error, Parameter occurrences must not overlap"
+    ]
 
 
 @pytest.mark.parametrize(
@@ -328,10 +385,14 @@ def test_schema_guards_uint_bounds_and_reference_kind(
     schema = candidate("試験２枚").parameter_schema
     assert schema is not None
     data = dict(schema.slots[0].model_dump(), **update)
-    with pytest.raises(ValidationError, match=re.escape(message)):
+    with pytest.raises(ValidationError) as raised:
         Slot.model_validate(data)
-    with pytest.raises(ValidationError, match="Only reminder spans may have an anchor"):
+    assert [e["msg"] for e in raised.value.errors()] == ["Value error, " + message]
+    with pytest.raises(ValidationError) as raised:
         SourceSpan(role="body", segments=(Range(start=0, end=1),), anchor=0)
+    assert [e["msg"] for e in raised.value.errors()] == [
+        "Value error, Only reminder spans may have an anchor"
+    ]
 
 
 def test_candidate_replay_rejects_changed_literal_positions_and_missing_slots() -> None:

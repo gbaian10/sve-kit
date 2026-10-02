@@ -1,7 +1,7 @@
 """Exact adopted card-name concepts and explicitly proposed vocabulary, never name-to-card guesses."""
 
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol
 
 from pydantic import JsonValue
 
@@ -13,8 +13,15 @@ from sve_carddb.translations.sources import excerpt
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.build_inputs import Source
+    from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.text_observations.vocabulary import Vocabulary
-    from sve_carddb.translations.sources import Sources
+
+
+class Evidence(Protocol):
+    def text(self, ref: SourceRef) -> tuple[str, str, Source]:
+        """Return a hash-verified complete field and its source language."""
+        ...
 
 
 @dataclass(frozen=True)
@@ -74,6 +81,21 @@ class References:
             ("term_role_requires_review",),
         )
 
+    def header_trait(self, raw: str) -> Resolution:
+        """The header grammar plus a unique adopted trait provides both position and category."""
+        found = self.terms.get(raw, [])
+        if len(found) != 1 or found[0][1] != "trait":
+            return Resolution(None, ("unknown_or_ambiguous_header_trait",))
+        identifier, _, checksum = found[0]
+        return Resolution(
+            {"kind": "term", "id": identifier, "record_hash": checksum}, ()
+        )
+
+    @staticmethod
+    def unclassified_header() -> Resolution:
+        """Do not infer a trait from a malformed or unknown header prefix."""
+        return Resolution(None, ("unrecognized_header_trait_layout",))
+
     def term_mentions(self, raw: str) -> tuple[dict[str, JsonValue], ...]:
         """Substring hits remain diagnostics; they do not establish a semantic slot role."""
         return tuple(
@@ -90,7 +112,7 @@ class References:
         )
 
 
-def adopted(root: Path, sources: Sources) -> References:
+def adopted(root: Path, sources: Evidence) -> References:
     """Reuse the full glossary closure and frozen source validator before exact lookup."""
     snapshot = load_glossary(root)
     result = References(pins={"glossary": snapshot.pins()})

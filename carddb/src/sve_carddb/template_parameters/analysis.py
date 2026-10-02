@@ -5,6 +5,8 @@ import unicodedata
 from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
+from sve_carddb.extract.official_jp import _traits as parse_traits
+from sve_carddb.fetch.validate import ValidationError
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.models import (
     Candidate,
@@ -15,7 +17,12 @@ from sve_carddb.template_parameters.models import (
     Slot,
 )
 from sve_carddb.template_parameters.provenance import Unit, merged, trace
-from sve_carddb.template_sources.normalizer import DIGITS, TOKEN_HEADER, VERSION
+from sve_carddb.template_sources.normalizer import (
+    DIGITS,
+    TOKEN_HEADER,
+    TYPE_WORDS,
+    VERSION,
+)
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -60,24 +67,7 @@ def positions(
     if part.role == "layout":
         return (Position(0, len(units), "whitespace", "layout"),)
     if part.role == "token_header":
-        match = TOKEN_HEADER.fullmatch(part.normalized)
-        if match is None:
-            raise ValueError(
-                "Token header candidate must match the complete legacy header grammar"
-            )
-        groups = {
-            "name": "card_name",
-            "cls": "class",
-            "kind": "type",
-            "cost": "cost",
-            "atk": "attack",
-            "hp": "health",
-        }
-        return tuple(
-            Position(match.start(group), match.end(group), "header", role)
-            for group, role in groups.items()
-            if match[group] is not None and match.start(group) < match.end(group)
-        )
+        return header_positions(part.normalized)
     result = [
         Position(
             index,
@@ -119,6 +109,45 @@ def positions(
         elif raw in refs.terms:
             result.append(Position(match.start(1), match.end(1), "braced", "term"))
     return tuple(sorted(result, key=lambda item: item.start))
+
+
+def header_positions(normalized: str) -> tuple[Position, ...]:
+    """Separate declared traits from the trailing base type; reuse embedded-separator exceptions."""
+    match = TOKEN_HEADER.fullmatch(normalized)
+    if match is None:
+        raise ValueError(
+            "Token header candidate must match the complete legacy header grammar"
+        )
+    groups = {
+        "name": "card_name",
+        "cls": "class",
+        "cost": "cost",
+        "atk": "attack",
+        "hp": "health",
+    }
+    result = [
+        Position(match.start(g), match.end(g), "header", role)
+        for g, role in groups.items()
+        if match[g] is not None and match.start(g) < match.end(g)
+    ]
+    suffix = re.search("(?:" + TYPE_WORDS + ")$", match["kind"])
+    assert suffix is not None
+    start = match.start("kind")
+    result.append(Position(start + suffix.start(), match.end("kind"), "header", "type"))
+    prefix = match["kind"][: suffix.start()]
+    if prefix:
+        try:
+            traits = parse_traits(prefix[:-1]) if prefix.endswith("・") else []
+        except ValidationError:
+            traits = []
+        if not traits:
+            result.append(
+                Position(start, start + len(prefix), "header", "trait_unclassified")
+            )
+        for trait in traits:
+            result.append(Position(start, start + len(trait), "header", "trait"))
+            start += len(trait) + 1
+    return tuple(sorted(result, key=lambda p: p.start))
 
 
 def unsigned(raw: str) -> int | None:
@@ -199,6 +228,10 @@ def hint(
         resolution = refs.proposed_vocabulary(position.semantic_role, raw)
     elif position.semantic_role == "term":
         resolution = refs.braced_term(raw)
+    elif position.semantic_role == "trait":
+        resolution = refs.header_trait(raw)
+    elif position.semantic_role == "trait_unclassified":
+        resolution = refs.unclassified_header()
     else:
         resolution = refs.quoted(raw)
     kind = None if resolution.target is None else resolution.target["kind"]
@@ -302,6 +335,14 @@ def analyze(
     issues = tuple(sorted({reason for h in hints for reason in h.issues}))
     if part.role == "reminder":
         issues += ("legacy_parenthesis_classification_requires_review",)
+    if part.role == "token_header":
+        header = TOKEN_HEADER.fullmatch(part.normalized)
+        assert header is not None
+        if any(
+            header[group] is not None and not header[group]
+            for group in ("cost", "atk", "hp")
+        ):
+            issues += ("header_empty_numeric_requires_review",)
     return Candidate(
         inventory_id=item.id,
         ordinal=located.ordinal,

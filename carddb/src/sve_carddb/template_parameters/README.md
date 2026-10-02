@@ -52,7 +52,9 @@ independently pinned. This does not rewrite the legacy inventory.
 
 Numeric candidates require exact ASCII/fullwidth decimal raw spellings within
 JavaScript's safe unsigned range. Token cost/attack/health roles come from the
-complete named header grammar. Other numbers require a bounded unit or prefix
+complete named header grammar. Header traits reuse the existing JP trait parser,
+including its embedded-separator exceptions, and require a unique exact adopted
+trait concept. Unknown trait layouts remain unresolved. Other numbers require a bounded unit or prefix
 grammar; signs, ASCII identifiers, compatibility numerals and unclassified bare
 numbers remain unresolved. This conservative classifier is a proposal, not a
 maintainer-approved semantic rule. Each occurrence has its own slot; grouping
