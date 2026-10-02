@@ -33,7 +33,7 @@ class CorrectionCase:
     image_store: Path
 
 
-def make_correction_case(
+def make_correction_case(  # ruff: ignore[too-many-arguments] -- explicit before/after fields keep missing-type evidence independent of its corrected value
     root: Path,
     inputs: Inputs,
     *,
@@ -41,11 +41,12 @@ def make_correction_case(
     field: str = "effect",
     state: str = "active",
     corrected: str | None = None,
+    raw_type: str = "Spell",
 ) -> CorrectionCase:
     number = "BP02-071" if region == "jp" else "BP02-070EN"
     original = (inputs.jp if region == "jp" else inputs.en)[number].faces[0]
     if region == "en" and field == "card_type":
-        original.info["Card Type"] = "Spell"
+        original.info["Card Type"] = raw_type
     expected = (
         original.text
         if field == "effect"

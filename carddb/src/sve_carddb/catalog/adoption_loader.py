@@ -216,6 +216,8 @@ def _check_shard(shard: Shard, path: str) -> None:  # ruff: ignore[complex-struc
     area, filing = Path(path).parts[1:3]
     kind, policy = _AREAS[area]
     decision = shard.decisions[0]
+    if decision.reviewed_by != "gbaian10":
+        raise ValueError("Adoption confirmer must be a repository-listed maintainer")
     if decision.category != kind or decision.policy_id != policy:
         raise ValueError("Adoption category/policy does not match area")
     keys = [record.record_key for record in shard.records]
@@ -265,7 +267,7 @@ def _check_shard(shard: Shard, path: str) -> None:  # ruff: ignore[complex-struc
         raise ValueError("Adoption checked members must cover the exact batch")
 
 
-def _chains(snapshot: AdoptionSnapshot) -> None:  # ruff: ignore[complex-structure,too-many-branches,too-many-statements] -- history and terminal uniqueness guards share one complete chain inventory
+def _chains(snapshot: AdoptionSnapshot) -> None:  # ruff: ignore[complex-structure,too-many-branches,too-many-statements,too-many-locals] -- history and terminal uniqueness guards share one complete chain inventory
     groups: dict[bytes, list[tuple[Record, str]]] = defaultdict(list)
     seen: set[str] = set()
     decisions: set[str] = set()
@@ -280,7 +282,7 @@ def _chains(snapshot: AdoptionSnapshot) -> None:  # ruff: ignore[complex-structu
         seen.add(record.record_key)
         groups[subject_key(record)].append((record, decision))
     symbol_codes: dict[tuple[str, str], str] = {}
-    mappings: dict[tuple[str, str, str, str], str] = {}
+    mappings: dict[tuple[str, str, str, str], tuple[str, tuple[str, ...]]] = {}
     normalizers: set[bytes] = set()
     for history in groups.values():
         history.sort(key=lambda pair: pair[0].data.adoption_no)
@@ -326,11 +328,15 @@ def _chains(snapshot: AdoptionSnapshot) -> None:  # ruff: ignore[complex-structu
             if value.active:
                 for raw in value.raw_mappings:
                     key = record.data.subject.kind, raw.region, raw.lang, raw.raw
-                    code = mappings.setdefault(key, record.data.subject.code)
-                    if code != record.data.subject.code:
+                    selection = record.data.subject.code, raw.special_kinds
+                    previous_mapping = mappings.get(key)
+                    if previous_mapping is not None and previous_mapping != selection:
                         raise ValueError(
-                            "Exact vocabulary raw maps to multiple active codes"
+                            "Exact vocabulary raw maps to multiple active code/marker pairs"
                         )
+                    if previous_mapping == selection:
+                        raise ValueError("Duplicate active vocabulary raw mapping")
+                    mappings[key] = selection
         if isinstance(record, AliasRecord) and record.data.value is not None:
             normalizers.add(canonical(_json(record.data.value.normalizer)))
         if isinstance(record, DefaultRecord) and record.data.value is not None:

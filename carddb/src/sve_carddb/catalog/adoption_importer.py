@@ -24,6 +24,7 @@ from sve_carddb.catalog.adoption_models import (
 from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
 from sve_carddb.catalog.importer import _insert_exact
 from sve_carddb.catalog.languages import register_languages
+from sve_carddb.catalog.projection import CatalogProjection, project_catalog
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
 from sve_carddb.extract import official_en, official_jp
 from sve_carddb.extract.compare_jp import legacy_projection
@@ -41,8 +42,12 @@ from sve_carddb.routes import populate_routes
 from sve_carddb.routes.defaults import select_defaults
 from sve_carddb.routes.rarity_policy import APPROVED_GENERAL_RARITIES
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.text_observations.importer import populate_text_observations
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.text_observations.plan import verify_plan
+from sve_carddb.text_observations.type_binding import type_binding
+from sve_carddb.translations.importer import Inputs as TranslationInputs
+from sve_carddb.translations.importer import populate_glossary
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -51,6 +56,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_inputs import BuildContext, InputRecord
     from sve_carddb.catalog.adoption_loader import Entry
     from sve_carddb.catalog.adoption_models import Record, ReviewContext
+    from sve_carddb.products.models import LocalizedText
     from sve_carddb.routes.defaults import DefaultPrinting
     from sve_carddb.text_observations.plan import TextPlan
 
@@ -64,6 +70,15 @@ class AdoptionInputs:
     repository: Path
     authored_revision: str
     entries: tuple[Entry, ...]
+    include_translations: bool = False
+
+    def translation_inputs(self) -> TranslationInputs | None:
+        """Enable the complete existing entry, never a filtered glossary subset."""
+        if type(self.include_translations) is not bool:
+            raise ValueError("Translation composition flag must be boolean")
+        if not self.include_translations:
+            return None
+        return TranslationInputs(self.root, self.repository, self.authored_revision)
 
     def load(self) -> tuple[AdoptionSnapshot, ...]:
         """Reload immutable bytes instead of accepting a caller-made approval object."""
@@ -93,8 +108,11 @@ class AdoptionInputs:
     def configuration(self) -> dict[str, JsonValue]:
         """Pin both enabled entries, complete byte inventories, and the authored commit."""
         snapshots = self.load()
+        translation = self.translation_inputs()
         return {
+            **({} if translation is None else translation.configuration()),
             "catalog_adoptions": {
+                "include_translations": self.include_translations,
                 "authored_revision": self.authored_revision,
                 "inputs": [s.pins() for s in snapshots],
                 "effective": [
@@ -109,19 +127,27 @@ class AdoptionInputs:
                     for snapshot in snapshots
                     for r, decision in snapshot.effective()
                 ],
-            }
+            },
         }
 
 
-def populate_adoptions(
+@dataclass(frozen=True)
+class PreparedAdoptions:
+    snapshots: tuple[AdoptionSnapshot, ...]
+    sources: AdoptionSources
+    effective: tuple[tuple[Record, str], ...]
+    reviews: dict[str, ReviewContext]
+
+
+def _prepare_adoptions(  # ruff: ignore[complex-structure] -- validate complete immutable inputs, history and current frozen evidence before projection
     db: Database,
     inputs: AdoptionInputs,
     *,
     build: BuildContext,
     stores: dict[str, Path],
-    text_plan: TextPlan | None = None,
-) -> InputRecord:
-    """Validate all histories and freshness before writing any catalog/display rows."""
+    text_plan: TextPlan | None,
+) -> PreparedAdoptions:
+    """Share the full read-only verification boundary with projection and import."""
     snapshots = inputs.load()
     configuration = object_value(parse(build.configuration.encode()))
     if any(
@@ -162,10 +188,20 @@ def populate_adoptions(
             )
         sources.uses.extend(text_plan.source_uses())
         sources.uses.extend(text_plan.identity.source_uses())
+        for use in {use.source for use in text_plan.source_uses()}:
+            archive = use.archive
+            source, _, _ = sources.batch(archive.store_id, archive.batch_id).read(
+                use.id, parser_version=use.parser_version
+            )
+            if source != use:
+                raise ValueError("Adoption text source-use frozen closure mismatch")
     _validate_histories(snapshots, sources)
-    if (inputs.root / "translations/index.yaml").exists():
+    translation_path = inputs.root / "translations"
+    if (
+        translation_path.exists() or translation_path.is_symlink()
+    ) and not inputs.include_translations:
         raise ValueError(
-            "Translation adoption loader is not integrated; symbol choices cannot be ignored"
+            "Translation entry must be explicitly enabled for catalog composition"
         )
     effective = tuple(pair for snapshot in snapshots for pair in snapshot.effective())
     reviews = {
@@ -176,6 +212,48 @@ def populate_adoptions(
     }
     _dependencies(effective, db, text_plan)
     _freshness(effective, reviews, sources, db, text_plan)
+    return PreparedAdoptions(snapshots, sources, effective, reviews)
+
+
+def derive_catalog(
+    db: Database,
+    inputs: AdoptionInputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    text_plan: TextPlan | None = None,
+) -> CatalogProjection:
+    """Rebuild memory objects from immutable effective receipts without writing rows."""
+    prepared = _prepare_adoptions(
+        db, inputs, build=build, stores=stores, text_plan=text_plan
+    )
+    projection = project_catalog(
+        prepared.effective, prepared.reviews, prepared.sources, text_plan
+    )
+    if text_plan is not None:
+        for item in (*text_plan.observations, *text_plan.candidates()):
+            type_binding(text_plan, item, projection.vocabulary)
+            if item.content.class_raw != "-":
+                projection.vocabulary.lookup(
+                    item.region, "class", item.content.class_raw
+                )
+    return projection
+
+
+def populate_adoptions(
+    db: Database,
+    inputs: AdoptionInputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    text_plan: TextPlan | None = None,
+) -> InputRecord:
+    """Validate all histories and freshness before writing any catalog/display rows."""
+    prepared = _prepare_adoptions(
+        db, inputs, build=build, stores=stores, text_plan=text_plan
+    )
+    snapshots, sources = prepared.snapshots, prepared.sources
+    effective, reviews = prepared.effective, prepared.reviews
     _audit(snapshots, db, inputs.authored_revision)
     insert_raw_sources(db, (use.source for use in sources.uses))
     _audit_evidence(snapshots, db, sources)
@@ -198,8 +276,15 @@ def populate_adoptions(
             record, decision, reviews[record.record_key], sources, db, texts, text_plan
         )
     db.verify_alias_targets()
-    result = input_record(build, sources.uses)
-    result.verify(db, build, tuple(sources.uses), complete=False)
+    translation = inputs.translation_inputs()
+    translation_uses = (
+        ()
+        if translation is None
+        else populate_glossary(db, translation, build=build, stores=stores).uses
+    )
+    uses = (*sources.uses, *translation_uses)
+    result = input_record(build, uses)
+    result.verify(db, build, uses, complete=False)
     return result
 
 
@@ -310,6 +395,42 @@ def import_adoptions(
         return populate_adoptions(
             db, inputs, build=build, stores=stores, text_plan=text_plan
         )
+
+
+def import_adopted_text(
+    db: Database,
+    inputs: AdoptionInputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+    text_plan: TextPlan,
+    published: tuple[LocalizedText, ...] = (),
+) -> InputRecord:
+    """Re-derive bindings and atomically import catalog, glossary and exact observations."""
+    with db.transaction():
+        identity = populate_identity_rows(
+            db,
+            text_plan.publication_identity(),
+            authored_revision=inputs.authored_revision,
+            build=build,
+        )
+        projection = derive_catalog(
+            db, inputs, build=build, stores=stores, text_plan=text_plan
+        )
+        adoption = populate_adoptions(
+            db, inputs, build=build, stores=stores, text_plan=text_plan
+        )
+        observations = populate_text_observations(
+            db,
+            text_plan,
+            build=build,
+            vocabulary=projection.vocabulary,
+            published=published,
+        )
+        uses = (*identity.uses, *adoption.uses, *observations.uses)
+        result = input_record(build, uses)
+        result.verify(db, build, uses, complete=False)
+        return result
 
 
 def import_adoption_build(

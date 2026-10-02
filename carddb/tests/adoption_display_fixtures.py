@@ -17,11 +17,12 @@ from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping
 from sve_carddb.registry.preview import FrozenJP, plan_preview
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.registry.review import Inputs, Receipt
+from sve_carddb.registry.review import Correction, Inputs, Receipt
 from sve_carddb.registry.storage import Entry, plan_files, read_yaml, write_files
 from sve_carddb.routes.rarity_policy import APPROVED_GENERAL_RARITIES
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_archive import seal_batch
+from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.text_observations import FrozenTexts, TextPlan, plan_text_observations
 
@@ -128,7 +129,12 @@ class DisplayCase:
 
 
 def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- one sealed fixture owns the independent source and registry pins
-    root: Path, *, variants: bool, pending: bool = False
+    root: Path,
+    *,
+    variants: bool,
+    pending: bool = False,
+    raw_type: str = "Synthetic type",
+    correction: bool = False,
 ) -> DisplayCase:
     root.mkdir()
     store = _store(root / "source")
@@ -143,6 +149,7 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
             )
             .replace(b"SYN-01", number.encode())
             .replace(b"/synthetic.png", IMAGE_URL.encode())
+            .replace(b"Synthetic type", raw_type.encode())
         )
         _put(
             store,
@@ -172,6 +179,20 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
             input_hashes={"jp": digest(b"Synthetic complete cards")},
         ),
     )
+    if correction:
+        inputs.receipt.corrections = [
+            Correction(
+                region="jp",
+                card_no="BP01-001",
+                field="effect",
+                expected_raw_value="Synthetic relation rule",
+                corrected_value="Synthetic revised relation rule",
+                image_sha256=digest(IMAGE_RAW),
+                locator="Synthetic field box",
+                state="active",
+                reason="Synthetic correction",
+            )
+        ]
     records = build(inputs, {})
     if variants:
         first = next(r for r in records if r.kind == "printing")
@@ -222,6 +243,9 @@ def make_display_case(  # ruff: ignore[too-many-locals,too-many-statements] -- o
             region="jp",
             parser_version="official-jp-exact-v1",
         ),
+        images=FrozenImages(store.root, store.store_id, sealed.batch_id)
+        if correction
+        else None,
     )
     code_path = "carddb/src/sve_carddb/extract/official_jp.py"
     recipe: dict[str, JsonValue] = {

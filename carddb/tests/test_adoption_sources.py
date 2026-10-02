@@ -113,6 +113,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
                         "lang": "ja",
                         "raw": "Synthetic source type",
                         "source_ref": type_ref,
+                        "special_kinds": [],
                     }
                 ]
                 member["evidence"] = sorted(
