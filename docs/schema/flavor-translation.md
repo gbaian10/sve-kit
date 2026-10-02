@@ -1,11 +1,10 @@
 # 風味文字的整段模板與譯本採納
 
-本文件補充 [翻譯契約](translation-contract.md) 的 flavor 路徑。**維護者 2026-10-02 同意寬鬆方向**：
-協調者提議「兩個模型無分歧就採納、維護者抽查 30–50 段」並建議整段對譯，維護者回覆「可以寬鬆」。
-本契約依該提議採整段技術方案；實際抽查數量與集合之後由維護者決定，不記為逐條核可所有細節。
+本文件補充 [翻譯契約](translation-contract.md) 的 flavor 路徑。風味文字採整段對譯與寬鬆的譯本採納門檻；
+符合 §4 的風味模板定義可逐筆機械全查後引用有效政策採納，不必每包人工抽查。
+首輪譯本的實際抽查數量與集合由維護者決定，不預填已完成抽查或逐筆採納。
 效果文字維持同語意同譯，單卡自由譯文先不做。
-以下固定技術格式與驗收規則，不把方向核可當成已完成首輪抽查或逐筆採納。
-**§4 的 flavor 模板定義政策採納放寬既有門檻，待維護者確認後才能合併**；方向核可不含這項新增例外。
+以下固定技術格式與驗收規則；契約合併不等於已有真實首輪抽查、政策核可收據或資料採納。
 這是 docs 契約；模板清冊／匯入由 #52、渲染／選用／正式建置入口由 #53 提供，資料入庫由 #197 處理。
 
 ## 1. 重用的載體與來源
@@ -92,18 +91,18 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
 
 ## 4. 譯本政策與歸因
 
-維護者同意的寬鬆方向不豁免來源、span、ID、譯本語法與採納閉包。
+寬鬆的採納門檻不豁免來源、span、ID、譯本語法與採納閉包。
 初始化順序為：先 human sampled 採納首輪定義，再取得其最終譯本的真實 human sampled 抽查，
 最後建立政策與核可收據。之後新增風味定義／無分歧譯本才可引用該政策，沒有首輪譯本反過來代簽未採納定義的循環。
 
 1. 模板**定義**若尚無有效風味政策，仍須 human `sampled` 批次採納，先建立首輪譯本需要的定義。
-   **新增、待維護者確認的例外**：只有 role=flavor、flavor-exact-v1、sentence、零參數、完整整欄且符合本文件的定義，
+   **風味定義的政策採納例外**：只有 role=flavor、flavor-exact-v1、sentence、零參數、完整整欄且符合本文件的定義，
    可逐筆機械全查後引用同一份有效風味政策採納，不要求每包另做真人樣本。
    這不是效果模板定義、概念或一般分類的例外；任何非 exact recipe／額外 slot／未知角色均拒絕政策路徑。
    機械採納為 category=sentence_template 的 confirmed batch，全 members checked，reviewer／時間沿政策收據，
    note 明示「政策核可」，工具作者／套用時間另記。定義沒有譯文 origin 或 model_review，不能偽填兩模型審過定義。
    不改既有九欄 data；decision.policy_id 必須在 authored 內唯一對到**已索引且釘完整 hash 的政策檔與核可收據**，
-   正式位置與索引由 #195（3/3）固定，歷史 policy_id 不可換內容或換收據。author source_record／decision_source
+   正式位置與索引依 [模板採納政策契約](translation-policy.md)，歷史 policy_id 不可換內容或換收據。author source_record／decision_source
    釘完整 authored commit、政策索引與檔案／收據 bytes，政策、收據及真實首輪 flavor 譯本 human sampled 決定均驗回。
    F1 configuration 可另列完整五欄 pin，僅複核上述 authored 有效採納，不能由呼叫端提供另一份同名政策。
    缺唯一索引／hash／收據、建置設定不符或格式／loader 未支援時不得機械採納。
@@ -113,7 +112,7 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
    依正式清冊頻率優先排審；不能把建議段數或政策核可當成已完成樣本。
    初輪已看譯本用 `adoption_review.mode=human`、真正的 `sampled` 決定，保存精確 template ID／revision。
 4. 首輪完成、有實際政策核可收據後，其餘無分歧譯本才用翻譯契約 §2 的 `approved_policy`。
-   五欄 policy pin 與非空 initial_sample_decisions 不變；政策只覆蓋 flavor 模板譯本、目標語 zh-Hant，
+   五欄 policy pin 與非空 initial_sample_decisions 不變；政策限 flavor 定義／譯本、目標語 zh-Hant，
    只按核可 kind 及逐筆 role 開放 flavor 定義／譯本，不給效果 sentence_template、glossary 或 catalog 代簽。
    政策檔／收據另有專用格式，不沿用 wording-rules 的核可。
 5. 政策批次為 `confirmed`，全 members 完整機械 checked；reviewer／時間沿真實政策收據，note 明示「政策核可」。
@@ -121,8 +120,9 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
    approved_policy_rows（譯本）、approved_flavor_definition_rows（定義）、待人工分歧與缺譯，
    不把品質門檻較寬鬆改成「已逐筆人工確認」。
 
-**#195（3/3）政策格式合併且完整 loader 支援前，風味譯本不得以政策採納**；
-定義的上述例外另須維護者明示確認。loader 必須逐筆經 template_id 解析到已驗清冊，
+風味定義／譯本的政策採納須符合 [模板採納政策契約](translation-policy.md)，具備可驗的 authored 政策索引、
+政策／核可收據、真實首輪抽查及完整 loader 支援；**loader 尚未完整支援時不得以政策採納**。
+loader 必須逐筆經 template_id 解析到已驗清冊，
 檢查整個政策批次的 role 都是 flavor，並核對 recipe／零參數／完整段落，不能只看 filing_key 或 policy_id。
 同一政策可以授權兩種 kind，但定義與譯本仍分批、分開計數，任何效果成員混入都拒絕。
 
@@ -181,14 +181,14 @@ tokens 維持 null，風味及其譯文留詳情分片。不增集合、tuple �
 | F11 | 同 ID 改敘事／recipe，完整 hash 撞異 bytes | 各自拒絕；合法改版需新 ID，不自動繼承譯本 |
 | F12 | 零參數譯本多 slot、未跳脫大括號、字改後沿用舊 review hash | 各自拒絕；最終 bytes 重審不能省略 |
 | F13 | 未做初輪抽查、借效果政策、借 wording 收據、分歧仍走政策、machine 改 project | 各自拒絕假採納／錯範圍／錯歸因 |
-| F14 | 效果定義借風味政策、風味定義缺 pin／尚未取得維護者確認，或同檔混定義／譯本／review mode | 各自拒絕；核可且逐筆全查的 flavor 定義可引用同一風味政策，譯本不能代簽定義 |
+| F14 | 效果定義借風味政策、風味定義缺 pin／政策收據未授權定義 kind，或同檔混定義／譯本／review mode | 各自拒絕；核可且逐筆全查的 flavor 定義可引用同一風味政策，譯本不能代簽定義 |
 | F15 | 單筆加封套恰為 1 MiB，或只測 text 大小 | 拒絕寫出；清冊／分片均測完整 bytes |
 | F16 | 敘事人名改譯，只改已核可分片或沿用舊 revision／互審 | 各自拒絕；新譯本 revision 與採納可重建 |
 | F17 | EN 同卡但該版 flavor 已知不同，仍顯示 JP 譯文 | 不共用此欄；獨立名稱／效果按各自閘門判斷 |
 | F18 | 只有 `空格+CRLF+全形空白` 的已知欄位；加入 U+200B 或敘事字各一次 | 前者原樣顯示、另計 whitespace_only、不造翻譯也不報缺譯；後兩者不能當空白跳過 |
 | F19 | JP／EN 各有自撰同一字串，所有來源 pin 合法 | source_lang 不同，兩個模板／context，不因同 bytes 合併 |
 | F20 | 同語言同字串同時作 flavor／name／effect，故同 default context；各方向錯借譯文一次 | 不得互相選用；混合用途只能表示一種時，保留合法名稱／卡文，風味回原文並計數，不只憑 context 命中 |
-| F21 | 一個政策譯本批次混 flavor／effect；定義批次混角色；只按 filing_key 放行各一次 | 逐筆清冊 role 檢查拒絕；3/3 或 loader 未到位也不得政策採納 |
+| F21 | 一個政策譯本批次混 flavor／effect；定義批次混角色；只按 filing_key 放行各一次 | 逐筆清冊 role 檢查拒絕；政策閉包或 loader 未到位也不得政策採納 |
 | F22 | 正式 text 含 CRLF、行尾空格／tab／全形空白、首尾空白、結尾 LF 各一次 | 各自拒絕；改成合法最終 bytes 後重審，不在審核後正規化 |
 
 實作驗收另核對重跑冪等、完整 F1 閉包、交易失敗無半套產物與公開白名單；
