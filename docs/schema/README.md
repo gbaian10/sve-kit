@@ -27,6 +27,7 @@
 | [卡名概念與身分關聯](card-name-concepts.md)   | exact 名稱自動推導與人工例外、預設選面及修復後重驗                                |
 | [模板採納政策與收據](translation-policy.md)   | authored 政策索引、不可變核可收據、首輪抽查與長尾驗證閉包                         |
 | [風味文字整段翻譯](flavor-translation.md)     | 零參數模板、完整段落 span、獨立 recipe／新 ID 與譯本採納政策                      |
+| [人工限量序號版次](manual-printings.md)       | 獨立入口、官方封存／第三方 URL、SNC／WB 歸屬、序號補充及人工名稱邊界              |
 
 ## 文件之間的關係
 
