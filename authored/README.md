@@ -24,3 +24,8 @@ Concept keys are permanent. Translation and emphasis corrections require a new a
 with its own receipt and predecessor; do not edit adopted records. Frozen evidence is
 replayed from external source stores, while unverified source claims remain project choices.
 Delegated receipts name the actual coordinator and do not count as personal maintainer approval.
+
+Class and card-type labels use catalog vocabulary references `(kind, code)`, rather than
+glossary identities. Equal display text does not merge those references: resource EP/SEP
+and their card types, or a class and a trait, remain distinct. A glossary-only import
+does not adopt vocabulary labels.
