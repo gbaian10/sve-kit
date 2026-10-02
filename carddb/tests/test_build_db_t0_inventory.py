@@ -155,6 +155,8 @@ class TestDocumentedInventory:
             if inline
             else tuple(re.findall(r"PK\(([^)]+)\)", raw)[0].split(","))
         )
+        if expected_pk == ("前兩欄",):
+            expected_pk = tuple(_fields(declaration))[:2]
         assert table.primary_key == expected_pk
         expected_uq = {
             tuple(fields.split(",")) for fields in re.findall(r"UQ\(([^)]+)\)", raw)
