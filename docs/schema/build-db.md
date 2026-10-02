@@ -262,6 +262,8 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ## 9. 翻譯、句型與術語
 
+風味文字沿本節既有模板與 use／selection，不新增表；printing_face.flavor 的整段零參數規則及譯本採納依 [風味文字契約](flavor-translation.md)。flavor 原文與譯文仍按版次面選用，不由 current 推定。
+
 **使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。同日追加核可：EN 同卡身分確認後先顯示 JP 繁中，以 shared_jp_unchecked 標「日英文字尚未核對」；完成核對且適用時改 shared_jp。已知 divergence 不套用此例外，官方 counterpart／DSL／機制仍受 §5 約束。首輪先翻高頻模板，模型互審，使用者抽查前約 100 個與全部分歧；模型譯文仍標 machine。技術封套、持久來源清冊與推導契約見 [翻譯契約](translation-contract.md)，不宣稱匯入器已實作。
 
 | 表                      | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |

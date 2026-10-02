@@ -5,8 +5,8 @@
 政策格式不是政策本身的核可，文件合併也不等於首輪抽查已完成。本輪不新增真實政策、收據或採納資料。
 模板載入由 #52、正式建置／渲染／選用與報告由 #53 接入，未支援時明確拒收。
 
-效果政策僅適用模板**譯本**。風味政策可列譯本，以及 #195（1/3）提出的 exact flavor **定義**例外；
-**定義例外放寬既有門檻，待維護者確認且 1/3 契約合併後才能授權**，不把「可以寬鬆」的方向回覆代作此確認。
+效果政策僅適用模板**譯本**。風味政策可列譯本，以及 [風味文字契約](flavor-translation.md) 的 exact flavor **定義**例外；
+符合該契約的定義可依有效政策逐筆機械全查後採納，不必每包人工抽查；仍須真實政策收據授權相應 kind。
 風味首輪段數亦由維護者實際決定，不在政策預填已看過 30／50。
 
 ## 1. 重用與新入口
@@ -49,14 +49,14 @@ policy_id 是 `[a-z][a-z0-9_-]*` 的永久版本 key；政策／收據的 ID、�
 | 欄位 | 規則 |
 | --- | --- |
 | domain | effect 或 flavor，兩者分 policy_id，不能用單一不限類別政策 |
-| kinds | 非空排序唯一陣列；effect 恰為 template_translation；flavor 恰為 template_translation，或在定義例外獲確認後同時列 sentence_template／template_translation |
+| kinds | 非空排序唯一陣列；effect 恰為 template_translation；flavor 恰為 template_translation，或同時列 sentence_template／template_translation |
 | roles | 非空排序唯一陣列；effect 只可 body／reminder／token_header，flavor 恰為 flavor；不得 name／label／layout 或未知角色 |
 | source_langs | 非空排序唯一陣列，只收 ja／en；每筆仍須來源選用及 parser 能力通過，列 en 不等於 EN 路徑已接入 |
 | target_lang | 恰為 zh-Hant；定義沒有 lang 欄，此值指同政策的首輪／譯本目標語，不是假造定義語言 |
 | normalizer_versions | 非空排序唯一 Code 陣列，恰列已支持且釘版的 recipe，不允許 wildcard；flavor 恰為 flavor-exact-v1 |
 | semantic_variants | 非空排序唯一 Code 陣列，恰列 default／已實際採納的語義 variant；不得因 owner／檔案名自行擴張 |
 
-flavor 的 domain、role 與 exact recipe 定義在 #195（1/3）；**1/3 合併前，本文件的 flavor 部分（含譯本政策）不可使用**。
+flavor 的 domain、role 與 exact recipe 依 [風味文字契約](flavor-translation.md)；風味定義／譯本政策均須完整 loader 與該 recipe 支援，未到位不得使用。
 
 符合 scope 只是必要條件。loader 逐筆經 template_id／inventory_id 解析核可模板及完整清冊，
 檢查來源語言、role、recipe、語義與來源／span／ID／引用閉包；不以 filing_key、ID 前綴、confidence 或宣告的 domain 替代。
@@ -97,8 +97,9 @@ approval 的 policy_id／policy_hash 必須與索引與 policy 全部一致；au
 **恰等於 scope.kinds**。reviewed_by 是真正核可政策的維護者，reviewed_at／precision 為真實事件；
 只有日期用 day 的 UTC 午夜編碼，不捏造時分秒。authorization_basis 是非空的正式決定定位／URL 與具體核可範圍，
 不是模板作者、模型 reviewer 或 coordinator 自行同意。note 記核可限制及初輪門檻，不貼官方原文。
-含 sentence_template 的收據須有**維護者明確同意 flavor 定義門檻放寬**的依據；
-方向回覆、同意譯本或 glossary 委託皆不能代替。未有這個事件就不寫含定義授權的收據。
+含 sentence_template 的風味收據須有**維護者實際核可該份政策包含定義 kind** 的依據；
+只核可譯本、glossary 委託或本契約允許定義政策採納，皆不能代替該份政策的核可事件。
+未有這個事件就不寫含定義授權的收據。
 
 `initial_sample` 恰為 `{authored_revision,index_hash,decisions,sampled_items,skipped_high_frequency_items,review_context,review_queue_hash,disputed_items}`：
 
@@ -191,7 +192,7 @@ authored_revision 是保存**政策索引與完整 pair** 的 immutable commit�
 該 ID 永久綁不可變內容與收據。author source_record／decision_source 釘完整 authored revision、索引／政策／收據／摘要三檔，
 再驗首輪、授權 kinds 與 flavor exact 邊界；僅有同名政策或呼叫端五欄 pin 不算有效採納。
 human 定義採納用獨立人工 policy_id，不能把政策 mode 與 human mode 混在一片。
-本例外須以已合併 1/3 與維護者確認為前提，未到位則拒絕，不先寫政策 confirmed 等以後補證。
+本例外須符合風味文字契約、具備授權定義 kind 的真實政策收據及完整 loader 支援；未到位則拒絕，不先寫政策 confirmed 等以後補證。
 
 使用政策時 F1 configuration 必含 `translation_policies` 的 policy_id → 五欄 pin 映射，
 值由**已驗 authored 索引與採納**推得，與 record pin／來源 bytes 複核，不是呼叫端可替代的採納來源。
@@ -232,13 +233,13 @@ authored_by／authored_at 是此次工具與時間，不改譯本 machine origin
 | pending_disputed_rows／failed_rows | 未處理分歧／缺譯或機械缺口分理由；壞 hash／closure 另作建置錯誤，不能藏成缺譯 |
 | policy_receipts | 使用的五欄 pin、政策索引／摘要 hash、初輪 revision／decision／membership／真正 sample 與高頻漏看集合，與當批精確 members hash |
 | generated_rows／changed_rows／sampled_rows | 沿翻譯契約渲染報告；當批真人樣本可為 0，但初輪不得假造，生成數與採納數分開 |
-| whitespace_only_rows／flavor_context_conflict_rows | 沿 1/3 的空白來源及同 context 衝突筆數、owner／context／原因；保留合法名稱／卡文，只讓不適用風味回原文 |
+| whitespace_only_rows／flavor_context_conflict_rows | 沿風味文字契約的空白來源及同 context 衝突筆數、owner／context／原因；保留合法名稱／卡文，只讓不適用風味回原文 |
 
 索引是新增獨立入口，`translation_authored_format=1`、模板／譯本／glossary 的必填 data、
 已有的 264 概念／39 分片與 hash 一律不改。新能力未支持時完整入口拒收，不忽略政策或降成空集合。
 現有 wording policy 的檔案與收據保持原位，不替代或重用它的授權。
 公開七欄 translation／FieldTranslation、tokens=null、bootstrap／詳情分片與格式版本都不改。
-風味政策不得在本格式合併且 loader 完整支持前套用；effect 亦須有可驗正式 pair／首輪才能用。
+風味政策須同時符合風味文字契約與本格式、且 loader 完整支持才可套用；effect 亦須有可驗正式 pair／首輪才能用。
 
 ## 6. 合成成功與逐條拒絕案例
 
@@ -248,7 +249,7 @@ authored_by／authored_at 是此次工具與時間，不改譯本 machine origin
 | 編號 | 合成基例／單條修改 | 預期 |
 | --- | --- | --- |
 | P01 | 兩個合成 human sampled 譯本、首輪 exact 輸入、不可變 effect policy／receipt／index、agreed 長尾 | 長尾可 confirmed，當批真人樣本 0；初輪仍計實際看過的兩項 |
-| P02 | 合成 flavor 初輪成立、維護者明確確認定義例外、same pair 授權兩種 kind | exact 定義與 agreed 譯本各自機械全查／confirmed／分檔分計數 |
+| P02 | 合成 flavor 初輪成立、真實政策核可事件、same pair 授權兩種 kind | exact 定義與 agreed 譯本各自機械全查／confirmed／分檔分計數 |
 | P03 | 新包仍在 scope，沒有新真人樣本 | 可引用舊首輪／收據，不冒稱真人看過新資料 |
 | P04 | 尚未採納的同內容 YAML 換排版；已採納 pair 換排版；新 policy_id 續版各一次 | 前者 canonical hash 相同而 bytes hash 不同；第二例拒絕；合法新版本保留舊核可 |
 | P05 | 缺索引／漏 pair／未索引 tmp／symlink／錯 canonical hash 各一次 | 各自拒絕完整閉包，不從設定補政策 |
@@ -256,7 +257,7 @@ authored_by／authored_at 是此次工具與時間，不改譯本 machine origin
 | P07 | 首輪不是 human sampled／sample_ids 多一項／漏一項／revision 或 text_hash 錯各一次 | 各自拒絕，不能借全 checked 冒人工 |
 | P08 | 抽樣頻率用舊草稿／歷史抓取重複計／更改 minimum_count 沿用收據 | 各自拒絕；按正式來源閉包重算 |
 | P09 | 同模型互審／final text 改／result disputed／machine 改 project 各一次 | 各自不得政策採納；分歧仍走 human |
-| P10 | flavor 批次混 effect／定義多 slot／非 exact recipe／未確認定義例外 | 各自拒絕，逐筆清冊與 kind 複核 |
+| P10 | flavor 批次混 effect／定義多 slot／非 exact recipe／政策收據未授權定義 kind | 各自拒絕，逐筆清冊與 kind 複核 |
 | P11 | 借 wording／glossary 收據、authorized_kinds 與 scope 不符、day 卻非 UTC 午夜各一次 | 各自拒絕錯授權／事件 |
 | P12 | 初輪定義與譯本引用未來政策互相代簽 | 拒絕循環；先 human 初始化再出真實 pair |
 | P13 | 缺 authored 摘要／hash 改／漏 disputed／adopted 指非 sample 成員各一次 | 各自拒絕閉包；deferred 不入正式分片 |

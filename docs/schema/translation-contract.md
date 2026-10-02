@@ -18,6 +18,8 @@
 
 政策採納的成員一律 origin=machine；使用者親自看過並認可的機器譯文也仍標 machine，這是沿用既有規則，不因審閱改成 project。
 
+風味文字採整段對譯與寬鬆的譯本採納門檻；符合專屬 exact 邊界的模板定義可依有效政策逐筆機械全查後採納，不必每包人工抽查。首輪譯本的實際抽查數量與集合由維護者決定，契約合併不等於已完成抽查或逐筆採納。效果文字維持同語意同譯、單卡自由譯文先不做。專屬來源、整段新模板、定義政策採納及譯本收據見 [風味文字契約](flavor-translation.md)；效果的前約 100 個高頻模板政策不移作風味收據。
+
 ## 2. 人工採納入口
 
 只有人工決定及其核可政策下的採納進 authored：模板定義與譯本、概念與譯詞、同字異義指派、模板匹配例外、跨區核對／counterpart 採納、來源例外及撤回。context/use/binding、渲染全文、selection **不進 authored**。模板或術語改字後工具重算，無須逐卡重新簽核；人看的是政策要求的抽查與失敗清單。
@@ -53,9 +55,11 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 
 **長尾模板譯本的政策採納例外**：比照 [authored-layout §9.5](authored-layout.md#95-核可規則confirmed-封套與人工確認) 的 approved_rules，僅 template_translation 可用 `adoption_review.mode=approved_policy`。adoption_review 恰為 `{mode,policy,initial_sample_decisions}`，mode=human/approved_policy；human 的 policy=null、initial_sample_decisions=[]。approved_policy 的 policy 為 `{policy_id,authored_revision,path,hash,approval_receipt_hash}`，釘完整 commit、repo 相對路徑、canonical 政策內容 hash 與核可收據 hash；initial_sample_decisions 是非空、排序唯一的 `{decision_id,membership_hash}` 陣列，引用實際完成首輪高頻抽查的 human sampled 決定。政策與收據須能驗明 §1 的抽查集合、無分歧長尾適用範圍與 machine 標示，不以本文件的核可敘述代替真實首輪收據；相關來源、分片及收據 bytes 全部納入 F1。
 
-政策檔、核可收據、authored 內唯一索引與首輪實際抽查的封閉格式依 [模板採納政策契約](translation-policy.md)。政策 ID 在 authored 唯一對到有索引／雜湊的不可變政策與收據，建置設定只作複核，不能取代有效採納。風味定義的政策例外須另依 #195（1/3）取得維護者確認並完成契約及 loader，不由本格式的存在自動授權。
+政策檔、核可收據、authored 內唯一索引與首輪實際抽查的封閉格式依 [模板採納政策契約](translation-policy.md)。政策 ID 在 authored 唯一對到有索引／雜湊的不可變政策與收據，建置設定只作複核，不能取代有效採納。風味定義的政策例外須符合 [風味文字契約](flavor-translation.md)、具備授權定義 kind 的真實政策收據及完整 loader 支援，不由本格式的存在自動授權。
 
 兩種 mode 分檔；approved_policy 同檔使用相同 policy 與首輪決定引用，decision.policy_id 必須等於 policy.policy_id。每個成員都須 origin=machine、不同模型對該 exact text_hash 的互審 result=agreed，且完整通過來源、slot、譯本與政策範圍檢查。決定 state=confirmed，sample_ids 恰為全體 checked record_key，表示政策機械全查，**不是此次逐筆人工審閱**；reviewed_by／reviewed_at／reviewed_precision 沿核可收據的人名與時間，note 明示「政策核可」，authored_by／authored_at 記本次套用工具與時間。缺首輪實際抽查、政策／收據 hash 不符或有模型分歧者不得走此例外；分歧項分到 human 批次、由使用者處理並列入實際 sample_ids。後續新增／改字重做互審與當批決定，可在仍符合政策時引用同一首輪收據，不冒稱使用者看過新譯本。報告分開計 human_sampled_rows、approved_policy_rows 及待人工分歧，不把全體 checked 當真人樣本數。
+
+**flavor 定義的政策採納例外**：僅符合 [風味整段契約 §4](flavor-translation.md#4-譯本政策與歸因) 的 sentence_template 可引用同一份風味政策機械全查後 confirmed；不改九欄 data，decision.policy_id 由 authored 內唯一、已索引且釘 hash 的政策檔與核可收據解析，正式位置依 [模板採納政策契約](translation-policy.md)；author source／decision_source 保留完整 commit、政策索引與檔案 bytes。F1 configuration 的五欄 pin 僅複核，不能取代 authored 的有效採納。這不使用譯本的 adoption_review 欄位，也不授權效果定義；初輪與政策格式／loader 支援要求仍須驗回。其餘 kind 仍按上述門檻。
 
 帶 adoption_no 的 data 另含 `{adoption_no,predecessor}`，首筆為 1/null；後續連續只增、完整替代，predecessor 恰為 `{record_key,record_hash,decision_id}`。每一選擇鍵只有一條已採納鏈，拒絕分叉、缺號與錯前件。kind 自定的 null／撤回值才撤回，舊記錄與證據保留。工具依有效鏈推導結果，不拿檔案順序作優先序。
 
@@ -67,7 +71,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`。同檔一種 kind�
 
 不新增物件庫。runtime 從正式清冊指向的**已封存卡頁**、釘住的 extractor/normalizer 重建內容，不讀研究草稿或 latest cache。清冊 recipes 每項 `{id,code_revision,code_path,code_hash,config,config_hash}`；code_path 是 repo 相對檔案，code_revision 為完整 commit，config 為 canonical JSON。缺正式實作或不能重現舊結果時停止遷入，不能拿未版控的腳本路徑作 runtime 依賴。
 
-清冊 entries 每項 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash,legacy_fingerprint}`。source_ref 定位完整欄位，line_ordinal 自 0，role=body/reminder/token_header/layout/name/label；新 role 的更細定位由 §4 的確定性分段及模板 source_span 給出。legacy_fingerprint 為舊 normalized 全 SHA-256，新 ID 為 null。完整來源與 recipe 足以重建 exact normalized，normalized_hash 驗證結果。多個來源產相同 ID 仍比完整內容，檢碰撞涵蓋所有歷史清冊，不能只看本批。
+清冊 entries 每項 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash,legacy_fingerprint}`。source_ref 定位完整欄位，line_ordinal 自 0，role=body/reminder/token_header/layout/name/label/flavor；各 role 的更細定位由 §4 的確定性分段及模板 source_span 給出。flavor 的行序 0 代表完整段落，限 printing_face.flavor，沿 [風味整段規則](flavor-translation.md#2-整段分段與清冊)。legacy_fingerprint 為舊 normalized 全 SHA-256，新 ID 為 null。完整來源與 recipe 足以重建 exact normalized，normalized_hash 驗證結果。多個來源產相同 ID 仍比完整內容，檢碰撞涵蓋所有歷史清冊，不能只看本批。
 
 舊 `T`（sentence）／`C`（clause）＋SHA-256(normalized UTF-8) 前 10 hex 原樣保留。舊分類 recipe 為切行、trim、移出全形括號片段與 token 標頭，再 NFKC、`『…』`→`『X』`、數字串→`N`；此 recipe 只重現分類指紋，**不授權把所有括號當提醒而刪除**。人採納模板前仍要確認提示／規則區分與完整參數位置。
 
@@ -94,6 +98,8 @@ binding 由每次建置產生。source_span 固定 `{role,segments,anchor}`，se
 | 裸 N／『X』與原文字面字母 | 舊 normalized 原樣留；schema 以 normalized 的位置指明「哪個 N/X 是哪個 slot」，其餘為 literal | 全域 replace N、把字面 N 當數字 slot 失敗 |
 
 layout 不含待翻語義，可機械生成固定模板；reminder/token_header 是新增句型，須像 body 一樣採納其譯本。版次欄位與 section 的完整覆蓋各自核對，不跨欄偷接；提示分類有疑義則保留原文／失敗清單，不擅自取語義等義。
+
+上表的一般卡文分段不套到 flavor。其非空整欄恰一個 flavor span，包含換行／空白／括號，不再分 layout 或 reminder；專屬 exact recipe 與零參數新 ID 依 [風味文字契約](flavor-translation.md#3-獨立-recipe-與新-id)。其餘欄位的完整覆蓋與分段規則不變。
 
 ### 4.2 參數 schema 與驗回來源
 
