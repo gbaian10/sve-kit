@@ -1,5 +1,6 @@
 """Every frozen version participates; raw scopes never claim equivalence or current."""
 
+import re
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
@@ -161,9 +162,16 @@ def test_bad_scope_inputs_fail_without_borrowing_another_source(
         if change == "overlap":
             providers = (case.provider(case.batches[1]), provider)
         monkeypatch.setattr(provider, "version", altered)
-    with pytest.raises(
-        ValueError, match=r"Historical wording|Overlapping batches|Effect presence"
-    ):
+    message = {
+        "face": "Historical wording face is absent from the reviewed registry",
+        "region": "Historical wording is missing a registered printing source",
+        "missing": "Historical wording is missing a registered printing source",
+        "identity": "Effect presence/extraction cannot be reproduced",
+        "map": "Effect presence/extraction cannot be reproduced",
+        "raw": "Effect presence has no frozen source bytes",
+        "overlap": "Overlapping batches disagree about a wording source",
+    }[change]
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         rebuild_raw_scope(
             registry,
             "f:" + "0" * 32 if change == "face" else case.face_id,
@@ -221,5 +229,14 @@ def test_receipt_must_reproduce_every_historical_raw_pin(
     if change == "none":
         verify_raw_inventory(scope, observations)
     else:
-        with pytest.raises(ValueError, match=r"full historical|cannot be reproduced"):
+        message = {
+            "missing": "Wording receipt does not cover the full historical raw inventory",
+            "duplicate": "Wording receipt does not cover the full historical raw inventory",
+            "raw": "Wording receipt raw/presence pins cannot be reproduced",
+            "parser": "Wording receipt raw/presence pins cannot be reproduced",
+            "face": "Wording receipt raw/presence pins cannot be reproduced",
+            "presence": "Wording receipt raw/presence pins cannot be reproduced",
+            "index": "Wording receipt does not cover the full historical raw inventory",
+        }[change]
+        with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
             verify_raw_inventory(scope, observations)

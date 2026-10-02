@@ -1,6 +1,7 @@
 """First availability is proven from every confirmed inclusion, never crawl dates."""
 
 import dataclasses
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -123,9 +124,17 @@ def test_first_day_requires_all_inclusions_and_explicit_precision(
         assert day == ("2019-01-01" if change == "override" else "2020-01-01")
         assert sources
     else:
-        with pytest.raises(
-            ValueError, match=r"availability|precision|catalog|unconfirmed"
-        ):
+        message = {
+            "unknown": "Unknown, month or year precision cannot establish first availability",
+            "month": "Unknown, month or year precision cannot establish first availability",
+            "year": "Unknown, month or year precision cannot establish first availability",
+            "override-month": "Unknown, month or year precision cannot establish first availability",
+            "unconfirmed": "First availability has missing or unconfirmed inclusions",
+            "region": "Printing order product is unconfirmed or in another region",
+            "missing": "First availability has missing or unconfirmed inclusions",
+            "no-catalog": "Printing order requires a pinned formal product catalog",
+        }[change]
+        with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
             _availability(scope, item)
 
 
@@ -153,5 +162,12 @@ def test_official_order_requires_strict_dates_and_the_exact_supporting_sources(
     if change == "none":
         _official_order(record, scope, (first,), (second,), basis, indexes)
     else:
-        with pytest.raises(ValueError, match=r"strict|exactly|unimplemented"):
+        message = {
+            "reverse": "Official evidence does not prove strict adjacent wording order",
+            "same-day": "Official evidence does not prove strict adjacent wording order",
+            "missing-proof": "Order evidence must cover exactly every first-availability source",
+            "extra-proof": "Order evidence must cover exactly every first-availability source",
+            "source-update": "Official source-update recipe is explicitly unimplemented",
+        }[change]
+        with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
             _official_order(record, scope, (first,), (second,), basis, indexes)

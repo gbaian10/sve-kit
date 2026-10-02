@@ -1,6 +1,7 @@
 """History continuity, sealed build artifacts, late rollback and immutable graphs."""
 
 import dataclasses
+import re
 import shutil
 import sqlite3
 from typing import TYPE_CHECKING
@@ -66,7 +67,13 @@ def test_second_adoption_replays_the_exact_previous_confirmed_receipt(
     install_adoptions(root / "authored", [second], sequence="002")
     revision = commit(root)
     if change != "none":
-        with pytest.raises(ValueError, match=r"predecessor|consecutive"):
+        message = {
+            "hash": "Adoption predecessor must match the exact prior confirmed record",
+            "decision": "Adoption predecessor must match the exact prior confirmed record",
+            "record": "Adoption predecessor must match the exact prior confirmed record",
+            "gap": "Adoption chain must have consecutive numbers",
+        }[change]
+        with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
             load_adoptions(
                 root / "authored",
                 authored_revision=revision,

@@ -1,6 +1,7 @@
 """Validate both regional histories before projecting a JP-only build."""
 
 import dataclasses
+import re
 import shutil
 from typing import TYPE_CHECKING
 
@@ -210,5 +211,9 @@ def test_regional_projection_is_explicit_and_pinned(
             dependencies=build.dependencies,
             configuration=canonical(configuration).decode(),
         )
-    with pytest.raises(ValueError, match=r"projection regions|configuration"):
+    message = {
+        "order": "Adoption projection regions must be sorted, unique and nonempty",
+        "pin": "Adoption build configuration or dependency closure is incomplete",
+    }[change]
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         importer.prepare_adoptions(inputs)

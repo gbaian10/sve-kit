@@ -1,5 +1,6 @@
 """Fixed synthetic matcher cases are part of the immutable approved policy."""
 
+import re
 import shutil
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- inspect immutable synthetic Git inputs
 from pathlib import Path
@@ -203,7 +204,17 @@ def test_diagnostic_or_partial_match_cannot_pass_equivalence(
         old = old.model_copy(update={"effect": None})
     else:
         new = new.model_copy(update={"stats": ("2", "1", "1")})
-    with pytest.raises(ValueError, match=r"Uncovered|CRLF|Missing"):
+    message = {
+        "space": "Complete difference is not CRLF/LF-only",
+        "punctuation": "Complete difference is not CRLF/LF-only",
+        "missing": "Complete difference is not CRLF/LF-only",
+        "number": "Complete difference is not CRLF/LF-only",
+        "standalone": "Complete difference is not CRLF/LF-only",
+        "section": "Uncovered current-bearing difference or missing text",
+        "unknown": "Uncovered current-bearing difference or missing text",
+        "protected": "Uncovered current-bearing difference or missing text",
+    }[change]
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         equivalent_matches(
             policy, {"old": old, "selected": new}, "selected", region="en"
         )

@@ -1,11 +1,12 @@
 """Independent immutable replay, predecessor and atomic import counterexamples."""
 
 import dataclasses
+import re
 import sqlite3
 from typing import TYPE_CHECKING
 
 import pytest
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
@@ -112,10 +113,32 @@ def test_each_full_context_pin_is_required(
             update={"configuration": canonical(config).decode()}
         )
     changed = review.model_copy(update={"context": context})
-    with pytest.raises(
-        ValueError,
-        match=r"dependency|Pinned|pin|replayed|Invalid|revision|Literal|date|regions|input",
-    ):
+    messages = {
+        "dependency": "Reviewed dependency closure is incomplete or changed",
+        "program": "Immutable dependency batch contains a missing/non-blob object",
+        "registry": "Pinned immutable dependency unavailable",
+        "python": "Value error, Pinned Python/Unicode runtime cannot be replayed",
+        "unicode": "Value error, Pinned Python/Unicode runtime cannot be replayed",
+        "parser": "Input should be 'text-observations-v1'",
+        "projection": "Input should be 'effect-presence-v1-then-source-correction-v1'",
+        "cutoff": "Value error, Invalid isoformat string: 'not-a-date'",
+        "region": "Value error, Review regions must be sorted, unique and nonempty",
+        "unknown-capability": "Input should be 'disabled'",
+    }
+    if change in {
+        "parser",
+        "unicode",
+        "projection",
+        "python",
+        "unknown-capability",
+        "region",
+        "cutoff",
+    }:
+        with pytest.raises(ValidationError) as error:
+            reconstruction.scope(changed, adoption_case.face_id, "jp")
+        assert [e["msg"] for e in error.value.errors()] == [messages[change]]
+        return
+    with pytest.raises(ValueError, match=rf"\A{re.escape(messages[change])}\Z"):
         reconstruction.scope(changed, adoption_case.face_id, "jp")
 
 
@@ -217,7 +240,14 @@ def test_predecessor_is_not_a_hash_or_an_implicit_order_answer(
         record = record.model_copy(
             update={"data": record.data.model_copy(update={"previous_order": order})}
         )
-    with pytest.raises(ValueError, match=r"Mechanical|Predecessor|Same-content|omits"):
+    message = {
+        "root-missing": "Mechanical predecessor is not the complete exact initial current",
+        "root-selection": "Mechanical predecessor selected representative cannot be replayed",
+        "root-evidence": "Mechanical predecessor source closure is missing",
+        "previous-order": "Predecessor requires independent ordering evidence",
+        "same-content": "Same-content predecessor order differs in exact content",
+    }[change]
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         replay_adoptions(snapshot_record(adoption_case, record), reconstruction)
 
 

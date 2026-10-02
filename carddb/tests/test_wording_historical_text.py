@@ -1,5 +1,6 @@
 """Historical text reads do not borrow current or escape a frozen batch."""
 
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -33,9 +34,14 @@ def test_explicit_historical_version_has_independent_frozen_identity(
     if change == "none":
         assert provider.version("jp", "SYN-01", original.source.id) == original
     else:
+        message = {
+            "region": "Frozen historical text region mismatch",
+            "number": "Frozen text source identity/media mismatch",
+            "version": "Source version is absent from pinned batch",
+        }[change]
         with pytest.raises(
             (ValueError, ArchiveError),
-            match=r"region|identity|version|pinned|batch|Source",
+            match=rf"\A{re.escape(message)}\Z",
         ):
             provider.version(
                 "en" if change == "region" else "jp",

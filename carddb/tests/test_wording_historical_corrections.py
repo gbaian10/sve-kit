@@ -1,6 +1,7 @@
 """Historical correction hashes bind the absence projection before correction."""
 
 import dataclasses
+import re
 from typing import TYPE_CHECKING
 
 import pytest
@@ -162,7 +163,14 @@ def test_historical_correction_cannot_borrow_or_ignore_its_confirmed_evidence(
         item = item.model_copy(
             update={"card": item.card.model_copy(update={"has_errata_link": True})}
         )
-    with pytest.raises(ValueError, match=r"conflicting|confirmed|closure|errata"):
+    message = {
+        "conflict": "Active historical correction is conflicting or unconfirmed",
+        "hash": "Active historical correction is conflicting or unconfirmed",
+        "image": "Historical correction image closure is absent or ambiguous",
+        "decision": "Correction adoption decision is not confirmed",
+        "errata": "Unimplemented errata coverage cannot confirm wording",
+    }[change]
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         reconstruction.rebuild_observation(registry, review, item)
 
 

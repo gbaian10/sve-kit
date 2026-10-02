@@ -1,5 +1,6 @@
 """Batch Git framing remains a strict boundary for immutable wording inputs."""
 
+import re
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- synthesize fixed Git process results at its checked boundary
 from typing import TYPE_CHECKING
 
@@ -58,7 +59,12 @@ def test_missing_non_blob_and_unsafe_paths_fail_without_partial_cache(
 ) -> None:
     root, revision = immutable
     repository = PinnedRepository(root)
-    with pytest.raises(ValueError, match=r"Unsafe|missing/non-blob"):
+    message = (
+        "Immutable dependency batch contains a missing/non-blob object"
+        if name in {"missing", "synthetic"}
+        else "Unsafe batch dependency path"
+    )
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         repository.read_many(revision, ("synthetic/a", name))
     assert not repository.cache
 
@@ -83,7 +89,14 @@ def test_git_response_framing_cannot_inject_a_dependency(
         "sve_carddb.catalog.adoption_sources.subprocess.run",
         lambda *_args, **_kwargs: subprocess.CompletedProcess([], 0, output, b""),
     )
-    with pytest.raises(ValueError, match=r"missing/non-blob|framing|Unexpected"):
+    message = {
+        b"bad\n": "Immutable dependency batch contains a missing/non-blob object",
+        b"oid blob nope\n": "Immutable dependency batch contains a missing/non-blob object",
+        b"oid blob 99\nx\n": "Invalid immutable Git batch framing",
+        b"oid blob 1\nx!": "Invalid immutable Git batch framing",
+        b"oid blob 1\nx\nextra": "Unexpected immutable Git batch output",
+    }[output]
+    with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
         repository.read_many(revision, ("synthetic/a",))
     assert not repository.cache
 
