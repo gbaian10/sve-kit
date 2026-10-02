@@ -14,6 +14,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import Database, Value
     from sve_carddb.build_inputs import Source
+    from sve_carddb.digital_links.importer import Result
     from sve_carddb.translations.sources import Sources
 
 
@@ -65,10 +66,18 @@ def _proof(  # ruff: ignore[too-many-locals] -- exact names need both frozen API
     return min(found, key=lambda item: canonical(item[0].model_dump(mode="json")))
 
 
-def populate_name_translation(  # ruff: ignore[too-many-locals] -- owner, raw proof and stable output are composed in one transaction
-    db: Database, sources: Sources, *, revision_id: str, lang: str
+def populate_name_translation(  # ruff: ignore[too-many-locals,complex-structure] -- owner, raw proof and stable output are composed in one transaction
+    db: Database,
+    sources: Sources,
+    *,
+    revision_id: str,
+    lang: str,
+    links: Result | None = None,
 ) -> str | None:
     """Use the caller's publication DB, including pending wording; no current filter."""
+    config = object_value(parse(sources.build.configuration.encode()))
+    if "digital_link_authored" in config and links is None:
+        raise ValueError("Authored digital names require owner evidence result")
     revisions = {r.values["id"]: r.values for r in db.rows("face_revision")}
     revision = revisions[revision_id]
     if revision["region"] != "jp" or lang != "zh-Hant":
@@ -77,8 +86,13 @@ def populate_name_translation(  # ruff: ignore[too-many-locals] -- owner, raw pr
         )
     faces = {r.values["id"]: r.values for r in db.rows("face")}
     face = faces[revision["face_id"]]
+    eligible = None if links is None else links.eligible(db, sources, revision_id)
     chosen = select_name(
-        db, card_id=str(face["card_id"]), face_id=str(face["id"]), lang=lang
+        db,
+        card_id=str(face["card_id"]),
+        face_id=str(face["id"]),
+        lang=lang,
+        eligible_links=eligible,
     )
     if chosen is None:
         return None
@@ -96,7 +110,13 @@ def populate_name_translation(  # ruff: ignore[too-many-locals] -- owner, raw pr
             continue
         owner = faces[other["face_id"]]
         alternative = select_name(
-            db, card_id=str(owner["card_id"]), face_id=str(owner["id"]), lang=lang
+            db,
+            card_id=str(owner["card_id"]),
+            face_id=str(owner["id"]),
+            lang=lang,
+            eligible_links=None
+            if links is None
+            else links.eligible(db, sources, str(other["id"])),
         )
         if alternative is not None and alternative[0] != text:
             raise ValueError(
@@ -108,10 +128,11 @@ def populate_name_translation(  # ruff: ignore[too-many-locals] -- owner, raw pr
         for r in db.rows("digital_text")
         if r.values["lang"] == lang and units[r.values["name_unit_id"]]["text"] == text
     }
-    links = [
+    matching_links = [
         r.values
         for r in db.rows("digital_link")
-        if r.values["decision_id"] == decision_id
+        if (eligible is None or r.values["id"] in eligible)
+        and r.values["decision_id"] == decision_id
         and r.values["face_id"] == face["id"]
         and r.values["card_id"] == face["card_id"]
         and r.values["relation"] == "same_card"
@@ -119,9 +140,9 @@ def populate_name_translation(  # ruff: ignore[too-many-locals] -- owner, raw pr
         and cards[r.values["digital_card_id"]]["game"]
         == origin.removeprefix("official_")
     ]
-    if not links:
+    if not matching_links:
         raise ValueError("Selected digital name lacks an eligible owner link")
-    link = min(links, key=lambda row: str(row["id"]))
+    link = min(matching_links, key=lambda row: str(row["id"]))
     card = cards[link["digital_card_id"]]
     digital_faces = {r.values["id"]: r.values for r in db.rows("digital_face")}
     phase = str(digital_faces[link["digital_face_id"]]["phase"])

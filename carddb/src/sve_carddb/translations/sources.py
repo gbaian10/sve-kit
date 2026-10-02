@@ -9,7 +9,7 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse
 from sve_carddb.catalog.adoption_models import Normalizer
-from sve_carddb.catalog.adoption_sources import PinnedRepository
+from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
 from sve_carddb.extract import official_jp
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
@@ -17,6 +17,7 @@ from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 if TYPE_CHECKING:
     from sve_carddb.build_inputs import BuildContext, Source
     from sve_carddb.catalog.adoption_models import SourceRef
+    from sve_carddb.digital_links.evidence import RegistryIndex
     from sve_carddb.translations.models import Span
 
 CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
@@ -40,6 +41,23 @@ RUNTIME = (
     "carddb/src/sve_carddb/build_inputs.py",
     "carddb/src/sve_carddb/text_observations/intern.py",
     "carddb/src/sve_carddb/catalog/importer.py",
+    "carddb/src/sve_carddb/digital_links/candidates.py",
+    "carddb/src/sve_carddb/digital_links/commands.py",
+    "carddb/src/sve_carddb/catalog/adoption_models.py",
+    "carddb/src/sve_carddb/catalog/adoption_loader.py",
+    "carddb/src/sve_carddb/products/models.py",
+    "carddb/src/sve_carddb/digital_links/models.py",
+    "carddb/src/sve_carddb/digital_links/loader.py",
+    "carddb/src/sve_carddb/digital_links/evidence.py",
+    "carddb/src/sve_carddb/digital_links/importer.py",
+    "carddb/src/sve_carddb/registry/snapshot.py",
+    "carddb/src/sve_carddb/registry/storage.py",
+    "carddb/src/sve_carddb/registry/records.py",
+    "carddb/src/sve_carddb/registry/validate.py",
+    "carddb/src/sve_carddb/registry/inputs.py",
+    "carddb/src/sve_carddb/registry/allocation.py",
+    "carddb/src/sve_carddb/registry/yaml_reader.py",
+    "carddb/src/sve_carddb/registry/transitions/files.py",
 )
 
 
@@ -122,15 +140,23 @@ def project(raw: bytes, url: str, provider: str) -> tuple[str, JsonValue]:
 
 class Sources:
     def __init__(
-        self, stores: dict[str, Path], repository: Path, build: BuildContext
+        self,
+        stores: dict[str, Path],
+        repository: Path,
+        build: BuildContext,
+        *,
+        historical: bool = False,
     ) -> None:
         self.stores = stores
         self.repository = PinnedRepository(repository)
         self.build = build
+        self.historical = historical
         self.repository.context(build)
+        self.identities = AdoptionSources(stores, self.repository)
+        self.identity_indexes: dict[bytes, RegistryIndex] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
         runtime = Path(__file__).resolve().parents[4]
-        for name in RUNTIME:
+        for name in () if historical else RUNTIME:
             file = runtime / name
             if file.is_symlink() or dependencies.get(name) != digest(file.read_bytes()):
                 raise ValueError(
@@ -142,31 +168,38 @@ class Sources:
 
     def document(self, ref: SourceRef) -> tuple[str, JsonValue, Source]:
         """Verify recipe, archive membership, metadata and raw before resolving text."""
+        return self.projection(
+            ref.store_id, ref.batch_id, ref.source_version_id, ref.parser
+        )
+
+    def projection(
+        self, store_id: str, batch_id: str, version: str, parser: str
+    ) -> tuple[str, JsonValue, Source]:
+        """Replay a complete page without inventing a text locator or text hash."""
         config = object_value(parse(self.build.configuration.encode()))
         recipes = object_value(config.get("translation_recipes"))
-        pin = Normalizer.model_validate_json(canonical(recipes.get(ref.parser)))
+        pin = Normalizer.model_validate_json(canonical(recipes.get(parser)))
         if (
-            pin.version != ref.parser
+            pin.version != parser
             or pin.code_path != CODE_PATH
             or set(pin.config) != {"provider"}
         ):
             raise ValueError("Unsupported translation source recipe")
-        self.repository.implementation(pin, self.build)
+        self.repository.implementation(
+            pin, self.build, current_runtime=not self.historical
+        )
         provider = pin.config["provider"]
-        if (
-            not isinstance(provider, str)
-            or ref.parser != "translation-" + provider + "-v1"
-        ):
+        if not isinstance(provider, str) or parser != "translation-" + provider + "-v1":
             raise ValueError("Translation recipe/provider mismatch")
-        cache_key = (ref.store_id, ref.batch_id, ref.source_version_id, ref.parser)
+        cache_key = (store_id, batch_id, version, parser)
         if cache_key not in self.cache:
-            batch_key = (ref.store_id, ref.batch_id)
+            batch_key = (store_id, batch_id)
             if batch_key not in self.batches:
                 self.batches[batch_key] = FrozenSources(
-                    self.stores[ref.store_id], *batch_key
+                    self.stores[store_id], *batch_key
                 )
             source, raw, descriptor = self.batches[batch_key].read(
-                ref.source_version_id, parser_version=ref.parser
+                version, parser_version=parser
             )
             if descriptor.provider != provider or descriptor.kind != (
                 "card" if provider == "jp" else "api"

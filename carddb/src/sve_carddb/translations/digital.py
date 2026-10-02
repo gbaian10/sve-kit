@@ -52,14 +52,21 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
     sources: Sources,
     refs: tuple[SourceRef, ...],
     targets: tuple[tuple[str, str], ...],
+    *,
+    allow_subset: bool = False,
 ) -> None:
     """Run inside the composing transaction; no candidate link is manufactured."""
-    if (
-        object_value(parse(sources.build.configuration.encode())).get(
-            "digital_evidence"
-        )
-        != configuration(refs, targets)["digital_evidence"]
-    ):
+    declared = object_value(parse(sources.build.configuration.encode())).get(
+        "digital_evidence"
+    )
+    expected = configuration(refs, targets)["digital_evidence"]
+    if allow_subset and isinstance(declared, dict):
+        declared_targets = declared.get("targets")
+        if isinstance(declared_targets, list) and all(
+            list(target) in declared_targets for target in targets
+        ):
+            expected = {**object_value(expected), "targets": declared_targets}
+    if declared != expected:
         raise ValueError("Build configuration does not pin digital inputs")
     cards: dict[tuple[str, str, str], tuple[dict[str, JsonValue], Source]] = {}
     for ref in refs:
@@ -191,7 +198,13 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
 
 
 def select_name(  # ruff: ignore[complex-structure] -- each name source needs both relation and exact-face eligibility
-    db: Database, *, card_id: str, face_id: str, lang: str, field: str = "name"
+    db: Database,
+    *,
+    card_id: str,
+    face_id: str,
+    lang: str,
+    field: str = "name",
+    eligible_links: frozenset[str] | None = None,
 ) -> tuple[str, str, str] | None:
     """Use only adopted same-card, exact-face names; confidence never promotes links."""
     if field != "name":
@@ -206,6 +219,8 @@ def select_name(  # ruff: ignore[complex-structure] -- each name source needs bo
     candidates: dict[str, set[tuple[str, str, str]]] = {"svwb": set(), "sv1": set()}
     for row in db.rows("digital_link"):
         link = row.values
+        if eligible_links is not None and link["id"] not in eligible_links:
+            continue
         if (
             link["card_id"] != card_id
             or link["face_id"] != face_id

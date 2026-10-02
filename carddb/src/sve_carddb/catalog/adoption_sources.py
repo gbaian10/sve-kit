@@ -126,8 +126,10 @@ class PinnedRepository:
             if digest(self.read(context.program_revision, pin.name)) != pin.sha256:
                 raise ValueError("Review dependency hash mismatch")
 
-    def implementation(self, pin: Normalizer, context: BuildContext) -> None:
-        """Accept only an implementation still reproducible by the loaded runtime."""
+    def implementation(
+        self, pin: Normalizer, context: BuildContext, *, current_runtime: bool = True
+    ) -> None:
+        """Verify immutable recipe provenance and, for current builds, loaded code."""
         content = self.read(pin.program_revision, pin.code_path)
         if (
             digest(content) != pin.code_hash
@@ -137,6 +139,8 @@ class PinnedRepository:
         expected = {p.name: p.sha256 for p in context.dependencies}
         if expected.get(pin.code_path) != pin.code_hash:
             raise ValueError("Recipe code is absent from review dependencies")
+        if not current_runtime:
+            return
         path = Path(__file__).resolve().parents[4] / pin.code_path
         if (
             path.is_symlink()
