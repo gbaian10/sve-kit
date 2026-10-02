@@ -211,6 +211,16 @@ def test_staging_reports_end_basis_and_unused_trailing_lines() -> None:
     assert notice.unused_trailing_lines == 2
     raw, pin = page(content=pair())
     assert parse_notice(raw, pin, region="en").blocks[0].end_basis == "end_of_document"
+    raw, pin = page(content=f"{pair()}<section class=inh1>Later heading</section>")
+    notice = parse_notice(raw, pin, region="en")
+    assert notice.blocks[0].end_basis == "heading"
+    assert notice.unused_trailing_lines == 1
+    raw, pin = page(
+        content="<p>Earlier unused line</p><section class=inh1>Later heading</section>"
+    )
+    notice = parse_notice(raw, pin, region="en")
+    assert notice.blocks == ()
+    assert notice.unused_trailing_lines == 1
 
 
 def test_heading_card_image_is_not_a_shared_scope_proof() -> None:

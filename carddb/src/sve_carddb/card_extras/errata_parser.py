@@ -1,4 +1,9 @@
-"""Conservative frozen announcement staging, with no current or approval effects."""
+"""Conservative frozen announcement staging, with no current or approval effects.
+
+Consumers must verify boundaries other than ``nbsp_separator`` and any unused
+lines, or report them as unresolved. A heading or document end can leave prose
+inside a fragment; matched associations alone do not prove complete coverage.
+"""
 
 import re
 from dataclasses import dataclass, field, replace
@@ -69,6 +74,13 @@ class ListedCards:
 
 @dataclass(frozen=True)
 class StagedNotice:
+    """Retain diagnostics without claiming that all announcement content was used.
+
+    ``unused_trailing_lines`` counts retained outside context since the last
+    heading or block reset, including the last heading itself. Earlier context
+    discarded by a heading is not counted, even when there are no blocks.
+    """
+
     source: Source
     region: Region
     listed: ListedCards
