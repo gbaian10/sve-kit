@@ -2,19 +2,23 @@
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
+from zlib import compress
 
 import pytest
 from pydantic import JsonValue
 from typer.testing import CliRunner
 
+import sve_carddb.snapshot.preview as writer_module
 import sve_carddb.snapshot.preview.build as build_module
 import sve_carddb.snapshot.preview.commands as cli_module
 from sve_carddb.build_db import create_database
 from sve_carddb.cli import app
+from sve_carddb.products import load_products
 from sve_carddb.products.identities import ProductIdentities
 from sve_carddb.products.plan import OfficialProducts
 from sve_carddb.registry.records import PrintingData
-from sve_carddb.snapshot.export import Ownership, export_snapshot
+from sve_carddb.registry.snapshot import load_registry
+from sve_carddb.snapshot.export import Brotli, Ownership, export_snapshot
 from sve_carddb.snapshot.preview import (
     Roots,
     _write,
@@ -29,6 +33,7 @@ from sve_carddb.snapshot.preview.build import (
     publication_printings,
 )
 from sve_carddb.snapshot.preview.commands import command_brotli, verify_inputs
+from sve_carddb.snapshot.project import project
 from sve_carddb.snapshot.project.records import art_records, initial
 from sve_carddb.snapshot.project.source import Source
 from sve_carddb.snapshot.publication import require_formal, require_preview
@@ -43,7 +48,8 @@ from sve_carddb.snapshot.values import (
 )
 from sve_carddb.text_observations import plan_text_observations
 
-from .snapshot_project_fixtures import populate, schema
+from .registry_snapshot_fixtures import edit_record
+from .snapshot_project_fixtures import SETTINGS, populate, schema
 from .test_snapshot_export import BATCH
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared module fixture
 from .test_snapshot_export import logical as logical  # ruff: ignore[useless-import-alias] -- register shared module fixture
@@ -52,10 +58,62 @@ from .text_observation_fixtures import LANGUAGES
 if TYPE_CHECKING:
     from pathlib import Path
 
+    from sve_carddb.registry.storage import Entry
     from sve_carddb.snapshot.export import Snapshot
     from sve_carddb.snapshot.project import Projection
 
-    from .shared_case_fixtures import TextCaseTemplate
+    from .shared_case_fixtures import CorrectionCaseTemplate, TextCaseTemplate
+    from .text_observation_fixtures import Case
+
+
+@pytest.fixture(params=["formal_version", "en_region"])
+def invalid_preview(request: pytest.FixtureRequest, exported: Snapshot) -> Snapshot:
+    change: dict[str, JsonValue] = (
+        {"data_version": "20261002T010203Z-0001"}
+        if request.param == "formal_version"
+        else {"regions": ["jp", "en"]}
+    )
+    return replace(exported, manifest=exported.manifest | change)
+
+
+def test_writer_rejects_non_preview_manifest(
+    invalid_preview: Snapshot, tmp_path: Path
+) -> None:
+    with pytest.raises(ValueError, match="Preview requires"):
+        write_preview(
+            invalid_preview, Roots(tmp_path / "preview", tmp_path / "formal"), {}
+        )
+    assert list(tmp_path.iterdir()) == []
+
+
+def test_export_entry_rejects_non_preview_manifest(
+    invalid_preview: Snapshot,
+    logical: tuple[Projection, Ownership],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    path = tmp_path / "inputs.json"
+    path.write_bytes(canonical(cli_recipe(tmp_path)))
+    monkeypatch.setattr(
+        cli_module, "build", lambda _recipe: Built(logical[0], logical[1], b"input", {})
+    )
+    monkeypatch.setattr(
+        cli_module, "export_snapshot", lambda *_args, **_kw: invalid_preview
+    )
+    # Isolate the command's guard from the writer's independent guard.
+    monkeypatch.setattr(cli_module, "write_preview", lambda *_args, **_kw: {})
+    result = CliRunner().invoke(
+        app,
+        ["snapshot", "export", "--inputs", str(path)],
+        env={
+            "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
+            "SVE_CDN_DIR": str(tmp_path / "formal"),
+        },
+    )
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception).startswith("Preview requires")
+    assert not (tmp_path / "preview").exists()
+    assert not (tmp_path / "formal").exists()
 
 
 @pytest.mark.parametrize("version", ["20261002T010203Z-0001", "20261002T010203Z-0002"])
@@ -96,6 +154,20 @@ def test_overlapping_roots_are_refused(tmp_path: Path, relation: str) -> None:
         Roots(preview, formal).verify()
     assert not preview.exists()
     assert not formal.exists()
+
+
+@pytest.mark.parametrize("relation", ["equal", "preview_child", "formal_child"])
+def test_direct_writer_refuses_overlapping_roots(
+    exported: Snapshot, tmp_path: Path, relation: str
+) -> None:
+    preview, formal = tmp_path / "root", tmp_path / "root"
+    if relation == "preview_child":
+        preview /= "child"
+    if relation == "formal_child":
+        formal /= "child"
+    with pytest.raises(ValueError, match="disjoint"):
+        write_preview(exported, Roots(preview, formal), {})
+    assert list(tmp_path.iterdir()) == []
 
 
 def test_symlink_roots_and_destinations_cannot_touch_formal(tmp_path: Path) -> None:
@@ -160,6 +232,73 @@ def test_failed_artifact_write_keeps_old_preview_pointer(
     ).read_bytes() == b"old preview"
 
 
+@pytest.mark.parametrize("with_brotli", [False, True])
+def test_preview_pointer_follows_every_immutable_member(
+    exported: Snapshot,
+    logical: tuple[Projection, Ownership],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    with_brotli: bool,
+) -> None:
+    codec = Brotli("synthetic-test-codec-v1", compress) if with_brotli else None
+    if codec is not None:
+        exported = export_snapshot(logical[0], logical[1], BATCH, brotli=codec)
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    manifest_hash = digest(canonical(exported.manifest))[7:]
+    raw_paths = {
+        string(object_value(item)["path"]) for item in array(exported.manifest["files"])
+    } | {
+        string(object_value(exported.manifest["text_all"])["path"]),
+        "snapshots/manifests/" + manifest_hash + ".json",
+    }
+    expected = raw_paths | {path + ".gz" for path in raw_paths}
+    if codec is not None:
+        expected |= {path + ".br" for path in raw_paths}
+    expected.add("reports/" + manifest_hash + ".json")
+    sealed: set[str] = set()
+    pointer_written = False
+
+    def observed_write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+        nonlocal pointer_written
+        if not immutable:
+            assert path == "snapshots/preview/current.json"
+            assert expected <= sealed
+            assert all((roots.preview / member).is_file() for member in expected)
+            pointer_written = True
+        else:
+            assert not pointer_written
+        _write(roots, path, raw, immutable=immutable)
+        if immutable:
+            sealed.add(path)
+
+    monkeypatch.setattr(writer_module, "_write", observed_write)
+    write_preview(exported, roots, {}, brotli=codec)
+    assert pointer_written
+
+
+@pytest.mark.parametrize("late_member", ["snapshots/manifests/", "reports/"])
+def test_late_immutable_failure_preserves_old_pointer(
+    exported: Snapshot,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    late_member: str,
+) -> None:
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    _write(roots, "snapshots/preview/current.json", b"old preview", immutable=False)
+
+    def failing_write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+        if path.startswith(late_member):
+            raise OSError("Synthetic late immutable failure")
+        _write(roots, path, raw, immutable=immutable)
+
+    monkeypatch.setattr(writer_module, "_write", failing_write)
+    with pytest.raises(OSError, match="late immutable"):
+        write_preview(exported, roots, {})
+    assert (
+        roots.preview / "snapshots/preview/current.json"
+    ).read_bytes() == b"old preview"
+
+
 @pytest.mark.parametrize("field", ["source_windows", "restriction_coverage"])
 def test_missing_coverage_cannot_be_invented_complete(
     logical: tuple[Projection, Ownership], field: str
@@ -214,6 +353,31 @@ def test_build_keeps_errata_pending_and_filters_diagnostic_identity(
     pub = publication_printings(case.plan.publication_identity())
     assert pub
     assert exclusions(case.plan.publication_identity()) == []
+    recipe = prepare_build(case, tmp_path, monkeypatch)
+    if not publish_printings:
+        pub = frozenset()
+        monkeypatch.setattr(build_module, "publication_printings", lambda _plan: pub)
+    built = build(recipe)
+    assert {row["id"] for row in built.projection.tables["printing"]} == pub
+    assert built.report["errata_link_printings"] == len(pub)
+    if not publish_printings:
+        assert built.projection.tables["card"] == []
+        assert built.projection.tables["face"] == []
+        assert built.projection.tables["face_revision"] == []
+    assert bool(built.report["pending_face_regions"]) == publish_printings
+    assert built.report["excluded_printings"] == []
+    assert built.projection.metadata["source_windows"] == []
+    assert built.projection.metadata["restriction_coverage"] == []
+    assert built.report["input_sha256"] == digest(built.input_content)
+    snapshot = export_snapshot(built.projection, built.ownership, recipe.batch())
+    snapshot.verify(built.projection)
+    with pytest.raises(ValueError, match="immutable input"):
+        verify_inputs(Roots(recipe.repo / "output", tmp_path / "formal"), recipe)
+
+
+def prepare_build(
+    case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> Inputs:
     repo = tmp_path / "repo"
     (repo / "carddb/src/sve_carddb").mkdir(parents=True)
     (repo / "carddb/uv.lock").write_bytes(b"synthetic lock")
@@ -263,25 +427,77 @@ def test_build_keeps_errata_pending_and_filters_diagnostic_identity(
             identities, (), (), (), (), case.identity
         ),
     )
-    if not publish_printings:
-        pub = frozenset()
-        monkeypatch.setattr(build_module, "publication_printings", lambda _plan: pub)
+    return recipe
+
+
+def test_build_rejects_invented_source_coverage(
+    default_text_case: TextCaseTemplate,
+    logical: tuple[Projection, Ownership],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    recipe = prepare_build(
+        default_text_case.copy(tmp_path / "synthetic"), tmp_path, monkeypatch
+    )
+    poisoned = replace(
+        logical[0],
+        metadata=logical[0].metadata | {"source_windows": [{"state": "complete"}]},
+    )
+    monkeypatch.setattr(build_module, "project", lambda *_args, **_kwargs: poisoned)
+    monkeypatch.setattr(Ownership, "from_database", lambda _db, _projection: logical[1])
+    with pytest.raises(ValueError, match="Uncovered sources must remain empty windows"):
+        build(recipe)
+
+
+def test_build_excludes_conflicted_publication_but_retains_identity(
+    default_correction_case: CorrectionCaseTemplate,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    fixture = default_correction_case.copy(tmp_path / "synthetic")
+    case = fixture.texts
+
+    def conflict(entry: Entry) -> None:
+        entry.data["expected_raw_value"] = "Wrong synthetic old value"
+
+    edit_record(case.root, "source_correction", conflict)
+    case.identity = replace(case.identity, snapshot=load_registry(case.root))
+    case.catalog = load_products(case.root, registry=case.identity.snapshot)
+    case.plan = plan_text_observations(
+        case.identity, case.provider, images=fixture.images
+    )
+    assert case.plan.corrections is not None
+    assert case.plan.corrections[0].status == "conflict"
+    diagnostic = publication_printings(case.identity)
+    publication = publication_printings(case.plan.publication_identity())
+    withheld = diagnostic - publication
+    assert withheld
+    recipe = prepare_build(case, tmp_path, monkeypatch)
     built = build(recipe)
-    assert {row["id"] for row in built.projection.tables["printing"]} == pub
-    assert built.report["errata_link_printings"] == len(pub)
-    if not publish_printings:
-        assert built.projection.tables["card"] == []
-        assert built.projection.tables["face"] == []
-        assert built.projection.tables["face_revision"] == []
-    assert bool(built.report["pending_face_regions"]) == publish_printings
-    assert built.report["excluded_printings"] == []
-    assert built.projection.metadata["source_windows"] == []
-    assert built.projection.metadata["restriction_coverage"] == []
-    assert built.report["input_sha256"] == digest(built.input_content)
-    snapshot = export_snapshot(built.projection, built.ownership, recipe.batch())
-    snapshot.verify(built.projection)
-    with pytest.raises(ValueError, match="immutable input"):
-        verify_inputs(Roots(repo / "output", tmp_path / "formal"), recipe)
+    public = {row["id"] for row in built.projection.tables["printing"]}
+    assert public == publication
+    assert not public & withheld
+    assert built.report["excluded_printings"] == exclusions(
+        case.plan.publication_identity()
+    )
+    assert built.report["excluded_printings"]
+    export_snapshot(built.projection, built.ownership, recipe.batch()).verify(
+        built.projection
+    )
+
+
+def test_project_refuses_publication_printing_absent_from_build() -> None:
+    with create_database(schema()) as db:
+        with db.transaction():
+            populate(db)
+        with pytest.raises(ValueError, match="Publication printing is absent"):
+            project(
+                db,
+                regions=("jp",),
+                as_of="2026-10-02",
+                settings=SETTINGS,
+                publication_printings=frozenset({"missing-synthetic-printing"}),
+            )
 
 
 class EmptySources:
@@ -320,12 +536,8 @@ def test_explicit_compressor_is_version_and_binary_pinned(
     ]
 
 
-def test_cli_export_explicit_env_roots(
-    logical: tuple[Projection, Ownership],
-    tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    recipe: dict[str, JsonValue] = {
+def cli_recipe(tmp_path: Path) -> dict[str, JsonValue]:
+    return {
         "repo": str(tmp_path / "repo"),
         "archive": str(tmp_path / "archive"),
         "store_id": "synthetic",
@@ -342,8 +554,15 @@ def test_cli_export_explicit_env_roots(
         "grammar_version": "synthetic-v1",
         "normalizer_version": "synthetic-v1",
     }
+
+
+def test_cli_export_explicit_env_roots(
+    logical: tuple[Projection, Ownership],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     path = tmp_path / "inputs.json"
-    path.write_bytes(canonical(recipe))
+    path.write_bytes(canonical(cli_recipe(tmp_path)))
     monkeypatch.setattr(
         cli_module,
         "build",
@@ -399,6 +618,11 @@ def test_exclusion_report_contains_only_genuine_jp_reasons(
         for record in plan.included("printing")
         if isinstance(record.data, PrintingData) and record.data.region == "jp"
     )
+    en_key = next(
+        record.record_key
+        for record in plan.included("printing")
+        if isinstance(record.data, PrintingData) and record.data.region == "en"
+    )
     changed = replace(
         plan,
         projections=tuple(
@@ -407,7 +631,7 @@ def test_exclusion_report_contains_only_genuine_jp_reasons(
                 disposition="excluded",
                 reasons=("synthetic_identity_not_adopted",),
             )
-            if item.record_key == key
+            if item.record_key in {key, en_key}
             else item
             for item in plan.projections
         ),
