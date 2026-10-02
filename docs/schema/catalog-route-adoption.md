@@ -166,7 +166,9 @@ F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 autho
 
 ### 4.1 詞彙與語言
 
-本版 vocabulary.kind 白名單恰為 class/type/rarity/trait/title/frame/stamp_series。
+本版 vocabulary.kind 白名單恰為 class/type/special_kind/rarity/trait/title/frame/stamp_series。
+class/type 的 caller YAML 輸入與首次 code 配發邊界沿[正式 catalog 輸入](catalog-inputs.md)；
+special_kind 此次限 evolve/advance/token，用於基本卡種的明示特殊標記，不擴充 vocabulary_choice 的翻譯 kind。
 技術預設 P8 先做查卡所需的固定 enum；新增對照須明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
 不能由 caller 在 configuration 填任意 kind 就擴張。keyword/stamp/product_family/card 保留給各自目標表，不能冒充詞彙。
 raw_mappings 是排序唯一的 `{region,lang,raw,source_ref}` 陣列；region 為 jp/en，lang 須與來源一致。
