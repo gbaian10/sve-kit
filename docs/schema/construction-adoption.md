@@ -16,27 +16,68 @@ area 恰為 profiles／revisions／refs／restrictions／coverage／roles／cr�
 
 共用 [catalog 採納 §2–§2.1](catalog-route-adoption.md#2-入口分片與封套) 的嚴格 YAML 1.2、單檔 <1 MiB／512 KiB 目標、canonical H、index 與安全路徑、review_context 及完整 decision 欄位。includes 值為分片解析後的完整 canonical hash；本次建置另釘完整 immutable authored revision、index／所有歷史分片的 exact bytes hash。啟用入口缺 index 拒絕，空集合須明示 includes={}；未知欄位／格式、重複鍵、symlink、跨入口引用、未索引檔、缺檔或 hash 不符皆拒絕。先驗全部地區與歷史再投影，不能縮小決定成員。
 
-record 恰為 `{record_key,kind,filing_key,data,evidence,review}`；filing_key 在賽制 area 為 `jp-standard`／`en-standard`，整區共用 area 為 `jp`／`en`，均符合共用 `[A-Za-z0-9_-]+`，不使用冒號。data 恰有 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`，subject 依下表；record_key 為 `[kind,subject,adoption_no]` 的 canonical JSON 字串。每個 subject 的 adoption_no 從 1 起連續增加；predecessor 首筆 null，後筆 `{record_key,record_hash,decision_id}` 必指前一採納。value 完整替換，不作 patch；續版 null 明示撤回。有效值先按全歷史續版解出，再匯入一份新的建置 DB，不把前版主鍵內容直接覆寫；相同列僅可逐欄 exact 重用。不能原地修改歷史／重用原決定，同一主體不得分成多條互相搶值的鏈。
+record 恰為 `{record_key,kind,filing_key,data,evidence,review,adoption_review}`；filing_key 在賽制 area 為 `jp-standard`／`en-standard`，整區共用 area 為 `jp`／`en`，均符合共用 `[A-Za-z0-9_-]+`，不使用冒號。data 恰有 `{subject,adoption_no,predecessor,value,review_context_hash,dependencies,reason}`，subject 依下表；record_key 為 `[kind,subject,adoption_no]` 的 canonical JSON 字串。每個 subject 的 adoption_no 從 1 起連續增加；predecessor 首筆 null，後筆 `{record_key,record_hash,decision_id}` 必指前一採納。value 完整替換，不作 patch；續版 null 明示撤回。有效值先按全歷史續版解出，再匯入一份新的建置 DB，不把前版主鍵內容直接覆寫；相同列僅可逐欄 exact 重用。不能原地修改歷史／重用原決定，同一主體不得分成多條互相搶值的鏈。
 
-| area／kind | subject（完整欄位） | value 範圍 | category／policy_id |
+| area／kind | subject（完整欄位） | value 範圍 | category |
 | --- | --- | --- | --- |
-| profiles／construction_profile | `{profile_id}` | `{region,format_code,name}`，name 為人工介面名稱 `{lang,text}` | construction_profile／construction-profile-v1 |
-| revisions／construction_revision | `{revision_id}` | `{profile_id,effective_from,effective_until,cr_version_id,default_copy_limit,construction_rules_ref}` | construction_revision／construction-revision-v1 |
-| refs／construction_ref | `{ref}` | §4 的有限 descriptor；ref 不可重綁不同內容 | construction_ref／construction-ref-v1 |
-| restrictions／construction_restriction | `{restriction_id}` | `{profile_id,announced_on,effective_from,effective_until,kind,state,max_copies,max_selected_groups,members}` | construction_restriction／construction-restriction-v1 |
-| coverage／construction_coverage | `{profile_id,from_date}` | `{until_date,as_of,state,source_set,reconciliation}`，見 §5 | construction_coverage／construction-coverage-v1 |
-| roles／construction_role | `{card_id,region}` | `{role,basis}`，basis 是 H(§6 card 的全部實體面 typed projection)，不得用一面代表整卡 | construction_role／construction-role-v1 |
-| cr／construction_cr | `{cr_version_id}` | `{region,version,published_on,effective_on,source_version_id,clauses}`，見 §3 | construction_cr／construction-cr-v1 |
+| profiles／construction_profile | `{profile_id}` | `{region,format_code,name}`，name 為人工介面名稱 `{lang,text}` | construction_profile |
+| revisions／construction_revision | `{revision_id}` | `{profile_id,effective_from,effective_until,cr_version_id,default_copy_limit,construction_rules_ref}` | construction_revision |
+| refs／construction_ref | `{ref}` | §4 的有限 descriptor；ref 不可重綁不同內容 | construction_ref |
+| restrictions／construction_restriction | `{restriction_id}` | `{profile_id,announced_on,effective_from,effective_until,kind,state,max_copies,max_selected_groups,members}` | construction_restriction |
+| coverage／construction_coverage | `{profile_id,from_date}` | `{until_date,as_of,state,source_set,reconciliation}`，見 §5 | construction_coverage |
+| roles／construction_role | `{card_id,region}` | `{role,basis}`，basis 是 H(§6 card 的全部實體面 typed projection)，不得用一面代表整卡 | construction_role |
+| cr／construction_cr | `{cr_version_id}` | `{region,version,published_on,effective_on,source_version_id,clauses}`，見 §3 | construction_cr |
 
-record_hash=H(完整 record)，members 恰為整片 `[record_key,record_hash]` 的排序唯一集合，membership_hash=H(members)，decision.id=`d:`＋完整 64 hex。members 涵蓋全部採納成員，一筆也是 batch。本入口專用驗證以每筆 review 的兩模型／分歧收據驗全成員，不沿用共用入口「sample_ids 恰列全部成員」的真人全查門檻；其他入口不受此差異影響。sample_ids 僅列維護者實際抽查／處理分歧且核可的成員，允許無真人逐筆核對的無分歧集合為 []，不把模型核對冒充真人抽樣。決定必為 confirmed／batch，製作者／模型核對者／維護者事件分開。不接受 identity／catalog／其他區域／前版決定代簽，不借用翻譯的決定或政策收據，不設略過來源／freshness 的旗標。
+record_hash=H(完整 record)，members 恰為整片 `[record_key,record_hash]` 的排序唯一集合，membership_hash=H(members)，decision.id=`d:`＋完整 64 hex。members 涵蓋全部採納成員，一筆也是 batch。human／approved_policy 分片，不混用；政策批次亦不得混用 policy pin 或首輪決定引用。policy_id 是政策的永久版本 key，不按 kind 另配一套 ID；上表只定 category。approved_policy 的 decision.policy_id 必等於 adoption_review.policy.policy_id，human 的 decision.policy_id 固定為 `construction-human-v1` 人工核對規程鍵（比照翻譯的獨立人工 policy_id），不能借政策收據冒作已核可；此保留鍵不得登錄成 approved_policy 的政策 ID。各 category 的實際驗證由同一構築 checks_recipe 與釘版 validator 完成；human 決定亦須完整驗來源與本文件欄位，只是不引用尚未核可的政策。
 
-### 1.1 兩模型核對與維護者決定
+approved_policy 決定必為 confirmed／batch，sample_ids 恰為全體 checked record_key，意思是**依政策機械全查**，不是本次逐筆人工確認。reviewed_by／reviewed_at／reviewed_precision 恰取政策核可收據的維護者事件；authored_by／authored_at 記本次套用工具及時間，note 明示「政策核可」。工具／模型／協調者名稱不得填 decision.reviewed_by。human 批次沿共用 sampled／confirmed 門檻：sampled 的 sample_ids 為非空實際樣本，confirmed 恰為全體真人核對成員；分歧的已採納成員必在實際 sample_ids 並有 maintainer_resolution。首輪 sampled 不依賴未來政策授權，避免初始化循環。不接受 identity／catalog／其他區域／前版決定代簽，不借翻譯收據，不設略過來源／freshness 的旗標。
 
-維護者 2026-10-03 定案的確認方式為**兩個不同模型各自對照官方來源核對、互審**，無分歧採用，有分歧才交維護者；維護者另行抽查，不要求逐筆真人確認。loader 與真實採納須釘本入口專用的 construction-two-models-v1 政策及維護者真實授權事件，不能引用翻譯政策 ID 當本入口授權。此文件記錄政策，不捏造已發生的資料核對。
+### 1.1 兩模型核對與維護者事件
 
-每筆 review 恰為 `{basis_hash,model_reviews,maintainer_resolution,maintainer_samples}`。basis_hash=H(本 record 的 `{record_key,kind,filing_key,data,evidence}`)，不含 review，避免循環；model_reviews 恰有兩項 `{model,version,reviewed_at,basis_hash,outcome,report_hash}`，按 model／version 排序。兩個 model 身分須不同（同一模型兩個 session 或僅版本不同不算），各有真實核對時間與報告 hash，basis_hash 都必等於最終資料；outcome 只允許 agreed／disputed。完整報告留 repo 外並釘入核對輸入，authored 不轉錄公告原文。任何模型更改值後，兩方都須核對最終 basis，不沿用初稿通過的 hash。
+維護者 2026-10-03 定案確認方式比照翻譯；協調者依既有交叉審核規則明示：**首輪須有維護者實際抽查才放行；之後兩個不同廠商模型各自對照官方來源核對、互審，無分歧者才可依政策採用**。兩方恰為 Claude 系與 Codex 系各一個模型；同廠商兩個型號、同一模型兩個 session 或僅版本不同不算。維護者仍可另行抽查，有分歧者交維護者，不要求後續每筆真人確認。此文件沒有捏造已發生的首輪抽查、政策核可或資料核對。
 
-兩項均 agreed 且沒有分歧才可直接採用，maintainer_resolution=null；任一 disputed 必有維護者真實確認最終 basis 的 `{reviewed_by,reviewed_at,reviewed_precision,basis_hash,outcome,note}`，outcome=adopted 才能成為有效成員，declined／deferred 留候選與診斷、不寫正式 proposed 分片。maintainer_samples 是同形狀的實際抽查事件陣列；沒有抽查則 []，不得填虛構日期或默認已抽查。分歧／抽查中被拒或待處理的項目不能因模型 agreed 而放行。decision.reviewed_by／時間記真正彙整並形成政策採納決定的協調者事件，不冒稱維護者逐筆核可；sample_ids 恰等於該批 resolution／samples 真正核可的成員集合。政策核可與全批 models／最終值／來源／依賴的 hash 都納入不可變核對背景；工具不能只驗兩個模型名字與 confirmed 布林。
+每筆 review 恰為 `{basis_hash,model_reviews,maintainer_resolution,maintainer_samples}`。basis_hash=H(本 record 的 `{record_key,kind,filing_key,data,evidence}`)，不含 review／adoption_review，避免循環；model_reviews 恰有兩項 `{vendor,model,version,reviewed_at,basis_hash,outcome,report_hash}`，按 vendor／model／version 排序。vendor 恰為 anthropic／openai 各一，實際 model／version 與受版控工具身分登錄相符，不能只換 vendor 字串冒充跨廠商。各有真實核對時間與完整報告 hash，basis_hash 都等於最終資料；outcome 只允許 agreed／disputed。任何模型更改值後，兩方都須核對最終 basis，不沿用初稿通過的 hash。
+
+政策採納要求兩項均 agreed、maintainer_resolution=null，且沒有抽查拒絕／待處理事件。任一 disputed 不得走 approved_policy，即使真人已解決也須另分 human 批次。maintainer_resolution 是維護者真實確認最終 basis 的 `{reviewed_by,reviewed_at,reviewed_precision,basis_hash,outcome,note}`；outcome=adopted 才成為有效成員，declined／deferred 留候選與診斷，不寫正式 proposed 分片。maintainer_samples 是同形狀的實際抽查事件陣列，沒有事件則 []；不可把全體 checked 填進此欄。首輪或後續的真人核對與政策核可是不同事件，時間可不同，只有日精度時用 day 的 UTC 午夜編碼，不捏造時分秒。
+
+完整模型報告留 repo 外的**核對證據 store**：執行者配置具名 store_id → 本機根目錄，不在 authored／公開資料保存絕對路徑。報告以 exact bytes 的 SHA-256 去重，只增不改，安全相對路徑固定為 `reports/sha256/<前兩碼>/<64hex>.json`；report_hash 是完整 `sha256:<64hex>`。每份報告是 UTF-8 JSON，恰為 `{construction_review_report_format:1,vendor,model,version,reviewed_at,basis_hash,outcome,source_uses,program_revision,dependencies,note}`；source_uses 恰列本筆全部 evidence.use，program_revision 為實際使用工具的完整 immutable SHA，dependencies 為按既有 review_context.context 規格釘住的程式／鎖定依賴。note 只記核對結論／缺口，不抄官方原文。私人原始互審輸入另保存，不進 Git；工具須採納當下驗回其 exact hash 及對最終 basis 的核對關係，不能用工具自行產出的摘要冒作已互審。
+
+review_context.context 的釘版 configuration 的 `construction_review_stores` 只列核對證據的具名 store_id 排序唯一陣列，不放尚未形成的報告 hash、政策收據或本次分片，避免 context → basis → report → context 自我引用。執行者配置另把 store_id 對到本機根目錄；本次正式建置的 F1 configuration 中 `construction_review_reports` 則由已驗完整採納重建為排序唯一 `{report_hash,store_id}` 集合，恰涵蓋全部 model_reviews 引用；報告 exact hash 及實際讀取的使用集合納入採納／建置輸入閉包，不拿它們回填舊 review_context。採納當下及本機正式建置須唯讀取回全部報告、驗 hash／安全路徑／格式及 vendor／model／version／事件／basis／outcome／完整 source_uses／工具依賴逐欄相等，缺檔、未知 store、symlink 或矛盾拒絕。此機械驗證能證明報告 bytes 與宣告釘版一致，不能單靠 hash 證明模型真有看過公告；交叉審核與真人事件仍各自有真實證據。CI 沒有私人 bytes 時只驗 authored 結構，不宣稱已重播報告。證據 store 每批採納前須有獨立備份並 restore-check 通過，備份收據／完整 hash 清單在報告形成後釘入私人採納輸入；失敗不發布，歷史引用永久保留，不因新政策／新卡包刪舊報告。
+
+### 1.2 政策、首輪抽查與核可收據載體
+
+沿 [translation-policy §1–§5](translation-policy.md#1-重用與新入口) 的 index／policy／approval、不可變五欄 pin 與真實首輪語意，建立本入口專用載體；不重用翻譯政策本身。下列路徑均相對 authored，三檔及索引進 Git，只存 ID／hash／核對摘要與真人事件，不存公告原文或私人路徑。
+
+| 路徑 | 完整頂層欄位 |
+| --- | --- |
+| `construction-policies/index.yaml` | `construction_policy_index_format:1,kind:construction_policy_index,policies` |
+| `construction-policies/<policy_id>.policy.yaml` | `construction_policy_format:1,kind:construction_policy,policy_id,scope,initial_sample_rule,checks_recipe` |
+| `construction-policies/<policy_id>.review-queue.yaml` | `construction_review_queue_format:1,kind:construction_review_queue,rows` |
+| `construction-policies/<policy_id>.approval.yaml` | `construction_approval_format:1,kind:construction_policy_approval,policy_id,policy_hash,authorized_kinds,reviewed_by,reviewed_at,reviewed_precision,authorization_basis,initial_sample,note` |
+
+policy_id 符合 `[a-z][a-z0-9_-]*`，是永久版本 key；檔名與檔內 ID 相同。policies 為 policy_id → `{path,hash,approval_receipt_hash,review_queue_hash}` 映射；path 固定為該 ID 的 `.policy.yaml`，其餘兩檔由同 basename 換副檔名推得。hash 對完整解析值計 canonical H，三種 Hash 均為完整 SHA-256；索引不含自身 commit SHA。此入口**不列 construction-adoptions/index.yaml.includes**，loader 另驗完整政策索引及全部歷史三檔閉包。空集合明示 policies={}；啟用但缺索引、未索引／孤立檔、缺檔、symlink、未知欄位／格式、不安全路徑或 hash 不符一律拒絕。format 只收整數 1，不收 bool／字串；共用嚴格 YAML 與單檔 <1 MiB 門檻。
+
+scope 恰為 `{kinds,regions,format_codes}`，均為非空排序唯一集合：kinds 是上表已支持 kind 的有限子集，regions 只 jp/en，format_codes 恰為 standard；roles／cr 雖整區共用，這份政策僅授權其 Standard 用途，不授權其他賽制。不得 wildcard 或呼叫端擴充 scope。initial_sample_rule 恰為 `{minimum_count}`，為維護者實際核可的正安全整數門檻；不預填樣本數、不把同一 subject 多版本或 model agreed 湊作真人抽查。checks_recipe 恰為 `construction-two-models-v1`，這是**驗證 recipe key，不是另一個 policy_id**；驗證本文件全封套／來源／依賴、跨廠商對最終 basis agreed、首輪真實抽查及政策收據、完整 coverage／freshness。recipe／授權條件改動須新版本，不只比名稱便放行。
+
+review-queue.rows 恰列首輪完整候選集合的 `{record_key,basis_hash,result}`，按 record_key 排序唯一，result=agreed/disputed；不先濾掉分歧、不存 value 或原文。採納當下由私人完整互審輸入重建，恰等於摘要；後續 authored 結構驗證可以驗此不可變摘要，不能宣稱重看私人原始輸入。政策核可之前，首輪採納以 human sampled 決定建立，每個 `(kind,subject)` 僅取首輪最終一個 adoption_no；真人至少實際核對 minimum_count 個不同 `(kind,subject)`，且有真實 maintainer_samples／maintainer_resolution；拒絕／暫緩可計實際看過，未回答不計、不進已採納成員。
+
+approval 的 policy_id／policy_hash 必與索引／政策一致，authorized_kinds 恰等於 scope.kinds。reviewed_by／reviewed_at／reviewed_precision 是**真正核可此份政策的維護者事件**；authorization_basis 是非空正式決定定位／URL 與具體核可範圍，不能填模型或工具自行同意。note 記核可限制及初輪門檻。initial_sample 恰為 `{authored_revision,index_hash,decisions,sampled_items,review_context,review_queue_hash,disputed_items}`：
+
+| 欄位 | 完整定義 |
+| --- | --- |
+| authored_revision／index_hash | 政策寫入之前已完成首輪 human sampled 的 immutable 40 碼 SHA／該版 construction-adoptions/index.yaml 完整 canonical hash；全入口與歷史仍完整驗，不引用自身未來 commit |
+| decisions | 非空排序唯一 `{decision_id,membership_hash,sample_ids}`；均指首輪同 scope 的 human sampled 決定，sample_ids 恰等於該決定實際非空集合，不借政策 checked 集合 |
+| sampled_items | 非空排序唯一 `{record_key,basis_hash,outcome,decision_ref,reviewed_by,reviewed_at,reviewed_precision,note}`；每項是真人實際核對事件。outcome=adopted/declined/deferred；adopted 的 decision_ref 為 `{decision_id,membership_hash,record_key,record_hash}`，其餘 null。adopted 集合恰等於 decisions 全部 sample_ids，最終 basis 與 maintainer_samples／resolution、真人決定事件逐欄相符；declined／deferred 須非空原因，adopted note 可空 |
+| review_context／review_queue_hash | 沿共用 `{context,source_batches}` 釘首輪完整模型與工具／來源輸入，不引用未來政策；摘要 hash 恰等於索引對應項，exact bytes 另釘不可變 revision |
+| disputed_items | 恰列摘要全部 disputed，排序唯一 `{record_key,basis_hash,outcome,decision_ref}`，outcome 與 decision_ref 同上；adopted／declined 須在 sampled_items 有相符真人事件。未處理只能 deferred，不捏造 reviewer 或占正式 record；兩處同項的 outcome／hash／ref 必逐欄相等 |
+
+初輪樣本及已解分歧的真人事件須發生於政策核可之前；未處理分歧留候選、不妨礙符合完整政策的其他無分歧項，但永不以政策採納該分歧。首輪 human 決定的實際 samples 與後續政策 checked 分開計數。批准整份政策的人與每個樣本 reviewer 可以不同，但事件均須真實；後續實際抽查仍記 maintainer_samples，不回填到舊收據。修改初輪集合／門檻／scope／互審要求、重核政策、換收據或改檔 bytes 均須新 policy_id／新核可，舊索引項與三檔只增不改。先完整驗證配對／摘要，最後原子追加索引；中斷不自動補收據或跳過孤立檔。
+
+adoption_review 恰為 `{mode,policy,initial_sample_decisions}`。human 時後兩欄 null／[]；approved_policy 時 policy 非空，恰為 `{policy_id,authored_revision,path,hash,approval_receipt_hash}`，path 為 repo 相對 `authored/construction-policies/<policy_id>.policy.yaml`，authored_revision 是保存政策完整索引與三檔的 immutable SHA。所有 hash 與同 revision 索引／收據恰相符；initial_sample_decisions 是非空排序唯一 `{decision_id,membership_hash}`，恰等於 approval.initial_sample.decisions 的該兩欄，不從最新採納猜首輪。每片所有成員用相同五欄 pin／初輪引用，decision.policy_id 必等於該 policy_id。
+
+F1 configuration 的 construction_policies 是由已驗 authored 索引與採納推得的 policy_id → 五欄 pin 映射，恰等於本次引用集合；設定鏡像不能代替 authored 授權。完整索引／政策／收據／摘要 canonical hash、各檔 exact bytes、初輪 revision／決定／來源、validator 與實際依賴都釘入閉包。此收據格式與完整 loader **到位前一律拒絕政策採納**；缺真實首輪、核可收據或必要來源／報告不能先寫政策 confirmed 等以後補證。構築公開資料與介面不得把政策採納顯示成逐筆人工確認；真人樣本、政策 checked 與待人工分歧須分開計數與標示，現行公開欄位不足時不另造本輪欄序或虛構人工標章。
+
+### 1.3 來源重核與首發能力邊界
 
 來源探索可補抓授權範圍的 JP 新聞分頁；已取得的頁數與時間範圍放登錄／探索收據，不用固定頁數當 coverage 規則。每次出新卡包時重抓入口與新聞並重核，得知新公告時亦可另行授權重核；資料只保證到最近核對且有來源支撐的日期，不把排程當延長 as_of。每次真實抓取仍須當次明示範圍與授權，本文件不授權 worker 連網。
 
@@ -116,18 +157,20 @@ ref descriptor 保存在已釘建置 configuration 的 construction_refs（恰�
 
 ## 5. 來源集合、入口漏公告與 coverage
 
-coverage.value.source_set 恰為 `{baseline,notices,discovery,excluded}`：前三欄是排序去重的 source_version_id 陣列，baseline 為完整現行限制基線或可重建起點，notices 為所有適用變更公告，discovery 為取得它們的入口／新聞索引；excluded 是 `{source_version_id,reason}` 的排序集合，reason 僅 unrelated_format／unrelated_topic／superseded。四組互斥；每項有 evidence、sealed pin 與核對理由，不刪 raw 或隱藏尚未判定的來源。
+coverage.value.source_set 恰為 `{baseline,notices,discovery,excluded}`：前三欄是排序去重的 source_version_id 陣列，baseline 為完整現行限制基線或可重建起點，notices 為所有適用變更公告，discovery 為取得它們的入口／新聞索引；excluded 是 `{source_version_id,reason}` 的排序集合，reason 僅 unrelated_format／unrelated_topic／superseded／historical_same_url。四組互斥；每項有 evidence、sealed pin 與核對理由，不刪 raw 或隱藏尚未判定的來源。
 
 **來源全集由程式獨立重建**：從 review_context 指定全部 sealed 批次的 inventory／descriptor 取得同區 provider、kind=limit/news 的全部來源版本，再加入本 coverage 實際使用的其他來源；不能由 caller 自選「相關公告」作分母。全集必恰屬四組之一；缺列的 ID 自動進 unresolved_source_ids 並使 complete 失敗，多列不存在的 ID／重複分組則輸入錯誤。已封存但入口未連結的公告同樣在分母內。來源全集完整只證明已取原檔都被分類，不能證明網路上沒有漏取，還須以下探索範圍與 href 閉包。
 
 reconciliation 恰有 `{knowledge_cutoff,region_date_zone,baseline_through,discovery_ranges,discovered_urls,missing_urls,unresolved_source_ids,decisions}`：
 
 - knowledge_cutoff 為核對知識截至的 UTC Instant，不用 snapshot／人審時間偽造更新；不得晚於本次 coverage 使用的 baseline、discovery 成功觀測時刻的**最早值**，尤其不能晚於最早 discovery 的成功觀測。一次性 index 用實際 fetched_at；後續重核若沿用同一 raw，須釘本批選定且可驗的成功 200／可信 304 觀測收據與 last_checked_at，不能拿 URL 首次抓取、descriptor.first_receipt 的舊內容時間、歸檔 observed_at 或無內容驗證的檢查時間補值。歷史 notices 的取得時間不拿來延長知識期限，也不迫使重抓未變動的歷史正文。
-- region_date_zone 為有官方來源或明示核可依據的 IANA zone。官方完整生效日保留該公告所屬日期語意，JP 以 Asia/Tokyo；EN 須由來源與核對確認，不猜整個地區等於某個美洲時區。跨來源時區不一致須明示轉換；不明則 partial／unknown，不能自行套 UTC 當官方日期。
-- baseline_through 為已證明基線完整的 UTC Instant，須由 baseline 的實際最後更新／適用日期與該區時區驗回；只有日精度時用該日開始，不補假時間。未知為 null，不得 complete。
-- discovery_ranges 是排序唯一 `{source_version_id,from_instant,until_instant,locator,complete_listing}` 陣列，closed interval、from≤until≤該來源依上述規則驗回的成功觀測時刻，每筆必對 discovery 來源。locator 釘 parser 的範圍／列表投影與邊界證據，complete_listing 是已依兩模型政策確認列表在此範圍沒有省略頁／同日條目，不是 parser 看到最舊標題就自動 true。頁面分頁鏈、重複邊界與日期精度須驗回；只知月份、同日界線不完整或標題不足判適用者，不宣稱範圍完整。
-- discovered_urls 是 parser 從所有 discovery 結果獨立重建的原樣公告 href（沿既有 URL canonicalizer 後去重）之完整分類，恰為 `{url,source_version_id,state,reason,locator}`。state=required/excluded/unresolved；locator 釘原列表項目。required 必解析到已封存且納入 source_set 的同區公告，否則 URL 恰列 missing_urls；unresolved 一律保留缺口。無關賽制／主題可由兩模型依官方標題與明示範圍核對後 excluded，無法從標題確定的公告須列 required／unresolved，不猜內文。沒有原檔者 source_version_id=null；缺 href 的入口不憑空造網址，也不能當公告探索完整證據。
+- region_date_zone 為有官方來源或明示核可依據的 IANA zone。官方完整生效日保留該公告所屬日期語意，JP 以 Asia/Tokyo；EN 公告日期時區仍待維護者確認，未確定前 EN coverage 不標 complete；須有來源或明示核可依據，不猜整個地區等於某個美洲時區。跨來源時區不一致須明示轉換；不明則 partial／unknown，不能自行套 UTC 當官方日期。
+- baseline_through 是**基線已反映的最後一則公告之發布時間**的 UTC Instant，須由 baseline／其相關公告與該區時區驗回，與 discovery_ranges 同用公告發布時間軸，不用生效日或頁面最後更新日替代。只有日精度時用該日開始，探索須完整包含該日全部條目，不補假時間；發布時間或反映關係未知為 null，不得 complete。基線完整性須涵蓋此起點之前全部已發布公告，包括較晚才生效者；未證明已反映的公告須把探索起點退到可證明的發布範圍，否則 partial。較早發布而較晚生效的公告亦須逐項核對，不能因尚未生效或入口漏列而越過探索起點。
+- discovery_ranges 是排序唯一 `{source_version_id,from_instant,until_instant,locator,complete_listing}` 陣列，closed interval、from≤until≤該來源依上述規則驗回的成功觀測時刻，每筆必對 discovery 來源。locator 釘 parser 的範圍／列表投影與邊界證據，complete_listing 是已依 §1 核對確認列表在此範圍沒有省略頁／同日條目，不是 parser 看到最舊標題就自動 true。頁面分頁鏈、重複邊界與日期精度須驗回；只知月份、同日界線不完整或標題不足判適用者，不宣稱範圍完整。
+- discovered_urls 是 parser 從所有 discovery 結果獨立重建的原樣公告 href（沿既有 URL canonicalizer 後去重）及 historical_same_url 歷史列表投影的完整分類，恰為 `{url,source_version_id,state,reason,locator}`。state=required/excluded/unresolved；locator 釘原列表項目。列表上**全部 href** 都須分類，包括不是 `/news/post-N` 的其他網址，不把網址形狀當公告適用性或完整分母。required 必解析到已封存且納入 source_set 的同區公告，否則 URL 恰列 missing_urls；unresolved 一律保留缺口。無關賽制／主題可由兩模型依官方標題與明示範圍核對後 excluded，無法從標題確定的公告須列 required／unresolved，不猜內文。沒有原檔者 source_version_id=null；缺 href 的入口不憑空造網址，也不能當公告探索完整證據。
 - missing_urls／unresolved_source_ids 是排序唯一的完整缺口，須包含上述機械重建結果，不接受 caller 清空以湊 complete。decisions 是 `{source_version_id,status,restriction_ids,superseded_by,reason}` 的排序集合，status=baseline/applied/no_change/conflict/discovery/excluded，恰覆蓋四組全集；所有值與對應限制／期間／evidence 可重播。除 superseded 的 excluded 項外 superseded_by=[]。
+
+historical_same_url 僅用於同區同 kind、canonical requested URL 完全相同的 limit／news **入口或列表頁**歷史版本；不得用於個別公告，亦不得因日期晚就判語意已取代。該 excluded 項須在 reconciliation.decisions 對應項的 reason 記 canonical JSON `{replacement_source_version_id,locator}`，指本次 baseline／discovery 中已核對的新版本與歷史版本投影差異定位；其 restriction_ids／superseded_by 為 []，不硬填禁限 ID。loader 驗兩版 frozen descriptor、URL／用途與該定位，並驗歷史版出現的全部 href 仍在 discovered_urls 分類，舊基線的限制／解除／更正／適用期間仍完整反映於有效 baseline／notices。新頁若漏了舊項、差異尚未核對或原版本含未解限制，不得如此排除，須 conflict／unresolved 或按下述 superseded 驗替代限制。所有歷史版本留來源全集、evidence、F1 及 seal，不刪原檔；每次新包重核可新增版本而不縮小分母。
 
 被 superseded 排除的來源必有 reconciliation 決定：superseded_by 非空且每筆為 `{source_version_id,restriction_ids,locator}`，指有效 baseline 或已 applied 的替代公告，核對原限制及**全部解除／更正／生效期間**確已反映。僅版號新、日期晚或內容看似重複不足；找不到替代證據就 conflict／unresolved，不得排除。無關賽制／主題亦要核對分類，不能把「未讀」當 unrelated。
 
@@ -167,6 +210,6 @@ Decklog 可用性與 profile／禁限正交，沿 regional_decklog 的版次目�
 
 本件的受版控 parser 放 `carddb/src/sve_carddb/construction/projection.py`，在 carddb 來源投影單位實作通用 HTML 區塊→exact 文字／欄位／日期／href 與探索範圍投影、可重播 locator 與結果 hash；語意主張由兩模型對照原公告採納，不是完整事件 adapter。重用既有 HTML 依賴，這輪不加 PDF 套件。PDF 頁／條文區塊、context 分辨、引用圖與必要 Standard 閉包均留 #48 的 carddb 萃取單位；如需 PDF 套件，先另開只改依賴的小 PR，再做萃取 PR。#48 須沿 §3 的 CR ID／UQ／recipe 與本來源 pin，不能重配既有實體。#49 做完整禁限語意事件與歷史 adapter，重用相同 frozen 投影與 ID，不把 #40 人工首批分類當完整歷史。#40 可在 ref／CR 為 null、能力 unknown 的狀態先交付已核對禁限，故不以 PDF 萃取阻擋 #40，也不形成 #40／#48 循環依賴；固定 ref 仍是未兌現交付，需 #48 接入後另驗。
 
-反例須覆蓋：非構築 category／錯全成員／兩次同模型或不同最終 basis／未解分歧／冒充真人抽查／少 source use；隔離登錄碰 live、原 hash／時間／redirect／media 不符、少一 raw、重複收據衝突、seal／backup／restore 缺一步；CR 空／少一子節／錯上下文／跨區／同官版換 raw；ref 任意 URL／未定義／內容 hash 不符／少依據／未知例外／與 profile 不合；限制空 members／選項缺成員／混區／兩種 max 同填／日期重疊；JP 新公告不在入口卻被丟掉、EN 沒鏈接被當無限制、只讀 news 首頁便 complete、解除未統整、來源全集少列／探索範圍有洞／cutoff 超過觀測／superseded 無替代證據／成員同名 scope 重複／as_of 之外；名稱／型別更正後照套舊決定；以及「資料 ready 等於合法」的錯誤。全部用合成資料／MockTransport／localhost，不依賴正式原檔，不把一次性全量比對放進每次測試。
+反例須覆蓋：缺首輪真人抽查／模型名冒 reviewed_by／政策 sample_ids 少一成員／首輪 sample_ids 偽填全體 checked／缺政策 index 或三檔／政策 pin 或 decision.policy_id 不一致／未實作 loader 卻放行／同廠商兩型號／報告缺檔或 hash、vendor、最終 basis 不符／缺證據備份還原；非構築 category／錯全成員／兩次同模型或不同最終 basis／未解分歧／冒充真人抽查／少 source use；隔離登錄碰 live、原 hash／時間／redirect／media 不符、少一 raw、重複收據衝突、seal／backup／restore 缺一步；CR 空／少一子節／錯上下文／跨區／同官版換 raw；ref 任意 URL／未定義／內容 hash 不符／少依據／未知例外／與 profile 不合；限制空 members／選項缺成員／混區／兩種 max 同填／日期重疊；JP 新公告不在入口卻被丟掉、EN 沒鏈接被當無限制、只讀 news 首頁便 complete、解除未統整、來源全集少列／探索範圍有洞／cutoff 超過觀測／EN 時區未定卻 complete／較早發布晚生效公告被跳過／列表非 post href 被漏分類／historical_same_url 跨 URL 或丟舊 href／superseded 無替代證據／成員同名 scope 重複／as_of 之外；名稱／型別更正後照套舊決定；以及「資料 ready 等於合法」的錯誤。全部用合成資料／MockTransport／localhost，不依賴正式原檔，不把一次性全量比對放進每次測試。
 
 目前程式的 decision-backed 匯入仍 fail-closed；本契約合併不會自動放行、不授權本 worker 執行來源登錄／抓取／正式建置。沒有實作／來源／採納就如實回 unknown。

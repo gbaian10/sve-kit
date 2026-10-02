@@ -26,7 +26,7 @@ A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合�
 
 `text_unit.lang` 與 `search_alias.lang` 必須以 `FK(lang)→language(code)` 引用已登錄語言，避免文字或搜尋別名缺少對應的語言配置。新增語言先登錄 `language`，不把外鍵限縮成初始三語的 enum；此規則不將其他 Lang 欄或 JSON 成員自動轉成 SQL FK。
 
-record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱。翻譯另有下述長尾政策例外；其餘類別的人工門檻不變。
+record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱。翻譯與構築另有下述政策例外；其餘類別的人工門檻不變。
 
 批次決定以精確 `(record_key,semantic_content_hash)` 成員集合排序後計 `membership_hash`，`sample_ids` 必須是集合子集；不可讓日後新增／修改列繼承舊抽查。各具體表自己的 `decision_id` 是 FK，封套在匯入時展開，不使用可逃避 FK 的 subject 表。證據 source 可多筆。
 
@@ -42,6 +42,8 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 | DSL                                            | §10 的不同作者審核或巨集機械門檻；實跑另判定                                                                 | 卡文可發布，自動能力不放行                                   |
 
 **翻譯門檻的明示例外**：依 [翻譯契約 §2](translation-contract.md#2-人工採納入口)，長尾模板譯本完成不同模型互審且無分歧，可引用首輪真實抽查決定與核可政策收據，以 `adoption_review.mode=approved_policy`、confirmed batch 採納，不要求當批另有人類樣本。全體 checked 表示依政策完整檢查；成員一律 machine，政策核可者／時間與本次工具套用者／時間分開保存。有分歧者仍交使用者，裸 model_reviewed 不達此例外；此例外不擴及其他翻譯類別或身分／跨區核對。
+
+**構築採納的明示例外**：依維護者 2026-10-03「比照翻譯」的決定及 [構築採納 §1](construction-adoption.md#1-專用入口與採納封套)，首輪須有維護者實際抽查與政策核可收據；之後由 Claude 系、Codex 系各一個模型對最終值及官方來源互審，無分歧且全體政策檢查通過者，可以 `adoption_review.mode=approved_policy`、confirmed batch 採納。sample_ids 恰列全體 checked，表示政策機械全查；reviewed_by／reviewed_at／reviewed_precision 取政策核可維護者的真實事件，authored_by／authored_at 記當次工具與時間，note 明示「政策核可」，不能把模型填成人工核可者。真人抽查／處理分歧另記實際事件，分歧走 human 批次，不混入政策批次；首輪或政策收據／loader 未到位一律拒絕。其餘類別的人工門檻不變，此例外不擴及身分／跨區核對、勘誤、更正、翻譯或其他採納入口。
 
 sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。confidence 只用於排審優先序。
 
