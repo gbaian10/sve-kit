@@ -4,24 +4,28 @@
 本清單由維護者親手操作；agent、CI 不取得 Cloudflare 憑證，不執行真實部署或上傳。
 資料契約見 [preview 建置與接線](../schema/preview-handoff.md)。
 
-本文未連外查證。下列 Cloudflare 控制台、Wrangler 設定語法、Access／網域／預覽與
-R2 的平台行為均為 **未驗證，需維護者實測**；範例是設定與驗收方案，不是已部署配置。
-官方連結供維護者查核，不代表本輪重新確認了當下的功能、方案或費率。
+本文未連外查證或部署。維護者提供官方依據的內容標為「依官方文件，未實測」；
+其餘控制台、Wrangler 語法、Access／網域／預覽與 R2 平台行為仍為
+**未驗證，需維護者實測**。範例是設定與驗收方案，不是已部署配置；官方連結
+供維護者查核，不代表本輪重新確認了當下的功能、方案或費率。
 
-## 1. 先決定資料入口，再填環境表
+## 1. 同網域資料入口與環境表
 
-開發資料入口有兩案，**待維護者決定**。不要同時啟用兩案留下未受保護的入口。
-正式 `cdn.svekit.app` 保留作獨立 CDN；這個開發選擇不變更正式架構。
+開發環境採同網域方案：**dev.svekit.app 由同一個 Worker 提供前端靜態資源，
+並綁私有 R2，在 /cdn-preview/ 提供資料**。桶不開公開網域；前端與資料共用
+Access 保護，不建立獨立開發 CDN 網域。
 
-| 方案 | 必要設定 | 風險與驗收 |
-| --- | --- | --- |
-| A：同網域、同一 Worker 綁 R2 | 前端為 `dev.svekit.app`，同 Worker 在 `/cdn-preview/` 提供桶內白名單物件；bucket 不開公開網域，Worker 綁定開發桶，資料路徑先走 handler | 沒有跨來源 cookie／CORS 配置，但需審核讀取 handler、登入與 host gate；避免資料路徑誤套 SPA fallback、任意 key 存取或 cache 洩漏；Worker 轉送可能增加請求／CPU 成本。平台行為未驗證，需維護者實測。 |
-| B：獨立開發 CDN | 前端為 `dev.svekit.app`，開發桶另連 `cdn-dev.svekit.app`，兩個 host 各自設 Access；前端明確選遠端 preview base | 兩個 host 的 Access 登入與跨來源 cookie、fetch credentials、CORS／preflight 必須配合。Cookie 或登入流程可能不能直接跨域使用，未驗證，需維護者實測；不可用放行匿名 GET 的 Bypass 解決。 |
+讀取 handler、登入與 host gate 須審核；資料路徑不能落進 SPA fallback，須拒絕
+任意 key 與私有內容，避免 cache 洩漏。Worker 轉送可能增加請求／CPU 成本，
+平台行為未驗證，需維護者實測。
+
+正式環境維持 **cdn.svekit.app 的 R2 自訂網域直出，不經 Worker**；正式發布與
+網域啟用另行安排，不由本清單自動執行。
 
 | 項目 | 開發 | 正式保留 |
 | --- | --- | --- |
 | 前端 | `dev.svekit.app` | `svekit.app` |
-| 資料入口 | A：同源 `/cdn-preview/`；B：`cdn-dev.svekit.app` | `cdn.svekit.app` |
+| 資料入口 | 同源 `/cdn-preview/` | `cdn.svekit.app`，R2 自訂網域直出 |
 | R2 bucket | `svekit-dev` | `svekit-prod` |
 | 前端 Worker | `svekit-web-dev` | `svekit-web-prod` |
 | 存取 | 指定人員、預設拒絕 | 公開前另行確認 |
@@ -34,14 +38,15 @@ R2 的平台行為均為 **未驗證，需維護者實測**；範例是設定與
 
 1. 登入啟用 MFA 的 Cloudflare 帳號，確認 account 與 `svekit.app` zone。
 2. 建立不同的開發／正式 bucket，資料與寫入 token 分離；本輪不上傳正式桶。
-3. 關閉開發桶的公開 `r2.dev` 入口，記下控制台顯示的完整 URL（若有），不由 account ID 猜 URL。
-4. 選 A：保持 bucket 無任何公開 custom domain；由第 5 節 Worker 的 R2 binding 讀取。
-5. 選 B：先設好第 4 節保護，再將 `cdn-dev.svekit.app` 連接開發桶，依介面核對 DNS／TLS。
-   若當下平台不能在此入口確實執行 Access，須另用受審的 Worker gate 或改選 A；不得先公開資料。
-6. 正式桶保持未發布，`cdn.svekit.app` 的公開操作另行安排。檢查沒有其他 public URL／Worker 可繞過保護。
+3. 確認開發桶的公開 `r2.dev` 入口為停用，記下控制台顯示的完整 URL（若有），不由 account ID 猜 URL。
+4. 保持開發 bucket 無任何公開 custom domain；由第 5 節 Worker 的 R2 binding 讀取。
+5. 正式桶保持未發布；未來 `cdn.svekit.app` 以 R2 自訂網域提供資料，不經 Worker。
+   檢查沒有其他 public URL／Worker 可繞過開發入口保護。
 
-Custom domain、同帳號 zone、r2.dev 關閉後的回應與 Access 接點，均未驗證，需維護者實測。
-參考 [R2 public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/)。
+依 [R2 public buckets](https://developers.cloudflare.com/r2/buckets/public-buckets/)
+官方文件，bucket 預設不公開，使用 Access 保護時須停用可繞過保護的 r2.dev，**未實測**。
+本方案另不開開發桶的自訂網域，只由受保護的 Worker 讀取。
+Custom domain、r2.dev 停用後的回應與實際入口保護，仍需維護者實測。
 
 ## 3. 維護者建立單桶 token 與本機 shell
 
@@ -78,59 +83,67 @@ IFS= read -r -p 'Development bucket: ' R2_DEV_BUCKET
 
 1. 選用本人要用的登入方式，建立精確 email／群組 Allow 規則，未命中者預設拒絕。
    不設 Everyone 或匿名 GET Bypass，不建立給 agent／CI 的 service token。
-2. 保護開發前端全路徑。A 的 `/cdn-preview/*` 也須受同一入口保護；B 額外保護 CDN 全路徑。
+2. 保護 `dev.svekit.app` 全路徑，包含 `/cdn-preview/*`；前端與資料使用同一個 Access application。
+   開發使用的工作階段期限建議設 **一個月**，降低頻繁重登成本；依
+   [Access session management](https://developers.cloudflare.com/cloudflare-one/access-controls/access-settings/session-management/)
+   官方文件，預設為 **24 小時**，**未實測**。維護者須核對 application／policy 的有效期限；
+   較長期限也延長已登入者的存取時間，撤銷／登出與到期後重新登入仍須驗收。
 3. 關閉開發 Worker 的 `workers.dev` 與每版 preview URL。若保留任何別名，必須逐一保護，
    並在 handler／靜態路徑都驗收；僅 custom domain 的 Access 不能當作別名安全證明。
 4. 關閉或全面保護的設定、既有部署別名是否仍可取用，未驗證，需維護者實測。
    無法證明保護時，使用受審的全路由 host gate，讓別名回 403／404；未通過前不部署真實資料。
-5. A：handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images key，
+5. handler 只接受 GET／HEAD，固定剝除 `/cdn-preview/`，只讀核准 snapshots／images key，
    不列桶、不提供任意 pathname、private／reports／PNG；缺物件回 404，不能回 SPA HTML。
-6. B：CORS 只允許開發前端精確 HTTPS origin，限 GET／HEAD／OPTIONS；需要時 expose ETag。
-   帶 cookie 的 fetch、Access cookie 與 CORS credentials 要一起驗；不用萬用 origin。
-   preflight 若被擋，只調整 OPTIONS 處理，不放開匿名 GET。平台行為未驗證，需維護者實測。
 
-參考 [Access HTTP applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/)
-及 [R2 CORS](https://developers.cloudflare.com/r2/buckets/cors/)。CORS 不代替存取控制。
+參考 [Access HTTP applications](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/)。
+同源路徑不需要跨網域資料請求，仍須完整執行 Access 與 host gate。
 
 ## 5. Workers 靜態資源與 Wrangler 配置
 
 Wrangler 設定放在 **`sim/web/wrangler.dev.jsonc`**；未來正式設定另放
 `sim/web/wrangler.prod.jsonc`，不同 Worker／桶／網域，不共用開發部署配置。
-部署設定及 A 的 handler 屬 `sim/web` 元件，須以該元件的 PR 納入與審核；這份 docs 清單
+部署設定及 R2 讀取 handler 屬 `sim/web` 元件，須以該元件的 PR 納入與審核；這份 docs 清單
 不夾帶配置或程式。執行前須已有包含此工具的 carddb 版次、核可的 Wrangler 版本與配置。
 新增 Wrangler 依賴須依專案規則另作依賴 PR，不用會臨時下載任意最新版的命令。
 
-以下為 B 的 assets-only 配置示意，所有選項語法與行為未驗證，需維護者以已核可的 Wrangler
-schema／官方文件核對並實測；不得直接視為已通過部署驗證：
+以下為同一個 Worker 提供靜態資源與 R2 讀取的配置示意；entrypoint 須先由
+獨立 sim/web 單位實作與審核。所有選項語法與行為未驗證，需維護者以已核可的
+Wrangler schema／官方文件核對並實測；不得直接視為已通過部署驗證：
 
 ```jsonc
 {
   "name": "svekit-web-dev",
+  "main": "src/cloudflare/worker.ts",
   "compatibility_date": "2026-10-02",
   "workers_dev": false,
   "preview_urls": false,
   "routes": [{ "pattern": "dev.svekit.app", "custom_domain": true }],
+  "r2_buckets": [{ "binding": "PREVIEW_BUCKET", "bucket_name": "svekit-dev" }],
   "assets": {
     "directory": "./dist",
-    "not_found_handling": "single-page-application"
+    "binding": "ASSETS",
+    "not_found_handling": "single-page-application",
+    "run_worker_first": true
   }
 }
 ```
 
-A 還需 `main` 指向受審的 Worker entrypoint，例如 `src/cloudflare/worker.ts`，R2 binding
-`PREVIEW_BUCKET` 指向開發桶、assets binding `ASSETS`，並讓資料路徑在 SPA fallback 之前
-交給 Worker。可評估 `assets.run_worker_first: true`，handler 驗 host／授權後，資料讀 R2、
-其餘委派 `ASSETS.fetch`；這樣所有靜態路徑亦會經過 Worker，可能有額外計費。
-選項與執行順序未驗證，需維護者實測；不得讓缺少資料 handler 的 SPA 回 index.html 假稱資料可用。
+`main` 指向受審的 Worker entrypoint，`PREVIEW_BUCKET` 綁開發桶，`ASSETS` 提供前端。
+示例以 `assets.run_worker_first: true` 讓 handler 在 SPA fallback 之前驗 host／授權，
+資料路徑讀 R2，其餘委派 `ASSETS.fetch`；所有靜態路徑亦會經過 Worker，可能有額外計費。
+實際配置與執行順序由後續 sim/web 單位核對、測試，平台行為未驗證，需維護者實測；
+不得讓缺少資料 handler 的 SPA 回 index.html 假稱資料可用。
 
 維護者以本機 Wrangler 登入或最小部署權限操作，登入方式／權限需依當下官方介面核對，
 未驗證，需維護者實測。部署登入只留本人本機，不把 R2 key pair 當部署 token，不交 CI／agent。
+下列 `bun run wrangler` 呼叫 sim/web 本機已核可的開發依賴，不依賴全域 PATH；
+尚未納入該依賴或 entrypoint 時先停止，不臨時下載工具。
 確認前端型別、測試與建置檢查後，在 repo 根執行：
 
 ```bash
 mise exec -- bun run --cwd sim/web build
 cd sim/web
-wrangler deploy --config wrangler.dev.jsonc
+mise exec -- bun run wrangler deploy --config wrangler.dev.jsonc
 ```
 
 既有 build script 呼叫 Vite；`dist` 只含前端程式與介面資源，不混 preview root、來源庫、
@@ -174,7 +187,7 @@ hash／壓縮／圖片即停止。離線數字是本機候選，遠端是否存�
 ## 7. 當次授權與條件上傳
 
 所有真實 Cloudflare 請求都由維護者當次同意後親手執行，agent 與 CI 不代跑。
-先以合成 preview 在開發桶實測條件寫入、重跑與兩案的存取控制；這次合成測試沒有
+先以合成 preview 在開發桶實測條件寫入、重跑與同源入口的存取控制；這次合成測試沒有
 建立真實 Cloudflare 可用性的證據，平台行為未驗證，需維護者實測。
 
 核對目標桶、當次 key pair、授權與離線數字後，從 repo 根執行：
@@ -202,7 +215,7 @@ GET 只對 timeout、network error、remote protocol error 重試，總共最多
 
 原 JSON 為 application/json，WebP 為 image/webp；gzip／br 是各自 key 的 octet-stream，
 沒有 Content-Encoding。開發不可變成員用 private／一年／immutable，指標 no-store；
-A 的 handler 必須保留 bytes／metadata，B 必須驗 CDN 行為，不能自動解壓後繞過 hash 驗證。
+Worker handler 必須保留 bytes／metadata，不能自動解壓後繞過 hash 驗證。
 
 ## 8. 執行時間與重跑成本
 
@@ -234,7 +247,6 @@ Authorization 或憑證選項；body 丟到 /dev/null，不印官方內容。取
 
 ```bash
 DEV_URL='https://dev.svekit.app'
-CDN_URL='https://cdn-dev.svekit.app'
 WORKERS_URL='https://<worker>.<subdomain>.workers.dev'
 WORKER_PREVIEW_URL='https://<version-preview-host-from-dashboard>'
 R2_DEV_URL='https://<full-r2.dev-host-from-dashboard>'
@@ -243,12 +255,11 @@ R2_DEV_URL='https://<full-r2.dev-host-from-dashboard>'
 | 入口 | 命令的 URL 參數 | 預期／通過條件（平台回應未驗證，需維護者實測） |
 | --- | --- | --- |
 | 開發前端 | "$DEV_URL/cards" | 401／403 或導向已核對 Access 登入的 302；不能匿名回 200 的開發 UI |
-| A 同源資料 | "$DEV_URL/cdn-preview/snapshots/preview/current.json" | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON |
-| B CDN | "$CDN_URL/snapshots/preview/current.json" | 同上；登入、CORS、cookie 另外用瀏覽器驗，不能只看到登入頁便算前端接通 |
+| 同源資料 | "$DEV_URL/cdn-preview/snapshots/preview/current.json" | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON |
 | workers.dev 前端 | "$WORKERS_URL/cards" | 已關閉者拒絕／不可用；若保留，須同樣受 Access 或 host gate 拒絕，不能 200 |
-| workers.dev 資料（A） | "$WORKERS_URL/cdn-preview/snapshots/preview/current.json" | 已關閉或 gate 拒絕，不能 200／206 |
-| 每個 preview URL | "$WORKER_PREVIEW_URL/cards"；A 再驗其 /cdn-preview/snapshots/preview/current.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain |
-| r2.dev | "$R2_DEV_URL/snapshots/preview/current.json" | 先確認控制台關閉，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
+| workers.dev 資料 | "$WORKERS_URL/cdn-preview/snapshots/preview/current.json" | 已關閉或 gate 拒絕，不能 200／206 |
+| 每個 preview URL | "$WORKER_PREVIEW_URL/cards"及其 /cdn-preview/snapshots/preview/current.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain |
+| r2.dev | "$R2_DEV_URL/snapshots/preview/current.json" | 先確認控制台停用，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
 | 其他綁定網域／既有預覽版本 | 依控制台列的完整 host，同樣測 /cards 及資料路徑 | 都要關閉或拒絕；新舊部署不能留下未受保護入口 |
 
 每個表格 URL 都執行一次以下命令，例如：
@@ -259,8 +270,6 @@ curl -q --max-time 20 --silent --show-error --output /dev/null \
 curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$DEV_URL/cdn-preview/snapshots/preview/current.json"
 curl -q --max-time 20 --silent --show-error --output /dev/null \
-  --write-out '%{http_code} %{redirect_url}\n' "$CDN_URL/snapshots/preview/current.json"
-curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$WORKERS_URL/cards"
 curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$WORKER_PREVIEW_URL/cards"
@@ -268,7 +277,7 @@ curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$R2_DEV_URL/snapshots/preview/current.json"
 ```
 
-只測已選方案及確有記錄的 URL，A 不建立 CDN；A 對 workers.dev／每個 preview URL 再測資料路徑。
+只測確有記錄的 URL；workers.dev／每個 preview URL 都須同時驗前端與資料路徑。
 302 必須是已核對的 Access 登入入口；其他資料 host 的轉址或不明 404 不能冒充拒絕保護。
 任何入口匿名回傳 200／206 都停止，先查設定。別名關閉／Access 設定的有效性不由程式假定。
 
@@ -277,3 +286,12 @@ hash 驗證與 pending 標記正確，缺資料路徑是 404 而非 SPA，登出
 不宣稱可以收回已授權下載的 browser cache。key pair 清除後才結束作業。
 
 此清單不放行 region_text_review、不產正式 manifest，不完成日英首發或正式 CDN 發布。
+
+## 10. 未採用的做法與原因
+
+未採用 B 案的獨立 `cdn-dev.svekit.app`。依
+[Access CORS 官方文件](https://developers.cloudflare.com/cloudflare-one/access-controls/applications/http-apps/authorization-cookie/cors/)，
+Access 登入 cookie 每個網域各一份；未登入第二個網域時，跨來源資料請求會失敗並出現
+CORS error，須先個別登入該網域，工作階段到期後也須重新登入。**依官方文件，未實測**。
+開發環境因此採同源前端與資料路徑，避免第二個登入入口；不以匿名 GET Bypass 解決此問題。
+正式 `cdn.svekit.app` 維持獨立 R2 自訂網域直出，公開操作另行安排。
