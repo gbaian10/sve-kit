@@ -43,3 +43,19 @@ updates:
         patterns: ['*']
     commit-message:
       prefix: ⬆️ dep-bump(carddb)
+
+  # Updates each hook's `rev:`; local hooks, additional_dependencies and language_version stay manual.
+  - package-ecosystem: pre-commit
+    directory: /
+    schedule:
+      interval: weekly
+    cooldown:
+      default-days: 7
+    groups:
+      pre-commit:
+        patterns: ['*']
+    ignore:
+      # Must move with the commitizen hook's additional_dependencies pin and the carddb dev dependency.
+      - dependency-name: '*cz-conventional-gitmoji*'
+    commit-message:
+      prefix: ⬆️ dep-bump
