@@ -38,6 +38,7 @@ def recipes(repository: Path, revision: str) -> tuple[Recipe, ...]:
             normalizer.VERSION,
             normalizer.CODE_PATH,
             {
+                "recognition_policy": None,
                 "python_version": sys.version.split()[0],
                 "unicode_version": unicodedata.unidata_version,
                 "dependencies": {pin.name: pin.sha256 for pin in context.dependencies},

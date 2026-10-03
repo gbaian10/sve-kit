@@ -89,6 +89,7 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
     refs.pins["vocabulary_proposals_hash"] = digest(proposal_bytes)
     refs.pins["vocabulary_basis_hash"] = digest(args.vocabulary_basis.read_bytes())
     config: dict[str, JsonValue] = {
+        "recognition_policy": None,
         "source_recipes": [p.model_dump(mode="json") for p in pins],
         "references": refs.pins,
         "numeric_classifier": configuration(),
