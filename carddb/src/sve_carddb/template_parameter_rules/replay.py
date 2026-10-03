@@ -228,6 +228,7 @@ def _resolve(
     loaded: Loaded | None, candidates: Candidates
 ) -> tuple[tuple[bytes, ...], tuple[bytes, ...]]:
     rules = {} if loaded is None else {r.rule_id: r for r in loaded.policy.rules}
+    roles = () if loaded is None else loaded.policy.scope.roles
     matches = {
         (str(row["inventory_id"]), str(row["slot"])): row
         for row in candidates.rule_matches
@@ -253,8 +254,7 @@ def _resolve(
             allowed = rules.get(rule_id) if rule_id is not None else None
             if (
                 allowed is not None
-                and candidate.source_span.role
-                in (loaded.policy.scope.roles if loaded else ())
+                and candidate.source_span.role in roles
                 and (hint.value is not None or match is not None)
                 and "invalid_safe_unsigned_decimal" not in issues
             ):

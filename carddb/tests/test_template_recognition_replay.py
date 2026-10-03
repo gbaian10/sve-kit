@@ -11,6 +11,7 @@ from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.template_parameter_rules import loader as loader_module
 from sve_carddb.template_parameter_rules import replay as replay_module
 from sve_carddb.template_parameter_rules.replay import (
     ProposalInputs,
@@ -38,6 +39,8 @@ from .translation_fixtures import envelope, term, write
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from pytest_mock import MockerFixture
 
     from sve_carddb.template_sources.models import Recipe
 
@@ -293,6 +296,17 @@ def test_resolution_never_clears_invalid_unsigned_value(
         "numeric_rule_pending_approval" in array(object_value(parse(raw))["issues"])
         for raw in pending
     )
+
+
+def test_policy_decode_cost_does_not_grow_with_resolved_positions(
+    recognition_source: SourceCase, mocker: MockerFixture
+) -> None:
+    item = candidate("甲2枚" * 16)
+    decode = mocker.spy(loader_module, "parse_policy")
+    resolved, pending = _resolve(recognition_source.loaded, Candidates(entries=[item]))
+    assert len(resolved) == len(item.slots) == 16
+    assert not pending
+    assert decode.call_count <= 2
 
 
 def test_first_batch_count_guard_cannot_be_skipped(
