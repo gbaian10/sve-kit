@@ -96,7 +96,7 @@ preview 根下的 `private/` 與 `reports/` 不屬於公開內容；正式上傳
 CacheStorage 的已驗 bytes 成功保存且未被清除時，翻回暖頁不向外重抓。
 
 `snapshot publish MANIFEST` 在任何寫入前拒絕 `preview-` 產物。正式發布其餘閘門與
-append-only index 屬 #34，目前命令在正式版號下也會停止；改掉前綴不能把 preview
+current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工作；目前命令在正式版號下也會停止；改掉前綴不能把 preview
 直接升為正式發布，正式批次須重新建置並通過完整發布閘門。
 
 Cloudflare 開發部署、公開目錄上傳與未登入入口驗收，見

@@ -96,7 +96,9 @@ CI 路徑分流須讓 `carddb/src/sve_carddb/snapshot/schema/**` 觸發 web 契�
 
 本節是待實作契約，不表示現有 v1／v1_1 資源已支援。新快照資源另放 `schema/v2/`，
 識別 `urn:sve-kit:snapshot:2.0.0`，從 source descriptor 生成，不手改產生結果；golden 另放 v2。
-1.x 資源保留原解讀；未曾正式發布，不要求先上線過渡版。尚未落地的 1.2 功能可整合首發 2.0，不能宣稱已做完。
+1.x 資源保留原解讀；未曾正式發布，不要求先上線過渡版。首發 2.0 **必須**同步 1.2 同名規則的 Schema、producer 與 reader 驗證，不能宣稱現有實作已完成。
+required_capabilities 已固定包含 digital-same-name-links-v1；即使 same_name 列為空，也不得省略能力、相關 Schema 或 reader 驗證。
+尚未完成時不得發布 2.0，不能以「可整合」為由裁掉必要能力。
 
 同步項目包括 printing_image 的 media 欄序／ImageDisplayVariant、移除公開 image_variant.path、
 固定 N／band width／dependencies、image-id-url-v1 與同名規則能力，以及獨立 index_format=2 的 current／previous。

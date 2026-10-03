@@ -59,11 +59,22 @@ f0 省略，其他面用永久 face.ordinal；printing.int_id 永不重配，不
 失敗預留號也不回收，相同計畫重試必須同號同輸出。此狀態耐久保存並備份，不由兩版 CDN 索引反推或重設。
 輸出 recipe、瀏覽器時間及每次全庫 data_version 都不能直接代替此事件版本。
 
+配號器使用 repo 外的**發布端耐久狀態檔**，與上傳計畫／發布收據同類，隨既有備份流程備份並驗還原；不是 authored 人工輸入，
+不放可丟棄建置快取、latest cache 或會按兩版回收的公開 snapshot namespace。
+至少保存已保留最高號 H、計畫識別、各組分配號與候選輸出完整 SHA，以及發布／失敗狀態；
+預留與備份確認完成後才可對外 PUT 或請求該 v，單一寫入者下原子推進 H。
+
+遺失時停止配號，從已驗備份及完整發布／預留收據恢復，含未發布、失敗與撤下號；
+安全下限 H 必須涵蓋所有曾使用或預留號，下一號嚴格大於 H，且仍在正安全整數範圍。
+R2 現存 current／previous media 的最大 v 是恢復時必須核對的下限，但 H 還須涵蓋未發布預留號。
+不能只取該最大值加任意安全間隔就宣稱不重用，因失敗／已回收的嘗試可能超過間隔；須由備份與完整收據證明上界。
+無法證明 H 完整時停止發布並恢復證據，不能猜時間戳、從 1 開始或把未知當零；到達上限亦停止，另訂版本策略。
+
 發布流程：
 
 1. 單一寫入者或等效鎖定，釘 current revision、候選內容 SHA／尺寸及 remote ETag，耐久記錄上傳計畫與保留 revision。
 2. 新圖片 key create-only，既有圖片以 If-Match 條件覆寫；只寫實際變動檔，未知 bytes／競爭停止。JSON／manifest 仍不可覆寫。
-3. 全組 origin bytes、尺寸及新 v CDN response 驗妥後，寫入新版不可變 JSON／manifest，最後 CAS 切 current／previous 索引。失敗不發布半套 current。
+3. 全組 origin bytes、尺寸驗妥，並逐一以普通 CDN GET 核對所有新 v URL 的完整輸出 SHA（含同組 bytes 未變而 URL 已換者）；不符依下述精確 URL purge 補救並重驗。全部通過後，寫入新版不可變 JSON／manifest，最後 CAS 切 current／previous 索引。失敗不發布半套 current。
 4. 提交後按 current 圖片集合清理撤下／不再使用 key，metadata 只保 current＋previous 聯集；GC 重驗 revision 並避開合法在途發布。
 
 同一組多尺寸覆寫並非跨物件原子交易；舊快照在寫入途中可能看到新舊尺寸混合，新快照只在全組就緒後發布。
@@ -77,10 +88,19 @@ previous 的舊 v 冷讀拿到目前 bytes 可接受，metadata 不重寫，也�
 CDN cache key 必須包含 v，rewrite／Worker 不得去掉 query；只 purge CDN 清不到 browser／SW。
 版本入口 no-store 或每次強制重驗。圖片可用 `public,max-age=86400,must-revalidate` 作初始配置，
 正確性靠新 URL；must-revalidate 不表示 fresh cache 每次重驗，舊 v 可取新 bytes，因此不把 URL 宣稱永久 immutable。
+部署時確認 Cloudflare 的 Browser Cache TTL 為 **Respect Existing Headers**，並核對 Cache Rules／Worker 不覆蓋物件 Cache-Control；
+Edge TTL 若另有覆寫須記錄實際設定與影響，不能用瀏覽器 TTL 推定 edge TTL。
+在正式網域以合成物件設定可辨識的 Cache-Control，比對 origin 與普通 CDN 回應，驗收實際採用的標頭及快取行為。
+先前實測回應的 max-age=14400 只證明當次回應值，不能據此證明物件標頭已受尊重或斷言由 zone 預設覆蓋。
 
 2026-10-04 已在 R2 自訂網域用合成圖驗證：普通 GET 暖 v1=A，未 purge 覆寫為 B，v1 仍 HIT A、v2 MISS B 後 HIT B。
 query 分離門檻已通過，未代驗瀏覽器／SW。正式網域核對設定，Cache Rules／Worker／rewrite／網域變更時回歸同一測試，
-不能用 bypass-cache 請求冒充通過。發布前不預暖尚未上傳的新 v；若新 v 已有錯 bytes／負快取，驗收失敗，處理後重驗。
+不能用 bypass-cache 請求冒充通過。發布前不預暖尚未上傳的新 v；若新 v 已有錯 bytes／負快取，驗收失敗並停止切索引。
+確認 origin 正確後，對受影響的**完整 URL（含 v）做精確 URL purge**，再以普通 CDN GET 核 SHA、暖快取後重讀；
+所有新 v URL 通過才可提交。purge 涉及 Cloudflare 權杖與權限，由維護者執行或逐次明示同意後執行；
+權杖不得寫入文件、上傳計畫、報告或 log，不把一般上傳同意視為 purge 授權。
+無權限或 purge／重驗失敗時保留未發布狀態，不以 bypass-cache 成功代替，也不擴大成全 zone purge。
+purge 只清 CDN；若 browser／SW 已取得受污染的 v，須放棄該號、另配新號並重新驗證，不以 CDN purge 宣稱端點舊快取已消失。
 另驗 browser／SW 全暖、網路／quota 失敗、撤下、晚到舊請求與回復版本；opaque response 不能稱為已驗 SHA。
 若部署無法可靠維持 query 分離，改採不重用版本檔名，須同步 producer／reader 契約，不能悄悄改 URL。
 
