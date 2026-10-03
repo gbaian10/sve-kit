@@ -162,13 +162,13 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 | `face_revision`：§2.3 display_ref 的現行／暫顯列                                                          | `id/face_id/region/name_unit_id/class_code/type_code/cost/attack/defense/traits/titles/special_kinds`；translations 中 field=name 的列 | id＋其餘白名單欄；translations 僅非 name 列                                                                                                                       |
 | `face_revision`：display_ref 外的候選／其餘觀測／歷史列                                                   | 無；以 §2.3 的 `display_ref` 區分，不另出貨集合                                                                                        | history 的完整列，按需載入（含其餘候選，不是現行／暫顯複本）                                                                                                      |
 | `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage`                                    | 全部欄位；status/reasons 不複製進 `card_facet`                                                                                         | 無                                                                                                                                                                |
-| `rules_name`、`face_rules_name`                                                                           | 1.0.0：全部欄位；1.1.0：無                                                                                                             | 1.0.0：無；1.1.0：全部原欄位，global detail                                                                                                                       |
+| `rules_name`、`face_rules_name`                                                                           | 1.0.0：全部欄位；1.1.0／1.2.0：無                                                                                                      | 1.0.0：無；1.1.0／1.2.0：全部原欄位，global detail                                                                                                                |
 | `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp                                  | 全部欄位                                                                                                                               | 無                                                                                                                                                                |
 | `text_unit`                                                                                               | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；每個文字 ID 只在其固定 bucket 的啟動包或詳情分片一邊                          | 非上述閉包的其餘文字列                                                                                                                                            |
 | `translation`                                                                                             | 現行／暫顯 name 與 facet labels 使用的翻譯列                                                                                           | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次                                                                                                                      |
 | 其餘文字集合                                                                                              | 無                                                                                                                                     | 完整白名單列                                                                                                                                                      |
 
-`rules_name`／`face_rules_name` 的全部原欄位在 format 1.0.0 唯一存於 bootstrap；在 1.1.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。其他表與 printing 診斷／art_id／printing_product／support 的存放均不變。
+`rules_name`／`face_rules_name` 的全部原欄位在 format 1.0.0 唯一存於 bootstrap；在 1.1.0／1.2.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。其他表與 printing 診斷／art_id／printing_product／support 的存放均不變。
 
 表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指儲存層，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。完整文字包只是這些欄位分割的容器聯集，仍維持分割，不額外打包全欄複本。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
 
@@ -298,12 +298,51 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 
 [construction-adoption-v1](construction-adoption.md) 定義首批 JP／EN Standard 的來源、兩模型核對採納與後續必要 CR 引用，不承諾整副牌合法性。首發先上禁限資料，CR 條文引用等 #48；其間 cr_version_id／construction_rules_ref 可為 null，固定 ref 尚未兌現，介面如實標示。已知限制可查，partial／未知日期或 evaluator 未支援 ref 時仍 unknown；不因入口沒公告連結而推無禁限。CR context_key、profile revision／restriction source_urls、coverage as_of、config.construction_refs 只在該契約列為待實作方案，本次不改公開表格／欄序。後續須與機器 Schema／types／reader、格式版本／capability 協商同步，才可宣稱出貨支援。
 
-## 9. 同名規則連結的待啟用格式擴充
+## 9. format 1.2.0 同名規則瀏覽
 
-[數位名字政策](digital-name-policy.md) 核可same_name卡層瀏覽；本次保留§2現行公開權威列／欄序與§8四種review_level。
-程式啟用時須同步新增relation值same_name，固定face_id／digital_face_id皆null、effect_similarity=null、review_level=unreviewed，
-畫面「同名規則視為同卡，未逐筆確認」；不改全域Source.review映射，不新增policy_checked或政策／收據公開欄。
-採minor版本＋required capability digital-same-name-links-v1／min_reader拒絕舊讀者，改tuple／原有意義則major。
-所有同名card/game/ID列出、wire依既有id，UI兩代全列先一代再二代；真人有效關係優先、同組規則不重複。
-純名字政策只出既有translation/FieldTranslation，數位卡／圖／link是否出貨依獨立實際能力，coverage缺紀錄仍未知。
-未啟用前不把核可當已出貨；正式容量與變動報告依實際所選版本量測，舊快照不回寫。
+[數位名字政策](digital-name-policy.md) 核可 same_name 卡層瀏覽，選用
+[傳輸契約 §5.3](snapshot-transport.md#53-format-120-同名規則瀏覽配置) 的 1.2.0 配置。
+本次先定版本與領域約束，保留 §2 現行公開權威列／欄序與 §8 四種 review_level；
+程式啟用時同步 relation 白名單、建置 DDL、typed projector、機器 Schema 與 reader。
+1.0.0／1.1.0 frozen Schema 與 golden 不變；1.2.0 另放 v1_2 資源，不能讓舊版本接受新枚舉。
+
+same_name 的公開欄位仍依 §2 的 digital_link 欄序：
+`id, card_id, face_id, digital_card_id, digital_phase, relation, effect_similarity, review_level`。
+face_id／digital_phase 皆 null、effect_similarity=null、review_level=unreviewed；
+它是一張實體卡到一個數位 game／official_id 的卡層連結，不展開面×phase。
+reader 必須拒絕 same_name 帶非 null 面／phase、效果相似度或非 unreviewed 的列。
+政策投影不能呼叫全域 Source.review 將私有機械 confirmed 轉成人工確認，其他 relation 的 review 映射不變。
+畫面標「同名規則視為同卡，未逐筆確認」，不能拿它供官方取名、同概念、效果等義、DSL、art 或 voice。
+不增加 policy_checked、政策／收據欄位或新的公開 review_level。
+
+所有符合政策的數位 ID 兩代全列，每個 `(card_id,game,official_id)` 的規則連結最多一筆，
+wire 依既有 link.id 排序；UI 先 sv1 再 svwb，各代按原始 ASCII official_id 排序。
+id 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，subject 依 digital-link-adoption 的完整卡層鍵；
+relation、時間、政策／排除清單 hash 不參與。政策卡層升真人且 subject 完全相同時沿 ID，
+精確面的人審 subject 是另一 ID。有效真人同 card/game/ID 的任何合法關係優先，規則不得另出重複列；
+真人負面、withdrawn、stale terminal 不由一般規則復活。尚無可支持的 rule_resume 格式時保守抑制，
+不能以猜測的收據解鎖。
+
+names 與 links 政策／排除互相獨立。被排除的名字不能供規則連結證據；
+同一卡對仍有另一個未排除名字的有效證據時可保留，card_target 排除則移除整個規則卡對。
+此處指 links 的名字排除；names 的取名排除不撤真人連結，也不自動代簽 links 排除。
+排除與有效真人關係重疊只報告，真人按自己的採納決定顯示。
+
+建置 digital_endpoint 不是新公開表：投影成既有 config.digital_endpoints，固定 sv1／svwb 兩列，
+欄位、排序、模板與語言對照依傳輸契約 §3／§5.3；不連網就保持 status=unknown。
+只公開有效關係所需的 digital_card 與必要引用閉包，不把完整凍結目錄全庫出貨；
+digital_face／digital_text 留建置端，沒有資產採納就不出 digital art／voice。
+純名字政策仍只用既有 translation／FieldTranslation；連結是否出貨依獨立能力。
+首批不採納 coverage，digital_link_coverage=[] 是未知，不表示查無或真人查完。
+
+| 驗收反例 | 結果 |
+| --- | --- |
+| 偽 1.0.0／1.1.0 的 same_name，或 1.2.0 缺 capability／最低版本不足 | 拒絕整份快照，不能丟掉列後降版 |
+| 1.2.0 零配對便省 capability，或 config／fragment／programs／text_all 仍寫舊版本 | 拒絕，不因空列放寬准入 |
+| same_name 帶面／phase、effect_similarity、sampled／confirmed review | producer 與 reader 各自拒絕 |
+| same_name 因不同面或 phase 重複出列，或同組真人與規則並存 | 拒絕重複規則列；建置端保留全部匹配來源，真人精確面的合法多筆沿自己的 subject |
+| digital_card／link／endpoint 引用缺目標，或把凍結目錄全部當必要閉包 | 拒絕缺引用；只投影實際有效關係所需內容 |
+| 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |
+
+上述為待實作契約，不表示前端已能讀取或已發布。正式容量與變動報告依各自所選版本量測，
+沿用 1.1 固定配置與既有預算；超出既有上限須交維護者決定，不自動改 N／格式。舊快照永不回寫。
