@@ -160,6 +160,18 @@ def revision(record: Record) -> int:
     return 0 if isinstance(record, TermRecord) else record.data.adoption_no
 
 
+def validate_snapshot(snapshot: Snapshot) -> None:
+    """Validate the glossary subset of a separately verified complete translation closure."""
+    for path, _, content in snapshot.shards:
+        match = re.fullmatch(
+            r"translations/glossary/([A-Za-z0-9_-]+)/[0-9]{3,}\.yaml", path
+        )
+        if match is None:
+            raise ValueError("Glossary snapshot contains an unsupported shard path")
+        _envelope(Shard.model_validate_json(content), match[1])
+    _history(snapshot)
+
+
 def _safe(path: Path) -> None:
     if any(part.is_symlink() for part in (path, *path.parents)) or not path.is_file():
         raise ValueError("Missing or symlink translation input")
