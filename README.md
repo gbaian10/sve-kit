@@ -73,9 +73,13 @@ dsl/ ──validates──> authored/ ──read by──> carddb/ ──exports
 ## Raw data
 
 Source caches (HTML, card images and voice files) and their manifests belong
-outside this repo. Selected official assets remain in the tree and are excluded
-from our grants as described in
-[LICENSING.md](LICENSING.md). Set `SVE_DATA_DIR` to a directory outside the repo:
+outside this repo. Public carddb test fixtures use synthetic content. Selected
+official assets and source-derived examples and fixtures elsewhere still remain,
+including the sim/web development snapshot, engine and scenario-runner tests,
+and `tests/ai-positions`. They are excluded from our grants as described in
+[LICENSING.md](LICENSING.md); follow-up cleanup is tracked in
+[#16](https://github.com/gbaian10/sve-kit/issues/16).
+Set `SVE_DATA_DIR` to a directory outside the repo:
 
 ```text
 $SVE_DATA_DIR/
