@@ -26,7 +26,7 @@ from .fakesite import IMG, FakeSite
 if TYPE_CHECKING:
     from .conftest import FakeClock
 
-FIXTURES = Path(__file__).parent / "fixtures" / "official_en"
+FIXTURES = Path(__file__).parent / "fixtures" / "synthetic_en"
 
 
 def fixture(name: str) -> bytes:
@@ -91,51 +91,54 @@ def test_allowed(url: str, *, expected: bool) -> None:
     assert en.allowed(url) is expected
 
 
-# --- real pages -------------------------------------------------------------------
+# --- synthetic pages -------------------------------------------------------------------
 
 
 def test_parse_sets() -> None:
-    sets = jp.parse_sets(fixture("sets.html"))
+    sets = jp.parse_sets(fixture("F06-sets.html"))
     assert len(sets) == 50
-    assert sets[0].code == "BP19-BP20"
-    assert sets[-1] == jp.CardSet(code="PR", name="Promo Cards")
+    assert sets[0] == jp.CardSet(code="SYN01", name="SVE-KIT 合成F06段落002。")
+    assert sets[-1] == jp.CardSet(code="SYN50", name="SVE-KIT 合成F06段落051。")
 
 
 def test_parse_list_pages() -> None:
-    first = jp.parse_list_first(fixture("list_BP01_1.html"))
+    first = jp.parse_list_first(fixture("F03-list.html"))
     assert (first.total, first.max_page) == (273, 19)
-    assert first.card_numbers[:2] == ["BP01-001EN", "BP01-002EN"]
+    assert first.card_numbers == [f"SYN01-{index:03}EN" for index in range(1, 16)]
     second = jp.parse_list_more(
-        fixture("list_BP01_2.html"), page=2, max_page=19, total=273
+        fixture("F05-list.html"), page=2, max_page=19, total=273
     )
-    assert second.card_numbers[0] == "BP01-016EN"
-    assert len(second.card_numbers) == 15
-    last = jp.parse_list_more(
-        fixture("list_BP01_19.html"), page=19, max_page=19, total=273
-    )
-    assert last.card_numbers == ["BP01-U05EN", "BP01-U06EN", "BP01-U07EN"]
+    assert second.card_numbers == [f"SYN01-{index:03}EN" for index in range(1, 16)]
+    last = jp.parse_list_more(fixture("F04-list.html"), page=19, max_page=19, total=273)
+    assert last.card_numbers == ["SYN01-001EN", "SYN01-002EN", "SYN01-003EN"]
 
 
 def test_card_page_resolves_images_on_the_english_site() -> None:
-    card = en.parse_card(fixture("card_BP01-001EN.html"), expected_number="BP01-001EN")
-    assert card.name == "Rose Queen"
+    card = en.parse_card(fixture("F01-card.html"), expected_number="SYN01-001EN")
+    assert card.card_number == "SYN01-001EN"
+    assert card.name == "SVE-KIT 合成測試卡 F01-01"
+    assert card.image_originals == [
+        "/wordpress/wp-content/images/cardlist/synthetic/SYN01-001EN-1.png"
+    ]
     assert card.image_urls == [
-        "https://en.shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP01/BP01-001EN.png"
+        "https://en.shadowverse-evolve.com/wordpress/wp-content/images/cardlist/synthetic/SYN01-001EN-1.png"
     ]
 
 
 def test_special_card_keeps_its_number() -> None:
-    card = en.parse_card(
-        fixture("card_BP18-SP01EN.html"), expected_number="BP18-SP01EN"
-    )
-    assert card.card_number == "BP18-SP01EN"
-    assert card.image_originals[0].endswith("/BP18/BP18-SP01EN.png")
+    card = en.parse_card(fixture("F02-card.html"), expected_number="SYN01-SP01EN")
+    assert card.card_number == "SYN01-SP01EN"
+    assert card.name == "SVE-KIT 合成測試卡 F02-01"
+    assert card.image_originals == [
+        "/wordpress/wp-content/images/cardlist/synthetic/SYN01-SP01EN-1.png"
+    ]
 
 
 def test_card_page_must_be_the_requested_card() -> None:
-    # A Japanese number without the suffix is a different card.
-    with pytest.raises(ValidationError, match="asked for BP01-001"):
-        en.parse_card(fixture("card_BP01-001EN.html"), expected_number="BP01-001")
+    with pytest.raises(
+        ValidationError, match=r"^asked for SYN01-099EN, page shows SYN01-001EN$"
+    ):
+        en.parse_card(fixture("F01-card.html"), expected_number="SYN01-099EN")
 
 
 # --- crawling ---------------------------------------------------------------------
