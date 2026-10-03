@@ -66,8 +66,10 @@ class Database:
         self._version = schema.version
         self._query_checks = schema.query_checks
 
-    def _read(self, sql: str) -> tuple[tuple[SQLValue, ...], ...]:
-        result: object = self._connection.execute(sql).fetchall()
+    def _read(
+        self, sql: str, parameters: tuple[SQLValue, ...] = ()
+    ) -> tuple[tuple[SQLValue, ...], ...]:
+        result: object = self._connection.execute(sql, parameters).fetchall()
         return _raw_rows(result)
 
     def verify(self) -> None:
@@ -173,7 +175,13 @@ class Database:
         """Expose declaration names, never unvalidated SQLite schema metadata."""
         return tuple(column.name for column in self._tables[name].columns)
 
-    def select(self, name: str, selected: tuple[str, ...]) -> tuple[Row, ...]:
+    def select(
+        self,
+        name: str,
+        selected: tuple[str, ...],
+        *,
+        where: Mapping[str, Value] | None = None,
+    ) -> tuple[Row, ...]:
         """Read only an explicit column whitelist through the typed boundary."""
         table = self._tables[name]
         if not selected or len(selected) != len(set(selected)):
@@ -181,7 +189,16 @@ class Database:
         declarations = tuple(table.column(column) for column in selected)
         columns = ", ".join(map(identifier, selected))
         order = ", ".join(map(identifier, table.primary_key))
-        raw = self._read(f"SELECT {columns} FROM {identifier(name)} ORDER BY {order}")
+        parameters = () if where is None else self._parameters(table, where)
+        condition = (
+            " WHERE " + " AND ".join(f"{identifier(key)} IS ?" for key in where)
+            if where
+            else ""
+        )
+        raw = self._read(
+            f"SELECT {columns} FROM {identifier(name)}{condition} ORDER BY {order}",
+            parameters,
+        )
         return tuple(
             Row(
                 name,

@@ -52,6 +52,29 @@ capability does not claim complete importer/validator readiness. Real migration
 counts, missing evidence and contract questions are reported separately in review
 artifacts; synthetic tests are not production adoption receipts.
 
+The opt-in `translation_names` schema now adds the complete `translation_use`
+and `translation_selection` column sets from build-db §9. Its population and
+query checks currently accept only name fields with a null ordinal, a face
+revision or a complete printing/face pair, and a default context. Other owners
+remain represented in the DDL and fail closed at the name-only capability.
+Non-default contexts require the later complete assignment-history replay;
+an adopted-looking decision row alone does not enable them.
+
+`name_build` reads each owner's own language, exact content hash and source unit.
+Unknown or omitted printed text yields no context or use even if a current name
+is available; known historical printing names can differ from current names.
+Pending wording does not suppress a known name. These helpers consume an already
+verified publication database; they do not validate raw archives, import policies
+or activate the offline build/preview path. Existing full glossary replay remains
+mandatory, including its rejection of unsupported overrides.
+
+Only reviewed unofficial translations can enter the shared selection table.
+Official names need per-owner eligibility and later `FieldTranslation` bindings;
+both the helper and commit-time checks prevent a shared selection from granting
+that eligibility. The optional tables do not change the default compiled table
+set or snapshot format. Disposable databases use schema version 5 and the existing
+atomic rebuild path; failed reconstruction preserves the previous file bytes.
+
 Glossary adoption format 1 now requires explicit `adoption_review` on all four
 glossary kinds, `source_claim` on choices, and the mutually exclusive frozen
 versus authored Japanese source fields on concepts. Old incomplete payloads are
