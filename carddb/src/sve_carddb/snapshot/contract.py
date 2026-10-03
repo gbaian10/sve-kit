@@ -6,25 +6,28 @@ from importlib.resources import files
 from jsonschema import Draft202012Validator
 from pydantic import JsonValue
 
+from sve_carddb.snapshot.profiles import LEGACY, profile
 from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
 
 
 @cache
-def schema() -> dict[str, JsonValue]:
+def schema(format_version: str = LEGACY) -> dict[str, JsonValue]:
     """Load the self-contained schema without network resolution."""
-    resource = files("sve_carddb.snapshot").joinpath("schema/v1/contract.schema.json")
+    resource = files("sve_carddb.snapshot").joinpath(
+        "schema/" + profile(format_version).resource + "/contract.schema.json"
+    )
     return object_value(parse(resource.read_bytes()))
 
 
-def definition(name: str) -> dict[str, JsonValue]:
+def definition(name: str, format_version: str = LEGACY) -> dict[str, JsonValue]:
     """Get a named format definition."""
-    return object_value(object_value(schema()["$defs"])[name])
+    return object_value(object_value(schema(format_version)["$defs"])[name])
 
 
-def validate(name: str, value: JsonValue) -> None:
+def validate(name: str, value: JsonValue, format_version: str = LEGACY) -> None:
     """Validate shape and primitive boundaries against a fixed definition."""
     canonical(value)
-    selected = schema() | {"$ref": "#/$defs/" + name}
+    selected = schema(format_version) | {"$ref": "#/$defs/" + name}
     selected.pop("oneOf")
     Draft202012Validator(selected).validate(value)
 
@@ -39,9 +42,9 @@ def tables() -> list[str]:
     return [string(item) for item in array(definition("Container")["x-tables"])]
 
 
-def row_type(table: str, partition: str) -> str:
+def row_type(table: str, partition: str, format_version: str = LEGACY) -> str:
     """Resolve a fragment's fixed row type."""
-    mapping = object_value(definition("Container")["x-fragments"])
+    mapping = object_value(definition("Container", format_version)["x-fragments"])
     return string(object_value(mapping[table])[partition])
 
 

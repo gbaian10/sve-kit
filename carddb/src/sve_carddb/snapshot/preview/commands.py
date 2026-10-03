@@ -19,6 +19,7 @@ from sve_carddb.snapshot.offline import Inputs as OfflineInputs
 from sve_carddb.snapshot.offline import build as build_offline
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.build import Inputs, build
+from sve_carddb.snapshot.profiles import LEGACY, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -49,7 +50,7 @@ def verify_inputs(roots: Roots, inputs: Inputs | OfflineInputs) -> None:
 
 
 @app.command("export")
-def export_command(
+def export_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI selects fixed profile and explicit isolated input/output roots
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
     cdn_dir: Annotated[Path, typer.Option(envvar="SVE_CDN_DIR")],
@@ -62,8 +63,10 @@ def export_command(
     image_cache_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
+    format_version: Annotated[str, typer.Option()] = LEGACY,
 ) -> None:
     """Require explicit roots and pins; write no formal index, active state or cache."""
+    profile(format_version)
     roots = Roots(preview_dir, cdn_dir)
     roots.verify()
     recipe = Inputs.model_validate_json(inputs.read_bytes())
@@ -96,7 +99,11 @@ def export_command(
             "new_encoding_milliseconds": 0,
         }
     snapshot = export_snapshot(
-        built.projection, built.ownership, recipe.batch(), brotli=codec
+        built.projection,
+        built.ownership,
+        recipe.batch(),
+        brotli=codec,
+        format_version=format_version,
     )
     require_preview(snapshot.manifest)
     _write(
@@ -133,8 +140,10 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     image_cache_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
+    format_version: Annotated[str, typer.Option()] = LEGACY,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
+    profile(format_version)
     roots = Roots(preview_dir, cdn_dir)
     recipe = OfflineInputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
@@ -179,7 +188,11 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         recipe, bundle_dir=bundle_dir, images=images, image_root=image_assets_dir
     )
     snapshot = export_snapshot(
-        built.projection, built.ownership, recipe.batch(), brotli=codec
+        built.projection,
+        built.ownership,
+        recipe.batch(),
+        brotli=codec,
+        format_version=format_version,
     )
     report = write_preview(
         snapshot,

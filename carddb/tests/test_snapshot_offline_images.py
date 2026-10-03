@@ -144,8 +144,11 @@ def regional_images(
     return recipe, assets, roots
 
 
+@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
 def test_bilingual_images_bundle_snapshot_and_upload(
-    regional_images: tuple[Inputs, ImageBuild, PreviewRoots], tmp_path: Path
+    format_version: str,
+    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
+    tmp_path: Path,
 ) -> None:
     recipe, assets, roots = regional_images
     built = offline.build(
@@ -165,7 +168,9 @@ def test_bilingual_images_bundle_snapshot_and_upload(
         "en_image_variant",
     } <= {use.usage for use in record.uses}
     assert (tmp_path / "bundle/inputs.json").read_bytes() == built.input_content
-    snapshot = export_snapshot(built.projection, built.ownership, recipe.batch())
+    snapshot = export_snapshot(
+        built.projection, built.ownership, recipe.batch(), format_version=format_version
+    )
     output = Roots(tmp_path / "preview", roots.cdn)
     write_preview(
         snapshot, output, built.report, regions=("en", "jp"), image_source=roots.preview

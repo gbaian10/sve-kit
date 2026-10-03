@@ -1,0 +1,29 @@
+{
+  "format_version": "1.1.0",
+  "tables": {
+    "printing_image": [
+      {
+        "base": null,
+        "bucket": 29,
+        "columns": [
+          "printing_id",
+          "face_id",
+          "image_id"
+        ],
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "p:a",
+            "f:a",
+            "img:a"
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {}
+}

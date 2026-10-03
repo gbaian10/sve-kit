@@ -585,7 +585,9 @@ def cli_recipe(tmp_path: Path) -> dict[str, JsonValue]:
     }
 
 
+@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
 def test_cli_export_explicit_env_roots(
+    format_version: str,
     logical: tuple[Projection, Ownership],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -599,7 +601,14 @@ def test_cli_export_explicit_env_roots(
     )
     result = CliRunner().invoke(
         app,
-        ["snapshot", "export", "--inputs", str(path)],
+        [
+            "snapshot",
+            "export",
+            "--inputs",
+            str(path),
+            "--format-version",
+            format_version,
+        ],
         env={
             "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
             "SVE_CDN_DIR": str(tmp_path / "formal"),
@@ -611,6 +620,15 @@ def test_cli_export_explicit_env_roots(
         tmp_path / "preview/private/inputs" / (digest(b"synthetic input")[7:] + ".json")
     ).read_bytes() == b"synthetic input"
     assert not (tmp_path / "formal").exists()
+
+    root = tmp_path / "preview"
+    pointer = object_value(
+        parse((root / "snapshots/preview/current.json").read_bytes())
+    )
+    manifest = object_value(
+        parse((root / string(pointer["manifest_path"])).read_bytes())
+    )
+    assert manifest["format_version"] == format_version
 
 
 def test_review_joins_follow_filtered_primary_keys() -> None:

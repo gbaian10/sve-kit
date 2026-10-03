@@ -1,0 +1,100 @@
+{
+  "format_version": "1.1.0",
+  "tables": {
+    "product_family": [
+      {
+        "base": null,
+        "bucket": 24,
+        "columns": [
+          "id",
+          "code",
+          "public_code",
+          "kind",
+          "name_unit_id",
+          "translations"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "bootstrap",
+        "rows": [
+          [
+            "set:a",
+            "synthetic",
+            "SYN",
+            "other",
+            "t:ja:90d435ce36c2c997",
+            []
+          ]
+        ]
+      }
+    ],
+    "text_unit": [
+      {
+        "base": null,
+        "bucket": 28,
+        "columns": [
+          "id",
+          "lang",
+          "text"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "bootstrap",
+        "rows": [
+          [
+            "t:ja:90d435ce36c2c997",
+            "ja",
+            "Synthetic set"
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {
+    "FieldTranslation": {
+      "columns": [
+        "field",
+        "ordinal",
+        "target_lang",
+        "translation_id",
+        "basis"
+      ],
+      "items": [
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "shared_jp",
+            "official_counterpart"
+          ]
+        }
+      ]
+    }
+  }
+}

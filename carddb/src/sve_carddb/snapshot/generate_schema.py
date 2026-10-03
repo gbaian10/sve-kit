@@ -6,6 +6,7 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
+from sve_carddb.snapshot.profiles import LEGACY, PROFILES, profile
 from sve_carddb.snapshot.schema_patterns import patterns
 from sve_carddb.snapshot.values import array, object_value, parse, string
 
@@ -117,11 +118,13 @@ def _changes(
     return {"type": "array", "items": {"oneOf": branches}}
 
 
-def generate() -> bytes:
+def generate(format_version: str = LEGACY) -> bytes:
     """Regenerate schema bytes solely from the packaged declarative source."""
     source = object_value(
         parse(
-            files("sve_carddb.snapshot").joinpath("schema/v1/source.json").read_bytes()
+            files("sve_carddb.snapshot")
+            .joinpath("schema/" + profile(format_version).resource + "/source.json")
+            .read_bytes()
         )
     )
     _patterns(source)
@@ -168,9 +171,10 @@ def generate() -> bytes:
 
 def main() -> None:
     """Replace the checked-in resource when run in a source checkout."""
-    Path(__file__).parent.joinpath("schema/v1/contract.schema.json").write_bytes(
-        generate()
-    )
+    for item in PROFILES:
+        Path(__file__).parent.joinpath(
+            "schema/" + item.resource + "/contract.schema.json"
+        ).write_bytes(generate(item.version))
 
 
 if __name__ == "__main__":

@@ -37,7 +37,14 @@ from sve_carddb.snapshot.preview import Roots, require_unknown_coverage, write_p
 from sve_carddb.snapshot.project import project
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import (
+    array,
+    canonical,
+    digest,
+    object_value,
+    parse,
+    string,
+)
 
 from .adoption_fixtures import REPO
 from .catalog_vocabulary_fixtures import make_vocabulary_case
@@ -446,7 +453,9 @@ def test_offline_coverage_remains_unknown(
         require_offline_coverage(poisoned, errata=False)
 
 
+@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
 def test_offline_cli_writes_private_bundle_and_dual_preview(
+    format_version: str,
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],
     tmp_path: Path,
 ) -> None:
@@ -458,6 +467,8 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
         [
             "snapshot",
             "export-offline",
+            "--format-version",
+            format_version,
             "--inputs",
             str(path),
             "--preview-dir",
@@ -472,6 +483,25 @@ def test_offline_cli_writes_private_bundle_and_dual_preview(
     assert (tmp_path / "bundle/build.sqlite").is_file()
     assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
     assert not (tmp_path / "formal").exists()
+
+    root = tmp_path / "preview"
+    pointer = object_value(
+        parse((root / "snapshots/preview/current.json").read_bytes())
+    )
+    manifest = object_value(
+        parse((root / string(pointer["manifest_path"])).read_bytes())
+    )
+    assert manifest["format_version"] == format_version
+
+    report = object_value(
+        parse(
+            (
+                root / "reports" / (string(pointer["manifest_sha256"])[7:] + ".json")
+            ).read_bytes()
+        )
+    )
+    startup = object_value(object_value(report["capacity"])["startup_by_region"])
+    assert startup["jp"] == startup["en"]
 
 
 @pytest.mark.parametrize("pins", [(), ("jp",), ("jp", "en"), ("en", "en")])

@@ -9,6 +9,7 @@ from sve_carddb.snapshot.contract import (
     required_types,
     row_type,
 )
+from sve_carddb.snapshot.profiles import LEGACY
 from sve_carddb.snapshot.values import array, object_value, string
 
 
@@ -33,16 +34,20 @@ def encode(name: str, row: dict[str, JsonValue]) -> list[JsonValue]:
     ]
 
 
-def container(tables: dict[str, JsonValue]) -> dict[str, JsonValue]:
+def container(
+    tables: dict[str, JsonValue], format_version: str = LEGACY
+) -> dict[str, JsonValue]:
     """Attach exactly the transitive nested descriptors used by these fragments."""
     used: set[str] = set()
     for table, fragments in tables.items():
         for fragment in array(fragments):
             used |= required_types(
-                row_type(table, string(object_value(fragment)["partition"]))
+                row_type(
+                    table, string(object_value(fragment)["partition"]), format_version
+                )
             )
     return {
-        "format_version": "1.0.0",
+        "format_version": format_version,
         "types": {name: descriptor(name) for name in sorted(used)},
         "tables": tables,
     }

@@ -1,13 +1,15 @@
 """Cross-row constraints that JSON Schema cannot express."""
 
 from typing import TYPE_CHECKING
-from urllib.parse import urlsplit
+from urllib.parse import quote, urlsplit
 
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.contract import definition
+from sve_carddb.snapshot.profiles import SHARDED, profile
 from sve_carddb.snapshot.values import (
     array,
+    bucket,
     canonical,
     digest,
     integer,
@@ -506,3 +508,81 @@ def _wording(view: View) -> None:
                 blocks.get(string(face["card_id"]), {}),
             )
             _wording_candidates(face, wording, physical, dates, revisions)
+
+
+def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> None:
+    """Recompute entity buckets from joined identities, independently of the exporter."""
+    selected = profile(string(manifest["format_version"]))
+    if selected.version != SHARDED:
+        return
+    faces = {string(row["id"]): row for row in view["face"]}
+    bases = {
+        (
+            f.file,
+            f.table,
+            canonical(f.value["owner"]),
+            integer(f.value["bucket"]),
+        ): f.rows
+        for f in fragments
+        if f.value["partition"] == "bootstrap"
+    }
+    for fragment in fragments:
+        owner = object_value(fragment.value["owner"])
+        kind = string(owner["kind"])
+        identifier = string(owner["id"]) if owner["id"] is not None else ""
+        part = string(fragment.value["partition"])
+        role = (
+            "images"
+            if fragment.table in {"image_asset", "image_variant", "printing_image"}
+            else "bootstrap"
+            if part == "bootstrap"
+            else "text"
+        )
+        width = selected.width(role, part, kind, identifier)
+        band = integer(fragment.value["bucket"]) // width
+        key = "/".join(
+            (
+                role,
+                part,
+                kind,
+                quote(identifier, safe="") or "global",
+                "band",
+                str(band),
+            )
+        )
+        if fragment.file != key:
+            raise ValueError("File key does not match fixed band recipe")
+        rows = fragment.rows
+        if fragment.value["base"] is not None:
+            base = object_value(fragment.value["base"])
+            rows = bases[
+                string(object_value(base["file"])["key"]),
+                fragment.table,
+                canonical(base["owner"]),
+                integer(base["bucket"]),
+            ]
+        for row in rows:
+            key_values = _entity_key(fragment.table, row, faces)
+            if bucket(key_values, selected.buckets) != fragment.value["bucket"]:
+                raise ValueError("Fragment entity bucket does not match fixed profile")
+
+
+def _entity_key(table: str, row: Row, faces: dict[str, Row]) -> list[JsonValue]:
+    if table in _CARD_TABLES:
+        entity = (
+            row["id"]
+            if table == "card"
+            else faces[string(row["face_id"])]["card_id"]
+            if table == "face_revision"
+            else row["from_card_id"]
+            if table == "card_related"
+            else row["card_id"]
+        )
+        return [entity]
+    if table in _PRINT_TABLES:
+        return [row["id" if table == "printing" else "printing_id"]]
+    if table in _ART_TABLES:
+        return [row["id" if table == "art" else "art_id"]]
+    if table in {"image_asset", "image_variant"}:
+        return [row["id" if table == "image_asset" else "image_id"]]
+    return [row[string(field)] for field in array(definition(table)["x-primary-key"])]
