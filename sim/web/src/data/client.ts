@@ -116,9 +116,28 @@ function validateIndex2(index: JsonObject): void {
   }
 }
 
+const mediaAnchors = new WeakMap<LoadedSnapshot, Map<string, Fragment>>()
+function mediaBootstrap(snapshot: LoadedSnapshot): Map<string, Fragment> {
+  const existing = mediaAnchors.get(snapshot)
+  if (existing) return existing
+  const anchors = new Map<string, Fragment>()
+  for (const fragment of snapshot.bootstrap) {
+    if (fragment.table !== "printing" && fragment.table !== "face") continue
+    for (const row of fragment.rows) {
+      const key = canonicalText([fragment.table, row["id"] ?? null])
+      if (anchors.has(key))
+        throw new SnapshotError("primary-key-duplicate", "duplicate media bootstrap target")
+      anchors.set(key, fragment)
+    }
+  }
+  mediaAnchors.set(snapshot, anchors)
+  return anchors
+}
+
 function validateMediaFile(fragments: readonly Fragment[], snapshot: LoadedSnapshot): void {
   const media = fragments.filter((fragment) => fragment.table === "printing_image")
   if (media.length === 0) return
+  const anchors = mediaBootstrap(snapshot)
   const required = new Set([stringValue(objectValue(snapshot.manifest["config_ref"])["key"])])
   for (const fragment of media) {
     for (const row of fragment.rows) {
@@ -126,9 +145,7 @@ function validateMediaFile(fragments: readonly Fragment[], snapshot: LoadedSnaps
         ["printing", "printing_id"],
         ["face", "face_id"],
       ]) {
-        const base = snapshot.bootstrap.find(
-          (f) => f.table === table && f.rows.some((r) => r["id"] === row[field ?? ""]),
-        )
+        const base = anchors.get(canonicalText([table ?? null, row[field ?? ""] ?? null]))
         if (!base) throw new SnapshotError("dangling-reference", "media bootstrap target missing")
         if (
           table === "printing" &&
@@ -470,7 +487,9 @@ export function createSnapshotClient(
     for (const fragment of fragments) (digitalView[fragment.table] ??= []).push(...fragment.rows)
     validateDigitalLinks(digitalView)
     if (!active()) throw new Error("snapshot replaced")
-    const faces = facesOf(snapshot)
+    const faces = fragments.some((fragment) => fragment.value["base"] !== null)
+      ? facesOf(snapshot)
+      : new Map<string, JsonObject>()
     return fragments.map((fragment) => {
       if (fragment.value["base"] === null) return fragment
       const base = findBase(fragment, [...snapshot.bootstrap, ...fragments], snapshot.files)

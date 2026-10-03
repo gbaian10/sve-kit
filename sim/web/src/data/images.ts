@@ -171,11 +171,13 @@ async function readMediaFaces(
   const locate = createLocator(snapshot.files, new Set(["printing_image"]))
   const printings = new Map<string, Row>()
   const faceRows = new Map<string, Row>()
+  const requestedFaces = new Set(faces.map((f) => f.faceId))
   const requested = new Set(faces.map((f) => f.printingId))
   const keys = new Set<string>()
   for (const fragment of snapshot.bootstrap) {
     for (const row of fragment.rows) {
-      if (fragment.table === "face") faceRows.set(stringValue(row["id"]), row)
+      if (fragment.table === "face" && requestedFaces.has(stringValue(row["id"])))
+        faceRows.set(stringValue(row["id"]), row)
       if (fragment.table === "printing" && requested.has(stringValue(row["id"]))) {
         const id = stringValue(row["id"])
         printings.set(id, row)

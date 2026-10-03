@@ -30,13 +30,15 @@ export function validatePlacement(
   const all = [...bootstrap, ...fragments]
   const faces =
     knownFaces ??
-    new Map(
-      all
-        .filter((f) => f.table === "face")
-        .flatMap((f) =>
-          f.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
-        ),
-    )
+    (fragments.some((f) => f.table === "face_revision")
+      ? new Map(
+          all
+            .filter((f) => f.table === "face")
+            .flatMap((f) =>
+              f.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
+            ),
+        )
+      : new Map<string, JsonValue>())
   for (const fragment of fragments) {
     const owner = objectValue(fragment.value["owner"])
     const kind = stringValue(owner["kind"])
