@@ -1,4 +1,5 @@
 import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json"
+import shardedContract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1_1/contract.schema.json"
 import { fail } from "./errors"
 import {
   arrayValue,
@@ -16,14 +17,23 @@ export const SCHEMA_ID = "urn:sve-kit:snapshot:1.0.0"
 // resource, so the strict byte boundary that snapshot data goes through is not needed here.
 export const schemaRoot: JsonObject = objectValue(contract)
 export const validator = new SchemaValidator(schemaRoot)
+const shardedValidator = new SchemaValidator(objectValue(shardedContract))
 
 export function definition(name: string): JsonObject {
   return validator.definition(name)
 }
 
 /** Shape and primitive boundaries against a fixed definition; throws a `schema` error. */
-export function validate(name: string, value: JsonValue, path: JsonPath = []): void {
-  const failure = validator.validate(name, value)
+export function validate(
+  name: string,
+  value: JsonValue,
+  path: JsonPath = [],
+  version = "1.0.0",
+): void {
+  const selected =
+    version === "1.0.0" ? validator : version === "1.1.0" ? shardedValidator : undefined
+  if (!selected) fail("unsupported-version", "unsupported schema profile")
+  const failure = selected.validate(name, value)
   if (failure)
     fail("schema", `${name}: ${failure.keyword} ${failure.detail}`, [...path, ...failure.path])
 }
@@ -43,8 +53,9 @@ export function tables(): string[] {
 }
 
 /** A fragment's fixed row type, e.g. printing + detail -> printing_detail. */
-export function rowType(table: string, partition: string): string {
-  const mapping = objectValue(definition("Container")["x-fragments"] ?? null)
+export function rowType(table: string, partition: string, version = "1.0.0"): string {
+  const selected = version === "1.1.0" ? shardedValidator : validator
+  const mapping = objectValue(selected.definition("Container")["x-fragments"] ?? null)
   return stringValue(objectValue(mapping[table] ?? null)[partition] ?? null)
 }
 

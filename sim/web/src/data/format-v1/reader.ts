@@ -15,14 +15,16 @@ import {
   stringValue,
   utf8,
 } from "./json"
+import { validatePlacement } from "./placement"
 import { descriptor, primaryKey, requiredTypes, rowType, tables, validate } from "./schema"
 import { validateConfig, validateFragments, validateView } from "./semantics"
 import { digest } from "./sha256"
 
-const FORMAT = "1.0.0"
+const FORMATS = ["1.0.0", "1.1.0"]
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "1.0.0"
+const READER_CONTRACT_VERSION = "1.1.0"
 const CAPABILITIES: readonly string[] = ["column-partition-v1", "fragment-container-v1"]
+const SHARDED_CAPABILITIES = [...CAPABILITIES, "image-entity-buckets-v1", "rules-name-on-demand-v1"]
 
 export type View = Record<string, Row[]>
 
@@ -125,8 +127,8 @@ export function readPayload(file: JsonObject, data: Uint8Array): JsonValue {
   return value
 }
 
-export function readContainer(file: JsonObject, value: JsonObject): Fragment[] {
-  validate("Container", value)
+export function readContainer(file: JsonObject, value: JsonObject, version = "1.0.0"): Fragment[] {
+  validate("Container", value, [], version)
   const key = stringValue(file["key"])
   const result: Fragment[] = []
   const used = new Set<string>()
@@ -140,13 +142,19 @@ export function readContainer(file: JsonObject, value: JsonObject): Fragment[] {
         : partition === "bootstrap"
           ? "bootstrap"
           : "text"
-      if (role !== file["role"] || fragment["bucket"] !== 0) {
+      if (
+        role !== file["role"] ||
+        !(
+          integerValue(fragment["bucket"]) >= 0 &&
+          integerValue(fragment["bucket"]) < (version === "1.1.0" ? 64 : 1)
+        )
+      ) {
         fail(
           "fragment-profile",
           `fragment ${table}/${partition} in ${key} does not match its file role or the bucket profile`,
         )
       }
-      const name = rowType(table, partition)
+      const name = rowType(table, partition, version)
       for (const nested of requiredTypes(name)) used.add(nested)
       const rows = arrayValue(fragment["rows"] ?? null).map((row, index) =>
         decodeRow(name, row, [key, table, index]),
@@ -155,7 +163,7 @@ export function readContainer(file: JsonObject, value: JsonObject): Fragment[] {
       result.push({
         file: key,
         table,
-        value: fragment,
+        value: Object.fromEntries(Object.entries(fragment).filter(([name]) => name !== "rows")),
         rows,
         identity: canonicalText([table, owner, fragment["bucket"] ?? null, partition]),
       })
@@ -180,7 +188,7 @@ export function readContainer(file: JsonObject, value: JsonObject): Fragment[] {
   return result
 }
 
-function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>): Fragment[] {
+function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>, version: string): Fragment[] {
   const expected = [...all.keys()].sort()
   const given = [...payloads.keys()].sort()
   if (expected.join("\n") !== given.join("\n"))
@@ -190,12 +198,12 @@ function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>): Fragment[]
     const value = objectValue(readPayload(file, payloads.get(key) ?? new Uint8Array()))
     const role = stringValue(file["role"])
     if (role === "config" || role === "programs") {
-      validate(role === "config" ? "Config" : "Programs", value, [key])
+      validate(role === "config" ? "Config" : "Programs", value, [key], version)
       if (role === "config") validateConfig(value)
       if (arrayValue(file["row_counts"] ?? null).length !== 0)
         fail("non-table-row-counts", `${key} has row counts`)
     } else {
-      result.push(...readContainer(file, value))
+      result.push(...readContainer(file, value, version))
     }
   }
   if (new Set(result.map((fragment) => fragment.identity)).size !== result.length) {
@@ -548,21 +556,57 @@ export function isCompatible(entry: JsonObject): boolean {
   const capabilities = arrayValue(entry["required_capabilities"] ?? null).map((item) =>
     stringValue(item),
   )
+  const capabilitiesForFormat =
+    entry["format_version"] === "1.1.0" ? SHARDED_CAPABILITIES : CAPABILITIES
   return (
-    entry["format_version"] === FORMAT &&
+    FORMATS.includes(stringValue(entry["format_version"])) &&
     !newerThan(stringValue(entry["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) &&
-    capabilities.length === CAPABILITIES.length &&
-    CAPABILITIES.every((capability) => capabilities.includes(capability))
+    capabilities.length === capabilitiesForFormat.length &&
+    capabilitiesForFormat.every((capability) => capabilities.includes(capability))
   )
 }
 
 /** Everything the manifest alone can prove: shape, compatibility, files, dependencies, metadata. */
 export function verifyManifest(manifestValue: JsonValue): { manifest: JsonObject; files: Files } {
-  validate("Manifest", manifestValue)
   const manifest = objectValue(manifestValue)
+  const version = stringValue(manifest["format_version"])
+  if (!FORMATS.includes(version)) fail("unsupported-version", "unsupported format")
+  validate("Manifest", manifestValue, [], version)
   if (!isCompatible(manifest))
     fail("unsupported-version", "unsupported format, reader version or capability")
   const all = files(manifest)
+  if (
+    version === "1.1.0" &&
+    [...all.values()].some((file) => integerValue(file["bytes"]) > 512 * 1024)
+  )
+    fail("fragment-profile", "data file exceeds fixed 512 KiB limit")
+  const identities = new Set<string>()
+  for (const file of all.values()) {
+    for (const count of arrayValue(file["row_counts"])) {
+      const entry = objectValue(count)
+      const identity = canonicalText([
+        entry["table"] ?? null,
+        entry["owner"] ?? null,
+        entry["bucket"] ?? null,
+        entry["partition"] ?? null,
+      ])
+      if (identities.has(identity))
+        fail("duplicate-fragment", "manifest fragment identity is not unique")
+      identities.add(identity)
+      validatePlacement(
+        [
+          {
+            file: stringValue(file["key"]),
+            table: stringValue(entry["table"]),
+            rows: [],
+            identity,
+            value: { ...entry, base: null },
+          },
+        ],
+        version,
+      )
+    }
+  }
   metadata(manifest, all)
   const configs = [...all.values()].filter((file) => file["role"] === "config")
   const programs = [...all.values()].filter((file) => file["role"] === "programs")
@@ -595,13 +639,14 @@ export function readSnapshot(
   payloads: ReadonlyMap<string, Uint8Array>,
 ): View {
   const { manifest, files: all } = verifyManifest(manifestValue)
-  const fragments = load(all, payloads)
+  const fragments = load(all, payloads, stringValue(manifest["format_version"]))
   validateFragments(fragments)
   const view = logical(fragments, all)
   unique(view)
   closure(view, manifest)
   current(view, fragments)
   validateView(view, manifest, fragments)
+  validatePlacement(fragments, stringValue(manifest["format_version"]))
   return view
 }
 
@@ -611,11 +656,13 @@ export function readTextAll(
   data: Uint8Array,
   attachments: ReadonlyMap<string, Uint8Array>,
 ): View {
-  validate("Manifest", manifestValue)
   const manifest = objectValue(manifestValue)
+  const version = stringValue(manifest["format_version"])
+  if (!FORMATS.includes(version)) fail("unsupported-version", "unsupported format")
+  validate("Manifest", manifestValue, [], version)
   const description = objectValue(manifest["text_all"] ?? null)
   const value = objectValue(readPayload(description, data))
-  validate("TextAll", value)
+  validate("TextAll", value, [], version)
   const all = files(manifest)
   const expected = [...all.values()]
     .filter((file) => TEXT_ROLES.has(stringValue(file["role"])))

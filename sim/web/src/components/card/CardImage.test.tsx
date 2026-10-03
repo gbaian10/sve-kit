@@ -88,6 +88,51 @@ describe("CardImage", () => {
     expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
   })
 
+  it("keeps a replacement image behind the text card until the new source loads", async () => {
+    const { rerender } = await renderInRouter(
+      <CardImage
+        summary={summary}
+        name={name}
+        images={images("available")}
+        alt="redundant"
+        sizes="50vw"
+        className="w-full"
+      />,
+    )
+    const original = document.querySelector("img[srcset]")
+    if (!original) throw new Error("no image")
+    act(() => {
+      original.dispatchEvent(new Event("load"))
+    })
+    expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+    const changed: ImageIndex = {
+      asset: images("available").asset,
+      cardImage: () => ({
+        src: "/cdn/new.webp",
+        srcSet: "/cdn/new.webp 320w",
+        width: 320,
+        height: 447,
+      }),
+    }
+    rerender(
+      <CardImage
+        summary={summary}
+        name={name}
+        images={changed}
+        alt="redundant"
+        sizes="50vw"
+        className="w-full"
+      />,
+    )
+    expect(screen.getByText("BP01-001", { selector: "[aria-hidden] *" })).toBeInTheDocument()
+    const replacement = document.querySelector("img[srcset]")
+    if (!replacement) throw new Error("no replacement")
+    act(() => {
+      replacement.dispatchEvent(new Event("load"))
+    })
+    expect(screen.queryByText("BP01-001")).not.toBeInTheDocument()
+  })
+
   it("shows the text card with a reason for missing, pending and withdrawn images", async () => {
     const { unmount } = await renderInRouter(
       <CardImage

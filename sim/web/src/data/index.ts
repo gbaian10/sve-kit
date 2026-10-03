@@ -1,9 +1,14 @@
 // Public API of the data layer: pages import from here only (lint enforces it). Exports grow with
 // their first consumer, so the barrel never carries unused surface.
 export { type CardSummary, type Catalog, catalogOf } from "./catalog"
-export type { LoadedSnapshot, SnapshotClient, SnapshotStatus } from "./client"
+export {
+  createSnapshotClient,
+  type LoadedSnapshot,
+  type SnapshotClient,
+  type SnapshotStatus,
+} from "./client"
 export type { Row } from "./format-v1/decode"
-export { type ImageIndex, imageIndexOf } from "./images"
+export { type ImageFace, type ImageIndex, loadImagePage } from "./images"
 export {
   activeSnapshotRoot,
   setActiveSnapshotRoot,
