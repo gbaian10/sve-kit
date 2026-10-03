@@ -12,6 +12,8 @@ from pathlib import Path
 from typing import cast
 
 EXPECTED_ARGS = 2
+FULL_THRESHOLD = 90
+MAX_THRESHOLD = 100
 
 
 @dataclass(frozen=True)
@@ -103,14 +105,42 @@ def coverage(path: Path, *, rust: bool) -> float:
     return number(totals_python["percent_covered"])
 
 
+def coverage_scope() -> tuple[str, float]:
+    """Scope comes from the event classifier, never from missing private files."""
+    selected = os.environ.get("SVE_CI_TEST_MODE", "full")
+    raw = os.environ.get(
+        "SVE_CI_COVERAGE_THRESHOLD", "90" if selected == "full" else ""
+    )
+    if selected not in {"full", "fork"} or not re.fullmatch(r"[0-9]+", raw):
+        raise ValueError("Invalid coverage scope")
+    minimum = number(raw)
+    if not 1 <= minimum <= MAX_THRESHOLD or (
+        selected == "full" and minimum != FULL_THRESHOLD
+    ):
+        raise ValueError("Invalid coverage threshold")
+    return selected, minimum
+
+
+def scope_description() -> str:
+    """Distinguish remaining-test coverage from complete acceptance."""
+    selected, _ = coverage_scope()
+    if selected == "full":
+        return "Test scope: **full**; private test data required."
+    return (
+        "Test scope: **fork / remaining tests**. Private real-page / engine snapshot tests were not run. "
+        "私有真實頁測試未執行。 This is not full coverage acceptance."
+    )
+
+
 def coverage_description(folder: Path, *, rust: bool) -> str:
     """Keep failure counts visible even when failing tests prevented coverage export."""
+    _, minimum = coverage_scope()
     label = "Line" if rust else "Combined line + branch"
     try:
         percent = coverage(folder / "coverage.json", rust=rust)
     except (OSError, ValueError, TypeError, KeyError, IndexError):
-        return f"{label} coverage unavailable; required **90%**."
-    return f"{label} coverage: **{percent:.2f}%**, required **90%**."
+        return f"{label} coverage unavailable; required **{minimum:g}%**."
+    return f"{label} coverage: **{percent:.2f}%**, required **{minimum:g}%**."
 
 
 def failure_section(locations: list[str]) -> list[str]:
@@ -146,7 +176,7 @@ def junit_summary(kind: str, folder: Path) -> str:
             f"Command wall time (including startup/coverage): **{wall:.2f} s**."
         )
     if kind == "python":
-        lines.append(coverage_description(folder, rust=False))
+        lines.extend([scope_description(), coverage_description(folder, rust=False)])
     lines.extend(
         failure_section(
             [f"{case.file}::{case.name}" for case in cases if case.state == "failed"]
@@ -200,7 +230,7 @@ def rust_summary(folder: Path) -> str:
     skipped = sum(int(row[2]) for row in results)
     elapsed = number((folder / "elapsed.txt").read_text(encoding="utf-8").strip())
     seconds = sum(number(row[3]) for row in results)
-    coverage_line = coverage_description(folder, rust=True)
+    coverage_line = scope_description() + "\n" + coverage_description(folder, rust=True)
     locations = re.findall(
         r"^test ((?:r#)?[A-Za-z_][A-Za-z0-9_]*(?:::(?:r#)?[A-Za-z_][A-Za-z0-9_]*)*) \.\.\. FAILED$",
         source,
@@ -222,6 +252,14 @@ def main(argv: list[str]) -> int:
         summary = (
             rust_summary(folder) if kind == "rust" else junit_summary(kind, folder)
         )
+        if kind != "web":
+            try:
+                _, minimum = coverage_scope()
+                status = int(
+                    coverage(folder / "coverage.json", rust=kind == "rust") < minimum
+                )
+            except (OSError, ValueError, TypeError, KeyError, IndexError):
+                status = 1
     except (OSError, ValueError, TypeError, KeyError, IndexError, ET.ParseError):
         # Exception strings can contain diagnostics from the report; keep them private too.
         summary = f"## {kind.title()} tests\n\nStatistics unavailable: missing or invalid report. See the test step exit status; reproduce locally for diagnostics.\n"

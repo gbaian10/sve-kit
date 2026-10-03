@@ -44,14 +44,18 @@ class DirectTestTests(unittest.TestCase):
             ("python", 'pytest -n "$PYTEST_WORKERS" --cov --durations=30'),
             (
                 "rust",
-                "cargo llvm-cov --locked --workspace -j 4 --summary-only --fail-under-lines 90",
+                'python3 .github/ci/testdata.py rust-tests "$REPORT_DIR/coverage.json"',
             ),
             ("web", "bun run test --maxWorkers=4 --reporter=junit"),
         ):
             steps = cast("list[dict[str, object]]", jobs[job]["steps"])
             test = next(step for step in steps if step.get("id") == "tests")
             assert command in str(test["run"])
-            assert "--output" in str(test["run"]) or "--junitxml" in str(test["run"])
+            assert (
+                "coverage.json" in str(test["run"])
+                if job == "rust"
+                else "--output" in str(test["run"]) or "--junitxml" in str(test["run"])
+            )
             assert 'exit "$status"' in str(test["run"])
             summary = next(
                 step for step in steps if "test_summary.py" in str(step.get("run"))
@@ -69,8 +73,8 @@ class DirectTestTests(unittest.TestCase):
             for step in cast("list[dict[str, object]]", job.get("steps", []))
         )
 
-    def test_every_job_uses_the_single_runner_switch(self) -> None:
-        """Only CI_RUNNER picks the runner; unset means GitHub-hosted, caches stay unchanged."""
+    def test_every_job_uses_fixed_github_hosted_runner(self) -> None:
+        """Every workflow job stays hosted even if a repository runner variable is reintroduced."""
         for name in ("ci.yml", "pr-title.yml"):
             source = (ROOT / ".github/workflows" / name).read_text()
             workflow = cast(
@@ -78,14 +82,73 @@ class DirectTestTests(unittest.TestCase):
                 yaml.safe_load(source),
             )
             assert "self-hosted" not in source
-            assert "CI_RUNNER_LABELS" not in source
+            assert "CI_RUNNER" not in source
             assert "cache-local-path" not in source
             jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
             for job in jobs.values():
-                assert job["runs-on"] == "${{ vars.CI_RUNNER || 'ubuntu-latest' }}"
+                assert job["runs-on"] == "ubuntu-latest"
                 for step in cast("list[dict[str, object]]", job["steps"]):
                     if "actions/checkout@" in str(step.get("uses")):
                         assert cast("dict[str, object]", step["with"])["clean"] is True
+
+    def test_private_checkout_and_key_are_only_required_for_full_scope(self) -> None:
+        """Forks omit checkout rather than attempting it without credentials."""
+        workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+        for component in ("python", "rust"):
+            steps = workflow["jobs"][component]["steps"]
+            select = next(step for step in steps if step.get("id") == "pin")
+            assert (
+                select["run"] == f"python3 .github/ci/testdata.py configure {component}"
+            )
+            checkout = next(
+                step
+                for step in steps
+                if step.get("with", {}).get("path") == ".testdata"
+            )
+            key = next(
+                step
+                for step in steps
+                if step.get("name") == "Require the private-data deploy key"
+            )
+            verify = next(
+                step
+                for step in steps
+                if step.get("name") == "Verify required private test data"
+            )
+            for step in (checkout, key, verify):
+                assert step["if"] == "steps.pin.outputs.mode == 'required'"
+            assert checkout["with"]["ref"] == "${{ steps.pin.outputs.commit }}"
+            assert checkout["with"]["persist-credentials"] is False
+            assert verify["run"] == f"python3 .github/ci/testdata.py verify {component}"
+            assert (
+                steps.index(select)
+                < steps.index(key)
+                < steps.index(checkout)
+                < steps.index(verify)
+            )
+            for value, expected in (("", 1), ("synthetic-key", 0)):
+                result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- real fixed key guard, synthetic secret
+                    [shutil.which("bash") or "bash", "-eu", "-c", key["run"]],
+                    env={**os.environ, "DEPLOY_KEY": value},
+                    capture_output=True,
+                    check=False,
+                )
+                assert result.returncode == expected
+                assert not value or value not in result.stdout.decode()
+        test = next(
+            step
+            for step in workflow["jobs"]["python"]["steps"]
+            if step.get("id") == "tests"
+        )
+        assert '--cov-fail-under="$SVE_CI_COVERAGE_THRESHOLD"' in test["run"]
+        assert test["env"]["TMPDIR"] == "${{ runner.temp }}"
+        cleanup = next(
+            step
+            for step in workflow["jobs"]["python"]["steps"]
+            if step.get("name") == "Remove private Python reports and test data"
+        )
+        assert cleanup["if"] == "always()"
+        assert '"${RUNNER_TEMP}"/pytest-of-*' in cleanup["run"]
 
     def test_only_pr_runs_are_cancelled(self) -> None:
         """Main cache writers must finish even when another commit is pushed."""

@@ -62,11 +62,11 @@ in `docs/m0/` are not covered by the project's Apache grant. Synthetic test
 content follows its path's project license. Any official or other third-party
 source expression embedded in test programs remains excluded from that grant.
 
-The current tree still contains source-derived fixtures and real-card assertions
-under `carddb/tests/`; their replacement with synthetic data is tracked in
-[issue #228](https://github.com/gbaian10/sve-kit/issues/228). Their official
-quotations and source-derived material are excluded from the project grants
-while present, as well as in historical revisions after removal.
+Public carddb tests use synthetic pages and wording. Original test pages and the
+engine card list are kept in a permanently private testdata repository; the public
+repository stores source pins and field-value SHA-256 hashes, not those inputs.
+Private storage controls access and does not grant rights in official material.
+Earlier source-derived fixtures and assertions remain excluded in Git history.
 
 The site image `sim/web/src/assets/official/logo/head-left.png` is a crop of an
 official character illustration, currently used as the site's logo. It is not an
@@ -91,8 +91,8 @@ license. There is no alternative-license choice for the complete mixed file.
 ## Previous revisions
 
 The repository retains its Git history. Deleted question originals remain
-accessible in previous revisions. When source-derived test fixtures are replaced,
-their earlier versions likewise remain accessible in previous revisions.
+accessible in previous revisions. Earlier source-derived test fixtures likewise
+remain accessible in previous revisions.
 Official and other third-party content there is excluded
 from the project's grants just as it is in the current tree. A license added to
 a later revision does not relicense earlier third-party material.

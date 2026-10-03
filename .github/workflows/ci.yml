@@ -22,7 +22,7 @@ env:
 jobs:
   changes:
     if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
       contents: read
@@ -70,7 +70,7 @@ jobs:
 
   repo:
     if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -117,13 +117,35 @@ jobs:
   python:
     needs: changes
     if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.python == 'true' }}
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           clean: true
+      - name: Clear prior private checkout
+        run: rm -rf .testdata
+      - name: Select explicit test scope and read the pin
+        id: pin
+        run: python3 .github/ci/testdata.py configure python
+      - name: Require the private-data deploy key
+        if: steps.pin.outputs.mode == 'required'
+        env:
+          DEPLOY_KEY: ${{ secrets.TESTDATA_DEPLOY_KEY }}
+        run: test -n "$DEPLOY_KEY" || { echo 'Required private test data key is missing'; exit 1; }
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.pin.outputs.mode == 'required'
+        with:
+          repository: ${{ steps.pin.outputs.repo }}
+          ref: ${{ steps.pin.outputs.commit }}
+          ssh-key: ${{ secrets.TESTDATA_DEPLOY_KEY }}
+          path: .testdata
+          persist-credentials: false
+          clean: true
+      - name: Verify required private test data
+        if: steps.pin.outputs.mode == 'required'
+        run: python3 .github/ci/testdata.py verify python
       # Hooks pin language_version python3.14 (.pre-commit-config.yaml).
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -162,9 +184,10 @@ jobs:
             uv run --project carddb --locked pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
-      - name: pytest (combined line and branch coverage >= 90%)
+      - name: pytest (coverage gate for the explicit test scope)
         id: tests
         env:
+          TMPDIR: ${{ runner.temp }}
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
         run: |
@@ -175,6 +198,7 @@ jobs:
           [[ "$PYTEST_WORKERS" =~ ^[1-4]$ ]] || { echo 'CI_PYTEST_WORKERS must be 1–4'; exit 1; }
           status=0
           uv --directory carddb run --locked pytest -n "$PYTEST_WORKERS" --cov --durations=30 \
+            --cov-fail-under="$SVE_CI_COVERAGE_THRESHOLD" \
             --junitxml="$REPORT_DIR/junit.xml" --cov-report="json:$REPORT_DIR/coverage.json" \
             > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
@@ -190,7 +214,7 @@ jobs:
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-python-reports
           SVE_DATA_DIR: ${{ runner.temp }}/sve-carddb-test-data
-        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache
+        run: rm -rf "$REPORT_DIR" "$SVE_DATA_DIR" carddb/htmlcov carddb/.pytest_cache .testdata "${RUNNER_TEMP}"/pytest-of-*
       - uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main' && steps.mypy-cache.outputs.cache-hit != 'true'
         with:
@@ -205,7 +229,7 @@ jobs:
   rust:
     needs: changes
     if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.rust == 'true' }}
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
       MISE_EXEC_AUTO_INSTALL: 'false' # the cargo hooks go through `mise exec`; Rust itself comes from rustup
@@ -214,18 +238,18 @@ jobs:
         with:
           persist-credentials: false
           clean: true
-      - name: Read the test data pin
+      - name: Clear prior private checkout
+        run: rm -rf .testdata
+      - name: Select explicit test scope and read the pin
         id: pin
-        run: |
-          python3 - <<'PY' >> "$GITHUB_OUTPUT"
-          import tomllib
-          with open(".github/ci/testdata.lock", "rb") as f:
-              pin = tomllib.load(f)
-          for key in ("repo", "commit", "snapshot_path", "snapshot_sha256"):
-              print(f"{key}={pin[key]}")
-          PY
-      # Private card text for the engine tests; a missing key or hash mismatch fails the job.
+        run: python3 .github/ci/testdata.py configure rust
+      - name: Require the private-data deploy key
+        if: steps.pin.outputs.mode == 'required'
+        env:
+          DEPLOY_KEY: ${{ secrets.TESTDATA_DEPLOY_KEY }}
+        run: test -n "$DEPLOY_KEY" || { echo 'Required private test data key is missing'; exit 1; }
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: steps.pin.outputs.mode == 'required'
         with:
           repository: ${{ steps.pin.outputs.repo }}
           ref: ${{ steps.pin.outputs.commit }}
@@ -233,15 +257,9 @@ jobs:
           path: .testdata
           persist-credentials: false
           clean: true
-      - name: Verify the test data
-        env:
-          SNAPSHOT: .testdata/${{ steps.pin.outputs.snapshot_path }}
-          EXPECTED: ${{ steps.pin.outputs.snapshot_sha256 }}
-          COMMIT: ${{ steps.pin.outputs.commit }}
-        run: |
-          test "$(git -C .testdata rev-parse HEAD)" = "$COMMIT"
-          echo "${EXPECTED}  ${SNAPSHOT}" | sha256sum -c -
-          echo "SVE_TEST_SNAPSHOT=${GITHUB_WORKSPACE}/${SNAPSHOT}" >> "$GITHUB_ENV"
+      - name: Verify required private test data
+        if: steps.pin.outputs.mode == 'required'
+        run: python3 .github/ci/testdata.py verify rust
       - name: Install the pinned Rust toolchain
         run: rustup show active-toolchain || rustup toolchain install
       - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -279,7 +297,7 @@ jobs:
             uv run --project carddb --locked --no-default-groups --group dev pre-commit run --all-files --hook-stage "$stage" --show-diff-on-failure
             echo "::endgroup::"
           done
-      - name: Rust tests (line coverage >= 90%)
+      - name: Rust tests (coverage gate for the explicit test scope)
         id: tests
         env:
           REPORT_DIR: ${{ runner.temp }}/sve-rust-reports
@@ -289,8 +307,8 @@ jobs:
           mkdir -p "$REPORT_DIR"
           start=$SECONDS
           status=0
-          cargo llvm-cov --locked --workspace -j 4 --summary-only --fail-under-lines 90 \
-            --json --output-path "$REPORT_DIR/coverage.json" > "$REPORT_DIR/test.log" 2>&1 || status=$?
+          python3 .github/ci/testdata.py rust-tests "$REPORT_DIR/coverage.json" \
+            > "$REPORT_DIR/test.log" 2>&1 || status=$?
           echo "$((SECONDS - start))" > "$REPORT_DIR/elapsed.txt"
           echo "cargo llvm-cov exit status: $status (statistics in the next step; raw output stays private)"
           exit "$status"
@@ -313,7 +331,7 @@ jobs:
   web:
     needs: changes
     if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && needs.changes.outputs.web == 'true' }}
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 20
     defaults:
       run:
@@ -373,7 +391,7 @@ jobs:
   # PRs and public main run this regardless of paths; the PR title has its own workflow.
   commit:
     if: ${{ !(github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) }}
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -399,7 +417,7 @@ jobs:
   ci-ok:
     if: always()
     needs: [changes, repo, python, rust, web, commit]
-    runs-on: ${{ vars.CI_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     timeout-minutes: ${{ (github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true) && 20 || 5 }}
     env:
       MAIN_MAINTENANCE: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && github.event.repository.private == true }}

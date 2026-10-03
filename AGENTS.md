@@ -60,13 +60,14 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 個人設定、秘密、本機的研究筆記不屬於這個 repo。
 `authored/` 依卡包切檔（例如 `authored/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
 
-測試用官方卡文存於專用私有 GitHub testdata repo，只放測試需要的卡表輸入（目前是完整的日文卡表 JSONL）與來源說明，不放卡圖或憑證，不用 R2。
-目前 `sve-kit` 仍有待 #228 替換的裁剪官方測試頁與真實卡文斷言；
-這些官方內容不在本專案授權內，範圍見 [LICENSING.md](LICENSING.md)。
+測試用官方卡文存於永久私有的 GitHub testdata repo，保存完整日文卡表 JSONL、19 個官方頁面測試原檔與來源說明，不放卡圖或憑證，不用 R2。
+公開 repo 的 carddb 測試使用自編的合成頁面與文字，只保存私有案例索引及逐欄位 SHA-256；官方網址、欄位標籤與解析所需的固定詞彙仍用於結構測試。
+歷史官方內容與其他保留內容的授權範圍見 [LICENSING.md](LICENSING.md)。
 `sve-kit` 只保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
 更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。
-主分支與專案自己的 PR 跑完整測試：Rust 行覆蓋率門檻為 90%，Python 行與分支覆蓋率合計門檻為 90%（本機 pytest hook 與 CI 相同）；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
-fork PR 使用針對剩餘測試配置的獨立覆蓋率門檻與結果標示，不套用完整測試的 90% 門檻，也不宣稱完整覆蓋率驗收通過。
+公開後主分支與專案自己的 PR 跑完整測試：Rust 行覆蓋率門檻為 90%，Python 行與分支覆蓋率合計門檻為 90%（本機 pytest hook 與 CI 相同）；公開後 fork PR 沒有 secret，明確排除依賴私有測試資料的測試並在 job summary 標示。
+fork PR 依來源 repo 判定，明確以 `excluded` 模式排除私有頁面，Rust 只排除依賴私有快照的 `cards`／`shared` 測試目標，保留 production 覆蓋範圍。
+fork PR 使用 `.github/ci/fork-coverage.json` 針對剩餘測試配置的獨立覆蓋率門檻與結果標示，不套用完整測試的 90% 門檻，也不宣稱完整覆蓋率驗收通過。
 測試卡文與含卡文的衍生產物不放 Actions cache／artifact；失敗 log 不印整行卡文。私有存放只是存取控制，不等於授權；公開前的 LICENSE 審查須涵蓋這批資料。
 
 ## 已定案的設計原則
@@ -77,7 +78,7 @@ fork PR 使用針對剩餘測試配置的獨立覆蓋率門檻與結果標示，
 - **卡號照官網原樣保存**（含 `Ⓢ`、小寫 `a`）；卡圖網址**從頁面 `<img src>` 原樣抓**，不能由卡號推算
   - 例外：一代數位版官網 shadowverse-portal.com（`sources/official_sv1.py`，只用來對應數位卡）的卡圖網址格式固定，
     用模板組網址；抓不到（官網會 302 轉到 HTML 頁，或 404）就改抓該卡的卡片頁、取實際的 `<img src>` 再試。
-    測試用真實卡片頁確認模板仍與頁面一致
+    合成頁測試模板與 fallback；私有真實頁測試驗證已鎖定的來源欄位
 - **SQLite 只在建置時用來檢查資料完整性**，使用者拿到的是 JSON 快照
 - 資訊洩漏原則：用戶端只能拿到公開資訊；未公開的對手手牌不能有可追蹤的固定 ID
 
