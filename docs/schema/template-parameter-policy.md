@@ -217,6 +217,11 @@ row／政策與 presented_in 所釘的正式條件輸出 hash 必須相符；舊
 
 ## 4. 五欄 pin、引用與 F1
 
+清冊 v2 依[歷史清冊重算契約](template-source-replay.md)以凍結語義版本重算並逐項比對輸出 hash。
+效果 replay_context.inputs 恰為 `{kind:effect}`，以下五欄 pin／來源／legacy／references 仍只以 recipe config 為權威；
+不在 context 重複一份。凍結語義 manifest 不取代 policy／approval、matcher_commit 與既有八檔 exact bytes。
+producer 環境與當次差異進 provenance，環境不同不先拒絕；全輸出、逐位置與授權仍驗。
+
 來源清冊的分類／參數 `recipes[].config` 必含 `recognition_policy`，值恰為 null 或：
 
 ```text
@@ -252,6 +257,10 @@ F1 dependencies 包含 pair 兩檔、實際 matcher／adapter／parser／normali
 
 ## 5. 對來源重播的約束
 
+全歷史清冊按其凍結版本與不可變 expected 重算，不使用 latest helper；members／checkpoint
+完整摘要記 resolved roles／reference 身分／pending，不能只驗字串 hash。
+升 pin 的逐身份比對仍須比較 resolved_slots；少掉或換概念拒絕並列受影響身份，不讓摘要替代單調比對。
+
 選項編號依賴同一**完整欄位**：有限引導須更早、引導與標號均屬 body，該群恰為連續 1..k、至少兩項，
 下個引導切斷前群；保存完整欄位 hash、引導與整組標號的原樣 code point spans，不能借提醒或別欄。
 同一舊模板在兩個來源可以一處命中、一處待審，不能把某個 legacy ID 的一次成功當全成員的核可。
@@ -277,6 +286,9 @@ policy.scope.source_batches 必須明列此批；14,782 個既有數值位置逐
 指紋重現、來源覆蓋、角色分類完整及正式採納分開驗收；本契約不接 presence v2，unknown 不轉空字串。
 
 ## 6. Loader 的兩層驗證及最低反例
+
+v2 封套結構與來源 C+hash 支援分開：僅支援封閉格式時，來源語意入口明示拒絕；
+完整接通後另驗[歷史清冊 H 系列](template-source-replay.md#6-最小獨立驗收)，不鬆開以下拒絕。
 
 | 層級 | 必驗範圍 | 限制 |
 | --- | --- | --- |

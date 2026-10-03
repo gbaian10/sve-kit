@@ -224,6 +224,14 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
+模板來源清冊的新格式為 `template_source_format:2`，頂層恰為
+`{template_source_format,kind,recipes,replay_context,entries}`，仍由 translations index.inventories
+釘完整 canonical hash。recipes 六欄、entries 八欄不變；replay_context 的凍結語義、producer 環境、
+逐清冊 inputs 與不可變六流 expected_outputs 依[歷史清冊重算契約](template-source-replay.md)。
+環境差異只記錄，輸出漂移或超預算分別回 replay_output_mismatch／replay_budget_exceeded；
+不將結構通過當來源重算通過，完整 C+hash 合併及首次獨立驗證前不寫真實清冊。
+格式修訂不修改已採納歷史 bytes；若發現正式 v1，停止新採納並另審追加遷移。
+
 `context_assignment` 的 data 必備自己的 identity_basis，固定三欄不可變 Git 背景沿
 [翻譯契約 §6.1.1](translation-contract.md#611-context_assignment-的不可變身分背景)。
 每筆歷史按自己的背景驗，當次再按 owner 原文與有效身分判適用；不得從 consumer revision 補值，
