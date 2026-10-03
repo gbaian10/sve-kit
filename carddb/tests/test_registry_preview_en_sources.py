@@ -2,7 +2,9 @@
 
 import hashlib
 import json
+import tempfile
 from dataclasses import replace
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
@@ -37,7 +39,7 @@ from .test_registry_preview_archive import RAW as JP_RAW
 from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
-    from pathlib import Path
+    from collections.abc import Iterator
 
     from sve_carddb.registry.preview.evidence import CardEvidence
     from sve_carddb.registry.records import Region as RegistryRegion
@@ -100,11 +102,18 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
     )
 
 
+@pytest.fixture
+def comparison_output() -> Iterator[Path]:
+    with tempfile.TemporaryDirectory() as directory:
+        yield Path(directory) / "comparison.json"
+
+
 @pytest.mark.parametrize("parser", ["candidate", "legacy"])
 def test_compare_main_selects_requested_parser_for_sealed_synthetic_sources(
     frozen_registry: tuple[Path, FrozenRegions],
     inputs: Inputs,
     tmp_path: Path,
+    comparison_output: Path,
     monkeypatch: pytest.MonkeyPatch,
     parser: str,
 ) -> None:
@@ -112,7 +121,7 @@ def test_compare_main_selects_requested_parser_for_sealed_synthetic_sources(
     legacy = tmp_path / "legacy.jsonl"
     raw = "".join(card.model_dump_json() + "\n" for card in inputs.en.values()).encode()
     legacy.write_bytes(raw)
-    output = tmp_path / "comparison.json"
+    output = comparison_output
     monkeypatch.setattr(
         "sys.argv",
         [

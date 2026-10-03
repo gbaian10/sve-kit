@@ -5,6 +5,7 @@ import hashlib
 import json
 import re
 import sys
+import tempfile
 from collections import Counter, defaultdict
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -372,8 +373,11 @@ def main() -> None:
     )
     parser.add_argument("--legacy-sha256")
     args = parser.parse_args()
-    if not args.output.resolve().is_relative_to(Path("/tmp")):  # ruff: ignore[hardcoded-temp-file] -- this one-off report must never enter source roots
-        msg = "report must be written under /tmp"
+    temporary_roots = (Path("/tmp"), Path(tempfile.gettempdir()))  # ruff: ignore[hardcoded-temp-file] -- preserve the legacy report root alongside runner-specific temporary storage
+    if not any(
+        args.output.resolve().is_relative_to(root.resolve()) for root in temporary_roots
+    ):
+        msg = "report must be written under /tmp or the runtime temporary directory"
         raise ValueError(msg)
     legacy, legacy_hash = read_legacy(args.legacy, args.legacy_sha256)
     snapshot = load_registry(args.authored)

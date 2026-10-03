@@ -40,6 +40,9 @@ all candidate observations are recomputed from verified sealed HTML. Reports
 contain hashes, byte lengths, counts and difference fields, never card text.
 Parser file pins use package-relative paths so source and extractor modules
 with the same basename cannot overwrite each other's hash.
+Reports must be written under `/tmp` or the runtime temporary directory selected
+by Python's `tempfile` (including CI's `TMPDIR`). Resolved output paths are checked,
+so a symlink into another directory does not bypass this restriction.
 
 ## Sealed extraction
 
