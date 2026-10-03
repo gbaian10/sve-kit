@@ -33,5 +33,5 @@ unused-allowed-license = "allow"
 exceptions = [{ crate = "borrow-or-share", allow = ["MIT-0"] }]
 
 [licenses.private]
-# Our own crates are `publish = false` and the LICENSE is still undecided.
+# Internal crates are unpublished; their original software uses Apache-2.0.
 ignore = true
