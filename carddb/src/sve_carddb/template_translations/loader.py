@@ -9,6 +9,7 @@ from pydantic import ValidationError
 from sve_carddb.catalog.adoption_loader import ordered
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
+from sve_carddb.template_sources.flavor import VERSION as FLAVOR_VERSION
 from sve_carddb.template_translations.files import (
     INVENTORY,
     SHARD,
@@ -16,6 +17,7 @@ from sve_carddb.template_translations.files import (
     json_bytes,
     read,
 )
+from sve_carddb.template_translations.flavor_models import FlavorEntry
 from sve_carddb.template_translations.models import (
     DefinitionRecord,
     Inventory,
@@ -24,7 +26,7 @@ from sve_carddb.template_translations.models import (
     TranslationRecord,
 )
 from sve_carddb.template_translations.review import require_resolved_dispute, verify
-from sve_carddb.template_translations.text import parse
+from sve_carddb.template_translations.text import parse, verify_flavor
 from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
@@ -336,6 +338,8 @@ def _translations(
                 "Template translation language must differ from its source"
             )
         parse(record.data.text, definition.data.parameter_schema)
+        if definition.data.source_span.role == "flavor":
+            verify_flavor(record.data.text, definition.data.parameter_schema)
         chains[record.data.template_id, record.data.lang].append(record)
     for chain in chains.values():
         if sorted(r.data.revision for r in chain) != list(range(1, len(chain) + 1)):
@@ -400,7 +404,12 @@ def _definition(
         raise ValueError("Template definition references an absent inventory entry")
     if (
         data.source_lang != "ja"
-        or data.normalizer_version != VERSION_PARAMETERS
+        or data.normalizer_version
+        != (
+            FLAVOR_VERSION
+            if isinstance(representative.entry, FlavorEntry)
+            else VERSION_PARAMETERS
+        )
         or data.semantic_variant != "default"
     ):
         raise ValueError(

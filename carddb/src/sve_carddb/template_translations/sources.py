@@ -25,9 +25,16 @@ from sve_carddb.template_parameters.analysis import (
 from sve_carddb.template_parameters.inventory import build
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.checkpoint import compare, parse_legacy
+from sve_carddb.template_sources.flavor import VERSION as FLAVOR_VERSION
 from sve_carddb.template_sources.inventory import coverage, entry, scan_batch
 from sve_carddb.template_sources.normalizer import VERSION, partition
 from sve_carddb.template_sources.pins import PARSER
+from sve_carddb.template_translations.flavor_models import (
+    FlavorCandidate,
+    FlavorEntry,
+    FlavorInputs,
+    FlavorOwner,
+)
 from sve_carddb.translations.sources import pointer, project
 
 if TYPE_CHECKING:
@@ -46,13 +53,14 @@ ORDINALS = {"choice_ordinal", "card_ordinal", "repetition_ordinal", "turn_ordina
 
 @dataclass(frozen=True)
 class Reconstructed:
-    entry: Entry
-    candidate: Candidate
+    entry: Entry | FlavorEntry
+    candidate: Candidate | FlavorCandidate
     normalized: str
     field_text: str
     hints: tuple[Hint, ...]
     roles: tuple[str, ...]
     pending: tuple[str, ...]
+    owner: FlavorOwner | None = None
 
     def verify_schema(self, schema: Schema) -> None:
         """Renaming or merging repeated slots cannot erase a source position or its role."""
@@ -60,6 +68,10 @@ class Reconstructed:
             raise ValueError(
                 "Template definition source has unresolved parameter roles"
             )
+        if isinstance(self.entry, FlavorEntry):
+            if schema.slots:
+                raise ValueError("Flavor template schema must have zero parameters")
+            return
         hints = []
         used = set()
         for slot in schema.slots:
@@ -123,17 +135,32 @@ class TemplateSources:
         main_revision: str,
         legacy_bytes: bytes,
         proposals: ProposalInputs | None = None,
+        flavor: FlavorInputs | None = None,
     ) -> None:
         self.repository = repository
         self.stores = dict(stores)
         self.main_revision = main_revision
         self.legacy_bytes = legacy_bytes
         self.proposals = proposals
+        self.flavor = flavor
         self._cache: dict[bytes, SourceReplay] = {}
 
     def reconstruct(self, pins: tuple[Recipe, ...]) -> SourceReplay:
         """The caller supplies pins, never normalized text, hints or resolution claims."""
         recipes = {r.id: r for r in pins}
+        if FLAVOR_VERSION in recipes:
+            from sve_carddb.template_translations.flavor_sources import reconstruct  # ruff: ignore[import-outside-top-level] -- independent flavor replay avoids changing the frozen effect recipe
+
+            key = canonical([r.model_dump(mode="json") for r in pins])
+            if key not in self._cache:
+                self._cache[key] = reconstruct(
+                    self.repository,
+                    self.stores,
+                    pins,
+                    self.flavor,
+                    self.main_revision,
+                )
+            return deepcopy(self._cache[key])
         if len(recipes) != len(pins) or set(recipes) != {
             VERSION,
             PARSER,
