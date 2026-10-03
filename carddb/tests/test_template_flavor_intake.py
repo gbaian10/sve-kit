@@ -3,25 +3,41 @@
 import copy
 import json
 import re
+from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.catalog.adoption_models import Batch
 from sve_carddb.catalog.adoption_sources import PinnedRepository
+from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.manifest import Kind
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.source_archive import Scope, seal_batch
+from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_parameters.models import Range, Schema, Slot
+from sve_carddb.template_translations import flavor_sources
+from sve_carddb.template_translations.flavor_models import FlavorInputs, FlavorOwner
+from sve_carddb.template_translations.flavor_owners import FlavorOwners
+from sve_carddb.template_translations.flavor_pins import verify
 from sve_carddb.template_translations.loader import load_templates
 from sve_carddb.template_translations.sources import TemplateSources
 from sve_carddb.template_translations.text import verify_flavor
 from sve_carddb.translations.loader import load_glossary
+from sve_carddb.translations.sources import Sources, project
 
 from .template_flavor_fixtures import Case, flavor_case
 from .template_intake_fixtures import DEFINITIONS, INVENTORY, TRANSLATIONS, shard, write
+from .test_registry_preview_archive import RAW
+from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
     from pathlib import Path
 
     from pydantic import JsonValue
+
+    from sve_carddb.build_inputs import Source
+    from sve_carddb.catalog.adoption_models import SourceRef
 
 __all__ = ("flavor_case",)
 
@@ -471,3 +487,195 @@ def test_full_identity_closure_pins_the_english_parser_too(tmp_path: Path) -> No
         "translation-jp-v1",
         "translation-en-v1",
     }
+
+
+@pytest.mark.parametrize("guard", ["ambiguous", "provisional", "foreign_face"])
+def test_replay_owner_refusals_keep_member_pending_and_block_adoption(
+    flavor_case: Case, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, guard: str
+) -> None:
+    case = flavor_case
+    target = next(m for m in case.replay.entries if m.normalized == "甲３『乙』")
+    original = FlavorOwners.resolve
+    calls: list[SourceRef] = []
+
+    def altered(
+        self: FlavorOwners, ref: SourceRef, source: Source, text: str
+    ) -> FlavorOwner | None:
+        if ref == target.entry.source_ref:
+            calls.append(ref)
+            printing = self.printings[source.url][0]
+            # Inject after validated registry replay to isolate this second owner boundary.
+            if guard == "ambiguous":
+                self.printings[source.url].append(
+                    printing.model_copy(update={"id": "p:" + "f" * 32})
+                )
+            elif guard == "provisional":
+                self.cards[printing.card_id] = self.cards[printing.card_id].model_copy(
+                    update={"identity_state": "provisional"}
+                )
+            else:
+                mapping = printing.source_face_map[0]
+                other_card = next(key for key in self.cards if key != printing.card_id)
+                self.faces[mapping.face_id] = self.faces[mapping.face_id].model_copy(
+                    update={"card_id": other_card}
+                )
+        return original(self, ref, source, text)
+
+    monkeypatch.setattr(FlavorOwners, "resolve", altered)
+    root = case.fork(tmp_path / guard)
+    sources = TemplateSources(
+        PinnedRepository(root),
+        {"test-store": case.store},
+        main_revision=case.prior,
+        legacy_bytes=b"",
+        flavor=case.sources.flavor,
+    )
+    replay = sources.reconstruct(case.pins)
+    rejected = next(m for m in replay.entries if m.entry.id == target.entry.id)
+    assert len(calls) == 1
+    assert rejected.owner is None
+    assert rejected.pending == ("missing_flavor_identity_owner",)
+    assert sum(bool(m.pending) for m in replay.entries) == 1
+    revision = write(root, copy.deepcopy(case.files))
+    with pytest.raises(
+        ValueError,
+        match=exact("Template definition source has unresolved parameter roles"),
+    ):
+        load_templates(PinnedRepository(root), revision, sources)
+
+
+@pytest.mark.parametrize("guard", ["observation", "field_text"])
+def test_resolved_owner_must_match_frozen_observation_and_exact_field(
+    flavor_case: Case, guard: str
+) -> None:
+    case = flavor_case
+    target = next(m for m in case.replay.entries if m.normalized == "甲３『乙』")
+    owners = FlavorOwners(
+        Sources(
+            {"test-store": case.store},
+            case.repository,
+            verify(PinnedRepository(case.repository), case.pins),
+        ),
+        case.basis,
+        case.prior,
+    )
+    ref = target.entry.source_ref
+    _, text, source = owners.evidence.sources.text(ref)
+    assert owners.resolve(ref, source, text) == target.owner
+    if guard == "observation":
+        printing = owners.printings[source.url][0]
+        owners.printings[source.url][0] = printing.model_copy(
+            update={
+                "observation": printing.observation.model_copy(
+                    update={"observation_hash": "sha256:" + "0" * 64}
+                )
+            }
+        )
+        message = "Flavor physical observation differs from its identity basis"
+    else:
+        text = "另一個合成段落"
+        # Keep the hash valid so only the physical projected-field comparison can refuse it.
+        ref = ref.model_copy(update={"text_hash": digest(text.encode())})
+        message = "Flavor owner source differs from its exact physical field"
+    with pytest.raises(ValueError, match=exact(message)):
+        owners.resolve(ref, source, text)
+
+
+@pytest.mark.parametrize(("provider", "kind"), [("en", "card"), ("jp", "image")])
+def test_flavor_batch_scope_is_exclusively_jp_card(
+    flavor_case: Case, tmp_path: Path, provider: str, kind: str
+) -> None:
+    store = _store(tmp_path / "scope")
+    _put(
+        store,
+        _resource(card_url("SYN-SCOPE"), "raw/scope.html", RAW, Kind.CARD),
+        RAW,
+    )
+    # The extra scope has no members: deleting this guard cannot rely on later media checks.
+    batch = seal_batch(
+        store,
+        scope=[Scope(provider="jp", kind="card"), Scope(provider=provider, kind=kind)],
+    )
+    assert len(batch.inventory.current) == 1
+    sources = TemplateSources(
+        PinnedRepository(flavor_case.repository),
+        {"test-store": store.root},
+        main_revision=flavor_case.prior,
+        legacy_bytes=b"",
+        flavor=FlavorInputs(
+            source_batch=Batch(store_id=store.store_id, batch_id=batch.batch_id),
+            identity_basis=None,
+            identity_batches=(),
+        ),
+    )
+    with pytest.raises(
+        ValueError, match=exact("Flavor replay requires an exclusively JP card batch")
+    ):
+        sources.reconstruct(flavor_case.pins)
+
+
+def test_source_batch_must_be_explicitly_included_in_identity_batches(
+    flavor_case: Case, tmp_path: Path
+) -> None:
+    case = flavor_case
+    store = replace(_store(tmp_path / "alternative"), store_id="identity-store")
+    original = FrozenSources(case.store, "test-store", case.batch)
+    for index, current in enumerate(original.inventory.current):
+        source, raw, _ = original.read(
+            current.source_version_id, parser_version="translation-jp-v1"
+        )
+        _put(
+            store,
+            _resource(source.url, f"raw/alternative-{index}.html", raw, Kind.CARD),
+            raw,
+        )
+    batch = seal_batch(store)
+    stores = {"test-store": case.store, "identity-store": store.root}
+    build = verify(PinnedRepository(case.repository), case.pins)
+    owners = FlavorOwners(
+        Sources(stores, case.repository, build), case.basis, case.prior
+    )
+    owners.evidence.complete(case.basis, ((store.store_id, batch.batch_id),))
+    assert owners.evidence.uses
+    assert case.sources.flavor is not None
+    sources = TemplateSources(
+        PinnedRepository(case.repository),
+        stores,
+        main_revision=case.prior,
+        legacy_bytes=b"",
+        flavor=case.sources.flavor.model_copy(
+            update={
+                "identity_batches": (
+                    Batch(store_id=store.store_id, batch_id=batch.batch_id),
+                )
+            }
+        ),
+    )
+    with pytest.raises(
+        ValueError,
+        match=exact(
+            "Flavor identity replay requires its complete explicit source batches"
+        ),
+    ):
+        sources.reconstruct(case.pins)
+
+
+def test_flavor_projection_requires_japanese_without_assertions(
+    flavor_case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def wrong_language(raw: bytes, url: str, provider: str) -> tuple[str, JsonValue]:
+        _, document = project(raw, url, provider)
+        return "en", document
+
+    monkeypatch.setattr(flavor_sources, "project", wrong_language)
+    sources = TemplateSources(
+        PinnedRepository(flavor_case.repository),
+        {"test-store": flavor_case.store},
+        main_revision=flavor_case.prior,
+        legacy_bytes=b"",
+        flavor=flavor_case.sources.flavor,
+    )
+    with pytest.raises(
+        ValueError, match=exact("Flavor projection language must be Japanese")
+    ):
+        sources.reconstruct(flavor_case.pins)

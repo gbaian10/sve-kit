@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from sve_carddb.template_sources.models import Recipe
 
 
-def reconstruct(  # ruff: ignore[too-many-locals,complex-structure] -- one batch shares its independent runtime and immutable identity closure
+def reconstruct(  # ruff: ignore[too-many-locals,too-many-branches,complex-structure] -- one batch shares its independent runtime and immutable identity closure
     repository: PinnedRepository,
     stores: dict[str, Path],
     pins: tuple[Recipe, ...],
@@ -66,7 +66,8 @@ def reconstruct(  # ruff: ignore[too-many-locals,complex-structure] -- one batch
         ):
             raise ValueError("Flavor frozen source identity or media mismatch")
         lang, document = project(raw, source.url, "jp")
-        assert lang == "ja"
+        if lang != "ja":
+            raise ValueError("Flavor projection language must be Japanese")
         faces = array(object_value(document).get("faces"))
         if not faces:
             raise ValueError("Flavor projection must contain physical faces")
