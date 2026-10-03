@@ -15,6 +15,7 @@ use crate::{Result, invalid};
 )]
 impl Game {
     pub(super) fn select(&self, selector: &Value, frame: &Frame) -> Result<Vec<String>> {
+        self.check_selector_binding(selector)?;
         if let Some(reference) = selector.as_str() {
             return self.reference_set(reference, frame);
         }
@@ -174,6 +175,7 @@ impl Game {
     }
 
     pub(super) fn matches(&self, id: &str, selector: &Value, frame: &Frame) -> Result<bool> {
+        self.check_selector_binding(selector)?;
         if selector.is_string()
             || selector.get("union").is_some()
             || selector.get("difference").is_some()
@@ -184,13 +186,14 @@ impl Game {
                 .any(|candidate| candidate == id));
         }
         let Some(object) = self.state.objects.get(id) else {
-            return Ok(id.strip_suffix(".leader").is_some_and(|seat| {
-                selector["zone"] == "leader"
-                    && self
-                        .seats(string(&selector["side"]), frame)
-                        .iter()
-                        .any(|candidate| candidate == seat)
-            }));
+            return Ok(selector["resource_role"].is_null()
+                && id.strip_suffix(".leader").is_some_and(|seat| {
+                    selector["zone"] == "leader"
+                        && self
+                            .seats(string(&selector["side"]), frame)
+                            .iter()
+                            .any(|candidate| candidate == seat)
+                }));
         };
         if let Some(zone) = selector["zone"].as_str()
             && zone != "any"
@@ -223,26 +226,8 @@ impl Game {
         if !card_type.contains(typ) {
             return Ok(false);
         }
-        let names = self.card_names(id)?;
-        if let Some(name) = selector["name"].as_str()
-            && !names.iter().any(|own| own == name)
-        {
+        if !self.matches_names(id, selector, frame)? {
             return Ok(false);
-        }
-        if let Some(part) = selector["name_contains"].as_str()
-            && !names.iter().any(|own| own.contains(part))
-        {
-            return Ok(false);
-        }
-        if let Some(name) = selector["not_name"].as_str() {
-            let name = if name == "self" {
-                string(&self.face(&frame.source)?["name"])
-            } else {
-                name
-            };
-            if names.iter().any(|own| own == name) {
-                return Ok(false);
-            }
         }
         if let Some(trait_name) = selector["trait"].as_str()
             && !list(&face["traits"])
@@ -272,6 +257,50 @@ impl Game {
             }
         }
         Ok(true)
+    }
+
+    fn check_selector_binding(&self, selector: &Value) -> Result<()> {
+        // Empty candidate sets still depend on the requested role's binding.
+        if let Some(role) = selector["resource_role"].as_str() {
+            self.catalog.rule_bindings.matches_resource(role, &[])?;
+        }
+        Ok(())
+    }
+
+    fn matches_names(&self, id: &str, selector: &Value, frame: &Frame) -> Result<bool> {
+        let names = self.card_names(id)?;
+        if let Some(role) = selector["resource_role"].as_str()
+            && !self.catalog.rule_bindings.matches_resource(role, &names)?
+        {
+            return Ok(false);
+        }
+        if let Some(name) = selector["name"].as_str()
+            && !names.iter().any(|own| own == name)
+        {
+            return Ok(false);
+        }
+        if let Some(part) = selector["name_contains"].as_str()
+            && !names.iter().any(|own| own.contains(part))
+        {
+            return Ok(false);
+        }
+        if let Some(name) = selector["not_name"].as_str() {
+            let name = if name == "self" {
+                string(&self.face(&frame.source)?["name"])
+            } else {
+                name
+            };
+            if names.iter().any(|own| own == name) {
+                return Ok(false);
+            }
+        }
+        Ok(true)
+    }
+
+    pub(super) fn single_rules_name_matches_role(&self, id: &str, role: &str) -> Result<bool> {
+        self.catalog
+            .rule_bindings
+            .matches_resource(role, &[self.card_name(id)?])
     }
 
     /// The rules name plus every alias (Q1145: an alias is an additional card name).

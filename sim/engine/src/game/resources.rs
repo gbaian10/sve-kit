@@ -146,7 +146,7 @@ impl Game {
         Ok(())
     }
 
-    pub(super) fn resource_code(mut code: Value) -> Value {
+    pub(super) fn resource_code(&self, mut code: Value) -> Value {
         let keyword = string(&code["body"]["name"]).to_owned();
         if code["body"]["op"] == "keyword"
             && matches!(keyword.as_str(), "single_drive" | "twin_drive")
@@ -165,20 +165,20 @@ impl Game {
         }
         let mut costs = list(&code["costs"]);
         if code["kind"] == "ride" {
-            Self::expand_ride_payment(&mut costs);
+            self.expand_ride_payment(&mut costs);
         }
         let mut specs = list(&code["cost_selections"]);
         for cost in &mut costs {
             let resource = match string(&cost["op"]) {
-                "lesson" => Some(("ex", "魔法のアイテム")),
-                "eat" => Some(("evolve_deck", "にんじん")),
-                "_drive_point" => Some(("evolve_deck", "ドライブポイント")),
+                "lesson" => Some(("ex", "lesson_item")),
+                "eat" => Some(("evolve_deck", "meal_item")),
+                "_drive_point" => Some(("evolve_deck", "drive_point")),
                 _ => None,
             };
-            if let Some((zone, name)) = resource {
+            if let Some((zone, role)) = resource {
                 let key = specs.len().saturating_add(1).to_string();
                 let count = cost.get("count").cloned().unwrap_or_else(|| json!(1_i64));
-                let mut selector = json!({"side":"self","zone":zone,"name":name});
+                let mut selector = json!({"side":"self","zone":zone,"resource_role":role});
                 if zone == "evolve_deck" {
                     selector["where"] = json!({"fn":"ne","args":[{"read":"item.face_up"},true]});
                 }
@@ -195,7 +195,7 @@ impl Game {
         code
     }
 
-    fn expand_ride_payment(costs: &mut Vec<Value>) {
+    fn expand_ride_payment(&self, costs: &mut Vec<Value>) {
         let explicit = costs
             .iter()
             .filter(|cost| cost["op"] == "link_resource")
@@ -210,7 +210,10 @@ impl Game {
         for cost in costs {
             if cost["op"] == "link_resource"
                 && cost["subjects"] == "self"
-                && cost["name"] == "ドライブポイント"
+                && (cost["resource_role"] == "drive_point"
+                    || cost["name"].as_str().is_some_and(|name| {
+                        self.catalog.rule_bindings.legacy_resource(name) == Some("drive_point")
+                    }))
                 && cost["count"] == 1_i64
                 && cost["from_zone"] == "evolve_deck"
                 && cost["to"] == "drive"
@@ -444,7 +447,7 @@ impl Game {
         }
         let selector = json!({"side":"self","zone":"field","keyword":"stack"});
         if self.select(&selector, frame)?.is_empty() {
-            let id = self.new_named_object("大地の魔片", &frame.controller)?;
+            let id = self.new_resource_object("stack_base", &frame.controller)?;
             frame
                 .values
                 .insert("stack_entry_counts".into(), json!({&id:amount}));

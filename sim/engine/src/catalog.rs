@@ -16,7 +16,10 @@ use serde_json::{Value, json};
 
 use crate::{EngineFailure, Result, invalid};
 
+mod rule_bindings;
 mod semantics;
+
+pub use rule_bindings::{EngineIdentityInput, FaceIdentity};
 
 /// Card facts from the sole versioned card database snapshot.
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -33,6 +36,7 @@ pub struct Catalog {
     pub(crate) cards: BTreeMap<String, Card>,
     pub(crate) programs: BTreeMap<String, Value>,
     pub(crate) keywords: BTreeMap<String, Value>,
+    pub(crate) rule_bindings: rule_bindings::RuleBindings,
     /// Schema-valid programs that failed the load-time semantic checks, with every
     /// finding as `file:line: message`. They are never executed.
     #[serde(default)]
@@ -45,6 +49,18 @@ impl Catalog {
     /// # Errors
     /// Rejects missing files, duplicate cards, unknown macros and invalid programs.
     pub fn load(snapshot: &Path, authored: &Path) -> Result<Self> {
+        Self::load_with_identity(snapshot, authored, &EngineIdentityInput::LegacyJp)
+    }
+
+    /// Loads explicit identity input; the default loader is restricted to legacy JP.
+    ///
+    /// # Errors
+    /// Rejects inconsistent input, missing bindings and the ordinary catalogue errors.
+    pub fn load_with_identity(
+        snapshot: &Path,
+        authored: &Path,
+        identity: &EngineIdentityInput,
+    ) -> Result<Self> {
         let mut paths: Vec<_> = read_dir(authored.join("effects"))
             .map_err(invalid)?
             .map(|entry| entry.map(|entry| entry.path()).map_err(invalid))
@@ -60,11 +76,36 @@ impl Catalog {
                 ))
             })
             .collect::<Result<Vec<_>>>()?;
-        Self::from_documents(
+        Self::from_documents_with_rules(
             &read_to_string(snapshot).map_err(invalid)?,
             &read_to_string(authored.join("keywords.yaml")).map_err(invalid)?,
             &documents,
+            &read_to_string(authored.join("engine-rules/index.yaml")).map_err(invalid)?,
+            identity,
         )
+    }
+
+    /// Resolves settings against caller-supplied bytes without filesystem access.
+    ///
+    /// # Errors
+    /// Rejects unknown, ambiguous, missing or inconsistent identities and templates.
+    pub fn from_documents_with_rules(
+        snapshot: &str,
+        keywords: &str,
+        documents: &[(String, String)],
+        rules: &str,
+        identity: &EngineIdentityInput,
+    ) -> Result<Self> {
+        let mut catalog = Self::from_documents(snapshot, keywords, documents)?;
+        let authored = serde_json::to_vec(&json!({"keywords":keywords,"documents":documents.iter().map(|(_, text)| text).collect::<Vec<_>>()})).map_err(invalid)?;
+        catalog.rule_bindings = rule_bindings::RuleBindings::resolve(
+            &catalog,
+            snapshot,
+            &rule_bindings::digest(&authored),
+            rules,
+            identity,
+        )?;
+        Ok(catalog)
     }
 
     /// Portable loader for caller-supplied snapshot and YAML bytes, including browser hosts.
@@ -145,6 +186,16 @@ impl Catalog {
         }
         catalog.validate_token_templates()?;
         Ok(catalog)
+    }
+
+    pub(super) fn rules_label(&self, card: &str, ordinal: usize) -> Result<String> {
+        let face = self.face(card, ordinal)?;
+        self.programs
+            .get(card)
+            .and_then(|program| program["rules_name"].as_str())
+            .or_else(|| face["name"].as_str())
+            .map(str::to_owned)
+            .ok_or_else(|| invalid("referenced face has no rules name"))
     }
 
     /// Number of authored card programs, including explicit partial programs.

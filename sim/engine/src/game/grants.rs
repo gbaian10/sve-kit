@@ -68,7 +68,7 @@ impl Game {
             }
             for mut ability in list(&entry["effect"]["abilities"])
                 .into_iter()
-                .map(Self::resource_code)
+                .map(|code| self.resource_code(code))
             {
                 let mut reference = entry["reference"].clone();
                 if !reference.is_object()

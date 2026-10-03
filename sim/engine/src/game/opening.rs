@@ -32,24 +32,30 @@ impl Game {
         let mut queue = Vec::new();
         for seat in ["P1", "P2"] {
             let player = self.player(seat)?;
-            let vanguard =
-                player.construction == "title" && player.title == "カードファイト!! ヴァンガード";
-            let idol = player.construction == "title"
-                && player.title == "アイドルマスター シンデレラガールズ";
-            if vanguard && !self.start_amulets(seat)?.is_empty() {
+            let start_selection = player.construction == "title"
+                && self
+                    .catalog
+                    .rule_bindings
+                    .capability(&player.title_code, "opening_start_amulet");
+            let opening_resources = player.construction == "title"
+                && self
+                    .catalog
+                    .rule_bindings
+                    .capability(&player.title_code, "opening_ex_resource");
+            if start_selection && !self.start_amulets(seat)?.is_empty() {
                 queue.push(json!(seat));
                 for id in self.start_amulets(seat)? {
                     self.learn(seat, &id, true);
                 }
             }
-            if idol {
+            if opening_resources {
                 let frame = Frame {
                     controller: seat.into(),
                     cause: json!({"rule":"14.3.1.2"}),
                     ..Frame::default()
                 };
                 for _ in 0_u8..5 {
-                    let id = self.new_named_object("魔法のアイテム", seat)?;
+                    let id = self.new_resource_object("lesson_item", seat)?;
                     self.move_objects(&[id], "ex", None, None, &frame)?;
                 }
             }

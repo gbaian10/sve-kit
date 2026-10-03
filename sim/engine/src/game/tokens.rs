@@ -68,12 +68,17 @@ fn prints_for_names(prints: &[String], names: &[String], chosen: &[String]) -> R
 impl Game {
     pub(super) fn new_named_object(&mut self, name: &str, controller: &str) -> Result<String> {
         let card = self.catalog.token_print(name)?;
-        self.new_token_object(&card, controller)
+        self.new_token_object(&card, 0, controller)
     }
 
-    fn new_token_object(&mut self, card: &str, controller: &str) -> Result<String> {
-        let printed = self.catalog.face(card, 0)?;
-        let state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":0_i64,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
+    pub(super) fn new_resource_object(&mut self, role: &str, controller: &str) -> Result<String> {
+        let template = self.catalog.rule_bindings.template(role)?;
+        self.new_token_object(&template.card_no, template.face_ordinal, controller)
+    }
+
+    fn new_token_object(&mut self, card: &str, face: usize, controller: &str) -> Result<String> {
+        let printed = self.catalog.face(card, face)?;
+        let state = json!({"power":scalar(&printed["power"]),"hp":scalar(&printed["hp"]),"max_hp":scalar(&printed["hp"]),"acted":false,"evolved":false,"entered_this_turn":false,"face":face,"damage":0_i64,"counters":{},"keywords":[],"silenced":false,"stats_increased_this_turn":false});
         let id = loop {
             let next = format!("new-{}", self.state.next_object);
             self.state.next_object = self.state.next_object.saturating_add(1);
@@ -178,7 +183,7 @@ impl Game {
         let prints = self.unique_crest_creations(prints, string(&node["to"]), controller)?;
         let created = prints
             .iter()
-            .map(|card| self.new_token_object(card, controller))
+            .map(|card| self.new_token_object(card, 0, controller))
             .collect::<Result<Vec<_>>>()?;
         if node["print_selected"] == true {
             for id in &created {

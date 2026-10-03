@@ -100,6 +100,7 @@ struct Player {
     sep: i64,
     construction: String,
     title: String,
+    title_code: String,
     deck_list: Value,
     zones: BTreeMap<String, Vec<Value>>,
 }
@@ -291,6 +292,14 @@ impl Game {
         let mut objects = BTreeMap::new();
         for seat in ["P1", "P2"] {
             let entry = &position["players"][seat];
+            let title_code = catalog
+                .rule_bindings
+                .title_code(string(&entry["title_code"]), string(&entry["title"]))?;
+            if entry["construction"] == "title" && title_code.is_none() {
+                return Err(EngineFailure::Unsupported(
+                    "title construction requires a registered title".into(),
+                ));
+            }
             let mut zones = BTreeMap::new();
             for zone in ZONES {
                 let mut ids = Vec::new();
@@ -358,6 +367,7 @@ impl Game {
                     sep: int(&entry["sep"]),
                     construction: string(&entry["construction"]).into(),
                     title: string(&entry["title"]).into(),
+                    title_code: title_code.unwrap_or_default(),
                     deck_list: entry["deck_list"].clone(),
                     zones,
                 },
@@ -628,7 +638,7 @@ impl Game {
                     vec![ability]
                 }
             })
-            .map(Self::resource_code)
+            .map(|code| self.resource_code(code))
             .collect())
     }
     fn abilities(&self, id: &str) -> Result<Vec<Value>> {
@@ -648,7 +658,7 @@ impl Game {
                     {
                         for mut granted in list(&body["abilities"])
                             .into_iter()
-                            .map(Self::resource_code)
+                            .map(|code| self.resource_code(code))
                         {
                             granted["granted_by"] = json!(source);
                             abilities.push(granted);

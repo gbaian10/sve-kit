@@ -50,7 +50,29 @@ each legal parameter combination, and resolution events follow effect completion
 and removal from the resolution zone. Remaining engine errors and open questions
 are tracked in [docs/m0/known-errors.md](../../docs/m0/known-errors.md).
 
-`Catalog::from_documents` accepts snapshot and YAML strings without filesystem
-access. The default `runner` feature enables evaluation adapters and the CLI. The
+`Catalog::load` reads `authored/engine-rules/index.yaml` and verifies its exact
+snapshot SHA-256. Its default identity boundary is explicitly `legacy-jp`.
+`Catalog::load_with_identity` and `Catalog::from_documents_with_rules` accept an
+explicit `EngineIdentityInput`; the latter uses only the supplied bytes. A
+`Resolved` projection supplies existing face/rules-name IDs, region and snapshot
+hash from that same input. It does not infer JP/EN counterparts or invent IDs.
+See [engine rule identities](../../docs/dsl/engine-rules-1.md) for the contract.
+
+Player setup may provide `title_code`. Frozen runner title labels resolve through
+the validated private anchor index; a supplied code and label must agree. Empty
+capabilities are registered explicitly; unknown titles fail closed. Capabilities
+apply only to title construction. Resource costs match current effective names,
+including valid aliases, against resolved roles. The EX-to-banish counter uses
+only the single rules name after movement, without aliases.
+
+`Catalog::from_documents` remains a filesystem-free entry for generic synthetic
+positions, without special bindings. A rule that requires an unbound role returns
+`Unsupported`. Bound loaders reject missing roles/templates and inconsistent
+references before execution. The resolved input background and required player
+codes are saved inside the existing prototype `astra-save/1`; missing fields fail
+rather than restoring empty defaults. Restore uses that saved background. This
+does not provide cross-version migration, `save/2`, or server input authorization.
+
+The default `runner` feature enables evaluation adapters and the CLI. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
 bindings, host time and execution have not been validated.

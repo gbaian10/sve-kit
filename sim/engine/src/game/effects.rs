@@ -616,7 +616,10 @@ impl Game {
             let id = &previous.id;
             let destination = plan.destination.as_str();
             let owner = &plan.controller;
-            let printed = self.catalog.face(&previous.card, 0)?.clone();
+            let printed = self
+                .catalog
+                .face(&previous.card, Self::movement_face(previous)?)?
+                .clone();
             let object = self.object_mut(id)?;
             object.zone = destination.into();
             object.controller.clone_from(owner);
@@ -671,7 +674,7 @@ impl Game {
             }
             if previous.zone == "ex"
                 && destination == "banish"
-                && self.card_name(id)? == "魔法のアイテム"
+                && self.single_rules_name_matches_role(id, "lesson_item")?
             {
                 self.bump(&format!("{}.magic_item_banished", previous.controller), 1);
             }
