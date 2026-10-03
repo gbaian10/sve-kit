@@ -170,7 +170,8 @@ pre-commit install
 The git hooks run the quick checks on every commit and push. `pytest`, `cargo-test` and `web-test`
 are manual hooks, because a full run takes minutes; CI runs each of them when a pull request changes
 that component or a shared input. The Python manual hook enforces 90% combined line and branch
-coverage; Rust tests enforce 90% line coverage. The same thresholds apply locally and in CI.
+coverage; Rust tests enforce 90% line coverage. The same thresholds apply locally and to full CI runs; fork PRs use separate
+remaining-test thresholds described below.
 Direct `pytest` runs do not enable coverage, so you can run selected files or tests without the
 full-suite gate; use the Python manual hook for the complete coverage check.
 
@@ -236,12 +237,7 @@ messages, captured output, parameter values and arbitrary Web case descriptions;
 safe file/function location (or Web case ordinal) to reproduce failures locally. A missing
 report is reported explicitly and cannot make a failing test step pass.
 
-Every job runs on the label in the repository variable `CI_RUNNER`, or GitHub-hosted
-`ubuntu-latest` when it is unset. While the repository is private, the maintainer may point it
-at a self-hosted runner. Before the repository becomes public, remove every self-hosted runner
-registration from the repository, then unset the variable and confirm a run on GitHub-hosted
-runners: a pull request can change the workflow to target any registered runner, so fork
-pull requests must never be able to reach one. While the repository is private, a push to
+Every job uses GitHub-hosted `ubuntu-latest`. While the repository is private, a push to
 `main` does not rerun pytest, Rust tests/coverage or Vitest. **Before merging, the PR must
 be rebased onto the latest `main` and its CI must be green.** This is a merge prerequisite,
 not something the cache-maintenance run verifies: its green `ci-ok` means maintenance
@@ -276,7 +272,32 @@ the workspace so test execution does not depend on a previous job's outputs.
 When needed and explicitly requested, manually compare the old and new YAML readers with
 `uv --directory carddb run pytest manual_tests/yaml_reader_equivalence.py`; CI never runs this check.
 
-`cargo-test` needs `SVE_TEST_SNAPSHOT` (see Setup); CI gets the same file from a private test-data repository.
+### Private test data and fork PRs
+
+The permanently private testdata repository holds the engine JSONL and 19 original
+carddb pages. CI checks out the full commit in `.github/ci/testdata.lock`, verifies
+that commit and the engine file SHA-256, and checks every original page and expected
+field against `carddb/tests/fixtures/private-pages.json`. Both pins must agree.
+Update the private repository first, retaining its existing history, then update
+the public pins in a separate PR. Do not rewrite private testdata history.
+
+Project PRs and public `main` use `SVE_PRIVATE_TESTDATA_MODE=required`; a missing
+key, checkout, file or hash match fails the job. Fork PRs are identified by the
+head repository, not by actor or credential availability. They do not check out
+private testdata: Python uses `excluded`, and Rust omits only the snapshot-dependent
+`cards` and `shared` integration targets. Production coverage scope is unchanged.
+The independent thresholds live in `.github/ci/fork-coverage.json`. Each component
+summary marks remaining-test coverage and says private tests were not run; this
+is not full coverage acceptance. Unknown modes or missing fork thresholds fail.
+
+With `SVE_PRIVATE_TESTDATA_MODE` unset, local Python runs only synthetic tests and
+prints `私有真實頁測試未執行` at the end. Maintainers running the full Python hook
+must explicitly set `SVE_PRIVATE_TESTDATA_MODE=required` and
+`SVE_PRIVATE_TESTDATA_DIR=/path/to/private-testdata` in ignored local configuration.
+Local Python checks per-file hashes; CI additionally verifies the checkout commit.
+`cargo-test` needs `SVE_TEST_SNAPSHOT` (see Setup). Never add `--showlocals`/`-l` to
+private-page tests: intermediate values can contain official wording. Their fixture
+wrapper has a safe representation, but local-variable dumps are not safe.
 
 Now and then, and before a release, run the mutation test. Every surviving mutant
 is a bug the tests would not notice; add a test, or explain why it cannot change behaviour:

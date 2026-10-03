@@ -16,8 +16,8 @@ maintainer's direction. Our grants cover only rights that exist and that we can
 grant. The current site logo is cropped from an official character illustration,
 not an original project logo; it and the official class icons and text symbols
 are excluded from our grants. Official material in previous revisions is likewise
-excluded. Source-derived test fixtures currently remain
-in the tree; their cleanup is separate from this licensing change.
+excluded. Public carddb test fixtures use synthetic content; original test pages
+and the engine card list are kept in a permanently private testdata repository.
 
 The [website's legal page](https://svekit.app/legal) is planned to carry card-image
 notices before public launch. For rights concerns or removal requests, contact
@@ -73,9 +73,13 @@ dsl/ ──validates──> authored/ ──read by──> carddb/ ──exports
 ## Raw data
 
 Source caches (HTML, card images and voice files) and their manifests belong
-outside this repo. Selected official assets and source-derived test fixtures
-currently remain in the tree and are excluded from our grants as described in
-[LICENSING.md](LICENSING.md). Set `SVE_DATA_DIR` to a directory outside the repo:
+outside this repo. Public carddb test fixtures use synthetic content. Selected
+official assets and source-derived examples and fixtures elsewhere still remain,
+including the sim/web development snapshot, engine and scenario-runner tests,
+and `tests/ai-positions`. They are excluded from our grants as described in
+[LICENSING.md](LICENSING.md); follow-up cleanup is tracked in
+[#16](https://github.com/gbaian10/sve-kit/issues/16).
+Set `SVE_DATA_DIR` to a directory outside the repo:
 
 ```text
 $SVE_DATA_DIR/

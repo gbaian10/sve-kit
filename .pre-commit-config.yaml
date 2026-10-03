@@ -10,12 +10,12 @@ repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
     hooks:
-      # Byte-exact fixtures: carddb keeps verbatim copies of real pages, and sim/web's dev snapshots
+      # Synthetic HTML deliberately preserves parser-significant whitespace; web snapshots
       # are canonical JSON whose sha256 is pinned (no trailing newline).
       - id: trailing-whitespace
-        exclude: ^(carddb/tests/fixtures|sim/web/fixtures)/
+        exclude: ^(carddb/tests/fixtures/synthetic_(jp|en)/.*\.html$|sim/web/fixtures/)
       - id: end-of-file-fixer
-        exclude: ^(carddb/tests/fixtures|sim/web/fixtures)/
+        exclude: ^(carddb/tests/fixtures/synthetic_(jp|en)/.*\.html$|sim/web/fixtures/)
       - id: check-added-large-files
         args: [--maxkb=1024, --enforce-all]
       - id: check-ast

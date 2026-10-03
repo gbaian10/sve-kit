@@ -11,7 +11,7 @@ from pathlib import Path
 from typing import override
 from unittest.mock import patch
 
-from test_summary import junit, junit_summary, main, rust_summary
+from test_summary import coverage_scope, junit, junit_summary, main, rust_summary
 
 PRIVATE = "合成卡文_PRIVATE_SENTINEL"
 
@@ -60,6 +60,68 @@ class SummaryTests(unittest.TestCase):
         )
         assert PRIVATE not in summary
         assert "[" not in summary
+
+    def test_fork_coverage_uses_its_own_gate_and_disclosure(self) -> None:
+        """The same report can fail the full gate and pass the remaining-test gate."""
+        self.write_junit()
+        (self.folder / "coverage.json").write_text(
+            json.dumps({"totals": {"percent_covered": 74.5}}), encoding="utf-8"
+        )
+        for mode, threshold, expected in (
+            ("full", "90", 1),
+            ("fork", "73", 0),
+            ("fork", "75", 1),
+        ):
+            output = io.StringIO()
+            with (
+                patch.dict(
+                    os.environ,
+                    {"SVE_CI_TEST_MODE": mode, "SVE_CI_COVERAGE_THRESHOLD": threshold},
+                    clear=True,
+                ),
+                contextlib.redirect_stdout(output),
+            ):
+                assert main(["python", str(self.folder)]) == expected
+            summary = output.getvalue()
+            assert f"required **{threshold}%**" in summary
+            assert "Failed/errors: **2**" in summary
+            assert PRIVATE not in summary
+            if mode == "fork":
+                assert "私有真實頁測試未執行" in summary
+                assert "This is not full coverage acceptance" in summary
+            else:
+                assert "Test scope: **full**" in summary
+
+    def test_invalid_scope_or_threshold_never_falls_back_to_full(self) -> None:
+        """Unknown flags and a missing fork gate must fail closed."""
+        for environment in (
+            {"SVE_CI_TEST_MODE": "fork"},
+            {"SVE_CI_TEST_MODE": "unknown", "SVE_CI_COVERAGE_THRESHOLD": "73"},
+            {"SVE_CI_TEST_MODE": "full", "SVE_CI_COVERAGE_THRESHOLD": "73"},
+            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "NaN"},
+            {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "0"},
+        ):
+            with patch.dict(os.environ, environment, clear=True):
+                with self.assertRaises(ValueError):
+                    coverage_scope()
+
+    def test_missing_fork_coverage_fails_but_preserves_safe_counts(self) -> None:
+        """A test crash cannot make the remaining-test summary a green gate."""
+        self.write_junit()
+        (self.folder / "coverage.json").unlink()
+        output = io.StringIO()
+        with (
+            patch.dict(
+                os.environ,
+                {"SVE_CI_TEST_MODE": "fork", "SVE_CI_COVERAGE_THRESHOLD": "73"},
+                clear=True,
+            ),
+            contextlib.redirect_stdout(output),
+        ):
+            assert main(["python", str(self.folder)]) == 1
+        assert "Failed/errors: **2**" in output.getvalue()
+        assert "coverage unavailable; required **73%**" in output.getvalue()
+        assert PRIVATE not in output.getvalue()
 
     def test_web_labels_and_malformed_locations_stay_private(self) -> None:
         """Web description strings and unsafe paths are never summary labels."""
