@@ -16,7 +16,7 @@ SVE 永久 card／face 身分及 exact 名稱如何對到已採納的 `category=
 | rules_name／face_rules_name | 構築計數的同名單位及特殊規則名稱，不是 card_name glossary 關聯；不能把構築同名當同概念 |
 | identity-transition-v1 | 沿有效身分重播驗永久鍵與父卡；不能從 URL alias、舊牌組提示或同名字串推譯名關聯 |
 
-`context_assignment` 的名稱 owner 是面修訂，修訂 ID 已包含永久 face／地區／內容指紋，
+`context_assignment` 的名稱 owner 是面修訂或印刷面。面修訂 ID 已包含永久 face／地區／內容指紋，
 並非沒有綁定永久面。它也會隨卡文勘誤換 ID，即使名稱不變；例外關聯以永久卡／面與 exact 名稱
 為鍵，避免因此失去已採納的同概念證據。它不取代語義 Code 的人工採納或官方同卡證據。
 因此新增**例外關聯 kind**，只記同字異義、改名／別名及個別英文特例等需要人工證明的例外；
@@ -47,12 +47,18 @@ data **恰為** `{subject,term_id,source_ref,identity_basis,reason,adoption_no,p
 兩個 index 及全部分片的 canonical／exact bytes、有效 record 決定與重播 recipe 都納入核對／建置 F1。
 本關聯不能引用尚未寫出的自身 commit：identity_basis 釘已存在的核對基準，
 新的 translations index／分片另由消費端的 authored_revision 釘住，沒有 hash 自我引用。
+讀取端只驗背景等於消費端 authored_revision 或是它的祖先，不讀可變 main ref；
+開發／採納 PR 的消費端可以是功能分支。採納 PR 的 CI／合併前檢查另以明示 base main pin
+或完整 base 歷史驗新增／續版背景為 base 祖先；正式發布的 main 建置由發布流程把關，
+依翻譯契約 §6.1.1 分層執行。
 
 核對時由 source_ref 的凍結卡頁來源、原樣 region／card_no、parser source_index 與基準的
 source_face_map **共同**驗 `(card_id,face_id)`，不得僅驗外鍵、依面 ordinal 猜對應或依名字找卡。
 原始 registry 的每筆 observation／cross-region 證據及所有相關 transition／來源均須可驗。
 概念的 exact `source_ja` 與 SVE JA 名稱相同且唯一時，依 §3 推導即可，**不得要求另簽關聯**。
 同字異義需要指定不同概念時才記例外；預設推導不新增譯詞或人工採納決定。
+歷史來源驗證只證明該 printing／face 自己凍結卡頁的名稱，不重建歷史勘誤覆蓋或 printed 狀態；
+本次印刷用途另依 §3 驗本次 printed_text_state 與自己的名稱，unknown／omitted 不借 current。
 名稱不同但確屬同概念（別名／改名）或 EN 名稱，reason、來源證據與人工核對必須支持此關聯；
 不要求 EN 字串等於 source_ja，不以已存在 JA 關聯自動擴張 EN 範圍。
 
@@ -239,6 +245,8 @@ key 是內部識別，不顯示給使用者，只要求唯一、穩定、能核�
 | N21 | 缺 SVE／數位英文名的合成候選；模型提羅馬字 slug、協調者核可 | 可配永久 key，不因無現成英文名缺概念／譯名 |
 | N22 | slug 含非 ASCII／首尾底線、key 超 96 bytes、跨分片撞既有 key 各一次 | 配發前全體檢查拒絕，改候選後重驗，不加流水號 |
 | N23 | 指派的歷史 basis／名稱不變，只更新消費端 printing observation；另改名字及面修訂 ID 各一次 | 前者重驗後仍適用；後兩者舊指派仍可歷史核對，但不搬至新字串／owner，依翻譯契約 I06／I07 |
+| N24 | 可讀的背景 commit 位於同層分支，不是消費端祖先 | 讀取端拒絕，不以可讀 blob 或 stale 掩蓋 |
+| N25 | 背景是 PR 消費端祖先，但不在明示 base main pin 的歷史 | 採納 PR CI／合併前檢查拒絕，與讀取端的祖先檢查分開 |
 
 後續 #51／#196 的正式資料、#52／#53 的載入與選用、#37 的有效身分能力須各自驗收；
 本文件不宣稱數位同卡證據、真實委託收據或 repaired registry 已可發布。
