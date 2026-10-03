@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_db import Capability, Column, Json, Kind, Table, compile_schema
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t1 import REGISTRY, compile_minimum
+from sve_carddb.build_db.t2_translation import TABLES as NAME_TABLES
 from sve_carddb.snapshot.project import Decisions, Settings
 from sve_carddb.snapshot.values import digest, parse
 
@@ -278,7 +279,9 @@ def schema(*, nullable_observation: bool = False) -> CompiledSchema:
     extra = tuple(
         Table(name, tuple(starmap(_column, row.items())), (next(iter(row)),))
         for name, row in extras().items()
-    )
+        if name not in {table.name for table in NAME_TABLES}
+    ) + tuple(replace(table, query_checks=()) for table in NAME_TABLES)
+    # These projector fixtures also cover non-name fields; only names builds enable the name-only query checks.
     base_tables = tuple(
         replace(
             table,

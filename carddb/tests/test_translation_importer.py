@@ -520,6 +520,7 @@ def test_name_translation_preserves_origin_and_stable_revision(
     with importer_template.copy() as db:
         sources = frozen.sources()
         with db.transaction():
+            db.update("card", {"id": "card"}, {"identity_state": "confirmed"})
             for identifier in ("svwb:normal", "sv1:normal"):
                 db.delete("digital_link", {"id": identifier})
             import_digital(db, sources, frozen.refs, (("svwb", "22345678"),))
@@ -965,6 +966,7 @@ def name_template(
 ) -> DatabaseTemplate:
     with importer_template.copy() as db:
         with db.transaction():
+            db.update("card", {"id": "card"}, {"identity_state": "confirmed"})
             for identifier in ("svwb:normal", "sv1:normal"):
                 db.delete("digital_link", {"id": identifier})
             import_digital(db, frozen.sources(), frozen.refs, (("svwb", "22345678"),))

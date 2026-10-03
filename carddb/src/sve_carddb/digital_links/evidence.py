@@ -189,9 +189,9 @@ class Evidence:
 
     def index(self, review: ReviewContext) -> RegistryIndex:
         """Index one verified registry per resolver, rather than scan it for every owner."""
-        registry = self.registry(review)
-        key = canonical(review.context.model_dump(mode="json"))
+        key = self.sources.context_key(review.context)
         if key not in self.sources.identity_indexes:
+            registry = self.registry(review)
             cards = {
                 r.data.id: r.data
                 for r in registry.records.values()

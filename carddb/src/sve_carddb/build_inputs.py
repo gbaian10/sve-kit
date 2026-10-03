@@ -192,9 +192,11 @@ def raw_values(sources: Iterable[Source]) -> dict[str, dict[str, Value]]:
 def insert_raw_sources(db: Database, sources: Iterable[Source]) -> None:
     """Reuse exact metadata only; never discard a conflicting version or its provenance."""
     required = raw_values(sources)
-    previous = {row.values["id"]: row.values for row in db.rows("source_record")}
     for source_id, values in required.items():
-        if source_id not in previous:
+        previous = db.select(
+            "source_record", db.columns("source_record"), where={"id": source_id}
+        )
+        if not previous:
             db.insert("source_record", values)
-        elif previous[source_id] != values:
+        elif previous[0].values != values:
             raise ValueError("Conflicting raw source metadata")

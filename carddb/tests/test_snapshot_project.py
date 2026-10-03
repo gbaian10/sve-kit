@@ -828,19 +828,23 @@ def test_cross_region_translation_does_not_use_pending_display_as_current(
 def test_selection_and_owner_ambiguity_are_rejected(db: Database) -> None:
     with db.transaction():
         db.update(
-            "translation_selection", {"context_id": "context"}, {"target_lang": "en"}
+            "translation_selection",
+            {"context_id": "context", "target_lang": "zh-Hant"},
+            {"target_lang": "en"},
         )
-    with pytest.raises(ValueError, match="selection context"):
+    with pytest.raises(ValueError, match=r"^Translation selection context mismatch$"):
         projected(db)
     with db.transaction():
         db.update(
             "translation_selection",
-            {"context_id": "context"},
+            {"context_id": "context", "target_lang": "en"},
             {"target_lang": "zh-Hant"},
         )
+    with (
+        pytest.raises(sqlite3.IntegrityError, match=r"^CHECK constraint failed: "),
+        db.transaction(),
+    ):
         db.update("translation_use", {"id": "use"}, {"product_id": "product"})
-    with pytest.raises(ValueError, match="exactly one owner"):
-        projected(db)
 
 
 @pytest.mark.parametrize(
@@ -1123,7 +1127,9 @@ def test_official_counterpart_uses_direct_id_without_common_selection(
 ) -> None:
     dual_region(db)
     with db.transaction():
-        db.delete("translation_selection", {"context_id": "context"})
+        db.delete(
+            "translation_selection", {"context_id": "context", "target_lang": "zh-Hant"}
+        )
         db.update(
             "translation",
             {"id": "translation"},
@@ -1245,7 +1251,9 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
         )
         db.update("translation", {"id": "translation"}, {"target_lang": "en"})
         db.update(
-            "translation_selection", {"context_id": "context"}, {"target_lang": "en"}
+            "translation_selection",
+            {"context_id": "context", "target_lang": "zh-Hant"},
+            {"target_lang": "en"},
         )
         db.insert(
             "translation_use",
@@ -1718,3 +1726,73 @@ def test_native_observation_boundary_rejects_invalid_public_payload(
     )
     with pytest.raises(ValueError, match=r"Observation|observation"):
         projected(db, chosen)
+
+
+def test_direct_own_name_replaces_shared_choice_only_on_its_owner(db: Database) -> None:
+    with db.transaction():
+        row = dict(db.rows("translation")[0].values)
+        db.insert(
+            "translation",
+            row
+            | {
+                "id": "official-name",
+                "origin": "official_sv1",
+                "authority": "digital_official",
+                "text": "Synthetic official name",
+            },
+        )
+    chosen = replace(
+        decisions(),
+        display_bindings=(
+            DisplayBinding(
+                "use",
+                ("face_revision", "revision"),
+                "zh-Hant",
+                "own_source",
+                "official-name",
+            ),
+        ),
+    )
+    result = projected(db, chosen)
+    bindings = result.tables["face_revision"][0]["translations"]
+    assert [
+        (object_value(row)["translation_id"], object_value(row)["basis"])
+        for row in array(bindings)
+    ] == [("official-name", "own_source")]
+    assert [row["id"] for row in result.tables["translation"]] == ["official-name"]
+
+
+def test_direct_own_name_never_transfers_to_another_owner(db: Database) -> None:
+    changed = replace(
+        decisions(),
+        display_bindings=(
+            DisplayBinding(
+                "use",
+                ("printing_face", "printing", "face"),
+                "zh-Hant",
+                "own_source",
+                "translation",
+            ),
+        ),
+    )
+    with pytest.raises(
+        ValueError, match=r"^Direct own-source binding must keep its exact owner$"
+    ):
+        projected(db, changed)
+
+
+def test_names_only_projection_keeps_digital_evidence_private(db: Database) -> None:
+    result = projected(db, replace(decisions(), private_digital=True))
+    assert all(
+        not result.tables[name]
+        for name in (
+            "digital_card",
+            "digital_art",
+            "digital_link",
+            "digital_art_link",
+            "digital_link_coverage",
+            "voice",
+            "card_voice",
+        )
+    )
+    assert not result.config["digital_endpoints"]

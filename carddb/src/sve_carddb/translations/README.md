@@ -64,8 +64,8 @@ verified assignment alone does not enable them.
 Unknown or omitted printed text yields no context or use even if a current name
 is available; known historical printing names can differ from current names.
 Pending wording does not suppress a known name. These helpers consume an already
-verified publication database; they do not validate raw archives, import policies
-or activate the offline build/preview path. Full glossary replay remains mandatory.
+verified publication database; the digital-name application separately validates
+raw archives, policy inputs and verified publication candidates. Full glossary replay remains mandatory.
 
 The complete indexed entry now also accepts name-only `context_assignment` and
 `card_name_concept` histories under `translations/overrides/`. Both require the
@@ -93,7 +93,8 @@ check. Its caller supplies the trusted, full PR base SHA, independently of the
 consumer. It checks every override background against that immutable base;
 a background exclusive to the feature history cannot be adopted even if the
 reader can replay it. The helper does not fetch, infer main or automatically
-wire itself into CI. Ancestry checks supplement, never replace, complete evidence
+wire itself into CI. Its CLI is available for the required trusted pre-merge check
+below. Ancestry checks supplement, never replace, complete evidence
 replay. Formal release builds remain governed by the publication
 process. No formal assignment or concept association is created by these APIs.
 
@@ -120,15 +121,15 @@ exact name hash and known printed state. A unique exact Japanese concept needs
 no exception record. A true homonym needs an adopted semantic assignment; English
 names need an explicit concept association. Withdrawal restores mechanical
 resolution, and stale hashes cannot transfer an old assignment to a renamed
-owner. The returned term/variant and audit IDs are inputs to the later application
-layer, not populated translations or uses. The offline build independently
+owner. The returned term/variant and audit IDs are inputs to the owner-local application
+layer; replay alone does not populate translations or uses. The offline build independently
 replays the full source-use closure, including identity observations; import
 audits preserve the corresponding registry and decision evidence.
 Each override decision audits only its own immutable identity revision, rather
 than claiming the historical basis of unrelated records.
 
 Only reviewed unofficial translations can enter the shared selection table.
-Official names need per-owner eligibility and later `FieldTranslation` bindings;
+Official names need per-owner eligibility and direct `FieldTranslation` bindings;
 both the helper and commit-time checks prevent a shared selection from granting
 that eligibility. The optional tables do not change the default compiled table
 set or snapshot format. Disposable databases use schema version 5 and the existing
@@ -164,3 +165,33 @@ Vocabulary choices still stop at the existing atomic label-projection boundary;
 full label use/binding and public raw/translated spans need the later projection
 work. Loader validation of all entries is not a claim that 279 terms have been
 adopted or projected.
+
+Before adopting a real name assignment or concept association, the coordinator or
+reviewer must supply a trusted immutable PR base SHA and execute:
+
+```bash
+sve-carddb translations check-name-adoption-base \
+  --authored /absolute/checkout/authored \
+  --repository /absolute/checkout \
+  --authored-revision <full-consumer-sha> \
+  --base-main-revision <independently-trusted-full-pr-base-sha>
+```
+
+This checks every override basis against the explicit base history, separately
+from full frozen replay and the reader's consumer-ancestry check. A feature branch
+cannot select its own trusted main base. Incomplete shallow ancestry produces an
+unavailable diagnostic, rather than claiming a proven nonancestor. Full history
+must be supplied before a negative ancestry conclusion is accepted.
+`IdentityEvidence.costs()` reports registry bases, complete observation cache
+keys, cache hits, new parses and preserved per-basis observation uses. Unchanged
+observations can be reused; changed expected observations or sealed batches require
+new verification and their cost must be measured separately.
+
+The context-v1 and use-v1 recipes remain shared with legacy name materialization.
+Nondefault contexts require the actual owner's complete assignment replay and
+imported identity audit. Ordinary render IDs depend on the exact source/target
+name, origin, game and recipe; adding later concept associations, policy versions,
+receipt metadata or another owner does not change them. True semantic variants
+remain distinct contexts. `translation_names` remains the sole owner of the
+use/selection DDL; extending it to other fields requires their complete source
+checks, rather than registering the same tables under a second capability.

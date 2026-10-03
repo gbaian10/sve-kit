@@ -160,6 +160,18 @@ class IdentityEvidence:
         self.checked: set[bytes] = set()
         self.observations: dict[bytes, tuple[Source, ...]] = {}
         self.assignment_identities: dict[str, tuple[str, str]] = {}
+        self.observation_cache_hits = 0
+        self.parsed_versions = 0
+
+    def costs(self) -> dict[str, int]:
+        """Expose actual work counts; identical inputs do not predict changed-input cost."""
+        return {
+            "registry_bases": len(self.cache),
+            "observation_keys": len(self.observations),
+            "observation_cache_hits": self.observation_cache_hits,
+            "parsed_versions": self.parsed_versions,
+            "basis_observation_uses": len(self.uses),
+        }
 
     def registry(self, basis: IdentityBasis) -> RegistrySnapshot:
         """An absent transition index must be absent in the immutable tree, not disk."""
@@ -278,6 +290,8 @@ class IdentityEvidence:
                 recipe,
             ]
         )
+        if observation_key in self.observations:
+            self.observation_cache_hits += 1
         if observation_key not in self.observations:
             found: list[Source] = []
             for store, batch in batches:
@@ -294,6 +308,7 @@ class IdentityEvidence:
                 for version in frozen.versions(printing.region, printing.card_no):
                     self.sources.projection(store, batch, version, parser)
                     card = frozen.version(printing.region, printing.card_no, version)
+                    self.parsed_versions += 1
                     if (
                         card.observation == printing.observation
                         and card.source.url == provider.card_url(printing.card_no)
@@ -430,6 +445,21 @@ def _ancestor(repository: PinnedRepository, earlier: str, later: str) -> bool:
     )
     if result.returncode not in {0, 1}:
         raise ValueError("Name identity Git ancestry is unavailable")
+    if result.returncode == 1:
+        shallow = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- inspect local history completeness, never fetch
+            [
+                repository.executable,
+                "-C",
+                str(repository.root),
+                "rev-parse",
+                "--is-shallow-repository",
+            ],
+            check=False,
+            capture_output=True,
+        )
+        # A shallow boundary can hide an actual ancestor even when both commits exist.
+        if shallow.returncode or shallow.stdout.strip() != b"false":
+            raise ValueError("Name identity Git ancestry is unavailable")
     return result.returncode == 0
 
 

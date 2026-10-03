@@ -87,10 +87,20 @@ TABLES = (
                 ("translation_use",),
             ),
             QueryCheck(
-                "name_use_default_context",
+                "name_use_adopted_variant",
                 "SELECT 1 FROM translation_use AS u JOIN translation_context AS c ON c.id=u.context_id "
-                "WHERE c.semantic_variant != 'default' LIMIT 1",
-                ("translation_use", "translation_context"),
+                "LEFT JOIN decision AS d ON d.id=c.decision_id "
+                "WHERE c.semantic_variant != 'default' AND (d.id IS NULL "
+                "OR d.category!='context_assignment' OR d.reviewed_by!='gbaian10' "
+                "OR d.state NOT IN ('sampled','confirmed') OR NOT EXISTS "
+                "(SELECT 1 FROM decision_source AS s WHERE s.decision_id=d.id "
+                "AND s.role LIKE 'name_identity:%')) LIMIT 1",
+                (
+                    "translation_use",
+                    "translation_context",
+                    "decision",
+                    "decision_source",
+                ),
             ),
             QueryCheck(
                 "name_use_confirmed_identity",

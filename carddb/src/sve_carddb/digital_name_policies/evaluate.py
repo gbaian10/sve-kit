@@ -290,7 +290,7 @@ def owner_text(
         raise ValueError("Digital-name owner identity or parent card mismatch")
     if owner.state == "unknown":
         return OwnerEvidence(
-            owner, None, (), digest(canonical(review.context.model_dump(mode="json")))
+            owner, None, (), digest(sources.context_key(review.context))
         )
     ref = owner.name_ref
     assert ref is not None
@@ -327,7 +327,7 @@ def owner_text(
     )
     sources.uses.append(use)
     return OwnerEvidence(
-        owner, text, (use,), digest(canonical(review.context.model_dump(mode="json")))
+        owner, text, (use,), digest(sources.context_key(review.context))
     )
 
 

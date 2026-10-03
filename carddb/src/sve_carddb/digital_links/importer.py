@@ -26,6 +26,7 @@ from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.digital import import_digital
+from sve_carddb.translations.name_build import NameOwner, name_source
 from sve_carddb.translations.sources import Sources
 
 if TYPE_CHECKING:
@@ -90,6 +91,7 @@ class Result:
     withdrawn: tuple[str, ...]
     decisions: tuple[tuple[str, str], ...]
     stale_reasons: tuple[tuple[str, str], ...]
+    checked_members: frozenset[str] = frozenset()
 
     @cached_property
     def by_owner(self) -> Mapping[tuple[str, str | None], tuple[Record, ...]]:
@@ -103,34 +105,51 @@ class Result:
             {key: tuple(records) for key, records in grouped.items()}
         )
 
-    def eligible(  # ruff: ignore[complex-structure,too-many-branches] -- owner proof must bind source, registry and adopted digital name
+    def eligible(
         self, db: Database, sources: Sources, revision_id: str
     ) -> frozenset[str]:
-        """Recheck the owner's own raw name; context equality never conveys permission."""
+        """Keep the existing exact-revision API for legacy name materialization."""
+        return self.eligible_owner(db, sources, NameOwner("face_revision", revision_id))
+
+    def eligible_owner(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- current printed state and frozen adoption are independent owner proofs
+        self,
+        db: Database,
+        sources: Sources,
+        owner: NameOwner,
+        *,
+        name_ref: SourceRef | None = None,
+    ) -> frozenset[str]:
+        """Recheck this owner's own name; unknown printings never borrow current."""
         if self.record.context != sources.build:
             raise ValueError("Digital-link name proof uses another build context")
-        revision = next(
-            row.values
-            for row in db.rows("face_revision")
-            if row.values["id"] == revision_id
-        )
-        face = next(
-            row.values
-            for row in db.rows("face")
-            if row.values["id"] == revision["face_id"]
-        )
-        unit = next(
-            row.values
-            for row in db.rows("text_unit")
-            if row.values["id"] == revision["name_unit_id"]
-        )
-        if (
-            revision["region"] != "jp"
-            or unit["lang"] != "ja"
-            or not isinstance(unit["text"], str)
-            or digest(unit["text"].encode()) != unit["content_hash"]
-        ):
+        source = name_source(db, owner)
+        if source is None:
+            return frozenset()
+        if source.lang != "ja":
             raise ValueError("Digital-link owner requires exact Japanese name")
+        revisions = {r.values["id"]: r.values for r in db.rows("face_revision")}
+        if owner.kind == "face_revision":
+            versions: tuple[str, ...] = (str(revisions[owner.identifier]["source_id"]),)
+        else:
+            versions = tuple(
+                str(row.values["source_id"])
+                for row in db.rows("printing_face_observation")
+                if row.values["printing_id"] == owner.identifier
+                and row.values["face_id"] == source.face_id
+                and revisions.get(row.values["revision_id"], {}).get("name_unit_id")
+                == source.unit_id
+            )
+        if name_ref is not None:
+            if (
+                name_ref.text_hash != source.source_hash
+                or name_ref.parser != "translation-jp-v1"
+            ):
+                raise ValueError(
+                    "Digital-link owner reference differs from its own name"
+                )
+            versions = (name_ref.source_version_id,)
+        face = {"id": source.face_id, "card_id": source.card_id}
+        unit = {"content_hash": source.source_hash}
         review = review_context(sources)
         evidence = Evidence(sources)
         printings = tuple(
@@ -171,13 +190,18 @@ class Result:
             proven = False
             for batch in review.source_batches:
                 for printing in printings:
-                    for mapping in printing.source_face_map:
-                        if mapping.face_id != face["id"]:
+                    for mapping, version in (
+                        (m, v) for m in printing.source_face_map for v in versions
+                    ):
+                        if mapping.face_id != face["id"] or (
+                            owner.kind == "printing_face"
+                            and printing.id != owner.identifier
+                        ):
                             continue
                         ref = SourceRef(
                             store_id=batch.store_id,
                             batch_id=batch.batch_id,
-                            source_version_id=str(revision["source_id"]),
+                            source_version_id=version,
                             parser="translation-jp-v1",
                             locator=f"/faces/{mapping.source_index}/name",
                             text_hash=str(unit["content_hash"]),
@@ -326,6 +350,14 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
         tuple(sorted(withdrawn)),
         tuple((record.record_key, decision) for record, decision, _ in fresh),
         tuple(sorted(stale_reasons)),
+        frozenset(
+            key
+            for shard, _ in resolved
+            for decision in shard.decisions
+            for key in decision.sample_ids
+            if decision.reviewed_by == "gbaian10"
+            and decision.state in {"sampled", "confirmed"}
+        ),
     )
 
 

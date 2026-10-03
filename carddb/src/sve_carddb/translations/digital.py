@@ -8,6 +8,7 @@ from sve_carddb.build_inputs import SourceUse, insert_raw_sources
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import canonical, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
+from sve_carddb.translations.name_selection import NameCandidate, first_counterpart
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
@@ -244,10 +245,21 @@ def select_name(  # ruff: ignore[complex-structure] -- each name source needs bo
                 candidates[game].add(
                     (str(unit["text"]), "official_" + game, str(link["decision_id"]))
                 )
-    for game in ("svwb", "sv1"):
-        found = candidates[game]
-        if len({name for name, _, _ in found}) > 1:
-            raise ValueError("Ambiguous adopted digital names")
-        if found:
-            return min(found)
-    return None
+    selected = first_counterpart(
+        tuple(
+            NameCandidate(
+                text=name,
+                origin=origin,
+                authority="digital_official",
+                decision_id=decision,
+                reviewed_at=str(decisions[decision]["reviewed_at"]),
+                source=None,
+            )
+            for values in candidates.values()
+            for name, origin, decision in sorted(values)
+        )
+    )
+    if selected is None:
+        return None
+    assert selected.decision_id is not None
+    return selected.text, selected.origin, selected.decision_id

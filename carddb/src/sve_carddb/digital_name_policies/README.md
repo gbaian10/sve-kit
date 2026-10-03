@@ -1,8 +1,9 @@
 # Frozen digital-name policy inputs
 
 This module validates the complete portable policy entry defined by
-`docs/schema/digital-name-policy.md`. It does not populate a database, create
-applications or receipts, or activate policies in preview/snapshot builds.
+`docs/schema/digital-name-policy.md`. Its loader and
+report command do not write applications or receipts. The explicit offline name
+application is described below.
 
 `load(authored, repository, authored_revision)` requires a full immutable Git SHA,
 regular indexed files, exact checkout bytes and complete policy/approval/exclusion
@@ -30,7 +31,7 @@ identity observation and exact name field and returns frozen `OwnerEvidence`.
 human link adoptions, have no review authority and cannot supply a name. Different
 build contexts cannot be combined. The composing build must still validate its
 real owner revision/printed state and complete input use closure before applying
-any result; that database integration belongs to the later implementation.
+any result; the explicit name application below supplies that integration.
 
 ## Offline private report
 
@@ -67,3 +68,39 @@ they are never published links. Historical private warning labels are unavailabl
 and explicitly reported as such. Coverage remains unadopted and publication
 counts remain zero. Official-name research exports, if needed, belong to private
 scratch tooling outside this module and git.
+
+## Owner-local name application
+
+The offline recipe can explicitly enable `"name_policy": "approved-frozen-v1"`.
+The default remains disabled. This first application has an explicit empty
+baseline; its counts refer to actual published JP face revisions and known
+printing faces, rather than the source-observation counts above. Unknown or
+omitted printed text receives no use or translation. Verified `TextPlan`
+publication candidates establish the exact owner before the frozen raw name is
+checked. A raw registry entry cannot authorize a withheld or reparented owner.
+
+The application combines full policy/catalogue history and glossary/name replay.
+An actual human-selected member ranks first, followed by eligible policy wording,
+that owner's actually checked same-card counterpart, another legal adopted
+choice, and original text. A sampled nonmember retains its true origin and lower
+priority. Name exclusions block automatic policy and counterpart wording without
+removing a personal human choice. All official candidates recheck their own
+owner; sharing a text context grants no official-name eligibility.
+
+Private application decisions use category `digital_name_policy`, batch scope,
+the exact policy ID and actual selected-owner membership hash. Their
+`sample_ids` are empty: approving a rule is not checking each card. Receipt review
+identity/time and separately pinned application author/time remain distinct.
+This creates neither approval receipts nor authored adoption data. Exact input
+bytes, historical catalogues, current implementations and own raw-name uses enter
+F1; expected uses are replayed independently before final verification and bundle
+reconstruction. Reports contain IDs, hashes, conditions and differences only.
+Historical draft warning labels are unavailable and are explicitly reported.
+
+The output still uses snapshot 1.0.0 and owner-local `FieldTranslation` values.
+The private same-card rows used for evidence are not projected publicly, and this
+path does not generate `same_name`, endpoint or coverage records. Those public
+browsing capabilities need the later format upgrade. Nonempty identity transition
+replay and corrected-revision override histories still fail closed where their
+complete evidence adapter is unavailable. This opt-in preview does not satisfy
+formal release coverage gates.

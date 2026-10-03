@@ -643,3 +643,21 @@ def test_nested_schemas_cannot_enable_external_or_format_validation(
 ) -> None:
     with pytest.raises(ValueError, match=r"local JSON|External JSON"):
         compile_schema(registry(), ("numeric",), JSON_SCHEMAS | {"anything": schema})
+
+
+def test_selected_predicates_use_canonical_json_and_boolean_encoding() -> None:
+    with create_database(compiled()) as db:
+        with db.transaction():
+            db.insert("numbers", number_row() | {"payload": Json({"z": 1, "a": 2})})
+            db.insert("numbers", number_row() | {"id": "off", "flag": False})
+        matched = db.select(
+            "numbers", ("id",), where={"flag": True, "payload": Json({"a": 2, "z": 1})}
+        )
+        assert [row.values["id"] for row in matched] == ["n"]
+        assert [
+            row.values["id"]
+            for row in db.select("numbers", ("id",), where={"flag": False})
+        ] == ["off"]
+        assert not db.select(
+            "numbers", ("id",), where={"flag": False, "payload": Json({"a": 2, "z": 1})}
+        )

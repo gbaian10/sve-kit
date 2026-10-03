@@ -2,17 +2,16 @@
 
 from typing import TYPE_CHECKING
 
-from sve_carddb.build_db import Json
-from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import SourceUse, insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.digital import _phases, select_name
+from sve_carddb.translations.name_build import NameOwner, name_context, name_source
+from sve_carddb.translations.name_materialization import materialize_name
+from sve_carddb.translations.name_selection import NameCandidate
 
 if TYPE_CHECKING:
-    from pydantic import JsonValue
-
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import Source
     from sve_carddb.digital_links.importer import Result
     from sve_carddb.translations.sources import Sources
@@ -153,69 +152,26 @@ def populate_name_translation(  # ruff: ignore[too-many-locals,complex-structure
     sources.uses.append(
         SourceUse(source=source, usage="digital_name_translation", locator=ref.locator)
     )
-    context = (
-        "ctx:"
-        + digest(
-            canonical(
-                {
-                    "recipe": "context-v1",
-                    "source_unit_id": str(unit["id"]),
-                    "semantic_variant": "default",
-                }
-            )
-        )[7:]
+    owner_source = name_source(db, NameOwner("face_revision", revision_id))
+    if owner_source is None:
+        return None
+    context = name_context(db, owner_source)
+    decision = next(
+        r.values for r in db.rows("decision") if r.values["id"] == decision_id
     )
-    insert_exact(
-        db,
-        "translation_context",
-        {
-            "id": context,
-            "source_unit_id": str(unit["id"]),
-            "semantic_variant": "default",
-            "decision_id": None,
-        },
-        ("id",),
-    )
-    link_json: dict[str, JsonValue] = {
-        k: v.value if isinstance(v, Json) else v for k, v in link.items()
-    }
-    dependency: dict[str, JsonValue] = {
-        "owner": {"face_revision_id": revision_id, "field": "name"},
-        "link_hash": digest(canonical(link_json)),
-        "source_ref": ref.model_dump(mode="json"),
-    }
-    checksum = digest(
-        canonical(
-            {
-                "recipe": "render-v1",
-                "context_id": context,
-                "target_lang": lang,
-                "dependency_key": dependency,
-                "text": text,
-                "origin": origin,
-                "authority": "digital_official",
-            }
-        )
-    )[7:]
-    decisions = {r.values["id"]: r.values for r in db.rows("decision")}
-    decision = decisions[decision_id]
     if decision["reviewed_at"] is None:
         raise ValueError("Adopted name decision lacks its actual review date")
-    values: dict[str, Value] = {
-        "id": "tr:" + checksum,
-        "context_id": context,
-        "target_lang": lang,
-        "revision": int(checksum[:13], 16),
-        "text": text,
-        "tokens": None,
-        "origin": origin,
-        "authority": "digital_official",
-        "status": "reviewed",
-        "source_hash": unit["content_hash"],
-        "source_id": source.id,
-        "translated_by": "digital-name-evidence-v1",
-        "translated_at": decision["reviewed_at"],
-        "decision_id": decision_id,
-    }
-    insert_exact(db, "translation", values, ("id",))
-    return "tr:" + checksum
+    return materialize_name(
+        db,
+        owner_source,
+        context,
+        NameCandidate(
+            text,
+            origin,
+            "digital_official",
+            decision_id,
+            str(decision["reviewed_at"]),
+            source,
+            (ref,),
+        ),
+    )

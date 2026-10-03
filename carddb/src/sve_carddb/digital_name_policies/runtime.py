@@ -26,6 +26,8 @@ RUNTIME = tuple(
                     "report",
                     "commands",
                     "runtime",
+                    "owners",
+                    "application",
                 )
             ),
         }

@@ -25,12 +25,15 @@ RUNTIME = (
     "carddb/uv.lock",
     "carddb/pyproject.toml",
     CODE_PATH,
+    "carddb/src/sve_carddb/translations/commands.py",
     "carddb/src/sve_carddb/translations/digital.py",
     "carddb/src/sve_carddb/translations/importer.py",
     "carddb/src/sve_carddb/translations/loader.py",
     "carddb/src/sve_carddb/translations/models.py",
     "carddb/src/sve_carddb/translations/name_replay.py",
     "carddb/src/sve_carddb/translations/name_build.py",
+    "carddb/src/sve_carddb/translations/name_selection.py",
+    "carddb/src/sve_carddb/translations/name_materialization.py",
     "carddb/src/sve_carddb/text_observations/archive.py",
     "carddb/src/sve_carddb/text_observations/models.py",
     "carddb/src/sve_carddb/text_observations/presence.py",
@@ -181,6 +184,7 @@ class Sources:
             stores, self.repository, historical=historical
         )
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
+        self.context_keys: dict[BuildContext, bytes] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
         runtime = Path(__file__).resolve().parents[4]
         for name in () if historical else RUNTIME:
@@ -192,6 +196,12 @@ class Sources:
         self.batches: dict[tuple[str, str], FrozenSources] = {}
         self.cache: dict[tuple[str, str, str, str], tuple[str, JsonValue, Source]] = {}
         self.uses: list[SourceUse] = []
+
+    def context_key(self, context: BuildContext) -> bytes:
+        """Full immutable contexts distinguish inputs without quoting them for every owner."""
+        if context not in self.context_keys:
+            self.context_keys[context] = canonical(context.model_dump(mode="json"))
+        return self.context_keys[context]
 
     def document(self, ref: SourceRef) -> tuple[str, JsonValue, Source]:
         """Verify recipe, archive membership, metadata and raw before resolving text."""
