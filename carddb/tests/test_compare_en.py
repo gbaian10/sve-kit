@@ -47,7 +47,7 @@ def test_candidate_parser_uses_english_page_fields() -> None:
     assert face.stats == {"cost": "3", "power": "3", "hp": "3"}
     assert (
         face.text
-        == "{[fanfare]} SVE-KIT 合成F01段落020。\n\n{[act]}{[engage]}SVE-KIT 合成F01段落021。"
+        == "{[fanfare]} SVE-KIT 合成F01段落020。\n{[act]}{[engage]}SVE-KIT 合成F01段落021。"
     )
     assert face.speech == "{[forestcraft]}{[cost02]} SVE-KIT 合成F01段落022。"
     assert (

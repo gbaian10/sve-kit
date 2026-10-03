@@ -39,7 +39,7 @@ FULL_TEXT = "First {synthetic.badge|[badge]}\nNext\n-----\nAuxiliary\n------\nLa
                 "type": "Follower",
                 "rarity": "Legendary",
                 "cost": "3",
-                "text": "{synthetic|[fanfare]} SVE-KIT 合成F01段落020。\n\n"
+                "text": "{synthetic|[fanfare]} SVE-KIT 合成F01段落020。\n"
                 "{synthetic|[act]}{synthetic|[engage]}SVE-KIT 合成F01段落021。",
                 "speech": "{synthetic|[forestcraft]}{synthetic|[cost02]} "
                 "SVE-KIT 合成F01段落022。",
@@ -53,7 +53,7 @@ FULL_TEXT = "First {synthetic.badge|[badge]}\nNext\n-----\nAuxiliary\n------\nLa
                 "type": "Follower / Evolved",
                 "rarity": "Special",
                 "cost": "-",
-                "text": "SVE-KIT 合成F02段落020。\n\nSVE-KIT 合成F02段落021。",
+                "text": "SVE-KIT 合成F02段落020。\nSVE-KIT 合成F02段落021。",
                 "speech": None,
             },
         ),

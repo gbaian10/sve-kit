@@ -97,8 +97,20 @@ def test_allowed(url: str, *, expected: bool) -> None:
 def test_parse_sets() -> None:
     sets = jp.parse_sets(fixture("F06-sets.html"))
     assert len(sets) == 50
-    assert sets[0] == jp.CardSet(code="SYN01", name="SVE-KIT 合成F06段落002。")
-    assert sets[-1] == jp.CardSet(code="SYN50", name="SVE-KIT 合成F06段落051。")
+    assert [item.code for item in sets] == [
+        "SN19-SN20",
+        "SN21-SN22",
+        "SN23-SN24",
+        *[f"SN{index:02}" for index in range(1, 28)],
+        *[f"SYN{index:02}" for index in range(28, 42)],
+        *[f"SYN{index:02}A" for index in range(42, 47)],
+        "SN",
+    ]
+    assert sets[0] == jp.CardSet(code="SN19-SN20", name="SVE-KIT 合成F06段落002。")
+    assert sets[3].code == "SN01"
+    assert sets[30].code == "SYN28"
+    assert sets[44].code == "SYN42A"
+    assert sets[-1] == jp.CardSet(code="SN", name="SVE-KIT 合成F06段落051。")
 
 
 def test_parse_list_pages() -> None:
@@ -108,9 +120,10 @@ def test_parse_list_pages() -> None:
     second = jp.parse_list_more(
         fixture("F05-list.html"), page=2, max_page=19, total=273
     )
-    assert second.card_numbers == [f"SYN01-{index:03}EN" for index in range(1, 16)]
+    assert second.card_numbers == [f"SYN01-{index:03}EN" for index in range(16, 31)]
     last = jp.parse_list_more(fixture("F04-list.html"), page=19, max_page=19, total=273)
-    assert last.card_numbers == ["SYN01-001EN", "SYN01-002EN", "SYN01-003EN"]
+    assert last.card_numbers == ["SN01-U31EN", "SN01-U32EN", "SN01-U33EN"]
+    assert len(set(first.card_numbers + second.card_numbers + last.card_numbers)) == 33
 
 
 def test_card_page_resolves_images_on_the_english_site() -> None:
@@ -135,10 +148,11 @@ def test_special_card_keeps_its_number() -> None:
 
 
 def test_card_page_must_be_the_requested_card() -> None:
+    # Suffix stripping would conflate distinct regional card numbers.
     with pytest.raises(
-        ValidationError, match=r"^asked for SYN01-099EN, page shows SYN01-001EN$"
+        ValidationError, match=r"^asked for SYN01-001, page shows SYN01-001EN$"
     ):
-        en.parse_card(fixture("F01-card.html"), expected_number="SYN01-099EN")
+        en.parse_card(fixture("F01-card.html"), expected_number="SYN01-001")
 
 
 # --- crawling ---------------------------------------------------------------------
