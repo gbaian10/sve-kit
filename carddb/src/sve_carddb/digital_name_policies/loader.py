@@ -85,8 +85,11 @@ SEMANTICS = {
     "names": "sha256:cf7946648d3a639210fb24cd2b70b1474cbaf04e29be657ee0537b3fc6561dcd",
     "links": "sha256:8514cf4a651bc8fb1881de24956c36896fa78eb07946a503fa63c883a51079ca",
 }
+INITIAL_NAMES_DOCUMENT = (
+    "sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3"
+)
 ADOPTED_PROJECTIONS = {
-    "sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3": "sha256:16d6f2f8fe23dd435fad9d1f436e35379c10d857b88ec766ce4c5c31089fe576",
+    INITIAL_NAMES_DOCUMENT: "sha256:16d6f2f8fe23dd435fad9d1f436e35379c10d857b88ec766ce4c5c31089fe576",
     "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:6d752c9f50170e2d2dc236d2c5f1a6bb255b09c229b6946b99d85f8ca46d40e5",
 }
 
@@ -402,6 +405,7 @@ def _approval(
 def _events(  # ruff: ignore[complex-structure] -- button, messages and disclosure are one approval evidence graph
     policy: Policy, receipt: Approval
 ) -> None:
+    # These locators bind the first approval layout in contract §4; a new layout needs a loader and SEMANTICS update.
     events = receipt.approval_events
     times = tuple(datetime.fromisoformat(e.at) for e in events)
     if times != tuple(sorted(times)) or len(
@@ -463,7 +467,7 @@ def _events(  # ruff: ignore[complex-structure] -- button, messages and disclosu
             < datetime.fromisoformat(change.disclosed_at)
         ):
             raise ValueError("Digital-name disclosed change lacks timely acceptance")
-    if policy.approved_document_hash == next(iter(ADOPTED_PROJECTIONS)) and (
+    if policy.approved_document_hash == INITIAL_NAMES_DOCUMENT and (
         set(messages) != {"b5d164b7-8e06-4336-af4e-de21f0306da4"}
         or messages["b5d164b7-8e06-4336-af4e-de21f0306da4"].at
         != "2026-10-02T20:33:39.423Z"

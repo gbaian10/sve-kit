@@ -184,11 +184,12 @@ importer/image builder/domain validator. SQL checks do not attest those facts.
 
 Compiled schemas carry a positive signed 32-bit `version`, stored in SQLite's
 `PRAGMA user_version` during creation and checked before every commit. Legacy
-`compile_t0()` uses version 1; the optional T1 registry uses version 4, including
+`compile_t0()` uses version 1; the optional T1 registry uses version 5, including
 its T0-only selection. Version 2 introduced images/CR, version 3 the remaining T1
-groups, and version 4 adopted art-use verification. The version identifies the
-declaration generation; the
-selected capability closure determines the actual table set. It is independent
+groups, and version 4 adopted art-use verification. Version 5 adds the optional
+`translation_names` tables (`translation_use` and `translation_selection`). The
+version identifies the declaration generation; the selected capability closure
+determines the actual table set. It is independent
 of crawl-manifest schema versions and public snapshot format/data versions.
 
 `rebuild_database(schema, destination, populate)` creates a private sibling

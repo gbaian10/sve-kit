@@ -12,8 +12,9 @@ def insert_exact(
     """Reject conflicting repeat inserts instead of silently replacing prior evidence."""
     previous = [
         row.values
-        for row in db.rows(table)
-        if all(row.values[key] == values[key] for key in keys)
+        for row in db.select(
+            table, db.columns(table), where={key: values[key] for key in keys}
+        )
     ]
     if previous:
         if previous != [values]:

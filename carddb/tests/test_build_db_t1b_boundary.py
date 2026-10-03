@@ -214,7 +214,7 @@ def test_rebuild_v2_to_v4_revalidates_art(tmp_path: Path) -> None:
     assert path.read_bytes() == before
     rebuild_database(compile_minimum(include_en=True), path, populate)
     with sqlite3.connect(path) as connection:
-        assert connection.execute("PRAGMA user_version").fetchall() == [(4,)]
+        assert connection.execute("PRAGMA user_version").fetchall() == [(5,)]
         assert connection.execute(
             "SELECT count(*) FROM sqlite_schema WHERE type='table'"
         ).fetchall() == [(61,)]

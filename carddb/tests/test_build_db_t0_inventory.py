@@ -168,10 +168,15 @@ class TestDocumentedInventory:
         assert expected_uq <= {unique.columns for unique in table.unique}
         for key in table.foreign_keys:
             if key.table == "vocabulary":
+                assert key.target == ("kind", "code")
+                if table.name == "translation_use":
+                    assert key.columns == ("vocabulary_kind", "vocabulary_code")
+                    assert table.column("vocabulary_kind").nullable
+                    assert table.column("vocabulary_code").nullable
+                    continue
                 fixed = table.column(key.columns[0])
                 assert fixed.fixed is not None
                 assert not fixed.nullable
-                assert key.target == ("kind", "code")
 
     @pytest.mark.parametrize(
         "table", [*TABLES, *T1_TABLES], ids=lambda table: table.name

@@ -199,7 +199,7 @@ def catalogue(loaded: LoadedPolicy, sources: Sources) -> Catalogue:
     ):
         raise ValueError("Digital-name catalogue differs from approved frozen pins")
     review = ReviewContext(context=sources.build, source_batches=pins.source_batches)
-    Evidence(sources).index(review)
+    registry = Evidence(sources).index(review)
     names: list[FrozenName] = []
     for game in ("sv1", "svwb"):
         full = complete_inventory(sources, review, game)
@@ -224,7 +224,6 @@ def catalogue(loaded: LoadedPolicy, sources: Sources) -> Catalogue:
         for item in excluded.entries
         if isinstance(item, CardTargetExclusion)
     )
-    registry = Evidence(sources).index(review)
     if any(
         card not in registry.cards
         or not any(

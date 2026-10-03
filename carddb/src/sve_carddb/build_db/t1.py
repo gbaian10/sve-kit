@@ -11,6 +11,7 @@ from sve_carddb.build_db import (
     t1_qa,
     t1_related,
     t2_semantics,
+    t2_translation,
     translation_evidence,
 )
 from sve_carddb.build_db.compiler import CompiledSchema, compile_schema
@@ -18,7 +19,7 @@ from sve_carddb.build_db.model import Capability
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t0_json import schemas
 
-SCHEMA_VERSION = 4
+SCHEMA_VERSION = 5
 MINIMUM_CAPABILITIES = ("t0", "images", "cr", "errata", "correction", "qa", "related")
 TABLES = (
     *t1_images.TABLES,
@@ -29,6 +30,7 @@ TABLES = (
     *t1_related.TABLES,
     *t1_en.TABLES,
     *translation_evidence.TABLES,
+    *t2_translation.TABLES,
 )
 REGISTRY = Registry(
     tables=(*t0.TABLES, *TABLES, *t2_semantics.TABLES),
@@ -48,6 +50,11 @@ REGISTRY = Registry(
             "semantics",
             tuple(table.name for table in t2_semantics.TABLES),
             requires=("t0",),
+        ),
+        Capability(
+            "translation_names",
+            tuple(table.name for table in t2_translation.TABLES),
+            requires=("t0", "translation_evidence"),
         ),
         Capability("art", ("art",)),
         Capability(
