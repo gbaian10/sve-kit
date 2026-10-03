@@ -20,8 +20,10 @@ if TYPE_CHECKING:
 
 
 class FlavorOwners:
-    def __init__(self, sources: Sources, basis: IdentityBasis) -> None:
-        self.evidence = IdentityEvidence(sources)
+    def __init__(
+        self, sources: Sources, basis: IdentityBasis, authored_revision: str
+    ) -> None:
+        self.evidence = IdentityEvidence(sources, authored_revision)
         self.basis = basis
         registry = self.evidence.registry(basis)
         self.printings: dict[str, list[PrintingData]] = {}

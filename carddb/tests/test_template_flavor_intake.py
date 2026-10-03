@@ -462,7 +462,7 @@ def test_full_identity_closure_pins_the_english_parser_too(tmp_path: Path) -> No
     assert set(parsers) == {"translation-jp-v1", "translation-en-v1"}
     assert object_value(parsers["translation-en-v1"])["config"] == {"provider": "en"}
     sources = Sources({"test-store": case.case.frozen.store}, root, build)
-    identity = IdentityEvidence(sources)
+    identity = IdentityEvidence(sources, revision)
     identity.complete(
         IdentityBasis.model_validate_json(canonical(case.case.basis)),
         (("test-store", case.name_ref.batch_id),),

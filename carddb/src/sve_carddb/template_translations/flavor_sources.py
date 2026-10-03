@@ -208,6 +208,6 @@ def _owners(
             "Flavor identity replay requires its complete explicit source batches"
         )
     ancestor(repository, basis.authored_revision, main_revision)
-    owners = FlavorOwners(Sources(stores, repository.root, build), basis)
+    owners = FlavorOwners(Sources(stores, repository.root, build), basis, main_revision)
     owners.evidence.complete(basis, batches)
     return owners
