@@ -197,7 +197,7 @@ def test_full_identity_evidence_guards(case: Case, guard: str) -> None:
         registry_index_hash=digest(canonical(read_yaml(root / "ids/index.yaml"))),
         transition_index_hash=None,
     )
-    evidence = IdentityEvidence(case.frozen.sources())
+    evidence = IdentityEvidence(case.frozen.sources(), basis.authored_revision)
     message = {
         "complete": "Name identity complete frozen observation closure is absent",
         "association": "Name override physical observation differs from identity basis",
@@ -776,12 +776,15 @@ def test_immutable_identity_tree_guards(
             case.replay(shards(record))
 
 
+@pytest.mark.parametrize("kind", ["assignment", "concept"])
 def test_historical_runtime_comment_does_not_invalidate_name_adoption(
     case: Case,
+    kind: str,
 ) -> None:
     from sve_carddb.translations.sources import CODE_PATH, Sources  # ruff: ignore[import-outside-top-level] -- exercise the historical/current distinction explicitly
 
-    inputs, build = case.stage(shards(case.concept()))
+    record = case.assignment() if kind == "assignment" else case.concept()
+    inputs, build = case.stage(shards(record))
     # The immutable program pin continues to verify after disk code changes.
     (case.frozen.root / CODE_PATH).write_bytes(b"# changed runtime only\n")
     sources = Sources(
@@ -953,13 +956,14 @@ def test_same_hash_and_variant_in_different_languages_do_not_conflict(
         assert (result.term_id, result.variant) == ("term:name.synthetic", "synthetic")
 
 
+@pytest.mark.parametrize("kind", ["assignment", "concept"])
 def test_each_override_decision_audits_only_its_own_immutable_identity_basis(
-    case: Case, database: DatabaseTemplate
+    case: Case, database: DatabaseTemplate, kind: str
 ) -> None:
     from sve_carddb.catalog.adoption_sources import PinnedRepository  # ruff: ignore[import-outside-top-level] -- verify hashes directly against Git blobs
     from sve_carddb.registry.storage import read_yaml  # ruff: ignore[import-outside-top-level] -- this fixture's registry content stays unchanged across revisions
 
-    first = case.concept()
+    first = case.assignment() if kind == "assignment" else case.concept()
     previous: dict[str, JsonValue] = {
         "record_key": first["record_key"],
         "record_hash": digest(canonical(first)),
@@ -969,7 +973,11 @@ def test_each_override_decision_audits_only_its_own_immutable_identity_basis(
         "A separate immutable identity revision.\n"
     )
     revision = commit(case.frozen.root)
-    second = case.concept(number=2, previous=previous)
+    second = (
+        case.assignment(number=2, previous=previous)
+        if kind == "assignment"
+        else case.concept(number=2, previous=previous)
+    )
     object_value(object_value(second["data"])["identity_basis"])[
         "authored_revision"
     ] = revision
