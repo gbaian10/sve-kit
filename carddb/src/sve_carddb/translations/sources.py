@@ -18,6 +18,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_inputs import BuildContext, Source
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.digital_links.evidence import RegistryIndex
+    from sve_carddb.template_semantics.registry import Checked
     from sve_carddb.translations.models import Span
 
 CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
@@ -170,24 +171,27 @@ class Sources:
         build: BuildContext,
         *,
         historical: bool = False,
+        semantics: Checked | None = None,
     ) -> None:
         self.stores = stores
         self.repository = PinnedRepository(repository)
         self.build = build
         self.historical = historical
+        self.semantics = semantics
+        self.semantic_parser = None if semantics is None else semantics.parser
         # One immutable batch avoids a Git process for each dependency on every owner replay.
         self.repository.read_many(
             build.program_revision, tuple(pin.name for pin in build.dependencies)
         )
         self.repository.context(build)
         self.identities = AdoptionSources(
-            stores, self.repository, historical=historical
+            stores, self.repository, historical=historical, semantics=semantics
         )
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         self.context_keys: dict[BuildContext, bytes] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
         runtime = Path(__file__).resolve().parents[4]
-        for name in () if historical else RUNTIME:
+        for name in () if historical or semantics is not None else RUNTIME:
             file = runtime / name
             if file.is_symlink() or dependencies.get(name) != digest(file.read_bytes()):
                 raise ValueError(
@@ -226,7 +230,9 @@ class Sources:
         ):
             raise ValueError("Unsupported translation source recipe")
         self.repository.implementation(
-            pin, self.build, current_runtime=not self.historical
+            pin,
+            self.build,
+            current_runtime=not self.historical and self.semantics is None,
         )
         provider = pin.config["provider"]
         if not isinstance(provider, str) or parser != "translation-" + provider + "-v1":
@@ -245,7 +251,11 @@ class Sources:
                 "card" if provider in {"jp", "en"} else "api"
             ):
                 raise ValueError("Frozen evidence provider/kind mismatch")
-            lang, document = project(raw, source.url, provider)
+            lang, document = (
+                project(raw, source.url, provider)
+                if self.semantic_parser is None
+                else self.semantic_parser.project(raw, source.url, provider)
+            )
             self.cache[cache_key] = lang, document, source
         return self.cache[cache_key]
 

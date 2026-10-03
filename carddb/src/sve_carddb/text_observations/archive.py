@@ -18,6 +18,8 @@ if TYPE_CHECKING:
     from collections.abc import Mapping
     from pathlib import Path
 
+    from sve_carddb.template_semantics.v1.parser import Parser
+
 
 def jp_face(face: official_jp.Face) -> FaceContent:
     """Retain each exact JP field, including absent effects and ordered sections."""
@@ -88,10 +90,12 @@ class FrozenTexts:
         *,
         region: Region,
         parser_version: str,
+        semantic_parser: Parser | None = None,
     ) -> None:
         self.sources = FrozenSources(root, store_id, batch_id)
         self.region = region
         self.parser_version = parser_version
+        self.semantic_parser = semantic_parser
         self.current = {
             item.url: item.source_version_id for item in self.sources.inventory.current
         }
@@ -138,6 +142,8 @@ class FrozenTexts:
             "official_page",
         ):
             raise ValueError("Frozen text source identity/media mismatch")
+        if self.semantic_parser is not None:
+            return self.semantic_parser.card(source, raw, region, card_no)
         if region == "jp":
             record = official_jp.extract_card(raw, number=card_no)
             faces = tuple(jp_face(face) for face in record.faces)
