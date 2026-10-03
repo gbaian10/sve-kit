@@ -50,8 +50,9 @@ event. Translations in the source language are refused. `approved_policy` has a 
 wire shape but is deliberately refused until the separate translation-policy loader
 and actual initial-sample prerequisites exist. Recognition approval cannot replace
 definition or translation adoption. This first implementation supports JP sentence
-definitions with the default semantic variant and the four implemented source roles
-(body, reminder, token_header, layout); other languages, variants and roles fail.
+definitions with the default semantic variant and the implemented effect roles
+(body, reminder, token_header, layout), plus the independent exact flavor path
+below; other languages, variants and roles fail.
 
 `text.parse()` implements the finite translation language from
 `docs/schema/translation-contract.md` §4.2. A parameter is exactly
@@ -93,3 +94,48 @@ side branch can be refused even if its merge result is valid. Current squash
 merges avoid that case; supporting branch-local immutable histories is separate
 work. The published index-entry guard is a second layer: a repointed hash is
 already caught by the indexed file hash before that guard can run.
+
+## Exact flavor intake
+
+`flavor_pins.recipes(repository, revision)` emits `flavor-exact-v1` with exactly
+empty config and the separately pinned JP parser. Replay verifies the complete
+installed first-party module set, exact Git bytes and dependency lock, refusing
+changed, extra or missing modules. It does not run the effect normalizer or borrow
+recognition consent. The frozen effect matcher files and recipe remain unchanged.
+
+`TemplateSources(..., flavor=FlavorInputs(source_batch=..., identity_basis=...,
+identity_batches=...))` pins one complete JP card batch separately from recipe
+options. Identity batches explicitly cover every base printing observation in the
+pinned registry, including EN identity claims when present; the flavor inventory
+itself still enumerates only the chosen JP batch's current physical face fields.
+The runtime dependencies, source batch, identity revision/index, exact identity
+files and observation uses are retained in `source_reports`. Missing registry
+owners remain pending; a source-only preview with `identity_basis=null` cannot
+adopt a definition. Invalid observations or identity pins fail rather than becoming
+missing translations. No caller-provided normalized string or owner resolves a
+pending entry.
+
+The independent closed `FlavorEntry` and `FlavorSpan` union members preserve the
+existing eight- and nine-field wire formats. Each present field yields one whole
+code-point span, sentence level, zero slots and no legacy fingerprint. Unknown,
+exact empty and fixed-White_Space-only fields remain separate report states;
+whitespace-only fields never acquire a template or a missing-translation claim.
+Original punctuation, numbers, names, newlines and spaces remain exact. The
+parser's frozen full-field projection and the exact normalizer are different pins.
+
+`FlavorOwners` reuses immutable registry and full frozen observation replay and
+maps each source to its own confirmed printing/face. Shared paragraphs can share a
+payload but retain separate physical owners. `flavor_owners.verify_owner()` is a
+read-only downstream guard: the printing face's own `flavor_unit_id` must match
+both the context source and exact text-unit hash/language. It neither reads the
+current effect nor drops a known flavor because effect wording is pending. It does
+not insert a context, use, selection or translation, or provide rendering/build
+wiring.
+
+Flavor definitions require `ja`, `default`, exact recipe, a whole-field span,
+zero parameters and a new payload ID. Final translations validate both the formal
+escaped bytes and decoded display: LF only, no outer whitespace or trailing
+whitespace on a nonempty line. Invalid final bytes require correction and another
+real model review; the loader never normalizes them. Human adoption remains the
+only supported path. Flavor policy adoption and actual initial human samples are
+separate prerequisites, not granted by a candidate page or an agreed model review.

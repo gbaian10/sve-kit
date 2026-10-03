@@ -12,6 +12,7 @@ from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import Hash, Instant, RecordData, Text
 from sve_carddb.template_parameters.models import Schema, SourceSpan
 from sve_carddb.template_sources.models import Entry, Recipe
+from sve_carddb.template_translations.flavor_models import FlavorEntry, FlavorSpan
 from sve_carddb.template_translations.review import ModelReview
 from sve_carddb.translations.models import Envelope
 
@@ -23,7 +24,7 @@ TemplateId = Annotated[
 class Definition(RecordData):
     id: TemplateId
     inventory_id: Text
-    source_span: SourceSpan
+    source_span: Annotated[SourceSpan | FlavorSpan, Field(discriminator="role")]
     source_lang: Literal["ja", "en"]
     normalizer_version: Code
     semantic_variant: Code
@@ -142,7 +143,7 @@ class Inventory(RecordData):
     template_source_format: Literal[1]
     kind: Literal["template_source_inventory"]
     recipes: Annotated[tuple[Recipe, ...], Field(min_length=1)]
-    entries: tuple[Entry, ...]
+    entries: tuple[Annotated[Entry | FlavorEntry, Field(discriminator="role")], ...]
 
     @field_validator("template_source_format", mode="before")
     @classmethod
