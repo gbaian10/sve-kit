@@ -252,6 +252,12 @@ class PrintingOwner(RecordData):
 Owner = Annotated[RevisionOwner | PrintingOwner, Field(discriminator="kind")]
 
 
+class IdentityBasis(RecordData):
+    authored_revision: Revision
+    registry_index_hash: Hash
+    transition_index_hash: Hash | None
+
+
 class AssignmentData(RecordData):
     owner: Owner
     field: Literal["name"]
@@ -259,6 +265,7 @@ class AssignmentData(RecordData):
     source_hash: Hash
     variant: Code
     concept_key: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
+    identity_basis: IdentityBasis
     reason: Text
     adoption_no: Annotated[int, Field(ge=1)]
     predecessor: Predecessor | None
@@ -276,12 +283,6 @@ class ConceptSubject(RecordData):
     face_id: Text
     source_lang: Literal["ja", "en"]
     source_hash: Hash
-
-
-class IdentityBasis(RecordData):
-    authored_revision: Revision
-    registry_index_hash: Hash
-    transition_index_hash: Hash | None
 
 
 class ConceptData(RecordData):

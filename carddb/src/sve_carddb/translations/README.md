@@ -81,12 +81,31 @@ owners. Runtime changes do not invalidate an immutable historical source recipe.
 Nonempty identity transitions currently fail closed until complete effective
 transition evidence can be composed. Revision assignments must reproduce their
 owner from the complete uncorrected observation; corrected revisions cannot be
-guessed from a name hash alone. Assignment records use the consumer's explicitly
-pinned immutable authored registry, since their wire format has no separate
-identity-basis field. Concept records use their own declared identity basis.
-Before the first production assignment is adopted, its contract must gain a
-historical `identity_basis`; current consumer pins cannot permanently preserve
-an assignment's review after the registry observation changes.
+guessed from a name hash alone. Assignment and concept records each require their
+own immutable `identity_basis`; missing/null assignment pins fail before replay.
+All histories use their own registry bytes, including superseded/default records.
+The reader verifies that each basis is equal to or an ancestor of the explicitly
+pinned consumer revision. It never reads a mutable main ref or requires a PR's
+consumer to have been merged.
+
+`verify_name_adoption_base(inputs, base_revision)` is a separate pre-adoption
+check. Its caller supplies the trusted, full PR base SHA, independently of the
+consumer. It checks every override background against that immutable base;
+a background exclusive to the feature history cannot be adopted even if the
+reader can replay it. The helper does not fetch, infer main or automatically
+wire itself into CI. Ancestry checks supplement, never replace, complete evidence
+replay. Formal release builds remain governed by the publication
+process. No formal assignment or concept association is created by these APIs.
+
+Identical frozen observations are parsed once across bases in one replay.
+The cache includes the full expected observation, exact URL, sealed store/batch
+membership and pinned parser recipe. Every basis keeps its own observation uses
+and authored/decision audit; every owner still rechecks its source-face mapping.
+Historical printing proofs establish the printing's own frozen name, without
+reconstructing historic errata coverage. Current resolution separately checks
+known printed state, exact language/name and the same permanent parent card/face;
+a repaired/reparented owner cannot inherit the old assignment. Non-name fields
+remain unsupported until their complete field/ordinal source replay is available.
 
 Complete replay needs frozen card batches for every region present in the
 registry. Offline recipes declare both batches; other callers must cover both

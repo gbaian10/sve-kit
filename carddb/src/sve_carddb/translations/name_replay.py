@@ -1,5 +1,6 @@
 """Complete name override evidence and current-owner applicability, without rendering."""
 
+import re
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- fixed immutable Git tree enumeration, never a shell
 import tempfile
 from dataclasses import dataclass
@@ -28,6 +29,7 @@ from sve_carddb.translations.name_build import NameOwner, NameSource, name_sourc
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
+    from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.registry.snapshot import RegistrySnapshot
     from sve_carddb.translations.importer import Inputs
@@ -51,18 +53,24 @@ class NameReplay:
     originals: tuple[tuple[str, str], ...]
     uses: tuple[SourceUse, ...]
     assignment_languages: tuple[tuple[str, str], ...] = ()
+    assignment_identities: tuple[tuple[str, str, str], ...] = ()
 
     def resolve(self, db: Database, owner: NameOwner) -> ResolvedName | None:
         """Recheck every owner; matching another owner never grants its eligibility."""
         source = name_source(db, owner)
         if source is None:
             return None
+        identities = {
+            key: (card, face) for key, card, face in self.assignment_identities
+        }
         assignments = [
             (r, d)
             for r, d in self.snapshot.effective()
             if isinstance(r, AssignmentRecord)
             and r.data.owner.model_dump(mode="json") == owner.payload()
             and r.data.source_hash == source.source_hash
+            and identities.get(r.record_key) == (source.card_id, source.face_id)
+            and dict(self.assignment_languages).get(r.record_key) == source.lang
         ]
         associations = [
             (r, d)
@@ -139,14 +147,19 @@ class NameReplay:
 
 
 class IdentityEvidence:
-    def __init__(self, sources: Sources) -> None:
+    def __init__(self, sources: Sources, authored_revision: str) -> None:
+        if re.fullmatch(r"[0-9a-f]{40}", authored_revision) is None:
+            raise ValueError("Name identity consumer revision must be a full Git SHA")
         self.sources = sources
+        self.authored_revision = authored_revision
         self.cache: dict[bytes, RegistrySnapshot] = {}
         self.providers: dict[tuple[str, str, str], FrozenTexts] = {}
         self.uses: list[SourceUse] = []
         self.authored_uses: list[tuple[str, str, str]] = []
         self.record_revisions: dict[str, str] = {}
         self.checked: set[bytes] = set()
+        self.observations: dict[bytes, tuple[Source, ...]] = {}
+        self.assignment_identities: dict[str, tuple[str, str]] = {}
 
     def registry(self, basis: IdentityBasis) -> RegistrySnapshot:
         """An absent transition index must be absent in the immutable tree, not disk."""
@@ -181,6 +194,10 @@ class IdentityEvidence:
         ]
         if any(mode not in {"100644", "100755"} for mode, _ in entries):
             raise ValueError("Name identity immutable tree contains a nonregular input")
+        if not _ancestor(
+            self.sources.repository, basis.authored_revision, self.authored_revision
+        ):
+            raise ValueError("Name identity basis is not a consumer ancestor")
         names = tuple(name for _, name in entries)
         files = repository.read_many(basis.authored_revision, names)
         with tempfile.TemporaryDirectory(prefix="name-identity-") as folder:
@@ -231,8 +248,38 @@ class IdentityEvidence:
             if not isinstance(record.data, PrintingData):
                 continue
             printing = record.data
-            provider = official_jp if printing.region == "jp" else official_en
-            found = False
+            matched = self._observations(printing, batches)
+            # Reuse parsing, never the per-basis audit or the owner's source-face check.
+            for source in matched:
+                self.uses.append(
+                    SourceUse(
+                        source=source,
+                        usage="name_identity_observation",
+                        locator=canonical(
+                            [basis.authored_revision, printing.id]
+                        ).decode(),
+                    )
+                )
+        self.checked.add(key)
+
+    def _observations(
+        self, printing: PrintingData, batches: tuple[tuple[str, str], ...]
+    ) -> tuple[Source, ...]:
+        provider = official_jp if printing.region == "jp" else official_en
+        parser = "translation-" + printing.region + "-v1"
+        config = object_value(parse(self.sources.build.configuration.encode()))
+        recipe = object_value(config.get("translation_recipes")).get(parser)
+        observation_key = canonical(
+            [
+                printing.observation.model_dump(mode="json"),
+                provider.card_url(printing.card_no),
+                [[store, batch] for store, batch in batches],
+                parser,
+                recipe,
+            ]
+        )
+        if observation_key not in self.observations:
+            found: list[Source] = []
             for store, batch in batches:
                 lookup = store, batch, printing.region
                 if lookup not in self.providers:
@@ -241,33 +288,23 @@ class IdentityEvidence:
                         store,
                         batch,
                         region=printing.region,
-                        parser_version="translation-" + printing.region + "-v1",
+                        parser_version=parser,
                     )
                 frozen = self.providers[lookup]
                 for version in frozen.versions(printing.region, printing.card_no):
-                    self.sources.projection(
-                        store, batch, version, "translation-" + printing.region + "-v1"
-                    )
+                    self.sources.projection(store, batch, version, parser)
                     card = frozen.version(printing.region, printing.card_no, version)
                     if (
                         card.observation == printing.observation
                         and card.source.url == provider.card_url(printing.card_no)
                     ):
-                        found = True
-                        self.uses.append(
-                            SourceUse(
-                                source=card.source,
-                                usage="name_identity_observation",
-                                locator=canonical(
-                                    [basis.authored_revision, printing.id]
-                                ).decode(),
-                            )
-                        )
+                        found.append(card.source)
             if not found:
                 raise ValueError(
                     "Name identity complete frozen observation closure is absent"
                 )
-        self.checked.add(key)
+            self.observations[observation_key] = tuple(found)
+        return self.observations[observation_key]
 
     def association(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- immutable identity, raw face and revision owner guards are independent
         self,
@@ -277,7 +314,7 @@ class IdentityEvidence:
         card_id: str | None = None,
         face_id: str | None = None,
         owner: NameOwner | None = None,
-    ) -> tuple[str, str]:
+    ) -> tuple[str, str, str, str]:
         """Bind raw URL, complete observation and physical source index to permanent keys."""
         registry = self.registry(basis)
         lang, text, source = self.sources.text(ref)
@@ -374,52 +411,47 @@ class IdentityEvidence:
                 locator=canonical([printing.id, face, ref.locator]).decode(),
             )
         )
-        return lang, text
+        return lang, text, printing.card_id, face
 
 
-def _assignment_basis(inputs: Inputs) -> IdentityBasis:
-    repository = PinnedRepository(inputs.repository)
-    index = repository.read(inputs.authored_revision, "authored/ids/index.yaml")
-    # Use the strict YAML reader for the canonical registry pin.
-    from sve_carddb.registry.inputs import JSON_VALUE  # ruff: ignore[import-outside-top-level] -- conversion belongs to the immutable YAML boundary
-    from sve_carddb.registry.yaml_reader import parse_yaml  # ruff: ignore[import-outside-top-level] -- shared strict reader avoids temporary files for this index
-
-    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- fixed tree lookup distinguishes absence from read failure
+def _ancestor(repository: PinnedRepository, earlier: str, later: str) -> bool:
+    result = subprocess.run(  # ruff: ignore[subprocess-without-shell-equals-true] -- immutable SHA arguments, no ref or network lookup
         [
             repository.executable,
             "-C",
             str(repository.root),
-            "ls-tree",
-            "--name-only",
-            inputs.authored_revision,
-            "--",
-            "authored/identity-transitions/index.yaml",
+            "merge-base",
+            "--is-ancestor",
+            earlier,
+            later,
         ],
-        check=True,
+        check=False,
         capture_output=True,
     )
-    transition = None
-    if result.stdout:
-        raw = repository.read(
-            inputs.authored_revision, "authored/identity-transitions/index.yaml"
-        )
-        transition = digest(
-            canonical(JSON_VALUE.validate_python(parse_yaml(raw), strict=True))
-        )
-    return IdentityBasis(
-        authored_revision=inputs.authored_revision,
-        registry_index_hash=digest(
-            canonical(JSON_VALUE.validate_python(parse_yaml(index), strict=True))
-        ),
-        transition_index_hash=transition,
-    )
+    if result.returncode not in {0, 1}:
+        raise ValueError("Name identity Git ancestry is unavailable")
+    return result.returncode == 0
+
+
+def verify_name_adoption_base(inputs: Inputs, base_revision: str) -> None:
+    """Adoption callers supply the trusted PR base; the loader never guesses main."""
+    if re.fullmatch(r"[0-9a-f]{40}", base_revision) is None:
+        raise ValueError("Name adoption base revision must be a full Git SHA")
+    snapshot = inputs.load()
+    repository = PinnedRepository(inputs.repository)
+    _ancestor(repository, base_revision, base_revision)
+    for record, _ in snapshot.records():
+        if isinstance(record, (AssignmentRecord, ConceptRecord)) and not _ancestor(
+            repository, record.data.identity_basis.authored_revision, base_revision
+        ):
+            raise ValueError("Name adoption basis is outside explicit base history")
 
 
 def replay_names(  # ruff: ignore[too-many-locals] -- retain full historical evidence and separate current applicability
     snapshot: Snapshot, originals: dict[str, str], inputs: Inputs, sources: Sources
 ) -> tuple[NameReplay, IdentityEvidence]:
     """Validate even superseded/withdrawn records before retaining effective applicability."""
-    evidence = IdentityEvidence(sources)
+    evidence = IdentityEvidence(sources, inputs.authored_revision)
     overrides = [
         (r, d)
         for r, d in snapshot.records()
@@ -456,15 +488,11 @@ def replay_names(  # ruff: ignore[too-many-locals] -- retain full historical evi
             batches.add((store, batch))
     assignment_languages: dict[str, str] = {}
     for record, _ in overrides:
-        basis = (
-            record.data.identity_basis
-            if isinstance(record, ConceptRecord)
-            else _assignment_basis(inputs)
-        )
+        basis = record.data.identity_basis
         evidence.complete(basis, tuple(sorted(batches)))
         evidence.record_revisions[record.record_key] = basis.authored_revision
         if isinstance(record, ConceptRecord):
-            lang, _ = evidence.association(
+            lang, _, _, _ = evidence.association(
                 record.data.identity_basis,
                 record.data.source_ref,
                 card_id=record.data.subject.card_id,
@@ -485,7 +513,8 @@ def replay_names(  # ruff: ignore[too-many-locals] -- retain full historical evi
                 if proof.source_ref.text_hash == record.data.source_hash
             ]
             for ref in refs:
-                language, _ = evidence.association(basis, ref, owner=owner)
+                language, _, card, face = evidence.association(basis, ref, owner=owner)
+                evidence.assignment_identities[record.record_key] = card, face
                 assignment_languages[record.record_key] = language
     uses = uses_sorted((*sources.uses, *evidence.uses))
     return NameReplay(
@@ -493,4 +522,10 @@ def replay_names(  # ruff: ignore[too-many-locals] -- retain full historical evi
         tuple(sorted((k, v) for k, v in originals.items() if k in terms)),
         uses,
         tuple(sorted(assignment_languages.items())),
+        tuple(
+            sorted(
+                (key, card, face)
+                for key, (card, face) in evidence.assignment_identities.items()
+            )
+        ),
     ), evidence

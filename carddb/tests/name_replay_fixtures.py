@@ -117,6 +117,7 @@ class Case:
                 "source_hash": self.frozen.jp.text_hash,
                 "variant": variant,
                 "concept_key": key,
+                "identity_basis": parse(canonical(self.basis)),
                 "reason": "Synthetic true homonym.",
                 "adoption_no": number,
                 "predecessor": previous,
