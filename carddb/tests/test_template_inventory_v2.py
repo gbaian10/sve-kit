@@ -448,16 +448,86 @@ def test_foreign_v2_is_structural_but_semantic_entry_refuses(
     files = copy.deepcopy(intake_case.files)
     inv = object_value(files[INVENTORY])
     inv["template_source_format"] = 2
-    inv["replay_context"] = context()
+    ctx = context()
+    from sve_carddb.template_semantics.environment import capture  # ruff: ignore[import-outside-top-level] -- complete necessary-package shape
+    from sve_carddb.template_semantics.registry import ROOT, manifest  # ruff: ignore[import-outside-top-level] -- finite binding evidence is loaded only for this fixture
+    from sve_carddb.template_semantics.versions import REGISTERED  # ruff: ignore[import-outside-top-level] -- no source execution enters the format-only reader
+
+    ctx["semantic_bindings"] = [
+        {
+            "id": name,
+            "revision": REVISION,
+            "path": manifest(name)[0],
+            "hash": REGISTERED[name][1],
+        }
+        for name in sorted(
+            ("physical-parser-v1", "template-effect-v1", "semantic-output-v1")
+        )
+    ]
+    ctx["environment"] = capture(ROOT, producer=True).model_dump(mode="json")
+    inv["replay_context"] = ctx
     revision = write(root, files)
     glossary = load_glossary(root / "authored")
     assert any(path == INVENTORY for path, _, _ in glossary.closure)
     with pytest.raises(
         ValueError,
-        match=r"^Template inventory v2 requires complete C\+hash source replay$",
+        match=r"^Pinned immutable dependency unavailable$",
     ):
         load_templates(PinnedRepository(root), revision, intake_case.sources())
     inv["replay_context"] = {"format": 1}
     write(root, files)
     with pytest.raises(ValueError, match=r"^Invalid formal template inventory$"):
         load_glossary(root / "authored")
+
+
+@pytest.mark.parametrize("packages", [["z", "a"], ["a", "a"]])
+def test_manifest_environment_packages_are_sorted_and_unique(
+    packages: list[str],
+) -> None:
+    good: dict[str, JsonValue] = {
+        "semantic_version_format": 1,
+        "id": "parser-v1",
+        "entrypoint": "parser_v1",
+        "files": [{"path": "carddb/parser.py", "hash": HASH}],
+        "environment_packages": ["a", "z"],
+    }
+    assert SemanticManifest.model_validate_json(
+        canonical(good)
+    ).environment_packages == ("a", "z")
+    with pytest.raises(ValidationError) as failure:
+        SemanticManifest.model_validate_json(
+            canonical({**good, "environment_packages": list[JsonValue](packages)})
+        )
+    assert [e["msg"] for e in failure.value.errors()] == [
+        "Value error, Semantic environment packages must be sorted and unique"
+    ]
+
+
+@pytest.mark.parametrize("flavor", [False, True])
+def test_flavor_inputs_and_exact_recipe_are_bidirectional(
+    wire: dict[str, JsonValue], flavor: bool
+) -> None:
+    recipe = object_value(array(wire["recipes"])[0])
+    if flavor:
+        object_value(wire["replay_context"])["inputs"] = {
+            "kind": "flavor",
+            "source_batch": {"store_id": "test", "batch_id": HASH},
+            "identity_basis": None,
+            "identity_batches": [],
+        }
+        item = object_value(array(wire["entries"])[0])
+        item.update(
+            role="flavor", normalizer_id="flavor-exact-v1", legacy_fingerprint=None
+        )
+        object_value(item["source_ref"])["locator"] = "/faces/0/flavor"
+        recipe["id"] = "flavor-exact-v1"
+        InventoryV2.model_validate_json(canonical(wire))
+        recipe["id"] = "synthetic-v1"
+    else:
+        InventoryV2.model_validate_json(canonical(wire))
+        recipe["id"] = "flavor-exact-v1"
+    with pytest.raises(ValidationError) as failure:
+        InventoryV2.model_validate_json(canonical(wire))
+    assert [e["msg"] for e in failure.value.errors()] == [
+        "Value error, Flavor replay requires its exact empty recipe config"
+    ]

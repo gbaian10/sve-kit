@@ -39,6 +39,7 @@ if TYPE_CHECKING:
     from sve_carddb.build_inputs import BuildContext, Source
     from sve_carddb.catalog.adoption_models import Record, ReviewContext, TextValue
     from sve_carddb.registry.snapshot import RegistrySnapshot
+    from sve_carddb.template_semantics.registry import Checked
 
 SOURCE_RECIPE_PATHS = {
     "official-jp-exact-v1": "carddb/src/sve_carddb/extract/official_jp.py",
@@ -163,10 +164,12 @@ class AdoptionSources:
         repository: PinnedRepository,
         *,
         historical: bool = False,
+        semantics: Checked | None = None,
     ) -> None:
         self.stores = dict(stores)
         self.repository = repository
         self.historical = historical
+        self.semantics = semantics
         self.batches: dict[tuple[str, str], FrozenSources] = {}
         self.uses: list[SourceUse] = []
         self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
@@ -187,7 +190,7 @@ class AdoptionSources:
             raise ValueError("Source parser recipe ID mismatch")
         _source_recipe(pin)
         self.repository.implementation(
-            pin, context, current_runtime=not self.historical
+            pin, context, current_runtime=not self.historical and self.semantics is None
         )
         self._runtime(pin, context)
         return pin
@@ -298,7 +301,9 @@ class AdoptionSources:
         if pin.version != parser:
             raise ValueError("Reviewed printing recipe ID mismatch")
         self.repository.implementation(
-            pin, review.context, current_runtime=not self.historical
+            pin,
+            review.context,
+            current_runtime=not self.historical and self.semantics is None,
         )
         self._runtime(pin, review.context)
         for batch in review.source_batches:
@@ -308,19 +313,29 @@ class AdoptionSources:
             ):
                 continue
             source, raw, _ = frozen.read(version, parser_version=parser)
-            _projection(pin, raw, source.url)
+            self._projection(pin, raw, source.url)
             card = (
-                legacy_projection(
-                    official_jp.extract_card(raw, number=printing.card_no)
-                )
-                if printing.region == "jp"
-                else official_en.legacy_projection(
-                    official_en.extract_card(raw, number=printing.card_no)
+                None
+                if self.semantics is not None
+                else (
+                    legacy_projection(
+                        official_jp.extract_card(raw, number=printing.card_no)
+                    )
+                    if printing.region == "jp"
+                    else official_en.legacy_projection(
+                        official_en.extract_card(raw, number=printing.card_no)
+                    )
                 )
             )
-            actual = Observation.model_validate_json(
-                canonical(observation(card, printing.region))
-            )
+            if self.semantics is None:
+                assert card is not None
+                actual = Observation.model_validate_json(
+                    canonical(observation(card, printing.region))
+                )
+            else:
+                actual = self.semantics.parser.card(
+                    source, raw, printing.region, printing.card_no
+                ).observation
             if actual != printing.observation:
                 raise ValueError(
                     "Historical printing identity observation cannot be replayed"
@@ -353,12 +368,18 @@ class AdoptionSources:
                 _, raw, _ = frozen.read(
                     version, parser_version="catalog-image-association-v1"
                 )
-                card = (
-                    official_jp.extract_card(raw, number=printing.card_no)
-                    if printing.region == "jp"
-                    else official_en.extract_card(raw, number=printing.card_no)
-                )
-                if card.faces[maps[0].source_index].image == source.url:
+                if self.semantics is not None:
+                    images = self.semantics.parser.images(
+                        raw, printing.card_no, printing.region
+                    )
+                else:
+                    card = (
+                        official_jp.extract_card(raw, number=printing.card_no)
+                        if printing.region == "jp"
+                        else official_en.extract_card(raw, number=printing.card_no)
+                    )
+                    images = tuple(face.image for face in card.faces)
+                if images[maps[0].source_index] == source.url:
                     return
         raise ValueError("Image adoption printing/face association mismatch")
 
@@ -398,14 +419,16 @@ class AdoptionSources:
             if pin.version != ref.parser:
                 raise ValueError("Source parser recipe ID mismatch")
             self.repository.implementation(
-                pin, review.context, current_runtime=not self.historical
+                pin,
+                review.context,
+                current_runtime=not self.historical and self.semantics is None,
             )
             self._runtime(pin, review.context)
             source, raw, descriptor = self.batch(ref.store_id, ref.batch_id).read(
                 ref.source_version_id,
                 parser_version=pin.version,
             )
-            projection = _projection(pin, raw, descriptor.url)
+            projection = self._projection(pin, raw, descriptor.url)
             value = pointer(projection, ref.locator)
             if (
                 not isinstance(value, str)
@@ -419,6 +442,16 @@ class AdoptionSources:
             self.cache[key] = LocalizedText(lang=lang, text=value), source, projection
             self._use(source, "catalog_exact_text", ref.model_dump(mode="json"))
         return self.cache[key]
+
+    def _projection(self, pin: Normalizer, raw: bytes, url: str) -> JsonValue:
+        """Historical provenance is checked separately from fixed installed execution."""
+        if self.semantics is None:
+            return _projection(pin, raw, url)
+        _source_recipe(pin)
+        if pin.version == "exact-json-v1":
+            return parse(raw)
+        provider = "jp" if pin.version == "official-jp-exact-v1" else "en"
+        return self.semantics.parser.project(raw, url, provider)[1]
 
     def _runtime(self, pin: Normalizer, context: BuildContext) -> None:
         # Historical recipe closures cannot grow without a new recipe version.
@@ -443,7 +476,7 @@ class AdoptionSources:
             required.add("carddb/src/sve_carddb/sources/official_en.py")
         required.add(pin.code_path)
         dependencies = {p.name: p.sha256 for p in context.dependencies}
-        if self.historical:
+        if self.historical or self.semantics is not None:
             if not required <= dependencies.keys():
                 raise ValueError(
                     "Source parser runtime/dependency closure cannot be replayed"

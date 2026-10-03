@@ -238,7 +238,12 @@ def _template_input(path: str, content: bytes) -> None:
     from sve_carddb.template_translations.loader import _inventory, _shard, envelope  # ruff: ignore[import-outside-top-level] -- the two area validators share a closure without a module import cycle
 
     if path.startswith("translations/template-sources/"):
-        _inventory(content)
+        data = _inventory(content)
+        from sve_carddb.template_semantics.registry import foreign  # ruff: ignore[import-outside-top-level] -- finite semantic support is independent of the source loader
+        from sve_carddb.template_translations.replay_models import InventoryV2  # ruff: ignore[import-outside-top-level] -- foreign validation must not recursively import source replay
+
+        if isinstance(data, InventoryV2):
+            foreign(data.replay_context)
     else:
         envelope(_shard(content), path.split("/")[2])
 

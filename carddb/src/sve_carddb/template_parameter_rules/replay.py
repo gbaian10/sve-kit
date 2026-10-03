@@ -37,9 +37,11 @@ from sve_carddb.translations.sources import RUNTIME as TRANSLATION_RUNTIME
 from sve_carddb.translations.sources import Sources, project
 
 if TYPE_CHECKING:
+    from sve_carddb.build_inputs import SourceUse
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_parameters.models import Candidate, Hint
     from sve_carddb.template_parameters.references import References
+    from sve_carddb.template_semantics.registry import Checked
     from sve_carddb.template_sources.models import Recipe
 
 CODE_PATH = "carddb/src/sve_carddb/template_parameter_rules/replay.py"
@@ -96,7 +98,11 @@ class Replay:
 
 
 def _evidence(
-    repository: PinnedRepository, recipe: Recipe, stores: dict[str, Path]
+    repository: PinnedRepository,
+    recipe: Recipe,
+    stores: dict[str, Path],
+    *,
+    semantics: Checked | None = None,
 ) -> Sources:
     dependencies = repository.read_many(recipe.code_revision, TRANSLATION_RUNTIME)
     parsers: dict[str, JsonValue] = {}
@@ -113,11 +119,16 @@ def _evidence(
     context = BuildContext.from_inputs(
         recipe.code_revision, dependencies, {"translation_recipes": parsers}
     )
-    return Sources(stores, repository.root, context)
+    return Sources(stores, repository.root, context, semantics=semantics)
 
 
 def _references(
-    repository: PinnedRepository, recipe: Recipe, stores: dict[str, Path]
+    repository: PinnedRepository,
+    recipe: Recipe,
+    stores: dict[str, Path],
+    *,
+    semantics: Checked | None = None,
+    evidence_uses: list[SourceUse] | None = None,
 ) -> References:
     pin = object_value(object_value(recipe.config.get("references")).get("glossary"))
     revision = pin.get("authored_revision")
@@ -146,7 +157,10 @@ def _references(
             target = root / name.removeprefix("authored/")
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_bytes(raw)
-        refs = adopted(root, _evidence(repository, recipe, stores))
+        evidence = _evidence(repository, recipe, stores, semantics=semantics)
+        refs = adopted(root, evidence)
+        if evidence_uses is not None:
+            evidence_uses.extend(evidence.uses)
     actual = object_value(refs.pins["glossary"])
     if canonical({**actual, "authored_revision": revision}) != canonical(pin):
         raise ValueError("Recognition glossary canonical index or shard pins differ")

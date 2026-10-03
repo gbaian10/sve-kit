@@ -42,11 +42,15 @@ if TYPE_CHECKING:
 
     from pydantic import JsonValue
 
+    from sve_carddb.build_inputs import SourceUse
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_parameter_rules.replay import ProposalInputs
     from sve_carddb.template_parameters.models import Candidate, Hint, Schema
+    from sve_carddb.template_semantics.budget import Monitor
+    from sve_carddb.template_semantics.v1.output import Output
     from sve_carddb.template_sources.models import Entry, Recipe
+    from sve_carddb.template_translations.replay_models import ReplayContext
 
 ORDINALS = {"choice_ordinal", "card_ordinal", "repetition_ordinal", "turn_ordinal"}
 
@@ -124,6 +128,9 @@ class SourceReplay:
     entries: tuple[Reconstructed, ...]
     source_coverage: bytes
     checkpoint: bytes
+    semantic_output: Output | None = None
+    provenance: bytes = b"{}"
+    source_uses: tuple[SourceUse, ...] = ()
 
 
 class TemplateSources:
@@ -144,6 +151,10 @@ class TemplateSources:
         self.proposals = proposals
         self.flavor = flavor
         self._cache: dict[bytes, SourceReplay] = {}
+        self._replay_monitor: Monitor | None = None
+        self.replay_groups: dict[
+            bytes, tuple[tuple[Recipe, ...], ReplayContext, SourceReplay]
+        ] = {}
 
     def reconstruct(self, pins: tuple[Recipe, ...]) -> SourceReplay:
         """The caller supplies pins, never normalized text, hints or resolution claims."""
@@ -196,6 +207,35 @@ class TemplateSources:
                     "Formal template recipe requires its exact legacy input and closed config"
                 )
             self._cache[key] = self._replay(recipe, source_pins)
+        return deepcopy(self._cache[key])
+
+    def reconstruct_v2(
+        self, pins: tuple[Recipe, ...], context: ReplayContext
+    ) -> SourceReplay:
+        """One session caches by the whole immutable background, never just recipe names."""
+        from sve_carddb.template_translations.semantic_replay import reconstruct  # ruff: ignore[import-outside-top-level] -- v1 remains independently replayable
+
+        key = canonical(
+            {
+                "recipes": [p.model_dump(mode="json") for p in pins],
+                "replay_context": context.model_dump(mode="json"),
+            }
+        )
+        if key not in self._cache:
+            from sve_carddb.template_semantics.audit import ExpectedPlan  # ruff: ignore[import-outside-top-level] -- declarations and actual replay are deliberately separate
+            from sve_carddb.template_semantics.budget import Budget, Monitor  # ruff: ignore[import-outside-top-level] -- historical paths alone require engineering guards
+
+            if self._replay_monitor is None:
+                self._replay_monitor = Monitor(Budget())
+            with self._replay_monitor.watchdog():
+                expected = ExpectedPlan(self.repository, self.stores).expected(
+                    pins, context, self.main_revision
+                )
+                replay = reconstruct(self, pins, context)
+                if replay.source_uses != expected:
+                    raise ValueError("Replay independent source use closure mismatch")
+                self._cache[key] = replay
+            self.replay_groups[key] = (pins, context, self._cache[key])
         return deepcopy(self._cache[key])
 
     def _replay(self, recipe: Recipe, pins: tuple[Recipe, ...]) -> SourceReplay:  # ruff: ignore[too-many-locals] -- a complete frozen batch shares one policy, source scan and reference closure

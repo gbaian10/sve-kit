@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 from pydantic import TypeAdapter, ValidationError
 
 from sve_carddb.catalog.adoption_loader import ordered
+from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
 from sve_carddb.template_sources.flavor import VERSION as FLAVOR_VERSION
@@ -32,7 +33,6 @@ from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
 if TYPE_CHECKING:
-    from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_translations.files import Files
     from sve_carddb.template_translations.sources import Reconstructed, TemplateSources
 
@@ -214,21 +214,30 @@ def _inventory(raw: bytes) -> Inventory | InventoryV2:
     return inventory
 
 
-def _inventories(
+def _inventories(  # ruff: ignore[complex-structure] -- each immutable shard is checked before per-context grouping
     files: Files, sources: TemplateSources
 ) -> tuple[dict[str, Reconstructed], tuple[tuple[bytes, bytes, bytes], ...]]:
     groups: dict[bytes, list[str]] = defaultdict(list)
     declared = {}
     recipes = {}
+    contexts = {}
+    frozen_repository = PinnedRepository(sources.repository.root)
     for path, _, raw in files.content:
         if INVENTORY.fullmatch(path) is None:
             continue
         inventory = _inventory(raw)
-        if inventory.template_source_format == INVENTORY_V2_FORMAT:
-            raise ValueError(
-                "Template inventory v2 requires complete C+hash source replay"
+        if isinstance(inventory, InventoryV2):
+            reread = _inventory(
+                json_bytes(frozen_repository.read(files.revision, "authored/" + path))
             )
-        identity = canonical([r.model_dump(mode="json") for r in inventory.recipes])
+            if reread != inventory:
+                raise ValueError(
+                    "Template immutable inventory differs from in-memory input"
+                )
+            identity = inventory.group_key().encode()
+            contexts[identity] = inventory.replay_context
+        else:
+            identity = canonical([r.model_dump(mode="json") for r in inventory.recipes])
         recipes[identity] = inventory.recipes
         for entry in inventory.entries:
             if entry.id in declared:
@@ -238,7 +247,11 @@ def _inventories(
     reconstructed = {}
     reports = []
     for identity, ids in sorted(groups.items()):
-        replay = sources.reconstruct(recipes[identity])
+        replay = (
+            sources.reconstruct_v2(recipes[identity], contexts[identity])
+            if identity in contexts
+            else sources.reconstruct(recipes[identity])
+        )
         expected = {m.entry.id: m for m in replay.entries}
         if set(expected) != set(ids):
             raise ValueError(
