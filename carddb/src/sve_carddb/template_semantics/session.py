@@ -82,8 +82,8 @@ def replay(  # ruff: ignore[too-many-locals,too-many-statements] -- one session 
         for identity, group in sorted(grouped.items()):
             inventory = group[0]
             before = time.monotonic()
-            independent = plans.expected(
-                inventory.recipes, inventory.replay_context, sources.main_revision
+            independent = sources.expected_v2(
+                inventory.recipes, inventory.replay_context
             )
             expected.extend(independent)
             result = sources.reconstruct_v2(inventory.recipes, inventory.replay_context)

@@ -7,10 +7,15 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, object_value, parse
+from sve_carddb.source_archive import ArchiveError
 from sve_carddb.template_parameter_rules.replay import ProposalInputs
 from sve_carddb.template_semantics import candidates
 from sve_carddb.template_semantics.audit import host_context
-from sve_carddb.template_semantics.budget import Budget, Monitor
+from sve_carddb.template_semantics.budget import (
+    Budget,
+    Monitor,
+    ReplayBudgetExceededError,
+)
 from sve_carddb.template_semantics.generation import generate
 from sve_carddb.template_semantics.session import replay
 from sve_carddb.template_translations.replay_models import (
@@ -112,7 +117,10 @@ def main() -> None:
             command.add_argument("--index-hash", required=True)
     try:
         result = run(parser.parse_args())
-    except ValueError, OSError, TypeError:
+    except ReplayBudgetExceededError:
+        sys.stderr.write("replay_budget_exceeded\n")
+        raise SystemExit(2) from None
+    except ValueError, OSError, TypeError, LookupError, ArchiveError:
         sys.stderr.write(
             "Template replay refused; no result was adopted or published.\n"
         )

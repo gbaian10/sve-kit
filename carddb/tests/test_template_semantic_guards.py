@@ -301,3 +301,46 @@ def test_more_shards_of_one_background_do_not_add_replay_work(
     assert len(calls) == report["replay_count"] == 1
     assert report["entries"] == len(inventory.entries)
     assert report["shards"] == shards
+
+
+def test_cli_budget_error_is_machine_readable_and_never_publishes(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+) -> None:
+    import sys  # ruff: ignore[import-outside-top-level] -- CLI arguments are isolated per test
+
+    from sve_carddb.template_semantics.__main__ import main  # ruff: ignore[import-outside-top-level] -- keep the CLI boundary independent of fixture imports
+
+    legacy, inputs, budget = (
+        tmp_path / name for name in ("legacy", "inputs", "budget")
+    )
+    legacy.write_bytes(b"")
+    inputs.write_bytes(b"{}")
+    budget.write_bytes(b'{"format":1,"wall_seconds":0}')
+    output = tmp_path / "not-published"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "template_semantics",
+            "generate",
+            "--repository",
+            str(tmp_path),
+            "--host",
+            "a" * 40,
+            "--legacy",
+            str(legacy),
+            "--kind",
+            "effect",
+            "--inputs",
+            str(inputs),
+            "--budget",
+            str(budget),
+            "--output",
+            str(output),
+        ],
+    )
+    with pytest.raises(SystemExit) as error:
+        main()
+    assert error.value.code == 2
+    assert capsys.readouterr().err == "replay_budget_exceeded\n"
+    assert not output.exists()

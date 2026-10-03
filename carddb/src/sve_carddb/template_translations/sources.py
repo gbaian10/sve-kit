@@ -152,6 +152,7 @@ class TemplateSources:
         self.flavor = flavor
         self._cache: dict[bytes, SourceReplay] = {}
         self._replay_monitor: Monitor | None = None
+        self._expected_v2: dict[bytes, tuple[SourceUse, ...]] = {}
         self.replay_groups: dict[
             bytes, tuple[tuple[Recipe, ...], ReplayContext, SourceReplay]
         ] = {}
@@ -209,6 +210,24 @@ class TemplateSources:
             self._cache[key] = self._replay(recipe, source_pins)
         return deepcopy(self._cache[key])
 
+    def expected_v2(
+        self, pins: tuple[Recipe, ...], context: ReplayContext
+    ) -> tuple[SourceUse, ...]:
+        """Cache only declarations proven from immutable inputs, never actual replay uses."""
+        from sve_carddb.template_semantics.audit import ExpectedPlan  # ruff: ignore[import-outside-top-level] -- independent input plans do not import execution results
+
+        key = canonical(
+            {
+                "recipes": [p.model_dump(mode="json") for p in pins],
+                "replay_context": context.model_dump(mode="json"),
+            }
+        )
+        if key not in self._expected_v2:
+            self._expected_v2[key] = ExpectedPlan(
+                self.repository, self.stores
+            ).expected(pins, context, self.main_revision)
+        return self._expected_v2[key]
+
     def reconstruct_v2(
         self, pins: tuple[Recipe, ...], context: ReplayContext
     ) -> SourceReplay:
@@ -222,15 +241,12 @@ class TemplateSources:
             }
         )
         if key not in self._cache:
-            from sve_carddb.template_semantics.audit import ExpectedPlan  # ruff: ignore[import-outside-top-level] -- declarations and actual replay are deliberately separate
             from sve_carddb.template_semantics.budget import Budget, Monitor  # ruff: ignore[import-outside-top-level] -- historical paths alone require engineering guards
 
             if self._replay_monitor is None:
                 self._replay_monitor = Monitor(Budget())
             with self._replay_monitor.watchdog():
-                expected = ExpectedPlan(self.repository, self.stores).expected(
-                    pins, context, self.main_revision
-                )
+                expected = self.expected_v2(pins, context)
                 replay = reconstruct(self, pins, context)
                 if replay.source_uses != expected:
                     raise ValueError("Replay independent source use closure mismatch")
