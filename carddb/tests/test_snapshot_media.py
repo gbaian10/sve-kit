@@ -60,7 +60,7 @@ def test_independent_v2_golden_and_union() -> None:
             attachments,
         )
     ) == expected
-    assert len(array(object_value(expected)["printing_image"])) == 3
+    assert len(array(object_value(expected)["printing_image"])) == 4
 
 
 def test_schema_regeneration_and_frozen_column_boundaries() -> None:
@@ -93,6 +93,8 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
 def test_shared_image_url_vectors() -> None:
     for raw in array(parse((GOLDEN / "image-url-cases.json").read_bytes())):
         case = object_value(raw)
+        if "reject" in case:
+            continue
         assert (
             image_url(
                 integer(case["int_id"]),
@@ -950,3 +952,104 @@ def test_v2_reader_rejects_endpoint_config_even_without_links(
             BATCH,
             format_version=MEDIA,
         )
+
+
+def test_prepare_rejects_duplicate_permanent_path(images: PublicImages) -> None:
+    projection = deepcopy(images.projection)
+    another = deepcopy(projection.tables["printing"][0])
+    another["id"] = "printing:collision"
+    projection.tables["printing"].append(another)
+    projection.tables["printing_image"].append(
+        projection.tables["printing_image"][0] | {"printing_id": "printing:collision"}
+    )
+    with pytest.raises(ValueError, match=r"^Duplicate permanent image path$"):
+        prepare_media(projection, images.library, revision=7)
+
+
+def test_prepare_rejects_face_absent_from_printing(images: PublicImages) -> None:
+    projection = deepcopy(images.projection)
+    projection.tables["printing"][0]["faces"] = []
+    with pytest.raises(ValueError, match=r"^Media face absent from printing$"):
+        prepare_media(projection, images.library, revision=7)
+
+
+def test_legacy_writer_rejects_media_plan(images: PublicImages, tmp_path: Path) -> None:
+    plan = prepare_media(images.projection, images.library, revision=7)
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    with pytest.raises(
+        ValueError, match=r"^Legacy preview cannot consume a media plan$"
+    ):
+        write_preview(
+            images.snapshot(), roots, {}, image_source=images.library, media_plan=plan
+        )
+    assert not (roots.preview / "snapshots/preview/current.json").exists()
+
+
+@pytest.mark.parametrize("revisions", [[1, 3], [1, 1]])
+def test_reservation_rejects_nonmonotonic_journal(
+    tmp_path: Path, revisions: list[int]
+) -> None:
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    journal = roots.destination("private/media-revisions.jsonl")
+    journal.parent.mkdir(parents=True)
+    raw = b"".join(canonical({"revision": r}) + b"\n" for r in revisions)
+    journal.write_bytes(raw)
+    with (
+        pytest.raises(
+            ValueError, match=r"^Preview media reservation journal is not monotonic$"
+        ),
+        reservation(roots),
+    ):
+        pytest.fail("Corrupt journal must not yield a reservation")
+    assert journal.read_bytes() == raw
+
+
+def test_written_media_corruption_does_not_activate(
+    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- corrupt only the sealed destination at the activation boundary
+
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    old = prepare_media(images.projection, images.library, revision=7)
+    old_snapshot = export_snapshot(
+        old.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    write_preview(old_snapshot, roots, {}, image_source=images.library, media_plan=old)
+    pointer_path = roots.preview / "snapshots/preview/current.json"
+    pointer = pointer_path.read_bytes()
+    projection = deepcopy(images.projection)
+    projection.tables["printing"][0]["rarity_raw"] = "Synthetic changed metadata"
+    new = prepare_media(projection, images.library, revision=8, previous=old.state)
+    snapshot = export_snapshot(
+        new.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    assert digest(canonical(snapshot.manifest)) != digest(
+        canonical(old_snapshot.manifest)
+    )
+    original = writer._write
+    corrupted = False
+
+    def corrupt_after_sealing(
+        roots: Roots, path: str, raw: bytes, *, immutable: bool
+    ) -> None:
+        nonlocal corrupted
+        original(roots, path, raw, immutable=immutable)
+        if path.startswith("reports/"):
+            assert pointer_path.read_bytes() == pointer
+            assert all(
+                roots.destination(string(a["path"])).exists() for a in new.assets
+            )
+            target = roots.destination(string(new.assets[0]["path"]))
+            content = target.read_bytes()
+            target.write_bytes(bytes([content[0] ^ 1]) + content[1:])
+            corrupted = True
+
+    monkeypatch.setattr(writer, "_write", corrupt_after_sealing)
+    with pytest.raises(ValueError, match=r"^Written media differs from sealed plan$"):
+        write_preview(snapshot, roots, {}, image_source=images.library, media_plan=new)
+    assert corrupted
+    assert pointer_path.read_bytes() == pointer
+    assert (
+        parse((roots.preview / "private/media-committed.json").read_bytes())
+        == old.state
+    )

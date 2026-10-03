@@ -279,6 +279,35 @@
       "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
     },
     {
+      "key": "images/detail/global/global/band/12",
+      "role": "images",
+      "row_counts": [
+        {
+          "table": "image_asset",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 12,
+          "partition": "detail",
+          "count": 2
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "path": "snapshots/blobs/567f3cf21ae99a95f5a03688789ffd59d4db3d51fa0d717d261f128537ef57a5.json",
+      "sha256": "sha256:567f3cf21ae99a95f5a03688789ffd59d4db3d51fa0d717d261f128537ef57a5",
+      "bytes": 550,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 313
+      }
+    },
+    {
       "bytes": 777,
       "compressed_bytes": {
         "br": null,
@@ -329,7 +358,7 @@
           },
           "bucket": 29,
           "partition": "detail",
-          "count": 1
+          "count": 2
         }
       ],
       "dependencies": [
@@ -342,12 +371,12 @@
           "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
         }
       ],
-      "path": "snapshots/blobs/8a0c92f29394201b77584adf23298f2154b32c3f3c9bc9a953500e68dd1ee2c4.json",
-      "sha256": "sha256:8a0c92f29394201b77584adf23298f2154b32c3f3c9bc9a953500e68dd1ee2c4",
-      "bytes": 619,
+      "path": "snapshots/blobs/10545ae2bcf3f6c1e1581c33efc48c7ddc1e010365ebb41906b40df4bba14b01.json",
+      "sha256": "sha256:10545ae2bcf3f6c1e1581c33efc48c7ddc1e010365ebb41906b40df4bba14b01",
+      "bytes": 680,
       "compressed_bytes": {
         "br": null,
-        "gzip": 371
+        "gzip": 392
       }
     },
     {
@@ -375,12 +404,12 @@
           "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
         }
       ],
-      "path": "snapshots/blobs/399d51b39dfd76482d4ad04c6334339e9a038e73bb19e4d469276e78ea1ecd34.json",
-      "sha256": "sha256:399d51b39dfd76482d4ad04c6334339e9a038e73bb19e4d469276e78ea1ecd34",
-      "bytes": 769,
+      "path": "snapshots/blobs/503b2c4705c6ef91bea2f3bd61195915032ba88e7da3e3432fa8f1b618d894d5.json",
+      "sha256": "sha256:503b2c4705c6ef91bea2f3bd61195915032ba88e7da3e3432fa8f1b618d894d5",
+      "bytes": 701,
       "compressed_bytes": {
         "br": null,
-        "gzip": 382
+        "gzip": 403
       }
     },
     {
@@ -455,14 +484,14 @@
       "sha256": "sha256:8ebc790e3960735a352c2bb94cdf228308373d430161c5c6e5ffe1585e7482e8"
     },
     {
-      "bytes": 233,
+      "bytes": 409,
       "compressed_bytes": {
         "br": null,
-        "gzip": 196
+        "gzip": 237
       },
       "dependencies": [],
       "key": "text/detail/global/global/band/19",
-      "path": "snapshots/blobs/c89eb91f637f17e5bdd71fcd893ac8b4c8fbd14e271122b525e7d674d4ae3149.json",
+      "path": "snapshots/blobs/0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b.json",
       "role": "text",
       "row_counts": [
         {
@@ -474,9 +503,19 @@
           "bucket": 39,
           "partition": "detail",
           "count": 1
+        },
+        {
+          "table": "digital_card",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 39,
+          "partition": "detail",
+          "count": 1
         }
       ],
-      "sha256": "sha256:c89eb91f637f17e5bdd71fcd893ac8b4c8fbd14e271122b525e7d674d4ae3149"
+      "sha256": "sha256:0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b"
     },
     {
       "bytes": 237,
@@ -503,6 +542,35 @@
       "sha256": "sha256:2f89bbfbf6b7b8d4ab02e583b88cfb6e40448e199d76332f1a49fa1b54b73948"
     },
     {
+      "key": "text/detail/global/global/band/26",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "digital_card",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 52,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "path": "snapshots/blobs/808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794.json",
+      "sha256": "sha256:808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794",
+      "bytes": 223,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 182
+      }
+    },
+    {
       "bytes": 1257,
       "compressed_bytes": {
         "br": null,
@@ -527,10 +595,10 @@
       "sha256": "sha256:fa7471f53eca29bef081a5bd8d585b3d8258ec8510a0a46ae452245cf54fe056"
     },
     {
-      "bytes": 2805,
+      "bytes": 3168,
       "compressed_bytes": {
         "br": null,
-        "gzip": 995
+        "gzip": 1093
       },
       "dependencies": [
         {
@@ -539,7 +607,7 @@
         }
       ],
       "key": "text/detail/home_set/set%3Aa/band/0",
-      "path": "snapshots/blobs/8113d77852379a5e4295a46ec998fc633233b6b6ff973820f0d54c04be9ef84b.json",
+      "path": "snapshots/blobs/2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a.json",
       "role": "text",
       "row_counts": [
         {
@@ -561,9 +629,19 @@
           "bucket": 29,
           "partition": "detail",
           "count": 1
+        },
+        {
+          "table": "digital_link",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 26,
+          "partition": "detail",
+          "count": 2
         }
       ],
-      "sha256": "sha256:8113d77852379a5e4295a46ec998fc633233b6b6ff973820f0d54c04be9ef84b"
+      "sha256": "sha256:2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a"
     },
     {
       "bytes": 2180,
@@ -646,12 +724,12 @@
   "restriction_coverage": [],
   "source_windows": [],
   "text_all": {
-    "path": "snapshots/blobs/0c467c0ba042470b176837635b2d838a7b38a5705bbfc180a6459cbe107dfeea.json",
-    "sha256": "sha256:0c467c0ba042470b176837635b2d838a7b38a5705bbfc180a6459cbe107dfeea",
-    "bytes": 21656,
+    "path": "snapshots/blobs/f6ce795a76efca87bb12a295c31c1b26088112f3a07faec8d2976757b35c7c79.json",
+    "sha256": "sha256:f6ce795a76efca87bb12a295c31c1b26088112f3a07faec8d2976757b35c7c79",
+    "bytes": 22556,
     "compressed_bytes": {
       "br": null,
-      "gzip": 4589
+      "gzip": 4762
     },
     "contains": [
       {
@@ -696,11 +774,15 @@
       },
       {
         "key": "text/detail/global/global/band/19",
-        "sha256": "sha256:c89eb91f637f17e5bdd71fcd893ac8b4c8fbd14e271122b525e7d674d4ae3149"
+        "sha256": "sha256:0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b"
       },
       {
         "key": "text/detail/global/global/band/23",
         "sha256": "sha256:2f89bbfbf6b7b8d4ab02e583b88cfb6e40448e199d76332f1a49fa1b54b73948"
+      },
+      {
+        "key": "text/detail/global/global/band/26",
+        "sha256": "sha256:808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794"
       },
       {
         "key": "text/detail/global/global/band/6",
@@ -708,7 +790,7 @@
       },
       {
         "key": "text/detail/home_set/set%3Aa/band/0",
-        "sha256": "sha256:8113d77852379a5e4295a46ec998fc633233b6b6ff973820f0d54c04be9ef84b"
+        "sha256": "sha256:2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a"
       },
       {
         "key": "text/detail/home_set/set%3Aa/band/1",

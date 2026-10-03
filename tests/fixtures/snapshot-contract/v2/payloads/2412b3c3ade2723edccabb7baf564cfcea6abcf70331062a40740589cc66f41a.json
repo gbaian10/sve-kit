@@ -145,6 +145,49 @@
           ]
         ]
       }
+    ],
+    "digital_link": [
+      {
+        "owner": {
+          "kind": "home_set",
+          "id": "set:a"
+        },
+        "bucket": 26,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "id",
+          "card_id",
+          "face_id",
+          "digital_card_id",
+          "digital_phase",
+          "relation",
+          "effect_similarity",
+          "review_level"
+        ],
+        "rows": [
+          [
+            "dl:sv1",
+            "c:a",
+            null,
+            "d:sv1",
+            null,
+            "same_name",
+            null,
+            "unreviewed"
+          ],
+          [
+            "dl:svwb",
+            "c:a",
+            null,
+            "d:svwb",
+            null,
+            "same_name",
+            null,
+            "unreviewed"
+          ]
+        ]
+      }
     ]
   },
   "types": {

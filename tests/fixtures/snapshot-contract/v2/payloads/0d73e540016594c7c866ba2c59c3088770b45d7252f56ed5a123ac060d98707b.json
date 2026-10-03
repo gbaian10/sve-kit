@@ -23,6 +23,29 @@
           ]
         ]
       }
+    ],
+    "digital_card": [
+      {
+        "owner": {
+          "kind": "global",
+          "id": null
+        },
+        "bucket": 39,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "id",
+          "game",
+          "official_id"
+        ],
+        "rows": [
+          [
+            "d:svwb",
+            "svwb",
+            "12345678"
+          ]
+        ]
+      }
     ]
   },
   "types": {}

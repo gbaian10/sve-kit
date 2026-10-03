@@ -33,7 +33,7 @@
           "kind": "home_set",
           "id": "set:a"
         },
-        "bucket": 29,
+        "bucket": 43,
         "partition": "detail",
         "base": null,
         "columns": [
@@ -49,7 +49,7 @@
         ],
         "rows": [
           [
-            "p:a",
+            "p:b",
             "f:a",
             "img:a",
             "approved",
@@ -84,6 +84,17 @@
                 179
               ]
             ]
+          ],
+          [
+            "p:b",
+            "f:b",
+            "img:w",
+            "withdrawn",
+            "available",
+            "Synthetic withdrawal",
+            null,
+            null,
+            []
           ]
         ]
       }

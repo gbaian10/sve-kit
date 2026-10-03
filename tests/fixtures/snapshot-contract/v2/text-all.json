@@ -1443,7 +1443,7 @@
     },
     {
       "key": "text/detail/global/global/band/19",
-      "sha256": "sha256:c89eb91f637f17e5bdd71fcd893ac8b4c8fbd14e271122b525e7d674d4ae3149",
+      "sha256": "sha256:0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -1466,6 +1466,29 @@
                   "t:ja:b17a760c59cb19db",
                   "ja",
                   "Synthetic rule"
+                ]
+              ]
+            }
+          ],
+          "digital_card": [
+            {
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 39,
+              "partition": "detail",
+              "base": null,
+              "columns": [
+                "id",
+                "game",
+                "official_id"
+              ],
+              "rows": [
+                [
+                  "d:svwb",
+                  "svwb",
+                  "12345678"
                 ]
               ]
             }
@@ -1505,6 +1528,39 @@
           ]
         },
         "types": {}
+      }
+    },
+    {
+      "key": "text/detail/global/global/band/26",
+      "sha256": "sha256:808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794",
+      "payload": {
+        "format_version": "2.0.0",
+        "types": {},
+        "tables": {
+          "digital_card": [
+            {
+              "owner": {
+                "kind": "global",
+                "id": null
+              },
+              "bucket": 52,
+              "partition": "detail",
+              "base": null,
+              "columns": [
+                "id",
+                "game",
+                "official_id"
+              ],
+              "rows": [
+                [
+                  "d:sv1",
+                  "sv1",
+                  "123456789"
+                ]
+              ]
+            }
+          ]
+        }
       }
     },
     {
@@ -1677,7 +1733,7 @@
     },
     {
       "key": "text/detail/home_set/set%3Aa/band/0",
-      "sha256": "sha256:8113d77852379a5e4295a46ec998fc633233b6b6ff973820f0d54c04be9ef84b",
+      "sha256": "sha256:2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -1822,6 +1878,49 @@
                       []
                     ]
                   ]
+                ]
+              ]
+            }
+          ],
+          "digital_link": [
+            {
+              "owner": {
+                "kind": "home_set",
+                "id": "set:a"
+              },
+              "bucket": 26,
+              "partition": "detail",
+              "base": null,
+              "columns": [
+                "id",
+                "card_id",
+                "face_id",
+                "digital_card_id",
+                "digital_phase",
+                "relation",
+                "effect_similarity",
+                "review_level"
+              ],
+              "rows": [
+                [
+                  "dl:sv1",
+                  "c:a",
+                  null,
+                  "d:sv1",
+                  null,
+                  "same_name",
+                  null,
+                  "unreviewed"
+                ],
+                [
+                  "dl:svwb",
+                  "c:a",
+                  null,
+                  "d:svwb",
+                  null,
+                  "same_name",
+                  null,
+                  "unreviewed"
                 ]
               ]
             }

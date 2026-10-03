@@ -1,0 +1,29 @@
+{
+  "format_version": "2.0.0",
+  "types": {},
+  "tables": {
+    "digital_card": [
+      {
+        "owner": {
+          "kind": "global",
+          "id": null
+        },
+        "bucket": 52,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "id",
+          "game",
+          "official_id"
+        ],
+        "rows": [
+          [
+            "d:sv1",
+            "sv1",
+            "123456789"
+          ]
+        ]
+      }
+    ]
+  }
+}

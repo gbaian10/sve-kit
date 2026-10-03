@@ -1,0 +1,173 @@
+[
+  {
+    "name": "media-shape-0",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      null,
+      0,
+      11,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-1",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      null,
+      true,
+      11,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-2",
+    "target": "printing_image",
+    "raw_json": "[\"p:a\",\"f:a\",\"img:a\",\"approved\",\"available\",null,9007199254740992,11,[[\"art_m\",384,288],[\"art_s\",160,120],[\"card_l\",459,641],[\"card_m\",320,447],[\"card_s\",128,179]]]",
+    "error": "Expected safe integer"
+  },
+  {
+    "name": "media-shape-3",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      null,
+      7,
+      -1,
+      [
+        [
+          "art_m",
+          384,
+          288
+        ],
+        [
+          "art_s",
+          160,
+          120
+        ],
+        [
+          "card_l",
+          459,
+          641
+        ],
+        [
+          "card_m",
+          320,
+          447
+        ],
+        [
+          "card_s",
+          128,
+          179
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-4",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      null,
+      7,
+      11,
+      [
+        [
+          "art_m",
+          0,
+          288
+        ]
+      ]
+    ]
+  },
+  {
+    "name": "media-shape-5",
+    "target": "printing_image",
+    "value": [
+      "p:a",
+      "f:a",
+      "img:a",
+      "approved",
+      "available",
+      null,
+      7,
+      11,
+      [
+        [
+          "png",
+          160,
+          120
+        ]
+      ]
+    ]
+  }
+]

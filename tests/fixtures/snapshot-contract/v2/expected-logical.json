@@ -432,6 +432,30 @@
       "width": 459,
       "height": 641,
       "format": "png"
+    },
+    {
+      "id": "img:m",
+      "origin": "official",
+      "publication_state": "approved",
+      "withdrawal_reason": null,
+      "source_src_raw": "/synthetic.png",
+      "source_url": "https://example.invalid/synthetic.png",
+      "availability": "missing",
+      "width": 459,
+      "height": 641,
+      "format": "png"
+    },
+    {
+      "id": "img:w",
+      "origin": "official",
+      "publication_state": "withdrawn",
+      "withdrawal_reason": "Synthetic withdrawal",
+      "source_src_raw": "/synthetic.png",
+      "source_url": "https://example.invalid/synthetic.png",
+      "availability": "available",
+      "width": 459,
+      "height": 641,
+      "format": "png"
     }
   ],
   "printing_image": [
@@ -473,6 +497,17 @@
       ]
     },
     {
+      "printing_id": "p:a",
+      "face_id": "f:b",
+      "image_id": "img:m",
+      "publication_state": "approved",
+      "availability": "missing",
+      "withdrawal_reason": null,
+      "card_version": null,
+      "art_version": null,
+      "variants": []
+    },
+    {
       "printing_id": "p:b",
       "face_id": "f:a",
       "image_id": "img:a",
@@ -512,39 +547,13 @@
     {
       "printing_id": "p:b",
       "face_id": "f:b",
-      "image_id": "img:a",
-      "publication_state": "approved",
+      "image_id": "img:w",
+      "publication_state": "withdrawn",
       "availability": "available",
-      "withdrawal_reason": null,
-      "card_version": 7,
-      "art_version": 11,
-      "variants": [
-        {
-          "size_key": "art_m",
-          "width": 384,
-          "height": 288
-        },
-        {
-          "size_key": "art_s",
-          "width": 160,
-          "height": 120
-        },
-        {
-          "size_key": "card_l",
-          "width": 459,
-          "height": 641
-        },
-        {
-          "size_key": "card_m",
-          "width": 320,
-          "height": 447
-        },
-        {
-          "size_key": "card_s",
-          "width": 128,
-          "height": 179
-        }
-      ]
+      "withdrawal_reason": "Synthetic withdrawal",
+      "card_version": null,
+      "art_version": null,
+      "variants": []
     }
   ],
   "product": [
@@ -632,9 +641,41 @@
   "rules_profile": [],
   "restriction": [],
   "card_related": [],
-  "digital_card": [],
+  "digital_card": [
+    {
+      "id": "d:sv1",
+      "game": "sv1",
+      "official_id": "123456789"
+    },
+    {
+      "id": "d:svwb",
+      "game": "svwb",
+      "official_id": "12345678"
+    }
+  ],
   "digital_art": [],
-  "digital_link": [],
+  "digital_link": [
+    {
+      "id": "dl:sv1",
+      "card_id": "c:a",
+      "face_id": null,
+      "digital_card_id": "d:sv1",
+      "digital_phase": null,
+      "relation": "same_name",
+      "effect_similarity": null,
+      "review_level": "unreviewed"
+    },
+    {
+      "id": "dl:svwb",
+      "card_id": "c:a",
+      "face_id": null,
+      "digital_card_id": "d:svwb",
+      "digital_phase": null,
+      "relation": "same_name",
+      "effect_similarity": null,
+      "review_level": "unreviewed"
+    }
+  ],
   "digital_art_link": [],
   "digital_link_coverage": [],
   "voice": [],

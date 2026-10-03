@@ -33,7 +33,7 @@
           "kind": "home_set",
           "id": "set:a"
         },
-        "bucket": 43,
+        "bucket": 29,
         "partition": "detail",
         "base": null,
         "columns": [
@@ -49,7 +49,7 @@
         ],
         "rows": [
           [
-            "p:b",
+            "p:a",
             "f:a",
             "img:a",
             "approved",
@@ -86,41 +86,15 @@
             ]
           ],
           [
-            "p:b",
+            "p:a",
             "f:b",
-            "img:a",
+            "img:m",
             "approved",
-            "available",
+            "missing",
             null,
-            7,
-            11,
-            [
-              [
-                "art_m",
-                384,
-                288
-              ],
-              [
-                "art_s",
-                160,
-                120
-              ],
-              [
-                "card_l",
-                459,
-                641
-              ],
-              [
-                "card_m",
-                320,
-                447
-              ],
-              [
-                "card_s",
-                128,
-                179
-              ]
-            ]
+            null,
+            null,
+            []
           ]
         ]
       }

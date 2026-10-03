@@ -24,6 +24,14 @@
     "url": "images/art_m/2-f7.webp?v=11"
   },
   {
+    "case": "back-f1",
+    "int_id": 18000,
+    "ordinal": 1,
+    "size": "card_s",
+    "version": 9,
+    "url": "images/card_s/18000-f1.webp?v=9"
+  },
+  {
     "case": "manual-special-card-number-irrelevant",
     "int_id": 12001,
     "ordinal": 0,
@@ -38,5 +46,85 @@
     "size": "art_s",
     "version": 9007199254740991,
     "url": "images/art_s/9007199254740991-f9007199254740991.webp?v=9007199254740991"
+  },
+  {
+    "case": "reject-int_id-0",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":0,\"ordinal\":0,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-int_id-1",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":9007199254740992,\"ordinal\":0,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-int_id-2",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":true,\"ordinal\":0,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-int_id-3",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":\"1\",\"ordinal\":0,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-int_id-4",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1.5,\"ordinal\":0,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-ordinal-0",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":-1,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-ordinal-1",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":9007199254740992,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-ordinal-2",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":true,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-ordinal-3",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":\"0\",\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-ordinal-4",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0.5,\"size\":\"card_s\",\"version\":1}"
+  },
+  {
+    "case": "reject-version-0",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0,\"size\":\"card_s\",\"version\":0}"
+  },
+  {
+    "case": "reject-version-1",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0,\"size\":\"card_s\",\"version\":9007199254740992}"
+  },
+  {
+    "case": "reject-version-2",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0,\"size\":\"card_s\",\"version\":true}"
+  },
+  {
+    "case": "reject-version-3",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0,\"size\":\"card_s\",\"version\":\"1\"}"
+  },
+  {
+    "case": "reject-version-4",
+    "reject": "Image URL integer outside safe domain",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0,\"size\":\"card_s\",\"version\":1.5}"
+  },
+  {
+    "case": "reject-size-0",
+    "reject": "Unknown image size",
+    "raw_json": "{\"int_id\":1,\"ordinal\":0,\"size\":\"png\",\"version\":1}"
   }
 ]
