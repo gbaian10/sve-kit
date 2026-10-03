@@ -25,7 +25,7 @@ def synthetic() -> CardRecord:
                 name="名前",
                 card_class="エルフ",
                 card_type="フォロワー",
-                traits=["ジオ・テオゴニア"],
+                traits=["Synthetic Alpha", "Synthetic Beta"],
                 rarity="LG",
                 product=None,
                 title=None,
@@ -37,7 +37,7 @@ def synthetic() -> CardRecord:
                 flavor="flavor",
                 illustrator=None,
                 image="/image.png",
-                trait_raw="ジオ・テオゴニア",
+                trait_raw="Synthetic Alpha・Synthetic Beta",
             )
         ],
         release_date=None,
@@ -75,7 +75,7 @@ def test_legacy_adapter_keeps_old_projection_separate_from_typed_flavor() -> Non
     assert face.text == ""  # ruff: ignore[compare-to-empty-string] -- distinguish present empty from missing
     assert face.sections == ["token definition"]
     assert face.image == "/image.png"
-    assert face.traits == ["ジオ・テオゴニア"]
+    assert face.traits == ["Synthetic Alpha", "Synthetic Beta"]
 
 
 def test_comparison_matches_envelope_then_reports_field_differences(
