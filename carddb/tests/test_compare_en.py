@@ -30,13 +30,30 @@ def _card(number: str, *, back_text: str = "unchanged") -> Card:
 
 def test_candidate_parser_uses_english_page_fields() -> None:
     body = (
-        Path(__file__).parent / "fixtures" / "official_en" / "card_BP01-001EN.html"
+        Path(__file__).parent / "fixtures" / "synthetic_en" / "F01-card.html"
     ).read_bytes()
-    card = compare_en.parse_card(body, "BP01-001EN")
-    assert len(card.faces) == 1
-    assert set(card.faces[0].stats) == {"cost", "power", "hp"}
-    assert {"Class", "Card Type", "Trait"} <= card.faces[0].info.keys()
-    assert card.faces[0].image.endswith("/BP01-001EN.png")
+    card = compare_en.parse_card(body, "SYN01-001EN")
+    assert card.number == "SYN01-001EN"
+    [face] = card.faces
+    assert face.name == "SVE-KIT 合成測試卡 F01-01"
+    assert face.info == {
+        "Format": "Any",
+        "Class": "Forestcraft",
+        "Card Type": "Follower",
+        "Trait": "SyntheticAlpha/SyntheticBeta",
+        "Rarity": "Legendary",
+        "Card Set": "SVE-KIT 合成商品 F01",
+    }
+    assert face.stats == {"cost": "3", "power": "3", "hp": "3"}
+    assert (
+        face.text
+        == "{[fanfare]} SVE-KIT 合成F01段落020。\n{[act]}{[engage]}SVE-KIT 合成F01段落021。"
+    )
+    assert face.speech == "{[forestcraft]}{[cost02]} SVE-KIT 合成F01段落022。"
+    assert (
+        face.image
+        == "/wordpress/wp-content/images/cardlist/synthetic/SYN01-001EN-1.png"
+    )
 
 
 def test_info_value_keeps_break_between_text_nodes() -> None:
@@ -44,7 +61,7 @@ def test_info_value_keeps_break_between_text_nodes() -> None:
         "<html><div class='cardlist-Detail'><div class='cardlist-Detail_Box_Inner'>"
         "<div class='ttl'>Synthetic</div><div class='img'><img src='/synthetic.png'></div>"
         "<div class='info'><dl><dt>Card Set</dt>"
-        "<dd>Starter Deck 2<br />\nBlade of Steel</dd></dl></div>"
+        "<dd>SVE-KIT synthetic set<br />\nSynthetic edition</dd></dl></div>"
         "<div class='status-Item status-Item-Cost'><span class='heading'>Cost</span>1</div>"
         "<div class='status-Item status-Item-Power'><span class='heading'>Power</span>2</div>"
         "<div class='status-Item status-Item-Hp'><span class='heading'>HP</span>3</div>"
@@ -52,7 +69,7 @@ def test_info_value_keeps_break_between_text_nodes() -> None:
         "</div></div><!-- " + "x" * 1100 + " --></html>"
     ).encode()
     card = compare_en.parse_card(body, "SYN-001EN")
-    assert card.faces[0].info["Card Set"] == "Starter Deck 2\nBlade of Steel"
+    assert card.faces[0].info["Card Set"] == "SVE-KIT synthetic set\nSynthetic edition"
 
 
 def test_length_distribution_separates_direction_and_common_deltas() -> None:

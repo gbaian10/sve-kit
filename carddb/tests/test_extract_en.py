@@ -2,6 +2,7 @@
 
 import hashlib
 import json
+from pathlib import Path
 from typing import TYPE_CHECKING, cast
 
 import pytest
@@ -21,12 +22,95 @@ from .en_extract_fixtures import face as make_face
 from .en_extract_fixtures import page
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.manifest import Manifest
 
 
 FULL_TEXT = "First {synthetic.badge|[badge]}\nNext\n-----\nAuxiliary\n------\nLast"
+
+
+@pytest.mark.parametrize(
+    ("case", "number", "expected"),
+    [
+        (
+            "F01",
+            "SYN01-001EN",
+            {
+                "class": "Forestcraft",
+                "type": "Follower",
+                "rarity": "Legendary",
+                "cost": "3",
+                "text": "{synthetic|[fanfare]} SVE-KIT 合成F01段落020。\n"
+                "{synthetic|[act]}{synthetic|[engage]}SVE-KIT 合成F01段落021。",
+                "speech": "{synthetic|[forestcraft]}{synthetic|[cost02]} "
+                "SVE-KIT 合成F01段落022。",
+            },
+        ),
+        (
+            "F02",
+            "SYN01-SP01EN",
+            {
+                "class": "Abysscraft",
+                "type": "Follower / Evolved",
+                "rarity": "Special",
+                "cost": "-",
+                "text": "SVE-KIT 合成F02段落020。\nSVE-KIT 合成F02段落021。",
+                "speech": None,
+            },
+        ),
+    ],
+    ids=["F01", "F02"],
+)
+def test_static_synthetic_page_has_an_independent_full_record(
+    case: str, number: str, expected: dict[str, str | None]
+) -> None:
+    raw = (
+        Path(__file__).parent / "fixtures" / "synthetic_en" / f"{case}-card.html"
+    ).read_bytes()
+    record = official_en.extract_card(raw, number=number)
+    info = {
+        "Format": "Any",
+        "Class": expected["class"],
+        "Card Type": expected["type"],
+        "Trait": "SyntheticAlpha/SyntheticBeta",
+        "Rarity": expected["rarity"],
+        "Card Set": f"SVE-KIT 合成商品 {case}",
+    }
+    name = f"SVE-KIT 合成測試卡 {case}-01"
+    image = f"/wordpress/wp-content/images/cardlist/synthetic/{number}-1.png"
+    stats = {"cost": expected["cost"], "power": "3", "hp": "3"}
+    [face] = record.faces
+    assert record.number == number
+    assert face.name == name
+    assert face.info == info
+    assert face.stats == stats
+    assert face.image == image
+    assert face.illustrator == f"SVE-KIT 合成插畫者 {case}-01"
+    assert face.trait_raw == "SyntheticAlpha/SyntheticBeta"
+    assert face.traits == ["SyntheticAlpha/SyntheticBeta"]
+    assert face.text == face.raw_text == expected["text"]
+    assert face.sections == []
+    assert face.speech == expected["speech"]
+    assert record.release_date is None
+    assert record.errata_url is None
+    assert record.notes == []
+    assert record.qa == []
+    assert record.products == []
+    assert record.related_cards == []
+    assert official_en.legacy_projection(record) == Card.model_validate(
+        {
+            "number": number,
+            "faces": [
+                {
+                    "name": name,
+                    "info": info,
+                    "stats": stats,
+                    "image": image,
+                    "text": expected["text"],
+                    "speech": expected["speech"],
+                }
+            ],
+        }
+    )
 
 
 def test_every_face_raw_value_and_page_hint_is_preserved() -> None:
