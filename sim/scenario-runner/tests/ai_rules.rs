@@ -129,10 +129,10 @@ impl Rules {
                 let (_, controller) = self.pending.remove(at);
                 let deck = self.zone(&controller, "deck").clone();
                 let options = if source.starts_with('a') {
-                    // Cutthroat: look at the top eight, choose one.
+                    // The first pending ability selects one card from the top eight.
                     deck.iter().take(8).map(|c| json!([c.id])).collect()
                 } else {
-                    // 符術の門弟: search for 式神の使役, or find none (Q816).
+                    // Matching-token selection also counts the discarded cards. (Q816)
                     let mut o: Vec<Value> = deck
                         .iter()
                         .filter(|c| c.card == SHIKIGAMI)
@@ -174,7 +174,7 @@ impl Rules {
             self.point = Some(("P1".to_owned(), "check-timing".to_owned()));
             return Ok("resolved");
         }
-        // 簒奪の舞: the distributed damage is dealt at once, then destroyed followers leave.
+        // Apply damage from the committed distribution.
         for (target, amount) in d["distribute"]["1"].as_object().into_iter().flatten() {
             let field = self.zone("P2", "field");
             let hit = field.iter_mut().find(|c| &c.id == target).unwrap();

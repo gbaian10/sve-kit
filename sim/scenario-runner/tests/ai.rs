@@ -218,8 +218,8 @@ fn report(edges: u64) -> AiReport {
     }
 }
 
-/// Sample 0 assumes P2 holds エンジェルスナイプ and answers the attack with it;
-/// sample 1 assumes a ファイター and ends the turn.
+// The quick response must come from the sampled hand.
+// Other samples cannot borrow a response from sample 0.
 fn good_log() -> Vec<Value> {
     let mut root0 = edge(
         1,
@@ -320,7 +320,7 @@ fn the_quick_answer_must_come_from_the_samples_hand() {
     let fails = |log: &[Value]| !log_ok(log, 3, 5000, "q-b");
     let mut not_quick = good_log();
     not_quick[0]["sample_hand"] = json!([{"id": "s0-h", "card": "BP01-173"}]);
-    assert!(fails(&not_quick), "a ファイター is not a Quick card");
+    assert!(fails(&not_quick), "the sampled hand has no quick response");
     let mut elsewhere = good_log();
     elsewhere[1]["decision"]["card"] = json!("h1");
     assert!(
