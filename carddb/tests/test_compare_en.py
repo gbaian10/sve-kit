@@ -2,11 +2,13 @@
 
 import json
 from pathlib import Path
+from types import SimpleNamespace
 from typing import TYPE_CHECKING, cast
 from urllib.parse import parse_qs, urlsplit
 
+import pytest
+
 if TYPE_CHECKING:
-    import pytest
     from pydantic import JsonValue
 
 from sve_carddb.extract import compare_en
@@ -14,6 +16,87 @@ from sve_carddb.fetch.validate import ValidationError
 from sve_carddb.fetch.writer import LocalState
 from sve_carddb.registry.inputs import Card
 from sve_carddb.registry.review import observation
+
+
+@pytest.fixture
+def runner_arguments(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> list[str]:
+    monkeypatch.setattr(
+        compare_en, "tempfile", SimpleNamespace(gettempdir=lambda: "/sve-runner-temp")
+    )
+    return [
+        "compare_en",
+        "--legacy",
+        str(tmp_path / "missing-legacy.jsonl"),
+        "--authored",
+        str(tmp_path / "missing-authored"),
+        "--store",
+        str(tmp_path / "missing-store"),
+        "--store-id",
+        "test-store",
+        "--batch-id",
+        "sha256:" + "0" * 64,
+    ]
+
+
+def test_main_accepts_runtime_temporary_root_before_reading_legacy(
+    runner_arguments: list[str], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        "sys.argv", [*runner_arguments, "--output", "/sve-runner-temp/report.json"]
+    )
+    with pytest.raises(
+        FileNotFoundError, match=r"^\[Errno 2\].*missing-legacy\.jsonl'$"
+    ) as error:
+        compare_en.main()
+    assert error.value.filename == str(tmp_path / "missing-legacy.jsonl")
+
+
+@pytest.mark.parametrize(
+    "output",
+    ["/sve-runner-temp-sibling/report.json", "/tmpx/report.json"],  # ruff: ignore[hardcoded-temp-file] -- rejection probes must cover a lookalike of the legacy root
+)
+def test_main_rejects_similar_prefix_sibling_of_temporary_root(
+    runner_arguments: list[str], monkeypatch: pytest.MonkeyPatch, output: str
+) -> None:
+    monkeypatch.setattr("sys.argv", [*runner_arguments, "--output", output])
+    with pytest.raises(
+        ValueError,
+        match=r"^report must be written under /tmp or the runtime temporary directory$",
+    ):
+        compare_en.main()
+
+
+@pytest.mark.parametrize("symlink", [False, True])
+def test_main_rejects_reports_outside_temporary_storage_before_reading_inputs(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, *, symlink: bool
+) -> None:
+    outside = Path("/sve-kit-non-temporary-reports/comparison.json")
+    output = tmp_path / "report.json" if symlink else outside
+    if symlink:
+        output.symlink_to(outside)
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "compare_en",
+            "--legacy",
+            str(tmp_path / "missing-legacy.jsonl"),
+            "--authored",
+            str(tmp_path / "missing-authored"),
+            "--store",
+            str(tmp_path / "missing-store"),
+            "--store-id",
+            "test-store",
+            "--batch-id",
+            "sha256:" + "0" * 64,
+            "--output",
+            str(output),
+        ],
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^report must be written under /tmp or the runtime temporary directory$",
+    ):
+        compare_en.main()
 
 
 def _card(number: str, *, back_text: str = "unchanged") -> Card:
