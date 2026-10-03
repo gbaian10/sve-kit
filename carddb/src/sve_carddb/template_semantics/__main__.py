@@ -35,6 +35,12 @@ def run(args: argparse.Namespace) -> dict[str, JsonValue]:
         if args.budget is None
         else Budget.model_validate_json(args.budget.read_bytes())
     )
+    with Monitor(budget).watchdog():
+        return _run(args, budget)
+
+
+def _run(args: argparse.Namespace, budget: Budget) -> dict[str, JsonValue]:
+    """Candidate reload and input I/O share the same budget as source replay."""
     repository = PinnedRepository(args.repository)
     stores = {}
     for value in args.store:

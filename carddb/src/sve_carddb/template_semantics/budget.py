@@ -14,6 +14,7 @@ from sve_carddb.registry.records import RecordData
 if TYPE_CHECKING:
     from collections.abc import Iterator
     from types import FrameType
+    from typing import ClassVar
 
 SECOND_LIMIT = 1800
 RSS_LIMIT = 6 * 1024**3
@@ -41,6 +42,8 @@ class ReplayBudgetExceededError(ValueError):
 
 
 class Monitor:
+    _active: ClassVar[list[Monitor]] = []
+
     def __init__(self, budget: Budget) -> None:
         self.budget = budget
         self.started = time.monotonic()
@@ -77,16 +80,20 @@ class Monitor:
         started = time.monotonic()
 
         def alarm(_signum: int, _frame: FrameType | None) -> None:
-            self.check()
+            # Inner replay guards must retain the caller's earlier or smaller limits.
+            for monitor in self._active:
+                monitor.check()
 
         signal.signal(signal.SIGALRM, alarm)
+        self._active.append(self)
         signal.setitimer(signal.ITIMER_REAL, 0.1, 0.1)
         try:
-            self.check()
+            alarm(signal.SIGALRM, None)
             yield
-            self.check()
+            alarm(signal.SIGALRM, None)
         finally:
             signal.setitimer(signal.ITIMER_REAL, 0)
+            assert self._active.pop() is self
             signal.signal(signal.SIGALRM, previous)
             signal.setitimer(
                 signal.ITIMER_REAL,

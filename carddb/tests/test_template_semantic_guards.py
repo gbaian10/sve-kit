@@ -303,8 +303,12 @@ def test_more_shards_of_one_background_do_not_add_replay_work(
     assert report["shards"] == shards
 
 
+@pytest.mark.parametrize("command", ["generate", "replay"])
 def test_cli_budget_error_is_machine_readable_and_never_publishes(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, capsys: pytest.CaptureFixture[str]
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    capsys: pytest.CaptureFixture[str],
+    command: str,
 ) -> None:
     import sys  # ruff: ignore[import-outside-top-level] -- CLI arguments are isolated per test
 
@@ -322,17 +326,23 @@ def test_cli_budget_error_is_machine_readable_and_never_publishes(
         "argv",
         [
             "template_semantics",
-            "generate",
+            command,
             "--repository",
             str(tmp_path),
             "--host",
             "a" * 40,
             "--legacy",
             str(legacy),
-            "--kind",
-            "effect",
-            "--inputs",
-            str(inputs),
+            *(
+                ["--kind", "effect", "--inputs", str(inputs)]
+                if command == "generate"
+                else [
+                    "--candidate",
+                    str(tmp_path),
+                    "--index-hash",
+                    "sha256:" + "f" * 64,
+                ]
+            ),
             "--budget",
             str(budget),
             "--output",
@@ -344,3 +354,33 @@ def test_cli_budget_error_is_machine_readable_and_never_publishes(
     assert error.value.code == 2
     assert capsys.readouterr().err == "replay_budget_exceeded\n"
     assert not output.exists()
+
+
+@pytest.mark.parametrize("kind", ["wall", "rss"])
+def test_nested_watchdog_cannot_hide_an_outer_hard_budget(
+    tmp_path: Path, kind: str
+) -> None:
+    import signal  # ruff: ignore[import-outside-top-level] -- simulate a timer tick without sleeping or allocating excessive memory
+
+    destination = tmp_path / "forbidden"
+    outer, inner = Monitor(Budget(wall_seconds=1)), Monitor(Budget())
+    previous = signal.getsignal(signal.SIGALRM)
+
+    def attempt() -> None:
+        with outer.watchdog():
+            with inner.watchdog():
+                if kind == "wall":
+                    outer.started -= 2
+                else:
+                    outer.budget = Budget(rss_bytes=1)
+                handler = signal.getsignal(signal.SIGALRM)
+                assert callable(handler)
+                handler(signal.SIGALRM, None)
+                destination.touch()
+
+    with pytest.raises(ReplayBudgetExceededError, match=r"^replay_budget_exceeded$"):
+        attempt()
+    assert not destination.exists()
+    assert signal.getsignal(signal.SIGALRM) == previous
+    with Monitor(Budget()).watchdog():
+        pass
