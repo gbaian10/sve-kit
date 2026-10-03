@@ -602,9 +602,9 @@ export const CARDS: readonly Card[] = [
         traits: [],
         name: { ja: "試作の古龍", zhHant: "試作古龍", en: "Prototype Elder Dragon" },
         effect: {
-          ja: "【守護】\n【ファンファーレ】相手のフォロワーすべてに3ダメージ。",
-          zhHant: "【守護】\n【入場曲】對對手所有從者造成 3 點傷害。",
-          en: "Ward\nFanfare: Deal 3 damage to all enemy followers.",
+          ja: "守護\nファンファーレ：合成テスト処理で相手フォロワー全員に3点を記録する。",
+          zhHant: "守護\n入場：合成測試程序對每位敵方從者記錄3點傷害。",
+          en: "Ward\nFanfare: Synthetic test procedure records 3 damage for each enemy follower.",
         },
       },
     ],
@@ -757,7 +757,11 @@ export const CARDS: readonly Card[] = [
         attack: 3,
         defense: 2,
         traits: ["machine", "artifact"],
-        name: { ja: "試作の機械兵", zhHant: "試作機械兵", en: "Prototype Automaton" },
+        name: {
+          ja: "合成カード・歯車パネル",
+          zhHant: "合成卡片・齒輪面板",
+          en: "Synthetic Gear Panel",
+        },
         effect: {
           ja: "【ファンファーレ】【アーティファクト】1枚を手札に加える。",
           zhHant: "【入場曲】將 1 張【神器】加入手牌。",

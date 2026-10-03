@@ -19,7 +19,7 @@ describe("route table", () => {
   it.each([
     ["/", "主頁"],
     ["/cards", "查卡"],
-    ["/cards/BP01-001/リノセウス", "單卡"],
+    ["/cards/BP01-001-合成経路サンプル", "單卡"],
     ["/cards/_provisional/12", "單卡"],
     ["/sets", "卡包"],
     ["/sets/BP01", "卡包"],
