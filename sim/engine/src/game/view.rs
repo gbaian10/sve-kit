@@ -37,7 +37,7 @@ impl Game {
         let mut packet = json!({"version":"astra-state/1","turn":self.state.turn,"room":self.state.room,"game":self.state.game,"objects":{}});
         for player in ["P1", "P2"] {
             let data = self.player(player)?;
-            let mut value = json!({"leader":data.leader,"pp":data.pp,"ep":data.ep,"sep":data.sep,"construction":data.construction,"title":data.title});
+            let mut value = json!({"leader":data.leader,"pp":data.pp,"ep":data.ep,"sep":data.sep,"construction":data.construction,"title":data.title,"title_code":data.title_code});
             if (self.state.room["open_decklists"] == true || seat.is_none() || seat == Some(player))
                 && !data.deck_list.is_null()
             {

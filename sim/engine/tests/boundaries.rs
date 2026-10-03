@@ -7,8 +7,11 @@ use core::slice::from_ref;
 
 use serde_json::{Value, json};
 use sve_engine::EngineFailure;
-use sve_engine::catalog::Catalog;
+use sve_engine::catalog::{Catalog, EngineIdentityInput};
 use sve_engine::game::{Game, View};
+
+#[path = "support/rule_fixtures.rs"]
+mod rule_fixtures;
 
 /// Authored programs cannot name runtime object ids (the loader rejects unknown
 /// references), so fixtures select one object by its id instead.
@@ -2033,11 +2036,32 @@ fn opening_catalog() -> Arc<Catalog> {
         json!([{ "kind":"static","line":1_i64,"body":{"op":"keyword","name":"start_amulet"}}]);
     let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
     keywords["keywords"]["start_amulet"] = json!({"ja":"スタートアミュレット","rule":"14.4.3","expansion":{"op":"keyword","name":"start_amulet"}});
+    let mut facts: Vec<Value> = snapshot()
+        .lines()
+        .map(|line| serde_json::from_str(line).unwrap())
+        .collect();
+    facts[0]["faces"][0]["title"] = json!("synthetic-start-label");
+    let facts = facts
+        .iter()
+        .map(Value::to_string)
+        .collect::<Vec<_>>()
+        .join("\n");
+    let rules = rule_fixtures::rules(
+        &facts,
+        json!([rule_fixtures::title(
+            "synthetic_start",
+            "unit-follower",
+            json!([{"kind":"opening_start_amulet"}])
+        )]),
+        json!([]),
+    );
     Arc::new(
-        Catalog::from_documents(
-            &snapshot(),
+        Catalog::from_documents_with_rules(
+            &facts,
             &keywords.to_string(),
             &[("opening.yaml".into(), doc.to_string())],
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     )
@@ -2047,7 +2071,7 @@ fn opening_catalog() -> Arc<Catalog> {
 fn pregame_facedown_choice_is_private_and_roundtrips_before_mulligan() {
     let catalog = opening_catalog();
     let position = json!({"pregame":true,"players":{
-        "P1":{"construction":"title","title":"カードファイト!! ヴァンガード","leader":{"class":"ニュートラル"},"deck_list":[{"id":"amulet","card":"unit-follower"},{"filler":40_i64}],"evolve_deck_list":[]},
+        "P1":{"construction":"title","title_code":"synthetic_start","leader":{"class":"ニュートラル"},"deck_list":[{"id":"amulet","card":"unit-follower"},{"filler":40_i64}],"evolve_deck_list":[]},
         "P2":{"construction":"class","leader":{"class":"ニュートラル"},"deck_list":[{"filler":40_i64}],"evolve_deck_list":[]}
     }});
     let random = json!({"first_chooser":"P2","shuffles":[{"player":"P1","zone":"deck","result":[{"filler":40_i64}]},{"player":"P2","zone":"deck","result":[{"filler":40_i64}]}]});
@@ -2096,17 +2120,30 @@ fn pregame_facedown_choice_is_private_and_roundtrips_before_mulligan() {
     reason = "Synthetic fixture maps are constructed here; malformed fixtures must fail the test."
 )]
 fn stack_catalog(body: &Value) -> Catalog {
-    let soil = json!({"number":"unit-soil","faces":[{"name":"大地の魔片","card_class":"ウィッチ","card_type":"アミュレット・トークン","cost":"1","traits":[],"text":null,"sections":[]}]});
+    let soil = json!({"number":"unit-soil","faces":[{"name":"synthetic-stack-token","card_class":"ウィッチ","card_type":"アミュレット・トークン","cost":"1","traits":[],"text":null,"sections":[]}]});
     let mut docs = document(body);
     docs["cards"]["unit-soil"] = json!({"status":"complete","review":"synthetic","abilities":[{"kind":"static","line":1_i64,"body":{"op":"keyword","name":"stack"}}]});
     let mut keywords: Value = serde_json::from_str(&registry()).unwrap();
     keywords["keywords"]["stack"] =
         json!({"ja":"スタック","rule":"13.3.2","expansion":{"op":"keyword","name":"stack"}});
     keywords["keywords"]["stack_counter"] = json!({"ja":"スタックカウンター","role":"counter","expansion":{"op":"keyword","name":"stack_counter"}});
-    Catalog::from_documents(
-        &format!("{}\n{soil}", snapshot()),
+    let facts = format!("{}\n{soil}", snapshot());
+    let rules = rule_fixtures::rules(
+        &facts,
+        json!([]),
+        json!([rule_fixtures::resource(
+            "stack_base",
+            "unit-soil",
+            "printed",
+            true
+        )]),
+    );
+    Catalog::from_documents_with_rules(
+        &facts,
         &keywords.to_string(),
         &[("stack.yaml".into(), docs.to_string())],
+        &rules.to_string(),
+        &EngineIdentityInput::LegacyJp,
     )
     .unwrap()
 }
@@ -2115,7 +2152,7 @@ fn stack_catalog(body: &Value) -> Catalog {
 fn stack_enters_with_counters_and_waits_for_recipient_even_when_unique() {
     for existing in [false, true] {
         let catalog = Arc::new(stack_catalog(&json!({"op":"seq","steps":[
-            {"op":"create","name":"大地の魔片","count":1_i64,"to":"field"},
+            {"op":"create","name":"synthetic-stack-token","count":1_i64,"to":"field"},
             {"op":"stack","amount":2_i64},
             {"op":"damage","subjects":"target.1","amount":1_i64}
         ]})));
@@ -2190,7 +2227,7 @@ fn stack_enters_with_counters_and_waits_for_recipient_even_when_unique() {
 
 #[test]
 fn stack_without_recipient_replaces_entry_count_and_obeys_capacity() {
-    for (amount, full) in [(3_i64, false), (0, false), (2, true)] {
+    for (amount, full) in [(3_i64, false), (0, false), (-2, false), (2, true)] {
         let catalog = Arc::new(stack_catalog(&json!({"op":"stack","amount":amount})));
         let mut initial = setup();
         if full {
@@ -2219,7 +2256,7 @@ fn stack_without_recipient_replaces_entry_count_and_obeys_capacity() {
                 engine.query(View::P1, "P1.field_count").unwrap(),
                 Some(json!(5_i64))
             );
-        } else if amount == 0 {
+        } else if amount <= 0 {
             assert_eq!(
                 engine.query(View::P1, "P1.field_count").unwrap(),
                 Some(json!(1_i64))
@@ -4052,9 +4089,25 @@ fn transformation_banishes_and_erases_before_creating_a_fresh_batch() {
     let body = json!({"op":"seq","steps":[{"op":"transform","subjects":"target.1","names":["shared-token","other-token"],"bind":"changed"},{"op":"modify","subjects":"changed","power":1_i64}]});
     let (facts, mut docs) = token_fixture(&body);
     docs["cards"]["unit-spell"]["abilities"][0]["targets"][0] = json!({"key":"1","select":{"zone":"ex","side":"self"},"min":2_i64,"max":2_i64,"order":true});
+    let rules = rule_fixtures::rules(
+        &facts,
+        json!([]),
+        json!([rule_fixtures::resource(
+            "lesson_item",
+            "token-b",
+            "printed",
+            true
+        )]),
+    );
     let loaded = Arc::new(
-        Catalog::from_documents(&facts, &registry(), &[("tokens".into(), docs.to_string())])
-            .unwrap(),
+        Catalog::from_documents_with_rules(
+            &facts,
+            &registry(),
+            &[("tokens".into(), docs.to_string())],
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
+        )
+        .unwrap(),
     );
     let mut initial = setup();
     initial["players"]["P1"]["zones"]["ex"] = json!([{"id":"x","card":"token-a","state":{"power":9_i64,"hp":9_i64,"keywords":["guard"]}},{"id":"y","card":"token-a"}]);
@@ -6145,18 +6198,31 @@ fn unknown_future_grant_periods_and_mixed_numeric_windows_rollback() {
     reason = "The resource fixture constructs its authored programs and complete player zones."
 )]
 fn ride_fixture(extra_costs: &[Value]) -> (Arc<Catalog>, Value) {
-    let resource = json!({"number":"unit-resource","faces":[{"name":"ドライブポイント","card_class":"ニュートラル","card_type":"スペル・エボルヴ","cost":"0","power":"-","hp":"-","traits":[],"text":null,"sections":[]}]});
+    let resource = json!({"number":"unit-resource","faces":[{"name":"synthetic-drive-point","card_class":"ニュートラル","card_type":"スペル・エボルヴ","cost":"0","power":"-","hp":"-","traits":[],"text":null,"sections":[]}]});
     let mut doc = document(&json!({"op":"draw","count":0_i64}));
     let mut costs = vec![json!({"op":"pp","amount":1_i64})];
     costs.extend_from_slice(extra_costs);
     doc["cards"]["unit-follower"]["abilities"] = json!([{"line":1_i64,"kind":"ride","costs":costs,"body":{"op":"gain_drive","subjects":"self"}}]);
     doc["cards"]["unit-resource"] =
         json!({"status":"complete","review":"synthetic","abilities":[]});
+    let facts = format!("{}\n{resource}", snapshot());
+    let rules = rule_fixtures::rules(
+        &facts,
+        json!([]),
+        json!([rule_fixtures::resource(
+            "drive_point",
+            "unit-resource",
+            "printed",
+            false
+        )]),
+    );
     let loaded = Arc::new(
-        Catalog::from_documents(
-            &format!("{}\n{resource}", snapshot()),
+        Catalog::from_documents_with_rules(
+            &facts,
             &drive_registry(),
             &[("ride".into(), doc.to_string())],
+            &rules.to_string(),
+            &EngineIdentityInput::LegacyJp,
         )
         .unwrap(),
     );
@@ -6172,7 +6238,7 @@ fn ride_fixture(extra_costs: &[Value]) -> (Arc<Catalog>, Value) {
 
 #[test]
 fn explicit_and_implicit_ride_costs_choose_and_pay_exactly_one_resource() {
-    let link = json!({"op":"link_resource","subjects":"self","name":"ドライブポイント","count":1_i64,"from_zone":"evolve_deck","to":"drive"});
+    let link = json!({"op":"link_resource","subjects":"self","resource_role":"drive_point","count":1_i64,"from_zone":"evolve_deck","to":"drive"});
     for explicit in [false, true] {
         for ep in [0_i64, 1_i64] {
             let (loaded, initial) = ride_fixture(if explicit { from_ref(&link) } else { &[] });
@@ -6232,7 +6298,7 @@ fn explicit_and_implicit_ride_costs_choose_and_pay_exactly_one_resource() {
 
 #[test]
 fn ride_payment_rejects_ambiguous_declarations_and_missing_unique_materials() {
-    let link = json!({"op":"link_resource","subjects":"self","name":"ドライブポイント","count":1_i64,"from_zone":"evolve_deck","to":"drive"});
+    let link = json!({"op":"link_resource","subjects":"self","resource_role":"drive_point","count":1_i64,"from_zone":"evolve_deck","to":"drive"});
     let mut doubled = link.clone();
     doubled["count"] = json!(2_i64);
     for costs in [vec![link.clone(), link.clone()], vec![doubled]] {
@@ -6828,7 +6894,7 @@ fn both_start_amulet_choices_are_known_only_to_the_chooser_and_shuffle_hides_lef
                 deck.push(json!({"id":id,"card":"unit-spell"}));
                 order.push(json!(id));
             }
-            position["players"][seat] = json!({"construction":"title","title":"カードファイト!! ヴァンガード","leader":{"class":"ニュートラル"},"deck_list":deck,"evolve_deck_list":[]});
+            position["players"][seat] = json!({"construction":"title","title_code":"synthetic_start","leader":{"class":"ニュートラル"},"deck_list":deck,"evolve_deck_list":[]});
             scripts.push(json!({"player":seat,"zone":"deck","result":order}));
         }
         let random = if scripted {

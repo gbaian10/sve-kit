@@ -760,7 +760,11 @@ impl Game {
         let object = self.object(id)?;
         let player = self.player(&object.controller)?;
         if code["ub"] == true
-            && (player.construction != "title" || player.title != "プリンセスコネクト！Re:Dive")
+            && (player.construction != "title"
+                || !self
+                    .catalog
+                    .rule_bindings
+                    .capability(&player.title_code, "ub_enabled"))
         {
             return Ok(false);
         }
