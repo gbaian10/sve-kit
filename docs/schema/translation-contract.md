@@ -191,12 +191,15 @@ record_key 仍為 `["context_assignment",owner,field,ordinal,adoption_no]` 的 c
 
 | 欄位 | 定義與拒絕條件 |
 | --- | --- |
-| authored_revision | 核對背景的完整 40 碼 Git commit；必須已存在且可讀。正式採納使用已合併 main 的 commit，不使用將被 squash 掉的功能分支 commit，也不能引用尚未寫出的自身分片 commit |
+| authored_revision | 核對背景的完整 40 碼 Git commit；必須已存在且可讀。正式採納使用已合併 main 的 commit，且必須是消費端 authored_revision 的祖先（含該 revision 本身）；消費端也須釘已合併 main 的 commit。不使用將被 squash 掉的功能分支 commit，也不能引用尚未寫出的自身分片 commit |
 | registry_index_hash | 該 revision 的 `authored/ids/index.yaml` 完整解析內容 canonical Hash；不是目前磁碟檔或消費端目前 revision 的 hash |
 | transition_index_hash | 同 revision 的 `authored/identity-transitions/index.yaml` canonical Hash；null 只表示該不可變樹沒有此檔，空 index 仍須釘 hash。非空入口須完整重播有效身分及其證據 |
 
 新分片與 translations index 由消費端的 authored_revision 另釘；不把尚未產生的 record／index hash
-反塞進 identity_basis，避免自我引用。每筆續版各保存實際核對時的背景；不得以首筆、末筆或本次
+反塞進 identity_basis，避免自我引用。讀者須以不可變 Git 歷史驗祖先關係；僅能讀到 blob 不算通過，
+同層分支或未合併功能分支背景須拒絕，不將失敗降成當次 stale。正式消費端的 main 來源也須可驗，
+不能以功能分支消費端令其祖先冒充已合併背景。合成 Git 測試應建立明示的主分支歷史。
+每筆續版各保存實際核對時的背景；不得以首筆、末筆或本次
 建置背景覆蓋其他歷史成員的值。欄位進完整 record_hash／membership_hash／decision_id，
 前件的既有 hash 不改。它不授予新 owner／field、譯詞或官方來源資格。
 
@@ -213,10 +216,12 @@ record_key 仍為 `["context_assignment",owner,field,ordinal,adoption_no]` 的 c
    text_hash 等於 source_hash，不能拿效果摘錄、另一張卡／另一面或數位卡名代替。
    face_revision 必須由其完整來源與 recipe 重建精確 revision_id；含 source_correction 時也須
    重播完整已採納修正及其證據，未支援時拒絕、不猜 raw 修訂 ID。printing_face 必須屬宣告
-   printing／face 且該版 printed 名稱已知，不能借 current。完整 printing 身分 observation／跨區
+   printing／face，且證據是該 printing 自己凍結卡頁的完整名稱，不能借 current。此步不重建
+   歷史勘誤覆蓋或 printed_text_state；本次 printed 狀態由第 3 步驗。完整 printing 身分 observation／跨區
    引用及相關 transition 的 frozen 閉包也須驗，不能只驗這個名字或 FK。
 3. **當次適用性**：歷史成功後，只對有效鏈的末筆，依本次有效身分、owner 自己實際來源與
-   source_hash 判適用。不以歷史 raw observation 必須等於目前 registry observation 作第二道
+   source_hash 判適用；printing_face 另驗本次 printed_text_state 與該版自己的名稱，
+   unknown／omitted 不借 current，也不沿歷史成功取得用途。不以歷史 raw observation 必須等於目前 registry observation 作第二道
    採納門檻。單純增加無關身分、更換建置背景或同名印刷頁其他欄更新，不要求重簽。
    若該 owner 的原文換字、revision owner 被新 ID 取代、原 card／face 合法退役或 printing
    已改配父卡／面，舊指派保留為歷史、列本次不適用原因，不把合法的歷史指派報成壞輸入。
@@ -229,7 +234,8 @@ record_key 仍為 `["context_assignment",owner,field,ordinal,adoption_no]` 的 c
 原 owner 的 context_assignment 不自動移給新修訂。相同 printing owner 的其他欄變動而名稱、
 有效 card／face 及 printed 狀態不變時，既有名字指派仍可用。非卡面 owner 仍依 §6.3 的
 自身來源與正式身分契約核對；registry pin 本身不能證明 QA、條文或標籤的 owner。
-未具備對應歷史 owner／來源重播的 loader 必須拒絕，不因加了本欄就宣稱已支援那些 owner。
+其他欄位同樣須定位該 owner 的完整欄位及其 ordinal；不能用名字的來源證明 effect／flavor／section。
+未具備對應歷史 owner／欄位來源重播的 loader 必須拒絕，不因加了本欄就宣稱已支援那些 owner。
 
 **F1 與審計**：歷史身分 index／全部分片、有效決定、transition 與全部 frozen observation
 批次／descriptor／receipt／raw、歷史 parser 程式及設定都須保留可重播 pin，連同本次有效身分
@@ -252,7 +258,7 @@ context/use/render 的既有 ID recipe 不另加 identity_basis 參數；實際�
 | 編號 | 最小反例／變更 | 預期 |
 | --- | --- | --- |
 | I01 | 移除 identity_basis／改成 null／加未知欄位，各一次 | 分別拒絕，不從 consumer revision 補值 |
-| I02 | commit 不存在／指 symlink 分片／registry canonical hash 改，各一次 | 歷史核對失敗，不能降成 stale |
+| I02 | commit 不存在／指 symlink 分片／registry canonical hash 改／非消費端祖先的同層功能分支 commit，各一次 | 歷史核對失敗，不能降成 stale |
 | I03 | absent transition 的 null；有空 index 卻仍 null；非空 transition 卻略過重播 | 前者可驗；後兩者拒絕或明示必要重播未支援 |
 | I04 | adoption 1、2 釘不同合法背景；只改其中一份舊來源或前件 hash | 各成員驗自己的背景；舊錯誤仍使建置失敗，不用末筆遮過 |
 | I05 | 新增無關 registry 記錄／只改目前磁碟 parser 註解 | 指派仍合法；當次 owner 未變時仍適用 |
