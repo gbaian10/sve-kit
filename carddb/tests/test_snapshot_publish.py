@@ -13,9 +13,16 @@ import sve_carddb.snapshot.publish.state as state_module
 from sve_carddb.snapshot.export import Batch, Brotli, export_snapshot
 from sve_carddb.snapshot.publish import Ledger, PublishError, collect, publish
 from sve_carddb.snapshot.publish.plan import INDEX, prepare
-from sve_carddb.snapshot.publish.state import attempt
+from sve_carddb.snapshot.publish.state import Checkpoint, attempt
 from sve_carddb.snapshot.publish.storage import Stored
-from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
+from sve_carddb.snapshot.values import (
+    array,
+    canonical,
+    digest,
+    object_value,
+    parse,
+    string,
+)
 
 from .snapshot_publish_fixtures import FakeCDN, FakeS3, candidate, index, version
 from .snapshot_publish_fixtures import changed_images as changed_images  # ruff: ignore[useless-import-alias] -- shared module-scoped second synthetic corpus
@@ -987,3 +994,180 @@ def test_gc_retains_complete_inflight_closure_after_failed_index_commit(
     assert staging <= store.objects.keys()
     publish(ledger, store, second, cdn)
     assert index(store)["revision"] == 2
+
+
+@pytest.mark.parametrize("operation", ["reserve", "recover"])
+@pytest.mark.parametrize(
+    "revisions", [(1, 3), (1, 1), (2, 1)], ids=["gap", "duplicate", "reordered"]
+)
+def test_consistently_corrupt_reservation_chain_is_rejected(
+    ledger: Ledger, revisions: tuple[int, int], operation: str
+) -> None:
+    ledger.reserve("synthetic-first")
+    ledger.reserve("synthetic-second")
+    state = ledger.read()
+    records = [
+        object_value(parse(line)) for line in ledger.receipts.read_bytes().splitlines()
+    ]
+    for number, item, record in zip(
+        revisions, array(state["attempts"]), records, strict=True
+    ):
+        object_value(item)["revision"] = number
+        record["revision"] = number
+    raw = canonical(state)
+    receipts = b"".join(canonical(record) + b"\n" for record in records)
+    ledger.path.write_bytes(raw)
+    ledger.copy.write_bytes(raw)
+    ledger.receipts.write_bytes(receipts)
+    assert state["high_water"] == len(records) == 2
+    # Matching hashes intentionally isolate continuity from the checkpoint gate.
+    proof = Checkpoint(2, digest(raw), digest(receipts))
+    if operation == "recover":
+        ledger.path.unlink()
+    if operation == "reserve":
+        with pytest.raises(
+            PublishError, match=r"^Invalid complete reservation receipts$"
+        ):
+            ledger.reserve("synthetic-next")
+    else:
+        with pytest.raises(
+            PublishError, match=r"^Invalid complete reservation receipts$"
+        ):
+            ledger.recover(observed_max=0, proof=proof)
+    assert ledger.copy.read_bytes() == raw
+    assert ledger.receipts.read_bytes() == receipts
+    if operation == "reserve":
+        assert ledger.path.read_bytes() == raw
+    else:
+        assert not ledger.path.exists()
+
+
+def test_recovery_cannot_overwrite_newer_existing_primary(
+    ledger: Ledger, images: PublicImages, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    release = candidate(ledger, images)
+    proof = ledger.checkpoint()
+    old_backup = ledger.copy.read_bytes()
+    old_receipts = ledger.receipts.read_bytes()
+    original = state_module.atomic
+
+    def interrupt_backup(path: Path, raw: bytes) -> None:
+        if path == ledger.copy:
+            raise OSError("synthetic sealed-plan backup failure")
+        original(path, raw)
+
+    store = FakeS3()
+    monkeypatch.setattr(state_module, "atomic", interrupt_backup)
+    with pytest.raises(OSError, match="synthetic sealed-plan backup"):
+        publish(ledger, store, release, FakeCDN(store))
+    monkeypatch.setattr(state_module, "atomic", original)
+    newer_primary = ledger.path.read_bytes()
+    assert newer_primary != old_backup
+    assert attempt(ledger.read(), 1)["status"] == "sealed"
+    assert not store.operations
+    with pytest.raises(
+        PublishError, match=r"^Recovery refuses to replace existing release state$"
+    ):
+        ledger.recover(observed_max=0, proof=proof)
+    assert ledger.path.read_bytes() == newer_primary
+    assert ledger.copy.read_bytes() == old_backup
+    assert ledger.receipts.read_bytes() == old_receipts
+
+
+@pytest.mark.parametrize("public_state", ["deleted", "rolled_back"])
+def test_public_index_must_match_durable_receipts_before_seal(
+    ledger: Ledger, images: PublicImages, public_state: str
+) -> None:
+    store = FakeS3()
+    cdn = FakeCDN(store)
+    first = candidate(ledger, images)
+    publish(ledger, store, first, cdn)
+    first_index = store.objects[INDEX]
+    second = candidate(ledger, images, from_version=version(first))
+    publish(ledger, store, second, cdn)
+    if public_state == "deleted":
+        del store.objects[INDEX]
+    else:
+        store.objects[INDEX] = first_index
+    # Both candidates match the tampered public predecessor, not durable current.
+    third = candidate(
+        ledger,
+        images,
+        from_version=None if public_state == "deleted" else version(first),
+    )
+    before = (
+        ledger.path.read_bytes(),
+        ledger.copy.read_bytes(),
+        ledger.receipts.read_bytes(),
+    )
+    remote_before = store.objects.copy()
+    store.operations.clear()
+    with pytest.raises(
+        PublishError, match=r"^Public index differs from durable publication receipts$"
+    ):
+        publish(ledger, store, third, cdn)
+    assert not store.operations
+    assert store.objects == remote_before
+    assert (
+        ledger.path.read_bytes(),
+        ledger.copy.read_bytes(),
+        ledger.receipts.read_bytes(),
+    ) == before
+    assert attempt(ledger.read(), 3)["status"] == "reserved"
+
+
+def test_retry_refuses_external_bytes_that_changed_after_seal(
+    ledger: Ledger, images: PublicImages, changed_images: PublicImages
+) -> None:
+    store = FakeS3()
+    cdn = FakeCDN(store)
+    first = candidate(ledger, images)
+    publish(ledger, store, first, cdn)
+    current = store.objects[INDEX]
+    second = candidate(ledger, changed_images, from_version=version(first))
+    key = next(k for k, _raw in second.images())
+
+    def interrupt_image(path: str) -> None:
+        if path == key:
+            raise OSError("synthetic interruption after seal")
+
+    store.before_put = interrupt_image
+    with pytest.raises(OSError, match="synthetic interruption after seal"):
+        publish(ledger, store, second, cdn)
+    assert attempt(ledger.read(), 2)["status"] == "failed"
+    sealed = deepcopy(attempt(ledger.read(), 2)["plan"])
+    external = Stored(
+        b"synthetic third-party origin bytes",
+        '"external-etag"',
+        store.objects[key].headers.copy(),
+    )
+    store.objects[key] = external
+    store.before_put = None
+    store.operations.clear()
+    with pytest.raises(PublishError, match=r"^Origin image changed concurrently$"):
+        publish(ledger, store, second, cdn)
+    assert store.objects[key] == external
+    assert store.objects[INDEX] == current
+    assert not store.operations
+    assert attempt(ledger.read(), 2)["plan"] == sealed
+
+
+def test_older_unsealed_reservation_cannot_publish_after_newer_commit(
+    ledger: Ledger, images: PublicImages
+) -> None:
+    older = candidate(ledger, images)
+    newer = candidate(ledger, images)
+    store = FakeS3()
+    cdn = FakeCDN(store)
+    publish(ledger, store, newer, cdn)
+    current = store.objects[INDEX]
+    store.operations.clear()
+    with pytest.raises(
+        ValueError, match=r"^Media revision must advance the committed state$"
+    ):
+        publish(ledger, store, older, cdn)
+    assert store.objects[INDEX] == current
+    assert not store.operations
+    item = attempt(ledger.read(), 1)
+    assert item["status"] == "reserved"
+    assert item["plan"] is None
