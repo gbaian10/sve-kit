@@ -20,12 +20,14 @@ export async function cachedImage(
   try {
     cache = await storage.open(CACHE)
     const hit = await cache.match(request)
-    if (hit) return hit
+    if (hit?.type === "opaque") await cache.delete(request)
+    else if (hit) return hit
   } catch {
     cache = undefined
   }
   const response = await network(request)
-  if (cache && (response.ok || response.type === "opaque")) {
+  // Opaque entries can consume padded quota far beyond the image's actual size.
+  if (cache && response.type !== "opaque" && response.ok) {
     try {
       await cache.put(request, response.clone())
       const keys = await cache.keys()

@@ -4,6 +4,43 @@ import { expect, it } from "vitest"
 import { memoryCache } from "../test-utils/cache"
 import { cachedImage, versionedImage } from "./image-cache"
 
+function opaqueResponse(): Response {
+  const response = Response.error()
+  Object.defineProperties(response, {
+    type: { value: "opaque" },
+    clone: { value: opaqueResponse },
+  })
+  return response
+}
+
+it("never stores opaque responses: each request reaches the network", async () => {
+  const storage = memoryCache()
+  const request = new Request("https://cdn.test/images/card_m/1.webp?v=2")
+  let requests = 0
+  const network: typeof fetch = () => {
+    requests += 1
+    return Promise.resolve(opaqueResponse())
+  }
+  expect((await cachedImage(request, storage, network)).type).toBe("opaque")
+  expect((await cachedImage(request, storage, network)).type).toBe("opaque")
+  expect(requests).toBe(2)
+  expect(await (await storage.open("sve-image-responses-v2")).keys()).toHaveLength(0)
+})
+it("discards an older opaque cache hit before fetching instead of retaining padded quota", async () => {
+  const storage = memoryCache()
+  const cache = await storage.open("sve-image-responses-v2")
+  const request = new Request("https://cdn.test/images/card_m/1.webp?v=2")
+  await cache.put(request, opaqueResponse())
+  let requests = 0
+  const response = await cachedImage(request, storage, () => {
+    requests += 1
+    return Promise.resolve(opaqueResponse())
+  })
+  expect(response.type).toBe("opaque")
+  expect(requests).toBe(1)
+  expect(await cache.keys()).toHaveLength(0)
+})
+
 it("matches the complete versioned URL: old cached bytes never satisfy a new v or failed v", async () => {
   const storage = memoryCache()
   let bytes = "A"

@@ -147,8 +147,11 @@ code. The `reader.test.ts` cases cover what the fixture cannot express (missing 
 reformatted bytes). CI runs these whenever `carddb/src/sve_carddb/snapshot/schema/**` or the
 fixture directory changes.
 
-The client negotiates exactly 1.0.0 or 1.1.0 (including capabilities and fixed band
-membership). Both published schemas and the shared handwritten goldens remain authoritative.
+The client negotiates exactly 1.0.0, 1.1.0 or 2.0.0 (including capabilities and fixed band
+membership). Their published schemas and shared handwritten goldens remain authoritative.
+Index v2 considers only current, previous and the local active snapshot; an incompatible
+current does not trigger a search through historical versions. An older usable snapshot has
+a visible notice, and having no compatible snapshot prompts an application update.
 It verifies and decodes in one Worker; an idle worker releases its parsing heap after one
 second. Node fixture scripts and tests use the same decoder without a Worker. Raw tuples
 are released after decoding, rather than kept alongside row objects.
@@ -161,6 +164,25 @@ faces. The legacy 1.0 unsharded image file is derived once per loaded snapshot, 
 does not repeatedly parse its entire payload. Browsing does not need the
 on-demand `rules_name` or `face_rules_name` tables; any future construction consumer must
 load their detail files before claiming a result.
+
+In 2.0, home-set media files provide display state, dimensions and separate card/art version
+tokens directly. Image URLs use the permanent printing integer ID and face ordinal, with
+the token in `?v=`; source-detail tables are optional on-demand data. Printing/face bootstrap
+lookups are indexed once per snapshot. Withdrawn, missing or unapproved media produce no image
+URL, and another printing is never used to fill that gap.
+
+The production image Service Worker matches the complete URL, including `v`, and stores only
+successful non-opaque responses in CacheStorage. The response cache has a 128-entry FIFO limit
+across roots and versions; a hit does not refresh its insertion order. Opaque responses are
+never stored, and an opaque entry from an earlier worker is discarded when requested. Each
+opaque request calls `fetch`; the browser's HTTP cache can still serve the versioned URL.
+Cross-origin images currently use that HTTP cache, avoiding opaque CacheStorage entries whose
+quota accounting can be much larger than their bodies. Failures never fall back to an old `v`.
+
+Using `crossOrigin="anonymous"` together with CDN CORS headers is a follow-up: the CDN must
+first serve the required headers, otherwise adding the attribute would break image loading.
+The application currently leaves the attribute unset. A browser that cannot register the
+module Service Worker continues through normal HTTP loading; CacheStorage is optional.
 
 After the catalog is ready, background work downloads **metadata bytes**, not all image
 blobs, only when persistent storage is available. Data saver delays that work. Storage loss
@@ -176,7 +198,7 @@ Visible work takes priority, with at most four requests including bodies and no 
 three background requests. Verified persistent bytes are rechecked before decoding; returning
 to an evicted face can reparse without another external request; recently used faces do not
 need re-decoding. CacheStorage failures visibly degrade
-to a 12 MiB / 64-file RAM byte LRU. The page parsing workset is capped at 12 MiB raw for 1.1;
+to a 12 MiB / 64-file RAM byte LRU. The page parsing workset is capped at 12 MiB raw for 1.1 and 2.0;
 this is not a heap measurement or a physical-phone acceptance claim. The legacy 1.0 index is reused per snapshot and is exempt from the 1.1 file/workset limits.
 
 ## Development snapshot

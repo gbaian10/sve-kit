@@ -158,6 +158,39 @@ async function readImageFaces(
   }
 }
 
+interface MediaLookup {
+  readonly printings: ReadonlyMap<string, { readonly row: Row; readonly owner: Row }>
+  readonly faces: ReadonlyMap<string, Row>
+  readonly locate: ReturnType<typeof createLocator>
+}
+const mediaLookups = new WeakMap<LoadedSnapshot, MediaLookup>()
+
+function mediaLookup(snapshot: LoadedSnapshot): MediaLookup {
+  const existing = mediaLookups.get(snapshot)
+  if (existing) return existing
+  const printings = new Map<string, { readonly row: Row; readonly owner: Row }>()
+  const faces = new Map<string, Row>()
+  for (const fragment of snapshot.bootstrap) {
+    if (fragment.table !== "printing" && fragment.table !== "face") continue
+    for (const row of fragment.rows) {
+      const id = stringValue(row["id"])
+      const duplicate = fragment.table === "printing" ? printings.has(id) : faces.has(id)
+      if (duplicate)
+        throw new SnapshotError("primary-key-duplicate", "duplicate media bootstrap target")
+      if (fragment.table === "printing")
+        printings.set(id, { row, owner: objectValue(fragment.value["owner"]) })
+      else faces.set(id, row)
+    }
+  }
+  const lookup = {
+    printings,
+    faces,
+    locate: createLocator(snapshot.files, new Set(["printing_image"])),
+  }
+  mediaLookups.set(snapshot, lookup)
+  return lookup
+}
+
 async function readMediaFaces(
   client: SnapshotClient,
   faces: readonly ImageFace[],
@@ -168,28 +201,23 @@ async function readMediaFaces(
   const check = () => {
     if (signal?.aborted || client.snapshot() !== snapshot) throw new Error("image page cancelled")
   }
-  const locate = createLocator(snapshot.files, new Set(["printing_image"]))
+  const lookup = mediaLookup(snapshot)
   const printings = new Map<string, Row>()
   const faceRows = new Map<string, Row>()
-  const requestedFaces = new Set(faces.map((f) => f.faceId))
-  const requested = new Set(faces.map((f) => f.printingId))
   const keys = new Set<string>()
-  for (const fragment of snapshot.bootstrap) {
-    for (const row of fragment.rows) {
-      if (fragment.table === "face" && requestedFaces.has(stringValue(row["id"])))
-        faceRows.set(stringValue(row["id"]), row)
-      if (fragment.table === "printing" && requested.has(stringValue(row["id"]))) {
-        const id = stringValue(row["id"])
-        printings.set(id, row)
-        const key = locate({
-          table: "printing_image",
-          owner: objectValue(fragment.value["owner"]),
-          bucket: bucketOf([id], 64),
-          partition: "detail",
-        })
-        if (key) keys.add(key)
-      }
-    }
+  for (const { printingId, faceId } of faces) {
+    const face = lookup.faces.get(faceId)
+    if (face) faceRows.set(faceId, face)
+    const printing = lookup.printings.get(printingId)
+    if (!printing) continue
+    printings.set(printingId, printing.row)
+    const key = lookup.locate({
+      table: "printing_image",
+      owner: printing.owner,
+      bucket: bucketOf([printingId], 64),
+      partition: "detail",
+    })
+    if (key) keys.add(key)
   }
   const wanted = new Set(faces.map((f) => faceKey(f.printingId, f.faceId)))
   const rows = new Map<string, FaceImage>()

@@ -523,6 +523,25 @@ describe("Index v2 finite window", () => {
       expect(client.snapshot()?.dataVersion).toBe(third.manifest["data_version"])
     },
   )
+  it("rejects a non-hash manifest path even when it serves the exact verified manifest bytes", async () => {
+    const first = v2Version()
+    const served = origin(first)
+    const alternate = `snapshots/manifests/${"0".repeat(64)}.json`
+    const bytes = first.files.get(stringValue(first.entry["manifest_path"]))
+    if (!bytes) throw new Error("missing manifest")
+    served.files.set(alternate, bytes)
+    served.setIndex({
+      index_format: 2,
+      revision: 1,
+      current: { ...first.entry, manifest_path: alternate },
+      previous: null,
+    })
+    const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
+    await client.load()
+    expect(client.snapshot()).toBeNull()
+    expect(client.status()).toMatchObject({ state: "error", kind: "corrupt" })
+    expect(served.requests).toEqual(["snapshots/versions/index.json"])
+  })
   it("rejects an entry/manifest mismatch, repeated revision mutation and unknown index_format", async () => {
     const first = v2Version()
     const served = origin(first)
