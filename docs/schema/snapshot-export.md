@@ -1,5 +1,12 @@
 # 公開快照候選匯出器
 
+本文既有命令與內容定址圖片輸出描述的是已實作 1.x；2.0 規格不表示這些入口已完成升級。
+2.0 須同步 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度) 與
+[傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：輸出卡包 media 的版本／尺寸，
+從建置 hash path 產生固定 ID key，圖片可受控覆寫、JSON 不可變，驗新 v 後才切指標；
+preview 配號與快取仍隔離，不寫正式 current／previous 索引。圖片只取 current，metadata 僅最新＋前一版。
+正式 publisher 仍拒絕 preview 版號；不得把 preview 直接升格或把本文件的舊 create-only 規則當 2.0 已驗收。
+
 本文件說明 Python producer 的邊界；公開欄位與分片語意以
 [snapshot-format.md](snapshot-format.md)、[snapshot-transport.md](snapshot-transport.md)
 為準，機器契約以套件內 Schema 為準。

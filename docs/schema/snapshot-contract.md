@@ -21,7 +21,7 @@
 | RegionView、PrintingFace、Section 等 | 25 種巢狀 tuple，含 PrintingFaceBootstrap／Detail |
 | ParameterSchema、CorrectionValue | 保留為 JSON 的有限值域；field 與更正值另於所屬 tuple 綁定 |
 | Programs、TextAll | 空程式包及文字容器聯集 |
-| Changes、Index、IndexPage | 公開變動摘要與永久版本索引形狀 |
+| Changes、Index、IndexPage | 既有 1.x 摘要與 index_format=1 的歷史形狀；2.0 另定 Index v2，不再使用 IndexPage |
 
 可直接以 `#/$defs/Manifest` 等片段作驗證入口。`x-columns`、`x-types`、`x-primary-key`、`x-fragments`、`x-tables` 是供固定 accessor 使用的註記；接受／拒絕 JSON 形狀使用標準 keywords。資料內 types 另以 const 驗完整 descriptor，不能讓 payload 的註記改變解碼方式。
 
@@ -91,3 +91,24 @@ CI 路徑分流須讓 `carddb/src/sve_carddb/snapshot/schema/**` 觸發 web 契�
 名字依獨立核可政策取詞仍走既有translation／FieldTranslation；same_name瀏覽是另一個需明示能力與reader升級的路徑。
 兩份核可與初始清單依[digital-name-policy](digital-name-policy.md)，不因名字可用就推導真人same_card、coverage或圖／語音。
 新relation與機械／真人review的投影須同步producer／reader，未實作不發布、不略去不認識的能力。
+
+## 2.0 圖片與有限保留的機器契約
+
+本節是待實作契約，不表示現有 v1／v1_1 資源已支援。新快照資源另放 `schema/v2/`，
+識別 `urn:sve-kit:snapshot:2.0.0`，從 source descriptor 生成，不手改產生結果；golden 另放 v2。
+1.x 資源保留原解讀；未曾正式發布，不要求先上線過渡版。首發 2.0 **必須**同步 1.2 同名規則的 Schema、producer 與 reader 驗證，不能宣稱現有實作已完成。
+required_capabilities 已固定包含 digital-same-name-links-v1；即使 same_name 列為空，也不得省略能力、相關 Schema 或 reader 驗證。
+尚未完成時不得發布 2.0，不能以「可整合」為由裁掉必要能力。
+
+同步項目包括 printing_image 的 media 欄序／ImageDisplayVariant、移除公開 image_variant.path、
+固定 N／band width／dependencies、image-id-url-v1 與同名規則能力，以及獨立 index_format=2 的 current／previous。
+舊 IndexPage 只供舊格式測試；新索引只允許兩筆入口，不產 pages 或每代索引歷史。
+Index 的 revision／Entry 欄位、JSON 閉包及 changes 非遞迴規則依 snapshot-format §4.1；
+unknown index_format 必拒收，不能把它當成空 pages。
+
+Python／TS 共用合成向量須覆蓋 int_id、f0／f1、JP／EN、手動版次、card／art 分組版本、
+withdrawn／missing、狀態與詳情不一致、尺寸不足與 srcset、同 image_id 多 printing、回復 bytes 不重用 v。
+新增 changes 的 PK／changed_fields 白名單；V1→V2→V3 只保 V3／V2，V2.changes.from 不保留 V1。
+另驗無相容 current／previous、本機 active、落後多版全量更新、下載中輪替導致缺檔後重抓 current。
+JSON hash／canonical／FK／base 驗證維持；圖片 SHA 由產製／發布端驗，不用歷史圖 hash 拒絕新 bytes。
+CDN query 分離已實測，但 browser／SW、新 v 負快取與發布中斷須在相應元件整合驗，不以 Schema 通過代替。

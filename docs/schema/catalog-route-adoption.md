@@ -155,7 +155,7 @@ vocabulary 的 `(kind,code)`、symbol 的 id/code 配對不可重配；停用仍
 route 撤回若將改已公開入口必走 §5 的永久路由限制，不得因 null 自動刪入口。
 
 F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 authored commit、來源／parser／配置、有效依賴與選用結果。
-重建只投影當次有效值，完整歷史留 authored 與舊快照。覆寫不得跨元件修改 registry、配號、翻譯或 public schema。
+重建只投影當次有效值，採納歷史留 authored；公開快照僅 current＋previous，不承諾 CDN 歷史下載。覆寫不得跨元件修改 registry、配號、翻譯或 public schema。
 未接 loader 的 typed API 只能做合成驗證，不能作真實採納旁門。
 
 ## 4. 詞彙、語言、別名與特殊名稱

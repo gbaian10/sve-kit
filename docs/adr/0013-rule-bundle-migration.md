@@ -21,3 +21,5 @@ face-bundle-v1 釘完整觀測；rule-bundle-v2 釘不可變規則表示、數�
 純已採納表記更新可維持規則 bundle，翻譯仍依 exact source/context 重算；規則本文、數值、特性、rules_names、normalizer 或 token 規則依賴改動須重驗。identity confirmed 與 region_text_review aligned 獨立，規則等義也不代表新版顯示字句已核。
 
 來源與人工採納依原歸檔／authored 契約保存，推導結果由對應 F1 輸入重現。只在翻譯／等義功能需要時啟用完整語義能力，不回寫首發已有等義證明。反例見 [翻譯契約 §9](../schema/translation-contract.md#9-獨立反例與定向突變驗收)，尤其 V16、V18–V19、V23、V26–V28。
+
+公開 CDN 的快照／圖片保留依 [ADR-0016](0016-snapshot-retention.md)；本 ADR 的本機重播／建置證據要求不構成永久歷史下載承諾。

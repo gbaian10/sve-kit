@@ -158,7 +158,7 @@ printing after.source_face_map 必須與此映射完全相同，after.card_id �
 插畫或繪師瀏覽；support 仍保留 required 列並標未實作，不帶自動能力。
 無現行 printing_face use 的舊 art 不進公開 art 清單，其 art_artist 不投影成公開 art.artists；僅因這些 art 被引用的 artist 亦不出貨；
 仍被其他現行 art 引用的 artist 保留。公開 baseline／巢狀引用不得指向被排除的 art，
-依欄位契約留 null 或移除相應非必填列，不可留下懸空 FK。舊快照閉包完全不改。
+依欄位契約留 null 或移除相應非必填列，不可留下懸空 FK。保留窗口內舊快照的 JSON 閉包不改寫，輪替後可回收；圖片只留 current。
 
 ### 4.1 三種修復的合成對照
 
@@ -266,16 +266,16 @@ revert 只從有效集合移除被指名 transaction 的全部邊，不新增 B�
   事件 ID 以相同固定 namespace、canonical `["identity-revert-v1",transition.record_key,reverts_id]` 的 UUIDv5 配發。
   apply 事件的 reverts_id=null；revert 必須指先前非 revert 事件，全域唯一且 confirmed，整組事件原子撤回。
   公開不出私有 transition key／decision，只出公開事件間的 reverts_id；consumer 先解析撤回再計有效圖。
-- data_version 是該事件**首次正式發布**版號。候選建置以目標版號暫填；發布成功後由永久版本索引
-  與該版快照固定事件與 data_version，後續重建驗它並沿用，不每版改時間；preview 不登錄首次正式發布。
+- data_version 是該事件**首次正式發布**版號。候選建置以目標版號暫填；發布流程以精簡的事件 ID→首次 data_version／manifest hash 收據固定，索引提交成功後確認收據；中斷以提交結果恢復，不把預留當已發布。
+  收據耐久保存並備份，後續重建驗它並沿用，不靠永久 CDN 索引／快照，不每版改時間；preview 不登錄首次正式發布。
   無法取得歷史發布證據時拒絕發布，不把舊事件當首次發布。
   同事件 ID 已公開但內容不同即拒絕。公開修復歷史與舊墓碑保留，changes 只列本次新增事件。
 - 卡片網址綁 printing；合併 card 不代表把該版次 URL 轉到另一個 printing。原卡號沒變就不新增 alias。
   確實改號時依 build-db §15 永久保留舊入口、展平 alias 到同 printing 的最新 canonical，
   禁止鏈／環、精確撞號、搶走舊入口與 provisional override。
 - 舊分享碼保留 int_id、數量、區域、位置。split 必須讓玩家選擇，不能靜默換 printing／刪行；
-  已知 int_id 仍解析原 printing 並呈現修復提示。對局／回放仍釘舊 data_version 與快照 hash，
-  不把新父 card、面或文字覆寫進舊快照。
+  已知 int_id 仍解析原 printing 並呈現修復提示。目前不承諾歷史對局回放或舊卡表重新下載；
+  保留窗口內 JSON 不回寫新父 card／面／文字，公開保留依 snapshot-format §4.1，不影響身分事件／採納鏈。
 
 公開形狀新增 kind=revert 與 required nullable reverts_id。format `1.0.0` 仍為候選時，依
 [機器契約的候選期規則](snapshot-contract.md) 在候選內同步修訂 Schema、欄序、golden 與 reader，

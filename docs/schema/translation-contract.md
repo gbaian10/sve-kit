@@ -190,7 +190,7 @@ owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派
 
 **binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
 
-歷史人工譯本與決定仍保存；歷史**推導結果**由對應 F1 輸入、演算法版本與舊快照重現，不要求把相互衝突的全部歷史 binding 同時塞進單一當前 DB。當快照需歷史 face_revision 時，為該 exact source 各自推導合法 context/binding。未被本次輸出引用的舊生成譯文不載入當次 DB，也不進 git。
+歷史人工譯本與決定仍保存；歷史**推導結果**由對應凍結 F1 輸入與演算法版本重算；公開快照僅 current＋previous，不保證 CDN 提供完整歷史，不要求把相互衝突的全部歷史 binding 同時塞進單一當前 DB。當快照需歷史 face_revision 時，為該 exact source 各自推導合法 context/binding。未被本次輸出引用的舊生成譯文不載入當次 DB，也不進 git。
 
 ### 6.1.1 context_assignment 的不可變身分背景
 
@@ -333,7 +333,7 @@ use 的 owner 是原文引用者，恰一組；context.source_unit 必須等於�
 
 模板譯本或術語 choice 更新後，反查精確依賴、重新渲染、機械驗證並產新 translation ID／selection；成功者自動選用，**不要求每張卡再簽一份 translation/selection**。原文或語義改變時舊產物不適用新 owner/context，仍從新來源重新匹配。機械失敗者列原因、該 context 回原文；缺任一句不能冒稱完整翻譯。模板來源／hash 損壞或引用閉包錯是建置錯誤，不吞成一般缺譯。
 
-新渲染批次必報 generated_rows、changed_rows、failed_rows、sampled_rows 及精確輸入／輸出成員 hash。已有核可抽查政策時依其檢查；首輪照 §1 已核可的高頻模板／模型分歧抽查流程，記實際樣本及核對者，不預填已抽查。§2 長尾政策採納不另要求每批人工樣本，當批 sampled_rows 可為 0，另報 approved_policy_rows 與引用收據。抽查失敗隔離受影響批次並修人工來源／匹配規則，不原地修改生成文字。舊生成物可留舊快照／報告作比較，不回填成新來源的 fresh。
+新渲染批次必報 generated_rows、changed_rows、failed_rows、sampled_rows 及精確輸入／輸出成員 hash。已有核可抽查政策時依其檢查；首輪照 §1 已核可的高頻模板／模型分歧抽查流程，記實際樣本及核對者，不預填已抽查。§2 長尾政策採納不另要求每批人工樣本，當批 sampled_rows 可為 0，另報 approved_policy_rows 與引用收據。抽查失敗隔離受影響批次並修人工來源／匹配規則，不原地修改生成文字。舊生成物可在保留窗口內快照／建置報告作比較，不延長公開快照保留期，不回填成新來源的 fresh。
 
 ## 7. 跨區核對、counterpart 與語義組
 

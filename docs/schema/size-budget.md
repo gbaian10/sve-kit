@@ -62,3 +62,10 @@
 reader 建好 typed 索引後必須釋放啟動包的原始 tuple 陣列與解碼字串，只保留 TypedArray、唯一字串池、索引與當頁 view。驗收時量「建索引後常駐」的 JS heap＋ArrayBuffer、詳情分片的 LRU 與更新期間峰值。桌面瀏覽器的 tuple heap 量測（約 11 MiB）不能代替 typed store 在手機上的實測。
 
 影像 metadata 的 CacheStorage bytes、解析暫存、當頁 image 列、衍生 Map／view 及 pin 工作集均須量測。format 1.1 的調度預算是 12 MiB raw 對應量與最多 64 檔，並不等於 JS heap；解析整個 bucket 後只保留當頁需要的 image 列，其他列即釋放，不建立全庫物件索引。PR 的桌面 heap 數字仍不能代替手機 48／80 MiB 驗收。
+
+## 2.0 卡包 media 的量測責任
+
+2.0 依傳輸契約 §5.4，只為可見面載入卡包 media，來源詳情按需；不套用 1.1 的全域影像預取成本。
+既有文字容量／每區啟動目標及 512 KiB 單片上限不變；manifest 與首屏實際必載 media 要計入實際啟動傳輸，不能隱藏在背景分類。
+分別報告文字 ready、首圖 ready、24 面同包／混包及單面 metadata、圖片 bitmap、常駐／更新峰值與長任務。
+2.0 新 wire 尚待雙區及手機實測，不以 ID URL 自動推論 heap 下降或直接套用舊配置數字。

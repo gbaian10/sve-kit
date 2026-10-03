@@ -145,7 +145,7 @@ interface QueryState {
 
 ### 4.2 載入順序與驗證鏈
 
-以下流程適用**正式卡表快照**（有版本索引）；預覽快照的清單入口由快照格式定義，本文不指定。
+以下流程適用**正式卡表快照**（有版本索引）；2.0 採 current／previous，既有 1.x pages 只供舊格式解讀。預覽快照的清單入口由快照格式定義。
 
 ```text
 idle → loading(version-index) → loading(manifest) → loading(bootstrap) → ready
@@ -154,12 +154,10 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 ```
 
 - reader 宣告 `READER = { version, capabilities: ["column-partition-v1"] }`。
-- 挑版本：讀版本索引，**從最後一頁往前逐頁**、頁內由新到舊，找第一個相容的 entry（format major 相同、`min_reader_version` ≤ reader、
-  `required_capabilities` ⊆ reader 支援的）。整個索引都沒有 → `incompatible`，畫面說「網站需要更新」。
-- 驗證鏈：頁以 `pages[].sha256` 驗、快照清單以 entry 的 `manifest_sha256` 驗、每個檔以 `files[].sha256` 驗**解壓後**的 bytes（WebCrypto）。
-  不符 → 重試一次，再不符 → `corrupt`。沒驗過的頁或清單不能決定下載路徑或相容性。
+- 挑版本：2.0 讀 index_format=2 的 current，再檢查 previous；須符合明示支援的 format、最低 reader 與所有能力。沒有相容項時只能保留本機已驗 active 或提示更新，不查全歷史 pages。
+- 驗證鏈：索引先驗形狀與 index_format，再以 entry.manifest_sha256 驗清單、File.sha256 驗解壓後的 canonical bytes。2.0 不下載 pages；不符重試一次，再不符 → corrupt，不用未驗清單決定下載或相容性。
 - 啟動包解析後丟掉原始 tuple 陣列與解碼字串，只留索引；詳情分片逐片解析，保留 tuple＋`row_index` 索引，LRU 淘汰；不把整包 JSON.parse 進 heap。
-- **快取邊界（PWA 之前）**：只靠 HTTP 快取（內容定址路徑配 `immutable`）＋每次載入在記憶體重建索引；Service Worker、CacheStorage、
+- **快取邊界（PWA 之前）**：JSON 只靠 HTTP 快取（內容定址路徑配 `immutable`）；2.0 卡圖使用含 v 完整 URL，header 依 image-variants；每次載入在記憶體重建索引；Service Worker、CacheStorage、
   IndexedDB 索引持久化、離線預取都跟 PWA 一起做，介面（`Locator`、`ShardCache`）留位。
 - `data/` 的公開 API 從第一天就是 async；解析與全文掃描搬進 Worker 時不改呼叫端。
 
@@ -232,7 +230,7 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 
 ## 6. 卡圖
 
-`components/card/CardImage.tsx`：由 `data/images.ts` 從 `printing_image`／`image_variant` 解出 `srcset`、`width`、`height`；`alt` 三種語境
+`components/card/CardImage.tsx`：由 `data/images.ts` 從 2.0 的卡包 `printing_image` media 取得版本／尺寸，配合 int_id／face.ordinal 組 `srcset`、`width`、`height`；不為首圖載 global `image_variant`；`alt` 三種語境
 （`identify`＝卡名＋版次；`redundant`＝旁邊已有同樣文字；`decorative`）；`sizes` 由呼叫端依版面給；`fit: cover | contain`（橫向卡用 contain）；
 固定比例、`loading="lazy"`、`decoding="async"`。載入中／缺圖／省流量共用同一張文字卡佔位，缺圖另加標示；`withdrawn` 顯示撤下原因與來源 hostname。
 列表與建議清單用整張卡圖檔位，放大層用最大檔位；查卡不用插畫裁切檔位。
@@ -286,3 +284,12 @@ idle → loading(version-index) → loading(manifest) → loading(bootstrap) →
 - **建牌**：同一個搜尋工作區加牌組面板；列表元件預留每張卡的動作列插槽，`useBlocker` 處理離開編輯頁。
 - **上線**：登入、PWA（Service Worker、CacheStorage、IndexedDB 索引持久化，namespace 帶根目錄與 `data_version`）、正式部署
   （`VITE_CDN_BASE` 指向 CDN 網域）。
+
+## 快照 2.0 與圖片更新邊界
+
+既有 format-v1／版本 pages 接線是 1.x 實作描述；2.0 須依 [傳輸契約 §5.4](../schema/snapshot-transport.md#54-format-200-卡包-media-與-id-圖片) 同步新 accessor 與 Index v2，不能只放寬版本範圍。
+卡包 media 提供 card／art 版本與實際尺寸，int_id＋永久 face.ordinal＋size 直接組背景圖片 URL；玩家頁面路由不變。
+切新快照時更新 src／srcset、取消舊工作、拒絕晚到舊 response；SW 以完整含 v URL 匹配，不忽略 query 或回退舊圖。
+新圖未完成／失敗用 placeholder；離線舊 active 明示時效，不宣稱圖片最新。
+只在 current／previous 或本機已驗完整 active 選相容者，無相容者更新 reader；落後多版、舊片回收則重取 current。
+本機 pin 不延長伺服器保留。query 分離已實測，瀏覽器／SW 的暖快取與故障整合仍須實作驗收。

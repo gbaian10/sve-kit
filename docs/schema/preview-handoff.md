@@ -1,5 +1,12 @@
 # JP preview 建置與前端接線
 
+本文既有命令與內容定址圖片輸出描述的是已實作 1.x；2.0 規格不表示這些入口已完成升級。
+2.0 須同步 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度) 與
+[傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：輸出卡包 media 的版本／尺寸，
+從建置 hash path 產生固定 ID key，圖片可受控覆寫、JSON 不可變，驗新 v 後才切指標；
+preview 配號與快取仍隔離，不寫正式 current／previous 索引。圖片只取 current，metadata 僅最新＋前一版。
+正式 publisher 仍拒絕 preview 版號；不得把 preview 直接升格或把本文件的舊 create-only 規則當 2.0 已驗收。
+
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
 `preview-` 前綴，`regions` 固定為 `jp`。payload 的欄位、分片 N、bootstrap/detail
 分工不因 preview 或容量目標而改變。
@@ -89,7 +96,7 @@ preview 根下的 `private/` 與 `reports/` 不屬於公開內容；正式上傳
 CacheStorage 的已驗 bytes 成功保存且未被清除時，翻回暖頁不向外重抓。
 
 `snapshot publish MANIFEST` 在任何寫入前拒絕 `preview-` 產物。正式發布其餘閘門與
-append-only index 屬 #34，目前命令在正式版號下也會停止；改掉前綴不能把 preview
+current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工作；目前命令在正式版號下也會停止；改掉前綴不能把 preview
 直接升為正式發布，正式批次須重新建置並通過完整發布閘門。
 
 Cloudflare 開發部署、公開目錄上傳與未登入入口驗收，見

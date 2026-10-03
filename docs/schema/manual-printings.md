@@ -96,7 +96,7 @@ review_context 釘完整核對背景，dependencies 釘相關已採納 family、
 
 **待實作欄位方案，不改本次公開白名單／欄序**：公開 printing 擬新增末尾 nullable `manual_metadata`，其具名 tuple ManualPrintingMetadata 恰有 `manual_name_unit_id?,serial_note_unit_id?,references,distribution`；references 為 `{url,source_class,checked_on,roles,locator?}` 的排序陣列，distribution 為 `{source_url,inclusion_kind,date_precision,date_raw?,available_on?,note_unit_id}` 陣列。每筆來源公開官方／第三方類別及人工查核日，不能只出 URL 而隱藏未封存的限制；official URL 仍等於 frozen URL。正常官方列 manual_metadata=null；官方 supplement 可以有序號註記／來源，但 manual_name 為 null。manual_metadata 擬由 bootstrap 主儲存，需連同人工名稱／註記閉包量測啟動預算；其餘印刷原文欄仍沿原來 fragment。
 
-後續格式 PR 須一次同步 snapshot-format、snapshot-transport 的末尾欄、types／Schema／golden／producer／各 reader，不能中間插欄或在舊 format 靜默換型別。尚未正式發布時依 snapshot-contract 的候選流程同步；已發布後追加 tuple 欄須按 snapshot-transport §1.1 升 format major，設最低 reader 版本與 required_capabilities 含 manual-printings-v1。未知 format／能力的 reader 留最近相容快照並提示更新，不截斷新欄後猜讀。card_id 非空、card／face／image join 沿既有規則；在機器契約實作前不宣稱人工名稱／查核日已可出貨。
+後續格式 PR 須一次同步 snapshot-format、snapshot-transport 的末尾欄、types／Schema／golden／producer／各 reader，不能中間插欄或在舊 format 靜默換型別。尚未正式發布時依 snapshot-contract 的候選流程同步；已發布後追加 tuple 欄須按 snapshot-transport §1.1 升 format major，設最低 reader 版本與 required_capabilities 含 manual-printings-v1。未知 format／能力的 reader 只在 current／previous 或本機已驗 active 中選相容快照；沒有則提示更新，不搜尋永久歷史索引，不截斷新欄後猜讀。card_id 非空、card／face／image join 沿既有規則；在機器契約實作前不宣稱人工名稱／查核日已可出貨。
 
 unlisted 頁面明示「非官方整理，可能不完整」、信心、暫定號碼狀態、人工名稱與回報入口。card_no_state=official 不會把 catalog_state 變成 official。圖片沿 mirror_reviewed、Decklog 沿 regional_decklog；參考 image URL 或本入口 confirmed 不等於圖片可鏡像，也不等於 Decklog 已查證。未查證的 unlisted 仍預設不能新加入／分享／匯出牌組，既有碼與條目按既有永久配號規則保留。
 
@@ -105,3 +105,7 @@ unlisted 頁面明示「非官方整理，可能不完整」、信心、暫定�
 程式 PR 須以合成資料驗：候選／high／無關 confirmed 不能採納；官方 URL 不得假裝第三方；URL-only 無 raw hash 可採納但不造原頁；official 缺 archive pin 拒絕；SNC（含 BP20-SNC01）／WB／PR 歸屬正確且不按卡號前綴誤分 BP20；稀有度 ANV 不作 family；PR supplement 不增版次、不改 PR 歸屬且保留官方卡文（含 PR-442）；暫定號改正 ID／int_id 不變及 alias 無環；日英相近號／不同面不自動配對；人工名稱不進官方文字／rules_name；未對應條目以 provisional card／face 可見、可掛圖而無卡文；月年不補日期；分母與實際張數不混用；無商品配送不造 product；歷史續版／全成員 hash／相關內容 stale／交易回滾均有反例。
 
 printing_reference 擬新增 url／source_class／checked_on 及配送欄位，唯一鍵擬為 `(printing_id,source_id,url,role)`，正式欄名／型別與 CHECK 在改表定義的 carddb PR 同步權威列。人工名稱／序號註記的建置欄位及公開 manual_metadata 亦須在後續 PR 同步 DDL、機器 Schema、types、合成 golden、producer／reader 及 ER 引用閉包；前端實作另拆 sim/web 單位。不能只改 Markdown 後宣稱已支援。新增 SNC／WB family 與真實記錄留 authored PR，先有正式來源及維護者逐筆核對；圖片留 #210，張數／EN 查證留 #211。本 docs PR 不授權來源抓取或資料發布。
+
+公開卡圖及快照保留依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
+此限制不刪 predecessor／adoption 歷史、永久 printing.int_id 或人可見路由 alias；上述建置重播不是對局回放服務。
+卡圖 2.0 使用 int_id＋永久 face.ordinal 的背景 URL 與卡包版本，不以 manual source image_id 當公開 key。

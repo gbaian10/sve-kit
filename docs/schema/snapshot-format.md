@@ -1,9 +1,11 @@
-# 卡表快照格式 v1
+# 卡表快照格式 v2
 
 引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
 專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
 
 卡表快照是由[建置資料庫](build-db.md)投影出的精簡契約。表名相同不代表欄位相同；本文件是出貨欄位白名單。精確 JSON 形狀、欄序、版本及分片規則見 [傳輸契約](snapshot-transport.md)。沒有指定的建置資料庫欄位不出貨，尤其 decision、`source_record`、逐列 hash、翻譯依賴、載入/考題報告與巨集。保留玩家可見的來源 URL、Q&A/CR 引文、印刷歷史、更正原值，不提供建置稽核包。
+
+本文件的 2.0.0 圖片與有限保留契約依 [ADR-0015](../adr/0015-image-url-version.md)／[ADR-0016](../adr/0016-snapshot-retention.md)。1.x 的既有機器資源維持原解讀；2.0.0 的 Schema、producer、reader 與發布器尚待同步實作，不因文件更新宣稱可出貨。
 
 ## 1. 快照清單（manifest）、版本與容器
 
@@ -15,7 +17,7 @@
 
 巢狀的 RegionView/PrintingFace/Section/FieldTranslation/Correction/Support 等記錄同樣用 tuple，types 以具名型別→columns 順序及引用型別描述（固定於 format）供載入器驗列長度；producer 以本文件的具名型別作型別名。`parameter_schema/corrected_from` 等值保持受限 JSON，不轉成位置陣列，值域依 [傳輸契約 §3.2–3.3](snapshot-transport.md#32-公開參數宣告)。純 ID/code 陣列亦保持原樣。每個分片只附用到的 types，producer 驗其與 format 定義一致；consumer 不執行資料提供的轉換程式。
 
-reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，與所有已發布歷史鍵聯集檢查碰撞；碰撞停止發布，不能重配舊鍵或自動加長，快照不附完整 hash。
+reader 編譯具型別 accessor，詳情分片保留 tuples＋ID→row 索引；啟動包轉 typed 索引後釋放原 tuples，只在畫面當前項目建立 view，不能全量展開成物件再多存一份。這項編碼主要節省未壓縮傳輸/快取大小；原型量測顯示 heap 並未因此降低，記憶體要靠 §3 的逐片解析/淘汰。每表按穩定主鍵排序、集合陣列按 ID/code 排序、有序段落保留 ordinal。payload 不含 `data_version/published_at`，未變內容跨版 bytes/hash 完全相同。完整文字包是同一分片 payload 的容器聯集，不能另做另一套 carddb。公共永久 ID 保持不透明字串；text ID 固定為 `t:{lang}:{sha256(exact UTF-8 text)[:16]}`，與耐久的已發布文字鍵索引 `(lang,short_id,full_digest)` 聯集檢查碰撞；該索引不依賴已回收的公開快照；碰撞停止發布，不能重配舊鍵或自動加長，快照不附完整 hash。
 
 下面列出的欄位全部存在，`?` 表示可 null，不表示任意省略。內嵌同型陣列可以空；未知與空的規則在 [build-db.md](build-db.md) 定義。顯示 label 參照 `text_unit`，介面通用提示留 app i18n。枚舉值與型別沿建置資料庫同名定義，投影新增型別於下節明列；不可帶出建置資料庫未列欄位。
 
@@ -92,17 +94,33 @@ translation 僅輸出上述欄位，用 `text_unit_id` 取譯文；同一 chosen
 
 ### 2.1 獨立影像清單與 DSL 附件
 
-| 集合             | 公開欄位                                                                                                                | 鍵與玩家用途（未註明 PK 者以首欄 `id` 為 PK）                                                            |
-| ---------------- | ----------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `image_asset`    | `id, origin, publication_state, withdrawal_reason?, source_src_raw, source_url, availability, width?, height?, format?` | 來源/缺圖狀態；不把 source sha 當必要 metadata                                                           |
-| `printing_image` | `printing_id, face_id, image_id`                                                                                        | 複合 `PK(printing_id,face_id)`；每面一圖                                                                 |
-| `image_variant`  | `image_id, size_key, format, path, width, height, bytes`                                                                | 複合 `PK(前三欄)`；path 已內容定址，下載時以內容定址 path 的 hash 驗 blob（清單檔 hash 只保護 metadata） |
+2.0.0 的三個影像集合如下。1.x 保留其原有三欄 printing_image 與含內容定址 path 的七欄 image_variant 解讀，不能用 2.0 accessor 猜讀。
 
-卡圖固定檔位、裁切與原 PNG 不公開的規則見 [卡圖衍生檔契約](image-variants.md)；image_variant 不要求 original。
+| 集合 | 公開欄位 | 鍵與用途（未註明 PK 者以首欄 `id` 為 PK） |
+| --- | --- | --- |
+| `image_asset` | `id, origin, publication_state, withdrawal_reason?, source_src_raw, source_url, availability, width?, height?, format?` | PK(id)；來源／缺圖詳情，沿既有型別 |
+| `printing_image` | `printing_id, face_id, image_id, publication_state, availability, withdrawal_reason?, card_version?, art_version?, variants` | PK(printing_id,face_id)；卡包 media 的當頁顯圖投影 |
+| `image_variant` | `image_id, size_key, format, width, height, bytes` | PK(前三欄)；當次輸出的詳情尺寸／大小，不含公開 path、不阻擋首圖 |
 
-DSL 程式包（`dsl-programs`）不是集合；封套、各 format 的 DSL 版本准入及 AST 驗證統一依 [傳輸契約 §3.4](snapshot-transport.md#34-dsl-程式包與版本准入)。
+printing_image 的狀態型別沿 image_asset，並須與該 image_id 一致；兩個 version 為正安全整數或 null。
+variants 是按 size_key 排序唯一的 `ImageDisplayVariant=[size_key:Code,width:UInt,height:UInt]` tuple 陣列，尺寸皆 >0。
+approved 且 available 時 card_version／art_version 均非 null、恰有五檔；其他狀態兩者均 null、variants=[]，不得組可用 URL。
+每個 display variant 與 image_variant 的尺寸一致；完整 bytes／SHA 由發布器核實，不能只驗 metadata。
+同 image_id 被不同版次引用時，各版次的路徑及版本獨立，來源詳情可共用。
 
-所有 reference（含 JSON 內 ID）都在 producer 驗閉包；瀏覽器不全量驗 FK。`image_variant/path`、`voice/asset_path` 是不透明 CDN path，不能用卡號重建。blob 內容定址的 hash 可在 path，這是實際快取定位，不是為了追溯逐列附 hash。
+卡圖 URL 為 `images/<size>/<int_id>[-f<ordinal>].webp?v=<version>`；ordinal=0 省略後綴，其餘使用永久 face.ordinal，不用陣列位置。
+int_id 讀 printing 的永久配號，不能由卡號或號段推 region；image_id 只供來源／詳情 join。
+card_s／m／l 取 card_version，art_s／m 取 art_version；ID、ordinal、版本皆用無前導零的十進位整數。
+query 由 reader 附加，不寫入 File.path；背景資源 URL 與玩家卡片頁路由分開。
+版本配發、產製／覆寫及新鮮度規則見 [卡圖衍生檔契約](image-variants.md)。
+
+printing_image 唯一存於 printing.home_set 的 media 分片，取得文字啟動包及一層卡包 metadata 後即可組圖；
+image_asset／image_variant 是按需詳情，不再為顯圖預取全域影像表。裝檔與精確依賴見[傳輸契約 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)。
+普通 img 成功不宣稱端到端 SHA 校驗；歷史圖片 metadata 不保證目前同 key 仍有歷史 bytes。
+JSON hash、當前 metadata FK 與來源核可檢查不變；建置／發布計畫仍保存完整輸出 hash 與本機內容定址位置。
+
+DSL 程式包（`dsl-programs`）不是集合；封套及 AST 驗證統一依 [傳輸契約 §3.4](snapshot-transport.md#34-dsl-程式包與版本准入)。
+所有 reference（含 JSON 內 ID）由 producer 驗閉包；瀏覽器不全量驗 FK。voice.asset_path 仍是不透明 CDN path；本次只改卡圖，不由卡號推算官方來源網址。
 
 ### 2.2 留在建置端與延後項
 
@@ -155,20 +173,20 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 §2 的 40 個文字集合是完整**邏輯讀取視圖**，不是額外下載的全欄主表。傳輸以同一 table 的固定欄位分割（fragment）分成啟動包（bootstrap）和詳情分片（detail），跨表 FK 保留永久 ID；同表詳情分片不重複永久 PK，而以片內 `row_index` 指向啟動包列（printing.faces 用 `face_ordinal`），每個實體欄位值只在一處。以下為完整分割規則；「其餘」精確指 §2 白名單扣去該列啟動包欄，非任意省欄。
 
-| 邏輯集合/列範圍                                                                                           | 啟動包唯一儲存欄位                                                                                                                     | 詳情分片唯一儲存欄位                                                                                                                                              |
-| --------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| card、face、`product_family`、product、`printing_product`、`identity_change`                              | 全部欄位                                                                                                                               | 無資料列，不發僅 PK 的空殼                                                                                                                                        |
-| `printing`                                                                                                | id 及除 faces 外全部欄位；faces 的裝飾欄位分割為 `face_id/art_id/frame_code/signed/embellishment_state/stamps`                         | id；faces 的文字欄位分割為 `face_id/printed_name_unit_id/printed_effect_unit_id/flavor_unit_id/printed_text_state/observations/sections/translations/corrections` |
-| `face_revision`：§2.3 display_ref 的現行／暫顯列                                                          | `id/face_id/region/name_unit_id/class_code/type_code/cost/attack/defense/traits/titles/special_kinds`；translations 中 field=name 的列 | id＋其餘白名單欄；translations 僅非 name 列                                                                                                                       |
-| `face_revision`：display_ref 外的候選／其餘觀測／歷史列                                                   | 無；以 §2.3 的 `display_ref` 區分，不另出貨集合                                                                                        | history 的完整列，按需載入（含其餘候選，不是現行／暫顯複本）                                                                                                      |
-| `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage`                                    | 全部欄位；status/reasons 不複製進 `card_facet`                                                                                         | 無                                                                                                                                                                |
-| `rules_name`、`face_rules_name`                                                                           | 1.0.0：全部欄位；1.1.0／1.2.0：無                                                                                                      | 1.0.0：無；1.1.0／1.2.0：全部原欄位，global detail                                                                                                                |
-| `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp                                  | 全部欄位                                                                                                                               | 無                                                                                                                                                                |
-| `text_unit`                                                                                               | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；每個文字 ID 只在其固定 bucket 的啟動包或詳情分片一邊                          | 非上述閉包的其餘文字列                                                                                                                                            |
-| `translation`                                                                                             | 現行／暫顯 name 與 facet labels 使用的翻譯列                                                                                           | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次                                                                                                                      |
-| 其餘文字集合                                                                                              | 無                                                                                                                                     | 完整白名單列                                                                                                                                                      |
+| 邏輯集合/列範圍 | 啟動包唯一儲存欄位 | 詳情分片唯一儲存欄位 |
+| --- | --- | --- |
+| card、face、`product_family`、product、`printing_product`、`identity_change` | 全部欄位 | 無資料列，不發僅 PK 的空殼 |
+| `printing` | id 及除 faces 外全部欄位；faces 的裝飾欄位分割為 `face_id/art_id/frame_code/signed/embellishment_state/stamps` | id；faces 的文字欄位分割為 `face_id/printed_name_unit_id/printed_effect_unit_id/flavor_unit_id/printed_text_state/observations/sections/translations/corrections` |
+| `face_revision`：§2.3 display_ref 的現行／暫顯列 | `id/face_id/region/name_unit_id/class_code/type_code/cost/attack/defense/traits/titles/special_kinds`；translations 中 field=name 的列 | id＋其餘白名單欄；translations 僅非 name 列 |
+| `face_revision`：display_ref 外的候選／其餘觀測／歷史列 | 無；以 §2.3 的 `display_ref` 區分，不另出貨集合 | history 的完整列，按需載入（含其餘候選，不是現行／暫顯複本） |
+| `card_engine_support`、`mechanic_projection`、`card_mechanic_coverage` | 全部欄位；status/reasons 不複製進 `card_facet` | 無 |
+| `rules_name`、`face_rules_name` | 1.0.0：全部欄位；1.1.0／1.2.0／2.0.0：無 | 1.0.0：無；1.1.0／1.2.0／2.0.0：全部原欄位，global detail |
+| `rules_profile`、restriction、vocabulary、`search_alias`、keyword、stamp | 全部欄位 | 無 |
+| `text_unit` | 現行／暫顯名字、可用名字翻譯與 facet 字典引用的 ID 閉包；每個文字 ID 只在其固定 bucket 的啟動包或詳情分片一邊 | 非上述閉包的其餘文字列 |
+| `translation` | 現行／暫顯 name 與 facet labels 使用的翻譯列 | 其餘翻譯列；同 ID 兩用途時歸啟動包，只存一次 |
+| 其餘文字集合 | 無 | 完整白名單列 |
 
-`rules_name`／`face_rules_name` 的全部原欄位在 format 1.0.0 唯一存於 bootstrap；在 1.1.0／1.2.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。其他表與 printing 診斷／art_id／printing_product／support 的存放均不變。
+`rules_name`／`face_rules_name` 的全部原欄位在 format 1.0.0 唯一存於 bootstrap；在 1.1.0／1.2.0／2.0.0 唯一存於 global detail，依 [傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 定位。兩表的 PK、欄序、型別及邏輯參照不變，也沒有 row_index/base。名稱搜尋與一般 facet 仍用 current／display 的名稱閉包；同名規則／構築功能按需取兩表，未完成須標「規則資料載入中／未備妥」，不能當作沒有同名限制或完整合法性。其他表與 printing 診斷／art_id／printing_product／support 的存放均不變。
 
 表中 `id/face_id` 是 join 後欄名；詳情分片傳輸以 `row_index/face_ordinal` 取代這些重複鍵。`row_index` 是該啟動包欄位分割已排序 rows 的位置，不是永久 ID；快照清單 dependencies 必釘精確啟動包 key/hash，錯版本/越界/同 ordinal 重複皆拒絕。當啟動包排序改變，相關詳情分片必重建，不能沿用舊 `row_index`；這會增加更新片數，是省去複本鍵的明示取捨。display_ref 外的 `face_revision`（含其餘候選）使用獨立的 history 分片與完整列，不混在現行／暫顯詳情分片的 columns。欄位分割的 columns/type 白名單由 format 固定，files.role 指儲存層，`row_counts` 按欄位分割實際列數計；producer 另外驗 join 後邏輯主鍵唯一、必填欄齊與無欄位重複。printing.faces 兩片以 `(printing.id,face_id)` 一對一合併；translation 子陣列按 `field/ordinal/target_lang` 合併且不重複。完整文字包只是這些欄位分割的容器聯集，仍維持分割，不額外打包全欄複本。owner/bucket 穩定，不因分片切換改永久 ID；字典選用狀態變更可讓該 bucket 的欄位分割內容更新。
 
@@ -182,13 +200,13 @@ printing 頁顯示自己的 observations 文字，並標為官網觀測；有多
 
 ## 4. 更新、相容性與離線
 
-比前一快照清單的檔 hash，重用未變片；新片在 staging 驗完完整 required 閉包後原子切 active。失敗/中止/空間不足保留舊完整 active，首訪失敗不稱離線備妥。更新時不把新舊兩版全解析到 heap；磁碟峰值另算已 pin 舊版＋新片，CacheStorage 容量失敗須有可恢復訊息。
+比前一快照清單的檔 hash，重用未變片；新片在 staging 驗完完整 required 閉包後原子切 active。失敗/中止/空間不足保留舊完整 active，首訪失敗不稱離線備妥。更新時不把新舊兩版全解析到 heap；磁碟峰值另算本機 active＋更新 staging 新片，CacheStorage 容量失敗須有可恢復訊息。
 
-對局/回放 pin `data_version`、快照清單 hash、engine version/build、rules profile revision。SW 不清仍被引用版本；離局才能依保留策略淘汰。row delta 延後；以替換不可變分片為 v1 增量。unknown format major/規則 enum/能力不能默默忽略，留最近相容快照並告知時效；查文字可只讀，合法性 unknown，自動對戰拒絕不支援能力。
+row delta 延後，以替換不可變 JSON 分片更新。未知 format／規則 enum／能力不能默默忽略；只在 current／previous 或本機完整 active 中找相容者，無相容版則提示更新 reader，不從全歷史索引搜尋。保留本機舊資料時明示時效，合法性 unknown，自動對戰拒絕不支援能力。對局重播與歷史牌組還原留待另訂，不要求公開快照或 WebP 永久可取回。
 
-card images 看過快取或已選牌組離線備妥；雙面兩張皆列，追加區只抓玩家實選。音檔與圖片各自狀態，不影響文字完成判定。不預抓隱藏對手的卡，也不把未實作提示洩漏其牌組。
+card images 依完整 URL（含 v）快取或供已選牌組離線使用；啟用新版時改用新版 v，不回退舊圖，下載失敗明示 placeholder。尚未連線取得新版者明示資料時效，不宣稱圖片最新；看過不等於所有圖片離線備妥；雙面兩張皆列，追加區只抓玩家實選。音檔與圖片各自狀態，不影響文字完成判定。不預抓隱藏對手的卡，也不把未實作提示洩漏其牌組。
 
-身分修復的永久 printing／int_id、舊 URL、split 玩家選擇與舊快照保留原則，沿 build-db §13／§15；
+身分修復的永久 printing／int_id、卡片入口舊 URL 與 split 玩家選擇，沿 build-db §13／§15；快照保留僅依下述 §4.1，
 建置端的追加封套與首次發布事件映射另見 [身分修復契約 §6](identity-repair.md#6-公開事件墓碑與路由)。
 **使用者 2026-10-01 核可**：§2 表格仍列目前候選 1.0.0 已實作的形狀；實作撤回時在原欄序尾端
 追加 reverts_id，identity_change 新增 kind=revert 與 required nullable reverts_id，
@@ -196,25 +214,43 @@ card images 看過快取或已選牌組離線備妥；雙面兩張皆列，追�
 reader 先移除被指名的有效事件再解析修復圖；原事件與撤回事件皆保留，不改舊快照。
 format `1.0.0` 仍為候選時，依 [機器契約的候選期規則](snapshot-contract.md) 在候選內同步修訂
 Schema、欄序、golden 與 reader，不要求額外升版；正式凍結後才至少升 minor、加入
-`identity-revert-v1` capability 並提高 min_reader_version。未支援的 reader 依 §4 留在最近相容版。
+`identity-revert-v1` capability 並提高 min_reader_version。未支援的 reader 依 §4 只選 current／previous 或本機 active 的相容版，否則提示更新。
 不將 decision、完整移轉清單或逐列稽核 hash 出貨。
 
-### 4.1 永久版本索引
+### 4.1 發布窗口、圖片新鮮度與回收
 
-R2 永久保留所有已發布快照清單及其引用的 text/完整文字包/分片/config/images metadata/programs 與實際所需資產閉包；同 hash 只存一次，不能只留快照清單再回收舊內容。資產沒有取得時仍明示 missing/unfetched，不捏造可回放的完整性。對局另 pin 引擎版本；保留卡表不等於保證任意舊引擎永久可執行。**伺服端永久保留**與**裝置端 LRU/pin 淘汰**分開；SW 可在無引用時清本機舊版，仍能從版本索引找回。
+公開 CDN 的卡表快照只保留**最新版（current）及其直接前一發布版（previous）**，previous 僅供更新過渡。首次發布 previous 為 null。每一保留版本的清單、文字／其他分片、完整文字包（若有）、config、影像 metadata、programs、changes 及所列壓縮表示，均保留其必要 JSON／檔案閉包；共同內容依 hash 去重。清單及內容定址 JSON 一經寫入不可覆寫，但輪替出保留窗口後可依引用集合回收。「內容不可變」不表示「永久保存」。
 
-- 快照清單：`snapshots/manifests/{sha256}.json`，hash 為 canonical 快照清單 bytes（不含自己的 path/hash）；先寫內容與快照清單，再原子更新索引。
-- payload：`snapshots/blobs/{sha256}.json`，壓縮表示加 .br/.gz；各快照清單 files 的 bytes/hash 規則不變。
-- `snapshots/versions/index.json`：`{index_format:1,revision,pages:[{path,sha256,first_data_version,last_data_version,count}]}`。pages 內容定址不可變；新發布改尾頁時舊頁仍保留，所有已公開 entries 永不刪除/重寫。
-- page：`{index_format:1,entries:[{data_version,published_at,format_version,min_reader_version,required_capabilities,manifest_path,manifest_sha256,engine_support_target}]}`；`data_version` 全域唯一，同版號不可換快照清單；建置比前索引確認 append-only。索引可以更新，但每一代 index 本身也另以 hash 留存，供除錯。
+**卡圖 WebP 僅提供當前圖片，不保存歷史圖片版本。** previous 或更舊 metadata 中的圖片引用不使舊 WebP 成為必留資產；其 image hash／bytes 不構成永遠可取得同一圖片的承諾。圖片產製、來源核可、格式／尺寸／內容檢查仍在發布前驗證。新版快照須提供足以選取新圖片的版本 token 或新 path；client 啟用新版後，瀏覽器／CDN／SW 不得以舊版本圖片作快取回退。未完成下載顯示載入狀態，失敗明示，不以舊圖充作新版圖。
 
-舊 reader 按 format `major/min_reader_version/capabilities` 找最後相容項；回放按 `data_version`＋`manifest_sha256` 精確定位，不能自動換最新卡文。`index_format` 不支援時保留本機 active 並提示更新。永久索引屬發行基礎檔，不計 40 個玩家文字集合；全部歷史也不強制每次預取到手機。
+版本入口是可更新的 current／previous 發布索引，revision 單調增加，不維護 append-only 全歷史 pages 或每代索引的公開歸檔。每個 entry 指向不可變 manifest 的 path／hash，並提供格式、最低 reader 版本與所需能力等准入資訊。data_version 不重用，同一版號不可改指另一份 manifest。索引必在新版所需內容及圖片新鮮度驗證完成後，以條件寫入原子切換；索引不得設為 immutable 快取。
+
+客戶端由 current 更新；若其本機版本恰為 previous，可使用對應 changes 摘要及未變 hash 重用分片。落後多版、所需舊片已回收或缺少相容前版時，直接取得 current 的完整所需閉包，不要求補齊歷史鏈；未知格式／能力時提示更新 reader，不猜讀。previous 是有限的過渡退路，不保證永遠有可供舊 reader 下載的相容版本。裝置已有的完整快照可在更新失敗時保留為本機 active 並明示時效，但不使伺服器延長歷史保留。
+
+新版本提交成功後，回收不再被 current／previous 及合法在途發布引用的公開 snapshot 產物；卡圖回收只依**當前圖片集合**判斷。清理與發布使用同一 revision 邊界並重驗，不能刪到同時發布的新檔或仍被保留版本引用的共用 blob。中斷留下的未發布 staging 可另行清理，不列為第三個保留版本。失敗不得把半套新版宣告為 current。
+
+本階段不承諾任意歷史 data_version 的重新下載、對局重播或舊牌組載入當年卡表。相關能力待實際開發時另訂保留／匯入方式，不以此限制當前發布策略。永久 ID／int_id、必要路由 alias、authored 採納及凍結來源歸檔仍依各自契約，不因公開 snapshot 回收而改寫或刪除。
+
+索引入口為 `snapshots/versions/index.json`，形狀恰為
+`{index_format:2,revision:UInt,current:Entry,previous:Entry|null}`。
+Entry 恰含 `data_version,published_at,format_version,min_reader_version,required_capabilities,manifest_path,manifest_sha256,engine_support_target`，型別沿 manifest；
+manifest_path 為 `snapshots/manifests/<64hex>.json`，manifest_sha256 為其 canonical bytes 的 Hash。
+payload 沿 `snapshots/blobs/<64hex>.json` 及 `.br`／`.gz`；兩版共用 blob 只存一次。
+revision 是正安全整數，current／previous 的 data_version 不同，previous 恰為直接前一發布版；首版為 null。
+發布配號與首次事件收據耐久保存，不以永久 CDN pages 維持唯一性；失敗嘗試預留的圖片版本號不得重用。
+reader 只從 current、previous 或本機已驗完整 active 選相容者；index_format 不支援時提示更新，不能猜讀。
+
+changes 是相鄰發布摘要，不是重建鏈。previous manifest 引用的 changes blob 仍保留，
+但其 from_data_version 只是批次識別，可指向已回收版本，不遞迴保留第三版。
+慢 client 遇到已回收分片須重讀索引並更新；不以無限延長保留期維持過時下載。
+本機引擎的確定性重播與來源重算仍可保留，均不構成公開歷史資料下載承諾。
+決策理由見 [ADR-0016](../adr/0016-snapshot-retention.md)。
 
 ### 4.2 預覽快照
 
 預覽快照是正式匯出器產生、與卡表快照同格式的開發產物；僅供非公開開發，不發布給使用者。預覽使用 `SVE_PREVIEW_DIR`，正式本機發布使用 `SVE_CDN_DIR`，兩個根目錄不得相同或互相包含。reader 須明確選擇資料根，預覽與正式版的 IndexedDB／Cache namespace 分開。
 
-預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；不寫 `snapshots/versions/index.json` 或其 pages，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
+預覽 `data_version` 使用 §1 定義的 `preview-` 命名空間，不屬於正式發布版號；不寫正式 `snapshots/versions/index.json`，不改正式 active，也不提供永久分享碼、公開 URL 或回放 pin 的相容保證。正式發布器拒收預覽版號；正式發布須重新建置並通過完整發布閘門，不能直接將預覽升為正式版。
 
 建置參數、隔離檢查與前端接線見 [JP preview 建置與前端接線](preview-handoff.md)。
 
@@ -226,7 +262,7 @@ R2 永久保留所有已發布快照清單及其引用的 text/完整文字包/�
 
 機器與非官方來源仍須清楚標示；繁中可用「非官方翻譯」、機器另標「機器翻譯・非官方」，審過不改 origin。此呈現文字與未核對標示並存，不把未核對譯文改成 aligned，也不放行對戰自動能力。
 
-卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，機翻歷史由當時的 F1 輸入／譯本決定與舊快照重現；繁中跟 JP；EN 身分已確認、來源完整且無相關 divergence 時可先輸出 shared_jp_unchecked；日英段落數不同的受影響 section／effect 欄不提前共用，不按 ordinal 猜配，缺譯回 EN 原文。核對且適用後改 shared_jp，完整閘門見翻譯契約 §7.1。
+卡面 region 決定卡圖/原文；UI 語言決定翻譯列。指定 printing 不被語言切換偷偷換圖。官方 counterpart 只用已人工確認 card/face 且完成語義核對、無相關 divergence 的版本；否則用該原文的 project/machine 譯文或原文回退。官英到齊且核對通過才自動優先，機翻歷史由當時釘住的 F1 輸入／譯本決定查核與重算，不保證 CDN 歷史快照可下載；繁中跟 JP；EN 身分已確認、來源完整且無相關 divergence 時可先輸出 shared_jp_unchecked；日英段落數不同的受影響 section／effect 欄不提前共用，不按 ordinal 猜配，缺譯回 EN 原文。核對且適用後改 shared_jp，完整閘門見翻譯契約 §7.1。
 
 | UI      | JP 卡面                                           | EN 卡面                             |
 | ------- | ------------------------------------------------- | ----------------------------------- |
@@ -274,7 +310,7 @@ art.regions 由實際 `printing_face→printing.region` 唯一推導，`[en]` �
 
 Spelling 與 RulingHint 的參數宣告、值域及拼法驗證依 [傳輸契約 §3.2](snapshot-transport.md#32-公開參數宣告)。`{Q}` 先登錄 literal、原樣文字顯示與複製，語意未查明前不賦予機制/引擎含義。文字 roundtrip 不以語意猜測為前提。
 
-withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，variants 為空；UI 顯示撤下原因與來源 hostname/連結，不顯示未出貨的確認日期。舊快照不可變，已下載舊副本不保證立即移除；實際 CDN blob 移除另行處理。`route_override` 僅作用於 official namespace，provisional 路由禁止覆寫。
+withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，variants 為空；UI 顯示撤下原因與來源 hostname/連結，不顯示未出貨的確認日期。舊快照不可變，已下載舊副本不保證立即移除；current 提交後按 §4.1 清理不再使用的卡圖 key；不因 previous metadata 引用而保留舊 WebP。`route_override` 僅作用於 official namespace，provisional 路由禁止覆寫。
 
 **使用者 2026-10-01 核可（身分修復投影）**：identity_state=retired 的墓碑 card 與原 faces
 只供 identity_change／歷史引用閉包，不進一般卡表、搜尋、卡包或插畫／繪師瀏覽；support 仍有 required
@@ -282,7 +318,7 @@ withdrawn 圖片在新影像清單中保留 `id/source_url/withdrawal_reason`，
 僅被排除 art 引用的 artist 不出貨；仍被現行 art 引用的 artist 保留。
 公開 baseline 與其他引用依白名單留 null／省去相應列，不能指向被排除 art。
 判定 uses 僅看此次地區投影的現行 printing_face，不把建置歷史或墓碑當現行用途。
-同圖修復後的新 art 可展示，舊 art 留建置歷史與舊版快照；舊快照的公開閉包永不回寫。
+同圖修復後的新 art 可展示，舊 art 留建置歷史；保留窗口內舊快照 JSON 不回寫，輪替後可回收，不保證舊圖片閉包。
 
 ### 卡片頁補充資料的離線投影
 
@@ -345,4 +381,4 @@ digital_face／digital_text 留建置端，沒有資產採納就不出 digital a
 | 同名連結被拿來授官方譯名、概念、圖或語音，或空 coverage 被說成無對應 | 不授權；各入口仍驗自己的採納／來源條件，未知如實呈現 |
 
 上述為待實作契約，不表示前端已能讀取或已發布。正式容量與變動報告依各自所選版本量測，
-沿用 1.1 固定配置與既有預算；超出既有上限須交維護者決定，不自動改 N／格式。舊快照永不回寫。
+沿用 1.1 固定配置與既有預算；超出既有上限須交維護者決定，不自動改 N／格式。保留窗口內舊快照不回寫，輪替後依 §4.1 回收。
