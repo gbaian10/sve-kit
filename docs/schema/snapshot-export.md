@@ -29,8 +29,12 @@ bucket 數只讀取目前候選 Schema 的 `bucket_count.const`，不接受呼�
 現行加 pending 暫顯的 `display_ref` 決定 revision 的 bootstrap/detail；其餘完整列
 只進 history。text 與 translation 按名字、可用名字翻譯及啟動欄位的文字引用閉包分列。
 
-裝檔保持同一 owner/bucket/partition 的完整 fragments 在同一檔案，避免讓可重用的
-永久 ID 與 types 閉包跨檔重複。檔內不同集合仍各有固定 fragment 身分，不合併邏輯列。
+1.0.0 裝檔保持同一 owner/bucket/partition 的完整 fragments 在同一檔案。
+1.1.0 使用 [傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 的 N=64、
+image 實體鍵與固定相鄰 bucket bands；BP01／CP04 是配置明列的 bootstrap 例外。
+同 role／partition／owner 的 band 合檔，檔內不同集合／bucket 仍各有固定 fragment
+身分，不合併邏輯列，不按資料大小動態換 width 或跨 owner 填裝。兩版本的欄序、
+PK／join 不變；1.1.0 的同名兩表完整移至 detail，其他啟動欄位保留。
 每片 raw 512 KiB 的預檢由量測 API 明示結果；超過上限仍可作容量診斷的候選產物，
 不能宣稱正式通過、任選 bucket 數、重配 owner 或丟棄資料。base 檔案 bytes/hash
 變動時，相關詳情片必須以新 base hash 重建，即使 row_index 本身不變。
@@ -51,8 +55,20 @@ printing 與 display revision 的詳情片一對一提供每個 base row，保�
 
 `export.measure.measure` 回傳數字：全文與啟動包 raw/br/gzip、逐片 owner/bucket/列數/
 大小、超限片與各容量閘門。它把快照清單和 config 計入，排除影像、空 DSL 附件及
-作為替代下載的 `text_all` 重複計算。啟動包分別列 br/gzip 的 1 MiB 檢查；全文遵守
-raw 40 MiB、br 8 MiB、gzip 10 MiB。任何失敗均不能宣稱正式容量驗收通過。
+作為替代下載的 `text_all` 重複計算。全文仍遵守 raw 40 MiB、br 8 MiB、gzip 10 MiB，
+每個資料 File 的完整 raw≤512 KiB；失敗不能宣稱正式容量驗收通過。
+
+啟動改報 `startup_by_region.jp`／`.en`：完整新 manifest＋config＋該版本首屏必載 File
+及依賴，按 key 去重；混區／共用 File 按實際整檔 bytes 計入各版本。初版若仍載全部
+bootstrap，兩區數字相同，須寫明負擔，不按語言比例分攤。Brotli 約 1 MiB 是盡量的目標，
+2 MiB 可接受；超過 2 MiB 停下交維護者決定該配置，非 CI gate。raw／gzip 另報，不再以
+`bootstrap_br_1_mib`／`bootstrap_gzip_1_mib` 當正式發布閘門；缺 br 不算通過目標。
+
+逐檔 owner／bucket／partition 報所有 fragments 的集合，不只取第一個。
+另報全部 images metadata 的檔數／raw／br／gzip（不加進完整文字）、冷／暖頁
+`page_image_cost`、P50／P95／max、LRU pin／命中／淘汰與快取 footprint；metadata 與
+圖片 blob 分列，當頁小型 row 集合不能冒充實際下載量。首屏後背景全量 metadata 的
+成本仍算首次 session／離線下載；實際阻擋首屏者加回啟動量。
 
 `export.measure.update` 比較不可變 payload bytes，列出變更檔鍵與替換下載量（含新
 快照清單）；base hash 變動即使 row_index 不變也會重建詳情片。選用 `text_all` 更新

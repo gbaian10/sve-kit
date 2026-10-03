@@ -183,9 +183,9 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得有額外鍵，format_version 與所屬 manifest 相同，entries 是陣列、不可 null。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
 
-format_version=`1.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
+format_version=`1.0.0` 與 `1.1.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
-此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 `{"format_version":"1.0.0","entries":[]}`；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
+此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（1.0.0 例為 `{"format_version":"1.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
 
 啟用正式 DSL 1.0 時須由新的 format 配置至少升 minor，明列支援 DSL 版本到 `dsl/` Schema 資源的映射、所需 capability 與最低 reader 版本，並依 §1.1 協商；reader 使用釘住的權威資源驗 ast，且拒絕未展開的作者巨集。未知 DSL 版本仍拒絕整包，不改寫既有 `1.0.0` 的空集合。
 
@@ -216,7 +216,7 @@ printing/bootstrap.faces 使用 PrintingFaceBootstrap，detail.faces 使用 Prin
 
 row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。detail 按 row_index 排序，每個 base row 必須且只能有一列 detail，包含文字未知／空陣列的卡，不能藉缺列改變 unknown 語意。printing detail 每列須恰有與 bootstrap 相同的 faces 集合，從 base 的 face_id 連回 face.ordinal 來定位。join 以 base 還原 id／face_id，不輸出 row_index／face_ordinal；translations 按 `(field,ordinal,target_lang)` 合併並拒絕同鍵重複，合併後依該鍵排序（null ordinal 在數字前）。
 
-`current_ref` 只是從所有 face.current.revision_id 推導的去重集合；`display_ref` 依 snapshot-format §2.3 為 current_ref 加 pending wording.display 非 null revision ID 的聯集，不加入其餘 candidates。兩者都不是 manifest 欄位、檔案或第 41 個集合。display_ref 內只用 bootstrap/detail，每個 pending face-region 最多一筆暫顯的輕量欄位、名稱與可用名稱翻譯閉包進 bootstrap；集合外（含其餘候選）用 history 完整列，role=text、base=null，按需載入。history 不表示年代，其餘候選引用不形成 bootstrap 對 history 的強制下載依賴。候選與現行／暫顯共用 revision 時只沿用其唯一儲存；同一 revision 不可同時兩邊出現。current 或 display 改變時重算分割，永久 ID 不變；所有分割 join 後必須恰等於公開邏輯投影，無遺失、無重複欄、無額外列。#145 須量測 manifest、config 與全部 bootstrap（含暫顯輕量投影、名稱／可用名稱翻譯閉包及稀疏 wording 引用）合計壓縮後 ≤1 MiB，另列其餘按需候選片容量；未載候選的索引與搜尋進度依 snapshot-format §2.3 標示。
+`current_ref` 只是從所有 face.current.revision_id 推導的去重集合；`display_ref` 依 snapshot-format §2.3 為 current_ref 加 pending wording.display 非 null revision ID 的聯集，不加入其餘 candidates。兩者都不是 manifest 欄位、檔案或第 41 個集合。display_ref 內只用 bootstrap/detail，每個 pending face-region 最多一筆暫顯的輕量欄位、名稱與可用名稱翻譯閉包進 bootstrap；集合外（含其餘候選）用 history 完整列，role=text、base=null，按需載入。history 不表示年代，其餘候選引用不形成 bootstrap 對 history 的強制下載依賴。候選與現行／暫顯共用 revision 時只沿用其唯一儲存；同一 revision 不可同時兩邊出現。current 或 display 改變時重算分割，永久 ID 不變；所有分割 join 後必須恰等於公開邏輯投影，無遺失、無重複欄、無額外列。須量測日版／英版各自的 manifest、config 與首屏實際必載 bootstrap（含暫顯輕量投影、名稱／可用名稱翻譯閉包及稀疏 wording 引用），共用／混區檔整檔計入；Brotli 約 1 MiB 為目標、2 MiB 可接受，更大停下交維護者決定，詳 [size-budget.md](size-budget.md)。另列其餘按需候選片容量；未載候選的索引與搜尋進度依 snapshot-format §2.3 標示。
 
 例如 base 有依 ID 排序的兩列 revision，detail 的 `[1,...]` 只可指第二列。缺 base hash、hash 指舊片、index=2、重複 index=1、漏 index=0，或 printing 同一 face_ordinal 兩次，都必須拒收，不能 fallback 到最新 bootstrap。
 
@@ -226,7 +226,7 @@ row_index 為從 0 起的 UInt，指 base fragment 已按 PK 排序的 rows。de
 
 完整文字包 payload 是 `{format_version,members:[{key,sha256,payload}]}`，按 key 排序。每個 payload 就是該 File 的 JSON 值（config 亦然），重新 canonical 序列化後 bytes/hash 須精確等於原 File；外層 Blob.sha256 驗整個聯集容器。members 與 contains 一對一，不能將 fragments 合併成全欄 rows、重新分配 row_index 或另放重複 config。reader 可從聯集還原與個別下載相同的驗證檔案，再走同一 join。
 
-text_all 是替代表示，不列入 files，不在容量合計重算。文字離線備妥要求整個 contains（未提供 text_all 時按相同規則從 files 推導）及其依賴均驗過；只完成 bootstrap 不算。容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；啟動預算包含 manifest、config 與全部 bootstrap。
+text_all 是替代表示，不列入 files，不在容量合計重算。文字離線備妥要求整個 contains（未提供 text_all 時按相同規則從 files 推導）及其依賴均驗過；只完成 bootstrap 不算。容量另計 manifest、config、changes 及其 QA／errata 摘要，不因 metadata 移出文字容器而免計；啟動量依所選日版／英版的實際必載閉包各自以 Brotli 計算；若 reader 仍載全部 bootstrap，兩區均完整計入，raw／gzip 另報，不用日英合計作啟動門檻。
 
 ### 4.3 檔案描述與容器對照例
 
@@ -299,13 +299,45 @@ text_all.contains 使用同一 key/sha256，其 members 的 payload 是上述整
 
 card、face、face_revision、card_engine_support、mechanic_projection、card_mechanic_coverage、card_related、digital_link、digital_link_coverage、card_voice 跟所屬 card.home_set_id；card_related 用 from_card_id。printing、printing_product、printing_image 跟永久 printing.home_set_id；art、digital_art_link 跟 art.card_id 的 home_set。其餘集合用 global owner；從全球共用的 image_asset/image_variant 到 text_unit、translation、QA、CR 都不跟最近引用者搬家。owner 只用建置資料推導，不因此將 printing.home_set_id 加入公開邏輯欄位。
 
-bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引用的 canonical-json-v1 取得 bytes。card 系列的鍵為 `[card_id]`，printing 系列為 `[printing_id]`，art 系列為 `[art_id]`；其他集合使用依公開 PK 欄序排列的完整主鍵值陣列，單欄 PK 也保留陣列外層。對這組 bytes 算 SHA-256，全 256 bit 視為無號 big-endian 整數，對 bucket_count 取餘數。所有同主實體欄位分割／所有 revision 共用此鍵；ID 保持字串型別，hash 不截斷。bucket 範圍 `[0,bucket_count)`，空 bucket 不必出檔。owner 分組與 bucket 一起定位，不由檔案下載順序決定。
+bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引用的 canonical-json-v1 取得 bytes。card 系列的鍵為 `[card_id]`，printing 系列為 `[printing_id]`，art 系列為 `[art_id]`；format 1.0.0 的其他集合使用依公開 PK 欄序排列的完整主鍵值陣列，單欄 PK 也保留陣列外層。format 1.1.0 只有 image_variant 改用 `[image_id]`，與 image_asset 的 `[id]` 共用實體 bucket；其邏輯 PK 與排序不變。對這組 bytes 算 SHA-256，全 256 bit 視為無號 big-endian 整數，對 bucket_count 取餘數。所有同主實體欄位分割／所有 revision 共用此鍵；ID 保持字串型別，hash 不截斷。bucket 範圍 `[0,bucket_count)`，空 bucket 不必出檔。owner 分組與 bucket 一起定位，不由檔案下載順序決定。
 
 可核算向量：card ID `c:example` 的鍵是 `["c:example"]`；canonical bytes 長度 13，hex 為 `5b22633a6578616d706c65225d`，SHA-256 為 `6ff93079f7688d35b704b55a2eea460f7d087079d15d238d8980a5d4b0eaea9f`。`bucket_count=4` 時餘數為 **3**（末 byte `0x9f` 對 4 取餘數亦為 3）。producer／reader 的共用 golden 須固定此向量，確保字串鍵的引號與陣列括號都參與 hash。
 
-正式配置凍結前，用候選 N（正整數，依次 1、2、4、8…）量實際 JP 資料，再量 EN 與三語閉包；依 [size-budget.md](size-budget.md) 驗總量、最大分片、bootstrap 大小。選擇通過單片預檢的最小 N，若 bootstrap／總量超標，回到投影與裝檔調整，不能只增加 N 冒稱通過。量測須含 row_index 依賴造成的重建片數與一次增量更新大小。
+正式配置凍結前，用候選 N（正整數，依次 1、2、4、8…）量實際 JP 資料，再量 EN 與三語閉包；依 [size-budget.md](size-budget.md) 驗總量、最大分片、bootstrap 大小。選擇通過單片預檢的最小 N，若完整文字超標，回到投影與裝檔調整；啟動量依各版本 Brotli 目標與維護者決定停點處理，不能只增加 N 冒稱通過。量測須含 row_index 依賴造成的重建片數與一次增量更新大小。
 
 每一候選配置也須有明示的 format 版本，且 Schema／golden／reader 支援表釘住對應 N；manifest 不得自選同版本的另一個 N。正式發布前以雙區實測（未收錄區域則如實列明）凍結配置；增加資料後若需改 N，升 format minor 並同步契約與 reader，舊快照仍照舊配置可讀。此規則不預先宣稱某個未量測數目足以承載全庫。
+
+### 5.1 format 1.1.0 固定配置
+
+此 minor 保持 1.0.0 的公開 tuple 欄序、型別、nullable、永久 ID、owner、PK 與 join 語意，新增 image 實體分片及同名表整表按需。1.0.0／N=1 仍依舊配置解讀；1.1.0 釘 N=64、min_reader_version=1.1.0，required_capabilities 恰為排序的 `column-partition-v1`、`fragment-container-v1`、`image-entity-buckets-v1`、`rules-name-on-demand-v1`。producer／reader 須明示支援這套配置，不只放寬 bucket 範圍；未支援者保留最近相容快照。Schema 與共用 golden 隨 producer／reader 同步，此文件不表示現有機器資源已支援 1.1.0。
+
+image_asset 使用 `[id]`，image_variant 使用 `[image_id]`，兩者仍是 global owner、detail partition，同 image 的所有 variant 同 bucket。printing_image 沿永久 printing.home_set_id 與 `[printing_id]`；不依卡號或 card.home_set_id 猜歸屬。rules_name／face_rules_name 的完整列唯一存於 global detail，其他集合仍用 §5 原本的主實體／完整 PK 鍵與欄位分割。
+
+實際裝檔按 `(role,partition,owner.kind,owner.id,band)`，`band = bucket // width`。同一固定群組的非空 fragments 合為一個 File，不跨 owner／partition 填裝，不按每版資料大小重新 greedy packing。File key 為 `<role>/<partition>/<owner.kind>/<encoded-owner-or-global>/band/<band>`，owner ID 按 UTF-8 percent encode（僅保留 RFC 3986 unreserved 字元），global 使用字面 `global`；key 不等於下載 path。下列 widths 屬格式配置，不是呼叫端參數：
+
+| role／partition／owner | width |
+| --- | ---: |
+| images／detail／global | 1 |
+| images／detail／home_set | 64 |
+| bootstrap／bootstrap／global | 8 |
+| bootstrap／bootstrap／home_set | 64；BP01、CP04 固定為 32 |
+| text／detail／global | 2 |
+| text／detail／home_set | 32 |
+| text／history／global 或 home_set | 32 |
+
+config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 bucket 可不出 fragment／檔案；相同 fragment 身分仍全庫唯一。每個資料 File 的 canonical raw（含 types 閉包與所有 fragments）≤512 KiB；manifest 與 text_all 另計。新增內容超標時停止驗收，另提至少 minor 的固定配置修訂，不能在同版自動加例外、搬 owner、縮 width 或丟列。BP01／CP04 是釘住的永久 family ID，不是從卡號前綴作判斷。
+
+先排定每個邏輯 fragment 的 PK 與 rows，裝 bootstrap 並取得實際 File hash，再重建 printing／display revision 的 row_index、base FileRef 與精確 dependencies；一個 detail File 可以依賴多個 bootstrap File，但每個 base 仍精確指相同 table／owner／bucket。types 只收必要且完整的引用閉包。完整文字包的 contains／members 仍是 config、bootstrap、text 的原 File 聯集，不產生另一份全欄卡表。單張 image metadata 更新只改其 global bucket 與 manifest；若 binding 未變，其他 image bucket 不因 hash 排序或插入重排。
+
+### 5.2 影像 metadata 的背景預取與逐頁解析
+
+1.1 reader 在首屏文字／名稱／facet 就緒後背景預取全部 role=images metadata，圖片 blob 只按可見面下載。這是延後完整 metadata 成本，不承諾 global 雜湊按頁省流量；必列完整 session／離線的 raw／br／gzip、檔數與 cache footprint。任何 metadata 若實際阻擋首屏，均加回 startup_by_region。saveData 啟用時延後背景預取、優先只補當頁，且不宣稱 metadata 已完整離線。
+
+先驗 File bytes／hash，再按 manifest hash 與內容 hash 隔離保存 CacheStorage bytes；按頁解析仍驗 canonical／Schema／語意，不把已驗 bytes 當已解析資料。當頁先取 printing_image，再依 image_id 定位 global asset／variant。同 File 的多 locator 去重，當頁優先於背景，整體最多 4 個 in-flight。切快照取消舊工作，舊回應不寫入新狀態；失敗／重試與尚未完整的進度明示，不標離線備妥。
+
+解析片的調度上限為 12 MiB raw 對應量與 64 檔，當頁 pin 到畫面移除；解析時只留下當頁所需 image 列，立即丟掉其他列與整片解碼物件，不建立全庫資產／variant Map。上一頁解除 pin 後即釋放不再使用的 image 列；列快取也須有界，連同 view／Map／暫存與 pinned 工作集量 JS heap；raw 調度量不能代替 48／80 MiB 手機驗收。已驗 bytes 可留在持久快取，換頁後重解析不需外部重抓；CacheStorage 不可用／quota 失敗／被清除時明示退化及實際成本。
+
+冷頁成本以前置啟動包已驗證並快取、尚無 images metadata 的狀態計算，config 依賴已在啟動量計入。每次配置定版須用至多 24 張可見面圖的頁面量冷頁 P50／P95／max：同 printing owner ≤25 個 metadata File、raw≤9 MiB、br≤2 MiB；混 owner ≤48 檔、raw≤12 MiB、br≤2.5 MiB。雙面若同時展示兩圖就算兩張圖，超過 24 圖的頁面另外量當頁 pin，不沿用此上界。同頁重繪、P1→P2→P1 及解析 LRU 淘汰後回頁，在已驗 byte cache 未被清除時，metadata 外部請求與傳輸 bytes 為 0，另報 cache 讀取／重解析成本。假 fetch／CacheStorage 接線與真實 heap 仍須獨立測，不用數值模擬冒稱瀏覽器驗收。
 
 ## 6. 覆蓋與 QA／errata 摘要
 
