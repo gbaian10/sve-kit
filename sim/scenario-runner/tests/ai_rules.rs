@@ -129,10 +129,10 @@ impl Rules {
                 let (_, controller) = self.pending.remove(at);
                 let deck = self.zone(&controller, "deck").clone();
                 let options = if source.starts_with('a') {
-                    // The first pending ability selects one card from the top eight.
+                    // A CUTTHROAT source (id prefix a) selects one card from the top eight.
                     deck.iter().take(8).map(|c| json!([c.id])).collect()
                 } else {
-                    // Matching-token selection also counts the discarded cards. (Q816)
+                    // MONTEI searches the deck for SHIKIGAMI or chooses to find none (Q816).
                     let mut o: Vec<Value> = deck
                         .iter()
                         .filter(|c| c.card == SHIKIGAMI)
@@ -174,7 +174,7 @@ impl Rules {
             self.point = Some(("P1".to_owned(), "check-timing".to_owned()));
             return Ok("resolved");
         }
-        // Apply damage from the committed distribution.
+        // Damage resolves simultaneously; check destruction only after applying the whole distribution.
         for (target, amount) in d["distribute"]["1"].as_object().into_iter().flatten() {
             let field = self.zone("P2", "field");
             let hit = field.iter_mut().find(|c| &c.id == target).unwrap();

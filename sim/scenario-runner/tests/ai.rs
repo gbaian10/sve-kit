@@ -218,8 +218,8 @@ fn report(edges: u64) -> AiReport {
     }
 }
 
-// The quick response must come from the sampled hand.
-// Other samples cannot borrow a response from sample 0.
+// Sample 0 holds SNIPE (Quick) and answers the attack.
+// Sample 1 holds BP01-173 (not Quick) and ends the turn.
 fn good_log() -> Vec<Value> {
     let mut root0 = edge(
         1,
