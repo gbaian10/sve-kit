@@ -234,20 +234,18 @@ class _SelectedTranslations:
             string(translation["target_lang"]), string(details["text"])
         )
         bindings = array(owner["translations"])
-        if basis != "own_source":
-            bindings[:] = [
-                raw
-                for raw in bindings
-                if (
-                    object_value(raw)["basis"] != "own_source"
-                    or (
-                        object_value(raw)["field"],
-                        object_value(raw)["ordinal"],
-                        object_value(raw)["target_lang"],
-                    )
-                    != (use["field"], use["ordinal"], translation["target_lang"])
+        bindings[:] = [
+            raw
+            for raw in bindings
+            if (
+                (
+                    object_value(raw)["field"],
+                    object_value(raw)["ordinal"],
+                    object_value(raw)["target_lang"],
                 )
-            ]
+                != (use["field"], use["ordinal"], translation["target_lang"])
+            )
+        ]
         bindings.append(
             {
                 "field": use["field"],
@@ -268,7 +266,7 @@ class _SelectedTranslations:
                 and row["target_lang"] == binding.target_lang
             )
         ]
-        if binding.basis == "official_counterpart":
+        if binding.basis in {"official_counterpart", "own_source"}:
             if binding.translation_id is None:
                 raise ValueError(
                     "Official counterpart requires a direct translation ID"
@@ -285,7 +283,7 @@ class _SelectedTranslations:
             self.append(owner, use, row, binding.basis)
 
 
-def translations(
+def translations(  # ruff: ignore[complex-structure] -- own-source and cross-region bindings must enforce independent owner gates
     source: Source, view: dict[str, list[Record]], texts: Texts, decisions: Decisions
 ) -> None:
     """Validate source ownership before deriving any cross-region display binding."""
@@ -304,13 +302,22 @@ def translations(
             if selected["context_id"] == use["context_id"]:
                 chosen.append(owner, use, selected, "own_source")
     for binding in decisions.display_bindings:
-        if binding.basis not in {"shared_jp", "official_counterpart"}:
+        if binding.basis not in {"own_source", "shared_jp", "official_counterpart"}:
             raise ValueError("Unknown translation display basis")
         use = uses[binding.source_use_id]
         owner = owners.get(binding.destination)
         if owner is None or _owner(use) not in owners:
             continue
-        if _cross_region_allowed(source, view, use, binding, decisions):
+        if binding.basis == "own_source":
+            if binding.destination != _owner(use):
+                raise ValueError("Direct own-source binding must keep its exact owner")
+            if (
+                source_unit(owner, string(use["field"]), use["ordinal"])
+                != chosen.contexts[string(use["context_id"])]["source_unit_id"]
+            ):
+                raise ValueError("Translation owner/context source mismatch")
+            chosen.bind(owner, use, binding)
+        elif _cross_region_allowed(source, view, use, binding, decisions):
             chosen.bind(owner, use, binding)
     used = {
         string(object_value(raw)["translation_id"])

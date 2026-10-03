@@ -2,7 +2,7 @@
 
 from dataclasses import replace
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Pydantic resolves recipe paths at runtime
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from pydantic import JsonValue, model_validator
 
@@ -42,6 +42,7 @@ from sve_carddb.registry.records import (
 from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Batch, Ownership
 from sve_carddb.snapshot.offline_images import prepare_images
+from sve_carddb.snapshot.offline_names import composer
 from sve_carddb.snapshot.preview.build import Built
 from sve_carddb.snapshot.project import Decisions, Settings, project
 from sve_carddb.snapshot.values import array, canonical, digest
@@ -76,6 +77,7 @@ if TYPE_CHECKING:
     from sve_carddb.products import ProductIdentities
     from sve_carddb.registry.records import CorrectionEvidence
     from sve_carddb.snapshot.project import Projection
+    from sve_carddb.translations.name_replay import NameReplay
 
 
 class RegionalInput(RecordData):
@@ -97,6 +99,7 @@ class Inputs(RecordData):
     feedback_url: Text
     grammar_version: Text
     normalizer_version: Text
+    name_policy: Literal["approved-frozen-v1"] | None = None
 
     @model_validator(mode="after")
     def regional_scope(self) -> Inputs:
@@ -188,13 +191,13 @@ def _translation_source_recipes(
     }
 
 
-def _translation_uses(
+def _name_replay(
     inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
-) -> tuple[SourceUse, ...]:
+) -> NameReplay | None:
     """Replay complete glossary history independently of the database producer."""
     translation = inputs.translation_inputs()
     if translation is None:
-        return ()
+        return None
     snapshot = translation.load()
     sources = TranslationSources(stores, inputs.repository, build)
     originals: dict[str, str] = {}
@@ -224,7 +227,15 @@ def _translation_uses(
                 relation.target_span if isinstance(relation, EffectTerm) else None,
             )
     replay, _ = replay_names(snapshot, originals, translation, sources)
-    return replay.uses
+    return replay
+
+
+def _translation_uses(
+    inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
+) -> tuple[SourceUse, ...]:
+    """Keep the existing independent closure without requiring name application."""
+    replay = _name_replay(inputs, build, stores)
+    return () if replay is None else replay.uses
 
 
 def _derive_adoptions(
@@ -298,6 +309,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 raise ValueError(
                     "Offline bundle must be disjoint from immutable inputs"
                 )
+    names = composer(inputs)
     mounted = prepare_images(inputs, images, image_root)
     if (
         mounted is not None
@@ -395,12 +407,22 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
+    if names is not None:
+        dependencies.update(names.dependencies())
+        configuration |= names.configuration(inputs)
     if mounted is not None:
         dependencies.update(mounted.crops.dependencies())
         configuration["image_crop_overrides"] = mounted.crops.configuration()
         configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
-    schema = compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence"))
+    schema = compile_build(
+        (
+            *MINIMUM_CAPABILITIES,
+            "en",
+            "translation_evidence",
+            *(("translation_names",) if names is not None else ()),
+        )
+    )
     derived = _derive_adoptions(adoptions, schema, context, stores)
     vocabulary = derived.vocabulary
     configuration |= text_configuration(texts, vocabulary, ())
@@ -410,6 +432,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
         *_translation_uses(adoptions, context, stores),
     )
     image_report: dict[str, JsonValue] | None = None
+    name_result = None
     with create_database(schema) as db:
         with db.transaction():
             parents = populate_text_preview(
@@ -424,6 +447,11 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 stores=stores,
                 official=official,
             )
+            link_result = (
+                None
+                if names is None
+                else names.populate_links(db, context=context, stores=stores)
+            )
             adopted = populate_adoptions(db, adoptions, build=context, stores=stores)
             extras = plan_card_extras(db, pages, errata=errata)
             # The parent record is private staging; only the complete context is emitted.
@@ -436,14 +464,46 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 },
             )
             added = populate_card_extras(db, extras, build=context)
+            name_expected: tuple[SourceUse, ...] = ()
+            if names is not None:
+                replay = _name_replay(adoptions, context, stores)
+                assert replay is not None
+                if link_result is not None:
+                    link_result = replace(
+                        link_result,
+                        record=input_record(context, link_result.record.uses),
+                    )
+                name_expected = names.expected(
+                    db,
+                    texts,
+                    context=context,
+                    stores=stores,
+                    replay=replay,
+                    links=link_result,
+                )
+                name_result = names.populate(
+                    db,
+                    texts,
+                    context=context,
+                    stores=stores,
+                    replay=replay,
+                    links=link_result,
+                )
+            link_uses = () if link_result is None else link_result.record.uses
+            name_uses = () if name_result is None else name_result.record.uses
             expected = uses_sorted(
                 (
                     *text_preview_uses(catalog, texts, stores, official=official),
                     *extras.source_uses(),
                     *adoption_uses,
+                    *link_uses,
+                    *name_expected,
                 )
             )
-            record = input_record(context, (*parents.uses, *added.uses, *adopted.uses))
+            record = input_record(
+                context,
+                (*parents.uses, *added.uses, *adopted.uses, *link_uses, *name_uses),
+            )
             record.verify(db, context, expected)
             if mounted is not None:
                 record, image_report = mounted.populate(
@@ -466,6 +526,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             Decisions(),
             related_regions=applicable_reskin_regions(db, texts, vocabulary=vocabulary),
             supplemental_restrictions=restrictions,
+            display_bindings=() if name_result is None else name_result.bindings,
+            private_digital=names is not None,
         ).with_text_views(wording_views(db, texts), printing_observed_texts(db, texts))
         projection = project(
             db,
@@ -542,6 +604,8 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             "Web handoff and acceptance",
         ],
     }
+    if name_result is not None:
+        report["name_application"] = name_result.report
     if image_report is not None:
         report["image_assets"] = image_report
         report["incomplete_formal_gates"] = [
@@ -564,13 +628,40 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 stores=stores,
                 official=official,
             )
+            replay_links = (
+                None
+                if names is None
+                else names.populate_links(target, context=context, stores=stores)
+            )
             adoption_record = populate_adoptions(
                 target, adoptions, build=context, stores=stores
             )
             extras_record = populate_card_extras(target, extras, build=context)
+            replay_names_result = None
+            if names is not None:
+                replay = _name_replay(adoptions, context, stores)
+                assert replay is not None
+                replay_names_result = names.populate(
+                    target,
+                    texts,
+                    context=context,
+                    stores=stores,
+                    replay=replay,
+                    links=replay_links,
+                )
             complete = input_record(
                 context,
-                (*parent_record.uses, *extras_record.uses, *adoption_record.uses),
+                (
+                    *parent_record.uses,
+                    *extras_record.uses,
+                    *adoption_record.uses,
+                    *(() if replay_links is None else replay_links.record.uses),
+                    *(
+                        ()
+                        if replay_names_result is None
+                        else replay_names_result.record.uses
+                    ),
+                ),
             )
             if mounted is not None:
                 complete, _ = mounted.populate(

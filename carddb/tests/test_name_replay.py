@@ -17,7 +17,9 @@ from sve_carddb.translations.loader import load_glossary
 from sve_carddb.translations.models import AssignmentData, ConceptData
 from sve_carddb.translations.name_build import (
     NameOwner,
+    bind_name_use,
     default_name_context,
+    name_context,
     name_source,
 )
 from sve_carddb.translations.name_replay import replay_names
@@ -132,6 +134,59 @@ def test_full_override_replay_and_atomic_glossary_import(
             "context_assignment",
         }
         assert not db.rows("translation_use")
+
+
+@pytest.mark.parametrize("fault", [None, "variant", "decision", "owner", "replay"])
+def test_nondefault_use_requires_its_actual_replayed_assignment(
+    case: Case, database: DatabaseTemplate, fault: str | None
+) -> None:
+    replay, inputs, build = case.replay(shards(case.concept(), case.assignment()))
+    with database.copy() as db:
+        case.frozen.publish(db)
+        with db.transaction():
+            db.update(
+                "face_revision", {"id": "link-revision"}, {"id": case.revision_id}
+            )
+        import_glossary(
+            db, inputs, build=build, stores={"test-store": case.frozen.store}
+        )
+        owner = NameOwner("face_revision", case.revision_id)
+        resolved = replay.resolve(db, owner)
+        assert resolved is not None
+        source = name_source(db, owner)
+        assert source is not None
+        with db.transaction():
+            context = name_context(
+                db,
+                source,
+                variant="wrong" if fault == "variant" else resolved.variant,
+                decision_id="decision"
+                if fault == "decision"
+                else resolved.decision_ids[-1],
+            )
+            if fault == "owner":
+                row = db.select(
+                    "face_revision",
+                    db.columns("face_revision"),
+                    where={"id": case.revision_id},
+                )[0]
+                db.insert(
+                    "face_revision",
+                    dict(row.values) | {"id": "third-owner", "revision": 2},
+                )
+                owner = NameOwner("face_revision", "third-owner")
+            if fault is not None:
+                with pytest.raises(
+                    ValueError,
+                    match=r"^Name variants require complete assignment replay support$",
+                ):
+                    bind_name_use(
+                        db, owner, context, replay=None if fault == "replay" else replay
+                    )
+            else:
+                use = bind_name_use(db, owner, context, replay=replay)
+                assert db.rows("translation_use")[0].values["id"] == use
+                assert context != default_name_context(db, owner)
 
 
 def test_offline_replays_name_source_closure_independently(

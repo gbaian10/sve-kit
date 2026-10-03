@@ -921,7 +921,7 @@ def test_owner_requires_japanese_name(
             )
             db.update("face_revision", {"id": "link-revision"}, {"name_unit_id": unit})
         with pytest.raises(
-            ValueError, match=r"^Digital-link owner requires exact Japanese name$"
+            ValueError, match=r"^Name build source language differs from owner region$"
         ):
             result.eligible(db, baseline.sources(), "link-revision")
 

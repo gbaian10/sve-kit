@@ -142,9 +142,17 @@ class PolicyFixture:
         )
 
 
-def make_policy_fixture(root: Path) -> PolicyFixture:
+def make_policy_fixture(
+    root: Path, *, translated_name: str = "合成測試名"
+) -> PolicyFixture:
+    def translate(data: dict[str, JsonValue], language: str) -> None:
+        if language == "zh-tw":
+            object_value(array(data["cards"])[0])["card_name"] = translated_name
+
     original = make_fixture(root)
-    digital = catalogue_fixture(original, game="sv1", languages=("ja", "zh-tw"))
+    digital = catalogue_fixture(
+        original, game="sv1", languages=("ja", "zh-tw"), transform=translate
+    )
     copy_policies(root)
     runtime_files = RUNTIME
     for name in runtime_files:

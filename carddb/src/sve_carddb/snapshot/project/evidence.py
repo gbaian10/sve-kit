@@ -36,6 +36,7 @@ class Decisions:
         default_factory=dict
     )
     display_bindings: tuple[DisplayBinding, ...] = ()
+    private_digital: bool = False
     related_regions: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     active_scopes: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     aligned_regions: frozenset[tuple[str, str]] = frozenset()

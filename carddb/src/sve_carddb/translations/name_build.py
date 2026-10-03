@@ -11,6 +11,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
     from sve_carddb.build_db import Database, Value
+    from sve_carddb.translations.name_replay import NameReplay
 
 
 @dataclass(frozen=True)
@@ -120,15 +121,18 @@ def name_source(db: Database, owner: NameOwner) -> NameSource | None:
     )
 
 
-def default_name_context(db: Database, owner: NameOwner) -> str | None:
-    """Default semantics require no new adoption or per-card variant."""
-    source = name_source(db, owner)
-    if source is None:
-        return None
+def name_context(
+    db: Database,
+    source: NameSource,
+    *,
+    variant: str = "default",
+    decision_id: str | None = None,
+) -> str:
+    """Share context-v1 with materialization; owner eligibility never changes its ID."""
     payload: dict[str, JsonValue] = {
         "recipe": "context-v1",
         "source_unit_id": source.unit_id,
-        "semantic_variant": "default",
+        "semantic_variant": variant,
     }
     identifier = "ctx:" + digest(canonical(payload))[7:]
     insert_exact(
@@ -137,15 +141,27 @@ def default_name_context(db: Database, owner: NameOwner) -> str | None:
         {
             "id": identifier,
             "source_unit_id": source.unit_id,
-            "semantic_variant": "default",
-            "decision_id": None,
+            "semantic_variant": variant,
+            "decision_id": decision_id,
         },
         ("id",),
     )
     return identifier
 
 
-def bind_name_use(db: Database, owner: NameOwner, context_id: str) -> str:
+def default_name_context(db: Database, owner: NameOwner) -> str | None:
+    """Default semantics require no new adoption or per-card variant."""
+    source = name_source(db, owner)
+    return None if source is None else name_context(db, source)
+
+
+def bind_name_use(
+    db: Database,
+    owner: NameOwner,
+    context_id: str,
+    *,
+    replay: NameReplay | None = None,
+) -> str:
     """Revalidate the real owner even when another owner already uses the context."""
     source = name_source(db, owner)
     if source is None:
@@ -154,7 +170,14 @@ def bind_name_use(db: Database, owner: NameOwner, context_id: str) -> str:
     if context["source_unit_id"] != source.unit_id:
         raise ValueError("Name use context does not match its owner source")
     if context["semantic_variant"] != "default":
-        raise ValueError("Name variants require complete assignment replay support")
+        resolved = None if replay is None else replay.resolve(db, owner)
+        if (
+            resolved is None
+            or resolved.term_id is None
+            or resolved.variant != context["semantic_variant"]
+            or context["decision_id"] not in resolved.decision_ids
+        ):
+            raise ValueError("Name variants require complete assignment replay support")
     identifier = (
         "use:"
         + digest(

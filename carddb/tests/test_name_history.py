@@ -429,3 +429,69 @@ def test_observation_cache_keeps_the_exact_batch_membership(mixed: Mixed) -> Non
     assert later
     assert {use.source.archive.batch_id for use in before} == {old_batch}
     assert {use.source.archive.batch_id for use in later} == {case.frozen.jp.batch_id}
+
+
+def test_changed_frozen_observation_and_batch_need_new_parsing(case: Case) -> None:
+    from sve_carddb.extract.compare_jp import legacy_projection  # ruff: ignore[import-outside-top-level] -- keep the changed-source fixture local to this cache counterexample
+    from sve_carddb.extract.official_jp import extract_card  # ruff: ignore[import-outside-top-level] -- same fixture boundary
+    from sve_carddb.frozen_sources import FrozenSources  # ruff: ignore[import-outside-top-level] -- same fixture boundary
+    from sve_carddb.manifest import Kind  # ruff: ignore[import-outside-top-level] -- same fixture boundary
+    from sve_carddb.registry.records import Observation  # ruff: ignore[import-outside-top-level] -- same fixture boundary
+    from sve_carddb.registry.review import observation  # ruff: ignore[import-outside-top-level] -- same fixture boundary
+    from sve_carddb.source_archive import ArchiveStore, seal_batch  # ruff: ignore[import-outside-top-level] -- synthetic archive only
+
+    from .test_source_archive import _put, _resource  # ruff: ignore[import-outside-top-level] -- synthetic archive only
+
+    frozen = case.frozen
+    old = FrozenSources(frozen.store, "test-store", frozen.jp.batch_id)
+    source, raw, _ = old.read(
+        frozen.jp.source_version_id, parser_version="translation-jp-v1"
+    )
+    changed = raw.replace(b"Synthetic card", b"Synthetic changed card")
+    assert raw != changed
+    base = frozen.store.parent / "data"
+    store = ArchiveStore(
+        base,
+        base / "manifest/manifest.sqlite",
+        base / "manifest/.lock",
+        frozen.store,
+        "test-store",
+    )
+    # A new cache path preserves the old sealed raw inode and its contents.
+    _put(
+        store, _resource(source.url, "raw/changed-jp.html", changed, Kind.CARD), changed
+    )
+    sealed = seal_batch(store)
+    printing = frozen.printing.model_copy(
+        update={
+            "observation": Observation.model_validate_json(
+                canonical(
+                    observation(
+                        legacy_projection(
+                            extract_card(changed, number=frozen.printing.card_no)
+                        ),
+                        "jp",
+                    )
+                )
+            )
+        }
+    )
+    evidence = IdentityEvidence(frozen.sources(), frozen.authored)
+    previous = evidence._observations(
+        frozen.printing, (("test-store", frozen.jp.batch_id),)
+    )
+    first = evidence.costs()["parsed_versions"]
+    current = evidence._observations(printing, (("test-store", sealed.batch_id),))
+    assert current != previous
+    assert evidence.costs()["parsed_versions"] > first
+    assert evidence.costs()["observation_keys"] == 2
+    parsed = evidence.costs()["parsed_versions"]
+    assert (
+        evidence._observations(printing, (("test-store", sealed.batch_id),)) == current
+    )
+    assert evidence.costs()["parsed_versions"] == parsed
+    assert evidence.costs()["observation_cache_hits"] == 1
+    assert (
+        old.read(frozen.jp.source_version_id, parser_version="translation-jp-v1")[1]
+        == raw
+    )

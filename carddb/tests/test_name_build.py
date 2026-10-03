@@ -460,7 +460,7 @@ def test_direct_nondefault_use_is_rejected(names: DatabaseTemplate) -> None:
         names.copy() as db,
         pytest.raises(
             sqlite3.IntegrityError,
-            match=_assert_error("Cross-table check failed: name_use_default_context"),
+            match=_assert_error("Cross-table check failed: name_use_adopted_variant"),
         ),
         db.transaction(),
     ):
@@ -471,6 +471,51 @@ def test_direct_nondefault_use_is_rejected(names: DatabaseTemplate) -> None:
             {"semantic_variant": "another", "decision_id": "decision"},
         )
         db.insert("translation_use", _use(context))
+
+
+def _adopted_variant_use(db: Database, *, fault: str | None = None) -> None:
+    context = _context(db)
+    db.update(
+        "decision",
+        {"id": "decision"},
+        {
+            "category": "context_assignment",
+            "reviewed_by": "Other reviewer" if fault == "reviewer" else "gbaian10",
+        },
+    )
+    db.update(
+        "decision_source",
+        {"decision_id": "decision", "source_id": "source", "role": "synthetic"},
+        {"role": "synthetic" if fault == "identity" else "name_identity:synthetic"},
+    )
+    db.update(
+        "translation_context",
+        {"id": context},
+        {"semantic_variant": "another", "decision_id": "decision"},
+    )
+    db.insert("translation_use", _use(context))
+
+
+def test_direct_nondefault_use_accepts_adopted_identity(
+    names: DatabaseTemplate,
+) -> None:
+    with names.copy() as db, db.transaction():
+        _adopted_variant_use(db)
+
+
+@pytest.mark.parametrize("fault", ["reviewer", "identity"])
+def test_direct_nondefault_use_requires_maintainer_and_identity_audit(
+    names: DatabaseTemplate, fault: str
+) -> None:
+    with (
+        names.copy() as db,
+        pytest.raises(
+            sqlite3.IntegrityError,
+            match=_assert_error("Cross-table check failed: name_use_adopted_variant"),
+        ),
+        db.transaction(),
+    ):
+        _adopted_variant_use(db, fault=fault)
 
 
 @pytest.mark.parametrize(

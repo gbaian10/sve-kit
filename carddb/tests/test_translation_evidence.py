@@ -290,16 +290,16 @@ def test_explicit_withdrawal_preserves_old_evidence(
     ] == [None]
 
 
-def test_svwb_priority_and_all_faces(digital_template: DatabaseTemplate) -> None:
+def test_sv1_priority_and_all_faces(digital_template: DatabaseTemplate) -> None:
     with digital_template.copy() as db:
         assert select_name(db, card_id="card", face_id="front", lang="zh-Hant") == (
-            "svwb:normal zh-Hant",
-            "official_svwb",
+            "sv1:normal zh-Hant",
+            "official_sv1",
             "decision",
         )
         assert select_name(db, card_id="card", face_id="back", lang="zh-Hant") == (
-            "svwb:evolved zh-Hant",
-            "official_svwb",
+            "sv1:evolved zh-Hant",
+            "official_sv1",
             "decision",
         )
         assert select_name(db, card_id="card", face_id="front", lang="en") is None
@@ -643,7 +643,7 @@ def test_selection_rejects_inconsistent_owner_evidence(
                     {"name_unit_id": "svwb:normal:ja"},
                 )
             elif fault == "ambiguous":
-                db.update("digital_link", {"id": "svwb:evolved"}, {"face_id": "front"})
+                db.update("digital_link", {"id": "sv1:evolved"}, {"face_id": "front"})
             select_name(
                 db,
                 card_id="other" if fault == "owner" else "card",
