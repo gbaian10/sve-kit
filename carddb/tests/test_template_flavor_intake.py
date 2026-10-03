@@ -38,6 +38,9 @@ def test_complete_frozen_flavor_intake_and_shared_paragraphs(
     revision = write(root, copy.deepcopy(case.files))
     result = load_templates(PinnedRepository(root), revision, case.sources)
     assert sorted(n for _, n in result.frequencies) == [1, 2]
+    assert result.pins()["source_report_hashes"] == tuple(
+        tuple(digest(content) for content in report) for report in result.source_reports
+    )
     assert len(result.effective_translations()) == 2
     assert not load_glossary(root / "authored").records()
     assert len(load_glossary(root / "authored").closure) == 3
@@ -410,3 +413,22 @@ def test_loader_validates_final_flavor_text_after_matching_review_hash(
     )
     with pytest.raises(ValueError, match=exact(message)):
         load_templates(PinnedRepository(root), revision, flavor_case.sources)
+
+
+def test_flavor_cache_cannot_borrow_another_identity_configuration(
+    flavor_case: Case,
+) -> None:
+    case = flavor_case
+    sources = TemplateSources(
+        PinnedRepository(case.repository),
+        {"test-store": case.store},
+        main_revision=case.prior,
+        legacy_bytes=b"",
+        flavor=case.sources.flavor,
+    )
+    assert all(m.owner is not None for m in sources.reconstruct(case.pins).entries)
+    assert sources.flavor is not None
+    sources.flavor = sources.flavor.model_copy(update={"identity_basis": None})
+    assert all(
+        m.owner is None and m.pending for m in sources.reconstruct(case.pins).entries
+    )

@@ -123,6 +123,10 @@ class Snapshot:
                 (p, digest(exact), digest(content))
                 for p, exact, content in (*self.shards, *self.inventories)
             ),
+            "source_report_hashes": tuple(
+                tuple(digest(content) for content in report)
+                for report in self.source_reports
+            ),
         }
 
 

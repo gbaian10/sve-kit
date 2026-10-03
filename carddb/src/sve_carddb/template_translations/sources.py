@@ -151,7 +151,15 @@ class TemplateSources:
         if FLAVOR_VERSION in recipes:
             from sve_carddb.template_translations.flavor_sources import reconstruct  # ruff: ignore[import-outside-top-level] -- independent flavor replay avoids changing the frozen effect recipe
 
-            key = canonical([r.model_dump(mode="json") for r in pins])
+            key = canonical(
+                {
+                    "recipes": [r.model_dump(mode="json") for r in pins],
+                    "flavor_inputs": None
+                    if self.flavor is None
+                    else self.flavor.model_dump(mode="json"),
+                    "main_revision": self.main_revision,
+                }
+            )
             if key not in self._cache:
                 self._cache[key] = reconstruct(
                     self.repository,
