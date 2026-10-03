@@ -5,6 +5,7 @@ import { useLocation, useNavigate, useSearchParams } from "react-router"
 import { type CardEntryState, useListEntryState } from "../../app/listEntryState"
 import { useCatalog, useImageIndex } from "../../app/snapshot"
 import { useDebouncedValue } from "../../app/useDebouncedValue"
+import { MetadataStatus } from "../../components/card/MetadataStatus"
 import { CardGrid, type GridCell } from "../../components/results/CardGrid"
 import { SkeletonGrid } from "../../components/results/SkeletonGrid"
 import { ClassQuickBar, type QuickBarClass } from "../../components/search/ClassQuickBar"
@@ -220,6 +221,7 @@ export function CardsPage() {
   return (
     <div className="flex flex-col gap-3 pt-2 pb-6">
       <h1 className="sr-only">{t("pages.cards")}</h1>
+      {catalog !== null && <MetadataStatus client={client} />}
       <div className="relative z-20">
         <SearchBar
           value={input}

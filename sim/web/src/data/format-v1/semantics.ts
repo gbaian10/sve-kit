@@ -316,6 +316,11 @@ export function validateView(view: View, manifest: Row, fragments: readonly Frag
   const cardIds = new Set((view["card"] ?? []).map((row) => stringValue(row["id"])))
   if (supported.size !== cardIds.size || [...cardIds].some((id) => !supported.has(id)))
     fail("support-missing", "every card requires support")
+  validateImageRows(view)
+}
+
+/** Colocated asset/variant and printing-face checks also apply to an on-demand file. */
+export function validateImageRows(view: View): void {
   const images = new Map((view["image_asset"] ?? []).map((row) => [stringValue(row["id"]), row]))
   for (const row of view["image_variant"] ?? []) {
     const asset = images.get(stringValue(row["image_id"]))

@@ -147,6 +147,38 @@ code. The `reader.test.ts` cases cover what the fixture cannot express (missing 
 reformatted bytes). CI runs these whenever `carddb/src/sve_carddb/snapshot/schema/**` or the
 fixture directory changes.
 
+The client negotiates exactly 1.0.0 or 1.1.0 (including capabilities and fixed band
+membership). Both published schemas and the shared handwritten goldens remain authoritative.
+It verifies and decodes in one Worker; an idle worker releases its parsing heap after one
+second. Node fixture scripts and tests use the same decoder without a Worker. Raw tuples
+are released after decoding, rather than kept alongside row objects.
+
+Image metadata uses the manifest's exact fragment locator: permanent printing owner and
+printing bucket first, then the image entity bucket. At most 24 intersecting image slots own
+rows at once; other slots remain text cards until visible. Decoded 1.1 image files are discarded, retaining up to 64 recently used face results.
+Overlapping visible faces keep their images while a debounced viewport change resolves new
+faces. The legacy 1.0 unsharded image file is derived once per loaded snapshot, so scrolling
+does not repeatedly parse its entire payload. Browsing does not need the
+on-demand `rules_name` or `face_rules_name` tables; any future construction consumer must
+load their detail files before claiming a result.
+
+After the catalog is ready, background work downloads **metadata bytes**, not all image
+blobs, only when persistent storage is available. Data saver delays that work. Storage loss
+stops queued background work; without persistent storage only visible faces are fetched.
+When background work completes, its session cost includes every images file.
+The progress surface offers pause/retry and distinguishes download completion from persistent
+cache availability; neither means all images or offline text are ready. Snapshot replacement
+aborts old metadata requests and isolates CacheStorage by manifest hash and file content path.
+After successful adoption, old metadata namespaces are pruned, retaining the active and
+immediately previous manifest only; unrelated application caches are preserved.
+
+Visible work takes priority, with at most four requests including bodies and no more than
+three background requests. Verified persistent bytes are rechecked before decoding; returning
+to an evicted face can reparse without another external request; recently used faces do not
+need re-decoding. CacheStorage failures visibly degrade
+to a 12 MiB / 64-file RAM byte LRU. The page parsing workset is capped at 12 MiB raw for 1.1;
+this is not a heap measurement or a physical-phone acceptance claim. The legacy 1.0 index is reused per snapshot and is exempt from the 1.1 file/workset limits.
+
 ## Development snapshot
 
 `fixtures/snapshot/` is a small synthetic card-data snapshot in the exact layout the CDN will

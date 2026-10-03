@@ -21,6 +21,9 @@ function fakeClient(
     },
     reload: () => Promise.resolve(),
     snapshot: () => null,
+    metadataStatus: () => ({ state: "idle" as const, done: 0, total: 0, persistent: false }),
+    prefetchImages: () => Promise.resolve(),
+    cancelImagePrefetch: () => undefined,
     fragments: () => Promise.reject(new Error("no")),
   }
   return client

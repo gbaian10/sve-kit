@@ -24,11 +24,12 @@ const identity = (ref: FragmentRef): string =>
  * Fragment identity is unique per manifest (transport §4), so `files[].row_counts` is an exact
  * table from (table, owner, bucket, partition) to the one file that holds it.
  */
-export function createLocator(files: Files): Locator {
+export function createLocator(files: Files, onlyTables?: ReadonlySet<string>): Locator {
   const index = new Map<string, string>()
   for (const [key, file] of files) {
     for (const count of file["row_counts"] as JsonValue[]) {
       const entry = objectValue(count)
+      if (onlyTables && !onlyTables.has(stringValue(entry["table"]))) continue
       index.set(
         identity({
           table: stringValue(entry["table"]),

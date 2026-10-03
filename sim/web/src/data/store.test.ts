@@ -5,7 +5,7 @@ import { buildSnapshot } from "../../scripts/fixture/build"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { stringValue } from "./format-v1/json"
-import { imageSource, loadImageIndex } from "./images"
+import { imageSource, loadImagePage } from "./images"
 import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
 import { createTextResolver } from "./text"
@@ -111,7 +111,10 @@ describe("text resolver", () => {
 
 describe("images", () => {
   it("indexes printing faces to content-addressed variants", async () => {
-    const images = await loadImageIndex(client)
+    const images = await loadImagePage(client, [
+      { printingId: "p:bp01-001", faceId: "f:bp01-001" },
+      { printingId: "p:bp01-040", faceId: "f:bp01-040" },
+    ])
     const source = images.cardImage("p:bp01-001", "f:bp01-001")
     expect(source?.width).toBe(459)
     expect(source?.src.startsWith("/cdn/images/sha256/")).toBe(true)

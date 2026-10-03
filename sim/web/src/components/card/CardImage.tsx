@@ -55,7 +55,7 @@ export function CardImage({
 }: CardImageProps) {
   const { t } = useTranslation()
   const { dataSaver } = usePrefs()
-  const [loaded, setLoaded] = useState(false)
+  const [loaded, setLoaded] = useState("")
   const asset = images?.asset(summary.printingId, summary.faceId)
   const source = images?.cardImage(summary.printingId, summary.faceId)
   const availability = asset?.["availability"]
@@ -71,8 +71,13 @@ export function CardImage({
         ? t("card.noImage")
         : publication === "pending" || availability === "unfetched"
           ? t("card.imagePending")
-          : undefined
+          : images?.failed && asset === undefined
+            ? t("card.imageError")
+            : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
+              ? t("card.imageLoading")
+              : undefined
   const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)
+  const isLoaded = source !== undefined && loaded === source.src
   // In identify mode the slot itself carries the name, so the card is announced with or without
   // a visible image (the text card underneath is decorative); the <img> then stays silent.
   const identify = alt === "identify"
@@ -82,12 +87,14 @@ export function CardImage({
         "relative block aspect-[63/88] overflow-hidden rounded-card border border-border bg-surface-2",
         className,
       )}
+      data-image-printing={summary.printingId}
+      data-image-face={summary.faceId}
       role={identify ? "img" : alt === "decorative" ? "presentation" : undefined}
       aria-label={
         identify ? t("card.imageAlt", { name: name.text, cardNo: summary.cardNo }) : undefined
       }
     >
-      {!(showImage && loaded) && (
+      {!(showImage && isLoaded) && (
         <TextCard
           name={name}
           classCode={summary.classCode}
@@ -100,6 +107,7 @@ export function CardImage({
       )}
       {showImage && (
         <img
+          key={source.src}
           src={source.src}
           srcSet={source.srcSet}
           sizes={sizes}
@@ -109,12 +117,12 @@ export function CardImage({
           loading="lazy"
           decoding="async"
           onLoad={() => {
-            setLoaded(true)
+            setLoaded(source.src)
           }}
           className={cn(
             "absolute inset-0 size-full transition-opacity duration-200",
             fit === "cover" ? "object-cover" : "object-contain",
-            loaded ? "opacity-100" : "opacity-0",
+            isLoaded ? "opacity-100" : "opacity-0",
           )}
         />
       )}

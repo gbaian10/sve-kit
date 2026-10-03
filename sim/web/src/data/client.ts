@@ -1,4 +1,5 @@
 import { fetchBytes, type Fetcher, NetworkError } from "./cdn"
+import { createDecoder } from "./format-v1/decoder"
 import { SnapshotError } from "./format-v1/errors"
 import {
   arrayValue,
@@ -8,19 +9,13 @@ import {
   parseStrict,
   stringValue,
 } from "./format-v1/json"
-import {
-  type Files,
-  findBase,
-  type Fragment,
-  isCompatible,
-  joinDetail,
-  readContainer,
-  readPayload,
-  verifyManifest,
-} from "./format-v1/reader"
+import { validatePlacement } from "./format-v1/placement"
+import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v1/reader"
 import { validate } from "./format-v1/schema"
-import { validateConfig, validateFragments } from "./format-v1/semantics"
-import { digest } from "./format-v1/sha256"
+import { validateImageRows } from "./format-v1/semantics"
+import { transferDigest } from "./integrity"
+import { MetadataBytes, type MetadataProgress } from "./metadata"
+import { requestQueue } from "./request-queue"
 
 type LoadPhase = "index" | "manifest" | "bootstrap"
 type ErrorKind = "network" | "incompatible" | "corrupt"
@@ -45,6 +40,7 @@ export type SnapshotStatus =
 
 export interface LoadedSnapshot {
   readonly dataVersion: string
+  readonly manifestHash: string
   readonly manifest: JsonObject
   readonly files: Files
   readonly config: JsonObject
@@ -57,6 +53,7 @@ export interface SnapshotClientOptions {
   /** `index`: the permanent version index (format §4.1); `preview`: a preview root's pointer file. */
   readonly entry?: "index" | "preview"
   readonly detailCacheSize?: number
+  readonly cacheStorage?: CacheStorage
 }
 
 export interface SnapshotClient {
@@ -71,6 +68,9 @@ export interface SnapshotClient {
   readonly snapshot: () => LoadedSnapshot | null
   /** A text, history or images file, decoded and joined onto its bootstrap base; cached LRU. */
   readonly fragments: (fileKey: string) => Promise<readonly Fragment[]>
+  readonly metadataStatus: () => MetadataProgress
+  readonly prefetchImages: () => Promise<void>
+  readonly cancelImagePrefetch: () => void
 }
 
 const INDEX_PATH = "snapshots/versions/index.json"
@@ -95,9 +95,13 @@ export function createSnapshotClient(
   base: string,
   options: SnapshotClientOptions = {},
 ): SnapshotClient {
-  const fetcher: Fetcher = options.fetch ?? ((url, init) => fetch(url, init))
+  const requests = requestQueue(options.fetch ?? ((url, init) => fetch(url, init)))
+  const fetcher = requests.foreground
   const entry = options.entry ?? "index"
-  const cacheSize = options.detailCacheSize ?? 8
+  const decode = createDecoder()
+  const cacheSize = options.detailCacheSize ?? 64
+  let metadata: MetadataBytes | undefined
+  let detailBytes = 0
   const listeners = new Set<() => void>()
   let status: SnapshotStatus = { state: "idle" }
   let loaded: LoadedSnapshot | null = null
@@ -122,7 +126,8 @@ export function createSnapshotClient(
   ): Promise<Uint8Array> => {
     for (let attempt = 0; ; attempt += 1) {
       const data = await fetchBytes(fetcher, url(path))
-      if (digest(data) === sha256 && (bytes === undefined || data.length === bytes)) return data
+      if ((await transferDigest(data)) === sha256 && (bytes === undefined || data.length === bytes))
+        return data
       if (attempt === 1)
         throw new SnapshotError("blob-integrity", `hash mismatch for ${path} after retry`)
     }
@@ -188,7 +193,10 @@ export function createSnapshotClient(
       stringValue(chosen["manifest_path"]),
       stringValue(chosen["manifest_sha256"]),
     )
-    const { manifest, files } = verifyManifest(parseStrict(manifestBytes))
+    const decodedManifest = await decode({ kind: "manifest", bytes: manifestBytes })
+    if (decodedManifest.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
+    const { manifest, files } = decodedManifest
+    const version = stringValue(manifest["format_version"])
     progress("bootstrap")
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
     const bootstrap: Fragment[] = []
@@ -201,19 +209,31 @@ export function createSnapshotClient(
         stringValue(file["sha256"]),
         integerValue(file["bytes"]),
       )
-      const value = objectValue(readPayload(file, data))
-      if (key === configKey) {
-        validate("Config", value, [key])
-        validateConfig(value)
-        config = value
-      } else {
-        bootstrap.push(...readContainer(file, value))
-      }
+      const result = await decode({ kind: "file", file, bytes: data, version })
+      if (key === configKey && result.kind === "config") config = result.value
+      else if (result.kind === "fragments") bootstrap.push(...result.fragments)
+      else throw new SnapshotError("shape", "unexpected startup payload")
     }
     if (!config) throw new SnapshotError("config-programs-count", "config file missing")
-    validateFragments(bootstrap)
+    const faceCards = new Map(
+      bootstrap
+        .filter((fragment) => fragment.table === "face")
+        .flatMap((fragment) =>
+          fragment.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
+        ),
+    )
+    let segment = performance.now()
+    for (const fragment of bootstrap) {
+      validatePlacement([fragment], version, bootstrap, faceCards)
+      // Leave time for input and rendering between bounded validation segments.
+      if (typeof Worker !== "undefined" && performance.now() - segment > 8) {
+        await new Promise<void>((resolve) => setTimeout(resolve, 0))
+        segment = performance.now()
+      }
+    }
     return {
       dataVersion: stringValue(manifest["data_version"]),
+      manifestHash: stringValue(chosen["manifest_sha256"]),
       manifest,
       files,
       config,
@@ -227,7 +247,21 @@ export function createSnapshotClient(
     const previous = loaded
     try {
       const candidate = await download(previous)
+      metadata?.dispose()
       loaded = candidate
+      detailBytes = 0
+      metadata = new MetadataBytes(
+        base,
+        candidate.manifestHash,
+        new Map([...candidate.files].filter(([, file]) => file["role"] === "images")),
+        fetcher,
+        () => {
+          for (const listener of listeners) listener()
+        },
+        options.cacheStorage ?? globalThis.caches,
+        requests.background,
+        previous?.manifestHash,
+      )
       details = new Map()
       inflight = new Map()
       set({ state: "ready", dataVersion: candidate.dataVersion })
@@ -262,13 +296,30 @@ export function createSnapshotClient(
     const role = file["role"]
     if (role !== "text" && role !== "images")
       throw new SnapshotError("payload-set", `${key} is not a detail file`)
-    const data = await fetchVerified(
-      stringValue(file["path"]),
-      stringValue(file["sha256"]),
-      integerValue(file["bytes"]),
-    )
-    const fragments = readContainer(file, objectValue(readPayload(file, data)))
-    validateFragments(fragments)
+    const data =
+      role === "images" && metadata
+        ? await metadata.read(key)
+        : await fetchVerified(
+            stringValue(file["path"]),
+            stringValue(file["sha256"]),
+            integerValue(file["bytes"]),
+          )
+    const version = stringValue(snapshot.manifest["format_version"])
+    const result = await decode({ kind: "file", file, bytes: data, version })
+    if (result.kind !== "fragments") throw new SnapshotError("shape", "expected fragments")
+    const fragments = result.fragments
+    validatePlacement(fragments, version, snapshot.bootstrap)
+    if (role === "images") {
+      const view: Record<string, JsonObject[]> = {}
+      for (const fragment of [
+        ...(fragments.some((fragment) => fragment.table === "printing_image")
+          ? snapshot.bootstrap.filter((fragment) => fragment.table === "printing")
+          : []),
+        ...fragments,
+      ])
+        (view[fragment.table] ??= []).push(...fragment.rows)
+      validateImageRows(view)
+    }
     const faces = facesOf(snapshot)
     return fragments.map((fragment) => {
       if (fragment.value["base"] === null) return fragment
@@ -294,11 +345,14 @@ export function createSnapshotClient(
       .then((result) => {
         // Ignore a result for a snapshot that was replaced while the request ran.
         if (started === inflight) {
+          if (snapshot.files.get(fileKey)?.["role"] === "images") return result
           details.set(fileKey, result)
-          while (details.size > cacheSize) {
+          detailBytes += integerValue(snapshot.files.get(fileKey)?.["bytes"])
+          while (details.size > cacheSize || detailBytes > 12 * 1024 * 1024) {
             const oldest = details.keys().next().value
             if (oldest === undefined) break
             details.delete(oldest)
+            detailBytes -= integerValue(snapshot.files.get(oldest)?.["bytes"])
           }
         }
         return result
@@ -331,5 +385,9 @@ export function createSnapshotClient(
     },
     snapshot: () => loaded,
     fragments,
+    metadataStatus: () =>
+      metadata?.status() ?? { state: "idle", done: 0, total: 0, persistent: false },
+    prefetchImages: () => metadata?.prefetch() ?? Promise.resolve(),
+    cancelImagePrefetch: () => metadata?.cancel(),
   }
 }
