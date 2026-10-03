@@ -136,6 +136,40 @@ def test_environment_difference_is_recorded_and_continues_with_identical_outputs
     )
 
 
+def test_unrelated_new_runtime_files_cannot_expand_historical_producer_evidence(
+    generated: tuple[TemplateSources, InventoryV2], monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sve_carddb.template_parameter_rules import replay as parameter_replay  # ruff: ignore[import-outside-top-level] -- simulate a later host feature that did not exist in the producer
+    from sve_carddb.template_semantics.registry import verify  # ruff: ignore[import-outside-top-level] -- verify the real fixed closure before constructing historical evidence
+    from sve_carddb.template_translations.semantic_replay import evidence_context  # ruff: ignore[import-outside-top-level] -- independently exercise both effect and identity evidence constructors
+    from sve_carddb.translations import sources as translation_sources  # ruff: ignore[import-outside-top-level] -- mutable host runtime deliberately differs
+
+    sources, inventory = generated
+    later = "carddb/src/sve_carddb/synthetic_later_name_feature.py"
+    monkeypatch.setattr(
+        parameter_replay,
+        "TRANSLATION_RUNTIME",
+        (*translation_sources.RUNTIME, later),
+    )
+    monkeypatch.setattr(
+        translation_sources, "RUNTIME", (*translation_sources.RUNTIME, later)
+    )
+    checked = verify(
+        sources.repository,
+        inventory.replay_context.semantic_bindings,
+        flavor=False,
+        environment=inventory.replay_context.environment,
+    )
+    context = evidence_context(sources.repository, sources.main_revision, checked)
+    assert later not in {p.name for p in context.dependencies}
+    assert set(checked.exact_pins) <= {
+        (context.program_revision, p.name, p.sha256) for p in context.dependencies
+    }
+    result = fresh(sources).reconstruct_v2(inventory.recipes, inventory.replay_context)
+    assert result.semantic_output is not None
+    assert result.semantic_output.manifest == inventory.replay_context.expected_outputs
+
+
 def test_private_candidate_requires_separate_hash_and_reloads_written_baseline(
     generated: tuple[TemplateSources, InventoryV2], tmp_path: Path
 ) -> None:

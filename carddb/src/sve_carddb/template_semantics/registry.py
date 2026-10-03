@@ -60,6 +60,20 @@ class Checked:
     parser: Parser
 
 
+def evidence_names(checked: Checked) -> tuple[str, ...]:
+    """Historical evidence cannot inherit newly added, unrelated host runtime files."""
+    return tuple(
+        sorted(
+            {
+                "carddb/uv.lock",
+                "carddb/pyproject.toml",
+                "carddb/src/sve_carddb/translations/sources.py",
+                *(name for _producer, name, _hash in checked.exact_pins),
+            }
+        )
+    )
+
+
 def regular(
     repository: PinnedRepository, commit: str, names: tuple[str, ...]
 ) -> dict[str, bytes]:

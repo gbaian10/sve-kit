@@ -102,7 +102,9 @@ class ExpectedPlan:
                     Sources(
                         self.stores,
                         self.repository.root,
-                        evidence_context(self.repository, pins[0].code_revision),
+                        evidence_context(
+                            self.repository, pins[0].code_revision, checked
+                        ),
                         semantics=checked,
                     ),
                     main_revision,

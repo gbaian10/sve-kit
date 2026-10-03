@@ -15,7 +15,12 @@ from sve_carddb.template_parameter_rules.replay import (
     _vocabulary,
 )
 from sve_carddb.template_semantics.environment import capture, differences
-from sve_carddb.template_semantics.registry import ROOT, verify, verify_recipes
+from sve_carddb.template_semantics.registry import (
+    ROOT,
+    evidence_names,
+    verify,
+    verify_recipes,
+)
 from sve_carddb.template_semantics.v1.candidates import build
 from sve_carddb.template_semantics.v1.checkpoint import compare, parse_legacy
 from sve_carddb.template_semantics.v1.flavor import reconstruct as flavor_replay
@@ -34,7 +39,7 @@ from sve_carddb.template_sources.normalizer import VERSION
 from sve_carddb.template_translations.flavor_models import FlavorInputs
 from sve_carddb.template_translations.replay_models import FlavorReplayInputs
 from sve_carddb.template_translations.sources import SourceReplay
-from sve_carddb.translations.sources import CODE_PATH, RUNTIME
+from sve_carddb.translations.sources import CODE_PATH
 
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_sources import PinnedRepository
@@ -47,9 +52,11 @@ PARAMETERS = "template-parameters-jp-candidate-v1"
 PARSER = "translation-jp-v1"
 
 
-def evidence_context(repository: PinnedRepository, producer: str) -> BuildContext:
+def evidence_context(
+    repository: PinnedRepository, producer: str, checked: Checked
+) -> BuildContext:
     """Audit producer evidence bytes without pretending they are executing code."""
-    raw = repository.read_many(producer, RUNTIME)
+    raw = repository.read_many(producer, evidence_names(checked))
     return BuildContext.from_inputs(
         producer,
         raw,
@@ -315,7 +322,9 @@ def _compute(  # ruff: ignore[too-many-locals] -- streams and provenance remain 
             inputs,
             sources.main_revision,
             semantics=checked,
-            build_context=evidence_context(sources.repository, pins[0].code_revision),
+            build_context=evidence_context(
+                sources.repository, pins[0].code_revision, checked
+            ),
         )
         frozen = FrozenSources(
             sources.stores[inputs.source_batch.store_id],

@@ -104,7 +104,12 @@ def _evidence(
     *,
     semantics: Checked | None = None,
 ) -> Sources:
-    dependencies = repository.read_many(recipe.code_revision, TRANSLATION_RUNTIME)
+    names: tuple[str, ...] = TRANSLATION_RUNTIME
+    if semantics is not None:
+        from sve_carddb.template_semantics.registry import evidence_names  # ruff: ignore[import-outside-top-level] -- explicit fixed semantics separate historical evidence from the evolving host runtime
+
+        names = evidence_names(semantics)
+    dependencies = repository.read_many(recipe.code_revision, names)
     parsers: dict[str, JsonValue] = {}
     for provider in ("jp", "sv1", "svwb"):
         config: dict[str, JsonValue] = {"provider": provider}
