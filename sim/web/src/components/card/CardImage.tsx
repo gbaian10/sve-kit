@@ -71,9 +71,9 @@ export function CardImage({
         ? t("card.noImage")
         : publication === "pending" || availability === "unfetched"
           ? t("card.imagePending")
-          : images?.failed
+          : images?.failed && asset === undefined
             ? t("card.imageError")
-            : images === undefined
+            : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
               ? t("card.imageLoading")
               : undefined
   const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)

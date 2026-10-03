@@ -16,17 +16,24 @@ export function MetadataStatus({ client }: { readonly client: SnapshotClient }) 
   )
   const snapshot = client.snapshot()
   useEffect(() => {
-    if (snapshot && !dataSaver) void client.prefetchImages()
-    return () => {
+    if (snapshot && progress.persistent && !dataSaver) void client.prefetchImages()
+    if (snapshot && progress.persistent && !dataSaver)
+      return () => {
+        client.cancelImagePrefetch()
+      }
+  }, [client, snapshot, dataSaver, progress.persistent])
+  useEffect(
+    () => () => {
       client.cancelImagePrefetch()
-    }
-  }, [client, snapshot, dataSaver])
+    },
+    [client],
+  )
   return (
     <div className="flex flex-wrap items-center gap-2 text-13 text-text-2">
       <span role="status">
         {t(`metadata.${progress.state}`, { done: progress.done, total: progress.total })}
       </span>
-      {!progress.persistent && <span>{t("metadata.degraded")}</span>}
+      {!progress.persistent && !progress.checking && <span>{t("metadata.degraded")}</span>}
       {progress.state === "running" ? (
         <Button
           onClick={() => {
@@ -35,7 +42,7 @@ export function MetadataStatus({ client }: { readonly client: SnapshotClient }) 
         >
           {t("metadata.cancel")}
         </Button>
-      ) : progress.state !== "complete" ? (
+      ) : progress.persistent && progress.state !== "complete" ? (
         <Button
           onClick={() => {
             void client.prefetchImages()

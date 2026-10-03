@@ -260,6 +260,7 @@ export function createSnapshotClient(
         },
         options.cacheStorage ?? globalThis.caches,
         requests.background,
+        previous?.manifestHash,
       )
       details = new Map()
       inflight = new Map()

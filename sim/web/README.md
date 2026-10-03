@@ -155,23 +155,29 @@ are released after decoding, rather than kept alongside row objects.
 
 Image metadata uses the manifest's exact fragment locator: permanent printing owner and
 printing bucket first, then the image entity bucket. At most 24 intersecting image slots own
-rows at once; other slots remain text cards until visible. Decoded image files are discarded,
-retaining only that page's bindings/assets/card-size variants. Browsing does not need the
+rows at once; other slots remain text cards until visible. Decoded 1.1 image files are discarded, retaining up to 64 recently used face results.
+Overlapping visible faces keep their images while a debounced viewport change resolves new
+faces. The legacy 1.0 unsharded image file is derived once per loaded snapshot, so scrolling
+does not repeatedly parse its entire payload. Browsing does not need the
 on-demand `rules_name` or `face_rules_name` tables; any future construction consumer must
 load their detail files before claiming a result.
 
 After the catalog is ready, background work downloads **metadata bytes**, not all image
-blobs. The total session cost still includes every images file. Data saver delays that work.
+blobs, only when persistent storage is available. Data saver delays that work. Storage loss
+stops queued background work; without persistent storage only visible faces are fetched.
+When background work completes, its session cost includes every images file.
 The progress surface offers pause/retry and distinguishes download completion from persistent
 cache availability; neither means all images or offline text are ready. Snapshot replacement
 aborts old metadata requests and isolates CacheStorage by manifest hash and file content path.
+After successful adoption, old metadata namespaces are pruned, retaining the active and
+immediately previous manifest only; unrelated application caches are preserved.
 
 Visible work takes priority, with at most four requests including bodies and no more than
 three background requests. Verified persistent bytes are rechecked before decoding; returning
-to a page can reparse without another external request. CacheStorage failures visibly degrade
+to an evicted face can reparse without another external request; recently used faces do not
+need re-decoding. CacheStorage failures visibly degrade
 to a 12 MiB / 64-file RAM byte LRU. The page parsing workset is capped at 12 MiB raw for 1.1;
-this is not a heap measurement or a physical-phone acceptance claim. The old 1.0 single image
-file remains readable and is measured separately rather than given the 1.1 size limits.
+this is not a heap measurement or a physical-phone acceptance claim. The legacy 1.0 index is reused per snapshot and is exempt from the 1.1 file/workset limits.
 
 ## Development snapshot
 

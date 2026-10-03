@@ -8,6 +8,7 @@ export interface MetadataProgress {
   readonly done: number
   readonly total: number
   readonly persistent: boolean
+  readonly checking?: boolean
 }
 interface Job {
   readonly key: string
@@ -18,6 +19,7 @@ interface Job {
 }
 const MAX_BYTES = 12 * 1024 * 1024
 const MAX_FILES = 64
+const cacheInitializers = new WeakMap<CacheStorage, Promise<unknown>>()
 
 /** Bytes only: background work never decodes fragments or builds an image index. */
 export class MetadataBytes {
@@ -49,22 +51,45 @@ export class MetadataBytes {
     changed: () => void,
     storage?: CacheStorage,
     backgroundFetch: Fetcher = fetcher,
+    previousHash?: string,
   ) {
     this.base = base
     this.files = files
     this.fetcher = fetcher
     this.changed = changed
     this.backgroundFetch = backgroundFetch
-    this.progress = { state: "idle", done: 0, total: files.size, persistent: false }
-    this.cache = storage
-      ? storage.open(`sve-images-${hash}`).then(
-          (cache) => {
-            if (!this.disposed) this.update({ persistent: true })
-            return cache
-          },
-          () => undefined,
-        )
-      : Promise.resolve(undefined)
+    this.progress = {
+      state: "idle",
+      done: 0,
+      total: files.size,
+      persistent: false,
+      checking: storage !== undefined,
+    }
+    if (storage) {
+      const current = `sve-images-${hash}`
+      const previous = previousHash ? `sve-images-${previousHash}` : undefined
+      const initialized = (cacheInitializers.get(storage) ?? Promise.resolve())
+        .then(async () => {
+          if (!this.active()) return undefined
+          for (const name of await storage.keys())
+            if (name.startsWith("sve-images-") && name !== current && name !== previous)
+              await storage.delete(name)
+          if (!this.active()) return undefined
+          const cache = await storage.open(current)
+          if (this.active()) this.update({ persistent: true, checking: false })
+          return cache
+        })
+        .catch(() => {
+          if (this.active()) this.update({ persistent: false, checking: false })
+          return undefined
+        })
+      cacheInitializers.set(storage, initialized)
+      this.cache = initialized
+    } else this.cache = Promise.resolve(undefined)
+  }
+
+  private active(): boolean {
+    return !this.disposed
   }
 
   status(): MetadataProgress {
@@ -149,6 +174,8 @@ export class MetadataBytes {
     const valid = async (bytes: Uint8Array) =>
       bytes.length === integerValue(file["bytes"]) && (await transferDigest(bytes)) === hash
     const cache = await this.cache
+    if (!priority && !this.progress.persistent)
+      throw new Error("persistent cache required for background fetch")
     let bytes: Uint8Array | undefined
     if (cache) {
       try {
@@ -156,12 +183,14 @@ export class MetadataBytes {
         if (response) {
           const cached = new Uint8Array(await response.arrayBuffer())
           if (await valid(cached)) bytes = cached
-        }
+        } else if (this.verified.has(key)) this.losePersistence()
       } catch {
-        this.update({ persistent: false })
+        this.losePersistence()
       }
     }
     if (!bytes) {
+      if (!priority && !this.progress.persistent)
+        throw new Error("persistent cache required for background fetch")
       for (let attempt = 0; attempt < 2; attempt += 1) {
         const candidate = await fetchBytes(priority ? this.fetcher : this.backgroundFetch, path, {
           signal: this.abort.signal,
@@ -178,20 +207,29 @@ export class MetadataBytes {
         try {
           await cache.put(path, new Response(bytes.slice().buffer))
         } catch {
-          this.update({ persistent: false })
+          this.losePersistence()
         }
       }
     }
     if (this.disposed) throw new Error("snapshot replaced")
     // CacheStorage owns persistent bytes; keep a bounded RAM fallback only when it fails.
-    if (!this.progress.persistent) this.remember(key, bytes)
+    if (!this.progress.persistent && priority) this.remember(key, bytes)
     this.verified.add(key)
-    this.update({ done: this.verified.size })
+    this.update({
+      done: this.verified.size,
+      ...(this.verified.size === this.files.size ? { state: "complete" as const } : {}),
+    })
     return bytes
   }
 
+  private losePersistence(): void {
+    this.update({ persistent: false })
+    this.cancel()
+  }
+
   async prefetch(): Promise<void> {
-    if (this.disposed) return
+    await this.cache
+    if (this.disposed || !this.progress.persistent) return
     this.cancelled = false
     const epoch = ++this.epoch
     this.update({ state: "running" })
@@ -219,7 +257,7 @@ export class MetadataBytes {
       this.pending.delete(job.key)
       job.reject(new Error("prefetch cancelled"))
     }
-    this.update({ state: "cancelled" })
+    this.update({ state: this.verified.size === this.files.size ? "complete" : "cancelled" })
   }
 
   dispose(): void {

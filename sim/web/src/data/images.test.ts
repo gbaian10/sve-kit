@@ -1,6 +1,8 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest"
+import { describe, expect, it, vi } from "vitest"
 
+import { buildSnapshot } from "../../scripts/fixture/build"
+import { memoryCache as storage } from "../test-utils/cache"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
 import { canonical, type JsonObject, type JsonValue, stringValue } from "./format-v1/json"
@@ -33,27 +35,6 @@ source.set(
 )
 const face = { printingId: "p:a", faceId: "f:a" }
 
-function storage(fail = false): CacheStorage {
-  const namespaces = new Map<string, Map<string, Response>>()
-  return {
-    open: (name: string) => {
-      let values = namespaces.get(name)
-      if (!values) {
-        values = new Map()
-        namespaces.set(name, values)
-      }
-      const cache = values
-      return Promise.resolve({
-        match: (key: string) => Promise.resolve(cache.get(key)?.clone()),
-        put: (key: string, response: Response) => {
-          if (fail) return Promise.reject(new Error("quota"))
-          cache.set(key, response.clone())
-          return Promise.resolve()
-        },
-      } as unknown as Cache)
-    },
-  } as unknown as CacheStorage
-}
 function serve(bytes = source) {
   const paths: string[] = []
   const fetcher: Fetcher = (url) => {
@@ -107,6 +88,152 @@ describe("page image metadata", () => {
     expect(served.paths).toHaveLength(done)
     expect(client.metadataStatus()).toMatchObject({ state: "complete", persistent: true })
   })
+  it("reuses decoded faces on overlapping pages and re-derives only evicted faces", async () => {
+    const served = serve()
+    const client = createSnapshotClient("/cdn", {
+      entry: "preview",
+      fetch: served.fetcher,
+      cacheStorage: storage(),
+    })
+    await client.load()
+    const parse = vi.spyOn(client, "fragments")
+    const first = await loadImagePage(client, [face])
+    expect(first.cardImage("p:a", "f:a")).toBeDefined()
+    const calls = parse.mock.calls.length
+    await loadImagePage(client, [face])
+    expect(parse).toHaveBeenCalledTimes(calls)
+    await loadImagePage(client, [face, { printingId: "p:b", faceId: "f:b" }])
+    const overlapping = parse.mock.calls.length
+    await loadImagePage(client, [face])
+    expect(parse).toHaveBeenCalledTimes(overlapping)
+    // Known negative entries consume the same finite face budget as successful ones.
+    for (let i = 0; i < 65; i += 1)
+      await loadImagePage(client, [
+        { printingId: `unbound${String(i)}`, faceId: `face${String(i)}` },
+      ])
+    await loadImagePage(client, [face])
+    expect(parse.mock.calls.length).toBeGreaterThan(overlapping)
+  })
+  it("legacy unsharded images are derived once per snapshot even without persistent cache", async () => {
+    const built = await buildSnapshot({
+      encodeImage: ({ width }) =>
+        Promise.resolve(new TextEncoder().encode(`synthetic-${String(width)}`)),
+    })
+    const served = serve(built.files)
+    const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
+    await client.load()
+    const parse = vi.spyOn(client, "fragments")
+    const index = await loadImagePage(client, [face])
+    const once = parse.mock.calls.length
+    expect(once).toBe(1)
+    expect(await loadImagePage(client, [{ printingId: "other", faceId: "other" }])).toBe(index)
+    expect(await loadImagePage(client, [face])).toBe(index)
+    expect(parse).toHaveBeenCalledTimes(once)
+    expect(served.paths.filter((path) => path.startsWith("images/"))).toHaveLength(0)
+  })
+  it("does not background-download anything without persistent storage", async () => {
+    let requests = 0
+    const bytes = new MetadataBytes(
+      "/cdn",
+      "no-storage",
+      metadataFiles(70),
+      () => {
+        requests += 1
+        return Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
+      },
+      () => undefined,
+    )
+    await bytes.prefetch()
+    expect(requests).toBe(0)
+    expect(bytes.status()).toMatchObject({ persistent: false, done: 0, state: "idle" })
+    await bytes.read("file0")
+    expect(requests).toBe(1)
+  })
+  it("prunes only old metadata namespaces and keeps the active and immediately previous version", async () => {
+    const cache = storage()
+    await cache.open("unrelated-app")
+    const fetcher: Fetcher = () =>
+      Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
+    const first = new MetadataBytes("/cdn", "a", metadataFiles(1), fetcher, () => undefined, cache)
+    await first.prefetch()
+    const second = new MetadataBytes(
+      "/cdn",
+      "b",
+      metadataFiles(1),
+      fetcher,
+      () => undefined,
+      cache,
+      fetcher,
+      "a",
+    )
+    await second.prefetch()
+    expect((await cache.keys()).sort()).toEqual(["sve-images-a", "sve-images-b", "unrelated-app"])
+    const third = new MetadataBytes(
+      "/cdn",
+      "c",
+      metadataFiles(1),
+      fetcher,
+      () => undefined,
+      cache,
+      fetcher,
+      "b",
+    )
+    await third.prefetch()
+    expect((await cache.keys()).sort()).toEqual(["sve-images-b", "sve-images-c", "unrelated-app"])
+  })
+  it("revalidates equal-length persistent bytes instead of accepting a corrupt cache entry", async () => {
+    const cache = storage()
+    const opened = await cache.open("sve-images-corrupt")
+    await opened.put("/cdn/data0", new Response(canonical({ synthetic: 9 }).slice().buffer))
+    let requests = 0
+    const bytes = new MetadataBytes(
+      "/cdn",
+      "corrupt",
+      metadataFiles(1),
+      () => {
+        requests += 1
+        return Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
+      },
+      () => undefined,
+      cache,
+    )
+    expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
+    expect(requests).toBe(1)
+  })
+  it("successful snapshot adoption aborts old metadata requests, not merely their returned indexes", async () => {
+    const served = serve()
+    const imagePaths = new Set(
+      (manifest["files"] as JsonObject[])
+        .filter((f) => f["role"] === "images")
+        .map((f) => `/cdn/${stringValue(f["path"])}`),
+    )
+    let aborted = 0
+    let block = false
+    const client = createSnapshotClient("/cdn", {
+      entry: "preview",
+      cacheStorage: storage(),
+      fetch: (url, init) => {
+        if (!block || !imagePaths.has(url)) return served.fetcher(url, init)
+        return new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener(
+            "abort",
+            () => {
+              aborted += 1
+              reject(new Error("aborted"))
+            },
+            { once: true },
+          )
+        })
+      },
+    })
+    await client.load()
+    block = true
+    const prefetch = client.prefetchImages()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    await client.reload()
+    await prefetch
+    expect(aborted).toBeGreaterThan(0)
+  })
   it("reopens bytes from persistent cache after the 64-file memory LRU has been evicted", async () => {
     const files = metadataFiles(70)
     const requests: string[] = []
@@ -151,13 +278,17 @@ describe("page image metadata", () => {
   })
   it("reports quota degradation and retries after eviction rather than claiming persistent offline readiness", async () => {
     const files = metadataFiles(70)
-    const served: Fetcher = (url) =>
-      Promise.resolve(
+    let requests = 0
+    const served: Fetcher = (url) => {
+      requests += 1
+      return Promise.resolve(
         new Response(canonical({ synthetic: Number(url.split("data")[1]) }).slice().buffer),
       )
+    }
     const bytes = new MetadataBytes("/cdn", "quota", files, served, () => undefined, storage(true))
     await bytes.prefetch()
-    expect(bytes.status()).toMatchObject({ persistent: false, state: "complete" })
+    expect(bytes.status()).toMatchObject({ persistent: false, state: "cancelled" })
+    expect(requests).toBeLessThanOrEqual(3)
     expect(await bytes.read("file0")).toEqual(canonical({ synthetic: 0 }))
   })
   it("rejects a replaced snapshot even when its transport ignores abort", async () => {
@@ -239,6 +370,35 @@ describe("network scheduling", () => {
       await new Promise((resolve) => setTimeout(resolve, 0))
     }
     await Promise.all([...background, visible])
+  })
+  it("promotes visible metadata ahead of queued background jobs in its own queue", async () => {
+    const starts: string[] = []
+    const release: Array<() => void> = []
+    const bytes = new MetadataBytes(
+      "/cdn",
+      "priority",
+      metadataFiles(10),
+      async (url) => {
+        starts.push(url)
+        await new Promise<void>((resolve) => {
+          release.push(resolve)
+        })
+        return new Response(canonical({ synthetic: Number(url.split("data")[1]) }).slice().buffer)
+      },
+      () => undefined,
+      storage(),
+    )
+    const background = bytes.prefetch()
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(starts).toHaveLength(3)
+    const visible = bytes.read("file9")
+    await new Promise((resolve) => setTimeout(resolve, 0))
+    expect(starts).toEqual(["/cdn/data0", "/cdn/data1", "/cdn/data2", "/cdn/data9"])
+    bytes.cancel()
+    release.splice(0).forEach((resolve) => {
+      resolve()
+    })
+    await Promise.all([background, visible])
   })
   it("cancels pending background work, preserves verified files, and permits a bounded retry", async () => {
     const files = metadataFiles(7)

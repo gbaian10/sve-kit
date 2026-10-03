@@ -53,6 +53,7 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
   useEffect(() => {
     if (!ready || !snapshot) return
     const visible = new Set<Element>()
+    let timer: ReturnType<typeof setTimeout> | undefined
     const collect = () => {
       const unique = new Set<string>()
       const faces = [...visible]
@@ -69,7 +70,10 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
           return true
         })
         .slice(0, 24)
-      setSelection(JSON.stringify(faces))
+      clearTimeout(timer)
+      timer = setTimeout(() => {
+        setSelection(JSON.stringify(faces))
+      }, 100)
     }
     const observer =
       typeof IntersectionObserver === "undefined"
@@ -101,6 +105,7 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
     mutations.observe(document.body, { childList: true, subtree: true })
     scan()
     return () => {
+      clearTimeout(timer)
       observer?.disconnect()
       mutations.disconnect()
     }
@@ -115,16 +120,21 @@ export function useImageIndex(client: SnapshotClient, ready: boolean): ImageInde
       },
       () => {
         if (!abort.signal.aborted)
-          setLoaded({
+          setLoaded((previous) => ({
             snapshot,
             selection,
-            index: { asset: () => undefined, cardImage: () => undefined, failed: true },
-          })
+            index: {
+              ...(previous?.snapshot === snapshot
+                ? previous.index
+                : { asset: () => undefined, cardImage: () => undefined }),
+              failed: true,
+            },
+          }))
       },
     )
     return () => {
       abort.abort()
     }
   }, [client, ready, snapshot, selection])
-  return loaded?.snapshot === snapshot && loaded.selection === selection ? loaded.index : undefined
+  return loaded?.snapshot === snapshot ? loaded.index : undefined
 }
