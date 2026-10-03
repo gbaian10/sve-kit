@@ -1,6 +1,7 @@
 # Which CI job runs each pre-commit hook (keyed by alias when a hook has one). `hooks.py check` fails when a hook in
 # .pre-commit-config.yaml has no entry here, so a new hook cannot silently skip CI.
 # job = "none" means CI does not run the hook itself; `reason` says what covers it instead.
+# Public CI verification run (2026-10-04); this PR is closed without merging.
 
 [hooks.trailing-whitespace]
 job = "repo"
