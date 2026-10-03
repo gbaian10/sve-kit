@@ -214,7 +214,10 @@ def _plan(root: Path, brotli: Brotli | None) -> Plan:
         if digest(raw)[7:] != Path(key).stem:
             raise UploadError("Content-addressed JSON hash mismatch")
         manifest = object_value(_public_json(raw))
-        require_preview(manifest)
+        require_preview(
+            manifest,
+            regions=tuple(string(region) for region in array(manifest["regions"])),
+        )
         allowed.add(key)
         _encodings(key, raw, files, allowed, brotli)
         joined = _payloads(manifest, files, allowed, brotli)

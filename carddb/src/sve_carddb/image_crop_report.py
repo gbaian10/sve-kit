@@ -49,7 +49,7 @@ def crop_report(
     for ref in references:
         record = by_url.get(ref.source_url)
         if record is not None and (record.region, record.card_no) != (
-            "jp",
+            ref.region,
             ref.card_no,
         ):
             annotations.append(
@@ -61,7 +61,9 @@ def crop_report(
         if record is None and other:
             # A missing regional pipeline must not be reported as a verified binding.
             source_key = digest(
-                canonical({"provider": "jp", "kind": "image", "url": ref.source_url})
+                canonical(
+                    {"provider": ref.region, "kind": "image", "url": ref.source_url}
+                )
             )
             warnings.append(
                 {

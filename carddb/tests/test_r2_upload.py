@@ -11,7 +11,13 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.r2_upload.plan import POINTER, UploadError, pointer_value, read_member
+from sve_carddb.r2_upload.plan import (
+    POINTER,
+    UploadError,
+    plan_preview,
+    pointer_value,
+    read_member,
+)
 from sve_carddb.r2_upload.s3 import S3, Credentials, sign
 from sve_carddb.r2_upload.upload import _pointer, upload
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
@@ -44,6 +50,27 @@ def seed(store: Store, local: Plan) -> None:
                 "cache-control": member.cache_control,
             },
         )
+
+
+@pytest.mark.parametrize("regions", [("en",), ("jp", "en"), ("en", "jp", "jp")])
+def test_upload_rejects_en_only_unsorted_or_duplicate_regions(
+    local: Plan, regions: tuple[str, ...]
+) -> None:
+    pointed = object_value(parse(read_member(local.root, POINTER)))
+    manifest = object_value(
+        parse(read_member(local.root, str(pointed["manifest_path"])))
+    )
+    manifest["regions"] = list(regions)
+    raw = canonical(manifest)
+    hashed = digest(raw)
+    path = "snapshots/manifests/" + hashed[7:] + ".json"
+    (local.root / path).write_bytes(raw)
+    (local.root / (path + ".gz")).write_bytes(gzip.compress(raw, mtime=0))
+    (local.root / POINTER).write_bytes(
+        canonical({"manifest_path": path, "manifest_sha256": hashed})
+    )
+    with pytest.raises(UploadError, match=r"^Public preview validation failed$"):
+        plan_preview(local.root)
 
 
 def test_first_upload_publishes_complete_members_then_pointer_and_rerun_skips(

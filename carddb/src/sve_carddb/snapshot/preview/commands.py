@@ -7,7 +7,12 @@ from typing import Annotated
 import typer
 
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.image_assets import PreviewRoots, build_jp_assets
+from sve_carddb.image_assets import (
+    ImageBuild,
+    PreviewRoots,
+    build_jp_assets,
+    build_regional_assets,
+)
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.snapshot.export import Brotli, export_snapshot
 from sve_carddb.snapshot.offline import Inputs as OfflineInputs
@@ -114,13 +119,19 @@ def export_command(
 
 
 @app.command("export-offline")
-def export_offline_command(
+def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- CLI binds explicit recipe, isolated outputs, paired image roots and optional compressor
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
     cdn_dir: Annotated[Path, typer.Option(envvar="SVE_CDN_DIR")],
     bundle_dir: Annotated[Path, typer.Option()],
     brotli_command: Annotated[
         Path | None, typer.Option(exists=True, dir_okay=False)
+    ] = None,
+    image_assets_dir: Annotated[
+        Path | None, typer.Option(exists=True, file_okay=False)
+    ] = None,
+    image_cache_dir: Annotated[
+        Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
@@ -136,12 +147,48 @@ def export_offline_command(
     if inputs.resolve().is_relative_to(preview_dir.resolve()):
         raise ValueError("Offline preview must be disjoint from recipe")
     codec = None if brotli_command is None else command_brotli(brotli_command)
-    built = build_offline(recipe, bundle_dir=bundle_dir)
+    if (image_assets_dir is None) != (image_cache_dir is None):
+        raise typer.BadParameter(
+            "Image asset and cache roots must be provided together"
+        )
+    images = None
+    if image_assets_dir is not None and image_cache_dir is not None:
+        image_roots = PreviewRoots(image_assets_dir, cdn_dir, image_cache_dir)
+        image_roots.validate(
+            (recipe.archive, recipe.repo, preview_dir, bundle_dir, inputs)
+        )
+        crops = load_image_crops(
+            recipe.repo / "authored", authored_revision=recipe.revision
+        )
+        regional = tuple(
+            build_regional_assets(
+                FrozenSources(recipe.archive, recipe.store_id, pin.image_batch),
+                image_roots,
+                region=pin.region,
+                crops=crops,
+                workers=2,
+                reuse_only=True,
+            )
+            for pin in recipe.sources
+        )
+        images = ImageBuild(
+            tuple(item for part in regional for item in part.images),
+            sum(part.elapsed_seconds for part in regional),
+        )
+    built = build_offline(
+        recipe, bundle_dir=bundle_dir, images=images, image_root=image_assets_dir
+    )
     snapshot = export_snapshot(
         built.projection, built.ownership, recipe.batch(), brotli=codec
     )
     report = write_preview(
-        snapshot, roots, built.report, brotli=codec, regions=("en", "jp")
+        snapshot,
+        roots,
+        built.report,
+        brotli=codec,
+        regions=("en", "jp"),
+        image_source=image_assets_dir,
+        confirmed_images=built.confirmed_images,
     )
     typer.echo(canonical(report).decode())
 

@@ -23,7 +23,9 @@ they do not grant digital same-card eligibility. Expected glossary source uses
 are independently replayed from every historical member, including superseded
 and withdrawn records, rather than copied from the import result. Missing
 trait/title or other raw-field adoptions fail closed rather than generating codes.
-Image batches verify authored correction evidence, rather than publishing assets.
+Image batches always verify authored correction evidence. Image publication is
+optional and requires the two explicit image roots below; EN card text remains
+the original EN observation, with no new translation workflow.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \
@@ -42,7 +44,43 @@ This remains a `preview-` candidate, with no formal index or activation (#34).
 The old `snapshot export` stays JP-only and still rejects ancillary data. Only
 `export-offline` selects EN and JP and permits card-page Q&A and related links.
 Both recipes retain unknown source coverage: observations do not prove Q&A or
-errata completeness, nor CR/restriction coverage. No image publication is claimed.
+errata completeness, nor CR/restriction coverage. Without explicit image roots,
+no image publication is claimed.
+
+## Regional preview images
+
+Prepare a separate private image library and recipe cache before exporting.
+`build_regional_assets(FrozenSources(...), roots, region=pin.region, crops=crops,
+workers=2)` converts one exclusively regional image batch. Load the complete
+`authored/image-crops` closure at the same revision, including unused records and
+receipts. Keep the JP and EN sealed batches independent, and retain each original
+PNG. The existing `build_jp_assets` API remains JP-only.
+
+```bash
+sve-carddb snapshot export-offline --inputs recipe.json \
+  --preview-dir /path/to/new-preview --cdn-dir /path/to/formal-cdn \
+  --bundle-dir /path/to/new-private-build-bundle \
+  --image-assets-dir /path/to/private-image-library \
+  --image-cache-dir /path/to/private-recipe-cache
+```
+
+The two image options must be provided together. CLI export only reuses validated
+five-size caches, with two workers, and never silently encodes or substitutes an
+old crop. The builder requires all current members of both pinned image batches,
+verifies PNG hashes and oriented dimensions, and binds pages using the region's
+extractor, exact original `img src` and adopted `source_face_map`. Card-number
+suffixes do not infer cross-region identity. Source uses are retained separately
+as `jp_image_link` / `en_image_link` and `jp_image_variant` / `en_image_variant`.
+
+The same transaction and private bundle replay include the image rows, complete
+source-use closure, exact recipe and crop adoption dependencies. Snapshot output
+copies only referenced content-addressed WebP blobs; orphan library entries,
+original PNGs and recipe caches stay private. Reports include applied/unused
+crops, annotation mismatches and verified reprint candidates in both regions.
+Available assets remove the image integration gate from this preview report;
+formal activation and source coverage still require their existing gates.
+`r2 upload-preview --dry-run` accepts complete JP or sorted EN+JP previews and
+validates the same five-size transport without credentials or remote access.
 
 ## Supplemental capabilities
 
