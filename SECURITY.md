@@ -1,7 +1,8 @@
 # Security policy
 
-Please report suspected vulnerabilities privately to
-[contact@svekit.app](mailto:contact@svekit.app). Do not open a public issue containing
+Please report suspected vulnerabilities privately, either through GitHub's
+[private vulnerability reporting](https://github.com/gbaian10/sve-kit/security/advisories/new)
+or by email to [contact@svekit.app](mailto:contact@svekit.app). Do not open a public issue containing
 exploit details, credentials, or private test data. Include the affected version
 or commit, impact, and a minimal reproduction using synthetic data where possible.
 Do not send active passwords or tokens.

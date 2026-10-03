@@ -323,6 +323,8 @@ pre-commit run --hook-stage manual cargo-mutants
 For version updates Dependabot waits 7 days after a release before proposing it; security updates
 are proposed at once, one pull request each. Workflow files are also checked by
 actionlint (syntax and expressions) and zizmor (security) on every commit and in CI.
+GitHub secret scanning with push protection, Dependabot alerts and malware alerts are enabled
+for the repository; gitleaks still checks commits locally and in CI.
 
 ## Crawling etiquette
 
