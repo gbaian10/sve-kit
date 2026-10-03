@@ -28,7 +28,7 @@
 | --- | --- |
 | `translations/index.yaml` | `translation_authored_format: 1, kind: translation_index, includes, inventories` |
 | `translations/<area>/<filing_key>/<sequence>.yaml` | `translation_authored_format: 1, kind: translation_shard, default_decision_id, records, decisions` |
-| `translations/template-sources/<sequence>.yaml` | `template_source_format: 1, kind: template_source_inventory, recipes, entries` |
+| `translations/template-sources/<sequence>.yaml` | `template_source_format: 2, kind: template_source_inventory, recipes, replay_context, entries`；完整封閉格式見[歷史清冊重算契約](template-source-replay.md) |
 | `template-parameter-rules/<policy_id>.policy.yaml`／`.approval.yaml` | 獨立 `template_parameter_rule_policy`／`template_parameter_rule_approval` 封套；完整欄位見[辨識政策契約](template-parameter-policy.md#1-獨立入口配對與不可變)，不進 translations 的 includes |
 
 area 為 `templates/glossary/overrides/region-reviews`。filing_key 為 `[A-Za-z0-9_-]+`，只歸檔；sequence 為只增三位以上十進位序號。includes/inventories 各映射上述分片／清冊到完整解析內容的 canonical hash。沿 [authored-layout §1／§2](authored-layout.md#2-分片批次決定與來源) 的 YAML 邊界、單檔 <1 MiB／512 KiB 目標、安全路徑及全入口驗證；拒絕缺檔、未索引分片、symlink、hash 不符與未知欄位。新分片驗妥後原子更新 index，舊分片不改。啟用時空集合需明示空映射，缺 index 不是空集合。
@@ -72,6 +72,13 @@ translation_shard 的決定封套一律 **scope=batch**，單筆也是一成員 
 
 不新增物件庫。runtime 從正式清冊指向的**已封存卡頁**、釘住的 extractor/normalizer 重建內容，不讀研究草稿或 latest cache。清冊 recipes 每項 `{id,code_revision,code_path,code_hash,config,config_hash}`；code_path 是 repo 相對檔案，code_revision 為完整 commit，config 為 canonical JSON。缺正式實作或不能重現舊結果時停止遷入，不能拿未版控的腳本路徑作 runtime 依賴。
 
+清冊 v2 按 [歷史清冊重算契約](template-source-replay.md) **以凍結語義版本重算並逐項比對輸出 hash**。
+recipes 六欄不變，code_revision 是歷史 producer，code_path 指固定計算入口；當次執行版本另記 F1。
+replay_context 釘語義 bindings、producer 環境、逐清冊風味背景與不可變六流 expected_outputs。
+環境差異只記錄，凍結 bytes／完整輸出全等才能通過，來源／schema／payload／採納仍各自驗。
+完整 Git 歷史與全部清冊只增不改，不修改舊 producer／expected 或忽略未被現行定義使用的 entry。
+v2 格式支援不能代替 C+hash 能力；首次採納 gate 未完整通過前不寫真實清冊，發現正式 v1 另審遷移。
+
 啟用辨識政策的分類／參數 recipe.config 明示 `recognition_policy=null` 或 `{policy_id,authored_revision,path,hash,approval_receipt_hash}` 五欄 pin，完整納入 config_hash；載體與驗證依[辨識政策契約 §4](template-parameter-policy.md#4-五欄-pin引用與-f1)。政策尚未被完整 loader 支援時只能留候選，不以開關或文字表態清除待審原因。歷史清冊的 config／pin 保留原值，不原地補欄或改標新 matcher commit。
 
 術語辨識的 recipe config 另釘 references.glossary 的 authored_revision、index_hash 與全部分片 exact bytes hashes；升術語 pin 也須完整重播原位置比對，不能把新同名歧義改選另一概念當成功。辨識核可不是清冊、來源覆蓋、模板定義或譯本採納，四者各自驗收。
@@ -107,6 +114,9 @@ layout 不含待翻語義，可機械生成固定模板；reminder/token_header 
 上表的一般卡文分段不套到 flavor。其非空整欄恰一個 flavor span，包含換行／空白／括號，不再分 layout 或 reminder；專屬 exact recipe 與零參數新 ID 依 [風味文字契約](flavor-translation.md#3-獨立-recipe-與新-id)。其餘欄位的完整覆蓋與分段規則不變。
 
 ### 4.2 參數 schema 與驗回來源
+
+清冊 v2 的 members／checkpoint 摘要逐位置保留角色、引用身分、raw 拼寫 hash、span 與 pending，
+但不取代本節逐位置 schema／raw roundtrip 或定義六欄 payload 驗證；同 hash 仍比完整 bytes。
 
 parameter_schema 固定 `{format:1,slots:[...]}`；每個 slot 恰為 `{name,type,occurrences,reference_kind,min,max}`。name 為 `[a-z][a-z0-9_]*`，唯一；type=uint/literal/reference，reference_kind 為 card/term/vocabulary 或 null，uint 的 min/max 為安全非負整數，其餘為 null。occurrences 是 normalized_text 的不重疊 `{start,end}` 陣列；同 slot 多次出現值須一致。slot 陣列按首次位置排序。舊 `『X』` 的 slot 只覆蓋中間 X，左右引號仍是 literal；params 的 uint/literal 是整數／字串，reference 為 `{kind:card,id}`、`{kind:term,id}` 或 `{kind:vocabulary,vocabulary_kind,vocabulary_code}`，須符合宣告種類與 FK。數字正規化前的 raw 字串與數值分開保存；reference 綁永久概念 ID，不能靠顯示名猜同卡。literal 僅給已核可的格式片段（例如 layout），不得包住整句外文冒充翻譯。
 
@@ -161,6 +171,10 @@ ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital
 ## 6. 推導、穩定 ID 與修訂
 
 ### 6.1 每次建置的資料
+
+清冊歷史以自身凍結語義與 inputs 驗回，當次 binding/use 另依有效 owner／來源重建。
+其完整來源重讀、六流摘要、單次 F1 與用途映射依[歷史清冊重算契約](template-source-replay.md)，
+不能用舊 root 代替當次用途適用性，也不把當次 owner 變動回寫成歷史 context。
 
 工具依凍結原文、有效人工決定與釘住的推導 recipe，順序產生 context→use/binding→translation→selection。translation.source_hash 驗 context 的 exact 原文 UTF-8；translation_binding 完整列出該 context 的 binding 與精確 template_translation 三欄主鍵，template_id、lang、context 均須吻合。translation_term 列全部直接與參數概念，依賴鍵另釘所用 choice record_hash；不能只記 term_id 丟失選詞修訂。同一 exact source/variant 共用 context，同一模板／參數只用一種有效翻法；新語義需人工 context_assignment，不能每卡自由翻。
 
@@ -313,6 +327,10 @@ use 的 owner 是原文引用者，恰一組；context.source_unit 必須等於�
 
 ### 6.4 更新與失效
 
+歷史清冊仍以自身凍結語義與 context 重算；歷史合法性與當次 owner／用途的適用性分開驗。
+換 current observation 或增加無關身分不改寫歷史 basis，也不直接使其歷史採納失效；
+當次用途變動仍依本節失效／重算。C+hash 不放寬使用新來源或錯 owner 的門檻。
+
 模板譯本或術語 choice 更新後，反查精確依賴、重新渲染、機械驗證並產新 translation ID／selection；成功者自動選用，**不要求每張卡再簽一份 translation/selection**。原文或語義改變時舊產物不適用新 owner/context，仍從新來源重新匹配。機械失敗者列原因、該 context 回原文；缺任一句不能冒稱完整翻譯。模板來源／hash 損壞或引用閉包錯是建置錯誤，不吞成一般缺譯。
 
 新渲染批次必報 generated_rows、changed_rows、failed_rows、sampled_rows 及精確輸入／輸出成員 hash。已有核可抽查政策時依其檢查；首輪照 §1 已核可的高頻模板／模型分歧抽查流程，記實際樣本及核對者，不預填已抽查。§2 長尾政策採納不另要求每批人工樣本，當批 sampled_rows 可為 0，另報 approved_policy_rows 與引用收據。抽查失敗隔離受影響批次並修人工來源／匹配規則，不原地修改生成文字。舊生成物可留舊快照／報告作比較，不回填成新來源的 fresh。
@@ -356,6 +374,9 @@ rule_hash、references 與 rule-bundle-v2 recipe 沿 build-db §14；unknown 段
 現有公開格式只出選定 translation/text 與 FieldTranslation，不出 context、模板、清冊或稽核 hash。glossary 的有效加粗由獨立採納鏈／型別推導；原文與譯文位置的公開承載須另審格式，[術語採納擴充 §6](glossary-adoption.md#6-公開快照影響與最小擴充提案) 列出最小提案及影響，不擅改現有白名單或啟用 translation.tokens。名稱／label 翻譯納入 bootstrap 容量驗收。無翻譯不阻止查卡／手動；本契約不宣稱雙區三語容量或匯入器已驗收。
 
 ## 9. 獨立反例與定向突變驗收
+
+清冊 v2 另須完整通過[歷史清冊 H01–H28](template-source-replay.md#6-最小獨立驗收)，
+包括混合 producer、環境差異兩例、六流漂移、決定性、全歷史、F1 與性能；以下逐筆反例仍保留。
 
 每列以最小合成成功基例只改指定條件，檢查獨立預期；同列多個條件須各跑一例。這是實作驗收規格，不是已實跑 mutant 的宣稱。真實遷入量、合成案例與實跑數分開。
 

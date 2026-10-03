@@ -174,6 +174,10 @@ effect `present_all` 另須 note 保存已呈現全部分歧的真實事件；�
 
 ## 4. 五欄 pin、定義引用與 F1 複核
 
+來源清冊依[歷史清冊重算契約](template-source-replay.md)以凍結語義版本重算並逐項比對輸出 hash，
+每次重讀封存閉包，全部歷史清冊均驗。producer 與當次執行程式分開記，環境差異僅為 provenance；
+輸出漂移、必要來源或 frozen bytes 不符仍拒絕，不影響五欄政策與實際首輪採納門檻。
+
 譯本 `adoption_review` 仍恰為 `{mode,policy,initial_sample_decisions}`，既有五欄 policy 仍是：
 
 ```text
@@ -206,6 +210,9 @@ F1 dependencies 含當次實際使用的 validator／source parser／normalizer�
 完整來源使用集合仍依 source-archive F1 驗證，不以一份自算 report hash 取代獨立 expected 集合。
 
 ### 4.1 兩層驗證與私人輸入的時點
+
+本節私人原審核頁面／未採納候選免重讀的例外，不擴張到正式封存來源：
+正式建置仍以清冊指定凍結語義重算、核對不可變六流摘要與逐筆採納，不讀成功報告代替來源。
 
 | 層級 | 執行處與驗證範圍 | 可宣稱／限制 |
 | --- | --- | --- |

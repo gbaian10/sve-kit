@@ -66,6 +66,10 @@ raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha
 
 #### 2.2.1 建置輸入紀錄與完整使用閉包
 
+歷史模板清冊的單次 F1 依[清冊重算契約 §4](template-source-replay.md#4-群組全歷史與單次-f1)：
+program_revision 記實際 H，各組 producer／凍結版本／預期及實際結果與用途映射另外保留。
+本節 context／uses／四檔 bundle 形狀和獨立 expected 驗證不變，不以 output root 代替完整 uses。
+
 F1 的建置輸入紀錄使用 `input_format: 1`，由 `context` 與排序唯一的 `uses` 組成，採 canonical-json-v1，完整 hash 可重算。紀錄不含卡片效果文或私人絕對路徑。
 
 - `context` 保存完整 40 碼 `program_revision`、非空的 `dependencies` 與 `configuration`。依賴項恰有 `{name, sha256}`，name 為來源 checkout／工具輸入內可追回的 canonical 相對路徑，按 name 排序唯一，hash 對 exact bytes 計算；呼叫端釘住實際依賴鎖定檔及相關輸入，不能以套件顯示版本代替。configuration 是完整 canonical JSON 字串，保留明示設定輸入；不能從 authored revision 猜程式 revision 或使用預設機器設定補值。
@@ -117,6 +121,15 @@ Writer 的檔案替換與 SQLite transaction 不是同一原子交易：既有�
 封存工作不修改既有 manifest 的 resource／fetch_log／generation 狀態；原始抓取失敗不因歸檔變成功。`Resource.archived_at` 是抓取器既有本機狀態，不是本契約的「raw 歷史已安全備份」收據。
 
 ## 5. 只讀重建與缺失歷史
+
+模板歷史清冊依[清冊重算契約](template-source-replay.md)以凍結語義版本重算並逐項比對輸出 hash；
+每次仍驗本節 sealed/raw 閉包，不借私人審核頁面的免重讀例外略過來源。
+只用一個 BuildContext／F1，實際 program_revision、完整程式／lock 如實記當次執行 H；
+逐群組保留歷史 producer R、凍結版本／manifest pins、context、預期／實際結果與實際環境差異。
+環境值不同不先拒絕也不進語義 root；缺閉包／凍結 bytes 或輸出漂移仍拒絕。
+同 raw 一列 source_record，不以 parser／producer 重配 raw ID；同 parser 跨 producer 的用途及 pin 歸屬
+保留群組映射，不以最後一筆覆蓋。caller 獨立 expected uses、DB 與 archive pins、F1 四檔 bundle 驗證不變，
+自算摘要不能代替獨立閉包，不增父子 executor。
 
 建置／離線 extract 接受 sealed inventory 的 hash，先驗 seal、DB、副本 schema、所有 metadata 與 raw 閉包。只用 `Manifest.open_snapshot()`（`mode=ro&immutable=1`）讀關閉的副本，不跑 DDL／journal pragma；parser／extractor 只能透過 archive locator 讀來源，不能回查 live/latest 補資料。既有 extract 持鎖讀 live 是另一種受控入口；不能把該輸出自動稱為 sealed 重建。
 

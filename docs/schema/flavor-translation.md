@@ -21,6 +21,9 @@
 `source_ref` 沿翻譯契約 §2，定位凍結 parser 完整投影中的**整個 flavor 字串**；
 `text_hash` 驗該字串 exact UTF-8。來源 parser 與下節 normalizer 是不同的 pin，不能只換 recipe 名稱。
 來源版本、raw、descriptor、receipt、parser 與 normalizer 的完整程式／設定依賴均進 F1。
+清冊依[歷史清冊重算契約](template-source-replay.md)以凍結語義版本重算並逐項比對輸出 hash；
+逐清冊的 source_batch、identity_basis、identity_batches 固定於 v2 replay_context.inputs，
+不借 caller 最新背景。歷史 owner 合法性與當次用途適用性分開驗，身份閉包用到 EN parser 也須釘住。
 不讀 latest、草稿或 live manifest 補來源，也不聯網重抓。官方原文與 normalized 字串不寫進 authored、
 測試或報告；報告只列 ID、hash、位置與原因，確認頁從私人凍結來源顯示內容。
 
@@ -89,6 +92,11 @@ section、name 或 label。除下述只有空白的欄位外，一個非空 flav
 不是草稿、解碼後顯示文字或 YAML 排版 bytes。人名改譯等任何 text 變動須新 revision、重做互審與採納，
 不得批次替換既有分片；工具可另列受影響候選。
 
+清冊 v2 的 replay_context 另釘凍結語義 manifest、producer 環境及完整六流 expected_outputs；
+config 仍恰 `{}`。環境值不同只記 provenance，凍結 bytes／所有輸出相同即可通過，
+漂移拒絕並附差異；runtime_dependencies／runtime_configuration 不進 coverage 語義 root，F1 仍完整保留。
+四狀態、整欄 span、exact 原文／payload、零參數、owner／pending 均驗，摘要不代替逐筆門檻。
+
 ## 4. 譯本政策與歸因
 
 寬鬆的採納門檻不豁免來源、span、ID、譯本語法與採納閉包。
@@ -145,8 +153,10 @@ loader 必須逐筆經 template_id 解析到已驗清冊，
 不把 flavor 選用散播到全部 use，也不因欄位不同虛造語義 variant 或改 context-v1 配方。
 真正同字異義可走已採納 context_assignment；其他需要的選用擴充由 #53 另審，不以本文件偷偷改 DDL／公開格式。
 
-`translation_authored_format=1`、`template_source_format=1`、record／decision／hash recipe 與既有 glossary 必填欄位不變。
-新增的是清冊／span 的 role 值與對應嚴格驗證，不修改已採納分片 bytes、索引舊 hash 或舊模板 ID。
+`translation_authored_format=1`、record／decision／hash recipe 與既有 glossary 必填欄位不變。
+新清冊使用 `template_source_format=2`，封套增加 replay_context，依歷史清冊契約的首次採納 gate；
+v2 結構支援尚未接完整重算時必須拒絕來源語意入口，不先寫真實清冊。
+不修改已採納分片 bytes、索引舊 hash 或舊模板 ID；發現正式 v1 另審可追溯遷移，不自填 expected。
 尚未支援 flavor role、模板／清冊或政策的 loader 必須拒收，不能忽略非空新資料後冒稱整份入口已驗證。
 風味資料需等 #52／#53 相關能力完整接入才可正式載入、重建與發布；本文不修改程式或能力旗標。
 
@@ -162,6 +172,9 @@ tokens 維持 null，風味及其譯文留詳情分片。不增集合、tuple �
 缺譯回原文；缺 raw／hash 錯／閉包錯則是建置錯誤，不能吞成一般缺譯。
 
 ## 6. 合成驗收清單
+
+歷史清冊[H01–H28](template-source-replay.md#6-最小獨立驗收)與以下 F 系列共同驗收；
+清冊以不同合法 basis 重算、環境差異與完整輸出 hash 檢查不減少既有 owner／採納反例。
 
 以下都是自撰輸入，不是官方卡文、採納收據或已跑過的測試。每列多個條件分開做最小案例；
 反例從相應成功基例只改該條件，不讓外層格式錯誤遮蔽待測拒絕。
