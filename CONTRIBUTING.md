@@ -308,17 +308,17 @@ pre-commit run --hook-stage manual cargo-mutants
 
 ## Keeping tools up to date
 
-| What                                                                | How it is updated                                                                               |
-| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| GitHub Actions (pinned by commit SHA)                               | Dependabot, weekly (`.github/dependabot.yml`)                                                   |
-| Rust and Python (`carddb`) dependencies                             | Dependabot, weekly, one grouped pull request per ecosystem (version updates)                    |
-| Bun dependencies (`sim/web`)                                        | `bun update` and `bun audit` by hand, monthly (Dependabot cannot read `bun.lock` version 2 yet) |
-| pre-commit hook versions (`rev:`)                                   | Dependabot, weekly, one grouped pull request                                                    |
-| `cz-conventional-gitmoji` (its hook and the commitizen pin)         | By hand, together with the `carddb` dev dependency (Dependabot ignores this hook)               |
-| Node for the markdownlint hook                                      | `language_version` in `.pre-commit-config.yaml`; keep it equal to `node` in `mise.toml`         |
-| Bun and Node                                                        | `mise.toml`, by hand                                                                            |
-| Rust toolchain                                                      | `rust-toolchain.toml`, by hand, together with `rust-version` in `Cargo.toml`                    |
-| cargo tools in CI (`cargo-llvm-cov`, `cargo-deny`, `cargo-machete`) | The `tool:` versions in `.github/workflows/ci.yml`, by hand                                     |
+| What                                                                | How it is updated                                                                                   |
+| ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| GitHub Actions (pinned by commit SHA)                               | Dependabot, weekly (`.github/dependabot.yml`)                                                       |
+| Rust and Python (`carddb`) dependencies                             | Dependabot, weekly, one grouped pull request per ecosystem (version updates)                        |
+| Bun dependencies (`sim/web`)                                        | `bun update` and `bun audit` by hand, monthly (Dependabot cannot read `bun.lock` version 2 yet)     |
+| pre-commit hook versions (`rev:`)                                   | Dependabot, weekly, one grouped pull request                                                        |
+| `cz-conventional-gitmoji` in the commitizen hook                    | Pinned in `.pre-commit-config.yaml`; bump it with its hook's `rev:` and the `carddb` dev dependency |
+| Node for the markdownlint hook                                      | `language_version` in `.pre-commit-config.yaml`; keep it equal to `node` in `mise.toml`             |
+| Bun and Node                                                        | `mise.toml`, by hand                                                                                |
+| Rust toolchain                                                      | `rust-toolchain.toml`, by hand, together with `rust-version` in `Cargo.toml`                        |
+| cargo tools in CI (`cargo-llvm-cov`, `cargo-deny`, `cargo-machete`) | The `tool:` versions in `.github/workflows/ci.yml`, by hand                                         |
 
 For version updates Dependabot waits 7 days after a release before proposing it; security updates
 are proposed at once, one pull request each. Workflow files are also checked by

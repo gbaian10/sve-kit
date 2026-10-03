@@ -54,8 +54,5 @@ updates:
     groups:
       pre-commit:
         patterns: ['*']
-    ignore:
-      # Must move with the commitizen hook's additional_dependencies pin and the carddb dev dependency.
-      - dependency-name: '*cz-conventional-gitmoji*'
     commit-message:
       prefix: ⬆️ dep-bump
