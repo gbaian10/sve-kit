@@ -362,9 +362,9 @@ fn banish_card_play_and_fusion_events_reach_their_triggers() {
 #[test]
 fn name_alias_counts_for_name_selectors() {
     let loaded = catalog(&json!({
-        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"ゴースト","while_zone":"field"}}],
+        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"合成トークン甲","while_zone":"field"}}],
         "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader",
-            "amount":{"count":{"side":"self","zone":"field","name":"ゴースト"}}}}]
+            "amount":{"count":{"side":"self","zone":"field","name":"合成トークン甲"}}}}]
     }));
     let mut engine = start(
         loaded,
@@ -695,12 +695,12 @@ fn granting_aura_with_name_conditions_does_not_recurse() {
     let granted = json!([{"line":9,"kind":"activated","body":{"op":"damage","subjects":"opponent.leader","amount":1}}]);
     for aura in [
         json!({"op":"aura","subjects":{"side":"self","zone":"field","type":"follower"},"abilities":granted,
-            "condition":{"fn":"gt","args":[{"count":{"side":"self","zone":"field","name":"ゴースト"}},0]}}),
-        json!({"op":"aura","subjects":{"side":"self","zone":"field","name":"ゴースト"},"abilities":granted}),
+            "condition":{"fn":"gt","args":[{"count":{"side":"self","zone":"field","name":"合成トークン甲"}},0]}}),
+        json!({"op":"aura","subjects":{"side":"self","zone":"field","name":"合成トークン甲"},"abilities":granted}),
     ] {
         let loaded = catalog(&json!({
             "amulet":[{"line":1,"kind":"static","body":aura}],
-            "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"ゴースト","while_zone":"field"}}]
+            "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"合成トークン甲","while_zone":"field"}}]
         }));
         let engine = start(
             loaded,
@@ -725,12 +725,12 @@ fn granting_aura_with_name_conditions_does_not_recurse() {
 #[test]
 fn all_name_conditions_use_aliases_only_in_their_zone() {
     let loaded = catalog(&json!({
-        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"操り人形","while_zone":"field"}}],
+        "f-a":[{"line":1,"kind":"static","body":{"op":"name_alias","subjects":"self","name":"合成トークン乙・拡張","while_zone":"field"}}],
         "spell":[{"line":1,"kind":"spell","body":{"op":"damage","subjects":"opponent.leader","amount":{"fn":"add","args":[
-            {"count":{"side":"self","zone":"field","name_contains":"人形"}},
+            {"count":{"side":"self","zone":"field","name_contains":"合成トークン乙"}},
             {"fn":"add","args":[
-                {"fn":"mul","args":[{"count":{"side":"self","zone":"field","not_name":"操り人形"}},10]},
-                {"fn":"mul","args":[{"count":{"side":"self","zone":"ex","name":"操り人形"}},100]}
+                {"fn":"mul","args":[{"count":{"side":"self","zone":"field","not_name":"合成トークン乙・拡張"}},10]},
+                {"fn":"mul","args":[{"count":{"side":"self","zone":"ex","name":"合成トークン乙・拡張"}},100]}
             ]}
         ]}}}]
     }));
@@ -881,7 +881,7 @@ fn scope_and_ruling_violations_are_rejected_at_load() {
     // CR 10.3.5, Q424: a follower's alias is field-only; `any` is rejected.
     let alias = |zone: &str| {
         format!(
-            "      - line: 1\n        kind: static\n        body:\n          op: name_alias\n          subjects: self\n          name: ゴースト\n          while_zone: {zone}\n"
+            "      - line: 1\n        kind: static\n        body:\n          op: name_alias\n          subjects: self\n          name: 合成トークン甲\n          while_zone: {zone}\n"
         )
     };
     assert!(rejections_for("f-a", &alias("any"))[0].contains("Q424"));

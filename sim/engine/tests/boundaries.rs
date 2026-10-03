@@ -6960,9 +6960,9 @@ fn suppression_fixture(local: bool, enabled: bool, sentence: &str) -> (Arc<Catal
 fn suppression_precedes_trigger_limits_and_preserves_unrelated_entry_triggers() {
     for (local, enabled) in [(true, true), (false, true), (false, false)] {
         let reason = if local {
-            "それの{ファンファーレ}能力は誘発しない。"
+            "合成ローカル注記：ファンファーレは誘発しない。"
         } else {
-            "これが場にいる限り、相手プレイヤーすべての{ファンファーレ}能力と【進化時】能力は誘発しない。"
+            "合成盤面注記：ファンファーレは誘発しない。"
         };
         let (catalog, mut engine) = suppression_fixture(local, enabled, reason);
         assert_eq!(
@@ -7020,7 +7020,7 @@ fn suppression_precedes_trigger_limits_and_preserves_unrelated_entry_triggers() 
 fn unknown_or_ambiguous_suppression_provenance_rolls_back_the_resolution() {
     for reason in [
         "無関係な文。",
-        "{ファンファーレ}能力は誘発しない。別の{ファンファーレ}能力は誘発しない。",
+        "合成条件Aのファンファーレは誘発しない。合成条件Bのファンファーレも誘発しない。",
     ] {
         let (_, mut engine) = suppression_fixture(true, true, reason);
         engine
