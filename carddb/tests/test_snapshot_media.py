@@ -394,3 +394,319 @@ def test_index_two_window_and_no_recursive_changes_history() -> None:
         read_index(index, {})
     with pytest.raises(ValidationError):
         validate("Index", index | {"pages": []}, MEDIA)
+
+
+def _changed_payload(
+    snapshot: object, *, add_dependency: bool
+) -> tuple[dict[str, JsonValue], dict[str, bytes]]:
+    from sve_carddb.snapshot.export import Snapshot  # ruff: ignore[import-outside-top-level] -- explicit synthetic helper type boundary
+
+    assert isinstance(snapshot, Snapshot)
+    manifest = deepcopy(snapshot.manifest)
+    files = {
+        string(f["key"]): f
+        for r in array(manifest["files"])
+        for f in (object_value(r),)
+    }
+    key = next(k for k in files if k.startswith("images/detail/home_set/"))
+    if add_dependency:
+        extra = next(k for k in files if k.startswith("images/detail/global/"))
+        array(files[key]["dependencies"]).append(
+            {"key": extra, "sha256": files[extra]["sha256"]}
+        )
+        array(files[key]["dependencies"]).sort(
+            key=lambda r: string(object_value(r)["key"])
+        )
+    else:
+        files[key]["dependencies"] = [
+            r
+            for r in array(files[key]["dependencies"])
+            if object_value(r)["key"] == "config"
+        ]
+    return manifest, {k: b.raw for k, b in snapshot.payloads.items()}
+
+
+@pytest.mark.parametrize("extra", [True, False])
+def test_media_rejects_missing_or_extra_bootstrap_dependencies(
+    images: PublicImages, extra: bool
+) -> None:
+    plan = prepare_media(images.projection, images.library, revision=7)
+    snapshot = export_snapshot(
+        plan.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    manifest, blobs = _changed_payload(snapshot, add_dependency=extra)
+    with pytest.raises(
+        ValueError, match=r"^Media dependencies must equal exact bootstrap closure$"
+    ):
+        read_snapshot(manifest, blobs)
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("face_id", "face"),
+        ("digital_phase", "normal"),
+        ("effect_similarity", "reworked"),
+        ("review_level", "confirmed"),
+        ("review_level", "sampled"),
+    ],
+)
+def test_same_name_is_card_level_not_human_review(
+    images: PublicImages, field: str, value: JsonValue
+) -> None:
+    projection = deepcopy(images.projection)
+    row = projection.tables["digital_link"][0]
+    row.update(
+        relation="same_name",
+        face_id=None,
+        digital_phase=None,
+        effect_similarity=None,
+        review_level="unreviewed",
+    )
+    row[field] = value
+    plan = prepare_media(projection, images.library, revision=7)
+    with pytest.raises(
+        ValueError, match=r"^Same-name browsing must be unreviewed and card-level$"
+    ):
+        export_snapshot(plan.projection, images.ownership, BATCH, format_version=MEDIA)
+
+
+def test_two_printings_and_permanent_back_ordinal_share_source_not_target(
+    images: PublicImages,
+) -> None:
+    projection = deepcopy(images.projection)
+    original = projection.tables["printing"][0]
+    another = deepcopy(original)
+    another.update(
+        id="printing:another", int_id=345, card_no="SYN-EN001aⓈ", region="jp"
+    )
+    projection.tables["printing"].append(another)
+    back = deepcopy(projection.tables["face"][0])
+    back.update(id="face:back", ordinal=7, side="back", current=[], wording=[])
+    projection.tables["face"].append(back)
+    array(projection.tables["card"][0]["faces"]).append("face:back")
+    back_printing = deepcopy(object_value(array(original["faces"])[0]))
+    back_printing["face_id"] = "face:back"
+    # Unknown back text has no adopted observation; the image uses permanent ordinal 7.
+    back_printing["observations"] = []
+    array(another["faces"]).append(back_printing)
+    projection.tables["printing_image"].extend(
+        [
+            {"printing_id": "printing:another", "face_id": "face", "image_id": "image"},
+            {
+                "printing_id": "printing:another",
+                "face_id": "face:back",
+                "image_id": "image",
+            },
+        ]
+    )
+    plan = prepare_media(projection, images.library, revision=7)
+    paths = {string(a["path"]) for a in plan.assets}
+    assert len(paths) == 15
+    assert "images/art_m/345-f7.webp" in paths
+    assert "images/card_s/345.webp" in paths
+    assert "images/card_s/345-f1.webp" not in paths
+    assert len({string(a["sha256"]) for a in plan.assets}) == 3
+
+
+def test_byte_change_after_sealing_rejected_before_activation(
+    images: PublicImages, tmp_path: Path
+) -> None:
+    import shutil  # ruff: ignore[import-outside-top-level] -- isolate a mutable synthetic cache
+
+    library = tmp_path / "library"
+    shutil.copytree(images.library, library)
+    plan = prepare_media(images.projection, library, revision=7)
+    asset = plan.assets[0]
+    source = library / string(asset["source"])
+    content = source.read_bytes()
+    source.write_bytes(bytes([content[0] ^ 1]) + content[1:])
+    snapshot = export_snapshot(
+        plan.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    with pytest.raises(ValueError, match=r"^Media plan source hash or bytes mismatch$"):
+        write_preview(snapshot, roots, {}, image_source=library, media_plan=plan)
+    assert not (roots.preview / "snapshots/preview/current.json").exists()
+
+
+def test_media_uses_printing_home_not_card_home(images: PublicImages) -> None:
+    from sve_carddb.snapshot.export import Ownership  # ruff: ignore[import-outside-top-level] -- independent build-only ownership input
+
+    projection = deepcopy(images.projection)
+    family = deepcopy(projection.tables["product_family"][0])
+    family["id"] = "new:home"
+    projection.tables["product_family"].append(family)
+    homes = {string(p["id"]): "new:home" for p in projection.tables["printing"]}
+    plan = prepare_media(projection, images.library, revision=7)
+    snapshot = export_snapshot(
+        plan.projection, Ownership(homes), BATCH, format_version=MEDIA
+    )
+    assert any(
+        string(object_value(f)["key"]).startswith("images/detail/home_set/new%3Ahome/")
+        for f in array(snapshot.manifest["files"])
+    )
+
+
+@pytest.mark.parametrize("field", ["card_version", "art_version", "variants"])
+def test_unavailable_media_never_offers_url(images: PublicImages, field: str) -> None:
+    plan = prepare_media(deepcopy(images.projection), images.library, revision=7)
+    for row in plan.projection.tables["image_asset"]:
+        row["availability"] = "missing"
+    plan.projection.tables["image_variant"] = []
+    media = plan.projection.tables["printing_image"][0]
+    media.update(
+        availability="missing", card_version=None, art_version=None, variants=[]
+    )
+    media[field] = (
+        [{"size_key": "art_s", "width": 160, "height": 120}]
+        if field == "variants"
+        else 7
+    )
+    with pytest.raises(
+        ValueError, match=r"^Unavailable media cannot provide image URLs$"
+    ):
+        export_snapshot(plan.projection, images.ownership, BATCH, format_version=MEDIA)
+
+
+@pytest.mark.parametrize("missing", ["card_s", "art_s"])
+def test_prepare_requires_complete_verified_outputs(
+    images: PublicImages, missing: str
+) -> None:
+    projection = deepcopy(images.projection)
+    projection.tables["image_variant"] = [
+        r for r in projection.tables["image_variant"] if r["size_key"] != missing
+    ]
+    with pytest.raises(
+        ValueError, match=r"^Available preview printing image requires all five sizes$"
+    ):
+        prepare_media(projection, images.library, revision=7)
+
+
+def test_local_reservation_fsync_before_yield(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sve_carddb.snapshot.preview.media_state as state  # ruff: ignore[import-outside-top-level] -- replace only the durable reservation boundary
+
+    calls: list[int] = []
+    monkeypatch.setattr(state.os, "fsync", calls.append)
+    with reservation(Roots(tmp_path / "preview", tmp_path / "formal")) as (revision, _):
+        assert revision == 1
+        assert calls
+
+
+def test_same_name_capability_nonempty_and_old_profile_rejects(
+    images: PublicImages,
+) -> None:
+    projection = deepcopy(images.projection)
+    row = projection.tables["digital_link"][0]
+    row.update(
+        relation="same_name",
+        face_id=None,
+        digital_phase=None,
+        effect_similarity=None,
+        review_level="unreviewed",
+    )
+    plan = prepare_media(projection, images.library, revision=7)
+    snapshot = export_snapshot(
+        plan.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    assert "digital-same-name-links-v1" in array(
+        snapshot.manifest["required_capabilities"]
+    )
+    assert (
+        read_snapshot(
+            snapshot.manifest, {k: b.raw for k, b in snapshot.payloads.items()}
+        )["digital_link"][0]["review_level"]
+        == "unreviewed"
+    )
+    with pytest.raises(ValidationError):
+        validate("digital_link", encode("digital_link", row), "1.1.0")
+
+
+def test_failed_image_group_does_not_switch_pointer(
+    images: PublicImages, tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sve_carddb.snapshot.preview as writer  # ruff: ignore[import-outside-top-level] -- fault only the output writer boundary
+
+    roots = Roots(tmp_path / "preview", tmp_path / "formal")
+    plan = prepare_media(images.projection, images.library, revision=7)
+    snapshot = export_snapshot(
+        plan.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    write_preview(snapshot, roots, {}, image_source=images.library, media_plan=plan)
+    pointer = (roots.preview / "snapshots/preview/current.json").read_bytes()
+    observed = writer._write
+    count = 0
+
+    def interrupted(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
+        nonlocal count
+        if path.startswith("images/"):
+            count += 1
+            if count == 3:
+                raise RuntimeError("synthetic interrupted group")
+        observed(roots, path, raw, immutable=immutable)
+
+    monkeypatch.setattr(writer, "_write", interrupted)
+    with pytest.raises(RuntimeError, match=r"^synthetic interrupted group$"):
+        write_preview(snapshot, roots, {}, image_source=images.library, media_plan=plan)
+    assert (roots.preview / "snapshots/preview/current.json").read_bytes() == pointer
+    assert (
+        parse((roots.preview / "private/media-committed.json").read_bytes())
+        == plan.state
+    )
+
+
+@pytest.mark.parametrize(("width", "height"), [(128, 96), (12, 16)])
+def test_landscape_and_tiny_images_expose_actual_dimensions(
+    images: PublicImages, tmp_path: Path, width: int, height: int
+) -> None:
+    from sve_carddb.image_variants import build_variants  # ruff: ignore[import-outside-top-level] -- reuse the production transform for synthetic inputs
+
+    from .test_image_variants import png, source  # ruff: ignore[import-outside-top-level] -- generated pixels, no real cards
+
+    result = build_variants(
+        source(png(width, height)),
+        blob_root=tmp_path / "library",
+        cache_root=tmp_path / "cache",
+    )
+    projection = deepcopy(images.projection)
+    projection.tables["image_asset"][0].update(width=width, height=height)
+    projection.tables["image_variant"] = [
+        {
+            "image_id": "image",
+            "size_key": v.size_key,
+            "format": v.format,
+            "path": v.path,
+            "width": v.width,
+            "height": v.height,
+            "bytes": v.bytes,
+        }
+        for v in sorted(result.variants, key=lambda v: v.size_key)
+    ]
+    plan = prepare_media(projection, tmp_path / "library", revision=7)
+    display = {
+        string(object_value(v)["size_key"]): object_value(v)
+        for v in array(plan.projection.tables["printing_image"][0]["variants"])
+    }
+    assert display["card_l"]["width"] == width
+    assert display["card_l"]["height"] == height
+    export_snapshot(plan.projection, images.ownership, BATCH, format_version=MEDIA)
+
+
+@pytest.mark.parametrize("field", ["width", "bytes"])
+def test_media_source_decoded_dimensions_and_length_are_verified(
+    images: PublicImages, field: str
+) -> None:
+    projection = deepcopy(images.projection)
+    variant = next(
+        r for r in projection.tables["image_variant"] if r["size_key"] == "card_s"
+    )
+    variant[field] = int(variant[field]) + 1
+    message = (
+        "Preview image decoded format or dimensions mismatch"
+        if field == "width"
+        else "Preview image hash or bytes mismatch"
+    )
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        prepare_media(projection, images.library, revision=7)
