@@ -193,7 +193,7 @@ cards:
             amount: 1
           - op: link_resource
             subjects: self
-            name: ドライブポイント
+            resource_role: drive_point
             count: 1
             from_zone: evolve_deck
             to: drive
@@ -423,7 +423,7 @@ cards:
             amount: 1
           - op: link_resource
             subjects: self
-            name: ドライブポイント
+            resource_role: drive_point
             count: 1
             from_zone: evolve_deck
             to: drive
