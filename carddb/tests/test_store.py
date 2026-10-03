@@ -101,7 +101,7 @@ def test_resolve_within_rejects_absolute_path_even_inside_allowed_root(
 
 
 def test_compress_round_trip() -> None:
-    html = "<html><p>竜の魔女・リリウム</p></html>".encode()
+    html = "<html><p>合成試験・テスト甲</p></html>".encode()
     stored = compress(html)
     assert stored != html
     assert decompress(stored) == html

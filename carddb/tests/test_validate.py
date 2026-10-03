@@ -110,8 +110,8 @@ def test_media_type_rejects(content_type: str | None) -> None:
 
 
 def test_decode_html() -> None:
-    body = "<html>竜の魔女</html>".encode()
-    assert decode_html(body, min_bytes=10) == "<html>竜の魔女</html>"
+    body = "<html>合成の文字</html>".encode()
+    assert decode_html(body, min_bytes=10) == "<html>合成の文字</html>"
 
 
 def test_decode_html_rejects_short_page() -> None:

@@ -77,7 +77,7 @@ def test_identical_labels_coexist_across_glossary_and_vocabulary(
         for concept, ja, zh, category in (
             ("resource.ep", "EP", "EP", "rule_term"),
             ("resource.sep", "SEP", "SEP", "rule_term"),
-            ("trait.spirit", "精霊", "精靈", "trait"),
+            ("trait.spirit", "仮合成族", "合成族", "trait"),
         ):
             db.insert(
                 "glossary_term",
@@ -102,7 +102,7 @@ def test_identical_labels_coexist_across_glossary_and_vocabulary(
         for kind, code, text in (
             ("type", "ep", "EP"),
             ("type", "sep", "SEP"),
-            ("class", "elf", "精靈"),
+            ("class", "elf", "合成族"),
         ):
             db.insert(
                 "vocabulary",
