@@ -1,0 +1,427 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://svekit.app/dsl/engine-rules.schema.json",
+  "title": "Engine rules and identity bindings",
+  "description": "Finite capabilities and resource identities; references are validated against the pinned input at the Catalog boundary.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "scope",
+    "input",
+    "titles",
+    "resources",
+    "evidence"
+  ],
+  "properties": {
+    "version": {
+      "const": "engine-rules/1"
+    },
+    "scope": {
+      "type": "object",
+      "properties": {
+        "region": {
+          "enum": [
+            "jp",
+            "en"
+          ]
+        },
+        "rules_version": {
+          "type": "string",
+          "minLength": 1
+        },
+        "rules_source_version_id": {
+          "type": "string",
+          "pattern": "^src:v1:[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "region",
+        "rules_version",
+        "rules_source_version_id"
+      ],
+      "additionalProperties": false
+    },
+    "input": {
+      "type": "object",
+      "properties": {
+        "kind": {
+          "enum": [
+            "legacy-jp",
+            "resolved"
+          ]
+        },
+        "snapshot_sha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        }
+      },
+      "required": [
+        "kind",
+        "snapshot_sha256"
+      ],
+      "additionalProperties": false
+    },
+    "titles": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "title_code": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "anchor": {
+            "$ref": "#/$defs/faceRef"
+          },
+          "capabilities": {
+            "type": "array",
+            "items": {
+              "$ref": "#/$defs/capability"
+            },
+            "minItems": 0,
+            "maxItems": 3,
+            "uniqueItems": true
+          },
+          "evidence": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]*$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          }
+        },
+        "required": [
+          "title_code",
+          "anchor",
+          "capabilities",
+          "evidence"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 0,
+      "uniqueItems": true
+    },
+    "resources": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/resourceBinding"
+      },
+      "minItems": 0,
+      "maxItems": 4,
+      "uniqueItems": true
+    },
+    "evidence": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "source_version_id": {
+            "type": "string",
+            "pattern": "^src:v1:[a-f0-9]{64}$"
+          },
+          "rule_refs": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9]+(?:\\.[0-9]+)*$"
+            },
+            "minItems": 1,
+            "uniqueItems": true
+          },
+          "qa_refs": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1
+            },
+            "minItems": 0,
+            "uniqueItems": true
+          },
+          "checked_on": {
+            "type": "string",
+            "format": "date"
+          },
+          "checked_by": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "required": [
+          "id",
+          "source_version_id",
+          "rule_refs",
+          "checked_on",
+          "checked_by"
+        ],
+        "additionalProperties": false
+      },
+      "minItems": 1,
+      "uniqueItems": true
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "input": {
+            "properties": {
+              "kind": {
+                "const": "legacy-jp"
+              }
+            },
+            "required": [
+              "kind"
+            ]
+          }
+        },
+        "required": [
+          "input"
+        ]
+      },
+      "then": {
+        "properties": {
+          "scope": {
+            "properties": {
+              "region": {
+                "const": "jp"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "$defs": {
+    "resourceRole": {
+      "enum": [
+        "lesson_item",
+        "meal_item",
+        "drive_point",
+        "stack_base"
+      ]
+    },
+    "faceRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "legacy-face"
+            },
+            "region": {
+              "enum": [
+                "jp",
+                "en"
+              ]
+            },
+            "card_no": {
+              "type": "string",
+              "minLength": 1
+            },
+            "face_ordinal": {
+              "type": "integer",
+              "minimum": 0
+            }
+          },
+          "required": [
+            "kind",
+            "region",
+            "card_no",
+            "face_ordinal"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "face-id"
+            },
+            "region": {
+              "enum": [
+                "jp",
+                "en"
+              ]
+            },
+            "face_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "region",
+            "face_id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "nameRef": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "legacy-name"
+            },
+            "face": {
+              "$ref": "#/$defs/faceRef"
+            },
+            "name_source": {
+              "enum": [
+                "printed",
+                "rules"
+              ]
+            }
+          },
+          "required": [
+            "kind",
+            "face",
+            "name_source"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "rules-name-id"
+            },
+            "region": {
+              "enum": [
+                "jp",
+                "en"
+              ]
+            },
+            "rules_name_id": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "kind",
+            "region",
+            "rules_name_id"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "capability": {
+      "oneOf": [
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "opening_start_amulet"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "opening_ex_resource"
+            },
+            "resource_role": {
+              "const": "lesson_item"
+            },
+            "count": {
+              "const": 5
+            },
+            "zone": {
+              "const": "ex"
+            }
+          },
+          "required": [
+            "kind",
+            "resource_role",
+            "count",
+            "zone"
+          ],
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "properties": {
+            "kind": {
+              "const": "ub_enabled"
+            }
+          },
+          "required": [
+            "kind"
+          ],
+          "additionalProperties": false
+        }
+      ]
+    },
+    "resourceBinding": {
+      "type": "object",
+      "properties": {
+        "role": {
+          "$ref": "#/$defs/resourceRole"
+        },
+        "names": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/nameRef"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "template": {
+          "$ref": "#/$defs/faceRef"
+        },
+        "evidence": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]*$"
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        }
+      },
+      "required": [
+        "role",
+        "names",
+        "evidence"
+      ],
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "role": {
+                "enum": [
+                  "lesson_item",
+                  "stack_base"
+                ]
+              }
+            },
+            "required": [
+              "role"
+            ]
+          },
+          "then": {
+            "required": [
+              "template"
+            ]
+          }
+        }
+      ]
+    }
+  }
+}
