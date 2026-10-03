@@ -1005,3 +1005,29 @@ fn resource_template_uses_the_resolved_face_at_birth() {
         assert_eq!(object["name"], "synthetic-selected-face");
     }
 }
+
+#[test]
+fn unbound_selectors_reject_before_enumerating_an_empty_candidate_set() {
+    let mut fixture = Fixture::new();
+    for selector in [
+        json!({"side":"self","zone":"ex","resource_role":"lesson_item"}),
+        json!({"from":{"side":"self","zone":"ex"},"resource_role":"lesson_item"}),
+    ] {
+        fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":selector,"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
+        let unbound = Catalog::from_documents(
+            &fixture.snapshot(),
+            &fixture.keywords.to_string(),
+            &fixture.documents(),
+        )
+        .unwrap();
+        let game = from_catalog(Arc::new(unbound), &position()).unwrap();
+        assert!(matches!(game.legal(), Err(EngineFailure::Unsupported(_))));
+    }
+}
+
+#[test]
+fn virtual_leaders_cannot_match_a_physical_resource_name_role() {
+    let mut fixture = Fixture::new();
+    fixture.programs["cards"]["actor"]["abilities"] = json!([{"kind":"activated","line":1_u8,"targets":[{"key":"1","select":{"side":"self","zone":"leader","resource_role":"lesson_item"},"min":1_u8,"max":1_u8}],"body":{"op":"draw","count":0_u8}}]);
+    assert!(choices(&fixture.game(&position()).unwrap(), 1).is_empty());
+}
