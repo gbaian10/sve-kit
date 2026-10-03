@@ -11,6 +11,7 @@ import {
   stringValue,
   utf8,
 } from "./json"
+import { validateMediaDetails } from "./media"
 import type { Fragment, View } from "./reader"
 import { primaryKey } from "./schema"
 import { digest } from "./sha256"
@@ -317,6 +318,35 @@ export function validateView(view: View, manifest: Row, fragments: readonly Frag
   if (supported.size !== cardIds.size || [...cardIds].some((id) => !supported.has(id)))
     fail("support-missing", "every card requires support")
   validateImageRows(view)
+  if (manifest["format_version"] === "2.0.0") validateMediaDetails(view)
+  validateDigitalLinks(view)
+}
+
+export function validateDigitalLinks(view: View): void {
+  const links = view["digital_link"] ?? []
+  const names = new Set<string>()
+  for (const row of links) {
+    if (row["relation"] !== "same_name") continue
+    if (
+      row["face_id"] !== null ||
+      row["digital_phase"] !== null ||
+      row["effect_similarity"] !== null ||
+      row["review_level"] !== "unreviewed"
+    )
+      fail("schema", "same_name is an unreviewed card-level relation")
+    const key = canonicalText([row["card_id"] ?? null, row["digital_card_id"] ?? null])
+    if (
+      names.has(key) ||
+      links.some(
+        (other) =>
+          other !== row &&
+          other["card_id"] === row["card_id"] &&
+          other["digital_card_id"] === row["digital_card_id"],
+      )
+    )
+      fail("primary-key-duplicate", "same_name cannot duplicate another relation")
+    names.add(key)
+  }
 }
 
 /** Colocated asset/variant and printing-face checks also apply to an on-demand file. */
@@ -349,7 +379,21 @@ const TEMPLATE_PARAMETERS: readonly (readonly [string, string, readonly string[]
 ]
 
 /** Language fallback closure and the finite URL template parameter lists. */
-export function validateConfig(config: Row): void {
+export function validateConfig(config: Row, version = "1.0.0"): void {
+  if (
+    version === "2.0.0" &&
+    arrayValue(config["digital_endpoints"])
+      .map((v) => stringValue(objectValue(v)["game"]))
+      .join(",") !== "sv1,svwb"
+  )
+    fail("config-url-template", "2.0 requires sorted sv1/svwb endpoints")
+  if (
+    version === "2.0.0" &&
+    arrayValue(config["digital_endpoints"])
+      .map((v) => stringValue(objectValue(v)["refresh_policy"]))
+      .join(",") !== "frozen,on_sve_release"
+  )
+    fail("config-url-template", "digital endpoint refresh policy differs from game")
   const langs = arrayValue(config["languages"]).map((item) => objectValue(item))
   orderedRows(langs, ["code"], "languages must be sorted with unique codes")
   const codes = new Set(langs.map((lang) => stringValue(lang["code"])))

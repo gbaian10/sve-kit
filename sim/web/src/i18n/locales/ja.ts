@@ -96,8 +96,10 @@ export default {
     imageAlt: "{{name}}（{{cardNo}}）",
     noImage: "画像なし",
     imageLoading: "画像情報を読み込み中",
+    imageDownloadError: "画像を読み込めませんでした",
     imageError: "画像情報を読み込めませんでした",
     imagePending: "画像は確認待ち",
+    withdrawnNoSource: "画像は取り下げ済み：{{reason}}",
     withdrawn: "画像は取り下げ済み：{{reason}}（出典 {{host}}）",
     noTranslation: "訳名なし",
     loadImage: "画像を読み込む",
@@ -110,6 +112,12 @@ export default {
   },
   dialog: {
     close: "閉じる",
+  },
+  snapshot: {
+    stale: "以前のローカルデータを使用中です。現在の画像は取得できない場合があります。",
+    offline: "オフライン：ローカルデータを使用中です。画像が古いか取得できない場合があります。",
+    updateApp: "最新のデータを読むにはアプリを更新してください。",
+    retry: "更新を確認",
   },
   dev: {
     root: { cdn: "本番", preview: "プレビュー" },

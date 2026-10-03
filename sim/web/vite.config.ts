@@ -91,6 +91,14 @@ export default defineConfig({
   server: {
     fs: { allow: [searchForWorkspaceRoot(process.cwd()), contractSchemaDir] },
   },
+  worker: {
+    rollupOptions: {
+      output: {
+        entryFileNames: (chunk) =>
+          chunk.name === "image-sw" ? "image-sw.js" : "assets/[name]-[hash].js",
+      },
+    },
+  },
   test: {
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],

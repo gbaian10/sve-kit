@@ -52,6 +52,30 @@ describe("decoder worker boundary", () => {
     await vi.advanceTimersByTimeAsync(1000)
     expect(FakeWorker.instances[0]?.terminated).toBe(true)
   })
+  it("cancels old work and ignores a queued old-worker error after replacement", async () => {
+    class PausedWorker extends FakeWorker {
+      message?: { id: number; request: DecodeRequest }
+      override postMessage(message: { id: number; request: DecodeRequest }) {
+        this.message = message
+      }
+    }
+    vi.stubGlobal("Worker", PausedWorker)
+    const decode = createDecoder()
+    const old = decode({ kind: "manifest", bytes: canonical({}) })
+    const previous = FakeWorker.instances[0]
+    const lateError = previous?.onerror
+    const rejected = expect(old).rejects.toThrow("snapshot replaced")
+    decode.cancel()
+    await rejected
+    expect(previous?.terminated).toBe(true)
+    const next = decode({ kind: "manifest", bytes: canonical({}) })
+    const current = FakeWorker.instances[1] as PausedWorker
+    lateError?.()
+    expect(current.terminated).toBe(false)
+    current.onmessage?.({ data: { id: current.message?.id ?? -1, code: "shape" } })
+    await expect(next).rejects.toThrow("worker validation failed")
+    decode.cancel()
+  })
   it("the workerless fixture path fails for the same schema reason", async () => {
     vi.stubGlobal("Worker", undefined)
     await expect(createDecoder()({ kind: "manifest", bytes: canonical({}) })).rejects.toThrow(

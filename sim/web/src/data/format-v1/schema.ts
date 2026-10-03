@@ -1,5 +1,6 @@
 import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json"
 import shardedContract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1_1/contract.schema.json"
+import v2Contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json"
 import { fail } from "./errors"
 import {
   arrayValue,
@@ -18,9 +19,23 @@ export const SCHEMA_ID = "urn:sve-kit:snapshot:1.0.0"
 export const schemaRoot: JsonObject = objectValue(contract)
 export const validator = new SchemaValidator(schemaRoot)
 const shardedValidator = new SchemaValidator(objectValue(shardedContract))
+const v2Validator = new SchemaValidator(objectValue(v2Contract))
 
-export function definition(name: string): JsonObject {
-  return validator.definition(name)
+function forVersion(version: string): SchemaValidator {
+  const selected =
+    version === "1.0.0"
+      ? validator
+      : version === "1.1.0"
+        ? shardedValidator
+        : version === "2.0.0"
+          ? v2Validator
+          : undefined
+  if (!selected) fail("unsupported-version", "unsupported schema profile")
+  return selected
+}
+
+export function definition(name: string, version = "1.0.0"): JsonObject {
+  return forVersion(version).definition(name)
 }
 
 /** Shape and primitive boundaries against a fixed definition; throws a `schema` error. */
@@ -30,9 +45,7 @@ export function validate(
   path: JsonPath = [],
   version = "1.0.0",
 ): void {
-  const selected =
-    version === "1.0.0" ? validator : version === "1.1.0" ? shardedValidator : undefined
-  if (!selected) fail("unsupported-version", "unsupported schema profile")
+  const selected = forVersion(version)
   const failure = selected.validate(name, value)
   if (failure)
     fail("schema", `${name}: ${failure.keyword} ${failure.detail}`, [...path, ...failure.path])
@@ -43,8 +56,8 @@ function strings(value: JsonValue): string[] {
 }
 
 /** The immutable column order of a row or nested tuple. */
-export function columns(name: string): string[] {
-  return strings(definition(name)["x-columns"] ?? null)
+export function columns(name: string, version = "1.0.0"): string[] {
+  return strings(definition(name, version)["x-columns"] ?? null)
 }
 
 /** The complete public collection whitelist, in schema order. */
@@ -54,14 +67,14 @@ export function tables(): string[] {
 
 /** A fragment's fixed row type, e.g. printing + detail -> printing_detail. */
 export function rowType(table: string, partition: string, version = "1.0.0"): string {
-  const selected = version === "1.1.0" ? shardedValidator : validator
+  const selected = forVersion(version)
   const mapping = objectValue(selected.definition("Container")["x-fragments"] ?? null)
   return stringValue(objectValue(mapping[table] ?? null)[partition] ?? null)
 }
 
 /** The format-authoritative descriptor; payload descriptors must equal it, never replace it. */
-export function descriptor(name: string): JsonObject {
-  const def = definition(name)
+export function descriptor(name: string, version = "1.0.0"): JsonObject {
+  const def = definition(name, version)
   return { columns: def["x-columns"] ?? null, items: def["x-types"] ?? null }
 }
 
@@ -69,23 +82,23 @@ export function primaryKey(table: string): string[] {
   return strings(definition(table)["x-primary-key"] ?? null)
 }
 
-function references(kind: JsonObject, into: Set<string>): void {
+function references(kind: JsonObject, into: Set<string>, version: string): void {
   const ref = kind["ref"]
   if (typeof ref === "string") {
     into.add(ref)
-    for (const name of requiredTypes(ref)) into.add(name)
+    for (const name of requiredTypes(ref, version)) into.add(name)
     return
   }
   for (const key of ["array", "nullable"]) {
     const inner = kind[key]
-    if (inner !== undefined) references(objectValue(inner), into)
+    if (inner !== undefined) references(objectValue(inner), into, version)
   }
 }
 
 /** Every nested descriptor a row type needs, from the fixed acyclic schema. */
-export function requiredTypes(name: string): Set<string> {
+export function requiredTypes(name: string, version = "1.0.0"): Set<string> {
   const result = new Set<string>()
-  for (const item of arrayValue(definition(name)["x-types"] ?? null))
-    references(objectValue(item), result)
+  for (const item of arrayValue(definition(name, version)["x-types"] ?? null))
+    references(objectValue(item), result, version)
   return result
 }

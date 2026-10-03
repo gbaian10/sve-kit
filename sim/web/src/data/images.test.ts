@@ -152,6 +152,7 @@ describe("page image metadata", () => {
   it("prunes only old metadata namespaces and keeps the active and immediately previous version", async () => {
     const cache = storage()
     await cache.open("unrelated-app")
+    await cache.open("sve-images-%2Fcdn-preview:-preview")
     const fetcher: Fetcher = () =>
       Promise.resolve(new Response(canonical({ synthetic: 0 }).slice().buffer))
     const first = new MetadataBytes("/cdn", "a", metadataFiles(1), fetcher, () => undefined, cache)
@@ -167,7 +168,14 @@ describe("page image metadata", () => {
       "a",
     )
     await second.prefetch()
-    expect((await cache.keys()).sort()).toEqual(["sve-images-a", "sve-images-b", "unrelated-app"])
+    expect((await cache.keys()).sort()).toEqual(
+      [
+        "sve-images-%2Fcdn:-a",
+        "sve-images-%2Fcdn:-b",
+        "sve-images-%2Fcdn-preview:-preview",
+        "unrelated-app",
+      ].sort(),
+    )
     const third = new MetadataBytes(
       "/cdn",
       "c",
@@ -179,11 +187,18 @@ describe("page image metadata", () => {
       "b",
     )
     await third.prefetch()
-    expect((await cache.keys()).sort()).toEqual(["sve-images-b", "sve-images-c", "unrelated-app"])
+    expect((await cache.keys()).sort()).toEqual(
+      [
+        "sve-images-%2Fcdn:-b",
+        "sve-images-%2Fcdn:-c",
+        "sve-images-%2Fcdn-preview:-preview",
+        "unrelated-app",
+      ].sort(),
+    )
   })
   it("revalidates equal-length persistent bytes instead of accepting a corrupt cache entry", async () => {
     const cache = storage()
-    const opened = await cache.open("sve-images-corrupt")
+    const opened = await cache.open("sve-images-%2Fcdn:-corrupt")
     await opened.put("/cdn/data0", new Response(canonical({ synthetic: 9 }).slice().buffer))
     let requests = 0
     const bytes = new MetadataBytes(

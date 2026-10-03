@@ -20,11 +20,13 @@ import { descriptor, primaryKey, requiredTypes, rowType, tables, validate } from
 import { validateConfig, validateFragments, validateView } from "./semantics"
 import { digest } from "./sha256"
 
-const FORMATS = ["1.0.0", "1.1.0"]
+const FORMATS = ["1.0.0", "1.1.0", "2.0.0"]
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
-const READER_CONTRACT_VERSION = "1.1.0"
+const READER_CONTRACT_VERSION = "2.0.0"
 const CAPABILITIES: readonly string[] = ["column-partition-v1", "fragment-container-v1"]
 const SHARDED_CAPABILITIES = [...CAPABILITIES, "image-entity-buckets-v1", "rules-name-on-demand-v1"]
+
+const V2_CAPABILITIES = [...SHARDED_CAPABILITIES, "digital-same-name-links-v1", "image-id-url-v1"]
 
 export type View = Record<string, Row[]>
 
@@ -146,7 +148,7 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "1.
         role !== file["role"] ||
         !(
           integerValue(fragment["bucket"]) >= 0 &&
-          integerValue(fragment["bucket"]) < (version === "1.1.0" ? 64 : 1)
+          integerValue(fragment["bucket"]) < (version === "1.0.0" ? 1 : 64)
         )
       ) {
         fail(
@@ -155,9 +157,9 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "1.
         )
       }
       const name = rowType(table, partition, version)
-      for (const nested of requiredTypes(name)) used.add(nested)
+      for (const nested of requiredTypes(name, version)) used.add(nested)
       const rows = arrayValue(fragment["rows"] ?? null).map((row, index) =>
-        decodeRow(name, row, [key, table, index]),
+        decodeRow(name, row, [key, table, index], version),
       )
       const owner = fragment["owner"] ?? null
       result.push({
@@ -179,7 +181,7 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "1.
     }
   }
   const expected: JsonObject = {}
-  for (const name of [...used].sort(compareCodePoints)) expected[name] = descriptor(name)
+  for (const name of [...used].sort(compareCodePoints)) expected[name] = descriptor(name, version)
   if (!same(value["types"], expected))
     fail("descriptor-mismatch", `missing, unused or altered nested descriptor in ${key}`)
   const declared = arrayValue(file["row_counts"] ?? null).map((item) => canonicalText(item))
@@ -199,7 +201,7 @@ function load(all: Files, payloads: ReadonlyMap<string, Uint8Array>, version: st
     const role = stringValue(file["role"])
     if (role === "config" || role === "programs") {
       validate(role === "config" ? "Config" : "Programs", value, [key], version)
-      if (role === "config") validateConfig(value)
+      if (role === "config") validateConfig(value, version)
       if (arrayValue(file["row_counts"] ?? null).length !== 0)
         fail("non-table-row-counts", `${key} has row counts`)
     } else {
@@ -557,7 +559,11 @@ export function isCompatible(entry: JsonObject): boolean {
     stringValue(item),
   )
   const capabilitiesForFormat =
-    entry["format_version"] === "1.1.0" ? SHARDED_CAPABILITIES : CAPABILITIES
+    entry["format_version"] === "2.0.0"
+      ? V2_CAPABILITIES
+      : entry["format_version"] === "1.1.0"
+        ? SHARDED_CAPABILITIES
+        : CAPABILITIES
   return (
     FORMATS.includes(stringValue(entry["format_version"])) &&
     !newerThan(stringValue(entry["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) &&
@@ -576,7 +582,7 @@ export function verifyManifest(manifestValue: JsonValue): { manifest: JsonObject
     fail("unsupported-version", "unsupported format, reader version or capability")
   const all = files(manifest)
   if (
-    version === "1.1.0" &&
+    version !== "1.0.0" &&
     [...all.values()].some((file) => integerValue(file["bytes"]) > 512 * 1024)
   )
     fail("fragment-profile", "data file exceeds fixed 512 KiB limit")

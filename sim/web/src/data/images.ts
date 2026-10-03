@@ -1,7 +1,9 @@
 import type { LoadedSnapshot, SnapshotClient } from "./client"
 import type { Row } from "./format-v1/decode"
 import { SnapshotError } from "./format-v1/errors"
-import { integerValue, objectValue, stringValue } from "./format-v1/json"
+import { arrayValue, integerValue, objectValue, stringValue } from "./format-v1/json"
+import { validateMedia } from "./format-v1/media"
+import { mediaImageSource } from "./image-url"
 import { bucketOf, createLocator, GLOBAL_OWNER } from "./locator"
 
 export interface ImageSource {
@@ -18,6 +20,7 @@ export interface ImageIndex {
   readonly cardImage: (printingId: string, faceId: string) => ImageSource | undefined
   readonly asset: (printingId: string, faceId: string) => Row | undefined
   readonly known?: (printingId: string, faceId: string) => boolean
+  readonly eager?: (printingId: string, faceId: string) => boolean
   readonly failed?: boolean
 }
 const CARD_SIZES = ["card_s", "card_m", "card_l"]
@@ -155,6 +158,79 @@ async function readImageFaces(
   }
 }
 
+async function readMediaFaces(
+  client: SnapshotClient,
+  faces: readonly ImageFace[],
+  signal?: AbortSignal,
+): Promise<ImageIndex> {
+  const snapshot = client.snapshot()
+  if (!snapshot) throw new Error("snapshot not loaded")
+  const check = () => {
+    if (signal?.aborted || client.snapshot() !== snapshot) throw new Error("image page cancelled")
+  }
+  const locate = createLocator(snapshot.files, new Set(["printing_image"]))
+  const printings = new Map<string, Row>()
+  const faceRows = new Map<string, Row>()
+  const requested = new Set(faces.map((f) => f.printingId))
+  const keys = new Set<string>()
+  for (const fragment of snapshot.bootstrap) {
+    for (const row of fragment.rows) {
+      if (fragment.table === "face") faceRows.set(stringValue(row["id"]), row)
+      if (fragment.table === "printing" && requested.has(stringValue(row["id"]))) {
+        const id = stringValue(row["id"])
+        printings.set(id, row)
+        const key = locate({
+          table: "printing_image",
+          owner: objectValue(fragment.value["owner"]),
+          bucket: bucketOf([id], 64),
+          partition: "detail",
+        })
+        if (key) keys.add(key)
+      }
+    }
+  }
+  const wanted = new Set(faces.map((f) => faceKey(f.printingId, f.faceId)))
+  const rows = new Map<string, FaceImage>()
+  let raw = 0
+  for (const key of keys) {
+    check()
+    raw += integerValue(snapshot.files.get(key)?.["bytes"])
+    if (raw > 12 * 1024 * 1024)
+      throw new SnapshotError("payload-set", "image page exceeds 12 MiB; reduce visible faces")
+    for (const fragment of await client.fragments(key)) {
+      if (fragment.table !== "printing_image") continue
+      for (const row of fragment.rows) {
+        const id = stringValue(row["printing_id"])
+        const faceId = stringValue(row["face_id"])
+        const key = faceKey(id, faceId)
+        if (!wanted.has(key)) continue
+        validateMedia(row)
+        const printing = printings.get(id)
+        const face = faceRows.get(faceId)
+        if (
+          !printing ||
+          !face ||
+          face["card_id"] !== printing["card_id"] ||
+          !arrayValue(printing["faces"]).some((f) => objectValue(f)["face_id"] === faceId)
+        )
+          throw new SnapshotError("printing-image-face", "media is not a face of this printing")
+        rows.set(key, {
+          asset: row,
+          source: mediaImageSource(
+            client.base,
+            integerValue(printing["int_id"]),
+            integerValue(face["ordinal"]),
+            row,
+            "card",
+          ),
+        })
+      }
+    }
+  }
+  check()
+  return indexOf(rows)
+}
+
 interface FaceImage {
   readonly asset: Row | undefined
   readonly source: ImageSource | undefined
@@ -166,6 +242,7 @@ const MAX_FACES = 64
 function indexOf(rows: ReadonlyMap<string, FaceImage>): ImageIndex {
   return {
     known: (printingId, faceId) => rows.has(faceKey(printingId, faceId)),
+    eager: (printingId, faceId) => rows.has(faceKey(printingId, faceId)),
     asset: (printingId, faceId) => rows.get(faceKey(printingId, faceId))?.asset,
     cardImage: (printingId, faceId) => rows.get(faceKey(printingId, faceId))?.source,
   }
@@ -247,7 +324,9 @@ export async function loadImagePage(
   }
   const missing = faces.filter((face) => !cache.has(faceKey(face.printingId, face.faceId)))
   if (missing.length) {
-    const loaded = await readImageFaces(client, missing, signal)
+    const loaded = await (snapshot.manifest["format_version"] === "2.0.0"
+      ? readMediaFaces(client, missing, signal)
+      : readImageFaces(client, missing, signal))
     check()
     for (const face of missing)
       cache.set(faceKey(face.printingId, face.faceId), {

@@ -9,6 +9,7 @@ import { ToastProvider } from "../components/ui/Toast"
 import { DevBadge } from "./DevBadge"
 import { useUiLanguageSync } from "./language"
 import { useActiveSnapshot } from "./snapshot"
+import { SnapshotNotice } from "./SnapshotNotice"
 import { useThemeAttributes } from "./theme-attributes"
 
 // Layout switches on content width (design §11): < lg bottom bar, ≥ lg left rail; content is
@@ -29,6 +30,7 @@ export function AppShell() {
         </a>
         <SideRail />
         <TopBar />
+        <SnapshotNotice client={client} status={status} />
         <main id="main" className="mx-auto w-full max-w-320 flex-1 px-4 lg:px-6">
           <Outlet />
         </main>

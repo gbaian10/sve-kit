@@ -193,7 +193,7 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
     const index = parseStrict(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
     served.files.set(
       "snapshots/versions/index.json",
-      new TextEncoder().encode(JSON.stringify({ ...index, index_format: 2 })),
+      new TextEncoder().encode(JSON.stringify({ ...index, index_format: 3 })),
     )
     await client.reload()
     expect(client.status()).toMatchObject({
@@ -249,7 +249,7 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
     const index = parseStrict(files.get("snapshots/versions/index.json") ?? "") as JsonObject
     files.set(
       "snapshots/versions/index.json",
-      new TextEncoder().encode(JSON.stringify({ ...index, index_format: 2 })),
+      new TextEncoder().encode(JSON.stringify({ ...index, index_format: 3 })),
     )
     const client = createSnapshotClient("/cdn", { fetch: serve("/cdn", files).fetcher })
     await client.load()

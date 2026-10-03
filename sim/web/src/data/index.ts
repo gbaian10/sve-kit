@@ -8,6 +8,7 @@ export {
   type SnapshotStatus,
 } from "./client"
 export type { Row } from "./format-v1/decode"
+export { registerImageCache } from "./image-sw-registration"
 export { type ImageFace, type ImageIndex, loadImagePage } from "./images"
 export {
   activeSnapshotRoot,

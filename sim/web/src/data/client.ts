@@ -3,16 +3,18 @@ import { createDecoder } from "./format-v1/decoder"
 import { SnapshotError } from "./format-v1/errors"
 import {
   arrayValue,
+  canonicalText,
   integerValue,
   type JsonObject,
   objectValue,
   parseStrict,
   stringValue,
 } from "./format-v1/json"
+import { validateMedia } from "./format-v1/media"
 import { validatePlacement } from "./format-v1/placement"
 import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v1/reader"
 import { validate } from "./format-v1/schema"
-import { validateImageRows } from "./format-v1/semantics"
+import { validateDigitalLinks, validateImageRows } from "./format-v1/semantics"
 import { transferDigest } from "./integrity"
 import { MetadataBytes, type MetadataProgress } from "./metadata"
 import { requestQueue } from "./request-queue"
@@ -35,11 +37,13 @@ export type SnapshotStatus =
       readonly dataVersion: string
       readonly updating?: LoadPhase
       readonly updateError?: LoadFailure
+      readonly outdated?: boolean
     }
   | ({ readonly state: "error" } & LoadFailure)
 
 export interface LoadedSnapshot {
   readonly dataVersion: string
+  readonly entrySource?: "current" | "previous"
   readonly manifestHash: string
   readonly manifest: JsonObject
   readonly files: Files
@@ -50,7 +54,7 @@ export interface LoadedSnapshot {
 
 export interface SnapshotClientOptions {
   readonly fetch?: Fetcher
-  /** `index`: the permanent version index (format §4.1); `preview`: a preview root's pointer file. */
+  /** `index`: the current/previous version index (format §4.1); `preview`: a preview root's pointer file. */
   readonly entry?: "index" | "preview"
   readonly detailCacheSize?: number
   readonly cacheStorage?: CacheStorage
@@ -74,7 +78,7 @@ export interface SnapshotClient {
 }
 
 const INDEX_PATH = "snapshots/versions/index.json"
-const INDEX_FORMAT = 1
+const INDEX_FORMAT = 2
 // Preview roots have no permanent index (format §4.2); until #4 Q12 settles, dev reads this pointer.
 const PREVIEW_POINTER = "snapshots/preview/current.json"
 
@@ -89,6 +93,62 @@ function failureOf(error: unknown): LoadFailure {
       : { kind: "corrupt", detail: error.message }
   }
   return { kind: "corrupt", detail: error instanceof Error ? error.message : String(error) }
+}
+
+function validateIndex2(index: JsonObject): void {
+  validate("Index", index, [], "2.0.0")
+  const entries = [
+    objectValue(index["current"]),
+    ...(index["previous"] === null ? [] : [objectValue(index["previous"])]),
+  ]
+  for (const entry of entries) {
+    const capabilities = arrayValue(entry["required_capabilities"]).map((value) =>
+      stringValue(value),
+    )
+    if (
+      new Set(capabilities).size !== capabilities.length ||
+      canonicalText([...capabilities].sort()) !== canonicalText(capabilities)
+    )
+      throw new SnapshotError("schema", "Index capabilities must be sorted and unique")
+    const hash = stringValue(entry["manifest_sha256"]).slice(7)
+    if (entry["manifest_path"] !== `snapshots/manifests/${hash}.json`)
+      throw new SnapshotError("blob-integrity", "Index manifest path differs from hash")
+  }
+}
+
+function validateMediaFile(fragments: readonly Fragment[], snapshot: LoadedSnapshot): void {
+  const media = fragments.filter((fragment) => fragment.table === "printing_image")
+  if (media.length === 0) return
+  const required = new Set([stringValue(objectValue(snapshot.manifest["config_ref"])["key"])])
+  for (const fragment of media) {
+    for (const row of fragment.rows) {
+      for (const [table, field] of [
+        ["printing", "printing_id"],
+        ["face", "face_id"],
+      ]) {
+        const base = snapshot.bootstrap.find(
+          (f) => f.table === table && f.rows.some((r) => r["id"] === row[field ?? ""]),
+        )
+        if (!base) throw new SnapshotError("dangling-reference", "media bootstrap target missing")
+        if (
+          table === "printing" &&
+          canonicalText(base.value["owner"] ?? null) !==
+            canonicalText(fragment.value["owner"] ?? null)
+        )
+          throw new SnapshotError("printing-owner-conflict", "media differs from printing home_set")
+        required.add(base.file)
+      }
+    }
+  }
+  // Dependencies belong to the physical file, which can pack many logical media fragments.
+  const deps = arrayValue(snapshot.files.get(media[0]?.file ?? "")?.["dependencies"]).map((d) =>
+    stringValue(objectValue(d)["key"]),
+  )
+  if (canonicalText(deps) !== canonicalText([...required].sort()))
+    throw new SnapshotError(
+      "dependency-closure",
+      "media requires exact config/printing/face dependencies",
+    )
 }
 
 export function createSnapshotClient(
@@ -107,6 +167,8 @@ export function createSnapshotClient(
   let loaded: LoadedSnapshot | null = null
   let pending: Promise<void> | null = null
   let lastRevision = -1
+  let lastIndex = ""
+  let detailAbort = new AbortController()
   // Settled detail files in LRU order; requests still in flight live apart so eviction never
   // drops a promise other callers are waiting on.
   let details = new Map<string, readonly Fragment[]>()
@@ -123,9 +185,10 @@ export function createSnapshotClient(
     path: string,
     sha256: string,
     bytes?: number,
+    signal?: AbortSignal,
   ): Promise<Uint8Array> => {
     for (let attempt = 0; ; attempt += 1) {
-      const data = await fetchBytes(fetcher, url(path))
+      const data = await fetchBytes(fetcher, url(path), signal ? { signal } : undefined)
       if ((await transferDigest(data)) === sha256 && (bytes === undefined || data.length === bytes))
         return data
       if (attempt === 1)
@@ -143,24 +206,55 @@ export function createSnapshotClient(
     }
   }
 
-  const chooseEntry = async (): Promise<JsonObject> => {
+  const chooseEntry = async (): Promise<{ chosen: JsonObject; source: "current" | "previous" }> => {
     if (entry === "preview") {
       const pointer = objectValue(
         parseStrict(await fetchBytes(fetcher, url(PREVIEW_POINTER), { cache: "no-cache" })),
       )
       return {
-        manifest_path: pointer["manifest_path"] ?? null,
-        manifest_sha256: pointer["manifest_sha256"] ?? null,
+        chosen: {
+          manifest_path: pointer["manifest_path"] ?? null,
+          manifest_sha256: pointer["manifest_sha256"] ?? null,
+        },
+        source: "current",
       }
     }
     const index = objectValue(
       parseStrict(await fetchBytes(fetcher, url(INDEX_PATH), { cache: "no-cache" })),
     )
     requireIndexFormat(index, "the version index")
-    validate("Index", index)
+    const modern = index["index_format"] === 2
+    if (modern) validateIndex2(index)
+    else validate("Index", index)
     const revision = integerValue(index["revision"])
     if (revision < lastRevision)
       throw new SnapshotError("blob-integrity", "version index revision went backwards")
+    const signature = canonicalText(index)
+    if (revision === lastRevision && lastIndex !== signature)
+      throw new SnapshotError("blob-integrity", "version index changed without a new revision")
+    if (modern) {
+      const current = objectValue(index["current"])
+      const previous = index["previous"] === null ? null : objectValue(index["previous"])
+      if (
+        previous &&
+        (current["data_version"] === previous["data_version"] ||
+          stringValue(current["published_at"]) < stringValue(previous["published_at"]))
+      )
+        throw new SnapshotError("blob-integrity", "invalid current/previous ordering")
+      lastRevision = revision
+      lastIndex = signature
+      for (const [source, candidate] of [
+        ["current", current],
+        ["previous", previous],
+      ] as const) {
+        if (candidate && isCompatible(candidate)) {
+          return { chosen: candidate, source }
+        }
+      }
+      throw new NoCompatibleVersion(
+        "no current or previous snapshot is compatible; update the site",
+      )
+    }
     const pages = arrayValue(index["pages"]).map((page) => objectValue(page))
     for (const page of pages.reverse()) {
       const data = await fetchVerified(stringValue(page["path"]), stringValue(page["sha256"]))
@@ -171,7 +265,8 @@ export function createSnapshotClient(
       for (const candidate of entries.reverse()) {
         if (isCompatible(candidate)) {
           lastRevision = revision
-          return candidate
+          lastIndex = signature
+          return { chosen: candidate, source: "current" }
         }
       }
     }
@@ -187,7 +282,7 @@ export function createSnapshotClient(
       )
     }
     progress("index")
-    const chosen = await chooseEntry()
+    const { chosen, source } = await chooseEntry()
     progress("manifest")
     const manifestBytes = await fetchVerified(
       stringValue(chosen["manifest_path"]),
@@ -196,6 +291,18 @@ export function createSnapshotClient(
     const decodedManifest = await decode({ kind: "manifest", bytes: manifestBytes })
     if (decodedManifest.kind !== "manifest") throw new SnapshotError("shape", "expected manifest")
     const { manifest, files } = decodedManifest
+    if (entry !== "preview") {
+      for (const field of [
+        "data_version",
+        "published_at",
+        "format_version",
+        "min_reader_version",
+        "required_capabilities",
+        "engine_support_target",
+      ])
+        if (canonicalText(chosen[field] ?? null) !== canonicalText(manifest[field] ?? null))
+          throw new SnapshotError("blob-integrity", "index entry differs from verified manifest")
+    }
     const version = stringValue(manifest["format_version"])
     progress("bootstrap")
     const configKey = stringValue(objectValue(manifest["config_ref"])["key"])
@@ -232,6 +339,7 @@ export function createSnapshotClient(
       }
     }
     return {
+      entrySource: source,
       dataVersion: stringValue(manifest["data_version"]),
       manifestHash: stringValue(chosen["manifest_sha256"]),
       manifest,
@@ -248,12 +356,24 @@ export function createSnapshotClient(
     try {
       const candidate = await download(previous)
       metadata?.dispose()
+      detailAbort.abort()
+      decode.cancel()
+      detailAbort = new AbortController()
       loaded = candidate
       detailBytes = 0
       metadata = new MetadataBytes(
         base,
         candidate.manifestHash,
-        new Map([...candidate.files].filter(([, file]) => file["role"] === "images")),
+        new Map(
+          [...candidate.files].filter(
+            ([, file]) =>
+              file["role"] === "images" &&
+              (candidate.manifest["format_version"] !== "2.0.0" ||
+                arrayValue(file["row_counts"]).some(
+                  (c) => objectValue(c)["table"] === "printing_image",
+                )),
+          ),
+        ),
         fetcher,
         () => {
           for (const listener of listeners) listener()
@@ -264,10 +384,20 @@ export function createSnapshotClient(
       )
       details = new Map()
       inflight = new Map()
-      set({ state: "ready", dataVersion: candidate.dataVersion })
+      set({
+        state: "ready",
+        dataVersion: candidate.dataVersion,
+        ...(candidate.entrySource === "previous" ? { outdated: true } : {}),
+      })
     } catch (error) {
       const failure = failureOf(error)
-      if (previous) set({ state: "ready", dataVersion: previous.dataVersion, updateError: failure })
+      if (previous)
+        set({
+          state: "ready",
+          dataVersion: previous.dataVersion,
+          outdated: true,
+          updateError: failure,
+        })
       else set({ state: "error", ...failure })
     } finally {
       pending = null
@@ -293,17 +423,24 @@ export function createSnapshotClient(
   const loadFile = async (snapshot: LoadedSnapshot, key: string): Promise<readonly Fragment[]> => {
     const file = snapshot.files.get(key)
     if (!file) throw new SnapshotError("payload-set", `unknown file ${key}`)
+    const signal = detailAbort.signal
+    const active = () => !signal.aborted && loaded === snapshot
     const role = file["role"]
     if (role !== "text" && role !== "images")
       throw new SnapshotError("payload-set", `${key} is not a detail file`)
     const data =
-      role === "images" && metadata
+      role === "images" &&
+      metadata &&
+      (snapshot.manifest["format_version"] !== "2.0.0" ||
+        arrayValue(file["row_counts"]).some((c) => objectValue(c)["table"] === "printing_image"))
         ? await metadata.read(key)
         : await fetchVerified(
             stringValue(file["path"]),
             stringValue(file["sha256"]),
             integerValue(file["bytes"]),
+            signal,
           )
+    if (!active()) throw new Error("snapshot replaced")
     const version = stringValue(snapshot.manifest["format_version"])
     const result = await decode({ kind: "file", file, bytes: data, version })
     if (result.kind !== "fragments") throw new SnapshotError("shape", "expected fragments")
@@ -319,7 +456,15 @@ export function createSnapshotClient(
       ])
         (view[fragment.table] ??= []).push(...fragment.rows)
       validateImageRows(view)
+      if (version === "2.0.0") {
+        for (const row of view["printing_image"] ?? []) validateMedia(row)
+        validateMediaFile(fragments, snapshot)
+      }
     }
+    const digitalView: Record<string, JsonObject[]> = {}
+    for (const fragment of fragments) (digitalView[fragment.table] ??= []).push(...fragment.rows)
+    validateDigitalLinks(digitalView)
+    if (!active()) throw new Error("snapshot replaced")
     const faces = facesOf(snapshot)
     return fragments.map((fragment) => {
       if (fragment.value["base"] === null) return fragment
@@ -342,6 +487,15 @@ export function createSnapshotClient(
     if (running) return running
     const started = inflight
     const promise = loadFile(snapshot, fileKey)
+      .catch(async (error: unknown) => {
+        if (
+          loaded === snapshot &&
+          error instanceof NetworkError &&
+          (error.status === 404 || error.status === 410)
+        )
+          await reload()
+        throw error
+      })
       .then((result) => {
         // Ignore a result for a snapshot that was replaced while the request ran.
         if (started === inflight) {
@@ -364,6 +518,12 @@ export function createSnapshotClient(
     return promise
   }
 
+  const reload = (): Promise<void> => {
+    if (pending) return pending
+    pending = run()
+    return pending
+  }
+
   return {
     base,
     status: () => status,
@@ -378,11 +538,7 @@ export function createSnapshotClient(
       if (status.state === "error") status = { state: "idle" }
       return load()
     },
-    reload: () => {
-      if (pending) return pending
-      pending = run()
-      return pending
-    },
+    reload,
     snapshot: () => loaded,
     fragments,
     metadataStatus: () =>

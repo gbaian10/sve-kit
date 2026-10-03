@@ -26,7 +26,7 @@ export function validatePlacement(
   bootstrap: readonly Fragment[] = [],
   knownFaces?: ReadonlyMap<string, JsonValue>,
 ): void {
-  if (version !== "1.1.0") return
+  if (version !== "1.1.0" && version !== "2.0.0") return
   const all = [...bootstrap, ...fragments]
   const faces =
     knownFaces ??
@@ -55,7 +55,9 @@ export function validatePlacement(
       role === "images"
         ? kind === "global"
           ? 1
-          : 64
+          : version === "2.0.0"
+            ? 32
+            : 64
         : role === "bootstrap"
           ? kind === "global"
             ? 8
