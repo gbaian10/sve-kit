@@ -1,4 +1,4 @@
-# AI-Q (q-a): opponent Quick timing. P2's hand is エンジェルスナイプ; q-b differs only in which card is in hand.
+# Paired AI position q-a.
 schema: sve-ai-position/1
 id: ai-q-a
 room: {open_decklists: true}
@@ -14,7 +14,7 @@ setup:
       sep: 0
       zones:
         field:
-          - {id: a1, card: BP01-042}      # ニンジャエッグ 2/2
+          - {id: a1, card: BP01-042}
           - {id: a2, card: BP01-042}
         hand: []
         deck:
@@ -87,8 +87,8 @@ setup:
         cemetery: []
 random: {}
 quick_cards:
-  - {card: BP01-179, cost: 1}    # エンジェルスナイプ
-  - {card: BP01-180, cost: 1}    # エンジェルバレッジ
+  - {card: BP01-179, cost: 1}
+  - {card: BP01-180, cost: 1}
 pair: q-b
 checks:
   - id: Q0
