@@ -1,0 +1,4219 @@
+parameter_rule_policy_format: 1
+kind: template_parameter_rule_policy
+policy_id: template-parameters-jp-20261002-v1
+scope:
+  region: jp
+  roles:
+    - body
+    - reminder
+  source_batches:
+    - store_id: gbaian10-home
+      batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+  parser_ids:
+    - translation-jp-v1
+  normalizer_ids:
+    - classification-jp-v0-v1
+    - template-parameters-jp-candidate-v1
+precedence:
+  - validate_source
+  - existing_numeric_rules
+  - unowned_pending_only
+  - recognition_rules
+  - reject_conflicts
+rules:
+  - rule_id: braced_ability_reference
+    matcher_version: parameter-rule-candidates-v1:braced_ability_reference
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: ability_marker_reference
+    match_conditions:
+      required_issue: term_role_requires_review
+      proposed_role: ability_marker_reference
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:ability.fanfare
+          - term:ability.activation
+          - term:ability.last_words
+          - term:ability.feed
+          - term:ability.union_burst
+          - term:ability.quick
+          - term:ability.possession
+          - term:ability.advance_activation
+        categories:
+          term:ability.fanfare: ability
+          term:ability.activation: ability
+          term:ability.last_words: ability
+          term:ability.feed: ability
+          term:ability.union_burst: ability
+          term:ability.quick: ability
+          term:ability.possession: ability
+          term:ability.advance_activation: ability
+        record_hash: true
+      braced_evidence:
+        before_ends_with: '{'
+        after_starts_with: '}'
+        left_prefix_brace_balance: 1
+        hint_target_equals_adopted: true
+    condition_hash: sha256:ea38f1ea3e9e900673c9d418583c52a9b477767f9bf0449defd67cde09a912a6
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.fanfare
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （{SyntheticTerm}試験）
+            role_spans:
+              - start: 0
+                end: 19
+                role: reminder
+            slot_segments:
+              - start: 2
+                end: 15
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.fanfare
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues: []
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.fanfare
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - ambiguous_or_missing_term_concept
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.fanfare
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: SyntheticTerm
+                id: term:ability.fanfare
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.fanfare
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: braced_action_engage_reference
+    matcher_version: parameter-rule-candidates-v1:braced_action_engage_reference
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: action_marker_reference
+    match_conditions:
+      required_issue: term_role_requires_review
+      proposed_role: action_marker_reference
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:action.engage
+        categories:
+          term:action.engage: ability
+        record_hash: true
+      braced_evidence:
+        before_ends_with: '{'
+        after_starts_with: '}'
+        left_prefix_brace_balance: 1
+        hint_target_equals_adopted: true
+    condition_hash: sha256:ddb8e91e2ac760c2cb8d69a52a26b7dc3fe8381a6df3d8bd891b4385081abaec
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:action.engage
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （{SyntheticTerm}試験）
+            role_spans:
+              - start: 0
+                end: 19
+                role: reminder
+            slot_segments:
+              - start: 2
+                end: 15
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:action.engage
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues: []
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:action.engage
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - ambiguous_or_missing_term_concept
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:action.engage
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: SyntheticTerm
+                id: term:action.engage
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{SyntheticTerm}試験'
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 1
+                end: 14
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:action.engage
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: braced_stat_reference
+    matcher_version: parameter-rule-candidates-v1:braced_stat_reference
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: stat_marker_reference
+    match_conditions:
+      required_issue: term_role_requires_review
+      proposed_role: stat_marker_reference
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:stat.attack
+          - term:stat.health
+        categories:
+          term:stat.attack: rule_term
+          term:stat.health: rule_term
+        record_hash: true
+      braced_evidence:
+        before_ends_with: '{'
+        after_starts_with: '}'
+        left_prefix_brace_balance: 1
+        hint_target_equals_adopted: true
+    condition_hash: sha256:d6ad8e62c6fab8658fa56b38f1e41e4bf8bfa7eb252d389c0ff5a7acb0d2b0de
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}試験'
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 1
+                end: 4
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （{攻撃力}試験）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 2
+                end: 5
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}試験'
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 1
+                end: 4
+            original_issues: []
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: '{攻撃力}試験'
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 1
+                end: 4
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}試験'
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 1
+                end: 4
+            original_issues:
+              - ambiguous_or_missing_term_concept
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}試験'
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 1
+                end: 4
+            original_issues:
+              - term_role_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: bracket_choice_index
+    matcher_version: parameter-rule-candidates-v1:bracket_choice_index
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: choice_ordinal
+    match_conditions:
+      required_issue: numeric_role_requires_review
+      proposed_role: choice_ordinal
+      scope:
+        region: jp
+        roles:
+          - body
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      choice_evidence:
+        before_ends_with: 【
+        after_starts_with: 】
+        introduction_pattern: (?<![A-Za-z0-9_０-９])[0-9０-９]+つ(?:まで)?チョイス
+        label_pattern: 【([0-9０-９]+)】
+        minimum_options: 2
+        same_full_field: true
+        body_only: true
+        quoted_spans_excluded: true
+        introduction_precedes_labels: true
+        stop_at_next_introduction: true
+        ordered_indices: 1..k
+        slot_is_exact_label_digits: true
+    condition_hash: sha256:08bbde239098ae434b2204df7d696e739731a23430d7748f3862821a6dc0279a
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: "3つチョイス\n【1】試験\n【2】試験"
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+              - start: 6
+                end: 7
+                role: layout
+              - start: 7
+                end: 12
+                role: body
+              - start: 12
+                end: 13
+                role: layout
+              - start: 13
+                end: 18
+                role: body
+            slot_segments:
+              - start: 8
+                end: 9
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: second_group_positive
+          input:
+            region: jp
+            role: body
+            field_text: "3つチョイス\n【1】試験\n【2】試験\n3つチョイス\n【1】試験"
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+              - start: 6
+                end: 7
+                role: layout
+              - start: 7
+                end: 12
+                role: body
+              - start: 12
+                end: 13
+                role: layout
+              - start: 13
+                end: 18
+                role: body
+              - start: 18
+                end: 19
+                role: layout
+              - start: 19
+                end: 25
+                role: body
+              - start: 25
+                end: 26
+                role: layout
+              - start: 26
+                end: 31
+                role: body
+            slot_segments:
+              - start: 14
+                end: 15
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: "（3つチョイス）\n【1】試験\n【2】試験"
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+              - start: 8
+                end: 9
+                role: layout
+              - start: 9
+                end: 14
+                role: body
+              - start: 14
+                end: 15
+                role: layout
+              - start: 15
+                end: 20
+                role: body
+            slot_segments:
+              - start: 10
+                end: 11
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: "3つチョイス\n【1】試験\n【2】試験"
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+              - start: 6
+                end: 7
+                role: layout
+              - start: 7
+                end: 12
+                role: body
+              - start: 12
+                end: 13
+                role: layout
+              - start: 13
+                end: 18
+                role: body
+            slot_segments:
+              - start: 8
+                end: 9
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: "3つチョイス\n【9007199254740992】試験\n【2】試験"
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+              - start: 6
+                end: 7
+                role: layout
+              - start: 7
+                end: 27
+                role: body
+              - start: 27
+                end: 28
+                role: layout
+              - start: 28
+                end: 33
+                role: body
+            slot_segments:
+              - start: 8
+                end: 24
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: incomplete_later_group_negative
+          input:
+            region: jp
+            role: body
+            field_text: "3つチョイス\n【1】試験\n【2】試験\n3つチョイス\n【4】試験"
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+              - start: 6
+                end: 7
+                role: layout
+              - start: 7
+                end: 12
+                role: body
+              - start: 12
+                end: 13
+                role: layout
+              - start: 13
+                end: 18
+                role: body
+              - start: 18
+                end: 19
+                role: layout
+              - start: 19
+                end: 25
+                role: body
+              - start: 25
+                end: 26
+                role: layout
+              - start: 26
+                end: 31
+                role: body
+            slot_segments:
+              - start: 27
+                end: 28
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: keyword_threshold_combo
+    matcher_version: parameter-rule-candidates-v1:keyword_threshold_combo
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: combo_threshold
+    match_conditions:
+      required_issue: numeric_identifier_requires_review
+      proposed_role: combo_threshold
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:ability.combo
+        categories:
+          term:ability.combo: ability
+        record_hash: true
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      keyword_pattern: 【([^【】]+)_$
+      after_starts_with: 】
+      name_remains_literal: true
+    condition_hash: sha256:8a7a19026ff68847006c9e737d193063876d2382e17dae44478672b3b42e85f9
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （【SyntheticTerm_2】）
+            role_spans:
+              - start: 0
+                end: 19
+                role: reminder
+            slot_segments:
+              - start: 16
+                end: 17
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【OtherTerm_2】
+            role_spans:
+              - start: 0
+                end: 13
+                role: body
+            slot_segments:
+              - start: 11
+                end: 12
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_9007199254740992】
+            role_spans:
+              - start: 0
+                end: 32
+                role: body
+            slot_segments:
+              - start: 15
+                end: 31
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.combo
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: keyword_threshold_lesson
+    matcher_version: parameter-rule-candidates-v1:keyword_threshold_lesson
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: lesson_threshold
+    match_conditions:
+      required_issue: numeric_identifier_requires_review
+      proposed_role: lesson_threshold
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:ability.lesson
+        categories:
+          term:ability.lesson: ability
+        record_hash: true
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      keyword_pattern: 【([^【】]+)_$
+      after_starts_with: 】
+      name_remains_literal: true
+    condition_hash: sha256:2e4606cccb807e7e23c0422832278e4c3ddbd8782a588a63bb72d0c93268f3ea
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （【SyntheticTerm_2】）
+            role_spans:
+              - start: 0
+                end: 19
+                role: reminder
+            slot_segments:
+              - start: 16
+                end: 17
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【OtherTerm_2】
+            role_spans:
+              - start: 0
+                end: 13
+                role: body
+            slot_segments:
+              - start: 11
+                end: 12
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_9007199254740992】
+            role_spans:
+              - start: 0
+                end: 32
+                role: body
+            slot_segments:
+              - start: 15
+                end: 31
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.lesson
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: keyword_threshold_necrocharge
+    matcher_version: parameter-rule-candidates-v1:keyword_threshold_necrocharge
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: necrocharge_threshold
+    match_conditions:
+      required_issue: numeric_identifier_requires_review
+      proposed_role: necrocharge_threshold
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:ability.necrocharge
+        categories:
+          term:ability.necrocharge: ability
+        record_hash: true
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      keyword_pattern: 【([^【】]+)_$
+      after_starts_with: 】
+      name_remains_literal: true
+    condition_hash: sha256:587c2a354e12efa580fd44cb4b5145c006e4501aec6d5d5cffe36ec20af5c64d
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （【SyntheticTerm_2】）
+            role_spans:
+              - start: 0
+                end: 19
+                role: reminder
+            slot_segments:
+              - start: 16
+                end: 17
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【OtherTerm_2】
+            role_spans:
+              - start: 0
+                end: 13
+                role: body
+            slot_segments:
+              - start: 11
+                end: 12
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_9007199254740992】
+            role_spans:
+              - start: 0
+                end: 32
+                role: body
+            slot_segments:
+              - start: 15
+                end: 31
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.necrocharge
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: keyword_threshold_spell_chain
+    matcher_version: parameter-rule-candidates-v1:keyword_threshold_spell_chain
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: spell_chain_threshold
+    match_conditions:
+      required_issue: numeric_identifier_requires_review
+      proposed_role: spell_chain_threshold
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:ability.spell_chain
+        categories:
+          term:ability.spell_chain: ability
+        record_hash: true
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      keyword_pattern: 【([^【】]+)_$
+      after_starts_with: 】
+      name_remains_literal: true
+    condition_hash: sha256:b6a2a9ada0a15a28fa63c677216a18b3f980db24d3ab49ba0da70ed6399b3230
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （【SyntheticTerm_2】）
+            role_spans:
+              - start: 0
+                end: 19
+                role: reminder
+            slot_segments:
+              - start: 16
+                end: 17
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【OtherTerm_2】
+            role_spans:
+              - start: 0
+                end: 13
+                role: body
+            slot_segments:
+              - start: 11
+                end: 12
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_9007199254740992】
+            role_spans:
+              - start: 0
+                end: 32
+                role: body
+            slot_segments:
+              - start: 15
+                end: 31
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: ability
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: 【SyntheticTerm_2】
+            role_spans:
+              - start: 0
+                end: 17
+                role: body
+            slot_segments:
+              - start: 15
+                end: 16
+            original_issues:
+              - numeric_identifier_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: SyntheticTerm
+                id: term:ability.spell_chain
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: prefix_attack_delta
+    matcher_version: parameter-rule-candidates-v1:prefix_attack_delta
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: attack_delta_magnitude
+    match_conditions:
+      required_issue: signed_numeric_requires_review
+      proposed_role: attack_delta_magnitude
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:stat.attack
+        categories:
+          term:stat.attack: rule_term
+        record_hash: true
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      prefix_pattern: \{攻撃力\}[+-]$
+      ascii_after_exclusion: ^[A-Za-z0-9_]
+      sign_remains_literal: true
+    condition_hash: sha256:9bafbb438c1e5caac1e5a3cdabdf3078101e71eeae2539a01abb460e8b4f8d5d
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}+2試験'
+            role_spans:
+              - start: 0
+                end: 9
+                role: body
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （{攻撃力}+2試験）
+            role_spans:
+              - start: 0
+                end: 11
+                role: reminder
+            slot_segments:
+              - start: 7
+                end: 8
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 未知+2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: '{攻撃力}+2試験'
+            role_spans:
+              - start: 0
+                end: 9
+                role: body
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}+9007199254740992試験'
+            role_spans:
+              - start: 0
+                end: 24
+                role: body
+            slot_segments:
+              - start: 6
+                end: 22
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （{攻撃力}＋2試験）
+            role_spans:
+              - start: 0
+                end: 11
+                role: reminder
+            slot_segments:
+              - start: 7
+                end: 8
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}+2試験'
+            role_spans:
+              - start: 0
+                end: 9
+                role: body
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{攻撃力}+2試験'
+            role_spans:
+              - start: 0
+                end: 9
+                role: body
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 攻撃力
+                id: term:stat.attack
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: prefix_cost_delta
+    matcher_version: parameter-rule-candidates-v1:prefix_cost_delta
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: cost_delta_magnitude
+    match_conditions:
+      required_issue: signed_numeric_requires_review
+      proposed_role: cost_delta_magnitude
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      prefix_pattern: コストを[+-]$
+      ascii_after_exclusion: ^[A-Za-z0-9_]
+      sign_remains_literal: true
+    condition_hash: sha256:7c5ba71551c05b8e99359ae6e854c6318936b185e0bc5e06c1f893b9bcbde8d3
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: コストを+2試験
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （コストを+2試験）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 未知+2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: コストを+2試験
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: コストを+9007199254740992試験
+            role_spans:
+              - start: 0
+                end: 23
+                role: body
+            slot_segments:
+              - start: 5
+                end: 21
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （コストを＋2試験）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: prefix_field_attack
+    matcher_version: numeric-rule-proposals-v3:prefix_field_attack
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: prefix_field_attack
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:bacd0862b5b550e569539c19547e499a517ddaa2f40d138248c45bebd37d0c48
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 攻撃力2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_attack
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （攻撃力2試験）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_attack
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 未知+2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 攻撃力2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_attack
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 攻撃力9007199254740992試験
+            role_spans:
+              - start: 0
+                end: 21
+                role: body
+            slot_segments:
+              - start: 3
+                end: 19
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_attack
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （攻撃力＋2試験）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: prefix_field_cost
+    matcher_version: numeric-rule-proposals-v3:prefix_field_cost
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: prefix_field_cost
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:1622b3de948695bfa5470bc78fad9766148ffdcd8fcc27ce2bdd0b0f939e944c
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: コスト2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_cost
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （コスト2試験）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_cost
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 未知+2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: コスト2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_cost
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: コスト9007199254740992試験
+            role_spans:
+              - start: 0
+                end: 21
+                role: body
+            slot_segments:
+              - start: 3
+                end: 19
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_cost
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （コスト＋2試験）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: prefix_field_health
+    matcher_version: numeric-rule-proposals-v3:prefix_field_health
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: prefix_field_health
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:2e38b9db593cfbf06fb4534d034807660859a3bc5b780b00379f571982b47f82
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 体力2試験
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_health
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （体力2試験）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_health
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 未知+2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 体力2試験
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_health
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 体力9007199254740992試験
+            role_spans:
+              - start: 0
+                end: 20
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_health
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （体力＋2試験）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: prefix_health_delta
+    matcher_version: parameter-rule-candidates-v1:prefix_health_delta
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: health_delta_magnitude
+    match_conditions:
+      required_issue: signed_numeric_requires_review
+      proposed_role: health_delta_magnitude
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      reference_evidence:
+        raw_name_exact: true
+        adopted_count: 1
+        targets:
+          - term:stat.health
+        categories:
+          term:stat.health: rule_term
+        record_hash: true
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      prefix_pattern: \{体力\}[+-]$
+      ascii_after_exclusion: ^[A-Za-z0-9_]
+      sign_remains_literal: true
+    condition_hash: sha256:f63edcd0900f9ca6d890e5014ba77574707c910712457631c6b7a21ff8ea9695
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: '{体力}+2試験'
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （{体力}+2試験）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 未知+2試験
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: '{体力}+2試験'
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{体力}+9007199254740992試験'
+            role_spans:
+              - start: 0
+                end: 23
+                role: body
+            slot_segments:
+              - start: 5
+                end: 21
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （{体力}＋2試験）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 6
+                end: 7
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: ambiguous_reference_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{体力}+2試験'
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+              - source_name: 体力
+                id: term:stat.health
+                category: rule_term
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+        - case_id: wrong_category_negative
+          input:
+            region: jp
+            role: body
+            field_text: '{体力}+2試験'
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 5
+                end: 6
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates:
+              - source_name: 体力
+                id: term:stat.health
+                category: card_name
+                record_hash: sha256:58cb96ea81c6ac397c18a31e461ef09fb7b48897fee91975d3ff240bd7904c57
+          expected_match: false
+  - rule_id: suffix_damage_amount
+    matcher_version: parameter-rule-candidates-v1:suffix_damage_amount
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: damage_amount
+    match_conditions:
+      required_issue: numeric_role_requires_review
+      proposed_role: damage_amount
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      suffix_pattern: ^ダメージ(?![A-Za-z0-9_])
+      preceding_sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before_exclusion: '[A-Za-z0-9_]$'
+    condition_hash: sha256:767777ccad7a4fa402d08d0c9c38ccd61711273265cb7d0bad28924c403d66ab
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2ダメージ
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2ダメージ）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2ダメージ
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2ダメージ
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992ダメージ
+            role_spans:
+              - start: 0
+                end: 22
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2ダメージA
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2ダメージ）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: owned_negative
+          input:
+            region: jp
+            role: body
+            field_text: コスト2ダメージ
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_cost
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_ordinal_cards
+    matcher_version: parameter-rule-candidates-v1:suffix_ordinal_cards
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: card_ordinal
+    match_conditions:
+      required_issue: numeric_ordinal_requires_review
+      proposed_role: card_ordinal
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      suffix_pattern: ^枚目(?![A-Za-z0-9_])
+      preceding_sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before_exclusion: '[A-Za-z0-9_]$'
+      zero_excluded: true
+    condition_hash: sha256:373ca2b48672aa3812cfbfedb80d42c009419ac16015ba3a2aa9435ab7615693
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2枚目
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2枚目）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2枚目
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2枚目
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992枚目
+            role_spans:
+              - start: 0
+                end: 20
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2枚目A
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2枚目）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_ordinal_times
+    matcher_version: parameter-rule-candidates-v1:suffix_ordinal_times
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: repetition_ordinal
+    match_conditions:
+      required_issue: numeric_ordinal_requires_review
+      proposed_role: repetition_ordinal
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      suffix_pattern: ^回目(?![A-Za-z0-9_])
+      preceding_sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before_exclusion: '[A-Za-z0-9_]$'
+      zero_excluded: true
+    condition_hash: sha256:49b4eaaaedb37561dc02c12690ae07a6f09ff5c7a809a2043d2f7699fb28856d
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2回目
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2回目）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2回目
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2回目
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992回目
+            role_spans:
+              - start: 0
+                end: 20
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2回目A
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2回目）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_ordinal_turns
+    matcher_version: parameter-rule-candidates-v1:suffix_ordinal_turns
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: turn_ordinal
+    match_conditions:
+      required_issue: numeric_ordinal_requires_review
+      proposed_role: turn_ordinal
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      suffix_pattern: ^ターン目(?![A-Za-z0-9_])
+      preceding_sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before_exclusion: '[A-Za-z0-9_]$'
+      zero_excluded: true
+    condition_hash: sha256:ecacc3819114aa0e00060a4d157b0c56a7e93d57529f2456ca16187cdc7e598f
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2ターン目
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2ターン目）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2ターン目
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2ターン目
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992ターン目
+            role_spans:
+              - start: 0
+                end: 22
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2ターン目A
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_ordinal_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2ターン目）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_recovery_amount
+    matcher_version: parameter-rule-candidates-v1:suffix_recovery_amount
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: recovery_amount
+    match_conditions:
+      required_issue: numeric_recovery_amount_requires_review
+      proposed_role: recovery_amount
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      suffix_pattern: ^回復(?![A-Za-z0-9_])
+      preceding_sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before_exclusion: '[A-Za-z0-9_]$'
+    condition_hash: sha256:c8cde2421c616e3a114560edbcfdd20218b41045f0a4d372fc2d735620a5dc78
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2回復
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_recovery_amount_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2回復）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_recovery_amount_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2回復
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2回復
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_recovery_amount_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992回復
+            role_spans:
+              - start: 0
+                end: 20
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_recovery_amount_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2回復A
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_recovery_amount_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2回復）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_unit_cards
+    matcher_version: numeric-rule-proposals-v3:suffix_unit_cards
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: suffix_unit_cards
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:5ae7c9361ad9d4e0b866609be9846822474979c894486b2e77bc7df2d98ac7ee
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2枚
+            role_spans:
+              - start: 0
+                end: 4
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_cards
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2枚）
+            role_spans:
+              - start: 0
+                end: 6
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_cards
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2枚
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2枚
+            role_spans:
+              - start: 0
+                end: 4
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_cards
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992枚
+            role_spans:
+              - start: 0
+                end: 19
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_cards
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2枚A
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2枚）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_unit_entities
+    matcher_version: numeric-rule-proposals-v3:suffix_unit_entities
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: suffix_unit_entities
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:42529ca9aa528d6fa7f0c7c93b09f26cc8d9f4369aa53b8eec6cbc270892548e
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2体
+            role_spans:
+              - start: 0
+                end: 4
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_entities
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2体）
+            role_spans:
+              - start: 0
+                end: 6
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_entities
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2体
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2体
+            role_spans:
+              - start: 0
+                end: 4
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_entities
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992体
+            role_spans:
+              - start: 0
+                end: 19
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_entities
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2体A
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2体）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_unit_items
+    matcher_version: parameter-rule-candidates-v1:suffix_unit_items
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: item_quantity
+    match_conditions:
+      required_issue: numeric_role_requires_review
+      proposed_role: item_quantity
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      existing_numeric_rule: false
+      invalid_safe_unsigned_decimal: false
+      exact_raw_safe_unsigned_decimal_equals_value: true
+      suffix_pattern: ^つ(?:チョイス|まで|を|持つ|裏向き|[）)]|以上|につ|の|。)
+      preceding_sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before_exclusion: '[A-Za-z0-9_]$'
+    condition_hash: sha256:671ff56a6f73d9ee9c8b5016ddeb1681d7ff0eac8570e1c49682554c13b1a7a7
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2つを試す
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2つを試す）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2つを試す
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2つを試す
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992つを試す
+            role_spans:
+              - start: 0
+                end: 22
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2つを試す）
+            role_spans:
+              - start: 0
+                end: 10
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: owned_negative
+          input:
+            region: jp
+            role: body
+            field_text: コスト2つを試す
+            role_spans:
+              - start: 0
+                end: 8
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: prefix_field_cost
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_unit_pp
+    matcher_version: numeric-rule-proposals-v3:suffix_unit_pp
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: suffix_unit_pp
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:1ff95fd5a859140ff12088271d30036fea6d917580bfca142548703526d79b0d
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2PP
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_pp
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2PP）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_pp
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2PP
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2PP
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_pp
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992PP
+            role_spans:
+              - start: 0
+                end: 20
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_pp
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2PPA
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2PP）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_unit_times
+    matcher_version: numeric-rule-proposals-v3:suffix_unit_times
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: suffix_unit_times
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:634d0a8b9b7b9178e6a47014d7dd12791f72fd66e332127d3dad05d844074ec5
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2回
+            role_spans:
+              - start: 0
+                end: 4
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_times
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2回）
+            role_spans:
+              - start: 0
+                end: 6
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_times
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2回
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2回
+            role_spans:
+              - start: 0
+                end: 4
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_times
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992回
+            role_spans:
+              - start: 0
+                end: 19
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_times
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2回A
+            role_spans:
+              - start: 0
+                end: 5
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2回）
+            role_spans:
+              - start: 0
+                end: 7
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+  - rule_id: suffix_unit_turns
+    matcher_version: numeric-rule-proposals-v3:suffix_unit_turns
+    matcher_commit: 4624a31fa8a423cde28270529b0809c7b0117097
+    recognized_role: numeric
+    match_conditions:
+      selected_group: suffix_unit_turns
+      scope:
+        region: jp
+        roles:
+          - body
+          - reminder
+      context:
+        body_nfkc: true
+        reminder_nfkc: false
+      sign_exclusion:
+        - '-'
+        - +
+        - −
+        - ＋
+        - －
+      ascii_before: '[A-Za-z0-9_]$'
+      ascii_after: ^[A-Za-z0-9_]
+      ascii_guard_exceptions:
+        prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+        after_starts_with: PP
+      lexical_vetoes:
+        - ^\u56de\u5fa9
+        - ^(?:\u679a|\u4f53|\u70b9|\u56de|\u30bf\u30fc\u30f3|PP)\u76ee
+      suffix_pattern: ^(?:(?P<suffix_unit_cards>枚(?!目))|(?P<suffix_unit_entities>体(?!目))|(?P<suffix_unit_points>点(?!目))|(?P<suffix_unit_times>回(?![復目]))|(?P<suffix_unit_turns>ターン(?!目))|(?P<suffix_unit_pp>PP(?!目)))(?![A-Za-z0-9_])
+      prefix_pattern: (?:(?P<prefix_field_cost>コスト)|(?P<prefix_field_attack>攻撃力)|(?P<prefix_field_health>体力)|(?P<prefix_field_pp>PP)|(?P<prefix_field_level>レベル))[=:：]?$
+      guard_order:
+        - sign
+        - ascii_identifier
+        - lexical_veto
+        - suffix
+        - prefix
+      suffix_precedes_prefix: true
+      exact_raw_safe_unsigned_decimal: true
+    condition_hash: sha256:2111bfea1ec41357eda5f4a25a956895b7bcb50698279ca0daa5e4e5a201578a
+    finite_transform: preserve_source
+    examples:
+      positive:
+        - case_id: body_positive
+          input:
+            region: jp
+            role: body
+            field_text: 試験2ターン
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_turns
+            reference_candidates: []
+          expected_match: true
+        - case_id: reminder_positive
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験2ターン）
+            role_spans:
+              - start: 0
+                end: 8
+                role: reminder
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_turns
+            reference_candidates: []
+          expected_match: true
+      negative:
+        - case_id: lexical_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験+2ターン
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 3
+                end: 4
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: region_negative
+          input:
+            region: en
+            role: body
+            field_text: 試験2ターン
+            role_spans:
+              - start: 0
+                end: 6
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_turns
+            reference_candidates: []
+          expected_match: false
+        - case_id: overflow_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験9007199254740992ターン
+            role_spans:
+              - start: 0
+                end: 21
+                role: body
+            slot_segments:
+              - start: 2
+                end: 18
+            original_issues:
+              - invalid_safe_unsigned_decimal
+              - numeric_rule_pending_approval
+            existing_numeric_rule: suffix_unit_turns
+            reference_candidates: []
+          expected_match: false
+        - case_id: ascii_tail_negative
+          input:
+            region: jp
+            role: body
+            field_text: 試験2ターンA
+            role_spans:
+              - start: 0
+                end: 7
+                role: body
+            slot_segments:
+              - start: 2
+                end: 3
+            original_issues:
+              - numeric_role_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
+        - case_id: reminder_fullwidth_sign_negative
+          input:
+            region: jp
+            role: reminder
+            field_text: （試験＋2ターン）
+            role_spans:
+              - start: 0
+                end: 9
+                role: reminder
+            slot_segments:
+              - start: 4
+                end: 5
+            original_issues:
+              - signed_numeric_requires_review
+            existing_numeric_rule:
+            reference_candidates: []
+          expected_match: false
