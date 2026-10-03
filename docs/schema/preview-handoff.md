@@ -74,8 +74,19 @@ preview 根下的 `private/` 與 `reports/` 不屬於公開內容；正式上傳
 實際執行時間與快取命中數放在命令 stdout 的 `image_execution`，不混入不可變清單或
 報告，確保相同輸入重建的逐檔 bytes 一致；唯讀重用的新轉檔時間為 0。
 這些檔案與輸出都不進 git、Actions cache／artifact 或測試 fixture。
-容量以每個所選批次各自計算；清單與 config 計一次，完整文字包不與分片重複加總，
-卡圖另計。以 br 為準，啟動包 1 MiB 是約略目標，超過時照實列數字，不自行修改格式。
+完整文字容量以批次的同一 File 聯集計算，完整文字包不與分片重複加總；卡圖另計。
+啟動則依使用者所選日版／英版各自以 Brotli 計完整新清單＋config＋首屏實際必載片／依賴，
+每個版本的共用／混區 File 整檔計入，不按語言比例分攤。約 1 MiB 是盡量的約略目標，
+2 MiB 可接受；更大須停下交維護者決定該配置。raw／gzip 另報，不設 gzip 啟動 1 MiB gate。
+
+[傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 的 1.1.0 是獨立協商的新配置，
+舊 1.0.0／N=1 預覽仍可使用；producer／reader 未同步前不切到新 minor。新配置移動的
+只有同名兩表的整表儲存與固定分片配置，pending／名稱／facet／公開欄位不縮減。
+每個實際資料 File（含 types）raw≤512 KiB，完整文字仍守 40／8／10 MiB。
+首屏後預取所有 images metadata bytes，不建立全庫物件索引、也不預取全部圖片 blob；
+所選頁面才解析必要 image 列與下載可見圖。saveData 可延後背景工作，未完成須標進度。
+完整 metadata 傳輸與冷／暖頁成本另報，不能把延後下載當成節流或離線已完成；
+CacheStorage 的已驗 bytes 成功保存且未被清除時，翻回暖頁不向外重抓。
 
 `snapshot publish MANIFEST` 在任何寫入前拒絕 `preview-` 產物。正式發布其餘閘門與
 append-only index 屬 #34，目前命令在正式版號下也會停止；改掉前綴不能把 preview
