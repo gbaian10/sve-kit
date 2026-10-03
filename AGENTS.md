@@ -61,7 +61,7 @@ HTML、PDF、API JSON 與卡圖 PNG 均屬凍結來源；WebP 已發布不代表
 `authored/` 依卡包切檔（例如 `authored/effects/BP01.yaml`），單檔不要超過 1 MiB（1024 KiB）。
 
 測試用官方卡文存於專用私有 GitHub testdata repo，只放測試需要的卡表輸入（目前是完整的日文卡表 JSONL）與來源說明，不放卡圖或憑證，不用 R2。
-目前 `sve-kit` 仍有待 #228 替換的裁剪官方測試頁與真實卡文斷言，以及待另行移除的題庫原稿；
+目前 `sve-kit` 仍有待 #228 替換的裁剪官方測試頁與真實卡文斷言；
 這些官方內容不在本專案授權內，範圍見 [LICENSING.md](LICENSING.md)。
 `sve-kit` 只保存資料來源鎖定檔（完整 commit SHA＋各檔案 SHA-256）；CI 以唯讀 deploy key 取得指定 commit 並驗 hash，key 由管理者設定為 secret。可信任 job 缺資料、缺憑證或 hash 不符即失敗，不靜默跳過。
 更新時先重產並推送資料 repo、保留舊 commit，再以 `sve-kit` PR 更新鎖定檔，通過 CI 後合併。

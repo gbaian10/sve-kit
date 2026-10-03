@@ -64,11 +64,9 @@ source expression embedded in test programs remains excluded from that grant.
 
 The current tree still contains source-derived fixtures and real-card assertions
 under `carddb/tests/`; their replacement with synthetic data is tracked in
-[issue #228](https://github.com/gbaian10/sve-kit/issues/228). Duplicate question
-originals under `tests/rules-scenarios/originals/` also remain in the current tree,
-with removal planned separately. Their official quotations and source-derived
-material are excluded from the project grants while present, as well as in
-historical revisions after removal.
+[issue #228](https://github.com/gbaian10/sve-kit/issues/228). Their official
+quotations and source-derived material are excluded from the project grants
+while present, as well as in historical revisions after removal.
 
 The site image `sim/web/src/assets/official/logo/head-left.png` is a crop of an
 official character illustration, currently used as the site's logo. It is not an
@@ -92,9 +90,10 @@ license. There is no alternative-license choice for the complete mixed file.
 
 ## Previous revisions
 
-The repository retains its Git history. When question originals are deleted or
-source-derived test fixtures are replaced, their earlier versions remain
-accessible in previous revisions. Official and other third-party content there is excluded
+The repository retains its Git history. Deleted question originals remain
+accessible in previous revisions. When source-derived test fixtures are replaced,
+their earlier versions likewise remain accessible in previous revisions.
+Official and other third-party content there is excluded
 from the project's grants just as it is in the current tree. A license added to
 a later revision does not relicense earlier third-party material.
 
