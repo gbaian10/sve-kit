@@ -1,4 +1,4 @@
-# AI-R (r-b): a choice after private information is revealed mid-resolution. ギルガメッシュ在底 2 張;
+# Paired AI position r-b.
 # r-a has the same ten cards and object ids in a different order.
 schema: sve-ai-position/1
 id: ai-r-b
@@ -15,18 +15,18 @@ setup:
       zones:
         field: []
         hand:
-          - {id: a, card: BP19-SL26}      # 機鋒の咎人・カットスロート
+          - {id: a, card: BP19-SL26}
         deck:
-          - {id: c1, card: BP01-173}   # ファイター
-          - {id: c2, card: BP10-122}   # ウィングメッセンジャー
-          - {id: c3, card: BP01-163}   # リザードマン
-          - {id: c4, card: BP01-176}   # 天剣の乙女
-          - {id: c10, card: BP14-032}   # バイオレンスソルジャー
-          - {id: c6, card: BP01-042}   # ニンジャエッグ
-          - {id: c7, card: BP01-046}   # 歴戦のランサー
-          - {id: c8, card: SD02-002}   # ヴァンガード・レイサム
-          - {id: c9, card: BP01-P10}   # ノーヴィストルーパー
-          - {id: c5, card: BP01-158}   # ギルガメッシュ
+          - {id: c1, card: BP01-173}
+          - {id: c2, card: BP10-122}
+          - {id: c3, card: BP01-163}
+          - {id: c4, card: BP01-176}
+          - {id: c10, card: BP14-032}
+          - {id: c6, card: BP01-042}
+          - {id: c7, card: BP01-046}
+          - {id: c8, card: SD02-002}
+          - {id: c9, card: BP01-P10}
+          - {id: c5, card: BP01-158}
     P2:
       construction: class
       leader: {class: ロイヤル, life: 20}

@@ -13,9 +13,9 @@ setup:
       sep: 0
       zones:
         field:
-          - {id: a1, card: BP01-042}      # ニンジャエッグ 2/2
+          - {id: a1, card: BP01-042}
         hand:
-          - {id: s1, card: BP08-028}      # 簒奪の舞
+          - {id: s1, card: BP08-028}
         deck:
           - {filler: 20}
     P2:
@@ -26,16 +26,16 @@ setup:
       sep: 0
       zones:
         field:
-          - {id: b1, card: BP06-048}      # 符術の門弟 1/1
+          - {id: b1, card: BP06-048}
           - {id: b2, card: BP06-048}
-          - {id: b3, card: BP01-173, state: {acted: true}}   # ファイター 2/3, acted
+          - {id: b3, card: BP01-173, state: {acted: true}}
         hand:
           - {id: b11, card: BP01-173}
           - {id: b12, card: BP01-163}
           - {id: b13, card: BP01-176}
         deck:
           - {id: b7, card: BP01-173}
-          - {id: b5, card: BP06-042}      # 式神の使役
+          - {id: b5, card: BP06-042}
           - {id: b8, card: BP01-163}
           - {id: b6, card: BP06-042}
           - {id: b9, card: BP01-176}
