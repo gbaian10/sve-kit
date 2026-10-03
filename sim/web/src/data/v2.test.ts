@@ -431,6 +431,42 @@ describe("Index v2 finite window", () => {
     expect(client.snapshot()).toBe(active)
     expect(client.status()).toMatchObject({ updateError: { kind: "corrupt" } })
   })
+  it("keeps the previous/outdated notice while a new current is still downloading", async () => {
+    const first = v2Version()
+    const served = origin(first)
+    served.setIndex({
+      index_format: 2,
+      revision: 2,
+      current: { ...first.entry, data_version: "20261004T010002Z-0001", format_version: "9.0.0" },
+      previous: first.entry,
+    })
+    let pause = false
+    let finish: (() => void) | undefined
+    let started: (() => void) | undefined
+    const began = new Promise<void>((resolve) => {
+      started = resolve
+    })
+    const client = createSnapshotClient("https://cdn.test", {
+      fetch: async (url, init) => {
+        if (pause && url.endsWith("index.json"))
+          await new Promise<void>((resolve) => {
+            started?.()
+            finish = resolve
+          })
+        return served.fetcher(url, init)
+      },
+    })
+    await client.load()
+    pause = true
+    served.setIndex({ index_format: 2, revision: 3, current: first.entry, previous: null })
+    const reload = client.reload()
+    await began
+    expect(client.status()).toMatchObject({ state: "ready", outdated: true, updating: "index" })
+    finish?.()
+    await reload
+    expect(client.status()).toMatchObject({ state: "ready" })
+    expect(client.status()).not.toHaveProperty("outdated")
+  })
   it("keeps local active on incompatible current/previous, and prompts update without a local active", async () => {
     const served = origin()
     const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })

@@ -277,7 +277,12 @@ export function createSnapshotClient(
     const progress = (phase: LoadPhase) => {
       set(
         previous
-          ? { state: "ready", dataVersion: previous.dataVersion, updating: phase }
+          ? {
+              ...(status.state === "ready" ? status : {}),
+              state: "ready",
+              dataVersion: previous.dataVersion,
+              updating: phase,
+            }
           : { state: "loading", phase },
       )
     }
