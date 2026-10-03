@@ -145,6 +145,7 @@ class IdentityEvidence:
         self.providers: dict[tuple[str, str, str], FrozenTexts] = {}
         self.uses: list[SourceUse] = []
         self.authored_uses: list[tuple[str, str, str]] = []
+        self.record_revisions: dict[str, str] = {}
         self.checked: set[bytes] = set()
 
     def registry(self, basis: IdentityBasis) -> RegistrySnapshot:
@@ -461,6 +462,7 @@ def replay_names(  # ruff: ignore[too-many-locals] -- retain full historical evi
             else _assignment_basis(inputs)
         )
         evidence.complete(basis, tuple(sorted(batches)))
+        evidence.record_revisions[record.record_key] = basis.authored_revision
         if isinstance(record, ConceptRecord):
             lang, _ = evidence.association(
                 record.data.identity_basis,

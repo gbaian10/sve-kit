@@ -11,7 +11,7 @@ from typing import TYPE_CHECKING
 import pytest
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.translations.importer import import_glossary
 from sve_carddb.translations.loader import load_glossary
 from sve_carddb.translations.models import AssignmentData, ConceptData
@@ -25,7 +25,15 @@ from sve_carddb.translations.name_replay import replay_names
 from .adoption_fixtures import commit
 from .identity_transition_fixtures import merge_record as merge_record  # ruff: ignore[useless-import-alias] -- module-scoped synthetic transition baseline
 from .name_build_fixtures import template
-from .name_replay_fixtures import Case, copied, human, make_case, name_term
+from .name_replay_fixtures import (
+    Case,
+    Mixed,
+    copied,
+    human,
+    make_case,
+    make_mixed_case,
+    name_term,
+)
 from .test_glossary_adoption import checked
 from .translation_fixtures import envelope, write
 
@@ -54,6 +62,28 @@ def shards(
 @pytest.fixture(scope="module")
 def baseline(tmp_path_factory: pytest.TempPathFactory) -> Case:
     return make_case(tmp_path_factory.mktemp("name-replay-template"))
+
+
+@pytest.fixture(scope="module")
+def mixed_baseline(tmp_path_factory: pytest.TempPathFactory) -> Mixed:
+    return make_mixed_case(tmp_path_factory.mktemp("name-mixed-template"))
+
+
+def english_concept(
+    case: Case, mixed: Mixed, key: str = "name.synthetic"
+) -> dict[str, JsonValue]:
+    record = case.concept(key=key)
+    data = object_value(record["data"])
+    subject = object_value(data["subject"])
+    subject.update(
+        card_id=mixed.printing.card_id,
+        face_id=mixed.printing.source_face_map[0].face_id,
+        source_lang="en",
+        source_hash=mixed.name_ref.text_hash,
+    )
+    data["source_ref"] = mixed.name_ref.model_dump(mode="json")
+    record["record_key"] = canonical(["card_name_concept", subject, 1]).decode()
+    return record
 
 
 @pytest.fixture(scope="module")
@@ -192,9 +222,9 @@ def test_full_identity_evidence_guards(case: Case, guard: str) -> None:
     ],
 )
 def test_assignment_data_is_name_only(
-    case: Case, field: str, value: JsonValue, message: str
+    baseline: Case, field: str, value: JsonValue, message: str
 ) -> None:
-    data = object_value(case.assignment()["data"])
+    data = object_value(baseline.assignment()["data"])
     data[field] = value
     if field == "variant":
         from pydantic import ValidationError  # ruff: ignore[import-outside-top-level] -- verify one constrained-field diagnostic without printing imported values
@@ -356,9 +386,9 @@ def test_ambiguous_concept_requires_variant_and_exact_owner(
     ],
 )
 def test_concept_data_guards(
-    case: Case, field: str, value: JsonValue, message: str
+    baseline: Case, field: str, value: JsonValue, message: str
 ) -> None:
-    data = object_value(case.concept()["data"])
+    data = object_value(baseline.concept()["data"])
     if field == "source_hash":
         object_value(data["subject"])[field] = value
     else:
@@ -800,3 +830,299 @@ def test_malformed_offline_batches_cannot_enter_identity_replay(case: Case) -> N
         ValueError, match=r"^Name identity offline source batch is malformed$"
     ):
         case.replay(shards(case.concept()))
+
+
+@pytest.mark.parametrize("include_en", [False, True])
+def test_mixed_registry_replays_jp_and_en_card_descriptors(
+    mixed_baseline: Mixed, tmp_path: Path, include_en: bool
+) -> None:
+    case = copied(mixed_baseline.case, tmp_path / "mixed")
+    records = [case.concept()]
+    if include_en:
+        records.append(english_concept(case, mixed_baseline))
+    replay, _, _ = case.replay(shards(*records))
+    observations = [
+        use for use in replay.uses if use.usage == "name_identity_observation"
+    ]
+    assert len(observations) == 2
+    assert {use.source.url for use in observations} == {
+        "https://shadowverse-evolve.com/cardlist/?cardno=SYN-001",
+        "https://en.shadowverse-evolve.com/cards/?cardno=SYN-EN001",
+    }
+    identity_uses = [use for use in replay.uses if use.usage == "name_identity"]
+    assert len(identity_uses) == (2 if include_en else 1)
+
+
+def test_english_exact_string_cannot_borrow_a_japanese_concept(
+    case: Case, database: DatabaseTemplate
+) -> None:
+    replay, _, _ = case.replay(shards(terms=[name_term(text="Synthetic English name")]))
+    with database.copy() as db:
+        result = replay.resolve(db, NameOwner("face_revision", "english-revision"))
+        assert result is not None
+        assert result.term_id is None
+        assert result.reason == "missing_name_concept"
+
+
+@pytest.mark.parametrize("include_name", [False, True])
+def test_only_card_name_concepts_participate_in_exact_name_resolution(
+    case: Case, database: DatabaseTemplate, include_name: bool
+) -> None:
+    trait = name_term("trait.synthetic", "Synthetic text")
+    object_value(trait["data"])["category"] = "trait"
+    keyword = name_term("keyword.synthetic", "Synthetic text")
+    object_value(keyword["data"])["category"] = "keyword"
+    terms = [trait, keyword]
+    if include_name:
+        terms.append(name_term("name.current", "Synthetic text"))
+    replay, _, _ = case.replay(shards(terms=terms))
+    with database.copy() as db:
+        result = replay.resolve(db, NameOwner("face_revision", "revision"))
+        assert result is not None
+        assert result.term_id == ("term:name.current" if include_name else None)
+        assert result.reason == ("selected" if include_name else "missing_name_concept")
+
+
+def test_renamed_owner_cannot_reuse_a_concept_association(
+    case: Case, database: DatabaseTemplate
+) -> None:
+    replay, _, _ = case.replay(
+        shards(
+            case.concept(key="name.alias"),
+            terms=[
+                name_term("name.alias", "Synthetic alias"),
+                name_term("name.other", "Synthetic other name"),
+            ],
+        )
+    )
+    with database.copy() as db:
+        case.frozen.publish(db)
+        with db.transaction():
+            db.update(
+                "face_revision", {"id": "link-revision"}, {"name_unit_id": "other-name"}
+            )
+        result = replay.resolve(db, NameOwner("face_revision", "link-revision"))
+        assert result is not None
+        assert (result.term_id, result.variant, result.reason) == (
+            "term:name.other",
+            "default",
+            "selected",
+        )
+        assert not result.record_hashes
+        assert not result.decision_ids
+
+
+def test_same_hash_and_variant_in_different_languages_do_not_conflict(
+    mixed_baseline: Mixed, tmp_path: Path, database: DatabaseTemplate
+) -> None:
+    case = copied(mixed_baseline.case, tmp_path / "mixed")
+    jp, en = case.assignment(), case.assignment(key="name.other")
+    data = object_value(en["data"])
+    owner: dict[str, JsonValue] = {
+        "kind": "face_revision",
+        "revision_id": mixed_baseline.revision_id,
+    }
+    data["owner"] = owner
+    data["source_hash"] = mixed_baseline.name_ref.text_hash
+    en["record_key"] = canonical(
+        ["context_assignment", owner, "name", None, 1]
+    ).decode()
+    en["evidence"] = [
+        {"source_ref": mixed_baseline.name_ref.model_dump(mode="json"), "role": "name"}
+    ]
+    replay, _, _ = case.replay(
+        shards(
+            jp,
+            en,
+            english_concept(case, mixed_baseline, "name.other"),
+            terms=[name_term(), name_term("name.other", "Synthetic other concept")],
+        )
+    )
+    assert dict(replay.assignment_languages) == {
+        str(jp["record_key"]): "ja",
+        str(en["record_key"]): "en",
+    }
+    with database.copy() as db:
+        case.frozen.publish(db)
+        with db.transaction():
+            db.update(
+                "face_revision", {"id": "link-revision"}, {"id": case.revision_id}
+            )
+        result = replay.resolve(db, NameOwner("face_revision", case.revision_id))
+        assert result is not None
+        assert (result.term_id, result.variant) == ("term:name.synthetic", "synthetic")
+
+
+def test_each_override_decision_audits_only_its_own_immutable_identity_basis(
+    case: Case, database: DatabaseTemplate
+) -> None:
+    from sve_carddb.catalog.adoption_sources import PinnedRepository  # ruff: ignore[import-outside-top-level] -- verify hashes directly against Git blobs
+    from sve_carddb.registry.storage import read_yaml  # ruff: ignore[import-outside-top-level] -- this fixture's registry content stays unchanged across revisions
+
+    first = case.concept()
+    previous: dict[str, JsonValue] = {
+        "record_key": first["record_key"],
+        "record_hash": digest(canonical(first)),
+        "decision_id": human([first])["default_decision_id"],
+    }
+    (case.frozen.root / "synthetic-history.txt").write_text(
+        "A separate immutable identity revision.\n"
+    )
+    revision = commit(case.frozen.root)
+    second = case.concept(number=2, previous=previous)
+    object_value(object_value(second["data"])["identity_basis"])[
+        "authored_revision"
+    ] = revision
+    _, inputs, build = case.replay(shards(first, second))
+    paths = {"authored/ids/index.yaml"} | {
+        "authored/" + path
+        for path in object_value(
+            object_value(read_yaml(inputs.root / "ids/index.yaml"))["includes"]
+        )
+    }
+    repository = PinnedRepository(inputs.repository)
+    with database.copy() as db:
+        case.frozen.publish(db)
+        import_glossary(
+            db, inputs, build=build, stores={"test-store": case.frozen.store}
+        )
+        sources = {row.values["id"]: row.values for row in db.rows("source_record")}
+        for record in (first, second):
+            decision = human([record])["default_decision_id"]
+            own = str(
+                object_value(object_value(record["data"])["identity_basis"])[
+                    "authored_revision"
+                ]
+            )
+            edges = [
+                row.values
+                for row in db.rows("decision_source")
+                if row.values["decision_id"] == decision
+                and str(row.values["role"]).startswith("name_identity:")
+            ]
+            assert len(edges) == len(paths)
+            actual = set()
+            for edge in edges:
+                source = sources[edge["source_id"]]
+                assert source["kind"] == "authored"
+                assert source["parser_version"] == "name-identity-v1"
+                assert edge["locator"] == source["authored_path"]
+                assert edge["quote"] is None
+                actual.add(
+                    (
+                        source["authored_revision"],
+                        source["authored_path"],
+                        source["sha256"],
+                    )
+                )
+            assert actual == {
+                (own, path, digest(repository.read(own, path))) for path in paths
+            }
+
+
+def test_historical_translation_sources_forward_mode_to_identity_replay(
+    case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import sve_carddb.catalog.adoption_sources as pinned_module  # ruff: ignore[import-outside-top-level] -- relocate only the synthetic runtime used by the real identity verifier
+    from sve_carddb.catalog.adoption_models import Batch, ReviewContext  # ruff: ignore[import-outside-top-level] -- actual reviewed identity closure
+    from sve_carddb.translations.sources import Sources  # ruff: ignore[import-outside-top-level] -- constructor forwarding is the reviewed behavior
+
+    config = object_value(parse(case.frozen.build.configuration.encode()))
+    path = "carddb/src/sve_carddb/extract/official_jp.py"
+    parser = "official-jp-exact-v1"
+    config["catalog_source_recipes"] = {
+        parser: {
+            "version": parser,
+            "program_revision": case.frozen.program,
+            "code_path": path,
+            "code_hash": digest((case.frozen.root / path).read_bytes()),
+            "config": {},
+            "config_hash": digest(canonical({})),
+        }
+    }
+    build = case.frozen.changed(config)
+    review = ReviewContext(
+        context=build,
+        source_batches=(
+            Batch(store_id=case.frozen.jp.store_id, batch_id=case.frozen.jp.batch_id),
+        ),
+    )
+    (case.frozen.root / path).write_bytes(
+        (case.frozen.root / path).read_bytes() + b"\n# Synthetic runtime change.\n"
+    )
+    monkeypatch.setattr(
+        pinned_module,
+        "__file__",
+        str(case.frozen.root / "carddb/src/sve_carddb/catalog/adoption_sources.py"),
+    )
+    sources = Sources(
+        {"test-store": case.frozen.store}, case.frozen.root, build, historical=True
+    )
+    sources.identities.verify_printing(
+        case.frozen.printing, review, case.frozen.jp.source_version_id
+    )
+    assert any(
+        use.usage == "catalog_reviewed_identity" for use in sources.identities.uses
+    )
+    current = Sources({"test-store": case.frozen.store}, case.frozen.root, build)
+    with pytest.raises(
+        ValueError, match=r"^Historical recipe implementation cannot be replayed$"
+    ):
+        current.identities.verify_printing(
+            case.frozen.printing, review, case.frozen.jp.source_version_id
+        )
+
+
+def test_multiple_printing_variants_cannot_make_a_face_mapping_unique(
+    case: Case,
+) -> None:
+    from sve_carddb.registry.storage import (  # ruff: ignore[import-outside-top-level] -- a valid registry permits distinct variants of the same regional number
+        Entry,
+        _area,
+        load,
+        read_yaml,
+        relayout,
+        write_files,
+    )
+
+    root = case.frozen.root / "authored"
+    index, records = load(root)
+    entries = list(records.values())
+    original = next(entry for entry in entries if entry.kind == "printing")
+    identifier = "p:" + "1" * 32
+    entries.extend(
+        [
+            Entry(
+                record_key="printing:" + identifier,
+                kind="printing",
+                owner=original.owner,
+                data=original.data
+                | {"id": identifier, "variant_key": "synthetic-alternate"},
+            ),
+            Entry(
+                record_key="card_int_id:" + identifier,
+                kind="card_int_id",
+                owner=original.owner,
+                data={
+                    "int_id": index.next_int_id["jp"],
+                    "printing_id": identifier,
+                    "allocated_at": "2026-10-03",
+                },
+            ),
+        ]
+    )
+    reviews = {
+        (_area(entry), entry.owner): ("gbaian10", "2026-10-03") for entry in entries
+    }
+    write_files(relayout(root, entries, reviews))
+    record = case.concept()
+    basis = object_value(object_value(record["data"])["identity_basis"])
+    basis.update(
+        authored_revision=commit(case.frozen.root),
+        registry_index_hash=digest(canonical(read_yaml(root / "ids/index.yaml"))),
+    )
+    with pytest.raises(
+        ValueError,
+        match=r"^Name override frozen source has no unique physical face mapping$",
+    ):
+        case.replay(shards(record))

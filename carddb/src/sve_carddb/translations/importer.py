@@ -276,6 +276,8 @@ def populate_glossary(  # ruff: ignore[complex-structure,too-many-branches] -- h
     for record, decision in snapshot.records():
         if isinstance(record, (AssignmentRecord, ConceptRecord)):
             for revision, path, checksum in sorted(set(identity.authored_uses)):
+                if revision != identity.record_revisions[record.record_key]:
+                    continue
                 identifier = (
                     "authored:name-identity:"
                     + digest(canonical([revision, path, checksum]))[7:]

@@ -232,7 +232,7 @@ class Sources:
                 version, parser_version=parser
             )
             if descriptor.provider != provider or descriptor.kind != (
-                "card" if provider == "jp" else "api"
+                "card" if provider in {"jp", "en"} else "api"
             ):
                 raise ValueError("Frozen evidence provider/kind mismatch")
             lang, document = project(raw, source.url, provider)

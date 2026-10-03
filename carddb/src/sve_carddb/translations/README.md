@@ -84,6 +84,17 @@ owner from the complete uncorrected observation; corrected revisions cannot be
 guessed from a name hash alone. Assignment records use the consumer's explicitly
 pinned immutable authored registry, since their wire format has no separate
 identity-basis field. Concept records use their own declared identity basis.
+Before the first production assignment is adopted, its contract must gain a
+historical `identity_basis`; current consumer pins cannot permanently preserve
+an assignment's review after the registry observation changes.
+
+Complete replay needs frozen card batches for every region present in the
+registry. Offline recipes declare both batches; other callers must cover both
+through the supplied override references. Both JP and EN physical descriptors
+have kind `card`, while digital catalogues have kind `api`. The observation
+closure checked here is physical printing identity, including the registry's
+cross-region references. It does not replace the independent evidence checks
+for ancillary related-card suggestions or source corrections.
 
 `NameReplay.resolve()` rechecks the current owner's confirmed identity, language,
 exact name hash and known printed state. A unique exact Japanese concept needs
@@ -94,6 +105,8 @@ owner. The returned term/variant and audit IDs are inputs to the later applicati
 layer, not populated translations or uses. The offline build independently
 replays the full source-use closure, including identity observations; import
 audits preserve the corresponding registry and decision evidence.
+Each override decision audits only its own immutable identity revision, rather
+than claiming the historical basis of unrelated records.
 
 Only reviewed unofficial translations can enter the shared selection table.
 Official names need per-owner eligibility and later `FieldTranslation` bindings;
