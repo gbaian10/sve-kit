@@ -69,8 +69,8 @@ class DirectTestTests(unittest.TestCase):
             for step in cast("list[dict[str, object]]", job.get("steps", []))
         )
 
-    def test_every_job_is_hosted_without_runner_switches(self) -> None:
-        """The abandoned runner option cannot change runner choice or cache behavior."""
+    def test_every_job_uses_the_single_runner_switch(self) -> None:
+        """Only CI_RUNNER picks the runner; unset means GitHub-hosted, caches stay unchanged."""
         for name in ("ci.yml", "pr-title.yml"):
             source = (ROOT / ".github/workflows" / name).read_text()
             workflow = cast(
@@ -82,7 +82,7 @@ class DirectTestTests(unittest.TestCase):
             assert "cache-local-path" not in source
             jobs = cast("dict[str, dict[str, object]]", workflow["jobs"])
             for job in jobs.values():
-                assert job["runs-on"] == "ubuntu-latest"
+                assert job["runs-on"] == "${{ vars.CI_RUNNER || 'ubuntu-latest' }}"
                 for step in cast("list[dict[str, object]]", job["steps"]):
                     if "actions/checkout@" in str(step.get("uses")):
                         assert cast("dict[str, object]", step["with"])["clean"] is True

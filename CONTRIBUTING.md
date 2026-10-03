@@ -236,7 +236,12 @@ messages, captured output, parameter values and arbitrary Web case descriptions;
 safe file/function location (or Web case ordinal) to reproduce failures locally. A missing
 report is reported explicitly and cannot make a failing test step pass.
 
-Every job uses GitHub-hosted `ubuntu-latest`. While the repository is private, a push to
+Every job runs on the label in the repository variable `CI_RUNNER`, or GitHub-hosted
+`ubuntu-latest` when it is unset. While the repository is private, the maintainer may point it
+at a self-hosted runner. Before the repository becomes public, remove every self-hosted runner
+registration from the repository, then unset the variable and confirm a run on GitHub-hosted
+runners: a pull request can change the workflow to target any registered runner, so fork
+pull requests must never be able to reach one. While the repository is private, a push to
 `main` does not rerun pytest, Rust tests/coverage or Vitest. **Before merging, the PR must
 be rebased onto the latest `main` and its CI must be green.** This is a merge prerequisite,
 not something the cache-maintenance run verifies: its green `ci-ok` means maintenance
