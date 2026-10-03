@@ -94,8 +94,10 @@ const zhTW = {
     imageAlt: "{{name}}（{{cardNo}}）",
     noImage: "尚無卡圖",
     imageLoading: "卡圖資訊載入中",
+    imageDownloadError: "卡圖載入失敗",
     imageError: "卡圖資訊載入失敗",
     imagePending: "卡圖待確認",
+    withdrawnNoSource: "卡圖已撤下：{{reason}}",
     withdrawn: "卡圖已撤下：{{reason}}（來源 {{host}}）",
     noTranslation: "尚無譯名",
     loadImage: "載入卡圖",
@@ -108,6 +110,12 @@ const zhTW = {
   },
   dialog: {
     close: "關閉",
+  },
+  snapshot: {
+    stale: "正在使用較舊的本機資料，目前圖片可能無法取得。",
+    offline: "離線使用本機資料；圖片可能過時或無法取得。",
+    updateApp: "請更新應用程式以讀取最新快照。",
+    retry: "檢查更新",
   },
   dev: {
     root: { cdn: "正式", preview: "預覽" },

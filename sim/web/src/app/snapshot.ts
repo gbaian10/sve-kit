@@ -26,6 +26,15 @@ export function useActiveSnapshot(): {
   const status = useSnapshotStatus(client)
   useEffect(() => {
     void client.load()
+    const refresh = () => {
+      void client.reload()
+    }
+    window.addEventListener("online", refresh)
+    window.addEventListener("focus", refresh)
+    return () => {
+      window.removeEventListener("online", refresh)
+      window.removeEventListener("focus", refresh)
+    }
   }, [client])
   return { client, status, root }
 }

@@ -26,17 +26,19 @@ export function validatePlacement(
   bootstrap: readonly Fragment[] = [],
   knownFaces?: ReadonlyMap<string, JsonValue>,
 ): void {
-  if (version !== "1.1.0") return
+  if (version !== "1.1.0" && version !== "2.0.0") return
   const all = [...bootstrap, ...fragments]
   const faces =
     knownFaces ??
-    new Map(
-      all
-        .filter((f) => f.table === "face")
-        .flatMap((f) =>
-          f.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
-        ),
-    )
+    (fragments.some((f) => f.table === "face_revision")
+      ? new Map(
+          all
+            .filter((f) => f.table === "face")
+            .flatMap((f) =>
+              f.rows.map((row) => [stringValue(row["id"]), row["card_id"] ?? null] as const),
+            ),
+        )
+      : new Map<string, JsonValue>())
   for (const fragment of fragments) {
     const owner = objectValue(fragment.value["owner"])
     const kind = stringValue(owner["kind"])
@@ -55,7 +57,9 @@ export function validatePlacement(
       role === "images"
         ? kind === "global"
           ? 1
-          : 64
+          : version === "2.0.0"
+            ? 32
+            : 64
         : role === "bootstrap"
           ? kind === "global"
             ? 8

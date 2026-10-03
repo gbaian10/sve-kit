@@ -167,9 +167,9 @@ describe("snapshot contract golden", () => {
     expect(canonicalText(view)).toBe(expected())
   })
 
-  it("accepts an older minimum reader version", () => {
+  it.each(["0.9.0", "2.0.0"])("accepts a supported legacy minimum reader version %s", (minimum) => {
     const m = manifest()
-    m["min_reader_version"] = "0.9.0"
+    m["min_reader_version"] = minimum
     expect(canonicalText(readSnapshot(m, payloads()))).toBe(expected())
   })
 
@@ -193,7 +193,12 @@ describe("snapshot contract golden", () => {
       }
       const target = item["target"] as string
       const value = target === "manifest" ? m : parseStrict(blobs.get(target) ?? new Uint8Array())
-      replace(value, item["path"] as (string | number)[], item["value"] ?? null)
+      // The frozen v1 vector targets a 1.0 reader; 2.0 is now supported by this reader.
+      replace(
+        value,
+        item["path"] as (string | number)[],
+        name === "future-reader" ? "3.0.0" : (item["value"] ?? null),
+      )
       if (target !== "manifest") {
         blobs.set(target, canonical(value))
         if (item["rehash"] === true) {

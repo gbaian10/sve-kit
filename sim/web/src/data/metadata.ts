@@ -66,13 +66,14 @@ export class MetadataBytes {
       checking: storage !== undefined,
     }
     if (storage) {
-      const current = `sve-images-${hash}`
-      const previous = previousHash ? `sve-images-${previousHash}` : undefined
+      const scope = `${encodeURIComponent(base)}:`
+      const current = `sve-images-${scope}-${hash}`
+      const previous = previousHash ? `sve-images-${scope}-${previousHash}` : undefined
       const initialized = (cacheInitializers.get(storage) ?? Promise.resolve())
         .then(async () => {
           if (!this.active()) return undefined
           for (const name of await storage.keys())
-            if (name.startsWith("sve-images-") && name !== current && name !== previous)
+            if (name.startsWith(`sve-images-${scope}-`) && name !== current && name !== previous)
               await storage.delete(name)
           if (!this.active()) return undefined
           const cache = await storage.open(current)

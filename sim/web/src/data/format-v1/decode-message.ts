@@ -27,7 +27,7 @@ export function decodeMessage(request: DecodeRequest): DecodeResult {
   const value = objectValue(readPayload(request.file, request.bytes))
   if (request.file["role"] === "config") {
     validate("Config", value, [stringValue(request.file["key"])], request.version)
-    validateConfig(value)
+    validateConfig(value, request.version)
     return { kind: "config", value }
   }
   const fragments = readContainer(request.file, value, request.version)

@@ -47,6 +47,62 @@ afterEach(() => {
 })
 
 describe("CardImage", () => {
+  it("removes a loaded old-v image on withdrawal and shows failure instead of falling back to it", async () => {
+    const old = images("available")
+    const props = { summary, name, sizes: "50vw", className: "w-full" }
+    const { rerender } = await renderInRouter(<CardImage {...props} alt="redundant" images={old} />)
+    const oldImage = document.querySelector("img[srcset]")
+    if (!oldImage) throw new Error("missing image")
+    act(() => {
+      oldImage.dispatchEvent(new Event("load"))
+    })
+    rerender(<CardImage {...props} alt="redundant" images={images("available", "withdrawn")} />)
+    expect(document.querySelector("img[srcset]")).toBeNull()
+    const changed: ImageIndex = {
+      asset: old.asset,
+      eager: () => true,
+      cardImage: () => ({
+        src: "/cdn/images/card_l/1.webp?v=2",
+        srcSet: "/cdn/images/card_l/1.webp?v=2 459w",
+        width: 459,
+        height: 641,
+      }),
+    }
+    rerender(<CardImage {...props} alt="redundant" images={changed} />)
+    const replacement = document.querySelector("img[srcset]")
+    expect(replacement).toHaveAttribute("loading", "eager")
+    act(() => {
+      oldImage.dispatchEvent(new Event("load"))
+    })
+    expect(replacement).toHaveClass("opacity-0")
+    act(() => {
+      replacement?.dispatchEvent(new Event("error"))
+    })
+    expect(document.querySelector("img[srcset]")).toBeNull()
+    expect(screen.getByText("卡圖載入失敗")).toBeInTheDocument()
+  })
+  it("shows a compact withdrawn media reason without inventing a source host", async () => {
+    const compact: ImageIndex = {
+      cardImage: () => undefined,
+      asset: () => ({
+        publication_state: "withdrawn",
+        withdrawal_reason: "Synthetic reason",
+        availability: "available",
+      }),
+    }
+    await renderInRouter(
+      <CardImage
+        summary={summary}
+        name={name}
+        images={compact}
+        alt="redundant"
+        sizes="50vw"
+        className="w-full"
+      />,
+    )
+    expect(screen.getByText("卡圖已撤下：Synthetic reason")).toBeInTheDocument()
+    expect(document.querySelector("img[srcset]")).toBeNull()
+  })
   it("names the card in identify mode and stays silent in redundant mode", async () => {
     await renderInRouter(
       <CardImage

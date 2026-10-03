@@ -97,8 +97,10 @@ export default {
     imageAlt: "{{name}} ({{cardNo}})",
     noImage: "No image yet",
     imageLoading: "Loading image metadata",
+    imageDownloadError: "Could not load the card image",
     imageError: "Could not load image metadata",
     imagePending: "Image awaiting review",
+    withdrawnNoSource: "Image withdrawn: {{reason}}",
     withdrawn: "Image withdrawn: {{reason}} (source {{host}})",
     noTranslation: "No translation yet",
     loadImage: "Load image",
@@ -111,6 +113,12 @@ export default {
   },
   dialog: {
     close: "Close",
+  },
+  snapshot: {
+    stale: "Using older local data; current images may be unavailable.",
+    offline: "Offline: using local data; pictures may be outdated or unavailable.",
+    updateApp: "Update the app to read the current snapshot.",
+    retry: "Check for updates",
   },
   dev: {
     root: { cdn: "Live", preview: "Preview" },

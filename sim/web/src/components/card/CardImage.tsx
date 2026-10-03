@@ -56,26 +56,32 @@ export function CardImage({
   const { t } = useTranslation()
   const { dataSaver } = usePrefs()
   const [loaded, setLoaded] = useState("")
+  const [failed, setFailed] = useState("")
   const asset = images?.asset(summary.printingId, summary.faceId)
   const source = images?.cardImage(summary.printingId, summary.faceId)
   const availability = asset?.["availability"]
   const publication = asset?.["publication_state"]
+  const withdrawal = {
+    reason: typeof asset?.["withdrawal_reason"] === "string" ? asset["withdrawal_reason"] : "",
+    host: hostOf(asset?.["source_url"]),
+  }
+  const withdrawn = withdrawal.host
+    ? t("card.withdrawn", withdrawal)
+    : t("card.withdrawnNoSource", withdrawal)
   const tag =
-    publication === "withdrawn"
-      ? t("card.withdrawn", {
-          reason:
-            typeof asset?.["withdrawal_reason"] === "string" ? asset["withdrawal_reason"] : "",
-          host: hostOf(asset?.["source_url"]),
-        })
-      : availability === "missing"
-        ? t("card.noImage")
-        : publication === "pending" || availability === "unfetched"
-          ? t("card.imagePending")
-          : images?.failed && asset === undefined
-            ? t("card.imageError")
-            : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
-              ? t("card.imageLoading")
-              : undefined
+    source !== undefined && failed === source.src
+      ? t("card.imageDownloadError")
+      : publication === "withdrawn"
+        ? withdrawn
+        : availability === "missing"
+          ? t("card.noImage")
+          : publication === "pending" || availability === "unfetched"
+            ? t("card.imagePending")
+            : images?.failed && asset === undefined
+              ? t("card.imageError")
+              : images === undefined || images.known?.(summary.printingId, summary.faceId) === false
+                ? t("card.imageLoading")
+                : undefined
   const showImage = source !== undefined && tag === undefined && (!dataSaver || imageWanted)
   const isLoaded = source !== undefined && loaded === source.src
   // In identify mode the slot itself carries the name, so the card is announced with or without
@@ -114,8 +120,11 @@ export function CardImage({
           width={source.width}
           height={source.height}
           alt=""
-          loading="lazy"
+          loading={images?.eager?.(summary.printingId, summary.faceId) ? "eager" : "lazy"}
           decoding="async"
+          onError={() => {
+            setFailed(source.src)
+          }}
           onLoad={() => {
             setLoaded(source.src)
           }}
