@@ -629,3 +629,17 @@ confirmed_none／reskin 續版及有效投影順序見 [身分修復與決定續
 但兩政策各自有真實全文核可事件，不能借wording／glossary／模板事件。
 卡名取詞與同名瀏覽不混入身分／真人digital-links封套，不記官方原文或平行卡名詞庫。
 政策資料、收據與清單存在不表示新loader、正式build或發布已驗收；格式未知拒絕，coverage首批不採納。
+
+## 14. 引擎能力與資源身分設定
+
+`authored/engine-rules/index.yaml` 是 `engine-rules/1` 可執行設定，
+語法權威位於 `dsl/engine-rules.schema.json`，完整欄位、legacy-jp 私有轉接與
+A／B 兩種名稱語意見 [引擎規則能力與資料身分](../dsl/engine-rules-1.md)。
+它引用已採納的 title code、規則名稱身分及釘版來源，不新增另一套卡表或永久 ID。
+角色不是整卡 construction_role，也不擴大 Standard 構築採納的 scope。
+
+公開設定不放官方標籤；舊 JP JSONL 透過明示 legacy-jp 的同批私有資料解析。
+記憶體載入必須顯式傳入規則與身分背景，不能暗讀工作目錄；未知／錯區、
+缺必要模板、歧義或 pin 不符都拒絕，沒有官方名稱預設。
+本專案在新路徑的可執行原創資料採 Apache-2.0，來源內容的排除仍依 LICENSING。
+格式合法不等於執行器支援或資料已採納，實際載入能力由 engine 契約與測試驗證。
