@@ -20,7 +20,7 @@ from sve_carddb.snapshot.contract import (
     validate,
 )
 from sve_carddb.snapshot.profiles import MEDIA, profile
-from sve_carddb.snapshot.reader_media import validate_media
+from sve_carddb.snapshot.reader_media import validate_digital, validate_media
 from sve_carddb.snapshot.semantics import (
     validate_config,
     validate_fragments,
@@ -528,6 +528,10 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     validate_placement(view, manifest, fragments)
     if selected.version == MEDIA:
         validate_media(view, fragments, files, object_value(manifest["config_ref"]))
+        config = object_value(
+            parse(payloads[string(object_value(manifest["config_ref"])["key"])])
+        )
+        validate_digital(view, config)
     return view
 
 
@@ -568,8 +572,29 @@ def read_text_all(
     return read_snapshot(manifest, payloads | dict(attachments))
 
 
+def _compatible(entry: Row) -> bool:
+    try:
+        selected = profile(string(entry["format_version"]))
+    except ValueError:
+        return False
+    minimum = tuple(map(int, string(entry["min_reader_version"]).split(".")))
+    return minimum <= tuple(map(int, selected.version.split("."))) and set(
+        map(string, array(entry["required_capabilities"]))
+    ) <= set(selected.capabilities)
+
+
+def select_index_entry(value: JsonValue) -> Row | None:
+    """Negotiate current, then previous; unknown capability is not corruption."""
+    index = object_value(value)
+    validate("Index", index, MEDIA)
+    for raw in (index["current"], index["previous"]):
+        if raw is not None and _compatible(object_value(raw)):
+            return object_value(raw)
+    return None
+
+
 def read_index(value: JsonValue, manifests: Mapping[str, bytes]) -> Row:
-    """Verify the 2.0 two-release window without following changes into history."""
+    """Verify the readable retained window, without loading incompatible manifests."""
     index = object_value(value)
     validate("Index", index, MEDIA)
     entries = [object_value(index["current"])]
@@ -577,19 +602,22 @@ def read_index(value: JsonValue, manifests: Mapping[str, bytes]) -> Row:
         entries.append(object_value(index["previous"]))
     if len({entry["data_version"] for entry in entries}) != len(entries):
         raise ValueError("Index current and previous must be distinct releases")
-    if set(manifests) != {string(e["manifest_sha256"]) for e in entries}:
-        raise ValueError("Index manifest set must equal retained window")
     for entry in entries:
-        raw = manifests[string(entry["manifest_sha256"])]
-        manifest = object_value(parse(raw))
-        if digest(raw) != entry["manifest_sha256"] or canonical(manifest) != raw:
-            raise ValueError("Index manifest hash or canonical bytes mismatch")
-        validate("Manifest", manifest, MEDIA)
+        _ordered(array(entry["required_capabilities"]))
         if (
             entry["manifest_path"]
             != "snapshots/manifests/" + string(entry["manifest_sha256"])[7:] + ".json"
         ):
             raise ValueError("Index manifest path must match its hash")
+    readable = [e for e in entries if _compatible(e)]
+    if set(manifests) != {string(e["manifest_sha256"]) for e in readable}:
+        raise ValueError("Index manifest set must equal readable window")
+    for entry in readable:
+        raw = manifests[string(entry["manifest_sha256"])]
+        manifest = object_value(parse(raw))
+        if digest(raw) != entry["manifest_sha256"] or canonical(manifest) != raw:
+            raise ValueError("Index manifest hash or canonical bytes mismatch")
+        validate("Manifest", manifest, string(entry["format_version"]))
         if any(
             entry[field] != manifest[field]
             for field in (

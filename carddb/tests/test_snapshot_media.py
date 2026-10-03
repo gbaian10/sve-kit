@@ -1,8 +1,9 @@
 """Synthetic 2.0 media, revision and independent wire counterexamples."""
 
 from copy import deepcopy
+from dataclasses import replace
 from pathlib import Path
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
@@ -21,6 +22,7 @@ from sve_carddb.snapshot.values import (
     array,
     canonical,
     digest,
+    integer,
     object_value,
     parse,
     string,
@@ -47,18 +49,18 @@ def test_independent_v2_golden_and_union() -> None:
         for f in (object_value(raw),)
     }
     expected = parse((GOLDEN / "expected-logical.json").read_bytes())
-    assert canonical(read_snapshot(manifest, blobs)) == canonical(expected)
+    assert read_snapshot(manifest, blobs) == expected
     attachments = {
         k: b for k, b in blobs.items() if k.startswith("images/") or k == "programs"
     }
-    assert canonical(
+    assert (
         read_text_all(
             manifest,
             canonical(parse((GOLDEN / "text-all.json").read_bytes())),
             attachments,
         )
-    ) == canonical(expected)
-    assert len(object_value(expected)["printing_image"]) == 3
+    ) == expected
+    assert len(array(object_value(expected)["printing_image"])) == 3
 
 
 def test_schema_regeneration_and_frozen_column_boundaries() -> None:
@@ -93,33 +95,39 @@ def test_shared_image_url_vectors() -> None:
         case = object_value(raw)
         assert (
             image_url(
-                int(case["int_id"]),
-                int(case["ordinal"]),
+                integer(case["int_id"]),
+                integer(case["ordinal"]),
                 string(case["size"]),
-                int(case["version"]),
+                integer(case["version"]),
             )
             == case["url"]
         )
         assert "?" not in image_path(
-            int(case["int_id"]), int(case["ordinal"]), string(case["size"])
+            integer(case["int_id"]), integer(case["ordinal"]), string(case["size"])
         )
 
 
 @pytest.mark.parametrize("field", ["int_id", "ordinal", "version"])
 @pytest.mark.parametrize("bad", [-1, MAX_SAFE + 1, True, 1.5, "01"])
-def test_url_rejects_unsafe_integer(field: str, bad: object) -> None:
-    kwargs = {"int_id": 1, "ordinal": 0, "size": "card_s", "version": 1}
-    kwargs[field] = bad  # type: ignore[assignment] -- deliberately cross the untyped caller boundary
+def test_url_rejects_unsafe_integer(field: str, bad: JsonValue) -> None:
+    values: dict[str, JsonValue] = {"int_id": 1, "ordinal": 0, "version": 1}
+    values[field] = bad
+    # Cast only the deliberately invalid caller boundary, not validated JSON.
     with pytest.raises(ValueError, match=r"^Image URL integer outside safe domain$"):
-        image_url(**kwargs)  # type: ignore[arg-type] -- intentionally invalid synthetic boundary values
+        image_url(
+            cast("int", values["int_id"]),
+            cast("int", values["ordinal"]),
+            "card_s",
+            cast("int", values["version"]),
+        )
 
 
 @pytest.mark.parametrize("field", ["int_id", "version"])
 def test_url_positive_domain(field: str) -> None:
-    kwargs = {"int_id": 1, "ordinal": 0, "size": "card_s", "version": 1}
-    kwargs[field] = 0
     with pytest.raises(ValueError, match=r"^Image URL integer outside safe domain$"):
-        image_url(**kwargs)  # type: ignore[arg-type] -- heterogeneous keyword mapping
+        image_url(
+            0 if field == "int_id" else 1, 0, "card_s", 0 if field == "version" else 1
+        )
 
 
 def test_unknown_size() -> None:
@@ -145,7 +153,7 @@ def test_project_export_and_preview(images: PublicImages, tmp_path: Path) -> Non
     )
     assert report["images"] == {
         "unique_files": 5,
-        "unique_bytes": sum(a["bytes"] for a in plan.assets),
+        "unique_bytes": sum(integer(a["bytes"]) for a in plan.assets),
     }
     assert {
         p.relative_to(roots.preview).as_posix() for p in roots.preview.rglob("*.webp")
@@ -240,9 +248,9 @@ def test_binding_and_a_b_a_never_reuse_token(
         r for r in changed.tables["image_variant"] if r["size_key"] == group + "_s"
     )
     raw = BytesIO()
-    Image.new("RGB", (int(row["width"]), int(row["height"])), (90, 40, 170)).save(
-        raw, format="WEBP"
-    )
+    Image.new(
+        "RGB", (integer(row["width"]), integer(row["height"])), (90, 40, 170)
+    ).save(raw, format="WEBP")
     content = raw.getvalue()
     hashed = digest(content)[7:]
     row.update(
@@ -306,10 +314,10 @@ def test_independent_media_counterexamples(
 
 
 @pytest.mark.parametrize("version", [0, MAX_SAFE + 1, True])
-def test_wire_token_domain(images: PublicImages, version: object) -> None:
+def test_wire_token_domain(images: PublicImages, version: JsonValue) -> None:
     plan = prepare_media(images.projection, images.library, revision=7)
     row = plan.projection.tables["printing_image"][0]
-    row["art_version"] = version  # type: ignore[assignment] -- invalid wire boundary
+    row["art_version"] = version
     if version == MAX_SAFE + 1:
         with pytest.raises(ValueError, match=r"^Expected safe integer$"):
             validate("printing_image", encode("printing_image", row, MEDIA), MEDIA)
@@ -381,7 +389,12 @@ def test_index_two_window_and_no_recursive_changes_history() -> None:
         }, raw
 
     e, raw = entry(manifest)
-    index = {"index_format": 2, "revision": 1, "current": e, "previous": None}
+    index: dict[str, JsonValue] = {
+        "index_format": 2,
+        "revision": 1,
+        "current": e,
+        "previous": None,
+    }
     assert read_index(index, {string(e["manifest_sha256"]): raw}) == index
     duplicate = index | {"previous": e}
     with pytest.raises(
@@ -389,7 +402,7 @@ def test_index_two_window_and_no_recursive_changes_history() -> None:
     ):
         read_index(duplicate, {string(e["manifest_sha256"]): raw})
     with pytest.raises(
-        ValueError, match=r"^Index manifest set must equal retained window$"
+        ValueError, match=r"^Index manifest set must equal readable window$"
     ):
         read_index(index, {})
     with pytest.raises(ValidationError):
@@ -586,10 +599,10 @@ def test_prepare_requires_complete_verified_outputs(
 def test_local_reservation_fsync_before_yield(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    import sve_carddb.snapshot.preview.media_state as state  # ruff: ignore[import-outside-top-level] -- replace only the durable reservation boundary
-
     calls: list[int] = []
-    monkeypatch.setattr(state.os, "fsync", calls.append)
+    monkeypatch.setattr(
+        "sve_carddb.snapshot.preview.media_state.os.fsync", calls.append
+    )
     with reservation(Roots(tmp_path / "preview", tmp_path / "formal")) as (revision, _):
         assert revision == 1
         assert calls
@@ -607,6 +620,7 @@ def test_same_name_capability_nonempty_and_old_profile_rejects(
         effect_similarity=None,
         review_level="unreviewed",
     )
+    projection.tables["card_voice"] = []
     plan = prepare_media(projection, images.library, revision=7)
     snapshot = export_snapshot(
         plan.projection, images.ownership, BATCH, format_version=MEDIA
@@ -702,7 +716,7 @@ def test_media_source_decoded_dimensions_and_length_are_verified(
     variant = next(
         r for r in projection.tables["image_variant"] if r["size_key"] == "card_s"
     )
-    variant[field] = int(variant[field]) + 1
+    variant[field] = integer(variant[field]) + 1
     message = (
         "Preview image decoded format or dimensions mismatch"
         if field == "width"
@@ -710,3 +724,229 @@ def test_media_source_decoded_dimensions_and_length_are_verified(
     )
     with pytest.raises(ValueError, match="^" + message + "$"):
         prepare_media(projection, images.library, revision=7)
+
+
+@pytest.mark.parametrize(
+    "change",
+    ["revision", "fields", "fingerprint", "token", "binding", "active", "empty"],
+)
+def test_committed_state_rejects_corruption(images: PublicImages, change: str) -> None:
+    plan = prepare_media(images.projection, images.library, revision=7)
+    previous = deepcopy(plan.state)
+    member = next(iter(object_value(previous["members"]).values()))
+    row = object_value(member)
+    if change == "revision":
+        previous["revision"] = 0
+    elif change == "fields":
+        row["unknown"] = True
+    elif change == "fingerprint":
+        row["card"] = "sha256:short"
+    elif change == "token":
+        row["card_version"] = 8
+    elif change == "binding":
+        array(row["binding"])[1] = True
+    elif change == "active":
+        row["active"] = False
+    else:
+        previous = {}
+    with pytest.raises(ValueError, match=r"^Invalid committed media state$"):
+        prepare_media(images.projection, images.library, revision=8, previous=previous)
+
+
+def test_group_version_selector_and_disabled_urls(images: PublicImages) -> None:
+    from sve_carddb.snapshot.media import display_url  # ruff: ignore[import-outside-top-level] -- test the visible-row accessor without a producer
+
+    plan = prepare_media(images.projection, images.library, revision=7)
+    media = plan.projection.tables["printing_image"][0]
+    media["art_version"] = 11
+    printing, face = (
+        images.projection.tables["printing"][0],
+        images.projection.tables["face"][0],
+    )
+    assert string(display_url(printing, face, media, "card_s")).endswith("?v=7")
+    assert string(display_url(printing, face, media, "art_m")).endswith("?v=11")
+    media["availability"] = "missing"
+    assert display_url(printing, face, media, "card_s") is None
+    with pytest.raises(
+        ValueError, match=r"^Image URL media belongs to another printing face$"
+    ):
+        display_url(printing | {"id": "other"}, face, media, "card_s")
+
+
+def test_retry_cannot_change_reserved_outputs(images: PublicImages) -> None:
+    plan = prepare_media(images.projection, images.library, revision=7)
+    same = prepare_media(images.projection, images.library, revision=7)
+    plan.verify_retry(same)
+    different = replace(same, assets=tuple(deepcopy(same.assets)))
+    different.assets[0]["sha256"] = "sha256:" + "0" * 64
+    with pytest.raises(ValueError, match=r"^Retry changes reserved media plan$"):
+        plan.verify_retry(different)
+
+
+def test_first_image_metadata_avoids_global_source_detail(images: PublicImages) -> None:
+    from sve_carddb.snapshot.export.page_cost import page_image_cost  # ruff: ignore[import-outside-top-level] -- inspect the public metadata transfer model
+
+    plan = prepare_media(images.projection, images.library, revision=7)
+    result = export_snapshot(
+        plan.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    report = page_image_cost(result)
+    assert report["source_details_required"] is False
+    assert object_value(object_value(report["cold"])["requests"])["max"] == 1
+
+
+@pytest.mark.parametrize(
+    "incompatible", ["future_format", "unknown_capability", "future_minimum"]
+)
+def test_index_future_current_is_not_corruption_and_compatible_previous_is_readable(
+    incompatible: str,
+) -> None:
+    from sve_carddb.snapshot.reader import select_index_entry  # ruff: ignore[import-outside-top-level] -- neutral index negotiation boundary
+
+    manifest = object_value(parse((GOLDEN / "manifest.json").read_bytes()))
+    manifest["data_version"] = string(manifest["data_version"]).removeprefix("preview-")
+    raw = canonical(manifest)
+    hashed = digest(raw)
+    previous: dict[str, JsonValue] = {
+        f: manifest[f]
+        for f in (
+            "data_version",
+            "published_at",
+            "format_version",
+            "min_reader_version",
+            "required_capabilities",
+            "engine_support_target",
+        )
+    } | {
+        "manifest_path": "snapshots/manifests/" + hashed[7:] + ".json",
+        "manifest_sha256": hashed,
+    }
+    current = deepcopy(previous)
+    current.update(
+        data_version="20261005T010203Z-0001",
+        manifest_path="snapshots/manifests/" + "a" * 64 + ".json",
+        manifest_sha256="sha256:" + "a" * 64,
+    )
+    if incompatible == "future_format":
+        current.update(format_version="3.0.0", min_reader_version="3.0.0")
+    elif incompatible == "future_minimum":
+        current["min_reader_version"] = "3.0.0"
+    else:
+        capabilities: list[JsonValue] = [
+            *array(current["required_capabilities"]),
+            "future-feature-v1",
+        ]
+        current["required_capabilities"] = sorted(capabilities, key=string)
+    index: dict[str, JsonValue] = {
+        "index_format": 2,
+        "revision": 3,
+        "current": current,
+        "previous": previous,
+    }
+    assert read_index(index, {hashed: raw}) == index
+    assert select_index_entry(index) == previous
+    no_compatible = index | {"previous": None}
+    assert read_index(no_compatible, {}) == no_compatible
+    assert select_index_entry(no_compatible) is None
+
+
+@pytest.mark.parametrize("failure", ["endpoint", "duplicate", "human_shadow"])
+def test_nonempty_same_name_requires_endpoints_and_excludes_extra_authority(
+    images: PublicImages, failure: str
+) -> None:
+    projection = deepcopy(images.projection)
+    rule = projection.tables["digital_link"][0]
+    rule.update(
+        relation="same_name",
+        face_id=None,
+        digital_phase=None,
+        effect_similarity=None,
+        review_level="unreviewed",
+    )
+    projection.tables["card_voice"] = []
+    if failure in {"duplicate", "human_shadow"}:
+        other = deepcopy(rule)
+        other["id"] = "digital-link:second"
+        if failure == "human_shadow":
+            other.update(relation="same_character", review_level="confirmed")
+        projection.tables["digital_link"].append(other)
+    plan = prepare_media(projection, images.library, revision=7)
+    if failure == "endpoint":
+        array(plan.projection.config["digital_endpoints"]).pop()
+    message = {
+        "endpoint": "Media config requires both sorted game endpoints",
+        "duplicate": "Duplicate or human-shadowed same-name card pair",
+        "human_shadow": "Duplicate or human-shadowed same-name card pair",
+    }[failure]
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        export_snapshot(plan.projection, images.ownership, BATCH, format_version=MEDIA)
+
+
+def test_v2_offline_endpoints_are_present_without_policy_links(
+    images: PublicImages,
+) -> None:
+    projection = deepcopy(images.projection)
+    projection.config["digital_endpoints"] = []
+    projection.tables["digital_link"] = []
+    projection.tables["card_voice"] = []
+    plan = prepare_media(projection, images.library, revision=7)
+    snapshot = export_snapshot(
+        plan.projection, images.ownership, BATCH, format_version=MEDIA
+    )
+    config = object_value(parse(snapshot.payloads["config"].raw))
+    endpoints = [object_value(e) for e in array(config["digital_endpoints"])]
+    assert [e["game"] for e in endpoints] == ["sv1", "svwb"]
+    assert [e["status"] for e in endpoints] == ["unknown", "unknown"]
+    assert [e["refresh_policy"] for e in endpoints] == ["frozen", "on_sve_release"]
+    assert [object_value(e["language_map"])["zh-Hant"] for e in endpoints] == [
+        "zh-tw",
+        "cht",
+    ]
+    assert (
+        endpoints[0]["card_url_template"]
+        == "https://shadowverse-portal.com/card/{official_id}?lang={provider_lang}"
+    )
+    assert (
+        endpoints[1]["card_url_template"]
+        == "https://shadowverse-wb.com/{provider_lang}/deck/cardslist/card/?card_id={official_id}"
+    )
+    assert plan.projection.tables["digital_link"] == []
+    assert projection.config["digital_endpoints"] == []
+
+
+@pytest.mark.parametrize(
+    "failure", ["empty", "missing", "duplicate", "reverse", "refresh"]
+)
+def test_v2_reader_rejects_endpoint_config_even_without_links(
+    images: PublicImages, failure: str
+) -> None:
+    from sve_carddb.snapshot.reader_media import validate_digital  # ruff: ignore[import-outside-top-level] -- independently exercise the reader without exporter rewriting
+
+    plan = prepare_media(images.projection, images.library, revision=7)
+    config = deepcopy(plan.projection.config)
+    endpoints = array(config["digital_endpoints"])
+    if failure == "empty":
+        endpoints.clear()
+    elif failure == "missing":
+        endpoints.pop()
+    elif failure == "duplicate":
+        endpoints.append(deepcopy(endpoints[0]))
+    elif failure == "reverse":
+        endpoints.reverse()
+    else:
+        object_value(endpoints[1])["refresh_policy"] = "frozen"
+    message = (
+        "Digital endpoint refresh policy differs from game"
+        if failure == "refresh"
+        else "Media config requires both sorted game endpoints"
+    )
+    view = plan.projection.tables | {"digital_card": [], "digital_link": []}
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        validate_digital(view, config)
+    with pytest.raises(ValueError, match="^" + message + "$"):
+        export_snapshot(
+            replace(plan.projection, config=config),
+            images.ownership,
+            BATCH,
+            format_version=MEDIA,
+        )

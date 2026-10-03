@@ -4,12 +4,14 @@ The publisher supplies a durably reserved revision and the last committed state.
 This module does not allocate production revisions or publish remote assets.
 """
 
+import re
 from dataclasses import dataclass, replace
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.snapshot.media_config import offline_configuration
 from sve_carddb.snapshot.preview.images import image_blobs
 from sve_carddb.snapshot.values import (
     array,
@@ -17,6 +19,7 @@ from sve_carddb.snapshot.values import (
     digest,
     integer,
     object_value,
+    parse,
     string,
 )
 
@@ -69,6 +72,88 @@ class MediaPlan:
             if digest(raw) != asset["sha256"] or len(raw) != integer(asset["bytes"]):
                 raise ValueError("Media plan source hash or bytes mismatch")
             yield string(asset["path"]), raw
+
+    def verify_retry(self, other: MediaPlan) -> None:
+        """A reserved image revision cannot acquire different outputs on retry."""
+        if self.state != other.state or self.assets != other.assets:
+            raise ValueError("Retry changes reserved media plan")
+
+
+def display_url(printing: Record, face: Record, media: Record, size: str) -> str | None:
+    """Select the group's version only after validating the exact printing face."""
+    if media["printing_id"] != printing["id"] or media["face_id"] != face["id"]:
+        raise ValueError("Image URL media belongs to another printing face")
+    if size not in SIZE_KEYS:
+        raise ValueError("Unknown image size")
+    if media["publication_state"] != "approved" or media["availability"] != "available":
+        return None
+    if size not in {object_value(v)["size_key"] for v in array(media["variants"])}:
+        raise ValueError("Image URL size has no verified display variant")
+    version = integer(
+        media["art_version" if size.startswith("art_") else "card_version"]
+    )
+    return image_url(
+        integer(printing["int_id"]), integer(face["ordinal"]), size, version
+    )
+
+
+_SUBJECT_ARITY = 2
+_BINDING_ARITY = 3
+
+
+def _member(member: Record, revision: int) -> None:
+    if (
+        set(member)
+        != {"active", "binding", "card", "art", "card_version", "art_version"}
+        or type(member["active"]) is not bool
+    ):
+        raise ValueError("member")
+    if member["binding"] is not None:
+        binding = array(member["binding"])
+        if len(binding) != _BINDING_ARITY or not string(binding[0]):
+            raise ValueError("binding")
+        _uint(integer(binding[1]), positive=True)
+        _uint(integer(binding[2]), positive=False)
+    for group in ("card", "art"):
+        if member["active"]:
+            if (
+                member["binding"] is None
+                or re.fullmatch(r"sha256:[0-9a-f]{64}", string(member[group])) is None
+            ):
+                raise ValueError("fingerprint")
+            token = _uint(integer(member[group + "_version"]), positive=True)
+            if token > revision:
+                raise ValueError("token")
+        elif member[group] is not None or member[group + "_version"] is not None:
+            raise ValueError("tombstone")
+
+
+def _checked_state(value: JsonValue) -> Record:
+    old = object_value(value)
+    if set(old) != {"revision", "members"}:
+        raise ValueError("fields")
+    revision = _uint(integer(old["revision"]), positive=True)
+    for key, raw in object_value(old["members"]).items():
+        ids = array(parse(key.encode()))
+        if (
+            len(ids) != _SUBJECT_ARITY
+            or not all(isinstance(i, str) and i for i in ids)
+            or canonical(ids).decode() != key
+        ):
+            raise ValueError("identity")
+        _member(object_value(raw), revision)
+    return old
+
+
+def _state(value: JsonValue) -> Record:
+    if value is None:
+        return {}
+    try:
+        result = _checked_state(value)
+    except (ValueError, KeyError, TypeError) as error:
+        raise ValueError("Invalid committed media state") from error
+    else:
+        return result
 
 
 def _tokens(
@@ -137,7 +222,7 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
     candidate. Tombstones distinguish restoration from a never-seen binding.
     """
     _uint(revision, positive=True)
-    old = {} if previous is None else object_value(previous)
+    old = _state(previous)
     if old and (
         set(old) != {"revision", "members"} or revision <= integer(old["revision"])
     ):
@@ -239,7 +324,9 @@ def prepare_media(  # ruff: ignore[too-many-locals] -- indexes, validated source
         ],
     }
     return MediaPlan(
-        replace(projection, tables=view),
+        replace(
+            projection, tables=view, config=offline_configuration(projection.config)
+        ),
         {"revision": revision, "members": next_members},
         tuple(sorted(assets, key=lambda a: string(a["path"]))),
     )

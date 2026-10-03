@@ -7,6 +7,7 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
+from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.values import array, object_value, parse, string
 
 if TYPE_CHECKING:
@@ -124,10 +125,12 @@ def page_image_cost(snapshot: Snapshot) -> dict[str, JsonValue]:
     for page in pages:
         wanted = {image for printing in page for _, image in bindings[printing]}
         needed = {key for printing in page for key, _ in bindings[printing]}
-        needed |= {key for image in wanted for key in assets[image]}
+        if snapshot.manifest["format_version"] != MEDIA:
+            needed |= {key for image in wanted for key in assets[image]}
         replay.page(snapshot, needed, wanted)
     return {
         "model": "sorted owner/region pages; 24 printings, all bound images; metadata only",
+        "source_details_required": snapshot.manifest["format_version"] != MEDIA,
         "page_count": len(pages),
         "images_per_page": _percentiles(replay.images),
         "cold": {

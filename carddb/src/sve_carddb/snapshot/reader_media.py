@@ -90,6 +90,9 @@ def _identities(view: View) -> None:
     int_ids = [integer(p["int_id"]) for p in view["printing"]]
     if len(set(int_ids)) != len(int_ids):
         raise ValueError("Printing integer identities must be unique")
+    positions = [(string(r["card_id"]), integer(r["ordinal"])) for r in view["face"]]
+    if len(set(positions)) != len(positions):
+        raise ValueError("Face ordinals must be unique within their card")
     for link in view["digital_link"]:
         if link["relation"] == "same_name" and (
             any(
@@ -99,3 +102,24 @@ def _identities(view: View) -> None:
             or link["review_level"] != "unreviewed"
         ):
             raise ValueError("Same-name browsing must be unreviewed and card-level")
+
+
+def validate_digital(view: View, config: Row) -> None:
+    """Name-policy browsing is distinct from human same-card review."""
+    endpoints = [object_value(v) for v in array(config["digital_endpoints"])]
+    games = [string(e["game"]) for e in endpoints]
+    if games != ["sv1", "svwb"]:
+        raise ValueError("Media config requires both sorted game endpoints")
+    if [e["refresh_policy"] for e in endpoints] != ["frozen", "on_sve_release"]:
+        raise ValueError("Digital endpoint refresh policy differs from game")
+    if any(string(c["game"]) not in games for c in view["digital_card"]):
+        raise ValueError("Digital card requires its game endpoint")
+    rules = [r for r in view["digital_link"] if r["relation"] == "same_name"]
+    pairs = [(string(r["card_id"]), string(r["digital_card_id"])) for r in rules]
+    human = {
+        (string(r["card_id"]), string(r["digital_card_id"]))
+        for r in view["digital_link"]
+        if r["relation"] != "same_name"
+    }
+    if len(set(pairs)) != len(pairs) or set(pairs) & human:
+        raise ValueError("Duplicate or human-shadowed same-name card pair")

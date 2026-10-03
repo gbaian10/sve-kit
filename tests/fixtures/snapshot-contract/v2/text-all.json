@@ -1158,11 +1158,34 @@
     },
     {
       "key": "config",
-      "sha256": "sha256:fcb4e0cb1890ce0f8f4d778e74dc50a91b4241105485e1bd888e61541514038a",
+      "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5",
       "payload": {
         "catalog_feedback_url": "https://example.invalid/feedback",
         "deck_eligibility_policy": "regional_decklog",
-        "digital_endpoints": [],
+        "digital_endpoints": [
+          {
+            "game": "sv1",
+            "card_url_template": "https://shadowverse-portal.com/card/{official_id}?lang={provider_lang}",
+            "language_map": {
+              "ja": "ja",
+              "en": "en",
+              "zh-Hant": "zh-tw"
+            },
+            "status": "unknown",
+            "refresh_policy": "frozen"
+          },
+          {
+            "game": "svwb",
+            "card_url_template": "https://shadowverse-wb.com/{provider_lang}/deck/cardslist/card/?card_id={official_id}",
+            "language_map": {
+              "ja": "ja",
+              "en": "en",
+              "zh-Hant": "cht"
+            },
+            "status": "unknown",
+            "refresh_policy": "on_sve_release"
+          }
+        ],
         "format_version": "2.0.0",
         "image_sizes": [
           {

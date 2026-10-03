@@ -2566,20 +2566,17 @@
           "$ref": "#/$defs/Instant"
         },
         "format_version": {
-          "$ref": "#/$defs/Format"
+          "$ref": "#/$defs/Version"
         },
         "min_reader_version": {
-          "$ref": "#/$defs/Format"
+          "$ref": "#/$defs/Version"
         },
         "required_capabilities": {
-          "const": [
-            "column-partition-v1",
-            "digital-same-name-links-v1",
-            "fragment-container-v1",
-            "image-entity-buckets-v1",
-            "image-id-url-v1",
-            "rules-name-on-demand-v1"
-          ]
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Code"
+          },
+          "uniqueItems": true
         },
         "manifest_path": {
           "$ref": "#/$defs/Path"
