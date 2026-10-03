@@ -124,6 +124,69 @@ def test_installed_one_byte_change_fails_before_any_output(
         registry.verify(PinnedRepository(root), pins, flavor=False)
 
 
+def test_producer_git_symlink_is_refused_even_when_it_targets_matching_bytes(
+    semantic_repository: tuple[Path, str], tmp_path: Path
+) -> None:
+    import shutil  # ruff: ignore[import-outside-top-level] -- fork the immutable shared Git fixture before changing file mode
+
+    original, _ = semantic_repository
+    root = tmp_path / "git-symlink"
+    shutil.copytree(original, root)
+    name = registry.manifest(registry.PARSER_ID)[1].files[0].path
+    target = root / name
+    data = target.read_bytes()
+    target.unlink()
+    backing = root / "same-bytes.txt"
+    backing.write_bytes(data)
+    target.symlink_to(backing)
+    producer = commit(root)
+    with pytest.raises(
+        ValueError, match=r"^Semantic producer inputs must be regular Git files$"
+    ):
+        registry.bindings(PinnedRepository(root), producer, flavor=False)
+
+
+@pytest.mark.parametrize("parent", [False, True])
+def test_installed_symlink_and_symlink_parent_are_both_refused(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, parent: bool
+) -> None:
+    root = tmp_path / "installed"
+    root.mkdir()
+    backing = tmp_path / "matching"
+    backing.mkdir()
+    (backing / "value.py").write_bytes(b"# synthetic identical content\n")
+    if parent:
+        (root / "package").symlink_to(backing, target_is_directory=True)
+        name = "package/value.py"
+    else:
+        (root / "value.py").symlink_to(backing / "value.py")
+        name = "value.py"
+    monkeypatch.setattr(registry, "ROOT", root)
+    with pytest.raises(
+        ValueError, match=r"^Installed semantic input must be a regular file$"
+    ):
+        registry.installed(name)
+
+
+def test_shallow_clone_cannot_borrow_missing_producer_history(
+    semantic_repository: tuple[Path, str], tmp_path: Path
+) -> None:
+    import shutil  # ruff: ignore[import-outside-top-level] -- only a synthetic local Git repository is cloned
+
+    original, old = semantic_repository
+    source = tmp_path / "full-history"
+    shutil.copytree(original, source)
+    (source / "later.txt").write_text("Synthetic unrelated later commit\n")
+    commit(source)
+    shallow = tmp_path / "shallow"
+    git(tmp_path, "clone", "--depth=1", source.as_uri(), str(shallow))
+    assert git(shallow, "rev-parse", "--is-shallow-repository") == "true"
+    with pytest.raises(
+        ValueError, match=r"^Recognition immutable Git history is unavailable$"
+    ):
+        registry.bindings(PinnedRepository(shallow), old, flavor=False)
+
+
 def test_two_explicit_installed_parser_versions_dispatch_independently(
     semantic_repository: tuple[Path, str],
     tmp_path: Path,
