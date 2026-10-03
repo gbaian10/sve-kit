@@ -60,7 +60,7 @@ class ImageReference:
     page: Source
     source_src_raw: str
     source_url: str
-    region: Region = "jp"
+    region: Region
 
 
 @dataclass(frozen=True)
@@ -95,7 +95,7 @@ class EncodedImage:
     source: Source
     raw_bytes: int
     result: VariantSet
-    region: Region = "jp"
+    region: Region
 
 
 @dataclass(frozen=True)

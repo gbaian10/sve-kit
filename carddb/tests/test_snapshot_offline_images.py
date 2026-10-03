@@ -19,13 +19,14 @@ from sve_carddb.image_assets import (
     populate_assets,
 )
 from sve_carddb.image_crops import load_image_crops
+from sve_carddb.image_variants import ImageVariantError
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.r2_upload.plan import plan_preview
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.preview import Roots, write_preview
-from sve_carddb.snapshot.values import digest
+from sve_carddb.snapshot.values import digest, object_value, parse
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import image_url
 
@@ -210,6 +211,59 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
     result = runner.invoke(app, [*arguments, "--image-cache-dir", str(roots.cache)])
     assert result.exit_code == 0, result.stdout
     assert plan_preview(tmp_path / "preview").members
+
+
+@pytest.mark.parametrize("region", ["en", "jp"])
+def test_offline_cli_missing_cache_never_encodes_or_publishes(
+    regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    region: str,
+) -> None:
+    recipe, assets, roots = regional_images
+    image = next(item for item in assets.images if item.region == region)
+    cache = next(
+        path
+        for path in (roots.cache / "image-variants").glob("*.json")
+        if object_value(parse(path.read_bytes()))["source_sha256"]
+        == image.result.source_sha256
+    )
+    cache.unlink()
+    path = tmp_path / "recipe.json"
+    path.write_text(recipe.model_dump_json())
+    calls: list[None] = []
+
+    def forbidden(*_args: object, **_kwargs: object) -> bytes:
+        calls.append(None)
+        raise AssertionError("Missing cache must not trigger image encoding")
+
+    monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
+    result = CliRunner().invoke(
+        app,
+        [
+            "snapshot",
+            "export-offline",
+            "--inputs",
+            str(path),
+            "--preview-dir",
+            str(tmp_path / "preview"),
+            "--cdn-dir",
+            str(roots.cdn),
+            "--bundle-dir",
+            str(tmp_path / "bundle"),
+            "--image-assets-dir",
+            str(roots.preview),
+            "--image-cache-dir",
+            str(roots.cache),
+        ],
+    )
+    assert result.exit_code != 0
+    assert isinstance(result.exception, ImageVariantError)
+    assert "Verified image recipe cache is incomplete" in str(result.exception)
+    assert calls == []
+    assert not (tmp_path / "preview").exists()
+    assert not (tmp_path / "bundle").exists()
+    assert not cache.exists()
 
 
 @pytest.mark.parametrize("failure", ["partial-batch", "wrong-pin", "missing-use"])

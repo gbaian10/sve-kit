@@ -197,6 +197,7 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
             chosen.source,
             chosen.source.url,
             chosen.source.url,
+            "jp",
         ),
         ImageReference(
             "reprint",
@@ -205,6 +206,7 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
             other.source,
             other.source.url,
             other.source.url,
+            "jp",
         ),
         ImageReference(
             "other-owner",
@@ -213,6 +215,7 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
             other.source,
             other.source.url,
             other.source.url,
+            "jp",
         ),
         ImageReference(
             "other-face",
@@ -221,6 +224,7 @@ def test_report_uses_effective_owner_and_never_auto_inherits(
             other.source,
             other.source.url,
             other.source.url,
+            "jp",
         ),
     )
 
@@ -272,6 +276,7 @@ def _diagnostics(
             images.images[index].source,
             images.images[index].source.url,
             images.images[index].source.url,
+            "jp",
         )
         for index, printing, _card in bindings
     )
