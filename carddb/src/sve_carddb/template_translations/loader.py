@@ -4,7 +4,7 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pydantic import ValidationError
+from pydantic import TypeAdapter, ValidationError
 
 from sve_carddb.catalog.adoption_loader import ordered
 from sve_carddb.snapshot.values import canonical, digest
@@ -25,6 +25,7 @@ from sve_carddb.template_translations.models import (
     Shard,
     TranslationRecord,
 )
+from sve_carddb.template_translations.replay_models import InventoryV2
 from sve_carddb.template_translations.review import require_resolved_dispute, verify
 from sve_carddb.template_translations.text import parse, verify_flavor
 from sve_carddb.translations.loader import Snapshot as Glossary
@@ -37,6 +38,10 @@ if TYPE_CHECKING:
 
 
 LEGACY_WIDTH = 10
+INVENTORY_V2_FORMAT = 2
+INVENTORY_WIRE: TypeAdapter[Inventory | InventoryV2] = TypeAdapter(
+    Inventory | InventoryV2
+)
 
 
 def record_hash(record: Record) -> str:
@@ -199,9 +204,9 @@ def _model_review(record: TranslationRecord, shard: Shard) -> None:
                 )
 
 
-def _inventory(raw: bytes) -> Inventory:
+def _inventory(raw: bytes) -> Inventory | InventoryV2:
     try:
-        inventory = Inventory.model_validate_json(raw)
+        inventory = INVENTORY_WIRE.validate_json(raw)
     except ValidationError:
         raise ValueError("Invalid formal template inventory") from None
     if not inventory.entries:
@@ -219,6 +224,10 @@ def _inventories(
         if INVENTORY.fullmatch(path) is None:
             continue
         inventory = _inventory(raw)
+        if inventory.template_source_format == INVENTORY_V2_FORMAT:
+            raise ValueError(
+                "Template inventory v2 requires complete C+hash source replay"
+            )
         identity = canonical([r.model_dump(mode="json") for r in inventory.recipes])
         recipes[identity] = inventory.recipes
         for entry in inventory.entries:

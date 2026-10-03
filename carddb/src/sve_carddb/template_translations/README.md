@@ -95,7 +95,32 @@ merges avoid that case; supporting branch-local immutable histories is separate
 work. The published index-entry guard is a second layer: a repointed hash is
 already caught by the indexed file hash before that guard can run.
 
-## Exact flavor intake
+## Historical inventory v2 structure
+
+`replay_models` defines the closed inventory v2, semantic manifests, producer
+environment, per-inventory effect/flavor inputs and six-stream hash-only expected
+output manifest. Its root hashes the format, recipe and complete stream digests;
+the root itself is excluded. Flavor batches and identity basis come from each
+context, rather than being inferred from the current caller's basis. Recipe
+and entry fields, translation records and adoption requirements are unchanged.
+`InventoryV2.group_key()` includes both recipes and the complete replay context;
+different producer environments, inputs, bindings or expected outputs cannot
+silently share a cache identity.
+
+Both area loaders accept this foreign envelope for structural validation. The
+template source entry explicitly rejects it with `Template inventory v2 requires
+complete C+hash source replay` until the frozen semantic dispatcher and complete
+immutable output comparison are connected. A correct root is structural evidence,
+not proof that any source was read or a definition adopted. Do not publish any real
+inventory to authored during this intermediate stage. Legacy v1 synthetic tests
+continue to use their original replay path; no v1 inventory is silently upgraded.
+
+The implementation contract is `docs/schema/template-source-replay.md` (C+hash).
+Environment values are provenance, not a host-equality gate. This stage does not
+implement semantic version dispatch, package-set verification against the fixed
+manifest, output recomputation, performance budgets or build/preview wiring.
+
+## Exact flavor replay (legacy v1)
 
 `flavor_pins.recipes(repository, revision)` emits `flavor-exact-v1` with exactly
 empty config and the separately pinned JP parser. Replay verifies the complete
