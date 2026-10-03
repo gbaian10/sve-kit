@@ -63,7 +63,16 @@ def test_parse_sets() -> None:
     sets = jp.parse_sets(fixture("F16-sets.html"))
     assert len(sets) == 55
     assert sets[0] == jp.CardSet(code="SYN01", name="SVE-KIT 合成F16段落002。")
-    assert sets[-1] == jp.CardSet(code="SYN55", name="SVE-KIT 合成F16段落056。")
+    assert sets[1] == jp.CardSet(code="SN02", name="SVE-KIT 合成F16段落003。")
+    assert sets[-6] == jp.CardSet(code="SYN50A", name="SVE-KIT 合成F16段落051。")
+    assert sets[-1] == jp.CardSet(code="SN", name="SVE-KIT 合成F16段落056。")
+    assert [s.code for s in sets] == [
+        "SYN01",
+        *[f"SN{i:02}" for i in range(2, 36)],
+        *[f"SYN{i:02}" for i in range(36, 50)],
+        *[f"SYN{i:02}A" for i in range(50, 55)],
+        "SN",
+    ]
     assert all(s.code for s in sets)
 
 
@@ -111,8 +120,8 @@ def test_parse_list_more_middle_and_last_page() -> None:
         fixture("F14-list.html"), page=18, max_page=19, total=273
     )
     last = jp.parse_list_more(fixture("F15-list.html"), page=19, max_page=19, total=273)
-    assert middle.card_numbers == [f"SYN01-{i:03}" for i in range(1, 16)]
-    assert last.card_numbers == ["SYN01-001", "SYN01-002", "SYN01-003"]
+    assert middle.card_numbers == [f"SN01-U{i:02}" for i in range(16, 31)]
+    assert last.card_numbers == ["SN01-U31", "SN01-U32", "SN01-U33"]
 
 
 def test_parse_list_more_rejects_a_short_middle_page() -> None:
