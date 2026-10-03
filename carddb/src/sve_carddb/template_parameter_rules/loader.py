@@ -17,6 +17,7 @@ from sve_carddb.template_parameter_rules.events import (
 from sve_carddb.template_parameter_rules.legacy import historical
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS, Approval, Pin, Policy
 from sve_carddb.template_parameter_rules.repository import ancestor, immutable
+from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
 from sve_carddb.template_parameters.numeric_rules import (
     definition as numeric_definition,
 )
@@ -145,7 +146,7 @@ def load_pairs(
             raise ValueError("Recognition receipt policy hash mismatch")
         if policy.scope.parser_ids != (PARSER,) or policy.scope.normalizer_ids != (
             VERSION,
-            "template-parameters-jp-candidate-v1",
+            VERSION_PARAMETERS,
         ):
             raise ValueError(
                 "Recognition policy parser or normalizer scope is unsupported"

@@ -102,6 +102,7 @@ def immutable(repository: PinnedRepository, commit: str) -> dict[str, str]:
         git(
             repository,
             "rev-list",
+            "--full-history",
             "--reverse",
             "--topo-order",
             "--parents",

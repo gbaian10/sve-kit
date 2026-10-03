@@ -6,6 +6,7 @@ import re
 import pytest
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
+from sve_carddb.template_parameter_rules import legacy
 from sve_carddb.template_parameter_rules.cases import _example, evaluate, fixed_examples
 from sve_carddb.template_parameter_rules.legacy import (
     ANALYSIS,
@@ -19,6 +20,28 @@ from sve_carddb.template_parameters.rule_candidates import BY_ID
 from .recognition_policy_fixtures import GitCase, policy_git
 
 __all__ = ("policy_git",)
+
+
+def test_current_signs_must_be_exactly_the_finite_restriction(
+    policy_git: GitCase, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    original = legacy._constants
+
+    def constants(raw: bytes) -> dict[str, object]:
+        result = original(raw)
+        if result.get("VERSION") == "numeric-rule-proposals-v3":
+            result["SIGNS"] = ("-", "+", "−")
+        return result
+
+    content = PinnedRepository(policy_git.repository).read_many(
+        policy_git.historical, (ANALYSIS, NUMERIC)
+    )
+    monkeypatch.setattr(legacy, "_constants", constants)
+    with pytest.raises(
+        ValueError,
+        match=r"^Recognition current sign guard exceeds the finite historical restriction$",
+    ):
+        validate_v2(content[ANALYSIS], content[NUMERIC])
 
 
 @pytest.mark.parametrize("rule_id", sorted((*LEGACY_IDS, *BY_ID)))

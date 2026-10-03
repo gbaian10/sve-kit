@@ -8,6 +8,7 @@ from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.template_parameter_rules import loader as recognition_loader
 from sve_carddb.template_parameter_rules.loader import (
     Loaded,
     load_config,
@@ -274,6 +275,69 @@ def test_published_pairs_are_immutable(
         match=r"^Recognition published policy pairs are immutable exact bytes$",
     ):
         immutable(PinnedRepository(policy_repository), revision)
+
+
+def test_merge_cannot_hide_a_receipt_modification_followed_by_revert(
+    policy_repository: Path, policy_git: GitCase
+) -> None:
+    policy, receipt = pair(policy_git.main)
+    publish(policy_repository, policy, receipt)
+    git(policy_repository, "checkout", "-b", "modified-side")
+    path = policy_repository / (ROOT + "synthetic-v1.approval.yaml")
+    original = path.read_bytes()
+    path.write_bytes(original + b"\n")
+    commit(policy_repository)
+    path.write_bytes(original)
+    commit(policy_repository)
+    git(policy_repository, "checkout", "main")
+    git(
+        policy_repository,
+        "-c",
+        "user.name=Synthetic Reviewer",
+        "-c",
+        "user.email=synthetic@example.invalid",
+        "merge",
+        "--no-ff",
+        "modified-side",
+        "-m",
+        "synthetic merge",
+    )
+    revision = git(policy_repository, "rev-parse", "HEAD")
+    assert path.read_bytes() == original
+    with pytest.raises(
+        ValueError,
+        match=r"^Recognition published policy pairs are immutable exact bytes$",
+    ):
+        immutable(PinnedRepository(policy_repository), revision)
+
+
+def test_load_pairs_checks_event_history_across_the_entire_directory(
+    policy_repository: Path, policy_git: GitCase
+) -> None:
+    first, first_receipt = pair(policy_git.main)
+    publish(policy_repository, first, first_receipt)
+    second, second_receipt = pair(policy_git.main, policy_id="synthetic-v2")
+    event = object_value(object_value(second_receipt["events"])["event_20261002_2"])
+    event["reviewed_by"] = "Different synthetic reviewer"
+    revision = publish(policy_repository, second, second_receipt)
+    with pytest.raises(
+        ValueError,
+        match=r"^Recognition immutable event changed across policy versions$",
+    ):
+        load(policy_repository, revision, policy_git.main)
+
+
+def test_loader_replays_fixed_cases_after_catalog_equality(
+    policy_repository: Path, policy_git: GitCase, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    policy, receipt = pair(policy_git.main)
+    revision = publish(policy_repository, policy, receipt)
+    monkeypatch.setattr(recognition_loader, "evaluate", lambda *_: False)
+    with pytest.raises(
+        ValueError,
+        match=r"^Recognition fixed case does not replay its declared answer$",
+    ):
+        load(policy_repository, revision, policy_git.main)
 
 
 @pytest.mark.parametrize(

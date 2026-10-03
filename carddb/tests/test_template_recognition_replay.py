@@ -2,6 +2,7 @@
 
 import copy
 import re
+import shutil
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -10,24 +11,42 @@ from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.template_parameter_rules import replay as replay_module
 from sve_carddb.template_parameter_rules.replay import (
     ProposalInputs,
     Replay,
+    ResolvedSlotsChangedError,
+    _evidence,
+    _resolve,
     compare_replays,
     replay,
+    resolved_identity,
 )
+from sve_carddb.template_parameters.inventory import Candidates
+from sve_carddb.template_parameters.references import adopted
 
-from .recognition_policy_fixtures import policy_git
+from .adoption_fixtures import commit
+from .recognition_policy_fixtures import pair, policy_git, publish
 from .recognition_replay_fixtures import (
     SourceCase,
     changed_sign_source,
     recognition_source,
+    recognition_term_source,
 )
+from .test_template_parameters import candidate
+from .translation_fixtures import envelope, term, write
 
 if TYPE_CHECKING:
+    from pathlib import Path
+
     from sve_carddb.template_sources.models import Recipe
 
-__all__ = ("changed_sign_source", "policy_git", "recognition_source")
+__all__ = (
+    "changed_sign_source",
+    "policy_git",
+    "recognition_source",
+    "recognition_term_source",
+)
 
 
 def changed(case: SourceCase, key: str, value: JsonValue) -> Recipe:
@@ -52,6 +71,239 @@ def run(case: SourceCase, recipe: Recipe | None = None) -> Replay:
 @pytest.fixture(scope="module")
 def verified_replay(recognition_source: SourceCase) -> Replay:
     return run(recognition_source)
+
+
+@pytest.fixture(scope="module")
+def verified_term_replay(recognition_term_source: SourceCase) -> Replay:
+    return run(recognition_term_source)
+
+
+def test_glossary_upgrade_ambiguity_lists_the_lost_resolution(
+    recognition_term_source: SourceCase, verified_term_replay: Replay, tmp_path: Path
+) -> None:
+    case = recognition_term_source
+    root = tmp_path / "glossary-upgrade"
+    shutil.copytree(case.repository, root)
+    path = root / "authored/translations/glossary/concepts/001.yaml"
+    original = object_value(array(object_value(parse(path.read_bytes()))["records"])[0])
+    other = term("stat.other")
+    object_value(other["data"]).update(
+        source_ref=None,
+        authored_source_ja="攻撃力",
+        missing_source_reason="Synthetic fixture unavailable source",
+    )
+    write(
+        root / "authored",
+        {"translations/glossary/concepts/001.yaml": envelope([original, other])},
+    )
+    revision = commit(root)
+    refs = adopted(
+        root / "authored",
+        _evidence(PinnedRepository(root), case.recipe, {"test-store": case.store}),
+    )
+    config = copy.deepcopy(case.recipe.config)
+    references = object_value(config["references"])
+    references.update(refs.pins)
+    object_value(references["glossary"])["authored_revision"] = revision
+    recipe = case.recipe.model_copy(
+        update={"config": config, "config_hash": digest(canonical(config))}
+    )
+    current = run(replace(case, repository=root, main=revision, recipe=recipe))
+    old = [
+        raw
+        for raw in verified_term_replay.resolved_slots
+        if object_value(parse(raw))["rule_id"] == "braced_stat_reference"
+    ]
+    assert len(old) == 1
+    assert not any(
+        object_value(parse(raw))["rule_id"] == "braced_stat_reference"
+        for raw in current.resolved_slots
+    )
+    assert any(
+        "ambiguous_or_missing_term_concept" in array(object_value(parse(raw))["issues"])
+        for raw in current.remaining_slots
+    )
+    assert current.numeric_positions == verified_term_replay.numeric_positions
+    assert current.fingerprints == verified_term_replay.fingerprints
+    affected = resolved_identity(old[0])
+    message = (
+        "Recognition replay lost or changed previously resolved slots: "
+        + canonical([parse(affected)]).decode()
+    )
+    with pytest.raises(
+        ResolvedSlotsChangedError, match="^" + re.escape(message) + "$"
+    ) as caught:
+        compare_replays(verified_term_replay, current)
+    assert caught.value.affected_slots == (affected,)
+    assert caught.value.comparison.added_resolved_slots == ()
+    assert caught.value.comparison.remaining_slots == current.remaining_slots
+
+
+@pytest.mark.parametrize(
+    "mutation",
+    [
+        "missing",
+        "slot",
+        "rule_id",
+        "source_segments",
+        "raw_hash",
+        "role",
+        "value",
+        "concept_id",
+        "concept_hash",
+    ],
+)
+def test_resolved_identity_cannot_disappear_or_be_rebound(
+    verified_term_replay: Replay, mutation: str
+) -> None:
+    previous = verified_term_replay
+    before = next(
+        raw
+        for raw in previous.resolved_slots
+        if object_value(parse(raw))["rule_id"] == "braced_stat_reference"
+    )
+    row = object_value(parse(before))
+    if mutation in {"slot", "rule_id"}:
+        row[mutation] = "other"
+    elif mutation in {"raw_hash", "value"}:
+        row[mutation] = digest(b"different") if mutation == "raw_hash" else 1
+    elif mutation == "source_segments":
+        row[mutation] = [{"start": 0, "end": 1}]
+    elif mutation == "role":
+        row["recognized_role"] = "other"
+    elif mutation in {"concept_id", "concept_hash"}:
+        object_value(row["match_evidence"])[
+            "target_id" if mutation == "concept_id" else "target_hash"
+        ] = "term:stat.other" if mutation == "concept_id" else digest(b"different")
+    entries = tuple(raw for raw in previous.resolved_slots if raw != before)
+    if mutation != "missing":
+        entries = (*entries, canonical(row))
+    current = replace(previous, resolved_slots=tuple(sorted(entries)))
+    affected = resolved_identity(before)
+    message = (
+        "Recognition replay lost or changed previously resolved slots: "
+        + canonical([parse(affected)]).decode()
+    )
+    with pytest.raises(
+        ResolvedSlotsChangedError, match="^" + re.escape(message) + "$"
+    ) as caught:
+        compare_replays(previous, current)
+    assert caught.value.affected_slots == (affected,)
+
+
+def test_added_resolution_and_pending_causes_are_reported_separately(
+    verified_term_replay: Replay,
+) -> None:
+    previous = verified_term_replay
+    added = object_value(parse(previous.resolved_slots[0]))
+    added["inventory_id"] = "synthetic-added"
+    updated = []
+    for raw in previous.resolved_slots:
+        row = object_value(parse(raw))
+        row["remaining_issues"] = []
+        updated.append(canonical(row))
+    current = replace(
+        previous,
+        resolved_slots=tuple(sorted((*updated, canonical(added)))),
+        remaining_slots=(),
+    )
+    comparison = compare_replays(previous, current)
+    assert comparison.added_resolved_slots == (resolved_identity(canonical(added)),)
+    assert comparison.remaining_slots == ()
+
+
+def test_body_only_policy_does_not_resolve_a_reminder(
+    recognition_source: SourceCase, tmp_path: Path
+) -> None:
+    case = recognition_source
+    root = tmp_path / "body-only"
+    shutil.copytree(case.repository, root)
+    policy, receipt = pair(
+        case.main, policy_id="synthetic-body-v1", store="test-store", batch=case.batch
+    )
+    object_value(policy["scope"])["roles"] = ["body"]
+    event = object_value(object_value(receipt["events"])["event_20261002_2"])
+    object_value(event["authorization_basis"])["event_locator"] = (
+        "00000000-0000-0000-0000-000000000003"
+    )
+    revision = publish(root, policy, receipt)
+    pin: dict[str, JsonValue] = {
+        "policy_id": policy["policy_id"],
+        "authored_revision": revision,
+        "path": "authored/template-parameter-rules/synthetic-body-v1.policy.yaml",
+        "hash": receipt["policy_hash"],
+        "approval_receipt_hash": digest(canonical(receipt)),
+    }
+    result = run(
+        replace(case, repository=root), changed(case, "recognition_policy", pin)
+    )
+    assert len(result.resolved_slots) == 1
+    assert (
+        object_value(parse(result.resolved_slots[0]))["rule_id"]
+        == "suffix_damage_amount"
+    )
+    assert not object_value(parse(result.resolved_slots[0]))["remaining_issues"]
+    assert any(
+        "numeric_role_requires_review" in array(object_value(parse(raw))["issues"])
+        for raw in result.remaining_slots
+    )
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("old", "Recognition new rules cannot claim old numeric ownership"),
+        ("duplicate", "Recognition matches must have unique slot ownership"),
+    ],
+)
+def test_resolution_defenses_reject_synthetic_conflicting_ownership(
+    recognition_source: SourceCase, mutation: str, message: str
+) -> None:
+    old = candidate("コスト2ダメージ")
+    match: dict[str, JsonValue] = {
+        "inventory_id": old.inventory_id,
+        "slot": old.slots[0].name,
+        "rule_id": "suffix_damage_amount",
+    }
+    values = Candidates(
+        entries=[old],
+        rule_matches=[match] if mutation == "old" else [match, dict(match)],
+    )
+    with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
+        _resolve(recognition_source.loaded, values)
+
+
+def test_resolution_never_clears_invalid_unsigned_value(
+    recognition_source: SourceCase,
+) -> None:
+    old = candidate("試験2枚")
+    hint = old.slots[0].model_copy(
+        update={
+            "issues": tuple(
+                sorted((*old.slots[0].issues, "invalid_safe_unsigned_decimal"))
+            )
+        }
+    )
+    candidate_with_invalid_value = old.model_copy(update={"slots": (hint,)})
+    resolved, pending = _resolve(
+        recognition_source.loaded, Candidates(entries=[candidate_with_invalid_value])
+    )
+    assert not resolved
+    assert any(
+        "numeric_rule_pending_approval" in array(object_value(parse(raw))["issues"])
+        for raw in pending
+    )
+
+
+def test_first_batch_count_guard_cannot_be_skipped(
+    recognition_source: SourceCase, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(replay_module, "JP_BATCH", recognition_source.batch)
+    with pytest.raises(
+        ValueError,
+        match=r"^Recognition first JP batch differs from its fixed baseline counts$",
+    ):
+        run(recognition_source)
 
 
 def test_full_source_replay_resolves_only_authorized_causes(

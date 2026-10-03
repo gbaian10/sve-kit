@@ -407,8 +407,53 @@ def replay(
     )
 
 
-def compare_replays(previous: Replay, current: Replay) -> None:
-    """Recipe or glossary upgrades must preserve identities, not merely usage totals."""
+@dataclass(frozen=True)
+class ReplayComparison:
+    added_resolved_slots: tuple[bytes, ...]
+    remaining_slots: tuple[bytes, ...]
+
+
+class ResolvedSlotsChangedError(ValueError):
+    def __init__(
+        self, affected_slots: tuple[bytes, ...], comparison: ReplayComparison
+    ) -> None:
+        self.affected_slots = affected_slots
+        self.comparison = comparison
+        super().__init__(
+            "Recognition replay lost or changed previously resolved slots: "
+            + canonical([parse(raw) for raw in affected_slots]).decode()
+        )
+
+
+def resolved_identity(raw: bytes) -> bytes:
+    """Ignore pending-cause changes while preserving ownership and concept bindings."""
+    row = object_value(parse(raw))
+    identity = {
+        key: row[key]
+        for key in (
+            "inventory_id",
+            "slot",
+            "rule_id",
+            "source_segments",
+            "raw_hash",
+            "recognized_role",
+            "value",
+        )
+    }
+    match = row["match_evidence"]
+    identity["concept"] = (
+        None
+        if match is None
+        else {
+            "id": object_value(match)["target_id"],
+            "record_hash": object_value(match)["target_hash"],
+        }
+    )
+    return canonical(identity)
+
+
+def compare_replays(previous: Replay, current: Replay) -> ReplayComparison:
+    """An upgrade may add resolutions, never silently lose or rebind an old one."""
     prior_batch = object_value(object_value(parse(previous.recipe))["config"])[
         "source_batch"
     ]
@@ -423,6 +468,13 @@ def compare_replays(previous: Replay, current: Replay) -> None:
         raise ValueError(
             "Recognition replay changed a legacy fingerprint or source use"
         )
+    old = {resolved_identity(raw) for raw in previous.resolved_slots}
+    new = {resolved_identity(raw) for raw in current.resolved_slots}
+    comparison = ReplayComparison(tuple(sorted(new - old)), current.remaining_slots)
+    affected = tuple(sorted(old - new))
+    if affected:
+        raise ResolvedSlotsChangedError(affected, comparison)
+    return comparison
 
 
 def _glossary_files(

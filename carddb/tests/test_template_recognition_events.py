@@ -4,6 +4,7 @@ import copy
 import re
 
 import pytest
+from pydantic import ValidationError
 
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from sve_carddb.template_parameter_rules.events import (
@@ -11,10 +12,24 @@ from sve_carddb.template_parameter_rules.events import (
     verify_events,
 )
 from sve_carddb.template_parameter_rules.loader import parse_approval, parse_policy
+from sve_carddb.template_parameter_rules.models import Event
 
 from .recognition_policy_fixtures import pair
 
 MATCHER = "a" * 40
+
+
+def test_authorized_identity_must_be_in_the_original_presentation() -> None:
+    _, receipt = pair(MATCHER)
+    event = object_value(object_value(receipt["events"])["event_20261002_2"])
+    presentation = object_value(event["presentation"])
+    presentation["presented_rules"] = array(presentation["presented_rules"])[:-1]
+    with pytest.raises(ValidationError) as caught:
+        Event.model_validate_json(canonical(event))
+    assert len(caught.value.errors()) == 1
+    assert caught.value.errors()[0]["msg"] == (
+        "Value error, Recognition authorization must be part of the original presentation"
+    )
 
 
 def test_legal_bulk_event_does_not_need_clicks_or_samples() -> None:

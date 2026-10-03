@@ -59,9 +59,16 @@ explicitly scoped batches use their own legacy input. Each rule resolves only
 its corresponding slot issue; other issues and reminder classification stay
 pending. `Replay` contains hash/range/role proofs and remaining issues, never
 source text. It produces no sampled adoption and preserves candidate-only
-status. `compare_replays(previous, current)` compares full old numeric identities
-and fingerprint/member bindings in the same frozen batch for recipe/glossary
-upgrades. Source coverage remains independent; presence v1 unknowns do not
+status. `compare_replays(previous, current)` compares full old numeric identities,
+fingerprint/member bindings and every previously resolved slot's ownership,
+coordinates, raw hash, role, value and concept ID/record hash in the same frozen
+batch. A missing or rebound resolution raises `ResolvedSlotsChangedError`, with exact
+text-free identities in `affected_slots`. Its `comparison` (also the successful
+return value) separately lists `added_resolved_slots` and the current
+`remaining_slots`; adding resolutions or changing pending causes is permitted.
+Recipe/glossary upgrades must run this comparison before publishing results;
+`replay()` alone cannot prove continuity against an earlier input pin.
+Source coverage remains independent; presence v1 unknowns do not
 become absent or empty fields.
 
 Original message/page bytes and the actual authorized scope still require
@@ -72,3 +79,6 @@ substitute that evidence. The candidate CLI still emits pending proposals with
 an explicit null policy; a candidate switch cannot activate formal recognition.
 Classification and parameter recipe configs explicitly record null until a
 separately authorized caller supplies a verified pair.
+The top-level `config.recognition_policy` is the contract's five-field pin/null.
+The candidate CLI's nested `candidate_classifier.recognition_policy: null`
+describes pending proposals and never activates this loader.

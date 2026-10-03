@@ -59,8 +59,19 @@ def changed_sign_source(
     return _source(policy_git, tmp_path_factory, sign_change=True)
 
 
+@pytest.fixture(scope="module")
+def recognition_term_source(
+    policy_git: GitCase, tmp_path_factory: pytest.TempPathFactory
+) -> SourceCase:
+    return _source(policy_git, tmp_path_factory, sign_change=False, term_reference=True)
+
+
 def _source(  # ruff: ignore[too-many-locals] -- independent sealed source closures share the same small fixture builder
-    policy_git: GitCase, tmp_path_factory: pytest.TempPathFactory, *, sign_change: bool
+    policy_git: GitCase,
+    tmp_path_factory: pytest.TempPathFactory,
+    *,
+    sign_change: bool,
+    term_reference: bool = False,
 ) -> SourceCase:
     folder = tmp_path_factory.mktemp("recognition-source")
     repository = folder / "repository"
@@ -71,10 +82,10 @@ def _source(  # ruff: ignore[too-many-locals] -- independent sealed source closu
         dirs_exist_ok=True,
         ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "_version.py"),
     )
-    glossary = term()
+    glossary = term("stat.attack") if term_reference else term()
     object_value(glossary["data"]).update(
         source_ref=None,
-        authored_source_ja="SyntheticTerm",
+        authored_source_ja="攻撃力" if term_reference else "SyntheticTerm",
         missing_source_reason="Synthetic fixture unavailable source",
     )
     write(
@@ -87,6 +98,8 @@ def _source(  # ruff: ignore[too-many-locals] -- independent sealed source closu
     effect = '<div class="detail">{SyntheticClass}甲2枚<br>乙3ダメージ<br>（丙4ダメージ）<br>Gamma『NoConcept』<br>コストを+5試験</div>'
     if sign_change:
         effect = effect.replace("（丙4ダメージ）", "（丙＋4枚）")
+    if term_reference:
+        effect = effect.replace("{SyntheticClass}", "{SyntheticClass}{攻撃力}")
     raw = page("jp", effect)
     _put(store, _resource(card_url("SYN-01"), "raw/SYN-01.html", raw, Kind.CARD), raw)
     batch = seal_batch(store)
@@ -101,7 +114,12 @@ def _source(  # ruff: ignore[too-many-locals] -- independent sealed source closu
         )
         + b"\n"
         for text, member in (
-            ("{SyntheticClass}甲N枚", "SYN-01#0/text/0"),
+            (
+                "{SyntheticClass}{攻撃力}甲N枚"
+                if term_reference
+                else "{SyntheticClass}甲N枚",
+                "SYN-01#0/text/0",
+            ),
             ("乙Nダメージ", "SYN-01#0/text/1"),
             ("Gamma『X』", "SYN-01#0/text/3"),
             ("コストを+N試験", "SYN-01#0/text/4"),
