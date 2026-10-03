@@ -10,7 +10,7 @@ from pydantic import JsonValue
 from sve_carddb.build_inputs import SourceUse
 from sve_carddb.catalog.adoption_models import Normalizer
 from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
-from sve_carddb.extract import official_jp
+from sve_carddb.extract import official_en, official_jp
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -29,6 +29,14 @@ RUNTIME = (
     "carddb/src/sve_carddb/translations/importer.py",
     "carddb/src/sve_carddb/translations/loader.py",
     "carddb/src/sve_carddb/translations/models.py",
+    "carddb/src/sve_carddb/translations/name_replay.py",
+    "carddb/src/sve_carddb/translations/name_build.py",
+    "carddb/src/sve_carddb/text_observations/archive.py",
+    "carddb/src/sve_carddb/text_observations/models.py",
+    "carddb/src/sve_carddb/text_observations/presence.py",
+    "carddb/src/sve_carddb/extract/official_en.py",
+    "carddb/src/sve_carddb/extract/compare_jp.py",
+    "carddb/src/sve_carddb/sources/official_en.py",
     "carddb/src/sve_carddb/translations/names.py",
     "carddb/src/sve_carddb/catalog/adoption_sources.py",
     "carddb/src/sve_carddb/extract/official_jp.py",
@@ -52,6 +60,7 @@ RUNTIME = (
     "carddb/src/sve_carddb/digital_links/evidence.py",
     "carddb/src/sve_carddb/digital_links/importer.py",
     "carddb/src/sve_carddb/registry/snapshot.py",
+    "carddb/src/sve_carddb/registry/review.py",
     "carddb/src/sve_carddb/registry/storage.py",
     "carddb/src/sve_carddb/registry/records.py",
     "carddb/src/sve_carddb/registry/validate.py",
@@ -98,20 +107,31 @@ def pointer(document: JsonValue, locator: str) -> JsonValue:
 
 
 def project(raw: bytes, url: str, provider: str) -> tuple[str, JsonValue]:
-    """Keep API JSON unmodified; JP locators address the existing exact extractor."""
+    """Keep API JSON unmodified; physical locators use the regional exact extractor."""
     parts = urlsplit(url)
-    if provider == "jp":
+    if provider in {"jp", "en"}:
         numbers = parse_qs(parts.query).get("cardno", [])
         if (
             parts.scheme != "https"
-            or parts.netloc != "shadowverse-evolve.com"
-            or parts.path != "/cardlist/"
+            or parts.netloc
+            != (
+                "shadowverse-evolve.com"
+                if provider == "jp"
+                else "en.shadowverse-evolve.com"
+            )
+            or parts.path != ("/cardlist/" if provider == "jp" else "/cards/")
             or len(numbers) != 1
         ):
-            raise ValueError("JP glossary source URL mismatch")
+            raise ValueError(provider.upper() + " glossary source URL mismatch")
         number = numbers[0]
-        card = official_jp.extract_card(raw, number=number)
-        return "ja", parse(canonical(dataclasses.asdict(card)))
+        card = (
+            official_jp.extract_card(raw, number=number)
+            if provider == "jp"
+            else official_en.extract_card(raw, number=number)
+        )
+        return ("ja" if provider == "jp" else "en"), parse(
+            canonical(dataclasses.asdict(card))
+        )
     host = "shadowverse-portal.com" if provider == "sv1" else "shadowverse-wb.com"
     expected = "/api/v1/cards" if provider == "sv1" else "/web/CardList/cardList"
     langs = parse_qs(parts.query).get("lang", [])
@@ -152,8 +172,14 @@ class Sources:
         self.repository = PinnedRepository(repository)
         self.build = build
         self.historical = historical
+        # One immutable batch avoids a Git process for each dependency on every owner replay.
+        self.repository.read_many(
+            build.program_revision, tuple(pin.name for pin in build.dependencies)
+        )
         self.repository.context(build)
-        self.identities = AdoptionSources(stores, self.repository)
+        self.identities = AdoptionSources(
+            stores, self.repository, historical=historical
+        )
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}
         runtime = Path(__file__).resolve().parents[4]
@@ -206,7 +232,7 @@ class Sources:
                 version, parser_version=parser
             )
             if descriptor.provider != provider or descriptor.kind != (
-                "card" if provider == "jp" else "api"
+                "card" if provider in {"jp", "en"} else "api"
             ):
                 raise ValueError("Frozen evidence provider/kind mismatch")
             lang, document = project(raw, source.url, provider)

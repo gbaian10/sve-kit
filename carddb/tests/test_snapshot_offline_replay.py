@@ -320,6 +320,7 @@ def test_export_offline_replays_source_receipts_after_pinned_update(
     assert isinstance(config["catalog_source_recipes"], dict)
     translations = object_value(config["translation_recipes"])
     assert set(translations) == {
+        "translation-en-v1",
         "translation-jp-v1",
         "translation-sv1-v1",
         "translation-svwb-v1",

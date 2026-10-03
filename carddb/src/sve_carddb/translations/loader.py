@@ -5,13 +5,16 @@ from collections import defaultdict
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue
+from pydantic import JsonValue, ValidationError
 
 from sve_carddb.catalog.adoption_loader import ordered
+from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, parse
 from sve_carddb.translations.models import (
+    AssignmentRecord,
     ChoiceRecord,
+    ConceptRecord,
     Decision,
     EmphasisRecord,
     Index,
@@ -23,6 +26,18 @@ from sve_carddb.translations.models import (
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+
+def _model[T: RecordData](model: type[T], value: JsonValue) -> T:
+    try:
+        return model.model_validate_json(canonical(value))
+    except ValidationError as error:
+        location = ".".join(
+            str(part) for part in error.errors(include_input=False)[0]["loc"]
+        )
+        raise ValueError(
+            "Invalid translation authored fields at " + (location or "root")
+        ) from None
 
 
 def record_hash(record: Record) -> str:
@@ -38,6 +53,15 @@ def key(record: Record) -> str:
         fields = [record.kind, record.data.term_id]
     elif isinstance(record, ChoiceRecord):
         fields = [record.kind, record.data.term_id, record.data.lang]
+    elif isinstance(record, AssignmentRecord):
+        fields = [
+            record.kind,
+            record.data.owner.model_dump(mode="json"),
+            record.data.field,
+            record.data.ordinal,
+        ]
+    elif isinstance(record, ConceptRecord):
+        fields = [record.kind, record.data.subject.model_dump(mode="json")]
     else:
         fields = [
             record.kind,
@@ -107,7 +131,10 @@ class Snapshot:
         """Count delegated checks separately from actual human sample declarations."""
         human = delegated = 0
         for shard in self.envelopes():
-            if shard.records[0].data.adoption_review.mode == "human":
+            if (
+                isinstance(shard.records[0], (AssignmentRecord, ConceptRecord))
+                or shard.records[0].data.adoption_review.mode == "human"
+            ):
                 human += len(shard.decisions[0].sample_ids)
             else:
                 delegated += len(shard.records)
@@ -142,7 +169,7 @@ def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] --
     """Reject unsupported areas and inventories, rather than treating them as empty."""
     path = root / "translations/index.yaml"
     _safe(path)
-    index = Index.model_validate_json(canonical(read_yaml(path)))
+    index = _model(Index, read_yaml(path))
     if index.inventories:
         raise ValueError("Template inventories require the #52 loader")
     present = set()
@@ -157,18 +184,22 @@ def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] --
     shards = []
     for name, checksum in sorted(index.includes.items()):
         match = re.fullmatch(
-            r"translations/glossary/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml", name
+            r"translations/(glossary|overrides)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml",
+            name,
         )
         if match is None:
             raise ValueError("Unsafe or unsupported translation include")
-        sequences[match[1]].append(int(match[2]))
+        sequences[match[1] + "/" + match[2]].append(int(match[3]))
         file = root / name
         _safe(file)
         content = canonical(read_yaml(file))
         if digest(content) != checksum:
             raise ValueError("Translation shard hash mismatch")
-        shard = Shard.model_validate_json(content)
-        _envelope(shard, match[1])
+        shard = _model(Shard, parse(content))
+        is_override = isinstance(shard.records[0], (AssignmentRecord, ConceptRecord))
+        if is_override != (match[1] == "overrides"):
+            raise ValueError("Translation record is in the wrong authored area")
+        _envelope(shard, match[2])
         shards.append((name, file.read_bytes(), content))
     for numbers in sequences.values():
         if sorted(numbers) != list(range(1, len(numbers) + 1)):
@@ -178,7 +209,7 @@ def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] --
     return snapshot
 
 
-def _envelope(shard: Shard, filing: str) -> None:
+def _envelope(shard: Shard, filing: str) -> None:  # ruff: ignore[complex-structure] -- exact membership and separate human/delegated gates are independently checked
     decision = shard.decisions[0]
     keys = [r.record_key for r in shard.records]
     if keys != sorted(set(keys)):
@@ -200,7 +231,12 @@ def _envelope(shard: Shard, filing: str) -> None:
         raise ValueError("Translation decision requires actual checked members")
     if decision.state == "confirmed" and decision.sample_ids != tuple(keys):
         raise ValueError("Confirmed translation must check every member")
-    modes = {record.data.adoption_review.mode for record in shard.records}
+    modes = {
+        "human"
+        if isinstance(record, (AssignmentRecord, ConceptRecord))
+        else record.data.adoption_review.mode
+        for record in shard.records
+    }
     if len(modes) != 1:
         raise ValueError("Glossary review modes must be uniform within a shard")
     for record in shard.records:
@@ -210,7 +246,16 @@ def _envelope(shard: Shard, filing: str) -> None:
             or record.record_key != key(record)
         ):
             raise ValueError("Translation record kind/key/filing mismatch")
-        _delegated(record, decision)
+        if isinstance(record, (AssignmentRecord, ConceptRecord)):
+            if decision.reviewed_by != "gbaian10":
+                raise ValueError("Name override requires the maintainer human reviewer")
+            if (
+                isinstance(record, ConceptRecord)
+                and decision.policy_id != "card-name-concept-v1"
+            ):
+                raise ValueError("Name concept decision policy mismatch")
+        else:
+            _delegated(record, decision)
         ordered(record.evidence)
         if (
             isinstance(record, TermRecord)
@@ -219,7 +264,10 @@ def _envelope(shard: Shard, filing: str) -> None:
             raise ValueError("Permanent term ID differs from concept key")
 
 
-def _delegated(record: Record, decision: Decision) -> None:
+def _delegated(
+    record: TermRecord | ChoiceRecord | VocabularyRecord | EmphasisRecord,
+    decision: Decision,
+) -> None:
     review = record.data.adoption_review
     if review.delegation is not None:
         receipt = review.delegation
@@ -241,7 +289,17 @@ def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure,too-
     seen: dict[str, tuple[Record, str]] = {}
     concepts = set()
     chains: dict[
-        str, list[tuple[ChoiceRecord | VocabularyRecord | EmphasisRecord, str]]
+        str,
+        list[
+            tuple[
+                ChoiceRecord
+                | VocabularyRecord
+                | EmphasisRecord
+                | AssignmentRecord
+                | ConceptRecord,
+                str,
+            ]
+        ],
     ] = defaultdict(list)
     for record, decision in snapshot.records():
         if record.record_key in seen:
@@ -255,7 +313,11 @@ def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure,too-
             subject = canonical(array(parse(record.record_key.encode()))[:-1]).decode()
             chains[subject].append((record, decision))
     for record, _ in snapshot.records():
-        receipt = record.data.adoption_review.delegation
+        receipt = (
+            None
+            if isinstance(record, (AssignmentRecord, ConceptRecord))
+            else record.data.adoption_review.delegation
+        )
         if receipt is not None:
             for member in receipt.scope:
                 scoped = seen.get(member)
@@ -263,7 +325,10 @@ def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure,too-
                     raise ValueError(
                         "Delegation scope references absent glossary record"
                     )
-                if scoped[0].data.adoption_review.delegation != receipt:
+                if (
+                    isinstance(scoped[0], (AssignmentRecord, ConceptRecord))
+                    or scoped[0].data.adoption_review.delegation != receipt
+                ):
                     raise ValueError("Delegation scope member has a different receipt")
     for chain in chains.values():
         chain.sort(key=lambda item: item[0].data.adoption_no)
@@ -300,3 +365,20 @@ def _history(snapshot: Snapshot) -> None:  # ruff: ignore[complex-structure,too-
                 raise ValueError("Emphasis references an unadopted concept")
             if categories[record.data.term_id] != "rule_term":
                 raise ValueError("Only rule terms accept emphasis choices")
+
+    keys = {
+        r.data.concept_key
+        for r, _ in snapshot.records()
+        if isinstance(r, TermRecord) and r.data.category == "card_name"
+    }
+    for record, _ in snapshot.records():
+        if (
+            isinstance(record, ConceptRecord)
+            and record.data.term_id is not None
+            and categories.get(record.data.term_id) != "card_name"
+        ):
+            raise ValueError("Name concept requires an adopted card-name term")
+        if isinstance(record, AssignmentRecord) and record.data.concept_key not in keys:
+            raise ValueError(
+                "Name assignment requires an adopted card-name concept key"
+            )

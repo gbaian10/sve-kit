@@ -93,6 +93,14 @@ TABLES = (
                 ("translation_use", "translation_context"),
             ),
             QueryCheck(
+                "name_use_confirmed_identity",
+                "SELECT 1 FROM translation_use AS u JOIN face_revision AS r ON r.id=u.face_revision_id "
+                "JOIN face AS f ON f.id=r.face_id JOIN card AS c ON c.id=f.card_id WHERE c.identity_state!='confirmed' "
+                "UNION ALL SELECT 1 FROM translation_use AS u JOIN printing AS p ON p.id=u.printing_id "
+                "JOIN card AS c ON c.id=p.card_id WHERE c.identity_state!='confirmed' LIMIT 1",
+                ("translation_use", "face_revision", "face", "printing", "card"),
+            ),
+            QueryCheck(
                 "name_use_revision_source",
                 "SELECT 1 FROM translation_use AS u JOIN translation_context AS c ON c.id=u.context_id "
                 "JOIN face_revision AS r ON r.id=u.face_revision_id "

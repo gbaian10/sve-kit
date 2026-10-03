@@ -57,16 +57,56 @@ and `translation_selection` column sets from build-db §9. Its population and
 query checks currently accept only name fields with a null ordinal, a face
 revision or a complete printing/face pair, and a default context. Other owners
 remain represented in the DDL and fail closed at the name-only capability.
-Non-default contexts require the later complete assignment-history replay;
-an adopted-looking decision row alone does not enable them.
+Non-default uses require the later application/binding composition; loading a
+verified assignment alone does not enable them.
 
 `name_build` reads each owner's own language, exact content hash and source unit.
 Unknown or omitted printed text yields no context or use even if a current name
 is available; known historical printing names can differ from current names.
 Pending wording does not suppress a known name. These helpers consume an already
 verified publication database; they do not validate raw archives, import policies
-or activate the offline build/preview path. Existing full glossary replay remains
-mandatory, including its rejection of unsupported overrides.
+or activate the offline build/preview path. Full glossary replay remains mandatory.
+
+The complete indexed entry now also accepts name-only `context_assignment` and
+`card_name_concept` histories under `translations/overrides/`. Both require the
+maintainer's actual sampled/confirmed decision; glossary delegation cannot grant
+these exceptions. All predecessors and withdrawn records retain their exact
+source evidence and immutable identity checks. Unsupported override kinds still
+fail before import. Loader diagnostics locate invalid fields without echoing
+their imported values.
+
+`name_replay` validates immutable Git registry bytes, all printing observations
+in the explicitly supplied frozen batches, physical face locations and revision
+owners. Runtime changes do not invalidate an immutable historical source recipe.
+Nonempty identity transitions currently fail closed until complete effective
+transition evidence can be composed. Revision assignments must reproduce their
+owner from the complete uncorrected observation; corrected revisions cannot be
+guessed from a name hash alone. Assignment records use the consumer's explicitly
+pinned immutable authored registry, since their wire format has no separate
+identity-basis field. Concept records use their own declared identity basis.
+Before the first production assignment is adopted, its contract must gain a
+historical `identity_basis`; current consumer pins cannot permanently preserve
+an assignment's review after the registry observation changes.
+
+Complete replay needs frozen card batches for every region present in the
+registry. Offline recipes declare both batches; other callers must cover both
+through the supplied override references. Both JP and EN physical descriptors
+have kind `card`, while digital catalogues have kind `api`. The observation
+closure checked here is physical printing identity, including the registry's
+cross-region references. It does not replace the independent evidence checks
+for ancillary related-card suggestions or source corrections.
+
+`NameReplay.resolve()` rechecks the current owner's confirmed identity, language,
+exact name hash and known printed state. A unique exact Japanese concept needs
+no exception record. A true homonym needs an adopted semantic assignment; English
+names need an explicit concept association. Withdrawal restores mechanical
+resolution, and stale hashes cannot transfer an old assignment to a renamed
+owner. The returned term/variant and audit IDs are inputs to the later application
+layer, not populated translations or uses. The offline build independently
+replays the full source-use closure, including identity observations; import
+audits preserve the corresponding registry and decision evidence.
+Each override decision audits only its own immutable identity revision, rather
+than claiming the historical basis of unrelated records.
 
 Only reviewed unofficial translations can enter the shared selection table.
 Official names need per-owner eligibility and later `FieldTranslation` bindings;

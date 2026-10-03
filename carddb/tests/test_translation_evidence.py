@@ -211,15 +211,15 @@ def test_independent_glossary_boundary(  # ruff: ignore[complex-structure,too-ma
         "hash": "^Translation shard hash mismatch$",
         "gap": "^Translation shard sequence gap$",
         "symlink": "^Symlink translation input$",
-        "unknown": "Extra inputs are not permitted",
-        "candidate": "Input should be 'sampled' or 'confirmed'",
+        "unknown": r"^Invalid translation authored fields at records\.0\.glossary_term\.extra$",
+        "candidate": r"^Invalid translation authored fields at decisions\.0\.state$",
         "key": "^Translation record kind/key/filing mismatch$",
         "id": "^Permanent term ID differs from concept key$",
         "members": "^Translation decision exact membership mismatch$",
         "checked": "^Translation decision requires actual checked members$",
-        "human": "String should have at least 1 character",
+        "human": r"^Invalid translation authored fields at decisions\.0\.reviewed_by$",
         "sample": "^Translation decision requires actual checked members$",
-        "format": "Translation format must be integer one",
+        "format": r"^Invalid translation authored fields at translation_authored_format$",
     }
     with pytest.raises(ValueError, match=messages[fault]):
         load_glossary(root)

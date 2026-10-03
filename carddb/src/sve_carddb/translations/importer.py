@@ -14,8 +14,10 @@ from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.translations.loader import Snapshot, load_glossary
 from sve_carddb.translations.models import (
+    AssignmentRecord,
     AuthoredValue,
     ChoiceRecord,
+    ConceptRecord,
     DictionaryEntry,
     DigitalName,
     EffectTerm,
@@ -25,6 +27,7 @@ from sve_carddb.translations.models import (
     TermRecord,
     VocabularyRecord,
 )
+from sve_carddb.translations.name_replay import replay_names
 from sve_carddb.translations.sources import Sources, pointer
 
 if TYPE_CHECKING:
@@ -251,8 +254,47 @@ def populate_glossary(  # ruff: ignore[complex-structure,too-many-branches] -- h
                 sources=sources,
                 db=db,
             )
+    replay, identity = replay_names(snapshot, originals, inputs, sources)
+    sources.uses[:] = replay.uses
     insert_raw_sources(db, (use.source for use in sources.uses))
+    for revision, path, checksum in sorted(set(identity.authored_uses)):
+        insert_exact(
+            db,
+            "source_record",
+            {
+                "id": "authored:name-identity:"
+                + digest(canonical([revision, path, checksum]))[7:],
+                "kind": "authored",
+                "sha256": checksum,
+                "authored_path": path,
+                "authored_revision": revision,
+                "parser_version": "name-identity-v1",
+            },
+            ("id",),
+        )
     _audit(db, snapshot, inputs.authored_revision, sources)
+    for record, decision in snapshot.records():
+        if isinstance(record, (AssignmentRecord, ConceptRecord)):
+            for revision, path, checksum in sorted(set(identity.authored_uses)):
+                if revision != identity.record_revisions[record.record_key]:
+                    continue
+                identifier = (
+                    "authored:name-identity:"
+                    + digest(canonical([revision, path, checksum]))[7:]
+                )
+                insert_exact(
+                    db,
+                    "decision_source",
+                    {
+                        "decision_id": decision,
+                        "source_id": identifier,
+                        "role": "name_identity:"
+                        + digest(canonical([revision, path]))[7:],
+                        "locator": path,
+                        "quote": None,
+                    },
+                    ("decision_id", "source_id", "role"),
+                )
     for record, decision in snapshot.effective():
         if isinstance(record, TermRecord):
             db.insert(
@@ -265,7 +307,7 @@ def populate_glossary(  # ruff: ignore[complex-structure,too-many-branches] -- h
                     "decision_id": decision,
                 },
             )
-        elif isinstance(record, EmphasisRecord):
+        elif isinstance(record, (EmphasisRecord, AssignmentRecord, ConceptRecord)):
             continue
         elif isinstance(record, ChoiceRecord):
             value = values[record.record_key]
