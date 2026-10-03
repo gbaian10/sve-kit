@@ -45,7 +45,7 @@ fn position(class: &str, hand: &Value, deck: &Value, counters: &Value) -> Value 
     })
 }
 
-/// KE-13, BP16-036: "このターン、自分の場のフォロワーが進化していたなら、代わりに2つまで"
+/// KE-13, BP16-036: the selection limit reads the evolution counter.
 /// counts every evolution (`evolutions`, also effect evolutions, Q2084), not only the
 /// evolve actions (`evolve_played`).
 #[test]
@@ -80,7 +80,7 @@ fn bp16_036_widens_the_choice_after_any_evolution() {
     assert_eq!(max_options(&json!({"P1.evolutions":1_i64})), 2);
 }
 
-/// KE-14, BP20-P28: "陰陽師・フォロワー1枚かスペル1枚" offers exactly those two kinds.
+/// KE-14, BP20-P28: only onmyoji followers and spells are offered.
 #[test]
 fn bp20_p28_offers_onmyoji_followers_or_spells_only() {
     let mut game = Game::new(
