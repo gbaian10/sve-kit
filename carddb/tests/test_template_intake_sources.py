@@ -8,16 +8,19 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, digest, object_value
 from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_sources.normalizer import partition
 from sve_carddb.template_translations.models import Inventory
+from sve_carddb.template_translations.sources import TemplateSources
 
 from .template_intake_fixtures import intake_case, policy_git, recognition_term_source
 from .test_template_parameters import candidate
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
+    from pytest_mock import MockerFixture
 
     from .template_intake_fixtures import Case
 
@@ -272,3 +275,26 @@ def test_repeated_slots_require_equal_values_and_roles(
     else:
         with pytest.raises(ValueError, match=exact(message)):
             member.verify_schema(schema)
+
+
+def test_first_jp_batch_also_pins_counts(
+    intake_case: Case, mocker: MockerFixture
+) -> None:
+    mocker.patch(
+        "sve_carddb.template_translations.sources.JP_BATCH",
+        object_value(intake_case.source.recipe.config["source_batch"])["batch_id"],
+    )
+    sources = TemplateSources(
+        PinnedRepository(intake_case.repository),
+        {"test-store": intake_case.source.store},
+        main_revision=intake_case.source.main,
+        legacy_bytes=intake_case.source.legacy,
+        proposals=intake_case.source.proposals,
+    )
+    with pytest.raises(
+        ValueError,
+        match=exact(
+            "Formal template first JP batch differs from its fixed baseline counts"
+        ),
+    ):
+        sources.reconstruct(intake_case.pins)

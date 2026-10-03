@@ -85,6 +85,7 @@ class Emphasis:
 class Snapshot:
     index: bytes
     shards: tuple[tuple[str, bytes, bytes], ...]
+    closure: tuple[tuple[str, bytes, bytes], ...] = ()
 
     def envelopes(self) -> tuple[Shard, ...]:
         """Return detached models; callers cannot mutate the approved byte snapshot."""
@@ -150,7 +151,7 @@ class Snapshot:
                     "exact_hash": digest(exact),
                     "canonical_hash": digest(content),
                 }
-                for p, exact, content in self.shards
+                for p, exact, content in (self.closure or self.shards)
             ],
         }
 
@@ -161,14 +162,18 @@ def revision(record: Record) -> int:
 
 
 def validate_snapshot(snapshot: Snapshot) -> None:
-    """Validate the glossary subset of a separately verified complete translation closure."""
+    """Validate glossary and name overrides in a separately verified full closure."""
     for path, _, content in snapshot.shards:
         match = re.fullmatch(
-            r"translations/glossary/([A-Za-z0-9_-]+)/[0-9]{3,}\.yaml", path
+            r"translations/(glossary|overrides)/([A-Za-z0-9_-]+)/[0-9]{3,}\.yaml", path
         )
         if match is None:
             raise ValueError("Glossary snapshot contains an unsupported shard path")
-        _envelope(Shard.model_validate_json(content), match[1])
+        shard = _model(Shard, parse(content))
+        is_override = isinstance(shard.records[0], (AssignmentRecord, ConceptRecord))
+        if is_override != (match[1] == "overrides"):
+            raise ValueError("Translation record is in the wrong authored area")
+        _envelope(shard, match[2])
     _history(snapshot)
 
 
@@ -178,47 +183,64 @@ def _safe(path: Path) -> None:
 
 
 def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] -- every filesystem closure guard precedes projection
-    """Reject unsupported areas and inventories, rather than treating them as empty."""
+    """Verify the full closure and project only glossary and name override records."""
     path = root / "translations/index.yaml"
     _safe(path)
     index = _model(Index, read_yaml(path))
-    if index.inventories:
-        raise ValueError("Template inventories require the #52 loader")
+    if set(index.includes) & set(index.inventories):
+        raise ValueError("Template shard and inventory paths must be disjoint")
+    indexed = {**index.includes, **index.inventories}
     present = set()
     for file in path.parent.rglob("*"):
         if file.is_symlink():
             raise ValueError("Symlink translation input")
         if not file.is_dir() and file != path:
             present.add(file.relative_to(root).as_posix())
-    if present != set(index.includes):
+    if present != set(indexed):
         raise ValueError("Translation indexed file closure differs from disk")
     sequences: dict[str, list[int]] = defaultdict(list)
     shards = []
-    for name, checksum in sorted(index.includes.items()):
+    closure = []
+    for name, checksum in sorted(indexed.items()):
         match = re.fullmatch(
-            r"translations/(glossary|overrides)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml",
+            r"translations/(glossary|overrides|templates)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml",
             name,
         )
-        if match is None:
+        inventory = re.fullmatch(
+            r"translations/template-sources/([0-9]{3,})\.yaml", name
+        )
+        if (name in index.includes and match is None) or (
+            name in index.inventories and inventory is None
+        ):
             raise ValueError("Unsafe or unsupported translation include")
-        sequences[match[1] + "/" + match[2]].append(int(match[3]))
+        sequences[name.rsplit("/", 1)[0]].append(int(name.rsplit("/", 1)[1][:-5]))
         file = root / name
         _safe(file)
         content = canonical(read_yaml(file))
         if digest(content) != checksum:
             raise ValueError("Translation shard hash mismatch")
-        shard = _model(Shard, parse(content))
-        is_override = isinstance(shard.records[0], (AssignmentRecord, ConceptRecord))
-        if is_override != (match[1] == "overrides"):
-            raise ValueError("Translation record is in the wrong authored area")
-        _envelope(shard, match[2])
+        closure.append((name, file.read_bytes(), content))
+        if inventory is not None or (match is not None and match[1] == "templates"):
+            _template_input(name, content)
+            continue
+        assert match is not None
         shards.append((name, file.read_bytes(), content))
     for numbers in sequences.values():
         if sorted(numbers) != list(range(1, len(numbers) + 1)):
             raise ValueError("Translation shard sequence gap")
-    snapshot = Snapshot(path.read_bytes(), tuple(shards))
-    _history(snapshot)
+    snapshot = Snapshot(path.read_bytes(), tuple(shards), tuple(closure))
+    validate_snapshot(snapshot)
     return snapshot
+
+
+def _template_input(path: str, content: bytes) -> None:
+    """Foreign envelopes are checked, but source replay belongs to load_templates."""
+    from sve_carddb.template_translations.loader import _inventory, _shard, envelope  # ruff: ignore[import-outside-top-level] -- the two area validators share a closure without a module import cycle
+
+    if path.startswith("translations/template-sources/"):
+        _inventory(content)
+    else:
+        envelope(_shard(content), path.split("/")[2])
 
 
 def _envelope(shard: Shard, filing: str) -> None:  # ruff: ignore[complex-structure] -- exact membership and separate human/delegated gates are independently checked

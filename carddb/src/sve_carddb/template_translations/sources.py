@@ -9,6 +9,7 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value, p
 from sve_carddb.template_parameter_rules.loader import load_config
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS
 from sve_carddb.template_parameter_rules.replay import (
+    JP_BATCH,
     _historical_positions,
     _recipe,
     _references,
@@ -210,19 +211,30 @@ class TemplateSources:
             )
         )
         candidates = build(sources, scan, refs, enabled_rules=enabled)
-        if loaded is not None and loaded.historical_revision is not None:
-            current = tuple(
-                sorted(
-                    numeric_identity(c, h, h.numeric_rule)
-                    for c in candidates.entries
-                    for h in c.slots
-                    if h.numeric_rule is not None
-                )
+        current = tuple(
+            sorted(
+                numeric_identity(c, h, h.numeric_rule)
+                for c in candidates.entries
+                for h in c.slots
+                if h.numeric_rule is not None
             )
-            if _historical_positions(sources, scan, candidates) != current:
-                raise ValueError(
-                    "Formal template recognition changed an original numeric position"
-                )
+        )
+        if sources.batch_id == JP_BATCH and (
+            len(current),
+            object_value(checkpoint["fingerprints"])["expected"],
+            object_value(checkpoint["legacy_member_coverage"])["expected"],
+        ) != (14782, 3669, 13913):
+            raise ValueError(
+                "Formal template first JP batch differs from its fixed baseline counts"
+            )
+        if (
+            loaded is not None
+            and loaded.historical_revision is not None
+            and _historical_positions(sources, scan, candidates) != current
+        ):
+            raise ValueError(
+                "Formal template recognition changed an original numeric position"
+            )
         resolved, remaining = _resolve(loaded, candidates)
         solved = {
             (str(r["inventory_id"]), str(r["slot"])): r

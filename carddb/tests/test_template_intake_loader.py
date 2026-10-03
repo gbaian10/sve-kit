@@ -110,7 +110,7 @@ def test_adopted_definition_translation_and_terminal_revisions(
         (
             "supersedes_id",
             "T" + "a" * 16,
-            "Template supersedes requires an adopted complete parent payload",
+            "Template supersedes requires an adopted parent or its verified legacy family",
         ),
     ],
 )

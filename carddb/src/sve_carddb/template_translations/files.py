@@ -18,7 +18,7 @@ if TYPE_CHECKING:
 INDEX = "authored/translations/index.yaml"
 DIRECTORY = "authored/translations"
 SHARD = re.compile(
-    r"translations/(glossary|templates)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml\Z"
+    r"translations/(glossary|overrides|templates)/([A-Za-z0-9_-]+)/([0-9]{3,})\.yaml\Z"
 )
 INVENTORY = re.compile(r"translations/template-sources/([0-9]{3,})\.yaml\Z")
 LIMIT = 1048576

@@ -6,7 +6,10 @@ adopted definition or terminal translation revision. Its wire models follow
 `docs/schema/translation-contract.md`: definitions have exactly nine data fields;
 their content hashes cover the six-field semantic payload reconstructed from the
 source, while record membership includes evidence. Unknown fields and unsupported
-record kinds fail closed. Glossary shards use their existing complete validator.
+record kinds fail closed. Glossary and name-override shards use their existing
+complete validator. Both area loaders verify the entire index and hash closure;
+the glossary projection validates foreign template envelopes and inventories, while
+source replay and semantic definition checks remain the template loader's responsibility. Glossary pins retain every closure file, including inventories.
 
 `files` reads exact Git bytes, verifies canonical YAML hashes, ordinary file modes,
 indexed file closure and contiguous shard numbers. It checks the complete ancestor
@@ -26,14 +29,24 @@ Definitions must cover every parameter position with the recognized type, role,
 bounds and exact raw spelling. A merged slot requires both equal values and equal
 roles. Unknown card-name and unimplemented vocabulary references remain pending.
 Keeping a legacy ID requires agreement across its entire normalized family;
-otherwise only compatible members count toward a new payload ID. Supersedes
-requires an adopted complete parent and forbids cycles. Frequencies count verified
-source entries once and sort by descending count, then ID.
+otherwise only compatible members count toward a new payload ID. A content hash
+has exactly one allocated ID, and an ID longer than 16 hex requires a different
+adopted payload at every shorter two-hex prefix. Complete hash collisions compare
+bytes and fail. After superseded definitions are retired, a source member can match
+at most one current definition; current frequencies count each entry once.
+
+Supersedes accepts an adopted parent from the same verified source family, or that
+family's unadopted legacy ID, and forbids cycles. The latter stays in immutable
+provenance and is exposed in `Snapshot.unadopted_parents`; `database_parent()`
+returns null until there is an adopted parent payload, without creating a parent
+row. Definition evidence must locate a member of its verified family.
 
 The initial loader accepts human `sampled` or `confirmed` batches, preserves their
 actual checked subsets, verifies final model-review hashes, and rejects translation
 revision gaps and duplicate records. Disputes require that particular member's
-actual human sample and matching resolution event. `approved_policy` has a closed
+actual human `sampled` declaration and matching resolution event. A `confirmed`
+batch currently does not resolve a machine dispute; use the explicit sampled
+event. Translations in the source language are refused. `approved_policy` has a closed
 wire shape but is deliberately refused until the separate translation-policy loader
 and actual initial-sample prerequisites exist. Recognition approval cannot replace
 definition or translation adoption. This first implementation supports JP sentence
@@ -73,3 +86,10 @@ Actual definition and translation sampling, translation-policy loading, database
 import, binding and rendering remain separate work. No build or preview entry is
 wired to this module. Keep original/final translation bytes and alignment review
 evidence private until a valid authored batch can be produced.
+
+The immutable-history guard currently conservatively requires one publication
+sequence across the traversed history. A general merge with an older divergent
+side branch can be refused even if its merge result is valid. Current squash
+merges avoid that case; supporting branch-local immutable histories is separate
+work. The published index-entry guard is a second layer: a repointed hash is
+already caught by the indexed file hash before that guard can run.

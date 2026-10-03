@@ -75,6 +75,16 @@ class Snapshot:
     glossary: Glossary
     source_reports: tuple[tuple[bytes, bytes, bytes], ...]
     frequencies: tuple[tuple[str, int], ...]
+    unadopted_parents: tuple[tuple[str, str], ...]
+
+    def database_parent(self, template_id: str) -> str | None:
+        """Keep legacy provenance without inventing an unadopted parent FK."""
+        for record, _ in self.records():
+            if isinstance(record, DefinitionRecord) and record.data.id == template_id:
+                if any(child == template_id for child, _ in self.unadopted_parents):
+                    return None
+                return record.data.supersedes_id
+        raise ValueError("Unknown adopted template definition")
 
     def envelopes(self) -> tuple[Shard, ...]:
         """Return detached wire models rather than mutable verified state."""
@@ -231,7 +241,11 @@ def _inventories(
 
 def _definitions(
     records: tuple[tuple[Record, str], ...], members: dict[str, Reconstructed]
-) -> tuple[dict[str, DefinitionRecord], tuple[tuple[str, int], ...]]:
+) -> tuple[
+    dict[str, DefinitionRecord],
+    tuple[tuple[str, int], ...],
+    tuple[tuple[str, str], ...],
+]:
     definitions = {}
     legacy: dict[str, str] = {}
     for member in members.values():
@@ -243,8 +257,9 @@ def _definitions(
                     "Legacy template fingerprint collision across the full inventory"
                 )
             legacy[identifier] = checksum
-    frequencies = []
     payloads: dict[str, bytes] = {}
+    allocations: dict[str, str] = {}
+    matches: dict[str, tuple[str, ...]] = {}
     for record, _ in records:
         if not isinstance(record, DefinitionRecord):
             continue
@@ -252,12 +267,58 @@ def _definitions(
         data = record.data
         if data.content_hash in payloads and payloads[data.content_hash] != content:
             raise ValueError("Template full payload hash collision")
+        if (
+            data.content_hash in allocations
+            and allocations[data.content_hash] != data.id
+        ):
+            raise ValueError("Template payload hash must have exactly one allocated ID")
         payloads[data.content_hash] = content
-        matched = _frequency(representative, record, members, old=old)
+        allocations[data.content_hash] = data.id
+        matches[data.id] = _matching_members(representative, record, members, old=old)
         definitions[data.id] = record
-        frequencies.append((data.id, matched))
-    _parent_chains(definitions)
-    return definitions, tuple(sorted(frequencies, key=lambda p: (-p[1], p[0])))
+    for record in definitions.values():
+        _allocation(record, definitions)
+        allowed = {members[i].entry.source_ref for i in matches[record.data.id]}
+        if any(e.source_ref not in allowed for e in record.evidence):
+            raise ValueError(
+                "Template definition evidence must belong to its matched family"
+            )
+    unadopted = _parent_chains(definitions, members)
+    return definitions, _current_frequencies(definitions, matches), unadopted
+
+
+def _current_frequencies(
+    definitions: dict[str, DefinitionRecord], matches: dict[str, tuple[str, ...]]
+) -> tuple[tuple[str, int], ...]:
+    retired = {r.data.supersedes_id for r in definitions.values()}
+    claimed: dict[str, str] = {}
+    frequencies = []
+    for identifier, ids in matches.items():
+        if identifier in retired:
+            continue
+        for member_id in ids:
+            if member_id in claimed:
+                raise ValueError(
+                    "Template source member has multiple current definitions"
+                )
+            claimed[member_id] = identifier
+        frequencies.append((identifier, len(ids)))
+    return tuple(sorted(frequencies, key=lambda p: (-p[1], p[0])))
+
+
+def _allocation(
+    record: DefinitionRecord, definitions: dict[str, DefinitionRecord]
+) -> None:
+    """Only an existing different payload at every shorter prefix permits extension."""
+    data = record.data
+    if len(data.id) - 1 == LEGACY_WIDTH:
+        return
+    for width in range(16, len(data.id) - 1, 2):
+        previous = definitions.get("T" + data.content_hash[7 : 7 + width])
+        if previous is None or previous.data.content_hash == data.content_hash:
+            raise ValueError(
+                "Extended template ID requires every shorter adopted collision"
+            )
 
 
 def _translations(
@@ -270,6 +331,10 @@ def _translations(
         definition = definitions.get(record.data.template_id)
         if definition is None:
             raise ValueError("Template translation requires an adopted definition")
+        if record.data.lang == definition.data.source_lang:
+            raise ValueError(
+                "Template translation language must differ from its source"
+            )
         parse(record.data.text, definition.data.parameter_schema)
         chains[record.data.template_id, record.data.lang].append(record)
     for chain in chains.values():
@@ -285,7 +350,12 @@ def load_templates(
     immutable(repository, authored_revision)
     glossary = Glossary(
         files.index,
-        tuple(f for f in files.content if f[0].startswith("translations/glossary/")),
+        tuple(
+            f
+            for f in files.content
+            if f[0].startswith(("translations/glossary/", "translations/overrides/"))
+        ),
+        files.content,
     )
     validate_snapshot(glossary)
     shards = tuple(
@@ -307,7 +377,7 @@ def load_templates(
     for record, _ in records:
         for evidence in record.evidence:
             sources.evidence(evidence.source_ref)
-    definitions, frequencies = _definitions(tuple(records), members)
+    definitions, frequencies, unadopted = _definitions(tuple(records), members)
     _translations(tuple(records), definitions)
     return Snapshot(
         authored_revision,
@@ -317,6 +387,7 @@ def load_templates(
         glossary,
         reports,
         frequencies,
+        unadopted,
     )
 
 
@@ -360,15 +431,25 @@ def _frequency(
     *,
     old: bool,
 ) -> int:
+    return len(_matching_members(representative, record, members, old=old))
+
+
+def _matching_members(
+    representative: Reconstructed,
+    record: DefinitionRecord,
+    members: dict[str, Reconstructed],
+    *,
+    old: bool,
+) -> tuple[str, ...]:
     data = record.data
     family = [
-        m
-        for m in members.values()
+        (identifier, m)
+        for identifier, m in members.items()
         if m.normalized == representative.normalized
         and m.entry.role == representative.entry.role
     ]
-    matched = 0
-    for member in family:
+    matched = []
+    for identifier, member in family:
         try:
             member.verify_schema(data.parameter_schema)
         except ValueError:
@@ -383,20 +464,44 @@ def _frequency(
                     "Legacy template members disagree on slot semantic roles"
                 )
             continue
-        matched += 1
-    return matched
+        matched.append(identifier)
+    return tuple(matched)
 
 
-def _parent_chains(definitions: dict[str, DefinitionRecord]) -> None:
+def _parent_chains(
+    definitions: dict[str, DefinitionRecord], members: dict[str, Reconstructed]
+) -> tuple[tuple[str, str], ...]:
+    unadopted = []
     for record in definitions.values():
+        representative = members[record.data.inventory_id]
+        direct = record.data.supersedes_id
+        if direct is not None and direct not in definitions:
+            if direct != representative.candidate.legacy_id:
+                raise ValueError(
+                    "Template supersedes requires an adopted parent or its verified legacy family"
+                )
+            unadopted.append((record.data.id, direct))
+        elif direct is not None and direct != record.data.id:
+            parent_member = members[definitions[direct].data.inventory_id]
+            same_family = representative.entry.role == parent_member.entry.role and (
+                (
+                    representative.candidate.legacy_id is not None
+                    and representative.candidate.legacy_id
+                    == parent_member.candidate.legacy_id
+                )
+                or representative.normalized == parent_member.normalized
+            )
+            if not same_family:
+                raise ValueError(
+                    "Template supersedes adopted parent belongs to another source family"
+                )
         seen = {record.data.id}
         parent = record.data.supersedes_id
         while parent is not None:
             if parent in seen:
                 raise ValueError("Template supersedes chain must not contain a cycle")
             if parent not in definitions:
-                raise ValueError(
-                    "Template supersedes requires an adopted complete parent payload"
-                )
+                break
             seen.add(parent)
             parent = definitions[parent].data.supersedes_id
+    return tuple(sorted(unadopted))

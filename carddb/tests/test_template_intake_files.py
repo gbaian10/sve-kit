@@ -175,3 +175,23 @@ def test_index_cannot_repoint_an_old_frozen_entry(
     revision = commit(root)
     with pytest.raises(ValueError, match=exact("Template indexed input hash mismatch")):
         immutable(PinnedRepository(root), revision)
+
+
+def test_shallow_clone_cannot_validate_immutable_history(
+    intake_case: Case, tmp_path: Path
+) -> None:
+    from .adoption_fixtures import git  # ruff: ignore[import-outside-top-level] -- real depth-limited local clone, with isolated fixture Git settings
+
+    root = tmp_path / "shallow"
+    git(
+        intake_case.repository,
+        "clone",
+        "--depth=1",
+        intake_case.repository.as_uri(),
+        str(root),
+    )
+    with pytest.raises(
+        ValueError,
+        match=exact("Template immutable replay requires complete Git history"),
+    ):
+        immutable(PinnedRepository(root), intake_case.revision)
