@@ -183,7 +183,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得有額外鍵，format_version 與所屬 manifest 相同，entries 是陣列、不可 null。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
 
-format_version=`1.0.0` 與 `1.1.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
+format_version=`1.0.0`、`1.1.0` 與 `1.2.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
 此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（1.0.0 例為 `{"format_version":"1.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
 
@@ -339,6 +339,48 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 
 冷頁成本以前置啟動包已驗證並快取、尚無 images metadata 的狀態計算，config 依賴已在啟動量計入。每次配置定版須用至多 24 張可見面圖的頁面量冷頁 P50／P95／max：同 printing owner ≤25 個 metadata File、raw≤9 MiB、br≤2 MiB；混 owner ≤48 檔、raw≤12 MiB、br≤2.5 MiB。雙面若同時展示兩圖就算兩張圖，超過 24 圖的頁面另外量當頁 pin，不沿用此上界。同頁重繪、P1→P2→P1 及解析 LRU 淘汰後回頁，在已驗 byte cache 未被清除時，metadata 外部請求與傳輸 bytes 為 0，另報 cache 讀取／重解析成本。假 fetch／CacheStorage 接線與真實 heap 仍須獨立測，不用數值模擬冒稱瀏覽器驗收。
 
+### 5.3 format 1.2.0 同名規則瀏覽配置
+
+1.2.0 沿用 §5.1 的 N=64、bucket 鍵、owner、band widths、512 KiB 資料 File 上限及欄位分割，
+並沿 §5.2 的影像 metadata 調度；不因增加數位連結而更改裝檔或啟動包預算。
+公開 tuple 欄序、型別、nullable、PK、ID、canonical bytes 與 join 語意維持 1.1.0。
+新增的可協商功能是 [snapshot-format §9](snapshot-format.md#9-format-120-同名規則瀏覽) 的
+digital_link.relation=same_name，以及由已驗建置資料庫投影的 config.digital_endpoints；
+後者沿 §3 的既有物件形狀，不新增公開 digital_endpoint 表或第 41 個集合。
+
+format_version 與 min_reader_version 都為 `1.2.0`，required_capabilities 恰為下列排序集合：
+
+```json
+[
+  "column-partition-v1",
+  "digital-same-name-links-v1",
+  "fragment-container-v1",
+  "image-entity-buckets-v1",
+  "rules-name-on-demand-v1"
+]
+```
+
+只要選擇此配置，即使當次 same_name 列為空也須帶上述能力及最低版本；
+manifest、config、所有 fragment、programs、text_all 與 changes 的 format_version 必須一致，
+不能只升 manifest 或以 data_version 放行新枚舉。
+只有名字政策的建置仍可選原來的 1.0.0 或 1.1.0 配置，不能因此宣稱已提供規則瀏覽。
+只支持 1.0.0／1.1.0、最低 reader 版本不足、或缺少任一 required capability 的讀者拒絕整份 1.2.0；
+具備該 capability 卻未明示支持 1.2.0 也拒絕，不偷偷刪除連結後當作舊快照。
+1.0.0／1.1.0 都不接受 same_name，原有枚舉意義與機器資源不回寫。
+
+producer 與 reader 須各自驗 same_name 的卡層 null、effect_similarity=null、review_level=unreviewed
+及完整公開引用閉包，不只驗 enum 合法。config.digital_endpoints 依 game 排序，
+此配置啟用規則瀏覽時固定 sv1／svwb 兩列；模板、language_map 沿 §3，
+未做連線健康檢查時 status=unknown，refresh_policy 分別為 frozen／on_sve_release。
+每個公開 digital_card.game 都須有可用來解析卡片頁 URL 的 endpoint；
+缺 UI 語言對照不能猜 provider_lang，狀態 unknown 不得顯示為已確認可用。
+
+1.2.0 的獨立 Schema、source descriptor、typed accessor 與 golden／invalid fixture 須與實作同步；
+沿現行資源命名另放 `v1_2/`，不覆寫 `v1/` 或 `v1_1/`。
+各版本 golden 均交由該版本明示支持的 reader 驗證；另測舊 reader 拒絕新版本、新 reader 保留舊版本解讀。
+本節定義尚待實作的版本，不表示現有 producer／reader 或前端已支援。
+實作與前端讀取能力到位後，才可發布使用此配置的產物；容量依各版本實際選定的文字／影像集合分開量測。
+
 ## 6. 覆蓋與 QA／errata 摘要
 
 `Coverage = {reviews:[ReviewCoverage],translations:[TranslationCoverage],mechanics:[MechanicCoverage]}`；陣列可空，空不等於已完整查核。
@@ -374,6 +416,7 @@ support_changes 比較套用 override/block 後的有效狀態；同狀態但 re
 
 ## 數位同名規則的版本准入
 
-[數位名字政策](digital-name-policy.md) 的same_name枚舉能力須在producer／reader同步實作後才啟用。
-未支持digital-same-name-links-v1或min_reader不足的reader拒絕該快照，不把規則unreviewed誤看成裸候選或真人確認。
-政策與收據不出貨，不追加公開tuple欄位；枚舉新增minor、既有欄序／語意更換major，沿既有快照准入與完整引用閉包。
+[數位名字政策](digital-name-policy.md) 的 same_name 枚舉能力選用 §5.3 的 1.2.0 配置，
+須在 producer／reader 同步實作後才啟用。未支持 digital-same-name-links-v1 或 min_reader 不足的 reader
+拒絕該快照，不把規則 unreviewed 誤看成裸候選或真人確認。
+政策與收據不出貨，不追加公開 tuple 欄位；枚舉新增 minor、既有欄序／語意更換 major，沿既有快照准入與完整引用閉包。
