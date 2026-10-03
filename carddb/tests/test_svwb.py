@@ -1,3 +1,4 @@
+import re
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -18,8 +19,6 @@ from .fakewb import FakeWb, image_hash
 
 if TYPE_CHECKING:
     from .conftest import FakeClock
-
-FIXTURES = Path(__file__).parent / "fixtures" / "official_svwb"
 
 
 def make_crawler(
@@ -77,25 +76,33 @@ def test_only_the_official_site_is_allowed() -> None:
 
 
 def test_image_url_and_path_follow_the_official_pattern() -> None:
-    url = svwb.image_url("917e60bac28d4027b9af8d7738281173")
+    url = svwb.image_url("0123456789abcdef0123456789abcdef")
     assert url == (
         "https://shadowverse-wb.com/uploads/card_image/jpn/card/"
-        "917e60bac28d4027b9af8d7738281173.png"
+        "0123456789abcdef0123456789abcdef.png"
     )
     assert svwb.image_path(url) == PurePosixPath(
         "media/images/svwb/uploads/card_image/jpn/card/"
-        "917e60bac28d4027b9af8d7738281173.png"
+        "0123456789abcdef0123456789abcdef.png"
     )
     with pytest.raises(ValidationError):
         svwb.image_path("https://shadowverse-wb.com/x.png")
 
 
-def test_image_hashes_of_a_real_page() -> None:
-    body = (FIXTURES / "cardlist_ja_offset30_trimmed.json").read_bytes()
-    hashes = svwb.image_hashes(body)
-    assert hashes
-    assert all(len(h) == 32 for h in hashes)
-    assert len(set(hashes)) == len(hashes)
+def test_image_hashes_of_a_synthetic_page() -> None:
+    site = FakeWb(904)
+    body = site(
+        httpx.Request("GET", svwb.list_url("ja", 900), headers={"Lang": "ja"})
+    ).content
+    assert svwb.image_hashes(body) == [
+        image_hash(10_000_900, "c"),
+        image_hash(10_000_900, "e"),
+        image_hash(10_000_900, "s"),
+        image_hash(10_000_901, "c"),
+        image_hash(10_000_902, "c"),
+        image_hash(10_000_902, "e"),
+        image_hash(10_000_903, "c"),
+    ]
 
 
 def test_image_hashes_cover_evolved_and_styles() -> None:
@@ -111,11 +118,14 @@ def test_image_hashes_cover_evolved_and_styles() -> None:
         svwb.image_hashes(orjson.dumps({"data": {"card_details": {"10": card}}}))
 
 
-def test_parses_a_real_page() -> None:
-    body = (FIXTURES / "cardlist_ja_offset30_trimmed.json").read_bytes()
-    page = svwb.parse_list(body)
-    assert page.count == 904
-    assert page.card_ids == [10711310, 10712310]
+def test_parses_a_synthetic_page() -> None:
+    site = FakeWb(904)
+    body = site(
+        httpx.Request("GET", svwb.list_url("ja", 902), headers={"Lang": "ja"})
+    ).content
+    parsed = svwb.parse_list(body)
+    assert parsed.count == 904
+    assert parsed.card_ids == [10_000_902, 10_000_903]
 
 
 @pytest.mark.parametrize(
@@ -192,3 +202,78 @@ async def test_image_urls_need_every_stored_page(
     # 505 cards, half with an evolved side, one in ten with a style.
     assert len(urls) == 505 + 253 + 51
     assert urls[0] == svwb.image_url(image_hash(10_000_000, "c"))
+
+
+@pytest.mark.parametrize(
+    ("data", "message"),
+    [
+        ({"count": True}, "API count True, expected at least 500"),
+        ({"sort_card_id_list": [True]}, "API sort_card_id_list is not a list of ints"),
+        ({"sort_card_id_list": 1}, "API sort_card_id_list is not a list of ints"),
+        ({"card_details": []}, "API card_details is not an object"),
+        ({"card_details": {}}, "API page has no details for [1]"),
+        ({"sort_card_id_list": [1, 1]}, "API page lists 2 cards or repeats one"),
+    ],
+    ids=[
+        "bool-total",
+        "bool-id",
+        "wrong-id-type",
+        "details-type",
+        "missing-details",
+        "duplicate-id",
+    ],
+)
+def test_list_guard_messages_are_precise(data: dict[str, object], message: str) -> None:
+    with pytest.raises(ValidationError, match="^" + re.escape(message) + "$"):
+        svwb.parse_list(page_body(**data))
+
+
+def test_image_hashes_keep_style_evolution_and_remove_duplicates() -> None:
+    card = FakeWb.details(10, "Synthetic digital card")
+    card["style_card_list"] = [
+        {"hash": image_hash(10, "c"), "evo_hash": image_hash(10, "z")},
+        {"hash": image_hash(10, "s"), "evo_hash": ""},
+    ]
+    assert svwb.image_hashes(
+        orjson.dumps({"data": {"card_details": {"10": card}}})
+    ) == [
+        image_hash(10, "c"),
+        image_hash(10, "e"),
+        image_hash(10, "z"),
+        image_hash(10, "s"),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("value", "message"),
+    [
+        ("a" * 31, "unexpected image hash '" + "a" * 31 + "'"),
+        ("g" * 32, "unexpected image hash '" + "g" * 32 + "'"),
+        (None, "unexpected image hash None"),
+    ],
+    ids=["length", "hex", "type"],
+)
+def test_image_hash_validation_is_precise(value: object, message: str) -> None:
+    card = FakeWb.details(1, "Synthetic digital card")
+    card["common"] = {"card_image_hash": value}
+    with pytest.raises(ValidationError, match="^" + re.escape(message) + "$"):
+        svwb.image_hashes(orjson.dumps({"data": {"card_details": {"1": card}}}))
+
+
+def test_image_style_list_is_required_even_when_empty() -> None:
+    card = FakeWb.details(1, "Synthetic digital card")
+    card["style_card_list"] = {}
+    with pytest.raises(ValidationError, match=r"^API style_card_list is not a list$"):
+        svwb.image_hashes(orjson.dumps({"data": {"card_details": {"1": card}}}))
+
+
+def test_api_mapping_keys_do_not_make_a_list_an_object() -> None:
+    with pytest.raises(ValidationError, match=r"^API response has no 'data_headers'$"):
+        svwb.parse_list(orjson.dumps(["data_headers"]))
+    with pytest.raises(ValidationError, match=r"^API response has no 'data'$"):
+        svwb.image_hashes(orjson.dumps(["data"]))
+
+
+def test_image_card_details_are_an_object() -> None:
+    with pytest.raises(ValidationError, match=r"^API card_details is not an object$"):
+        svwb.image_hashes(orjson.dumps({"data": {"card_details": []}}))
