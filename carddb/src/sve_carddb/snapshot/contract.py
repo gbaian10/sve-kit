@@ -32,9 +32,11 @@ def validate(name: str, value: JsonValue, format_version: str = LEGACY) -> None:
     Draft202012Validator(selected).validate(value)
 
 
-def columns(name: str) -> list[str]:
+def columns(name: str, format_version: str = LEGACY) -> list[str]:
     """Return the immutable column order for a row or nested tuple."""
-    return [string(item) for item in array(definition(name)["x-columns"])]
+    return [
+        string(item) for item in array(definition(name, format_version)["x-columns"])
+    ]
 
 
 def tables() -> list[str]:
@@ -48,52 +50,59 @@ def row_type(table: str, partition: str, format_version: str = LEGACY) -> str:
     return string(object_value(mapping[table])[partition])
 
 
-def descriptor(name: str) -> dict[str, JsonValue]:
+def descriptor(name: str, format_version: str = LEGACY) -> dict[str, JsonValue]:
     """Return the format-authoritative descriptor, never a payload override."""
     return {
-        "columns": definition(name)["x-columns"],
-        "items": definition(name)["x-types"],
+        "columns": definition(name, format_version)["x-columns"],
+        "items": definition(name, format_version)["x-types"],
     }
 
 
-def _decode_type(kind: dict[str, JsonValue], value: JsonValue) -> JsonValue:
+def _decode_type(
+    kind: dict[str, JsonValue], value: JsonValue, format_version: str = LEGACY
+) -> JsonValue:
     if "nullable" in kind:
         return (
             None
             if value is None
-            else _decode_type(object_value(kind["nullable"]), value)
+            else _decode_type(object_value(kind["nullable"]), value, format_version)
         )
     if "array" in kind:
         return [
-            _decode_type(object_value(kind["array"]), item) for item in array(value)
+            _decode_type(object_value(kind["array"]), item, format_version)
+            for item in array(value)
         ]
     if "ref" in kind:
-        return decode(string(kind["ref"]), value)
+        return decode(string(kind["ref"]), value, format_version)
     return value
 
 
-def decode(name: str, value: JsonValue) -> dict[str, JsonValue]:
+def decode(
+    name: str, value: JsonValue, format_version: str = LEGACY
+) -> dict[str, JsonValue]:
     """Decode a validated tuple with a fixed descriptor."""
-    kinds = array(definition(name)["x-types"])
+    kinds = array(definition(name, format_version)["x-types"])
     return {
-        column: _decode_type(object_value(kind), item)
-        for column, kind, item in zip(columns(name), kinds, array(value), strict=True)
+        column: _decode_type(object_value(kind), item, format_version)
+        for column, kind, item in zip(
+            columns(name, format_version), kinds, array(value), strict=True
+        )
     }
 
 
-def _references(kind: dict[str, JsonValue]) -> set[str]:
+def _references(kind: dict[str, JsonValue], format_version: str = LEGACY) -> set[str]:
     if "ref" in kind:
         name = string(kind["ref"])
-        return {name} | required_types(name)
+        return {name} | required_types(name, format_version)
     for key in ("array", "nullable"):
         if key in kind:
-            return _references(object_value(kind[key]))
+            return _references(object_value(kind[key]), format_version)
     return set()
 
 
-def required_types(name: str) -> set[str]:
+def required_types(name: str, format_version: str = LEGACY) -> set[str]:
     """Compute nested descriptor closure from the fixed, acyclic schema."""
     result: set[str] = set()
-    for item in array(definition(name)["x-types"]):
-        result |= _references(object_value(item))
+    for item in array(definition(name, format_version)["x-types"]):
+        result |= _references(object_value(item), format_version)
     return result

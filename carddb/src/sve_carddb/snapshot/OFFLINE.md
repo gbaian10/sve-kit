@@ -133,3 +133,28 @@ Neither test group claims complete real-card, catalog and translation acceptance
 When real raw-field adoptions block the build, later-stage diagnostic runs must
 be identified separately; an empty substitute for a blocked phase does not
 prove the original phase or authorize a candidate for publication.
+
+## 2.0 media previews
+
+Select `--format-version 2.0.0` to export printing-owned media with permanent
+image keys. The source library still uses verified content-addressed WebPs;
+the isolated preview writes only the five display sizes to
+`images/<size>/<int_id>[-f<ordinal>].webp`. `display_url` selects the card or art
+version from media, never from the card number or an array position.
+
+`private/media-revisions.jsonl` reserves local preview revisions under an exclusive
+lock and fsyncs before producing a candidate. Failed numbers remain reserved.
+`private/media-committed.json` supplies the last successful card/art comparison;
+removed bindings retain tombstones. Pure text changes preserve both versions,
+art-only changes preserve the card version, and restoration uses a new revision.
+A retry of a reserved plan must pass `MediaPlan.verify_retry`; changing bytes
+requires a fresh reservation. These files are private preview state, not an R2
+publisher, backed-up production allocator, formal release receipt or CDN check.
+Do not upload `private/` or `reports/`.
+
+2.0 supports the same-name wire capability and rejects malformed nonempty links.
+The existing offline recipe still keeps policy browsing private: its public
+same-name links are empty. This preview does not certify policy browsing or
+formal release readiness; policy links and the digital endpoint DB integration
+remain separate. The 2.0 offline config itself always contains the two game URL
+templates, with unknown service status; this does not perform a health check.

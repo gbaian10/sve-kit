@@ -1,0 +1,52 @@
+{
+  "format_version": "2.0.0",
+  "tables": {
+    "text_unit": [
+      {
+        "base": null,
+        "bucket": 39,
+        "columns": [
+          "id",
+          "lang",
+          "text"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "t:ja:b17a760c59cb19db",
+            "ja",
+            "Synthetic rule"
+          ]
+        ]
+      }
+    ],
+    "digital_card": [
+      {
+        "owner": {
+          "kind": "global",
+          "id": null
+        },
+        "bucket": 39,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "id",
+          "game",
+          "official_id"
+        ],
+        "rows": [
+          [
+            "d:svwb",
+            "svwb",
+            "12345678"
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {}
+}

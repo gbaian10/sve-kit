@@ -1,0 +1,805 @@
+{
+  "changes_ref": null,
+  "config_ref": {
+    "key": "config",
+    "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+  },
+  "coverage": {
+    "mechanics": [],
+    "reviews": [],
+    "translations": []
+  },
+  "data_version": "preview-20260929T010203Z-0001",
+  "engine_support_target": {
+    "engine_build_hash": null,
+    "engine_version": null,
+    "validation_policy_id": null
+  },
+  "errata_card_ids": [],
+  "files": [
+    {
+      "bytes": 236,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 199
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/global/global/band/0",
+      "path": "snapshots/blobs/0c6c9b5f9cb03d8fe874769a125c693db5e8df84f07c66434990e77fdef85c22.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 1,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:0c6c9b5f9cb03d8fe874769a125c693db5e8df84f07c66434990e77fdef85c22"
+    },
+    {
+      "bytes": 239,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 200
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/global/global/band/1",
+      "path": "snapshots/blobs/6be8eb431d10c62eaad0dc9a50ffb1999a5f307c9dcd1bcfa136a4196659a2b0.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 9,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:6be8eb431d10c62eaad0dc9a50ffb1999a5f307c9dcd1bcfa136a4196659a2b0"
+    },
+    {
+      "bytes": 361,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 266
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/global/global/band/2",
+      "path": "snapshots/blobs/ddc1e889c12c2361f691b665b7c49c15776103616088a74090dc683c8365352a.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "translation",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 23,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:ddc1e889c12c2361f691b665b7c49c15776103616088a74090dc683c8365352a"
+    },
+    {
+      "bytes": 799,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 422
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/global/global/band/3",
+      "path": "snapshots/blobs/35f53f8e7672d27819882018396de1524b74b9abdd657a05424e61a8eda2ec65.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "product_family",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 24,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 28,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:35f53f8e7672d27819882018396de1524b74b9abdd657a05424e61a8eda2ec65"
+    },
+    {
+      "bytes": 418,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 257
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/global/global/band/4",
+      "path": "snapshots/blobs/93604d1fdf77471dcb5033111ada94222a047475e9eb2e062acfa3e7479a5176.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 33,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 35,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:93604d1fdf77471dcb5033111ada94222a047475e9eb2e062acfa3e7479a5176"
+    },
+    {
+      "bytes": 916,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 464
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/global/global/band/7",
+      "path": "snapshots/blobs/b3e98ad378c902c0852c7c40afcb7fbd7b4f55de4fdb916793514d79cfd5ad34.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "product",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 59,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "vocabulary",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 56,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:b3e98ad378c902c0852c7c40afcb7fbd7b4f55de4fdb916793514d79cfd5ad34"
+    },
+    {
+      "bytes": 5694,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 1630
+      },
+      "dependencies": [],
+      "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+      "path": "snapshots/blobs/73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729.json",
+      "role": "bootstrap",
+      "row_counts": [
+        {
+          "table": "card",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 26,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "card_engine_support",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 26,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "face",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 26,
+          "partition": "bootstrap",
+          "count": 2
+        },
+        {
+          "table": "face_revision",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 26,
+          "partition": "bootstrap",
+          "count": 2
+        },
+        {
+          "table": "printing",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 29,
+          "partition": "bootstrap",
+          "count": 1
+        },
+        {
+          "table": "printing",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 43,
+          "partition": "bootstrap",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+    },
+    {
+      "bytes": 1218,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 548
+      },
+      "dependencies": [],
+      "key": "config",
+      "path": "snapshots/blobs/87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5.json",
+      "role": "config",
+      "row_counts": [],
+      "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+    },
+    {
+      "key": "images/detail/global/global/band/12",
+      "role": "images",
+      "row_counts": [
+        {
+          "table": "image_asset",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 12,
+          "partition": "detail",
+          "count": 2
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "path": "snapshots/blobs/567f3cf21ae99a95f5a03688789ffd59d4db3d51fa0d717d261f128537ef57a5.json",
+      "sha256": "sha256:567f3cf21ae99a95f5a03688789ffd59d4db3d51fa0d717d261f128537ef57a5",
+      "bytes": 550,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 313
+      }
+    },
+    {
+      "bytes": 777,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 384
+      },
+      "dependencies": [
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "key": "images/detail/global/global/band/55",
+      "path": "snapshots/blobs/4839ec3f07f5d0792c7ddd8e4e45f52f84a53e0979f77cf0e9a21a86ff9f016c.json",
+      "role": "images",
+      "row_counts": [
+        {
+          "table": "image_asset",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 55,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "image_variant",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 55,
+          "partition": "detail",
+          "count": 5
+        }
+      ],
+      "sha256": "sha256:4839ec3f07f5d0792c7ddd8e4e45f52f84a53e0979f77cf0e9a21a86ff9f016c"
+    },
+    {
+      "key": "images/detail/home_set/set%3Aa/band/0",
+      "role": "images",
+      "row_counts": [
+        {
+          "table": "printing_image",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 29,
+          "partition": "detail",
+          "count": 2
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+          "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+        },
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "path": "snapshots/blobs/10545ae2bcf3f6c1e1581c33efc48c7ddc1e010365ebb41906b40df4bba14b01.json",
+      "sha256": "sha256:10545ae2bcf3f6c1e1581c33efc48c7ddc1e010365ebb41906b40df4bba14b01",
+      "bytes": 680,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 392
+      }
+    },
+    {
+      "key": "images/detail/home_set/set%3Aa/band/1",
+      "role": "images",
+      "row_counts": [
+        {
+          "table": "printing_image",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 43,
+          "partition": "detail",
+          "count": 2
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+          "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+        },
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "path": "snapshots/blobs/503b2c4705c6ef91bea2f3bd61195915032ba88e7da3e3432fa8f1b618d894d5.json",
+      "sha256": "sha256:503b2c4705c6ef91bea2f3bd61195915032ba88e7da3e3432fa8f1b618d894d5",
+      "bytes": 701,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 403
+      }
+    },
+    {
+      "bytes": 39,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 59
+      },
+      "dependencies": [],
+      "key": "programs",
+      "path": "snapshots/blobs/984f3cb84f502a4d616abbbc1c987251aa732ee4ba830394e85dd174161b97a4.json",
+      "role": "programs",
+      "row_counts": [],
+      "sha256": "sha256:984f3cb84f502a4d616abbbc1c987251aa732ee4ba830394e85dd174161b97a4"
+    },
+    {
+      "bytes": 241,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 211
+      },
+      "dependencies": [],
+      "key": "text/detail/global/global/band/15",
+      "path": "snapshots/blobs/4a5fc07120d3aab0f6d11b4bb5fea5a42a2fdf428c47a3ec2cb500de722c2ace.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 31,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:4a5fc07120d3aab0f6d11b4bb5fea5a42a2fdf428c47a3ec2cb500de722c2ace"
+    },
+    {
+      "bytes": 1232,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 562
+      },
+      "dependencies": [],
+      "key": "text/detail/global/global/band/18",
+      "path": "snapshots/blobs/8ebc790e3960735a352c2bb94cdf228308373d430161c5c6e5ffe1585e7482e8.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "text_symbol",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 37,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "translation",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 36,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:8ebc790e3960735a352c2bb94cdf228308373d430161c5c6e5ffe1585e7482e8"
+    },
+    {
+      "bytes": 409,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 237
+      },
+      "dependencies": [],
+      "key": "text/detail/global/global/band/19",
+      "path": "snapshots/blobs/0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 39,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "digital_card",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 39,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b"
+    },
+    {
+      "bytes": 237,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 198
+      },
+      "dependencies": [],
+      "key": "text/detail/global/global/band/23",
+      "path": "snapshots/blobs/2f89bbfbf6b7b8d4ab02e583b88cfb6e40448e199d76332f1a49fa1b54b73948.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "text_unit",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 46,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:2f89bbfbf6b7b8d4ab02e583b88cfb6e40448e199d76332f1a49fa1b54b73948"
+    },
+    {
+      "key": "text/detail/global/global/band/26",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "digital_card",
+          "owner": {
+            "kind": "global",
+            "id": null
+          },
+          "bucket": 52,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "dependencies": [
+        {
+          "key": "config",
+          "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+        }
+      ],
+      "path": "snapshots/blobs/808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794.json",
+      "sha256": "sha256:808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794",
+      "bytes": 223,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 182
+      }
+    },
+    {
+      "bytes": 1257,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 585
+      },
+      "dependencies": [],
+      "key": "text/detail/global/global/band/6",
+      "path": "snapshots/blobs/fa7471f53eca29bef081a5bd8d585b3d8258ec8510a0a46ae452245cf54fe056.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "ruling_revision",
+          "owner": {
+            "id": null,
+            "kind": "global"
+          },
+          "bucket": 13,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:fa7471f53eca29bef081a5bd8d585b3d8258ec8510a0a46ae452245cf54fe056"
+    },
+    {
+      "bytes": 3168,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 1093
+      },
+      "dependencies": [
+        {
+          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+          "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+        }
+      ],
+      "key": "text/detail/home_set/set%3Aa/band/0",
+      "path": "snapshots/blobs/2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "face_revision",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 26,
+          "partition": "detail",
+          "count": 2
+        },
+        {
+          "table": "printing",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 29,
+          "partition": "detail",
+          "count": 1
+        },
+        {
+          "table": "digital_link",
+          "owner": {
+            "kind": "home_set",
+            "id": "set:a"
+          },
+          "bucket": 26,
+          "partition": "detail",
+          "count": 2
+        }
+      ],
+      "sha256": "sha256:2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a"
+    },
+    {
+      "bytes": 2180,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 904
+      },
+      "dependencies": [
+        {
+          "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+          "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+        }
+      ],
+      "key": "text/detail/home_set/set%3Aa/band/1",
+      "path": "snapshots/blobs/68c1871dbc157101f46a1e19a021fa8e2e1629d43e1eb169da706664ad5904ef.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "printing",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 43,
+          "partition": "detail",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:68c1871dbc157101f46a1e19a021fa8e2e1629d43e1eb169da706664ad5904ef"
+    },
+    {
+      "bytes": 1313,
+      "compressed_bytes": {
+        "br": null,
+        "gzip": 605
+      },
+      "dependencies": [],
+      "key": "text/history/home_set/set%3Aa/band/0",
+      "path": "snapshots/blobs/36d63e74a18080b65d2e5cd9274b2613cfa3cd58f04177f1161afdcaad34aaac.json",
+      "role": "text",
+      "row_counts": [
+        {
+          "table": "face_revision",
+          "owner": {
+            "id": "set:a",
+            "kind": "home_set"
+          },
+          "bucket": 26,
+          "partition": "history",
+          "count": 1
+        }
+      ],
+      "sha256": "sha256:36d63e74a18080b65d2e5cd9274b2613cfa3cd58f04177f1161afdcaad34aaac"
+    }
+  ],
+  "format_version": "2.0.0",
+  "languages": [
+    "ja",
+    "zh-Hant"
+  ],
+  "mechanic_universe_id": "sha256:4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945",
+  "min_reader_version": "2.0.0",
+  "partitioning": {
+    "algorithm": "sha256-mod-v1",
+    "bucket_count": 64
+  },
+  "published_at": "2026-09-29T01:02:03Z",
+  "qa_card_ids": [],
+  "regions": [
+    "jp"
+  ],
+  "required_capabilities": [
+    "column-partition-v1",
+    "digital-same-name-links-v1",
+    "fragment-container-v1",
+    "image-entity-buckets-v1",
+    "image-id-url-v1",
+    "rules-name-on-demand-v1"
+  ],
+  "restriction_coverage": [],
+  "source_windows": [],
+  "text_all": {
+    "path": "snapshots/blobs/f6ce795a76efca87bb12a295c31c1b26088112f3a07faec8d2976757b35c7c79.json",
+    "sha256": "sha256:f6ce795a76efca87bb12a295c31c1b26088112f3a07faec8d2976757b35c7c79",
+    "bytes": 22556,
+    "compressed_bytes": {
+      "br": null,
+      "gzip": 4762
+    },
+    "contains": [
+      {
+        "key": "bootstrap/bootstrap/global/global/band/0",
+        "sha256": "sha256:0c6c9b5f9cb03d8fe874769a125c693db5e8df84f07c66434990e77fdef85c22"
+      },
+      {
+        "key": "bootstrap/bootstrap/global/global/band/1",
+        "sha256": "sha256:6be8eb431d10c62eaad0dc9a50ffb1999a5f307c9dcd1bcfa136a4196659a2b0"
+      },
+      {
+        "key": "bootstrap/bootstrap/global/global/band/2",
+        "sha256": "sha256:ddc1e889c12c2361f691b665b7c49c15776103616088a74090dc683c8365352a"
+      },
+      {
+        "key": "bootstrap/bootstrap/global/global/band/3",
+        "sha256": "sha256:35f53f8e7672d27819882018396de1524b74b9abdd657a05424e61a8eda2ec65"
+      },
+      {
+        "key": "bootstrap/bootstrap/global/global/band/4",
+        "sha256": "sha256:93604d1fdf77471dcb5033111ada94222a047475e9eb2e062acfa3e7479a5176"
+      },
+      {
+        "key": "bootstrap/bootstrap/global/global/band/7",
+        "sha256": "sha256:b3e98ad378c902c0852c7c40afcb7fbd7b4f55de4fdb916793514d79cfd5ad34"
+      },
+      {
+        "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
+        "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+      },
+      {
+        "key": "config",
+        "sha256": "sha256:87088349a011672c39a881c9545b47eb594fa852aac9cf5dabb572da8efbfdc5"
+      },
+      {
+        "key": "text/detail/global/global/band/15",
+        "sha256": "sha256:4a5fc07120d3aab0f6d11b4bb5fea5a42a2fdf428c47a3ec2cb500de722c2ace"
+      },
+      {
+        "key": "text/detail/global/global/band/18",
+        "sha256": "sha256:8ebc790e3960735a352c2bb94cdf228308373d430161c5c6e5ffe1585e7482e8"
+      },
+      {
+        "key": "text/detail/global/global/band/19",
+        "sha256": "sha256:0d73e540016594c7c866ba2c59c3088770b45d7252f56ed5a123ac060d98707b"
+      },
+      {
+        "key": "text/detail/global/global/band/23",
+        "sha256": "sha256:2f89bbfbf6b7b8d4ab02e583b88cfb6e40448e199d76332f1a49fa1b54b73948"
+      },
+      {
+        "key": "text/detail/global/global/band/26",
+        "sha256": "sha256:808dc83052e626e3befc7db711b747ec63d596b20077a22037a0618029517794"
+      },
+      {
+        "key": "text/detail/global/global/band/6",
+        "sha256": "sha256:fa7471f53eca29bef081a5bd8d585b3d8258ec8510a0a46ae452245cf54fe056"
+      },
+      {
+        "key": "text/detail/home_set/set%3Aa/band/0",
+        "sha256": "sha256:2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a"
+      },
+      {
+        "key": "text/detail/home_set/set%3Aa/band/1",
+        "sha256": "sha256:68c1871dbc157101f46a1e19a021fa8e2e1629d43e1eb169da706664ad5904ef"
+      },
+      {
+        "key": "text/history/home_set/set%3Aa/band/0",
+        "sha256": "sha256:36d63e74a18080b65d2e5cd9274b2613cfa3cd58f04177f1161afdcaad34aaac"
+      }
+    ]
+  }
+}

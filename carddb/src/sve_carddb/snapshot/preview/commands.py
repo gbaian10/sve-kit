@@ -2,7 +2,7 @@
 
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- explicitly injected optional compressor boundary
 from pathlib import Path
-from typing import Annotated
+from typing import TYPE_CHECKING, Annotated
 
 import typer
 
@@ -15,11 +15,13 @@ from sve_carddb.image_assets import (
 )
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.snapshot.export import Brotli, export_snapshot
+from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.offline import Inputs as OfflineInputs
 from sve_carddb.snapshot.offline import build as build_offline
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.build import Inputs, build
-from sve_carddb.snapshot.profiles import LEGACY, profile
+from sve_carddb.snapshot.preview.media_state import reservation
+from sve_carddb.snapshot.profiles import LEGACY, MEDIA, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -98,31 +100,15 @@ def export_command(  # ruff: ignore[too-many-arguments, too-many-positional-argu
             "cache_hits": sum(item.result.cache_hit for item in images.images),
             "new_encoding_milliseconds": 0,
         }
-    snapshot = export_snapshot(
-        built.projection,
-        built.ownership,
+    _finish(
+        built,
+        roots,
         recipe.batch(),
-        brotli=codec,
-        format_version=format_version,
+        codec,
+        image_assets_dir,
+        image_execution,
+        format_version,
     )
-    require_preview(snapshot.manifest)
-    _write(
-        roots,
-        "private/inputs/" + digest(built.input_content)[7:] + ".json",
-        built.input_content,
-        immutable=True,
-    )
-    report = write_preview(
-        snapshot,
-        roots,
-        built.report,
-        brotli=codec,
-        image_source=image_assets_dir,
-        confirmed_images=built.confirmed_images,
-    )
-    if image_execution is not None:
-        report["image_execution"] = dict(image_execution)
-    typer.echo(canonical(report).decode())
 
 
 @app.command("export-offline")
@@ -160,6 +146,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
         raise typer.BadParameter(
             "Image asset and cache roots must be provided together"
         )
+    image_execution: dict[str, int] | None = None
     images = None
     if image_assets_dir is not None and image_cache_dir is not None:
         image_roots = PreviewRoots(image_assets_dir, cdn_dir, image_cache_dir)
@@ -184,26 +171,80 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
             tuple(item for part in regional for item in part.images),
             sum(part.elapsed_seconds for part in regional),
         )
+    if images is not None:
+        image_execution = {
+            "reuse_milliseconds": round(images.elapsed_seconds * 1000),
+            "cache_hits": sum(item.result.cache_hit for item in images.images),
+            "new_encoding_milliseconds": 0,
+        }
     built = build_offline(
         recipe, bundle_dir=bundle_dir, images=images, image_root=image_assets_dir
     )
-    snapshot = export_snapshot(
-        built.projection,
-        built.ownership,
-        recipe.batch(),
-        brotli=codec,
-        format_version=format_version,
-    )
-    report = write_preview(
-        snapshot,
+    _finish(
+        built,
         roots,
-        built.report,
-        brotli=codec,
-        regions=("en", "jp"),
-        image_source=image_assets_dir,
-        confirmed_images=built.confirmed_images,
+        recipe.batch(),
+        codec,
+        image_assets_dir,
+        image_execution,
+        format_version,
     )
-    typer.echo(canonical(report).decode())
+
+
+if TYPE_CHECKING:
+    from sve_carddb.snapshot.export import Batch
+    from sve_carddb.snapshot.media import MediaPlan
+    from sve_carddb.snapshot.preview.build import Built
+
+
+def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] -- common sealing boundary receives the explicit codec, verified build, roots and profile
+    built: Built,
+    roots: Roots,
+    batch: Batch,
+    codec: Brotli | None,
+    image_source: Path | None,
+    image_execution: dict[str, int] | None,
+    version: str,
+) -> None:
+    def seal(plan: MediaPlan | None) -> None:
+        projection = built.projection if plan is None else plan.projection
+        snapshot = export_snapshot(
+            projection, built.ownership, batch, brotli=codec, format_version=version
+        )
+        require_preview(snapshot.manifest, regions=batch.regions)
+        _write(
+            roots,
+            "private/inputs/" + digest(built.input_content)[7:] + ".json",
+            built.input_content,
+            immutable=True,
+        )
+        report = write_preview(
+            snapshot,
+            roots,
+            dict(built.report),
+            brotli=codec,
+            image_source=image_source,
+            confirmed_images=built.confirmed_images,
+            regions=batch.regions,
+            media_plan=plan,
+        )
+        if image_execution is not None:
+            report["image_execution"] = dict(image_execution)
+        typer.echo(canonical(report).decode())
+
+    if version == MEDIA:
+        with reservation(roots) as (revision, previous):
+            seal(
+                prepare_media(
+                    built.projection,
+                    image_source,
+                    revision=revision,
+                    previous=previous,
+                    confirmed_images=built.confirmed_images,
+                )
+            )
+    else:
+        seal(None)
 
 
 @app.command("publish")

@@ -13,24 +13,37 @@ from sve_carddb.snapshot.profiles import LEGACY
 from sve_carddb.snapshot.values import array, object_value, string
 
 
-def _value(kind: dict[str, JsonValue], value: JsonValue) -> JsonValue:
+def _value(
+    kind: dict[str, JsonValue], value: JsonValue, format_version: str
+) -> JsonValue:
     if "nullable" in kind:
-        return None if value is None else _value(object_value(kind["nullable"]), value)
+        return (
+            None
+            if value is None
+            else _value(object_value(kind["nullable"]), value, format_version)
+        )
     if "array" in kind:
-        return [_value(object_value(kind["array"]), item) for item in array(value)]
+        return [
+            _value(object_value(kind["array"]), item, format_version)
+            for item in array(value)
+        ]
     if "ref" in kind:
-        return encode(string(kind["ref"]), object_value(value))
+        return encode(string(kind["ref"]), object_value(value), format_version)
     return value
 
 
-def encode(name: str, row: dict[str, JsonValue]) -> list[JsonValue]:
+def encode(
+    name: str, row: dict[str, JsonValue], format_version: str = LEGACY
+) -> list[JsonValue]:
     """Reject missing/extra fields before emitting positional wire values."""
-    names = columns(name)
+    names = columns(name, format_version)
     if set(row) != set(names):
         raise ValueError(f"Public field whitelist mismatch: {name}")
     return [
-        _value(object_value(kind), row[field])
-        for field, kind in zip(names, array(definition(name)["x-types"]), strict=True)
+        _value(object_value(kind), row[field], format_version)
+        for field, kind in zip(
+            names, array(definition(name, format_version)["x-types"]), strict=True
+        )
     ]
 
 
@@ -44,10 +57,11 @@ def container(
             used |= required_types(
                 row_type(
                     table, string(object_value(fragment)["partition"]), format_version
-                )
+                ),
+                format_version,
             )
     return {
         "format_version": format_version,
-        "types": {name: descriptor(name) for name in sorted(used)},
+        "types": {name: descriptor(name, format_version) for name in sorted(used)},
         "tables": tables,
     }

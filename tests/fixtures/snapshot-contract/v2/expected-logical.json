@@ -1,0 +1,783 @@
+{
+  "card": [
+    {
+      "id": "c:a",
+      "layout": "double_faced",
+      "identity_state": "confirmed",
+      "home_set_id": "set:a",
+      "faces": [
+        "f:a",
+        "f:b"
+      ],
+      "regions": [
+        {
+          "region": "jp",
+          "release_state": "released",
+          "mapping_state": "unmapped",
+          "as_of": "2026-09-29",
+          "mapping_as_of": null,
+          "mapping_scope": null,
+          "default_printing_id": "p:a",
+          "default_method": "fallback",
+          "deck_role": "main",
+          "debut_product_ids": [],
+          "debut_state": "unknown"
+        }
+      ]
+    }
+  ],
+  "face": [
+    {
+      "id": "f:a",
+      "card_id": "c:a",
+      "ordinal": 0,
+      "side": "front",
+      "current": [
+        {
+          "region": "jp",
+          "revision_id": "r:a2",
+          "basis": "latest_adopted_wording"
+        }
+      ],
+      "wording": [
+        {
+          "region": "jp",
+          "state": "pending",
+          "display": {
+            "revision_id": "r:a2",
+            "basis": "current"
+          },
+          "candidates": [
+            {
+              "printing_id": "p:a",
+              "revision_id": "r:a2"
+            },
+            {
+              "printing_id": "p:b",
+              "revision_id": null
+            }
+          ],
+          "undated_printing_ids": [
+            "p:a",
+            "p:b"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "f:b",
+      "card_id": "c:a",
+      "ordinal": 1,
+      "side": "back",
+      "current": [
+        {
+          "region": "jp",
+          "revision_id": "r:b1",
+          "basis": "dated_effective"
+        }
+      ],
+      "wording": []
+    }
+  ],
+  "product_family": [
+    {
+      "id": "set:a",
+      "code": "synthetic",
+      "public_code": "SYN",
+      "kind": "other",
+      "name_unit_id": "t:ja:90d435ce36c2c997",
+      "translations": []
+    }
+  ],
+  "card_engine_support": [
+    {
+      "card_id": "c:a",
+      "shared": {
+        "status": "missing_dsl",
+        "dsl_status": null,
+        "dsl_version": null,
+        "dsl_id": null,
+        "validation_state": "not_applicable",
+        "reasons": [
+          "no_formal_candidate"
+        ],
+        "reason_detail": null,
+        "program_ref": null,
+        "ruling_revision_ids": []
+      },
+      "overrides": [],
+      "region_blocks": []
+    }
+  ],
+  "vocabulary": [
+    {
+      "kind": "type",
+      "code": "follower",
+      "label_unit_id": "t:ja:0f977fdcb5d4fe74",
+      "active": true,
+      "translations": []
+    }
+  ],
+  "face_revision": [
+    {
+      "id": "r:a1",
+      "face_id": "f:a",
+      "region": "jp",
+      "revision": 1,
+      "effective_from": null,
+      "effective_until": null,
+      "temporal_status": "unknown",
+      "change_kind": "initial",
+      "name_unit_id": "t:ja:c011ad4340c14396",
+      "effect_unit_id": "t:ja:4cae4ae84ce083d7",
+      "class_code": null,
+      "type_code": "follower",
+      "cost": 1,
+      "attack": 1,
+      "defense": 1,
+      "traits": [],
+      "titles": [],
+      "special_kinds": [],
+      "sections": [],
+      "translations": [],
+      "corrections": []
+    },
+    {
+      "id": "r:a2",
+      "face_id": "f:a",
+      "region": "jp",
+      "revision": 2,
+      "effective_from": null,
+      "effective_until": null,
+      "temporal_status": "unknown",
+      "change_kind": "wording",
+      "name_unit_id": "t:ja:c011ad4340c14396",
+      "effect_unit_id": "t:ja:b17a760c59cb19db",
+      "class_code": null,
+      "type_code": "follower",
+      "cost": 1,
+      "attack": 2,
+      "defense": 3,
+      "traits": [],
+      "titles": [],
+      "special_kinds": [],
+      "sections": [
+        {
+          "ordinal": 0,
+          "text_unit_id": "t:ja:b17a760c59cb19db",
+          "kind": "rule"
+        }
+      ],
+      "translations": [
+        {
+          "field": "effect",
+          "ordinal": null,
+          "target_lang": "zh-Hant",
+          "translation_id": "tr:effect",
+          "basis": "own_source"
+        },
+        {
+          "field": "name",
+          "ordinal": null,
+          "target_lang": "zh-Hant",
+          "translation_id": "tr:name",
+          "basis": "own_source"
+        }
+      ],
+      "corrections": [
+        {
+          "field": "cost",
+          "corrected_from": null,
+          "is_corrected": true,
+          "reason": "Synthetic correction",
+          "source_url": null
+        }
+      ]
+    },
+    {
+      "id": "r:b1",
+      "face_id": "f:b",
+      "region": "jp",
+      "revision": 1,
+      "effective_from": "2026-09-29",
+      "effective_until": null,
+      "temporal_status": "known",
+      "change_kind": "initial",
+      "name_unit_id": "t:ja:d772c516f7ee6f94",
+      "effect_unit_id": "t:ja:b17a760c59cb19db",
+      "class_code": null,
+      "type_code": "follower",
+      "cost": null,
+      "attack": 3,
+      "defense": 4,
+      "traits": [],
+      "titles": [],
+      "special_kinds": [],
+      "sections": [],
+      "translations": [],
+      "corrections": []
+    }
+  ],
+  "printing": [
+    {
+      "id": "p:a",
+      "card_id": "c:a",
+      "region": "jp",
+      "card_no": "SYN-001",
+      "card_no_state": "official",
+      "catalog_state": "official",
+      "listing_confidence": null,
+      "review_level": "unreviewed",
+      "reference_urls": [],
+      "variant_key": "standard",
+      "rarity_code": null,
+      "rarity_raw": "",
+      "premium": null,
+      "serial_total": null,
+      "int_id": 1,
+      "decklog_available": true,
+      "decklog_verification": "unverified",
+      "decklog_source_url": null,
+      "decklog_checked_on": null,
+      "faces": [
+        {
+          "face_id": "f:a",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": null,
+          "printed_effect_unit_id": null,
+          "flavor_unit_id": null,
+          "printed_text_state": "unknown",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": [],
+          "observations": [
+            {
+              "revision_id": "r:a2",
+              "state": "available",
+              "source_url": "https://example.invalid/observations/a"
+            }
+          ]
+        },
+        {
+          "face_id": "f:b",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": null,
+          "printed_effect_unit_id": null,
+          "flavor_unit_id": null,
+          "printed_text_state": "unknown",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": [],
+          "observations": []
+        }
+      ]
+    },
+    {
+      "id": "p:b",
+      "card_id": "c:a",
+      "region": "jp",
+      "card_no": "SYN-002",
+      "card_no_state": "official",
+      "catalog_state": "official",
+      "listing_confidence": null,
+      "review_level": "unreviewed",
+      "reference_urls": [],
+      "variant_key": "standard",
+      "rarity_code": null,
+      "rarity_raw": "",
+      "premium": null,
+      "serial_total": null,
+      "int_id": 2,
+      "decklog_available": true,
+      "decklog_verification": "unverified",
+      "decklog_source_url": null,
+      "decklog_checked_on": null,
+      "faces": [
+        {
+          "face_id": "f:a",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": "t:ja:c011ad4340c14396",
+          "printed_effect_unit_id": "t:ja:b17a760c59cb19db",
+          "flavor_unit_id": null,
+          "printed_text_state": "verified",
+          "sections": [
+            {
+              "ordinal": 0,
+              "text_unit_id": "t:ja:b17a760c59cb19db",
+              "kind": "rule"
+            }
+          ],
+          "stamps": [],
+          "translations": [
+            {
+              "field": "effect",
+              "ordinal": null,
+              "target_lang": "zh-Hant",
+              "translation_id": "tr:effect",
+              "basis": "own_source"
+            }
+          ],
+          "corrections": [
+            {
+              "field": "name",
+              "corrected_from": "Synthetic old front",
+              "is_corrected": true,
+              "reason": "Synthetic printed correction",
+              "source_url": "https://example.invalid/correction"
+            }
+          ],
+          "observations": []
+        },
+        {
+          "face_id": "f:b",
+          "art_id": null,
+          "frame_code": null,
+          "signed": null,
+          "embellishment_state": "unreviewed",
+          "printed_name_unit_id": null,
+          "printed_effect_unit_id": null,
+          "flavor_unit_id": null,
+          "printed_text_state": "unknown",
+          "sections": [],
+          "stamps": [],
+          "translations": [],
+          "corrections": [],
+          "observations": []
+        }
+      ]
+    }
+  ],
+  "text_unit": [
+    {
+      "id": "t:ja:0f977fdcb5d4fe74",
+      "lang": "ja",
+      "text": "Synthetic follower"
+    },
+    {
+      "id": "t:ja:4cae4ae84ce083d7",
+      "lang": "ja",
+      "text": "Synthetic old rule"
+    },
+    {
+      "id": "t:ja:90d435ce36c2c997",
+      "lang": "ja",
+      "text": "Synthetic set"
+    },
+    {
+      "id": "t:ja:b17a760c59cb19db",
+      "lang": "ja",
+      "text": "Synthetic rule"
+    },
+    {
+      "id": "t:ja:c011ad4340c14396",
+      "lang": "ja",
+      "text": "Synthetic front"
+    },
+    {
+      "id": "t:ja:d772c516f7ee6f94",
+      "lang": "ja",
+      "text": "Synthetic back"
+    },
+    {
+      "id": "t:zh-Hant:396cbc2e2e8d61a1",
+      "lang": "zh-Hant",
+      "text": "合成規則"
+    },
+    {
+      "id": "t:zh-Hant:8967c9d899bcfc91",
+      "lang": "zh-Hant",
+      "text": "合成名稱"
+    }
+  ],
+  "translation": [
+    {
+      "id": "tr:effect",
+      "source_unit_id": "t:ja:b17a760c59cb19db",
+      "target_lang": "zh-Hant",
+      "text_unit_id": "t:zh-Hant:396cbc2e2e8d61a1",
+      "origin": "project",
+      "authority": "unofficial",
+      "status": "reviewed"
+    },
+    {
+      "id": "tr:name",
+      "source_unit_id": "t:ja:c011ad4340c14396",
+      "target_lang": "zh-Hant",
+      "text_unit_id": "t:zh-Hant:8967c9d899bcfc91",
+      "origin": "project",
+      "authority": "unofficial",
+      "status": "reviewed"
+    }
+  ],
+  "image_asset": [
+    {
+      "id": "img:a",
+      "origin": "official",
+      "publication_state": "approved",
+      "withdrawal_reason": null,
+      "source_src_raw": "/synthetic.png",
+      "source_url": "https://example.invalid/synthetic.png",
+      "availability": "available",
+      "width": 459,
+      "height": 641,
+      "format": "png"
+    },
+    {
+      "id": "img:m",
+      "origin": "official",
+      "publication_state": "approved",
+      "withdrawal_reason": null,
+      "source_src_raw": "/synthetic.png",
+      "source_url": "https://example.invalid/synthetic.png",
+      "availability": "missing",
+      "width": 459,
+      "height": 641,
+      "format": "png"
+    },
+    {
+      "id": "img:w",
+      "origin": "official",
+      "publication_state": "withdrawn",
+      "withdrawal_reason": "Synthetic withdrawal",
+      "source_src_raw": "/synthetic.png",
+      "source_url": "https://example.invalid/synthetic.png",
+      "availability": "available",
+      "width": 459,
+      "height": 641,
+      "format": "png"
+    }
+  ],
+  "printing_image": [
+    {
+      "printing_id": "p:a",
+      "face_id": "f:a",
+      "image_id": "img:a",
+      "publication_state": "approved",
+      "availability": "available",
+      "withdrawal_reason": null,
+      "card_version": 7,
+      "art_version": 11,
+      "variants": [
+        {
+          "size_key": "art_m",
+          "width": 384,
+          "height": 288
+        },
+        {
+          "size_key": "art_s",
+          "width": 160,
+          "height": 120
+        },
+        {
+          "size_key": "card_l",
+          "width": 459,
+          "height": 641
+        },
+        {
+          "size_key": "card_m",
+          "width": 320,
+          "height": 447
+        },
+        {
+          "size_key": "card_s",
+          "width": 128,
+          "height": 179
+        }
+      ]
+    },
+    {
+      "printing_id": "p:a",
+      "face_id": "f:b",
+      "image_id": "img:m",
+      "publication_state": "approved",
+      "availability": "missing",
+      "withdrawal_reason": null,
+      "card_version": null,
+      "art_version": null,
+      "variants": []
+    },
+    {
+      "printing_id": "p:b",
+      "face_id": "f:a",
+      "image_id": "img:a",
+      "publication_state": "approved",
+      "availability": "available",
+      "withdrawal_reason": null,
+      "card_version": 7,
+      "art_version": 11,
+      "variants": [
+        {
+          "size_key": "art_m",
+          "width": 384,
+          "height": 288
+        },
+        {
+          "size_key": "art_s",
+          "width": 160,
+          "height": 120
+        },
+        {
+          "size_key": "card_l",
+          "width": 459,
+          "height": 641
+        },
+        {
+          "size_key": "card_m",
+          "width": 320,
+          "height": 447
+        },
+        {
+          "size_key": "card_s",
+          "width": 128,
+          "height": 179
+        }
+      ]
+    },
+    {
+      "printing_id": "p:b",
+      "face_id": "f:b",
+      "image_id": "img:w",
+      "publication_state": "withdrawn",
+      "availability": "available",
+      "withdrawal_reason": "Synthetic withdrawal",
+      "card_version": null,
+      "art_version": null,
+      "variants": []
+    }
+  ],
+  "product": [
+    {
+      "id": "prod:null",
+      "family_id": null,
+      "region": "jp",
+      "product_code": null,
+      "name_unit_id": "t:ja:90d435ce36c2c997",
+      "product_type": null,
+      "released_on": null,
+      "date_precision": "unknown",
+      "date_raw": null,
+      "translations": []
+    }
+  ],
+  "printing_product": [],
+  "identity_change": [],
+  "art": [],
+  "artist": [],
+  "stamp": [],
+  "qa": [],
+  "qa_version": [],
+  "cr_version": [],
+  "cr_clause": [],
+  "errata": [],
+  "ruling_revision": [
+    {
+      "id": "rr:a",
+      "ruling_id": "ruling:a",
+      "revision": 1,
+      "question_unit_id": "t:ja:c011ad4340c14396",
+      "decision_unit_id": "t:ja:b17a760c59cb19db",
+      "strength": "inferred",
+      "decided_on": "2026-09-29",
+      "review_state": "current",
+      "active_scopes": [],
+      "replaced_scopes": [],
+      "cards": [
+        "c:a"
+      ],
+      "evidence": [],
+      "hints": [
+        {
+          "lang": "ja",
+          "text_unit_id": "t:ja:b17a760c59cb19db",
+          "parameter_schema": {
+            "parameters": [
+              {
+                "name": "amount",
+                "uint": {
+                  "minimum": 0,
+                  "maximum": 9
+                },
+                "variables": [
+                  "X"
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "lang": "zh-Hant",
+          "text_unit_id": "t:zh-Hant:396cbc2e2e8d61a1",
+          "parameter_schema": {
+            "parameters": [
+              {
+                "name": "amount",
+                "uint": {
+                  "minimum": 0,
+                  "maximum": 9
+                },
+                "variables": [
+                  "X"
+                ]
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "rules_name": [],
+  "face_rules_name": [],
+  "rules_profile": [],
+  "restriction": [],
+  "card_related": [],
+  "digital_card": [
+    {
+      "id": "d:sv1",
+      "game": "sv1",
+      "official_id": "123456789"
+    },
+    {
+      "id": "d:svwb",
+      "game": "svwb",
+      "official_id": "12345678"
+    }
+  ],
+  "digital_art": [],
+  "digital_link": [
+    {
+      "id": "dl:sv1",
+      "card_id": "c:a",
+      "face_id": null,
+      "digital_card_id": "d:sv1",
+      "digital_phase": null,
+      "relation": "same_name",
+      "effect_similarity": null,
+      "review_level": "unreviewed"
+    },
+    {
+      "id": "dl:svwb",
+      "card_id": "c:a",
+      "face_id": null,
+      "digital_card_id": "d:svwb",
+      "digital_phase": null,
+      "relation": "same_name",
+      "effect_similarity": null,
+      "review_level": "unreviewed"
+    }
+  ],
+  "digital_art_link": [],
+  "digital_link_coverage": [],
+  "voice": [],
+  "card_voice": [],
+  "keyword": [],
+  "mechanic_projection": [],
+  "card_mechanic_coverage": [],
+  "search_alias": [],
+  "text_symbol": [
+    {
+      "id": "sym:a",
+      "code": "synthetic",
+      "parameter_schema": {
+        "parameters": [
+          {
+            "name": "amount",
+            "uint": {
+              "minimum": 0,
+              "maximum": 9
+            },
+            "variables": [
+              "X"
+            ]
+          }
+        ]
+      },
+      "keyword_id": null,
+      "spellings": [
+        {
+          "lang": "ja",
+          "literal_prefix": "Synthetic ",
+          "literal_suffix": "",
+          "parameter_name": "amount",
+          "parse_kind": "uint"
+        },
+        {
+          "lang": "en",
+          "literal_prefix": "Synthetic ",
+          "literal_suffix": "",
+          "parameter_name": "amount",
+          "parse_kind": "variable"
+        },
+        {
+          "lang": "zh-Hant",
+          "literal_prefix": "合成",
+          "literal_suffix": "",
+          "parameter_name": null,
+          "parse_kind": "literal"
+        }
+      ],
+      "localizations": [
+        {
+          "lang": "ja",
+          "name": "Synthetic symbol",
+          "tooltip": "Synthetic tooltip",
+          "copy_pattern": "Synthetic copy"
+        }
+      ]
+    }
+  ],
+  "card_route_alias": [],
+  "route_override": [],
+  "image_variant": [
+    {
+      "image_id": "img:a",
+      "size_key": "art_m",
+      "format": "webp",
+      "width": 384,
+      "height": 288,
+      "bytes": 100
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "art_s",
+      "format": "webp",
+      "width": 160,
+      "height": 120,
+      "bytes": 80
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "card_l",
+      "format": "webp",
+      "width": 459,
+      "height": 641,
+      "bytes": 300
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "card_m",
+      "format": "webp",
+      "width": 320,
+      "height": 447,
+      "bytes": 200
+    },
+    {
+      "image_id": "img:a",
+      "size_key": "card_s",
+      "format": "webp",
+      "width": 128,
+      "height": 179,
+      "bytes": 90
+    }
+  ]
+}
