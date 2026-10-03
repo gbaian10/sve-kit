@@ -369,6 +369,8 @@ def test_physical_identity_basis_is_independent_of_paragraph_hash(
         message = "Name identity registry index hash mismatch"
     elif guard == "unreachable":
         git(root, "checkout", "--orphan", "synthetic-other")
+        # Identical root trees committed within one second can reuse the same SHA.
+        (root / "unmerged-note.txt").write_text("Synthetic unreachable history\n")
         revision = commit(root)
         basis = basis.model_copy(update={"authored_revision": revision})
         message = "Recognition matcher commit must be reachable from pinned main"

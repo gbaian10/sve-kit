@@ -19,6 +19,7 @@ from sve_carddb.template_semantics.registry import (
     ROOT,
     evidence_names,
     verify,
+    verify_ancestry,
     verify_recipes,
 )
 from sve_carddb.template_semantics.v1.candidates import build
@@ -408,8 +409,10 @@ def reconstruct(
     sources: TemplateSources, pins: tuple[Recipe, ...], context: ReplayContext
 ) -> SourceReplay:
     """Formal consumption always compares the separately loaded immutable baseline."""
+    verify_ancestry(sources.repository, pins, context, sources.main_revision)
     result = _compute(sources, pins, context)
-    assert result.semantic_output is not None
+    if result.semantic_output is None:
+        raise ValueError("Semantic computation must produce its complete output")
     delta = object_value(
         object_value(parse(result.provenance))["environment_differences"]
     )
@@ -422,7 +425,8 @@ def produce(
 ) -> tuple[ReplayContext, SourceReplay]:
     """First generation is a candidate; an independent loader must replay its written baseline."""
     result = _compute(sources, pins, context)
-    assert result.semantic_output is not None
+    if result.semantic_output is None:
+        raise ValueError("Semantic computation must produce its complete output")
     return context.model_copy(
         update={"expected_outputs": result.semantic_output.manifest}
     ), result

@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.template_parameter_rules.repository import git, revision
+from sve_carddb.template_parameter_rules.repository import ancestor, git, revision
 from sve_carddb.template_semantics import versions
 from sve_carddb.template_semantics.environment import PACKAGES, validate
 from sve_carddb.template_semantics.v1.parser import Parser
@@ -193,6 +193,20 @@ def verify(  # ruff: ignore[complex-structure] -- each fixed closure and entrypo
     return Checked(
         declared, tuple(manifests), tuple(sorted(set(exact))), PARSERS[parser_id]()
     )
+
+
+def verify_ancestry(
+    repository: PinnedRepository,
+    pins: tuple[Recipe, ...],
+    context: ReplayContext,
+    main_revision: str,
+) -> None:
+    """Squash-discarded producer commits cannot become immutable formal inputs."""
+    producers = {b.revision for b in context.semantic_bindings} | {
+        p.code_revision for p in pins
+    }
+    for producer in sorted(producers):
+        ancestor(repository, producer, main_revision)
 
 
 def verify_recipes(

@@ -93,7 +93,8 @@ class Monitor:
             alarm(signal.SIGALRM, None)
         finally:
             signal.setitimer(signal.ITIMER_REAL, 0)
-            assert self._active.pop() is self
+            if self._active.pop() is not self:
+                raise RuntimeError("Replay budget watchdog nesting is inconsistent")
             signal.signal(signal.SIGALRM, previous)
             signal.setitimer(
                 signal.ITIMER_REAL,

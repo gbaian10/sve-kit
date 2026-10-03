@@ -14,6 +14,13 @@ ID and retained old files; denied IDs must name their reason and reviewed fix.
 There is no fallback to the latest parser or whole-host-runtime equality gate for v2.
 The legacy v1 consumer retains its original checks.
 
+Formal consumption requires every semantic binding revision and recipe code
+revision to be an ancestor of the explicitly pinned main revision, including
+cache hits. Missing history refuses consumption. Private candidates may use the
+producer's own history as their pinned main for engineering previews; that does
+not make a discarded branch commit eligible for formal adoption. The first formal
+inventory must be regenerated with the actual merged producer commit.
+
 The complete canonical recipe/context selects a session cache group. The loader
 reads every inventory from immutable Git before comparing its full entries. A
 separate source plan enumerates raw, field, glossary and identity uses before replay.
@@ -60,3 +67,10 @@ groups and retained outputs, and RSS includes native allocations. A main-thread
 watchdog aborts over-budget work with `replay_budget_exceeded`; it never skips
 history, raises limits, or publishes a partially verified bundle. There is no
 persistent replay cache or historical interpreter environment.
+
+Producer package versions are fixed by `v1/environment-artifacts.json`. Upgrading
+any of those packages requires a reviewed, newly registered semantic version
+before generating new inventories with that environment. Keep old versions and
+files available. Historical consumption verifies the producer's recorded versions;
+a different host version is recorded as an environment difference and is accepted
+when all six outputs agree. Never edit v1 to accommodate a dependency upgrade.

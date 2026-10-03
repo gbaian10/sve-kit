@@ -232,8 +232,10 @@ class TemplateSources:
         self, pins: tuple[Recipe, ...], context: ReplayContext
     ) -> SourceReplay:
         """One session caches by the whole immutable background, never just recipe names."""
+        from sve_carddb.template_semantics.registry import verify_ancestry  # ruff: ignore[import-outside-top-level] -- cached results cannot bypass formal main ancestry
         from sve_carddb.template_translations.semantic_replay import reconstruct  # ruff: ignore[import-outside-top-level] -- v1 remains independently replayable
 
+        verify_ancestry(self.repository, pins, context, self.main_revision)
         key = canonical(
             {
                 "recipes": [p.model_dump(mode="json") for p in pins],
