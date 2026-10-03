@@ -224,6 +224,12 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
+`context_assignment` 的 data 必備自己的 identity_basis，固定三欄不可變 Git 背景沿
+[翻譯契約 §6.1.1](translation-contract.md#611-context_assignment-的不可變身分背景)。
+每筆歷史按自己的背景驗，當次再按 owner 原文與有效身分判適用；不得從 consumer revision 補值，
+也不以只驗 frozen 來源代替。新增欄位須先完成 loader／offline 閉包才可採納真實指派；
+不改既有 glossary 分片、公開快照或模板／詞彙的人工與委託門檻。
+
 card_name_concept 於 translations/overrides 只採納卡／面與 exact 名稱到 glossary 概念的人工例外；預設唯一 exact 名稱匹配每次建置自動重算，不寫關聯紀錄。來源 hash、身分基準、預設名稱面及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。不更改已採納 glossary 分片，也不以此關聯替代數位 same-card link。
 
 風味文字重用 templates 與 template-sources 封套，不另設自由譯文入口；整段零參數模板、flavor role、獨立 recipe／新 ID 及譯本政策見 [風味文字契約](flavor-translation.md)。符合專屬 exact 邊界的定義可依有效政策逐筆機械全查後採納，不必每包人工抽查；不宣稱 loader 或首輪抽查已完成。

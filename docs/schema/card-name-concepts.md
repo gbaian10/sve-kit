@@ -96,6 +96,11 @@ field=name、ordinal=null。每次建置依真正選中來源的有效永久 car
 報告逐 owner 列永久 card／face、owner ID、語言、source_hash、候選 term_id、reason，
 並分別彙總三類 owner 筆數，不輸出原文／譯文。壞外鍵、hash、歷史鏈則建置失敗，不冒充待人工。
 
+名字 `context_assignment` 自己的 identity_basis 必填，歷史核對與當次適用性分開，
+依 [翻譯契約 §6.1.1](translation-contract.md#611-context_assignment-的不可變身分背景)。
+消費端 registry observation 更新不能讓舊合法採納報錯，也不把舊指派搬給新 owner；
+印刷名稱未變且本次有效永久卡／面與 printed 狀態仍成立時，可沿用該 owner 的指派。
+
 有效 context_assignment 的 source_hash 必須吻合實際 owner；concept_key 必須等於選中 term 的
 **concept_key**（不是 term: 前綴的 id），矛盾是建置錯誤。人工指派能消歧時照它的已採納 variant
 推導；例外關聯只證明概念，不自行配發 variant Code。同原文選不同概念仍須有理由的人工語義
@@ -233,6 +238,7 @@ key 是內部識別，不顯示給使用者，只要求唯一、穩定、能核�
 | N20 | 已採納同字異義例外，卡文勘誤換 revision ID，但名稱及永久卡／面不變 | 例外仍有效、不重簽；新 owner 的語義指派另驗，壞舊指派不沿用 |
 | N21 | 缺 SVE／數位英文名的合成候選；模型提羅馬字 slug、協調者核可 | 可配永久 key，不因無現成英文名缺概念／譯名 |
 | N22 | slug 含非 ASCII／首尾底線、key 超 96 bytes、跨分片撞既有 key 各一次 | 配發前全體檢查拒絕，改候選後重驗，不加流水號 |
+| N23 | 指派的歷史 basis／名稱不變，只更新消費端 printing observation；另改名字及面修訂 ID 各一次 | 前者重驗後仍適用；後兩者舊指派仍可歷史核對，但不搬至新字串／owner，依翻譯契約 I06／I07 |
 
 後續 #51／#196 的正式資料、#52／#53 的載入與選用、#37 的有效身分能力須各自驗收；
 本文件不宣稱數位同卡證據、真實委託收據或 repaired registry 已可發布。

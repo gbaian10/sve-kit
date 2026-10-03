@@ -166,7 +166,7 @@ ref 均為 §2 source_ref。effect_term/dictionary_entry 不強制捏造 digital
 
 | 人工例外的 data（另加 adoption_no/predecessor） | 意義 |
 | --- | --- |
-| context_assignment: `owner,field,ordinal,source_hash,variant,concept_key,reason` | source_hash 精確釘原文；variant=default 或已採納 Code，非 default 需同字異義理由；續版可改回 default |
+| context_assignment: `owner,field,ordinal,source_hash,variant,concept_key,identity_basis,reason` | source_hash 精確釘原文；identity_basis 必填，歷史核對與當次適用性依 §6.1.1；variant=default 或已採納 Code，非 default 需同字異義理由；續版可改回 default |
 | template_match: `context_key,source_hash,matches` | context_key 同下列 `{source_unit_id,variant}`，source_hash 必與該 unit 相符，避免不同語言同 bytes 撞鍵；matches 為 `{template_id,source_span,params}` 陣列；null 撤回例外回機械匹配，否則完整覆蓋且通過 §4；變更 schema／normalizer 需新 template_id |
 | translation_override: `context_key,lang,action,template_revisions,term_choices,reason` | context_key={source_unit_id,variant}；action=suppress/pin/default，後兩陣列在 pin 指定 `{template_id,revision}`／`{term_id,choice_record_key,record_hash}`，其餘為空；只選已採納依賴，不存另寫全文 |
 
@@ -177,6 +177,90 @@ owner 原文變更使舊 context_assignment/source_hash 不匹配時，舊指派
 **binding 每次建置推導，當次 DB 只放目前一組。** use 同樣重建。模板拆分、normalizer 修正、補登同字異義、商品／標籤原文更正，都在新建置以新依賴重算；舊 DB/快照不原地更新，新的 DB 不帶上一組 binding 的 translation_binding。`UQ(context_id,ordinal)` 與 owner/field/ordinal 唯一約束不變；不需新組序號或後續 DDL 才能改綁。
 
 歷史人工譯本與決定仍保存；歷史**推導結果**由對應 F1 輸入、演算法版本與舊快照重現，不要求把相互衝突的全部歷史 binding 同時塞進單一當前 DB。當快照需歷史 face_revision 時，為該 exact source 各自推導合法 context/binding。未被本次輸出引用的舊生成譯文不載入當次 DB，也不進 git。
+
+### 6.1.1 context_assignment 的不可變身分背景
+
+`context_assignment` 沿 §2 的 overrides 入口、record 五欄、單 kind／單 decision 與實際人工門檻。
+data **恰為** `{owner,field,ordinal,source_hash,variant,concept_key,identity_basis,reason,adoption_no,predecessor}`。
+record_key 仍為 `["context_assignment",owner,field,ordinal,adoption_no]` 的 canonical JSON 字串；
+選擇鍵仍為 `(owner,field,ordinal)`，不把背景版本放進永久鍵。variant／concept_key 與非空 reason 的
+既有條件不變，回 default 仍是同一選擇鏈的下一筆，不是刪除歷史。
+
+`identity_basis` **必填且不可為 null**，重用 [卡名概念關聯 §2](card-name-concepts.md#2-card_name_concept-採納格式)
+的三欄封閉物件，不新增另一套 registry pin：
+
+| 欄位 | 定義與拒絕條件 |
+| --- | --- |
+| authored_revision | 核對背景的完整 40 碼 Git commit；必須已存在且可讀。正式採納使用已合併 main 的 commit，不使用將被 squash 掉的功能分支 commit，也不能引用尚未寫出的自身分片 commit |
+| registry_index_hash | 該 revision 的 `authored/ids/index.yaml` 完整解析內容 canonical Hash；不是目前磁碟檔或消費端目前 revision 的 hash |
+| transition_index_hash | 同 revision 的 `authored/identity-transitions/index.yaml` canonical Hash；null 只表示該不可變樹沒有此檔，空 index 仍須釘 hash。非空入口須完整重播有效身分及其證據 |
+
+新分片與 translations index 由消費端的 authored_revision 另釘；不把尚未產生的 record／index hash
+反塞進 identity_basis，避免自我引用。每筆續版各保存實際核對時的背景；不得以首筆、末筆或本次
+建置背景覆蓋其他歷史成員的值。欄位進完整 record_hash／membership_hash／decision_id，
+前件的既有 hash 不改。它不授予新 owner／field、譯詞或官方來源資格。
+
+**先驗全部歷史，再判本次適用。** 兩階段不得用同一個目前 registry 比對代替：
+
+1. **歷史合法性**：從該成員的不可變 authored_revision 讀兩個 index、全部分片與決定，
+   驗 canonical／exact bytes、永久身分與有效 transition；缺版本、symlink／非 regular blob、
+   hash 不符或未支援的必要重播均建置失敗。已 superseded 或回 default 的指派也須驗。
+   來源依 §2 evidence 的 frozen SourceRef 與其釘住的歷史 parser／設定重建，
+   不跟目前磁碟上的執行期檔比；只改現在程式註解不能讓舊合法採納失效。
+2. **卡面 owner 的歷史證明**：面修訂／印刷面依凍結卡頁、原樣地區／卡號、parser source_index
+   及該背景的 source_face_map 共同核對永久 card／face，並驗該成員當時的 owner 與 exact 欄位。
+   名字指派的 field=name、ordinal=null；至少一筆 evidence 定位該 owner 的完整名稱，
+   text_hash 等於 source_hash，不能拿效果摘錄、另一張卡／另一面或數位卡名代替。
+   face_revision 必須由其完整來源與 recipe 重建精確 revision_id；含 source_correction 時也須
+   重播完整已採納修正及其證據，未支援時拒絕、不猜 raw 修訂 ID。printing_face 必須屬宣告
+   printing／face 且該版 printed 名稱已知，不能借 current。完整 printing 身分 observation／跨區
+   引用及相關 transition 的 frozen 閉包也須驗，不能只驗這個名字或 FK。
+3. **當次適用性**：歷史成功後，只對有效鏈的末筆，依本次有效身分、owner 自己實際來源與
+   source_hash 判適用。不以歷史 raw observation 必須等於目前 registry observation 作第二道
+   採納門檻。單純增加無關身分、更換建置背景或同名印刷頁其他欄更新，不要求重簽。
+   若該 owner 的原文換字、revision owner 被新 ID 取代、原 card／face 合法退役或 printing
+   已改配父卡／面，舊指派保留為歷史、列本次不適用原因，不把合法的歷史指派報成壞輸入。
+   不搬到新 owner、字串、父卡或面；新來源無歧義回 default，有歧義才等新的合法指派。
+   當次若仍引用有效舊 owner，仍按該 owner 自己的 exact 來源判適用，不因存在新修訂
+   就把全部歷史用途一律停用。
+   本次已宣告的 source／身分證據閉包缺失、矛盾或必要重播未支援仍須明示拒絕，不以 stale 掩蓋。
+
+同名但效果改字造成新 face_revision ID 時，永久 card_name_concept 關聯仍依其契約重驗；
+原 owner 的 context_assignment 不自動移給新修訂。相同 printing owner 的其他欄變動而名稱、
+有效 card／face 及 printed 狀態不變時，既有名字指派仍可用。非卡面 owner 仍依 §6.3 的
+自身來源與正式身分契約核對；registry pin 本身不能證明 QA、條文或標籤的 owner。
+未具備對應歷史 owner／來源重播的 loader 必須拒絕，不因加了本欄就宣稱已支援那些 owner。
+
+**F1 與審計**：歷史身分 index／全部分片、有效決定、transition 與全部 frozen observation
+批次／descriptor／receipt／raw、歷史 parser 程式及設定都須保留可重播 pin，連同本次有效身分
+及 owner 的實際 source uses 納入閉包。建置輸入須明示提供所有歷史背景所需的來源批次／recipes，
+不能只帶最新 JP／EN 批次、用 live manifest 或 latest cache 補缺。每個 assignment 決定的
+name_identity decision_source 只歸屬自己的背景；全部歷史來源仍留 source_record。
+最後由 caller 獨立重播 expected uses 並作完整 InputRecord.verify；不能只靠 importer partial verify。
+
+**相容與能力啟用**：本欄是 authored 指派的核對資料，不加 DB 欄或公開 snapshot 欄位，
+translation_authored_format=1 的 index／分片封套、既有 glossary／card_name_concept 形狀不變。
+context/use/render 的既有 ID recipe 不另加 identity_basis 參數；實際選用的指派 record_hash
+仍依原依賴配方驗證，不另定義忽略採納修訂的捷徑。第一筆真實 assignment 之前，loader／
+歷史重播、匯入審計及 offline 閉包必須全接入本欄；舊 loader 對新增欄位應嚴格拒絕。
+新 loader 不接受缺欄或 null 的指派，也不得從消費端背景補值；只驗 frozen 來源不能代替身分背景。
+合成 fixture 須改成明示 pin。目前沒有正式 assignment 需要遷移；若發現舊式正式資料，
+先停止新採納、另審有當時核對依據的遷移，不能工具猜背景、改歷史分片或重算舊決定冒充真人確認。
+
+以下均為後續實作的合成驗收，非本文件已執行測試；每次拒絕只改成功基例的一項條件：
+
+| 編號 | 最小反例／變更 | 預期 |
+| --- | --- | --- |
+| I01 | 移除 identity_basis／改成 null／加未知欄位，各一次 | 分別拒絕，不從 consumer revision 補值 |
+| I02 | commit 不存在／指 symlink 分片／registry canonical hash 改，各一次 | 歷史核對失敗，不能降成 stale |
+| I03 | absent transition 的 null；有空 index 卻仍 null；非空 transition 卻略過重播 | 前者可驗；後兩者拒絕或明示必要重播未支援 |
+| I04 | adoption 1、2 釘不同合法背景；只改其中一份舊來源或前件 hash | 各成員驗自己的背景；舊錯誤仍使建置失敗，不用末筆遮過 |
+| I05 | 新增無關 registry 記錄／只改目前磁碟 parser 註解 | 指派仍合法；當次 owner 未變時仍適用 |
+| I06 | 同 printing／face、名稱與 printed 狀態不變，只更新其他欄的 observation | 歷史按舊 pin 通過；依現在來源重驗後仍適用，不要求舊 observation 等於新 observation |
+| I07 | printing 名稱換字；同名但面修訂 ID 更新，各一次 | 舊指派歷史可驗、當次新來源不套用；不搬到新 owner／字串 |
+| I08 | 名稱證據是另一張卡／另一面／effect／錯 source_hash，各一次 | 歷史採納證據拒絕，不以目前同名放行 |
+| I09 | split／reassign／退役使有效父卡或面不同；printing 名稱 unknown | 舊指派不轉移、不借 current；保留歷史並報當次不適用或缺來源 |
+| I10 | 省一個歷史 EN 批次／省歷史 name_identity use／給決定掛別筆背景，各一次 | 完整來源或決定審計拒絕，不以 partial verify 宣稱成功 |
 
 ### 6.2 穩定 ID
 
