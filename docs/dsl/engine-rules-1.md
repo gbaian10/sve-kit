@@ -84,6 +84,8 @@ partial／rejected program、錯型別／面序、歧義或版本背景不一致
 
 selector 的 `zone` 與 `from` object 分支可加 `resource_role`，
 沿既有 side、zone、type、條件、表裏面及數量等篩選共同求值。
+若 selector 同時指定 `name` 與 `resource_role`，兩者以 AND／交集求值，必須同時滿足；
+不得讓其中一項取代或放寬另一項。
 角色匹配是「物件目前有效名稱身分集合」與「角色綁定身分」相交，
 不是僅允許某卡號的靜態白名單。有效集合包含規則名稱、有效 zone 的 name_alias、
 rules_name 覆寫及目前 information_source／面切換；額外名稱離開適用 zone 後失效。
@@ -140,7 +142,8 @@ view 可顯示已知的私有標籤，但不投影 Catalog 完整索引或可追
 rule_refs（原版條號）、可選 qa_refs（整數編號）、checked_on、checked_by。
 scope 的 CR 來源與所有 evidence 皆須能驗回封存來源版本，且與實際規則相關。
 bindings 的 evidence ID 恰連到本封套，不能只寫無關來源當成有核對。
-checked_on 是 ISO 8601 的日期；checked_by 記實際核對者，不能捏造維護者核可；此紀錄不是新的 decision 採納流程。
+checked_on 是 ISO 8601 的日期；checked_by 只能記實際核對模型的識別或維護者的公開帳號，
+不填私人聯絡資訊，也不能冒稱維護者已核可；此紀錄不是新的 decision 採納流程。
 來源封存、資料採納與引擎執行器能力各自驗證，不互相替代。
 
 合成層須證明名稱一致重命名不改規則，錯身分／能力不能靠同樣外觀取得特權；
@@ -178,7 +181,7 @@ evidence:
     source_version_id: src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     rule_refs: ['1.2.3']
     checked_on: '2026-10-03'
-    checked_by: synthetic-reviewer
+    checked_by: synthetic-model
 ```
 
 實際資料必須替換為釘版真實輸入、已登錄 code 與能驗回的來源；
