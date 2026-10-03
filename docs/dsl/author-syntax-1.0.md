@@ -1,5 +1,8 @@
 # SVE 效果 DSL：撰寫語法 1.0
 
+引用與授權：下列卡名、卡文與規則／Q&A 原文片段屬來源引用，不在本專案 Apache-2.0 授權內。
+卡文區塊與其下的專案 YAML／解讀分開閱讀；來源記法及權利界線見[文件引用說明](../quotations.md)。
+
 版本 1.0，2026-09-28 採用。配對 [IR 詞彙](ir-vocabulary-1.0.md)；總覽見 [README](README.md)。本文件定義撰寫語法，不是已發布的 JSON Schema，也不宣稱引擎已接受示例。日文卡文與 Q&A 以 2026-09-26 凍結資料為準，CR 1.27.0。以下新增欄位都是封閉型別；不能用 `custom_effect`、自由字串路徑或手寫 IR 逃避登錄。
 
 ## 0. 原則與記法
@@ -230,6 +233,8 @@ define 是表達式別名，在 draw 開始讀牌庫數（Live）；負數所要
 
 真實卡例：**BP08-038 無貌の魔女**；來源 `BP08-038#0/text/1`，句型 `T4acb7d7328`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP08-038)；不在本專案授權內）。
+
 > {ファンファーレ}X枚引く。Xは「自分のデッキの枚数-5」である。
 
 ```yaml
@@ -245,6 +250,8 @@ fanfare:
 
 真實卡例：**BP09-SL05 絶望の使者・セリア**；來源 `BP09-SL05#1/text/1`，句型 `T32d588f527`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP09-SL05)；不在本專案授權內）。
+
 > 【進化時】『スティールナイト』1体と『ナイト』1体を出す。
 
 ```yaml
@@ -259,6 +266,8 @@ act 材料接受 Sel／Cardinality；降低 D.play-param CostMaterials＋K.pay�
 
 真實卡例：**BP11-001 開拓のロデオガイ・ロキサス**；來源 `BP11-001#0/text/2`，句型 `T064cbd6279`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP11-001)；不在本專案授權內）。
+
 > {起動}場のアミュレット3つを{アクト}：1枚引く。
 
 ```yaml
@@ -272,6 +281,8 @@ activate:
 either 明確在結算時選一路，選完才建立 token；不產生不存在 token 的 ObjectId。
 
 真實卡例：**SD03-016 ゴーレムの錬成**；來源 `SD03-016#0/text/1`，句型 `Tacbc87e742`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=SD03-016)；不在本專案授權內）。
 
 > 『防御型ゴーレム』1枚か『攻撃型ゴーレム』1枚をEXエリアに置く。
 
@@ -290,6 +301,8 @@ resource.kind 封閉為 pp_max/pp/ep/sep，回 Int；一般條件 Live。pp.to_m
 
 真實卡例：**BP21-SL28 駆動の領域・グレティナ**；來源 `BP21-SL28#0/text/0`，句型 `Tca82225beb`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL28)；不在本專案授權內）。
+
 > 自分のSEPが0である限り、これは【疾走】を持つ。
 
 ```yaml
@@ -304,6 +317,8 @@ static:
 move.result → follow 只取實際成功 after refs，apply 捕捉它們；原例未寫期限，故不擅加 turn。下文另列 set 0 完整例。
 
 真實卡例：**ETD01-005 騎竜兵**；來源 `ETD01-005#0/text/0`，句型 `T328d04a2a4`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=ETD01-005)；不在本專案授權內）。
 
 > {ファンファーレ}自分のデッキの上1枚をEXエリアに置く。それをプレイする際、コストを-2する。
 
@@ -322,6 +337,8 @@ fanfare:
 
 真實卡例：**BP17-018 不屈のブレイブフェアリー**；來源 `BP17-018#0/text/1`，句型 `T1919d5e509`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP17-018)；不在本專案授權內）。
+
 > 【攻撃時】このターン、これはダメージを受けない。
 
 ```yaml
@@ -335,6 +352,8 @@ attack_time:
 cannot.what=stand；during 錨定 self 的 start phase 規則起身，非全時段禁止效果 stand。IR Stand(scope=RuleStart)。
 
 真實卡例：**ECP01-053 〔月下の悪魔ちゃん♪〕メジロパーマー**；來源 `ECP01-053#0/text/2`，句型 `Tb77a58afaf`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=ECP01-053)；不在本專案授權內）。
 
 > これは自分のスタートフェイズにスタンドしない。
 
@@ -355,6 +374,8 @@ create 的 instead 保留自我取代優先權，不能改成先建立再補一�
 
 真實卡例：**ETD01-018 ドラゴニックアーマー**；來源 `ETD01-018#0/text/0`，句型 `T79a83fa8d0`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=ETD01-018)；節錄，略去末尾括號註解；不在本專案授權內）。
+
 > 『ドラゴウェポン』1つを出す。【覚醒】状態なら、代わりに2つ。
 
 ```yaml
@@ -373,6 +394,8 @@ top:{who,n} 是保序牌庫切片，banish 與費用 banish 都可用，未公�
 
 真實卡例：**BP21-047 カースドソーサラー・リーズ**；來源 `BP21-047#0/text/0`，句型 `Tc00b28ac32`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP21-047)；不在本專案授權內）。
+
 > {ファンファーレ}自分のデッキの上1枚を消滅させる。
 
 ```yaml
@@ -385,6 +408,8 @@ fanfare:
 top 明定來源玩家；目的地依卡片 owner，by 預設執行能力者。look 同樣接受 who。
 
 真實卡例：**BP06-028 鮮やかな奪取**；來源 `BP06-028#0/text/1`，句型 `T7c3b9072aa`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP06-028)；不在本專案授權內）。
 
 > 相手のデッキの上3枚を墓場に置く。
 
@@ -399,6 +424,8 @@ spell:
 
 真實卡例：**BP14-008 仲居のエルフ**；來源 `BP14-008#0/text/1`，句型 `T450443faa5`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP14-008)；不在本專案授權內）。
+
 > {ファンファーレ}手札1枚をデッキの下に置く：自分のリーダーは{体力}+2する。
 
 ```yaml
@@ -412,6 +439,8 @@ fanfare:
 entered_by:{ref,by:ability|play} 讀當次入場事實；E.enter-field.cause 與 entry_method 分開，效果中 play 仍為 play。delayed.on 同 filter。
 
 真實卡例：**BP17-SL25 実りの参謀・ムニャール**；來源 `BP17-SL25#0/text/2`，句型 `Tb81e00e86b`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP17-SL25)；不在本專案授權內）。
 
 > {ファンファーレ}これが能力によって場に出ていたなら、1枚引く。
 
@@ -428,6 +457,8 @@ fanfare:
 ub_activated.holder 以發動時 holder／場上快照過濾，不用 controller 代替物件。
 
 真實卡例：**CP04-SL15 ホマレ**；來源 `CP04-SL15#0/section:0/0`，句型 `T92e6f007a4`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL15)；不在本專案授權內）。
 
 > 自分の場の他のフォロワーの{UB}能力が発動したとき、自分のPP最大値を+1する。
 
@@ -450,6 +481,8 @@ move/create.acted:true → initial_posture=Acted；static enters_acted 是 Move.
 
 真實卡例：**BP11-112 ジャイアントマッチ**；來源 `BP11-112#0/text/0`，句型 `T8872dde0e9`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP11-112)；不在本專案授權內）。
+
 > これはアクト状態で場に出る。
 
 ```yaml
@@ -462,6 +495,8 @@ static:
 逐項補法見 §14 的 11 個子項，不能只憑這個抽牌篩選例關閉整族。during.not_phase 只篩選 Draw，不改其他取得手牌動作。
 
 真實卡例：**BP10-SL20 《節制》・ルーゼン**；來源 `BP10-SL20#0/text/1`，句型 `T7122153437`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL20)；不在本專案授權內）。
 
 > これが場にいる限り、相手プレイヤーすべては、スタートフェイズ以外でカードを引けない。
 
@@ -476,6 +511,8 @@ static:
 create.to 接 {one_of:[field,ex],by,scope:each|batch}；每張分配與整批選一路分型，均 ResolutionChoice。
 
 真實卡例：**BP17-SL06 光耀の標・ミストリナ＆ベイリオン**；來源 `BP17-SL06#0/text/1`，句型 `T0456012426`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP17-SL06)；不在本專案授權內）。
 
 > {ファンファーレ}『ナテラの大樹』1枚を場かEXエリアに置いてよい。
 
@@ -497,6 +534,8 @@ fanfare:
 材料 groups 不重用，手牌 this 明確包括自身；不同區域不能偷把解決區中的自身當手牌。
 
 真實卡例：**SD08-017 オーブキャンサー**；來源 `SD08-017#0/text/1`，句型 `T0ddcddd1de`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=SD08-017)；不在本專案授權內）。
 
 > {起動}{コスト1}手札のこれと元のコスト7以上の{ドラゴン}カード1枚を捨てる：2枚引く。
 
@@ -523,6 +562,8 @@ deck_rule 指定 deck:main|evolve 與 same_name_max；不把進化牌庫的 10 �
 
 真實卡例：**ECP01-058 開催大成功！**；來源 `ECP01-058#0/text/0`，句型 `T783169f7b6`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=ECP01-058)；不在本專案授權內）。
+
 > これはエボルヴデッキに10枚まで入れることができる。
 
 ```yaml
@@ -534,6 +575,8 @@ deck_rule: { deck: evolve, same_name_max: 10 }
 leaders:all 是包括自身與所有對手的 DamageRecipient 集合，同一 I.damage 批次。
 
 真實卡例：**BP06-P23 ベアーベルセルク**；來源 `BP06-P23#0/text/1`，句型 `Te49f7fdc4b`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP06-P23)；不在本專案授權內）。
 
 > 【攻撃時】リーダーすべてに1ダメージ。
 
@@ -548,6 +591,8 @@ destroy/banish 的 by=ability 判直接 cause；體力歸零的規則破壞仍�
 
 真實卡例：**BP19-SL15 禁牙の執行者・ドラズエル**；來源 `BP19-SL15#0/text/3`，句型 `T2ad29027f2`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP19-SL15)；節錄，略去末尾括號註解；不在本專案授權內）。
+
 > これは能力によって破壊されない。
 
 ```yaml
@@ -560,6 +605,8 @@ static:
 any_of 可列任意合法事件；stat 清單是同事件 payload 多選，合併能力身分／限次；同一次攻體俱增的事實去重。事件邊界仍見 ADR-0008。
 
 真實卡例：**BP11-P27 レヴィールの無法者**；來源 `BP11-P27#0/text/1`，句型 `T65bea14e0b`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP11-P27)；不在本專案授權內）。
 
 > これの{攻撃力}か{体力}を+したとき、これは【疾走】を持つ。
 
@@ -575,6 +622,8 @@ cannot.attack.target 可為 leader/follower/Sel；領袖限制不擋攻擊從者
 
 真實卡例：**BP13-024 生還の突撃兵**；來源 `BP13-024#0/text/1`，句型 `T2cf6acc174`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP13-024)；不在本專案授權內）。
+
 > これは相手のリーダーを攻撃できない。
 
 ```yaml
@@ -588,6 +637,8 @@ static:
 is:{ref,kind} 窄化事件引用；attack_target 為凍結事件目標，本文條件依 R-0003 判。
 
 真實卡例：**BP01-SL16 ムーンアルミラージ**；來源 `BP01-SL16#0/text/1`，句型 `T474d229c66`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL16)；不在本專案授權內）。
 
 > 【攻撃時】フォロワーへの攻撃なら、これは{攻撃力}+2する。
 
@@ -604,6 +655,8 @@ attack_time:
 evolve_cost_mod 用 PlayAbility(Evolution).Cost set/delta；dynamic count 在費用計算時讀，非改印刷 cost。
 
 真實卡例：**SP01-012 音速の機構・ララミア**；來源 `SP01-012#0/text/1`，句型 `T24cd9af7dd`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=SP01-012)；不在本專案授權內）。
 
 > これの{進化}コストは「自分の場の他のフォロワーの数」と同じだけ-1する。
 
@@ -631,6 +684,8 @@ search 共用 SelectionConstraint，總原費用以找到的成員算，找不�
 
 真實卡例：**BP18-P10 俯瞰の捜査員**；來源 `BP18-P10#0/text/1`，句型 `Tf6a43e66dd`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP18-P10)；不在本專案授權內）。
+
 > 【進化時】自分のデッキから透京・フォロワーを元のコストの合計が3以下になるように2枚まで探し、場に出す。
 
 ```yaml
@@ -649,6 +704,8 @@ drive_trigger:{who} → E.drive-trigger，指該玩家真正執行 trigger 效�
 
 真實卡例：**CP03-P81 オラクルガーディアン ニケ**；來源 `CP03-P81#0/text/1`，句型 `T9177744e95`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP03-P81)；不在本專案授權內）。
+
 > 自分のドライブチェックによってトリガーしたとき、これは【疾走】を持つ。
 
 ```yaml
@@ -662,6 +719,8 @@ auto:
 agg:{of,attr,fn:sum|max|min}，空 sum=0，空 min/max 為 AbsentByRules；可用 min/max:[Expr…]，空陣列拒絕。
 
 真實卡例：**BP04-070 ケートス**；來源 `BP04-070#0/text/0`，句型 `T151ea50320`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP04-070)；不在本專案授權內）。
 
 > 【進化時】相手の場のコスト最小のフォロワーすべてを破壊する。
 
@@ -704,6 +763,8 @@ history.where 是 typed payload 條件；stat_changed 的 ref 相等比較包含
 
 真實卡例：**BP20-P37 吹雪のドラゴニュート**；來源 `BP20-P37#0/text/0`，句型 `T4fa538d54e`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP20-P37)；不在本專案授權內）。
+
 > 【進化時】「このターン中にダメージを受けた相手の場のフォロワー」すべてを破壊する。
 
 ```yaml
@@ -730,6 +791,8 @@ dealt_damage.recipient 接 DamageRecipient selector；kind=attack 與 combat 可
 
 真實卡例：**BP04-003 深き森の異形**；來源 `BP04-003#0/text/1`，句型 `T165d4ce33c`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP04-003)；不在本專案授權內）。
+
 > これが相手のリーダーへの攻撃ダメージを与えたとき、自分はこのバトルに勝利する。
 
 ```yaml
@@ -747,6 +810,8 @@ auto:
 counter.on 接 Sel，須明確選定一個 holder 再取 counter，不能默認 this；result 保留選到的 holder。
 
 真實卡例：**BP14-063 竜山の鳴動**；來源 `BP14-063#0/text/0`，句型 `T9059c4c9cd`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP14-063)；不在本專案授權內）。
 
 > これをプレイする際、場の『竜山温泉』1つの神湯カウンター2個を取る：コストを-2する。
 
@@ -769,6 +834,8 @@ move/create.by 接 PlayerRef；和目的地、owner 不同；master_of:t 於該�
 
 真實卡例：**CP02-010 相葉夕美**；來源 `CP02-010#0/text/0`，句型 `T83e340332e`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP02-010)；節錄，略去末尾括號註解；不在本專案授權內）。
+
 > 【進化時】体力3以下の相手の場のフォロワー1体を選ぶ。それのプレイヤーはそれをデッキの下に置く。
 
 ```yaml
@@ -789,6 +856,8 @@ evolve_time:
 exclude:this_execution 只排本次呼叫，Q2390／Q2391；instead 條件 Live 查詢，外層已進入結算的 UB 資格可見。
 
 真實卡例：**CP04-P60 レイ**；來源 `CP04-P60#0/text/0`，句型 `T731ab48948`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-P60)；不在本專案授權內）。
 
 > {UB}【攻撃時】これは{攻撃力}+1する。これを含めず、このターン中に自分の{UB}能力が2回以上発動していたなら、代わりに{攻撃力}+2する。
 
@@ -820,6 +889,8 @@ exclude_chosen:this_turn 降模式 domain 過濾；key 為 AbilityInstanceId＋M
 
 真實卡例：**CP04-SL19 ランファ**；來源 `CP04-SL19#0/section:0/0`，句型 `T5d0334eba7`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-SL19)；不在本專案授權內）。
+
 > 自分の場の他のフォロワーの{UB}能力が発動したとき、下記から1つチョイスする。このターン、この能力でチョイスした選択肢はチョイスできない。【1】相手のリーダーすべてに2ダメージ。【2】自分のリーダーは{体力}+2する。
 
 ```yaml
@@ -847,6 +918,8 @@ count_of.where 在成功公開材料快照過濾原費用；不使用後來的�
 
 真實卡例：**BP08-SL14 真紅のローズクイーン**；來源 `BP08-SL14#0/text/1`，句型 `Tacf76f3452`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP08-SL14)；不在本專案授權內）。
+
 > 【進化時】自分の手札を公開する。自分のPPを「これによって公開した元のコスト2のカードの枚数」と同じだけ回復する。
 
 ```yaml
@@ -869,6 +942,8 @@ evolve_time:
 kind 增 advance_follower；boxed/racing 是 V.state 具名屬性。racing 表當前出走狀態，不是回合內歷史次數。
 
 真實卡例：**CSD01-010 見習い魔女と長い夜**；來源 `CSD01-010#0/text/1`，句型 `T985b42c820`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CSD01-010)；不在本專案授權內）。
 
 > 相手のフォロワー1体を選ぶ。それに2ダメージ。自分の場に出走したフォロワーがいるなら、代わりに3ダメージ。
 
@@ -898,6 +973,8 @@ spell:
 
 真實卡例：**BP09-004 愛の妖精・ポーラ**；來源 `BP09-004#0/text/0`，句型 `T3e96f90125`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP09-004)；不在本專案授權內）。
+
 > {進化}{コスト1}：これは『深緑の純心・ポーラ』か『真紅の絆・ポーラ』に進化する。
 
 ```yaml
@@ -911,6 +988,8 @@ evolve:
 dice_rolled 產生 E.dice；event.value 為該次最終接受骰值，條件在本文（R-0009），不把點數 6 篩掉誘發。
 
 真實卡例：**BP21-SL19 エンペラーフィスト・ガロム**；來源 `BP21-SL19#0/text/1`，句型 `Ta33b0c016f`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP21-SL19)；不在本專案授權內）。
 
 > 自分がサイコロをふったとき、出た目が6なら、相手のリーダーすべてに4ダメージ。
 
@@ -928,6 +1007,8 @@ auto:
 create 數量可為 upto 或 any；在建立前 ResolutionChoice 選數，不讓容量吞掉原選擇。也可 declare→bound，但只有明示數字宣告才用 I.declare。
 
 真實卡例：**BP07-P20 ワイルド・マナ**；來源 `BP07-P20#0/text/0`，句型 `T5c85164636`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP07-P20)；不在本專案授權內）。
 
 > 『ナテラの大樹』1つを出す。【覚醒】状態なら、代わりに3つまで。
 
@@ -947,6 +1028,8 @@ optional_cost_set 是付款後的固定費用修改（先 set 後 delta）；alt
 
 真實卡例：**EBD02-007 次元の超越**；來源 `EBD02-007#0/text/0`，句型 `T556fd02bdc`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=EBD02-007)；不在本專案授權內）。
+
 > これをプレイする際、墓場のスペル10枚を消滅：コストを7にする。
 
 ```yaml
@@ -961,6 +1044,8 @@ play:
 變動成本量來自實付 receipt；此卡無須問一個額外 X。若卡文明訂 X=實付量，可 x.from_payment，不允許未付款前讀實付值。
 
 真實卡例：**CP01-003 スマートファルコン**；來源 `CP01-003#0/text/1`，句型 `T9e3e0112f3`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP01-003)；節錄，略去末尾括號註解；不在本專案授權內）。
 
 > {ファンファーレ}場の他のウマ娘・カードを好きな枚数手札に戻す：相手のフォロワーすべてに「戻した枚数」の2倍のダメージ。
 
@@ -987,6 +1072,8 @@ fanfare:
 
 真實卡例：**BP20-R13 安息の絶傑・マーウィン**；來源 `BP20-R13#0/text/1`，句型 `T3658b61e88`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP20-R13)；不在本專案授權內）。
+
 > {進化}次の自分のターンをスキップする：これは進化する。
 
 ```yaml
@@ -999,6 +1086,8 @@ evolve:
 fused.material 過濾本次素材快照；counter_reached:{ref,name,value} 是變更後值而非持續輪詢。舊 Stack 提醒依 R-0008 不另造 destroy 誘發。
 
 真實卡例：**BP20-SL05 空絶の顕現・オクトリス**；來源 `BP20-SL05#0/text/0`，句型 `Ta395908a27`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP20-SL05)；不在本專案授權內）。
 
 > 自分の財宝・カードを融合したときか自分が財宝・カードをプレイしたとき、これは【疾走】を持つ。
 
@@ -1016,6 +1105,8 @@ auto:
 move.entry_effects 在該移動後物件建立時、判斷入場能力之前安裝；no_trigger 是抑制誘發，本文「使えない」此例用 cannot PlayAbility(Fanfare)，不任意變為不誘發。
 
 真實卡例：**BP04-SL08 言霊遣い・ジンジャー**；來源 `BP04-SL08#0/text/0`，句型 `T10d53fbd99`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP04-SL08)；不在本專案授權內）。
 
 > 【進化時】自分の手札のフォロワーを好きな枚数場に出してよい。それの{ファンファーレ}能力を使えない。このターン、それは相手を攻撃できない。
 
@@ -1058,6 +1149,8 @@ ability:{kind:activated,except:evolution} 與 keyword:fanfare 是 AbilityPredica
 
 真實卡例：**CP02-005 喜多見柚**；來源 `CP02-005#0/text/2`，句型 `T7887b26969`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP02-005)；不在本專案授權內）。
+
 > {起動}【レッスン\_1】：元のコスト1以下の自分の場の他のカード1枚を選ぶ。それを手札に戻す。このターン、これの{起動}能力を使えない。
 
 ```yaml
@@ -1088,6 +1181,8 @@ by.ability_of 只判造成捨棄的直接能力 holder 與事件快照；一般�
 
 真實卡例：**BP21-043 マナリアパーティー**；來源 `BP21-043#0/text/0`，句型 `Tf7295e0d27`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP21-043)；不在本專案授權內）。
+
 > 自分の学院・カードの能力によってこれを自分の手札から捨てたとき、1枚引く。
 
 ```yaml
@@ -1111,6 +1206,8 @@ drive_checked 於一次檢查程序完成產生，和接受 trigger 不同，it 
 
 真實卡例：**CP03-P27 スターライト・ユニコーン**；來源 `CP03-P27#0/text/0`，句型 `T125ed14f0d`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP03-P27)；不在本專案授權內）。
+
 > 自分の場のフォロワーがドライブチェックしたとき、それは{攻撃力}+1する。
 
 ```yaml
@@ -1124,6 +1221,8 @@ auto:
 fusion.sel 限合法素材區手牌／EX，加入種族與原費用過濾；不可把 n=3 硬寫成任意材料。
 
 真實卡例：**BP20-030 簒奪のアジト**；來源 `BP20-030#0/text/1`，句型 `Tcd83ca58bc`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP20-030)；不在本專案授權內）。
 
 > {起動}【融合】元のコスト1以上の財宝・カード3枚：これに融合カウンター1個を置く。
 
@@ -1145,6 +1244,8 @@ must_target:{on,by} → ChooseTarget Require；只在整體合法選擇可包含
 
 真實卡例：**BP03-SL18 ダイヤモンドマスター**；來源 `BP03-SL18#0/text/1`，句型 `Td5914ae7be`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP03-SL18)；不在本專案授權內）。
+
 > 相手プレイヤーは能力でこれを選べるとき、これを選ぶ。
 
 ```yaml
@@ -1157,6 +1258,8 @@ static:
 fusion.result 保存素材；fused_as_material 是 E.fused 的材料角色投影，來源為融合能力持有者，不是這張素材。
 
 真實卡例：**BP19-048 没頭の実験体**；來源 `BP19-048#0/text/0`，句型 `Teb6968e3cc`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP19-048)；不在本專案授權內）。
 
 > 自分の八獄・フォロワーの能力によってこれを融合したとき、1枚引く。自分の手札1枚を捨てる。
 
@@ -1178,6 +1281,8 @@ auto:
 新增 A.by-kind → K.match RecipientKind；能力的一個目標可為領袖或從者，各分支窄化，不能把 follower hp 當 player life。
 
 真實卡例：**BP21-P54 浄火の令嬢**；來源 `BP21-P54#0/text/1`，句型 `Td992c08d2f`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP21-P54)；不在本專案授權內）。
 
 > 【進化時】自分のリーダーか自分の場のフォロワー1体を選ぶ。それは{体力}+2する。
 
@@ -1204,6 +1309,8 @@ moved:{from,to,sel,during?} → E.move；drew:{who,not_phase} → E.draw，phase
 
 真實卡例：**BP05-029 簒奪の従者**；來源 `BP05-029#0/text/0`，句型 `T0d8f4d5397`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP05-029)；不在本專案授權內）。
+
 > 自分のターン中、相手のデッキ1枚が墓場に置かれたとき、これは{攻撃力}+1する。
 
 ```yaml
@@ -1225,6 +1332,8 @@ auto:
 distinct_by 接已登錄屬性 orig_cost/class/name；成本無資訊者依 CR 1.3.6，不把空值當一個費用種類。
 
 真實卡例：**BP10-003 遺物の番人・ルチル**；來源 `BP10-003#0/text/1`，句型 `T57776b5e98`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP10-003)；不在本專案授權內）。
 
 > {起動}これを{アクト}EXエリアのカードを元のコストがすべて異なるように5枚消滅：自分のエボルヴデッキの『神秘の遺物・スピネ＆ルチル』1枚を場に出してよい。
 
@@ -1252,6 +1361,8 @@ additional_cost.result 的作用域是該次卡片 play；後續 fanfare 透過 
 
 真實卡例：**CP03-SL16 ファントム・ブラスター・ドラゴン**；來源 `CP03-SL16#0/text/3`，句型 `T3b6f77cb64`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP03-SL16)；不在本專案授權內）。
+
 > {ファンファーレ}これをプレイする際の追加コストとして自分の『ブラスター・ダーク』を場から墓場に置いていたなら、これは進化する。
 
 ```yaml
@@ -1274,6 +1385,8 @@ fanfare:
 search.to 可為分配表或自我取代：先找到才問替代目的地，may 拒絕時仍去原手牌，最後只洗一次。found 為 search 的內部唯讀 binding。
 
 真實卡例：**BP03-002 コスモスファング**；來源 `BP03-002#0/text/1`，句型 `Te2eddc98cf`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP03-002)；不在本專案授權內）。
 
 > {ファンファーレ}自分のデッキから獣・フォロワー1枚を探し、手札に加える。それがコスト2以下なら、代わりに場に出してよい。
 
@@ -1298,6 +1411,8 @@ turn_number:{who} → V.turn.PlayerTurnOrdinal；只數實際開始的該玩家�
 
 真實卡例：**CP04-013 リマ**；來源 `CP04-013#0/text/0`，句型 `Td4234bcd75`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-013)；不在本專案授權內）。
+
 > これは自分のターンが5ターン目かそれ以降でないなら、プレイできない。
 
 ```yaml
@@ -1310,6 +1425,8 @@ play:
 kind/name 的 same_as 接型別化引用；名稱比較用凍結材料 CardNames 集合，精確比對按 CR 2.1，不能改查墓地新物件。
 
 真實卡例：**BP10-112 星灯りの女神**；來源 `BP10-112#0/text/1`，句型 `Tb0ecfd3840`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP10-112)；不在本專案授權內）。
 
 > 【進化時】墓場のフォロワー1枚を消滅：自分のデッキから「消滅させたフォロワーと同名のフォロワー」2枚まで探し、EXエリアに置く。
 
@@ -1343,6 +1460,8 @@ equipped → E.equip{holder,equipment}；event.holder 是此次 host，和目前
 
 真實卡例：**CP04-PR22 氷竜剣**；來源 `CP04-PR22#0/text/0`，句型 `T06c77a2077`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-PR22)；不在本專案授權內）。
+
 > これを装備したとき、相手の場のフォロワー1体を選ぶ。それをアクトする。これを装備したフォロワーは{攻撃力}+2/{体力}+2する。
 
 ```yaml
@@ -1359,6 +1478,8 @@ auto:
 zone 單值正規化為集合，static 依來源在任一合法區有效；不複製成兩份效果。
 
 真實卡例：**EBD01-005 瘴気の妖精姫・アリア**；來源 `EBD01-005#0/text/2`，句型 `Tc84e6a03de`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=EBD01-005)；不在本專案授權內）。
 
 > これが場かEXエリアにある限り、自分の場の妖精・トークン・フォロワーすべては【突進】を持つ。
 
@@ -1385,6 +1506,8 @@ static:
 did(evolve) 只讀該次 receipt.evolved；重新出場 this 需沿 move receipt 跟隨，不沿印刷卡號尋找。
 
 真實卡例：**BP07-SL20 母なる君**；來源 `BP07-SL20#0/text/1`，句型 `T7ef0795334`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP07-SL20)；不在本專案授權內）。
 
 > {ラストワード}場かEXエリアの『ナテラの大樹』1枚を消滅：これをアクト状態で場に出す。これは進化する。進化しなかったなら、これは消滅する。
 
@@ -1420,6 +1543,8 @@ event.field 或 `event:<field>` 都須先由 on 型別推導欄位。固定傷�
 
 真實卡例：**CP02-SL10 辻野あかり**；來源 `CP02-SL10#0/text/1`，句型 `T247492c8a1`。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP02-SL10)；不在本專案授權內）。
+
 > これがダメージを受けたとき、そのダメージが5以上なら、自分のPP最大値を+1する。
 
 ```yaml
@@ -1436,6 +1561,8 @@ auto:
 cannot.deal_damage 降來源方向 Damage.Prevent；不生成 0 點 E.damage，不等於不能攻擊。
 
 真實卡例：**BP01-024 精霊の呪い**；來源 `BP01-024#0/text/1`，句型 `Tf08d681221`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP01-024)；不在本專案授權內）。
 
 > 相手のフォロワー1体を選ぶ。このターン、それはダメージを与えない。
 
@@ -1456,6 +1583,8 @@ spell:
 pp_max_increase 是獨立許可，duration 必須覆盖下次階段全程。mode 的 who=opp 為打出程序交接；效果接受者也是該玩家。
 
 真實卡例：**BP05-006 マインドルーラー・モートン**；來源 `BP05-006#0/text/0`，句型 `T1aa285dfc8`。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP05-006)；不在本專案授權內）。
 
 > 自分のエンドフェイズが来たとき、相手プレイヤー1人は下記から1つチョイスする。【1】次のスタートフェイズに1枚引けない。【2】次のスタートフェイズにPP最大値を+1できない。【3】次のメインフェイズにフォロワーをプレイできない。
 
@@ -1512,6 +1641,8 @@ GAP-A-016 的 11 個子項逐項列出；GAP-A-042 的 skip_turn 已見 §13，�
 
 **BP11-112 ジャイアントマッチ**；`BP11-112#0/text/2`。reveal.random 是 I.random 的均勻不放回抽樣，無玩家選牌輸入。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP11-112)；不在本專案授權內）。
+
 > {起動}これを{アクト}墓場に置く：自分の手札をランダムに2枚公開する。その中から、フォロワーすべてを場に出す。
 
 ```yaml
@@ -1525,6 +1656,8 @@ activate:
 ### A-016b 從頂第二張或底
 
 **BP10-062 エターナルホエール**；`BP10-062#0/text/2`。position.one_of 在結算時選位置；nth 從 1 起算，牌庫不足的邊界尚無直接 Q&A；不宣告「夾到合法位置」是既定規則，需另登錄判讀與局面。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP10-062)；不在本專案授權內）。
 
 > {ラストワード}相手のリーダーすべてに2ダメージ。これをデッキの上から2番目かデッキの下に置く。
 
@@ -1543,6 +1676,8 @@ lastword:
 ### A-016c repeat 累積結果
 
 **BP14-046 願望の実現**；`BP14-046#0/text/0`。collect.receipts 回保序 ReceiptList；follow 接列表取各輪成功 after 的聯集。必須在離開迴圈後使用；循環無進展不假裝完成。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP14-046)；不在本專案授權內）。
 
 > 自分のデッキの上1枚をEXエリアに置く。これをEXエリアが上限になるまでくり返す。このターン、次に自分が「これによってEXエリアに置いたカード」をプレイする際、コストを0にする。
 
@@ -1580,6 +1715,8 @@ spell:
 
 **BP01-SL15 骸の王**；`BP01-SL15#0/text/0`。one_of 在 optional_cost 所屬 PlayParameter 選，材料與是否付款合併；不是本文 either。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP01-SL15)；不在本專案授權內）。
+
 > これをプレイする際、場のスタンド状態の{ナイトメア}カード4枚を墓場に置く、または、EXエリアの{ナイトメア}カード4枚を消滅：コストを-9する。
 
 ```yaml
@@ -1599,6 +1736,8 @@ play:
 
 **CP04-P86 アメス**；`CP04-P86#0/text/0`。只列此卡選項 2 的最小片段，t 為該模式打出時所選、已滿足卡文條件的合法目標；完整頭與歷史條件沿 A-033／034。Normal 與 waive_original 對應 I.play-ability 的封閉 CostPolicy，UB 的任意 X 依 CR 14.5.1.4.2 為 0。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=CP04-P86)；不在本專案授權內）。
+
 > {UB}【進化時】下記から1つチョイスする。【1】自分の場の他のフォロワー1体を選ぶ。それは【守護】を持つ。【2】自分の場の「これと同名を除くプリコネ・フォロワー」1体を選ぶ。これを含めず、このターン中に自分の{UB}能力が2回以上発動していたなら、それの{UB}能力1つを元のコストを支払わずに発動する。
 
 ```yaml
@@ -1611,6 +1750,8 @@ play_ability:
 ### A-016f create 綁定
 
 **BP20-SL15 絶尽の顕現・ライオ**；`BP20-SL15#0/text/0`。create.bind 保存實際新物件，不是輸入模板；後文 cost_mod 捕捉這次建立物件。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP20-SL15)；不在本專案授權內）。
 
 > 【進化時】相手の場のフォロワーすべてに9ダメージ。『絶尽の偽証』2枚をEXエリアに置く。このターン、それをプレイする際、コストを-1する。
 
@@ -1631,6 +1772,8 @@ evolve_time:
 
 **BP19-052 景観の魔導師**；`BP19-052#0/text/1`。token.allocate.total=3，對兩模板分配非負整數總和；與 [A,B] 各一張不同。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP19-052)；不在本專案授權內）。
+
 > {起動}{コスト5}【土の秘術】：『防御型ゴーレム』や『攻撃型ゴーレム』合わせて3体を場に出す。
 
 ```yaml
@@ -1650,6 +1793,8 @@ activate:
 
 **BP21-PR13 楽園の終焉・イツルギ**；`BP21-PR13#0/text/1`。所有目標與主傷害角色在同一打出參數中指定，選零張時 primary 也零；不任選集合首元素。roles primary 為 if_nonempty:1、rest 為餘者。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP21-PR13)；不在本專案授權內）。
+
 > {ファンファーレ}相手の場のフォロワー3体まで選ぶ。その中の1体に5ダメージ。残りの2体に2ダメージ。
 
 ```yaml
@@ -1667,6 +1812,8 @@ fanfare:
 ### A-016i 同時放置現有物件與 token
 
 **BP13-SL16 永劫の吸血鬼・アルザード**；`BP13-SL16#0/text/0`。simultaneous 共享容量程序及批次，不能先填滿再丟掉另一項。內部子 receipt 在整批完成後可讀。Q1776：EX 已有 4 張時可選放アルザード或紅の牙；若選後者，前者留墓地，self_moved 無成功成員，後句 counter 不做。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP13-SL16)；不在本專案授權內）。
 
 > {ラストワード}これと『紅の牙』1枚をEXエリアに置く。EXエリアのこれに休眠カウンター2個を置く。
 
@@ -1689,6 +1836,8 @@ lastword:
 
 **BP08-011 心無き決闘**；`BP08-011#0/text/0`。Q1060 要求打出時必選 2 張；Q1061 要求完整成功時各一種。依 CR 5.17.1 先消滅、再依實際消滅數新建；在後者以 ResolutionChoice 分配模板張數，不對原卡配 token。若只消滅成功 1 張，在兩模板中選 1 種、每模板最多 1 張（`strength: inferred`）；0 張則不建立也不問分配。容量限制另在建立時處理，不回寫消滅數。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP08-011)；不在本專案授權內）。
+
 > 自分のEXエリアの『操り人形』2枚を選ぶ。それはそれぞれ『ロイド』と『ヴィクトリア』に変身する。
 
 ```yaml
@@ -1708,6 +1857,8 @@ spell:
 
 **BP10-SL20 《節制》・ルーゼン**；`BP10-SL20#0/text/1`。during.not_phase 看 Draw 的真實發生階段；不是所有把卡放到手牌。
 
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP10-SL20)；不在本專案授權內）。
+
 > これが場にいる限り、相手プレイヤーすべては、スタートフェイズ以外でカードを引けない。
 
 ```yaml
@@ -1719,6 +1870,8 @@ static:
 ### A-042a PP 上限費用
 
 **BP06-P16 不死鳥の女帝**；`BP06-P16#0/text/1`。pp_max:1 在成本表示減最大值 1，降低 I.resource ReduceMaximum；不能付不足。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP06-P16)；不在本專案授權內）。
 
 > {ラストワード}PP最大値を-1：これをアクト状態で場に出す。
 
@@ -1743,6 +1896,8 @@ lastword:
 ### A-042b 捨手牌自身
 
 **BP20-SL14 絶尽の顕現・ライオ**；`BP20-SL14#0/text/2`。兩個 group 跨組不重用；this 真正在手牌才可付，與手牌外文字來源不同。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP20-SL14)；不在本專案授權內）。
 
 > {起動}手札のこれと絶傑・魔法使い・スペル1枚を捨てる：『絶尽の偽証』1枚をEXエリアに置く。
 
@@ -1769,6 +1924,8 @@ activate:
 ### A-042c 隨機捨棄成本
 
 **BP03-088 悪魔の笛吹き**；`BP03-088#0/text/1`。費用預演不能先向玩家洩漏隨機結果再讓其反悔；付款 transaction 同步記 RNG 與 receipt。
+
+**官方卡文引用**（[日文官方卡片頁](https://shadowverse-evolve.com/cardlist/?cardno=BP03-088)；不在本專案授權內）。
 
 > {ファンファーレ}手札をランダムに1枚捨てる：これは{攻撃力}+1して、【ドレイン】を持つ。
 
