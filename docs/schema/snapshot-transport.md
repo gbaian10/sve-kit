@@ -1,6 +1,8 @@
-# 卡表快照傳輸契約 v1
+# 卡表快照傳輸契約 v2
 
 本文件補足 [snapshot-format.md](snapshot-format.md) 的 JSON 容器、欄序與版本契約；公開邏輯欄位仍以該文件 §2 為唯一白名單。這些記錄不是新增的玩家集合或建置表。所有物件拒絕未列出的欄位；所有列出的欄位必須存在，`T?` 表示 `T` 或 JSON null，不能省略。空陣列表示已知無成員，來源是否完整另看 coverage。
+
+2.0.0 的圖片契約與配置見 §5.4；1.x 各節保留原版本解讀，不能套用其圖片 path／下載 hash 規則於 2.0.0。此為待實作契約，機器資源依 [snapshot-contract](snapshot-contract.md) 同步後才可發布。
 
 ## 1. 基本型別與 canonical bytes
 
@@ -18,7 +20,7 @@
 - 改 tuple 欄序／型別／nullable、移除欄、改 enum 語義、變動 canonical 規則或 join 語義，升 format major。新增可協商功能／新分片配置以 minor 升版並更新 Schema、共用 golden、reader 能力與最低版本。patch 只修正不改 wire bytes 解釋的規格問題。資料修字、來源新增與新卡只升 data_version。
 - 分片 bucket 的算法與數目由每個 format 版本的配置釘死；調整至少升 minor，不能只更換 data_version。`search.grammar_version/normalizer_version` 是搜尋契約的獨立 Code，不宣稱特定搜尋實作已完成；reader 必須明示支援這一對值，未知值停用搜尋並告知，不能用舊 normalizer 建錯索引。
 
-例如 reader 支援 `1.0.0` 且具有上述兩能力，可以讀兩個 data_version 不同的 `1.0.0` 快照。`1.1.0` 改 bucket 數後，尚未宣告支援 `1.1.0` 的 reader 留在最近相容快照；支援該版本者依新 manifest 重建索引。`2.0.0` 改欄序不能沿用 `1.x` accessor。`preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
+例如 reader 支援 `1.0.0` 且具有上述兩能力，可以讀兩個 data_version 不同的 `1.0.0` 快照。`1.1.0` 改 bucket 數後，尚未宣告支援 `1.1.0` 的 reader 留在 current／previous 中相容者或本機已驗 active，無相容者提示更新；支援該版本者依新 manifest 重建索引。`2.0.0` 改欄序不能沿用 `1.x` accessor。`preview-20260929T010203Z-0001` 即使格式相容，也不能交給正式發布器。
 
 ## 2. 快照清單與檔案描述
 
@@ -183,7 +185,7 @@ URL 模板展開後限 HTTPS；shop 參數只允許已列出的具名欄位，v1
 
 DSL 程式包是物件 `{format_version,entries}`；兩鍵皆 required 且不得有額外鍵，format_version 與所屬 manifest 相同，entries 是陣列、不可 null。程式項目的封套為 `{id:ID,dsl_version:Text,ast:JSON}`，三鍵皆 required 且不得有額外鍵；id 在包內唯一並排序，dsl_version 採 `主版.次版`（非負十進位整數，除 0 外無前導零）。ast 保留 JSON，不轉 tuple，其合法形狀只由該 DSL 版本在 `dsl/` 的正式 Schema 定義。
 
-format_version=`1.0.0`、`1.1.0` 與 `1.2.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
+format_version=`1.0.0`、`1.1.0`、`1.2.0` 與 `2.0.0` 的支援 DSL 版本集合固定為空：唯一可接受的 entries 為 `[]`。任何非空 entries 都拒絕整包，即使封套完整也不放行；不忽略項目、不轉用 astra/1、不使用任意 JSON 的 ast 驗證替代正式 Schema。此規則是版本契約，不因執行環境裝有某個引擎或 Schema 而改變。沒有程式項目可供引用時，非 null ProgramRef 亦無法通過引用閉包驗證。
 
 此格式每份 manifest 必須恰有一個 role=programs 的 File，固定提供 format_version 與 manifest 相同且 entries=[] 的程式包（1.0.0 例為 `{"format_version":"1.0.0","entries":[]}`）；row_counts 與 dependencies 都是 []，仍驗 canonical bytes、長度及 hash。不得以省略檔案表示沒有程式；reader 缺檔即拒收。此附件依 §4.2 不列入 text_all，下載文字分片不依賴它；驗完整快照時另外取得。
 
@@ -305,11 +307,11 @@ bucket 使用 `sha256-mod-v1`：分片鍵一律為 JSON 陣列，再依 §1 引�
 
 正式配置凍結前，用候選 N（正整數，依次 1、2、4、8…）量實際 JP 資料，再量 EN 與三語閉包；依 [size-budget.md](size-budget.md) 驗總量、最大分片、bootstrap 大小。選擇通過單片預檢的最小 N，若完整文字超標，回到投影與裝檔調整；啟動量依各版本 Brotli 目標與維護者決定停點處理，不能只增加 N 冒稱通過。量測須含 row_index 依賴造成的重建片數與一次增量更新大小。
 
-每一候選配置也須有明示的 format 版本，且 Schema／golden／reader 支援表釘住對應 N；manifest 不得自選同版本的另一個 N。正式發布前以雙區實測（未收錄區域則如實列明）凍結配置；增加資料後若需改 N，升 format minor 並同步契約與 reader，舊快照仍照舊配置可讀。此規則不預先宣稱某個未量測數目足以承載全庫。
+每一候選配置也須有明示的 format 版本，且 Schema／golden／reader 支援表釘住對應 N；manifest 不得自選同版本的另一個 N。正式發布前以雙區實測（未收錄區域則如實列明）凍結配置；增加資料後若需改 N，升 format minor 並同步契約與 reader，保留窗口內舊快照仍按原配置解讀，不承諾永久重新下載。此規則不預先宣稱某個未量測數目足以承載全庫。
 
 ### 5.1 format 1.1.0 固定配置
 
-此 minor 保持 1.0.0 的公開 tuple 欄序、型別、nullable、永久 ID、owner、PK 與 join 語意，新增 image 實體分片及同名表整表按需。1.0.0／N=1 仍依舊配置解讀；1.1.0 釘 N=64、min_reader_version=1.1.0，required_capabilities 恰為排序的 `column-partition-v1`、`fragment-container-v1`、`image-entity-buckets-v1`、`rules-name-on-demand-v1`。producer／reader 須明示支援這套配置，不只放寬 bucket 範圍；未支援者保留最近相容快照。Schema 與共用 golden 隨 producer／reader 同步，此文件不表示現有機器資源已支援 1.1.0。
+此 minor 保持 1.0.0 的公開 tuple 欄序、型別、nullable、永久 ID、owner、PK 與 join 語意，新增 image 實體分片及同名表整表按需。1.0.0／N=1 仍依舊配置解讀；1.1.0 釘 N=64、min_reader_version=1.1.0，required_capabilities 恰為排序的 `column-partition-v1`、`fragment-container-v1`、`image-entity-buckets-v1`、`rules-name-on-demand-v1`。producer／reader 須明示支援這套配置，不只放寬 bucket 範圍；未支援者保留 current／previous 中相容者或本機已驗 active，無相容者提示更新。Schema 與共用 golden 隨 producer／reader 同步，此文件不表示現有機器資源已支援 1.1.0。
 
 image_asset 使用 `[id]`，image_variant 使用 `[image_id]`，兩者仍是 global owner、detail partition，同 image 的所有 variant 同 bucket。printing_image 沿永久 printing.home_set_id 與 `[printing_id]`；不依卡號或 card.home_set_id 猜歸屬。rules_name／face_rules_name 的完整列唯一存於 global detail，其他集合仍用 §5 原本的主實體／完整 PK 鍵與欄位分割。
 
@@ -381,6 +383,48 @@ producer 與 reader 須各自驗 same_name 的卡層 null、effect_similarity=nu
 本節定義尚待實作的版本，不表示現有 producer／reader 或前端已支援。
 實作與前端讀取能力到位後，才可發布使用此配置的產物；容量依各版本實際選定的文字／影像集合分開量測。
 
+### 5.4 format 2.0.0 卡包 media 與 ID 圖片
+
+format_version、min_reader_version 均為 `2.0.0`。除下述圖片投影外，文字欄序、same_name 規則、canonical、owner、分片鍵及文字裝檔沿 1.2.0；
+圖片欄序改變是 major，不假稱 1.3 相容新增。required_capabilities 恰為排序的：
+
+```json
+[
+  "column-partition-v1",
+  "digital-same-name-links-v1",
+  "fragment-container-v1",
+  "image-entity-buckets-v1",
+  "image-id-url-v1",
+  "rules-name-on-demand-v1"
+]
+```
+
+所有容器、config、programs、text_all、changes 的 format_version 都必須一致；空圖片／same_name 也不省能力。
+索引以獨立 `index_format:2` 協商，形狀依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)，不混同於 reader 契約版號。
+沒有已公開 1.x 快照須先行遷移；既有 1.x fixtures 不回寫，也不要求為不存在的使用者先發布中間版。
+
+N 固定為 64，沿用 sha256-mod-v1。printing_image 使用永久 printing.home_set_id、鍵 `[printing_id]`，
+role=images、partition=detail、base=null，columns 為 snapshot-format §2.1 的完整 2.0 欄序。
+此卡包投影稱 media，**不是新增 role 或 partition enum**；home_set 的 images band width 固定 32。
+image_asset／image_variant 仍在 global detail、width=1，以 `[id]`／`[image_id]` 共置；其餘 widths 沿 §5.1。
+File key 仍用 §5.1 配方，不新增另一套手寫 URL 對照庫。
+
+media File.dependencies 恰為 config 加上該檔各 printing_id／face_id 所需的 printing、face bootstrap FileRef 聯集，按 key 排序去重；
+不依賴 global images 詳情，不用 row_index。全域影像詳情依賴 config；所有公開 FK 仍由 producer 整體驗證。
+printing.home_set_id 是建置所有權，不出貨新 printing 欄位；reader 由已驗 printing bootstrap fragment 的 owner 定位相同 home_set media。
+局部列冗餘狀態／尺寸是明示顯示投影，producer 驗其與 image_asset／image_variant 一致，不新增第二資料來源。
+`ImageDisplayVariant` descriptor 固定為 `[Code,UInt,UInt]`，各 size_key 限 config 五檔且尺寸 >0；
+version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format §2.1。
+
+首屏只取可見面的 media，拿到該列即由 int_id／face.ordinal／size／version 組 URL；
+來源詳情按使用者需要再載，不全量預取 global images，亦不建立全庫影像 Map。
+最多四個 metadata in-flight，有界 byte／row LRU；沿 §5.2 的工作集上限與手機量測要求。
+前一頁解除 pin 即釋放列，切新版取消舊工作；src、srcset、SW key 必須包含新 v，失敗不能 fallback 舊圖。
+按實際可見面 eager、其餘 lazy，不能把固定 100 張 eager 當規格。
+
+本配置仍須用 2.0 雙區輸出核對 ≤512 KiB 單片、manifest、首屏 24 面同包／混包及單面成本、增量重建與真實 heap；
+不能拿舊 C2 或 1.1 數字當通過。未驗收不得發布，超標依 §5 的候選／升版流程處理，不在同格式自動改 width。
+
 ## 6. 覆蓋與 QA／errata 摘要
 
 `Coverage = {reviews:[ReviewCoverage],translations:[TranslationCoverage],mechanics:[MechanicCoverage]}`；陣列可空，空不等於已完整查核。
@@ -403,7 +447,7 @@ changes 是一般物件 `{format_version,from_data_version,to_data_version,added
 
 | 欄位 | 元素完整形狀 |
 | --- | --- |
-| added, modified, retired | `{entity:Code,key:{欄名:主鍵值},changed_fields:[Text],reason:Text}`；entity 限公開 40＋3 集合，key 恰含其 PK 欄且型別相同；changed_fields 是排序唯一的公開頂層欄名，modified 非空，added/retired 為 [] |
+| added, modified, retired | `{entity:Code,key:{欄名:主鍵值},changed_fields:[Text],reason:Text}`；entity 限該 format 的公開 40＋3 集合，key 恰含其 PK 欄且型別相同；changed_fields 是排序唯一的公開頂層欄名，modified 非空，added/retired 為 [] |
 | errata | `{errata_id:ID,version_id:ID,card_ids:[ID],reason:Text}`；新公布／改版的 ErrataVersion，不把所有舊公告重列 |
 | new_qa_versions | `{qa_id:ID,version_id:ID,card_ids:[ID]}`；包含新增題與同題新 revision |
 | identity_changes | `{identity_change_id:ID}`；引用本次新增公開 identity_change，包含撤回事件；原事件不重寫，reverts_id 沿 snapshot-format 的新格式白名單 |
@@ -413,6 +457,8 @@ changes 是一般物件 `{format_version,from_data_version,to_data_version,added
 added/modified 的 key 必存在新快照；retired 指前版存在而新版不存在的公開列，不代表撤銷永久身分或刪掉永久 registry。陣列按 entity＋canonical key／各元素 ID 排序，coverage_changes 按 section＋其列鍵排序，support_changes 按 card_id/region 排序；不得重複。before／after 的來源版本要與 from／to 一致。QA／errata card_ids 排序去重且須與對應新版本的關聯一致。
 
 support_changes 比較套用 override/block 後的有效狀態；同狀態但 reasons 或 manifest engine_support_target 改變也列出受影響卡區，reason 明示目標變動。changes_ref 為 null 不宣稱「無變更」。ETag／抓取時間改變但公開投影不變不列 modified；coverage 的查核日期變動屬公開投影變動。完整發布閘門仍驗兩版實際差異，摘要不能代替資料閉包驗證。
+
+2.0.0 的 printing_image changed_fields 包含 publication_state、availability、withdrawal_reason、card_version、art_version、variants；image_variant 不再接受 path。key 仍依各自 PK，不能把 URL 當 ID。changes 是摘要，不是 row delta；previous 引用的 changes blob 保留，但其 from_data_version 不構成對更早快照的遞迴保留依賴。落後多版或無法讀取跨格式摘要時全量取得 current，仍須通過格式准入；詳見 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
 ## 數位同名規則的版本准入
 

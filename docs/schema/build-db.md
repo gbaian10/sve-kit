@@ -143,7 +143,7 @@ art 屬 card/face；同圖換框或加簽名仍同 art。frame/signed/premium �
 | `semantic_reference`        | `semantic_id→face_semantics,target_face_id→face,relation:token_definition\|rule_reference`；`PK(semantic_id,target_face_id,relation)`，依賴閉包參與引擎來源 hash                                                                                                                                                                                                                                                                                                                 |
 | `source_coverage`           | `kind:errata\|qa\|cardlist\|cr,region:Region,scope_key:Text,from_date:Date,until_date:Date?,as_of:Date,state:complete\|partial,source_id→source_record,decision_id→decision?`；`PK(kind,region,scope_key,from_date,as_of)`，`scope_key` 明列來源涵蓋集合；until 為排他上界，null 不表示未來已爬完                                                                                                                                                                                |
 
-`text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同鍵不同完整內容一律停止發布，不自動加長新舊鍵；歷次已發布文字鍵從永久快照聯集檢碰撞（可重建衍生索引）。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
+`text_unit` 依 `(lang,exact text bytes)` 去重，不讓單一 `source_id` 丟失再錄來源；`face_revision`、`printing_face`、QA 等引用端保留自己的 source。ID 固定為 `t:{lang}:{SHA256(exact UTF-8 text) 前16hex}`，同鍵不同完整內容一律停止發布，不自動加長新舊鍵；歷次已發布文字鍵從耐久的 `(lang,short_id,full_digest)` 發布鍵索引檢碰撞；發布前保留候選鍵、衝突即停止，失敗保留已占鍵，不能因 CDN 回收而遺失舊鍵。索引與發布收據備份驗回，不保存完整歷史文字到 R2。既有鍵不變，改規則需新 format/命名空間並保留舊引用。內容不可變，不把完整 hash 出貨。null 是缺資料；空字串是已確定無文字；原始 text=null 先檢查 type/sections/來源，不能直接當無能力。
 
 **使用者 2026-10-01 核可 B**：依 [authored-layout §9.8](authored-layout.md#98-無主文的證據-recipe採用-b) 的 effect-presence-v1，能證明來源版本確定無主文時，以既有 exact 空字串 text_unit 表示；無法證明者保持 null，完整來源與判別結果留 report／F1、明列 deferred，不能借別版文字補 FK。這延續「空字串＝已確定無文字」，不是直接 null→空字串。face_revision.effect_unit_id、printing_face_observation.revision_id、text_unit.text 均維持 NOT NULL；absent 的來源證據不掛在共享空文字上。
 
@@ -294,7 +294,7 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 所有句型含只出現一次者都用模板翻，子句組合無環，params/span 完整覆蓋原文。同一語意模板與參數只選一個翻法；`translation_context=(source_unit,semantic_variant)` 區分同字串不同語意，`translation_selection` `PK(context_id,target_lang)`。`translation_use` 明確綁引用者，禁止任意每卡另翻同語意句。只有經採納的語意歧義（同名不同角色等）才新增 variant；FieldTranslation 由此選用，不只是前端標記。模板 ID 沿用現有內容指紋；不設 `template_revision` 層，parameter `schema/normalizer/semantic_variant` 改變都須新 ID，舊 ID 不改，supersedes 連回。既有 10 hex 前綴碰撞必停，不能默認不會撞；新分叉 ID 由 registry 加長且不重配舊 ID。
 
-人工模板譯本與選詞的不可變修訂保留於 authored，建置資料庫保存本次使用的修訂、作者、來源 hash 與模板依賴。context/use/binding、渲染後 translation/selection 每次重建；只有當前 binding 組及所需歷史來源的各自 context，不混入衝突的舊組外鍵。歷史生成物由釘住 F1 輸入與舊快照重現，不要求同一 DB 保存全部歷史推導組；卡表快照只出 selected text/origin/authority/status 與少量跨區適用選擇。英文官方自動優先由已確認 card＋face 共用和 divergence 例外決定，不逐單元人工 equivalence。繁中從 JP 模板共用到 EN，已核對為 shared_jp，未核對但身分已確認為 shared_jp_unchecked，EN 不另寫一份；若 divergence 則按該區獨立翻譯或回原文。
+人工模板譯本與選詞的不可變修訂保留於 authored，建置資料庫保存本次使用的修訂、作者、來源 hash 與模板依賴。context/use/binding、渲染後 translation/selection 每次重建；只有當前 binding 組及所需歷史來源的各自 context，不混入衝突的舊組外鍵。歷史生成物由釘住的 F1 輸入與演算法版本重算，不承諾公開歷史快照可下載，不要求同一 DB 保存全部歷史推導組；卡表快照只出 selected text/origin/authority/status 與少量跨區適用選擇。英文官方自動優先由已確認 card＋face 共用和 divergence 例外決定，不逐單元人工 equivalence。繁中從 JP 模板共用到 EN，已核對為 shared_jp，未核對但身分已確認為 shared_jp_unchecked，EN 不另寫一份；若 divergence 則按該區獨立翻譯或回原文。
 
 `translation_use` 的 owner 是翻譯**來源**欄位，`context.source_unit` 必須等於該 owner 的原文。EN 的 `FieldTranslation.basis=shared_jp` 由 JP owner 的 use＋已確認面對應/語義核對推導；shared_jp_unchecked 則僅放寬尚未完成語義核對的顯示，仍須來源完整、已確認身分且無已知相關 divergence，不把 JP `source_unit` 硬綁成 EN owner 的原文；`official_counterpart` 亦由已核對 counterpart 原文產生選用。這些投影只重用可驗來源，不能繞過 owner/context 一致性檢查。counterpart 逐 owner 直接供 FieldTranslation 引用，不占 `(context,target_lang)` 的共用 selection；同原文的不同卡可以有各自官英用字。推導 translation.id/revision 採內容定址，細節依翻譯契約 §6.2，不按執行時間配號。
 
@@ -368,7 +368,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 - `availability=available` 必須有 `content_hash/mime/width/height/bytes`，mime 非空、寬高為正；這些 metadata 不代替實際 bytes 解碼與比對。
 - `publication_state=withdrawn` 必須有非空白 `withdrawal_reason`；官方 approved 必須 available，且 `review_decision_id` 為 null。第三方 approved 必須有 confirmed decision、核對人與時間，`decision_source` 連回該圖的 `source_id`。
 - `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／withdrawn／missing／unfetched 不得保有公開 variant 列。
-- 公開 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。
+- 建置 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。此 path 是建置內容定址位置；2.0 公開 ID key／query 由發布投影生成，不能把這個本機 path 當 2.0 圖片 URL，見 [image-variants](image-variants.md)。
 
 跨表條件在建置交易完成寫入後、提交前檢查最終資料圖；修改圖片、decision、decision_source 或 image_size 同樣必須重驗，不能只在新增 variant 時檢查。任一條件失敗即回滾整筆交易；可以在同一交易中撤下圖片並刪除其 variants。已有 available／approved 來源但尚未產 variants 是合法的建置中間狀態，不代表影像發布閉包已完成。
 
@@ -487,7 +487,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 `origin=official` 的圖在官方來源歸屬、頁面原樣 `img src` 與解析後來源 URL 的對應、實際取得 bytes 的來源 hash 及圖片解碼／寬高驗證均通過後，由建置器設為 `publication_state=approved`，`review_decision_id=null`，不要求逐圖人工 decision。尚未完成或驗證失敗為 pending，並留下建置診斷；availability 仍按抓取結果表示 available/missing/unfetched，不能把 pending 當 missing，也不能把只有 URL 的 unfetched 圖當已通過。來源或內容換版須重新驗證；withdrawn 不因再次驗證通過而自動恢復 approved。
 
-圖片事後有問題或來源要求撤下時，`publication_state=withdrawn`，`withdrawal_reason` 必填可公開原因，新快照不出該圖 variants/path，但保留 `image_asset` 與來源供說明；舊快照不可變。來源標示從 `source_url` 的 hostname 顯示站名並連回原網址，不捏造人工確認日期（不出貨）。「撤下」會阻止現行清單再引用，不能保證已離線下載的舊副本立即消失；是否刪除 CDN blob 牽涉永久回放保留，另循實際移除處理，不在此承諾或自動刪除。
+圖片事後有問題或來源要求撤下時，`publication_state=withdrawn`，`withdrawal_reason` 必填可公開原因，新快照不出該圖 variants/path，但保留 `image_asset` 與來源供說明；舊快照不可變。來源標示從 `source_url` 的 hostname 顯示站名並連回原網址，不捏造人工確認日期（不出貨）。「撤下」會阻止現行清單再引用，不能保證已離線下載的舊副本立即消失；current 提交後依 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 清理不再引用的公開卡圖；不因 previous 的圖片引用或未來重播需求保留舊 WebP。
 
 ### 17.2 `regional_decklog`
 
@@ -499,7 +499,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 `decklog_available=false` 的版次僅供查卡，不允許新加入牌組（main/evolve/leader/extra），原因為 `decklog_unavailable`；不得顯示成暫定身分、禁卡或缺 DSL。所有出貨 printing 仍配永久 `int_id`，不重用、不因資格變更漏配。收到舊分享碼照常解碼；既有牌組照常開啟並可檢視/編輯，保留 `printing/int_id`、數量、區域及原條目位置，不自動丟行或換卡。若現行版次不可用，顯示警告並提示可用的同地區同名版次（依 `rules_name` 的官方同名關係，不靠翻譯名或跨區對應；關係未確認時不猜，沒有候選就說明）。替換須使用者選擇。
 
-新的分享碼（含重新分享）與所有牌組匯出遇任何不可用條目，拒絕整次操作並列明原因及替換建議，不能輸出刪減牌組；使用者移除/換成可用版次後才重試。未知 `int_id` 仍保留並顯示 `needs_update`，解析完成前不編碼/匯出；這是無法解析條目的處理，不是 provisional 門檻。解碼/開啟舊牌組不套此拒絕。反向改為可用則恢復加入、分享與匯出，`int_id/URL` alias 及歷史快照不變；新操作用所載現行快照重驗，離線顯示 `data_version`/查證日期，不保證得知尚未同步的變更，舊回放保留原版本。
+新的分享碼（含重新分享）與所有牌組匯出遇任何不可用條目，拒絕整次操作並列明原因及替換建議，不能輸出刪減牌組；使用者移除/換成可用版次後才重試。未知 `int_id` 仍保留並顯示 `needs_update`，解析完成前不編碼/匯出；這是無法解析條目的處理，不是 provisional 門檻。解碼/開啟舊牌組不套此拒絕。反向改為可用則恢復加入、分享與匯出，`int_id/URL` alias 不變，保留窗口內 JSON 不改寫；新操作用所載現行快照重驗，離線顯示 `data_version`/查證日期，不保證得知尚未同步的變更，歷史對局重播另訂設計，不要求永久保留公開快照。
 
 SNC 最低資料仍為 `catalog_state`、`card_no_state`、`serial_total`、`listing_confidence`、`review_level`、`reference_urls`、`inclusion_kind`/註記、日期精度；UI「非官方整理，可能不完整」、回報連結必有。`source_record.kind` 與 image origin 是不同軸；每張非官方圖的確認紀錄不能由條目 high confidence 代替。不收集個人持有序號。
 

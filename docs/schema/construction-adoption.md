@@ -204,7 +204,7 @@ Decklog 可用性與 profile／禁限正交，沿 regional_decklog 的版次目�
 
 ## 7. 邏輯擴充、後續單位與反例驗收
 
-**待實作欄位方案只留本文件，不改現有權威表格／公開欄序**：cr_clause 擬新增 context_key 與其唯一鍵／公開欄位；restriction_coverage 擬新增 as_of／decision_id；config 擬新增 construction_refs；profile revision／restriction 擬新增公開 source_urls。不新增建置資料庫的表，不改已有原始來源 ID recipe（隔離 manifest 的新收據表見 §2）。正式欄位改動須與程式表定義在同一 carddb PR 更新 build-db 權威列，並同步 snapshot-format／snapshot-transport／Schema／types／golden／producer／reader，禁止 docs-only 先改欄位造成 CI 對照失敗。公開 tuple 擬在末尾追加 context_key／source_urls，不中間插欄；新增 config 與 coverage 欄位的機器形狀也須整套審核。格式未首發時依候選流程；已發布後 tuple 形狀改動升 major、設最低 reader 與 construction-ref-v1 required capability，舊 reader 留最近相容快照，不猜新欄。維護者真實規則數值／適用期間／逐筆採納不在這個 PR。
+**待實作欄位方案只留本文件，不改現有權威表格／公開欄序**：cr_clause 擬新增 context_key 與其唯一鍵／公開欄位；restriction_coverage 擬新增 as_of／decision_id；config 擬新增 construction_refs；profile revision／restriction 擬新增公開 source_urls。不新增建置資料庫的表，不改已有原始來源 ID recipe（隔離 manifest 的新收據表見 §2）。正式欄位改動須與程式表定義在同一 carddb PR 更新 build-db 權威列，並同步 snapshot-format／snapshot-transport／Schema／types／golden／producer／reader，禁止 docs-only 先改欄位造成 CI 對照失敗。公開 tuple 擬在末尾追加 context_key／source_urls，不中間插欄；新增 config 與 coverage 欄位的機器形狀也須整套審核。格式未首發時依候選流程；已發布後 tuple 形狀改動升 major、設最低 reader 與 construction-ref-v1 required capability，舊 reader 只選 current／previous 或本機已驗 active 的相容快照，否則提示更新，不猜新欄。維護者真實規則數值／適用期間／逐筆採納不在這個 PR。
 
 實作依元件分 PR，次序與進度留 issue：carddb 的入口／隔離來源登錄／交易／staging 接線是一個單位；authored 真實結構值、source pins 與兩模型／維護者決定另作單位；離線建置／公開投影另作 carddb 單位。來源型別、schema 版本與 reader 接線必在啟用前完成，不以 docs 合併當能力已實作。必要的 sim/web reader／整副牌 evaluator 分開，不在本入口偷偷補算法。
 
