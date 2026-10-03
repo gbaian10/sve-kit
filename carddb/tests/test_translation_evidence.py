@@ -512,7 +512,7 @@ def test_index_must_be_regular_input(tmp_path: Path, mode: str) -> None:
 @pytest.mark.parametrize(
     ("fault", "message"),
     [
-        ("inventory", "Template inventories require the #52 loader"),
+        ("inventory", "Translation indexed file closure differs from disk"),
         ("include", "Unsafe or unsupported translation include"),
         ("unsorted", "Translation members must be sorted and unique"),
         ("duplicate", "Translation members must be sorted and unique"),
