@@ -432,3 +432,42 @@ def test_flavor_cache_cannot_borrow_another_identity_configuration(
     assert all(
         m.owner is None and m.pending for m in sources.reconstruct(case.pins).entries
     )
+
+
+def test_full_identity_closure_pins_the_english_parser_too(tmp_path: Path) -> None:
+    import shutil  # ruff: ignore[import-outside-top-level] -- this independent mixed-region fixture copies the current runtime once
+
+    from sve_carddb.template_translations.flavor_pins import recipes, verify  # ruff: ignore[import-outside-top-level] -- independent parser/runtime pins
+    from sve_carddb.translations.models import IdentityBasis  # ruff: ignore[import-outside-top-level] -- closed immutable input basis
+    from sve_carddb.translations.name_replay import IdentityEvidence  # ruff: ignore[import-outside-top-level] -- actual complete physical identity replay
+    from sve_carddb.translations.sources import Sources  # ruff: ignore[import-outside-top-level] -- actual EN projection consumer
+
+    from .adoption_fixtures import commit  # ruff: ignore[import-outside-top-level] -- synthetic Git only
+    from .name_replay_fixtures import make_mixed_case  # ruff: ignore[import-outside-top-level] -- existing adopted JP/EN identity fixture
+    from .recognition_policy_fixtures import RUNTIME  # ruff: ignore[import-outside-top-level] -- installed first-party code oracle
+
+    case = make_mixed_case(tmp_path / "mixed")
+    root = case.case.frozen.root
+    shutil.copytree(
+        RUNTIME / "carddb/src",
+        root / "carddb/src",
+        dirs_exist_ok=True,
+        ignore=shutil.ignore_patterns("__pycache__", "*.pyc", "_version.py"),
+    )
+    revision = commit(root)
+    repo = PinnedRepository(root)
+    build = verify(repo, recipes(repo, revision))
+    config = object_value(parse(build.configuration.encode()))
+    parsers = object_value(config["translation_recipes"])
+    assert set(parsers) == {"translation-jp-v1", "translation-en-v1"}
+    assert object_value(parsers["translation-en-v1"])["config"] == {"provider": "en"}
+    sources = Sources({"test-store": case.case.frozen.store}, root, build)
+    identity = IdentityEvidence(sources)
+    identity.complete(
+        IdentityBasis.model_validate_json(canonical(case.case.basis)),
+        (("test-store", case.name_ref.batch_id),),
+    )
+    assert {use.source.parser_version for use in identity.uses} == {
+        "translation-jp-v1",
+        "translation-en-v1",
+    }

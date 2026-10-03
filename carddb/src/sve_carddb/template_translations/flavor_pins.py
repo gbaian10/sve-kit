@@ -88,14 +88,15 @@ def verify(repository: PinnedRepository, pins: tuple[Recipe, ...]) -> BuildConte
         runtime(repository, parser.code_revision),
         {
             "translation_recipes": {
-                PARSER: {
-                    "version": PARSER,
+                "translation-" + provider + "-v1": {
+                    "version": "translation-" + provider + "-v1",
                     "program_revision": parser.code_revision,
                     "code_path": parser.code_path,
                     "code_hash": parser.code_hash,
-                    "config": parser.config,
-                    "config_hash": parser.config_hash,
+                    "config": {"provider": provider},
+                    "config_hash": digest(canonical({"provider": provider})),
                 }
+                for provider in ("jp", "en")
             }
         },
     )

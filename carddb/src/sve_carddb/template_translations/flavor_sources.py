@@ -7,7 +7,7 @@ from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.frozen_sources import FrozenSources
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.template_parameter_rules.repository import ancestor
 from sve_carddb.template_parameters.models import Range
 from sve_carddb.template_sources.flavor import partition
@@ -171,6 +171,7 @@ def reconstruct(  # ruff: ignore[too-many-locals,complex-structure] -- one batch
         if owners is None
         else [list(row) for row in owners.evidence.authored_uses],
         "runtime_dependencies": [p.model_dump(mode="json") for p in build.dependencies],
+        "runtime_configuration": parse(build.configuration.encode()),
     }
     return SourceReplay(
         canonical([p.model_dump(mode="json") for p in pins]),
