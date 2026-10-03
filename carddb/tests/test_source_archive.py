@@ -779,9 +779,9 @@ def test_pre_archive_history_gap_is_reported_without_forging_bytes(
 
 def test_offline_extract_repeats_without_touching_sources(tmp_path: Path) -> None:
     store = _store(tmp_path)
-    number = "BP01-003"
+    number = "SYN01-007"
     raw = (
-        Path(__file__).parent / "fixtures" / "official_jp" / "card_BP01-003.html"
+        Path(__file__).parent / "fixtures" / "synthetic_jp" / "F07-card.html"
     ).read_bytes()
     stored = compress(raw)
     resource = replace(
@@ -796,14 +796,14 @@ def test_offline_extract_repeats_without_touching_sources(tmp_path: Path) -> Non
                 sets.id,
                 jp.sets_url(),
                 "sets-hash",
-                [Link("https://example.invalid/BP01", Kind.LIST, 0, "BP01")],
+                [Link("https://example.invalid/SYN01", Kind.LIST, 0, "SYN01")],
             )
         manifest.generations.validate(sets.id, declared_total=1)
-        cards = manifest.generations.start(list_root("BP01"))
+        cards = manifest.generations.start(list_root("SYN01"))
         with manifest.transaction():
             manifest.generations.add_page(
                 cards.id,
-                jp.list_url("BP01", 1),
+                jp.list_url("SYN01", 1),
                 "list-hash",
                 [Link(resource.url, Kind.CARD, 0, number)],
             )
@@ -820,6 +820,8 @@ def test_offline_extract_repeats_without_touching_sources(tmp_path: Path) -> Non
         tmp_path / "derived" / "two.jsonl"
     ).read_bytes()
     assert hashlib.sha256(frozen.read_bytes()).hexdigest() == before
+    assert (store.data_root / resource.path).read_bytes() == stored
+    assert reader.read(resource.url) == raw
 
 
 def test_cross_device_copy_and_replace_race(
