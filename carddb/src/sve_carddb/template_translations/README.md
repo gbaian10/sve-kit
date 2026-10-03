@@ -107,18 +107,24 @@ and entry fields, translation records and adoption requirements are unchanged.
 different producer environments, inputs, bindings or expected outputs cannot
 silently share a cache identity.
 
-Both area loaders accept this foreign envelope for structural validation. The
-template source entry explicitly rejects it with `Template inventory v2 requires
-complete C+hash source replay` until the frozen semantic dispatcher and complete
-immutable output comparison are connected. A correct root is structural evidence,
-not proof that any source was read or a definition adopted. Do not publish any real
-inventory to authored during this intermediate stage. Legacy v1 synthetic tests
-continue to use their original replay path; no v1 inventory is silently upgraded.
+The glossary loader validates foreign envelopes and known semantic versions
+without recursively replaying their sources. The template loader rereads every
+immutable inventory, groups its complete recipe/context, then uses the installed
+finite dispatcher to reconstruct the full batch and compare all six expected
+streams. A correct declared root alone is structural evidence, not proof that any
+source was read or a definition adopted. Legacy v1 retains its original replay
+checks; no v1 inventory is silently upgraded.
 
 The implementation contract is `docs/schema/template-source-replay.md` (C+hash).
-Environment values are provenance, not a host-equality gate. This stage does not
-implement semantic version dispatch, package-set verification against the fixed
-manifest, output recomputation, performance budgets or build/preview wiring.
+Environment values are provenance, not a host-equality gate. The implementation
+verifies exact producer/installed semantic files, recipe pins and necessary
+package evidence, compares complete outputs, and bounds replay with nested hard
+budgets. Its independent source plan and single executing-host F1 bundle are
+described in `../template_semantics/README.md`. Source generation only writes
+private candidates. No actual inventory may be adopted before this capability
+merges, a candidate is generated with the merged producer and independently
+replayed, and the required engineering/adoption reviews complete. Application
+build/preview and authored adoption remain separate work.
 
 ## Exact flavor replay (legacy v1)
 
