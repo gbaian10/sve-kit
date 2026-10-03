@@ -98,7 +98,8 @@ def name_source(db: Database, owner: NameOwner) -> NameSource | None:
         if printed["printed_name_unit_id"] is None:
             raise ValueError("Known printed name is missing its own source")
         unit_id = printed["printed_name_unit_id"]
-    _row(db, "card", str(card_id))
+    if _row(db, "card", str(card_id))["identity_state"] != "confirmed":
+        return None
     unit = _row(db, "text_unit", str(unit_id))
     text = unit["text"]
     if (

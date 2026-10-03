@@ -7,8 +7,9 @@ from urllib.parse import urlsplit
 
 from pydantic import Field, field_validator, model_validator
 
+from sve_carddb.build_inputs import Revision
 from sve_carddb.catalog.adoption_models import Predecessor, SourceRef, TextEvidence
-from sve_carddb.products.models import Date, Instant, Lang
+from sve_carddb.products.models import Code, Date, Instant, Lang
 from sve_carddb.registry.records import Hash, RecordData, Text
 
 Category = Literal["keyword", "ability", "trait", "rule_term", "card_name"]
@@ -237,8 +238,95 @@ class EmphasisRecord(RecordData):
     evidence: tuple[TextEvidence, ...]
 
 
+class RevisionOwner(RecordData):
+    kind: Literal["face_revision"]
+    revision_id: Text
+
+
+class PrintingOwner(RecordData):
+    kind: Literal["printing_face"]
+    printing_id: Text
+    face_id: Text
+
+
+Owner = Annotated[RevisionOwner | PrintingOwner, Field(discriminator="kind")]
+
+
+class AssignmentData(RecordData):
+    owner: Owner
+    field: Literal["name"]
+    ordinal: None
+    source_hash: Hash
+    variant: Code
+    concept_key: Annotated[str, Field(pattern=r"^[a-z][a-z0-9_.-]*\Z")]
+    reason: Text
+    adoption_no: Annotated[int, Field(ge=1)]
+    predecessor: Predecessor | None
+
+    @field_validator("reason")
+    @classmethod
+    def _reason(cls, value: str) -> str:
+        if not value.strip():
+            raise ValueError("Name assignment reason must be nonblank")
+        return value
+
+
+class ConceptSubject(RecordData):
+    card_id: Text
+    face_id: Text
+    source_lang: Literal["ja", "en"]
+    source_hash: Hash
+
+
+class IdentityBasis(RecordData):
+    authored_revision: Revision
+    registry_index_hash: Hash
+    transition_index_hash: Hash | None
+
+
+class ConceptData(RecordData):
+    subject: ConceptSubject
+    term_id: Text | None
+    source_ref: SourceRef
+    identity_basis: IdentityBasis
+    reason: Text
+    adoption_no: Annotated[int, Field(ge=1)]
+    predecessor: Predecessor | None
+
+    @model_validator(mode="after")
+    def _subject(self) -> ConceptData:
+        if self.source_ref.text_hash != self.subject.source_hash:
+            raise ValueError("Name concept subject and frozen name hash disagree")
+        if not self.reason.strip():
+            raise ValueError("Name concept reason must be nonblank")
+        if self.adoption_no == 1 and self.term_id is None:
+            raise ValueError("Initial name concept cannot be withdrawn")
+        return self
+
+
+class AssignmentRecord(RecordData):
+    record_key: Text
+    kind: Literal["context_assignment"]
+    filing_key: Text
+    data: AssignmentData
+    evidence: tuple[TextEvidence, ...]
+
+
+class ConceptRecord(RecordData):
+    record_key: Text
+    kind: Literal["card_name_concept"]
+    filing_key: Text
+    data: ConceptData
+    evidence: tuple[TextEvidence, ...]
+
+
 Record = Annotated[
-    TermRecord | ChoiceRecord | VocabularyRecord | EmphasisRecord,
+    TermRecord
+    | ChoiceRecord
+    | VocabularyRecord
+    | EmphasisRecord
+    | AssignmentRecord
+    | ConceptRecord,
     Field(discriminator="kind"),
 ]
 
@@ -261,6 +349,8 @@ class Decision(RecordData):
         "glossary_choice",
         "vocabulary_choice",
         "glossary_emphasis_choice",
+        "context_assignment",
+        "card_name_concept",
     ]
     policy_id: Text
 

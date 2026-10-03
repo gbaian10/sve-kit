@@ -62,6 +62,7 @@ from sve_carddb.translations.models import (
     TermRecord,
     VocabularyRecord,
 )
+from sve_carddb.translations.name_replay import replay_names
 from sve_carddb.translations.sources import CODE_PATH as TRANSLATION_CODE
 from sve_carddb.translations.sources import Sources as TranslationSources
 
@@ -183,7 +184,7 @@ def _translation_source_recipes(
             "config": {"provider": provider},
             "config_hash": digest(canonical({"provider": provider})),
         }
-        for provider in ("jp", "sv1", "svwb")
+        for provider in ("en", "jp", "sv1", "svwb")
     }
 
 
@@ -196,9 +197,14 @@ def _translation_uses(
         return ()
     snapshot = translation.load()
     sources = TranslationSources(stores, inputs.repository, build)
+    originals: dict[str, str] = {}
     for record, _ in snapshot.records():
-        if isinstance(record, TermRecord) and record.data.source_ref is not None:
-            sources.text(record.data.source_ref, record.data.source_span)
+        if isinstance(record, TermRecord):
+            originals[record.data.id] = (
+                sources.text(record.data.source_ref, record.data.source_span)[1]
+                if record.data.source_ref is not None
+                else str(record.data.authored_source_ja)
+            )
         for proof in record.evidence:
             sources.text(proof.source_ref)
         if (
@@ -217,7 +223,8 @@ def _translation_uses(
                 relation.target_ref,
                 relation.target_span if isinstance(relation, EffectTerm) else None,
             )
-    return uses_sorted(sources.uses)
+    replay, _ = replay_names(snapshot, originals, translation, sources)
+    return replay.uses
 
 
 def _derive_adoptions(
