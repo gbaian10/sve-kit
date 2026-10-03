@@ -1,0 +1,112 @@
+{
+  "format_version": "1.1.0",
+  "tables": {
+    "product": [
+      {
+        "base": null,
+        "bucket": 59,
+        "columns": [
+          "id",
+          "family_id",
+          "region",
+          "product_code",
+          "name_unit_id",
+          "product_type",
+          "released_on",
+          "date_precision",
+          "date_raw",
+          "translations"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "bootstrap",
+        "rows": [
+          [
+            "prod:null",
+            null,
+            "jp",
+            null,
+            "t:ja:90d435ce36c2c997",
+            null,
+            null,
+            "unknown",
+            null,
+            []
+          ]
+        ]
+      }
+    ],
+    "vocabulary": [
+      {
+        "base": null,
+        "bucket": 56,
+        "columns": [
+          "kind",
+          "code",
+          "label_unit_id",
+          "active",
+          "translations"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "bootstrap",
+        "rows": [
+          [
+            "type",
+            "follower",
+            "t:ja:0f977fdcb5d4fe74",
+            true,
+            []
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {
+    "FieldTranslation": {
+      "columns": [
+        "field",
+        "ordinal",
+        "target_lang",
+        "translation_id",
+        "basis"
+      ],
+      "items": [
+        {
+          "enum": [
+            "name",
+            "effect",
+            "flavor",
+            "question",
+            "answer",
+            "section",
+            "label",
+            "action_label"
+          ]
+        },
+        {
+          "nullable": {
+            "scalar": "UInt"
+          }
+        },
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "enum": [
+            "own_source",
+            "shared_jp",
+            "official_counterpart"
+          ]
+        }
+      ]
+    }
+  }
+}

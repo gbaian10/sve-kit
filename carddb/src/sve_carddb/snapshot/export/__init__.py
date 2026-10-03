@@ -1,6 +1,6 @@
 """Export the public logical projection to immutable candidate transport blobs."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 from urllib.parse import quote
 
@@ -10,6 +10,8 @@ from sve_carddb.snapshot.contract import columns, definition, row_type, tables, 
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress, recipe
 from sve_carddb.snapshot.export.layout import Group, Layout, Ownership, references
 from sve_carddb.snapshot.export.wire import container, encode
+from sve_carddb.snapshot.profiles import LEGACY, SHARDED
+from sve_carddb.snapshot.profiles import profile as profile_for
 from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.reader import read_snapshot
 from sve_carddb.snapshot.values import (
@@ -88,7 +90,9 @@ def _partition(layout: Layout) -> dict[Group, dict[str, list[Record]]]:
     result: dict[Group, dict[str, list[Record]]] = {}
     text_ids: set[str] = set()
     translation_ids: set[str] = set()
-    mapping = object_value(definition("Container")["x-fragments"])
+    mapping = object_value(
+        definition("Container", layout.profile.version)["x-fragments"]
+    )
     for table, rows in layout.view.items():
         if table in {"text_unit", "translation"}:
             continue
@@ -189,7 +193,7 @@ def _fragments(
 ) -> Record:
     fragments: Record = {}
     for table, rows in sorted(records.items()):
-        name = row_type(table, group.partition)
+        name = row_type(table, group.partition, layout.profile.version)
         fragments[table] = [
             {
                 "owner": group.owner,
@@ -211,7 +215,7 @@ def _fragments(
                 ],
             }
         ]
-    return container(fragments)
+    return container(fragments, layout.profile.version)
 
 
 def _add_groups(
@@ -243,19 +247,95 @@ def _add_groups(
             )
 
 
+def _seal_bands(
+    layout: Layout,
+    files: _Files,
+    pieces: list[tuple[Group, Record]],
+    config: Record,
+) -> dict[Group, Record]:
+    bands: dict[Group, list[tuple[Group, Record]]] = {}
+    for group, value in pieces:
+        width = layout.profile.width(
+            group.role, group.partition, group.kind, group.identifier
+        )
+        band = replace(group, bucket=group.bucket // width)
+        bands.setdefault(band, []).append((group, value))
+    locations: dict[Group, Record] = {}
+    for band, entries in sorted(bands.items()):
+        fragments: dict[str, list[JsonValue]] = {}
+        dependencies: dict[str, Record] = {}
+        if band.role == "images":
+            dependencies[string(config["key"])] = _reference(config)
+        for _, value in entries:
+            for table, raw in object_value(value["tables"]).items():
+                for fragment in array(raw):
+                    fragments.setdefault(table, []).append(fragment)
+                    base = object_value(fragment)["base"]
+                    if base is not None:
+                        ref = object_value(object_value(base)["file"])
+                        dependencies[string(ref["key"])] = ref
+        tables_value: Record = {
+            table: sorted(rows, key=lambda f: integer(object_value(f)["bucket"]))
+            for table, rows in sorted(fragments.items())
+        }
+        key = _file_key(band).rsplit("/", 1)[0] + "/band/" + str(band.bucket)
+        file = files.add(
+            key,
+            band.role,
+            container(tables_value, layout.profile.version),
+            [dependencies[k] for k in sorted(dependencies)],
+        )
+        for group, _ in entries:
+            locations[group] = file
+    return locations
+
+
+def _add_bands(
+    layout: Layout,
+    files: _Files,
+    groups: dict[Group, dict[str, list[Record]]],
+    config: Record,
+) -> None:
+    bootstrap = [
+        (group, _fragments(layout, group, records, None))
+        for group, records in groups.items()
+        if group.role == "bootstrap"
+    ]
+    bases = _seal_bands(layout, files, bootstrap, config)
+    remaining = [
+        (group, _fragments(layout, group, records, None))
+        for group, records in groups.items()
+        if group.role != "bootstrap"
+    ]
+    for group, records in groups.items():
+        if group.role != "bootstrap":
+            continue
+        split = {
+            table: rows
+            for table, rows in records.items()
+            if table in {"printing", "face_revision"}
+        }
+        if split:
+            detail = replace(group, role="text", partition="detail")
+            remaining.append((detail, _fragments(layout, detail, split, bases[group])))
+    _seal_bands(layout, files, remaining, config)
+
+
 def export_snapshot(
     projection: Projection,
     ownership: Ownership,
     batch: Batch,
     *,
     brotli: Brotli | None = None,
+    format_version: str = LEGACY,
 ) -> Snapshot:
-    """Export fixed candidate 1.0.0 partitions and verify the independent join."""
+    """Export an explicitly selected fixed wire profile and verify the independent join."""
     if not batch.data_version.startswith("preview-"):
         raise ValueError("Candidate exporter requires a preview data version")
     if set(projection.tables) != set(tables()):
         raise ValueError("Exact public collection whitelist required")
-    properties = object_value(definition("Manifest")["properties"])
+    selected = profile_for(format_version)
+    properties = object_value(definition("Manifest", format_version)["properties"])
     profile = object_value(object_value(properties["partitioning"])["properties"])
     count = integer(object_value(profile["bucket_count"])["const"])
     if any(
@@ -264,11 +344,19 @@ def export_snapshot(
         for row in projection.tables[table]
     ):
         raise ValueError("Public region is outside the explicit manifest scope")
-    layout = Layout(projection.tables, ownership, count)
+    layout = Layout(projection.tables, ownership, count, format_version)
     files = _Files(brotli)
-    config = files.add("config", "config", projection.config, [])
-    files.add("programs", "programs", {"format_version": "1.0.0", "entries": []}, [])
-    _add_groups(layout, files, _partition(layout), config)
+    config = files.add(
+        "config", "config", projection.config | {"format_version": format_version}, []
+    )
+    files.add(
+        "programs", "programs", {"format_version": format_version, "entries": []}, []
+    )
+    groups = _partition(layout)
+    if format_version == SHARDED:
+        _add_bands(layout, files, groups, config)
+    else:
+        _add_groups(layout, files, groups, config)
     contains: list[JsonValue] = [
         _reference(file)
         for key, file in sorted(files.files.items())
@@ -277,7 +365,7 @@ def export_snapshot(
     union = compress(
         canonical(
             {
-                "format_version": "1.0.0",
+                "format_version": format_version,
                 "members": [
                     object_value(ref)
                     | {"payload": files.values[string(object_value(ref)["key"])]}
@@ -297,20 +385,20 @@ def export_snapshot(
     )
     partitioning: Record = {"algorithm": "sha256-mod-v1", "bucket_count": count}
     manifest: Record = projection.metadata | {
-        "format_version": "1.0.0",
+        "format_version": format_version,
         "data_version": batch.data_version,
         "published_at": batch.published_at,
         "regions": list(batch.regions),
         "languages": languages,
-        "min_reader_version": "1.0.0",
-        "required_capabilities": ["column-partition-v1", "fragment-container-v1"],
+        "min_reader_version": format_version,
+        "required_capabilities": list(selected.capabilities),
         "files": [files.files[key] for key in sorted(files.files)],
         "config_ref": _reference(config),
         "text_all": _description(union) | {"contains": contains},
         "partitioning": partitioning,
         "changes_ref": None,
     }
-    validate("Manifest", manifest)
+    validate("Manifest", manifest, format_version)
     result = Snapshot(manifest, files.payloads, union, recipe(brotli))
     result.verify(projection)
     return result

@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress
+from sve_carddb.snapshot.export.page_cost import page_image_cost
+from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.values import (
     array,
     canonical,
@@ -65,6 +67,12 @@ def measure(
             for entries in object_value(payload["tables"]).values()
             for item in array(entries)
         ]
+        set_buckets: list[JsonValue] = json_list(
+            sorted({integer(f["bucket"]) for f in fragments})
+        )
+        set_partitions: list[JsonValue] = json_list(
+            sorted({string(f["partition"]) for f in fragments})
+        )
         shards.append(
             {
                 "key": key,
@@ -73,8 +81,8 @@ def measure(
                     parse(value)
                     for value in sorted({canonical(f["owner"]) for f in fragments})
                 ],
-                "bucket": fragments[0]["bucket"],
-                "partition": fragments[0]["partition"],
+                "buckets": set_buckets,
+                "partitions": set_partitions,
                 "rows": sum(len(array(f["rows"])) for f in fragments),
                 **_sizes([blob]),
             }
@@ -83,9 +91,29 @@ def measure(
             oversized.append(key)
     full = _sizes([manifest, *text])
     bootstrap = _sizes([manifest, *initial])
+    images = [
+        blob
+        for key, blob in snapshot.payloads.items()
+        if files[key]["role"] == "images"
+    ]
+    startup: dict[str, JsonValue] = {
+        string(region): bootstrap
+        | {
+            "file_count": len(initial) + 1,
+            "scope": "all bootstrap and dependency closure; shared/mixed files counted in full",
+            "target_br_1_mib": bootstrap["br"] is not None
+            and integer(bootstrap["br"]) <= MIB,
+            "stop_for_maintainer": bootstrap["br"] is not None
+            and integer(bootstrap["br"]) > 2 * MIB,
+        }
+        for region in array(snapshot.manifest["regions"])
+    }
     return {
         "text_total": full,
         "bootstrap": bootstrap,
+        "startup_by_region": startup,
+        "images_metadata": {"file_count": len(images), **_sizes(images)},
+        "page_image_cost": page_image_cost(snapshot),
         "manifest": _sizes([manifest]),
         "text_all": _sizes([snapshot.text_all]),
         "shard_count": len(shards),
@@ -95,9 +123,6 @@ def measure(
             "raw_40_mib": integer(full["raw"]) <= 40 * MIB,
             "br_8_mib": full["br"] is not None and integer(full["br"]) <= 8 * MIB,
             "gzip_10_mib": integer(full["gzip"]) <= 10 * MIB,
-            "bootstrap_br_1_mib": bootstrap["br"] is not None
-            and integer(bootstrap["br"]) <= MIB,
-            "bootstrap_gzip_1_mib": integer(bootstrap["gzip"]) <= MIB,
             "shards_512_kib": not oversized,
         },
     }

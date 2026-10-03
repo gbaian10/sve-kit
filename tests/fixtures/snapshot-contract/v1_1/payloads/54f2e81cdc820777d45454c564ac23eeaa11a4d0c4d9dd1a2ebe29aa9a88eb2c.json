@@ -1,0 +1,164 @@
+{
+  "format_version": "1.1.0",
+  "tables": {
+    "ruling_revision": [
+      {
+        "base": null,
+        "bucket": 13,
+        "columns": [
+          "id",
+          "ruling_id",
+          "revision",
+          "question_unit_id",
+          "decision_unit_id",
+          "strength",
+          "decided_on",
+          "review_state",
+          "active_scopes",
+          "replaced_scopes",
+          "cards",
+          "evidence",
+          "hints"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "rr:a",
+            "ruling:a",
+            1,
+            "t:ja:c011ad4340c14396",
+            "t:ja:b17a760c59cb19db",
+            "inferred",
+            "2026-09-29",
+            "current",
+            [],
+            [],
+            [
+              "c:a"
+            ],
+            [],
+            [
+              [
+                "ja",
+                "t:ja:b17a760c59cb19db",
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "uint": {
+                        "maximum": 9,
+                        "minimum": 0
+                      },
+                      "variables": [
+                        "X"
+                      ]
+                    }
+                  ]
+                }
+              ],
+              [
+                "zh-Hant",
+                "t:zh-Hant:396cbc2e2e8d61a1",
+                {
+                  "parameters": [
+                    {
+                      "name": "amount",
+                      "uint": {
+                        "maximum": 9,
+                        "minimum": 0
+                      },
+                      "variables": [
+                        "X"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            ]
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {
+    "Evidence": {
+      "columns": [
+        "qa_version_id",
+        "cr_clause_id",
+        "source_url",
+        "role",
+        "quote",
+        "locator"
+      ],
+      "items": [
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "ID"
+          }
+        },
+        {
+          "nullable": {
+            "scalar": "URL"
+          }
+        },
+        {
+          "enum": [
+            "direct",
+            "supporting",
+            "terminology",
+            "community"
+          ]
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "nullable": {
+            "scalar": "Text"
+          }
+        }
+      ]
+    },
+    "ReplacedScope": {
+      "columns": [
+        "scope_unit_id",
+        "replacement_revision_id"
+      ],
+      "items": [
+        {
+          "scalar": "ID"
+        },
+        {
+          "scalar": "ID"
+        }
+      ]
+    },
+    "RulingHint": {
+      "columns": [
+        "lang",
+        "text_unit_id",
+        "parameter_schema"
+      ],
+      "items": [
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "ID"
+        },
+        {
+          "json": "ParameterSchema"
+        }
+      ]
+    }
+  }
+}

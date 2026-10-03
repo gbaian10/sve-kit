@@ -19,9 +19,11 @@ from sve_carddb.snapshot.contract import (
     tables,
     validate,
 )
+from sve_carddb.snapshot.profiles import profile
 from sve_carddb.snapshot.semantics import (
     validate_config,
     validate_fragments,
+    validate_placement,
     validate_view,
 )
 from sve_carddb.snapshot.values import (
@@ -118,7 +120,8 @@ def _payload(file: Row, data: bytes) -> JsonValue:
 
 
 def _container(file: Row, value: Row) -> list[Fragment]:
-    validate("Container", value)
+    selected = profile(string(value["format_version"]))
+    validate("Container", value, selected.version)
     result: list[Fragment] = []
     used: set[str] = set()
     counts: list[JsonValue] = []
@@ -133,9 +136,12 @@ def _container(file: Row, value: Row) -> list[Fragment]:
                 if part == "bootstrap"
                 else "text"
             )
-            if role != file["role"] or fragment["bucket"] != 0:
+            if (
+                role != file["role"]
+                or not 0 <= integer(fragment["bucket"]) < selected.buckets
+            ):
                 raise ValueError("Fragment role or bucket does not match profile")
-            name = row_type(table, part)
+            name = row_type(table, part, selected.version)
             used |= required_types(name)
             rows = [decode(name, row) for row in array(fragment["rows"])]
             result.append(Fragment(string(file["key"]), table, fragment, rows))
@@ -156,15 +162,19 @@ def _container(file: Row, value: Row) -> list[Fragment]:
     return result
 
 
-def _load(files: dict[str, Row], payloads: Mapping[str, bytes]) -> list[Fragment]:
+def _load(
+    files: dict[str, Row], payloads: Mapping[str, bytes], version: str
+) -> list[Fragment]:
     if set(files) != set(payloads):
         raise ValueError("Payload set does not match manifest")
     result: list[Fragment] = []
     for key, file in files.items():
         value = object_value(_payload(file, payloads[key]))
+        if value["format_version"] != version:
+            raise ValueError("Payload format differs from manifest")
         role = string(file["role"])
         if role in {"config", "programs"}:
-            validate("Config" if role == "config" else "Programs", value)
+            validate("Config" if role == "config" else "Programs", value, version)
             if role == "config":
                 validate_config(value)
             if file["row_counts"] != []:
@@ -481,11 +491,13 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     Missing keys and invalid shapes intentionally propagate as errors; the reader
     never repairs a dependency or falls back to another snapshot.
     """
-    validate("Manifest", manifest_value)
     manifest = object_value(manifest_value)
-    if (
-        tuple(map(int, string(manifest["min_reader_version"]).split("."))) > (1, 0, 0)
-        or set(map(string, array(manifest["required_capabilities"]))) != CAPABILITIES
+    validate("Manifest", manifest, string(manifest["format_version"]))
+    selected = profile(string(manifest["format_version"]))
+    if tuple(map(int, string(manifest["min_reader_version"]).split("."))) > tuple(
+        map(int, selected.version.split("."))
+    ) or set(map(string, array(manifest["required_capabilities"]))) != set(
+        selected.capabilities
     ):
         raise ValueError("Unsupported reader version or capability")
     files = _files(manifest)
@@ -503,13 +515,14 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
             file["dependencies"]
         ):
             raise ValueError("Images must depend on config")
-    fragments = _load(files, payloads)
+    fragments = _load(files, payloads, selected.version)
     validate_fragments(fragments)
     view = _logical(fragments, files)
     _unique(view)
     _closure(view, manifest)
     _current(view, fragments)
     validate_view(view, manifest, fragments)
+    validate_placement(view, manifest, fragments)
     return view
 
 
@@ -517,11 +530,13 @@ def read_text_all(
     manifest_value: JsonValue, data: bytes, attachments: Mapping[str, bytes]
 ) -> View:
     """Validate alternative member bytes, then use the same independent reader."""
-    validate("Manifest", manifest_value)
     manifest = object_value(manifest_value)
+    validate("Manifest", manifest, string(manifest["format_version"]))
     description = object_value(manifest["text_all"])
     value = object_value(_payload(description, data))
-    validate("TextAll", value)
+    validate("TextAll", value, string(manifest["format_version"]))
+    if value["format_version"] != manifest["format_version"]:
+        raise ValueError("TextAll format differs from manifest")
     files = _files(manifest)
     expected = [
         _reference(file)

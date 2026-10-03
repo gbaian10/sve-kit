@@ -545,7 +545,9 @@ def test_extra_nested_audit_field_is_not_silently_removed() -> None:
         )
 
 
+@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
 def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
+    format_version: str,
     logical: tuple[Projection, Ownership],
 ) -> None:
     from sve_carddb.snapshot.export.measure import SHARD_LIMIT  # ruff: ignore[import-outside-top-level] -- synthetic data exercises the real shard gate
@@ -560,7 +562,9 @@ def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     )
     projection.tables["text_unit"].sort(key=lambda row: string(row["id"]))
     physical["flavor_unit_id"] = identifier
-    result = export_snapshot(projection, ownership, BATCH)
+    result = export_snapshot(
+        projection, ownership, BATCH, format_version=format_version
+    )
     report = measure(result)
     assert object_value(report["gates"])["shards_512_kib"] is False
     assert array(report["oversized_shards"])
