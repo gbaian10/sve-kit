@@ -1,7 +1,7 @@
 import type { Row } from "./decode"
 import { fail } from "./errors"
 import { arrayValue, canonicalText, integerValue, objectValue, stringValue } from "./json"
-import type { View } from "./reader"
+import type { Files, Fragment, View } from "./reader"
 
 const SIZES = ["art_m", "art_s", "card_l", "card_m", "card_s"]
 
@@ -49,5 +49,58 @@ export function validateMediaDetails(view: View): void {
       if (!detail || detail["width"] !== variant["width"] || detail["height"] !== variant["height"])
         fail("image-variant-unapproved", "media size differs from source details")
     }
+  }
+}
+
+/** URL identities cannot alias another printing or another face of the same card. */
+export function validateMediaIdentities(view: View): void {
+  const ids = (view["printing"] ?? []).map((r) => integerValue(r["int_id"]))
+  if (new Set(ids).size !== ids.length)
+    fail("primary-key-duplicate", "printing integer identities must be unique")
+  const positions = (view["face"] ?? []).map((r) =>
+    canonicalText([r["card_id"] ?? null, integerValue(r["ordinal"])]),
+  )
+  if (new Set(positions).size !== positions.length)
+    fail("face-ordinal", "face ordinals must be unique within their card")
+}
+
+/** Source-only image files require just config; media requires its exact bootstrap anchors. */
+export function validateMediaDependencies(
+  fragments: readonly Fragment[],
+  files: Files,
+  configKey: string,
+): void {
+  const locations = new Map<string, string>()
+  for (const fragment of fragments) {
+    if (
+      fragment.value["partition"] !== "bootstrap" ||
+      !["printing", "face"].includes(fragment.table)
+    )
+      continue
+    for (const row of fragment.rows)
+      locations.set(`${fragment.table}\0${stringValue(row["id"])}`, fragment.file)
+  }
+  const needed = new Map<string, Set<string>>()
+  for (const [key, file] of files)
+    if (file["role"] === "images") needed.set(key, new Set([configKey]))
+  for (const fragment of fragments) {
+    if (fragment.table !== "printing_image") continue
+    for (const row of fragment.rows) {
+      for (const [table, field] of [
+        ["printing", "printing_id"],
+        ["face", "face_id"],
+      ] as const) {
+        const key = locations.get(`${table}\0${stringValue(row[field])}`)
+        if (!key) fail("dangling-reference", "media bootstrap anchor missing")
+        needed.get(fragment.file)?.add(key)
+      }
+    }
+  }
+  for (const [key, keys] of needed) {
+    const expected = [...keys]
+      .sort()
+      .map((k) => ({ key: k, sha256: files.get(k)?.["sha256"] ?? null }))
+    if (canonicalText(files.get(key)?.["dependencies"] ?? null) !== canonicalText(expected))
+      fail("dependency-closure", "media dependencies must equal exact bootstrap closure")
   }
 }

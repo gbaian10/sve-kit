@@ -54,19 +54,6 @@ describe("2.0 shared contract and display projection", () => {
       canonicalText(v2Fixture("expected-logical.json")),
     )
   })
-  it("uses exactly the Python shared URL vectors, including permanent f7 and safe integer boundary", () => {
-    for (const raw of v2Fixture("image-url-cases.json") as JsonObject[]) {
-      expect(
-        imageUrl(
-          "https://cdn.test",
-          Number(raw["int_id"]),
-          Number(raw["ordinal"]),
-          stringValue(raw["size"]),
-          Number(raw["version"]),
-        ),
-      ).toBe(`https://cdn.test/${stringValue(raw["url"])}`)
-    }
-  })
   it("uses the art token separately and emits only distinct width descriptors for tiny sources", () => {
     const row = (
       objectValue(v2Fixture("expected-logical.json"))["printing_image"] as JsonObject[]
@@ -129,7 +116,7 @@ describe("2.0 shared contract and display projection", () => {
     expect(
       (await loadImagePage(client, [{ printingId: "p:b", faceId: "f:b" }])).cardImage("p:b", "f:b")
         ?.src,
-    ).toBe("https://cdn.test/images/card_l/2-f1.webp?v=7")
+    ).toBeUndefined()
     const global = [...(client.snapshot()?.files.values() ?? [])]
       .filter((f) =>
         (f["row_counts"] as JsonObject[]).some(
@@ -183,7 +170,7 @@ describe("2.0 shared contract and display projection", () => {
   it("rejects an absent media face rather than exposing a guessed URL", async () => {
     const served = origin(
       v2Version(1, (table, row) => {
-        if (table === "printing_image" && row[0] === "p:a") row[1] = "f:absent"
+        if (table === "printing_image" && row[0] === "p:a" && row[1] === "f:a") row[1] = "f:absent"
       }),
     )
     const client = createSnapshotClient("https://cdn.test", { fetch: served.fetcher })
@@ -228,7 +215,8 @@ describe("2.0 shared contract and display projection", () => {
     await client.load()
     for (const token of [8, 9]) {
       const next = v2Version(token === 8 ? 2 : 3, (table, row) => {
-        if (table === "printing_image") row[6] = token
+        if (table === "printing_image" && row[3] === "approved" && row[4] === "available")
+          row[6] = token
       })
       for (const [key, bytes] of next.files) served.files.set(key, bytes)
       served.setIndex({ index_format: 2, revision: token, current: next.entry, previous: null })

@@ -10,7 +10,7 @@ import {
   parseStrict,
   stringValue,
 } from "./format-v1/json"
-import { validateMedia } from "./format-v1/media"
+import { validateMedia, validateMediaIdentities } from "./format-v1/media"
 import { validatePlacement } from "./format-v1/placement"
 import { type Files, findBase, type Fragment, isCompatible, joinDetail } from "./format-v1/reader"
 import { validate } from "./format-v1/schema"
@@ -344,6 +344,11 @@ export function createSnapshotClient(
       else throw new SnapshotError("shape", "unexpected startup payload")
     }
     if (!config) throw new SnapshotError("config-programs-count", "config file missing")
+    if (version === "2.0.0")
+      validateMediaIdentities({
+        printing: bootstrap.filter((f) => f.table === "printing").flatMap((f) => f.rows),
+        face: bootstrap.filter((f) => f.table === "face").flatMap((f) => f.rows),
+      })
     const faceCards = new Map(
       bootstrap
         .filter((fragment) => fragment.table === "face")

@@ -15,6 +15,7 @@ import {
   stringValue,
   utf8,
 } from "./json"
+import { validateMediaDependencies, validateMediaIdentities } from "./media"
 import { validatePlacement } from "./placement"
 import { descriptor, primaryKey, requiredTypes, rowType, tables, validate } from "./schema"
 import { validateConfig, validateFragments, validateView } from "./semantics"
@@ -651,6 +652,14 @@ export function readSnapshot(
   unique(view)
   closure(view, manifest)
   current(view, fragments)
+  if (manifest["format_version"] === "2.0.0") {
+    validateMediaIdentities(view)
+    validateMediaDependencies(
+      fragments,
+      all,
+      stringValue(objectValue(manifest["config_ref"])["key"]),
+    )
+  }
   validateView(view, manifest, fragments)
   validatePlacement(fragments, stringValue(manifest["format_version"]))
   return view
