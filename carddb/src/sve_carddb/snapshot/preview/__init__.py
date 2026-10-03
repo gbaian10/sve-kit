@@ -11,12 +11,14 @@ from pydantic import JsonValue
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
 from sve_carddb.snapshot.preview.images import image_blobs, verify_images
+from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, string
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.export import Brotli, Snapshot
+    from sve_carddb.snapshot.media import MediaPlan
     from sve_carddb.snapshot.project import Projection
     from sve_carddb.snapshot.project.source import Record
 
@@ -96,6 +98,7 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
     image_source: Path | None = None,
     confirmed_images: frozenset[str] = frozenset(),
     regions: tuple[str, ...] = ("jp",),
+    media_plan: MediaPlan | None = None,
 ) -> dict[str, JsonValue]:
     """Seal content-addressed transport and atomically switch only preview/current."""
     roots.verify()
@@ -125,7 +128,14 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         string(object_value(item)["key"]): object_value(item)
         for item in array(snapshot.manifest["files"])
     }
-    image_report = _write_images(joined, roots, image_source, confirmed_images)
+    image_report = _publish_images(
+        joined,
+        roots,
+        image_source,
+        confirmed_images,
+        media_plan,
+        string(snapshot.manifest["format_version"]),
+    )
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
         if path != "snapshots/blobs/" + digest(blob.raw)[7:] + ".json":
@@ -134,8 +144,7 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
             raise ValueError("Preview blob differs from manifest hash")
         _write(roots, path, blob.raw, immutable=True)
         _write(roots, path + ".gz", blob.gzip, immutable=True)
-        if blob.br is not None:
-            _write(roots, path + ".br", blob.br, immutable=True)
+        _write_brotli(roots, path, blob.br)
     union = object_value(snapshot.manifest["text_all"])
     if digest(snapshot.text_all.raw) != union["sha256"]:
         raise ValueError("Preview text union differs from manifest hash")
@@ -144,15 +153,13 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         raise ValueError("Preview requires content-addressed union path")
     _write(roots, union_path, snapshot.text_all.raw, immutable=True)
     _write(roots, union_path + ".gz", snapshot.text_all.gzip, immutable=True)
-    if snapshot.text_all.br is not None:
-        _write(roots, union_path + ".br", snapshot.text_all.br, immutable=True)
+    _write_brotli(roots, union_path, snapshot.text_all.br)
     manifest = compress(canonical(snapshot.manifest), brotli)
     hashed = digest(manifest.raw)
     manifest_path = "snapshots/manifests/" + hashed[7:] + ".json"
     _write(roots, manifest_path, manifest.raw, immutable=True)
     _write(roots, manifest_path + ".gz", manifest.gzip, immutable=True)
-    if manifest.br is not None:
-        _write(roots, manifest_path + ".br", manifest.br, immutable=True)
+    _write_brotli(roots, manifest_path, manifest.br)
     pointer: dict[str, JsonValue] = {
         "manifest_path": manifest_path,
         "manifest_sha256": hashed,
@@ -164,9 +171,70 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         "images": image_report,
     }
     _write(roots, "reports/" + hashed[7:] + ".json", canonical(report), immutable=True)
-    verify_images(joined, roots.preview, confirmed_images)
+    _verify_written_images(joined, roots, confirmed_images, media_plan)
     _write(roots, "snapshots/preview/current.json", canonical(pointer), immutable=False)
+    if media_plan is not None:
+        _write(
+            roots,
+            "private/media-committed.json",
+            canonical(media_plan.state),
+            immutable=False,
+        )
     return report
+
+
+def _write_brotli(roots: Roots, path: str, raw: bytes | None) -> None:
+    if raw is not None:
+        _write(roots, path + ".br", raw, immutable=True)
+
+
+def _verify_written_images(
+    joined: dict[str, list[Record]],
+    roots: Roots,
+    confirmed_images: frozenset[str],
+    media_plan: MediaPlan | None,
+) -> None:
+    if media_plan is None:
+        verify_images(joined, roots.preview, confirmed_images)
+    else:
+        for asset in media_plan.assets:
+            raw = roots.destination(string(asset["path"])).read_bytes()
+            if digest(raw) != asset["sha256"] or len(raw) != asset["bytes"]:
+                raise ValueError("Written media differs from sealed plan")
+
+
+def _publish_images(
+    tables: dict[str, list[Record]],
+    roots: Roots,
+    image_source: Path | None,
+    confirmed_images: frozenset[str],
+    media_plan: MediaPlan | None,
+    version: str,
+) -> dict[str, JsonValue]:
+    image_report: dict[str, JsonValue]
+    if version == MEDIA:
+        if media_plan is None or media_plan.projection.tables != tables:
+            raise ValueError("Preview requires the matching verified media plan")
+        if media_plan.assets and image_source is None:
+            raise ValueError("Preview media requires an explicit asset source")
+        image_files, image_bytes = 0, 0
+        if image_source is not None:
+            for path, raw in media_plan.blobs(image_source):
+                _write(roots, path, raw, immutable=False)
+                image_files += 1
+                image_bytes += len(raw)
+        image_report = {"unique_files": image_files, "unique_bytes": image_bytes}
+        _write(
+            roots,
+            "private/media-plans/" + digest(canonical(media_plan.state))[7:] + ".json",
+            canonical({"state": media_plan.state, "assets": list(media_plan.assets)}),
+            immutable=True,
+        )
+    else:
+        if media_plan is not None:
+            raise ValueError("Legacy preview cannot consume a media plan")
+        image_report = _write_images(tables, roots, image_source, confirmed_images)
+    return image_report
 
 
 def _write_images(

@@ -10,7 +10,7 @@ from sve_carddb.snapshot.contract import columns, definition, row_type, tables, 
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress, recipe
 from sve_carddb.snapshot.export.layout import Group, Layout, Ownership, references
 from sve_carddb.snapshot.export.wire import container, encode
-from sve_carddb.snapshot.profiles import LEGACY, SHARDED
+from sve_carddb.snapshot.profiles import LEGACY, MEDIA
 from sve_carddb.snapshot.profiles import profile as profile_for
 from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.reader import read_snapshot
@@ -208,9 +208,13 @@ def _fragments(
                     "bucket": group.bucket,
                     "partition": "bootstrap",
                 },
-                "columns": list(columns(name)),
+                "columns": list(columns(name, layout.profile.version)),
                 "rows": [
-                    encode(name, layout.record(table, row, group.partition, index))
+                    encode(
+                        name,
+                        layout.record(table, row, group.partition, index),
+                        layout.profile.version,
+                    )
                     for index, row in enumerate(rows)
                 ],
             }
@@ -247,11 +251,33 @@ def _add_groups(
             )
 
 
+def _dependencies(
+    layout: Layout,
+    table: str,
+    fragment: Record,
+    bootstrap_refs: dict[str, dict[str, Record]] | None,
+) -> list[Record]:
+    refs: list[Record] = []
+    if layout.profile.version == MEDIA and table == "printing_image":
+        if bootstrap_refs is None:
+            raise ValueError("Media requires bootstrap locations")
+        for raw_row in array(fragment["rows"]):
+            row = array(raw_row)
+            refs.extend(
+                bootstrap_refs[field][string(row[index])]
+                for field, index in (("printing", 0), ("face", 1))
+            )
+    if fragment["base"] is not None:
+        refs.append(object_value(object_value(fragment["base"])["file"]))
+    return refs
+
+
 def _seal_bands(
     layout: Layout,
     files: _Files,
     pieces: list[tuple[Group, Record]],
     config: Record,
+    bootstrap_refs: dict[str, dict[str, Record]] | None = None,
 ) -> dict[Group, Record]:
     bands: dict[Group, list[tuple[Group, Record]]] = {}
     for group, value in pieces:
@@ -270,9 +296,9 @@ def _seal_bands(
             for table, raw in object_value(value["tables"]).items():
                 for fragment in array(raw):
                     fragments.setdefault(table, []).append(fragment)
-                    base = object_value(fragment)["base"]
-                    if base is not None:
-                        ref = object_value(object_value(base)["file"])
+                    for ref in _dependencies(
+                        layout, table, object_value(fragment), bootstrap_refs
+                    ):
                         dependencies[string(ref["key"])] = ref
         tables_value: Record = {
             table: sorted(rows, key=lambda f: integer(object_value(f)["bucket"]))
@@ -302,6 +328,12 @@ def _add_bands(
         if group.role == "bootstrap"
     ]
     bases = _seal_bands(layout, files, bootstrap, config)
+    bootstrap_refs: dict[str, dict[str, Record]] = {"printing": {}, "face": {}}
+    for group, records in groups.items():
+        if group.role == "bootstrap":
+            for table in ("printing", "face"):
+                for row in records.get(table, []):
+                    bootstrap_refs[table][string(row["id"])] = _reference(bases[group])
     remaining = [
         (group, _fragments(layout, group, records, None))
         for group, records in groups.items()
@@ -318,7 +350,7 @@ def _add_bands(
         if split:
             detail = replace(group, role="text", partition="detail")
             remaining.append((detail, _fragments(layout, detail, split, bases[group])))
-    _seal_bands(layout, files, remaining, config)
+    _seal_bands(layout, files, remaining, config, bootstrap_refs)
 
 
 def export_snapshot(
@@ -353,7 +385,7 @@ def export_snapshot(
         "programs", "programs", {"format_version": format_version, "entries": []}, []
     )
     groups = _partition(layout)
-    if format_version == SHARDED:
+    if format_version != LEGACY:
         _add_bands(layout, files, groups, config)
     else:
         _add_groups(layout, files, groups, config)

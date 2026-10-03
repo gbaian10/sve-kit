@@ -1,0 +1,163 @@
+{
+  "format_version": "2.0.0",
+  "tables": {
+    "text_symbol": [
+      {
+        "base": null,
+        "bucket": 37,
+        "columns": [
+          "id",
+          "code",
+          "parameter_schema",
+          "keyword_id",
+          "spellings",
+          "localizations"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "sym:a",
+            "synthetic",
+            {
+              "parameters": [
+                {
+                  "name": "amount",
+                  "uint": {
+                    "maximum": 9,
+                    "minimum": 0
+                  },
+                  "variables": [
+                    "X"
+                  ]
+                }
+              ]
+            },
+            null,
+            [
+              [
+                "ja",
+                "Synthetic ",
+                "",
+                "amount",
+                "uint"
+              ],
+              [
+                "en",
+                "Synthetic ",
+                "",
+                "amount",
+                "variable"
+              ],
+              [
+                "zh-Hant",
+                "合成",
+                "",
+                null,
+                "literal"
+              ]
+            ],
+            [
+              [
+                "ja",
+                "Synthetic symbol",
+                "Synthetic tooltip",
+                "Synthetic copy"
+              ]
+            ]
+          ]
+        ]
+      }
+    ],
+    "translation": [
+      {
+        "base": null,
+        "bucket": 36,
+        "columns": [
+          "id",
+          "source_unit_id",
+          "target_lang",
+          "text_unit_id",
+          "origin",
+          "authority",
+          "status"
+        ],
+        "owner": {
+          "id": null,
+          "kind": "global"
+        },
+        "partition": "detail",
+        "rows": [
+          [
+            "tr:effect",
+            "t:ja:b17a760c59cb19db",
+            "zh-Hant",
+            "t:zh-Hant:396cbc2e2e8d61a1",
+            "project",
+            "unofficial",
+            "reviewed"
+          ]
+        ]
+      }
+    ]
+  },
+  "types": {
+    "Localization": {
+      "columns": [
+        "lang",
+        "name",
+        "tooltip",
+        "copy_pattern"
+      ],
+      "items": [
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "scalar": "Text"
+        }
+      ]
+    },
+    "Spelling": {
+      "columns": [
+        "lang",
+        "literal_prefix",
+        "literal_suffix",
+        "parameter_name",
+        "parse_kind"
+      ],
+      "items": [
+        {
+          "scalar": "Lang"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "scalar": "Text"
+        },
+        {
+          "nullable": {
+            "scalar": "Code"
+          }
+        },
+        {
+          "enum": [
+            "literal",
+            "uint",
+            "variable"
+          ]
+        }
+      ]
+    }
+  }
+}

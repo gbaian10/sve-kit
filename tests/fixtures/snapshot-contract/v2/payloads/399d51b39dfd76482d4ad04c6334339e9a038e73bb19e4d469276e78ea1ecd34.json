@@ -1,0 +1,129 @@
+{
+  "format_version": "2.0.0",
+  "types": {
+    "ImageDisplayVariant": {
+      "columns": [
+        "size_key",
+        "width",
+        "height"
+      ],
+      "items": [
+        {
+          "enum": [
+            "card_s",
+            "card_m",
+            "card_l",
+            "art_s",
+            "art_m"
+          ]
+        },
+        {
+          "scalar": "UInt"
+        },
+        {
+          "scalar": "UInt"
+        }
+      ]
+    }
+  },
+  "tables": {
+    "printing_image": [
+      {
+        "owner": {
+          "kind": "home_set",
+          "id": "set:a"
+        },
+        "bucket": 43,
+        "partition": "detail",
+        "base": null,
+        "columns": [
+          "printing_id",
+          "face_id",
+          "image_id",
+          "publication_state",
+          "availability",
+          "withdrawal_reason",
+          "card_version",
+          "art_version",
+          "variants"
+        ],
+        "rows": [
+          [
+            "p:b",
+            "f:a",
+            "img:a",
+            "approved",
+            "available",
+            null,
+            7,
+            11,
+            [
+              [
+                "art_m",
+                384,
+                288
+              ],
+              [
+                "art_s",
+                160,
+                120
+              ],
+              [
+                "card_l",
+                459,
+                641
+              ],
+              [
+                "card_m",
+                320,
+                447
+              ],
+              [
+                "card_s",
+                128,
+                179
+              ]
+            ]
+          ],
+          [
+            "p:b",
+            "f:b",
+            "img:a",
+            "approved",
+            "available",
+            null,
+            7,
+            11,
+            [
+              [
+                "art_m",
+                384,
+                288
+              ],
+              [
+                "art_s",
+                160,
+                120
+              ],
+              [
+                "card_l",
+                459,
+                641
+              ],
+              [
+                "card_m",
+                320,
+                447
+              ],
+              [
+                "card_s",
+                128,
+                179
+              ]
+            ]
+          ]
+        ]
+      }
+    ]
+  }
+}
