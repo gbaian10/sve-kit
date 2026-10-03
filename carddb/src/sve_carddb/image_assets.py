@@ -1,4 +1,4 @@
-"""Convert sealed JP images and compose their verified bindings into build bundles."""
+"""Convert sealed regional images and compose their verified bindings into build bundles."""
 
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass
@@ -19,6 +19,7 @@ from sve_carddb.build_inputs import (
     insert_raw_sources,
     uses_sorted,
 )
+from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.image_crop_report import crop_report
@@ -31,8 +32,9 @@ from sve_carddb.image_variants import (
     build_variants,
     crop_box,
 )
-from sve_carddb.registry.records import PrintingData
+from sve_carddb.registry.records import PrintingData, Region
 from sve_carddb.snapshot.values import canonical, digest, parse
+from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import card_url, image_url
 from sve_carddb.store import resolve_within
 
@@ -45,6 +47,8 @@ if TYPE_CHECKING:
     from sve_carddb.registry.preview import PreviewPlan
 
 PARSER = "jp-image-links-v1"
+EN_PARSER = "en-image-links-v1"
+PARSERS = {"jp": PARSER, "en": EN_PARSER}
 MAX_WORKERS = 4
 
 
@@ -56,6 +60,7 @@ class ImageReference:
     page: Source
     source_src_raw: str
     source_url: str
+    region: Region
 
 
 @dataclass(frozen=True)
@@ -90,6 +95,7 @@ class EncodedImage:
     source: Source
     raw_bytes: int
     result: VariantSet
+    region: Region
 
 
 @dataclass(frozen=True)
@@ -102,7 +108,7 @@ class ImageBuild:
         return uses_sorted(
             SourceUse(
                 source=item.source,
-                usage="jp_image_variant",
+                usage=item.region + "_image_variant",
                 locator=canonical({"image_id": item.result.image_id}).decode(),
             )
             for item in self.images
@@ -154,20 +160,43 @@ def _text(row: Row, name: str) -> str:
     return value
 
 
+def _parser(region: Region) -> str:
+    if region not in PARSERS:
+        raise ValueError("Unsupported image region")
+    return PARSERS[region]
+
+
+def _page_url(region: Region, number: str) -> str:
+    return (official_en.card_url if region == "en" else card_url)(number)
+
+
+def _face_images(raw: bytes, number: str, region: Region) -> tuple[str, ...]:
+    record = (extract_en if region == "en" else extract_card)(raw, number=number)
+    return tuple(face.image for face in record.faces)
+
+
 def plan_jp_images(
     db: Database, plan: PreviewPlan, cards: FrozenSources
 ) -> tuple[ImageReference, ...]:
-    """Use the adopted source face map and the page's actual img src for each JP face."""
+    """Keep the existing JP-only entry point explicit."""
+    return plan_regional_images(db, plan, cards, region="jp")
+
+
+def plan_regional_images(
+    db: Database, plan: PreviewPlan, cards: FrozenSources, *, region: Region
+) -> tuple[ImageReference, ...]:
+    """Bind each regional page to its adopted source face map and actual img src."""
+    parser = _parser(region)
     db.verify()
     printing_rows = {
         row.values["id"]: row
         for row in db.rows("printing")
-        if row.values["region"] == "jp"
+        if row.values["region"] == region
     }
     printings = {
         record.data.id: record.data
         for record in plan.included("printing")
-        if isinstance(record.data, PrintingData) and record.data.region == "jp"
+        if isinstance(record.data, PrintingData) and record.data.region == region
     }
     if printing_rows.keys() != printings.keys():
         raise ValueError("Image identity plan does not match the build printings")
@@ -179,42 +208,49 @@ def plan_jp_images(
     references: list[ImageReference] = []
     for printing_id, data in sorted(printings.items()):
         row = printing_rows[printing_id]
-        evidence = plan.evidence["jp", data.card_no]
-        source, raw, descriptor = cards.read(evidence.source.id, parser_version=PARSER)
+        evidence = plan.evidence[region, data.card_no]
+        source, raw, descriptor = cards.read(evidence.source.id, parser_version=parser)
         if (descriptor.provider, descriptor.kind, descriptor.url, source.kind) != (
-            "jp",
+            region,
             "card",
-            card_url(data.card_no),
+            _page_url(region, data.card_no),
             "official_page",
         ):
-            raise ValueError("JP image descriptor differs from the card page")
+            raise ValueError(
+                f"{region.upper()} image descriptor differs from the card page"
+            )
         if (
             source.values() != evidence.source.values()
             or source_rows.get(source.id) != source.values()
         ):
-            raise ValueError("JP image page provenance differs from the identity input")
+            raise ValueError(
+                f"{region.upper()} image page provenance differs from the identity input"
+            )
         if (row.values["source_id"], row.values["card_no"], row.values["card_id"]) != (
             source.id,
             data.card_no,
             data.card_id,
         ):
-            raise ValueError("JP printing identity differs from the image page")
-        record = extract_card(raw, number=data.card_no)
-        mappings = data.source_face_map
-        if {mapping.source_index for mapping in mappings} != set(
-            range(len(record.faces))
-        ) or len(mappings) != len(record.faces):
+            raise ValueError(
+                f"{region.upper()} printing identity differs from the image page"
+            )
+        face_images = _face_images(raw, data.card_no, region)
+        if {mapping.source_index for mapping in data.source_face_map} != set(
+            range(len(face_images))
+        ) or len(data.source_face_map) != len(face_images):
             raise ValueError(
                 "Image source face map must cover every extracted face once"
             )
-        expected_faces = {(printing_id, mapping.face_id) for mapping in mappings}
+        expected_faces = {
+            (printing_id, mapping.face_id) for mapping in data.source_face_map
+        }
         if expected_faces != {key for key in face_keys if key[0] == printing_id}:
             raise ValueError("Image source face map differs from the build faces")
-        for mapping in mappings:
+        for mapping in data.source_face_map:
             face_row = face_keys[printing_id, mapping.face_id]
             if face_row.values["source_id"] != source.id:
                 raise ValueError("Printing face and image page provenance disagree")
-            raw_src = record.faces[mapping.source_index].image
+            raw_src = face_images[mapping.source_index]
             references.append(
                 ImageReference(
                     printing_id,
@@ -223,6 +259,7 @@ def plan_jp_images(
                     source,
                     raw_src,
                     image_url(raw_src, source.url),
+                    region,
                 )
             )
     return tuple(sorted(references, key=lambda ref: (ref.printing_id, ref.face_id)))
@@ -233,7 +270,7 @@ def reference_uses(references: tuple[ImageReference, ...]) -> tuple[SourceUse, .
     return uses_sorted(
         SourceUse(
             source=ref.page,
-            usage="jp_image_link",
+            usage=ref.region + "_image_link",
             locator=canonical(
                 {"printing_id": ref.printing_id, "face_id": ref.face_id}
             ).decode(),
@@ -250,14 +287,33 @@ def build_jp_assets(
     workers: int = 1,
     reuse_only: bool = False,
 ) -> ImageBuild:
-    """Convert every current JP image before any DB or public manifest is written."""
+    """Keep JP batch validation for existing callers."""
+    return build_regional_assets(
+        images, roots, region="jp", crops=crops, workers=workers, reuse_only=reuse_only
+    )
+
+
+def build_regional_assets(
+    images: FrozenSources,
+    roots: PreviewRoots,
+    *,
+    region: Region,
+    crops: ImageCrops,
+    workers: int = 1,
+    reuse_only: bool = False,
+) -> ImageBuild:
+    """Convert exactly one pinned regional image batch before public publication."""
+    if region not in PARSERS:
+        raise ValueError("Unsupported image region")
     roots.validate((images.root,))
     if type(workers) is not int or not 1 <= workers <= MAX_WORKERS:
         raise ValueError("Image worker count must be between 1 and 4")
     if {(scope.provider, scope.kind) for scope in images.inventory.scope} != {
-        ("jp", "image")
+        (region, "image")
     }:
-        raise ValueError("Image conversion requires an exclusively JP image batch")
+        raise ValueError(
+            f"Image conversion requires an exclusively {region.upper()} image batch"
+        )
     start = perf_counter()
 
     def convert(version: str) -> EncodedImage:
@@ -265,11 +321,13 @@ def build_jp_assets(
             version, parser_version=DEFAULT_RECIPE.version
         )
         if (descriptor.provider, descriptor.kind, source.kind) != (
-            "jp",
+            region,
             "image",
             "image",
         ):
-            raise ValueError("JP image batch contains another provider or source kind")
+            raise ValueError(
+                f"{region.upper()} image batch contains another provider or source kind"
+            )
         image_id = conversion_image_id(source.id)
         override = crops.override(descriptor)
         # Conversion only knows the resource URL; HTML src enters the DB from verified bindings.
@@ -289,7 +347,7 @@ def build_jp_assets(
             reuse_only=reuse_only,
             override=override,
         )
-        return EncodedImage(source, descriptor.raw_bytes, result)
+        return EncodedImage(source, descriptor.raw_bytes, result, region)
 
     versions = tuple(
         sorted(item.source_version_id for item in images.inventory.current)
@@ -361,6 +419,44 @@ def populate_jp_assets(
     references: tuple[ImageReference, ...],
     preview: Path,
 ) -> tuple[SourceUse, ...]:
+    """Retain the original JP-only composition boundary."""
+    if any(item.region != "jp" for item in build.images) or any(
+        ref.region != "jp" for ref in references
+    ):
+        raise ValueError("JP image composition requires only JP sources and bindings")
+    return populate_assets(db, build, references, preview)
+
+
+def _verify_binding(
+    ref: ImageReference, printing: Row | None, face: Row | None
+) -> None:
+    if (
+        ref.region not in PARSERS
+        or ref.page.kind != "official_page"
+        or ref.page.parser_version != PARSERS[ref.region]
+        or ref.source_url != image_url(ref.source_src_raw, ref.page.url)
+        or not ref.source_src_raw
+    ):
+        raise ValueError("Invalid official image binding provenance")
+    if ref.page.url != _page_url(ref.region, ref.card_no):
+        raise ValueError("Image binding differs from the regional page URL")
+    if printing is None or face is None:
+        raise ValueError("Image binding has no printing face")
+    if (
+        printing.values["region"],
+        printing.values["card_no"],
+        printing.values["source_id"],
+        face.values["source_id"],
+    ) != (ref.region, ref.card_no, ref.page.id, ref.page.id):
+        raise ValueError("Image binding differs from the printing page")
+
+
+def populate_assets(
+    db: Database,
+    build: ImageBuild,
+    references: tuple[ImageReference, ...],
+    preview: Path,
+) -> tuple[SourceUse, ...]:
     """Populate only verified bindings in the caller's bundle transaction after blobs."""
     verify_assets(build, preview)
     if len({(ref.printing_id, ref.face_id) for ref in references}) != len(references):
@@ -371,24 +467,11 @@ def populate_jp_assets(
         for row in db.rows("printing_face")
     }
     for ref in references:
-        if (
-            ref.page.kind != "official_page"
-            or ref.page.parser_version != PARSER
-            or ref.source_url != image_url(ref.source_src_raw, ref.page.url)
-            or not ref.source_src_raw
-        ):
-            raise ValueError("Invalid official image binding provenance")
-        printing = printing_rows.get(ref.printing_id)
-        face = face_rows.get((ref.printing_id, ref.face_id))
-        if printing is None or face is None:
-            raise ValueError("Image binding has no printing face")
-        if (
-            printing.values["region"],
-            printing.values["card_no"],
-            printing.values["source_id"],
-            face.values["source_id"],
-        ) != ("jp", ref.card_no, ref.page.id, ref.page.id):
-            raise ValueError("Image binding differs from the printing page")
+        _verify_binding(
+            ref,
+            printing_rows.get(ref.printing_id),
+            face_rows.get((ref.printing_id, ref.face_id)),
+        )
     uses = uses_sorted((*build.source_uses(), *reference_uses(references)))
     insert_raw_sources(db, (use.source for use in uses))
     by_url = {item.source.url: item for item in build.images}
@@ -406,6 +489,8 @@ def populate_jp_assets(
     used: set[str] = set()
     for ref in references:
         item = by_url.get(ref.source_url)
+        if item is not None and item.region != ref.region:
+            raise ValueError("Image binding crosses regional image batches")
         image_id = "img:binding:" + digest(
             canonical(
                 {
@@ -474,6 +559,7 @@ def verify_asset_sources(
 ) -> None:
     """Compare retained source size and oriented dimensions with the sealed PNGs."""
     batches: dict[tuple[str, str], FrozenSources] = {}
+    current: dict[tuple[str, str], set[str]] = {}
     for item in build.images:
         pin = item.source.archive
         key = pin.store_id, pin.batch_id
@@ -482,9 +568,17 @@ def verify_asset_sources(
             if root is None:
                 raise ValueError("Image source store is not configured")
             batches[key] = FrozenSources(root, *key)
+            current[key] = {
+                entry.source_version_id for entry in batches[key].inventory.current
+            }
         source, raw, descriptor = batches[key].read(
             item.source.id, parser_version=DEFAULT_RECIPE.version
         )
+        if item.source.id not in current[key] or (
+            descriptor.provider,
+            descriptor.kind,
+        ) != (item.region, "image"):
+            raise ValueError("Image source is not current in its regional batch")
         with Image.open(BytesIO(raw)) as opened:
             oriented = ImageOps.exif_transpose(opened)
             dimensions = oriented.size

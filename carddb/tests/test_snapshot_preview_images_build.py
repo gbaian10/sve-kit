@@ -109,6 +109,7 @@ def prepared_image_build(
             "https://shadowverse-evolve.com/synthetic/1.png"
             if mapping.source_index
             else "https://shadowverse-evolve.com/synthetic/0.png",
+            "jp",
         )
         for record in case.identity.included("printing")
         if isinstance(record.data, PrintingData) and record.data.region == "jp"

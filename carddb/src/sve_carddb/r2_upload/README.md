@@ -24,8 +24,9 @@ Only these public keys are permitted:
 - `snapshots/manifests/<64hex>.json` and their `.gz` / optional `.br` siblings
 - `snapshots/preview/current.json`
 
-Every retained manifest must be a complete JP preview under the existing
-publication contract. Validation checks content addresses, sizes, independent
+Every retained manifest must be a complete JP or sorted EN+JP preview under the
+existing publication contract. EN-only and other regional scopes remain rejected.
+Validation checks content addresses, sizes, independent
 snapshot and full-text readers, reference closure, canonical compressed bytes,
 public image bindings, all five image sizes, and decoded WebP format/dimensions.
 Unknown files, PNG, private fields/recipes, local paths, symlinks, special files,

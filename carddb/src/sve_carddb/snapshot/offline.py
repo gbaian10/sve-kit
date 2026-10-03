@@ -22,6 +22,7 @@ from sve_carddb.catalog.adoption_sources import (
     AdoptionSources,
     PinnedRepository,
 )
+from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
     FrozenProducts,
     load_product_identities,
@@ -40,6 +41,7 @@ from sve_carddb.registry.records import (
 )
 from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Batch, Ownership
+from sve_carddb.snapshot.offline_images import prepare_images
 from sve_carddb.snapshot.preview.build import Built
 from sve_carddb.snapshot.project import Decisions, Settings, project
 from sve_carddb.snapshot.values import array, canonical, digest
@@ -69,6 +71,7 @@ if TYPE_CHECKING:
     from sve_carddb.card_extras import ErrataPage, ExtrasPlan
     from sve_carddb.catalog.adoption_importer import AdoptionInputs
     from sve_carddb.catalog.projection import CatalogProjection
+    from sve_carddb.image_assets import ImageBuild
     from sve_carddb.products import ProductIdentities
     from sve_carddb.registry.records import CorrectionEvidence
     from sve_carddb.snapshot.project import Projection
@@ -270,11 +273,13 @@ def _source_gaps(db: Database, extras: ExtrasPlan) -> list[JsonValue]:
     return source_gaps
 
 
-def build(  # ruff: ignore[too-many-locals] -- one composition binds verified domain plans in a single transaction
+def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statements] -- one transaction and its sealed replay bind the independently verified domain plans
     inputs: Inputs,
     *,
     errata: tuple[ErrataPage, ...] = (),
     bundle_dir: Path | None = None,
+    images: ImageBuild | None = None,
+    image_root: Path | None = None,
 ) -> Built:
     """Build both regions from sealed sources, retaining every diagnostic source use."""
     from sve_carddb.catalog.adoption_importer import AdoptionInputs, populate_adoptions  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
@@ -286,6 +291,16 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                 raise ValueError(
                     "Offline bundle must be disjoint from immutable inputs"
                 )
+    mounted = prepare_images(inputs, images, image_root)
+    if (
+        mounted is not None
+        and bundle_dir is not None
+        and (
+            bundle_dir.resolve().is_relative_to(mounted.root.resolve())
+            or mounted.root.resolve().is_relative_to(bundle_dir.resolve())
+        )
+    ):
+        raise ValueError("Offline bundle and image assets must be disjoint")
     en, jp = inputs.sources
     identity = plan_preview(
         inputs.repo / "authored",
@@ -373,6 +388,10 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
         "selected_regions": ["en", "jp"],
         "published_history": "explicit-empty-no-releases",
     }
+    if mounted is not None:
+        dependencies.update(mounted.crops.dependencies())
+        configuration["image_crop_overrides"] = mounted.crops.configuration()
+        configuration["image_recipe"] = DEFAULT_RECIPE.version
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     schema = compile_build((*MINIMUM_CAPABILITIES, "en", "translation_evidence"))
     derived = _derive_adoptions(adoptions, schema, context, stores)
@@ -383,6 +402,7 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
         *_adoption_uses(adoptions, stores),
         *_translation_uses(adoptions, context, stores),
     )
+    image_report: dict[str, JsonValue] | None = None
     with create_database(schema) as db:
         with db.transaction():
             parents = populate_text_preview(
@@ -418,6 +438,11 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
             )
             record = input_record(context, (*parents.uses, *added.uses, *adopted.uses))
             record.verify(db, context, expected)
+            if mounted is not None:
+                record, image_report = mounted.populate(
+                    db, inputs, identity, context, record
+                )
+                expected = record.uses
         restrictions = require_card_extras_ready(
             db,
             tuple(
@@ -510,6 +535,13 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
             "Web handoff and acceptance",
         ],
     }
+    if image_report is not None:
+        report["image_assets"] = image_report
+        report["incomplete_formal_gates"] = [
+            item
+            for item in array(report["incomplete_formal_gates"])
+            if item != "image publication (#35)"
+        ]
     if bundle_dir is not None:
 
         def populate(target: Database) -> InputRecord:
@@ -529,10 +561,15 @@ def build(  # ruff: ignore[too-many-locals] -- one composition binds verified do
                 target, adoptions, build=context, stores=stores
             )
             extras_record = populate_card_extras(target, extras, build=context)
-            return input_record(
+            complete = input_record(
                 context,
                 (*parent_record.uses, *extras_record.uses, *adoption_record.uses),
             )
+            if mounted is not None:
+                complete, _ = mounted.populate(
+                    target, inputs, identity, context, complete
+                )
+            return complete
 
         publish_bundle(
             schema, bundle_dir, context, expected, populate, report, stores=stores
