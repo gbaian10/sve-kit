@@ -1,3 +1,4 @@
+import re
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -22,11 +23,11 @@ from sve_carddb.manifest import Kind, Link, Manifest, Outcome, Region
 from sve_carddb.sources import official_sv1 as sv1
 
 from .fakeportal import ETAG, FakePortal, card_id
+from .fakesite import page
 
 if TYPE_CHECKING:
     from .conftest import FakeClock
 
-FIXTURES = Path(__file__).parent / "fixtures" / "official_sv1"
 FOLLOWER = card_id(0)
 SPELL = card_id(1)
 
@@ -77,16 +78,20 @@ def test_urls_follow_the_official_patterns() -> None:
     )
 
 
-def test_template_matches_the_real_card_page() -> None:
-    # The template is an exception to reading `<img src>`; it must keep matching the site.
-    images = sv1.parse_card_images((FIXTURES / "card_100011010.html").read_bytes())
-    assert images.urls == [sv1.image_url(100011010, face) for face in sv1.FACES]
-    assert images.originals[0].endswith("C_100011010.png?202609261156")
+def test_template_matches_the_synthetic_card_page() -> None:
+    images = sv1.parse_card_images(FakePortal().card_page(FOLLOWER).encode())
+    assert images.urls == [sv1.image_url(FOLLOWER, face) for face in sv1.FACES]
+    assert images.originals == [
+        f"{sv1.image_url(FOLLOWER, face)}?202609261156" for face in sv1.FACES
+    ]
 
 
-def test_the_real_error_page_has_no_images() -> None:
-    body = (FIXTURES / "card_930844060_error.html").read_bytes()
-    assert sv1.parse_card_images(body).urls == []
+def test_the_synthetic_error_page_has_no_images() -> None:
+    portal = FakePortal()
+    portal.no_page.add(SPELL)
+    images = sv1.parse_card_images(portal.card_page(SPELL).encode())
+    assert images.urls == []
+    assert images.originals == []
 
 
 def test_a_page_that_is_neither_card_nor_error_is_rejected() -> None:
@@ -442,3 +447,71 @@ async def test_stored_cards_reads_the_japanese_api(
     cards = stored_cards(crawler.crawler.writer)
     assert cards is not None
     assert cards[0].card_id == FOLLOWER
+
+
+@pytest.mark.parametrize(
+    ("content", "message"),
+    [
+        ('<h1 class="card-main-title"></h1>', "card page has no title"),
+        (
+            '<h1 class="card-main-title">Synthetic</h1>',
+            "card page 'Synthetic' has no card image",
+        ),
+        (
+            '<h1 class="card-main-title">Synthetic</h1><div class="card-main-image"><img alt="decoy"></div>',
+            "card page 'Synthetic' has no card image",
+        ),
+    ],
+    ids=["empty-title", "missing-images", "missing-src"],
+)
+def test_card_page_rejections_are_precise(content: str, message: str) -> None:
+    with pytest.raises(ValidationError, match="^" + re.escape(message) + "$"):
+        sv1.parse_card_images(page(content).encode())
+
+
+def test_title_and_images_are_confined_to_the_card_structure() -> None:
+    content = (
+        FakePortal()
+        .card_page(FOLLOWER)
+        .replace(
+            '<div class="card">',
+            '<h1>Unrelated heading</h1><img src="/decoy.png"><div class="card">',
+        )
+    )
+    assert sv1.parse_card_images(content.encode()).urls == [
+        sv1.image_url(FOLLOWER, face) for face in sv1.FACES
+    ]
+    with pytest.raises(MissingElementError, match=r"h1\.card-main-title"):
+        sv1.parse_card_images(page("<h1>Unrelated heading</h1>").encode())
+
+
+@pytest.mark.parametrize(
+    ("field", "value", "message"),
+    [
+        ("card_id", 12345678, "unexpected card_id 12345678"),
+        ("card_id", True, "unexpected card_id True"),
+        ("card_name", [], f"card {FOLLOWER}: unexpected card_name or char_type"),
+        ("char_type", "1", f"card {FOLLOWER}: unexpected card_name or char_type"),
+    ],
+    ids=["short-id", "bool-id", "name-type", "char-type"],
+)
+def test_api_card_fields_are_checked(field: str, value: object, message: str) -> None:
+    cards = FakePortal().cards
+    cards[0][field] = value
+    with pytest.raises(ValidationError, match="^" + re.escape(message) + "$"):
+        sv1.parse_cards(api_body(cards))
+
+
+def test_api_mapping_keys_do_not_make_a_list_an_object() -> None:
+    with pytest.raises(ValidationError, match=r"^API response has no 'data'$"):
+        sv1.parse_cards(orjson.dumps(["data"]))
+
+
+def test_template_requires_digits_and_face_prefix() -> None:
+    prefix = f"{sv1.BASE}/image/card/phase2/common/C/"
+    assert not sv1.is_template(prefix + "C_abcdefghi.png", sv1.Face.BASE)
+    assert not sv1.is_template(prefix + "E_100000000.png", sv1.Face.BASE)
+    assert not sv1.is_template(prefix + "100000000.png", sv1.Face.BASE)
+    assert sv1.resolve_image("/image/card/C_100000000.png?cache=1#card") == (
+        f"{sv1.BASE}/image/card/C_100000000.png"
+    )
