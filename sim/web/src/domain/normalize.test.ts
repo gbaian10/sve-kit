@@ -5,12 +5,12 @@ import { compareCodePoints, normalizeLoose, normalizeText } from "./normalize"
 describe("normalizeText", () => {
   it("folds width, case and separators so typed variants match", () => {
     expect(normalizeText("ＢＰ０１－００１")).toBe("bp01001")
-    expect(normalizeText("Fairy  Whisperer")).toBe("fairywhisperer")
+    expect(normalizeText("Synthetic  Lantern")).toBe("syntheticlantern")
     expect(normalizeText("ﾌｧｹﾞ")).toBe("ファゲ".normalize("NFKC"))
     expect(normalizeText("  ")).toBe("")
   })
   it("loose form keeps single spaces between words", () => {
-    expect(normalizeLoose("  Fairy\u3000Whisperer - EX ")).toBe("fairy whisperer ex")
+    expect(normalizeLoose("  Synthetic\u3000Lantern - EX ")).toBe("synthetic lantern ex")
   })
 })
 
