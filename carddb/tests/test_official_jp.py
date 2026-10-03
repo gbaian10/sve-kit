@@ -6,7 +6,7 @@ from sve_carddb.fetch.validate import ValidationError
 from sve_carddb.html import MissingElementError
 from sve_carddb.sources import official_jp as jp
 
-FIXTURES = Path(__file__).parent / "fixtures" / "official_jp"
+FIXTURES = Path(__file__).parent / "fixtures" / "synthetic_jp"
 MAINTENANCE = (
     "<!DOCTYPE html><html><body><header>Shadowverse EVOLVE</header>"
     + "<p>ただいまメンテナンス中です</p>" * 50
@@ -60,10 +60,10 @@ def test_allowed(url: str, *, expected: bool) -> None:
 
 
 def test_parse_sets() -> None:
-    sets = jp.parse_sets(fixture("sets.html"))
+    sets = jp.parse_sets(fixture("F16-sets.html"))
     assert len(sets) == 55
-    assert sets[0].code == "PCS02"
-    assert sets[-1] == jp.CardSet(code="PR", name="PRカード")
+    assert sets[0] == jp.CardSet(code="SYN01", name="SVE-KIT 合成F16段落002。")
+    assert sets[-1] == jp.CardSet(code="SYN55", name="SVE-KIT 合成F16段落056。")
     assert all(s.code for s in sets)
 
 
@@ -73,21 +73,30 @@ def test_parse_sets_rejects_a_page_without_the_form() -> None:
 
 
 def test_parse_list_first() -> None:
-    page = jp.parse_list_first(fixture("list_BP01_1.html"))
+    page = jp.parse_list_first(fixture("F13-list.html"))
     assert page.total == 273
     assert page.max_page == 19
-    assert page.card_numbers[:3] == ["BP01-001", "BP01-002", "BP01-003"]
-    assert len(page.card_numbers) == 15
+    assert page.card_numbers == [f"SYN01-{i:03}" for i in range(1, 16)]
 
 
 def test_parse_list_first_rejects_inconsistent_counts() -> None:
-    body = fixture("list_BP01_1.html").replace(b"max_page = 19;", b"max_page = 20;")
-    with pytest.raises(ValidationError, match="do not fit"):
-        jp.parse_list_first(body)
+    original = fixture("F13-list.html")
+    for before, after, message in (
+        (
+            b"max_page = 19;",
+            b"max_page = 20;",
+            r"^273 cards do not fit 20 pages of 15$",
+        ),
+        (b">273<", b">270<", r"^270 cards do not fit 19 pages of 15$"),
+    ):
+        assert before in original
+        body = original.replace(before, after)
+        with pytest.raises(ValidationError, match=message):
+            jp.parse_list_first(body)
 
 
 def test_parse_list_first_rejects_a_page_without_max_page() -> None:
-    body = fixture("list_BP01_1.html").replace(b"var max_page = 19;", b"")
+    body = fixture("F13-list.html").replace(b"var max_page = 19;", b"")
     with pytest.raises(ValidationError, match="max_page"):
         jp.parse_list_first(body)
 
@@ -99,20 +108,16 @@ def test_parse_list_first_rejects_a_maintenance_page() -> None:
 
 def test_parse_list_more_middle_and_last_page() -> None:
     middle = jp.parse_list_more(
-        fixture("list_BP01_18.html"), page=18, max_page=19, total=273
+        fixture("F14-list.html"), page=18, max_page=19, total=273
     )
-    last = jp.parse_list_more(
-        fixture("list_BP01_19.html"), page=19, max_page=19, total=273
-    )
-    assert len(middle.card_numbers) == 15
-    assert last.card_numbers == ["BP01-U05", "BP01-U06", "BP01-U07"]
+    last = jp.parse_list_more(fixture("F15-list.html"), page=19, max_page=19, total=273)
+    assert middle.card_numbers == [f"SYN01-{i:03}" for i in range(1, 16)]
+    assert last.card_numbers == ["SYN01-001", "SYN01-002", "SYN01-003"]
 
 
 def test_parse_list_more_rejects_a_short_middle_page() -> None:
     with pytest.raises(ValidationError, match="expected 15"):
-        jp.parse_list_more(
-            fixture("list_BP01_19.html"), page=18, max_page=19, total=273
-        )
+        jp.parse_list_more(fixture("F15-list.html"), page=18, max_page=19, total=273)
 
 
 def test_parse_list_more_rejects_an_empty_response() -> None:
@@ -126,32 +131,55 @@ def test_parse_list_more_rejects_a_page_without_cards() -> None:
 
 
 def test_card_without_illustrator_has_the_number_in_heading() -> None:
-    card = jp.parse_card(fixture("card_BP02-070.html"), expected_number="BP02-070")
-    assert card.card_number == "BP02-070"
-    assert card.name
+    card = jp.parse_card(fixture("F09-card.html"), expected_number="SYN01-009")
+    assert card.card_number == "SYN01-009"
+    assert card.name == "SVE-KIT 合成測試卡 F09-01"
     assert card.image_originals == [
-        "/wordpress/wp-content/images/cardlist/BP02/bp02_070.png"
+        "/wordpress/wp-content/images/cardlist/synthetic/SYN01-009-1.png"
     ]
     assert card.image_urls == [
-        "https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/BP02/bp02_070.png"
+        "https://shadowverse-evolve.com/wordpress/wp-content/images/cardlist/synthetic/SYN01-009-1.png"
     ]
 
 
 def test_card_with_illustrator_has_the_number_in_name() -> None:
-    card = jp.parse_card(fixture("card_BP02-071.html"), expected_number="BP02-071")
-    assert card.card_number == "BP02-071"
+    card = jp.parse_card(fixture("F10-card.html"), expected_number="SYN01-010")
+    assert card.card_number == "SYN01-010"
 
 
 def test_alternate_art_keeps_its_own_image() -> None:
-    card = jp.parse_card(fixture("card_BP02-SP01.html"), expected_number="BP02-SP01")
-    assert card.image_originals[0].endswith("/BP02/bp02_sp01_3.png")
+    card = jp.parse_card(fixture("F11-card.html"), expected_number="SYN01-SP01")
+    assert card.image_originals == [
+        "/wordpress/wp-content/images/cardlist/synthetic/SYN01-SP01-1.png"
+    ]
 
 
 def test_card_page_must_be_the_requested_card() -> None:
-    with pytest.raises(ValidationError, match="asked for BP02-069"):
-        jp.parse_card(fixture("card_BP02-070.html"), expected_number="BP02-069")
+    with pytest.raises(
+        ValidationError, match=r"^asked for SYN01-099, page shows SYN01-009$"
+    ):
+        jp.parse_card(fixture("F09-card.html"), expected_number="SYN01-099")
 
 
 def test_card_page_rejects_a_maintenance_page() -> None:
     with pytest.raises(MissingElementError, match="cardlist-Detail"):
         jp.parse_card(MAINTENANCE, expected_number="BP02-070")
+
+
+def test_list_numbers_outside_list_items_are_ignored() -> None:
+    body = fixture("F13-list.html") + b'<span class="number">SYN01-OUTSIDE</span>'
+    assert jp.parse_list_first(body).card_numbers == [
+        f"SYN01-{i:03}" for i in range(1, 16)
+    ]
+
+
+def test_duplicate_list_number_is_rejected() -> None:
+    body = fixture("F13-list.html").replace(b">SYN01-002<", b">SYN01-001<")
+    with pytest.raises(ValidationError, match=r"^duplicate card numbers on one page$"):
+        jp.parse_list_first(body)
+
+
+def test_product_code_trailing_character_is_rejected() -> None:
+    body = fixture("F16-sets.html").replace(b'value="SYN01"', b'value="SYN01!"')
+    with pytest.raises(ValidationError, match=r"^unexpected product code 'SYN01!'$"):
+        jp.parse_sets(body)
