@@ -42,6 +42,7 @@ from sve_carddb.crawl_svwb import SVWB_SITE
 from sve_carddb.crawl_svwb import cards as svwb_cards
 from sve_carddb.crawl_svwb import stored_image_urls as svwb_image_urls
 from sve_carddb.digital_links.commands import app as digital_links_app
+from sve_carddb.digital_name_policies.commands import app as digital_name_policies_app
 from sve_carddb.errata_fetch import (
     ErrataResult,
     fetch_new,
@@ -101,6 +102,7 @@ if TYPE_CHECKING:
 
 app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card database.")
 app.add_typer(digital_links_app, name="digital-links")
+app.add_typer(digital_name_policies_app, name="digital-name-policies")
 crawl_app = typer.Typer(
     no_args_is_help=True, help="Fetch official pages into SVE_DATA_DIR."
 )
