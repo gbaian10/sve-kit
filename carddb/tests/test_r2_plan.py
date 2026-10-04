@@ -3,19 +3,19 @@
 import gzip
 import json
 import os
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- only monkeypatched calls, never a real subprocess
 from typing import TYPE_CHECKING
 
+import brotli
 import httpx
 import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.r2_upload.compression import command_brotli
 from sve_carddb.r2_upload.plan import POINTER, UploadError, plan_preview, read_member
 from sve_carddb.r2_upload.s3 import Credentials
 from sve_carddb.r2_upload.upload import upload
-from sve_carddb.snapshot.export import Brotli, export_snapshot
+from sve_carddb.snapshot.export import export_snapshot
+from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -210,22 +210,29 @@ def test_broken_public_closure_stops_before_any_network(
     assert store.calls == []
 
 
-def test_explicit_brotli_producer_is_required_and_verified(
+def test_brotli_preview_is_validated_offline_without_a_producer(
     images: PublicImages, tmp_path: Path
 ) -> None:
-    codec = Brotli("synthetic-protocol", lambda raw: b"synthetic-br:" + raw)
+    codec = python_brotli()
     snapshot = export_snapshot(images.projection, images.ownership, BATCH, brotli=codec)
     roots = Roots(tmp_path / "br", tmp_path / "formal")
     write_preview(snapshot, roots, {}, brotli=codec, image_source=images.library)
-    with pytest.raises(
-        UploadError, match=r"^Brotli members require the explicit producer compressor$"
-    ):
-        plan_preview(roots.preview)
-    plan = plan_preview(roots.preview, brotli=codec)
-    br = next(m for m in plan.members if m.key.endswith(".br"))
-    (roots.preview / br.key).write_bytes(b"synthetic bad br")
+    plan = plan_preview(roots.preview)
+    br = next(m for m in plan.members if m.phase == 2 and m.key.endswith(".br"))
+    path = roots.preview / br.key
+    raw = path.with_suffix("").read_bytes()
+    alternate = brotli.compress(raw, quality=4)
+    assert alternate != path.read_bytes()
+    path.write_bytes(alternate)
+    alternate_plan = plan_preview(roots.preview)
+    assert len(alternate_plan.members) == len(plan.members)
+    assert alternate_plan != plan
+    path.write_bytes(brotli.compress(b"synthetic wrong content"))
     with pytest.raises(UploadError, match=r"^Inconsistent Brotli member$"):
-        plan_preview(roots.preview, brotli=codec)
+        plan_preview(roots.preview)
+    path.write_bytes(b"synthetic invalid br")
+    with pytest.raises(UploadError, match=r"^Inconsistent Brotli member$"):
+        plan_preview(roots.preview)
 
 
 @pytest.mark.parametrize(
@@ -294,44 +301,3 @@ def test_public_image_bytes_and_size_set_are_independently_verified(
     )
     with pytest.raises(UploadError, match="^" + message + "$"):
         plan_preview(root)
-
-
-def test_local_encoder_protocol_and_redaction(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    command = tmp_path / "encoder"
-    command.write_bytes(b"synthetic local producer executable")
-
-    def fake(
-        argv: list[str],
-        *,
-        stderr: int,
-        env: dict[str, str],
-        input: bytes | None = None,  # ruff: ignore[builtin-argument-shadowing] -- exact subprocess keyword protocol
-    ) -> bytes:
-        assert env == {"PATH": os.defpath, "LC_ALL": "C", "LANG": "C"}
-        assert "SVE_R2_SECRET_ACCESS_KEY" not in env
-        assert "AWS_SECRET_ACCESS_KEY" not in env
-        assert stderr == subprocess.DEVNULL
-        assert argv[0] == str(command)
-        if argv[1:] == ["--version"]:
-            return b"synthetic producer-v1"
-        assert argv[1:] == ["-q", "11", "-c"]
-        assert input == b"synthetic input"
-        return b"synthetic encoded"
-
-    monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
-    monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
-    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "synthetic-aws-secret")
-    monkeypatch.setattr(subprocess, "check_output", fake)
-    codec = command_brotli(command)
-    assert codec.compress(b"synthetic input") == b"synthetic encoded"
-
-    def failed(*_args: object, **_kwargs: object) -> bytes:
-        raise subprocess.CalledProcessError(1, "synthetic private executable")
-
-    monkeypatch.setattr(subprocess, "check_output", failed)
-    with pytest.raises(UploadError, match=r"^Explicit Brotli compressor failed$"):
-        codec.compress(b"synthetic input")
-    with pytest.raises(UploadError, match=r"^Explicit Brotli compressor failed$"):
-        command_brotli(command)

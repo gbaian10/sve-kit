@@ -60,8 +60,9 @@ the newly reserved token. Index size/previous come from durable receipts; execut
 must reconcile them with the real index. No remote inventory can be discovered
 without I/O. `would_collect` is empty because collection requires a separate
 per-run inventory and consent, rather than a guessed list of obsolete objects.
-A Brotli bundle requires the same pinned
-`--brotli-command` as its producer; gzip-only needs no external compressor.
+Brotli bundles use the locked Python `brotli` package for bounded decompression against raw JSON.
+No external compressor or Brotli CLI option is required; frozen manifest and
+changes bytes are preserved without recompression.
 
 ## Explicit maintainer execution
 

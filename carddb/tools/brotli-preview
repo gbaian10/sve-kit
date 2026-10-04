@@ -1,3 +1,0 @@
-#!/bin/sh
-# Use the project's interpreter without ambient Python or credential configuration.
-exec "$(dirname "$0")/../.venv/bin/python" -m sve_carddb.r2_upload.brotli_encoder "$@"

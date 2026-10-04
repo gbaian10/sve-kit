@@ -12,7 +12,12 @@ from sve_carddb.r2_upload.plan import read_member
 from sve_carddb.snapshot.export import Blob, Snapshot
 from sve_carddb.snapshot.media import MediaPlan
 from sve_carddb.snapshot.project import Projection
-from sve_carddb.snapshot.publish.plan import JSON_KEY, prepare, verify_media
+from sve_carddb.snapshot.publish.plan import (
+    JSON_KEY,
+    prepare,
+    release_attachments,
+    verify_media,
+)
 from sve_carddb.snapshot.publish.state import Checkpoint, Ledger, atomic, attempt
 from sve_carddb.snapshot.publish.storage import PublishError
 from sve_carddb.snapshot.reader import read_snapshot
@@ -27,7 +32,6 @@ from sve_carddb.snapshot.values import (
 )
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.export import Brotli
     from sve_carddb.snapshot.publish.plan import Release
 
 
@@ -126,21 +130,17 @@ def _inventory(root: Path, allowed: set[str]) -> None:
         raise PublishError("Frozen bundle inventory differs from sealed members")
 
 
-def load_bundle(
-    root: Path, ledger: Ledger, *, cdn_root: str, brotli: Brotli | None = None
-) -> Release:
+def load_bundle(root: Path, ledger: Ledger, *, cdn_root: str) -> Release:
     """Validate the full transport and reservation before any credential/network access."""
     try:
-        return _load(root, ledger, cdn_root=cdn_root, brotli=brotli)
+        return _load(root, ledger, cdn_root=cdn_root)
     except PublishError:
         raise
     except ValueError, OSError, KeyError, TypeError, SchemaError:
         raise PublishError("Frozen formal release bundle validation failed") from None
 
 
-def _load(
-    root: Path, ledger: Ledger, *, cdn_root: str, brotli: Brotli | None
-) -> Release:
+def _load(root: Path, ledger: Ledger, *, cdn_root: str) -> Release:
     directory(root)
     private = object_value(parse(read_member(root, "release.json")))
     if (
@@ -191,12 +191,24 @@ def _load(
     )
     for asset in media.assets:
         read_member(root / "sources", string(asset["source"]))
+    attachments = {
+        path: Blob(
+            manifest_raw,
+            read_member(root, path + ".br")
+            if (root / (path + ".br")).exists()
+            else None,
+            read_member(root, path + ".gz"),
+        )
+    }
+    if manifest["changes_ref"] is not None:
+        ref = object_value(manifest["changes_ref"])
+        attachments[string(ref["path"])] = _blob(root, ref)
     release = prepare(
         snapshot,
         media,
         root / "sources",
         cdn_root=cdn_root,
-        brotli=brotli,
+        attachments=attachments,
         changes=None
         if manifest["changes_ref"] is None
         else read_member(root, string(object_value(manifest["changes_ref"])["path"])),
@@ -225,7 +237,7 @@ def _load(
     return release
 
 
-def write_bundle(root: Path, release: Release, *, brotli: Brotli | None = None) -> None:
+def write_bundle(root: Path, release: Release) -> None:
     """Upstream formal-gate callers freeze their already-reserved release explicitly."""
     directory(root)
     if (
@@ -234,7 +246,7 @@ def write_bundle(root: Path, release: Release, *, brotli: Brotli | None = None) 
             release.media,
             release.source,
             cdn_root=release.cdn_root,
-            brotli=brotli,
+            attachments=release_attachments(release),
             changes=None if release.changes is None else canonical(release.changes),
             confirmed_images=release.confirmed_images,
         )

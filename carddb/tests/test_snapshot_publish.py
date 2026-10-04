@@ -1,7 +1,6 @@
 """Fake-S3 races, poisoned query caches, failed attempts and restricted window GC."""
 
 import os
-import zlib
 from copy import deepcopy
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -10,7 +9,8 @@ import pytest
 
 import sve_carddb.snapshot.publish as runner
 import sve_carddb.snapshot.publish.state as state_module
-from sve_carddb.snapshot.export import Batch, Brotli, export_snapshot
+from sve_carddb.snapshot.export import Batch, export_snapshot
+from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.publish import Ledger, PublishError, collect, publish
 from sve_carddb.snapshot.publish.plan import INDEX, prepare
 from sve_carddb.snapshot.publish.state import Checkpoint, attempt
@@ -859,24 +859,18 @@ def test_retry_pins_valid_regenerated_manifest_and_cdn_root(
     assert INDEX not in store.objects
 
 
-def test_three_representation_closure_and_pinned_compressor(
+def test_three_representation_closure_preserves_frozen_encodings(
     ledger: Ledger, images: PublicImages
 ) -> None:
-    # A synthetic codec exercises injection without installing a live Brotli adapter.
-    codec = Brotli("synthetic-zlib-test-v1", zlib.compress)
+    codec = python_brotli()
     store = FakeS3()
     cdn = FakeCDN(store)
     first = candidate(ledger, images, brotli=codec)
-    with pytest.raises(
-        PublishError, match=r"^Brotli requires the pinned producer compressor$"
-    ):
-        publish(ledger, store, first, cdn)
-    assert not store.objects
-    publish(ledger, store, first, cdn, brotli=codec)
+    publish(ledger, store, first, cdn)
     second = candidate(ledger, images, from_version=version(first), brotli=codec)
-    publish(ledger, store, second, cdn, brotli=codec)
+    publish(ledger, store, second, cdn)
     third = candidate(ledger, images, from_version=version(second), brotli=codec)
-    publish(ledger, store, third, cdn, brotli=codec)
+    publish(ledger, store, third, cdn)
     collect(ledger, store, revision=3, namespaces=PUBLIC)
     retained = {m.key for r in (second, third) for m in r.members}
     assert retained <= store.objects.keys()

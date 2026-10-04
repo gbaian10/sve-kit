@@ -7,7 +7,6 @@ from typing import Annotated
 import httpx
 import typer
 
-from sve_carddb.r2_upload.compression import command_brotli
 from sve_carddb.r2_upload.plan import UploadError, plan_preview
 from sve_carddb.r2_upload.s3 import S3, Credentials
 from sve_carddb.r2_upload.upload import upload
@@ -39,13 +38,11 @@ def upload_command(
     confirm_maintainer_authorization: Annotated[bool, typer.Option()] = False,
     account_id: Annotated[str | None, typer.Option()] = None,
     bucket: Annotated[str | None, typer.Option()] = None,
-    brotli_command: Annotated[Path | None, typer.Option()] = None,
 ) -> None:
     """Print counts and bytes without contacting R2 unless execution is authorized."""
     try:
         _authorization(execute, confirm_maintainer_authorization)
-        codec = None if brotli_command is None else command_brotli(brotli_command)
-        plan = plan_preview(preview_dir, brotli=codec)
+        plan = plan_preview(preview_dir)
         report = plan.report()
         if execute:
             account_id, bucket = _target(account_id, bucket)
@@ -54,7 +51,7 @@ def upload_command(
                 trust_env=False, follow_redirects=False, timeout=30
             ) as client:
                 remote = S3(account_id, bucket, credentials, client)
-                report = upload(plan, remote, brotli=codec)
+                report = upload(plan, remote)
         typer.echo(json.dumps(report, sort_keys=True, separators=(",", ":")))
     except UploadError as error:
         raise typer.BadParameter(str(error)) from None

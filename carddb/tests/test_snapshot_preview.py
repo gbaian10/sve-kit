@@ -2,7 +2,6 @@
 
 from dataclasses import replace
 from typing import TYPE_CHECKING
-from zlib import compress
 
 import pytest
 from pydantic import JsonValue
@@ -18,7 +17,8 @@ from sve_carddb.products.identities import ProductIdentities
 from sve_carddb.products.plan import OfficialProducts
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.snapshot import load_registry
-from sve_carddb.snapshot.export import Brotli, Ownership, export_snapshot
+from sve_carddb.snapshot.export import Ownership, export_snapshot
+from sve_carddb.snapshot.export.compression import python_brotli, verify_brotli
 from sve_carddb.snapshot.preview import (
     Roots,
     _write,
@@ -32,7 +32,7 @@ from sve_carddb.snapshot.preview.build import (
     exclusions,
     publication_printings,
 )
-from sve_carddb.snapshot.preview.commands import command_brotli, verify_inputs
+from sve_carddb.snapshot.preview.commands import verify_inputs
 from sve_carddb.snapshot.project import project
 from sve_carddb.snapshot.project.records import art_records, initial
 from sve_carddb.snapshot.project.source import Source
@@ -260,7 +260,7 @@ def test_preview_pointer_follows_every_immutable_member(
     monkeypatch: pytest.MonkeyPatch,
     with_brotli: bool,
 ) -> None:
-    codec = Brotli("synthetic-test-codec-v1", compress) if with_brotli else None
+    codec = python_brotli() if with_brotli else None
     if codec is not None:
         exported = export_snapshot(logical[0], logical[1], BATCH, brotli=codec)
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
@@ -534,37 +534,6 @@ class EmptySources:
         return ()
 
 
-def test_explicit_compressor_is_version_and_binary_pinned(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    executable = tmp_path / "compressor"
-    executable.write_bytes(b"synthetic executable")
-    calls: list[tuple[list[str], bytes | None]] = []
-
-    def output(args: list[str], **kwargs: object) -> str | bytes:
-        raw = kwargs.get("input")
-        assert raw is None or isinstance(raw, bytes)
-        calls.append((args, raw))
-        return (
-            "synthetic-compressor-v1\n"
-            if kwargs.get("text")
-            else b"synthetic compressed"
-        )
-
-    monkeypatch.setattr(
-        "sve_carddb.snapshot.preview.commands.subprocess.check_output", output
-    )
-    codec = command_brotli(executable)
-    assert codec.version == "synthetic-compressor-v1 / " + digest(
-        executable.read_bytes()
-    )
-    assert codec.compress(b"synthetic bytes") == b"synthetic compressed"
-    assert calls == [
-        ([str(executable), "--version"], None),
-        ([str(executable), "-q", "11", "-c"], b"synthetic bytes"),
-    ]
-
-
 def cli_recipe(tmp_path: Path) -> dict[str, JsonValue]:
     return {
         "repo": str(tmp_path / "repo"),
@@ -586,8 +555,10 @@ def cli_recipe(tmp_path: Path) -> dict[str, JsonValue]:
 
 
 @pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
+@pytest.mark.parametrize("with_brotli", [False, True])
 def test_cli_export_explicit_env_roots(
     format_version: str,
+    with_brotli: bool,
     logical: tuple[Projection, Ownership],
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
@@ -608,6 +579,7 @@ def test_cli_export_explicit_env_roots(
             str(path),
             "--format-version",
             format_version,
+            "--brotli" if with_brotli else "--no-brotli",
         ],
         env={
             "SVE_PREVIEW_DIR": str(tmp_path / "preview"),
@@ -629,6 +601,10 @@ def test_cli_export_explicit_env_roots(
         parse((root / string(pointer["manifest_path"])).read_bytes())
     )
     assert manifest["format_version"] == format_version
+    br_files = list((root / "snapshots").rglob("*.json.br"))
+    assert bool(br_files) == with_brotli
+    for member in br_files:
+        verify_brotli(member.read_bytes(), member.with_suffix("").read_bytes())
 
 
 def test_review_joins_follow_filtered_primary_keys() -> None:
