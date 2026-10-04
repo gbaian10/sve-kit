@@ -21,7 +21,6 @@ from sve_carddb.manifest import Kind, Region
 from sve_carddb.registry.build import build as build_identity
 from sve_carddb.registry.inputs import Card, Mapping
 from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.preview.evidence import MemoryEvidence
 from sve_carddb.registry.review import Inputs as IdentityInputs
 from sve_carddb.registry.review import Receipt
 from sve_carddb.registry.storage import Index, plan_files, write_files
@@ -34,6 +33,7 @@ from sve_carddb.translations.sources import CODE_PATH, RUNTIME, Sources
 
 from .adoption_fixtures import REPO, commit, write
 from .catalog_vocabulary_fixtures import current_vocabulary_case, make_vocabulary_case
+from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import envelope as product_envelope
 from .product_fixtures import family, install
 from .test_adoption_sources import SOURCE_RUNTIME

@@ -21,17 +21,12 @@ from sve_carddb.catalog.adoption_models import (
     TextEvidence,
 )
 from sve_carddb.extract import official_en, official_jp
-from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.registry.inputs import JSON_VALUE
-from sve_carddb.registry.records import Observation, PrintingData
-from sve_carddb.registry.review import observation
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
-from sve_carddb.sources import official_en as en
-from sve_carddb.sources import official_jp as jp
 
 if TYPE_CHECKING:
     from collections.abc import Mapping
@@ -237,153 +232,11 @@ class AdoptionSources:
                 self.registries[key] = load_registry(root)
         return self.registries[key]
 
-    def association(
-        self, ref: SourceRef, printing_id: str, face_id: str, review: ReviewContext
-    ) -> None:
-        """Verify source version, exact card URL, language and the reviewed source-face map."""
-        registry = self.registry(review)
-        found = [
-            r.data
-            for r in registry.records.values()
-            if isinstance(r.data, PrintingData) and r.data.id == printing_id
-        ]
-        if len(found) != 1:
-            raise ValueError("Historical name observation printing is absent")
-        printing = found[0]
-        source = self.text(ref, review)[1]
-        provider = jp if printing.region == "jp" else en
-        expected = {
-            f"/faces/{mapping.source_index}/name"
-            for mapping in printing.source_face_map
-            if mapping.face_id == face_id
-        }
-        if (
-            source.url != provider.card_url(printing.card_no)
-            or ref.locator not in expected
-        ):
-            raise ValueError(
-                "Historical name observation printing/face/source mismatch"
-            )
-        self.verify_printing(printing, review, ref.source_version_id)
-
-    def printing_sources(
-        self, printing: PrintingData, review: ReviewContext
-    ) -> set[str]:
-        """Reconstruct reviewed physical source closure from all pinned batch inventories."""
-        provider = jp if printing.region == "jp" else en
-        versions = {
-            item.source_version_id
-            for pin in review.source_batches
-            for item in self.batch(pin.batch_id).inventory.current
-            if item.url == provider.card_url(printing.card_no)
-        }
-        if not versions:
-            raise ValueError("Reviewed printing frozen source coverage is incomplete")
-        return versions
-
-    def verify_printing(
-        self, printing: PrintingData, review: ReviewContext, version: str
-    ) -> None:
-        """Replay the reviewed complete observation, not just its name or card URL."""
-        if version not in self.printing_sources(printing, review):
-            raise ValueError("Historical printing source is outside reviewed closure")
-        parser = (
-            "official-jp-exact-v1"
-            if printing.region == "jp"
-            else "official-en-exact-v1"
-        )
-        config = object_value(parse(review.context.configuration.encode()))
-        recipes = object_value(config.get("catalog_source_recipes"))
-        try:
-            pin = Normalizer.model_validate_json(canonical(recipes.get(parser)))
-        except ValidationError:
-            raise ValueError("Reviewed printing recipe is absent") from None
-        if pin.version != parser:
-            raise ValueError("Reviewed printing recipe ID mismatch")
-        self.repository.implementation(
-            pin,
-            review.context,
-            current_runtime=not self.historical,
-        )
-        self._runtime(pin, review.context)
-        for batch in review.source_batches:
-            frozen = self.batch(batch.batch_id)
-            if not any(
-                item.source_version_id == version for item in frozen.inventory.current
-            ):
-                continue
-            source, raw, _ = frozen.read(version, parser_version=parser)
-            self._projection(pin, raw, source.url)
-            card = (
-                legacy_projection(
-                    official_jp.extract_card(raw, number=printing.card_no)
-                )
-                if printing.region == "jp"
-                else official_en.legacy_projection(
-                    official_en.extract_card(raw, number=printing.card_no)
-                )
-            )
-            actual = Observation.model_validate_json(
-                canonical(observation(card, printing.region))
-            )
-            if actual != printing.observation:
-                raise ValueError(
-                    "Historical printing identity observation cannot be replayed"
-                )
-            self._use(source, "catalog_reviewed_identity", {"printing_id": printing.id})
-
-    def image_association(self, evidence: ImageEvidence, review: ReviewContext) -> None:
-        """Resolve historical image evidence through its reviewed printing and source face."""
-        ref = evidence.image_ref
-        source = self.image(evidence)
-        records = [
-            r.data
-            for r in self.registry(review).records.values()
-            if isinstance(r.data, PrintingData) and r.data.id == ref.printing_id
-        ]
-        if len(records) != 1:
-            raise ValueError("Image adoption printing/face association mismatch")
-        printing = records[0]
-        maps = [m for m in printing.source_face_map if m.face_id == ref.face_id]
-        if len(maps) != 1:
-            raise ValueError("Image adoption printing/face association mismatch")
-        for version in self.printing_sources(printing, review):
-            self.verify_printing(printing, review, version)
-            for batch in review.source_batches:
-                frozen = self.batch(batch.batch_id)
-                if not any(
-                    i.source_version_id == version for i in frozen.inventory.current
-                ):
-                    continue
-                _, raw, _ = frozen.read(
-                    version, parser_version="catalog-image-association-v1"
-                )
-                card = (
-                    official_jp.extract_card(raw, number=printing.card_no)
-                    if printing.region == "jp"
-                    else official_en.extract_card(raw, number=printing.card_no)
-                )
-                images = tuple(face.image for face in card.faces)
-                if images[maps[0].source_index] == source.url:
-                    return
-        raise ValueError("Image adoption printing/face association mismatch")
-
     def batch(self, batch: str) -> FrozenSources:
         """Validate the complete descriptor/receipt/raw closure once per frozen batch."""
         if batch not in self.batches:
             self.batches[batch] = FrozenSources.configured(self.stores, batch)
         return self.batches[batch]
-
-    def verify(self, record: Record, review: ReviewContext) -> None:
-        """Verify every evidence item, including historical and withdrawn members."""
-        self.repository.context(review.context)
-        for batch in review.source_batches:
-            self.batch(batch.batch_id)
-        for evidence in record.evidence:
-            if isinstance(evidence, TextEvidence):
-                self.text(evidence.source_ref, review)
-            else:
-                self.image(evidence)
 
     def text(
         self, ref: SourceRef, review: ReviewContext

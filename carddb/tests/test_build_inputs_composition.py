@@ -34,8 +34,9 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.build_inputs import BuildContext, InputRecord
-    from sve_carddb.registry.preview.evidence import MemoryEvidence
     from sve_carddb.registry.review import Inputs
+
+    from .identity_evidence_fixtures import MemoryEvidence
 
 
 def _omit_first_use(build: BuildContext, uses: Iterable[SourceUse]) -> InputRecord:

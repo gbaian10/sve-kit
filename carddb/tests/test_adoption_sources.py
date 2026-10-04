@@ -9,13 +9,13 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.build_db import CompiledSchema, create_database
-from sve_carddb.build_db.t0 import compile_t0
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
-from sve_carddb.catalog.adoption_importer import import_adoptions
 from sve_carddb.catalog.adoption_sources import pointer
 from sve_carddb.manifest import Kind
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.offline import _populate_adoptions
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_archive import ArchiveError, seal_batch, verify_batch
 from sve_carddb.sources.official_jp import card_url
 
@@ -30,6 +30,7 @@ from .adoption_fixtures import (
     make_case,
     write,
 )
+from .current_catalog_fixtures import current_case, populate_case
 from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
@@ -154,7 +155,7 @@ def case(tmp_path: Path, baseline: tuple[Case, Path, str]) -> tuple[Case, Path, 
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_t0()
+    return compile_current_build()
 
 
 def test_exact_frozen_field_source_and_f1(
@@ -162,21 +163,10 @@ def test_exact_frozen_field_source_and_f1(
 ) -> None:
     inputs, archive, version = case
     with create_database(schema) as db:
-        result = import_adoptions(
-            db, inputs.inputs(), build=inputs.build(), stores={"test-store": archive}
-        )
+        result = populate_case(db, inputs, {"test-store": archive})
         assert len(result.uses) == 2
         assert {u.source.id for u in result.uses} == {version}
-        assert (
-            len(
-                [
-                    r
-                    for r in db.rows("decision_source")
-                    if r.values["source_id"] == version
-                ]
-            )
-            == 2
-        )
+        assert not db.rows("decision")
         assert any(
             r.values["text"] == "Synthetic source name" for r in db.rows("text_unit")
         )
@@ -201,7 +191,7 @@ def test_exact_frozen_field_source_and_f1(
         ),
     ],
 )
-def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- independent mutations of one tiny sealed-source baseline
+def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals,complex-structure] -- independent mutations of one tiny sealed-source baseline
     case: tuple[Case, Path, str], schema: CompiledSchema, mutation: str, message: str
 ) -> None:
     inputs, archive, _ = case
@@ -219,23 +209,13 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- inde
             blob.write_bytes(b"Changed synthetic source")
         else:
             blob.unlink()
-    elif mutation in {"parser_hash", "runtime_pin"}:
+    elif mutation == "runtime_pin":
         context = object_value(review["context"])
-        if mutation == "parser_hash":
-            config = object_value(
-                __import__("json").loads(str(context["configuration"]))
-            )
-            object_value(
-                object_value(config["catalog_source_recipes"])["exact-json-v1"]
-            )["code_hash"] = "sha256:" + "e" * 64
-            context["configuration"] = canonical(config).decode()
-        else:
-            context["dependencies"] = [
-                p
-                for p in array(context["dependencies"])
-                if object_value(p)["name"] != SOURCE_RUNTIME
-            ]
-        data["review_context_hash"] = digest(canonical(review))
+        context["dependencies"] = [
+            p
+            for p in array(context["dependencies"])
+            if object_value(p)["name"] != SOURCE_RUNTIME
+        ]
     elif mutation in {"wrong_kind", "trait", "disabled_recipe"}:
         object_value(data["subject"])["kind"] = (
             "class"
@@ -255,7 +235,7 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- inde
             for e in array(member["evidence"])
             if object_value(e)["source_ref"] != reference
         ]
-    else:
+    elif mutation != "parser_hash":
         reference["locator" if mutation == "locator" else "text_hash"] = (
             "/missing" if mutation == "locator" else "sha256:" + "e" * 64
         )
@@ -266,15 +246,28 @@ def test_source_single_guard_rejection(  # ruff: ignore[too-many-locals] -- inde
         member["evidence"] = sorted(array(member["evidence"]), key=canonical)
     write(inputs.root, name, envelope([member], review))
     index(inputs.root)
-    revised = replace(inputs, revision=commit(inputs.repository))
+    revised = replace(inputs, revision=commit(inputs.repository), review=review)
+    revised = current_case(revised)
+    build = revised.build()
+    if mutation == "parser_hash":
+        config = object_value(parse(build.configuration.encode()))
+        object_value(object_value(config["catalog_source_recipes"])["exact-json-v1"])[
+            "code_hash"
+        ] = "sha256:" + "e" * 64
+        build = BuildContext.from_inputs(
+            build.program_revision,
+            {
+                pin.name: (revised.repository / pin.name).read_bytes()
+                for pin in build.dependencies
+            },
+            config,
+        )
     with create_database(schema) as db:
         with pytest.raises((ValueError, OSError, ArchiveError), match=message):
-            import_adoptions(
-                db,
-                revised.inputs(),
-                build=revised.build(),
-                stores={"test-store": archive},
-            )
+            with db.transaction():
+                _populate_adoptions(
+                    db, revised.inputs(), build=build, stores={"test-store": archive}
+                )
         assert not db.rows("source_record")
 
 

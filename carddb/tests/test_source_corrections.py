@@ -9,7 +9,6 @@ from sve_carddb.build_db import Json, create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.products import load_products
 from sve_carddb.registry.preview import plan_preview
-from sve_carddb.registry.preview.evidence import MemoryEvidence
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.snapshot.values import canonical
@@ -24,6 +23,7 @@ from sve_carddb.text_observations import (
 from sve_carddb.text_observations.importer import revision_id
 from sve_carddb.text_observations.plan import verify_plan
 
+from .identity_evidence_fixtures import MemoryEvidence
 from .registry_snapshot_fixtures import edit_record, rewrite
 from .source_correction_fixtures import make_correction_case
 from .test_registry import inputs as inputs  # ruff: ignore[useless-import-alias] -- shared synthetic fixture

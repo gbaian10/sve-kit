@@ -1,4 +1,4 @@
-"""Anchored independent counterexamples for compound mappings and maintainer receipts."""
+"""Anchored independent counterexamples for native current compound mappings."""
 
 import copy
 import re
@@ -9,17 +9,13 @@ from typing import TYPE_CHECKING, cast
 import pytest
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.catalog.adoption_importer import derive_catalog, import_adoptions
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.catalog.adoption_models import RawMapping
 from sve_carddb.catalog.adoption_validation import _mapping_metadata
-from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, object_value
+from sve_carddb.snapshot.values import canonical, object_value
 from sve_carddb.text_observations.vocabulary import Vocabulary
 
-from .adoption_fixtures import commit, envelope, index, record, write
 from .catalog_vocabulary_fixtures import (
-    VOCABULARY_PATH,
     VocabularyCase,
     make_vocabulary_case,
     mapping,
@@ -27,6 +23,7 @@ from .catalog_vocabulary_fixtures import (
     save,
     vocabulary_record,
 )
+from .current_catalog_fixtures import current_case, populate_case, prepare_case
 from .test_glossary_adoption import checked
 
 if TYPE_CHECKING:
@@ -37,7 +34,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_t0()
+    return compile_current_build()
 
 
 @pytest.fixture(scope="module")
@@ -61,17 +58,13 @@ def case(tmp_path: Path, baseline: VocabularyCase) -> VocabularyCase:
     )
 
 
-def test_effective_receipts_derive_bilingual_bindings_and_empty_marker_definitions(
+def test_native_current_catalog_has_bilingual_bindings_and_empty_marker_definitions(
     case: VocabularyCase,
     schema: CompiledSchema,
 ) -> None:
+    case = replace(case, case=current_case(case.case))
     with create_database(schema) as db:
-        derived = derive_catalog(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        )
+        derived = prepare_case(case.case, {"test-store": case.archive}).projection
         assert not db.rows("vocabulary")
         assert not db.rows("source_record")
         assert len(derived.catalog.terms) == 3
@@ -79,18 +72,13 @@ def test_effective_receipts_derive_bilingual_bindings_and_empty_marker_definitio
         for region in ("jp", "en"):
             binding = derived.vocabulary.lookup(region, "type", "Synthetic type")
             assert (binding.code, binding.special_kinds) == ("follower", ("evolve",))
-        result = import_adoptions(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        )
+        result = populate_case(db, case.case, {"test-store": case.archive})
         assert len(db.rows("vocabulary")) == 3
         assert {u.source.id for u in result.uses}
 
 
 def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
-    case: VocabularyCase, schema: CompiledSchema
+    case: VocabularyCase,
 ) -> None:
     case = save(
         case,
@@ -99,47 +87,13 @@ def test_inactive_type_retains_its_key_but_cannot_bind_a_frozen_spelling(
             vocabulary_record(case, "type", "spell", [mapping(case)], active=False),
         ],
     )
-    with create_database(schema) as db:
-        derived = derive_catalog(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        )
-        inactive = next(t for t in derived.catalog.terms if t.code == "spell")
-        assert not inactive.active
-        assert not derived.vocabulary.bindings
-        message = "Missing or ambiguous explicit vocabulary binding: kind='type', region='jp', raw='Synthetic type', candidates=[]; new spellings require maintainer confirmation"
-        with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-            derived.vocabulary.lookup("jp", "type", "Synthetic type")
-
-
-@pytest.mark.parametrize(
-    "reviewer",
-    ["Claude Opus", "Codex", "sve-kit-sol[bot]", "Synthetic human", "gbaian10 "],
-)
-def test_confirmers_are_exact_repository_maintainers(
-    case: VocabularyCase, schema: CompiledSchema, reviewer: str
-) -> None:
-    name = "catalog-adoptions/languages/shared/001.yaml"
-    shard = object_value(read_yaml(case.case.root / name))
-    object_value(array(shard["decisions"])[0])["reviewed_by"] = reviewer
-    write(case.case.root, name, shard)
-    index(case.case.root)
-    case = replace(case, case=replace(case.case, revision=commit(case.case.repository)))
-    with (
-        create_database(schema) as db,
-        pytest.raises(
-            ValueError,
-            match=r"^Adoption confirmer must be a repository-listed maintainer$",
-        ),
-    ):
-        import_adoptions(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        )
+    derived = prepare_case(case.case, {"test-store": case.archive}).projection
+    inactive = next(t for t in derived.catalog.terms if t.code == "spell")
+    assert not inactive.active
+    assert not derived.vocabulary.bindings
+    message = "Missing or ambiguous explicit vocabulary binding: kind='type', region='jp', raw='Synthetic type', candidates=[]; new spellings require maintainer confirmation"
+    with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
+        derived.vocabulary.lookup("jp", "type", "Synthetic type")
 
 
 @pytest.mark.parametrize(
@@ -154,22 +108,20 @@ def test_confirmers_are_exact_repository_maintainers(
         ("definition_mapping", "Special-kind definitions cannot declare raw mappings"),
         ("missing_class_code", "Missing class value cannot be adopted as a code"),
         ("missing_type_code", "Missing type value cannot be adopted as a code"),
-        ("omit_marker_dependency", "Adoption direct dependency closure mismatch"),
         (
             "same_code_different_markers",
-            "Exact vocabulary raw maps to multiple active code/marker pairs",
+            "Duplicate vocabulary binding",
         ),
         (
             "same_raw_other_code",
-            "Exact vocabulary raw maps to multiple active code/marker pairs",
+            "Duplicate vocabulary binding",
         ),
-        ("duplicate_raw_different_ref", "Duplicate active vocabulary raw mapping"),
+        ("duplicate_raw_different_ref", "Duplicate vocabulary binding"),
         (
             "missing_marker_definition",
-            "Adoption dependency lacks its contract's verified effective projection",
+            "Special-kind vocabulary reference is missing",
         ),
-        ("inactive_marker", "Adoption dependency is withdrawn or inactive"),
-        ("catalog_delegation_field", "Invalid adoption fields"),
+        ("inactive_marker", "Special-kind vocabulary reference is missing"),
     ],
 )
 def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,too-many-branches] -- each mutation rebuilds all unrelated signed hashes and dependencies
@@ -184,7 +136,6 @@ def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,t
         for r in items
         if object_value(object_value(r["data"])["subject"])["kind"] == "type"
     )
-    data = object_value(base["data"])
     if mutation in {
         "missing_marker_definition",
         "inactive_marker",
@@ -213,14 +164,6 @@ def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,t
                     "role": "Synthetic complete field",
                 }
             ]
-    elif mutation == "omit_marker_dependency":
-        data["dependencies"] = [
-            d
-            for d in array(data["dependencies"])
-            if object_value(d)["table"] != "vocabulary"
-        ]
-    elif mutation == "catalog_delegation_field":
-        data["adoption_review"] = {"mode": "delegated_catalog"}
     elif mutation == "same_raw_other_code":
         items.append(
             vocabulary_record(
@@ -274,57 +217,9 @@ def test_compound_adoption_single_rejection(  # ruff: ignore[complex-structure,t
     case = save(case, items)
     with create_database(schema) as db:
         with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
-            import_adoptions(
-                db,
-                case.case.inputs(),
-                build=case.build(),
-                stores={"test-store": case.archive},
-            )
+            populate_case(db, case.case, {"test-store": case.archive})
         assert not db.rows("source_record")
         assert not db.rows("vocabulary")
-
-
-def test_withdrawn_marker_cannot_be_borrowed_from_history(
-    case: VocabularyCase, schema: CompiledSchema
-) -> None:
-    shard = object_value(read_yaml(case.case.root / VOCABULARY_PATH))
-    marker = next(
-        r
-        for r in records(case)
-        if object_value(object_value(r["data"])["subject"])["kind"] == "special_kind"
-    )
-    previous = {
-        "record_key": marker["record_key"],
-        "record_hash": digest(canonical(marker)),
-        "decision_id": shard["default_decision_id"],
-    }
-    successor = record(
-        "vocabulary_adoption",
-        {"kind": "special_kind", "code": "evolve"},
-        None,
-        case.case.review,
-        number=2,
-        previous=previous,
-    )
-    write(
-        case.case.root,
-        "catalog-adoptions/vocabulary/shared/002.yaml",
-        envelope([successor], case.case.review),
-    )
-    index(case.case.root)
-    case = replace(case, case=replace(case.case, revision=commit(case.case.repository)))
-    with (
-        create_database(schema) as db,
-        pytest.raises(
-            ValueError, match=r"^Adoption dependency is withdrawn or inactive$"
-        ),
-    ):
-        import_adoptions(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        )
 
 
 @pytest.mark.parametrize(
@@ -336,15 +231,11 @@ def test_withdrawn_marker_cannot_be_borrowed_from_history(
     ],
 )
 def test_memory_vocabulary_checks_actual_term_definitions(
-    case: VocabularyCase, schema: CompiledSchema, mutation: str, message: str
+    case: VocabularyCase, mutation: str, message: str
 ) -> None:
-    with create_database(schema) as db:
-        vocabulary = derive_catalog(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        ).vocabulary
+    vocabulary = prepare_case(
+        case.case, {"test-store": case.archive}
+    ).projection.vocabulary
     terms = vocabulary.terms
     if mutation == "term_duplicate":
         terms = (*terms, terms[0])
@@ -360,15 +251,11 @@ def test_memory_vocabulary_checks_actual_term_definitions(
 
 
 def test_new_spelling_lists_exact_missing_value_and_unapproved_candidates(
-    case: VocabularyCase, schema: CompiledSchema
+    case: VocabularyCase,
 ) -> None:
-    with create_database(schema) as db:
-        vocabulary = derive_catalog(
-            db,
-            case.case.inputs(),
-            build=case.build(),
-            stores={"test-store": case.archive},
-        ).vocabulary
+    vocabulary = prepare_case(
+        case.case, {"test-store": case.archive}
+    ).projection.vocabulary
     message = "Missing or ambiguous explicit vocabulary binding: kind='type', region='jp', raw='New spelling', candidates=['follower']; new spellings require maintainer confirmation"
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         vocabulary.lookup("jp", "type", "New spelling")

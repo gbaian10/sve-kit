@@ -20,7 +20,6 @@ from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
 from sve_carddb.registry.preview import FrozenEN, plan_preview
-from sve_carddb.registry.preview.evidence import MemoryEvidence
 from sve_carddb.registry.records import CorrectionData, CorrectionEvidence, PrintingData
 from sve_carddb.registry.review import Correction, Inputs, Receipt
 from sve_carddb.registry.storage import plan_files, write_files
@@ -41,6 +40,7 @@ from sve_carddb.text_observations import (
 )
 
 from .en_extract_fixtures import page
+from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import envelope, family, install
 from .product_identity_fixtures import (
     commit,

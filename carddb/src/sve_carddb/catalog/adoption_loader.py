@@ -89,15 +89,6 @@ class AdoptionSnapshot:
     index_content: bytes
     shards: tuple[LoadedShard, ...]
 
-    @property
-    def has_current(self) -> bool:
-        """Keep format dispatch local to each shard."""
-        return any(
-            object_value(parse(s.content)).get("catalog_adoption_format")
-            == CURRENT_FORMAT
-            for s in self.shards
-        )
-
     def current_records(self) -> tuple[CurrentRecord, ...]:
         """Read current vocabulary values without creating adoption envelopes."""
         return tuple(

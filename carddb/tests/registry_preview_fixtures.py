@@ -4,14 +4,11 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.build_inputs import ArchivePin, BuildContext, Source
 from sve_carddb.registry.inputs import digest
-from sve_carddb.registry.preview.evidence import (
-    CardEvidence,
-    FaceEvidence,
-    MemoryEvidence,
-)
+from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.records import CardData, PrintingData, Region
 
 from .build_db_fixtures import rows
+from .identity_evidence_fixtures import MemoryEvidence
 
 if TYPE_CHECKING:
     from sve_carddb.build_db.database import Database
