@@ -34,3 +34,9 @@ CR／Q&A 更新後反查裁定→IR→巨集→能力→測試；supersedes 保�
 ## 未決事項
 
 六項專案解讀已採用並登錄為 R-0010～R-0015，標 strength: inferred，不冒稱已有官方直接依據。證據正規化及前端提示長度待介面設計，但不能因此省掉 inferred 標記。
+
+## 2026-10-05 欄位簡化
+
+裁定登錄移除 `decided_by` 的決定者，日期以頂層 `decided_on` 保留，取代上列對該欄的要求。
+`question`、`decision`、`evidence`、`strength`、`applies_to`、`hint`、`supersedes` 原樣保留，
+來源本身的日期／版本與必要引文不刪；欄位清除不提升任何裁定的證據強度。
