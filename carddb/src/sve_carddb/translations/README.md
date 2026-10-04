@@ -19,6 +19,31 @@ compose in a caller-owned transaction. Authored index/shard bytes must match the
 pinned authored commit. Historical choices and raw sources remain traceable after
 withdrawal. Identical translated strings never merge different concept IDs.
 
+## Delegated card-name preparation
+
+`card_names.prepare()` creates glossary term/zh-Hant choice envelopes from an
+explicit key/value/source-claim map and its delegated coordinator receipt. It
+requires the receipt's exact record-key scope and the complete map hash in its
+decision basis. This is an authoring helper; supplying a receipt is not evidence
+that approval happened. Obtain the coordinator's actual key-allocation decision
+before calling it. Bare model reviews and another batch's delegation do not grant
+that authority.
+
+Candidates contain a frozen JP name reference, never a separate original-name
+field. The helper keeps `machine` wording as `machine`; fully borrowed wording
+uses `project` with its unverified `source_claim`. Callers decide provenance per
+name before preparation; draft basis/confidence is not an adoption rule. Omit
+untranslated or pending candidates and preserve their IDs, hashes and confidence
+in a separate private report. These envelopes create no card identity, same-card
+links, per-card exceptions or emphasis overrides.
+
+Validate all proposed keys against the complete adopted glossary first. The
+helper rejects reused keys, duplicate exact names and non-JP/name locators; the
+regular loader/importer must still replay every frozen field and source closure.
+It returns small, deterministic, single-kind shards without writing files. Append
+their sequences and update the existing index only after checking the complete
+closure. Previously adopted files remain immutable.
+
 `import_digital()` reads the explicitly pinned API inputs and only imports the
 requested cards, required parent cards and all recognized name faces/languages.
 Absent parents or inconsistent localized face inventories fail. Missing names stay
