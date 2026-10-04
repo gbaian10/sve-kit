@@ -249,3 +249,50 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
             ),
         ],
     )
+
+
+def current_vocabulary_case(case: VocabularyCase) -> VocabularyCase:
+    """Replace synthetic receipt vocabulary with the native current entry."""
+    includes: dict[str, JsonValue] = {}
+    for path in (case.case.root / "catalog-adoptions").rglob("*.yaml"):
+        if path.name == "index.yaml":
+            continue
+        relative = path.relative_to(case.case.root).as_posix()
+        if "/vocabulary/" not in relative and "/languages/" not in relative:
+            path.unlink()
+            continue
+        rows: list[JsonValue] = []
+        for raw in array(object_value(read_yaml(path))["records"]):
+            record = object_value(raw)
+            data = object_value(record["data"])
+            rows.append(
+                {
+                    "record_key": canonical([record["kind"], data["subject"]]).decode(),
+                    "kind": record["kind"],
+                    "data": {
+                        "subject": data["subject"],
+                        "value": data["value"],
+                        "evidence": record["evidence"],
+                    },
+                    "origin": "project",
+                    "low_confidence": False,
+                    "note": "Synthetic current value",
+                }
+            )
+        payload: dict[str, JsonValue] = {
+            "catalog_adoption_format": 2,
+            "kind": "catalog_adoption_shard",
+            "records": sorted(rows, key=lambda r: str(object_value(r)["record_key"])),
+        }
+        path.write_bytes(canonical(payload))
+        includes[relative] = digest(canonical(payload))
+    write(
+        case.case.root,
+        "catalog-adoptions/index.yaml",
+        {
+            "catalog_adoption_format": 2,
+            "kind": "catalog_adoption_index",
+            "includes": dict(sorted(includes.items())),
+        },
+    )
+    return replace(case, case=replace(case.case, revision=commit(case.case.repository)))

@@ -2,6 +2,7 @@
 
 import shutil
 from dataclasses import replace
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
@@ -159,11 +160,14 @@ def catalogue(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
         vocabulary,
     )
+    monkeypatch.setattr(offline, "_adoption_uses", lambda *_args: ())
     monkeypatch.setattr(adoption_importer, "AdoptionInputs", CatalogInputs)
     monkeypatch.setattr(
-        adoption_importer, "derive_catalog", lambda *_args, **_kwargs: projection
+        offline,
+        "_prepare_catalog",
+        lambda *_args, **_kwargs: SimpleNamespace(projection=projection),
     )
-    monkeypatch.setattr(adoption_importer, "populate_adoptions", populate)
+    monkeypatch.setattr(offline, "_populate_adoptions", populate)
 
 
 def test_offline_name_policy_reconstructs_identical_bundle(

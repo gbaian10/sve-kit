@@ -1,12 +1,12 @@
 """Small regional composition counterexamples, sharing sealed immutable baselines."""
 
 from dataclasses import replace
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
 from typer.testing import CliRunner
 
-from sve_carddb.build_db.t1 import compile_minimum
 from sve_carddb.build_inputs import InputRecord, SourceUse, input_record
 from sve_carddb.card_extras import (
     CardPage,
@@ -25,6 +25,7 @@ from sve_carddb.catalog.projection import CatalogProjection
 from sve_carddb.cli import app
 from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
+from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.media import prepare_media
@@ -47,8 +48,8 @@ from sve_carddb.snapshot.values import (
     string,
 )
 
-from .adoption_fixtures import REPO
-from .catalog_vocabulary_fixtures import make_vocabulary_case
+from .adoption_fixtures import REPO, commit
+from .catalog_vocabulary_fixtures import current_vocabulary_case, make_vocabulary_case
 from .test_snapshot_export import exported as exported  # ruff: ignore[useless-import-alias] -- register shared export fixture
 from .test_snapshot_preview import EmptySources, prepare_build
 from .test_snapshot_preview import logical as logical  # ruff: ignore[useless-import-alias] -- register the export fixture parent
@@ -122,17 +123,19 @@ def prepared(
         adoption_importer, "AdoptionInputs", lambda *_args, **_kwargs: AdoptedInputs()
     )
     monkeypatch.setattr(
-        adoption_importer,
-        "derive_catalog",
-        lambda *_args, **_kwargs: CatalogProjection(
-            Catalog(
-                languages=LANGUAGES,
-                terms=(),
-                aliases=(),
-                symbols=(),
-                normalizer_version="nfkc-casefold-v1",
-            ),
-            case.vocabulary,
+        offline,
+        "_prepare_catalog",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            projection=CatalogProjection(
+                Catalog(
+                    languages=LANGUAGES,
+                    terms=(),
+                    aliases=(),
+                    symbols=(),
+                    normalizer_version="nfkc-casefold-v1",
+                ),
+                case.vocabulary,
+            )
         ),
     )
     adoption_uses = (
@@ -144,8 +147,8 @@ def prepared(
     )
     monkeypatch.setattr(offline, "_adoption_uses", lambda *_args: adoption_uses)
     monkeypatch.setattr(
-        adoption_importer,
-        "populate_adoptions",
+        offline,
+        "_populate_adoptions",
         lambda _db, _inputs, *, build, **_kwargs: input_record(build, adoption_uses),
     )
     identities = ProductIdentities(
@@ -712,17 +715,19 @@ def test_missing_adopted_language_fails_before_population(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        adoption_importer,
-        "derive_catalog",
-        lambda *_args, **_kwargs: CatalogProjection(
-            Catalog(
-                languages=(LANGUAGES[0],),
-                terms=(),
-                aliases=(),
-                symbols=(),
-                normalizer_version="nfkc-casefold-v1",
-            ),
-            prepared[0].vocabulary,
+        offline,
+        "_prepare_catalog",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            projection=CatalogProjection(
+                Catalog(
+                    languages=(LANGUAGES[0],),
+                    terms=(),
+                    aliases=(),
+                    symbols=(),
+                    normalizer_version="nfkc-casefold-v1",
+                ),
+                prepared[0].vocabulary,
+            )
         ),
     )
     with pytest.raises(
@@ -736,8 +741,8 @@ def test_lost_adoption_evidence_is_rejected_by_complete_closure(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setattr(
-        adoption_importer,
-        "populate_adoptions",
+        offline,
+        "_populate_adoptions",
         lambda _db, _inputs, *, build, **_kwargs: input_record(build, ()),
     )
     with pytest.raises(
@@ -748,7 +753,9 @@ def test_lost_adoption_evidence_is_rejected_by_complete_closure(
 
 @pytest.fixture(scope="module")
 def immutable_adoptions(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
-    return make_vocabulary_case(tmp_path_factory.mktemp("offline-adoptions"))
+    return current_vocabulary_case(
+        make_vocabulary_case(tmp_path_factory.mktemp("offline-adoptions"))
+    )
 
 
 def test_offline_adapter_uses_real_checked_bilingual_adoptions(
@@ -757,7 +764,6 @@ def test_offline_adapter_uses_real_checked_bilingual_adoptions(
     case = immutable_adoptions
     derived = offline._derive_adoptions(
         case.case.inputs(),
-        compile_minimum(include_en=True),
         case.build(),
         {"test-store": case.archive},
     )
@@ -766,7 +772,9 @@ def test_offline_adapter_uses_real_checked_bilingual_adoptions(
         binding = derived.vocabulary.lookup(region, "type", "Synthetic type")
         assert binding.code == "follower"
         assert binding.special_kinds == ("evolve",)
-    uses = offline._adoption_uses(case.case.inputs(), {"test-store": case.archive})
+    uses = offline._adoption_uses(
+        case.case.inputs(), case.build(), {"test-store": case.archive}
+    )
     assert uses
     assert {use.usage for use in uses} == {"catalog_exact_text"}
     assert {use.source.url for use in uses} == {
@@ -786,7 +794,24 @@ def test_adoption_adapter_rejects_an_unpinned_configuration(
     ):
         offline._derive_adoptions(
             case.case.inputs(),
-            compile_minimum(include_en=True),
             build,
             {"test-store": case.archive},
+        )
+
+
+@pytest.mark.parametrize("index_format", [1, 2])
+def test_native_offline_rejects_receipt_catalog(
+    tmp_path: Path, index_format: int
+) -> None:
+    case = make_vocabulary_case(tmp_path)
+    path = case.case.root / "catalog-adoptions/index.yaml"
+    index = object_value(read_yaml(path))
+    index["catalog_adoption_format"] = index_format
+    path.write_bytes(canonical(index))
+    case = replace(case, case=replace(case.case, revision=commit(case.case.repository)))
+    with pytest.raises(
+        ValueError, match=r"^Offline catalog requires current format 2 inputs$"
+    ):
+        offline._derive_adoptions(
+            case.case.inputs(), case.build(), {"test-store": case.archive}
         )

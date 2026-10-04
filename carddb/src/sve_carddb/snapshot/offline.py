@@ -10,7 +10,13 @@ from sve_carddb.build_bundle import publish_bundle
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
-from sve_carddb.build_inputs import BuildContext, Revision, input_record, uses_sorted
+from sve_carddb.build_inputs import (
+    BuildContext,
+    Revision,
+    input_record,
+    insert_raw_sources,
+    uses_sorted,
+)
 from sve_carddb.card_extras import (
     FrozenCardExtras,
     applicable_reskin_regions,
@@ -18,11 +24,7 @@ from sve_carddb.card_extras import (
     populate_card_extras,
     require_card_extras_ready,
 )
-from sve_carddb.catalog.adoption_sources import (
-    SOURCE_RECIPE_PATHS,
-    AdoptionSources,
-    PinnedRepository,
-)
+from sve_carddb.catalog.adoption_sources import SOURCE_RECIPE_PATHS
 from sve_carddb.image_variants import DEFAULT_RECIPE
 from sve_carddb.products import (
     FrozenProducts,
@@ -46,7 +48,7 @@ from sve_carddb.snapshot.offline_images import prepare_images
 from sve_carddb.snapshot.offline_names import composer
 from sve_carddb.snapshot.preview.build import Built
 from sve_carddb.snapshot.project import Decisions, Settings, project
-from sve_carddb.snapshot.values import array, canonical, digest
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_corrections import FrozenImages
 from sve_carddb.text_observations import (
     FrozenTexts,
@@ -69,10 +71,11 @@ from sve_carddb.translations.sources import CODE_PATH as TRANSLATION_CODE
 from sve_carddb.translations.sources import Sources as TranslationSources
 
 if TYPE_CHECKING:
-    from sve_carddb.build_db import CompiledSchema, Database
+    from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import InputRecord, Source, SourceUse
     from sve_carddb.card_extras import ErrataPage, ExtrasPlan
     from sve_carddb.catalog.adoption_importer import AdoptionInputs
+    from sve_carddb.catalog.current import Prepared
     from sve_carddb.catalog.projection import CatalogProjection
     from sve_carddb.image_assets import ImageBuild
     from sve_carddb.products import ProductIdentities
@@ -247,35 +250,74 @@ def _translation_uses(
     return uses_sorted(_translation_sources(inputs, build, stores)[1].uses)
 
 
-def _derive_adoptions(
-    inputs: AdoptionInputs,
-    schema: CompiledSchema,
-    context: BuildContext,
-    stores: dict[str, Path],
-) -> CatalogProjection:
-    """Derive only from checked receipts before any candidate text is written."""
-    from sve_carddb.catalog.adoption_importer import derive_catalog  # ruff: ignore[import-outside-top-level] -- load after the text interner to avoid the catalog/text package import cycle
+def _prepare_catalog(
+    inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
+) -> Prepared:
+    """Native offline builds consume current values, never receipt envelopes."""
+    from sve_carddb.catalog.current import CURRENT_FORMAT, prepare  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
 
-    with create_database(schema) as probe:
-        derived = derive_catalog(probe, inputs, build=context, stores=stores)
+    snapshots = inputs.load()
+    if any(
+        snapshot.entry != "catalog-adoptions"
+        or object_value(parse(snapshot.index_content)).get("catalog_adoption_format")
+        != CURRENT_FORMAT
+        or any(
+            object_value(parse(shard.content)).get("catalog_adoption_format")
+            != CURRENT_FORMAT
+            for shard in snapshot.shards
+        )
+        for snapshot in snapshots
+    ):
+        raise ValueError("Offline catalog requires current format 2 inputs")
+    configuration = object_value(parse(build.configuration.encode()))
+    if any(
+        configuration.get(key) != value for key, value in inputs.configuration().items()
+    ):
+        raise ValueError("Build configuration does not pin adoption inputs")
+    return prepare(snapshots, inputs.repository, build, stores)
+
+
+def _derive_adoptions(
+    inputs: AdoptionInputs, context: BuildContext, stores: dict[str, Path]
+) -> CatalogProjection:
+    """Derive current values before any candidate text is written."""
+    derived = _prepare_catalog(inputs, context, stores).projection
     if not {"en", "ja"} <= {language.code for language in derived.catalog.languages}:
         raise ValueError("Offline launch requires adopted EN and JA languages")
     return derived
 
 
 def _adoption_uses(
-    inputs: AdoptionInputs, stores: dict[str, Path]
+    inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
 ) -> tuple[SourceUse, ...]:
-    """Replay the complete receipt evidence independently of database insertion."""
-    sources = AdoptionSources(
-        stores, PinnedRepository(inputs.repository), historical=True
+    """Replay current frozen evidence independently of database insertion."""
+    return uses_sorted(_prepare_catalog(inputs, build, stores).sources.uses)
+
+
+def _populate_adoptions(
+    db: Database,
+    inputs: AdoptionInputs,
+    *,
+    build: BuildContext,
+    stores: dict[str, Path],
+) -> InputRecord:
+    """Write the current catalog and glossary under the current schema only."""
+    from sve_carddb.catalog.current import populate  # ruff: ignore[import-outside-top-level] -- initialize the shared text interner before catalog modules
+    from sve_carddb.translations.importer import populate_glossary  # ruff: ignore[import-outside-top-level] -- glossary import shares the catalog/text boundary
+
+    prepared = _prepare_catalog(inputs, build, stores)
+    insert_raw_sources(db, (use.source for use in prepared.sources.uses))
+    populate(db, prepared.snapshots, prepared, inputs.authored_revision)
+    translation = inputs.translation_inputs()
+    translation_uses = (
+        ()
+        if translation is None
+        else populate_glossary(db, translation, build=build, stores=stores).uses
     )
-    for snapshot in inputs.load():
-        for shard in snapshot.shards:
-            envelope = shard.envelope()
-            for record in envelope.records:
-                sources.verify(record, envelope.review_context)
-    return uses_sorted(sources.uses)
+    uses = (*prepared.sources.uses, *translation_uses)
+    result = input_record(build, uses)
+    result.verify(db, build, uses, complete=False)
+    return result
 
 
 def _source_gaps(db: Database, extras: ExtrasPlan) -> list[JsonValue]:
@@ -309,7 +351,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
     image_root: Path | None = None,
 ) -> Built:
     """Build both regions from sealed sources, retaining every diagnostic source use."""
-    from sve_carddb.catalog.adoption_importer import AdoptionInputs, populate_adoptions  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
+    from sve_carddb.catalog.adoption_importer import AdoptionInputs  # ruff: ignore[import-outside-top-level] -- load after text modules initialize the shared interner
 
     if bundle_dir is not None:
         for protected in (inputs.repo, inputs.archive):
@@ -432,12 +474,12 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             *(("translation_names",) if names is not None else ()),
         )
     )
-    derived = _derive_adoptions(adoptions, schema, context, stores)
+    derived = _derive_adoptions(adoptions, context, stores)
     vocabulary = derived.vocabulary
     configuration |= text_configuration(texts, vocabulary, ())
     context = BuildContext.from_inputs(inputs.revision, dependencies, configuration)
     adoption_uses = (
-        *_adoption_uses(adoptions, stores),
+        *_adoption_uses(adoptions, context, stores),
         *_translation_uses(adoptions, context, stores),
     )
     image_report: dict[str, JsonValue] | None = None
@@ -461,7 +503,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 if names is None
                 else names.populate_links(db, context=context, stores=stores)
             )
-            adopted = populate_adoptions(db, adoptions, build=context, stores=stores)
+            adopted = _populate_adoptions(db, adoptions, build=context, stores=stores)
             extras = plan_card_extras(db, pages, errata=errata)
             # The parent record is private staging; only the complete context is emitted.
             context = BuildContext.from_inputs(
@@ -642,7 +684,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
                 if names is None
                 else names.populate_links(target, context=context, stores=stores)
             )
-            adoption_record = populate_adoptions(
+            adoption_record = _populate_adoptions(
                 target, adoptions, build=context, stores=stores
             )
             extras_record = populate_card_extras(target, extras, build=context)
