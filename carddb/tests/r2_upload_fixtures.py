@@ -17,6 +17,7 @@ from sve_carddb.snapshot.export import export_snapshot
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.values import canonical, digest, string
 
+from .r2_sdk_fixtures import mock_client
 from .test_snapshot_export import BATCH
 from .test_snapshot_preview_images import images as images  # ruff: ignore[useless-import-alias] -- register the shared synthetic image/export fixture
 
@@ -40,7 +41,7 @@ def verify_signature(request: httpx.Request) -> None:
     parsed = dict(part.split("=", 1) for part in fields.split(", "))
     credential, scope = parsed["Credential"].split("/", 1)
     assert credential == CREDENTIALS.access_key
-    assert scope == "20261002/auto/s3/aws4_request"
+    assert scope.endswith("/auto/s3/aws4_request")
     names = parsed["SignedHeaders"].split(";")
     assert names == sorted(names)
     assert "host" in names
@@ -116,8 +117,12 @@ class Store:
             ACCOUNT,
             BUCKET,
             CREDENTIALS,
-            httpx.Client(transport=httpx.MockTransport(self.handle)),
-            lambda: NOW,
+            mock_client(
+                httpx.Client(transport=httpx.MockTransport(self.handle)),
+                account=ACCOUNT,
+                bucket=BUCKET,
+                credentials=CREDENTIALS,
+            ),
             lambda _delay: None,
         )
 

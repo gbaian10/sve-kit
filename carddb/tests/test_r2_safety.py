@@ -18,6 +18,8 @@ from .r2_upload_fixtures import public_template as public_template  # ruff: igno
 from .r2_upload_fixtures import synthetic_transport
 from .test_snapshot_preview_images import images as images  # ruff: ignore[useless-import-alias] -- synthetic image base
 
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
+
 if TYPE_CHECKING:
     from pathlib import Path
 

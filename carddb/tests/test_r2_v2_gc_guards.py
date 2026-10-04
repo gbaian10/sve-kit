@@ -26,6 +26,8 @@ from .test_r2_v2_gc import NAMESPACES, ORPHAN
 from .test_r2_v2_gc import published as published  # ruff: ignore[useless-import-alias] -- isolated publication copies
 from .test_r2_v2_gc import published_base as published_base  # ruff: ignore[useless-import-alias] -- immutable remote baseline
 
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -239,6 +241,7 @@ def test_gc_cli_authorization_is_separate_from_the_exact_confirmation(
 
     monkeypatch.setattr(Credentials, "environment", forbidden)
     monkeypatch.setattr(httpx, "Client", forbidden)
+    monkeypatch.setattr("sve_carddb.r2_upload.sdk.Session", forbidden)
     args = [
         "r2",
         "gc-v2",

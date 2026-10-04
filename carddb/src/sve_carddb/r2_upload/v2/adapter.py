@@ -3,24 +3,36 @@
 import re
 from contextlib import contextmanager
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
-from urllib.parse import quote
 from uuid import uuid4
-from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-import] -- UTF-8-only bounded input rejects all declarations/entities before parse
 
-import httpx
+from botocore.exceptions import BotoCoreError, ClientError
+from botocore.parsers import ResponseParserError
 
-from sve_carddb.r2_upload.s3 import Credentials, sign
+from sve_carddb.r2_upload.plan import UploadError
+from sve_carddb.r2_upload.sdk import (
+    BoundaryError,
+    Credentials,
+    bounded,
+    object_headers,
+    put_parameters,
+    status,
+    validate_key,
+)
 from sve_carddb.snapshot.publish.plan import IMAGE_KEY, INDEX, JSON_KEY
 from sve_carddb.snapshot.publish.storage import PublishError, Stored
 from sve_carddb.snapshot.values import canonical, digest, integer
 
 if TYPE_CHECKING:
-    from collections.abc import Callable, Iterator
+    from collections.abc import Iterator
 
     from pydantic import JsonValue
+    from types_boto3_s3 import S3Client
+    from types_boto3_s3.type_defs import (
+        ListObjectsV2OutputTypeDef,
+        ListObjectsV2RequestTypeDef,
+    )
 
 LEASE_KEY = "coordination/snapshot-v2-writer.json"
 LEASE_HEADERS = {"content-type": "application/json", "cache-control": "no-store"}
@@ -29,94 +41,65 @@ PUBLIC_PREFIXES = frozenset(
     | {"images/" + s + "/" for s in ("card_s", "card_m", "card_l", "art_s", "art_m")}
 )
 MAX_OBJECT = 128 * 1024 * 1024
-MAX_LIST = 2 * 1024 * 1024
-
-
-def body(response: httpx.Response, limit: int) -> bytes:
-    """Preserve stored compressed siblings instead of HTTP-decoding their bytes."""
-    result = bytearray()
-    for chunk in response.iter_raw():
-        result.extend(chunk)
-        if len(result) > limit:
-            raise PublishError("Remote response exceeds the configured byte limit")
-    return bytes(result)
 
 
 @dataclass(repr=False)
 class R2Store:
-    """Single bucket boundary; inject a transport rather than a different endpoint."""
+    """Single bucket boto3 boundary with the deployment-wide CAS lease."""
 
     account_id: str
     bucket: str
     credentials: Credentials
-    client: httpx.Client
-    clock: Callable[[], datetime] = field(default=lambda: datetime.now(UTC))
+    client: S3Client
     _lease: Stored | None = field(default=None, init=False)
 
     def __post_init__(self) -> None:
-        """Restrict signed requests to one explicitly selected R2 endpoint."""
+        """Restrict the publication adapter to one explicit R2 deployment."""
         if not re.fullmatch(r"[0-9a-f]{32}", self.account_id):
             raise PublishError("Invalid explicit R2 account ID")
         if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]", self.bucket):
             raise PublishError("Invalid explicit R2 bucket")
-
-    def _request(
-        self,
-        method: str,
-        key: str,
-        raw: bytes = b"",
-        headers: dict[str, str] | None = None,
-        params: dict[str, str] | None = None,
-    ) -> httpx.Request:
         if (
-            key.startswith("/")
-            or any(p in {".", ".."} for p in key.split("/"))
-            or "\\" in key
-            or "\0" in key
+            self.client.meta.endpoint_url
+            != f"https://{self.account_id}.r2.cloudflarestorage.com"
         ):
-            raise PublishError("Invalid S3 object key")
-        request = httpx.Request(
-            method,
-            f"https://{self.account_id}.r2.cloudflarestorage.com/{self.bucket}/"
-            + quote(key, safe="/"),
-            params=params,
-            headers=(headers or {}) | {"accept-encoding": "identity"},
-            content=raw,
-        )
-        sign(request, self.credentials, self.clock())
-        return request
+            raise PublishError("S3 client differs from the explicit R2 account")
 
+    @staticmethod
     @contextmanager
-    def _response(self, request: httpx.Request) -> Iterator[httpx.Response]:
+    def _operation(key: str) -> Iterator[None]:
         try:
-            response = self.client.send(
-                request, auth=None, stream=True, follow_redirects=False
-            )
-        except httpx.HTTPError, ValueError:
-            raise PublishError("R2 transport or protocol failed") from None
+            validate_key(key)
+        except UploadError:
+            raise PublishError("Invalid S3 object key") from None
         try:
-            yield response
-        except httpx.HTTPError:
+            yield
+        except BoundaryError as error:
+            raise PublishError(str(error)) from None
+        except BotoCoreError:
             raise PublishError("R2 transport or protocol failed") from None
-        finally:
-            response.close()
+        except ResponseParserError:
+            raise PublishError("R2 inventory XML is invalid") from None
 
     def get(self, key: str) -> Stored | None:
-        """Read exact raw bytes, opaque ETag and only contractual content metadata."""
-        with self._response(self._request("GET", key)) as response:
-            if response.status_code == HTTPStatus.NOT_FOUND:
-                return None
-            if response.status_code != HTTPStatus.OK:
-                raise PublishError("R2 object read failed")
-            etag = response.headers.get("etag", "")
-            if not etag or etag.startswith("W/"):
-                raise PublishError("R2 object requires a strong opaque ETag")
-            metadata = {
-                k: response.headers[k]
-                for k in ("content-type", "cache-control", "content-encoding")
-                if k in response.headers
-            }
-            return Stored(body(response, MAX_OBJECT), etag, metadata)
+        """Read exact raw bytes, opaque ETag and contractual content metadata."""
+        with self._operation(key):
+            try:
+                response = self.client.get_object(Bucket=self.bucket, Key=key)
+            except ClientError as error:
+                if status(error) == HTTPStatus.NOT_FOUND:
+                    return None
+                raise PublishError("R2 object read failed") from None
+            body = response["Body"]
+            try:
+                etag = response.get("ETag", "")
+                if not etag or etag.startswith("W/"):
+                    raise PublishError("R2 object requires a strong opaque ETag")
+                metadata = object_headers(response)
+                metadata.pop("etag", None)
+                return Stored(bounded(body, MAX_OBJECT), etag, metadata)
+            finally:
+                body.close()
 
     def put(
         self, key: str, raw: bytes, headers: dict[str, str], *, expected: str | None
@@ -133,19 +116,17 @@ class R2Store:
         condition = (
             {"if-none-match": "*"} if expected is None else {"if-match": expected}
         )
-        with self._response(
-            self._request("PUT", key, raw, headers | condition)
-        ) as response:
-            if response.status_code == HTTPStatus.PRECONDITION_FAILED:
-                return False
-            if response.status_code not in {
-                HTTPStatus.OK,
-                HTTPStatus.CREATED,
-                HTTPStatus.NO_CONTENT,
-            }:
+        with self._operation(key):
+            try:
+                self.client.put_object(
+                    **put_parameters(self.bucket, key, raw, headers | condition)
+                )
+            except ClientError as error:
+                if status(error) == HTTPStatus.PRECONDITION_FAILED:
+                    return False
                 raise PublishError(
                     "R2 conditional PUT failed; no unconditional fallback"
-                )
+                ) from None
             return True
 
     @staticmethod
@@ -183,26 +164,35 @@ class R2Store:
         if self.get(INDEX) != index:
             raise PublishError("GC current/previous index changed before deletion")
         self.verify_lease()
-        with self._response(self._request("DELETE", key)) as response:
-            if response.status_code not in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
-                raise PublishError("R2 approved DELETE failed; inspect before retry")
+        with self._operation(key):
+            try:
+                self.client.delete_object(Bucket=self.bucket, Key=key)
+            except ClientError:
+                raise PublishError(
+                    "R2 approved DELETE failed; inspect before retry"
+                ) from None
 
     def keys(self, prefix: str) -> tuple[str, ...]:
-        """Bounded ListObjectsV2 pagination only in explicitly public namespaces."""
+        """Bounded SDK ListObjectsV2 pagination only in public namespaces."""
         if prefix not in PUBLIC_PREFIXES:
             raise PublishError("List prefix is not explicitly public")
         keys: set[str] = set()
         seen: set[str] = set()
         token = None
         while True:
-            params = {"list-type": "2", "prefix": prefix, "max-keys": "1000"}
+            params: ListObjectsV2RequestTypeDef = {
+                "Bucket": self.bucket,
+                "Prefix": prefix,
+                "MaxKeys": 1000,
+            }
             if token is not None:
-                params["continuation-token"] = token
-            with self._response(self._request("GET", "", params=params)) as response:
-                if response.status_code != HTTPStatus.OK:
-                    raise PublishError("R2 public inventory read failed")
-                raw = body(response, MAX_LIST)
-            page, token = _page(raw, prefix)
+                params["ContinuationToken"] = token
+            with self._operation(""):
+                try:
+                    response = self.client.list_objects_v2(**params)
+                except ClientError:
+                    raise PublishError("R2 public inventory read failed") from None
+            page, token = _page(response, prefix)
             if keys.intersection(page):
                 raise PublishError("R2 inventory contains repeated keys")
             keys.update(page)
@@ -261,28 +251,18 @@ class R2Store:
                 self._lease = None
 
 
-def _page(raw: bytes, prefix: str) -> tuple[set[str], str | None]:
-    try:
-        text = raw.decode("utf-8")
-    except UnicodeError:
-        raise PublishError("R2 inventory XML must be UTF-8") from None
-    if "<!" in text:
-        raise PublishError("R2 inventory XML declarations are forbidden")
-    try:
-        root = ET.fromstring(text)  # ruff: ignore[suspicious-xml-element-tree-usage] -- UTF-8 only; all DTD/entity declarations rejected above
-    except ET.ParseError:
-        raise PublishError("R2 inventory XML is invalid") from None
-    ns = "{http://s3.amazonaws.com/doc/2006-03-01/}"
-    if root.tag != ns + "ListBucketResult" or root.findtext(ns + "Prefix") != prefix:
+def _page(
+    response: ListObjectsV2OutputTypeDef, prefix: str
+) -> tuple[set[str], str | None]:
+    if response.get("Prefix") != prefix:
         raise PublishError("R2 inventory prefix differs from request")
-    rows = root.findall(ns + "Contents")
-    result = {r.findtext(ns + "Key", "") for r in rows}
+    rows = response.get("Contents", [])
+    result = {r.get("Key", "") for r in rows}
     if len(result) != len(rows) or any(not k.startswith(prefix) for k in result):
         raise PublishError("R2 inventory contains invalid keys")
-    flag = root.findtext(ns + "IsTruncated")
-    if flag not in {"true", "false"}:
+    if "IsTruncated" not in response:
         raise PublishError("R2 inventory lacks a truncation flag")
-    token = root.findtext(ns + "NextContinuationToken")
-    if flag == "true" and not token:
+    token = response.get("NextContinuationToken")
+    if response["IsTruncated"] and not token:
         raise PublishError("R2 inventory lacks a continuation token")
-    return result, token if flag == "true" else None
+    return result, token if response["IsTruncated"] else None

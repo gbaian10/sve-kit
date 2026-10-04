@@ -19,6 +19,7 @@ from .isolation_guard import IsolationGuard
 from .official_registry_fixtures import load_shared_registry
 from .product_fixtures import product_files as product_files  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .product_identity_fixtures import identity_template as identity_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
+from .r2_sdk_fixtures import close_sdk_clients as close_sdk_clients  # ruff: ignore[useless-import-alias] -- register SDK cleanup fixture
 from .registry_snapshot_fixtures import registry_template as registry_template  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .shared_case_fixtures import default_correction_case as default_correction_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency
 from .shared_case_fixtures import default_text_case as default_text_case  # ruff: ignore[useless-import-alias] -- register session fixture dependency

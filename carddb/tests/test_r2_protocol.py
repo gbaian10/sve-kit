@@ -1,69 +1,15 @@
 """Published AWS vectors and bounded, GET-only transient retries."""
 
-from datetime import UTC, datetime
-
 import httpx
 import pytest
 
 from sve_carddb.r2_upload.plan import UploadError
-from sve_carddb.r2_upload.s3 import S3, Credentials, sign
+from sve_carddb.r2_upload.s3 import S3, Credentials
 
-from .r2_upload_fixtures import ACCOUNT, BUCKET, CREDENTIALS, NOW
+from .r2_sdk_fixtures import mock_client
+from .r2_upload_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 
-
-@pytest.mark.parametrize(
-    ("method", "path", "headers", "body", "expected"),
-    [
-        (
-            "GET",
-            "test.txt",
-            {"range": "bytes=0-9"},
-            b"",
-            "f0e8bdb87c964420e857bd35b5d6ed310bd44f0170aba48dd91039c6036bdb41",
-        ),
-        (
-            "GET",
-            "?max-keys=2&prefix=J",
-            {},
-            b"",
-            "34b48302e7b5fa45bde8084f4b7868a86f0a534bc59db6670ed5711ef69dc6f7",
-        ),
-        (
-            "GET",
-            "?lifecycle",
-            {},
-            b"",
-            "fea454ca298b7da1c68078a5d1bdbfbbe0d65c699e0f91ac7a200a0136783543",
-        ),
-        (
-            "PUT",
-            "test%24file.text",
-            {
-                "date": "Fri, 24 May 2013 00:00:00 GMT",
-                "x-amz-storage-class": "REDUCED_REDUNDANCY",
-            },
-            b"Welcome to Amazon S3.",
-            "98ad721746da40c64f1a55b78f14c238d841ea1380cd77a1b5971af0ece108bd",
-        ),
-    ],
-    ids=["aws-get", "aws-list", "aws-lifecycle", "aws-put"],
-)
-def test_published_aws_s3_sigv4_vectors(
-    method: str, path: str, headers: dict[str, str], body: bytes, expected: str
-) -> None:
-    # Public example constants: https://docs.aws.amazon.com/AmazonS3/latest/API/sig-v4-header-based-auth.html
-    credentials = Credentials(
-        "AKIAIOSFODNN7EXAMPLE", "wJalrXUtnFEMI/K7MDENG/bPxRfiCYEXAMPLEKEY"
-    )
-    request = httpx.Request(
-        method,
-        "https://examplebucket.s3.amazonaws.com/" + path,
-        headers=headers,
-        content=body,
-    )
-    sign(request, credentials, datetime(2013, 5, 24, tzinfo=UTC), region="us-east-1")
-    assert request.headers["authorization"].endswith("Signature=" + expected)
-    assert "20130524/us-east-1/s3/aws4_request" in request.headers["authorization"]
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 
 def test_r2_endpoint_is_the_explicit_https_account_bucket() -> None:
@@ -74,7 +20,14 @@ def test_r2_endpoint_is_the_explicit_https_account_bucket() -> None:
         return httpx.Response(404)
 
     with httpx.Client(transport=httpx.MockTransport(handle)) as client:
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW)
+        remote = S3(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+        )
         assert remote.get("snapshots/preview/current.json", limit=4096) is None
     assert len(requests) == 1
     assert (
@@ -100,7 +53,15 @@ def test_transient_get_retries_are_finite_and_backoff_is_bounded(
         raise error("synthetic transient", request=request)
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW, waits.append)
+        remote = S3(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+            waits.append,
+        )
         if recover:
             result = remote.get("key", limit=2)
             assert result is not None
@@ -123,7 +84,15 @@ def test_http_status_failures_are_not_transport_retries(status: int) -> None:
         return httpx.Response(status)
 
     with httpx.Client(transport=httpx.MockTransport(handle)) as client:
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW, waits.append)
+        remote = S3(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+            waits.append,
+        )
         with pytest.raises(UploadError, match=r"^R2 object read failed$"):
             remote.get("key", limit=2)
     assert len(calls) == 1
@@ -139,7 +108,15 @@ def test_non_retryable_local_protocol_error_is_not_retried() -> None:
         raise httpx.LocalProtocolError("synthetic local error", request=request)
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW, waits.append)
+        remote = S3(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+            waits.append,
+        )
         with pytest.raises(UploadError, match=r"^R2 transport failed$"):
             remote.get("key", limit=2)
     assert len(calls) == 1
@@ -155,7 +132,15 @@ def test_put_with_lost_response_is_never_retried_or_made_unconditional() -> None
         raise httpx.ReadTimeout("synthetic lost response", request=request)
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as client:
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW, waits.append)
+        remote = S3(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+            waits.append,
+        )
         with pytest.raises(UploadError, match=r"^R2 transport failed$"):
             remote.put("key", b"{}", {"if-none-match": "*"})
     assert len(calls) == 1

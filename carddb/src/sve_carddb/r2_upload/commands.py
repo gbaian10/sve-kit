@@ -4,11 +4,11 @@ import json
 from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Typer resolves runtime annotations
 from typing import Annotated
 
-import httpx
 import typer
 
 from sve_carddb.r2_upload.plan import UploadError, plan_preview
 from sve_carddb.r2_upload.s3 import S3, Credentials
+from sve_carddb.r2_upload.sdk import sdk_client
 from sve_carddb.r2_upload.upload import upload
 from sve_carddb.r2_upload.v2.commands import upload_v2
 from sve_carddb.r2_upload.v2.gc_commands import gc_v2
@@ -47,9 +47,7 @@ def upload_command(
         if execute:
             account_id, bucket = _target(account_id, bucket)
             credentials = Credentials.environment()
-            with httpx.Client(
-                trust_env=False, follow_redirects=False, timeout=30
-            ) as client:
+            with sdk_client(account_id, bucket, credentials) as client:
                 remote = S3(account_id, bucket, credentials, client)
                 report = upload(plan, remote)
         typer.echo(json.dumps(report, sort_keys=True, separators=(",", ":")))

@@ -5,14 +5,17 @@ from typing import TYPE_CHECKING
 import httpx
 import pytest
 
-from sve_carddb.r2_upload.v2.adapter import LEASE_HEADERS, LEASE_KEY, R2Store, _page
+from sve_carddb.r2_upload.v2.adapter import LEASE_HEADERS, LEASE_KEY, R2Store
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness
 from sve_carddb.snapshot.publish.storage import PublishError, Stored
 from sve_carddb.snapshot.values import canonical
 
-from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS, NOW
+from .r2_sdk_fixtures import inventory, mock_client
+from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- isolated loopback server
 from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
+
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from .r2_v2_fixtures import Loopback, ServerState
@@ -30,7 +33,7 @@ def test_duplicate_rows_in_one_inventory_page_are_rejected() -> None:
         "<IsTruncated>false</IsTruncated></ListBucketResult>"
     )
     with pytest.raises(PublishError, match=r"^R2 inventory contains invalid keys$"):
-        _page(raw.encode(), PREFIX)
+        inventory(raw.encode(), PREFIX)
 
 
 def test_duplicate_keys_across_inventory_pages_are_rejected() -> None:
@@ -49,7 +52,14 @@ def test_duplicate_keys_across_inventory_pages_are_rejected() -> None:
         return httpx.Response(200, stream=httpx.ByteStream(raw.encode()))
 
     with httpx.Client(transport=httpx.MockTransport(handle)) as client:
-        store = R2Store(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW)
+        store = R2Store(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+        )
         with pytest.raises(
             PublishError, match=r"^R2 inventory contains repeated keys$"
         ):

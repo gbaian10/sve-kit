@@ -17,6 +17,8 @@ from sve_carddb.r2_upload.s3 import Credentials
 from sve_carddb.r2_upload.v2.adapter import R2Store
 from sve_carddb.snapshot.publish.storage import Stored
 
+from .r2_sdk_fixtures import mock_client
+
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
@@ -56,11 +58,8 @@ def reference_authorization(
             for k, v in parse_qsl(split.query, keep_blank_values=True)
         )
     )
-    selected = {
-        k: " ".join(v.split())
-        for k, v in headers.items()
-        if k not in {"authorization", "content-length"}
-    }
+    names = headers["authorization"].split("SignedHeaders=", 1)[1].split(",", 1)[0]
+    selected = {k: " ".join(headers[k].split()) for k in names.split(";")}
     names = ";".join(sorted(selected))
     canonical_request = "\n".join(
         (
@@ -301,7 +300,14 @@ def remote(
         transport=transport, trust_env=False, follow_redirects=False
     ) as client:
         yield (
-            R2Store(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW),
+            R2Store(
+                ACCOUNT,
+                BUCKET,
+                CREDENTIALS,
+                mock_client(
+                    client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+                ),
+            ),
             state,
             transport,
         )

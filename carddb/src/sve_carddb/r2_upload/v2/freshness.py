@@ -6,9 +6,19 @@ from urllib.parse import urlsplit
 
 import httpx
 
-from sve_carddb.r2_upload.v2.adapter import MAX_OBJECT, body
+from sve_carddb.r2_upload.v2.adapter import MAX_OBJECT
 from sve_carddb.snapshot.publish.plan import IMAGE_KEY
 from sve_carddb.snapshot.publish.storage import PublishError
+
+
+def body(response: httpx.Response, limit: int) -> bytes:
+    """Preserve stored compressed siblings instead of HTTP-decoding their bytes."""
+    result = bytearray()
+    for chunk in response.iter_raw():
+        result.extend(chunk)
+        if len(result) > limit:
+            raise PublishError("Remote response exceeds the configured byte limit")
+    return bytes(result)
 
 
 def cdn_root(value: str) -> str:

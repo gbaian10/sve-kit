@@ -28,6 +28,8 @@ from .test_image_variants import png
 from .test_snapshot_export import BATCH
 from .test_snapshot_preview_images import images as images  # ruff: ignore[useless-import-alias] -- register the synthetic image template
 
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
+
 if TYPE_CHECKING:
     from pathlib import Path
 
@@ -61,6 +63,7 @@ def test_default_cli_is_offline_and_reconciles_all_public_members(
 
     monkeypatch.setattr(Credentials, "environment", forbidden)
     monkeypatch.setattr(httpx, "Client", forbidden)
+    monkeypatch.setattr("sve_carddb.r2_upload.sdk.Session", forbidden)
     result = CliRunner().invoke(
         app, ["r2", "upload-preview", "--preview-dir", str(local.root), *flags]
     )
