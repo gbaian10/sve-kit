@@ -50,7 +50,7 @@ repos:
         args: [-o, array_auto_collapse=false, -o, 'indent_string=    '] # 4 spaces
 
   - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.16.8
+    rev: v0.16.9
     hooks:
       # docs/schema/er/ and .github/ci/ have ruff.toml files that extend the carddb settings.
       - id: ruff-format
@@ -69,7 +69,7 @@ repos:
         args: [--fix]
 
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.30.0
+    rev: v8.30.1
     hooks:
       # Aliases keep SKIP from matching both hooks through their shared id.
       - id: gitleaks
@@ -89,7 +89,7 @@ repos:
         stages: [manual]
 
   - repo: https://github.com/astral-sh/uv-pre-commit
-    rev: 0.12.17
+    rev: 0.12.19
     hooks:
       # monorepo: the Python project lives in carddb/
       - id: uv-lock
