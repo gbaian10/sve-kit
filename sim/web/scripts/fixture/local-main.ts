@@ -55,6 +55,8 @@ async function encodeImage({ width, height, seed, source }: ImageRequest): Promi
   return new Uint8Array(await image.webp({ quality: 80 }).toBuffer())
 }
 
+// Real-looking local snapshot for demos: the private JP card list plus the crawled card images,
+// written to SVE_CDN_DIR (never into the repo). Delete it once M2 delivers real snapshots.
 async function main(): Promise<void> {
   const args = parseLocalArgs(process.argv.slice(2))
   const list = process.env["SVE_TEST_SNAPSHOT"]
