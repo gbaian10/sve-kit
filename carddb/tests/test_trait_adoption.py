@@ -9,8 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t0 import compile_t0
-from sve_carddb.catalog.adoption_importer import derive_catalog
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.catalog.adoption_models import (
     RawMapping,
     ReviewContext,
@@ -22,6 +21,7 @@ from sve_carddb.catalog.adoption_validation import term as validate_term
 from sve_carddb.snapshot.values import canonical, digest, object_value
 
 from .catalog_vocabulary_fixtures import save, vocabulary_record
+from .current_catalog_fixtures import prepare_case
 from .trait_adoption_fixtures import trait_baseline as trait_baseline  # ruff: ignore[useless-import-alias] -- register the shared immutable archive fixture
 
 if TYPE_CHECKING:
@@ -43,7 +43,7 @@ SEPARATOR = "Trait source component contains an unprotected separator"
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_t0()
+    return compile_current_build()
 
 
 @pytest.fixture
@@ -70,12 +70,9 @@ def derive(
 ) -> CatalogProjection:
     prepared = save(case.vocabulary, records)
     with create_database(schema) as db:
-        result = derive_catalog(
-            db,
-            prepared.case.inputs(),
-            build=prepared.build(),
-            stores={"test-store": prepared.archive},
-        )
+        result = prepare_case(
+            prepared.case, {"test-store": prepared.archive}
+        ).projection
         assert not db.rows("vocabulary")
         assert not db.rows("source_record")
         return result
@@ -151,7 +148,6 @@ def test_trait_locator_is_an_exact_ascii_component_path(
     sources = AdoptionSources(
         {"test-store": case.vocabulary.archive},
         PinnedRepository(case.vocabulary.case.repository),
-        historical=True,
     )
     record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))
@@ -239,7 +235,7 @@ def test_same_exact_trait_cannot_get_two_codes(
     records = [term(case, case.mapping(), code=code) for code in ("first", "second")]
     with pytest.raises(
         ValueError,
-        match=r"^Exact vocabulary raw maps to multiple active code/marker pairs$",
+        match=r"^Duplicate vocabulary binding$",
     ):
         derive(case, schema, records)
 
@@ -303,7 +299,6 @@ def test_trait_projection_shape_is_checked_independently_of_the_text_resolver(
     sources = AdoptionSources(
         {"test-store": case.vocabulary.archive},
         PinnedRepository(case.vocabulary.case.repository),
-        historical=True,
     )
     record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))

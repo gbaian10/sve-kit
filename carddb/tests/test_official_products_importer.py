@@ -27,16 +27,13 @@ from sve_carddb.products.plan import plan_official_products
 from sve_carddb.registry.build import build
 from sve_carddb.registry.inputs import Mapping as CardMapping
 from sve_carddb.registry.preview import FrozenEN, FrozenJP, FrozenRegions, plan_preview
-from sve_carddb.registry.preview.evidence import (
-    CardEvidence,
-    FaceEvidence,
-    MemoryEvidence,
-)
+from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.records import AllocationData, PrintingData
 from sve_carddb.registry.review import Inputs, Receipt
 from sve_carddb.registry.storage import plan_files, write_files
 from sve_carddb.source_archive import ArchiveError
 
+from .identity_evidence_fixtures import MemoryEvidence
 from .product_identity_fixtures import (
     LANGUAGES,
     IdentityFixture,

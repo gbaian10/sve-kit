@@ -28,8 +28,8 @@ the parser's code/dependency version explicitly.
 `EvidenceProvider` is the injection boundary for already verified, pinned inputs.
 Providers must bind extracted observations and face metadata to the actual raw
 source version; they must not echo expected registry hashes. `CardEvidence.from_card`
-computes the original recipe from extracted data. `MemoryEvidence` supports
-synthetic JP/EN sources in tests. `FrozenEN` uses the same sealed metadata reader
+computes the original recipe from extracted data. Synthetic JP/EN test providers
+live in the test fixtures, outside the production package. `FrozenEN` uses the same sealed metadata reader
 with the production EN extractor and its measured legacy projection.
 `FrozenRegions(jp=jp_provider, en=en_provider)` composes pinned regional providers
 by explicit region; it never infers counterparts from suffixes. EN exact page

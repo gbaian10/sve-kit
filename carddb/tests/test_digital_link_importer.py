@@ -26,6 +26,7 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value, p
 from sve_carddb.source_archive import ArchiveError
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.digital import configuration, import_digital
+from sve_carddb.translations.name_sources import NameOwner
 from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit
@@ -108,7 +109,9 @@ def test_real_entry_proves_relation_name_and_no_coverage(
         )
         assert (unit["lang"], unit["text"]) == ("zh-Hant", "合成測試名")
         assert db.rows("digital_link_coverage") == ()
-        assert result.eligible(db, baseline.sources(), "link-revision")
+        assert result.eligible_owner(
+            db, baseline.sources(), NameOwner("face_revision", "link-revision")
+        )
         used = {
             (u.source.id, u.locator, u.usage, u.source.parser_version)
             for u in result.record.uses
@@ -238,7 +241,9 @@ def test_owner_source_must_replay_its_printing(
             ValueError,
             match=r"^Digital-link owner lacks frozen printing face evidence$",
         ):
-            result.eligible(db, baseline.sources(), "link-revision")
+            result.eligible_owner(
+                db, baseline.sources(), NameOwner("face_revision", "link-revision")
+            )
 
 
 def test_equal_length_raw_tamper_and_complete_source_closure(
@@ -330,7 +335,12 @@ def test_current_replay_marks_changed_names_stale_without_resurrection(
         assert len(result.fresh) == (0 if stale else 1)
         assert db.rows("digital_link_coverage") == ()
         assert (
-            bool(result.eligible(db, fixture.sources(), "link-revision")) is not stale
+            bool(
+                result.eligible_owner(
+                    db, fixture.sources(), NameOwner("face_revision", "link-revision")
+                )
+            )
+            is not stale
         )
 
 
@@ -456,7 +466,9 @@ def test_owner_rechecks_materialized_target_against_adoption(
             ValueError,
             match=r"^Digital-link materialized relation differs from adoption$",
         ):
-            result.eligible(db, dual.sources(), "link-revision")
+            result.eligible_owner(
+                db, dual.sources(), NameOwner("face_revision", "link-revision")
+            )
 
 
 def test_authored_byte_pin_and_runtime_closure(
@@ -517,7 +529,9 @@ def test_evolved_phase_is_explicit_and_not_inferred_from_sve_front(
             if r.values["card_id"] == fixture.card.id
         )
         assert link["digital_face_id"] == "digital:svwb:22345678:evolved"
-        assert result.eligible(db, fixture.sources(), "link-revision")
+        assert result.eligible_owner(
+            db, fixture.sources(), NameOwner("face_revision", "link-revision")
+        )
 
 
 def test_composer_verifies_actual_raw_metadata_before_returning(
@@ -592,7 +606,9 @@ def test_jp_owner_does_not_probe_same_number_english_printing(
                 by_card={baseline.card.id: (english, *index.by_card[baseline.card.id])},
             )
         )
-        assert result.eligible(db, sources, "link-revision")
+        assert result.eligible_owner(
+            db, sources, NameOwner("face_revision", "link-revision")
+        )
 
 
 @pytest.mark.parametrize("name", ["commands.py", "sources.py"])
@@ -640,7 +656,9 @@ def test_historical_review_survives_new_runtime(
         )
         assert len(result.fresh) == 1
         assert result.stale == result.withdrawn == ()
-        assert result.eligible(db, fixture.sources(), "link-revision")
+        assert result.eligible_owner(
+            db, fixture.sources(), NameOwner("face_revision", "link-revision")
+        )
     assert fixture.inputs().load().shards == baseline.inputs().load().shards
 
 
@@ -711,7 +729,9 @@ def test_owner_requires_same_build_context(
         with pytest.raises(
             ValueError, match=r"^Digital-link name proof uses another build context$"
         ):
-            result.eligible(db, sources, "link-revision")
+            result.eligible_owner(
+                db, sources, NameOwner("face_revision", "link-revision")
+            )
 
 
 def test_owner_requires_japanese_name(
@@ -734,7 +754,9 @@ def test_owner_requires_japanese_name(
         with pytest.raises(
             ValueError, match=r"^Name build source language differs from owner region$"
         ):
-            result.eligible(db, baseline.sources(), "link-revision")
+            result.eligible_owner(
+                db, baseline.sources(), NameOwner("face_revision", "link-revision")
+            )
 
 
 def test_evidence_resolver_requires_same_review(baseline: Fixture) -> None:

@@ -105,12 +105,6 @@ class Result:
             {key: tuple(records) for key, records in grouped.items()}
         )
 
-    def eligible(
-        self, db: Database, sources: Sources, revision_id: str
-    ) -> frozenset[str]:
-        """Keep the existing exact-revision API for legacy name materialization."""
-        return self.eligible_owner(db, sources, NameOwner("face_revision", revision_id))
-
     def eligible_owner(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- current printed state and frozen adoption are independent owner proofs
         self,
         db: Database,

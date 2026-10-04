@@ -59,7 +59,7 @@ def _adopted(db: Database, decision_id: str) -> None:
     # A sourced confirmed decision alone cannot bind this input to its reviewed bytes.
     raise ValueError(
         "Catalog staging cannot verify category, exact members or freshness; "
-        "use import_adoptions"
+        "decision-backed catalog staging is not supported"
     )
 
 
@@ -70,7 +70,7 @@ def populate_catalog(
     build: BuildContext,
     published: tuple[LocalizedText, ...],
 ) -> None:
-    """Project synthetic staging inputs; authored receipts use import_adoptions."""
+    """Project synthetic staging inputs without admitting decision-backed values."""
     catalog = Catalog.model_validate_json(catalog.model_dump_json())
     config = object_value(parse(build.configuration.encode()))
     if any(

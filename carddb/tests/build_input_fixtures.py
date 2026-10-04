@@ -8,16 +8,13 @@ from sve_carddb.manifest import Kind, Region
 from sve_carddb.products.evidence import resolve_evidence
 from sve_carddb.products.importer import product_source_uses
 from sve_carddb.registry.inputs import Card
-from sve_carddb.registry.preview.evidence import (
-    CardEvidence,
-    FaceEvidence,
-    MemoryEvidence,
-)
+from sve_carddb.registry.preview.evidence import CardEvidence, FaceEvidence
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources import official_en
 from sve_carddb.sources.official_jp import card_url
 
+from .identity_evidence_fixtures import MemoryEvidence
 from .product_fixtures import first_record, install, obj
 from .test_source_archive import _put, _resource, _store
 

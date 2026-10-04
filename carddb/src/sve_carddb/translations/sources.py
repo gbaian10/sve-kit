@@ -181,9 +181,7 @@ class Sources:
             build.program_revision, tuple(pin.name for pin in build.dependencies)
         )
         self.repository.context(build)
-        self.identities = AdoptionSources(
-            stores, self.repository, historical=historical
-        )
+        self.identities = AdoptionSources(stores, self.repository)
         self.identity_indexes: dict[bytes, RegistryIndex] = {}
         self.context_keys: dict[BuildContext, bytes] = {}
         dependencies = {pin.name: pin.sha256 for pin in build.dependencies}

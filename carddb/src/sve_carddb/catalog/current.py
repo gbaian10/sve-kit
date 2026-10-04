@@ -100,23 +100,6 @@ def prepare(
     return Prepared(snapshots, records, sources, CatalogProjection(catalog, vocabulary))
 
 
-def merge(current: Prepared, legacy: CatalogProjection) -> CatalogProjection:
-    """Compose two format representations into the one derived catalog authority."""
-    old, new = legacy.catalog, current.projection.catalog
-    catalog = old.model_copy(
-        update={
-            "languages": (*old.languages, *new.languages),
-            "terms": (*old.terms, *new.terms),
-        }
-    )
-    vocabulary = Vocabulary(
-        bindings=(*legacy.vocabulary.bindings, *current.projection.vocabulary.bindings),
-        terms=catalog.terms,
-    )
-    vocabulary.verify()
-    return CatalogProjection(catalog, vocabulary)
-
-
 def populate(  # ruff: ignore[complex-structure,too-many-branches] -- indexed provenance and distinct vocabulary/language keys precede row writes
     db: Database,
     snapshots: tuple[AdoptionSnapshot, ...],
