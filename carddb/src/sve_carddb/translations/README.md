@@ -19,15 +19,23 @@ compose in a caller-owned transaction. Authored index/shard bytes must match the
 pinned authored commit. Historical choices and raw sources remain traceable after
 withdrawal. Identical translated strings never merge different concept IDs.
 
-## Delegated card-name preparation
+## Card-name preparation by covering event
 
-`card_names.prepare()` creates glossary term/zh-Hant choice envelopes from an
-explicit key/value/source-claim map and its delegated coordinator receipt. It
-requires the receipt's exact record-key scope and the complete map hash in its
-decision basis. This is an authoring helper; supplying a receipt is not evidence
-that approval happened. Obtain the coordinator's actual key-allocation decision
-before calling it. Bare model reviews and another batch's delegation do not grant
-that authority.
+`card_names.prepare()` takes a separate delegated key-allocation receipt and a
+caller-supplied `choices` mapping from every concept key to its covering event.
+Each delegated event must match exactly its assigned record keys and bind the
+complete `mapping_hash()`, including source references, values and attribution.
+An `IndividualApproval` binds exact choice keys/value hashes, the maintainer and
+actual button instant. Individual choices use human confirmed decisions; delegated
+terms and choices retain their coordinator/time and the explicit delegated note.
+Different events and record kinds occupy separate deterministic shards. A word
+approval cannot allocate a permanent key. Writing time never replaces event time.
+
+This is an authoring helper; supplying an event is not evidence that approval
+happened. Verify the underlying evidence first. Bulk agreement is not an individual
+approval: this helper accepts only individual human events or delegated receipts.
+Until a bulk representation is decided, do not convert it to an individual event.
+Bare model reviews and another batch's delegation do not grant adoption authority.
 
 Candidates contain a frozen JP name reference, never a separate original-name
 field. The helper keeps `machine` wording as `machine`; fully borrowed wording

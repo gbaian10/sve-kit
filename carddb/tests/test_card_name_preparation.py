@@ -1,5 +1,6 @@
 """Synthetic rejection cases for delegated name preparation, without raw card text."""
 
+from collections.abc import Mapping  # ruff: ignore[typing-only-standard-library-import] -- public helper accepts covariant event mappings
 from dataclasses import replace
 from typing import TYPE_CHECKING
 
@@ -8,7 +9,12 @@ from pydantic import JsonValue, ValidationError
 
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.translations import card_names
-from sve_carddb.translations.card_names import Candidate, mapping_hash, prepare
+from sve_carddb.translations.card_names import (
+    Candidate,
+    IndividualApproval,
+    mapping_hash,
+    prepare,
+)
 from sve_carddb.translations.loader import Snapshot, validate_snapshot
 from sve_carddb.translations.models import ChoiceRecord, Delegation, TermRecord
 
@@ -18,6 +24,7 @@ if TYPE_CHECKING:
     from sve_carddb.translations.models import Shard
 
 EMPTY = Snapshot(b"", ())
+AUTHORED_AT = "2026-10-04T10:00:00Z"
 
 
 def candidate(slug: str = "test_star", text: str = "合成測試星") -> Candidate:
@@ -36,16 +43,14 @@ def candidate(slug: str = "test_star", text: str = "合成測試星") -> Candida
     )
 
 
-def receipt(rows: tuple[Candidate, ...]) -> Delegation:
-    parts: list[list[JsonValue]] = []
-    for row in rows:
-        parts.extend(
-            [
-                ["glossary_term", "term:" + row.concept_key],
-                ["glossary_choice", "term:" + row.concept_key, "zh-Hant", 1],
-            ]
-        )
-    keys = sorted(canonical(value).decode() for value in parts)
+def receipt(rows: tuple[Candidate, ...], *, choice: bool = False) -> Delegation:
+    parts: list[list[JsonValue]] = [
+        ["glossary_choice", "term:" + row.concept_key, "zh-Hant", 1]
+        if choice
+        else ["glossary_term", "term:" + row.concept_key]
+        for row in rows
+    ]
+    keys = sorted({canonical(value).decode() for value in parts})
     return Delegation(
         authorized_by="Synthetic maintainer",
         authorization_basis="Synthetic scoped name delegation, event 1.",
@@ -62,13 +67,17 @@ def build(
     rows: tuple[Candidate, ...],
     existing: Snapshot = EMPTY,
     approval: Delegation | None = None,
+    choices: Mapping[str, card_names.ChoiceEvent] | None = None,
 ) -> tuple[Shard, ...]:
     return prepare(
         rows,
         existing,
         receipt(rows) if approval is None else approval,
+        choices={c.concept_key: receipt(rows, choice=True) for c in rows}
+        if choices is None
+        else choices,
         authored_by="Synthetic writer",
-        authored_at=INSTANT,
+        authored_at=AUTHORED_AT,
     )
 
 
@@ -117,7 +126,7 @@ def test_receipts_cover_separate_small_shards_and_output_is_deterministic() -> N
     shards = build(rows)
     assert shards == build(tuple(reversed(rows)))
     assert len(shards) == 6
-    assert [len(s.records) for s in shards] == [24, 24, 24, 24, 1, 1]
+    assert [len(s.records) for s in shards] == [24, 24, 1, 24, 24, 1]
     result = snapshot(shards)
     validate_snapshot(result)
     for shard in shards:
@@ -288,7 +297,7 @@ def test_claim_change_requires_new_approved_map() -> None:
 
 def test_invalid_delegation_scope_does_not_depend_on_record_order() -> None:
     row = candidate()
-    approval = receipt((row,))
+    approval = receipt((row, candidate("test_moon")))
     data = approval.model_dump(mode="json")
     data["scope"] = list(reversed(approval.scope))
     with pytest.raises(ValidationError) as caught:
@@ -321,3 +330,188 @@ def test_preparation_does_not_mutate_existing_snapshot() -> None:
     existing = replace(EMPTY, index=b"synthetic immutable index")
     build((candidate(),), existing)
     assert existing == replace(EMPTY, index=b"synthetic immutable index")
+
+
+def test_scope_cannot_borrow_larger_delegation() -> None:
+    row = candidate()
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name delegation scope must cover the exact prepared map$",
+    ):
+        build((row,), approval=receipt((row, candidate("test_moon"))))
+
+
+def test_only_origin_change_requires_new_approved_map() -> None:
+    claim: dict[str, JsonValue] = {
+        "source_work": "Synthetic work",
+        "source_urls": [],
+        "claimed_source": None,
+        "note": "Unverified synthetic wording claim.",
+    }
+    row = change(candidate(), source_claim=claim)
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name decision must identify the approved complete map$",
+    ):
+        build((change(row, origin="project"),), approval=receipt((row,)))
+
+
+def test_only_source_ref_change_requires_new_approved_map() -> None:
+    row = candidate()
+    ref = row.source_ref.model_dump(mode="json")
+    ref["locator"] = "/faces/1/name"
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name decision must identify the approved complete map$",
+    ):
+        build((change(row, source_ref=ref),), approval=receipt((row,)))
+
+
+def test_review_time_uses_actual_decision_not_write_time() -> None:
+    row = candidate()
+    approval = receipt((row,))
+    assert approval.decided_at != AUTHORED_AT
+    for shard in build((row,), approval=approval):
+        decision = shard.decisions[0]
+        assert decision.authored_at == AUTHORED_AT
+        assert decision.reviewed_at == approval.decided_at
+        assert decision.reviewed_precision == approval.decided_precision
+
+
+def individual(row: Candidate, *, at: str = INSTANT) -> IndividualApproval:
+    return IndividualApproval(
+        kind="individual",
+        reviewed_by="gbaian10",
+        reviewed_at=at,
+        basis="Synthetic actual individual approve button, event 2.",
+        values=((card_names._keys(row)[1], digest(row.text.encode())),),
+    )
+
+
+def test_individual_choice_and_delegated_key_have_separate_events() -> None:
+    row = candidate()
+    approval = individual(row, at="2026-10-04T04:42:57Z")
+    shards = build((row,), choices={row.concept_key: approval})
+    validate_snapshot(snapshot(shards))
+    term, choice = (s.records[0] for s in shards)
+    assert isinstance(term, TermRecord)
+    assert isinstance(choice, ChoiceRecord)
+    assert term.data.adoption_review.mode == "delegated_glossary"
+    assert choice.data.adoption_review.mode == "human"
+    assert choice.data.adoption_review.delegation is None
+    decision = shards[1].decisions[0]
+    assert decision.reviewed_by == "gbaian10"
+    assert decision.reviewed_at == approval.reviewed_at
+    assert decision.reviewed_precision == "instant"
+    assert decision.state == "confirmed"
+    assert decision.sample_ids == (choice.record_key,)
+    assert "不是維護者親自核可" not in decision.note
+    assert approval.basis in decision.note
+    assert choice.data.origin == "machine"
+
+
+def test_bulk_cannot_be_individual_approval() -> None:
+    row = candidate()
+    data = individual(row).model_dump(mode="json")
+    data["kind"] = "bulk"
+    with pytest.raises(ValidationError) as caught:
+        IndividualApproval.model_validate_json(canonical(data))
+    assert [(e["loc"], e["type"]) for e in caught.value.errors()] == [
+        (("kind",), "literal_error")
+    ]
+
+
+def test_choice_event_cannot_cover_another_event_record() -> None:
+    first, second = candidate(), candidate("test_moon")
+    broad = receipt((first, second), choice=True)
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name choice event scope must match its assigned records$",
+    ):
+        build(
+            (first, second),
+            choices={first.concept_key: broad, second.concept_key: individual(second)},
+        )
+
+
+def test_individual_event_requires_exact_value_and_members() -> None:
+    row = candidate()
+    with pytest.raises(
+        ValueError,
+        match=r"^Individual card-name approval must match exact assigned values$",
+    ):
+        build(
+            (change(row, text="合成改名"),), choices={row.concept_key: individual(row)}
+        )
+
+
+def test_term_cannot_borrow_individual_word_approval() -> None:
+    row = candidate()
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name delegation scope must cover the exact prepared map$",
+    ):
+        build((row,), approval=receipt((row,), choice=True))
+
+
+def test_choice_covering_events_are_required_for_all_and_only_candidates() -> None:
+    row = candidate()
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name choices require one covering event per candidate$",
+    ):
+        build((row,), choices={})
+
+
+def test_individual_event_requires_nonblank_evidence() -> None:
+    row = candidate()
+    data = individual(row).model_dump(mode="json")
+    data["basis"] = " "
+    with pytest.raises(
+        ValueError, match=r"^Individual card-name approval requires event evidence$"
+    ):
+        build(
+            (row,),
+            choices={
+                row.concept_key: IndividualApproval.model_validate_json(canonical(data))
+            },
+        )
+
+
+def test_choice_delegation_requires_approved_map() -> None:
+    row = candidate()
+    data = receipt((row,), choice=True).model_dump(mode="json")
+    data["decision_basis"] = "Synthetic unrelated map"
+    with pytest.raises(
+        ValueError,
+        match=r"^Card-name decision must identify the approved complete map$",
+    ):
+        build(
+            (row,),
+            choices={row.concept_key: Delegation.model_validate_json(canonical(data))},
+        )
+
+
+def test_individual_reviewer_must_be_maintainer() -> None:
+    data = individual(candidate()).model_dump(mode="json")
+    data["reviewed_by"] = "Synthetic coordinator"
+    with pytest.raises(ValidationError) as caught:
+        IndividualApproval.model_validate_json(canonical(data))
+    assert [(e["loc"], e["type"]) for e in caught.value.errors()] == [
+        (("reviewed_by",), "literal_error")
+    ]
+
+
+def test_distinct_individual_events_cannot_share_a_decision() -> None:
+    first, second = candidate(), candidate("test_moon")
+    events = {
+        first.concept_key: individual(first),
+        second.concept_key: individual(second, at="2026-10-04T04:44:00Z"),
+    }
+    shards = build((first, second), choices=events)
+    assert shards == build((second, first), choices=events)
+    validate_snapshot(snapshot(shards))
+    assert len(shards) == 3
+    assert {s.decisions[0].reviewed_at for s in shards[1:]} == {
+        a.reviewed_at for a in events.values()
+    }
