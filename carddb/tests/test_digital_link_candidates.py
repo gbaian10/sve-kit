@@ -330,7 +330,8 @@ def test_catalogue_requires_declared_store(baseline: Fixture, consumer: str) -> 
             batch_refs(sources, review.source_batches, "svwb")
 
     with pytest.raises(
-        ValueError, match=r"^Digital-link source store is not declared$"
+        ValueError,
+        match=r"^Source batch requires exactly one configured archive store$",
     ):
         check()
 
@@ -347,7 +348,7 @@ def test_sve_projection_boundary_refusals(baseline: Fixture, fault: str) -> None
     else:
         object_value(array(object_value(document)["faces"])[0])["name"] = ""
         message = "Digital candidate SVE name is absent"
-    sources.cache[ref.store_id, ref.batch_id, ref.source_version_id, ref.parser] = (
+    sources.cache[ref.batch_id, ref.source_version_id, ref.parser] = (
         lang,
         document,
         source,

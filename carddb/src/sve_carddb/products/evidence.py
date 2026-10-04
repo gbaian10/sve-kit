@@ -22,19 +22,14 @@ def resolve_evidence(
     references: tuple[Evidence, ...], stores: Mapping[str, Path]
 ) -> Mapping[Evidence, CheckedSource]:
     """Verify each full batch before resolving its descriptor and first receipt."""
-    batches: dict[tuple[str, str], FrozenSources] = {}
+    batches: dict[str, FrozenSources] = {}
     result: dict[Evidence, CheckedSource] = {}
     for reference in references:
         if reference in result:
             continue
-        root = stores.get(reference.store_id)
-        if root is None:
-            raise ValueError(
-                "Product evidence requires an explicitly configured archive store"
-            )
-        key = reference.store_id, reference.batch_id
+        key = reference.batch_id
         if key not in batches:
-            batches[key] = FrozenSources(root, *key)
+            batches[key] = FrozenSources.configured(stores, key)
         if reference.source_version_id not in batches[key].entries:
             raise ValueError(
                 "Product evidence source version is absent from pinned batch"

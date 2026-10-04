@@ -324,7 +324,7 @@ data 恰含下表欄位；可空欄仍必須明示 null。Hash 一律為完整 `
 | `selected_observation_key` | 精確指 observations 成員，且位於 wording_order 最後一層 |
 | `previous_order` | previous=null 時為 null；否則明示前次選中內容至本次選中內容的先後證據，見 §9.4 |
 
-`review_context` 恰有 `context, source_batches`。context 沿 [F1 §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的完整 `{program_revision,dependencies,configuration}`；source_batches 是排序唯一的 `{store_id,batch_id}` 陣列。configuration 的 canonical JSON 內容明列本次 registry、商品內容、商品身分、更正／勘誤等已讀 authored 入口各自的 `{authored_revision,index_path,index_hash}`、解析與投影 recipe、地區範圍及勘誤查核截止日。dependencies 保存所有實際讀取的 index／分片、parser／投影程式與 lock 的 exact bytes hash。不能以 authored revision 代替程式 revision；所有檔案須能從對應 immutable revision 重取。尚未支援的能力明示未啟用，不假造空的已驗覆蓋。
+`review_context` 恰有 `context, source_batches`。context 沿 [F1 §2.2.1](source-archive.md#221-建置輸入紀錄與完整使用閉包) 的完整 `{program_revision,dependencies,configuration}`；source_batches 是排序唯一的 `{batch_id}` 陣列。configuration 的 canonical JSON 內容明列本次 registry、商品內容、商品身分、更正／勘誤等已讀 authored 入口各自的 `{authored_revision,index_path,index_hash}`、解析與投影 recipe、地區範圍及勘誤查核截止日。dependencies 保存所有實際讀取的 index／分片、parser／投影程式與 lock 的 exact bytes hash。不能以 authored revision 代替程式 revision；所有檔案須能從對應 immutable revision 重取。尚未支援的能力明示未啟用，不假造空的已驗覆蓋。
 
 此 context 是**產生待核對觀測時**的輸入，不引用尚未寫出的本次採納分片，避免 hash 自我引用。採納後的建置另釘住 wording-adoptions 入口，見 §9.7。批次包括核對來源與排序證據來源；範圍由釘住 registry 的該 face／region 全部 printing，加上 source_batches 中能匹配這些 printing 的全部卡片來源版本決定。不得挑一頁、刪除缺句版本或先濾不合意內容後宣稱全體；缺來源、解析失敗、身分不匹配均列明並阻止該群組 confirmed。
 
@@ -336,7 +336,7 @@ data 恰含下表欄位；可空欄仍必須明示 null。Hash 一律為完整 `
 
 observation_key 是 `["wording-observation-v1",printing_id,face_id,region,source_index,source_version_id,raw_hash,parser_version,raw_face_hash,effect_presence,corrections,content_hash]` 的 §2 canonical JSON **字串**。同一 printing／face 的不同來源版本都保留；同來源換 parser 或更正採納也不會誤命中舊收據。僅 raw hash 相同不足以合併來源；觀測物件、checked 全集合與排序均包含在完整 record hash 內。
 
-record.evidence 沿 §10.3 的 `{store_id,batch_id,source_version_id,locator,role}`，非空、無重複，逐項驗 sealed batch／descriptor／first receipt／raw 閉包。effect_presence 的完整 result／hash 沿 §9.8，參與精確觀測鍵與重建；尚未核可或實作的 parser 不得用固定 absent 填值。每個 observation 至少有 role=`wording_observation` 的對應證據，locator 是 `{printing_id,face_id,source_index}` 的 canonical JSON 字串。來源可共用，角色與定位不丟失；舊 current、更正與排序的依賴須同樣能追回完整來源閉包，不能只留下 hash。所有 evidence 的批次均須列於相應 review_context。
+record.evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、無重複，逐項驗 sealed batch／descriptor／first receipt／raw 閉包。effect_presence 的完整 result／hash 沿 §9.8，參與精確觀測鍵與重建；尚未核可或實作的 parser 不得用固定 absent 填值。每個 observation 至少有 role=`wording_observation` 的對應證據，locator 是 `{printing_id,face_id,source_index}` 的 canonical JSON 字串。來源可共用，角色與定位不丟失；舊 current、更正與排序的依賴須同樣能追回完整來源閉包，不能只留下 hash。所有 evidence 的批次均須列於相應 review_context。
 
 ### 9.3 明示順序與選定觀測
 
@@ -526,7 +526,7 @@ family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的�
 
 `date_precision` 限 `day/month/year/unknown`。day 的 released_on 必須是有效完整 ISO 日期；month/year 必須有非空 date_raw 且 released_on=null；unknown 的 released_on=null，date_raw 可以保留來源的未知描述或為 null。日精度若來源有原字串仍保留 date_raw，不把轉換後 ISO 日期冒充原字串。inclusion 的日期三欄同理；precision=null 時另兩欄皆 null，以免把無覆寫與部分覆寫混在一起。不得從抓取／封存時間補發售日期。
 
-`evidence` 是去重陣列，每項恰有 `{store_id, batch_id, source_version_id, locator, role}`。前三個識別欄釘住 [source-archive](source-archive.md) 的具名 store、已封存批次與其中來源版本；locator 是非空人工定位字串（例如商品區塊序號），role 是非空證據用途。匯入須驗 batch／descriptor／receipt／raw 閉包並由 descriptor 取得原 URL／raw hash，不接受以 URL 或 hash 字串代替實際可驗來源，也不在 authored 存本機絕對路徑。locator 不是可執行查詢語言。
+`evidence` 是去重陣列，每項恰有 `{batch_id, source_version_id, locator, role}`。前兩個識別欄釘住 [source-archive](source-archive.md) 的已封存批次與其中來源版本；store 名稱及根目錄由執行端設定；locator 是非空人工定位字串（例如商品區塊序號），role 是非空證據用途。匯入須驗 batch／descriptor／receipt／raw 閉包並由 descriptor 取得原 URL／raw hash，不接受以 URL 或 hash 字串代替實際可驗來源，也不在 authored 存本機絕對路徑。locator 不是可執行查詢語言。
 
 商品與收錄的 evidence 不可空，且須支持該地區、商品及具體版次收錄的主張；卡片頁 products 區的共現只產候選，不能自動宣稱某家族、配布方式或完整收錄全集。純人工的歸檔家族可 evidence=[]，由下節精確成員的人工決定支持；若主張與真實商品對應，仍須該商品的來源證據及人工核對。商品頁 URL 可以是卡片頁記載的線索，但未封存該商品頁就不能宣稱已驗其內容。
 
@@ -585,7 +585,7 @@ JP、EN 均讀搜尋 URL query 中名稱精確為 `expansion` 的參數，參數
 
 同一區塊若有多個不同商品 URL／expansion 值，parser 不任選或作笛卡兒積：列出歧義，僅容許經使用者核對的 exact `source_block` 對照辨識該區塊代表的商品；若該區塊其實含數個商品，須先有能分出個別商品的來源及 parser。`source_block` 不用名稱／日期作匹配鍵；raw 改版後即使只是更正名稱，也須為新來源補對照，沿用原 product_id，不能套用舊 ordinal 猜。
 
-evidence 沿 §10.3 的 `{store_id,batch_id,source_version_id,locator,role}`，非空、無重複；每項都須驗 sealed batch／descriptor／first receipt／raw 閉包。至少一項證據的 role 為 `product_identity_match`，locator 為 §2 canonical JSON 字串 `{"product_block_ordinal":0}`（數字依實際區塊），正式 parser 須從該來源重現完整 match 與 region；source_block 還須與 evidence 的版本／ordinal 相同。其他 role 可保留人工判斷所需的來源及非空定位。卡片頁的商品區塊可以證明該頁記載的識別線索；只有商品連結不表示已讀／驗該商品頁內容。
+evidence 沿 §10.3 的 `{batch_id,source_version_id,locator,role}`，非空、無重複；每項都須驗 sealed batch／descriptor／first receipt／raw 閉包。至少一項證據的 role 為 `product_identity_match`，locator 為 §2 canonical JSON 字串 `{"product_block_ordinal":0}`（數字依實際區塊），正式 parser 須從該來源重現完整 match 與 region；source_block 還須與 evidence 的版本／ordinal 相同。其他 role 可保留人工判斷所需的來源及非空定位。卡片頁的商品區塊可以證明該頁記載的識別線索；只有商品連結不表示已讀／驗該商品頁內容。
 
 ### 11.3 首次採納、重建匹配與改址
 

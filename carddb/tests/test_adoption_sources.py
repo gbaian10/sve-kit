@@ -80,12 +80,11 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Case, Path, str]
     )
     review: dict[str, JsonValue] = {
         "context": context.model_dump(mode="json"),
-        "source_batches": [{"store_id": store.store_id, "batch_id": sealed.batch_id}],
+        "source_batches": [{"batch_id": sealed.batch_id}],
     }
 
     def ref(locator: str, text: str) -> dict[str, JsonValue]:
         return {
-            "store_id": store.store_id,
             "batch_id": sealed.batch_id,
             "source_version_id": version,
             "parser": "exact-json-v1",

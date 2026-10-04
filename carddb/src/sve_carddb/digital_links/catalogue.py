@@ -21,20 +21,16 @@ def complete_inventory(  # ruff: ignore[complex-structure] -- provider-specific 
     counts: dict[str, set[int]] = defaultdict(set)
     offsets: dict[str, set[int]] = defaultdict(set)
     identifiers: dict[str, set[str]] = defaultdict(set)
-    batches = {(b.store_id, b.batch_id) for b in review.source_batches}
-    for (store, batch, version, parser), (
+    batches = {b.batch_id for b in review.source_batches}
+    for (batch, version, parser), (
         lang,
         document,
         source,
     ) in sources.cache.items():
-        if (store, batch) not in batches or parser != "translation-" + game + "-v1":
+        if batch not in batches or parser != "translation-" + game + "-v1":
             continue
         data = object_value(object_value(document)["data"])
-        refs.append(
-            PageRef(
-                store_id=store, batch_id=batch, source_version_id=version, parser=parser
-            )
-        )
+        refs.append(PageRef(batch_id=batch, source_version_id=version, parser=parser))
         query = parse_qs(urlsplit(source.url).query)
         if game == "sv1" and (
             set(query) != {"format", "lang"} or query["format"] != ["json"]

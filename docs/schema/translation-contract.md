@@ -84,8 +84,8 @@ source_exception 的 divergence 只在本次存在該卡／區／scope 的 fresh
 default_jp 撤回例外並按預設重算，不造不存在的 JP 來源。英文獨有仍由 fresh confirmed_none 與 as_of 推導，
 不另寫 en_only、不藉翻譯欄位授予跨區資格。
 
-source_ref 保留既有 `{store_id,batch_id,source_version_id,parser,locator,text_hash}`，只定位來源資料；
-store_id 是可攜邏輯識別，實體路徑由執行端設定。parser 是本次支援的解析器，locator 為 JSON Pointer，
+source_ref 保留既有 `{batch_id,source_version_id,parser,locator,text_hash}`，只定位來源資料；
+store 名稱與實體路徑由執行端設定，authored 不保存 store_id。parser 是本次支援的解析器，locator 為 JSON Pointer，
 text_hash 對定位到的完整 UTF-8 字串計算；span 使用 Unicode code point 半開區間。
 不把本機檔名、對話紀錄、點擊時間或私人網頁 hash 塞進來源欄位。
 

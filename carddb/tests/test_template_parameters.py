@@ -39,14 +39,13 @@ def candidate(
     position = locate(text, parts)[0]
     part = parts[0]
     ref = SourceRef(
-        store_id="synthetic",
         batch_id=HASH,
         source_version_id="src:v1:" + "b" * 64,
         parser=PARSER,
         locator="/faces/0/text" if section is None else f"/faces/0/sections/{section}",
         text_hash=digest(text.encode()),
     )
-    item = entry(ref, part, VERSION)
+    item = entry(ref, part, VERSION, store_id="test-store")
     evidence = refs or References()
     result = analyze(text, part, item, position, evidence)
     verify_candidate(text, part, item, position, evidence, result)
@@ -412,14 +411,13 @@ def test_candidate_replay_rejects_changed_literal_positions_and_missing_slots() 
     text = "試験２枚"
     parts = partition(text)
     ref = SourceRef(
-        store_id="synthetic",
         batch_id=HASH,
         source_version_id="src:v1:" + "b" * 64,
         parser=PARSER,
         locator="/faces/0/text",
         text_hash=digest(text.encode()),
     )
-    item = entry(ref, parts[0], VERSION)
+    item = entry(ref, parts[0], VERSION, store_id="test-store")
     position = locate(text, parts)[0]
     result = analyze(text, parts[0], item, position, References())
     damaged = result.model_copy(update={"literal_trace": ()})
@@ -529,14 +527,13 @@ def test_rule_identifier_and_pending_reason_are_part_of_exact_candidate_replay()
     located = locate(text, (part,))[0]
     result = candidate(text)
     ref = SourceRef(
-        store_id="synthetic",
         batch_id=HASH,
         source_version_id="src:v1:" + "b" * 64,
         parser=PARSER,
         locator="/faces/0/text",
         text_hash=digest(text.encode()),
     )
-    item = entry(ref, part, VERSION)
+    item = entry(ref, part, VERSION, store_id="test-store")
     for updates in ({"numeric_rule": "suffix_unit_times"}, {"issues": ()}):
         damaged = result.model_copy(
             update={"slots": (result.slots[0].model_copy(update=updates),)}

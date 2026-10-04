@@ -67,7 +67,7 @@ def regional_case(  # ruff: ignore[too-many-locals] -- shared fixture pins two i
     wire = case.review.model_dump(mode="json")
     configuration = object_value(parse(case.review.context.configuration.encode()))
     configuration["regions"] = ["en"]
-    wire["source_batches"] = [{"store_id": store.store_id, "batch_id": batch}]
+    wire["source_batches"] = [{"batch_id": batch}]
     # Configuration is part of the context hash, including its own identity.
     context = case.review.context.from_inputs(
         case.review.context.program_revision,

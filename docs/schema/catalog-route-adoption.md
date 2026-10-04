@@ -130,7 +130,7 @@ loader 必須重算三層 hash、驗 category/policy/area/kind 與精確成員�
 evidence 為排序去重的 `{source_ref,role}` 陣列；source_ref 沿
 [translation-contract §2](translation-contract.md#2-當前資料入口) 六欄，parser/locator/text_hash 指向凍結投影的 exact 字串。
 圖片人工核對可改用 `{image_ref,role}`，image_ref 恰為
-`{store_id,batch_id,source_version_id,raw_hash,printing_id,face_id}`，須驗圖像 descriptor/raw hash 及版次面關聯。
+`{batch_id,source_version_id,raw_hash,printing_id,face_id}`，須驗圖像 descriptor/raw hash 及版次面關聯。
 兩種 ref 恰擇一；role 非空，不將圖片 hash 當作文字 hash。format 1 的批次列入 review_context.source_batches；format 2 由本次建置來源集合提供。
 純自撰的 code、別名或介面配置可 evidence=[]；format 1 仍須依賴與核對收據，format 2 不含這些欄位；聲稱官方原值／名稱／記號者必有來源。
 

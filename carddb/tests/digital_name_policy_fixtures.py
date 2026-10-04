@@ -39,7 +39,7 @@ def _link_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
     identifier = LINKS
     checksum = digest(b"synthetic policy evidence; no actual approval")
     revision = "a" * 40
-    batches: list[JsonValue] = [{"store_id": "test-store", "batch_id": checksum}]
+    batches: list[JsonValue] = [{"batch_id": checksum}]
     registry: dict[str, JsonValue] = {
         "authored_revision": revision,
         "index_path": "authored/ids/index.yaml",
@@ -69,7 +69,6 @@ def _link_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
         "private_name_list_hash": checksum,
         "r2_inventory_evidence_hash": checksum,
         "source_batches": batches,
-        "store_id": "test-store",
     }
     content["proposed_clause_replacements"] = []
     if purpose == "links":
@@ -355,7 +354,6 @@ def make_policy_fixture(
             count_replay_main_revision=digital.program,
             parser_and_registry_configuration=configuration,
             source_batches=configuration["digital_link_sources"],
-            store_id="test-store",
         )
         if purpose == "links":
             registry = object_value(configuration["catalog_registry"])

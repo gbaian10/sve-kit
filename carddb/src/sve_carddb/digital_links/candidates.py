@@ -142,16 +142,7 @@ def sve_inventory(  # ruff: ignore[complex-structure] -- multiple printing varia
             printings[record.data.card_no].append(record.data)
     result: dict[str, list[tuple[SveName, dict[str, JsonValue]]]] = defaultdict(list)
     for batch in review.source_batches:
-        # batch_refs shares this cache with source replay and checks store ownership.
-        from sve_carddb.frozen_sources import FrozenSources  # ruff: ignore[import-outside-top-level] -- deferred archive traversal shares the source resolver cache
-
-        if (batch.store_id, batch.batch_id) not in sources.batches:
-            if batch.store_id not in sources.stores:
-                raise ValueError("Digital-link source store is not declared")
-            sources.batches[batch.store_id, batch.batch_id] = FrozenSources(
-                sources.stores[batch.store_id], batch.store_id, batch.batch_id
-            )
-        frozen = sources.batches[batch.store_id, batch.batch_id]
+        frozen = sources.batch(batch.batch_id)
         for current in frozen.inventory.current:
             descriptor = frozen.descriptor(current.source_version_id)
             if descriptor.provider != "jp" or descriptor.kind != "card":
@@ -161,7 +152,6 @@ def sve_inventory(  # ruff: ignore[complex-structure] -- multiple printing varia
             if not matching:
                 continue
             lang, document, _ = sources.projection(
-                batch.store_id,
                 batch.batch_id,
                 current.source_version_id,
                 "translation-jp-v1",
@@ -179,7 +169,6 @@ def sve_inventory(  # ruff: ignore[complex-structure] -- multiple printing varia
                     from sve_carddb.catalog.adoption_models import SourceRef  # ruff: ignore[import-outside-top-level] -- reference is created only after frozen face validation
 
                     ref = SourceRef(
-                        store_id=batch.store_id,
                         batch_id=batch.batch_id,
                         source_version_id=current.source_version_id,
                         parser="translation-jp-v1",

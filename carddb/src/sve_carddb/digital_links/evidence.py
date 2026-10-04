@@ -8,7 +8,6 @@ from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse, Version
 from sve_carddb.catalog.adoption_models import Batch, ReviewContext, SourceRef
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.registry.records import CardData, FaceData, PrintingData, Text
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
@@ -47,7 +46,7 @@ def inventory(  # ruff: ignore[complex-structure,too-many-locals] -- both API la
     result: dict[tuple[str, str, str, str], Name] = {}
     for ref in refs:
         lang, document, source = sources.projection(
-            ref.store_id, ref.batch_id, ref.source_version_id, ref.parser
+            ref.batch_id, ref.source_version_id, ref.parser
         )
         sources.uses.append(
             SourceUse(source=source, usage="digital_name_inventory", locator="/data")
@@ -84,7 +83,6 @@ def inventory(  # ruff: ignore[complex-structure,too-many-locals] -- both API la
             locator = base + ("/" if game == "sv1" else "/common/") + field
             for phase in phases:
                 exact = SourceRef(
-                    store_id=ref.store_id,
                     batch_id=ref.batch_id,
                     source_version_id=ref.source_version_id,
                     parser=ref.parser,
@@ -113,21 +111,15 @@ def batch_refs(
     """Enumerate the declared frozen pages; no made-up field hash becomes evidence."""
     refs = []
     for batch in batches:
-        cache_key = batch.store_id, batch.batch_id
-        if cache_key not in sources.batches:
-            if batch.store_id not in sources.stores:
-                raise ValueError("Digital-link source store is not declared")
-            sources.batches[cache_key] = FrozenSources(
-                sources.stores[batch.store_id], *cache_key
-            )
-        frozen = sources.batches[cache_key]
+        cache_key = batch.batch_id
+        frozen = sources.batch(cache_key)
         for current in frozen.inventory.current:
             descriptor = frozen.descriptor(current.source_version_id)
             if descriptor.provider != game or descriptor.kind != "api":
                 continue
             parser = "translation-" + game + "-v1"
             _, document, source = sources.projection(
-                batch.store_id, batch.batch_id, current.source_version_id, parser
+                batch.batch_id, current.source_version_id, parser
             )
             sources.uses.append(
                 SourceUse(
@@ -158,7 +150,6 @@ def batch_refs(
             locator, text = min(names)
             refs.append(
                 SourceRef(
-                    store_id=batch.store_id,
                     batch_id=batch.batch_id,
                     source_version_id=current.source_version_id,
                     parser=parser,

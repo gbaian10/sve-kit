@@ -267,7 +267,7 @@ def test_adopted_concept_requires_japanese_and_nonempty_exact_frozen_text(
                 raw_locator="synthetic/raw",
                 parser_version=ref.parser,
                 archive=ArchivePin(
-                    store_id=ref.store_id,
+                    store_id="test-store",
                     batch_id=ref.batch_id,
                     descriptor_sha256=HASH,
                     first_receipt_id=HASH,

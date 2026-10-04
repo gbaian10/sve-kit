@@ -263,7 +263,7 @@ def test_pinned_context_refusals(
     elif change == "git":
         monkeypatch.setattr(shutil, "which", lambda _name: None)
     message = {
-        "store": "Reviewed archive store is not configured",
+        "store": "Source batch requires exactly one configured archive store",
         "index": "Reviewed authored index hash mismatch",
         "region": "Adoption region is outside the reviewed scope",
         "runtime": "Historical wording runtime cannot be replayed",
@@ -272,7 +272,7 @@ def test_pinned_context_refusals(
 
     def operation() -> None:
         if change == "store":
-            rebuilt.batch("not-configured", "sha256:" + "0" * 64)
+            rebuilt.batch("sha256:" + "0" * 64)
         elif change == "index":
             rebuilt._inventory(
                 tmp_path / "inventory",

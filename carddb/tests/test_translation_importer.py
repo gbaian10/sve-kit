@@ -127,7 +127,6 @@ def frozen(  # ruff: ignore[too-many-locals] -- two sealed language sources shar
         )
         refs.append(
             SourceRef(
-                store_id=store.store_id,
                 batch_id=sealed.batch_id,
                 source_version_id=source.id,
                 parser="translation-svwb-v1",

@@ -259,18 +259,16 @@ def replay_adoptions(
             raise ValueError(
                 "Null predecessor cannot discard an available mechanical current"
             )
-        batches = {(b.store_id, b.batch_id) for b in data.review_context.source_batches}
+        batches = {b.batch_id for b in data.review_context.source_batches}
         if previous_scope is not None and isinstance(data.previous, Mechanical):
             batches.update(
-                (b.store_id, b.batch_id)
-                for b in data.previous.review_context.source_batches
+                b.batch_id for b in data.previous.review_context.source_batches
             )
         if isinstance(data.previous, PreviousAdoption):
             batches.update(
-                (e.store_id, e.batch_id)
-                for e in result[data.previous.record_key].record.evidence
+                e.batch_id for e in result[data.previous.record_key].record.evidence
             )
-        if any((e.store_id, e.batch_id) not in batches for e in record.evidence):
+        if any(e.batch_id not in batches for e in record.evidence):
             raise ValueError(
                 "Evidence batch is outside its corresponding reviewed contexts"
             )

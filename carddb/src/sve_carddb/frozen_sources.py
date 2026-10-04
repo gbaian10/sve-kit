@@ -1,5 +1,6 @@
 """Verify sealed source closure and expose exact raw bytes with shared metadata."""
 
+import re
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
 from typing import TYPE_CHECKING
@@ -12,10 +13,28 @@ from sve_carddb.source_archive import ArchiveError, Descriptor, Receipt, verify_
 from sve_carddb.store import resolve_within
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
     from pathlib import Path
 
 
 class FrozenSources:
+    @classmethod
+    def configured(cls, stores: Mapping[str, Path], batch_id: str) -> FrozenSources:
+        """Resolve an exact batch in explicitly configured stores, then verify ownership."""
+        if re.fullmatch(r"sha256:[0-9a-f]{64}", batch_id) is None:
+            raise ValueError("Invalid configured source batch ID")
+        matches = [
+            (name, root)
+            for name, root in stores.items()
+            if (root / "batches" / batch_id[7:]).exists()
+        ]
+        if len(matches) != 1:
+            raise ValueError(
+                "Source batch requires exactly one configured archive store"
+            )
+        name, root = matches[0]
+        return cls(root, name, batch_id)
+
     def __init__(self, root: Path, store_id: str, batch_id: str) -> None:
         self.inventory = verify_batch(root, store_id, batch_id)
         self.entries = {

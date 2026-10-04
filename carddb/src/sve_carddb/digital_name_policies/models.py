@@ -141,7 +141,6 @@ class CataloguePins(RecordData):
     private_name_list_hash: Hash
     r2_inventory_evidence_hash: Hash
     source_batches: tuple[Batch, ...]
-    store_id: Text
 
 
 class LinkRegistryPins(RecordData):

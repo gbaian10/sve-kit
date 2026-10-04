@@ -278,7 +278,7 @@ class Validated:
 def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
     """One current build verifies every declared source before exposing usable definitions."""
     batches = {
-        (batch.store_id, batch.batch_id): batch
+        batch.batch_id: batch
         for item in inputs.inventories
         for batch in item.source_batches
     }

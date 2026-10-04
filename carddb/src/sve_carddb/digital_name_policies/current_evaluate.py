@@ -71,10 +71,10 @@ def catalogue(policy: Policy, sources: Sources) -> Catalogue:
             SourceRef.model_validate_json(canonical(r))
             for r in array(object_value(config.get("digital_evidence"))["refs"])
         )
-        batches = sorted({(r.store_id, r.batch_id) for r in refs})
+        batches = sorted({r.batch_id for r in refs})
         review = ReviewContext(
             context=sources.build,
-            source_batches=tuple(Batch(store_id=s, batch_id=b) for s, b in batches),
+            source_batches=tuple(Batch(batch_id=b) for b in batches),
         )
     names: list[FrozenName] = []
     for game in policy.content.game_priority:

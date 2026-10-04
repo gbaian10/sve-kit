@@ -189,7 +189,7 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
     )
     review: dict[str, JsonValue] = {
         "context": context.model_dump(mode="json"),
-        "source_batches": [{"store_id": store.store_id, "batch_id": batch.batch_id}],
+        "source_batches": [{"batch_id": batch.batch_id}],
     }
     for file in (case.root / "catalog-adoptions").rglob("*.yaml"):
         if file.name == "index.yaml":
@@ -217,7 +217,6 @@ def make_vocabulary_case(root: Path) -> VocabularyCase:  # ruff: ignore[too-many
                     else "Synthetic class"
                 )
                 references[region, kind, face] = {
-                    "store_id": store.store_id,
                     "batch_id": batch.batch_id,
                     "source_version_id": versions[region],
                     "parser": "exact-json-v1",

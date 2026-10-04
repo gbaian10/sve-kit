@@ -85,7 +85,7 @@ def corrected(
                 "context": BuildContext.from_inputs(
                     "1" * 40, {"synthetic.lock": b"synthetic"}, {}
                 ).model_dump(mode="json"),
-                "source_batches": [{"store_id": "image-store", "batch_id": batch}],
+                "source_batches": [{"batch_id": batch}],
             }
         )
     )

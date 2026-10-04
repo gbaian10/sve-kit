@@ -95,18 +95,10 @@ class InclusionData(RecordData):
 
 
 class Evidence(RecordData):
-    store_id: Text
     batch_id: Hash
     source_version_id: Annotated[str, Field(pattern=r"^src:v1:[0-9a-f]{64}\Z")]
     locator: Text
     role: Text
-
-    @field_validator("store_id")
-    @classmethod
-    def _store(cls, value: str) -> str:
-        if "/" in value or ".." in value:
-            raise ValueError("Archive store ID must be a simple stable name")
-        return value
 
 
 class _Record(RecordData):

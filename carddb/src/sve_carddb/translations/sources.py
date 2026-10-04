@@ -194,9 +194,15 @@ class Sources:
                 raise ValueError(
                     "Translation runtime/dependency closure cannot be replayed"
                 )
-        self.batches: dict[tuple[str, str], FrozenSources] = {}
-        self.cache: dict[tuple[str, str, str, str], tuple[str, JsonValue, Source]] = {}
+        self.batches: dict[str, FrozenSources] = {}
+        self.cache: dict[tuple[str, str, str], tuple[str, JsonValue, Source]] = {}
         self.uses: list[SourceUse] = []
+
+    def batch(self, batch_id: str) -> FrozenSources:
+        """Verify the configured archive ownership before exposing any source member."""
+        if batch_id not in self.batches:
+            self.batches[batch_id] = FrozenSources.configured(self.stores, batch_id)
+        return self.batches[batch_id]
 
     def context_key(self, context: BuildContext) -> bytes:
         """Full immutable contexts distinguish inputs without quoting them for every owner."""
@@ -206,12 +212,10 @@ class Sources:
 
     def document(self, ref: SourceRef) -> tuple[str, JsonValue, Source]:
         """Verify recipe, archive membership, metadata and raw before resolving text."""
-        return self.projection(
-            ref.store_id, ref.batch_id, ref.source_version_id, ref.parser
-        )
+        return self.projection(ref.batch_id, ref.source_version_id, ref.parser)
 
     def projection(
-        self, store_id: str, batch_id: str, version: str, parser: str
+        self, batch_id: str, version: str, parser: str
     ) -> tuple[str, JsonValue, Source]:
         """Replay a complete page without inventing a text locator or text hash."""
         config = parse(self.build.configuration.encode())
@@ -234,14 +238,9 @@ class Sources:
         provider = pin.config["provider"]
         if not isinstance(provider, str) or parser != "translation-" + provider + "-v1":
             raise ValueError("Translation recipe/provider mismatch")
-        cache_key = (store_id, batch_id, version, parser)
+        cache_key = (batch_id, version, parser)
         if cache_key not in self.cache:
-            batch_key = (store_id, batch_id)
-            if batch_key not in self.batches:
-                self.batches[batch_key] = FrozenSources(
-                    self.stores[store_id], *batch_key
-                )
-            source, raw, descriptor = self.batches[batch_key].read(
+            source, raw, descriptor = self.batch(batch_id).read(
                 version, parser_version=parser
             )
             if descriptor.provider != provider or descriptor.kind != (

@@ -93,10 +93,10 @@ subject 恰為 `{card_id,game}`；非 null value 恰為 `{state,as_of,sve_names,
 coverage 的 sve_names 恰為排序唯一的 `{face_id,name_ref}` 陣列，保存各永久面出現過的相異完整名稱，不含 printing_id；link 的 sve_names 仍沿 §3 的版次／面證據形狀。每個 `(face_id,name_ref.text_hash)` 只留一項可重播的代表來源，按此鍵排序；不同面同名不合併。由核對時 registry/source_face_map 驗來源面的 card／face 歸屬，不能以去掉 printing_id 免掉來源驗證。catalogues 為排序唯一的**完整凍結目錄引用**，每項恰為：
 
 ```text
-{store_id,batch_id,source_version_id,parser,inventory_hash}
+{batch_id,source_version_id,parser,inventory_hash}
 ```
 
-前三欄沿來源歸檔版本引用，parser 沿釘住的數位 API recipe；引用的是完整 JSON 投影，不是任意 locator 或可執行查詢。inventory_hash=H(從該完整投影得到的排序唯一 `{official_id,phase,name_hash}` 陣列)，依 `(official_id,phase)` 排序，ID 原樣保留，name_hash 為該 phase 完整 JA 名稱的 exact UTF-8 hash，缺名稱則明示 null。只能用同 game 的 ja 目錄；重複 official_id／同卡同 phase 或不支援的面結構須拒絕，不能去重吞掉來源衝突。這是新的結構性引用型別，重用歸檔與 parser 驗證，不把 array/object hash 冒稱 SourceRef.text_hash；來源語言名稱仍用普通 SourceRef。
+前兩欄沿來源歸檔版本引用，store 由執行設定解析，parser 沿釘住的數位 API recipe；引用的是完整 JSON 投影，不是任意 locator 或可執行查詢。inventory_hash=H(從該完整投影得到的排序唯一 `{official_id,phase,name_hash}` 陣列)，依 `(official_id,phase)` 排序，ID 原樣保留，name_hash 為該 phase 完整 JA 名稱的 exact UTF-8 hash，缺名稱則明示 null。只能用同 game 的 ja 目錄；重複 official_id／同卡同 phase 或不支援的面結構須拒絕，不能去重吞掉來源衝突。這是新的結構性引用型別，重用歸檔與 parser 驗證，不把 array/object hash 冒稱 SourceRef.text_hash；來源語言名稱仍用普通 SourceRef。
 
 完整目錄也只表示**此次凍結來源的範圍**，不是未來或所有外部來源的全球無對應證明。不能從只匯入已對應卡的 digital_card 表、名稱搜尋命中子集或草稿已選候選算目錄 hash。review_context 及 F1 保存實際搜索的全部目錄；不能把一個局部清單說成涵蓋未檢查的來源。catalogues 按 canonical 引用排序；空目錄本身不能證明無對應。
 
@@ -230,7 +230,7 @@ docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易
 
 `digital_links.loader.load_links(authored_root)` 驗全入口並返回不可變 snapshot；每次取封套得到獨立的型別化值。第一版只接受 links，coverage 路徑／kind 明確拒絕，沒有紀錄即未知。`digital_links.importer.Inputs` 驗本機入口 bytes 與明示 authored commit 完全相同，再把 index／分片 exact 與 canonical hash 納入 `digital_link_authored` 設定。不以目前 working tree 或單一分片代替全入口。
 
-建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{store_id,batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 沿既有 registry pin；`translation_recipes` 沿既有凍結 parser pin。`digital_evidence` 沿既有 `translations.digital.configuration()`，列明示 API refs 與 targets。歷史封套的 review_context 分別由不可變 Git 驗程式／依賴與 recipe，使用目前解析器重驗凍結證據；目前建置才驗載入的執行期；本次來源另驗全部名稱閉包，不能只交目標語或已選目標的子集。
+建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 沿既有 registry pin；`translation_recipes` 沿既有凍結 parser pin。`digital_evidence` 沿既有 `translations.digital.configuration()`，列明示 API refs 與 targets。歷史封套的 review_context 分別由不可變 Git 驗程式／依賴與 recipe，使用目前解析器重驗凍結證據；目前建置才驗載入的執行期；本次來源另驗全部名稱閉包，不能只交目標語或已選目標的子集。
 
 在 caller-owned transaction 內先呼叫 `populate_links()`；`snapshot/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.prepare()`／`populate()`，再委派 `current_application` 驗期望來源閉包與產生 current 名稱。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale／withdrawn record keys、決定對照及 F1 input record，並按 card／face 索引已驗的 terminal records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
 

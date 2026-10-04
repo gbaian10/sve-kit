@@ -653,7 +653,6 @@ class TestIdentityWireConstraints:
             "data": {"product_id": "permanent-example", "region": "jp", "match": match},
             "evidence": [
                 {
-                    "store_id": "test-store",
                     "batch_id": "sha256:" + "1" * 64,
                     "source_version_id": "src:v1:" + "2" * 64,
                     "locator": '{"product_block_ordinal":0}',

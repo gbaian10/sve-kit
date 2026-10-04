@@ -7,7 +7,7 @@
 
 `translations/template-sources/<sequence>.yaml` 的完整欄位：
 `{template_source_format:3,kind:template_source_inventory,source_batches,entries}`。
-source_batches 是排序唯一的 `{store_id,batch_id}` 陣列，由呼叫端提供資料位置；不保存實體 pathname。
+source_batches 是排序唯一的 `{batch_id}` 陣列，由呼叫端設定 store 名稱與資料位置；authored 不保存 store_id 或實體 pathname。
 清冊以 translations index.inventories 的 canonical hash 索引，hash 只檢查檔案一致，不作核可證明。
 
 entry 沿用八欄 `{id,level,source_ref,line_ordinal,role,normalizer_id,normalized_hash,legacy_fingerprint}`。

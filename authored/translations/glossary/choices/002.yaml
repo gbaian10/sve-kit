@@ -12,7 +12,6 @@ records:
       value:
         kind: source
         source_ref:
-          store_id: gbaian10-home
           batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
           source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
           parser: translation-svwb-v1
@@ -24,14 +23,12 @@ records:
           dictionary_kind: skill_names
           entry_key: '26'
           jp_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
             parser: translation-svwb-v1
             locator: /data/skill_names/26
             text_hash: sha256:e73b7be6f0d5c286a5674414f162c4bde8742f86fc0d5e5cf9058935634a5f83
           target_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
             parser: translation-svwb-v1
@@ -50,7 +47,6 @@ records:
       value:
         kind: source
         source_ref:
-          store_id: gbaian10-home
           batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
           source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
           parser: translation-svwb-v1
@@ -62,14 +58,12 @@ records:
           dictionary_kind: skill_names
           entry_key: '19'
           jp_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
             parser: translation-svwb-v1
             locator: /data/skill_names/19
             text_hash: sha256:95b556eb014217b8fe0f95de425611f14d33ff08542376ffdb96990cf9c12478
           target_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
             parser: translation-svwb-v1
@@ -88,7 +82,6 @@ records:
       value:
         kind: source
         source_ref:
-          store_id: gbaian10-home
           batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
           source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
           parser: translation-svwb-v1
@@ -100,14 +93,12 @@ records:
           dictionary_kind: skill_names
           entry_key: '41'
           jp_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
             parser: translation-svwb-v1
             locator: /data/skill_names/41
             text_hash: sha256:af05d63b616675a9c44d95f3cd1dd231ef54e0e2aedb682ee40769fcdf81b10c
           target_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
             parser: translation-svwb-v1
@@ -177,7 +168,6 @@ records:
       value:
         kind: source
         source_ref:
-          store_id: gbaian10-home
           batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
           source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
           parser: translation-sv1-v1
@@ -189,7 +179,6 @@ records:
       concept_evidence:
         - kind: effect_term
           jp_ref:
-            store_id: gbaian10-home
             batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
             source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
             parser: translation-sv1-v1
@@ -199,7 +188,6 @@ records:
             start: 84
             end: 88
           target_ref:
-            store_id: gbaian10-home
             batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
             source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
             parser: translation-sv1-v1
@@ -261,7 +249,6 @@ records:
       value:
         kind: source
         source_ref:
-          store_id: gbaian10-home
           batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
           source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
           parser: translation-svwb-v1
@@ -273,14 +260,12 @@ records:
           dictionary_kind: skill_names
           entry_key: '42'
           jp_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
             parser: translation-svwb-v1
             locator: /data/skill_names/42
             text_hash: sha256:b7cd3fd52dc042f88f67b0c186f5bdddcf018545e25e0f558a4e0e37e1e39773
           target_ref:
-            store_id: gbaian10-home
             batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
             source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
             parser: translation-svwb-v1

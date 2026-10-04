@@ -304,20 +304,15 @@ def _ordinal(locator: str) -> int:
 def _evidence(
     records: Mapping[str, IdentityRecord], stores: Mapping[str, Path]
 ) -> dict[Evidence, IdentityEvidence]:
-    batches: dict[tuple[str, str], FrozenSources] = {}
-    parsed: dict[tuple[str, str, str], ProductPage] = {}
+    batches: dict[str, FrozenSources] = {}
+    parsed: dict[tuple[str, str], ProductPage] = {}
     pages: dict[Evidence, IdentityEvidence] = {}
     for record in records.values():
         for ref in record.evidence:
-            key = ref.store_id, ref.batch_id
+            key = ref.batch_id
             if key not in batches:
-                root = stores.get(ref.store_id)
-                if root is None:
-                    raise ValueError(
-                        "Product identity evidence requires an explicit store"
-                    )
-                batches[key] = FrozenSources(root, *key)
-            parse_key = (*key, ref.source_version_id)
+                batches[key] = FrozenSources.configured(stores, key)
+            parse_key = (key, ref.source_version_id)
             source, raw, descriptor = batches[key].read(
                 ref.source_version_id, parser_version="archive-closure-v1"
             )

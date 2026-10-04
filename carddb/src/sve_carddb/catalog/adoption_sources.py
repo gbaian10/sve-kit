@@ -170,7 +170,7 @@ class AdoptionSources:
         self.stores = dict(stores)
         self.repository = repository
         self.historical = historical
-        self.batches: dict[tuple[str, str], FrozenSources] = {}
+        self.batches: dict[str, FrozenSources] = {}
         self.uses: list[SourceUse] = []
         self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
         self.registries: dict[bytes, RegistrySnapshot] = {}
@@ -274,7 +274,7 @@ class AdoptionSources:
         versions = {
             item.source_version_id
             for pin in review.source_batches
-            for item in self.batch(pin.store_id, pin.batch_id).inventory.current
+            for item in self.batch(pin.batch_id).inventory.current
             if item.url == provider.card_url(printing.card_no)
         }
         if not versions:
@@ -307,7 +307,7 @@ class AdoptionSources:
         )
         self._runtime(pin, review.context)
         for batch in review.source_batches:
-            frozen = self.batch(batch.store_id, batch.batch_id)
+            frozen = self.batch(batch.batch_id)
             if not any(
                 item.source_version_id == version for item in frozen.inventory.current
             ):
@@ -350,7 +350,7 @@ class AdoptionSources:
         for version in self.printing_sources(printing, review):
             self.verify_printing(printing, review, version)
             for batch in review.source_batches:
-                frozen = self.batch(batch.store_id, batch.batch_id)
+                frozen = self.batch(batch.batch_id)
                 if not any(
                     i.source_version_id == version for i in frozen.inventory.current
                 ):
@@ -368,21 +368,17 @@ class AdoptionSources:
                     return
         raise ValueError("Image adoption printing/face association mismatch")
 
-    def batch(self, store: str, batch: str) -> FrozenSources:
+    def batch(self, batch: str) -> FrozenSources:
         """Validate the complete descriptor/receipt/raw closure once per frozen batch."""
-        key = store, batch
-        if key not in self.batches:
-            root = self.stores.get(store)
-            if root is None:
-                raise ValueError("Adoption source store is not configured")
-            self.batches[key] = FrozenSources(root, *key)
-        return self.batches[key]
+        if batch not in self.batches:
+            self.batches[batch] = FrozenSources.configured(self.stores, batch)
+        return self.batches[batch]
 
     def verify(self, record: Record, review: ReviewContext) -> None:
         """Verify every evidence item, including historical and withdrawn members."""
         self.repository.context(review.context)
         for batch in review.source_batches:
-            self.batch(batch.store_id, batch.batch_id)
+            self.batch(batch.batch_id)
         for evidence in record.evidence:
             if isinstance(evidence, TextEvidence):
                 self.text(evidence.source_ref, review)
@@ -409,7 +405,7 @@ class AdoptionSources:
                 current_runtime=not self.historical,
             )
             self._runtime(pin, review.context)
-            source, raw, descriptor = self.batch(ref.store_id, ref.batch_id).read(
+            source, raw, descriptor = self.batch(ref.batch_id).read(
                 ref.source_version_id,
                 parser_version=pin.version,
             )
@@ -499,7 +495,7 @@ class AdoptionSources:
     def image(self, evidence: ImageEvidence) -> Source:
         """Keep image raw hashes separate from string hashes and parser recipes."""
         ref = evidence.image_ref
-        source, _, _ = self.batch(ref.store_id, ref.batch_id).read(
+        source, _, _ = self.batch(ref.batch_id).read(
             ref.source_version_id,
             parser_version="catalog-image-closure-v1",
         )

@@ -44,7 +44,7 @@ includes 釘解析後完整分片的 canonical hash，歷史 entries 只增不�
 | review_context | 沿 authored-layout §9.2 的 `{context,source_batches}`；完整 F1 程式、依賴、設定與凍結批次，釘前件及核對來源，不引用尚未產生的自身分片 |
 | updates | 非空陣列，按 target_key 排序且唯一；元素見下節，完整新內容參與本次 record hash |
 | repairs | 按 id 排序唯一的修復群組陣列；純來源更新／決定續版為 []，見 §4 |
-| evidence | 沿 authored-layout §10.3 的非空 `{store_id,batch_id,source_version_id,locator,role}` 陣列，按 canonical bytes 排序唯一；全部批次列入 review_context |
+| evidence | 沿 authored-layout §10.3 的非空 `{batch_id,source_version_id,locator,role}` 陣列，按 canonical bytes 排序唯一；全部批次列入 review_context |
 | reason | 不含官方卡文、私人路徑的非空說明；公開事件另用各群組的公開 reason |
 
 decision 完整欄位沿 authored-layout §10.4；category=`identity_transition`、policy_id=`identity-transition-v1`、
@@ -327,7 +327,7 @@ old_members = [[key, digest(old)]]
 old_decision = "d:" + digest(old_members).removeprefix("sha256:")
 basis = {"authored_revision": "0" * 40, "index_path": "ids/index.yaml",
          "index_hash": "sha256:" + "6" * 64}
-evidence = [{"store_id": "example", "batch_id": "sha256:" + "7" * 64,
+evidence = [{"batch_id": "sha256:" + "7" * 64,
              "source_version_id": "src:v1:" + digit * 64,
              "locator": locator, "role": role}
             for digit, locator, role in [
@@ -344,7 +344,7 @@ record = {
                     "dependencies": [{"name": "carddb/uv.lock", "sha256": "sha256:" + "c" * 64}],
                     "configuration": canonical({"registry": basis,
                         "observation_recipe": "registry-observation-v1"}).decode("utf-8")},
-        "source_batches": [{"store_id": "example", "batch_id": "sha256:" + "7" * 64}]},
+        "source_batches": [{"batch_id": "sha256:" + "7" * 64}]},
     "updates": [{"target_key": key,
                  "before": {"transition_key": None, "record_key": key,
                             "record_hash": digest(old), "decision_id": old_decision},

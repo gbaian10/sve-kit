@@ -109,7 +109,7 @@ def test_new_changed_source_candidate_comes_from_current_adoption_inventory(  # 
     )
     batch = seal_batch(store).batch_id
     wire = case.review.model_dump(mode="json")
-    wire["source_batches"].append({"store_id": store.store_id, "batch_id": batch})
+    wire["source_batches"].append({"batch_id": batch})
     wire["source_batches"].sort(key=canonical)
     review = ReviewContext.model_validate_json(canonical(wire))
     stores = {"wording-store": case.store, store.store_id: store.root}

@@ -118,7 +118,6 @@ def _owner(
         printing_id=item.printing_id,
         state="known",
         name_ref=SourceRef(
-            store_id=archive.store_id,
             batch_id=archive.batch_id,
             source_version_id=item.card.source.id,
             parser="translation-jp-v1",

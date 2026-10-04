@@ -237,7 +237,7 @@ def make_adoption_case(root: Path, *, human: bool = False) -> AdoptionCase:  # r
             canonical(
                 {
                     "context": context.model_dump(mode="json"),
-                    "source_batches": [{"store_id": "wording-store", "batch_id": b}],
+                    "source_batches": [{"batch_id": b}],
                 }
             )
         )

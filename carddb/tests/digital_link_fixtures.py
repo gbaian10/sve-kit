@@ -23,7 +23,7 @@ def review() -> dict[str, JsonValue]:
             "dependencies": [{"name": "synthetic.py", "sha256": "sha256:" + "b" * 64}],
             "configuration": "{}",
         },
-        "source_batches": [{"store_id": "synthetic", "batch_id": "sha256:" + "a" * 64}],
+        "source_batches": [{"batch_id": "sha256:" + "a" * 64}],
     }
 
 

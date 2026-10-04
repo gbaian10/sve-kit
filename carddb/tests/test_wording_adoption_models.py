@@ -52,7 +52,6 @@ def record() -> dict[str, JsonValue]:
         observations.append(observation.model_dump(mode="json"))
         evidence.append(
             {
-                "store_id": "synthetic",
                 "batch_id": digest(b"synthetic batch"),
                 "source_version_id": source,
                 "locator": canonical(
@@ -80,9 +79,7 @@ def record() -> dict[str, JsonValue]:
             "adoption_no": 1,
             "review_context": {
                 "context": context.model_dump(mode="json"),
-                "source_batches": [
-                    {"store_id": "synthetic", "batch_id": digest(b"synthetic batch")}
-                ],
+                "source_batches": [{"batch_id": digest(b"synthetic batch")}],
             },
             "observations": observations,
             "observations_hash": digest(canonical(observations)),

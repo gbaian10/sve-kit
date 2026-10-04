@@ -45,14 +45,14 @@ def prepare(
     records = tuple(r for snapshot in snapshots for r in snapshot.current_records())
     sources = AdoptionSources(stores, PinnedRepository(repository))
     batches = {
-        (e.source_ref.store_id, e.source_ref.batch_id)
+        e.source_ref.batch_id
         for r in records
         for e in r.evidence
         if isinstance(e, TextEvidence)
     }
     review = ReviewContext(
         context=build,
-        source_batches=tuple(Batch(store_id=s, batch_id=b) for s, b in sorted(batches)),
+        source_batches=tuple(Batch(batch_id=b) for b in sorted(batches)),
     )
     registered = {
         r.data.subject.code

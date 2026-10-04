@@ -22,7 +22,6 @@ from sve_carddb.digital_links.evidence import (
 from sve_carddb.digital_links.loader import Snapshot, link_id, load_links
 from sve_carddb.digital_links.models import Record, Shard, SveName
 from sve_carddb.digital_links.models import Value as LinkValue
-from sve_carddb.frozen_sources import FrozenSources
 from sve_carddb.maintainers import is_maintainer
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
@@ -200,19 +199,14 @@ class Result:
                         ):
                             continue
                         ref = SourceRef(
-                            store_id=batch.store_id,
                             batch_id=batch.batch_id,
                             source_version_id=version,
                             parser="translation-jp-v1",
                             locator=f"/faces/{mapping.source_index}/name",
                             text_hash=str(unit["content_hash"]),
                         )
-                        batch_key = batch.store_id, batch.batch_id
-                        if batch_key not in sources.batches:
-                            sources.batches[batch_key] = FrozenSources(
-                                sources.stores[batch.store_id], *batch_key
-                            )
-                        frozen = sources.batches[batch_key]
+                        batch_key = batch.batch_id
+                        frozen = sources.batch(batch_key)
                         if (
                             ref.source_version_id not in frozen.entries
                             or frozen.descriptor(ref.source_version_id).url

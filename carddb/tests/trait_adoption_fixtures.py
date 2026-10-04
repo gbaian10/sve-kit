@@ -36,7 +36,6 @@ class TraitCase:
             "lang": "ja" if region == "jp" else "en",
             "raw": raw,
             "source_ref": {
-                "store_id": "test-store",
                 "batch_id": self.batch_id,
                 "source_version_id": self.versions[region],
                 "parser": "exact-json-v1",
@@ -137,7 +136,7 @@ def trait_baseline(tmp_path_factory: pytest.TempPathFactory) -> TraitCase:
     )
     review: dict[str, JsonValue] = {
         "context": context.model_dump(mode="json"),
-        "source_batches": [{"store_id": store.store_id, "batch_id": batch.batch_id}],
+        "source_batches": [{"batch_id": batch.batch_id}],
     }
     for file in (case.root / "catalog-adoptions").rglob("*.yaml"):
         if file.name == "index.yaml":

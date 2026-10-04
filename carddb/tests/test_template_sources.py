@@ -43,7 +43,13 @@ def test_every_candidate_replays_the_pinned_complete_field(template_case: Case) 
         documents[source.id] = project(raw, source.url, "jp")[1]
     for item in template_case.scan.entries:
         assert (
-            digest(replay(item, documents[item.source_ref.source_version_id]).encode())
+            digest(
+                replay(
+                    item,
+                    documents[item.source_ref.source_version_id],
+                    store_id="test-store",
+                ).encode()
+            )
             == item.normalized_hash
         )
         assert item.legacy_fingerprint == (
@@ -122,9 +128,9 @@ def test_entry_replay_rejects_changed_hash_or_coordinates(
             update={"locator": "/faces/0/name", "text_hash": digest(b"Synthetic name")}
         )
         part = partition("Synthetic name")[0]
-        item = inventory.entry(ref, part, item.normalizer_id)
+        item = inventory.entry(ref, part, item.normalizer_id, store_id="test-store")
     with pytest.raises(ValueError, match=rf"\A{re.escape(message)}\Z"):
-        replay(item, document)
+        replay(item, document, store_id="test-store")
 
 
 @pytest.mark.parametrize(
@@ -231,8 +237,10 @@ def test_candidate_id_collision_is_refused_before_publication(
 ) -> None:
     original = inventory.entry
 
-    def colliding_entry(ref: SourceRef, part: Part, normalizer_id: str) -> Entry:
-        return original(ref, part, normalizer_id).model_copy(
+    def colliding_entry(
+        ref: SourceRef, part: Part, normalizer_id: str, *, store_id: str
+    ) -> Entry:
+        return original(ref, part, normalizer_id, store_id=store_id).model_copy(
             update={"id": "inv:synthetic-collision"}
         )
 

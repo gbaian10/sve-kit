@@ -315,9 +315,11 @@ def test_owner_counterexamples_are_exact(
             faces = array(object_value(document)["faces"])
             object_value(faces[0])["card_type"] = "Synthetic card"
             ref = ref.model_copy(update={"locator": "/faces/0/card_type"})
-            sources.cache[
-                ref.store_id, ref.batch_id, ref.source_version_id, ref.parser
-            ] = lang, document, source
+            sources.cache[ref.batch_id, ref.source_version_id, ref.parser] = (
+                lang,
+                document,
+                source,
+            )
         owner = owner.model_copy(update={"name_ref": ref})
     else:
         original = Evidence(sources).index(review)
@@ -511,7 +513,7 @@ def test_catalogue_rejects_duplicate_id_even_when_rows_equal(
     )
     complete_inventory(sources, review_context(sources), "sv1")
     for key, (_, document, _) in sources.cache.items():
-        if key[3] == "translation-sv1-v1":
+        if key[2] == "translation-sv1-v1":
             cards = array(object_value(object_value(document)["data"])["cards"])
             cards.append(cards[0])
             break

@@ -58,7 +58,6 @@ def referenced_family(product_root: Path, tmp_path: Path) -> tuple[Path, str, st
     raw = obj(read_yaml(product_root / NAME))
     first_record(raw)["evidence"] = [
         {
-            "store_id": store.store_id,
             "batch_id": batch.batch_id,
             "source_version_id": source,
             "locator": "product block 0",

@@ -53,7 +53,7 @@ class Sources:
         self.references = deepcopy(references)
         self.rules = deepcopy(rules)
         self.owners = owners
-        self._cache: dict[tuple[str, str], Generated] = {}
+        self._cache: dict[str, Generated] = {}
         self.generated_batches = 0
 
     def generate(self, batches: tuple[Batch, ...]) -> Generated:
@@ -61,7 +61,7 @@ class Sources:
         entries: list[Reconstructed] = []
         reports: list[JsonValue] = []
         for batch in batches:
-            key = batch.store_id, batch.batch_id
+            key = batch.batch_id
             if key not in self._cache:
                 self._cache[key] = self._batch(batch)
                 self.generated_batches += 1
@@ -75,10 +75,7 @@ class Sources:
         return Generated(tuple(deepcopy(entries)), canonical(reports))
 
     def _batch(self, batch: Batch) -> Generated:
-        store = self.stores.get(batch.store_id)
-        if store is None:
-            raise ValueError("Current template source store is unavailable")
-        frozen = FrozenSources(store, batch.store_id, batch.batch_id)
+        frozen = FrozenSources.configured(self.stores, batch.batch_id)
         scan = scan_current(frozen)
         candidates = build(
             frozen,
@@ -109,7 +106,12 @@ class Sources:
                 )
             texts[ref.source_version_id, ref.locator] = value
         effect = _members(
-            tuple(scan.entries), tuple(candidates.entries), texts, solved, pending
+            tuple(scan.entries),
+            tuple(candidates.entries),
+            texts,
+            solved,
+            pending,
+            store_id=frozen.store_id,
         )
         flavor, flavor_fields = self._flavor(frozen, scan.documents)
         return Generated(
@@ -155,7 +157,6 @@ class Sources:
                 if part is None:
                     continue
                 ref = SourceRef(
-                    store_id=frozen.store_id,
                     batch_id=frozen.batch_id,
                     source_version_id=source.id,
                     parser=PARSER,
@@ -172,7 +173,8 @@ class Sources:
                     + digest(
                         canonical(
                             [
-                                ref.model_dump(mode="json"),
+                                ref.model_dump(mode="json")
+                                | {"store_id": frozen.store_id},
                                 0,
                                 "flavor",
                                 [[0, len(part.normalized)]],

@@ -128,7 +128,7 @@ class Inventory(RecordData):
 
     @model_validator(mode="after")
     def _order(self) -> Self:
-        keys = tuple((batch.store_id, batch.batch_id) for batch in self.source_batches)
+        keys = tuple(batch.batch_id for batch in self.source_batches)
         identifiers = tuple(entry.id for entry in self.entries)
         if keys != tuple(sorted(set(keys))) or identifiers != tuple(
             sorted(set(identifiers))
@@ -136,9 +136,6 @@ class Inventory(RecordData):
             raise ValueError(
                 "Current inventory batches and entries must be sorted and unique"
             )
-        if any(
-            (entry.source_ref.store_id, entry.source_ref.batch_id) not in keys
-            for entry in self.entries
-        ):
+        if any(entry.source_ref.batch_id not in keys for entry in self.entries):
             raise ValueError("Current inventory entry is outside its source batches")
         return self
