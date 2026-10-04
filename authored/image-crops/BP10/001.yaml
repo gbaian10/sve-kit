@@ -1,4 +1,4 @@
-image_crop_format: 1
+image_crop_format: 2
 kind: crop_override_shard
 records:
   - source_key: sha256:1f9f6e4e05b7af8378c45d7bd5bde1a72d46e2017abe8a6196363aecf1075b02
@@ -8,7 +8,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: en
     card_no: BP10-001EN
   - source_key: sha256:a87af26d93f1fd92b4a6ebd4b7584de1ca394c3b8023b7c75e0fa499419843de
@@ -18,7 +17,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: en
     card_no: BP10-002EN
   - source_key: sha256:f7f7b75fbfe60bb997f5b9b032335dd9566e20b411e03b8036592af417282b2c
@@ -28,7 +26,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: en
     card_no: BP10-SL01EN
   - source_key: sha256:6951ac102ae6fe6f98424f429dbc7ddf3c0d7127fcb658712c3330f44d65a348
@@ -38,7 +35,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: en
     card_no: BP10-SL02EN
   - source_key: sha256:b3e4863e41079991ed3c0d646a05accc3690f2d7ddd2d25df2d9407d658f210b
@@ -48,7 +44,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: en
     card_no: BP10-U01EN
   - source_key: sha256:bec1b1e386e3b34b545190f6ccf3652ab73238630b19d6fa8cdc55802fd96a1f
@@ -58,7 +53,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: jp
     card_no: BP10-001
   - source_key: sha256:c4abc4f04d998c51f438ab51af1384897b2a179f110e5a920276cbd9a320e553
@@ -68,7 +62,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: jp
     card_no: BP10-002
   - source_key: sha256:4de8f0d005f9f298200d55d38434bce0f8236a1daebc2a5d2fcd8987cbe063a9
@@ -78,7 +71,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: jp
     card_no: BP10-SL01
   - source_key: sha256:a45416867e873938e0e8bedb18ea956bc2daecc47959c6939ad711667bfcce1b
@@ -88,7 +80,6 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: jp
     card_no: BP10-SL02
   - source_key: sha256:228e03d232a45bd1aba57abae37dd3172d20b35397edec8e7ea63cd45014361c
@@ -98,6 +89,5 @@ records:
     width: 384
     height: 288
     reason: 避開上置的效果文字框並保留臉部，維持原方向。
-    receipt_id: hanged-art-crop-v1
     region: jp
     card_no: BP10-U01
