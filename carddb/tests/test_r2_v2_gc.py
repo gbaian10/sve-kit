@@ -268,7 +268,7 @@ def test_cli_inspection_then_explicit_consent_is_required_for_deletion(
     assert "synthetic-secret" not in executed.output
 
 
-def test_previous_images_stay_until_neither_retained_version_references_them(
+def test_previous_images_are_collectible_while_both_json_versions_stay(
     ledger: Ledger,
     images: PublicImages,
     remote: tuple[R2Store, ServerState, Loopback],
@@ -286,22 +286,26 @@ def test_previous_images_stay_until_neither_retained_version_references_them(
     second = candidate(ledger, images, projection=hidden, from_version=version(first))
     publish(ledger, origin, second, cdn)
     state.objects = deepcopy(origin.objects)
-    plan = gc.inspect(ledger, store, namespaces=frozenset({"images/card_s/"}))
-    assert gc.report(plan)["would_collect"] == []
-    assert gc.execute(ledger, store, plan, confirmed=gc.confirmation(plan)) == ()
-    third = candidate(ledger, images, projection=hidden, from_version=version(second))
-    publish(ledger, origin, third, cdn)
-    state.objects = deepcopy(origin.objects)
-    plan = gc.inspect(ledger, store, namespaces=frozenset({"images/card_s/"}))
+    before = deepcopy(state.objects)
+    namespaces = NAMESPACES | frozenset(
+        {"images/card_m/", "images/card_l/", "images/art_s/", "images/art_m/"}
+    )
+    expected = {string(a["path"]) for a in first.assets}
+    assert expected
+    plan = gc.inspect(ledger, store, namespaces=namespaces)
+    assert gc.report(plan)["would_collect"] == sorted(expected)
     removed = gc.execute(ledger, store, plan, confirmed=gc.confirmation(plan))
-    assert set(removed) == {
-        string(a["path"])
-        for a in first.assets
-        if string(a["path"]).startswith("images/card_s/")
-    }
-    assert not any(
-        op[0] == "DELETE" and not op[1].startswith("images/card_s/")
-        for op in state.operations
+    assert set(removed) == expected
+    assert expected.isdisjoint(state.objects)
+    assert all(state.objects[m.key] == before[m.key] for m in first.members)
+    assert all(state.objects[m.key] == before[m.key] for m in second.members)
+    assert all(
+        op[1].startswith("images/") for op in state.operations if op[0] == "DELETE"
+    )
+    repeated = gc.inspect(ledger, store, namespaces=namespaces)
+    assert gc.report(repeated)["would_collect"] == []
+    assert (
+        gc.execute(ledger, store, repeated, confirmed=gc.confirmation(repeated)) == ()
     )
 
 

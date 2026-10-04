@@ -143,13 +143,16 @@ block deletion. Inspection and execution replan check the pointer under their
 lease, with another check before deletion. Use a separate preview bucket if GC
 must coexist with a live preview; this command never removes the pointer.
 
-Both retained versions' JSON closures **and image paths** remain protected, as do
-legal sealed/failed attempts. A missing retained member stops collection. The
+Both retained versions' JSON closures remain protected, but public images retain
+only the **current** image set (ADR-0016). Previous-only image paths are collectible;
+they are not required to exist when verifying the retained closure. Legal
+sealed/failed attempts' staged members and assets remain protected separately.
+A missing retained member stops collection. The
 collector must use the publisher's same complete ledger and backup; another
 machine's incomplete copy cannot prove the absence of unfinished releases.
-This R2 collector retains both versions' images; the generic #297 `collect`
-implements the older current-only image rule and is not this deployment's GC
-entry point. Its conditional deletion contract remains unsupported by R2Store.
+This matches the generic #297 `collect` retention rule. Its conditional deletion
+contract remains unsupported by R2Store; use the separately approved `gc-v2`
+workflow for R2 deployment collection.
 The inspection releases the lease while the maintainer reviews its saved list; it
 does not hold a lock across an unbounded human wait. Actual execution requires
 `--execute --confirm-maintainer-authorization --confirm-delete 'DELETE-V2 sha256:…'`,

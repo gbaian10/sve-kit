@@ -39,11 +39,7 @@ def confirmation(plan: dict[str, JsonValue]) -> str:
 
 def _retained(ledger: Ledger, store: R2Store, index: dict[str, JsonValue]) -> set[str]:
     keep = _keep(store, index)
-    versions = {
-        object_value(index[k])["data_version"]
-        for k in ("current", "previous")
-        if index[k] is not None
-    }
+    current_version = string(object_value(index["current"])["data_version"])
     for raw in array(ledger.read()["attempts"]):
         item = object_value(raw)
         if item["plan"] is None:
@@ -51,7 +47,7 @@ def _retained(ledger: Ledger, store: R2Store, index: dict[str, JsonValue]) -> se
         plan = object_value(item["plan"])
         if (
             item["status"] == "committed"
-            and object_value(plan["entry"])["data_version"] in versions
+            and object_value(plan["entry"])["data_version"] == current_version
         ) or item["status"] in {"sealed", "failed"}:
             keep.update(string(object_value(a)["path"]) for a in array(plan["assets"]))
         if item["status"] in {"sealed", "failed"}:
