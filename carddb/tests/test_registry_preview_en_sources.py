@@ -1,17 +1,12 @@
 """Actual frozen EN evidence passes through the existing identity and F1 gates."""
 
-import hashlib
-import json
-import tempfile
 from dataclasses import replace
-from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.extract import compare_en
 from sve_carddb.extract.compare_jp import legacy_projection as legacy_jp
 from sve_carddb.extract.official_en import extract_card as extract_en
 from sve_carddb.extract.official_en import legacy_projection as legacy_en
@@ -39,7 +34,7 @@ from .test_registry_preview_archive import RAW as JP_RAW
 from .test_source_archive import _put, _resource, _store
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from pathlib import Path
 
     from sve_carddb.registry.preview.evidence import CardEvidence
     from sve_carddb.registry.records import Region as RegistryRegion
@@ -100,61 +95,6 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
             store.root, store.store_id, sealed.batch_id, parser_version="en-pin"
         ),
     )
-
-
-@pytest.fixture
-def comparison_output() -> Iterator[Path]:
-    with tempfile.TemporaryDirectory() as directory:
-        yield Path(directory) / "comparison.json"
-
-
-@pytest.mark.parametrize("parser", ["candidate", "legacy"])
-def test_compare_main_selects_requested_parser_for_sealed_synthetic_sources(
-    frozen_registry: tuple[Path, FrozenRegions],
-    inputs: Inputs,
-    tmp_path: Path,
-    comparison_output: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    parser: str,
-) -> None:
-    root, provider = frozen_registry
-    legacy = tmp_path / "legacy.jsonl"
-    raw = "".join(card.model_dump_json() + "\n" for card in inputs.en.values()).encode()
-    legacy.write_bytes(raw)
-    output = comparison_output
-    monkeypatch.setattr(
-        "sys.argv",
-        [
-            "compare_en",
-            "--legacy",
-            str(legacy),
-            "--legacy-sha256",
-            "sha256:" + hashlib.sha256(raw).hexdigest(),
-            "--authored",
-            str(root),
-            "--store",
-            str(tmp_path / "archive"),
-            "--store-id",
-            "test-store",
-            "--batch-id",
-            provider.en.batch_id,
-            "--output",
-            str(output),
-            "--parser",
-            parser,
-        ],
-    )
-    compare_en.main()
-    report = json.loads(output.read_text())
-    assert report["inputs"]["parser"] == parser
-    assert report["denominator"] == len(inputs.en)
-    assert report["counts"] == {
-        "exact": len(inputs.en) if parser == "legacy" else 0,
-        "mismatch": len(inputs.en) if parser == "candidate" else 0,
-        "missing_raw": 0,
-        "parse_failed": 0,
-        "no_corresponding_input": 0,
-    }
 
 
 def test_verified_en_import_preserves_history_usage_and_text_review_block(

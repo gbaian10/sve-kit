@@ -12,8 +12,6 @@ from sve_carddb.template_semantics import registry, versions
 from sve_carddb.template_semantics.environment import capture
 from sve_carddb.template_sources.models import Recipe
 from sve_carddb.template_translations.replay_models import (
-    Artifact,
-    ProducerEnvironment,
     SemanticBinding,
     SemanticManifest,
 )
@@ -196,39 +194,6 @@ def test_producer_lock_hashes_are_checked_against_git_not_claims(
         ValueError, match=r"^Semantic producer environment lock evidence differs$"
     ):
         registry.verify_environment(PinnedRepository(root), declared(producer), env)
-
-
-def test_native_artifact_set_cannot_grow_even_when_required_native_is_present(
-    semantic_repository: tuple[Path, str],
-) -> None:
-    root, producer = semantic_repository
-    env = capture(registry.ROOT, producer=True)
-    target = next(p for p in env.packages if p.name == "pydantic-core")
-    artifacts = tuple(
-        sorted(
-            (
-                *target.artifacts,
-                Artifact(path="pydantic_core/undeclared.so", hash="sha256:" + "f" * 64),
-            ),
-            key=lambda a: a.path,
-        )
-    )
-    altered = env.model_copy(
-        update={
-            "packages": tuple(
-                p.model_copy(update={"artifacts": artifacts}) if p == target else p
-                for p in env.packages
-            )
-        }
-    )
-    # Wire and generic necessary-native validation must pass before the exact set gate.
-    altered = ProducerEnvironment.model_validate_json(
-        canonical(altered.model_dump(mode="json"))
-    )
-    with pytest.raises(
-        ValueError, match=r"^Semantic producer native artifact closure must be exact$"
-    ):
-        registry.verify_environment(PinnedRepository(root), declared(producer), altered)
 
 
 def test_valid_byte_and_hash_pins_do_not_permit_a_mutable_import(

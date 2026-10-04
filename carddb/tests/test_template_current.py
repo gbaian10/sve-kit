@@ -396,3 +396,21 @@ def test_current_vocabulary_requires_catalog_authority_and_retains_composites() 
         "special_kinds": [],
     }
     assert refs.proposed_vocabulary("class", "Unknown").target is None
+
+
+def test_current_build_does_not_require_legacy_catalog_or_environment_replay(
+    current_case: Case, mocker: MockerFixture
+) -> None:
+    for path in (
+        "sve_carddb.template_translations.sources.parse_legacy",
+        "sve_carddb.template_semantics.registry.verify_environment",
+        "sve_carddb.template_semantics.environment.capture",
+    ):
+        mocker.patch(path, side_effect=AssertionError("No historical input gate"))
+    fresh = Sources(
+        current_case.sources.stores, References(), current_case.sources.rules
+    )
+    verified = validate_templates(current_case.inputs, fresh)
+    assert not verified.missing_translations
+    assert sum(count for _, count in verified.frequencies) == 1
+    assert fresh.generated_batches == 1
