@@ -227,14 +227,14 @@ def test_duplicate_source_numbers_are_not_overwritten(tmp_path: Path) -> None:
     "source",
     [
         "a: 1\na: 2\n",
-        "a: &ref 1\nb: *ref\n",
+        "a: &ref [*ref]\n",
         "true: value\n",
         "1: value\n",
-        "a: !!str test\n",
+        "a: !custom test\n",
         "%YAML 1.1\n---\na: yes\n",
         "a: 1\n---\na: 2\n",
         "a: .inf\n",
-        "<<: value\n",
+        "? [a, b]\n: value\n",
     ],
 )
 def test_yaml_rejects_unsafe_or_ambiguous_inputs(tmp_path: Path, source: str) -> None:
@@ -244,7 +244,7 @@ def test_yaml_rejects_unsafe_or_ambiguous_inputs(tmp_path: Path, source: str) ->
         read_yaml(path)
 
 
-def test_yaml_core_preserves_words_and_dates(tmp_path: Path) -> None:
+def test_yaml_preserves_words_and_dates(tmp_path: Path) -> None:
     path = tmp_path / "input.yaml"
     path.write_text("on: yes\nn: no\ndate: 2026-09-28\nflag: true\n")
     assert read_yaml(path) == {

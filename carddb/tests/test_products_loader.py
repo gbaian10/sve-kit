@@ -402,8 +402,8 @@ def test_missing_index_never_bootstraps(product_root: Path) -> None:
     "text",
     [
         "x: 1\nx: 2\n",
-        "x: &x 1\ny: *x\n",
-        "x: !!str hi\n",
+        "x: &x [*x]\n",
+        "x: !custom hi\n",
         "---\nx: 1\n---\ny: 2\n",
         "1: value\n",
         "%YAML 1.1\n---\nx: 1\n",

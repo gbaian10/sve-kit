@@ -295,7 +295,10 @@ def test_unused_en_record_is_valid_without_an_approval(crop_case: CropCase) -> N
 @pytest.mark.parametrize(
     ("raw", "message"),
     [
-        (b"image_crop_format: 2\nimage_crop_format: 2\n", "Duplicate YAML mapping key"),
+        (
+            b"image_crop_format: 2\nimage_crop_format: 2\n",
+            "Invalid authored YAML syntax",
+        ),
         (b"left: 4.0\n", "Floating point JSON is forbidden"),
     ],
     ids=["duplicate-key", "float"],

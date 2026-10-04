@@ -44,7 +44,7 @@ def test_empty_adoption_inventory_is_explicit_and_immutable(
     if change == "missing":
         index.unlink()
     elif change == "bytes":
-        index.write_bytes(index.read_bytes() + b"# different exact bytes\n")
+        index.write_bytes(index.read_bytes() + b"\n# different exact bytes\n")
     elif change == "unindexed":
         (directory / "jp").mkdir()
         (directory / "jp/001.yaml").write_bytes(b"{}\n")

@@ -268,12 +268,12 @@ def test_all_symlink_inputs_are_rejected(
     "value",
     [
         "identity_transition_format: 1\nidentity_transition_format: 1\n",
-        "a: &a 1\nb: *a\n",
-        "a: !!str text\n",
+        "a: &a [*a]\n",
+        "a: !custom text\n",
         "a: 1\n---\nb: 2\n",
         "a: .nan\n",
         "a: 1.0\n",
-        "a:\n  <<: {}\n",
+        "? [a, b]\n: value\n",
         "a: [\n",
     ],
 )

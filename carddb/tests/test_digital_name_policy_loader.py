@@ -85,20 +85,42 @@ def test_complete_entry_is_detached_and_retains_both_hashes(
 @pytest.mark.parametrize(
     "raw",
     [
-        b"x: &a hi",
+        b"x: &a [*a]",
         b"x: *a",
-        b"x: !!str hi",
+        b"x: !custom hi",
         b"x: 1\nx: 2",
         b"x: .nan",
         b"\xff",
         b"x: 1\n---\nx: 2",
-        b"x: {<<: hi}",
+        b"? [a, b]\n: value",
     ],
-    ids=["anchor", "alias", "tag", "duplicate", "nan", "utf8", "documents", "merge"],
+    ids=[
+        "cycle",
+        "alias",
+        "custom-tag",
+        "duplicate",
+        "nan",
+        "utf8",
+        "documents",
+        "complex-key",
+    ],
 )
 def test_yaml_boundary(raw: bytes) -> None:
     with pytest.raises(ValueError, match=r"^Invalid digital-name policy YAML$"):
         decoded(raw)
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        (b"x: &a hi\ny: *a", {"x": "hi", "y": "hi"}),
+        (b"x: !!str hi", {"x": "hi"}),
+        (b"x: {<<: {k: hi}}", {"x": {"k": "hi"}}),
+    ],
+    ids=["alias", "standard-tag", "merge"],
+)
+def test_yaml_expansion_is_allowed(raw: bytes, expected: JsonValue) -> None:
+    assert decoded(raw) == expected
 
 
 def test_size_boundary() -> None:
