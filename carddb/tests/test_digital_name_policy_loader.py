@@ -8,7 +8,6 @@ import pytest
 from pydantic import JsonValue
 
 from sve_carddb.digital_name_policies.loader import (
-    ADOPTED_APPROVALS,
     ADOPTED_PROJECTIONS,
     INDEX,
     decoded,
@@ -25,7 +24,6 @@ from .digital_name_policy_fixtures import (
     exclusion,
     loader_repository,
     policy,
-    receipt,
     rewrite,
 )
 
@@ -47,11 +45,6 @@ def synthetic_bindings(
         document = policy(baseline[0], purpose)
         approved = str(document["approved_document_hash"])
         monkeypatch.setitem(ADOPTED_PROJECTIONS, approved, digest(canonical(document)))
-        monkeypatch.setitem(
-            ADOPTED_APPROVALS,
-            approved,
-            digest(canonical(receipt(baseline[0], purpose))),
-        )
 
 
 def copied(baseline: tuple[Path, str], root: Path) -> Path:
@@ -69,7 +62,7 @@ def test_complete_entry_is_detached_and_retains_both_hashes(
 ) -> None:
     root, revision = baseline
     snapshot = load(root / "authored", root, revision)
-    assert len(snapshot.files) == 5
+    assert len(snapshot.files) == 4
     assert len(snapshot.policies) == 1
     for purpose in ("links",):
         loaded = snapshot.effective(purpose)
@@ -227,88 +220,22 @@ def test_entry_and_rule_closure(
     reject(root, message)
 
 
-@pytest.mark.parametrize(
-    ("fault", "message"),
-    [
-        ("reviewer", "Invalid digital-name policy fields"),
-        ("precision", "Invalid digital-name policy fields"),
-        ("doc_hash", "Digital-name approval hash closure mismatch"),
-        ("initial_hash", "Digital-name approval hash closure mismatch"),
-        ("list_hash", "Digital-name approved exclusion hash mismatch"),
-        ("event_order", "Digital-name approval events must be sorted and unique"),
-        ("evidence_path", "Unsafe digital-name approval evidence key"),
-        ("evidence_hash", "Digital-name approval evidence hash mismatch"),
-        (
-            "no_button",
-            "Digital-name approval requires exactly one explicit policy button",
-        ),
-        (
-            "button_value",
-            "Digital-name approval button does not approve this policy text",
-        ),
-        (
-            "button_text",
-            "Digital-name approval button does not approve this policy text",
-        ),
-        (
-            "button_time",
-            "Digital-name approval button does not approve this policy text",
-        ),
-        ("message", "Digital-name approval message evidence mismatch"),
-        ("disclosure_order", "Digital-name disclosures must be sorted and unique"),
-        ("disclosure_uuid", "Digital-name disclosed change lacks timely acceptance"),
-        ("disclosure_time", "Digital-name disclosed change lacks timely acceptance"),
-    ],
-)
-def test_approval_is_not_a_background_event(  # ruff: ignore[complex-structure,too-many-branches] -- one small immutable receipt is independently corrupted along each approval edge
-    baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
+@pytest.mark.parametrize("fault", ["receipt_file", "receipt_hash"])
+def test_removed_receipt_inputs_are_not_accepted(
+    baseline: tuple[Path, str], tmp_path: Path, fault: str
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
-    approval = receipt(root, "links")
-    events = array(approval["approval_events"])
-    button, oral = object_value(events[0]), object_value(events[1])
-    changes = array(approval["disclosed_changes"])
-    if fault == "reviewer":
-        approval["reviewed_by"] = "Another reviewer"
-    elif fault == "precision":
-        approval["reviewed_precision"] = "day"
-    elif fault == "doc_hash":
-        approval["approved_document_hash"] = digest(b"other")
-    elif fault == "initial_hash":
-        approval["initial_exclusions_hash"] = digest(b"other")
-    elif fault == "list_hash":
-        excluded = exclusion(root, "links")
-        excluded["approved_list_hash"] = digest(b"other")
-        rewrite(root, "links", excluded=excluded)
-        reject(root, message)
-        return
-    elif fault == "event_order":
-        approval["approval_events"] = list(reversed(events))
-    elif fault == "evidence_path":
-        object_value(approval["evidence_hashes"])["/private/path"] = digest(b"other")
-    elif fault == "evidence_hash":
-        object_value(approval["evidence_hashes"])["links-policy.plain.md"] = digest(
-            b"other"
-        )
-    elif fault == "no_button":
-        approval["approval_events"] = [oral]
-    elif fault == "button_value":
-        object_value(button["value"])["value"] = "submitted_answers"
-    elif fault == "button_text":
-        object_value(button["value"])["text_sha256"] = digest(b"other")
-    elif fault == "button_time":
-        button["at"] = "2026-10-02T20:32:21.779Z"
-    elif fault == "message":
-        oral["locator"] = "not-this-uuid"
-    elif fault == "disclosure_order":
-        approval["disclosed_changes"] = list(reversed(changes))
-    elif fault == "disclosure_uuid":
-        object_value(changes[0])["accepted_message_uuid"] = (
-            "00000000-0000-0000-0000-000000000000"
-        )
-    elif fault == "disclosure_time":
-        object_value(changes[0])["disclosed_at"] = "2026-10-02T20:34:00Z"
-    rewrite(root, "links", approval=approval, close=False)
+    if fault == "receipt_file":
+        path = root / "authored/digital-name-policies" / LINKS / "001.approval.yaml"
+        path.write_text("{}")
+        message = "Unindexed digital-name policy input"
+    else:
+        index_path = root / "authored" / INDEX
+        index = object_value(read_yaml(index_path))
+        entries = array(object_value(index["policies"])[LINKS])
+        object_value(entries[0])["approval_receipt_hash"] = digest(b"obsolete receipt")
+        index_path.write_bytes(canonical(index))
+        message = "Invalid digital-name policy fields"
     reject(root, message)
 
 
@@ -360,7 +287,6 @@ def test_git_and_disk_are_both_immutable(
         ("kind", "Invalid digital-name policy fields"),
         ("target", "Digital-name exclusion target ID mismatch"),
         ("duplicate", "Digital-name exclusions must be sorted and unique"),
-        ("receipt_changed", "Previously adopted digital-name approval changed"),
     ],
 )
 def test_remaining_closed_fields(
@@ -370,54 +296,50 @@ def test_remaining_closed_fields(
     purpose = "links"
     raw = policy(root, purpose)
     excluded = exclusion(root, purpose)
-    approval = receipt(root, purpose)
     content = object_value(raw["content"])
-    if fault == "receipt_changed":
-        approval["note"] = "Unapproved replacement note"
-    else:
-        raw["approved_document_hash"] = digest(b"synthetic replacement")
-        pins = object_value(content["catalogue_pins"])
-        if fault == "batches":
-            pins["source_batches"] = []
-        elif fault == "recipes":
+    raw["approved_document_hash"] = digest(b"synthetic replacement")
+    pins = object_value(content["catalogue_pins"])
+    if fault == "batches":
+        pins["source_batches"] = []
+    elif fault == "recipes":
+        object_value(
+            object_value(pins["parser_and_registry_configuration"])[
+                "translation_recipes"
+            ]
+        ).pop("translation-sv1-v1")
+    elif fault == "provider":
+        object_value(
             object_value(
                 object_value(pins["parser_and_registry_configuration"])[
                     "translation_recipes"
                 ]
-            ).pop("translation-sv1-v1")
-        elif fault == "provider":
-            object_value(
-                object_value(
-                    object_value(pins["parser_and_registry_configuration"])[
-                        "translation_recipes"
-                    ]
-                )["translation-sv1-v1"]
-            )["config"] = {"provider": "svwb"}
-        elif fault == "registry":
-            object_value(content["registry_pins"])["index_hash"] = digest(
-                b"different index"
-            )
-        else:
-            item: dict[str, JsonValue] = {
-                "source_lang": "ja",
-                "source_name_hash": digest(b"Synthetic card"),
+            )["translation-sv1-v1"]
+        )["config"] = {"provider": "svwb"}
+    elif fault == "registry":
+        object_value(content["registry_pins"])["index_hash"] = digest(
+            b"different index"
+        )
+    else:
+        item: dict[str, JsonValue] = {
+            "source_lang": "ja",
+            "source_name_hash": digest(b"Synthetic card"),
+            "reason": "Synthetic exclusion",
+            "kind": "name",
+        }
+        if fault == "reason":
+            item["reason"] = " "
+        elif fault == "kind":
+            item["kind"] = "unsupported"
+        elif fault == "target":
+            item = {
+                "kind": "card_target",
+                "card_id": "c:" + "1" * 32,
+                "game": "sv1",
+                "official_id": "123",
                 "reason": "Synthetic exclusion",
-                "kind": "name",
             }
-            if fault == "reason":
-                item["reason"] = " "
-            elif fault == "kind":
-                item["kind"] = "unsupported"
-            elif fault == "target":
-                item = {
-                    "kind": "card_target",
-                    "card_id": "c:" + "1" * 32,
-                    "game": "sv1",
-                    "official_id": "123",
-                    "reason": "Synthetic exclusion",
-                }
-            excluded["entries"] = [item, item] if fault == "duplicate" else [item]
-    rewrite(root, purpose, raw, approval, excluded)
+        excluded["entries"] = [item, item] if fault == "duplicate" else [item]
+    rewrite(root, purpose, raw, excluded)
     reject(root, message)
 
 

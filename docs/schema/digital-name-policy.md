@@ -97,31 +97,30 @@ CI 固定輸入可重新產生相同名字及診斷清單；測試不需重建�
 
 下列保留既有 names/links 共用載體的定義，**只有 purpose=links 繼續適用**；
 names 的 format 1 描述僅供轉換，不是 §3 當前名字規則的門檻。index format 2 可容納下列 links 版本陣列。
-本節不新增收據；非翻譯連結的核可、來源及排除條件原樣保留，不能將它們移用到翻譯。
+本節保留來源與排除條件，不讀核可收據，也不以核可事件作載入門檻；不能將非翻譯連結移用到翻譯。
 
-### 6.1 政策、核可文件與可攜入口
+### 6.1 政策與可攜入口
 
 沿 authored-layout 的嚴格 YAML 1.2、安全路徑、全入口查重、canonical-json-v1 與單檔 <1 MiB。
 未知欄／格式、Bool 當整數、symlink、缺檔、孤立／未索引檔、hash 不符、分叉或缺號均拒絕。
-版本從 `001` 起只增，既有 policy／approval／exclusions 的 bytes 與 index entry 不改。
+版本從 `001` 起只增，既有 policy／exclusions 的內容不改；核可收據及索引的 approval_receipt_hash 已移除。
 
 | 路徑（相對 authored） | 完整頂層欄位 |
 | --- | --- |
 | `digital-name-policies/index.yaml` | `digital_name_policy_index_format:1,kind:digital_name_policy_index,policies` |
 | `digital-name-policies/<policy_id>/<version>.policy.yaml` | `digital_name_policy_format:1,kind:digital_name_policy,policy_id,version,purpose,approved_document_hash,projection_recipe,content` |
-| 對應 `<version>.approval.yaml` | `digital_name_approval_format:1,kind:digital_name_policy_approval,policy_id,version,policy_hash,approved_document_hash,presented_text_hash,reviewed_by,reviewed_at,reviewed_precision,approval_events,evidence_hashes,initial_exclusions_hash,disclosed_changes,note` |
 | `digital-name-exclusions/<policy_id>/<version>.yaml` | `digital_name_exclusion_format:1,kind:digital_name_initial_exclusions,policy_id,version,purpose,approved_list_hash,entries` |
 
 policy_id 沿實際核可文件，不因名稱帶 draft 就當未核可；version 為正整數，路徑序號至少三位。
 purpose=names/links。policies 是 policy_id → 非空版本陣列；每項恰為
-`{version,path,hash,approval_receipt_hash,exclusions_path,exclusions_hash,predecessor}`。
+`{version,path,hash,exclusions_path,exclusions_hash,predecessor}`。
 path／exclusions_path 固定符合上表與 ID／版本；predecessor 首筆 null，後續指上一 entry 的完整 canonical hash。
-所有 Hash 是完整 `sha256:<64 lowercase hex>`。消費端 authored_revision 釘已合併後 main 的索引及全部歷史 pair，
+所有 Hash 是完整 `sha256:<64 lowercase hex>`。消費端 authored_revision 釘已合併後 main 的索引及全部歷史政策與清單，
 索引不引用自己的未來 commit；完整 bytes 另進 F1。
 
 **核可文件 hash 與 authored 操作政策 hash 分開**：維護者核可的是私人保存的完整呈現文件，含歷史題目／本機追溯欄，
 不得刪路徑、回填核可事件或換封套後宣稱他核可新 hash。`approved_document_hash` 始終釘該完整 parsed canonical hash；
-`policy_hash`／index.hash 是本表操作政策完整解析值的 hash。收據同時釘兩者，不混用，不產生 hash 自我引用。
+`policy_hash`／index.hash 是本表操作政策完整解析值的 hash。保留兩種內容 hash，不混用，不產生 hash 自我引用。
 
 projection_recipe 恰為 `approved-digital-name-document-v1`，content **逐欄原值複製**下列集合，不能改字或改規則：
 
@@ -132,25 +131,18 @@ projection_recipe 恰為 `approved-digital-name-document-v1`，content **逐欄�
 
 只省略既有文件的呈現題目／草案狀態／歷史流程／本機背景路徑等非操作欄；完整已核可文件留私人持久證據。
 採納當下先驗其 canonical、真正呈現白話全文、頁面與按鍵，逐欄驗投影；不能藉新封套／recipe 添加新授權。
-之後 build／CI 驗 authored 內已驗的操作政策、收據與來源閉包，不重讀未入庫的私人核可頁；
-不聲稱重新驗了原頁，也不因私人頁不在 CI 而使真實採納失效。CI／build 無法重新驗證 content 是否確為核可文件的逐欄投影，也無法重驗 evidence_hashes 所指的私人檔案；這兩項由採納審核者在採納當下核對並留審核紀錄。缺 supported projection recipe 即拒絕使用。
+之後 build／CI 驗 authored 的操作政策、清單與來源閉包，不重讀私人核可頁，也不讀核可收據。
+缺 supported projection recipe 即拒絕使用；內容雜湊只檢查資料完整性，不證明真人核可。
 
-content 保留核可當時的文件原文，包含「本次答案尚待最終政策核可」「本次不生成收據」及 proposed_…_not_merged 等歷史措辭；不為消除這些字句而改寫投影。實際核可狀態以對應 `.approval.yaml` 為準，條文是否已合併以正式 docs 為準，不能僅靠 content 的呈現狀態判定。
+content 保留當時文件原文，包含歷史題目、收據及 proposed_…_not_merged 等措辭，不為清除流程欄位改寫規則內容。
+這些歷史文字不是載入門檻；條文是否已合併以正式 docs 為準。
 任何操作文字、matcher、枚舉、scope 或來源語意改變須另核可；來源／清單有限續版依 §6.3，不借純 metadata 投影改規則。
 
-### 6.2 真實核可與初始清單
+### 6.2 初始清單
 
-reviewed_by 逐字等於實際核可的維護者帳號；reviewed_precision=instant，reviewed_at 為本政策真正按鍵時間。
-approval_events 是按事件時間排序的非空陣列；每項恰為 `{kind,at,uuid,source_hash,locator,value}`。
-kind=page_button/message；按鍵沒有訊息 UUID 時 uuid=null，value 是原始按鍵 JSON 完整值；
-message 的 uuid 是真實訊息 ID，value=null，source_hash 釘不可變事件摘要，locator 精確定位該訊息。
-按鍵必驗 policy_hash=approved_document_hash、text_sha256=presented_text_hash、value=agree；拒絕背景／作答紀錄代替明示核可。
-evidence_hashes 是不可變來源檔名 → exact bytes hash 映射，只含 basename／安全相對路徑，不存私人絕對路徑、憑證或官方名稱。
-政策／規則文本不是官方卡文，可入 git；完整官方目錄／卡名表與私人頁面不進 git。
-disclosed_changes 是恰含 `{rule_id,removed,added,disclosed_at,accepted_message_uuid}` 的排序陣列，依 rule_id 排序。若有已揭露並接受的刻意差異，disclosed_at 指真正揭露時間，accepted_message_uuid 指收據內接受差異的真實訊息；沒有差異時陣列空。note 明示政策核可、無逐筆／抽樣樣本；不引用其他政策來補假樣本。
-
-初始排除 entries 恰等於已核可文件的完整最終清單。
-approved_list_hash 釘原最終清單 canonical；initial_exclusions_hash 釘本表可攜清單完整解析值的 canonical。
+初始排除 entries 恰等於政策內容的完整最終清單。
+approved_list_hash 釘該清單 canonical，exclusions_hash 釘可攜清單完整解析值的 canonical。
+政策與清單只保存規則所需內容；官方目錄、卡名表及私人核可頁不進 git。
 names entry 為 `{source_lang,source_name_hash,reason}`；links entry 為
 `{kind:name,source_lang,source_name_hash,reason}` 或 `{kind:card_target,card_id,game,official_id,reason}`。
 完整鍵排序唯一，理由非空；清單可以空但必明示，不為空清單另造操作事件。
@@ -160,24 +152,24 @@ names entry 為 `{source_lang,source_name_hash,reason}`；links entry 為
 第三題 agree：新 JP 凍結批次自己的 owner 符合有效政策／指定目錄，就沿用，逐批報新增，不冒稱真人逐張看過。
 第四題選 **乙，兩政策共用**：純新增、完整符合各自條件、舊名稱／資格／取名遊戲／既有連結與對應未變，
 無新增兩代異譯、排除或真人決定衝突，才可有限機械續版。兩代異譯、譯名改變、失去資格、既有對應變動、
-目標消失仍由維護者實際看過明示同意；較新建置批次只報差異，不使原政策 stale、不偷偷換目錄。
+目標消失須經 PR 審核；較新建置批次只報差異，不使原政策 stale、不偷偷換目錄。
 有限續版仍釘完整新批次、精確前件及完整檢查報告，不把原事件寫成他看過新批次；
 **有限續版的封閉格式與 loader 尚未完成，不先啟用自動新增**。
 
 names 排除不允許借真人 B／規則 link 繞回自動官方名，但本人實際採納選詞仍可用；
-它不撤真人關係或獨立規則連結。改 names 清單須核可完整新清單與差異，並證明其他規則／目錄未變。
+它不撤真人關係或獨立規則連結。改 names 清單須經 PR 審核完整新清單與差異，並證明其他規則／目錄未變。
 links 排除只移除規則證據：同名排除不移除其他合法名字對同卡對的依據，整對排除才移除所有名依據。
 真人有效關係照自己的決定顯示，重疊只報告不停出貨；要撤真人另走真人撤回。
-兩份清單、hash／核可各自獨立。後續 links add/remove 只增 log 與輕量收據，釘實際維護者訊息 UUID／instant、
-政策 hash、精確操作／理由、前件與結果集合 hash；remove 是新記錄，不刪歷史。
-修改規則／遊戲範圍不能借輕量清單收據，未支持續版格式不得靜默套用。
+兩份清單及 hash 各自獨立。後續 links 新增或移除直接修改政策或排除清單並經 PR 審核，
+Git 歷史保留修改紀錄；不寫收據，也不記維護者訊息 UUID 或 instant。
+修改規則／遊戲範圍同樣須經 PR 審核；未支持續版格式不得靜默套用。
 
 ### 6.4 來源與能力啟用
 
 歷史背景由宣告的不可變 Git 版本驗，不與目前磁碟執行期比較；正式來源基準用 main 保留的 commit，
 不能用會被 squash 掉的功能分支 commit。目前程式／parser／checker 的完整依賴另釘並重驗使用，
 加註解或重構不讓歷史政策失效；raw／父層／閉包錯仍建置拒絕。
-F1 包含政策索引／完整 pair／清單及鏈、核可摘要、所有 raw descriptor／來源／parser、逐 owner 與實際使用；
+F1 包含政策索引／完整政策／清單及鏈、所有 raw descriptor／來源／parser、逐 owner 與實際使用；
 完整 `record.verify(...,complete=True)` 不能由子階段 partial verify 代替。
 
 純名字政策不要求發布數位卡／圖／link；同名瀏覽才啟用最小 digital_card／digital_face／digital_text／

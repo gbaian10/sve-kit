@@ -8,13 +8,11 @@ from pydantic import Field, JsonValue, field_validator
 
 from sve_carddb.build_inputs import Revision
 from sve_carddb.catalog.adoption_models import Batch, Normalizer
-from sve_carddb.maintainers import Maintainer
-from sve_carddb.registry.records import CardId, Hash, Instant, RecordData, Text
+from sve_carddb.registry.records import CardId, Hash, RecordData, Text
 
 PolicyId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
 Positive = Annotated[int, Field(ge=1)]
 Purpose = Literal["links"]
-UUID = Annotated[str, Field(pattern=r"^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\Z")]
 
 
 class Envelope(RecordData):
@@ -37,39 +35,6 @@ class Policy(Envelope):
     approved_document_hash: Hash
     projection_recipe: Literal["approved-digital-name-document-v1"]
     content: dict[str, JsonValue]
-
-
-class Event(RecordData):
-    kind: Literal["page_button", "message"]
-    at: Instant
-    uuid: UUID | None
-    source_hash: Hash
-    locator: Text
-    value: dict[str, JsonValue] | None
-
-
-class Disclosure(RecordData):
-    rule_id: Text
-    removed: Text
-    added: str | None
-    disclosed_at: Instant
-    accepted_message_uuid: UUID
-
-
-class Approval(Envelope):
-    digital_name_approval_format: Literal[1]
-    kind: Literal["digital_name_policy_approval"]
-    policy_hash: Hash
-    approved_document_hash: Hash
-    presented_text_hash: Hash
-    reviewed_by: Maintainer
-    reviewed_at: Instant
-    reviewed_precision: Literal["instant"]
-    approval_events: Annotated[tuple[Event, ...], Field(min_length=1)]
-    evidence_hashes: Annotated[dict[str, Hash], Field(min_length=1)]
-    initial_exclusions_hash: Hash
-    disclosed_changes: tuple[Disclosure, ...]
-    note: Text
 
 
 class NameExclusion(RecordData):
@@ -102,7 +67,6 @@ class Entry(RecordData):
     version: Positive
     path: Text
     hash: Hash
-    approval_receipt_hash: Hash
     exclusions_path: Text
     exclusions_hash: Hash
     predecessor: Hash | None

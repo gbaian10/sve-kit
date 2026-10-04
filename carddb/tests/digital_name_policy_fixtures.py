@@ -100,65 +100,7 @@ def _link_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
         ],
         "entries": [],
     }
-    instant = "2026-10-02T20:32:22.779Z"
-    uuid = "b5d164b7-8e06-4336-af4e-de21f0306da4"
-    events: list[JsonValue] = [
-        {
-            "kind": "page_button",
-            "at": instant,
-            "uuid": None,
-            "source_hash": checksum,
-            "locator": f"name2_policy/{purpose}.json",
-            "value": {
-                "at": instant,
-                "id": purpose,
-                "note": "",
-                "policy_hash": approved,
-                "text_sha256": checksum,
-                "value": "agree",
-            },
-        },
-        {
-            "kind": "message",
-            "at": "2026-10-02T20:33:39.423Z",
-            "uuid": uuid,
-            "source_hash": checksum,
-            "locator": uuid,
-            "value": None,
-        },
-    ]
-    approval: dict[str, JsonValue] = {
-        "digital_name_approval_format": 1,
-        "kind": "digital_name_policy_approval",
-        "policy_id": identifier,
-        "version": 1,
-        "policy_hash": digest(canonical(document)),
-        "approved_document_hash": approved,
-        "presented_text_hash": checksum,
-        "reviewed_by": "gbaian10",
-        "reviewed_at": instant,
-        "reviewed_precision": "instant",
-        "approval_events": events,
-        "evidence_hashes": {
-            purpose + "-policy.canonical.json": approved,
-            purpose + "-policy.plain.md": checksum,
-            f"name2_policy/{purpose}.json": checksum,
-            uuid: checksum,
-        },
-        "initial_exclusions_hash": digest(canonical(excluded)),
-        "disclosed_changes": [
-            {
-                "rule_id": r,
-                "removed": "Synthetic boundary case",
-                "added": "Synthetic boundary replacement",
-                "disclosed_at": "2026-10-02T20:30:00Z",
-                "accepted_message_uuid": uuid,
-            }
-            for r in ("label-and-authority", "new-jp")
-        ],
-        "note": "Synthetic boundary inputs; no actual approval evidence.",
-    }
-    return document, approval, excluded
+    return document, excluded
 
 
 def copy_policies(root: Path) -> None:
@@ -168,20 +110,18 @@ def copy_policies(root: Path) -> None:
         "policies": {},
     }
     for purpose, identifier in (("links", LINKS),):
-        document, approval, excluded = _link_files(purpose)
+        document, excluded = _link_files(purpose)
         base = root / "authored/digital-name-policies" / identifier
         base.mkdir(parents=True, exist_ok=True)
         exclusions = root / "authored/digital-name-exclusions" / identifier
         exclusions.mkdir(parents=True, exist_ok=True)
         (base / "001.policy.yaml").write_bytes(canonical(document))
-        (base / "001.approval.yaml").write_bytes(canonical(approval))
         (exclusions / "001.yaml").write_bytes(canonical(excluded))
         object_value(index["policies"])[identifier] = [
             {
                 "version": 1,
                 "path": f"digital-name-policies/{identifier}/001.policy.yaml",
                 "hash": digest(canonical(document)),
-                "approval_receipt_hash": digest(canonical(approval)),
                 "exclusions_path": f"digital-name-exclusions/{identifier}/001.yaml",
                 "exclusions_hash": digest(canonical(excluded)),
                 "predecessor": None,
@@ -213,17 +153,6 @@ def policy(root: Path, purpose: str) -> dict[str, JsonValue]:
     )
 
 
-def receipt(root: Path, purpose: str) -> dict[str, JsonValue]:
-    return object_value(
-        read_yaml(
-            root
-            / "authored/digital-name-policies"
-            / (NAMES if purpose == "names" else LINKS)
-            / "001.approval.yaml"
-        )
-    )
-
-
 def exclusion(root: Path, purpose: str) -> dict[str, JsonValue]:
     return object_value(
         read_yaml(
@@ -239,35 +168,15 @@ def rewrite(
     root: Path,
     purpose: str,
     document: dict[str, JsonValue] | None = None,
-    approval: dict[str, JsonValue] | None = None,
     excluded: dict[str, JsonValue] | None = None,
-    *,
-    close: bool = True,
 ) -> None:
     assert purpose == "links"
     identifier = LINKS
     base = root / "authored/digital-name-policies" / identifier
     document = document if document is not None else policy(root, purpose)
-    approval = approval if approval is not None else receipt(root, purpose)
     excluded = excluded if excluded is not None else exclusion(root, purpose)
-    if close:
-        approval.update(
-            policy_hash=digest(canonical(document)),
-            approved_document_hash=document["approved_document_hash"],
-            initial_exclusions_hash=digest(canonical(excluded)),
-        )
-        for event in array(approval["approval_events"]):
-            item = object_value(event)
-            if item["kind"] == "page_button":
-                object_value(item["value"])["policy_hash"] = document[
-                    "approved_document_hash"
-                ]
-        object_value(approval["evidence_hashes"])[
-            purpose + "-policy.canonical.json"
-        ] = document["approved_document_hash"]
     for path, value in [
         (base / "001.policy.yaml", document),
-        (base / "001.approval.yaml", approval),
         (root / "authored/digital-name-exclusions" / identifier / "001.yaml", excluded),
     ]:
         path.write_bytes(canonical(value))
@@ -276,7 +185,6 @@ def rewrite(
     entry = object_value(array(object_value(index["policies"])[identifier])[0])
     entry.update(
         hash=digest(canonical(document)),
-        approval_receipt_hash=digest(canonical(approval)),
         exclusions_hash=digest(canonical(excluded)),
     )
     index_path.write_bytes(canonical(index))
@@ -362,12 +270,7 @@ def make_policy_fixture(
                 index_hash=registry["index_hash"],
                 source_replay_revision=digital.program,
             )
-        approval = receipt(root, purpose)
-        approval["disclosed_changes"] = []
-        button = object_value(array(approval["approval_events"])[0])
-        approval["approval_events"] = [button]
-        approval["note"] = "Synthetic approval for boundary tests; never adopted data."
-        rewrite(root, purpose, document, approval)
+        rewrite(root, purpose, document)
     authored = commit(root)
     dependencies = {n: (root / n).read_bytes() for n in (*RUNTIME, *runtime_files)}
     build = BuildContext.from_inputs(authored, dependencies, configuration)

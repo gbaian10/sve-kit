@@ -76,7 +76,6 @@ class Catalogue:
     purpose: str
     names: tuple[FrozenName, ...]
     uses: tuple[SourceUse, ...]
-    reviewed_at: str
     whitespace: frozenset[int]
     kana: tuple[tuple[int, int], ...]
     excluded_names: frozenset[str]
@@ -241,7 +240,6 @@ def catalogue(loaded: LoadedPolicy, sources: Sources) -> Catalogue:
         document.purpose,
         tuple(names),
         uses_sorted(sources.uses),
-        loaded.receipt().reviewed_at,
         frozenset(),
         (),
         name_exclusions,
