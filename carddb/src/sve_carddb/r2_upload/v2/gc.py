@@ -23,6 +23,14 @@ if TYPE_CHECKING:
     from sve_carddb.snapshot.publish import Ledger
     from sve_carddb.snapshot.publish.storage import Stored
 
+PREVIEW_POINTER = "snapshots/preview/current.json"
+
+
+def _refuse_preview(store: R2Store) -> None:
+    """Legacy previews share public blob keys but do not join this writer lease."""
+    if store.get(PREVIEW_POINTER) is not None:
+        raise PublishError("GC refuses a bucket with a preview pointer")
+
 
 def confirmation(plan: dict[str, JsonValue]) -> str:
     """Bind the maintainer's contemporary consent to the exact list and index."""
@@ -59,6 +67,7 @@ def _plan(
     if not namespaces or not namespaces <= PUBLIC_PREFIXES:
         raise PublishError("GC namespace is not explicitly public")
     ledger.verify_backup()
+    _refuse_preview(store)
     remote = store.get(INDEX)
     index = _index(remote)
     if remote is None or index is None or index != _receipt_index(ledger.read()):
@@ -97,6 +106,7 @@ def _plan(
 
 def _unchanged(store: R2Store, approved: Stored) -> None:
     store.verify_lease()
+    _refuse_preview(store)
     if store.get(INDEX) != approved:
         raise PublishError(
             "GC current/previous index changed; discard the approved list"

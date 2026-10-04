@@ -182,6 +182,7 @@ def test_frozen_preview_cannot_be_promoted(frozen: Frozen) -> None:
         "reserved-version",
         "media-token",
         "source-change",
+        "root-member",
     ],
 )
 def test_invalid_frozen_input_is_rejected_before_credentials(
@@ -194,6 +195,8 @@ def test_invalid_frozen_input_is_rejected_before_credentials(
     descriptor = object_value(parse((frozen.root / "release.json").read_bytes()))
     if attack == "unreferenced":
         (frozen.root / "snapshots" / "unexpected.json").write_bytes(b"{}")
+    elif attack == "root-member":
+        (frozen.root / "unexpected.txt").write_bytes(b"synthetic root member")
     elif attack == "symlink":
         p = frozen.root / string(descriptor["manifest_path"])
         target = p.with_suffix(".original")
@@ -254,6 +257,14 @@ def test_checkpoint_cannot_live_beside_primary_or_backup(frozen: Frozen) -> None
         PublishError, match=r"^Checkpoint must be outside both ledger roots$"
     ):
         save_checkpoint(frozen.ledger.backup / "checkpoint.json", frozen.ledger)
+
+
+def test_checkpoint_with_group_or_other_permissions_is_rejected(frozen: Frozen) -> None:
+    frozen.checkpoint.chmod(0o677)
+    with pytest.raises(
+        PublishError, match=r"^Checkpoint requires a private regular file$"
+    ):
+        verify_checkpoint(frozen.checkpoint, frozen.ledger)
 
 
 def test_ledger_not_automatically_created_in_dry_run(

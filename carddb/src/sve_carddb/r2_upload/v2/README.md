@@ -135,9 +135,22 @@ prefix are accepted. An irregular key aborts the entire inspection, rather than
 being skipped. Raw, inventory, crawl manifests, backups and authored data are
 outside these namespaces.
 
+If `snapshots/preview/current.json` exists, **the entire GC is refused**, including
+for a valid preview pointer. Legacy previews share these manifest/blob namespaces
+but do not use this writer lease. This collector does not try to interpret or
+discard their closure; malformed, unknown-format and legacy 1.x pointers also
+block deletion. Inspection and execution replan check the pointer under their
+lease, with another check before deletion. Use a separate preview bucket if GC
+must coexist with a live preview; this command never removes the pointer.
+
 Both retained versions' JSON closures **and image paths** remain protected, as do
 legal sealed/failed attempts. A missing retained member stops collection. The
-inspection releases the lease while the maintainer reviews its saved list; it
+collector must use the publisher's same complete ledger and backup; another
+machine's incomplete copy cannot prove the absence of unfinished releases.
+This R2 collector retains both versions' images; the generic #297 `collect`
+implements the older current-only image rule and is not this deployment's GC
+entry point. Its conditional deletion contract remains unsupported by R2Store.
+The inspection releases the lease while the maintainer reviews its saved list; it
 does not hold a lock across an unbounded human wait. Actual execution requires
 `--execute --confirm-maintainer-authorization --confirm-delete 'DELETE-V2 sha256:…'`,
 where the exact confirmation string is printed with that list. Execution acquires

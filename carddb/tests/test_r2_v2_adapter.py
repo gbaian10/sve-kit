@@ -23,6 +23,40 @@ META = {"content-type": "application/json", "cache-control": "no-store"}
 KEY = "snapshots/blobs/" + "a" * 64 + ".json"
 
 
+@pytest.mark.parametrize(
+    ("account", "bucket", "message"),
+    [
+        (ACCOUNT + ".evil.example/x?", BUCKET, "Invalid explicit R2 account ID"),
+        ("evil." + ACCOUNT, BUCKET, "Invalid explicit R2 account ID"),
+        (ACCOUNT, BUCKET + ".evil.example/x?", "Invalid explicit R2 bucket"),
+        (ACCOUNT, "https://evil.example/" + BUCKET, "Invalid explicit R2 bucket"),
+    ],
+)
+def test_endpoint_rejects_prefix_or_suffix_injection_without_http(
+    remote: tuple[R2Store, ServerState, Loopback],
+    account: str,
+    bucket: str,
+    message: str,
+) -> None:
+    store, state, _transport = remote
+    with pytest.raises(PublishError, match="^" + message + "$"):
+        R2Store(account, bucket, CREDENTIALS, store.client)
+    assert state.requests == []
+
+
+@pytest.mark.parametrize(
+    "key", ["snapshots/./blobs/x", "snapshots/../blobs/x", "./x", "../x"]
+)
+def test_dot_segments_in_keys_are_rejected_before_signed_http(
+    remote: tuple[R2Store, ServerState, Loopback],
+    key: str,
+) -> None:
+    store, state, _transport = remote
+    with pytest.raises(PublishError, match=r"^Invalid S3 object key$"):
+        store.get(key)
+    assert state.requests == []
+
+
 def test_conditional_create_overwrite_and_stale_etag_are_atomic(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
