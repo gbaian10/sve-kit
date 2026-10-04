@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
+import yamlrocks
 from pydantic import JsonValue, RootModel, ValidationError
 
 from sve_carddb.registry import storage
@@ -305,6 +306,23 @@ def test_parser_diagnostics_do_not_expose_source_text(tmp_path: Path) -> None:
     exposed = "".join(traceback.format_exception(error.value))
     assert "synthetic-secret-sentinel" not in exposed
     assert "YAMLRocksDecodeError" not in exposed
+
+
+def test_package_error_with_source_is_suppressed(
+    tmp_path: Path, mocker: MockerFixture
+) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text("a: value")
+    mocker.patch.object(
+        yamlrocks,
+        "loads_all",
+        side_effect=yamlrocks.YAMLRocksDecodeError("synthetic-private-source-sentinel"),
+    )
+    with pytest.raises(ValueError, match=r"^Invalid authored YAML syntax$") as error:
+        read_yaml(path)
+    assert "synthetic-private-source-sentinel" not in "".join(
+        traceback.format_exception(error.value)
+    )
 
 
 @pytest.mark.parametrize(
