@@ -244,8 +244,8 @@ def test_two_explicit_installed_parser_versions_dispatch_independently(
     )
 
 
-@pytest.mark.parametrize("change", ["package", "native", "python_file", "version"])
-def test_producer_environment_cannot_shrink_or_forge_artifact_evidence(
+@pytest.mark.parametrize("change", ["package", "native"])
+def test_producer_environment_cannot_omit_necessary_package_or_native_metadata(
     semantic_repository: tuple[Path, str], change: str
 ) -> None:
     from sve_carddb.template_translations.replay_models import ProducerEnvironment  # ruff: ignore[import-outside-top-level] -- validate the tampered closed wire shape
@@ -262,12 +262,40 @@ def test_producer_environment_cannot_shrink_or_forge_artifact_evidence(
             a for a in data["packages"][1]["artifacts"] if a["path"].endswith(".py")
         ]
         expected = "Semantic environment omits necessary Python or native artifacts"
-    elif change == "python_file":
-        data["packages"][0]["artifacts"].pop()
-        expected = "Semantic producer Python artifact closure must be exact"
-    else:
-        data["packages"][0]["version"] = "0.0.1"
-        expected = "Semantic producer package version differs from fixed lock evidence"
     env = ProducerEnvironment.model_validate_json(canonical(data))
     with pytest.raises(ValueError, match="^" + re.escape(expected) + "$"):
         registry.verify(repository, bindings, flavor=False, environment=env)
+
+
+@pytest.mark.parametrize("flavor", [False, True])
+def test_dependency_versions_and_artifact_names_are_not_historical_gates(
+    semantic_repository: tuple[Path, str], flavor: bool
+) -> None:
+    from sve_carddb.template_translations.replay_models import Artifact  # ruff: ignore[import-outside-top-level] -- explicit recorded environment shape
+
+    root, revision = semantic_repository
+    repository = PinnedRepository(root)
+    bindings = registry.bindings(repository, revision, flavor=flavor)
+    env = capture(registry.ROOT, producer=True)
+    changed = env.model_copy(
+        update={
+            "packages": tuple(
+                package.model_copy(
+                    update={
+                        "version": "999.0.0",
+                        "artifacts": (
+                            Artifact(path="new_module.py", hash="sha256:" + "a" * 64),
+                            Artifact(path="new_native.so", hash="sha256:" + "b" * 64),
+                        ),
+                    }
+                )
+                for package in env.packages
+            )
+        }
+    )
+    assert (
+        registry.verify(
+            repository, bindings, flavor=flavor, environment=changed
+        ).bindings
+        == bindings
+    )

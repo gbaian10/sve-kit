@@ -68,9 +68,9 @@ watchdog aborts over-budget work with `replay_budget_exceeded`; it never skips
 history, raises limits, or publishes a partially verified bundle. There is no
 persistent replay cache or historical interpreter environment.
 
-Producer package versions are fixed by `v1/environment-artifacts.json`. Upgrading
-any of those packages requires a reviewed, newly registered semantic version
-before generating new inventories with that environment. Keep old versions and
-files available. Historical consumption verifies the producer's recorded versions;
-a different host version is recorded as an environment difference and is accepted
-when all six outputs agree. Never edit v1 to accommodate a dependency upgrade.
+Legacy environment values are diagnostic provenance, not a package-version lock.
+Dependency upgrades do not need a new semantic ID. Recorded lock hashes still
+verify the producer's Git evidence, but package versions and artifact filenames
+are not compared with historical lists. Historical output comparison remains in
+the legacy API; the current template reader/build does not invoke it or require
+a legacy catalog. See ADR-0018 for the current translation validation boundary.

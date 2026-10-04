@@ -20,10 +20,7 @@ recipe 核對，不能為吻合率丟欄位。
 | 解析／封存驗證失敗 | 既有 provider 直接失敗，不產生成功驗收報告；修 parser 或補正凍結輸入後重跑 |
 
 本報告直接與 authored 的歷史觀測比對，不需要舊 JSONL 作來源；分母不排除
-缺來源項目，可比對分母僅含 exact＋mismatch。若要交逐欄差異分群，另用
-`compare_en --parser legacy` 與有 exact checksum 的歷史 JSONL；該工具的
-`no_corresponding_input` 要先補齊正確歷史輸入，不以重新簽 hash 消除差異。
-舊 `candidate` parser 只供重現原量測，不能取代正式 extractor 的 exact 驗收。
+缺來源項目，可比對分母僅含 exact＋mismatch。
 
 真來源更新時，先封存新版本、釘新 parser／批次，重新計算觀測，再交
 `review_queue`。清單包含所有受影響的身分、圖片分組、跨區與 related 決定，

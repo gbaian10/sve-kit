@@ -11,8 +11,9 @@ from sve_carddb.build_bundle import publish_bundle, verify_bundle
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.t1 import compile_build
 from sve_carddb.build_inputs import input_record
-from sve_carddb.extract.compare_en import parse_card
 from sve_carddb.extract.compare_jp import legacy_projection
+from sve_carddb.extract.official_en import extract_card as extract_en
+from sve_carddb.extract.official_en import legacy_projection as legacy_en
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.products import (
     import_product_preview,
@@ -512,7 +513,7 @@ def test_english_inclusions_obey_existing_identity_gate(
         .replace("レアリティ".encode(), b"Rarity")
     )
     page = add_page(fixture, raw, region="en", number="TEST-001EN")
-    en_card = parse_card(raw, "TEST-001EN")
+    en_card = legacy_en(extract_en(raw, number="TEST-001EN"))
     jp_card = legacy_projection(extract_card(html(), number="TEST-001"))
     inputs = Inputs(
         jp={jp_card.number: jp_card},
@@ -543,7 +544,7 @@ def test_english_inclusions_obey_existing_identity_gate(
     if state != "missing_source":
         if state == "observation_mismatch":
             changed_raw = raw.replace(b"Synthetic rule.", b"Different synthetic rule.")
-            en_card = parse_card(changed_raw, "TEST-001EN")
+            en_card = legacy_en(extract_en(changed_raw, number="TEST-001EN"))
             page = add_page(fixture, changed_raw, region="en", number="TEST-001EN")
         cards["en", en_card.number] = CardEvidence.from_card(
             page.source, "en", en_card, (FaceEvidence("LG", None),)

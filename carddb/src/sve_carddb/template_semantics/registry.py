@@ -1,12 +1,11 @@
 """Finite immutable semantic bindings; producer Git bytes are data, never executed."""
 
 import ast
-import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 from typing import TYPE_CHECKING
 
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameter_rules.repository import ancestor, git, revision
 from sve_carddb.template_semantics import versions
 from sve_carddb.template_semantics.environment import PACKAGES, validate
@@ -261,7 +260,7 @@ def verify_environment(
     bindings: tuple[SemanticBinding, ...],
     environment: ProducerEnvironment,
 ) -> None:
-    """Producer lock provenance is checked; host values never form an equality gate."""
+    """Check recorded lock provenance without freezing package versions or artifact names."""
     validate(environment)
     raw: dict[str, bytes] = {}
     for producer in sorted({b.revision for b in bindings}):
@@ -271,36 +270,6 @@ def verify_environment(
             environment.pyproject_hash,
         ):
             raise ValueError("Semantic producer environment lock evidence differs")
-    required = object_value(
-        parse(
-            installed(
-                "carddb/src/sve_carddb/template_semantics/v1/environment-artifacts.json"
-            )
-        )
-    )
-    locked = {
-        p["name"]: p.get("version")
-        for p in tomllib.loads(raw["carddb/uv.lock"].decode())["package"]
-    }
-    for package in environment.packages:
-        spec = object_value(required[package.name])
-        if (
-            package.version != locked.get(package.name)
-            or package.version != spec["version"]
-        ):
-            raise ValueError(
-                "Semantic producer package version differs from fixed lock evidence"
-            )
-        if [a.path for a in package.artifacts if a.path.endswith(".py")] != array(
-            spec["python_files"]
-        ):
-            raise ValueError("Semantic producer Python artifact closure must be exact")
-        if sorted(
-            a.path.split(".")[0]
-            for a in package.artifacts
-            if a.path.endswith((".so", ".pyd"))
-        ) != array(spec["native_modules"]):
-            raise ValueError("Semantic producer native artifact closure must be exact")
 
 
 def foreign(context: ReplayContext) -> None:

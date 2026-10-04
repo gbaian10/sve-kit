@@ -1,6 +1,5 @@
 """Each legacy constraint has an independent synthetic oracle or counterexample."""
 
-import hashlib
 import json
 from pathlib import Path
 from typing import TYPE_CHECKING, cast
@@ -9,7 +8,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb import cli
-from sve_carddb.extract import compare_en, jsonl, official_en
+from sve_carddb.extract import jsonl, official_en
 from sve_carddb.fetch.validate import ValidationError
 from sve_carddb.fetch.writer import LocalState
 from sve_carddb.html import MissingElementError, parse, require_one
@@ -334,13 +333,6 @@ def test_back_face_image_without_src_fails_after_valid_front_face() -> None:
         official_en.extract_card(raw, number="SYNⓈ-01aEN")
 
 
-def test_measurement_explicitly_selects_production_adapter() -> None:
-    card = compare_en.parse_legacy_card(page(), "SYNⓈ-01aEN")
-    assert card.faces[0].text == FULL_TEXT
-    baseline = compare_en.parse_card(page(), "SYNⓈ-01aEN")
-    assert baseline.faces[0].text != card.faces[0].text
-
-
 def test_en_jsonl_uses_exact_region_urls_and_serializes_record(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -403,89 +395,6 @@ def test_digital_regions_rejected_before_writing(
     )
     assert result.exit_code == 1
     assert "only JP and EN" in result.stdout
-
-
-def test_legacy_checksum_precedes_parsing_and_binds_the_same_bytes(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    path = tmp_path / "old.jsonl"
-    raw = b"not-json: synthetic private input\n"
-    path.write_bytes(raw)
-
-    def forbidden(_raw: bytes) -> Card:
-        raise AssertionError("Legacy parser must not run before checksum verification")
-
-    monkeypatch.setattr(Card, "model_validate_json", forbidden)
-    with pytest.raises(ValueError, match="Legacy input hash mismatch"):
-        compare_en.read_legacy(path, "sha256:" + "0" * 64)
-    assert path.read_bytes() == raw
-    assert "sha256:" + hashlib.sha256(raw).hexdigest() != "sha256:" + "0" * 64
-
-
-def test_legacy_validation_errors_do_not_echo_input_and_duplicates_fail(
-    tmp_path: Path,
-) -> None:
-    path = tmp_path / "old.jsonl"
-    path.write_bytes(b'{"text":"synthetic private input"}\n')
-    with pytest.raises(ValueError, match="Invalid legacy EN input") as failure:
-        compare_en.read_legacy(path, None)
-    assert "synthetic private input" not in str(failure.value)
-    card = compare_en.parse_legacy_card(page(), "SYNⓈ-01aEN")
-    raw = card.model_dump_json().encode() + b"\n"
-    path.write_bytes(raw)
-    expected_hash = "sha256:" + hashlib.sha256(raw).hexdigest()
-    found, checksum = compare_en.read_legacy(path, expected_hash)
-    assert found == {"SYNⓈ-01aEN": card}
-    assert checksum == expected_hash
-    path.write_bytes(raw + raw)
-    with pytest.raises(ValueError, match="Duplicate legacy EN card number"):
-        compare_en.read_legacy(path, None)
-
-
-def test_renderer_mismatch_stays_mismatch_in_candidate_report_and_legacy_is_exact() -> (
-    None
-):
-    old = compare_en.parse_card(page(), "SYNⓈ-01aEN")
-    old.faces[0].text = FULL_TEXT
-    old.faces[0].speech = "Voice {synthetic.voice|voice}"
-    expected = observation(old, "en")
-
-    class Reader:
-        def local_state(self, _url: str) -> LocalState:
-            return LocalState.TRUSTED
-
-        def read(self, _url: str) -> bytes:
-            return page()
-
-    selected: list[tuple[str, str, str, str, str | None]] = [
-        (
-            old.number,
-            "synthetic-printing",
-            str(expected["observation_hash"]),
-            str(expected["rules_hash"]),
-            None,
-        )
-    ]
-    candidate = compare_en.measure(selected, {old.number: old}, Reader())
-    legacy = compare_en.measure(
-        selected, {old.number: old}, Reader(), parser=compare_en.parse_legacy_card
-    )
-    assert candidate["counts"] == {
-        "exact": 0,
-        "mismatch": 1,
-        "missing_raw": 0,
-        "parse_failed": 0,
-        "no_corresponding_input": 0,
-    }
-    assert legacy["counts"] == {
-        "exact": 1,
-        "mismatch": 0,
-        "missing_raw": 0,
-        "parse_failed": 0,
-        "no_corresponding_input": 0,
-    }
-    assert "First" not in json.dumps(candidate)
-    assert "Voice" not in json.dumps(legacy)
 
 
 def test_explicit_empty_trait_retains_empty_value_instead_of_failing_or_inventing_dash() -> (

@@ -32,18 +32,6 @@ exposes them. No section content is removed to make a hash match. Page hints
 and credits are retained in the full record; they are outside the original
 `registry-observation-v1` recipe. Neither that recipe nor old decisions change.
 
-`compare_en` keeps the M2-05b0 candidate parser as its default. Explicit
-`--parser legacy` measures the production extractor and its legacy projection.
-`--legacy-sha256 sha256:<64-hex>` verifies exact historic input bytes **before**
-parsing those same bytes. The historical input is only a comparison oracle:
-all candidate observations are recomputed from verified sealed HTML. Reports
-contain hashes, byte lengths, counts and difference fields, never card text.
-Parser file pins use package-relative paths so source and extractor modules
-with the same basename cannot overwrite each other's hash.
-Reports must be written under `/tmp` or the runtime temporary directory selected
-by Python's `tempfile` (including CI's `TMPDIR`). Resolved output paths are checked,
-so a symlink into another directory does not bypass this restriction.
-
 ## Sealed extraction
 
 ```bash
