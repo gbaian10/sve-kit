@@ -12,6 +12,22 @@ const stubImage = ({ width, height, seed }: { width: number; height: number; see
   )
 const built = await buildSnapshot({ encodeImage: stubImage })
 
+const keyFor = (table: string, partition: string, owner: string | null = null): string => {
+  const file = (built.manifest["files"] as JsonObject[]).find((f) =>
+    (f["row_counts"] as JsonObject[]).some(
+      (r) =>
+        r["table"] === table &&
+        r["partition"] === partition &&
+        (r["owner"] as JsonObject)["id"] === owner,
+    ),
+  )
+  if (!file) throw new Error(`fixture has no ${table}/${partition}`)
+  return stringValue(file["key"])
+}
+const printingKey = keyFor("printing", "detail", "set:bp01")
+const revisionKey = keyFor("face_revision", "detail", "set:bp01")
+const textKey = keyFor("text_unit", "detail")
+
 interface Served {
   readonly fetcher: Fetcher
   readonly requests: string[]
@@ -43,7 +59,7 @@ function serve(base: string, files = new Map(built.files)): Served {
 }
 
 describe("createSnapshotClient", () => {
-  it("walks the version index to a compatible snapshot and loads config plus bootstrap", async () => {
+  it("selects the current compatible snapshot and loads config plus bootstrap", async () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
     const seen: SnapshotStatus[] = []
@@ -63,10 +79,6 @@ describe("createSnapshotClient", () => {
       grammar_version: "synthetic-v1",
       normalizer_version: "synthetic-v1",
     })
-    // The last page only holds a 2.0.0 entry, so both pages are read but no 2.0.0 manifest is.
-    expect(
-      served.requests.filter((path) => path.startsWith("snapshots/versions/pages/")),
-    ).toHaveLength(2)
     expect(served.requests.some((path) => path.includes("0000000000000000"))).toBe(false)
     expect(
       served.requests.some((path) => path.includes("programs") || path.startsWith("images/")),
@@ -77,13 +89,18 @@ describe("createSnapshotClient", () => {
     )
   })
 
-  it("reports incompatible when no page has a readable entry", async () => {
+  it("reports incompatible when current and previous have no readable entry", async () => {
     const files = new Map(built.files)
     const index = parseStrict(files.get("snapshots/versions/index.json") ?? "") as JsonObject
-    const pages = index["pages"] as JsonObject[]
     files.set(
       "snapshots/versions/index.json",
-      new TextEncoder().encode(JSON.stringify({ ...index, pages: [pages[1]] })),
+      new TextEncoder().encode(
+        JSON.stringify({
+          ...index,
+          current: { ...(index["current"] as JsonObject), format_version: "3.0.0" },
+          previous: null,
+        }),
+      ),
     )
     const client = createSnapshotClient("/cdn", { fetch: serve("/cdn", files).fetcher })
     await client.load()
@@ -119,7 +136,7 @@ describe("createSnapshotClient", () => {
     const index = parseStrict(served.files.get("snapshots/versions/index.json") ?? "") as JsonObject
     served.files.set(
       "snapshots/versions/index.json",
-      new TextEncoder().encode(JSON.stringify({ ...index, revision: 0 })),
+      new TextEncoder().encode(JSON.stringify({ ...index, revision: 1 })),
     )
     await client.reload()
     // A reload failure keeps the active snapshot; the regression shows up as the update error.
@@ -133,19 +150,22 @@ describe("createSnapshotClient", () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher, detailCacheSize: 1 })
     await client.load()
-    const bp01 = await client.fragments("text/bp01")
+    const bp01 = await client.fragments(printingKey)
     const printing = bp01.find((fragment) => fragment.table === "printing")
     expect(printing?.rows[0]?.["id"]).toBeTypeOf("string")
     expect((printing?.rows[0]?.["faces"] as JsonObject[])[0]?.["printed_text_state"]).toBeTypeOf(
       "string",
     )
-    const revision = bp01.find((fragment) => fragment.table === "face_revision")
+    const revision = (await client.fragments(revisionKey)).find(
+      (fragment) => fragment.table === "face_revision",
+    )
     expect(revision?.rows[0]?.["effect_unit_id"]).toBeTypeOf("string")
+    await client.fragments(printingKey)
     const before = served.requests.length
-    await client.fragments("text/bp01")
+    await client.fragments(printingKey)
     expect(served.requests.length).toBe(before)
-    await client.fragments("text/global")
-    await client.fragments("text/bp01")
+    await client.fragments(textKey)
+    await client.fragments(printingKey)
     expect(served.requests.length).toBe(before + 2)
     await expect(client.fragments("programs")).rejects.toThrow("not a detail file")
     await expect(client.fragments("nope")).rejects.toThrow("unknown file")
@@ -202,7 +222,7 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
       updateError: { kind: "incompatible" },
     })
     expect(client.snapshot()).toBe(before)
-    expect((await client.fragments("text/bp01")).length).toBeGreaterThan(0)
+    expect((await client.fragments(printingKey)).length).toBeGreaterThan(0)
     served.fail((path) => path === "snapshots/versions/index.json")
     await client.reload()
     expect(client.status()).toMatchObject({ state: "ready", updateError: { kind: "network" } })
@@ -276,12 +296,12 @@ describe("createSnapshotClient: reload and transport edge cases", () => {
     const served = serve("/cdn")
     const client = createSnapshotClient("/cdn", { fetch: served.fetcher, detailCacheSize: 1 })
     await client.load()
-    const first = client.fragments("text/bp01")
-    const other = client.fragments("text/global")
-    const again = client.fragments("text/bp01")
+    const first = client.fragments(printingKey)
+    const other = client.fragments(textKey)
+    const again = client.fragments(printingKey)
     expect(again).toBe(first)
     await Promise.all([first, other, again])
-    const bp01Path = stringValue(client.snapshot()?.files.get("text/bp01")?.["path"])
+    const bp01Path = stringValue(client.snapshot()?.files.get(printingKey)?.["path"])
     expect(served.requests.filter((path) => path === bp01Path)).toHaveLength(1)
   })
 })

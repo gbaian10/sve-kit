@@ -135,7 +135,7 @@ reader in `carddb/src/sve_carddb/snapshot/`.
   (one source of truth, no copy). `scripts/schema/` compiles Ajv2020 standalone validators;
   runtime dispatch never compiles schemas or uses `new Function`, including in the decode Worker.
   Annotation keywords `x-columns`, `x-types`, `x-primary-key`, `x-fragments` and `x-tables` are
-  registered explicitly; any other unknown keyword fails the build. Only the eight reader
+  registered explicitly; any other unknown keyword fails the build. Only the seven reader
   entry definitions are bundled; the conformance build also checks every named definition.
   `schema.test.ts` runs shared positive and negative examples through standalone and live Ajv,
   which must agree. Schema failures keep their `schema` code, while Ajv supplies the path and keyword.
@@ -144,15 +144,15 @@ reader in `carddb/src/sve_carddb/snapshot/`.
   cross-row rules JSON Schema cannot express. Every rejection is a `SnapshotError` with a fixed
   `code`; tests match codes, never message text.
 
-`contract.test.ts` is the conformance harness against `tests/fixtures/snapshot-contract/v1/`:
-the golden manifest and payloads must join into exactly `expected-logical.json`, `text-all.json`
-must give the same view, and every `reader-invalid.json` mutation must fail with its intended
-code. The `reader.test.ts` cases cover what the fixture cannot express (missing files, cycles,
-reformatted bytes). CI runs these whenever `carddb/src/sve_carddb/snapshot/schema/**` or the
-fixture directory changes.
+`v2-contract.test.ts` runs the shared schema, reader, index and image-URL vectors from
+`tests/fixtures/snapshot-contract/v2/`. The current golden manifest and payloads join into
+exactly `expected-logical.json`; text-all gives the same view. `contract.test.ts` covers
+additional transport errors (missing files, cycles and integrity failures), and
+`schema.test.ts` checks synthetic positive samples against standalone and live Ajv.
 
-The client negotiates exactly 1.0.0, 1.1.0 or 2.0.0 (including capabilities and fixed band
-membership). Their published schemas and shared handwritten goldens remain authoritative.
+The client supports only snapshot 2.0.0, including its capabilities and fixed band membership.
+The `format-v1/` directory name is historical; its strict JSON, Ajv, decoding and semantic
+checks are shared current-format logic, with no 1.0 or 1.1 reader or schema branches.
 Index v2 considers only current, previous and the local active snapshot; an incompatible
 current does not trigger a search through historical versions. An older usable snapshot has
 a visible notice, and having no compatible snapshot prompts an application update.
@@ -161,13 +161,12 @@ second. Node fixture scripts and tests use the same decoder without a Worker. Ra
 are released after decoding, rather than kept alongside row objects.
 
 Image metadata uses the manifest's exact fragment locator: permanent printing owner and
-printing bucket first, then the image entity bucket. At most 24 intersecting image slots own
-rows at once; other slots remain text cards until visible. Decoded 1.1 image files are discarded, retaining up to 64 recently used face results.
-Overlapping visible faces keep their images while a debounced viewport change resolves new
-faces. The legacy 1.0 unsharded image file is derived once per loaded snapshot, so scrolling
-does not repeatedly parse its entire payload. Browsing does not need the
-on-demand `rules_name` or `face_rules_name` tables; any future construction consumer must
-load their detail files before claiming a result.
+printing bucket select a home-set media file. At most 24 intersecting image slots own rows
+at once; other slots remain text cards until visible. Decoded files are discarded, retaining
+up to 64 recently used face results. Overlapping visible faces keep their images while a
+debounced viewport change resolves new faces. Browsing does not need the on-demand
+`rules_name` or `face_rules_name` tables; any future construction consumer must load their
+detail files before claiming a result.
 
 In 2.0, home-set media files provide display state, dimensions and separate card/art version
 tokens directly. Image URLs use the permanent printing integer ID and face ordinal, with
@@ -191,7 +190,7 @@ module Service Worker continues through normal HTTP loading; CacheStorage is opt
 After the catalog is ready, background work downloads **metadata bytes**, not all image
 blobs, only when persistent storage is available. Data saver delays that work. Storage loss
 stops queued background work; without persistent storage only visible faces are fetched.
-When background work completes, its session cost includes every images file.
+When background work completes, its session cost includes every file containing `printing_image` rows.
 The progress surface offers pause/retry and distinguishes download completion from persistent
 cache availability; neither means all images or offline text are ready. Snapshot replacement
 aborts old metadata requests and isolates CacheStorage by manifest hash and file content path.
@@ -205,8 +204,8 @@ work while running requests finish, and snapshot replacement aborts the active t
 to an evicted face can reparse without another external request; recently used faces do not
 need re-decoding. CacheStorage failures visibly degrade
 to a 12 MiB / 64-file RAM byte LRU provided by lru-cache. Oversized files are not retained;
-empty values count as one byte for the library's size accounting. The page parsing workset is capped at 12 MiB raw for 1.1 and 2.0;
-this is not a heap measurement or a physical-phone acceptance claim. The legacy 1.0 index is reused per snapshot and is exempt from the 1.1 file/workset limits.
+empty values count as one byte for the library's size accounting. The page parsing workset is capped at 12 MiB raw;
+this is not a heap measurement or a physical-phone acceptance claim.
 
 ## Development snapshot
 
@@ -214,7 +213,8 @@ this is not a heap measurement or a physical-phone acceptance claim. The legacy 
 have (version index, manifest, canonical blobs, WebP placeholders). `bun run fixture:build`
 regenerates it from `scripts/fixture/cards.ts` (about two dozen handwritten cards covering
 double faces, alternate printings, errata, Q&A, bans, the JP/EN mapping states and image
-states) through `scripts/fixture/build.ts`, which emits the column partitions, sorts every
+states) through `scripts/fixture/build.ts`, which emits snapshot 2.0 with index format 2, 64 buckets,
+fixed bands, five display sizes and permanent-ID image URLs, emits the column partitions, sorts every
 collection the way the reader requires and hashes every blob. The output is deterministic and
 the reader must accept it (`scripts/fixture/build.test.ts`), so a change to either the reader or
 the generator that breaks the contract fails the tests, not the pages.

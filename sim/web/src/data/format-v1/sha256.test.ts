@@ -1,7 +1,7 @@
 // @vitest-environment node
 import { describe, expect, it } from "vitest"
 
-import vectorsText from "../../../../../tests/fixtures/snapshot-contract/v1/vectors.json?raw"
+import vectorsText from "../../../fixtures/canonical-vectors.json?raw"
 import { type JsonObject, parseStrict, utf8 } from "./json"
 import { bucket, digest, hex, sha256 } from "./sha256"
 

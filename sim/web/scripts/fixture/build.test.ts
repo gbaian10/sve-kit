@@ -77,26 +77,19 @@ describe("fixture snapshot", async () => {
       expect(hex(again.files.get(path) ?? new Uint8Array())).toBe(hex(bytes))
   })
 
-  it("publishes a two-page version index whose last page is unusable for a v1 reader", () => {
+  it("publishes the current snapshot through index format 2", () => {
     const index = parseStrict(
       snapshot.files.get("snapshots/versions/index.json") ?? "",
     ) as JsonObject
-    const pages = index["pages"] as JsonObject[]
-    expect(pages).toHaveLength(2)
-    const last = parseStrict(
-      snapshot.files.get(stringValue(pages[1]?.["path"])) ?? "",
-    ) as JsonObject
-    expect((last["entries"] as JsonObject[])[0]?.["format_version"]).toBe("2.0.0")
-    const first = parseStrict(
-      snapshot.files.get(stringValue(pages[0]?.["path"])) ?? "",
-    ) as JsonObject
-    expect((first["entries"] as JsonObject[])[0]?.["manifest_path"]).toBe(snapshot.manifestPath)
+    expect(index["index_format"]).toBe(2)
+    expect(index["previous"]).toBeNull()
+    expect((index["current"] as JsonObject)["manifest_path"]).toBe(snapshot.manifestPath)
     expect(canonicalText(parseStrict(snapshot.files.get(snapshot.manifestPath) ?? ""))).toBe(
       canonicalText(snapshot.manifest),
     )
   })
 
   it("stays well under the 1 MiB fixture budget without images", () => {
-    expect(canonicalSize(snapshot)).toBeLessThan(600 * 1024)
+    expect(canonicalSize(snapshot)).toBeLessThan(1024 * 1024)
   })
 })

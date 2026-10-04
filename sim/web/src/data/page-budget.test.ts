@@ -8,82 +8,74 @@ import { bucket } from "./format-v1/sha256"
 import { loadImagePage } from "./images"
 
 function page(extra: number) {
-  const ids: string[] = []
-  const buckets = new Set<number>()
-  for (let i = 0; ids.length < 24; i += 1) {
-    const id = `image:${String(i)}`
-    const number = bucket([id], 64)
-    if (!buckets.has(number)) {
-      ids.push(id)
-      buckets.add(number)
-    }
-  }
-  const faces = ids.map((_, i) => ({ printingId: `p:${String(i)}`, faceId: `f:${String(i)}` }))
-  const owner = { kind: "home_set", id: "TEST" }
-  const global = { kind: "global", id: null }
-  const bindingKey = "images/detail/home_set/TEST/band/0"
+  const faces = Array.from({ length: 25 }, (_, i) => ({
+    printingId: `p:${String(i)}`,
+    faceId: `f:${String(i)}`,
+  }))
   const files = new Map<string, JsonObject>()
   const fragments = new Map<string, Fragment[]>()
-  const bindings = faces.map((face, i) => ({
-    printing_id: face.printingId,
-    face_id: face.faceId,
-    image_id: ids[i] ?? "",
-  }))
-  const printing: Fragment = {
-    file: "bootstrap",
-    table: "printing",
-    identity: "printing",
-    value: { owner, base: null },
-    rows: faces.map((face) => ({ id: face.printingId })),
-  }
-  files.set(bindingKey, {
-    key: bindingKey,
-    role: "images",
-    bytes: 503316 + extra,
-    row_counts: faces.map((face) => ({
-      table: "printing_image",
-      partition: "detail",
-      owner,
-      bucket: bucket([face.printingId], 64),
-    })),
-  })
-  fragments.set(bindingKey, [
-    {
-      file: bindingKey,
-      table: "printing_image",
-      identity: "binding",
-      value: { owner, base: null },
-      rows: bindings,
-    },
-  ])
-  for (const id of ids) {
-    const number = bucket([id], 64)
-    const key = `images/detail/global/global/band/${String(number)}`
+  const bootstrap: Fragment[] = []
+  for (const [i, face] of faces.entries()) {
+    const owner = { kind: "home_set", id: `set:${String(i)}` }
+    const number = bucket([face.printingId], 64)
+    const key = `images/detail/home_set/set%3A${String(i)}/band/${String(Math.floor(number / 32))}`
     files.set(key, {
       key,
       role: "images",
-      bytes: 503316,
-      row_counts: ["image_asset", "image_variant"].map((table) => ({
-        table,
-        partition: "detail",
-        owner: global,
-        bucket: number,
-      })),
+      bytes: 503316 + (i === 0 ? extra : 0),
+      row_counts: [{ table: "printing_image", partition: "detail", owner, bucket: number }],
+    })
+    bootstrap.push({
+      file: "bootstrap",
+      table: "printing",
+      identity: face.printingId,
+      value: { owner },
+      rows: [
+        {
+          id: face.printingId,
+          int_id: i + 1,
+          card_id: `c:${String(i)}`,
+          faces: [{ face_id: face.faceId }],
+        },
+      ],
+    })
+    bootstrap.push({
+      file: "bootstrap",
+      table: "face",
+      identity: face.faceId,
+      value: { owner },
+      rows: [{ id: face.faceId, card_id: `c:${String(i)}`, ordinal: 0 }],
     })
     fragments.set(key, [
       {
         file: key,
-        table: "image_asset",
-        identity: id,
-        value: { owner: global, base: null },
-        rows: [{ id, publication_state: "approved", availability: "available" }],
+        table: "printing_image",
+        identity: face.printingId,
+        value: { owner, base: null },
+        rows: [
+          {
+            printing_id: face.printingId,
+            face_id: face.faceId,
+            image_id: `i:${String(i)}`,
+            publication_state: "approved",
+            availability: "available",
+            withdrawal_reason: null,
+            card_version: 1,
+            art_version: 1,
+            variants: ["art_m", "art_s", "card_l", "card_m", "card_s"].map((size_key) => ({
+              size_key,
+              width: 128,
+              height: 179,
+            })),
+          },
+        ],
       },
     ])
   }
   // The page API consumes an already-validated client, independently of byte decoding.
   const snapshot = {
-    manifest: { format_version: "1.1.0", partitioning: { bucket_count: 64 } },
-    bootstrap: [printing],
+    manifest: { format_version: "2.0.0", partitioning: { bucket_count: 64 } },
+    bootstrap,
     files,
   } as unknown as LoadedSnapshot
   const read = vi.fn((key: string) => Promise.resolve(fragments.get(key) ?? []))
@@ -96,7 +88,7 @@ function page(extra: number) {
 }
 
 describe("image page raw budget", () => {
-  it("accepts a 24-face workset just under 12 MiB and rejects the same valid-sized files one byte above", async () => {
+  it("accepts a 25-face workset just under 12 MiB and rejects the same valid-sized files one byte above", async () => {
     const fits = page(0)
     expect((await loadImagePage(fits.client, fits.faces)).asset("p:0", "f:0")).toBeDefined()
     expect(fits.read).toHaveBeenCalledTimes(25)

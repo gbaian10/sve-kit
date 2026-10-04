@@ -2,7 +2,7 @@
 import * as jsonc from "jsonc-parser"
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import vectorsText from "../../../../../tests/fixtures/snapshot-contract/v1/vectors.json?raw"
+import vectorsText from "../../../fixtures/canonical-vectors.json?raw"
 import { SnapshotError } from "./errors"
 import {
   canonical,

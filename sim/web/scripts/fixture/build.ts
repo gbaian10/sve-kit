@@ -15,7 +15,7 @@ import {
   rowType,
   tables,
 } from "../../src/data/format-v1/schema"
-import { digest, hex, sha256 } from "../../src/data/format-v1/sha256"
+import { bucket, digest, hex, sha256 } from "../../src/data/format-v1/sha256"
 import {
   type Card,
   CARDS,
@@ -61,7 +61,7 @@ export interface BuiltSnapshot {
   readonly counts: Readonly<Record<string, number>>
 }
 
-const FORMAT = "1.0.0"
+const FORMAT = "2.0.0"
 const AS_OF = "2026-09-29"
 const IMAGE_SIZES = [
   { key: "art_m", purpose: "art", max_width: 384, max_height: 288 },
@@ -70,7 +70,6 @@ const IMAGE_SIZES = [
   { key: "card_m", purpose: "card", max_width: 320, max_height: 447 },
   { key: "card_s", purpose: "card", max_width: 128, max_height: 179 },
 ] as const
-const CARD_SIZES = IMAGE_SIZES.filter((size) => size.purpose === "card")
 const LANGS = { ja: "ja", zhHant: "zh-Hant", en: "en" } as const
 const ARTISTS = ["artist:aoi", "artist:kuro", "artist:shiro"]
 
@@ -114,6 +113,7 @@ interface Fragment {
   readonly owner: Owner
   readonly partition: Partition
   readonly rows: JsonObject[]
+  readonly bucket?: number
 }
 
 /** Accumulates logical rows per (table, owner, partition) and assembles the transport files. */
@@ -689,12 +689,12 @@ function addFaces(ctx: CardContext): FaceRevisions {
     for (const plan of plans) {
       if (!plan.current) continue
       const rulesName = `rn:${plan.region}:${face.id}`
-      builder.push("rules_name", GLOBAL, "bootstrap", {
+      builder.push("rules_name", GLOBAL, "detail", {
         id: rulesName,
         region: plan.region,
         official_name: plan.name,
       })
-      builder.push("face_rules_name", GLOBAL, "bootstrap", {
+      builder.push("face_rules_name", GLOBAL, "detail", {
         face_id: face.id,
         region: plan.region,
         rules_name_id: rulesName,
@@ -731,13 +731,21 @@ async function addImages(
     height: state === "missing" ? null : 641,
     format: state === "missing" ? null : "png",
   })
-  builder.push("printing_image", owner, "detail", {
+  const media: JsonObject = {
     printing_id: printing.id,
     face_id: face.id,
     image_id: imageId,
-  })
+    publication_state:
+      state === "withdrawn" ? "withdrawn" : state === "pending" ? "pending" : "approved",
+    availability: state === "missing" ? "missing" : state === "pending" ? "unfetched" : "available",
+    withdrawal_reason: state === "withdrawn" ? "Synthetic withdrawal for the fixture" : null,
+    card_version: state === "approved" ? 1 : null,
+    art_version: state === "approved" ? 1 : null,
+    variants: [],
+  }
+  builder.push("printing_image", owner, "detail", media)
   if (state !== "approved") return
-  for (const size of CARD_SIZES) {
+  for (const size of IMAGE_SIZES) {
     const bytes = await encodeImage({
       width: size.max_width,
       height: size.max_height,
@@ -747,14 +755,19 @@ async function addImages(
         (printing.variant === "alt" ? 1 : printing.variant === "signed" ? 2 : 0),
       source,
     })
-    const hash = hex(sha256(bytes))
-    const path = `images/sha256/${hash.slice(0, 2)}/${hash}.webp`
-    images.set(path, bytes)
+    images.set(
+      `images/${size.key}/${String(printing.intId)}${ordinal === 0 ? "" : `-f${String(ordinal)}`}.webp`,
+      bytes,
+    )
+    ;(media["variants"] as JsonObject[]).push({
+      size_key: size.key,
+      width: size.max_width,
+      height: size.max_height,
+    })
     builder.push("image_variant", GLOBAL, "detail", {
       image_id: imageId,
       size_key: size.key,
       format: "webp",
-      path,
       width: size.max_width,
       height: size.max_height,
       bytes: bytes.length,
@@ -1124,16 +1137,39 @@ interface FileSpec {
 }
 
 function fileKeyFor(fragment: Fragment): string {
-  const tableSet = new Set(["image_asset", "printing_image", "image_variant"])
-  if (tableSet.has(fragment.table)) return "images"
-  if (fragment.partition === "bootstrap") return "bootstrap"
-  const ownerKey = fragment.owner.id === null ? "global" : fragment.owner.id.slice(4)
-  return fragment.partition === "history" ? `history/${ownerKey}` : `text/${ownerKey}`
+  const role = ["image_asset", "printing_image", "image_variant"].includes(fragment.table)
+    ? "images"
+    : fragment.partition === "bootstrap"
+      ? "bootstrap"
+      : "text"
+  const global = fragment.owner.kind === "global"
+  const width =
+    role === "images"
+      ? global
+        ? 1
+        : 32
+      : role === "bootstrap"
+        ? global
+          ? 8
+          : ["BP01", "CP04"].includes(fragment.owner.id)
+            ? 32
+            : 64
+        : global && fragment.partition === "detail"
+          ? 2
+          : 32
+  const id = encodeURIComponent(fragment.owner.id ?? "").replace(
+    /[!'()*]/g,
+    (c) => `%${c.charCodeAt(0).toString(16).toUpperCase()}`,
+  )
+  return `${role}/${fragment.partition}/${fragment.owner.kind}/${id || "global"}/band/${String(Math.floor((fragment.bucket ?? 0) / width))}`
 }
 
 const orderOwner = byFields(["kind", "id", "bucket", "partition"])
 
-function buildContainer(spec: FileSpec, bootstrapRef: JsonObject | null): JsonObject {
+function buildContainer(
+  spec: FileSpec,
+  bootstrapRefs: ReadonlyMap<string, JsonObject>,
+): JsonObject {
   const types = new Set<string>()
   const tableFragments = new Map<string, JsonObject[]>()
   for (const fragment of spec.fragments) {
@@ -1143,19 +1179,20 @@ function buildContainer(spec: FileSpec, bootstrapRef: JsonObject | null): JsonOb
       fragment.partition === "detail" &&
       (fragment.table === "printing" || fragment.table === "face_revision")
     const rows = fragment.rows.map((row) => encodeRow(name, row))
+    const bootstrapRef = bootstrapRefs.get(fileKeyFor({ ...fragment, partition: "bootstrap" }))
     const base =
       withBase && bootstrapRef
         ? {
             file: bootstrapRef,
             table: fragment.table,
             owner: fragment.owner,
-            bucket: 0,
+            bucket: fragment.bucket ?? 0,
             partition: "bootstrap",
           }
         : null
     const entry: JsonObject = {
       owner: fragment.owner,
-      bucket: 0,
+      bucket: fragment.bucket ?? 0,
       partition: fragment.partition,
       base,
       columns: columns(name),
@@ -1169,8 +1206,16 @@ function buildContainer(spec: FileSpec, bootstrapRef: JsonObject | null): JsonOb
     if (!list) continue
     tablesOut[table] = [...list].sort((a, b) =>
       orderOwner(
-        { ...(a["owner"] as JsonObject), bucket: 0, partition: a["partition"] ?? null },
-        { ...(b["owner"] as JsonObject), bucket: 0, partition: b["partition"] ?? null },
+        {
+          ...(a["owner"] as JsonObject),
+          bucket: a["bucket"] ?? 0,
+          partition: a["partition"] ?? null,
+        },
+        {
+          ...(b["owner"] as JsonObject),
+          bucket: b["bucket"] ?? 0,
+          partition: b["partition"] ?? null,
+        },
       ),
     )
   }
@@ -1267,9 +1312,54 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     builder.push("translation", GLOBAL, bootstrap === true ? "bootstrap" : "detail", rest)
   }
 
-  // Sort rows, then split the printing rows into their two column partitions.
-  const fragments: Fragment[] = []
+  const cardsByFace = new Map(
+    fragmentsOf(builder, "face").map((row) => [stringValue(row["id"]), row["card_id"] ?? null]),
+  )
+  const cardTables = new Set([
+    "card",
+    "face",
+    "face_revision",
+    "card_engine_support",
+    "mechanic_projection",
+    "card_mechanic_coverage",
+    "card_related",
+    "digital_link",
+    "digital_link_coverage",
+    "card_voice",
+  ])
+  const printTables = new Set(["printing", "printing_product", "printing_image"])
+  const artTables = new Set(["art", "digital_art_link"])
+  const grouped: Fragment[] = []
   for (const fragment of builder.fragments.values()) {
+    const bins = new Map<number, JsonObject[]>()
+    for (const row of fragment.rows) {
+      const values = cardTables.has(fragment.table)
+        ? [
+            fragment.table === "card"
+              ? row["id"]
+              : fragment.table === "face_revision"
+                ? cardsByFace.get(stringValue(row["face_id"]))
+                : fragment.table === "card_related"
+                  ? row["from_card_id"]
+                  : row["card_id"],
+          ]
+        : printTables.has(fragment.table)
+          ? [row[fragment.table === "printing" ? "id" : "printing_id"]]
+          : artTables.has(fragment.table)
+            ? [row[fragment.table === "art" ? "id" : "art_id"]]
+            : ["image_asset", "image_variant"].includes(fragment.table)
+              ? [row[fragment.table === "image_asset" ? "id" : "image_id"]]
+              : primaryKey(fragment.table).map((key) => row[key])
+      const number = bucket(
+        values.map((value) => value ?? null),
+        64,
+      )
+      bins.set(number, [...(bins.get(number) ?? []), row])
+    }
+    for (const [number, rows] of bins) grouped.push({ ...fragment, bucket: number, rows })
+  }
+  const fragments: Fragment[] = []
+  for (const fragment of grouped) {
     const sorted = sortRows(fragment.rows, primaryKey(fragment.table))
     if (fragment.table === "printing") {
       fragments.push({
@@ -1277,8 +1367,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         rows: sorted.map(({ faces_detail: _detail, ...rest }) => rest),
       })
       fragments.push({
-        table: "printing",
-        owner: fragment.owner,
+        ...fragment,
         partition: "detail",
         rows: sorted.map((row, index) => ({ row_index: index, faces: row["faces_detail"] ?? [] })),
       })
@@ -1293,8 +1382,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         })),
       })
       fragments.push({
-        table: "face_revision",
-        owner: fragment.owner,
+        ...fragment,
         partition: "detail",
         rows: sorted.map((row, index) => ({
           ...row,
@@ -1312,7 +1400,11 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   const specs = new Map<string, FileSpec>()
   for (const fragment of fragments) {
     const key = fileKeyFor(fragment)
-    const role = key === "images" ? "images" : key === "bootstrap" ? "bootstrap" : "text"
+    const role = key.startsWith("images/")
+      ? "images"
+      : key.startsWith("bootstrap/")
+        ? "bootstrap"
+        : "text"
     const spec = specs.get(key) ?? { key, role, fragments: [], dependencies: [] }
     spec.fragments.push(fragment)
     specs.set(key, spec)
@@ -1325,7 +1417,22 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       { code: "ja", fallback_order: [], display_name: "日本語" },
       { code: "zh-Hant", fallback_order: ["ja"], display_name: "繁體中文" },
     ].filter((language) => [...builder.units.values()].some((unit) => unit.lang === language.code)),
-    digital_endpoints: [],
+    digital_endpoints: [
+      {
+        game: "sv1",
+        card_url_template: "https://example.invalid/sv1/{official_id}/{provider_lang}",
+        language_map: { ja: "ja" },
+        status: "unknown",
+        refresh_policy: "frozen",
+      },
+      {
+        game: "svwb",
+        card_url_template: "https://example.invalid/svwb/{official_id}/{provider_lang}",
+        language_map: { ja: "ja" },
+        status: "unknown",
+        refresh_policy: "on_sve_release",
+      },
+    ],
     shop_links: [],
     image_sizes: IMAGE_SIZES.map((size) => ({ ...size })),
     search: { grammar_version: "synthetic-v1", normalizer_version: "synthetic-v1" },
@@ -1368,7 +1475,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         out.push({
           table,
           owner: fragment["owner"] ?? null,
-          bucket: 0,
+          bucket: fragment["bucket"] ?? null,
           partition: fragment["partition"] ?? null,
           count: (fragment["rows"] as JsonValue[]).length,
         })
@@ -1378,31 +1485,57 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   }
   const configRef = register("config", "config", config, [], [])
   register("programs", "programs", programs, [], [])
-  const bootstrapSpec = specs.get("bootstrap")
-  if (!bootstrapSpec) throw new Error("no bootstrap fragments")
-  const bootstrapContainer = buildContainer(bootstrapSpec, null)
-  const bootstrapRef = register(
-    "bootstrap",
-    "bootstrap",
-    bootstrapContainer,
-    counts(bootstrapContainer),
-    [],
-  )
+  const bootstrapRefs = new Map<string, JsonObject>()
   for (const key of [...specs.keys()].sort(compareCodePoints)) {
-    if (key === "bootstrap") continue
     const spec = specs.get(key)
-    if (!spec) continue
-    const container = buildContainer(spec, bootstrapRef)
-    const dependencies =
-      spec.role === "images"
-        ? [configRef]
-        : spec.fragments.some(
-              (f) =>
-                f.partition === "detail" && (f.table === "printing" || f.table === "face_revision"),
-            )
-          ? [bootstrapRef]
-          : []
-    register(key, spec.role, container, counts(container), dependencies)
+    if (!spec || spec.role !== "bootstrap") continue
+    const container = buildContainer(spec, bootstrapRefs)
+    bootstrapRefs.set(key, register(key, spec.role, container, counts(container), []))
+  }
+  const anchors = new Map<string, string>()
+  for (const [key, spec] of specs) {
+    if (spec.role !== "bootstrap") continue
+    for (const fragment of spec.fragments)
+      if (["printing", "face"].includes(fragment.table))
+        for (const row of fragment.rows)
+          anchors.set(`${fragment.table}\0${stringValue(row["id"])}`, key)
+  }
+  for (const key of [...specs.keys()].sort(compareCodePoints)) {
+    const spec = specs.get(key)
+    if (!spec || spec.role === "bootstrap") continue
+    const container = buildContainer(spec, bootstrapRefs)
+    const dependencies = new Map<string, JsonObject>()
+    if (spec.role === "images") dependencies.set("config", configRef)
+    for (const fragment of spec.fragments) {
+      if (fragment.table === "printing_image")
+        for (const row of fragment.rows) {
+          for (const [table, field] of [
+            ["printing", "printing_id"],
+            ["face", "face_id"],
+          ] as const) {
+            const anchor = anchors.get(`${table}\0${stringValue(row[field])}`)
+            const ref = bootstrapRefs.get(anchor ?? "")
+            if (!anchor || !ref) throw new Error("missing media anchor")
+            dependencies.set(anchor, ref)
+          }
+        }
+      if (
+        fragment.partition === "detail" &&
+        ["printing", "face_revision"].includes(fragment.table)
+      ) {
+        const base = fileKeyFor({ ...fragment, partition: "bootstrap" })
+        const ref = bootstrapRefs.get(base)
+        if (!ref) throw new Error("missing detail base")
+        dependencies.set(base, ref)
+      }
+    }
+    register(
+      key,
+      spec.role,
+      container,
+      counts(container),
+      [...dependencies].sort(([a], [b]) => compareCodePoints(a, b)).map(([, ref]) => ref),
+    )
   }
   fileRows.sort((a, b) => compareCodePoints(stringValue(a["key"]), stringValue(b["key"])))
   for (const [path, bytes] of images) files.set(path, bytes)
@@ -1458,8 +1591,15 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
     published_at: publishedAt,
     regions,
     languages,
-    min_reader_version: "1.0.0",
-    required_capabilities: ["column-partition-v1", "fragment-container-v1"],
+    min_reader_version: "2.0.0",
+    required_capabilities: [
+      "column-partition-v1",
+      "digital-same-name-links-v1",
+      "fragment-container-v1",
+      "image-entity-buckets-v1",
+      "image-id-url-v1",
+      "rules-name-on-demand-v1",
+    ],
     engine_support_target: {
       engine_version: null,
       engine_build_hash: null,
@@ -1477,7 +1617,7 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
         sha256: fileRows.find((row) => row["key"] === key)?.["sha256"] ?? null,
       })),
     },
-    partitioning: { algorithm: "sha256-mod-v1", bucket_count: 1 },
+    partitioning: { algorithm: "sha256-mod-v1", bucket_count: 64 },
     coverage: { reviews: [], translations: [], mechanics: [] },
     mechanic_universe_id: digest(canonical(keywordUniverse)),
     restriction_coverage: [
@@ -1520,14 +1660,19 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
   const manifestPath = `snapshots/manifests/${manifestHash.slice(7)}.json`
   files.set(manifestPath, manifestBytes)
 
-  // Version index: page 1 carries this snapshot; page 2 only an entry no v1 reader can use, so
-  // the client has to walk back one page (format §4.1).
   const entry = {
     data_version: dataVersion,
     published_at: publishedAt,
     format_version: FORMAT,
-    min_reader_version: "1.0.0",
-    required_capabilities: ["column-partition-v1", "fragment-container-v1"],
+    min_reader_version: "2.0.0",
+    required_capabilities: [
+      "column-partition-v1",
+      "digital-same-name-links-v1",
+      "fragment-container-v1",
+      "image-entity-buckets-v1",
+      "image-id-url-v1",
+      "rules-name-on-demand-v1",
+    ],
     manifest_path: manifestPath,
     manifest_sha256: manifestHash,
     engine_support_target: {
@@ -1536,31 +1681,10 @@ export async function buildSnapshot(options: BuildOptions): Promise<BuiltSnapsho
       validation_policy_id: null,
     },
   }
-  const futureVersion = "20260930T000000Z-0001"
-  const future = {
-    ...entry,
-    data_version: futureVersion,
-    published_at: "2026-09-30T00:00:00Z",
-    format_version: "2.0.0",
-    min_reader_version: "2.0.0",
-    required_capabilities: ["column-partition-v2", "fragment-container-v1"],
-    manifest_path:
-      "snapshots/manifests/0000000000000000000000000000000000000000000000000000000000000000.json",
-    manifest_sha256: "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-  }
-  const pages = [[entry], [future]].map((entries) => {
-    const page = blob({ index_format: 1, entries })
-    const path = `snapshots/versions/pages/${page.hash.slice(7)}.json`
-    files.set(path, page.bytes)
-    return {
-      path,
-      sha256: page.hash,
-      first_data_version: String(entries[0]?.data_version),
-      last_data_version: String(entries.at(-1)?.data_version),
-      count: entries.length,
-    }
-  })
-  files.set("snapshots/versions/index.json", canonical({ index_format: 1, revision: 2, pages }))
+  files.set(
+    "snapshots/versions/index.json",
+    canonical({ index_format: 2, revision: 2, current: entry, previous: null }),
+  )
 
   const countsOut: Record<string, number> = {}
   for (const table of tables()) countsOut[table] = view(table).length
