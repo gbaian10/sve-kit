@@ -1,4 +1,4 @@
-# Cloudflare 開發環境設定與 preview 上傳
+# Cloudflare 開發環境設定與快照上傳
 
 前端使用 **Workers 靜態資源**，建置與部署為 Vite build → Wrangler deploy。
 本清單由維護者親手操作；agent、CI 不取得 Cloudflare 憑證，不執行真實部署或上傳。
@@ -158,85 +158,63 @@ mise exec -- bun run wrangler deploy --config wrangler.dev.jsonc
 及 [從 Pages 遷移](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)。
 本文不依賴 Pages project、Pages Functions 或 pages.dev 別名。
 
-## 6. 套件化 Brotli 與離線對帳
+## 6. 快照 2.0 的離線對帳
 
-從 repo 根依 lockfile 準備 carddb `.venv`，直接驗證公開預覽：
+R2 只發布快照 2.0。1.x 預覽仍可在本機匯出，不再提供上傳入口；不能把 preview
+直接升格為正式版本。先依既有發布流程完成來源與採納守門、版本預留、圖片規劃及
+凍結包，保存發布 ledger 的主副本與獨立 checkpoint；命令不自動初始化或恢復。
+詳細格式與步驟見 [R2 2.0 發布](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
+
+以下變數由維護者填入實際的凍結包、ledger 主副本與獨立 checkpoint；路徑須符合
+既有發布契約，不寫入 repo。`CDN_BASE_URL` 為該環境的資料入口。
 
 ```bash
 uv --directory carddb sync --locked
-uv --directory carddb run sve-carddb r2 upload-preview \
-  --preview-dir /explicit/preview --dry-run
+uv --directory carddb run sve-carddb r2 upload-v2 \
+  --release-dir "$RELEASE_DIR" \
+  --ledger-dir "$LEDGER_DIR" --backup-dir "$BACKUP_DIR" \
+  --checkpoint-file "$CHECKPOINT_FILE" \
+  --cdn-base-url "$CDN_BASE_URL" --dry-run
 ```
 
-`.br` 使用 `uv.lock` 鎖定的 PyPI `brotli` 在行程內串流解碼，逐段核對原始 JSON。
-無效、截斷、尾隨 bytes、超出 raw 長度或內容不同即停止；manifest 壓縮大小與完整
-閉包檢查仍須通過。不同 producer／quality 的合法表示可驗證，不要求重壓後 bytes 相同。
-既有預覽保持唯讀，不能刪 br 讓驗證放行，也不能因解壓相等就覆寫既有不可變物件。
-
-新建置的 `snapshot export`／`snapshot export-offline` 以 `--brotli` 啟用壓縮，預設
-`--no-brotli`；producer 固定 generic mode、quality 11、lgwin 22，私人 recipe 記錄
-套件版本。上傳命令不需 Brotli 選項，亦不依賴系統函式庫、外部 encoder 或包裝程式。
-正式 2.0 凍結包的 manifest／changes 壓縮表示在回讀與重試時原樣保留，不以新套件重壓。
-dry-run 不讀憑證或建立 HTTP client，不連網、不抓來源或開 live manifest。
-
-先前實測的 203 個 br 曾以舊 libbrotli 1.0.9 配方逐份重壓相同；這是歷史測量，
-不能當作 PyPI 實作的重測結果，原重壓耗時也不代表目前串流解壓檢查的耗時。
-
-核對 candidate_files／candidate_bytes、各類 totals 與 manifest pin。private／reports
-不遍歷、不讀、不傳；公開樹的未知檔案、PNG、未引用資產、私有配方／欄位、本機路徑、壞
-hash／壓縮／圖片即停止。離線數字是本機候選，遠端是否存在／實際新增量未知。
+`.br` 使用 lockfile 的 Python `brotli` 在行程內解碼並核對原始 JSON；凍結包的
+manifest／changes 壓縮表示原樣保留，不以新套件重壓。核對 candidate_files、
+candidate_bytes 與既有 ledger／checkpoint。離線數字是本機候選，遠端存在與否未知。
+dry-run 不讀憑證、不建立 HTTP client、不抓來源或開 live manifest，也不修改狀態。
 
 ## 7. 當次授權與條件上傳
 
 所有真實 Cloudflare 請求都由維護者當次同意後親手執行，agent 與 CI 不代跑。
-先以合成 preview 在開發桶實測條件寫入、重跑與同源入口的存取控制；這次合成測試沒有
-建立真實 Cloudflare 可用性的證據，平台行為未驗證，需維護者實測。
-
-核對目標桶、當次 key pair、授權與離線數字後，從 repo 根執行：
+核對目標桶、當次 key pair、授權與離線數字後，使用同一組凍結輸入：
 
 ```bash
-uv --directory carddb run sve-carddb r2 upload-preview \
-  --preview-dir /explicit/preview \
+uv --directory carddb run sve-carddb r2 upload-v2 \
+  --release-dir "$RELEASE_DIR" \
+  --ledger-dir "$LEDGER_DIR" --backup-dir "$BACKUP_DIR" \
+  --checkpoint-file "$CHECKPOINT_FILE" \
+  --cdn-base-url "$CDN_BASE_URL" \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
   --execute --confirm-maintainer-authorization
 ```
 
-先圖、再 blobs、再 manifests 的不可變版本集合，最後才更新 preview/current.json。
-不另造版本目錄，不寫正式 versions/index、不刪遠端物件。既有物件須內容／metadata
-一致才 skip，差異停；新物件用 If-None-Match。指標用舊 ETag 的 If-Match，首次用 If-None-Match。
+發布與 GC 共用部署級 writer lease。上傳驗回圖片與不可變 JSON，並從 CDN 驗回帶
+版本查詢的圖片後，才以條件寫入更新 `snapshots/versions/index.json` 的 current／previous。
+條件或傳輸失敗就停止，不退回無條件 PUT，也不重送寫入；保留既有狀態與 checkpoint，
+由維護者核對後重跑。GC 為另外授權的 `r2 gc-v2`，不在上傳後自動刪除。
 
-每次執行先驗回第一個不可變成員，再以**同一份 bytes**做已存在鍵的 If-None-Match 及
-錯誤 ETag 的 If-Match 探測，兩者都須回 412。若平台回成功就停止，不傳其餘成員或指標。
-探測無額外 key、無 delete；壞平台可能對此鍵重寫相同 bytes，不能聲稱平台未寫入。
-這是當次最低限度檢查，不代替真正的競爭與權限驗收。
+正式發布包含 CDN GET 驗證。受 Access 保護的入口若不能供此無登入、無授權標頭的
+驗證讀取，執行會被擋；須先解決驗收條件，不能用 1.x 預覽繞過或宣稱已發布成功。
+Worker 須原樣提供 bytes／metadata，資料路徑不能回 SPA HTML。
 
-GET 只對 timeout、network error、remote protocol error 重試，總共最多 3 次，退避
-0.5／1 秒。HTTP 狀態錯誤、驗證錯誤、local protocol error 不重試。PUT 每次只送一次，
-不變更條件、不改成無條件寫；回應遺失停止，由維護者核對後重跑。沒有隱含無限 retry。
+## 8. 執行成本與恢復
 
-原 JSON 為 application/json，WebP 為 image/webp；gzip／br 是各自 key 的 octet-stream，
-沒有 Content-Encoding。開發不可變成員用 private／一年／immutable，指標 no-store；
-Worker handler 必須保留 bytes／metadata，不能自動解壓後繞過 hash 驗證。
+1.x 預覽的歷史檔數、請求數與耗時不適用於 2.0 發布。現行本機候選數量由 dry-run
+取得；一般發布每個 current 圖片 URL 需四次 CDN GET，已提交版本重試需兩次。
+實際網路、計費、Access 與快取行為須另行實測，不能把離線檢查當作部署驗收。
 
-## 8. 執行時間與重跑成本
-
-以這批 33,863 檔／1,121,058,055 bytes、203 個 br 為例，本機 CLI 一次完整離線驗證約
-5–7 分鐘（不同負載會變）。execute 做三次完整本機驗證，約 15–21 分鐘只花在本機；
-不是整次上傳時間預估。先凍結本機 preview，不並行修改或發布。
-
-| 情境 | 不含重試的請求數／成本 |
-| --- | --- |
-| 首次全部新增 | 約 101,591 次循序請求：每個不可變成員 GET／PUT／GET，加指標與兩次探測；另上傳約 1.12 GB，驗回也需下載約 1.12 GB |
-| 全部已一致的重跑 | 約 33,866 次循序請求；沒有新增 PUT，但有兩次預期 412 的探測 PUT；仍下載約 1.12 GB 完整核對，且再做三次本機驗證 |
-| 途中出錯重跑 | 已一致成員 skip，未完成成員續傳；不從上次序號盲目跳過驗證，前面物件仍重新完整 GET |
-
-HTTP client 每段 I/O timeout 為 30 秒，GET retry 額外等待最多 1.5 秒／操作；沒有全程
-wall-time deadline。真實網路速度／Class A、B 計費與 cache 行為未驗證，需維護者實測；
-可能遠超本機時間，不在網路中斷後立刻反覆重跑約 1.12 GB 的核對。
-
-任何錯誤先停，由維護者核對原因與授權。已完成不可變物件可留桶中，用同一凍結 preview
-重新離線對帳、重新取得當次授權後重跑。不同既有內容、探測失敗或指標競爭，不用強制覆寫、
-清桶或通用 sync 繞過。指標 PUT 已完成而回應遺失時，指標仍只指已驗完整版本。
+每段 I/O timeout 為 30 秒，沒有全程期限。失敗先核對既有 ledger、獨立 checkpoint、
+遠端 index 與 writer lease；不自動初始化、重置或定時接管 lease，不用通用 sync 或
+清桶繞過。恢復流程與每次 GC 的授權條件見上述發布文件。
 
 ## 9. 每個入口的未登入驗法與預期結果
 
@@ -256,11 +234,11 @@ R2_DEV_URL='https://<full-r2.dev-host-from-dashboard>'
 | 入口 | 命令的 URL 參數 | 預期／通過條件（平台回應未驗證，需維護者實測） |
 | --- | --- | --- |
 | 開發前端 | "$DEV_URL/cards" | 401／403 或導向已核對 Access 登入的 302；不能匿名回 200 的開發 UI |
-| 同源資料 | "$DEV_URL/cdn-preview/snapshots/preview/current.json" | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON |
+| 同源資料 | "$DEV_URL/cdn-preview/snapshots/versions/index.json" | 同上，不能匿名回 JSON／200／206；登入後為該指標的 JSON |
 | workers.dev 前端 | "$WORKERS_URL/cards" | 已關閉者拒絕／不可用；若保留，須同樣受 Access 或 host gate 拒絕，不能 200 |
-| workers.dev 資料 | "$WORKERS_URL/cdn-preview/snapshots/preview/current.json" | 已關閉或 gate 拒絕，不能 200／206 |
-| 每個 preview URL | "$WORKER_PREVIEW_URL/cards"及其 /cdn-preview/snapshots/preview/current.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain |
-| r2.dev | "$R2_DEV_URL/snapshots/preview/current.json" | 先確認控制台停用，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
+| workers.dev 資料 | "$WORKERS_URL/cdn-preview/snapshots/versions/index.json" | 已關閉或 gate 拒絕，不能 200／206 |
+| 每個 preview URL | "$WORKER_PREVIEW_URL/cards"及其 /cdn-preview/snapshots/versions/index.json | 每個版本逐一測，關閉或全面保護，不能只保護 custom domain |
+| r2.dev | "$R2_DEV_URL/snapshots/versions/index.json" | 先確認控制台停用，再驗不可取得；沒有 URL 時記錄未啟用，不猜 host；404／DNS 失效單獨不構成保護證據 |
 | 其他綁定網域／既有預覽版本 | 依控制台列的完整 host，同樣測 /cards 及資料路徑 | 都要關閉或拒絕；新舊部署不能留下未受保護入口 |
 
 每個表格 URL 都執行一次以下命令，例如：
@@ -269,13 +247,13 @@ R2_DEV_URL='https://<full-r2.dev-host-from-dashboard>'
 curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$DEV_URL/cards"
 curl -q --max-time 20 --silent --show-error --output /dev/null \
-  --write-out '%{http_code} %{redirect_url}\n' "$DEV_URL/cdn-preview/snapshots/preview/current.json"
+  --write-out '%{http_code} %{redirect_url}\n' "$DEV_URL/cdn-preview/snapshots/versions/index.json"
 curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$WORKERS_URL/cards"
 curl -q --max-time 20 --silent --show-error --output /dev/null \
   --write-out '%{http_code} %{redirect_url}\n' "$WORKER_PREVIEW_URL/cards"
 curl -q --max-time 20 --silent --show-error --output /dev/null \
-  --write-out '%{http_code} %{redirect_url}\n' "$R2_DEV_URL/snapshots/preview/current.json"
+  --write-out '%{http_code} %{redirect_url}\n' "$R2_DEV_URL/snapshots/versions/index.json"
 ```
 
 只測確有記錄的 URL；workers.dev／每個 preview URL 都須同時驗前端與資料路徑。
@@ -286,7 +264,7 @@ curl -q --max-time 20 --silent --show-error --output /dev/null \
 hash 驗證與 pending 標記正確，缺資料路徑是 404 而非 SPA，登出後不能取得新資料。
 不宣稱可以收回已授權下載的 browser cache。key pair 清除後才結束作業。
 
-此清單不放行 region_text_review、不產正式 manifest，不完成日英首發或正式 CDN 發布。
+此清單不放行 region_text_review，不代替來源、採納與正式發布所需的既有守門。
 
 ## 10. 未採用的做法與原因
 

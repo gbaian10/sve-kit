@@ -1,12 +1,10 @@
 # R2 publication of snapshot 2.0
 
 `r2 upload-v2` connects the injected 2.0 publisher to signed S3 requests and ordinary
-CDN GETs. The existing `r2 upload-preview` remains the unchanged 1.x preview path;
-this command accepts only an already formally gated, frozen **2.0** release.
-It never changes `preview-*` into a formal data version. The legacy 1.x uploader
-does not join the new writer lease; do not run it concurrently against the same
-bucket as a 2.0 publisher/collector. No credentials or account,
-bucket or CDN hostname are stored in the repository or passed through CI.
+CDN GETs. It accepts only an already formally gated, frozen **2.0** release;
+it never changes `preview-*` into a formal data version. Snapshot 1.x previews
+have no R2 upload command. No credentials or account, bucket or CDN hostname
+are stored in the repository or passed through CI.
 
 ## Offline preparation
 
@@ -139,12 +137,12 @@ being skipped. Raw, inventory, crawl manifests, backups and authored data are
 outside these namespaces.
 
 If `snapshots/preview/current.json` exists, **the entire GC is refused**, including
-for a valid preview pointer. Legacy previews share these manifest/blob namespaces
-but do not use this writer lease. This collector does not try to interpret or
+for a valid preview pointer. Previously uploaded previews can share these manifest/blob namespaces
+and have no writer lease. This collector does not try to interpret or
 discard their closure; malformed, unknown-format and legacy 1.x pointers also
 block deletion. Inspection and execution replan check the pointer under their
-lease, with another check before deletion. Use a separate preview bucket if GC
-must coexist with a live preview; this command never removes the pointer.
+lease, with another check before deletion. The operator must resolve previously uploaded previews separately;
+this command never removes the pointer.
 
 Both retained versions' JSON closures remain protected, but public images retain
 only the **current** image set (ADR-0016). Previous-only image paths are collectible;

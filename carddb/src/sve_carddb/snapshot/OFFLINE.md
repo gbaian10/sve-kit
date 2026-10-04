@@ -79,8 +79,9 @@ original PNGs and recipe caches stay private. Reports include applied/unused
 crops, annotation mismatches and verified reprint candidates in both regions.
 Available assets remove the image integration gate from this preview report;
 formal activation and source coverage still require their existing gates.
-`r2 upload-preview --dry-run` accepts complete JP or sorted EN+JP previews and
-validates the same five-size transport without credentials or remote access.
+Preview exports remain local. R2 publication uses `r2 upload-v2` with a formally
+gated frozen snapshot 2.0 release and its existing ledger/checkpoint inputs;
+see [the publication guide](../r2_upload/v2/README.md).
 
 ## Supplemental capabilities
 

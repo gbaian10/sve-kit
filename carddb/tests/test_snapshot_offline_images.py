@@ -1,4 +1,4 @@
-"""Bilingual text, verified image closure, private bundle and public upload replay."""
+"""Bilingual text, verified image closure, private bundle and preview export."""
 
 import shutil
 from dataclasses import replace
@@ -21,7 +21,6 @@ from sve_carddb.image_assets import (
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.image_variants import ImageVariantError
 from sve_carddb.products import OfficialProducts, ProductIdentities
-from sve_carddb.r2_upload.plan import plan_preview
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
@@ -145,7 +144,7 @@ def regional_images(
 
 
 @pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
-def test_bilingual_images_bundle_snapshot_and_upload(
+def test_bilingual_images_bundle_snapshot_and_preview(
     format_version: str,
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
     tmp_path: Path,
@@ -175,12 +174,13 @@ def test_bilingual_images_bundle_snapshot_and_upload(
     write_preview(
         snapshot, output, built.report, regions=("en", "jp"), image_source=roots.preview
     )
-    plan = plan_preview(output.preview)
-    assert plan.members
-    assert any(member.key.startswith("images/") for member in plan.members)
-    assert all(
-        not member.key.startswith(("private/", "reports/")) for member in plan.members
-    )
+    for row in built.projection.tables["image_variant"]:
+        path = row["path"]
+        assert isinstance(path, str)
+        assert (output.preview / path).read_bytes() == (
+            roots.preview / path
+        ).read_bytes()
+    assert (output.preview / "snapshots/preview/current.json").is_file()
 
 
 def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
@@ -215,7 +215,7 @@ def test_offline_cli_reuses_both_caches_and_rejects_partial_roots(
     monkeypatch.setattr("sve_carddb.image_variants._encode", forbidden)
     result = runner.invoke(app, [*arguments, "--image-cache-dir", str(roots.cache)])
     assert result.exit_code == 0, result.stdout
-    assert plan_preview(tmp_path / "preview").members
+    assert (tmp_path / "preview/snapshots/preview/current.json").is_file()
 
 
 @pytest.mark.parametrize("region", ["en", "jp"])

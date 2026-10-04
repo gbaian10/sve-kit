@@ -65,10 +65,9 @@ gzip。`snapshot export` 與 `snapshot export-offline` 可用 `--brotli` 額外�
 lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
 不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
 
-上傳工具以 bounded 串流解壓比對 raw JSON，拒絕無效、截斷、尾隨、超出 raw 長度或
-內容不同的 `.br`，不靠重壓逐位元組比對來驗證。不同 producer／quality 的合法表示
-可通過內容驗證；manifest 所列長度與其他閉包檢查仍須全部符合。既有檔案保持唯讀，
-不可變遠端物件仍須與本機確切 bytes 相同，不能因解壓相等就覆寫換編碼。
+preview 的壓縮旁檔只供本機載入與容量檢查，不作 R2 發布輸入。
+R2 僅透過 `r2 upload-v2` 發布通過驗證的 2.0 凍結包；凍結包、ledger、checkpoint
+與 CDN 驗證條件依 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 及 [R2 接線](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
 
 公開 WebP 存於 `images/sha256/<前兩碼>/<64hex>.webp`。先驗證／寫入圖片，再寫 images
 分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，依 hash 去重。
@@ -82,8 +81,8 @@ lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行�
 
 `reports/<manifest-hash>.json` 保存輸入 hash、JP 範圍、逐表數量、真正排除清單、
 未定卡文數、容量及未完成的正式閘門；輸入記錄留在 `private/inputs/<input-hash>.json`。
-preview 根下的 `private/` 與 `reports/` 不屬於公開內容；正式上傳只傳 `snapshots/` 與
-`images/`，不可把整個 preview 根直接上傳。
+preview 根下的 `private/` 與 `reports/` 不屬於公開內容；整個 preview 只供本機使用，
+沒有上傳入口。正式 R2 發布須使用另行建置的 2.0 凍結包。
 含圖建置另記 `image_assets` 的來源／綁定／變體數，以及 `images` 的公開去重檔數／bytes。
 實際執行時間與快取命中數放在命令 stdout 的 `image_execution`，不混入不可變清單或
 報告，確保相同輸入重建的逐檔 bytes 一致；唯讀重用的新轉檔時間為 0。
@@ -106,7 +105,7 @@ CacheStorage 的已驗 bytes 成功保存且未被清除時，翻回暖頁不向
 current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工作；目前命令在正式版號下也會停止；改掉前綴不能把 preview
 直接升為正式發布，正式批次須重新建置並通過完整發布閘門。
 
-Cloudflare 開發部署、公開目錄上傳與未登入入口驗收，見
+Cloudflare 開發部署、R2 2.0 發布與未登入入口驗收，見
 [Cloudflare 開發環境設定清單](../deployment/cloudflare-development.md)。
 
 ## M3 載入

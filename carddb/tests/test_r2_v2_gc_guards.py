@@ -9,7 +9,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.r2_upload.s3 import Credentials
+from sve_carddb.r2_upload.sdk import Credentials
 from sve_carddb.r2_upload.v2 import gc
 from sve_carddb.snapshot.publish import Ledger, _seal, publish
 from sve_carddb.snapshot.publish.plan import IMAGE_CACHE, INDEX
