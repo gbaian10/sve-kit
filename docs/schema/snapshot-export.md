@@ -27,7 +27,23 @@ preview 配號與快取仍隔離，不寫正式 current／previous 索引。圖�
 mtime=0、無 filename 的 bytes。沒有提供 Brotli 時，快照清單的 br 長度明示 null，
 容量量測也不宣稱 br 閘門通過。Brotli 由呼叫端提供釘住版本、固定 quality 11 的
 `Brotli(version, compress)`；版本與參數屬建置 recipe，不放進可重用的資料 payload。
-呼叫端須將這份 recipe 與其他建置依賴一起釘住；啟用新的壓縮函式庫遵守專案的依賴流程。
+`sve_carddb.snapshot.export.compression.python_brotli()` 提供使用 `uv.lock` 鎖定的
+PyPI `brotli` 的實作，固定 generic mode、quality 11、lgwin 22，recipe 記錄套件版本。
+preview CLI 的 `export`／`export-offline` 用 `--brotli` 啟用；預設 `--no-brotli`。
+不依賴系統 libbrotli、外部壓縮命令或執行檔 hash。呼叫端須將這份 recipe 與其他建置
+依賴一起釘住；新套件仍遵守專案的依賴流程。換 encoder 後 `.br` bytes 與長度可能改變，
+快照清單的 `compressed_bytes` 必須反映實際輸出，不能沿用舊長度或清單 hash。
+
+上傳驗證使用同模組的 `verify_brotli(encoded, raw)` bounded 串流解碼逐段比對 raw。
+完整流須內容及長度完全相等；無效、截斷、尾隨資料或解壓超出 raw 長度皆拒絕。
+原生 `output_buffer_limit` 以 64 KiB 為停止增長的門檻，不代表每段精確為 64 KiB 或
+整個 decoder 的記憶體上限；不先一次性配置整份不可信的解壓輸出。
+驗證不要求重現 producer 的壓縮 bytes，亦不取代 manifest 的長度／hash／閉包檢查。
+
+正式 2.0 凍結包回讀與發布重試保留既有 manifest／changes 的 raw、gzip、br 表示，
+重驗後直接使用，不呼叫 producer 重壓。`load_bundle`、`write_bundle` 與 `publish`
+因此不需提供 producer codec；`prepare` 仍可用 Brotli 建立新的表示。遠端不可變物件
+比對確切 bytes，不因兩份 `.br` 解壓內容相同就允許換編碼覆寫。
 
 ## 固定分片與裝檔
 

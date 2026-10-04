@@ -59,9 +59,16 @@ uv --directory carddb run sve-carddb snapshot export --inputs /private/jp-inputs
 ## 輸出與容量
 
 分片與完整文字包存於 `snapshots/blobs/<sha256>.json`，另存固定時間戳、等級 9 的
-gzip。若提供 `--brotli-command /explicit/compressor`，該程式須接受 `--version` 及
-`-q 11 -c`（stdin 原始 bytes，stdout 壓縮 bytes）；報告釘住其版本與程式 hash。
-沒有明確 Brotli compressor 時，br 數字為 null，不能宣稱通過 br 容量目標。
+gzip。`snapshot export` 與 `snapshot export-offline` 可用 `--brotli` 額外產生 `.br`；
+預設為 `--no-brotli`，br 數字為 null，不能宣稱通過 br 容量目標。
+啟用時直接使用 `uv.lock` 鎖定的 PyPI `brotli`，固定 generic mode、quality 11、
+lgwin 22；報告的私人壓縮 recipe 記錄套件版本，不放本機執行檔 hash。
+不再提供 `--brotli-command` 或呼叫外部 encoder，亦不需準備系統 libbrotli。
+
+上傳工具以 bounded 串流解壓比對 raw JSON，拒絕無效、截斷、尾隨、超出 raw 長度或
+內容不同的 `.br`，不靠重壓逐位元組比對來驗證。不同 producer／quality 的合法表示
+可通過內容驗證；manifest 所列長度與其他閉包檢查仍須全部符合。既有檔案保持唯讀，
+不可變遠端物件仍須與本機確切 bytes 相同，不能因解壓相等就覆寫換編碼。
 
 公開 WebP 存於 `images/sha256/<前兩碼>/<64hex>.webp`。先驗證／寫入圖片，再寫 images
 分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，依 hash 去重。
