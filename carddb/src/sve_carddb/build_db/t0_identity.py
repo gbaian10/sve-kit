@@ -192,7 +192,6 @@ TABLES = (
         (
             Column("int_id", Kind.UINT32),
             Column("printing_id", Kind.ID),
-            Column("allocated_at", Kind.TEXT, pattern=DATE),
         ),
         ("int_id",),
         foreign_keys=(ForeignKey(("printing_id",), "printing", ("id",)),),

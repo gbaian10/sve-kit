@@ -211,7 +211,6 @@ def _identity(record: RegistryRecord, source_id: str) -> dict[str, Value]:
         return {
             "int_id": data.int_id,
             "printing_id": data.printing_id,
-            "allocated_at": data.allocated_at,
         }
     if isinstance(data, ArtData):
         return {

@@ -444,7 +444,6 @@ def test_final_verification_failure_rolls_back_both_importers(
                 {
                     "printing_id": "missing",
                     "int_id": 20123,
-                    "allocated_at": "2026-09-30",
                 },
             )
         for table in AUDIT:

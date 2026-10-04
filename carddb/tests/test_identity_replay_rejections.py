@@ -470,7 +470,7 @@ def test_post_review_append_needs_new_route_evidence(
             "record_key": "card_int_id:" + pid,
             "kind": "card_int_id",
             "owner": "EXAMPLE",
-            "data": {"int_id": 20001, "printing_id": pid, "allocated_at": "2026-10-01"},
+            "data": {"int_id": 20001, "printing_id": pid},
         },
     ]
     basis(tmp_path, rows)
