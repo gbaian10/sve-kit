@@ -1,1411 +1,459 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:4b0ee7f10ca3d6f58d517f169532da4446332104258eabc3c2486464b7fd3483
 records:
-  - record_key: '["glossary_term","term:trait.thief"]'
+  - record_key: '["glossary_term","term:name.classroom_lily"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.thief
-      category: trait
-      concept_key: trait.thief
+      id: term:name.classroom_lily
+      category: card_name
+      concept_key: name.classroom_lily
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:26711c4851280eb1c0fa94a65296dbf563bf32ec74095299ead6b2ae57b47547
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:09492a2a62637314b2d7756816b03ff0be6e0086b370585285fe45ca7fe68acd
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.togh_keyoh"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.togh_keyoh
-      category: trait
-      concept_key: trait.togh_keyoh
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:2ccb13bcca5342998a4d7478695cee50cbf75301e8732bd954762ef2f1ee504d
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:7b15fbf8e8628154f9ca03ccb7af9e898fc52e4b9db9e6f885037a7f8622ca51
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.tracen_academy"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.tracen_academy
-      category: trait
-      concept_key: trait.tracen_academy
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:351f16e7c3ab71ae413cc4fbcdd71a82f2f1e6f9276fc90685dfb51b9295bf09
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:3518a1ff46c97e308a9da1ab05519d71bac075d4803118568f8c8c2b7a34925f
-      source_span:
-        start: 0
-        end: 6
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.twilight_caravan"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.twilight_caravan
-      category: trait
-      concept_key: trait.twilight_caravan
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:0498d4804e9b8d8b24b766a0054a604e610ddef3f0fb3537d42612431e9e1175
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:af0ad5911bf06f8ff9ef8abb08adb07e1c26d89eaec75a5dab93c9247ac18930
-      source_span:
-        start: 5
-        end: 16
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.twinkle_wish"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.twinkle_wish
-      category: trait
-      concept_key: trait.twinkle_wish
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:3602b3fe01da7a96959819065eecb3dc5142f3baa48e08bd01a1ef003b4fd467
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:2bd463f52662360fac2c67eeac5924bf040a7787e69fce2733ff104f66a09b41
-      source_span:
-        start: 5
-        end: 16
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.umamusume"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.umamusume
-      category: trait
-      concept_key: trait.umamusume
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:977577bad91d43e9175bb3d4b4039003ba54267eaed250ac98265be53f4335db
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:867b543a827af1083f926bca9e56b62134bb0b34ae61eb12a32fca776f29eed8
-      source_span:
-        start: 0
-        end: 3
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.vampire"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.vampire
-      category: trait
-      concept_key: trait.vampire
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:d078a5d4a86dd350796dfd4b3030e6964cd59d90ff7df548a68226e5da24c0e3
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:0c6918a0198ea2c5747541c636fc3b7ed1e948203bdea5dde31cc4700276f5f8
-      source_span:
-        start: 0
-        end: 3
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.vanguard"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.vanguard
-      category: trait
-      concept_key: trait.vanguard
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:651c39d7fb17452040d7f3d1de47c376e523115c82b6fc54d1114cac4cb8e446
+        source_version_id: src:v1:3d5d4d6b8dd03cfd12ac08d23e7b3519b03e0ad16cf18fca7275c890de18037c
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:2d9f367b4f9ae8425eae2b88be22308b24f62d928c93f56311bacde152388429
+        text_hash: sha256:29f9f137e02e549e9d531d59db16289980fc340616559557f48682f1b9cebac8
       source_span:
-        start: 5
-        end: 11
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.verdant"]'
+  - record_key: '["glossary_term","term:name.clear"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.verdant
-      category: trait
-      concept_key: trait.verdant
+      id: term:name.clear
+      category: card_name
+      concept_key: name.clear
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:8203c955d844cad23a9e3b0871a81e4038f73065cbb6a95efca71c16347ce6cd
-      source_span:
-        start: 0
-        end: 3
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.ward_office"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.ward_office
-      category: trait
-      concept_key: trait.ward_office
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:2dcdb86fe316d728aacab81d64191787f4c5265ae2781816119dc7a3df30ad4c
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:d55e08485312919b869122670271d4efddf0a9038b182e73012a6aa0272c9a3a
-      source_span:
-        start: 3
-        end: 6
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.wasteland"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.wasteland
-      category: trait
-      concept_key: trait.wasteland
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:0c76dcb06702d2206f6565c9e6d50c3372cabf9c4f7ee7b50e34073a5f73e5aa
+        source_version_id: src:v1:41140de165374ba3c2f73402bfeed4417f5c08146abcac158d5729ffe3e54c5f
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:f4cc1b0d2a3ea504c2d8436aae9363e7f08409160553f758ec31aee02a03a01a
+        text_hash: sha256:df8b14c87ba1216c7a8647bd525eb4b301c68cc4aeee3a04562ffc3632b1dffe
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.weissflugel"]'
+  - record_key: '["glossary_term","term:name.cleuru"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.weissflugel
-      category: trait
-      concept_key: trait.weissflugel
+      id: term:name.cleuru
+      category: card_name
+      concept_key: name.cleuru
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:cf0f5eb977bd47cabc4d5543b6e73369b411adffb758a1d1047545fbd0857283
+        source_version_id: src:v1:a38dc6e8e4d47d162ef33698cb6cb9c5aaaab620320f3989b525f9c577c2be47
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:c1d8e03f18d43f5a24f46f817213b8d3af91d7d9b31c4558083f727def71cd60
+        locator: /faces/0/name
+        text_hash: sha256:50872b76971a1ee5e29b4ca4feba2aca86abefa96a2617ec1ca96485f0d0216c
       source_span:
-        start: 5
-        end: 15
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.wyrmkin"]'
+  - record_key: '["glossary_term","term:name.close_knit_ambitions"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.wyrmkin
-      category: trait
-      concept_key: trait.wyrmkin
+      id: term:name.close_knit_ambitions
+      category: card_name
+      concept_key: name.close_knit_ambitions
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:484301f94817a96b857334316b4b586c6ed66496a110eb63c8eb0f65c989b878
+        source_version_id: src:v1:c5440e3759c4c9768ad3579747e546f3da25337c53979d6660ebb4891859e400
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:6919754fd7967782a7c5e4f87a99eaf1c36b17e7a0f4bde6306b511fe8a79307
+        locator: /faces/0/name
+        text_hash: sha256:e57245db68408dced82128c95e9b1e883c9257df1bf94ff49810bc3946efd7c5
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.yokai"]'
+  - record_key: '["glossary_term","term:name.coco_infernal_left_paw"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.yokai
-      category: trait
-      concept_key: trait.yokai
+      id: term:name.coco_infernal_left_paw
+      category: card_name
+      concept_key: name.coco_infernal_left_paw
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:77edaaa74398bed1cc495f6c87f2aecee8e684e8b4049429fa0e0fa8937f8646
+        source_version_id: src:v1:48f42b358a8062acac5139aa29deb58bdfb0f571e1e9ed997781d154bbeff574
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:e7b0e0bf0d2fea66f0fdf6751eda2fbfcd83061eb25e1615eb152de1fa2481a9
+        locator: /faces/0/name
+        text_hash: sha256:1b7f5a9824d633af3609a6f8697af6a88bc386d348a7851a9c4286cb11657c23
       source_span:
-        start: 4
-        end: 6
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.zealot"]'
+  - record_key: '["glossary_term","term:name.cold_case_analyst"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.zealot
-      category: trait
-      concept_key: trait.zealot
+      id: term:name.cold_case_analyst
+      category: card_name
+      concept_key: name.cold_case_analyst
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:e694abd443f66d56d23af8470b38e1ee55fa3b14a6da7584d696d0ea3b4588fd
+        source_version_id: src:v1:4a3a1231498fcdb6f2b06842fe1defa04590e9111468ab817441b7dc3cbb4141
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:0453ff385abbb50a699adaa08fb43e35d8029995e6a4573a644ab01cc809a9d3
+        locator: /faces/0/name
+        text_hash: sha256:72694a9e547e46dede9bcf1230f288b577e0fc8dbff777b3ea6bd78e2670fcfe
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.banishment"]'
+  - record_key: '["glossary_term","term:name.colossal_grudge"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.banishment
-      category: rule_term
-      concept_key: zone.banishment
+      id: term:name.colossal_grudge
+      category: card_name
+      concept_key: name.colossal_grudge
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:fc270d6975a98f19c3f9d5674d460be6d29d95e229cfc0aa8dad4097c913114b
+        source_version_id: src:v1:d12eb674959ff55b74619ff840bee5179d7316dfb5cd10c0a1be821485ef2b83
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:c319cbde5d444edba98c051a31dfb5593048605b7478cb6f3557ab860740fe82
+        locator: /faces/0/name
+        text_hash: sha256:d6a2f61b038f819e3df6209c50de17034eb78beea892973ec115c2b30e182a89
       source_span:
-        start: 8
-        end: 12
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.battlefield"]'
+  - record_key: '["glossary_term","term:name.conferrer_of_vows"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.battlefield
-      category: rule_term
-      concept_key: zone.battlefield
+      id: term:name.conferrer_of_vows
+      category: card_name
+      concept_key: name.conferrer_of_vows
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        source_version_id: src:v1:0e09cfe22f42fc438a41ee8498a3471d38a413d71a346625e7743b3d726ffd2e
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+        locator: /faces/0/name
+        text_hash: sha256:45ff0eba3522632462a67008976ca88c9d2ac533947cea36b61e0d688729b084
       source_span:
-        start: 34
-        end: 35
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.cemetery"]'
+  - record_key: '["glossary_term","term:name.conjure_golem"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.cemetery
-      category: rule_term
-      concept_key: zone.cemetery
+      id: term:name.conjure_golem
+      category: card_name
+      concept_key: name.conjure_golem
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:d8741b42b244ae4bb4e91a2e903359ed9e096af7f1df581dc0df287b2440d489
+        source_version_id: src:v1:78cf155a040e6fb862021fe88e03733b87fd826b835b844543688565647061a6
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:594d7a2c76df8043113d6b0d50b845fad19dc6807cd4dde0b32512c0bcb2dd87
+        locator: /faces/0/name
+        text_hash: sha256:5714b5820de65e31e440811f2e142f182979bb40c414dce8734f70cd773bb4e3
       source_span:
-        start: 35
-        end: 37
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.deck"]'
+  - record_key: '["glossary_term","term:name.construct_of_truth_and_being"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.deck
-      category: rule_term
-      concept_key: zone.deck
+      id: term:name.construct_of_truth_and_being
+      category: card_name
+      concept_key: name.construct_of_truth_and_being
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:b1c6c86b3779b7a5e4429650c9e5350d70c9f46a67e093cac9c9eef2c7e0a211
+        source_version_id: src:v1:33ccbd7c4339aebe429eb499cf8d9a55696c40c363741dbf6b065cd5ccb64388
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:afadd1a5bdc1b53eea0da452f0875bf8c2d10f8f31ce93d76116a5569887f3ce
+        locator: /faces/0/name
+        text_hash: sha256:388332385bec08bbb6bb5691dcb1412fba47c1ec346c076c911a08b5ce5d6a1d
       source_span:
-        start: 26
-        end: 29
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.deck_bottom"]'
+  - record_key: '["glossary_term","term:name.cool_earrings"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.deck_bottom
-      category: rule_term
-      concept_key: zone.deck_bottom
+      id: term:name.cool_earrings
+      category: card_name
+      concept_key: name.cool_earrings
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:3690e314b12222339baed8d8bb368e41d409d0bbe9ab54db5a80c743efc1c8f1
+        source_version_id: src:v1:b5c048cd88c7731f6cb44c126b9da511192c8057ea5973dd979827c68fd648b0
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:7c71c9a48f297f70cc8f8a4d69c4c36e33a7c6fbe26e7fe6ea8865ac78c91522
+        locator: /faces/0/name
+        text_hash: sha256:8dc4f4f6c3a1945761c83bdab96e0993e11aaca0d1b7b63dacff4409dd4abe9a
       source_span:
-        start: 58
-        end: 63
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.deck_top"]'
+  - record_key: '["glossary_term","term:name.cool_pendant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.deck_top
-      category: rule_term
-      concept_key: zone.deck_top
+      id: term:name.cool_pendant
+      category: card_name
+      concept_key: name.cool_pendant
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:b1c6c86b3779b7a5e4429650c9e5350d70c9f46a67e093cac9c9eef2c7e0a211
+        source_version_id: src:v1:90b5446360f8e0debc5ec3d495aab4dcf9e09bcd72da9d43da924b8c594ed553
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:afadd1a5bdc1b53eea0da452f0875bf8c2d10f8f31ce93d76116a5569887f3ce
+        locator: /faces/0/name
+        text_hash: sha256:ab77ef7d9bc8fad4810b82b0387839a5745b11fba617b308431b1854ab8b12e8
       source_span:
-        start: 26
-        end: 31
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.evolve_deck"]'
+  - record_key: '["glossary_term","term:name.cool_tiara"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.evolve_deck
-      category: rule_term
-      concept_key: zone.evolve_deck
+      id: term:name.cool_tiara
+      category: card_name
+      concept_key: name.cool_tiara
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:670fa0cb38b51a5ea86f9c190c933911fe2c6def0c8aed60408d38adbb88439a
+        source_version_id: src:v1:24b314f102d276328eb6f131291f9113be74807555092533cf4919cafdd6f63b
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:1d755f0ba010f1995a7efc9738240e1af011a980f93a79452d5a9ee17a5cc667
+        locator: /faces/0/name
+        text_hash: sha256:0eca1e43c8b4c2b2b4e9019a5906b753b2f0dca62f39852ca8b6f0ccf97f541a
       source_span:
-        start: 20
-        end: 27
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.ex"]'
+  - record_key: '["glossary_term","term:name.coral_assault"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.ex
-      category: rule_term
-      concept_key: zone.ex
+      id: term:name.coral_assault
+      category: card_name
+      concept_key: name.coral_assault
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
+        source_version_id: src:v1:235b4193f1a313da998c997e89acbee0b0940e8f42f830dbd4f0444ac41ee518
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:1c6191cc955eb23c323d07ab79102e144e70d7da2e99e8f8b889cb02fef0de24
+        locator: /faces/0/name
+        text_hash: sha256:0ac394f621794bd915c02441d099e75caad408b943bbb78a554163f4b6149a03
       source_span:
-        start: 12
-        end: 17
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:zone.hand"]'
+  - record_key: '["glossary_term","term:name.cornelia_li_britannia"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:zone.hand
-      category: rule_term
-      concept_key: zone.hand
+      id: term:name.cornelia_li_britannia
+      category: card_name
+      concept_key: name.cornelia_li_britannia
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:cddd9e634e2bbeab2a9c6c04159a21b0e14a506ca46f2ba61159ae6e16a7c914
+        source_version_id: src:v1:63857373c3e9a7de5b4a4bf79edcfb89fce0a396751f2f40821f70190636a6ec
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:9bd3d16c9c5bd05d2a1da448d74fbc2620311d6242e09259e7d4225a1209b5c8
+        locator: /faces/0/name
+        text_hash: sha256:7828128f27dbeeb4f78a375c1c378c91963eb2c57021021cfdfdb5e2684647be
       source_span:
-        start: 44
-        end: 46
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.thief"]'
-            - '["glossary_term","term:trait.togh_keyoh"]'
-            - '["glossary_term","term:trait.tracen_academy"]'
-            - '["glossary_term","term:trait.twilight_caravan"]'
-            - '["glossary_term","term:trait.twinkle_wish"]'
-            - '["glossary_term","term:trait.umamusume"]'
-            - '["glossary_term","term:trait.vampire"]'
-            - '["glossary_term","term:trait.vanguard"]'
-            - '["glossary_term","term:trait.verdant"]'
-            - '["glossary_term","term:trait.ward_office"]'
-            - '["glossary_term","term:trait.wasteland"]'
-            - '["glossary_term","term:trait.weissflugel"]'
-            - '["glossary_term","term:trait.wyrmkin"]'
-            - '["glossary_term","term:trait.yokai"]'
-            - '["glossary_term","term:trait.zealot"]'
-            - '["glossary_term","term:zone.banishment"]'
-            - '["glossary_term","term:zone.battlefield"]'
-            - '["glossary_term","term:zone.cemetery"]'
-            - '["glossary_term","term:zone.deck"]'
-            - '["glossary_term","term:zone.deck_bottom"]'
-            - '["glossary_term","term:zone.deck_top"]'
-            - '["glossary_term","term:zone.evolve_deck"]'
-            - '["glossary_term","term:zone.ex"]'
-            - '["glossary_term","term:zone.hand"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-decisions:
-  - id: d:4b0ee7f10ca3d6f58d517f169532da4446332104258eabc3c2486464b7fd3483
-    state: confirmed
-    scope: batch
-    category: glossary_term
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:4b0ee7f10ca3d6f58d517f169532da4446332104258eabc3c2486464b7fd3483
-    members:
-      -   - '["glossary_term","term:trait.thief"]'
-          - sha256:91a6ea105f009d659008a6292ce3628f820ff8cfd2f9ffe1528aa55d65a549da
-      -   - '["glossary_term","term:trait.togh_keyoh"]'
-          - sha256:7e3ae70239788c74ae52750b5043f3ba4addb5dcd4cd616539bacab681b2b391
-      -   - '["glossary_term","term:trait.tracen_academy"]'
-          - sha256:47c1835ae9270a0ec9fd83570f88e6d0f8f4dac3f0ae01206174e7be3b584749
-      -   - '["glossary_term","term:trait.twilight_caravan"]'
-          - sha256:acb3c4daa39620e8210d15eb607846126a2836096691b2629c5d24f5810141d7
-      -   - '["glossary_term","term:trait.twinkle_wish"]'
-          - sha256:da01bc455f9bb22ed24d2d0f83ee0a80e78ed3131838756f4b8ab7b06dabfb5a
-      -   - '["glossary_term","term:trait.umamusume"]'
-          - sha256:ed44f9c23965a299afb48b73e7e260794b9e9915cc30b68a24af832cb0904ca7
-      -   - '["glossary_term","term:trait.vampire"]'
-          - sha256:6fda1456d514f73edcc6e992af09057612dad0602c007a6d568817f4bee0b161
-      -   - '["glossary_term","term:trait.vanguard"]'
-          - sha256:450d8453f68e3b5e3b129d0b607f53ac41fada5df72e63490041ab09e92197cc
-      -   - '["glossary_term","term:trait.verdant"]'
-          - sha256:e5bc7f03c703ee850d3c251eef41ebcf9eff271993fdcc165c5319cfc060a621
-      -   - '["glossary_term","term:trait.ward_office"]'
-          - sha256:cfe5ef988826cddd830104957e136df412ae5a2b6e6bb88f6ebee15d329b2007
-      -   - '["glossary_term","term:trait.wasteland"]'
-          - sha256:e7536025dd0b4cb616c13b988386241358e1367af93e4496d411014c47fc9894
-      -   - '["glossary_term","term:trait.weissflugel"]'
-          - sha256:2fb94403335428290a386193882fbd94f5f7af5b3b8175e830296ff2ab777565
-      -   - '["glossary_term","term:trait.wyrmkin"]'
-          - sha256:163580a98fc9cdc3ace6912f4a657f01efeaacbcb6ddd4eddd4a2985b7e336d0
-      -   - '["glossary_term","term:trait.yokai"]'
-          - sha256:9af35330c7c9ebc8e23999a2d32715d1a8f2e45b4fd30f4c57094a9caa47721f
-      -   - '["glossary_term","term:trait.zealot"]'
-          - sha256:c1af5936c6345bff16a7fae4d11b2dc61dec84790d6e13ec5599de45883707c6
-      -   - '["glossary_term","term:zone.banishment"]'
-          - sha256:d709aa7e9a4dbc218eba5cc33be9f9b5267837c20e80b7598166b94f947b7801
-      -   - '["glossary_term","term:zone.battlefield"]'
-          - sha256:18d590c8c47931be7f15c31d32d78c77474d007bb6ae46bb4f75291fdd880465
-      -   - '["glossary_term","term:zone.cemetery"]'
-          - sha256:4ba868b894e50abbbf7baab3621b1f8683742e62f1cb5d9688e0b913c1373fe1
-      -   - '["glossary_term","term:zone.deck"]'
-          - sha256:fb3820382f5f7690867c9f92da50fc2be603dea6b50288e8ad46465ecc61a560
-      -   - '["glossary_term","term:zone.deck_bottom"]'
-          - sha256:f59c61f87214827766a9790c78ffa608e22bd1b08b34759b8b1c38080a4feb23
-      -   - '["glossary_term","term:zone.deck_top"]'
-          - sha256:99cd62ba4fa42a9700bbfc8391c52cfe72535ccf6480ecece0d74fc3b43ba3e2
-      -   - '["glossary_term","term:zone.evolve_deck"]'
-          - sha256:2c034ff0ca7c125981f592575e82984e4061d19abd6e212d48f908035def165b
-      -   - '["glossary_term","term:zone.ex"]'
-          - sha256:f28cc7513ec9d3cfa4c1137946cdc71771c9a6d8c217d73d0bf2aed953538be9
-      -   - '["glossary_term","term:zone.hand"]'
-          - sha256:216acd3b923dff1586355cc108656ae2e564549877d609ff2a32b3af5ccf017d
-    sample_ids:
-      - '["glossary_term","term:trait.thief"]'
-      - '["glossary_term","term:trait.togh_keyoh"]'
-      - '["glossary_term","term:trait.tracen_academy"]'
-      - '["glossary_term","term:trait.twilight_caravan"]'
-      - '["glossary_term","term:trait.twinkle_wish"]'
-      - '["glossary_term","term:trait.umamusume"]'
-      - '["glossary_term","term:trait.vampire"]'
-      - '["glossary_term","term:trait.vanguard"]'
-      - '["glossary_term","term:trait.verdant"]'
-      - '["glossary_term","term:trait.ward_office"]'
-      - '["glossary_term","term:trait.wasteland"]'
-      - '["glossary_term","term:trait.weissflugel"]'
-      - '["glossary_term","term:trait.wyrmkin"]'
-      - '["glossary_term","term:trait.yokai"]'
-      - '["glossary_term","term:trait.zealot"]'
-      - '["glossary_term","term:zone.banishment"]'
-      - '["glossary_term","term:zone.battlefield"]'
-      - '["glossary_term","term:zone.cemetery"]'
-      - '["glossary_term","term:zone.deck"]'
-      - '["glossary_term","term:zone.deck_bottom"]'
-      - '["glossary_term","term:zone.deck_top"]'
-      - '["glossary_term","term:zone.evolve_deck"]'
-      - '["glossary_term","term:zone.ex"]'
-      - '["glossary_term","term:zone.hand"]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+  - record_key: '["glossary_term","term:name.corruption_guardian"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.corruption_guardian
+      category: card_name
+      concept_key: name.corruption_guardian
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:763a4c9326a9857e91b72ad61d279da28f91479835ee157d5f1248aa7d11e19a
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:3ea9c8ee6bb8c0366f4eef8e887074d4a3908142cba8bbee8c69cb8915500dd7
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.covetous_serpent"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.covetous_serpent
+      category: card_name
+      concept_key: name.covetous_serpent
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:51146c366adb903072196b8011559e457c2cc7258e65e87dfcd3c309c9d6521c
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:411c3c8d1222d08cd92373da702b67f92ea923e20a6d5a550ec29f5b12b7742c
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.creditta"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.creditta
+      category: card_name
+      concept_key: name.creditta
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:015c801771d5e4c74f6855e821a5f07d8b9bebefc2dbeb3e0fe838bacfcc8f38
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:830525d0da380e6694f751b629d6ceb00aadefe9b2f102090931ae0ddc09da24
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.crescent_moon_of_centennial_death"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.crescent_moon_of_centennial_death
+      category: card_name
+      concept_key: name.crescent_moon_of_centennial_death
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:279b4438583dd844a673aff3cb571b236f684d4176679f5e259e798fe14f8de1
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:516ca0fc332efe641e7936cd9a9037b66d58b030fa6b8f14d02c20ad28775914
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.crest_congregant_of_repose"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.crest_congregant_of_repose
+      category: card_name
+      concept_key: name.crest_congregant_of_repose
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:208b3271e418d0c73221c1749c17f1f4c94d9a77dc1fd1a64b432f16c62640d0
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:175d3bc5962322296188da8e2acd0953a2b6ab6a52deb3b6262fb5dcd7da9617
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.crest_galmieux_ardor_manifest"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.crest_galmieux_ardor_manifest
+      category: card_name
+      concept_key: name.crest_galmieux_ardor_manifest
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:1edfeaa29c6d1ed90b42954c0001f1063285d8f55a532d0876a3ba8bd0688ebf
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:be4f380ef445836df5268db48761afa1e24c3d9de9e0c5883c71f85ae3ba581f
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.crest_himeka_heir_to_repose"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.crest_himeka_heir_to_repose
+      category: card_name
+      concept_key: name.crest_himeka_heir_to_repose
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:5335d072811c762dc03aa19d2ad79d51943fb52c434f3b72213bb34c78f8178a
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:de56d55f6e7e22265a4fb0c80f78003e3bbac2aaa9beb81358efd0359b332ee8
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.crest_krulle_heir_to_unkilling"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.crest_krulle_heir_to_unkilling
+      category: card_name
+      concept_key: name.crest_krulle_heir_to_unkilling
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:6300e511b901143080b14a20e3ec2fb35415c140874b438916665e4d9ad9bc79
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:36ff8925ae6020027c701045efe843692329392cc2144b8e95d113fa17add898
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.crest_marwynn_despair_manifest"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.crest_marwynn_despair_manifest
+      category: card_name
+      concept_key: name.crest_marwynn_despair_manifest
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:b9e319247539678aa8e64ccf79eb4d0025f3293f21f49eca8197640ffa8a009d
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:9b21bddfae7e5b4cb9f10395a1a9e4185215c6206d4db53fbad062743db641b4
+      source_span:
+      authored_source_ja:
+      missing_source_reason:

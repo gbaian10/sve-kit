@@ -12,6 +12,11 @@ from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.translations.current_models import ChoiceRecord as CurrentChoiceRecord
+from sve_carddb.translations.current_models import DigitalName as CurrentDigitalName
+from sve_carddb.translations.current_models import (
+    VocabularyRecord as CurrentVocabularyRecord,
+)
 from sve_carddb.translations.loader import Snapshot, load_glossary
 from sve_carddb.translations.models import (
     AssignmentRecord,
@@ -72,8 +77,11 @@ class Inputs:
         }
 
 
-def validate_choice(  # ruff: ignore[complex-structure,too-many-branches] -- independent source/concept guards cannot substitute for each other
-    record: ChoiceRecord | VocabularyRecord,
+def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- independent source/concept guards cannot substitute for each other
+    record: ChoiceRecord
+    | VocabularyRecord
+    | CurrentChoiceRecord
+    | CurrentVocabularyRecord,
     *,
     original: str | None,
     sources: Sources,
@@ -91,7 +99,12 @@ def validate_choice(  # ruff: ignore[complex-structure,too-many-branches] -- ind
         if lang != data.lang:
             raise ValueError("Choice source language mismatch")
         source_id = source.id
-    official = data.origin in {"official_svwb", "official_sv1"}
+    origin = (
+        record.origin
+        if isinstance(record, (CurrentChoiceRecord, CurrentVocabularyRecord))
+        else record.data.origin
+    )
+    official = origin in {"official", "official_svwb", "official_sv1"}
     if official and not data.concept_evidence:
         raise ValueError("Official choice lacks same-concept evidence")
     for evidence in data.concept_evidence:
@@ -104,16 +117,17 @@ def validate_choice(  # ruff: ignore[complex-structure,too-many-branches] -- ind
         if jp_lang != "ja" or target_lang != data.lang or target != text:
             raise ValueError("Concept evidence language/exact target mismatch")
         if (
-            not isinstance(evidence, DigitalName)
+            not isinstance(evidence, (DigitalName, CurrentDigitalName))
             and original is not None
             and ja != original
         ):
             raise ValueError("Concept evidence differs from adopted Japanese term")
-        if (
-            official
-            and evidence.target_ref.parser
-            != "translation-" + data.origin.removeprefix("official_") + "-v1"
-        ):
+        expected_provider = (
+            {"translation-sv1-v1", "translation-svwb-v1"}
+            if origin == "official"
+            else {"translation-" + origin.removeprefix("official_") + "-v1"}
+        )
+        if official and evidence.target_ref.parser not in expected_provider:
             raise ValueError("Official origin differs from evidence provider")
         if isinstance(evidence, DictionaryEntry):
             expected = f"/data/{evidence.dictionary_kind}/{evidence.entry_key.replace('~', '~0').replace('/', '~1')}"
@@ -123,7 +137,7 @@ def validate_choice(  # ruff: ignore[complex-structure,too-many-branches] -- ind
                 or evidence.jp_ref.parser != evidence.target_ref.parser
             ):
                 raise ValueError("Official dictionary concept/key mismatch")
-        elif isinstance(evidence, DigitalName):
+        elif isinstance(evidence, (DigitalName, CurrentDigitalName)):
             _digital_evidence(evidence, ja, target, data.lang, db)
             for ref in (evidence.jp_ref, evidence.target_ref):
                 _digital_location(evidence, ref, sources, db)
@@ -159,7 +173,10 @@ def _effect_location(ref: SourceRef) -> None:
 
 
 def _digital_location(
-    evidence: DigitalName, ref: SourceRef, sources: Sources, db: Database
+    evidence: DigitalName | CurrentDigitalName,
+    ref: SourceRef,
+    sources: Sources,
+    db: Database,
 ) -> None:
     faces = {r.values["id"]: r.values for r in db.rows("digital_face")}
     cards = {r.values["id"]: r.values for r in db.rows("digital_card")}
@@ -186,17 +203,26 @@ def _digital_location(
 
 
 def _digital_evidence(
-    evidence: DigitalName, ja: str, target: str, lang: str, db: Database
+    evidence: DigitalName | CurrentDigitalName,
+    ja: str,
+    target: str,
+    lang: str,
+    db: Database,
 ) -> None:
     decisions = {r.values["id"]: r.values for r in db.rows("decision")}
-    decision = decisions.get(evidence.decision_id)
-    if decision is None or decision["state"] not in {"sampled", "confirmed"}:
+    identifier = evidence.decision_id if isinstance(evidence, DigitalName) else None
+    decision = decisions.get(identifier)
+    if identifier is not None and (
+        decision is None or decision["state"] not in {"sampled", "confirmed"}
+    ):
         raise ValueError("Digital same-concept decision is unadopted")
     links = [
         r.values
         for r in db.rows("digital_link")
         if r.values["digital_face_id"] == evidence.digital_face_id
-        and r.values["decision_id"] == evidence.decision_id
+        and (identifier is None or r.values["decision_id"] == identifier)
+        and decisions.get(r.values["decision_id"], {}).get("state")
+        in {"sampled", "confirmed"}
         and r.values["relation"] == "same_card"
         and r.values["face_id"] == evidence.sve_owner
     ]
@@ -222,6 +248,10 @@ def populate_glossary(  # ruff: ignore[complex-structure,too-many-branches] -- h
 ) -> InputRecord:
     """Compose with an already verified publication identity and frozen digital closure."""
     snapshot = inputs.load()
+    if snapshot.has_current or "record_key" in db.columns("glossary_term"):
+        from sve_carddb.translations.current_importer import populate  # ruff: ignore[import-outside-top-level] -- format dispatch avoids a cycle with shared evidence validators
+
+        return populate(db, inputs, snapshot, build=build, stores=stores)
     configuration = object_value(parse(build.configuration.encode()))
     if (
         configuration.get("translation_authored")

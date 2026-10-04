@@ -10,6 +10,9 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
+from sve_carddb.digital_name_policies.current_models import CurrentEntry
+from sve_carddb.digital_name_policies.current_models import Index as CurrentIndex
+from sve_carddb.digital_name_policies.current_models import Policy as CurrentPolicy
 from sve_carddb.digital_name_policies.models import (
     Approval,
     CardTargetExclusion,
@@ -33,6 +36,8 @@ if TYPE_CHECKING:
 
 INDEX = "digital-name-policies/index.yaml"
 DIRECTORIES = ("digital-name-policies", "digital-name-exclusions")
+CURRENT_FORMAT = 2
+
 CONTENT_KEYS = {
     "names": frozenset(
         [
@@ -183,6 +188,7 @@ class Snapshot:
     authored_revision: str
     files: tuple[tuple[str, bytes], ...]
     policies: tuple[LoadedPolicy, ...]
+    current_names: tuple[CurrentPolicy, ...] = ()
 
     def effective(self, purpose: Purpose) -> LoadedPolicy:
         """Select one terminal policy per explicitly requested purpose."""
@@ -262,10 +268,45 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
     if any((root / name).read_bytes() != raw for name, raw in files):
         raise ValueError("Digital-name policy bytes differ from authored revision")
     values = {name: decoded(raw) for name, raw in files}
-    index = model(Index, values[INDEX])
+    raw_index = object_value(values[INDEX])
+    current_names = []
     expected = {INDEX}
+    if raw_index.get("digital_name_policy_index_format") == CURRENT_FORMAT:
+        current_index = model(CurrentIndex, raw_index)
+        legacy: dict[str, JsonValue] = {}
+        for identifier, current_entry in current_index.policies.items():
+            if isinstance(current_entry, CurrentEntry):
+                current_path = f"digital-name-policies/{identifier}/current.yaml"
+                if current_entry.path != current_path or current_path not in values:
+                    raise ValueError("Current name policy indexed path mismatch")
+                if digest(canonical(values[current_path])) != current_entry.hash:
+                    raise ValueError("Current name policy indexed hash mismatch")
+                current_policy = model(CurrentPolicy, values[current_path])
+                if current_policy.policy_id != identifier:
+                    raise ValueError("Current name policy identity mismatch")
+                current_names.append(current_policy)
+                expected.add(current_path)
+            else:
+                legacy[identifier] = [e.model_dump(mode="json") for e in current_entry]
+        # This is a format-one view of the remaining links; no policy or proof is invented.
+        index = (
+            model(
+                Index,
+                {
+                    "digital_name_policy_index_format": 1,
+                    "kind": "digital_name_policy_index",
+                    "policies": legacy,
+                },
+            )
+            if legacy
+            else None
+        )
+    else:
+        index = model(Index, values[INDEX])
     policies = []
-    for identifier, entries in sorted(index.policies.items()):
+    for identifier, entries in sorted(
+        {}.items() if index is None else index.policies.items()
+    ):
         if not entries or tuple(e.version for e in entries) != tuple(
             range(1, len(entries) + 1)
         ):
@@ -307,6 +348,8 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
                 or excluded.purpose != policy.purpose
             ):
                 raise ValueError("Digital-name policy envelope identity mismatch")
+            if current_names and policy.purpose != "links":
+                raise ValueError("Current name policy cannot mix a legacy name policy")
             _content(policy)
             _approval(policy, receipt, excluded, entry)
             expected.update(paths)
@@ -314,7 +357,9 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
             previous = entry
     if expected != set(values):
         raise ValueError("Unindexed digital-name policy input")
-    return Snapshot(revision, files, tuple(policies))
+    if len(current_names) > 1:
+        raise ValueError("Current names must select exactly one policy")
+    return Snapshot(revision, files, tuple(policies), tuple(current_names))
 
 
 def _content(policy: Policy) -> None:

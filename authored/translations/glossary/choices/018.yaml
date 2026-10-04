@@ -1,748 +1,383 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:5b09954572dbd5b2bfa1637b3b0a776c21261a359529c56739ee3d5a976fcede
 records:
-  - record_key: '["glossary_choice","term:ability.lesson","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.grim_reaper","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.lesson
+      term_id: term:name.grim_reaper
       lang: zh-Hant
       value:
         kind: authored
-        text: 課程
-      origin: project
+        text: 死神
       concept_evidence: []
       source_claim:
-        source_work: 偶像大師 灰姑娘女孩
+  - record_key: '["glossary_choice","term:name.guiding_words","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.guiding_words
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 先導者的談話
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.guren_revolt","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.guren_revolt
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紅蓮的反叛
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.gururubau","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.gururubau
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 咕嚕嚕汪
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.hades_hypnotist","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.hades_hypnotist
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 冥界的催眠術師
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.hagoromo_komachi","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.hagoromo_komachi
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 羽衣小町
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.hajime_fujiwara_pink_blossom_dream","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.hajime_fujiwara_pink_blossom_dream
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔朱華色之夢〕藤原肇
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
         source_urls:
-          - https://forum.gamer.com.tw/C.php?bsn=28688&snA=388
-          - https://forum.gamer.com.tw/C.php?bsn=28688&snA=4476
-          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_星光舞台
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:ability.necrocharge","zh-Hant",1]'
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hakui_koyori","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.necrocharge
+      term_id: term:name.hakui_koyori
       lang: zh-Hant
       value:
         kind: authored
-        text: 死靈充能
-      origin: project
+        text: 博衣小夜璃
       concept_evidence: []
       source_claim:
-        source_work:
+        source_work: Shadowverse or collaboration names
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:ability.overflow","zh-Hant",1]'
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hakui_koyori_clear_mind","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.overflow
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/skill_names/10
-          text_hash: sha256:d8957cc196786cb81b98f4c157cb63aa6e97e8beeed56cfa32d8e58165d93fb3
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: skill_names
-          entry_key: '10'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/skill_names/10
-            text_hash: sha256:9fb5292d33e8920a612f75044a4639f0d2f2e5313eed66ae8dd879c40793d5c1
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/skill_names/10
-            text_hash: sha256:d8957cc196786cb81b98f4c157cb63aa6e97e8beeed56cfa32d8e58165d93fb3
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:ability.quick","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:ability.quick
+      term_id: term:name.hakui_koyori_clear_mind
       lang: zh-Hant
       value:
         kind: authored
-        text: 快速
-      origin: project
+        text: 澄明的頭腦‧博衣小夜璃
       concept_evidence: []
       source_claim:
-        source_work:
+        source_work: Shadowverse or collaboration names
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:action.banish","zh-Hant",1]'
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hare_of_illusions","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:action.banish
+      term_id: term:name.hare_of_illusions
       lang: zh-Hant
       value:
         kind: authored
-        text: 使…消失
-      origin: project
+        text: 夢想的白兔
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:action.restore","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.haru_urara","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:action.restore
+      term_id: term:name.haru_urara
       lang: zh-Hant
       value:
         kind: authored
-        text: 回復
-      origin: project
+        text: 春烏菈菈
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:action.return_to_hand","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.haru_urara_sunny_passion","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:action.return_to_hand
+      term_id: term:name.haru_urara_sunny_passion
       lang: zh-Hant
       value:
         kind: authored
-        text: 返回手牌
-      origin: project
+        text: 〔烏菈菈之歌‧Passion♪〕春烏菈菈
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:duration.per_turn","zh-Hant",1]'
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.haru_yuuki","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:duration.per_turn
+      term_id: term:name.haru_yuuki
       lang: zh-Hant
       value:
         kind: authored
-        text: 1回合中
-      origin: project
+        text: 結城晴
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:event.attack","zh-Hant",1]'
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.haru_yuuki_secret_blue_rose","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:event.attack
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/skill_names/4
-          text_hash: sha256:29ebdf2209a25632c47943d02a1fd533b3330b72e33e5cbda8a9099b8b34f86f
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: skill_names
-          entry_key: '4'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/skill_names/4
-            text_hash: sha256:6287260e3413db3d420cef1e787d68e6b8e31b1a20eb2d88a1ec08c741396fa4
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/skill_names/4
-            text_hash: sha256:29ebdf2209a25632c47943d02a1fd533b3330b72e33e5cbda8a9099b8b34f86f
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:event.super_evolve","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:event.super_evolve
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/skill_names/33
-          text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: skill_names
-          entry_key: '33'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/skill_names/33
-            text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/skill_names/33
-            text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:keyword.bane","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:keyword.bane
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/skill_names/8
-          text_hash: sha256:7fd9433530f55c5e23515f41e875e2a27cd4bc2b4bbc77237df68bf5b7cf7893
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: skill_names
-          entry_key: '8'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/skill_names/8
-            text_hash: sha256:7fd9433530f55c5e23515f41e875e2a27cd4bc2b4bbc77237df68bf5b7cf7893
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/skill_names/8
-            text_hash: sha256:7fd9433530f55c5e23515f41e875e2a27cd4bc2b4bbc77237df68bf5b7cf7893
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:object.counter","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:object.counter
+      term_id: term:name.haru_yuuki_secret_blue_rose
       lang: zh-Hant
       value:
         kind: authored
-        text: 指示物
-      origin: project
+        text: 〔秘密的藍玫瑰〕結城晴
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:object.token","zh-Hant",1]'
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hatsune","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:object.token
+      term_id: term:name.hatsune
       lang: zh-Hant
       value:
         kind: authored
-        text: 衍生物
-      origin: project
+        text: 初音
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:phase.end","zh-Hant",1]'
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.heavenly_castle","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:phase.end
+      term_id: term:name.heavenly_castle
       lang: zh-Hant
       value:
         kind: authored
-        text: 結束階段
-      origin: project
+        text: 御天空城
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:rule.cannot_attack","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.hermit_of_lust","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:rule.cannot_attack
+      term_id: term:name.hermit_of_lust
       lang: zh-Hant
       value:
         kind: authored
-        text: 無法攻擊
-      origin: project
+        text: 欲望的隱者
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:rule.instead","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.high_dog_breeder_akane","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:rule.instead
+      term_id: term:name.high_dog_breeder_akane
       lang: zh-Hant
       value:
         kind: authored
-        text: 轉變為
-      origin: project
+        text: 高階馴犬師 茜
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:rule.same_name","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.hina_araki","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:rule.same_name
+      term_id: term:name.hina_araki
       lang: zh-Hant
       value:
         kind: authored
-        text: 同名
-      origin: project
+        text: 荒木比奈
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:stat.max_pp","zh-Hant",1]'
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hinako_kita_true_dream","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:stat.max_pp
+      term_id: term:name.hinako_kita_true_dream
       lang: zh-Hant
       value:
         kind: authored
-        text: PP最大值
-      origin: project
+        text: 〔True Dream〕喜多日菜子
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.academic","zh-Hant",1]'
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hiromi_seki_twinkle_in_my_eye","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.academic
+      term_id: term:name.hiromi_seki_twinkle_in_my_eye
       lang: zh-Hant
       value:
         kind: authored
-        text: 學院
-      origin: project
+        text: 〔眼眸中的閃耀〕關裕美
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.fable","zh-Hant",1]'
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hishi_akebono","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.fable
+      term_id: term:name.hishi_akebono
       lang: zh-Hant
       value:
         kind: authored
-        text: 童話
-      origin: project
+        text: 菱曙
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.machina","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hishi_amazon","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.machina
+      term_id: term:name.hishi_amazon
       lang: zh-Hant
       value:
         kind: authored
-        text: 機械
-      origin: project
+        text: 菱亞馬遜
       concept_evidence: []
       source_claim:
-        source_work: Shadowverse
-        source_urls: []
-        claimed_source: 數位版 sv1 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.omen","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.hishi_miracle","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.omen
+      term_id: term:name.hishi_miracle
       lang: zh-Hant
       value:
         kind: authored
-        text: 絕傑
-      origin: project
+        text: 菱奇蹟
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.pixie","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.pixie
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/tribe_names/5
-          text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: tribe_names
-          entry_key: '5'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/tribe_names/5
-            text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/tribe_names/5
-            text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.puppetry","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.puppetry
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/tribe_names/15
-          text_hash: sha256:cfabe4c78b660c669330f45a0df21570a10f4de02f989b78523d8d090ff58b52
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: tribe_names
-          entry_key: '15'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/tribe_names/15
-            text_hash: sha256:8f0298f9c8a835e73f6ec8f040fd778b1b681f776df8d351f95d3ba88c854cc6
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/tribe_names/15
-            text_hash: sha256:cfabe4c78b660c669330f45a0df21570a10f4de02f989b78523d8d090ff58b52
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:5b09954572dbd5b2bfa1637b3b0a776c21261a359529c56739ee3d5a976fcede
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:5b09954572dbd5b2bfa1637b3b0a776c21261a359529c56739ee3d5a976fcede
-    members:
-      -   - '["glossary_choice","term:ability.lesson","zh-Hant",1]'
-          - sha256:164b48870c3bd36542913918170f2d20349f6c974c4883179733e6bb038e0abb
-      -   - '["glossary_choice","term:ability.necrocharge","zh-Hant",1]'
-          - sha256:83ca6e23a5e153fc8c24449169db069b17d0c8f6d5f15eeb0dc3cdc4eb391f60
-      -   - '["glossary_choice","term:ability.overflow","zh-Hant",1]'
-          - sha256:16f2bb0237b45f4f055aae3706a07f1e9bc29f176e56efdccc6a1a592e442680
-      -   - '["glossary_choice","term:ability.quick","zh-Hant",1]'
-          - sha256:33d1d77498b626dbeb739efdb9ab787fbdd066045ce2b482231385aa35e8ac7d
-      -   - '["glossary_choice","term:action.banish","zh-Hant",1]'
-          - sha256:dbf2dbb91da33e9f5810df7af966555e2eac01eca2ec7f04c1236b850dee7f83
-      -   - '["glossary_choice","term:action.restore","zh-Hant",1]'
-          - sha256:b6635a7b844d4cd8f6fafd38e3f6fea0997c15c97796268551eb98282a0ce790
-      -   - '["glossary_choice","term:action.return_to_hand","zh-Hant",1]'
-          - sha256:b8cff3b91ae5935a552eb7b5794d4635dbea226559951c26a24fa12455cc5c43
-      -   - '["glossary_choice","term:duration.per_turn","zh-Hant",1]'
-          - sha256:700009aaf0c820e771cabc75ac45022051f3ff1e48cc86b46c82b9aa87096a84
-      -   - '["glossary_choice","term:event.attack","zh-Hant",1]'
-          - sha256:43cf9aea1ae037bfe12483f11459a4ad14088aa1864bcf2792cc775b76ac611a
-      -   - '["glossary_choice","term:event.super_evolve","zh-Hant",1]'
-          - sha256:f4eca281e765ec2703a41d4ca5d35b3747014cd13c8a08e30813731115e602b9
-      -   - '["glossary_choice","term:keyword.bane","zh-Hant",1]'
-          - sha256:b38fc36e325a38bc559e1684fabda260cba44b2b43de6c963112ca07a8289098
-      -   - '["glossary_choice","term:object.counter","zh-Hant",1]'
-          - sha256:2fbc3afdc45b48c847f4f889800a88a1af0789b91f20369f3aabf62b378c9729
-      -   - '["glossary_choice","term:object.token","zh-Hant",1]'
-          - sha256:b8ad42686a2cdae9a1f8c04dd7fc60e70841e5755232ed326affc0a4dc8834e3
-      -   - '["glossary_choice","term:phase.end","zh-Hant",1]'
-          - sha256:3a4e6fb479dc4b51d19299c554aec136ef55499f25f38519dad1c79336b2456e
-      -   - '["glossary_choice","term:rule.cannot_attack","zh-Hant",1]'
-          - sha256:6a4f3d659ac3e6b11a1f8640d0792ef05f29dd6fa67880d4dc492f712e6eebc6
-      -   - '["glossary_choice","term:rule.instead","zh-Hant",1]'
-          - sha256:a0bb281f71a9de9c9b97e822e1624a621bbc2f9f11950224ddee4e1fe86d2506
-      -   - '["glossary_choice","term:rule.same_name","zh-Hant",1]'
-          - sha256:7842933fc858635ab2066342b1616b6354dc33bfa9a6d2ff077cb5ff85650f4d
-      -   - '["glossary_choice","term:stat.max_pp","zh-Hant",1]'
-          - sha256:1ee8ec15575eb6937811e07a87ec54bfbb6b115b1085078bfe0b3b6623fe23b5
-      -   - '["glossary_choice","term:trait.academic","zh-Hant",1]'
-          - sha256:185844ca9399d044aae9a27e81ae32d11ea720077419bd3b0ad7ae4756b75d27
-      -   - '["glossary_choice","term:trait.fable","zh-Hant",1]'
-          - sha256:df9201435342403fc75e0e785b16db6e855c0c2728206be8cfb72ae0f87df6bd
-      -   - '["glossary_choice","term:trait.machina","zh-Hant",1]'
-          - sha256:51bec10bfc3bb151e68bc71450e70bf8dc5c929698e7e563eaed0c6ac86a3460
-      -   - '["glossary_choice","term:trait.omen","zh-Hant",1]'
-          - sha256:fbbf09bd544d58694eecf296d79ad72ab10a7ae6251ee8cd4c33fe866da44049
-      -   - '["glossary_choice","term:trait.pixie","zh-Hant",1]'
-          - sha256:909f70d04e76e1ea7466b5b566d5616afd72e9f5153868270f0c91dec2daaedb
-      -   - '["glossary_choice","term:trait.puppetry","zh-Hant",1]'
-          - sha256:fa9a6a2c88bf61bdbc03fd779898fe6a8cf1b5356ea292a303bd34c2c1bee200
-    sample_ids:
-      - '["glossary_choice","term:ability.lesson","zh-Hant",1]'
-      - '["glossary_choice","term:ability.necrocharge","zh-Hant",1]'
-      - '["glossary_choice","term:ability.overflow","zh-Hant",1]'
-      - '["glossary_choice","term:ability.quick","zh-Hant",1]'
-      - '["glossary_choice","term:action.banish","zh-Hant",1]'
-      - '["glossary_choice","term:action.restore","zh-Hant",1]'
-      - '["glossary_choice","term:action.return_to_hand","zh-Hant",1]'
-      - '["glossary_choice","term:duration.per_turn","zh-Hant",1]'
-      - '["glossary_choice","term:event.attack","zh-Hant",1]'
-      - '["glossary_choice","term:event.super_evolve","zh-Hant",1]'
-      - '["glossary_choice","term:keyword.bane","zh-Hant",1]'
-      - '["glossary_choice","term:object.counter","zh-Hant",1]'
-      - '["glossary_choice","term:object.token","zh-Hant",1]'
-      - '["glossary_choice","term:phase.end","zh-Hant",1]'
-      - '["glossary_choice","term:rule.cannot_attack","zh-Hant",1]'
-      - '["glossary_choice","term:rule.instead","zh-Hant",1]'
-      - '["glossary_choice","term:rule.same_name","zh-Hant",1]'
-      - '["glossary_choice","term:stat.max_pp","zh-Hant",1]'
-      - '["glossary_choice","term:trait.academic","zh-Hant",1]'
-      - '["glossary_choice","term:trait.fable","zh-Hant",1]'
-      - '["glossary_choice","term:trait.machina","zh-Hant",1]'
-      - '["glossary_choice","term:trait.omen","zh-Hant",1]'
-      - '["glossary_choice","term:trait.pixie","zh-Hant",1]'
-      - '["glossary_choice","term:trait.puppetry","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: gbaian10
-    reviewed_at: '2026-10-01T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者在確認頁核可此繁中選詞；日期照定案檔或追加紀錄（day，無時分秒）。首次配發 key 是協調者另行核可，origin 的專案歸類依委託政策，不表示維護者親自驗過官方來源；本次未採納英文，也未核可加粗。
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。

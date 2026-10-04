@@ -342,7 +342,7 @@ class DisplayShard(Shard):
 
 
 class CatalogIndex(RecordData):
-    catalog_adoption_format: Literal[1]
+    catalog_adoption_format: Literal[1, 2]
     kind: Literal["catalog_adoption_index"]
     includes: dict[str, Hash]
 

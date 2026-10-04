@@ -1,54 +1,495 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:17b3f73f26778b317648219537f659c0af0e0ce6146bd672fffb825fd7b8251e
 records:
-  - record_key: '["glossary_choice","term:trait.geo_niflhel","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:action.leave_play","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.geo_niflhel
+      term_id: term:action.leave_play
       lang: zh-Hant
       value:
         kind: authored
-        text: 吉歐‧尼布爾黑爾
-      origin: project
+        text: 離開戰場
       concept_evidence: []
       source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.look","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.look
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 查看
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.lose","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.lose
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 失去
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.place","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.place
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 放置
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.play","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.play
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 使用
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.put_into_play","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.put_into_play
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 召喚…到戰場上
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.restore","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.restore
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 回復
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.return_to_deck","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.return_to_deck
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 返回牌堆
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 svwb 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.return_to_hand","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.return_to_hand
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 返回手牌
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.reveal","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.reveal
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 公開
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.search","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.search
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 搜尋
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.shuffle","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.shuffle
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 洗牌
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.stand","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.stand
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 重置
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.super_evolve","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.super_evolve
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 超進化
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 svwb 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:action.transform","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.transform
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 變身
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:duration.per_turn","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:duration.per_turn
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 1回合中
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:duration.this_turn","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:duration.this_turn
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 本回合
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:duration.until_turn_end","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:duration.until_turn_end
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 到回合結束為止
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:event.attack","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:event.attack
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/4
+          text_hash: sha256:29ebdf2209a25632c47943d02a1fd533b3330b72e33e5cbda8a9099b8b34f86f
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '4'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/4
+            text_hash: sha256:6287260e3413db3d420cef1e787d68e6b8e31b1a20eb2d88a1ec08c741396fa4
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/4
+            text_hash: sha256:29ebdf2209a25632c47943d02a1fd533b3330b72e33e5cbda8a9099b8b34f86f
+          concept_note: 同概念依精確來源定位核對。
+      source_claim:
+  - record_key: '["glossary_choice","term:event.combat","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:event.combat
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/17
+          text_hash: sha256:ec24a66afe850cf224d178477d3fde0e81901f5635a187a3b6e6e4f1aa6941ec
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '17'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/17
+            text_hash: sha256:98106325662221d932b2e382d782e471eb7d0f11955c2ccf60f5693fc84ab06a
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/17
+            text_hash: sha256:ec24a66afe850cf224d178477d3fde0e81901f5635a187a3b6e6e4f1aa6941ec
+          concept_note: 同概念依精確來源定位核對。
+      source_claim:
+  - record_key: '["glossary_choice","term:event.enter_play","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:event.enter_play
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 進入戰場時
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:event.evolve","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:event.evolve
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/3
+          text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '3'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/3
+            text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/3
+            text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
+          concept_note: 同概念依精確來源定位核對。
+      source_claim:
+  - record_key: '["glossary_choice","term:event.gain_drive","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:event.gain_drive
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 獲得驅動時
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:trait.geo_niflhel","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 〈ジオ・ニヴルヘル〉 → 吉歐‧尼布爾黑爾；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:17b3f73f26778b317648219537f659c0af0e0ce6146bd672fffb825fd7b8251e
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:17b3f73f26778b317648219537f659c0af0e0ce6146bd672fffb825fd7b8251e
-    members:
-      -   - '["glossary_choice","term:trait.geo_niflhel","zh-Hant",1]'
-          - sha256:1781ba709a6718ec8086588a7265dc23e3b5b846cc926f6f728f9375d59b4a75
-    sample_ids:
-      - '["glossary_choice","term:trait.geo_niflhel","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 〈ジオ・ニヴルヘル〉 → 吉歐‧尼布爾黑爾；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:event.super_evolve","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:event.super_evolve
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/33
+          text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '33'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/33
+            text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/33
+            text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
+          concept_note: 同概念依精確來源定位核對。
+      source_claim:

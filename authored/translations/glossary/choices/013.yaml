@@ -1,53 +1,341 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:e10556192edf9b438a58676155fa9210c6df58ad9d2f3e23da570c9ef9aac940
 records:
-  - record_key: '["glossary_choice","term:zone.banishment","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.dark_charisma","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:zone.banishment
+      term_id: term:name.dark_charisma
       lang: zh-Hant
       value:
         kind: authored
-        text: 消失區
-      origin: project
+        text: 漆黑的領袖魅力
       concept_evidence: []
       source_claim:
-        source_work:
+  - record_key: '["glossary_choice","term:name.dark_eclipse","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dark_eclipse
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 暗黑日蝕
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.dark_metal_bicorn","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dark_metal_bicorn
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 暗黑金屬‧雙角獸
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dark_shield_mac_lir","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dark_shield_mac_lir
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 暗黑之盾 馬克利爾
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:zone.banishment","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 消滅領域 → 消失區；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:e10556192edf9b438a58676155fa9210c6df58ad9d2f3e23da570c9ef9aac940
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:e10556192edf9b438a58676155fa9210c6df58ad9d2f3e23da570c9ef9aac940
-    members:
-      -   - '["glossary_choice","term:zone.banishment","zh-Hant",1]'
-          - sha256:a4da01ba5eff8fd8cc69c75016210d235765159d85de42931b272c3f1e903acc
-    sample_ids:
-      - '["glossary_choice","term:zone.banishment","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 消滅領域 → 消失區；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.darkness_maiden_macha","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.darkness_maiden_macha
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 漆黑的少女 瑪哈
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.darkside_trumpeter","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.darkside_trumpeter
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 暗面小號手
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.death_sentence","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.death_sentence
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 死亡宣告
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.deliverer_of_punishment","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.deliverer_of_punishment
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 加罰的執行者
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.demonic_dragon_berserker_yaksha","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.demonic_dragon_berserker_yaksha
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魔龍戰鬼‧夜叉
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.demonic_dragon_mage_kimnara","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.demonic_dragon_mage_kimnara
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魔龍導師 緊那羅
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.demonic_lord_invasion","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.demonic_lord_invasion
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魔侯來襲
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.demonic_salvation_infinity","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.demonic_salvation_infinity
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 羅剎涅槃‧無式
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.demonium_clash_devil","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.demonium_clash_devil
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 粉碎惡魔‧戴莫尼亞
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.descent_of_the_king_of_knights","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.descent_of_the_king_of_knights
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 騎士王降臨
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.diawl","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.diawl
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 狄奧羅亞雷
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.disciple_of_lust","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.disciple_of_lust
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 欲望的信徒
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.diurnal_slumber","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.diurnal_slumber
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 待宵的休憩
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.divine_tiger","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.divine_tiger
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 神虎
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dolphin_soldier_of_high_speed_raids","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dolphin_soldier_of_high_speed_raids
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 高速游擊的海豚兵
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.doranbau","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.doranbau
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 多蘭汪
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dragon_eyed_secretary","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dragon_eyed_secretary
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 龍瞳書記
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dragon_knight_aleph","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dragon_knight_aleph
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 龍騎士‧阿里夫
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dragon_knight_nehalem","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dragon_knight_nehalem
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 龍騎士 尼哈連
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.dragon_monk_genjo","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dragon_monk_genjo
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 龍僧 玄奘
+      concept_evidence: []
+      source_claim:

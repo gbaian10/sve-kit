@@ -1,0 +1,105 @@
+"""Current values still need valid frozen sources and atomic authored provenance."""
+
+import shutil
+from typing import TYPE_CHECKING
+
+import pytest
+from pydantic import JsonValue
+
+from sve_carddb.build_db import create_database
+from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.build_inputs import BuildContext
+from sve_carddb.registry.storage import read_yaml
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.translations.current import convert
+from sve_carddb.translations.importer import Inputs, import_glossary
+from sve_carddb.translations.loader import load_glossary
+from sve_carddb.translations.sources import RUNTIME
+
+from .adoption_fixtures import commit
+from .build_db_fixtures import seed
+from .database_fixtures import DatabaseTemplate
+from .test_translation_importer import frozen as _frozen_fixture
+
+synthetic_frozen = _frozen_fixture
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from .test_translation_importer import Fixture
+
+
+@pytest.fixture(scope="module")
+def importer_template() -> DatabaseTemplate:
+    schema = compile_current_build(("translation_evidence",))
+    with create_database(schema) as db:
+        seed(db)
+        return DatabaseTemplate(schema, db._connection.serialize())
+
+
+@pytest.mark.parametrize("bad_source", [False, True])
+def test_current_import_rechecks_source_without_creating_decision(
+    synthetic_frozen: Fixture,
+    importer_template: DatabaseTemplate,
+    tmp_path: Path,
+    bad_source: bool,
+) -> None:
+    frozen = synthetic_frozen
+    shutil.copytree(frozen.root, tmp_path / "repository")
+    root = tmp_path / "repository"
+    old = load_glossary(root / "authored")
+    index = object_value(read_yaml(root / "authored/translations/index.yaml"))
+    includes = object_value(index["includes"])
+    for path, _, _ in old.shards:
+        rows = [
+            convert(r).model_dump(mode="json")
+            for r, _ in old.effective()
+            if (r.kind == "glossary_term") == ("concepts" in path)
+        ]
+        if "choices" in path:
+            rows[0]["low_confidence"] = True
+            if bad_source:
+                ref = object_value(
+                    object_value(
+                        array(object_value(rows[0]["data"])["concept_evidence"])[0]
+                    )["target_ref"]
+                )
+                ref["text_hash"] = "sha256:" + "0" * 64
+        payload: dict[str, JsonValue] = {
+            "translation_authored_format": 2,
+            "kind": "translation_shard",
+            "records": list[JsonValue](rows),
+        }
+        (root / "authored" / path).write_bytes(canonical(payload))
+        includes[path] = digest(canonical(payload))
+    index["translation_authored_format"] = 2
+    (root / "authored/translations/index.yaml").write_bytes(canonical(index))
+    revision = commit(root)
+    inputs = Inputs(root / "authored", root, revision)
+    config = object_value(parse(frozen.build.configuration.encode()))
+    config.update(inputs.configuration())
+    build = BuildContext.from_inputs(
+        frozen.program, {name: (root / name).read_bytes() for name in RUNTIME}, config
+    )
+    with importer_template.copy() as db:
+        if bad_source:
+            with pytest.raises(
+                ValueError, match=r"^Evidence must locate exact hash-verified text$"
+            ):
+                import_glossary(
+                    db, inputs, build=build, stores={"test-store": frozen.store}
+                )
+            assert not db.rows("glossary_term")
+        else:
+            before = db.rows("decision")
+            result = import_glossary(
+                db, inputs, build=build, stores={"test-store": frozen.store}
+            )
+            assert db.rows("decision") == before
+            row = db.rows("glossary_translation")[0].values
+            assert row["text"] == "合成乙"
+            assert "decision_id" not in row
+            assert row["authored_source_id"] is not None
+            assert row["origin"] == "official"
+            assert row["low_confidence"] is True
+            assert len(result.uses) == 2

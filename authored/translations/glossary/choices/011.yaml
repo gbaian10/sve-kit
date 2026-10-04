@@ -1,54 +1,344 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:093371345ee447a308b32d1e1c48b404206f9f2f9f1f94f60947cb6d2582fcbf
 records:
-  - record_key: '["glossary_choice","term:trait.richmond_corporation","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.classroom_lily","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.richmond_corporation
+      term_id: term:name.classroom_lily
       lang: zh-Hant
       value:
         kind: authored
-        text: 里士滿工商協會
-      origin: project
+        text: 教室的白百合
       concept_evidence: []
       source_claim:
-        source_work: 公主連結
+  - record_key: '["glossary_choice","term:name.clear","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.clear
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 可璃亞
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
         source_urls:
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:trait.richmond_corporation","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 リッチモンド商工会 → 里士滿工商協會；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:093371345ee447a308b32d1e1c48b404206f9f2f9f1f94f60947cb6d2582fcbf
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:093371345ee447a308b32d1e1c48b404206f9f2f9f1f94f60947cb6d2582fcbf
-    members:
-      -   - '["glossary_choice","term:trait.richmond_corporation","zh-Hant",1]'
-          - sha256:9c154b2c7095a61aa6cd8c929af34cbcf550ebe32cd67bca6cc239a31b47be31
-    sample_ids:
-      - '["glossary_choice","term:trait.richmond_corporation","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 リッチモンド商工会 → 里士滿工商協會；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.cleuru","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cleuru
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 庫露露
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.close_knit_ambitions","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.close_knit_ambitions
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 一起繼續創造的回憶
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.coco_infernal_left_paw","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.coco_infernal_left_paw
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 冥焰的左臂‧可可
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cold_case_analyst","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cold_case_analyst
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 隘路的調查員
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.colossal_grudge","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.colossal_grudge
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 巨大的怨念
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.conferrer_of_vows","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.conferrer_of_vows
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 誓斷的賦予者
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.conjure_golem","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.conjure_golem
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 巨像的鍊成
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.construct_of_truth_and_being","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.construct_of_truth_and_being
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 真理與存在的共同幻想
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.cool_earrings","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cool_earrings
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cool耳環
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cool_pendant","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cool_pendant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cool墜飾
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cool_tiara","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cool_tiara
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cool后冠
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.coral_assault","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.coral_assault
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 珊瑚突擊
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cornelia_li_britannia","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cornelia_li_britannia
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 柯內莉亞‧Li‧不列顛尼亞
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.corruption_guardian","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.corruption_guardian
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 腐化守護者
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.covetous_serpent","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.covetous_serpent
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 貪婪之蛇
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.creditta","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.creditta
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 克蕾琪塔
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.crescent_moon_of_centennial_death","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crescent_moon_of_centennial_death
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 佰死的新月
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_congregant_of_repose","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_congregant_of_repose
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 安息的團結者
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_galmieux_ardor_manifest","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_galmieux_ardor_manifest
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 烈絕的顯現‧嘉魯蜜兒
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_himeka_heir_to_repose","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_himeka_heir_to_repose
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 安息的繼承者‧希彌佳
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_krulle_heir_to_unkilling","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_krulle_heir_to_unkilling
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 不殺的繼承者‧庫璐璐
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_marwynn_despair_manifest","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_marwynn_despair_manifest
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 絕望的顯現‧瑪文
+      concept_evidence: []
+      source_claim:

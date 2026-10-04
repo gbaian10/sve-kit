@@ -1,53 +1,392 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:47e3e7190c0a219c5c0154fc7f5adb3ada88a419ce583c009a9bffe4586a56e8
 records:
-  - record_key: '["glossary_choice","term:ability.advance_activation","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.akino_saren","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.advance_activation
+      term_id: term:name.akino_saren
       lang: zh-Hant
       value:
         kind: authored
-        text: 進階起動
-      origin: project
+        text: 秋乃＆咲戀
       concept_evidence: []
       source_claim:
-        source_work:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akira_sunazuka","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akira_sunazuka
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 砂塚明
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akira_sunazuka_online_life","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akira_sunazuka_online_life
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔Life Online〕砂塚明
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.albert_tempestuous_doom","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.albert_tempestuous_doom
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 雷迅卿‧阿爾貝爾
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.alfred_early","zh-Hant"]'
+    origin: project
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.alfred_early
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 阿爾弗雷德‧厄利
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:ability.advance_activation","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 アドバンス起動 → 進階起動；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:47e3e7190c0a219c5c0154fc7f5adb3ada88a419ce583c009a9bffe4586a56e8
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:47e3e7190c0a219c5c0154fc7f5adb3ada88a419ce583c009a9bffe4586a56e8
-    members:
-      -   - '["glossary_choice","term:ability.advance_activation","zh-Hant",1]'
-          - sha256:427f9f4ed2ea037ac22c9c34e81d616ce27d9bb351853dd329e188286741ec47
-    sample_ids:
-      - '["glossary_choice","term:ability.advance_activation","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 アドバンス起動 → 進階起動；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.alice_golden_afternoon","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.alice_golden_afternoon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 不可思議的青空‧愛麗絲
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.all_access_search","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.all_access_search
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 無限搜查
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.amataz_blade_of_renewal","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.amataz_blade_of_renewal
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 迴天劍‧阿瑪茲
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.amelia_sunny_paladin","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.amelia_sunny_paladin
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 晴空的銀騎士‧艾蜜莉亞
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.ameth","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.ameth
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 愛梅斯
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.ameth_amulet","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.ameth_amulet
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 愛梅斯護符
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.amped_on_acorns","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.amped_on_acorns
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 橡子蓄力
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.anastasia","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.anastasia
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 安娜斯塔西婭
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.anastasia_all_out_vacation","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.anastasia_all_out_vacation
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔貪心的晴朗假期〕安娜斯塔西婭
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.anastasia_seize_the_light","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.anastasia_seize_the_light
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔捕捉光芒〕安娜斯塔西婭
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.ancient_protector","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.ancient_protector
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 古老的守護者
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.anemone","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.anemone
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 安涅默涅
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.angelic_maid","zh-Hant"]'
+    origin: project
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.angelic_maid
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Angelic Maid
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.anne_grea_bonds_everlasting","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.anne_grea_bonds_everlasting
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 遙遠的羈絆‧安與古蕾婭
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.anzu_futaba","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.anzu_futaba
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 雙葉杏
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aoi","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aoi
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 碧
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aoi_kiryuin","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aoi_kiryuin
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 桐生院葵
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aoi_kiryuin_trainers_teamwork","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aoi_kiryuin_trainers_teamwork
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔一起朝相同的目標！〕桐生院葵
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.apostle_of_lust","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.apostle_of_lust
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 欲望的使徒
+      concept_evidence: []
+      source_claim:

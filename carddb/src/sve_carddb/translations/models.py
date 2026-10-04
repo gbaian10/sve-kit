@@ -367,13 +367,13 @@ class Decision(RecordData):
 
 
 class Envelope(RecordData):
-    translation_authored_format: Literal[1]
+    translation_authored_format: Literal[1, 2]
 
     @field_validator("translation_authored_format", mode="before")
     @classmethod
     def _format(cls, value: object) -> object:
         if type(value) is not int:
-            raise ValueError("Translation format must be integer one")
+            raise ValueError("Translation format must be an integer")
         return value
 
 
@@ -386,7 +386,7 @@ class Shard(Envelope):
 
 
 class Index(Envelope):
-    translation_authored_format: Literal[1]
+    translation_authored_format: Literal[1, 2]
     kind: Literal["translation_index"]
     includes: dict[str, Hash]
     inventories: dict[str, Hash]

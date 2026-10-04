@@ -1,53 +1,346 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:b9ef342fa18608fdd7fee6e33acc5b3daf8ec6f971fc28288aa8b793fe47089f
 records:
-  - record_key: '["glossary_choice","term:trait.musical","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.blaster_javelin","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.musical
+      term_id: term:name.blaster_javelin
       lang: zh-Hant
       value:
         kind: authored
-        text: 歌手
-      origin: project
+        text: 爆破標槍
       concept_evidence: []
       source_claim:
-        source_work:
+  - record_key: '["glossary_choice","term:name.blazing_core_dragon","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blazing_core_dragon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 熾熱核心龍
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.blazing_flare_dragon","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blazing_flare_dragon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 熾焰烈火龍
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:trait.musical","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 シンガー → 歌手；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:b9ef342fa18608fdd7fee6e33acc5b3daf8ec6f971fc28288aa8b793fe47089f
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:b9ef342fa18608fdd7fee6e33acc5b3daf8ec6f971fc28288aa8b793fe47089f
-    members:
-      -   - '["glossary_choice","term:trait.musical","zh-Hant",1]'
-          - sha256:e79a667f522fd8eaaa39e4ed48604bdf2c4c4acf461b18bda30379c1b24b3df3
-    sample_ids:
-      - '["glossary_choice","term:trait.musical","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 シンガー → 歌手；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.blind_spot_surveyor","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blind_spot_surveyor
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 死角的觀測員
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.blossoms_advance","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blossoms_advance
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 夢色開花前線
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.blue_storm_armada","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blue_storm_armada
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蒼嵐艦隊
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.blue_storm_dragon_maelstrom","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blue_storm_dragon_maelstrom
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蒼嵐龍 大漩渦
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.blue_storm_supreme_dragon_glory_maelstrom","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.blue_storm_supreme_dragon_glory_maelstrom
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蒼嵐霸龍 榮耀‧大漩渦
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.brand_new_beat","zh-Hant"]'
+    origin: project
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.brand_new_beat
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Brand New Beat
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.breaker_of_limits","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.breaker_of_limits
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 極限突破
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.bright_lights","zh-Hant"]'
+    origin: project
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.bright_lights
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: BRIGHT:LIGHTS
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.brilliant_cut","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.brilliant_cut
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 明亮式切割
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.bring_em_home_please","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.bring_em_home_please
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 轟出去吧──！！？
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.bunny_eared_administrator","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.bunny_eared_administrator
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 兔耳管理員
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.burning_horn_dragon","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.burning_horn_dragon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 燃角龍
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.c_c","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.c_c
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: C.C.
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.c_c_woodland_witch","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.c_c_woodland_witch
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 森林魔女‧C.C.
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.call_of_the_guild","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.call_of_the_guild
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 公會呼喚
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.candy_clown","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.candy_clown
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 糖果小丑
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cardfight_vanguard_divinez_deluxe_arc","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cardfight_vanguard_divinez_deluxe_arc
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 卡片戰鬥!! 先導者 Divinez
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.carrot","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.carrot
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紅蘿蔔
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/training-event-helper
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.cavalry_of_black_steel","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cavalry_of_black_steel
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 黑鋼的戰騎
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.celestial_shikigami","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.celestial_shikigami
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 天后
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.celestial_valkyries","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.celestial_valkyries
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 神諭的女武神
+      concept_evidence: []
+      source_claim:

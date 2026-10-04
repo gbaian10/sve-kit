@@ -1,53 +1,357 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:d58799d0b7c9dbd28bc57b1e1e9b55456ecc9a0cc20ce712ec24479fd8b5361e
 records:
-  - record_key: '["glossary_choice","term:trait.eidolon","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.crest_mjerrabaine_great_manifest","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.eidolon
+      term_id: term:name.crest_mjerrabaine_great_manifest
       lang: zh-Hant
       value:
         kind: authored
-        text: 偶像
-      origin: project
+        text: 紋章 絕大的顯現‧馬塞班恩
       concept_evidence: []
       source_claim:
-        source_work:
+  - record_key: '["glossary_choice","term:name.crest_octrice_hollowness_manifest","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_octrice_hollowness_manifest
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 空絕的顯現‧歐克托莉斯
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_sham_nacha_heir_to_entwining","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_sham_nacha_heir_to_entwining
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 混融的繼承者‧夏姆‧娜可亞
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_supplicant_of_repose","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_supplicant_of_repose
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 安息的祈禱者
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crest_wilbert_sobbing_paladin","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crest_wilbert_sobbing_paladin
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 紋章 嗚咽的聖騎士‧維爾伯特
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crimson_beast_tamer","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crimson_beast_tamer
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 緋紅馴獸師
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.croce","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.croce
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 克蘿茜
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.crocus_rat","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crocus_rat
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 番紅花鼠
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.crusader_s_rallying_cry","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.crusader_s_rallying_cry
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 神聖的咆哮
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.curren_chan","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.curren_chan
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 真機伶
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.cursed_lancer","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cursed_lancer
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 詛咒槍兵
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.curtain_call_of_smiles","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.curtain_call_of_smiles
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 笑容的謝幕
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cute_earrings","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cute_earrings
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cute耳環
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文） 消歧說明：另見「アイドル」：兩者不同，要避免同名。偶像出現在主教職業的神像、祭壇類卡片
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:trait.eidolon","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 偶像 → 偶像；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:d58799d0b7c9dbd28bc57b1e1e9b55456ecc9a0cc20ce712ec24479fd8b5361e
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:d58799d0b7c9dbd28bc57b1e1e9b55456ecc9a0cc20ce712ec24479fd8b5361e
-    members:
-      -   - '["glossary_choice","term:trait.eidolon","zh-Hant",1]'
-          - sha256:c41556f21e372c11d143d72f693c00a45cd82990b1d9f7de737216079937314b
-    sample_ids:
-      - '["glossary_choice","term:trait.eidolon","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 偶像 → 偶像；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.cute_pendant","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cute_pendant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cute墜飾
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cute_tiara","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cute_tiara
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cute后冠
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.cyberglasses_criminal","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.cyberglasses_criminal
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 賽博眼鏡龐克
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.daiichi_ruby","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.daiichi_ruby
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 第一紅寶
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.daitaku_helios","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.daitaku_helios
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 大德太陽
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.daiwa_scarlet","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.daiwa_scarlet
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 大和赤驥
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.dancing_in_the_rain","zh-Hant"]'
+    origin: project
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dancing_in_the_rain
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Dancin' in the Rain
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.daria_dimension_drifter","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.daria_dimension_drifter
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 超越境界者‧桃樂絲
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dark_axe_nachtfang","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dark_axe_nachtfang
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 闇斧夜之牙
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.dark_bishop","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dark_bishop
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 黑主教
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.dark_cat","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.dark_cat
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 黑暗‧貓
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。

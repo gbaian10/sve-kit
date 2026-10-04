@@ -1,0 +1,461 @@
+translation_authored_format: 2
+kind: translation_shard
+records:
+  - record_key: '["glossary_choice","term:trait.arena","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.arena
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 挑戰者
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.armed","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.armed
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 武裝
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.arthurian","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.arthurian
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 圓桌
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.artifact","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.artifact
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/tribe_names/14
+          text_hash: sha256:f6d3f5ab7d368a5f76dfc07f75856aa6c2b2beda8f92496093e6adf7416adde6
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: tribe_names
+          entry_key: '14'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/14
+            text_hash: sha256:2ab0403946331cf22e90ff21fbd9b06eaa5fc43ba8efaf8a14257afd1101bd15
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/14
+            text_hash: sha256:f6d3f5ab7d368a5f76dfc07f75856aa6c2b2beda8f92496093e6adf7416adde6
+          concept_note: 同概念依精確來源定位核對。
+      source_claim:
+  - record_key: '["glossary_choice","term:trait.assassin","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.assassin
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 暗殺者
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.avian","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.avian
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 鳥族
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.beast","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.beast
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 野獸
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.bnw","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.bnw
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: BNW
+      concept_evidence: []
+      source_claim:
+        source_work: 賽馬娘
+        source_urls:
+          - https://gnn.gamer.com.tw/detail.php?sn=214115
+          - https://zh.wikipedia.org/zh-tw/賽馬娘_Pretty_Derby
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.caon","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.caon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 哞哞自衛隊
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://www.princessconnect.so-net.tw/role
+          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.carmina","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.carmina
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 慈樂之音
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://www.princessconnect.so-net.tw/role
+          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.celestial","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.celestial
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 星神
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.chef","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.chef
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 廚師
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.chess","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.chess
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 西洋棋
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.commander","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.commander
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 指揮官
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.condemned","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.condemned
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 八獄
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.cool","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.cool
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cool
+      concept_evidence: []
+      source_claim:
+        source_work: 偶像大師 灰姑娘女孩
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.crystalian","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.crystalian
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 冰晶
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.cute","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.cute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cute
+      concept_evidence: []
+      source_claim:
+        source_work: 偶像大師 灰姑娘女孩
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.dancer","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.dancer
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 舞者
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.deity","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.deity
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 大神
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.demon","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.demon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魔界
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.departed","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.departed
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/tribe_names/6
+          text_hash: sha256:3429a3a4795b93135698ed2726ced10edb048176586d2efb57fd7dce97d3bc01
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: tribe_names
+          entry_key: '6'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/6
+            text_hash: sha256:3429a3a4795b93135698ed2726ced10edb048176586d2efb57fd7dce97d3bc01
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/6
+            text_hash: sha256:3429a3a4795b93135698ed2726ced10edb048176586d2efb57fd7dce97d3bc01
+          concept_note: 同概念依精確來源定位核對。
+      source_claim:
+  - record_key: '["glossary_choice","term:trait.detective","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.detective
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 偵探
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:trait.diabolos","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.diabolos
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 惡魔偽王國軍
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://www.princessconnect.so-net.tw/role
+          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。

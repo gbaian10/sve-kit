@@ -3,6 +3,7 @@
 import re
 from collections import defaultdict
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
@@ -10,7 +11,11 @@ from pydantic import JsonValue, ValidationError
 from sve_carddb.catalog.adoption_loader import ordered
 from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import array, canonical, digest, parse
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.translations.current import CURRENT_FORMAT
+from sve_carddb.translations.current import records as current_records
+from sve_carddb.translations.current import validate as validate_current
+from sve_carddb.translations.current_models import Shard as CurrentShard
 from sve_carddb.translations.models import (
     AssignmentRecord,
     ChoiceRecord,
@@ -26,6 +31,8 @@ from sve_carddb.translations.models import (
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from sve_carddb.translations.current_models import Record as CurrentRecord
 
 
 def _model[T: RecordData](model: type[T], value: JsonValue) -> T:
@@ -87,10 +94,29 @@ class Snapshot:
     shards: tuple[tuple[str, bytes, bytes], ...]
     closure: tuple[tuple[str, bytes, bytes], ...] = ()
 
+    @property
+    def has_current(self) -> bool:
+        """Version belongs to each shard, independently of the shared index."""
+        return any(
+            object_value(parse(c))["translation_authored_format"] == CURRENT_FORMAT
+            for _, _, c in self.shards
+        )
+
+    @cached_property
+    def _current_values(self) -> tuple[CurrentRecord, ...]:
+        """Frozen record models can be shared within this exact byte snapshot."""
+        return current_records(self)
+
+    def current_records(self) -> tuple[CurrentRecord, ...]:
+        """Expose current data to consumers without synthesizing legacy decisions."""
+        return self._current_values
+
     def envelopes(self) -> tuple[Shard, ...]:
         """Return detached models; callers cannot mutate the approved byte snapshot."""
         return tuple(
-            Shard.model_validate_json(content) for _, _, content in self.shards
+            Shard.model_validate_json(content)
+            for _, _, content in self.shards
+            if object_value(parse(content))["translation_authored_format"] == 1
         )
 
     def records(self) -> tuple[tuple[Record, str], ...]:
@@ -169,12 +195,29 @@ def validate_snapshot(snapshot: Snapshot) -> None:
         )
         if match is None:
             raise ValueError("Glossary snapshot contains an unsupported shard path")
+        if (
+            object_value(parse(content))["translation_authored_format"]
+            == CURRENT_FORMAT
+        ):
+            current = _model(CurrentShard, parse(content))
+            keys = [r.record_key for r in current.records]
+            if keys != sorted(set(keys)):
+                raise ValueError(
+                    "Current translation records must be sorted and unique"
+                )
+            for record in current.records:
+                is_override = record.kind in {"context_assignment", "card_name_concept"}
+                if is_override != (match[1] == "overrides"):
+                    raise ValueError("Translation record is in the wrong authored area")
+            continue
         shard = _model(Shard, parse(content))
         is_override = isinstance(shard.records[0], (AssignmentRecord, ConceptRecord))
         if is_override != (match[1] == "overrides"):
             raise ValueError("Translation record is in the wrong authored area")
         _envelope(shard, match[2])
     _history(snapshot)
+    if snapshot.has_current:
+        validate_current(snapshot)
 
 
 def _safe(path: Path) -> None:
@@ -199,6 +242,7 @@ def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] --
     if present != set(indexed):
         raise ValueError("Translation indexed file closure differs from disk")
     sequences: dict[str, list[int]] = defaultdict(list)
+    current_groups: set[str] = set()
     shards = []
     closure = []
     for name, checksum in sorted(indexed.items()):
@@ -219,14 +263,21 @@ def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] --
         content = canonical(read_yaml(file))
         if digest(content) != checksum:
             raise ValueError("Translation shard hash mismatch")
+        if (
+            object_value(parse(content)).get("translation_authored_format")
+            == CURRENT_FORMAT
+        ):
+            current_groups.add(name.rsplit("/", 1)[0])
         closure.append((name, file.read_bytes(), content))
         if inventory is not None or (match is not None and match[1] == "templates"):
             _template_input(name, content)
             continue
         assert match is not None
         shards.append((name, file.read_bytes(), content))
-    for numbers in sequences.values():
-        if sorted(numbers) != list(range(1, len(numbers) + 1)):
+    for group, numbers in sequences.items():
+        if group not in current_groups and sorted(numbers) != list(
+            range(1, len(numbers) + 1)
+        ):
             raise ValueError("Translation shard sequence gap")
     snapshot = Snapshot(path.read_bytes(), tuple(shards), tuple(closure))
     validate_snapshot(snapshot)

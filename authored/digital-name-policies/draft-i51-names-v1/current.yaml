@@ -1,0 +1,178 @@
+digital_name_policy_format: 2
+kind: digital_name_policy
+policy_id: draft-i51-names-v1
+purpose: names
+content:
+  scope:
+    field: name
+    owners:
+      - face_revision.name
+      - known_printing_face.name
+    region: jp
+    source_lang: ja
+    target_lang: zh-Hant
+  game_priority:
+    - sv1
+    - svwb
+  target_minimum_check:
+    kana_ranges:
+      -   - 12353
+          - 12438
+      -   - 12441
+          - 12447
+      -   - 12449
+          - 12538
+      -   - 12540
+          - 12543
+      -   - 12784
+          - 12799
+      -   - 65382
+          - 65439
+      -   - 110592
+          - 110847
+      -   - 110848
+          - 110895
+      -   - 110896
+          - 110959
+    whitespace_codepoints:
+      - 9
+      - 10
+      - 11
+      - 12
+      - 13
+      - 32
+      - 133
+      - 160
+      - 5760
+      - 8192
+      - 8193
+      - 8194
+      - 8195
+      - 8196
+      - 8197
+      - 8198
+      - 8199
+      - 8200
+      - 8201
+      - 8202
+      - 8232
+      - 8233
+      - 8239
+      - 8287
+      - 12288
+    trim_or_normalize: false
+  excluded_names: []
+  name_overrides:
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:084112a362ce743312b2570ab1a02da63fbc3b81638d417d315ee7d7a1e0c2e7
+      source_hash: sha256:6582bbe2f21b835feecaa6139ae0c96e097e4a893965b34bc97043a8917494e1
+      term_id: term:name.center_street
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:0f99b8770578883e4f03df37756c6001b061218e4485c725f589635a05b9fb2c
+      source_hash: sha256:1defb8fbd724fec62625e314792737abadf980501b654e10a41557006eea1c8a
+      term_id: term:name.dancing_in_the_rain
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:20dcd9493c32ebd62e72b9cd0c6875256828ea28cb5d7fbdcf5b6c09801e2d0e
+      source_hash: sha256:0cffacdd10d7750b79c0195d4797f659ee7314f08464b328b71812fe4e7a30de
+      term_id: term:name.my_life_my_sounds
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:2910a9866090d556d16cf5af3208a5027670b1abc6ee4cf04c917a059d49692a
+      source_hash: sha256:6948cfbed35d4cf5ff34969afe924ddbbebb9e1b42328c83ebd83c4aa69dd039
+      term_id: term:name.lovesign
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:2b7b7f6cad00d9a6b28a51f0969570c98731369f08766df2ed9d614cfb89a808
+      source_hash: sha256:03dde2d11025ef04a9dc7dba5780d5b423a6dd6babda3bc686d45b3ea697c6da
+      term_id: term:name.passion_tiara
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:2ed621956d5fe5e30ebff3b1865b9bb01c529744d1285863e53c6b3b774e9274
+      source_hash: sha256:c72f5617eb3004af861d467922b8190aa4bbaa1890de1b1c839d7812e83199f5
+      term_id: term:name.sparkling_days
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:42ed9b45790bc513a381ca36e292061920852d1ddb251cfd111a997d6f60d02a
+      source_hash: sha256:8769adb8b05ee36193ff0cb252d7f25fead8105257f206f0794299b4207469cd
+      term_id: term:name.passion_pendant
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:4958957a2612d8a7ceeb51ac751a47f933377e0d5d08f07bece974a0ba91154a
+      source_hash: sha256:0eca1e43c8b4c2b2b4e9019a5906b753b2f0dca62f39852ca8b6f0ccf97f541a
+      term_id: term:name.cool_tiara
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:4e6666c5875416c2eac7336b54b461a6d79cdfdcffef42672c3ee13e252d28c3
+      source_hash: sha256:551a8e9376db48a094b518ee3951f4d376beaab45d7c1966bed5fb73780e9922
+      term_id: term:name.diawl
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:5542e767fee6f9923165cd663d818d3acaacb1fc2ff5bb3194653e4398eb8c11
+      source_hash: sha256:995013a489136e7583257323e2fa0191201a7bb2635a24dea20c0249ffb2de07
+      term_id: term:name.unbound_emotion
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:69f1dbb890f6fb2d5750246b2e8df26c635dff9cc3cda0785e454a32a3cb19c2
+      source_hash: sha256:ee11fce9c63ebf368bca90f069806c881404f70708e6be19173d1467868462e0
+      term_id: term:name.miroir
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:742fb77f163563ce798da4274931f36cf86a7ddd24ed4ac88eaa5c3d676e8843
+      source_hash: sha256:7ba6ca7f810606a67e62133f90a35d39f634ead621ee8e382a4ca9be828cb501
+      term_id: term:name.cute_pendant
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:7798f1ce398e0764284669ddc02754d2a751f169b73207551aef3090e77381e6
+      source_hash: sha256:6d006477309ebe0266a49157fd275f326e4bb88f6a1e9ace3a654591042b406b
+      term_id: term:name.bright_lights
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:9460b9629abadb546dc9062ac705a9c4885db12aee663aaffb99f59825d8773f
+      source_hash: sha256:771e42d29f82b0747f025e7a429de98b1824f2868bb51878b1e1065194eab453
+      term_id: term:name.aurora_healing
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:9db392b1cddc09b6c612cd838eaf1bdfb1f13082693a3728e00988bdc5347c9d
+      source_hash: sha256:8d28a2fa2db53c0e2bd81867e41a6733e5424f2531200998307bee152c2be20b
+      term_id: term:name.fortuna_regina
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:9deb9bfb0b66035ab30e3f3bbdfd7b22cc6e07f2561a8cf01608f545df2d8dc9
+      source_hash: sha256:7f01ed96a7fe138570e5238a960863ff278abb6ea91aba54a18ddfdcc7cebf39
+      term_id: term:name.cute_tiara
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:a735e4d040d1400ffdb329a8da97876d59561b306334573cf5eb4b1e26f87716
+      source_hash: sha256:cb1cbda07a15e7834bb7ca5cba366d19454067da89d1296b50e5a69801f69f35
+      term_id: term:name.angelic_maid
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:b42cdfe8d0f1f85d0fe2202bb2e1b9818f5ccada4d5a8b00a7185a368f0e4d20
+      source_hash: sha256:4940d97c8fc12fc64955a86a331179e7761bfe04bcaa314306df9b125e3426ad
+      term_id: term:name.prank_proclamation
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:c28403785c36331ffda99f390f4ee9e022da09b31d181f5160e5bad2987e0255
+      source_hash: sha256:c65413d4949dfc0d08869ce199290c74eb8e630e8fbfe2055caca43764f87585
+      term_id: term:name.precocious_little_devil
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:c9e73c99bacfce1474376d4e0ae649bdac41def7c714d460d26c68e526c01f18
+      source_hash: sha256:eaccfa9712123707b8b3f03ff6b2c6969793e64766e683eebea30d8f037af186
+      term_id: term:name.glitz_glam_parade
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:d93100d30312a099fce177afaf17ec25afc47d0c5121b2fc4dbfe8712454a910
+      source_hash: sha256:3260b59af0ac8338e871def20a1440de3a0ceaae37980ef5f68b2728a74029e2
+      term_id: term:name.new_wave
+    - owner:
+        kind: face_revision
+        revision_id: rev:v1:f72f3128120bfadd66f66c746f961e1197affef53e1c6d8f38918fbb0154ce28
+      source_hash: sha256:ab77ef7d9bc8fad4810b82b0387839a5745b11fba617b308431b1854ab8b12e8
+      term_id: term:name.cool_pendant
+origin: project
+low_confidence: false
+note: ''

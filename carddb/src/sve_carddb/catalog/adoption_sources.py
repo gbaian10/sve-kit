@@ -38,6 +38,9 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_inputs import BuildContext, Source
     from sve_carddb.catalog.adoption_models import Record, ReviewContext, TextValue
+    from sve_carddb.catalog.current_models import (
+        VocabularyRecord as CurrentVocabularyRecord,
+    )
     from sve_carddb.registry.snapshot import RegistrySnapshot
     from sve_carddb.template_semantics.registry import Checked
 
@@ -500,7 +503,10 @@ class AdoptionSources:
                 )
 
     def value(
-        self, value: TextValue, record: Record, review: ReviewContext
+        self,
+        value: TextValue,
+        record: Record | CurrentVocabularyRecord,
+        review: ReviewContext,
     ) -> LocalizedText:
         """Source TextValues must be part of the same human-approved evidence set."""
         if isinstance(value, AuthoredText):

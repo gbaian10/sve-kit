@@ -1,0 +1,43 @@
+catalog_adoption_format: 2
+kind: catalog_adoption_shard
+records:
+  - record_key: '["language_adoption",{"code":"en"}]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: language_adoption
+    data:
+      subject:
+        code: en
+      value:
+        display_name: English
+        fallback_order:
+          - ja
+      evidence: []
+  - record_key: '["language_adoption",{"code":"ja"}]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: language_adoption
+    data:
+      subject:
+        code: ja
+      value:
+        display_name: 日本語
+        fallback_order:
+          - en
+      evidence: []
+  - record_key: '["language_adoption",{"code":"zh-Hant"}]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: language_adoption
+    data:
+      subject:
+        code: zh-Hant
+      value:
+        display_name: 繁體中文
+        fallback_order:
+          - ja
+          - en
+      evidence: []

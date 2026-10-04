@@ -11,6 +11,9 @@ from sve_carddb.digital_links.candidates import sve_inventory
 from sve_carddb.digital_links.catalogue import complete_inventory
 from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
+from sve_carddb.digital_name_policies.current_evaluate import (
+    catalogue as current_catalogue,
+)
 from sve_carddb.digital_name_policies.evaluate import (
     FrozenName,
     NameOwner,
@@ -24,6 +27,9 @@ from sve_carddb.digital_name_policies.runtime import require_runtime
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
+    from sve_carddb.digital_name_policies.current_evaluate import (
+        Catalogue as CurrentCatalogue,
+    )
     from sve_carddb.digital_name_policies.evaluate import Catalogue, OwnerEvidence
     from sve_carddb.digital_name_policies.loader import Snapshot
     from sve_carddb.translations.sources import Sources
@@ -66,17 +72,20 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
     review = review_context(sources)
     index = Evidence(sources).index(review)
     physical = sve_inventory(sources, review)
-    names_policy, links_policy = (
-        snapshot.effective("names"),
-        snapshot.effective("links"),
-    )
-    historic = historical_sources(names_policy, sources.stores, sources.repository.root)
-    names = catalogue(names_policy, historic)
-    links_sources = historic
-    if links_policy.catalogue() != names_policy.catalogue():
-        links_sources = historical_sources(
-            links_policy, sources.stores, sources.repository.root
+    names: Catalogue | CurrentCatalogue
+    if snapshot.current_names:
+        historic = sources
+        names = current_catalogue(snapshot.current_names[0], sources)
+    else:
+        names_policy = snapshot.effective("names")
+        historic = historical_sources(
+            names_policy, sources.stores, sources.repository.root
         )
+        names = catalogue(names_policy, historic)
+    links_policy = snapshot.effective("links")
+    links_sources = historical_sources(
+        links_policy, sources.stores, sources.repository.root
+    )
     links = catalogue(links_policy, links_sources)
     owners = []
     seen = set()
@@ -148,7 +157,7 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
         "baseline_hash": None if baseline is None else digest(baseline),
         "baseline": "empty_first_run" if baseline is None else "previous_report",
         "summary": {
-            "policies": len(snapshot.policies),
+            "policies": len(snapshot.policies) + len(snapshot.current_names),
             "owners_eligible": counts["eligible"],
             "owners_untranslated": counts["untranslated"],
             "owners_excluded": counts["excluded"],
@@ -189,7 +198,9 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
 
 
 def _comparison(
-    names: Catalogue, owners: list[OwnerEvidence], comparison: Sources
+    names: Catalogue | CurrentCatalogue,
+    owners: list[OwnerEvidence],
+    comparison: Sources,
 ) -> dict[str, JsonValue]:
     """Diagnose a newer catalogue without certifying continuation or replacing pins."""
     require_runtime(comparison)

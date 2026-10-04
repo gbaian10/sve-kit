@@ -1,4 +1,33 @@
-# Adopted glossary and digital names
+# Glossary and digital names
+
+## Editable current values (format 2)
+
+`Index` accepts formats 1 and 2 independently of each shard's format. New glossary
+shards contain `record_key/kind/data/origin/low_confidence/note`, without decisions,
+revision chains or approval evidence. `Snapshot.current_records()` is the complete
+current view; the legacy `records()/effective()` APIs expose format-one records only.
+Current selection keys and concept IDs remain stable when wording or notes change.
+
+Use `build_db.current.compile_current_build()` with current imports. The importer
+checks exact frozen sources, language, spans, owner applicability and official
+same-concept evidence, then records real authored provenance. It creates no review
+decisions. `current_names.prepare()` resolves each owner's own printed source;
+changed sources cannot borrow an old assignment. `current_card_names.prepare()`
+produces new card-name values from caller-selected keys without requiring an event.
+
+Current name policies contain business conditions, exact name exclusions and explicit
+owner/source overrides. Complete frozen catalogues follow sv1 then svwb, with owner
+eligibility checked independently of ambiguous semantic name concepts. Actual
+same-card relations retain their existing checks; same-name browsing supplies no
+translation authority. Reports contain IDs, counts and reasons rather than card text.
+
+Origin and low confidence are independent: machine wording stays machine even after
+review, and valid low-confidence wording is usable. Current render IDs derive from
+semantic values and quality, not comments or approval hashes. Snapshot publication
+of the new quality fields requires coordinated schema/producer/reader support;
+the legacy public translation shape is not silently extended here.
+
+## Legacy transition
 
 This library implements the glossary boundary of translation-contract §2/§5.
 It has no crawler, CLI command, application entry point or snapshot selection.

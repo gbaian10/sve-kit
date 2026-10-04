@@ -31,6 +31,12 @@ if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.catalog.adoption_models import Record, ReviewContext
     from sve_carddb.catalog.adoption_sources import AdoptionSources
+    from sve_carddb.catalog.current_models import (
+        LanguageRecord as CurrentLanguageRecord,
+    )
+    from sve_carddb.catalog.current_models import (
+        VocabularyRecord as CurrentVocabularyRecord,
+    )
     from sve_carddb.products.models import LocalizedText
     from sve_carddb.text_observations.models import FaceObservation
     from sve_carddb.text_observations.plan import TextPlan
@@ -139,7 +145,9 @@ def verify_dependencies(record: Record, *, source_lang: str | None = None) -> No
         raise ValueError("Adoption direct dependency closure mismatch")
 
 
-def language(record: LanguageRecord, registered: set[str]) -> Language | None:
+def language(
+    record: LanguageRecord | CurrentLanguageRecord, registered: set[str]
+) -> Language | None:
     """Validate a complete UI fallback list against the approved policy."""
     value = record.data.value
     if value is None:
@@ -159,7 +167,9 @@ def language(record: LanguageRecord, registered: set[str]) -> Language | None:
 
 
 def term(
-    record: VocabularyRecord, review: ReviewContext, sources: AdoptionSources
+    record: VocabularyRecord | CurrentVocabularyRecord,
+    review: ReviewContext,
+    sources: AdoptionSources,
 ) -> Term | None:
     """Reconstruct a baseline label and exact source-field mappings."""
     value = record.data.value

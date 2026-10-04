@@ -1,53 +1,412 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:6278dd83c170b6f9abd836b02aeab6e279358067458ce97489f7610a2c9bbc2a
 records:
-  - record_key: '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.agnes_digital","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.idolatry
+      term_id: term:name.agnes_digital
       lang: zh-Hant
       value:
         kind: authored
-        text: 偶像歌手
-      origin: project
+        text: 愛麗數碼
       concept_evidence: []
       source_claim:
-        source_work:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.agnes_tachyon","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.agnes_tachyon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 愛麗速子
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aichi_sendou","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aichi_sendou
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 先導愛知
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：Claude 決定：莉榭娜系列（歌聲、獨唱、信徒）的特性；為了讓漢字「偶像」維持原字，這個改成「偶像歌手」 消歧說明：另見種族「偶像」：兩者不同。アイドル出現在巫師職業的卡（與特性「絶傑」一起），不是合作作品；「偶像」出現在主教職業的神像、祭壇類卡片
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 アイドル → 偶像歌手；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。Claude 決定：莉榭娜系列（歌聲、獨唱、信徒）的特性；為了讓漢字「偶像」維持原字，這個改成「偶像歌手」日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:6278dd83c170b6f9abd836b02aeab6e279358067458ce97489f7610a2c9bbc2a
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:6278dd83c170b6f9abd836b02aeab6e279358067458ce97489f7610a2c9bbc2a
-    members:
-      -   - '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
-          - sha256:def554f65f23192df17af84fdc2c941bbbd8623a0b76c2863ec2a7e48b4d1c31
-    sample_ids:
-      - '["glossary_choice","term:trait.idolatry","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 アイドル → 偶像歌手；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。Claude 決定：莉榭娜系列（歌聲、獨唱、信徒）的特性；為了讓漢字「偶像」維持原字，這個改成「偶像歌手」日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aichi_sendou_arise_my_avatar","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aichi_sendou_arise_my_avatar
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔站起來吧，我的分身!!〕先導愛知
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.aichi_sendou_guiding_hand_of_bonds","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aichi_sendou_guiding_hand_of_bonds
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔羈絆的引導者〕先導愛知
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aiko_takamori","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aiko_takamori
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 高森藍子
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aiko_takamori_handmade_happiness","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aiko_takamori_handmade_happiness
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔親手做的幸福〕高森藍子
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.aiko_takamori_vow_of_love","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aiko_takamori_vow_of_love
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔愛的誓言〕高森藍子
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.air_groove","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.air_groove
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 氣槽
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.air_shakur","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.air_shakur
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 空中神宮
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.airi_totoki_anniversary_princess","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.airi_totoki_anniversary_princess
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔週年紀念公主〕十時愛梨
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.airi_totoki_cinderella_girl","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.airi_totoki_cinderella_girl
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔灰姑娘女孩〕十時愛梨
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gnn.gamer.com.tw/detail.php?sn=312315
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.airi_totoki_private_maid","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.airi_totoki_private_maid
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔Private Maid〕十時愛梨
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://gnn.gamer.com.tw/detail.php?sn=312315
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akane_hino","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akane_hino
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 日野茜
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akane_hino_positive_passion","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akane_hino_positive_passion
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔Positive Passion〕日野茜
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.akari","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akari
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 茜里
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akari_akira","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akari_akira
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 朱里＆明
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akari_tsujino","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akari_tsujino
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 辻野朱里
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akari_tsujino_brand_new","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akari_tsujino_brand_new
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔Brand new！〕辻野朱里
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akari_tsujino_shining_summer_apple","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akari_tsujino_shining_summer_apple
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔迸發夏日蘋果〕辻野朱里
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akari_tsujino_twice_as_lovely","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akari_tsujino_twice_as_lovely
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔茁壯×2朱里蘋果〕辻野朱里
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.aki_yamato","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aki_yamato
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 大和亞季
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.akiha_ikebukuro","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akiha_ikebukuro
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 池袋晶葉
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.akino","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.akino
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 秋乃
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。

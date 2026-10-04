@@ -1,1411 +1,459 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:0d823512ef452e187e67ac25f02a3a8e294b6bcc46a8af3cf46a7af40c286e70
 records:
-  - record_key: '["glossary_term","term:trait.insect"]'
+  - record_key: '["glossary_term","term:name.blaster_javelin"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.insect
-      category: trait
-      concept_key: trait.insect
+      id: term:name.blaster_javelin
+      category: card_name
+      concept_key: name.blaster_javelin
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:e7e377d017c534d3c25c9b33796ad140c752ff325ae0eb59583ec108d4d4341d
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:438fce45377ed71cfe1ea0c6ab97eeb1de3e4722902168e19afe609a295ea885
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.kagero"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.kagero
-      category: trait
-      concept_key: trait.kagero
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:54c6f4abe29add667f4259c0907f1600b8fa8cc9b28d6b1768f974b584bd5036
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:95abbe23dee2f169b154daa93972d49b55f49c2ac032a0022130e5418c4636d9
-      source_span:
-        start: 7
-        end: 11
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.killer"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.killer
-      category: trait
-      concept_key: trait.killer
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:06df166b728c4c8dfcea2b83bc5fae9cb88a6f2aa9eb19079ac8c147d5836026
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:e2f499a91591dd38b9309c79267a97372bd22d82191d9d9f0cab13255a8eaff7
-      source_span:
-        start: 0
-        end: 3
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.labyrinth"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.labyrinth
-      category: trait
-      concept_key: trait.labyrinth
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:ad08a2ea2eb62d5890673af163e6905cfd52895bd92cce8a22632d3bd65850c3
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:77d52727d3eec90be45cc9b35ace852da2891e18f11dfb2f548dcdd24d043a14
-      source_span:
-        start: 5
-        end: 10
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.levin"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.levin
-      category: trait
-      concept_key: trait.levin
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:827197863b1598c1214e3216d2cd540f0ffda3d5ff02f75632dcd814cd3dfe48
+        source_version_id: src:v1:ac650afafffaa9eba8f5423d82a46ee7498ec697d5114d7245cb31f695f8fa8f
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:3fd8fcc810c5a65ce96f3c44e7d8ba446f89fc6f8165b78d685898d552f77931
+        text_hash: sha256:51a0c242fb0e3595a1c64623642e78a70ff530287edb3565a43a204e7a7c9286
       source_span:
-        start: 0
-        end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.lightborne"]'
+  - record_key: '["glossary_term","term:name.blazing_core_dragon"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.lightborne
-      category: trait
-      concept_key: trait.lightborne
+      id: term:name.blazing_core_dragon
+      category: card_name
+      concept_key: name.blazing_core_dragon
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:1fa8187001f510d14adbe66039fdd013dc72effe2af20742ebe54bc8af24bd22
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:e77017f434fb18b93eba61d069e5bc1736b65fd3d22689911fa83b77236179f6
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.little_lyrical"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.little_lyrical
-      category: trait
-      concept_key: trait.little_lyrical
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:770d73e3a2078f56cbc0d052d435c3a2c4258868b672bd83386a22522b1611ca
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:2b507ed2585ee51b9146e9bd057b0c00f75a801bb6a42f4818214866086ddba6
-      source_span:
-        start: 5
-        end: 12
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.loot"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.loot
-      category: trait
-      concept_key: trait.loot
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:17a7cfbdafe131b2351afd449f33cea209aa9fc4d5f620f88e39f7696a376223
+        source_version_id: src:v1:39e102ecb041f1e3da90183301d5640dc9b1966e297949e77d5447dc99519c32
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:0ddbfddbec26061e5bc76a92418635b3cc6c8bc5780a8fb11f5b6e1831b375a9
+        text_hash: sha256:992f5f40e5394f668cc69f08f15c6a8347b72293799181c80881a62e7d3ec0dc
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.lucent_academy"]'
+  - record_key: '["glossary_term","term:name.blazing_flare_dragon"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.lucent_academy
-      category: trait
-      concept_key: trait.lucent_academy
+      id: term:name.blazing_flare_dragon
+      category: card_name
+      concept_key: name.blazing_flare_dragon
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:2c5b740408759ec4c993a0570daa06ca448a9c7d3a0fd2d9c741414db4e9a949
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:ffa58a29a33ce5895d8be508af1c112ca3d9c62a91391663e2c86e2282d04564
-      source_span:
-        start: 5
-        end: 12
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.luminary"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.luminary
-      category: trait
-      concept_key: trait.luminary
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:f7167e5ea2bc26541e8f5a70e590f1c885dea9c9adea3bf2c9d21d5c45a997b7
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:3569a7c0ee3d50801cccea2622770e5d5150eac8b903099a376fb87ae56c9da9
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.luminous"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.luminous
-      category: trait
-      concept_key: trait.luminous
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:55ad6350bf9dde23664850532c4e32d1def92d5f00e55acef0562229438a9114
+        source_version_id: src:v1:1580581c410768f13e6e7dc41624fa8a6061be6317200a9d01f5091f85c07146
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:a0f9e9db60a93190325f567cebaa4f6e839362249fa45a141f3277b74c407d3d
+        text_hash: sha256:51208e9d4c79445817efa0abd1742a1008f34fd416db42e268af549d9a29f7b0
       source_span:
-        start: 0
-        end: 4
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.machina"]'
+  - record_key: '["glossary_term","term:name.blind_spot_surveyor"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.machina
-      category: trait
-      concept_key: trait.machina
+      id: term:name.blind_spot_surveyor
+      category: card_name
+      concept_key: name.blind_spot_surveyor
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:60982e6cf0f07e045139e388fc052ea13b7a68aa10784d4e36b769d284885df8
+        source_version_id: src:v1:3cd579c1e91074fb306ba99344f676fb933afeac2e93ce308ce2ca80d97bb14f
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:090057953eaf14fd06e911259dd77ecb6bb6eafdcc873cb721107cfcb5bc74fa
+        text_hash: sha256:5bf65ebd1a0fe8186f2668fe1be9786fdff921263727d4b7bbeebdc8e1bf44ac
       source_span:
-        start: 2
-        end: 4
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.mage"]'
+  - record_key: '["glossary_term","term:name.blossoms_advance"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.mage
-      category: trait
-      concept_key: trait.mage
+      id: term:name.blossoms_advance
+      category: card_name
+      concept_key: name.blossoms_advance
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:af0cf43b904342cf9c60046e5e227e776714a8c851177fccf50225876fdfca7a
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:7091c8dd956c19425718127b8f11dcb2e0f1d1761e5d66e2f10a65c2aca22e06
-      source_span:
-        start: 0
-        end: 4
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.magna"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.magna
-      category: trait
-      concept_key: trait.magna
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:015c1d10a72fb66426ffed22a27ab92590f6f1757e080e1a1627c108eaa796bf
+        source_version_id: src:v1:3781ff9a5b5de3bbc03650513454f846adc532b766ef1c9907d750b70501b7ae
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:917041c4dd19ffe679278043d492b625f242723c785723cbe53c75d854568222
+        text_hash: sha256:64ee220d054cddacb83f71ce3a01c033fb4d02ac1926358f4886c6483eb936d1
       source_span:
-        start: 0
-        end: 3
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.maid"]'
+  - record_key: '["glossary_term","term:name.blue_storm_armada"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.maid
-      category: trait
-      concept_key: trait.maid
+      id: term:name.blue_storm_armada
+      category: card_name
+      concept_key: name.blue_storm_armada
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:26d24ce00c4067d8d1530e8815b304f51c0c177a84453dd85dd79ac431dfd766
+        source_version_id: src:v1:26b37348985a7cc85e02f4ce76e678675b5e49261f9524ea64b53ea635bb734d
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:8dc5aec1537bf03bb6c4ae4d158b4e8d363e1d598d409ee083677e152f9f47eb
+        text_hash: sha256:06d9dae4a30344f86743ee69c07f7ed9a2bde2069d0f2a38b3dde92a909f6e02
       source_span:
-        start: 0
-        end: 3
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.manaria"]'
+  - record_key: '["glossary_term","term:name.blue_storm_dragon_maelstrom"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.manaria
-      category: trait
-      concept_key: trait.manaria
+      id: term:name.blue_storm_dragon_maelstrom
+      category: card_name
+      concept_key: name.blue_storm_dragon_maelstrom
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:fa0aa3d95352e6ce3950f6a2fd77eadb2ca9e6648851d36f9f7260b50ee8426c
+        source_version_id: src:v1:08c5d540e2c3dfd2f42f09eb386ceb49a4692f4a13e88da0d32a16afbbdb84fe
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:e8c03971de11d94b35ee27691785e6e733633736357462e75b1dd16342cfa139
+        text_hash: sha256:14228bc3f0d852dff22fd5cd12c2014d2f960001db65625617a15b9baabf834e
       source_span:
-        start: 5
-        end: 9
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.marine"]'
+  - record_key: '["glossary_term","term:name.blue_storm_supreme_dragon_glory_maelstrom"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.marine
-      category: trait
-      concept_key: trait.marine
+      id: term:name.blue_storm_supreme_dragon_glory_maelstrom
+      category: card_name
+      concept_key: name.blue_storm_supreme_dragon_glory_maelstrom
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:41acdc903900a09edc3221e28448cd85b7b69a2411a61774be81170009acce3f
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:2a4e670552f990fce501e7dc71c9b20277b483857819fd817feafc8e0e9cc42f
-      source_span:
-        start: 4
-        end: 6
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.mejiro_family"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.mejiro_family
-      category: trait
-      concept_key: trait.mejiro_family
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:f1fdb48561437b756e1219a6ab26636018df0da07425d776b4e4bec3a6129592
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:67d0daf68b8e803d461f859c2c4333da978eebbee5b58787a5b42a104d42c21e
-      source_span:
-        start: 4
-        end: 8
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.mercenary"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.mercenary
-      category: trait
-      concept_key: trait.mercenary
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:c255ddf4e2c98c4dc96762ff13ac75d15fa3e781ad39851c17678b745397e286
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:cd9ec9ecb80b2411bba2f5d4bb1f24662ce1eabe17d76cad751e57a3c9e73e03
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.merchant"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.merchant
-      category: trait
-      concept_key: trait.merchant
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:f3d423d21b2e344a4d674b3aef8a70d52661b1bfb7d652551e67853b386510f8
+        source_version_id: src:v1:76e48a68dfe1402ba801a4d8f315a931603c0e18c56fc6fe5bceb39b49e6a4d8
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:5151f75761c9f27bc86a714c8b0339cd099fcc285fff2233cfeab035b7ded4f3
+        text_hash: sha256:5cf26f2eef03b3fb316bb0163a29763afc954c4c064772b50b586b0446b54d5d
       source_span:
-        start: 1
-        end: 3
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.mercurius_foundation"]'
+  - record_key: '["glossary_term","term:name.brand_new_beat"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.mercurius_foundation
-      category: trait
-      concept_key: trait.mercurius_foundation
+      id: term:name.brand_new_beat
+      category: card_name
+      concept_key: name.brand_new_beat
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:6ccc8df0b538b4b191e6c326dff163fc1a9b3de1b21e19f61a8cfd641452e319
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b64943ab8deb4c56ab16364c593e34babfc36fd89debb98d5d54557f8b8f14d6
-      source_span:
-        start: 5
-        end: 13
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.mount"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.mount
-      category: trait
-      concept_key: trait.mount
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:f710cd03913e7110079d6902dc1c77005af1ed619f0adb621016b8338054d22b
-        parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:dcd8d1ffd7d7a0a72ac9c336bc6352b45912213a89ae1beb51edf3a0fd736274
-      source_span:
-        start: 15
-        end: 17
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.musical"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.musical
-      category: trait
-      concept_key: trait.musical
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:75ad7952aa81341f9e51cdfbcb441fef41a72957cdb28bce46ac73e52f3fb0ae
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:7c8a544967f740fee713139cfe1f4434e2b4ad46257e93411b8eae88b35ad5dc
-      source_span:
-        start: 0
-        end: 4
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.natura"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.natura
-      category: trait
-      concept_key: trait.natura
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:9854a9c39675d48a24241e0592b02134737b8fd46f9e2c2a63dc42bd4fad3f0c
+        source_version_id: src:v1:0eb7b0a09836b31cc5232e1aaf02bb942187cfb82f0ead816b8992a21f0de215
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:47a557da456250e80f6846db8827a68e32eb19fb6e9a3e33d2ef418d61da4174
+        text_hash: sha256:11ce1623694ef5ce245ebd904426f1458896763bfbd8157642fa18e7c458d20e
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.insect"]'
-            - '["glossary_term","term:trait.kagero"]'
-            - '["glossary_term","term:trait.killer"]'
-            - '["glossary_term","term:trait.labyrinth"]'
-            - '["glossary_term","term:trait.levin"]'
-            - '["glossary_term","term:trait.lightborne"]'
-            - '["glossary_term","term:trait.little_lyrical"]'
-            - '["glossary_term","term:trait.loot"]'
-            - '["glossary_term","term:trait.lucent_academy"]'
-            - '["glossary_term","term:trait.luminary"]'
-            - '["glossary_term","term:trait.luminous"]'
-            - '["glossary_term","term:trait.machina"]'
-            - '["glossary_term","term:trait.mage"]'
-            - '["glossary_term","term:trait.magna"]'
-            - '["glossary_term","term:trait.maid"]'
-            - '["glossary_term","term:trait.manaria"]'
-            - '["glossary_term","term:trait.marine"]'
-            - '["glossary_term","term:trait.mejiro_family"]'
-            - '["glossary_term","term:trait.mercenary"]'
-            - '["glossary_term","term:trait.merchant"]'
-            - '["glossary_term","term:trait.mercurius_foundation"]'
-            - '["glossary_term","term:trait.mount"]'
-            - '["glossary_term","term:trait.musical"]'
-            - '["glossary_term","term:trait.natura"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-decisions:
-  - id: d:0d823512ef452e187e67ac25f02a3a8e294b6bcc46a8af3cf46a7af40c286e70
-    state: confirmed
-    scope: batch
-    category: glossary_term
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:0d823512ef452e187e67ac25f02a3a8e294b6bcc46a8af3cf46a7af40c286e70
-    members:
-      -   - '["glossary_term","term:trait.insect"]'
-          - sha256:f0ca108f6d84a11d79d17b327b3872b15ad5e3c6f3cd8ac8e6ceb36c2c8b8a81
-      -   - '["glossary_term","term:trait.kagero"]'
-          - sha256:7639cdf74c0d148677ceb753ee592b83151bea9bf345a7a466ecfde12dd4d1a1
-      -   - '["glossary_term","term:trait.killer"]'
-          - sha256:1a571a10cbafcc1228bc683cbd181d6bcd22ace0d8165d49df46efcabf373c1d
-      -   - '["glossary_term","term:trait.labyrinth"]'
-          - sha256:d203e19a7714e6b37623befe8c1fe4e5aab70f2b641b818cbb00b4553321129b
-      -   - '["glossary_term","term:trait.levin"]'
-          - sha256:d48c19ef00ba9524676b9512c79cb22263ba3f7654a7b978c28b5a45446ce653
-      -   - '["glossary_term","term:trait.lightborne"]'
-          - sha256:c38ae9a09f407459974af6876d813f0bcc8842c663a7718592bbd63da682ead4
-      -   - '["glossary_term","term:trait.little_lyrical"]'
-          - sha256:23b2a50488eefe368930071c2f3da65c4d1f6f79d93ca9f8e76d8bd01ba2e305
-      -   - '["glossary_term","term:trait.loot"]'
-          - sha256:3484ea3afbbe7e617db04cbe104f77ef2550b0b406ff22013f28c13727e7f4aa
-      -   - '["glossary_term","term:trait.lucent_academy"]'
-          - sha256:109162ffc0ff6bab2a77cb6c91e72bae2404f47d26aa39bc1042e9d3b725dc6b
-      -   - '["glossary_term","term:trait.luminary"]'
-          - sha256:2fbcc1ae7f6e59764ede43a5f6a3a64311ef31599d98af21eeb30045962ea82e
-      -   - '["glossary_term","term:trait.luminous"]'
-          - sha256:3e483d1c7a0c74519258b0e999304732546327f249ea83797ed83539f2d435be
-      -   - '["glossary_term","term:trait.machina"]'
-          - sha256:3ec5523a2d6391f23a3d00ca725711e13bbab1fcc1493aa392798414e1c5969e
-      -   - '["glossary_term","term:trait.mage"]'
-          - sha256:ad20c47373d3f949f311157330f310b246d02d6a8abd345cb4f4b36c2f57ac4f
-      -   - '["glossary_term","term:trait.magna"]'
-          - sha256:d05bae67377ef377b06f87937e1996a0b78161721c7dd47aedf860087a2708ff
-      -   - '["glossary_term","term:trait.maid"]'
-          - sha256:a710abe617931fb0ba1913c8dab7aa031013bff794c9ef95efc73c257c0914ca
-      -   - '["glossary_term","term:trait.manaria"]'
-          - sha256:f34a19fdb8b5de7139400ac353a05ca69f5f904f721832486869e8e733042c7a
-      -   - '["glossary_term","term:trait.marine"]'
-          - sha256:2c1363dcd9fc94f3b02bb910e05fc5024a8b397e389dc7ce423307417acd97cf
-      -   - '["glossary_term","term:trait.mejiro_family"]'
-          - sha256:7b1f116ac938e54217c8b67cb7759ddc0ea8df2e6bfa79366450a84d834c7d06
-      -   - '["glossary_term","term:trait.mercenary"]'
-          - sha256:762a7e7341fb002bef43d537483c8beca3e497213236150d2d3b77b8d0c0c072
-      -   - '["glossary_term","term:trait.merchant"]'
-          - sha256:3f86adecd8d8d860748b24afac1282d25538258f18f03f27ae51b94b3444909f
-      -   - '["glossary_term","term:trait.mercurius_foundation"]'
-          - sha256:ff1436fa45d36b4e13fb5af168301c58e42c7f413673140a1ca574eddb36d3ab
-      -   - '["glossary_term","term:trait.mount"]'
-          - sha256:0b14cd15ccf06075d117401ac6fa90120f902f9aee09b89a98b0867e42dba9cc
-      -   - '["glossary_term","term:trait.musical"]'
-          - sha256:b2bc746ddbad9d018f2a5aa1525c68ce6154c71f800d8de41cd39cd6f29b871d
-      -   - '["glossary_term","term:trait.natura"]'
-          - sha256:2352817a688d67a16b067b284638d15fe748a91c846c6c1055de43689088883f
-    sample_ids:
-      - '["glossary_term","term:trait.insect"]'
-      - '["glossary_term","term:trait.kagero"]'
-      - '["glossary_term","term:trait.killer"]'
-      - '["glossary_term","term:trait.labyrinth"]'
-      - '["glossary_term","term:trait.levin"]'
-      - '["glossary_term","term:trait.lightborne"]'
-      - '["glossary_term","term:trait.little_lyrical"]'
-      - '["glossary_term","term:trait.loot"]'
-      - '["glossary_term","term:trait.lucent_academy"]'
-      - '["glossary_term","term:trait.luminary"]'
-      - '["glossary_term","term:trait.luminous"]'
-      - '["glossary_term","term:trait.machina"]'
-      - '["glossary_term","term:trait.mage"]'
-      - '["glossary_term","term:trait.magna"]'
-      - '["glossary_term","term:trait.maid"]'
-      - '["glossary_term","term:trait.manaria"]'
-      - '["glossary_term","term:trait.marine"]'
-      - '["glossary_term","term:trait.mejiro_family"]'
-      - '["glossary_term","term:trait.mercenary"]'
-      - '["glossary_term","term:trait.merchant"]'
-      - '["glossary_term","term:trait.mercurius_foundation"]'
-      - '["glossary_term","term:trait.mount"]'
-      - '["glossary_term","term:trait.musical"]'
-      - '["glossary_term","term:trait.natura"]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+  - record_key: '["glossary_term","term:name.breaker_of_limits"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.breaker_of_limits
+      category: card_name
+      concept_key: name.breaker_of_limits
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:32d94fca119aa837fff63b3eb89647bfe77bd24ff97b9f4991e71b6317af06a0
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:d8f50c637bed3e207be9516645e3a416f08fb2a52c467533306716667211aa90
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bright_lights"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bright_lights
+      category: card_name
+      concept_key: name.bright_lights
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:1a62e0044036fb5677cec4953b86341c47ec44587b4b6f40eb22c4aef6a985d9
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:6d006477309ebe0266a49157fd275f326e4bb88f6a1e9ace3a654591042b406b
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.brilliant_cut"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.brilliant_cut
+      category: card_name
+      concept_key: name.brilliant_cut
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:8ad3d74289f170a4f7a0cb17c9ce85661e69c44c9b6c7760a3154154781d9994
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:6090c39c2df09a9ec42fdf831ed0a11cd8e4f16db9ac0d9754ecf9126698fa34
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bring_em_home_please"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bring_em_home_please
+      category: card_name
+      concept_key: name.bring_em_home_please
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:420f5e6dc16981bfc72cb9b5f83c7268115ffb828abb239323ad825995449dca
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:5c67c9ae6f9c6d78e3eade83af58da84f2249d5818debf645792be12071d04d8
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bunny_eared_administrator"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bunny_eared_administrator
+      category: card_name
+      concept_key: name.bunny_eared_administrator
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:843ea55723f58c4dba811d160b13ad28188f97542ca8284aaca12586100ef49b
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:6f3e01a6ba6706bda06d87b03fcdcdb7e8527e7fd7b39da897182dcf9689652c
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.burning_horn_dragon"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.burning_horn_dragon
+      category: card_name
+      concept_key: name.burning_horn_dragon
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:063c4298eb1f539c1654896ef463e47a48075106ddd2fc17fd7530111a619769
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:ded27da4b1ad930dd2f3155e9420c6528f2e26beeff36a0660c398704f2ed11f
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.c_c"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.c_c
+      category: card_name
+      concept_key: name.c_c
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:643ffae304aec05f7427a15e13724575ca5bc838e9ea9ada040c5186f8e66b97
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:50ad3ad04474c55cc1e56e2a0f22d85a1b71aad6fe54f0e57421855c185c253c
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.c_c_woodland_witch"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.c_c_woodland_witch
+      category: card_name
+      concept_key: name.c_c_woodland_witch
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:f51b0db0c1044179ebaa9901b0bd48525b7c78fe406d87a012f15ec1a92668fc
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:4f1f6fb2d59990d1e400d2d76504635fa4b713f25c1cfbf0e40ee24abf307d03
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.call_of_the_guild"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.call_of_the_guild
+      category: card_name
+      concept_key: name.call_of_the_guild
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:00bb7c09fae0928f8539ed9da7395b0e8917047450af89fd4314e8115b8e9997
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:d7fd96d2acfe47818d1394e4a99d465398a5c51b70986a2aacbc6ba6878a22cc
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.candy_clown"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.candy_clown
+      category: card_name
+      concept_key: name.candy_clown
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:9991ac50b520eaa3083f8405134830760dbdbb09d05c5a3dd0ea2ff739bdc542
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:673345f6efda1f1a31e862c087c1bcc09c27853070023a7d31615d56752b811d
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.cardfight_vanguard_divinez_deluxe_arc"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.cardfight_vanguard_divinez_deluxe_arc
+      category: card_name
+      concept_key: name.cardfight_vanguard_divinez_deluxe_arc
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:942fa17a08eca498f3a864e7374ebf9b3bcae568195d0922735558e675cbc231
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:395a3a2ae0c11e4e5b27baf50a3769037d0bb72e1580988bcab911c3902f8b96
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.carrot"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.carrot
+      category: card_name
+      concept_key: name.carrot
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:00b69b483cbb37941996d299a579b8f1c3157b93d06c6afdd22d5527df618c46
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:1df7aad047d26cc616847a814e61204bb04927e0948c7da0a8a9bb41db65f5bf
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.cavalry_of_black_steel"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.cavalry_of_black_steel
+      category: card_name
+      concept_key: name.cavalry_of_black_steel
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:116cff1cc892fdb44baef626e5d498a82dfbf100808a1dae5fc1f9ee16b2cf31
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:c7391cce28f59ba648c66e94cc4c80072dcb56588003fbb789429682323a1ee6
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.celestial_shikigami"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.celestial_shikigami
+      category: card_name
+      concept_key: name.celestial_shikigami
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:17e3ff1dd4eb3e6797120cd8ddad81c362c9bf0b2429b2306807072494391d41
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:0d384772c3fb106fe5b21de64aef9d2e78ef3cb459a5f3f525060965fe18c774
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.celestial_valkyries"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.celestial_valkyries
+      category: card_name
+      concept_key: name.celestial_valkyries
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:1e9d68bf4aadd8da20a85e446f211048e19a3e66b6c184a97ab92fa4a1415039
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:13c55105d388081bf91b12d5e370664d0d60910e8c4a4f26e86efda9835da509
+      source_span:
+      authored_source_ja:
+      missing_source_reason:

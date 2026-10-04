@@ -1,10 +1,11 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:f7639b479ecf3727a859d017bca42259ff560a4c5c07ce56fe32264864aa8264
 records:
   - record_key: '["glossary_term","term:ability.rally"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.rally
       category: ability
@@ -19,45 +20,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.reanimate"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.reanimate
       category: ability
@@ -72,45 +39,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.secret_art"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.secret_art
       category: ability
@@ -125,45 +58,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.single_drive"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.single_drive
       category: ability
@@ -180,45 +79,11 @@ records:
         end: 29
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.spell_boost"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.spell_boost
       category: ability
@@ -227,45 +92,11 @@ records:
       source_span:
       authored_source_ja: スペルブースト
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.spell_chain"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.spell_chain
       category: ability
@@ -282,45 +113,11 @@ records:
         end: 18
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.stack"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.stack
       category: ability
@@ -337,45 +134,11 @@ records:
         end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.twin_drive"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.twin_drive
       category: ability
@@ -392,45 +155,11 @@ records:
         end: 54
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.union_burst"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.union_burst
       category: ability
@@ -447,45 +176,11 @@ records:
         end: 3
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.unleashed_secret_art"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.unleashed_secret_art
       category: ability
@@ -500,45 +195,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.vengeance"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.vengeance
       category: ability
@@ -555,45 +216,11 @@ records:
         end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.add_to_deck"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.add_to_deck
       category: rule_term
@@ -602,45 +229,11 @@ records:
       source_span:
       authored_source_ja: デッキに加える
       missing_source_reason: 首輪凍結 JP／數位字典未找到此 exact JA；依專案採納的規則詞名稱登錄，不捏造 raw locator，也不視為官方證據。
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.add_to_hand"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.add_to_hand
       category: rule_term
@@ -657,45 +250,11 @@ records:
         end: 37
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.banish"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.banish
       category: rule_term
@@ -712,45 +271,11 @@ records:
         end: 88
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.choose"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.choose
       category: rule_term
@@ -767,45 +292,11 @@ records:
         end: 34
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.destroy"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.destroy
       category: rule_term
@@ -822,45 +313,11 @@ records:
         end: 42
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.discard"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.discard
       category: rule_term
@@ -877,45 +334,11 @@ records:
         end: 17
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.distribute"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.distribute
       category: rule_term
@@ -932,45 +355,11 @@ records:
         end: 35
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.draw"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.draw
       category: rule_term
@@ -987,45 +376,11 @@ records:
         end: 35
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.drive_check"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.drive_check
       category: rule_term
@@ -1042,45 +397,11 @@ records:
         end: 19
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.engage"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.engage
       category: ability
@@ -1097,45 +418,11 @@ records:
         end: 63
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.equip"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.equip
       category: rule_term
@@ -1152,45 +439,11 @@ records:
         end: 59
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.evolve"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.evolve
       category: rule_term
@@ -1207,45 +460,11 @@ records:
         end: 18
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:action.ignore"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:action.ignore
       category: rule_term
@@ -1262,126 +481,3 @@ records:
         end: 17
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.rally"]'
-            - '["glossary_term","term:ability.reanimate"]'
-            - '["glossary_term","term:ability.secret_art"]'
-            - '["glossary_term","term:ability.single_drive"]'
-            - '["glossary_term","term:ability.spell_boost"]'
-            - '["glossary_term","term:ability.spell_chain"]'
-            - '["glossary_term","term:ability.stack"]'
-            - '["glossary_term","term:ability.twin_drive"]'
-            - '["glossary_term","term:ability.union_burst"]'
-            - '["glossary_term","term:ability.unleashed_secret_art"]'
-            - '["glossary_term","term:ability.vengeance"]'
-            - '["glossary_term","term:action.add_to_deck"]'
-            - '["glossary_term","term:action.add_to_hand"]'
-            - '["glossary_term","term:action.banish"]'
-            - '["glossary_term","term:action.choose"]'
-            - '["glossary_term","term:action.destroy"]'
-            - '["glossary_term","term:action.discard"]'
-            - '["glossary_term","term:action.distribute"]'
-            - '["glossary_term","term:action.draw"]'
-            - '["glossary_term","term:action.drive_check"]'
-            - '["glossary_term","term:action.engage"]'
-            - '["glossary_term","term:action.equip"]'
-            - '["glossary_term","term:action.evolve"]'
-            - '["glossary_term","term:action.ignore"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-decisions:
-  - id: d:f7639b479ecf3727a859d017bca42259ff560a4c5c07ce56fe32264864aa8264
-    state: confirmed
-    scope: batch
-    category: glossary_term
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:f7639b479ecf3727a859d017bca42259ff560a4c5c07ce56fe32264864aa8264
-    members:
-      -   - '["glossary_term","term:ability.rally"]'
-          - sha256:f6069163f21b4151ba161663b59d438e40a5c1826aafb2dbb954d89f2d391a80
-      -   - '["glossary_term","term:ability.reanimate"]'
-          - sha256:15be592560c7c86e8943b66bf069623bea3e56951ad1a8a851fb916ea5a36eec
-      -   - '["glossary_term","term:ability.secret_art"]'
-          - sha256:9b5b7a5a305c3dbee6078e9aec7539fb6e8662346edd73687cae13e26f6b6b10
-      -   - '["glossary_term","term:ability.single_drive"]'
-          - sha256:49191260ce4ef4897d53ad10428fb61180f9b9de5f0aef42c4f55629a366905b
-      -   - '["glossary_term","term:ability.spell_boost"]'
-          - sha256:3c23cb499cfecf5724ca966e1da2f9f6875a45916d2f3a71cc3695ba81dfaefa
-      -   - '["glossary_term","term:ability.spell_chain"]'
-          - sha256:5ff53d47539b77ba3634c630309859554a35b6ee3903840a86f99dbcc992afb4
-      -   - '["glossary_term","term:ability.stack"]'
-          - sha256:0c052e7b91091c80fe85cf9e24deeca878984b15df02c1531605c91654a2e61a
-      -   - '["glossary_term","term:ability.twin_drive"]'
-          - sha256:2f8fa4a18fc7febea7c661e206b79f16fbb4af09ec3e48a89a2d53bb376c028e
-      -   - '["glossary_term","term:ability.union_burst"]'
-          - sha256:260144a65ee760b5e6ed2f1afec3f80e58045a4e5a1de7418d8a9ca06435932e
-      -   - '["glossary_term","term:ability.unleashed_secret_art"]'
-          - sha256:95080aa0981fda9fb26d7b3133f9428dd0850d7b5db6e595b1171326fbcabdc8
-      -   - '["glossary_term","term:ability.vengeance"]'
-          - sha256:c373f10d0536a593d92e848edc2cb2f24d16aa96b3bd9ac22bedcc9dea759e3a
-      -   - '["glossary_term","term:action.add_to_deck"]'
-          - sha256:d437e2207dcd7ec911b44eb4835622c90ae7c5c87ab710a11152e4750c76511a
-      -   - '["glossary_term","term:action.add_to_hand"]'
-          - sha256:d356a78148f2e59406a19dc2f2bb2a3b6f9bd101bd409cd50ca5bf65a815b571
-      -   - '["glossary_term","term:action.banish"]'
-          - sha256:9f972d6e8f75a955c9e59f3fc794da03eee17e73b7cfd82bd926f89b4c3ed201
-      -   - '["glossary_term","term:action.choose"]'
-          - sha256:f98cd709e6785450ae43b28c510f667cd1410c56b6bc437af9e5d52951d9bcc0
-      -   - '["glossary_term","term:action.destroy"]'
-          - sha256:f0dcac1e5e21d8da38e06ff2fb9770c526b146d0d600e1baab255acaae42ce74
-      -   - '["glossary_term","term:action.discard"]'
-          - sha256:3167bbf54187dd60218842ffbd7d2b8f6d7382afd103a78908a67f04fa8b8e8a
-      -   - '["glossary_term","term:action.distribute"]'
-          - sha256:fb23054da348b029cabf6c7a92b17d3cd1b950ad2641b5099638ab68687e2b69
-      -   - '["glossary_term","term:action.draw"]'
-          - sha256:cc17e1da979d72c5607a6ca18a8c2cf9cb539e1e72df033a6491c1bc7aa28125
-      -   - '["glossary_term","term:action.drive_check"]'
-          - sha256:e1ea06582a0cfb9741d95b897eb454d15a7b69b46fde7df8cc3a2d18c12a7918
-      -   - '["glossary_term","term:action.engage"]'
-          - sha256:9f8c208298ce487063b077d5c6707f893a2f9a22ee4a7689899b0f8e3a41288c
-      -   - '["glossary_term","term:action.equip"]'
-          - sha256:7bb51609a42bb0a991ce6b8331644480a4d58b9d377b3daa619eb15dace4fb32
-      -   - '["glossary_term","term:action.evolve"]'
-          - sha256:ee1d875085da9d4c53098af2012ffe51660e14a1f59b8f81e335b36b294f3f66
-      -   - '["glossary_term","term:action.ignore"]'
-          - sha256:c5b6b054580c0f0f9e83457091570578a43e3f3196ce8cb9e9950e373f64074b
-    sample_ids:
-      - '["glossary_term","term:ability.rally"]'
-      - '["glossary_term","term:ability.reanimate"]'
-      - '["glossary_term","term:ability.secret_art"]'
-      - '["glossary_term","term:ability.single_drive"]'
-      - '["glossary_term","term:ability.spell_boost"]'
-      - '["glossary_term","term:ability.spell_chain"]'
-      - '["glossary_term","term:ability.stack"]'
-      - '["glossary_term","term:ability.twin_drive"]'
-      - '["glossary_term","term:ability.union_burst"]'
-      - '["glossary_term","term:ability.unleashed_secret_art"]'
-      - '["glossary_term","term:ability.vengeance"]'
-      - '["glossary_term","term:action.add_to_deck"]'
-      - '["glossary_term","term:action.add_to_hand"]'
-      - '["glossary_term","term:action.banish"]'
-      - '["glossary_term","term:action.choose"]'
-      - '["glossary_term","term:action.destroy"]'
-      - '["glossary_term","term:action.discard"]'
-      - '["glossary_term","term:action.distribute"]'
-      - '["glossary_term","term:action.draw"]'
-      - '["glossary_term","term:action.drive_check"]'
-      - '["glossary_term","term:action.engage"]'
-      - '["glossary_term","term:action.equip"]'
-      - '["glossary_term","term:action.evolve"]'
-      - '["glossary_term","term:action.ignore"]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。

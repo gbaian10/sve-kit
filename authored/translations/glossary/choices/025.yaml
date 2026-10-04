@@ -1,108 +1,365 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:ea8022cc5d304c439fc4476e12c01b8acace11e56c97ae794b58fe799f422324
 records:
-  - record_key: '["glossary_choice","term:ability.quick","zh-Hant",2]'
+  - record_key: '["glossary_choice","term:name.li_xingke","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.quick
+      term_id: term:name.li_xingke
       lang: zh-Hant
       value:
         kind: authored
-        text: Quick
-      origin: project
+        text: 黎星刻
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 2026-10-03 維護者本人在譯文抽查後決定將「快速」改為「Quick」，是專案選詞，並非官方繁中出處主張。決定依據：events-glossary-quick-1.md；完整原話與紀錄 hash 見本批 decision.note。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 2
-      predecessor:
-        record_key: '["glossary_choice","term:ability.quick","zh-Hant",1]'
-        record_hash: sha256:33d1d77498b626dbeb739efdb9ab787fbdd066045ce2b482231385aa35e8ac7d
-        decision_id: d:5b09954572dbd5b2bfa1637b3b0a776c21261a359529c56739ee3d5a976fcede
-    evidence: []
-  - record_key: '["glossary_choice","term:ability.stack","zh-Hant",2]'
+  - record_key: '["glossary_choice","term:name.light_signals_penguin_soldier","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.stack
+      term_id: term:name.light_signals_penguin_soldier
       lang: zh-Hant
       value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-          source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-          parser: translation-sv1-v1
-          locator: /data/cards/5578/skill_disc
-          text_hash: sha256:faaafab12e7f87ca9048fbd6e81a6ade020acccd1270d72b352fb38c55736cc5
-        span:
-          start: 77
-          end: 79
-      origin: official_sv1
-      concept_evidence:
-        - kind: effect_term
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
-            parser: translation-sv1-v1
-            locator: /data/cards/5578/skill_disc
-            text_hash: sha256:e1ee314a01247e260eada364892be26fef07f414fda071cf48abcd23019ac653
-          jp_span:
-            start: 84
-            end: 88
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
-            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
-            parser: translation-sv1-v1
-            locator: /data/cards/5578/skill_disc
-            text_hash: sha256:faaafab12e7f87ca9048fbd6e81a6ade020acccd1270d72b352fb38c55736cc5
-          target_span:
-            start: 77
-            end: 79
-          concept_note: 同一封存一代官方卡表 API 的上游 card_id=107341020、相同 skill_disc 欄位，日文「スタック」與繁中「蓄積」唯一出現片段逐字對應。證據只核對此術語選詞，不宣稱日英 SVE 身分或整張卡效果等義。
+        kind: authored
+        text: 發光信號的企鵝兵
+      concept_evidence: []
       source_claim:
-        source_work: Shadowverse
+  - record_key: '["glossary_choice","term:name.light_tenryu","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.light_tenryu
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 天龍光翔
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lightning_clawed_loafer","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lightning_clawed_loafer
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 電爪回家社社員
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lightning_kicker","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lightning_kicker
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 閃電踢擊手
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lily","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lily
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 莉莉
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
         source_urls:
-          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
-          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
-        claimed_source: 已封存一代官方 API 同卡／同效果欄位的繁中術語片段
-        note: 維護者 2026-10-03 指出蓄積是一代線上版既有繁中；本次唯讀核對封存日文與繁中同上游卡號，依 glossary-adoption §3 追加官方來源 adoption，不改字、不改舊概念或第一版來源主張。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 2
-      predecessor:
-        record_key: '["glossary_choice","term:ability.stack","zh-Hant",1]'
-        record_hash: sha256:e5f5ae96387c487eb9fb3fdeaa6a951116ed0b6a7c7395ccc6ce4bb185d28aa7
-        decision_id: d:d9a32ff4734b8d0bec8084174ceb7362137c7679d70211b42adca5fe7c97f5aa
-    evidence: []
-decisions:
-  - id: d:ea8022cc5d304c439fc4476e12c01b8acace11e56c97ae794b58fe799f422324
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-maintainer-20261003-v1
-    membership_hash: sha256:ea8022cc5d304c439fc4476e12c01b8acace11e56c97ae794b58fe799f422324
-    members:
-      -   - '["glossary_choice","term:ability.quick","zh-Hant",2]'
-          - sha256:d3c4d26ed5206ed05150b8d3ea02cdf65769f01b967ebbd746d747d9b1c21a85
-      -   - '["glossary_choice","term:ability.stack","zh-Hant",2]'
-          - sha256:c6397191c699c3c5da310a70465d704d66af07c7ff120bbabc3ffd350937c237
-    sample_ids:
-      - '["glossary_choice","term:ability.quick","zh-Hant",2]'
-      - '["glossary_choice","term:ability.stack","zh-Hant",2]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-03T13:40:47.806985Z'
-    reviewed_by: gbaian10
-    reviewed_at: '2026-10-03T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者本人 2026-10-03 決定；日期依〈術語「クイック」繁中改為 Quick：維護者決定紀錄〉（events-glossary-quick-1.md，sha256:7ea2c71b6c4899e62d56e61a163b7311c7628d4643101a3cae15fa8224385b42），原話：「那10個大個只有Quick我想換回英文 其他維持翻譯沒問題 尤其第二個 蓄積是一代線上版關鍵字 原本就有翻譯」。記錄只有日期與約略台灣時間，不捏造精確 UTC 事件，故用 day 精度。checked 僅涵蓋 Quick 改字與蓄積維持譯字且補足官方來源；沒有額外抽查或委託收據。蓄積的新 official_sv1 證據由工具於 authored_at 唯讀查封存來源後補入，不冒稱維護者當時親自驗過 source_ref／hash。
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lima","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lima
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 莉瑪
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lind","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lind
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 琳德
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lishenna_the_second_omen","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lishenna_the_second_omen
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 第二絕傑‧里榭娜
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.little_sage_marron","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.little_sage_marron
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 小小賢者 馬隆
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.liza_greenwood_queen","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.liza_greenwood_queen
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 統御自然的女王‧莉莎
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lizard_runner_undeux","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lizard_runner_undeux
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蜥蜴奔跑者 安德烏
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lizard_soldier_conroe","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lizard_soldier_conroe
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蜥蜴士兵 孔羅
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lizard_soldier_ganlu","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lizard_soldier_ganlu
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蜥蜴士兵 岡魯
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lorena_gentle_piety","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lorena_gentle_piety
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 溫柔的虔誠‧蘿蕾娜
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lovesign","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lovesign
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 拉卜桑
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lozenge_magus","zh-Hant"]'
+    origin: project
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lozenge_magus
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 菱形‧魔導士
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.luck_bird","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.luck_bird
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 幸運‧鳥
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.lucky_star_in_the_sky","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lucky_star_in_the_sky
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 夜之曙光、天之祥星
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.luna","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.luna
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 露娜
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.luzen_bridled_desire","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.luzen_bridled_desire
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 制御的欲望‧盧澤
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lycoris_soothing_venom","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lycoris_soothing_venom
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 溫柔的猛毒‧莉柯瑞絲
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lyrael","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lyrael
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 萊拉耶爾
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
+  - record_key: '["glossary_choice","term:name.mahiru","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.mahiru
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 真陽
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
