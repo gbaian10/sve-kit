@@ -51,6 +51,7 @@ note 可空，僅寫簡短資料理由，不參與 ID 或決定狀態。來源�
 | symbol_localization_choice | symbol_id,lang | `symbol_id,lang,symbol_basis,value,concept_evidence`，完整值依[記號文案契約](catalog-route-adoption.md#6-卡文記號與三語文案) |
 | sentence_template | id | `id,inventory_id,source_span,source_lang,normalizer_version,semantic_variant,parameter_schema,content_hash,supersedes_id` |
 | template_translation | template_id,lang | `template_id,lang,text` |
+| template_translation_candidate | source_kind,candidate_id,lang | `source_kind,candidate_id,lang,text,inventory_ids,reasons`，未啟用原稿依 §2.1 |
 | template_translation_variant | template_id,lang,variant_key | `template_id,lang,variant_key,text` |
 | glossary_choice_variant | term_id,lang,variant_key | `term_id,lang,variant_key,value,concept_evidence,source_claim` |
 | context_assignment | owner,field,ordinal | `owner,field,ordinal,source_hash,variant,concept_key,reason` |
@@ -87,6 +88,36 @@ source_ref 保留既有 `{store_id,batch_id,source_version_id,parser,locator,tex
 store_id 是可攜邏輯識別，實體路徑由執行端設定。parser 是本次支援的解析器，locator 為 JSON Pointer，
 text_hash 對定位到的完整 UTF-8 字串計算；span 使用 Unicode code point 半開區間。
 不把本機檔名、對話紀錄、點擊時間或私人網頁 hash 塞進來源欄位。
+
+### 2.1 無法綁定 slot 的候選原稿
+
+`template_translation_candidate` 保存尚無完整參數定義或無法無損綁定的專案譯文草稿。
+沿用 format 2 的六欄 record，origin 限 project/machine，low_confidence 保留原值；
+它始終未啟用，不因低信心旗標為 false 而成為可渲染譯文，也不能用 template_translation_variant 代替。
+
+路徑固定為 `authored/translations/templates/template_translation_candidate/<sequence>.yaml`，
+沿共用 includes 索引、可修改分片及單檔小於 1 MiB 的限制；索引 hash 仍由工具更新。
+record_key 為 `["template_translation_candidate",source_kind,candidate_id,lang]` 的 canonical JSON 字串。
+text、reasons、note 不參與身分；同鍵原稿有不同文字時拒絕，不按檔序選取。
+
+| data 欄位 | 型別與含義 |
+| --- | --- |
+| source_kind | effect/flavor |
+| candidate_id | 非空的原稿穩定識別，例如效果舊 T ID 或風味 exact ID；不是已驗證的模板 ID，不要求存在正式 definition |
+| lang | 沿既有 Lang 型別的目標語言 |
+| text | 非空 UTF-8 譯文草稿字串，保留最終原稿字元；不解析匿名 N/X 或套用可渲染譯文的 slot 語法 |
+| inventory_ids | 按 ID 排序、唯一的當前清冊 entry ID 陣列；來源確實缺失時可空，並在 reasons 記原因，不偽造定位 |
+| reasons | 排序、唯一且非空的原因代號陣列，每項符合 ASCII `[a-z][a-z0-9_]*` |
+
+data 恰含上表六欄；record 及分片沿既有封閉結構、鍵唯一、安全路徑與引用檢查。
+所列 inventory_ids 必須存在；完整建置仍驗當前清冊的來源閉包，不能因資料是候選就跳過壞來源。
+原稿只存我們撰寫／生成的譯文，不保存官方原文、JP normalized、完整來源欄位、私人路徑、核可 hash 或事件。
+來源文字由清冊的 source_ref／locator 取得，不另抄進 text 或 note。
+
+候選不加入 active targets、bindings、renderer、pin 選用或公開翻譯投影，也不計為機械有效／已翻譯覆蓋。
+統一處理清單保留 candidate ID、各原因及受影響卡片數；來源未知時影響數記未知，不當成零。
+日後能綁定時，以普通資料 PR 改為有效定義與 template_translation，通過原有參數／來源驗證後才可渲染。
+不新增核可、收據、修訂鏈或不可變機制。
 
 ## 3. 清冊與定義
 
@@ -283,5 +314,5 @@ format 1 的 decisions、membership、sampled/confirmed、policy／approval／re
 及 inventory 1/2 的 producer／expected／replay_context 僅供讀出舊有效值；新資料不再寫入這些機制。
 轉換保留模板、參數、有效選詞、加粗、來源類別、排除及撤回的語義；不能用舊核可紀錄造新核可事件。
 官方數位卡名繼續由當前規則與來源產生。機器草稿通過格式／引用檢查即可入庫，原低信心或仍有語意疑義者標旗標。
-匿名參數無法無損對齊者保留候選並列清單；不將錯誤正文混入可渲染集合。
+匿名參數無法無損對齊者依 §2.1 保留候選原稿並列清單；不將錯誤正文混入可渲染集合。
 共同 index 切換先讓兩個 reader 認新格式，再分批換 glossary／模板資料；各批可獨立驗證，不改寫 Git 歷史。
