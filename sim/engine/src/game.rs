@@ -43,6 +43,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use crate::catalog::Catalog;
+use crate::random::{Random, RandomAlgorithm};
 use crate::{EngineFailure, Result, invalid};
 
 /// Seat or referee requesting an observation.
@@ -201,7 +202,7 @@ struct State {
     #[serde(default)]
     random_cursors: BTreeMap<String, usize>,
     schedule: turns::TurnSchedule,
-    rng: u64,
+    rng: Random,
     next_object: u64,
     next_event: u64,
     next_group: u64,
@@ -268,16 +269,38 @@ impl Game {
     ///
     /// # Errors
     /// Rejects missing card facts, malformed positions and unsupported historical state.
-    #[expect(
-        clippy::too_many_lines,
-        reason = "All initial authoritative fields are assembled together for snapshot auditing."
-    )]
     pub fn new(
         catalog: Arc<Catalog>,
         setup: &Value,
         facts: &Value,
         random: &Value,
         seed: &str,
+    ) -> Result<Self> {
+        Self::new_with_random_algorithm(
+            catalog,
+            setup,
+            facts,
+            random,
+            seed,
+            RandomAlgorithm::ChaCha12V1,
+        )
+    }
+
+    /// Builds a position using an explicit algorithm for seed-based reconstruction.
+    ///
+    /// # Errors
+    /// Rejects missing card facts, malformed positions and unsupported historical state.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "All initial authoritative fields are assembled together for snapshot auditing."
+    )]
+    pub fn new_with_random_algorithm(
+        catalog: Arc<Catalog>,
+        setup: &Value,
+        facts: &Value,
+        random: &Value,
+        seed: &str,
+        algorithm: RandomAlgorithm,
     ) -> Result<Self> {
         let mut position = Self::prepare_opening(setup);
         if position["history"] == "none" {
@@ -394,9 +417,7 @@ impl Game {
             random_index: 0,
             random_cursors: BTreeMap::new(),
             schedule: turns::TurnSchedule::load(&position["semantic_state"]["turn_schedule"])?,
-            rng: seed.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |s, b| {
-                (s ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
-            }),
+            rng: Random::new(seed, algorithm),
             next_object: 1,
             next_event: 1,
             next_group: 1,
@@ -824,12 +845,5 @@ impl Game {
         let group = self.state.next_group;
         self.state.next_group = group.saturating_add(1);
         group
-    }
-    const fn random_word(&mut self) -> u64 {
-        self.state.rng = self.state.rng.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        let mut n = self.state.rng;
-        n = (n ^ (n >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-        n = (n ^ (n >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-        n ^ (n >> 31)
     }
 }

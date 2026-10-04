@@ -27,18 +27,7 @@ impl Game {
     }
 
     fn bounded_random(&mut self, bound: u64) -> Result<u64> {
-        let threshold = bound
-            .wrapping_neg()
-            .checked_rem(bound)
-            .ok_or_else(|| invalid("random range must be nonempty"))?;
-        loop {
-            let value = self.random_word();
-            if value >= threshold {
-                return value
-                    .checked_rem(bound)
-                    .ok_or_else(|| invalid("empty random range"));
-            }
-        }
+        self.state.rng.bounded(bound)
     }
 
     fn check_random_population(&self, select: &Value, frame: &Frame) -> Result<()> {

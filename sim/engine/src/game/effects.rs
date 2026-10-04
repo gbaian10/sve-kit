@@ -941,17 +941,10 @@ impl Game {
                 deck[*index] = value;
             }
         } else {
-            for i in (1..indexes.len()).rev() {
-                let bound = u64::try_from(i.saturating_add(1)).map_err(invalid)?;
-                let j = usize::try_from(
-                    self.random_word()
-                        .checked_rem(bound)
-                        .ok_or_else(|| invalid("zero shuffle bound"))?,
-                )
-                .map_err(invalid)?;
-                if let (Some(&a), Some(&b)) = (indexes.get(i), indexes.get(j)) {
-                    deck.swap(a, b);
-                }
+            let mut selected = indexes.iter().map(|&i| deck[i].clone()).collect::<Vec<_>>();
+            self.state.rng.shuffle(&mut selected);
+            for (index, value) in indexes.iter().zip(selected) {
+                deck[*index] = value;
             }
         }
         self.player_mut(seat)?.zones.insert("deck".into(), deck);

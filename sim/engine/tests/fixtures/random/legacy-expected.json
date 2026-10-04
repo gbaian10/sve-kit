@@ -1,0 +1,481 @@
+{
+  "final_digest": "00f80240ac1955a76d50d8cf9c54b96c3591650831bbfe6c8dbc88bb5e9acaf6",
+  "final_state": {
+    "P1": {
+      "banish": [],
+      "banish_count": 0,
+      "cemetery": [
+        "s"
+      ],
+      "cemetery_count": 1,
+      "construction": "class",
+      "deck": [
+        "d6",
+        "d4",
+        "d2",
+        "d7",
+        "d3",
+        "d5",
+        "d0",
+        "d1"
+      ],
+      "deck_count": 8,
+      "drive": [],
+      "drive_count": 0,
+      "ep": 0,
+      "equipment": [],
+      "equipment_count": 0,
+      "evolution": [],
+      "evolution_count": 0,
+      "evolve_deck": [],
+      "evolve_deck_count": 0,
+      "ex": [],
+      "ex_count": 0,
+      "field": [],
+      "field_count": 0,
+      "hand": [],
+      "hand_count": 0,
+      "leader": {
+        "class": "ニュートラル",
+        "life": 20
+      },
+      "pp": {
+        "current": 2,
+        "max": 2
+      },
+      "race": [],
+      "race_count": 0,
+      "resolution": [],
+      "resolution_count": 0,
+      "sep": 0,
+      "title": "",
+      "title_code": "",
+      "trigger": [],
+      "trigger_count": 0
+    },
+    "P2": {
+      "banish": [],
+      "banish_count": 0,
+      "cemetery": [],
+      "cemetery_count": 0,
+      "construction": "class",
+      "deck": [],
+      "deck_count": 0,
+      "drive": [],
+      "drive_count": 0,
+      "ep": 0,
+      "equipment": [],
+      "equipment_count": 0,
+      "evolution": [],
+      "evolution_count": 0,
+      "evolve_deck": [],
+      "evolve_deck_count": 0,
+      "ex": [],
+      "ex_count": 0,
+      "field": [],
+      "field_count": 0,
+      "hand": [],
+      "hand_count": 0,
+      "leader": {
+        "class": "ニュートラル",
+        "life": 17
+      },
+      "pp": {
+        "current": 2,
+        "max": 2
+      },
+      "race": [],
+      "race_count": 0,
+      "resolution": [],
+      "resolution_count": 0,
+      "sep": 0,
+      "title": "",
+      "title_code": "",
+      "trigger": [],
+      "trigger_count": 0
+    },
+    "awaiting": {
+      "at": "main",
+      "by": "P1",
+      "choices": [
+        {
+          "do": "end-phase"
+        }
+      ]
+    },
+    "flow": {
+      "kind": "main"
+    },
+    "game": {
+      "ended": false
+    },
+    "knowledge": {
+      "carried": [],
+      "identifiable": [
+        "d0",
+        "d1",
+        "d2",
+        "d3",
+        "d4",
+        "d5",
+        "d6",
+        "d7",
+        "s"
+      ]
+    },
+    "known_cards": [],
+    "legal": [
+      {
+        "do": "end-phase"
+      }
+    ],
+    "objects": {
+      "d0": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d0",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d1": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d1",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d2": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d2",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d3": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d3",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d4": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d4",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d5": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d5",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d6": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d6",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "d7": {
+        "acted": false,
+        "card": "unit",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 0,
+        "hp": 3,
+        "id": "d7",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "unit",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      },
+      "s": {
+        "acted": false,
+        "attacks_this_turn": 0,
+        "card": "spell",
+        "counters": {},
+        "damage": 0,
+        "entered_this_turn": false,
+        "evolved": false,
+        "face": 0,
+        "generation": 2,
+        "hp": 3,
+        "id": "s",
+        "keywords": [],
+        "max_hp": 3,
+        "name": "spell",
+        "power": 2,
+        "silenced": false,
+        "stats_increased_this_turn": false
+      }
+    },
+    "room": null,
+    "semantic_state": {
+      "continuous_effects": [],
+      "counters_this_turn": {
+        "P1": {
+          "attacks": 0,
+          "cards_played": 1,
+          "discarded": 0,
+          "evolutions": 0,
+          "evolve_played": 0,
+          "leader_damaged": 0,
+          "leader_hp_decreased": 0,
+          "leader_hp_increased": 0,
+          "ub_activated": 0
+        },
+        "P1.attacks": 0,
+        "P1.cards_played": 1,
+        "P1.discarded": 0,
+        "P1.evolutions": 0,
+        "P1.evolve_played": 0,
+        "P1.leader_damaged": 0,
+        "P1.leader_hp_decreased": 0,
+        "P1.leader_hp_increased": 0,
+        "P1.ub_activated": 0,
+        "P2": {
+          "attacks": 0,
+          "cards_played": 0,
+          "discarded": 0,
+          "evolutions": 0,
+          "evolve_played": 0,
+          "leader_damaged": 2,
+          "leader_hp_decreased": 2,
+          "leader_hp_increased": 0,
+          "ub_activated": 0
+        },
+        "P2.attacks": 0,
+        "P2.cards_played": 0,
+        "P2.discarded": 0,
+        "P2.evolutions": 0,
+        "P2.evolve_played": 0,
+        "P2.leader_damaged": 2,
+        "P2.leader_hp_decreased": 2,
+        "P2.leader_hp_increased": 0,
+        "P2.ub_activated": 0
+      },
+      "delayed_triggers": [],
+      "event_occurrences": [],
+      "pending_triggers": [],
+      "turn_schedule": {
+        "extra": [],
+        "normal": null,
+        "skipped": []
+      },
+      "used_this_turn": []
+    },
+    "turn": {
+      "active": "P1",
+      "elapsed_turns": {
+        "P1": 3,
+        "P2": 2
+      },
+      "first_player": "P1",
+      "phase": "main"
+    },
+    "version": "astra-state/1"
+  },
+  "first": {
+    "events": [
+      {
+        "cause": {
+          "decision": "legacy:n1"
+        },
+        "from": "P1.hand",
+        "group": 3,
+        "id": "legacy:n1:e1",
+        "kind": "移動",
+        "object": "s",
+        "to": "P1.resolution"
+      },
+      {
+        "cause": {
+          "decision": "legacy:n1"
+        },
+        "group": 6,
+        "id": "legacy:n1:e2",
+        "kind": "プレイ",
+        "object": "s"
+      },
+      {
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 8,
+        "id": "legacy:n1:e3",
+        "kind": "公開",
+        "object": "d7",
+        "source": "s",
+        "to": "all"
+      },
+      {
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 8,
+        "id": "legacy:n1:e4",
+        "kind": "公開",
+        "object": "d0",
+        "source": "s",
+        "to": "all"
+      },
+      {
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 9,
+        "id": "legacy:n1:e5",
+        "kind": "サイコロ",
+        "player": "P1",
+        "reroll": false,
+        "result": 2
+      },
+      {
+        "amount": 2,
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 10,
+        "id": "legacy:n1:e6",
+        "kind": "ダメージ",
+        "source": "s",
+        "target": "P2.leader"
+      }
+    ],
+    "outcome": "paused"
+  },
+  "initial_digest": "c99b034510efa4a98a3edf441839e5b88d77ae827752c193715cb6df4a45d46e",
+  "second": {
+    "events": [
+      {
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 13,
+        "id": "legacy:n2:e7",
+        "kind": "サイコロ",
+        "player": "P1",
+        "reroll": false,
+        "result": 1
+      },
+      {
+        "amount": 1,
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 14,
+        "id": "legacy:n2:e8",
+        "kind": "ダメージ",
+        "source": "s",
+        "target": "P2.leader"
+      },
+      {
+        "by": "rule-10.6.2.8.3",
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "from": "P1.resolution",
+        "group": 18,
+        "id": "legacy:n2:e9",
+        "kind": "移動",
+        "object": "s",
+        "to": "P1.cemetery"
+      },
+      {
+        "cause": {
+          "event": "legacy:n1:e2"
+        },
+        "group": 21,
+        "id": "legacy:n2:e10",
+        "kind": "解決",
+        "object": "s"
+      }
+    ],
+    "outcome": "resolved"
+  }
+}

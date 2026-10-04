@@ -8,8 +8,9 @@ use alloc::sync::Arc;
 use serde_json::{Value, json};
 
 use super::{Game, ZONES, int, list, string};
-use crate::ai::{Random, SearchLog};
+use crate::ai::SearchLog;
 use crate::catalog::Catalog;
+use crate::random::{Random, RandomAlgorithm};
 use crate::{EngineFailure, Result, invalid};
 
 impl Game {
@@ -23,7 +24,27 @@ impl Game {
         seat: &str,
         seed: &str,
     ) -> Result<Self> {
-        let mut random = Random::new(seed);
+        Self::from_observation_with_random_algorithm(
+            catalog,
+            packet,
+            seat,
+            seed,
+            RandomAlgorithm::ChaCha12V1,
+        )
+    }
+
+    /// Reconstructs a hypothetical world with an explicitly selected seed algorithm.
+    ///
+    /// # Errors
+    /// Inconsistent public deck counts or a continuation unavailable to this observer.
+    pub fn from_observation_with_random_algorithm(
+        catalog: Arc<Catalog>,
+        packet: &Value,
+        seat: &str,
+        seed: &str,
+        algorithm: RandomAlgorithm,
+    ) -> Result<Self> {
+        let mut random = Random::new(seed, algorithm);
         let mut setup = json!({"turn":packet["turn"],"room":packet["room"],"semantic_state":packet["semantic_state"],"players":{}});
         setup["semantic_state"]["delayed_triggers"] = json!([]);
         for owner in ["P1", "P2"] {
@@ -57,7 +78,14 @@ impl Game {
             }
             setup["players"][owner] = player;
         }
-        let mut game = Self::new(catalog, &setup, &Value::Null, &Value::Null, seed)?;
+        let mut game = Self::new_with_random_algorithm(
+            catalog,
+            &setup,
+            &Value::Null,
+            &Value::Null,
+            seed,
+            algorithm,
+        )?;
         game.state.delayed = list(&packet["semantic_state"]["delayed_triggers"]);
         for (id, object) in &mut game.state.objects {
             if let Some(visible) = packet["objects"].get(id) {
