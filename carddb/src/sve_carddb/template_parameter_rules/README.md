@@ -1,7 +1,8 @@
 # Current parameter rules
 
 `current` reads the registered matcher switches from the current Git tree or an
-explicit bounded local YAML file. An empty selection enables no rules. Rule IDs,
+explicit bounded local YAML file. Empty notes may be omitted and read as empty
+strings. An empty selection enables no rules. Rule IDs,
 roles and match conditions belong to the installed program; there are no historical
 policy/approval pairs, producer pins or replay comparisons.
 

@@ -81,7 +81,6 @@ def make_case(tmp_path: Path) -> Case:
                         "enabled": True,
                         "origin": "project",
                         "low_confidence": False,
-                        "note": "",
                     }
                 ],
             }
