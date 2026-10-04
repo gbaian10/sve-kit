@@ -7,7 +7,7 @@ evidence:
   - {ref: CR 5.18.2.2, kind: supporting, quote: "5.18.2.2. チョイスの個数が 0 である場合、その一連\nの指示はまったく実行しません。", version: 1.27.0}
   - {ref: project, kind: project, reason: 依 CR 1.3.5 與 5.18.2.2 推論；沒有這張卡的直接 Q&A，也查無反證 Q&A。, date: '2026-09-27'}
 strength: inferred
-decided_by: {who: agents, date: 2026-09-27}
+decided_on: 2026-09-27
 applies_to: [Tf9545f43d1]
 hint:
   zh-TW: 本專案解讀：這裡的「好きな数」可以選 0 個；選 0 個時，這段チョイス整段不執行。
