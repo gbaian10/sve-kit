@@ -7,7 +7,7 @@ from typing import Annotated, Literal, Self
 from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_models import Batch
-from sve_carddb.products.models import Lang
+from sve_carddb.products.models import Code, Lang
 from sve_carddb.registry.records import RecordData, Text
 from sve_carddb.template_sources.models import Entry
 from sve_carddb.template_translations.flavor_models import FlavorEntry
@@ -38,7 +38,28 @@ class TranslationRecord(RecordData):
     note: str
 
 
-Record = Annotated[DefinitionRecord | TranslationRecord, Field(discriminator="kind")]
+class Variant(Translation):
+    variant_key: Code
+
+    @model_validator(mode="after")
+    def _named(self) -> Self:
+        if self.variant_key == "default":
+            raise ValueError("Named template variant cannot be default")
+        return self
+
+
+class VariantRecord(RecordData):
+    record_key: Text
+    kind: Literal["template_translation_variant"]
+    data: Variant
+    origin: Literal["official", "project", "machine"]
+    low_confidence: bool
+    note: str
+
+
+Record = Annotated[
+    DefinitionRecord | TranslationRecord | VariantRecord, Field(discriminator="kind")
+]
 
 
 class Shard(RecordData):

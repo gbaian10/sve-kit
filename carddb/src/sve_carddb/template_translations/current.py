@@ -12,6 +12,7 @@ from sve_carddb.template_translations.current_models import (
     Record,
     Shard,
     TranslationRecord,
+    VariantRecord,
 )
 from sve_carddb.template_translations.files import INVENTORY, SHARD, Files, read
 from sve_carddb.template_translations.loader import (
@@ -36,10 +37,20 @@ CURRENT_INVENTORY_FORMAT = 3
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_translations.current_sources import Sources
+    from sve_carddb.template_translations.sources import Reconstructed
 
 
 def key(record: Record) -> str:
     """Current selection keys exclude translated text, notes and adoption metadata."""
+    if isinstance(record, VariantRecord):
+        return canonical(
+            [
+                record.kind,
+                record.data.template_id,
+                record.data.lang,
+                record.data.variant_key,
+            ]
+        ).decode()
     return canonical(
         [record.kind, record.data.id]
         if isinstance(record, DefinitionRecord)
@@ -213,7 +224,7 @@ def _texts(
     records: dict[str, Record], definitions: dict[str, DefinitionRecord]
 ) -> None:
     for record in records.values():
-        if isinstance(record, TranslationRecord):
+        if isinstance(record, (TranslationRecord, VariantRecord)):
             target = definitions.get(record.data.template_id)
             if target is None:
                 raise ValueError("Current template translation requires a definition")
@@ -240,6 +251,8 @@ class Validated:
     missing_translations: tuple[str, ...]
     low_confidence: tuple[str, ...]
     source_report: bytes
+    members: tuple[Reconstructed, ...]
+    matches: tuple[tuple[str, str], ...]
 
 
 def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
@@ -272,15 +285,16 @@ def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
     )
     retired = {record.data.supersedes_id for record in definitions.values()}
     matched: set[str] = set()
+    matches: list[tuple[str, str]] = []
     for identifier, record in definitions.items():
         if identifier in retired:
             continue
         member = actual[record.data.inventory_id]
-        matched.update(
-            _matching_members(
-                member, record, actual, old=len(identifier) == LEGACY_ID_LENGTH
-            )
+        identifiers = _matching_members(
+            member, record, actual, old=len(identifier) == LEGACY_ID_LENGTH
         )
+        matched.update(identifiers)
+        matches.extend((entry_id, identifier) for entry_id in identifiers)
     translated = {record.data.template_id for record in inputs.translations()}
     missing = set(definitions) - retired - translated
     return Validated(
@@ -295,4 +309,6 @@ def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
             )
         ),
         generated.report,
+        generated.entries,
+        tuple(sorted(matches)),
     )

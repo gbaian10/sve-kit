@@ -63,7 +63,17 @@ of original low confidence and unresolved unsure flags without requiring reviews
 
 The old `loader.load_templates`, v1/v2 inventory models, frozen semantic interpreter
 and approval helpers remain available only for explicit legacy conversion and
-regression diagnostics. They are not the current read/build path. This module does
-not yet wire template import or rendering into production build/preview; that is
-a separate consumer change. Frozen raw inputs for CI must come from the project's
+regression diagnostics. They are not the current read/build path. `current_build.populate()` projects the verified definitions and current targets
+into the shared current DB schema. `populate_field()` checks each face/printing
+field before writing contexts, uses, bindings and selections. `current_render`
+requires the whole field, appends anchored reminders once, preserves layout,
+and returns fallback issues instead of a partial translation when any fragment or
+reference label is missing. It returns exact reference positions and emphasis;
+low confidence propagates through actual template and label dependencies. Named
+variants are selected only by explicit pins. `render-v2` identity excludes notes,
+receipts and the representative source locator. Unofficial card text does not gain
+an official authority from an individual official reference label.
+
+The command/export consumers must select this current schema and synchronize
+public origin, confidence and emphasis fields before enabling current output. Frozen raw inputs for CI must come from the project's
 private testdata input, never a maintainer-only path or a live website.

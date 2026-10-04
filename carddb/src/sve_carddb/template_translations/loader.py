@@ -37,6 +37,8 @@ from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
     from sve_carddb.template_translations.sources import Reconstructed, TemplateSources
 
 
@@ -346,7 +348,9 @@ def _current_frequencies(
     return tuple(sorted(frequencies, key=lambda p: (-p[1], p[0])))
 
 
-def _allocation(record: DefinitionLike, definitions: dict[str, DefinitionLike]) -> None:
+def _allocation(
+    record: DefinitionLike, definitions: Mapping[str, DefinitionLike]
+) -> None:
     """Only an existing different payload at every shorter prefix permits extension."""
     data = record.data
     if isinstance(record, CurrentDefinitionRecord) or len(data.id) - 1 == LEGACY_WIDTH:

@@ -284,8 +284,20 @@ def load_glossary(root: Path) -> Snapshot:  # ruff: ignore[complex-structure] --
     return snapshot
 
 
+CURRENT_TEMPLATE_SOURCE_FORMAT = 3
+
+
 def _template_input(path: str, content: bytes) -> None:
     """Foreign envelopes are checked, but source replay belongs to load_templates."""
+    value = object_value(parse(content))
+    if (
+        value.get("translation_authored_format") == CURRENT_FORMAT
+        or value.get("template_source_format") == CURRENT_TEMPLATE_SOURCE_FORMAT
+    ):
+        from sve_carddb.template_translations.current import validate_foreign  # ruff: ignore[import-outside-top-level] -- shared foreign validation remains source free
+
+        validate_foreign(path, content)
+        return
     from sve_carddb.template_translations.loader import _inventory, _shard, envelope  # ruff: ignore[import-outside-top-level] -- the two area validators share a closure without a module import cycle
 
     if path.startswith("translations/template-sources/"):
