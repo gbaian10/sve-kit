@@ -37,7 +37,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/26
             text_hash: sha256:7679113f520b4b3c7b523fe711e57c149cf637031b9f162e58b232f4ed316cc3
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:ability.reanimate","zh-Hant"]'
     origin: official
@@ -75,7 +75,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/19
             text_hash: sha256:177b1a9903fd4ae8237dcb45a874984f6f5f58de82c10a5200da33ac17c907d4
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:ability.secret_art","zh-Hant"]'
     origin: official
@@ -113,7 +113,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/41
             text_hash: sha256:51bd96fab9ab9240feb3885cdbeee6e06e4bafd0c11bba29f89d07b5903dfe8c
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:ability.single_drive","zh-Hant"]'
     origin: project
@@ -131,7 +131,7 @@ records:
         source_work: 卡片戰鬥先導者
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:ability.spell_boost","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -148,7 +148,7 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:ability.spell_chain","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -165,7 +165,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:ability.stack","zh-Hant"]'
     origin: official
     low_confidence: false
@@ -208,14 +208,14 @@ records:
           target_span:
             start: 77
             end: 79
-          concept_note: 同一封存一代官方卡表 API 的上游 card_id=107341020、相同 skill_disc 欄位，日文「スタック」與繁中「蓄積」唯一出現片段逐字對應。證據只核對此術語選詞，不宣稱日英 SVE 身分或整張卡效果等義。
+          concept_note: 同概念依精確來源定位核對。
       source_claim:
         source_work: Shadowverse
         source_urls:
           - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
           - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
         claimed_source: 已封存一代官方 API 同卡／同效果欄位的繁中術語片段
-        note: 維護者 2026-10-03 指出蓄積是一代線上版既有繁中；本次唯讀核對封存日文與繁中同上游卡號，依 glossary-adoption §3 追加官方來源 adoption，不改字、不改舊概念或第一版來源主張。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:ability.twin_drive","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -232,7 +232,7 @@ records:
         source_work: 卡片戰鬥先導者
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:ability.union_burst","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -249,7 +249,7 @@ records:
         source_work: 公主連結
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:ability.unleashed_secret_art","zh-Hant"]'
     origin: official
     low_confidence: false
@@ -286,7 +286,7 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/42
             text_hash: sha256:ae92cae6ccc2627ddc2f98190dc47c87432fb011c971db4d612f0ac654cd94f5
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:ability.vengeance","zh-Hant"]'
     origin: project
@@ -304,7 +304,7 @@ records:
         source_work: Shadowverse
         source_urls: []
         claimed_source: 數位版 sv1 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.add_to_deck","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -321,7 +321,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.add_to_hand","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -338,7 +338,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.banish","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -355,7 +355,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.choose","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -372,7 +372,7 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.destroy","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -389,7 +389,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.discard","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -406,7 +406,7 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.distribute","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -423,7 +423,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.draw","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -440,7 +440,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.drive_check","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -457,7 +457,7 @@ records:
         source_work: 卡片戰鬥先導者
         source_urls: []
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.engage","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -474,7 +474,7 @@ records:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.equip","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -492,7 +492,7 @@ records:
         source_urls:
           - https://forum.gamer.com.tw/C.php?bsn=30861&snA=15674
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.evolve","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -509,7 +509,7 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
   - record_key: '["glossary_choice","term:action.ignore","zh-Hant"]'
     origin: project
     low_confidence: false
@@ -526,4 +526,4 @@ records:
         source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
         source_urls: []
         claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+        note: 保留所列翻譯來源主張，不據此認定為官方譯名。
