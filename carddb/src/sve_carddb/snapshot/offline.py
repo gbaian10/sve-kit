@@ -242,6 +242,8 @@ def _translation_uses(
     inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
 ) -> tuple[SourceUse, ...]:
     """Check the current source closure independently of database insertion."""
+    if inputs.translation_inputs() is None:
+        return ()
     return uses_sorted(_translation_sources(inputs, build, stores)[1].uses)
 
 
