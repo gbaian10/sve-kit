@@ -139,11 +139,10 @@ view 可顯示已知的私有標籤，但不投影 Catalog 完整索引或可追
 ## 6. evidence 與驗證層次
 
 每筆 evidence 包含 id、source_version_id（既有 src:v1: 的完整內容身分）、
-rule_refs（原版條號）、可選 qa_refs（整數編號）、checked_on、checked_by。
+rule_refs（原版條號）、可選 qa_refs（整數編號）、checked_on。
 scope 的 CR 來源與所有 evidence 皆須能驗回封存來源版本，且與實際規則相關。
 bindings 的 evidence ID 恰連到本封套，不能只寫無關來源當成有核對。
-checked_on 是 ISO 8601 的日期；checked_by 只能記實際核對模型的識別或維護者的公開帳號，
-不填私人聯絡資訊，也不能冒稱維護者已核可；此紀錄不是新的 decision 採納流程。
+checked_on 是 ISO 8601 的日期；不存 checked_by 這類流程紀錄，來源與條號仍需核對。
 來源封存、資料採納與引擎執行器能力各自驗證，不互相替代。
 
 合成層須證明名稱一致重命名不改規則，錯身分／能力不能靠同樣外觀取得特權；
@@ -181,7 +180,6 @@ evidence:
     source_version_id: src:v1:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
     rule_refs: ['1.2.3']
     checked_on: '2026-10-03'
-    checked_by: synthetic-model
 ```
 
 實際資料必須替換為釘版真實輸入、已登錄 code 與能驗回的來源；
