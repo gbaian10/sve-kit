@@ -27,7 +27,7 @@ class Rule(RecordData):
     enabled: bool
     origin: Literal["official", "project", "machine"]
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 class Rules(RecordData):

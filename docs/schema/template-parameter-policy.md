@@ -7,7 +7,7 @@
 
 `authored/template-parameter-rules/current.yaml` 完整欄位：
 `{parameter_rule_format:2,kind:template_parameter_rules,rules}`。
-rules 是按 rule_id 排序的 `{rule_id,enabled,origin,low_confidence,note}` 陣列，ID 唯一、enabled 為 Bool。
+rules 是按 rule_id 排序的 `{rule_id,enabled,origin,low_confidence,note}` 陣列，ID 唯一、enabled 為 Bool；note 可省略，讀取時視為空字串。
 origin/low_confidence/note 沿翻譯 record 的意義；不用 policy_id、matcher_commit、condition_hash 或 approval。
 
 rule_id 必須對到現行程式已登錄的具名規則；條件、適用語言／角色、優先序、型別與數值界限由該規則程式明定。
