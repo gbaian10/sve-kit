@@ -1,1 +1,1 @@
-"""Offline legacy template reconstruction; no adoption or translation import."""
+"""Current sealed template sources and deterministic source partitioning."""

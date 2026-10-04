@@ -10,8 +10,9 @@ from pydantic import ValidationError
 from sve_carddb.build_inputs import ArchivePin, Source
 from sve_carddb.snapshot.values import canonical, digest, object_value
 from sve_carddb.template_parameters.analysis import header_positions, prepared
+from sve_carddb.template_parameters.current_references import adopted
 from sve_carddb.template_parameters.models import Range, Schema, Slot, SourceSpan
-from sve_carddb.template_parameters.references import References, adopted
+from sve_carddb.template_parameters.references import References
 from sve_carddb.template_parameters.verification import verify_values
 from sve_carddb.template_sources.normalizer import partition
 

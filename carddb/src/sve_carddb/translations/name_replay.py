@@ -303,7 +303,6 @@ class IdentityEvidence:
                         batch,
                         region=printing.region,
                         parser_version=parser,
-                        semantic_parser=self.sources.semantic_parser,
                     )
                 frozen = self.providers[lookup]
                 for version in frozen.versions(printing.region, printing.card_no):
@@ -390,7 +389,6 @@ class IdentityEvidence:
                 ref.batch_id,
                 region=printing.region,
                 parser_version=ref.parser,
-                semantic_parser=self.sources.semantic_parser,
             )
         frozen = self.providers[key].version(
             printing.region, printing.card_no, ref.source_version_id

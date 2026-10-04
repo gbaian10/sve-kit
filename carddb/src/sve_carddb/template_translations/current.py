@@ -5,9 +5,9 @@ from functools import cached_property
 from types import MappingProxyType
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue, ValidationError
+from pydantic import ValidationError
 
-from sve_carddb.snapshot.values import canonical, object_value, parse
+from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_translations.current_models import (
     CandidateRecord,
     DefinitionRecord,
@@ -17,17 +17,8 @@ from sve_carddb.template_translations.current_models import (
     TranslationRecord,
     VariantRecord,
 )
+from sve_carddb.template_translations.definitions import _definitions, _matching_members
 from sve_carddb.template_translations.files import INVENTORY, SHARD, Files, read
-from sve_carddb.template_translations.loader import (
-    _definitions,
-    _inventory,
-    _matching_members,
-    _shard,
-)
-from sve_carddb.template_translations.models import DefinitionRecord as LegacyDefinition
-from sve_carddb.template_translations.models import (
-    TranslationRecord as LegacyTranslation,
-)
 from sve_carddb.template_translations.text import parse as parse_text
 from sve_carddb.template_translations.text import verify_flavor
 from sve_carddb.translations.loader import Snapshot as Glossary
@@ -43,7 +34,7 @@ if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_translations.current_sources import Sources
-    from sve_carddb.template_translations.sources import Reconstructed
+    from sve_carddb.template_translations.members import Reconstructed
 
 
 def key(record: Record) -> str:
@@ -95,65 +86,12 @@ def inventory(raw: bytes) -> Inventory:
         raise ValueError("Invalid current template inventory") from None
 
 
-def migrate_shard(raw: bytes) -> Shard:
-    """Keep the latest actual values; removing receipts does not upgrade machine origin."""
-    previous = _shard(raw)
-    selected: dict[str, LegacyDefinition | LegacyTranslation] = {}
-    for record in previous.records:
-        name = canonical(
-            [record.kind, record.data.id]
-            if isinstance(record, LegacyDefinition)
-            else [record.kind, record.data.template_id, record.data.lang]
-        ).decode()
-        existing = selected.get(name)
-        if existing is not None and isinstance(record, LegacyDefinition):
-            raise ValueError("Duplicate legacy template definition")
-        if existing is None or (
-            isinstance(record, LegacyTranslation)
-            and isinstance(existing, LegacyTranslation)
-            and record.data.revision > existing.data.revision
-        ):
-            selected[name] = record
-    records: list[JsonValue] = []
-    for name, record in sorted(selected.items()):
-        data = object_value(parse(canonical(record.data.model_dump(mode="json"))))
-        origin = "project"
-        if isinstance(record, LegacyTranslation):
-            data = {k: data[k] for k in ("template_id", "lang", "text")}
-            origin = record.data.origin
-        records.append(
-            {
-                "record_key": name,
-                "kind": record.kind,
-                "data": data,
-                "origin": origin,
-                "low_confidence": False,
-                "note": "",
-            }
-        )
-    return shard(
-        canonical(
-            {
-                "translation_authored_format": 2,
-                "kind": "translation_shard",
-                "records": records,
-            }
-        )
-    )
-
-
 def validate_foreign(path: str, raw: bytes) -> None:
     """Glossary readers may validate template shapes without reading frozen sources."""
-    value = object_value(parse(raw))
     if path.startswith("translations/template-sources/"):
-        if value.get("template_source_format") == CURRENT_INVENTORY_FORMAT:
-            inventory(raw)
-        else:
-            _inventory(raw)
-    elif value.get("translation_authored_format") == CURRENT_FORMAT:
-        _candidate_path(path, shard(raw).records)
+        inventory(raw)
     else:
-        _shard(raw)
+        _candidate_path(path, shard(raw).records)
 
 
 @dataclass(frozen=True)

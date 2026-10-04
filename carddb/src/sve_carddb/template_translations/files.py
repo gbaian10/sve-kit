@@ -1,4 +1,4 @@
-"""Read complete immutable translation inputs from Git, including every ancestor."""
+"""Read the complete current translation tree from Git, without traversing ancestors."""
 
 import re
 from dataclasses import dataclass
@@ -112,59 +112,3 @@ def read(repository: PinnedRepository, commit: str) -> Files:
     if any(sorted(ns) != list(range(1, len(ns) + 1)) for ns in sequences.values()):
         raise ValueError("Template indexed sequence has a gap or duplicate")
     return Files(commit, raw[INDEX], tuple(content))
-
-
-def immutable(repository: PinnedRepository, commit: str) -> None:
-    """A revert cannot hide a modified shard; indexes may only append frozen entries."""
-    if git(repository, "rev-parse", "--is-shallow-repository").strip() != b"false":
-        raise ValueError("Template immutable replay requires complete Git history")
-    revision(repository, commit)
-    history = (
-        git(
-            repository,
-            "rev-list",
-            "--full-history",
-            "--topo-order",
-            "--reverse",
-            commit,
-            "--",
-            DIRECTORY,
-        )
-        .decode()
-        .splitlines()
-    )
-    seen: dict[str, str] = {}
-    indexed: dict[str, str] = {}
-    started = False
-    for ancestor in history:
-        names = tree(repository, ancestor)
-        formal = {
-            p: oid
-            for p, oid in names.items()
-            if p.startswith(
-                (DIRECTORY + "/templates/", DIRECTORY + "/template-sources/")
-            )
-        }
-        started |= bool(formal)
-        if not started:
-            continue
-        if any(formal.get(p) != oid for p, oid in seen.items()):
-            raise ValueError(
-                "Template published shards or inventories were modified or removed"
-            )
-        files = read(repository, ancestor)
-        index = _index(files.index)
-        current = {
-            **{
-                p: h
-                for p, h in index.includes.items()
-                if p.startswith("translations/templates/")
-            },
-            **index.inventories,
-        }
-        if any(current.get(p) != h for p, h in indexed.items()):
-            raise ValueError(
-                "Template published index entries were modified or removed"
-            )
-        seen.update(formal)
-        indexed.update(current)

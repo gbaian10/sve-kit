@@ -1,4 +1,4 @@
-"""Current glossary references; frozen template-effect-v1 code remains unchanged."""
+"""Current glossary references without a historical template interpreter."""
 
 from typing import TYPE_CHECKING
 

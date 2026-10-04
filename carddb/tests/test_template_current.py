@@ -14,7 +14,8 @@ from sve_carddb.source_archive import seal_batch
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.template_parameter_rules.current import load_file
 from sve_carddb.template_parameter_rules.current import parse as parse_rules
-from sve_carddb.template_parameters.models import Schema
+from sve_carddb.template_parameters.analysis import SAFE_INTEGER, VERSION_PARAMETERS
+from sve_carddb.template_parameters.models import Schema, Slot
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_translations.current import (
     read_templates,
@@ -29,10 +30,11 @@ from sve_carddb.template_translations.current_models import (
     TranslationRecord,
 )
 from sve_carddb.template_translations.current_sources import Generated, Sources
+from sve_carddb.template_translations.definitions import payload
+from sve_carddb.template_translations.members import ORDINALS
 from sve_carddb.template_translations.models import Definition
 
 from .adoption_fixtures import commit, git
-from .template_intake_fixtures import definition
 from .test_effect_presence import page
 from .test_source_archive import _put, _resource, _store
 
@@ -42,7 +44,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from sve_carddb.template_translations.current import Inputs
-    from sve_carddb.template_translations.sources import Reconstructed
+    from sve_carddb.template_translations.members import Reconstructed
 
 
 @dataclass(frozen=True)
@@ -56,6 +58,10 @@ class Case:
 
 @pytest.fixture
 def current_case(tmp_path: Path) -> Case:
+    return make_case(tmp_path)
+
+
+def make_case(tmp_path: Path) -> Case:
     root = tmp_path / "repository"
     root.mkdir()
     git(root, "init", "-b", "main")
@@ -103,14 +109,47 @@ def current_case(tmp_path: Path) -> Case:
 
 
 def _current_definition(member: Reconstructed) -> DefinitionRecord:
-    value = definition(member, new=True)
-    return DefinitionRecord(
-        record_key=str(value["record_key"]),
+    schema = Schema(
+        slots=tuple(
+            Slot(
+                name=h.name,
+                type=h.type or "uint",
+                occurrences=(h.occurrence,),
+                reference_kind=h.reference_kind,
+                min=(1 if role in ORDINALS else 0) if h.type == "uint" else None,
+                max=SAFE_INTEGER if h.type == "uint" else None,
+            )
+            for h, role in zip(member.hints, member.roles, strict=True)
+        )
+    )
+    member.verify_schema(schema)
+    record = DefinitionRecord(
+        record_key="temporary",
         kind="sentence_template",
-        data=Definition.model_validate_json(canonical(value["data"])),
+        data=Definition(
+            id="T" + "0" * 16,
+            inventory_id=member.entry.id,
+            source_span=member.candidate.source_span,
+            source_lang="ja",
+            normalizer_version=VERSION_PARAMETERS,
+            semantic_variant="default",
+            parameter_schema=schema,
+            content_hash="sha256:" + "0" * 64,
+            supersedes_id=None,
+        ),
         origin="project",
         low_confidence=False,
         note="",
+    )
+    checksum = digest(payload(member, record))
+    identifier = "T" + checksum[7:23]
+    return record.model_copy(
+        update={
+            "record_key": canonical(["sentence_template", identifier]).decode(),
+            "data": record.data.model_copy(
+                update={"id": identifier, "content_hash": checksum}
+            ),
+        }
     )
 
 
@@ -163,10 +202,6 @@ def _write(root: Path, values: dict[str, JsonValue]) -> None:
 def test_read_is_source_free_and_low_confidence_stays_active(
     current_case: Case, mocker: MockerFixture
 ) -> None:
-    mocker.patch(
-        "sve_carddb.template_translations.files.immutable",
-        side_effect=AssertionError("No history gate"),
-    )
     mocker.patch.object(
         current_case.sources, "generate", side_effect=AssertionError("No raw reads")
     )
@@ -399,14 +434,8 @@ def test_current_vocabulary_requires_catalog_authority_and_retains_composites() 
 
 
 def test_current_build_does_not_require_legacy_catalog_or_environment_replay(
-    current_case: Case, mocker: MockerFixture
+    current_case: Case,
 ) -> None:
-    for path in (
-        "sve_carddb.template_translations.sources.parse_legacy",
-        "sve_carddb.template_semantics.registry.verify_environment",
-        "sve_carddb.template_semantics.environment.capture",
-    ):
-        mocker.patch(path, side_effect=AssertionError("No historical input gate"))
     fresh = Sources(
         current_case.sources.stores, References(), current_case.sources.rules
     )

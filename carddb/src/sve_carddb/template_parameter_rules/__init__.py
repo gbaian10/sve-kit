@@ -1,1 +1,1 @@
-"""Recognition policy validation, independent of template and translation adoption."""
+"""Current parameter matcher switches and positional resolution."""
