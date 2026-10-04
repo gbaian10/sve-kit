@@ -74,16 +74,11 @@ decisions:
     membership_hash: "sha256:<64 hex>"
     members: [["card:c:<32 hex>", "sha256:<64 hex>"]]
     sample_ids: ["card:c:<32 hex>"]
-    authored_by: registry-tool
-    authored_at: "2026-09-28T00:00:00Z"
-    reviewed_by: coordinator
-    reviewed_at: "2026-09-28T00:00:00Z"
-    reviewed_precision: day
 ```
 
-這是格式示意，不是額外審核證據。2026-09-28 的採納依使用者整批確認與後續裁決；`sample_ids` 列**全部 checked record keys**，不是抽樣。`reviewed_precision=day` 表示原紀錄只有日期；UTC 日界是可重現的日精度編碼，不聲稱核對發生於零時。該精度保留於 authored 證據，匯入 decision 的 Instant 採此編碼。本批新找出的更正候選用 proposed decision、空 checked 集合與 null reviewer/time，不能冒稱 coordinator 已確認。
+這是格式示意，不是額外審核證據。2026-09-28 的採納依使用者整批確認與後續裁決；`sample_ids` 列**全部 checked record keys**，不是抽樣。決定不保存製作者／核對者姓名、時間或精度。本批新找出的更正候選用 proposed decision 與空 checked 集合，不能冒稱已確認。
 
-hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。先對完整 record（不含封套的 decision 指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序，再計 membership hash。decision ID 使用完整 membership hash。任何新成員或內容變更都不得沿用舊決定。2026-09-28 的一次性重新分片讓部分 printing 分片合併，這些分片的 decision 依新成員重算 ID／members／membership_hash；審核者、日期與政策沿用原成員的決定（原本就是同一次使用者整批確認），不是新的審核事件，也不保留舊 decision ID。
+hash recipe 固定：JSON 物件鍵排序、UTF-8（不 ASCII escape）、分隔符 `,`／`:`、無額外空白／尾端換行，不正規化 Unicode。先對完整 record（不含封套的 decision 指針）計 semantic hash；將 `(record_key,semantic_hash)` 二元素陣列按 key 排序，再計 membership hash。decision ID 使用完整 membership hash。任何新成員或內容變更都不得沿用舊決定。2026-09-28 的一次性重新分片讓部分 printing 分片合併，這些分片的 decision 依新成員重算 ID／members／membership_hash；政策與確認狀態沿用原成員的決定（原本就是同一次使用者整批確認），不是新的審核事件，也不保留舊 decision ID。
 
 `ids/index.yaml` 的 `includes` 是 authored 根目錄相對路徑 → 分片**解析後 canonical JSON** hash；`authored_format: 2` 的 index 另有 `allocation_policy`（目前 `region-ranges-2026-09-28-v1`）與各地區游標 `next_int_id: {en: …, jp: …}`，每個游標是該區下一個未使用值；鍵必須恰為政策內的地區，值落在 `[start, end+1]`，`end+1` 表示該區已用盡。不認識的政策或格式直接拒絕。解析內容 hash 可容忍格式工具只調整 YAML 排版。入口列出所有登錄分片，不掃描未被納入的檔案作為有效資料；存在未索引的登錄檔時停止，避免中斷後重用配號。
 
@@ -171,7 +166,7 @@ confirmed_none 與 same_rules_reskin 的決定不可因追加版次自動擴張�
 
 `source_correction` 的 `data` 保存 `id/printing_id/face_id/field/expected_raw_value/corrected_value/expected_source_hash/source_hash_recipe/reason/state/reported_to_official/reported_on/report_url/evidence`。本格式 field 白名單為 effect、card_type，分別映射效果文字與種類；公開 field／值型別依 [傳輸契約 §3.3](snapshot-transport.md#33-公開更正值)，不擴張此 authored 格式的兩欄白名單。expected_source_hash 採前述觀測 recipe，匯入仍須先匹配來源版本，不可直接替換 HTML 原文。
 
-evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，decision 為 confirmed、reviewed_by=user、日期精度 day。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review＋proposed decision，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
+evidence 元素為 `kind: card_image`、`sha256`、官網原樣 `image_src`、region、locator（卡面文字框／種類標記）。匯入以檔案 hash 與 URL 連到 image source_record，再寫 correction_evidence；不把圖片或本機路徑存進 git。BP07-P06 由協調者確認為 active；使用者於 2026-09-28 追加確認 JP PR-114、BP20-P42、BP20-P57、BP20-P67 與 EN BP15-P32EN、CP03-127EN、PR-388EN、PR-442EN，這八筆亦為 active，decision 為 confirmed，不保存確認者與流程日期。卡圖 hash 與原觀測不變。一般尚未確認的候選仍用 needs_review＋proposed decision，不得套用至 current／規則解讀。來源原始觀測永遠保留。卡圖已支持的同卡判定與來源欄位是否正式套用更正是不同採納事項。
 
 本批八筆候選升為 active 是使用者明示授權的來源更正採納，非一般追加：移至 active 分片、建立涵蓋精確內容的新 confirmed decision、同步更新 index。先前 proposed 分片與收據保留在 Git 歷史及舊批次資料中；其他永久登錄與決定不改動。一般產生工具仍拒絕修改既有記錄，不以自動升級取代人工確認。
 
@@ -284,7 +279,7 @@ wording diff 封套可一次簽 confirmed，但 `sample_ids` 必須列全部 che
 
 維護者 2026-10-03 最新更正：SNC 周年（日英、含 BP20-SNC01）歸 SNC，WB 三張歸 WB，PR-350／PR-442／PR-544 留 PR 且只補序號資料。ANV 等稀有度照卡面原樣存，不作歸檔家族。serial_total 為卡面分母；EN 一周年填 10、註記實際每種一張。無實體商品不造 product，只留 distribution 參考與註記；月年精度保留原樣，不補完整日期。圖片與額外張數／EN 查證各屬 #210／#211。
 
-暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都依其地區號段追加分配（§3.2）。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。每張第三方圖以 `review_decision_id` 連到 confirmed 的來源/圖片確認，保存 `source_url`、內容 hash、確認者 `reviewed_by` 與時間 `reviewed_at`；換圖/換來源須重新確認，抽樣不代替逐圖確認。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
+暫定 `card_no` 不占官方網址；`int_id` 所有出貨 printing 都依其地區號段追加分配（§3.2）。補正 `card_no` 後留下 provisional→official 永久 alias；`int_id` 不變。卡號推算與 card 身分是不同軸，同卡通則不會讓所有 SNC 或 EN 候選自動 confirmed。authored/config 已固定 `third_party_image_policy=mirror_reviewed`、`deck_eligibility_policy=regional_decklog`。每張第三方圖以 `review_decision_id` 連到 confirmed 的來源/圖片確認，保存 `source_url`、內容 hash 與確認決定；換圖/換來源須重新確認，抽樣不代替逐圖確認。建牌資格依該地區/版次的 `decklog_available`；人工查證記來源與日期，未查證依官方卡表收錄狀態預設（詳 [build-db.md](build-db.md) §17.2）。暫定號/身分不阻擋建牌；不可用版次禁止新加入、新分享碼與匯出。舊碼/既有牌組仍開啟保留條目，警告並提示可用同名版次，不靜默刪除。
 
 發布程序維護精簡且耐久的 `(lang,short_id,full_digest)` 文字鍵索引，以全部已發布／已保留鍵檢查固定 16 hex＋lang 碰撞，不能只驗 current＋previous 或重配歷史鍵。此索引及發布收據須備份驗回，不進人工 registry，不含完整歷史卡文；資料來源不再是永久 R2 快照聯集。公開快照只保 current＋previous，詳 [snapshot-format §4.1](snapshot-format.md#41-發布窗口圖片新鮮度與回收)。
 
@@ -344,7 +339,7 @@ wording_order 恰好分割 observations 全集合，各 observation_key 出現�
 
 不同內容必須分層；每組相鄰層恰有一筆 order_evidence，欄位為 `{before_level,after_level,basis,evidence_indexes,review_receipt}`。level 是零起算 UInt、after=before+1。basis 為 `printing_availability/source_update/reviewed_order`：前兩者的 evidence_indexes 為本 record.evidence 的非空唯一排序索引，分別釘正式 product／printing_product 的可信發售／收錄日期，或可驗的官方更新證據，review_receipt=null；證據必須支持該相鄰層先後，不只指任一相關頁。
 
-**使用者 2026-10-01 核可**：按可信發售日排序；未知日期的 PR 等版次另列詢問使用者。同日、month/year/unknown 或多重收錄不足以判斷時，不以 date_raw 字典序、卡號、hash、fetched_at、reviewed_at 或分片順序補年代。對未知／並列部分，reviewed_order 保存使用者明示的**採納順序**，不聲稱官方先後：evidence_indexes=[]，review_receipt 恰有 `{reviewed_by,reviewed_at,reviewed_precision,before_observation_keys,after_observation_keys,note}`；兩組 keys 恰等於該相鄰層，精確內容已在 record hash 中。收據保存實際回答者／時間，不能從等義回答自動生成；批次決定的審核與此順序回答都須可驗。沒有回答仍報 unresolved_wording_order，但按 §9.6 顯示候選，不排除卡片。
+**使用者 2026-10-01 核可**：按可信發售日排序；未知日期的 PR 等版次另列詢問使用者。同日、month/year/unknown 或多重收錄不足以判斷時，不以 date_raw 字典序、卡號、hash、fetched_at 或分片順序補年代。對未知／並列部分，reviewed_order 保存使用者明示的**採納順序**，不聲稱官方先後：evidence_indexes=[]，review_receipt 恰有 `{before_observation_keys,after_observation_keys,note}`；兩組 keys 恰等於該相鄰層，精確內容已在 record hash 中。收據保存兩組觀測及順序說明，不保存回答者／時間，不能從等義回答自動生成採納順序。沒有回答仍報 unresolved_wording_order，但按 §9.6 顯示候選，不排除卡片。
 
 只依可信發售／更新證據選取時，basis=latest_adopted_wording；wording_order 或 previous_order 含任一 reviewed_order 時，face_current.basis=reviewed_override，decision 指本次精確封套。這個例外只核可同面同區、已證等義表記的採納順序，不授權真規則 override。順序不填 effective_from／effective_until，不改未知日期；正式勘誤仍依生效區間處理，不能以等義收據接受真規則變更。§9.6 未採納觀測的暫顯也不是此 reviewed_override。
 
@@ -394,7 +389,7 @@ previous_order 恰有 `{basis,evidence_indexes,review_receipt}`，basis 為 `sam
 | common_boundary | `comparison`、`protected_fields`、`protected_condition`、`missing_text`、`sections`、`output`、`equivalence`；保存全體規則的共同比較、保護欄位、null、段落與採納邊界 |
 | rules 每項 | `rule_id`、`category`、`regions`、`fields`、`matcher_version`、`parameters`、`action`、`match_condition`、`exclusions`、`finite_transform`、`examples` |
 | examples | `positive`、`negative` 非空陣列；每項恰含 `case_id`、`region`、`before`、`after`、`parameters`；before／after 是完整合成 wording-face-v1 物件，case_id 在該規則內唯一 |
-| approval | `rule_approval_format: 1`、`kind: wording_rule_approval`、`policy_id`、`rule_set_hash`、`reviewed_by`、`reviewed_at`、`reviewed_precision`、`rules`、`note` |
+| approval | `rule_approval_format: 1`、`kind: wording_rule_approval`、`policy_id`、`rule_set_hash`、`rules`、`note` |
 | approval.rules 每項 | `rule_id`、`action`；按 rule_id 排序唯一，恰與 policy.rules 相同 |
 
 封套欄位封閉；policy.rules 依 rule_id 排序唯一，regions／fields 保留已核可範圍。examples.parameters 是固定測試輸入，不能擴張正式 rules.parameters（首版 reminder ordinals 與 term pairs 皆空）；危險正例仍可分類，action=classify_only 不因正例而升為 equivalent。例子只可用合成文字、hash 或位置，不保存官方卡文。
@@ -407,7 +402,7 @@ record.data 新增必填 `review`，恰有 `{mode,rule_set,rule_matches}`；mode
 
 每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位與 hash 計算沿 §10.4；scope=`batch`、category=`wording_adoption`、policy_id=`wording-adoption-v1`、state 固定 `confirmed`。members 恰為本檔全部 `[record_key,完整 record 的 semantic_hash]`；membership_hash 對排序 members 計算，id=`d:<完整 membership hash hex>`。semantic_hash 是歷史欄位名，不表示工具已證明語義相同。
 
-sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_keys 恰為全部精確觀測；human 表示人逐組／逐型態核對，approved_rules 表示依核可政策逐觀測完整機械檢查，**不能把後者宣稱為逐卡人工審閱**。兩種 mode 分檔；同檔 approved_rules 使用同一 rule_set。human 保存實際核對者與時間；approved_rules 的 reviewed_by／reviewed_at／reviewed_precision 保存該規則集核可收據的人名／時間，note 明示「政策核可」，authored_by／authored_at 才是此次工具套用的作者／時間。不捏造使用者此次逐組點擊，也不以舊身分／商品決定代簽。報告分開計 `human_rows`（mode=human）、`approved_rules_rows`（mode=approved_rules）與仍待人工的群組。
+sample_ids 恰為全體 checked record_key，各 record 的 checked_observation_keys 恰為全部精確觀測；human 表示人逐組／逐型態核對，approved_rules 表示依核可政策逐觀測完整機械檢查，**不能把後者宣稱為逐卡人工審閱**。兩種 mode 分檔；同檔 approved_rules 使用同一 rule_set。human／approved_rules 的依據由 mode 與政策內容區分，決定不保存姓名／時間；approved_rules 的 note 明示「政策核可」。不捏造使用者此次逐組點擊，也不以舊身分／商品決定代簽。報告分開計 `human_rows`（mode=human）、`approved_rules_rows`（mode=approved_rules）與仍待人工的群組。
 
 只對等義且可表示、排序已解的群組追加採納；未回答、勘誤、不確定、未涵蓋或待排序者留 authored 外的精確收據／診斷，不先寫 proposed 再覆寫。null 主文未能依 §9.8 證明 absent 者仍 deferred，不能以等義回答補造缺文。
 
@@ -532,9 +527,9 @@ family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的�
 
 ### 10.4 新定的決定形式與匯入投影
 
-每個商品分片使用 batch 決定，必須有 `id, state, scope, category, policy_id, membership_hash, members, sample_ids, authored_by, authored_at, reviewed_by, reviewed_at, reviewed_precision`，可附 `note`。scope 固定 `batch`、category 固定 `product_catalog`、policy_id 固定 `product-authored-v1`；state 限 `proposed/confirmed`。members 為排序唯一的 `[record_key,semantic_hash]` 二元素陣列，恰好包含本檔全部記錄；semantic_hash 對完整 record（含 evidence）套 §2 canonical recipe，membership_hash 對 members 套同 recipe，id 為 `d:` 加完整 membership hash 的 64 hex。default_decision_id 必須指向此 id。
+每個商品分片使用 batch 決定，必須有 `id, state, scope, category, policy_id, membership_hash, members, sample_ids`，可附 `note`。scope 固定 `batch`、category 固定 `product_catalog`、policy_id 固定 `product-authored-v1`；state 限 `proposed/confirmed`。members 為排序唯一的 `[record_key,semantic_hash]` 二元素陣列，恰好包含本檔全部記錄；semantic_hash 對完整 record（含 evidence）套 §2 canonical recipe，membership_hash 對 members 套同 recipe，id 為 `d:` 加完整 membership hash 的 64 hex。default_decision_id 必須指向此 id。
 
-confirmed 必須由實際核對者填人名、核對時間，sample_ids 恰為全體 members 的 record_key 集合（排序、無重複）；不是抽查。只有日精度的真實核對日期才使用 §2 的 UTC 日界編碼，reviewed_precision=day；確知時間則為 instant。proposed 的 sample_ids=[]、reviewed_by/reviewed_at/reviewed_precision=null；兩種狀態均須實際 authored_by／authored_at，note 可省略，讀取時視為空字串；若提供則為 Text（可空字串，不是 null）。不能沿用 identity_registry 的決定、把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
+confirmed 的 sample_ids 恰為全體 members 的 record_key 集合（排序、無重複），不是抽查；proposed 的 sample_ids=[]。決定不保存姓名、時間或精度；note 可省略，讀取時視為空字串，若提供則為 Text（可空字串，不是 null）。不能沿用 identity_registry 的決定、把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
 
 這些欄位是本格式的明示人工採納收據，不新增 product／printing_product 的 DB decision_id 欄。匯入每個分片時以完整 authored revision、分片路徑及 canonical hash 建立 authored source_record；決定以 decision_source 指回完整封套及全部 evidence 的 raw source_record。product_family.decision_id 指該決定；人工 product／printing_product.source_id 指上述 authored source_record，沿 decision_source 可追回核對及原始證據。文字以既有 text_unit 邊界建立後填 name_unit_id／note_unit_id，不另建第二套文字真值。
 
@@ -561,7 +556,7 @@ region 恰為 jp/en，sequence 為只增的三位以上十進位序號。單檔�
 
 同一 `(region,match)` 全域只允許一筆記錄，即使目標 ID 相同也不能重複；同一 product_id 可以有多筆不同 match，但 region 必須一致。product_id 與 §10 人工 product 共用全域身分命名空間：同 ID 必須指同區同商品，不能另作配號池。對照記錄不是 product 父列；沒有正式商品內容與來源仍不得填 FK。
 
-每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位、日期精度及 hash 計算沿 §10.4；本格式的 state 固定 `confirmed`，category 固定 `product_identity`、policy_id 固定 `product-identity-v1`。semantic_hash 包含完整 record 與 evidence；members 精確涵蓋本檔全部記錄，membership_hash 與 `d:<64hex>` 可重算。confirmed 須有使用者實際確認的收據、姓名與時間，sample_ids 恰為全部 checked record_key；工具不得自行簽名。既有 family／product_catalog／identity_registry 決定不能代簽商品身分。
+每檔 records 非空，共用一個 default_decision_id，decisions 恰含該決定。決定欄位及 hash 計算沿 §10.4；本格式的 state 固定 `confirmed`，category 固定 `product_identity`、policy_id 固定 `product-identity-v1`。semantic_hash 包含完整 record 與 evidence；members 精確涵蓋本檔全部記錄，membership_hash 與 `d:<64hex>` 可重算。confirmed 表示使用者實際確認，sample_ids 恰為全部 checked record_key；決定不保存姓名／時間，工具不得自行宣稱已核對。既有 family／product_catalog／identity_registry 決定不能代簽商品身分。
 
 **協調者決定（2026-10-01）**：商品身分對照只接受 confirmed 記錄；proposed 或其他 state 一律視為輸入驗證失敗。因 `(region,match)` 全域唯一且分片只增，不能先納入 proposed 再原地升級或追加同鍵的 confirmed。候選草稿一律留在 authored 外，經使用者逐筆確認後才首次寫入正式分片；本限制只適用於 §11，不改 §10 的既有格式。
 

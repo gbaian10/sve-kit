@@ -33,7 +33,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence}`；data 恰為 `{subje
 | manual_printing／printings | manual_printing_adoption | manual-printings-v1 |
 | serial_supplement／serials | serial_supplement_adoption | serial-supplement-v1 |
 
-decision 必為 confirmed／batch，reviewed_by 本版恰為維護者 `gbaian10`，reviewed_at／reviewed_precision 沿共用 day／instant 編碼，製作者另記 authored_by／authored_at。核對包括完整值、號碼狀態、歸屬、來源、全部依賴及每一對應面。工具不得捏造核對事件；身分、商品或其他序號記錄的決定不能代簽。此入口採全筆人審，較 build-db §2 的一般序號 sampled 門檻嚴格；不借用 approved_rules／approved_policy 例外。confirmed 表示核可按所記的不確定程度公開，**不會把 provisional 號碼或未知對應變成已證實**。
+decision 必為 confirmed／batch，不保存製作者／核對者姓名、時間或精度。核對包括完整值、號碼狀態、歸屬、來源、全部依賴及每一對應面。工具不得捏造核對事件；身分、商品或其他序號記錄的決定不能代簽。此入口採全筆人審，較 build-db §2 的一般序號 sampled 門檻嚴格；不借用 approved_rules／approved_policy 例外。confirmed 表示核可按所記的不確定程度公開，**不會把 provisional 號碼或未知對應變成已證實**。
 
 ## 3. 值、對應與永久 ID
 

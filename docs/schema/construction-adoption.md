@@ -30,7 +30,7 @@ record 恰為 `{record_key,kind,filing_key,data,evidence,review,adoption_review}
 
 record_hash=H(完整 record)，members 恰為整片 `[record_key,record_hash]` 的排序唯一集合，membership_hash=H(members)，decision.id=`d:`＋完整 64 hex。members 涵蓋全部採納成員，一筆也是 batch。human／approved_policy 分片，不混用；政策批次亦不得混用 policy pin 或首輪決定引用。policy_id 是政策的永久版本 key，不按 kind 另配一套 ID；上表只定 category。approved_policy 的 decision.policy_id 必等於 adoption_review.policy.policy_id，human 的 decision.policy_id 固定為 `construction-human-v1` 人工核對規程鍵（比照翻譯的獨立人工 policy_id），不能借政策收據冒作已核可；此保留鍵不得登錄成 approved_policy 的政策 ID。各 category 的實際驗證由同一構築 checks_recipe 與釘版 validator 完成；human 決定亦須完整驗來源與本文件欄位，只是不引用尚未核可的政策。
 
-approved_policy 決定必為 confirmed／batch，sample_ids 恰為全體 checked record_key，意思是**依政策機械全查**，不是本次逐筆人工確認。reviewed_by／reviewed_at／reviewed_precision 恰取政策核可收據的維護者事件；authored_by／authored_at 記本次套用工具及時間，note 明示「政策核可」。工具／模型／協調者名稱不得填 decision.reviewed_by。human 批次沿共用 sampled／confirmed 門檻：sampled 的 sample_ids 為非空實際樣本，confirmed 恰為全體真人核對成員。禁限／角色覆寫的 human 批次只能 confirmed，批內每筆均由維護者實際核對、sample_ids 恰為全體；與既有 restriction_confirmed_decision 檢查及角色覆寫投影門檻一致。分歧的已採納成員必在實際 sample_ids 並有 maintainer_resolution。首輪 human sampled 或 human confirmed 不依賴未來政策授權，避免初始化循環。不接受 identity／catalog／其他區域／前版決定代簽，不借翻譯收據，不設略過來源／freshness 的旗標。
+approved_policy 決定必為 confirmed／batch，sample_ids 恰為全體 checked record_key，意思是**依政策機械全查**，不是本次逐筆人工確認。decision 不保存製作者／核對者姓名或時間，note 明示「政策核可」。不能把政策機械檢查宣稱為逐筆人工核可。human 批次沿共用 sampled／confirmed 門檻：sampled 的 sample_ids 為非空實際樣本，confirmed 恰為全體真人核對成員。禁限／角色覆寫的 human 批次只能 confirmed，批內每筆均由維護者實際核對、sample_ids 恰為全體；與既有 restriction_confirmed_decision 檢查及角色覆寫投影門檻一致。分歧的已採納成員必在實際 sample_ids 並有 maintainer_resolution。首輪 human sampled 或 human confirmed 不依賴未來政策授權，避免初始化循環。不接受 identity／catalog／其他區域／前版決定代簽，不借翻譯收據，不設略過來源／freshness 的旗標。
 
 ### 1.1 兩模型核對與維護者事件
 

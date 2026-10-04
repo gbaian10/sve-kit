@@ -46,16 +46,19 @@ record_key 是 `[kind,subject,adoption_no]` 的 canonical JSON 字串。全域�
 
 ### 2.1 決定與續版
 
-decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sample_ids,authored_by,authored_at,reviewed_by,reviewed_at,reviewed_precision,note`。scope 固定 batch，一筆也是 batch。
+decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sample_ids,note`。scope 固定 batch，一筆也是 batch。
 
 | record.kind（area） | category | policy_id | 最低門檻 |
 | --- | --- | --- | --- |
 | digital_link_adoption（links） | digital_link | digital-link-v1 | sampled／confirmed |
 | digital_link_coverage_adoption（coverage） | digital_link_coverage | digital-link-coverage-v1 | sampled／confirmed |
 
-sampled 須有實際真人審核者、時間及非空 checked 成員子集；confirmed 的 sample_ids 恰為全部 checked 成員。集合均排序唯一，不得有非成員。reviewed_precision=day 用 UTC 午夜編碼實際日期，不捏造時分秒；authored 身分／時間與審核事件分開。此門檻沿既有數位政策；不套 glossary 的 delegated_glossary 或模板的 approved_policy 例外。新增 same_name 的政策入口另依 [數位名字政策](digital-name-policy.md#2-同名規則瀏覽連結)，僅限該獨立核可規則與完整能力的卡層級瀏覽，不放寬本入口真人 same_card 門檻。confidence、auto_ok、模型審查、來源官方及規格通過不代替真人事件。兩層採納的確認者均須是本契約明列的維護者，現行名單僅 `gbaian10`，reviewed_by 逐字比對，不 trim、不接受工具或模型名稱；新增／變更名單須維護者確認後修改契約與驗證器。具名欄位不等於已發生審核，sample_ids 與時間仍須忠實反映實際真人事件。
+sampled 的 sample_ids 為非空的實際 checked 成員子集；confirmed 的 sample_ids 恰為全部 checked 成員。
+集合均排序唯一，不得有非成員。決定不保存製作者／審核者姓名、時間或精度，loader 不驗帳號名單。
+真人 same_card 的實際核對要求不變，工具不能把規格通過或模型結果宣稱為真人核對。
+新增 same_name 的政策入口另依[數位名字政策](digital-name-policy.md#2-同名規則瀏覽連結)，不放寬本入口的同卡核對。
 
-令 H 為 authored-layout 的完整 SHA-256 canonical JSON recipe，Hash 帶 `sha256:`。`record_hash=H(完整 record)`，包含 evidence、review_context_hash 與 reason；members 恰為全部 `[record_key,record_hash]` 按 key 排序，membership_hash=H(members)，decision.id=`d:`＋membership_hash 的 64 hex。review 欄仍須依真實事件驗證，不能因 ID 相同就接受互相矛盾的收據。
+令 H 為 authored-layout 的完整 SHA-256 canonical JSON recipe，Hash 帶 `sha256:`。`record_hash=H(完整 record)`，包含 evidence、review_context_hash 與 reason；members 恰為全部 `[record_key,record_hash]` 按 key 排序，membership_hash=H(members)，decision.id=`d:`＋membership_hash 的 64 hex。成員及來源仍須完整驗證，不能因 ID 相同就接受互相矛盾的資料。
 
 每個 kind/subject 只有一條採納鏈。拒絕缺號、分叉、錯前件、重複 record、decision 指向或 hash 錯誤。修正 relation、名稱依據、覆蓋或撤回只追加新分片並原子更新 index，舊分片不動。末筆 null 或末筆對本次輸入 stale 都不回復較早值；stale 不等於撤回，歷史保留，重新確認須追加採納。
 
