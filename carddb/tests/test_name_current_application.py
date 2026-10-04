@@ -16,32 +16,29 @@ from sve_carddb.digital_name_policies.current_application import materialize, pr
 from sve_carddb.digital_name_policies.runtime import RUNTIME
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
-from sve_carddb.translations.current import convert
 from sve_carddb.translations.current_models import (
     AssignmentData,
     AssignmentRecord,
+    ChoiceRecord,
     TermRecord,
     key,
 )
 from sve_carddb.translations.current_names import prepare as prepare_names
 from sve_carddb.translations.importer import Inputs as TranslationInputs
-from sve_carddb.translations.models import ChoiceRecord as LegacyChoice
 from sve_carddb.translations.models import PrintingOwner, RevisionOwner
-from sve_carddb.translations.models import TermRecord as LegacyTerm
 
 from .adoption_fixtures import commit
 from .database_fixtures import DatabaseTemplate
 from .digital_name_policy_fixtures import NAMES
 from .name_application_fixtures import ApplicationCase, application_case, printed_owner
-from .name_replay_fixtures import name_term
-from .translation_fixtures import choice, write
+from .translation_fixtures import choice, name_term, write
 
 if TYPE_CHECKING:
     from pathlib import Path
 
 
 @pytest.fixture(scope="module")
-def legacy_case(tmp_path_factory: pytest.TempPathFactory) -> ApplicationCase:
+def base_case(tmp_path_factory: pytest.TempPathFactory) -> ApplicationCase:
     return application_case(tmp_path_factory.mktemp("current-names"))
 
 
@@ -56,17 +53,10 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
 ) -> ApplicationCase:
     shutil.copytree(case.fixture.root, root)
     base = root / "authored/digital-name-policies" / NAMES
-    document = object_value(read_yaml(base / "001.policy.yaml"))
-    original = object_value(document["content"])
-    minimum = object_value(original["target_minimum_check"])
-    content: dict[str, JsonValue] = {
-        "scope": original["scope"],
-        "game_priority": original["game_priority"],
-        "target_minimum_check": {
-            k: minimum[k]
-            for k in ("kana_ranges", "whitespace_codepoints", "trim_or_normalize")
-        },
-        "excluded_names": [
+    document = object_value(read_yaml(base / "current.yaml"))
+    content = object_value(document["content"])
+    content["excluded_names"] = (
+        [
             {
                 "source_lang": "ja",
                 "source_name_hash": digest(b"Synthetic card"),
@@ -74,9 +64,8 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
             }
         ]
         if excluded
-        else [],
-        "name_overrides": [],
-    }
+        else []
+    )
     if override:
         with case.database.copy() as db:
             owner = str(db.rows("face_revision")[0].values["id"])
@@ -99,8 +88,6 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     }
     for path in base.iterdir():
         path.unlink()
-    for path in (root / "authored/digital-name-exclusions" / NAMES).iterdir():
-        path.unlink()
     (base / "current.yaml").write_bytes(canonical(policy))
     index_path = root / "authored/digital-name-policies/index.yaml"
     index = object_value(read_yaml(index_path))
@@ -113,15 +100,13 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
     values: list[dict[str, JsonValue]] = []
     for identifier in ["name.test", "name.other"] if ambiguous else ["name.test"]:
         values.append(  # ruff: ignore[manual-list-comprehension] -- synthetic source construction keeps each concept identifier explicit
-            convert(
-                LegacyTerm.model_validate_json(canonical(name_term(identifier)))
-            ).model_dump(mode="json")
+            TermRecord.model_validate_json(canonical(name_term(identifier))).model_dump(
+                mode="json"
+            )
         )
     if choice_text is not None:
-        selected = convert(
-            LegacyChoice.model_validate_json(
-                canonical(choice("name.test", value=choice_text))
-            )
+        selected = ChoiceRecord.model_validate_json(
+            canonical(choice("name.test", value=choice_text))
         )
         values.append(
             selected.model_copy(
@@ -169,7 +154,7 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
         case,
         inputs=inputs,
         context=context,
-        replay=replace(case.replay, snapshot=snapshot, originals=originals, uses=()),
+        replay=replace(case.replay, snapshot=snapshot, originals=originals),
         database=database,
         fixture=replace(
             case.fixture,
@@ -184,13 +169,11 @@ def current_case(  # ruff: ignore[too-many-locals] -- one synthetic fixture comp
 
 @pytest.mark.parametrize("excluded", [False, True])
 def test_current_policy_no_audit_and_ambiguous_name_is_independent(
-    legacy_case: ApplicationCase,
+    base_case: ApplicationCase,
     tmp_path: Path,
     excluded: bool,
 ) -> None:
-    case = current_case(
-        legacy_case, tmp_path / "repo", excluded=excluded, ambiguous=True
-    )
+    case = current_case(base_case, tmp_path / "repo", excluded=excluded, ambiguous=True)
     with case.database.copy() as db, db.transaction():
         decisions = db.rows("decision")
         result = populate(
@@ -213,10 +196,10 @@ def test_current_policy_no_audit_and_ambiguous_name_is_independent(
 
 
 def test_current_render_quality_changes_id_but_note_does_not(
-    legacy_case: ApplicationCase,
+    base_case: ApplicationCase,
     tmp_path: Path,
 ) -> None:
-    case = current_case(legacy_case, tmp_path / "repo")
+    case = current_case(base_case, tmp_path / "repo")
     with case.database.copy() as db, db.transaction():
         plan = prepare(
             db, case.inputs, case.texts, sources=case.sources(), replay=case.replay
@@ -242,12 +225,12 @@ def test_current_render_quality_changes_id_but_note_does_not(
 
 @pytest.mark.parametrize("override", [False, True])
 def test_current_explicit_override_and_low_machine_name(
-    legacy_case: ApplicationCase,
+    base_case: ApplicationCase,
     tmp_path: Path,
     override: bool,
 ) -> None:
     case = current_case(
-        legacy_case, tmp_path / "repo", choice_text="合成低信心名稱", override=override
+        base_case, tmp_path / "repo", choice_text="合成低信心名稱", override=override
     )
     with case.database.copy() as db, db.transaction():
         result = populate(
@@ -266,10 +249,10 @@ def test_current_explicit_override_and_low_machine_name(
 
 
 def test_current_variant_cannot_select_two_concepts(
-    legacy_case: ApplicationCase,
+    base_case: ApplicationCase,
     tmp_path: Path,
 ) -> None:
-    case = current_case(legacy_case, tmp_path / "repo", ambiguous=True)
+    case = current_case(base_case, tmp_path / "repo", ambiguous=True)
     with case.database.copy() as db, db.transaction():
         printed = printed_owner(db, case)
         owners: tuple[RevisionOwner | PrintingOwner, ...] = (

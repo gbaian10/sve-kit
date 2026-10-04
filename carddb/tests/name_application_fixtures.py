@@ -1,12 +1,10 @@
 """One immutable synthetic policy/replay and real name-capability DB per module."""
 
-from dataclasses import dataclass, replace
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
-from pydantic import JsonValue
-
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_name_policies.application import Inputs
 from sve_carddb.digital_name_policies.runtime import RUNTIME
@@ -14,19 +12,15 @@ from sve_carddb.registry.preview import FrozenJP, plan_preview
 from sve_carddb.snapshot.values import object_value, parse
 from sve_carddb.text_observations import FrozenTexts, plan_text_observations
 from sve_carddb.text_observations.models import candidate_revision_id
+from sve_carddb.translations.current_names import Names
 from sve_carddb.translations.importer import Inputs as TranslationInputs
-from sve_carddb.translations.name_build import NameOwner
-from sve_carddb.translations.name_replay import replay_names
+from sve_carddb.translations.name_sources import NameOwner
 from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit
 from .build_db_fixtures import rows
 from .database_fixtures import DatabaseTemplate
-from .digital_name_policy_fixtures import (
-    PolicyFixture,
-    copied_policy,
-    make_policy_fixture,
-)
+from .digital_name_policy_fixtures import PolicyFixture, make_policy_fixture
 from .translation_fixtures import template, write
 
 if TYPE_CHECKING:
@@ -34,7 +28,6 @@ if TYPE_CHECKING:
 
     from sve_carddb.build_db import Database
     from sve_carddb.text_observations import TextPlan
-    from sve_carddb.translations.name_replay import NameReplay
 
 
 @dataclass(frozen=True)
@@ -43,7 +36,7 @@ class ApplicationCase:
     inputs: Inputs
     context: BuildContext
     texts: TextPlan
-    replay: NameReplay
+    replay: Names
     database: DatabaseTemplate
 
     def sources(self) -> Sources:
@@ -69,7 +62,6 @@ def application_case(
     context = BuildContext.from_inputs(
         revision, {name: (root / name).read_bytes() for name in RUNTIME}, config
     )
-    sources = Sources({"test-store": fixture.digital.store}, root, context)
     owner = fixture.owner()
     assert owner.name_ref is not None
     batch = owner.name_ref.batch_id
@@ -94,8 +86,8 @@ def application_case(
         ),
     )
     translation = TranslationInputs(root / "authored", root, revision)
-    replay, _ = replay_names(translation.load(), {}, translation, sources)
-    schema = compile_build(("t0", "translation_names"))
+    replay = Names(translation.load(), ())
+    schema = compile_current_build(("t0", "translation_names"))
     with create_database(schema) as db, template().copy() as original:
         with db.transaction():
             for table in schema.tables:
@@ -111,37 +103,6 @@ def application_case(
             )
         database = DatabaseTemplate(schema, db._connection.serialize())
     return ApplicationCase(fixture, inputs, context, texts, replay, database)
-
-
-def staged(
-    case: ApplicationCase, root: Path, shards: dict[str, dict[str, JsonValue]]
-) -> ApplicationCase:
-
-    fixture = copied_policy(case.fixture, root)
-    write(root / "authored", shards)
-    revision = commit(root)
-    inputs = replace(
-        case.inputs, root=root / "authored", repository=root, authored_revision=revision
-    )
-    translations = TranslationInputs(root / "authored", root, revision)
-    config = (
-        object_value(parse(case.context.configuration.encode()))
-        | inputs.configuration()
-        | translations.configuration()
-    )
-    object_value(config["catalog_registry"])["authored_revision"] = revision
-    context = BuildContext.from_inputs(
-        revision, {name: (root / name).read_bytes() for name in RUNTIME}, config
-    )
-    snapshot = translations.load()
-    originals = {
-        r.data.id: str(r.data.authored_source_ja)
-        for r, _ in snapshot.records()
-        if r.kind == "glossary_term"
-    }
-    sources = Sources({"test-store": fixture.digital.store}, root, context)
-    replay, _ = replay_names(snapshot, originals, translations, sources)
-    return ApplicationCase(fixture, inputs, context, case.texts, replay, case.database)
 
 
 def printed_owner(db: Database, case: ApplicationCase) -> NameOwner:

@@ -34,7 +34,7 @@ if TYPE_CHECKING:
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Result
     from sve_carddb.text_observations import TextPlan
-    from sve_carddb.translations.name_replay import NameReplay
+    from sve_carddb.translations.current_names import Names
 
 
 @pytest.fixture(scope="module")
@@ -216,7 +216,7 @@ def test_offline_detects_missing_name_application_source_use(
         *,
         context: BuildContext,
         stores: dict[str, Path],
-        replay: NameReplay,
+        replay: Names,
         links: LinkResult | None,
     ) -> Result:
         result = original(

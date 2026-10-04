@@ -20,9 +20,7 @@ from sve_carddb.digital_name_policies.models import (
     Entry,
     Exclusions,
     Index,
-    LinkNameExclusion,
     LinkRegistryPins,
-    NameExclusion,
     Policy,
 )
 from sve_carddb.registry.inputs import JSON_VALUE
@@ -39,25 +37,6 @@ DIRECTORIES = ("digital-name-policies", "digital-name-exclusions")
 CURRENT_FORMAT = 2
 
 CONTENT_KEYS = {
-    "names": frozenset(
-        [
-            "policy_id",
-            "actual_answers",
-            "normative_rules",
-            "plain_language_rules",
-            "catalogue_pins",
-            "scope",
-            "game_priority",
-            "target_minimum_check",
-            "display_label",
-            "excluded_names",
-            "visible_notices",
-            "shared_answer_bindings",
-            "shared_future_scope_rules",
-            "final_exclusions_hash",
-            "proposed_clause_replacements",
-        ]
-    ),
     "links": frozenset(
         [
             "policy_id",
@@ -87,19 +66,13 @@ CONTENT_KEYS = {
 # These identify the supported rule semantics, including the disclosed name wording.
 # Source pins and separately approved exclusion lists are checked independently.
 SEMANTICS = {
-    "names": "sha256:cf7946648d3a639210fb24cd2b70b1474cbaf04e29be657ee0537b3fc6561dcd",
     "links": "sha256:8514cf4a651bc8fb1881de24956c36896fa78eb07946a503fa63c883a51079ca",
 }
-INITIAL_NAMES_DOCUMENT = (
-    "sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3"
-)
 ADOPTED_PROJECTIONS = {
-    INITIAL_NAMES_DOCUMENT: "sha256:16d6f2f8fe23dd435fad9d1f436e35379c10d857b88ec766ce4c5c31089fe576",
     "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:6d752c9f50170e2d2dc236d2c5f1a6bb255b09c229b6946b99d85f8ca46d40e5",
 }
 
 ADOPTED_APPROVALS = {
-    "sha256:f38dc612c694abb743466778824da7baec0b0dff07d03d32e2a1a53b74c4f9f3": "sha256:96ae0305bd71e907e5956eb2f1c9dfe91c74b2d49290911c4ada8f4235561a14",
     "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:b1ba6c901a6e5d92ba5e98fcf92244f129cac18cdb498abde36f2d46b32159fa",
 }
 
@@ -148,15 +121,13 @@ def semantics(content: dict[str, JsonValue], purpose: str) -> str:
     detached = object_value(parse(canonical(content)))
     for key in ("policy_id", "catalogue_pins", "proposed_clause_replacements"):
         detached.pop(key, None)
-    if purpose == "names":
-        detached.pop("excluded_names", None)
-        detached.pop("final_exclusions_hash", None)
-    else:
-        detached.pop("registry_pins", None)
-        object_value(detached["exclusions"]).pop("initial_exclusions_hash", None)
-        object_value(object_value(detached["review"])["private_application"]).pop(
-            "policy_id", None
-        )
+    if purpose != "links":
+        raise ValueError("Versioned policy semantics are only defined for links")
+    detached.pop("registry_pins", None)
+    object_value(detached["exclusions"]).pop("initial_exclusions_hash", None)
+    object_value(object_value(detached["review"])["private_application"]).pop(
+        "policy_id", None
+    )
     return digest(canonical(detached))
 
 
@@ -273,7 +244,7 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
     expected = {INDEX}
     if raw_index.get("digital_name_policy_index_format") == CURRENT_FORMAT:
         current_index = model(CurrentIndex, raw_index)
-        legacy: dict[str, JsonValue] = {}
+        versioned_links: dict[str, JsonValue] = {}
         for identifier, current_entry in current_index.policies.items():
             if isinstance(current_entry, CurrentEntry):
                 current_path = f"digital-name-policies/{identifier}/current.yaml"
@@ -287,7 +258,9 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
                 current_names.append(current_policy)
                 expected.add(current_path)
             else:
-                legacy[identifier] = [e.model_dump(mode="json") for e in current_entry]
+                versioned_links[identifier] = [
+                    e.model_dump(mode="json") for e in current_entry
+                ]
         # This is a format-one view of the remaining links; no policy or proof is invented.
         index = (
             model(
@@ -295,10 +268,10 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
                 {
                     "digital_name_policy_index_format": 1,
                     "kind": "digital_name_policy_index",
-                    "policies": legacy,
+                    "policies": versioned_links,
                 },
             )
-            if legacy
+            if versioned_links
             else None
         )
     else:
@@ -348,8 +321,6 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
                 or excluded.purpose != policy.purpose
             ):
                 raise ValueError("Digital-name policy envelope identity mismatch")
-            if current_names and policy.purpose != "links":
-                raise ValueError("Current name policy cannot mix a legacy name policy")
             _content(policy)
             _approval(policy, receipt, excluded, entry)
             expected.update(paths)
@@ -415,22 +386,13 @@ def _approval(
         or receipt.initial_exclusions_hash != entry.exclusions_hash
     ):
         raise ValueError("Digital-name approval hash closure mismatch")
-    final_hash = (
-        policy.content["final_exclusions_hash"]
-        if policy.purpose == "names"
-        else object_value(policy.content["exclusions"])["initial_exclusions_hash"]
-    )
+    final_hash = object_value(policy.content["exclusions"])["initial_exclusions_hash"]
     if final_hash != exclusions.approved_list_hash:
         raise ValueError("Digital-name approved exclusion hash mismatch")
     keys: list[tuple[str, ...]] = []
     for item in exclusions.entries:
         if not item.reason.strip():
             raise ValueError("Digital-name exclusion reason is blank")
-        if (policy.purpose == "names" and type(item) is not NameExclusion) or (
-            policy.purpose == "links"
-            and type(item) not in {LinkNameExclusion, CardTargetExclusion}
-        ):
-            raise ValueError("Digital-name exclusion kind differs from policy purpose")
         if isinstance(item, CardTargetExclusion):
             if (
                 re.fullmatch(
@@ -512,15 +474,6 @@ def _events(  # ruff: ignore[complex-structure] -- button, messages and disclosu
             < datetime.fromisoformat(change.disclosed_at)
         ):
             raise ValueError("Digital-name disclosed change lacks timely acceptance")
-    if policy.approved_document_hash == INITIAL_NAMES_DOCUMENT and (
-        set(messages) != {"b5d164b7-8e06-4336-af4e-de21f0306da4"}
-        or messages["b5d164b7-8e06-4336-af4e-de21f0306da4"].at
-        != "2026-10-02T20:33:39.423Z"
-        or tuple(c.rule_id for c in changes) != ("label-and-authority", "new-jp")
-    ):
-        raise ValueError(
-            "Initial adopted name policy requires its disclosed oral acceptance"
-        )
     approved_receipt_hash = ADOPTED_APPROVALS.get(policy.approved_document_hash)
     if (
         approved_receipt_hash is not None

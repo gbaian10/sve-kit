@@ -26,7 +26,7 @@ if TYPE_CHECKING:
     from sve_carddb.digital_name_policies.application import Result as NameResult
     from sve_carddb.snapshot.offline import Inputs
     from sve_carddb.text_observations.plan import TextPlan
-    from sve_carddb.translations.name_replay import NameReplay
+    from sve_carddb.translations.current_names import Names
 
 
 @dataclass(frozen=True)
@@ -36,9 +36,11 @@ class Composer:
 
     def configuration(self, recipe: Inputs) -> dict[str, JsonValue]:
         """Declare current registry and frozen source scopes separately from policy pins."""
-        loaded = self.inputs.load().effective("names")
+        loaded = self.inputs.load()
         batches = [
-            pin.model_dump(mode="json") for pin in loaded.catalogue().source_batches
+            pin.model_dump(mode="json")
+            for policy in loaded.policies
+            for pin in policy.catalogue().source_batches
         ]
         batches.extend(
             {"store_id": recipe.store_id, "batch_id": pin.card_batch}
@@ -106,7 +108,7 @@ class Composer:
         *,
         context: BuildContext,
         stores: dict[str, Path],
-        replay: NameReplay,
+        replay: Names,
         links: LinkResult | None,
     ) -> tuple[SourceUse, ...]:
         """Replay expectations independently before the writing stage."""
@@ -122,7 +124,7 @@ class Composer:
         *,
         context: BuildContext,
         stores: dict[str, Path],
-        replay: NameReplay,
+        replay: Names,
         links: LinkResult | None,
     ) -> NameResult:
         """Compose owner-local names without enabling public digital browse data."""

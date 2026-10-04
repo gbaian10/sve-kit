@@ -88,7 +88,7 @@ def flavor_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
     index_file.write_bytes(
         canonical(
             {
-                "translation_authored_format": 1,
+                "translation_authored_format": 2,
                 "kind": "translation_index",
                 "includes": {},
                 "inventories": {},

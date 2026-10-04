@@ -30,7 +30,7 @@ if TYPE_CHECKING:
     from sve_carddb.digital_name_policies.current_evaluate import (
         Catalogue as CurrentCatalogue,
     )
-    from sve_carddb.digital_name_policies.evaluate import Catalogue, OwnerEvidence
+    from sve_carddb.digital_name_policies.evaluate import OwnerEvidence
     from sve_carddb.digital_name_policies.loader import Snapshot
     from sve_carddb.translations.sources import Sources
 
@@ -72,16 +72,10 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
     review = review_context(sources)
     index = Evidence(sources).index(review)
     physical = sve_inventory(sources, review)
-    names: Catalogue | CurrentCatalogue
-    if snapshot.current_names:
-        historic = sources
-        names = current_catalogue(snapshot.current_names[0], sources)
-    else:
-        names_policy = snapshot.effective("names")
-        historic = historical_sources(
-            names_policy, sources.stores, sources.repository.root
-        )
-        names = catalogue(names_policy, historic)
+    if len(snapshot.current_names) != 1:
+        raise ValueError("Name report needs one current name policy")
+    historic = sources
+    names = current_catalogue(snapshot.current_names[0], sources)
     links_policy = snapshot.effective("links")
     links_sources = historical_sources(
         links_policy, sources.stores, sources.repository.root
@@ -198,7 +192,7 @@ def generate(  # ruff: ignore[too-many-locals] -- diagnostic report retains inde
 
 
 def _comparison(
-    names: Catalogue | CurrentCatalogue,
+    names: CurrentCatalogue,
     owners: list[OwnerEvidence],
     comparison: Sources,
 ) -> dict[str, JsonValue]:

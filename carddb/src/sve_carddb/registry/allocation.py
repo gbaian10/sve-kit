@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from sve_carddb.registry.storage import Entry
 
-MAX_INT_ID = 4294967295
 ALLOCATION_POLICY = "region-ranges-2026-09-28-v1"
 
 
@@ -24,7 +23,7 @@ class IdRange:
 
 
 # 1..20000 is reserved and never used by the regular allocator; 60000 and
-# 100000..MAX_INT_ID are unassigned so new regions get new disjoint ranges.
+# 100000..4294967295 are unassigned so new regions get new disjoint ranges.
 RESERVED = IdRange(1, 20000)
 REGION_RANGES = {"jp": IdRange(20001, 59999), "en": IdRange(60001, 99999)}
 

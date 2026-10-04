@@ -14,12 +14,12 @@ from sve_carddb.digital_name_policies.owners import publication_owners
 from sve_carddb.digital_name_policies.runtime import require_runtime
 from sve_carddb.snapshot.project.evidence import DisplayBinding
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.translations.counterparts import first_counterpart
 from sve_carddb.translations.current_models import ChoiceRecord, TermRecord
 from sve_carddb.translations.current_names import prepare as prepare_names
 from sve_carddb.translations.importer import Inputs as NameInputs
 from sve_carddb.translations.importer import validate_choice
-from sve_carddb.translations.name_build import name_source
-from sve_carddb.translations.name_selection import first_counterpart
+from sve_carddb.translations.name_sources import name_source
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -30,10 +30,9 @@ if TYPE_CHECKING:
     from sve_carddb.digital_name_policies.application import Inputs
     from sve_carddb.digital_name_policies.loader import Snapshot
     from sve_carddb.text_observations.plan import TextPlan
+    from sve_carddb.translations.counterparts import NameCandidate
     from sve_carddb.translations.current_names import Names
-    from sve_carddb.translations.name_build import NameSource
-    from sve_carddb.translations.name_replay import NameReplay
-    from sve_carddb.translations.name_selection import NameCandidate
+    from sve_carddb.translations.name_sources import NameSource
     from sve_carddb.translations.sources import Sources
 
 
@@ -89,7 +88,7 @@ class Plan:
 def _choice(
     db: Database,
     sources: Sources,
-    replay: NameReplay | Names,
+    replay: Names,
     owner: NameSource,
     term_id: str | None,
     counterparts: tuple[NameCandidate, ...],
@@ -155,7 +154,7 @@ def prepare(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals
     texts: TextPlan,
     *,
     sources: Sources,
-    replay: NameReplay | Names,
+    replay: Names,
     links: LinkResult | None = None,
 ) -> Plan:
     """Complete catalogues and each own source are checked in the current build."""
@@ -276,7 +275,7 @@ def populate(
     texts: TextPlan,
     *,
     sources: Sources,
-    replay: NameReplay | Names,
+    replay: Names,
     links: LinkResult | None = None,
 ) -> Result:
     """Generate current IDs and bindings without any review event or decision row."""

@@ -176,7 +176,7 @@ def _records(generated: Generated) -> Shard:
 
 def _write(root: Path, values: dict[str, JsonValue]) -> None:
     index: dict[str, JsonValue] = {
-        "translation_authored_format": 1,
+        "translation_authored_format": 2,
         "kind": "translation_index",
         "includes": {},
         "inventories": {},

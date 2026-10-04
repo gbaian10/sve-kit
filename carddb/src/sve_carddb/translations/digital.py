@@ -5,15 +5,15 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_inputs import SourceUse, insert_raw_sources
+from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.products.models import LocalizedText
-from sve_carddb.snapshot.values import canonical, object_value, parse
+from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.translations.name_selection import NameCandidate, first_counterpart
+from sve_carddb.translations.counterparts import NameCandidate, first_counterpart
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import Source
-    from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.translations.sources import Sources
 
 
@@ -263,3 +263,52 @@ def select_name(  # ruff: ignore[complex-structure] -- each name source needs bo
         return None
     assert selected.decision_id is not None
     return selected.text, selected.origin, selected.decision_id
+
+
+def name_proof(  # ruff: ignore[too-many-locals] -- exact names need both frozen API identity and language pins
+    sources: Sources, game: str, official: str, phase: str, lang: str, text: str
+) -> tuple[SourceRef, Source]:
+    """Verify the selected digital face and language against exact frozen text."""
+    config = object_value(parse(sources.build.configuration.encode()))
+    digital = object_value(config.get("digital_evidence"))
+    found = []
+    for value in array(digital.get("refs")):
+        ref = SourceRef.model_validate_json(canonical(value))
+        if ref.parser != "translation-" + game + "-v1":
+            continue
+        actual_lang, document, source = sources.document(ref)
+        if actual_lang != lang:
+            continue
+        data = object_value(object_value(document).get("data"))
+        if game == "svwb":
+            details = object_value(data.get("card_details"))
+            if official not in details:
+                continue
+            item = object_value(details[official])
+            common = object_value(item.get("common"))
+            locator = f"/data/card_details/{official}/common/name"
+            name = common.get("name")
+        else:
+            matches = [
+                (i, object_value(c))
+                for i, c in enumerate(array(data.get("cards")))
+                if str(object_value(c).get("card_id")) == official
+            ]
+            if len(matches) != 1:
+                continue
+            index, common = matches[0]
+            item = common
+            locator = f"/data/cards/{index}/card_name"
+            name = common.get("card_name")
+        if phase not in _phases(game, common, item):
+            raise ValueError("Selected digital face is absent from frozen source")
+        if name != text:
+            raise ValueError("Selected digital name differs from frozen source")
+        exact = ref.model_copy(
+            update={"locator": locator, "text_hash": digest(text.encode())}
+        )
+        sources.text(exact)
+        found.append((exact, source))
+    if not found:
+        raise ValueError("Selected digital name lacks frozen language evidence")
+    return min(found, key=lambda item: canonical(item[0].model_dump(mode="json")))

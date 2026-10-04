@@ -1,7 +1,7 @@
 """Resolve names using the current identity and each owner's exact printed source."""
 
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest
@@ -12,14 +12,23 @@ from sve_carddb.translations.current_models import (
     TermRecord,
 )
 from sve_carddb.translations.models import IdentityBasis, PrintingOwner
-from sve_carddb.translations.name_build import NameOwner, name_source
-from sve_carddb.translations.name_replay import IdentityEvidence, ResolvedName
+from sve_carddb.translations.name_identity import IdentityEvidence
+from sve_carddb.translations.name_sources import NameOwner, NameSource, name_source
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
     from sve_carddb.translations.importer import Inputs
     from sve_carddb.translations.loader import Snapshot
     from sve_carddb.translations.sources import Sources
+
+
+@dataclass(frozen=True)
+class ResolvedName:
+    source: NameSource
+    term_id: str | None
+    variant: str
+    reason: Literal["selected", "missing_name_concept", "ambiguous_name_concept"]
+    record_hashes: tuple[str, ...]
 
 
 @dataclass(frozen=True)
@@ -82,11 +91,8 @@ class Names:
                 variant,
                 "ambiguous_name_concept" if candidates else "missing_name_concept",
                 tuple(hashes),
-                (),
             )
-        return ResolvedName(
-            source, candidates[0], variant, "selected", tuple(hashes), ()
-        )
+        return ResolvedName(source, candidates[0], variant, "selected", tuple(hashes))
 
 
 def prepare(

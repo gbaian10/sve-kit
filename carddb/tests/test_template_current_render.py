@@ -17,7 +17,7 @@ from sve_carddb.template_translations.current_models import (
 )
 from sve_carddb.template_translations.current_render import render
 from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.name_build import NameOwner
+from sve_carddb.translations.name_sources import NameOwner
 
 from .build_db_fixtures import seed
 from .test_template_current import Case, current_case

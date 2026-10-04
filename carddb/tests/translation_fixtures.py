@@ -5,8 +5,8 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.build_db import Json, create_database
-from sve_carddb.build_db.t1 import compile_build
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.build_db.current import compile_current_build
+from sve_carddb.snapshot.values import canonical, digest, object_value
 
 from .database_fixtures import DatabaseTemplate
 
@@ -36,7 +36,9 @@ def term(
     return {
         "record_key": canonical(["glossary_term", "term:" + identifier]).decode(),
         "kind": "glossary_term",
-        "filing_key": "concepts",
+        "origin": "project",
+        "low_confidence": False,
+        "note": "",
         "data": {
             "id": "term:" + identifier,
             "category": category,
@@ -45,76 +47,43 @@ def term(
             "source_span": None,
             "authored_source_ja": None,
             "missing_source_reason": None,
-            "adoption_review": {"mode": "human", "delegation": None},
         },
-        "evidence": [],
     }
 
 
 def choice(
-    identifier: str = "rule.test",
-    *,
-    number: int = 1,
-    predecessor: JsonValue = None,
-    value: JsonValue = "同名",
+    identifier: str = "rule.test", *, value: JsonValue = "同名"
 ) -> dict[str, JsonValue]:
     return {
         "record_key": canonical(
-            ["glossary_choice", "term:" + identifier, "zh-Hant", number]
+            ["glossary_choice", "term:" + identifier, "zh-Hant"]
         ).decode(),
         "kind": "glossary_choice",
-        "filing_key": "choices",
+        "origin": "project",
+        "low_confidence": False,
+        "note": "",
         "data": {
             "term_id": "term:" + identifier,
             "lang": "zh-Hant",
             "value": None if value is None else {"kind": "authored", "text": value},
-            "origin": "project",
             "concept_evidence": [],
             "source_claim": None,
-            "adoption_review": {"mode": "human", "delegation": None},
-            "adoption_no": number,
-            "predecessor": predecessor,
         },
-        "evidence": [],
     }
 
 
 def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
-    records.sort(key=lambda r: str(r["record_key"]))
-    members: list[JsonValue] = [
-        [r["record_key"], digest(canonical(r))] for r in records
-    ]
-    checksum = digest(canonical(members))
-    identifier = "d:" + checksum[7:]
+    ordered = sorted(records, key=lambda record: str(record["record_key"]))
     return {
-        "translation_authored_format": 1,
+        "translation_authored_format": 2,
         "kind": "translation_shard",
-        "default_decision_id": identifier,
-        "records": list[JsonValue](records),
-        "decisions": [
-            {
-                "id": identifier,
-                "state": "confirmed",
-                "scope": "batch",
-                "category": records[0]["kind"],
-                "policy_id": "synthetic-glossary-v1",
-                "membership_hash": checksum,
-                "members": members,
-                "sample_ids": [r["record_key"] for r in records],
-                "authored_by": "Synthetic author",
-                "authored_at": INSTANT,
-                "reviewed_by": "Synthetic human",
-                "reviewed_at": INSTANT,
-                "reviewed_precision": "day",
-                "note": "Synthetic decision.",
-            }
-        ],
+        "records": list[JsonValue](ordered),
     }
 
 
 def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
     index: dict[str, JsonValue] = {
-        "translation_authored_format": 1,
+        "translation_authored_format": 2,
         "kind": "translation_index",
         "includes": {p: digest(canonical(v)) for p, v in shards.items()},
         "inventories": {},
@@ -126,7 +95,7 @@ def write(root: Path, shards: dict[str, dict[str, JsonValue]]) -> None:
 
 
 def template() -> DatabaseTemplate:
-    schema = compile_build(("t0", "translation_evidence"))
+    schema = compile_current_build(("t0", "translation_evidence"))
     with create_database(schema) as db:
         with db.transaction():
             db.insert(
@@ -240,3 +209,15 @@ def template() -> DatabaseTemplate:
                         },
                     )
         return DatabaseTemplate(schema, db._connection.serialize())
+
+
+def name_term(
+    key: str = "name.synthetic", text: str = "Synthetic card"
+) -> dict[str, JsonValue]:
+    record = term(key, category="card_name")
+    object_value(record["data"]).update(
+        source_ref=None,
+        authored_source_ja=text,
+        missing_source_reason="Synthetic name without an official source",
+    )
+    return record

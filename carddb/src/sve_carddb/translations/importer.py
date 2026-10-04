@@ -1,4 +1,4 @@
-"""Adopt exact glossary evidence atomically; never promote candidate confidence."""
+"""Adopt current glossary values atomically with exact frozen evidence."""
 
 import re
 from dataclasses import dataclass
@@ -6,12 +6,9 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.build_db import Json
-from sve_carddb.build_db.rows import insert_exact
-from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.catalog.adoption_sources import PinnedRepository
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, object_value
 from sve_carddb.translations.current_models import ChoiceRecord as CurrentChoiceRecord
 from sve_carddb.translations.current_models import DigitalName as CurrentDigitalName
 from sve_carddb.translations.current_models import (
@@ -19,26 +16,17 @@ from sve_carddb.translations.current_models import (
 )
 from sve_carddb.translations.loader import Snapshot, load_glossary
 from sve_carddb.translations.models import (
-    AssignmentRecord,
     AuthoredValue,
-    ChoiceRecord,
-    ConceptRecord,
     DictionaryEntry,
-    DigitalName,
     EffectTerm,
-    EmphasisRecord,
-    Shard,
     SourceValue,
-    TermRecord,
-    VocabularyRecord,
 )
-from sve_carddb.translations.name_replay import replay_names
 from sve_carddb.translations.sources import Sources, pointer
 
 if TYPE_CHECKING:
     from pathlib import Path
 
-    from sve_carddb.build_db import Database, Value
+    from sve_carddb.build_db import Database
     from sve_carddb.build_inputs import BuildContext, InputRecord
 
 
@@ -78,10 +66,7 @@ class Inputs:
 
 
 def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-many-locals] -- independent source/concept guards cannot substitute for each other
-    record: ChoiceRecord
-    | VocabularyRecord
-    | CurrentChoiceRecord
-    | CurrentVocabularyRecord,
+    record: CurrentChoiceRecord | CurrentVocabularyRecord,
     *,
     original: str | None,
     sources: Sources,
@@ -99,12 +84,8 @@ def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-man
         if lang != data.lang:
             raise ValueError("Choice source language mismatch")
         source_id = source.id
-    origin = (
-        record.origin
-        if isinstance(record, (CurrentChoiceRecord, CurrentVocabularyRecord))
-        else record.data.origin
-    )
-    official = origin in {"official", "official_svwb", "official_sv1"}
+    origin = record.origin
+    official = origin == "official"
     if official and not data.concept_evidence:
         raise ValueError("Official choice lacks same-concept evidence")
     for evidence in data.concept_evidence:
@@ -117,16 +98,12 @@ def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-man
         if jp_lang != "ja" or target_lang != data.lang or target != text:
             raise ValueError("Concept evidence language/exact target mismatch")
         if (
-            not isinstance(evidence, (DigitalName, CurrentDigitalName))
+            not isinstance(evidence, CurrentDigitalName)
             and original is not None
             and ja != original
         ):
             raise ValueError("Concept evidence differs from adopted Japanese term")
-        expected_provider = (
-            {"translation-sv1-v1", "translation-svwb-v1"}
-            if origin == "official"
-            else {"translation-" + origin.removeprefix("official_") + "-v1"}
-        )
+        expected_provider = {"translation-sv1-v1", "translation-svwb-v1"}
         if official and evidence.target_ref.parser not in expected_provider:
             raise ValueError("Official origin differs from evidence provider")
         if isinstance(evidence, DictionaryEntry):
@@ -137,7 +114,7 @@ def validate_choice(  # ruff: ignore[complex-structure,too-many-branches,too-man
                 or evidence.jp_ref.parser != evidence.target_ref.parser
             ):
                 raise ValueError("Official dictionary concept/key mismatch")
-        elif isinstance(evidence, (DigitalName, CurrentDigitalName)):
+        elif isinstance(evidence, CurrentDigitalName):
             _digital_evidence(evidence, ja, target, data.lang, db)
             for ref in (evidence.jp_ref, evidence.target_ref):
                 _digital_location(evidence, ref, sources, db)
@@ -173,7 +150,7 @@ def _effect_location(ref: SourceRef) -> None:
 
 
 def _digital_location(
-    evidence: DigitalName | CurrentDigitalName,
+    evidence: CurrentDigitalName,
     ref: SourceRef,
     sources: Sources,
     db: Database,
@@ -203,24 +180,17 @@ def _digital_location(
 
 
 def _digital_evidence(
-    evidence: DigitalName | CurrentDigitalName,
+    evidence: CurrentDigitalName,
     ja: str,
     target: str,
     lang: str,
     db: Database,
 ) -> None:
     decisions = {r.values["id"]: r.values for r in db.rows("decision")}
-    identifier = evidence.decision_id if isinstance(evidence, DigitalName) else None
-    decision = decisions.get(identifier)
-    if identifier is not None and (
-        decision is None or decision["state"] not in {"sampled", "confirmed"}
-    ):
-        raise ValueError("Digital same-concept decision is unadopted")
     links = [
         r.values
         for r in db.rows("digital_link")
         if r.values["digital_face_id"] == evidence.digital_face_id
-        and (identifier is None or r.values["decision_id"] == identifier)
         and decisions.get(r.values["decision_id"], {}).get("state")
         in {"sampled", "confirmed"}
         and r.values["relation"] == "same_card"
@@ -243,123 +213,13 @@ def _digital_evidence(
         raise ValueError("Digital name evidence does not locate the adopted face names")
 
 
-def populate_glossary(  # ruff: ignore[complex-structure,too-many-branches] -- histories are validated before any effective choice is inserted
+def populate_glossary(
     db: Database, inputs: Inputs, *, build: BuildContext, stores: dict[str, Path]
 ) -> InputRecord:
-    """Compose with an already verified publication identity and frozen digital closure."""
-    snapshot = inputs.load()
-    if snapshot.has_current or "record_key" in db.columns("glossary_term"):
-        from sve_carddb.translations.current_importer import populate  # ruff: ignore[import-outside-top-level] -- format dispatch avoids a cycle with shared evidence validators
+    """Compose current values with verified publication identity and frozen sources."""
+    from sve_carddb.translations.current_importer import populate  # ruff: ignore[import-outside-top-level] -- the projection reuses this module's independent evidence validators
 
-        return populate(db, inputs, snapshot, build=build, stores=stores)
-    configuration = object_value(parse(build.configuration.encode()))
-    if (
-        configuration.get("translation_authored")
-        != inputs.configuration()["translation_authored"]
-    ):
-        raise ValueError("Build configuration does not pin translation authored bytes")
-    sources = Sources(stores, inputs.repository, build)
-    originals = {}
-    for record, _ in snapshot.records():
-        if isinstance(record, TermRecord):
-            if record.data.source_ref is None:
-                lang, text = "ja", record.data.authored_source_ja
-            else:
-                lang, text, _ = sources.text(
-                    record.data.source_ref, record.data.source_span
-                )
-            if lang != "ja" or not text:
-                raise ValueError("Glossary concept requires exact Japanese source")
-            originals[record.data.id] = text
-        for evidence in record.evidence:
-            sources.text(evidence.source_ref)
-    values = {}
-    for record, _ in snapshot.records():
-        if isinstance(record, (ChoiceRecord, VocabularyRecord)):
-            values[record.record_key] = validate_choice(
-                record,
-                original=originals.get(record.data.term_id)
-                if isinstance(record, ChoiceRecord)
-                else None,
-                sources=sources,
-                db=db,
-            )
-    replay, identity = replay_names(snapshot, originals, inputs, sources)
-    sources.uses[:] = replay.uses
-    insert_raw_sources(db, (use.source for use in sources.uses))
-    for revision, path, checksum in sorted(set(identity.authored_uses)):
-        insert_exact(
-            db,
-            "source_record",
-            {
-                "id": "authored:name-identity:"
-                + digest(canonical([revision, path, checksum]))[7:],
-                "kind": "authored",
-                "sha256": checksum,
-                "authored_path": path,
-                "authored_revision": revision,
-                "parser_version": "name-identity-v1",
-            },
-            ("id",),
-        )
-    _audit(db, snapshot, inputs.authored_revision, sources)
-    for record, decision in snapshot.records():
-        if isinstance(record, (AssignmentRecord, ConceptRecord)):
-            for revision, path, checksum in sorted(set(identity.authored_uses)):
-                if revision != identity.record_revisions[record.record_key]:
-                    continue
-                identifier = (
-                    "authored:name-identity:"
-                    + digest(canonical([revision, path, checksum]))[7:]
-                )
-                insert_exact(
-                    db,
-                    "decision_source",
-                    {
-                        "decision_id": decision,
-                        "source_id": identifier,
-                        "role": "name_identity:"
-                        + digest(canonical([revision, path]))[7:],
-                        "locator": path,
-                        "quote": None,
-                    },
-                    ("decision_id", "source_id", "role"),
-                )
-    for record, decision in snapshot.effective():
-        if isinstance(record, TermRecord):
-            db.insert(
-                "glossary_term",
-                {
-                    "id": record.data.id,
-                    "category": record.data.category,
-                    "source_ja": originals[record.data.id],
-                    "concept_key": record.data.concept_key,
-                    "decision_id": decision,
-                },
-            )
-        elif isinstance(record, (EmphasisRecord, AssignmentRecord, ConceptRecord)):
-            continue
-        elif isinstance(record, ChoiceRecord):
-            value = values[record.record_key]
-            if value is not None:
-                db.insert(
-                    "glossary_translation",
-                    {
-                        "term_id": record.data.term_id,
-                        "lang": record.data.lang,
-                        "text": value[0],
-                        "origin": record.data.origin,
-                        "source_id": value[1],
-                        "decision_id": decision,
-                    },
-                )
-        else:
-            raise TypeError(
-                "Vocabulary label projection belongs to #53; glossary import is atomic"
-            )
-    result = input_record(build, sources.uses)
-    result.verify(db, build, tuple(sources.uses), complete=False)
-    return result
+    return populate(db, inputs, inputs.load(), build=build, stores=stores)
 
 
 def import_glossary(
@@ -378,75 +238,3 @@ def _refs(value: JsonValue) -> tuple[SourceRef, ...]:
     if isinstance(value, list):
         return tuple(ref for item in value for ref in _refs(item))
     return ()
-
-
-def _audit(db: Database, snapshot: Snapshot, revision: str, sources: Sources) -> None:
-    for path, exact, _ in (
-        ("translations/index.yaml", snapshot.index, b""),
-        *snapshot.shards,
-    ):
-        identifier = "authored:translations:" + digest(
-            canonical([revision, path, digest(exact)])
-        ).removeprefix("sha256:")
-        insert_exact(
-            db,
-            "source_record",
-            {
-                "id": identifier,
-                "kind": "authored",
-                "sha256": digest(exact),
-                "authored_path": "authored/" + path,
-                "authored_revision": revision,
-                "parser_version": "translation-authored-v1",
-            },
-            ("id",),
-        )
-        for name, _, content in snapshot.shards:
-            if name != path:
-                continue
-            shard = Shard.model_validate_json(content)
-            decision = shard.decisions[0]
-            values: dict[str, Value] = {
-                k: v
-                for k, v in decision.model_dump(
-                    mode="json", exclude={"members", "reviewed_precision", "sample_ids"}
-                ).items()
-                if isinstance(v, str) or v is None
-            }
-            values["sample_ids"] = Json(list[JsonValue](decision.sample_ids))
-            insert_exact(db, "decision", values, ("id",))
-            insert_exact(
-                db,
-                "decision_source",
-                {
-                    "decision_id": decision.id,
-                    "source_id": identifier,
-                    "role": "translation_envelope",
-                    "locator": path,
-                    "quote": None,
-                },
-                ("decision_id", "source_id", "role"),
-            )
-            references = {
-                (sources.document(ref)[2].id, ref.locator)
-                for record in shard.records
-                for ref in _refs(record.model_dump(mode="json"))
-            }
-            for use in sources.uses:
-                if (use.source.id, use.locator) not in references:
-                    continue
-                role = "translation_evidence:" + digest(
-                    canonical([use.source.id, use.locator])
-                ).removeprefix("sha256:")
-                insert_exact(
-                    db,
-                    "decision_source",
-                    {
-                        "decision_id": decision.id,
-                        "source_id": use.source.id,
-                        "role": role,
-                        "locator": use.locator,
-                        "quote": None,
-                    },
-                    ("decision_id", "source_id", "role"),
-                )

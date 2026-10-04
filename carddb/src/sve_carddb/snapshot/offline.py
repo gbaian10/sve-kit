@@ -56,14 +56,14 @@ from sve_carddb.text_observations import (
 )
 from sve_carddb.text_observations.composition import text_preview_uses
 from sve_carddb.text_observations.wording import printing_observed_texts, wording_views
-from sve_carddb.translations.models import (
+from sve_carddb.translations.current_models import (
     ChoiceRecord,
-    EffectTerm,
-    SourceValue,
+    ConceptRecord,
     TermRecord,
     VocabularyRecord,
 )
-from sve_carddb.translations.name_replay import replay_names
+from sve_carddb.translations.current_names import prepare as prepare_names
+from sve_carddb.translations.models import EffectTerm, SourceValue
 from sve_carddb.translations.sources import CODE_PATH as TRANSLATION_CODE
 from sve_carddb.translations.sources import Sources as TranslationSources
 
@@ -77,7 +77,7 @@ if TYPE_CHECKING:
     from sve_carddb.products import ProductIdentities
     from sve_carddb.registry.records import CorrectionEvidence
     from sve_carddb.snapshot.project import Projection
-    from sve_carddb.translations.name_replay import NameReplay
+    from sve_carddb.translations.current_names import Names
 
 
 class RegionalInput(RecordData):
@@ -191,51 +191,57 @@ def _translation_source_recipes(
     }
 
 
-def _name_replay(
+def _translation_sources(
     inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
-) -> NameReplay | None:
-    """Replay complete glossary history independently of the database producer."""
+) -> tuple[dict[str, str], TranslationSources]:
+    """Collect exactly the current frozen terms and values, without historical decisions."""
     translation = inputs.translation_inputs()
-    if translation is None:
-        return None
-    snapshot = translation.load()
     sources = TranslationSources(stores, inputs.repository, build)
     originals: dict[str, str] = {}
-    for record, _ in snapshot.records():
+    if translation is None:
+        return originals, sources
+    for record in translation.load().current_records():
         if isinstance(record, TermRecord):
             originals[record.data.id] = (
                 sources.text(record.data.source_ref, record.data.source_span)[1]
                 if record.data.source_ref is not None
                 else str(record.data.authored_source_ja)
             )
-        for proof in record.evidence:
-            sources.text(proof.source_ref)
-        if (
-            not isinstance(record, (ChoiceRecord, VocabularyRecord))
-            or record.data.value is None
+        elif isinstance(record, ConceptRecord):
+            sources.text(record.data.source_ref)
+        elif (
+            isinstance(record, (ChoiceRecord, VocabularyRecord))
+            and record.data.value is not None
         ):
-            continue
-        if isinstance(record.data.value, SourceValue):
-            sources.text(record.data.value.source_ref, record.data.value.span)
-        for relation in record.data.concept_evidence:
-            sources.text(
-                relation.jp_ref,
-                relation.jp_span if isinstance(relation, EffectTerm) else None,
-            )
-            sources.text(
-                relation.target_ref,
-                relation.target_span if isinstance(relation, EffectTerm) else None,
-            )
-    replay, _ = replay_names(snapshot, originals, translation, sources)
-    return replay
+            if isinstance(record.data.value, SourceValue):
+                sources.text(record.data.value.source_ref, record.data.value.span)
+            for relation in record.data.concept_evidence:
+                sources.text(
+                    relation.jp_ref,
+                    relation.jp_span if isinstance(relation, EffectTerm) else None,
+                )
+                sources.text(
+                    relation.target_ref,
+                    relation.target_span if isinstance(relation, EffectTerm) else None,
+                )
+    return originals, sources
+
+
+def _current_names(
+    inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path], db: Database
+) -> Names | None:
+    translation = inputs.translation_inputs()
+    if translation is None:
+        return None
+    originals, sources = _translation_sources(inputs, build, stores)
+    return prepare_names(translation.load(), originals, translation, sources, db)
 
 
 def _translation_uses(
     inputs: AdoptionInputs, build: BuildContext, stores: dict[str, Path]
 ) -> tuple[SourceUse, ...]:
-    """Keep the existing independent closure without requiring name application."""
-    replay = _name_replay(inputs, build, stores)
-    return () if replay is None else replay.uses
+    """Check the current source closure independently of database insertion."""
+    return uses_sorted(_translation_sources(inputs, build, stores)[1].uses)
 
 
 def _derive_adoptions(
@@ -466,7 +472,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             added = populate_card_extras(db, extras, build=context)
             name_expected: tuple[SourceUse, ...] = ()
             if names is not None:
-                replay = _name_replay(adoptions, context, stores)
+                replay = _current_names(adoptions, context, stores, db)
                 assert replay is not None
                 if link_result is not None:
                     link_result = replace(
@@ -639,7 +645,7 @@ def build(  # ruff: ignore[too-many-locals, complex-structure, too-many-statemen
             extras_record = populate_card_extras(target, extras, build=context)
             replay_names_result = None
             if names is not None:
-                replay = _name_replay(adoptions, context, stores)
+                replay = _current_names(adoptions, context, stores, target)
                 assert replay is not None
                 replay_names_result = names.populate(
                     target,

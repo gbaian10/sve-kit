@@ -25,10 +25,8 @@ NAMES = "draft-i51-names-v1"
 LINKS = "digital-name-links-v1"
 
 
-def _legacy_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
-    """Keep legacy guards testable after active authored names move to format two."""
-    from sve_carddb.digital_name_policies.loader import INITIAL_NAMES_DOCUMENT  # ruff: ignore[import-outside-top-level] -- exercise the legacy first-layout special case
-
+def _link_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
+    """Retain the adopted versioned links contract with synthetic provenance."""
     business = object_value(
         parse(
             (
@@ -37,7 +35,8 @@ def _legacy_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
         )
     )
     content = object_value(business[purpose])
-    identifier = NAMES if purpose == "names" else LINKS
+    assert purpose == "links"
+    identifier = LINKS
     checksum = digest(b"synthetic policy evidence; no actual approval")
     revision = "a" * 40
     batches: list[JsonValue] = [{"store_id": "test-store", "batch_id": checksum}]
@@ -80,7 +79,7 @@ def _legacy_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
             "card_projection_evidence_hash": checksum,
             "source_replay_revision": revision,
         }
-    approved = INITIAL_NAMES_DOCUMENT if purpose == "names" else checksum
+    approved = checksum
     document: dict[str, JsonValue] = {
         "digital_name_policy_format": 1,
         "kind": "digital_name_policy",
@@ -97,9 +96,9 @@ def _legacy_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
         "policy_id": identifier,
         "version": 1,
         "purpose": purpose,
-        "approved_list_hash": content["final_exclusions_hash"]
-        if purpose == "names"
-        else object_value(content["exclusions"])["initial_exclusions_hash"],
+        "approved_list_hash": object_value(content["exclusions"])[
+            "initial_exclusions_hash"
+        ],
         "entries": [],
     }
     instant = "2026-10-02T20:32:22.779Z"
@@ -165,12 +164,12 @@ def _legacy_files(purpose: str) -> tuple[dict[str, JsonValue], ...]:
 
 def copy_policies(root: Path) -> None:
     index: dict[str, JsonValue] = {
-        "digital_name_policy_index_format": 1,
+        "digital_name_policy_index_format": 2,
         "kind": "digital_name_policy_index",
         "policies": {},
     }
-    for purpose, identifier in (("names", NAMES), ("links", LINKS)):
-        document, approval, excluded = _legacy_files(purpose)
+    for purpose, identifier in (("links", LINKS),):
+        document, approval, excluded = _link_files(purpose)
         base = root / "authored/digital-name-policies" / identifier
         base.mkdir(parents=True, exist_ok=True)
         exclusions = root / "authored/digital-name-exclusions" / identifier
@@ -189,6 +188,18 @@ def copy_policies(root: Path) -> None:
                 "predecessor": None,
             }
         ]
+    current = object_value(
+        read_yaml(REPO / "authored/digital-name-policies" / NAMES / "current.yaml")
+    )
+    current["note"] = "Synthetic current policy"
+    object_value(current["content"]).update(excluded_names=[], name_overrides=[])
+    base = root / "authored/digital-name-policies" / NAMES
+    base.mkdir(parents=True)
+    (base / "current.yaml").write_bytes(canonical(current))
+    object_value(index["policies"])[NAMES] = {
+        "path": f"digital-name-policies/{NAMES}/current.yaml",
+        "hash": digest(canonical(current)),
+    }
     (root / "authored" / INDEX).write_bytes(canonical(index))
 
 
@@ -234,7 +245,8 @@ def rewrite(
     *,
     close: bool = True,
 ) -> None:
-    identifier = NAMES if purpose == "names" else LINKS
+    assert purpose == "links"
+    identifier = LINKS
     base = root / "authored/digital-name-policies" / identifier
     document = document if document is not None else policy(root, purpose)
     approval = approval if approval is not None else receipt(root, purpose)
@@ -334,7 +346,7 @@ def make_policy_fixture(
         ],
         key=canonical,
     )
-    for purpose in ("names", "links"):
+    for purpose in ("links",):
         document = policy(root, purpose)
         document["approved_document_hash"] = digest(canonical(["synthetic", purpose]))
         content = object_value(document["content"])

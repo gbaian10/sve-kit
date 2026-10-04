@@ -11,7 +11,6 @@ from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.translations.current import convert
 from sve_carddb.translations.importer import Inputs, import_glossary
 from sve_carddb.translations.loader import load_glossary
 from sve_carddb.translations.sources import RUNTIME
@@ -52,8 +51,8 @@ def test_current_import_rechecks_source_without_creating_decision(
     includes = object_value(index["includes"])
     for path, _, _ in old.shards:
         rows = [
-            convert(r).model_dump(mode="json")
-            for r, _ in old.effective()
+            r.model_dump(mode="json")
+            for r in old.current_records()
             if (r.kind == "glossary_term") == ("concepts" in path)
         ]
         if "choices" in path:

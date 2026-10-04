@@ -1,4 +1,4 @@
-"""Both readers recognize the shared index before individual areas migrate."""
+"""Glossary and template readers share one current index."""
 
 from typing import TYPE_CHECKING
 
@@ -26,22 +26,16 @@ def test_format_two_index_is_shared_by_glossary_and_template_readers(
         authored,
         {"translations/glossary/concepts/001.yaml": envelope([term()])},
     )
-    index = authored / "translations/index.yaml"
-    index.write_text(
-        index.read_text().replace(
-            "translation_authored_format: 1", "translation_authored_format: 2"
-        )
-    )
     glossary = load_glossary(authored)
     git(tmp_path, "init")
     revision = commit(tmp_path)
     templates = read(PinnedRepository(tmp_path), revision)
     assert templates.index == glossary.index
     assert templates.content == glossary.closure
-    assert len(glossary.records()) == 1
+    assert len(glossary.current_records()) == 1
 
 
-@pytest.mark.parametrize("version", [True, 0, 3, "2"])
+@pytest.mark.parametrize("version", [True, 0, 1, 3, "2"])
 def test_index_rejects_unknown_or_noninteger_versions(version: JsonValue) -> None:
     with pytest.raises(ValidationError, match="translation_authored_format"):
         Index.model_validate_json(

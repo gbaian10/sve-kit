@@ -22,7 +22,6 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value
 from .adoption_fixtures import commit
 from .digital_name_policy_fixtures import (
     LINKS,
-    NAMES,
     exclusion,
     loader_repository,
     policy,
@@ -39,12 +38,12 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> tuple[Path, str]:
     return loader_repository(tmp_path_factory.mktemp("name-policy-loader"))
 
 
-@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- all legacy boundary cases share synthetic document bindings
+@pytest.fixture(autouse=True)  # ruff: ignore[pytest-fixture-autouse] -- versioned link guards share synthetic document bindings
 def synthetic_bindings(
     baseline: tuple[Path, str], monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    # Legacy immutability guards use synthetic bindings rather than personal evidence.
-    for purpose in ("names", "links"):
+    # Versioned link immutability uses synthetic bindings rather than private evidence.
+    for purpose in ("links",):
         document = policy(baseline[0], purpose)
         approved = str(document["approved_document_hash"])
         monkeypatch.setitem(ADOPTED_PROJECTIONS, approved, digest(canonical(document)))
@@ -70,9 +69,9 @@ def test_complete_entry_is_detached_and_retains_both_hashes(
 ) -> None:
     root, revision = baseline
     snapshot = load(root / "authored", root, revision)
-    assert len(snapshot.files) == 7
-    assert len(snapshot.policies) == 2
-    for purpose in ("names", "links"):
+    assert len(snapshot.files) == 5
+    assert len(snapshot.policies) == 1
+    for purpose in ("links",):
         loaded = snapshot.effective(purpose)
         document = loaded.document()
         assert document.approved_document_hash != digest(loaded.policy)
@@ -132,7 +131,7 @@ def test_size_boundary() -> None:
 
 @pytest.mark.parametrize("field", ["digital_name_policy_format", "version"])
 def test_bool_is_not_a_version(baseline: tuple[Path, str], field: str) -> None:
-    raw = policy(baseline[0], "names")
+    raw = policy(baseline[0], "links")
     raw[field] = True
     message = (
         "Policy format must be an integer"
@@ -158,9 +157,9 @@ def test_unknown_envelope_is_not_ignored(
     baseline: tuple[Path, str], tmp_path: Path, field: str, value: JsonValue
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
-    raw = policy(root, "names")
+    raw = policy(root, "links")
     raw[field] = value
-    rewrite(root, "names", raw)
+    rewrite(root, "links", raw)
     reject(root, "Invalid digital-name policy fields")
 
 
@@ -187,7 +186,7 @@ def test_entry_and_rule_closure(
     root = copied(baseline, tmp_path / "repo")
     index_path = root / "authored" / INDEX
     index = object_value(read_yaml(index_path))
-    entries = array(object_value(index["policies"])[NAMES])
+    entries = array(object_value(index["policies"])[LINKS])
     entry = object_value(entries[0])
     if fault in {"sequence", "path", "predecessor", "hash"}:
         bad_values: dict[str, JsonValue] = {
@@ -206,14 +205,14 @@ def test_entry_and_rule_closure(
         ] = bad_values[fault]
         index_path.write_bytes(canonical(index))
     elif fault == "empty":
-        object_value(index["policies"])[NAMES] = []
+        object_value(index["policies"])[LINKS] = []
         index_path.write_bytes(canonical(index))
     elif fault == "missing":
         (root / "authored" / str(entry["path"])).unlink()
     elif fault == "orphan":
         (root / "authored/digital-name-policies/orphan.yaml").write_text("{}")
     else:
-        raw = policy(root, "names")
+        raw = policy(root, "links")
         if fault == "identity":
             raw["policy_id"] = "synthetic-other"
         elif fault == "content_keys":
@@ -221,10 +220,10 @@ def test_entry_and_rule_closure(
         elif fault == "content_id":
             object_value(raw["content"])["policy_id"] = "synthetic-other"
         else:
-            object_value(raw["content"])["game_priority"] = ["svwb", "sv1"]
+            object_value(raw["content"])["rule"] = "Unsupported rule"
             if fault == "semantics":
                 raw["approved_document_hash"] = digest(b"synthetic new document")
-        rewrite(root, "names", raw)
+        rewrite(root, "links", raw)
     reject(root, message)
 
 
@@ -259,17 +258,13 @@ def test_entry_and_rule_closure(
         ("disclosure_order", "Digital-name disclosures must be sorted and unique"),
         ("disclosure_uuid", "Digital-name disclosed change lacks timely acceptance"),
         ("disclosure_time", "Digital-name disclosed change lacks timely acceptance"),
-        (
-            "oral_missing",
-            "Initial adopted name policy requires its disclosed oral acceptance",
-        ),
     ],
 )
 def test_approval_is_not_a_background_event(  # ruff: ignore[complex-structure,too-many-branches] -- one small immutable receipt is independently corrupted along each approval edge
     baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
-    approval = receipt(root, "names")
+    approval = receipt(root, "links")
     events = array(approval["approval_events"])
     button, oral = object_value(events[0]), object_value(events[1])
     changes = array(approval["disclosed_changes"])
@@ -282,9 +277,9 @@ def test_approval_is_not_a_background_event(  # ruff: ignore[complex-structure,t
     elif fault == "initial_hash":
         approval["initial_exclusions_hash"] = digest(b"other")
     elif fault == "list_hash":
-        excluded = exclusion(root, "names")
+        excluded = exclusion(root, "links")
         excluded["approved_list_hash"] = digest(b"other")
-        rewrite(root, "names", excluded=excluded)
+        rewrite(root, "links", excluded=excluded)
         reject(root, message)
         return
     elif fault == "event_order":
@@ -292,7 +287,7 @@ def test_approval_is_not_a_background_event(  # ruff: ignore[complex-structure,t
     elif fault == "evidence_path":
         object_value(approval["evidence_hashes"])["/private/path"] = digest(b"other")
     elif fault == "evidence_hash":
-        object_value(approval["evidence_hashes"])["names-policy.plain.md"] = digest(
+        object_value(approval["evidence_hashes"])["links-policy.plain.md"] = digest(
             b"other"
         )
     elif fault == "no_button":
@@ -313,10 +308,7 @@ def test_approval_is_not_a_background_event(  # ruff: ignore[complex-structure,t
         )
     elif fault == "disclosure_time":
         object_value(changes[0])["disclosed_at"] = "2026-10-02T20:34:00Z"
-    elif fault == "oral_missing":
-        approval["approval_events"] = [button]
-        approval["disclosed_changes"] = []
-    rewrite(root, "names", approval=approval, close=False)
+    rewrite(root, "links", approval=approval, close=False)
     reject(root, message)
 
 
@@ -365,7 +357,7 @@ def test_git_and_disk_are_both_immutable(
         ("provider", "Unsupported digital-name policy catalogue recipe"),
         ("registry", "Digital-name link registry pins mismatch"),
         ("reason", "Digital-name exclusion reason is blank"),
-        ("kind", "Digital-name exclusion kind differs from policy purpose"),
+        ("kind", "Invalid digital-name policy fields"),
         ("target", "Digital-name exclusion target ID mismatch"),
         ("duplicate", "Digital-name exclusions must be sorted and unique"),
         ("receipt_changed", "Previously adopted digital-name approval changed"),
@@ -375,7 +367,7 @@ def test_remaining_closed_fields(
     baseline: tuple[Path, str], tmp_path: Path, fault: str, message: str
 ) -> None:
     root = copied(baseline, tmp_path / "repo")
-    purpose = "links" if fault in {"registry", "target"} else "names"
+    purpose = "links"
     raw = policy(root, purpose)
     excluded = exclusion(root, purpose)
     approval = receipt(root, purpose)
@@ -410,11 +402,12 @@ def test_remaining_closed_fields(
                 "source_lang": "ja",
                 "source_name_hash": digest(b"Synthetic card"),
                 "reason": "Synthetic exclusion",
+                "kind": "name",
             }
             if fault == "reason":
                 item["reason"] = " "
             elif fault == "kind":
-                item["kind"] = "name"
+                item["kind"] = "unsupported"
             elif fault == "target":
                 item = {
                     "kind": "card_target",
@@ -443,4 +436,14 @@ def test_purpose_must_be_explicit_and_unique(baseline: tuple[Path, str]) -> None
         ValueError,
         match=r"^Digital-name policy purpose must select exactly one policy$",
     ):
-        replace(snapshot, policies=()).effective("names")
+        replace(snapshot, policies=()).effective("links")
+
+
+def test_versioned_names_are_rejected_while_links_remain_valid(
+    baseline: tuple[Path, str],
+) -> None:
+    raw = policy(baseline[0], "links")
+    assert model(Policy, raw).purpose == "links"
+    raw["purpose"] = "names"
+    with pytest.raises(ValueError, match=r"^Invalid digital-name policy fields$"):
+        model(Policy, raw)

@@ -7,7 +7,7 @@ from sve_carddb.digital_name_policies.evaluate import NameOwner as PolicyOwner
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.text_observations.models import candidate_revision_id
 from sve_carddb.text_observations.plan import verify_plan
-from sve_carddb.translations.name_build import NameOwner, name_source
+from sve_carddb.translations.name_sources import NameOwner, name_source
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database

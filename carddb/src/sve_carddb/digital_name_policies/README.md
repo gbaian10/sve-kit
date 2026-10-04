@@ -6,15 +6,11 @@ report command do not write applications or receipts. The explicit offline name
 application is described below.
 
 `load(authored, repository, authored_revision)` requires a full immutable Git SHA,
-regular indexed files, exact checkout bytes and complete policy/approval/exclusion
-history. It keeps exact byte pins and detached canonical envelopes. The two
-already adopted documents and receipts have immutable bindings. The supported
-v1 rule signature covers the complete operational wording, scope, matcher and
-answers, with source pins and independently approved initial lists checked
-separately. New semantics require reviewed implementation support. Hash
-consistency alone does not prove that a maintainer actually approved a document.
-Private original pages and projection evidence are not re-read by CI: their
-adoption review is the boundary specified by the contract.
+regular indexed files, exact checkout bytes and complete closure. Names accept
+only editable format-two business conditions and quality fields. Versioned links
+retain format-one policy/approval/exclusion histories and their immutable bindings;
+their receipts cannot supply name translation authority. New link semantics need
+reviewed loader support. Hash consistency alone does not prove human approval.
 
 `historical_sources()` verifies historical parser/config/registry pins against
 immutable Git blobs. `require_runtime()` independently checks the currently
@@ -71,36 +67,22 @@ scratch tooling outside this module and git.
 
 ## Owner-local name application
 
-The offline recipe can explicitly enable `"name_policy": "approved-frozen-v1"`.
-The default remains disabled. This first application has an explicit empty
-baseline; its counts refer to actual published JP face revisions and known
-printing faces, rather than the source-observation counts above. Unknown or
-omitted printed text receives no use or translation. Verified `TextPlan`
-publication candidates establish the exact owner before the frozen raw name is
-checked. A raw registry entry cannot authorize a withheld or reparented owner.
+Current names use one format-two policy plus the current glossary and explicit
+owner/source overrides. `Inputs.configuration()` pins the complete authored
+closure; application checks current runtime bytes and whole frozen catalogues.
+Each published JP face revision and known printing face uses its own verified
+`TextPlan` observation. Unknown printed names remain unavailable.
 
-The application combines full policy/catalogue history and glossary/name replay.
-An actual human-selected member ranks first, followed by eligible policy wording,
-that owner's actually checked same-card counterpart, another legal adopted
-choice, and original text. A sampled nonmember retains its true origin and lower
-priority. Name exclusions block automatic policy and counterpart wording without
-removing a personal human choice. All official candidates recheck their own
-owner; sharing a text context grants no official-name eligibility.
+Names prefer an explicit owner/source override, then eligible current policy
+wording, then the owner's actually checked same-card counterpart, then a current
+glossary choice, with original text as the final fallback. Official choices are independently rechecked against their own exact face
+and frozen name evidence. Exclusions block automatic names; sharing a context
+never grants eligibility. Origin and low confidence stay separate from human
+link adoption. The application produces current render values and owner bindings,
+without inventing approval events or review decisions. Reports contain IDs, counts
+and reasons, not official card wording.
 
-Private application decisions use category `digital_name_policy`, batch scope,
-the exact policy ID and actual selected-owner membership hash. Their
-`sample_ids` are empty: approving a rule is not checking each card. Receipt review
-identity/time and separately pinned application author/time remain distinct.
-This creates neither approval receipts nor authored adoption data. Exact input
-bytes, historical catalogues, current implementations and own raw-name uses enter
-F1; expected uses are replayed independently before final verification and bundle
-reconstruction. Reports contain IDs, hashes, conditions and differences only.
-Historical draft warning labels are unavailable and are explicitly reported.
-
-The output still uses snapshot 1.0.0 and owner-local `FieldTranslation` values.
-The private same-card rows used for evidence are not projected publicly, and this
-path does not generate `same_name`, endpoint or coverage records. Those public
-browsing capabilities need the later format upgrade. Nonempty identity transition
-replay and corrected-revision override histories still fail closed where their
-complete evidence adapter is unavailable. This opt-in preview does not satisfy
-formal release coverage gates.
+Current names use this build's declared frozen catalogue; versioned links retain
+their independently pinned historical catalogue. Both source closures remain
+traceable. Public snapshot projection is a separate coordinated boundary and
+must preserve current `origin` and `low_confidence` without claiming human review.

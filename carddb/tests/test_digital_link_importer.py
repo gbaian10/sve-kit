@@ -26,7 +26,6 @@ from sve_carddb.snapshot.values import array, canonical, digest, object_value, p
 from sve_carddb.source_archive import ArchiveError
 from sve_carddb.text_observations.intern import TextInterner
 from sve_carddb.translations.digital import configuration, import_digital, select_name
-from sve_carddb.translations.names import populate_name_translation
 from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit
@@ -99,83 +98,6 @@ def test_real_entry_proves_relation_name_and_no_coverage(
                 "digital_name_inventory",
                 ref.parser,
             ) in used
-
-
-def test_name_wiring_requires_proof_and_rechecks_each_owner(
-    baseline: Fixture, database: DatabaseTemplate
-) -> None:
-
-    with database.copy() as db:
-        baseline.publish(db)
-        result = import_links(
-            db,
-            baseline.inputs(),
-            build=baseline.build,
-            stores={"test-store": baseline.store},
-        )
-        with pytest.raises(
-            ValueError, match=r"^Authored digital names require owner evidence result$"
-        ):
-            populate_name_translation(
-                db, baseline.sources(), revision_id="link-revision", lang="zh-Hant"
-            )
-        with db.transaction():
-            translated = populate_name_translation(
-                db,
-                baseline.sources(),
-                revision_id="link-revision",
-                lang="zh-Hant",
-                links=result,
-            )
-            assert translated is not None
-            revision = next(
-                r.values
-                for r in db.rows("face_revision")
-                if r.values["id"] == "link-revision"
-            )
-            # A same-card back face sharing the name/context still has no adopted link.
-            db.insert(
-                "face",
-                {
-                    "id": "f:" + "9" * 32,
-                    "card_id": baseline.card.id,
-                    "ordinal": 1,
-                    "side": "back",
-                },
-            )
-            db.insert(
-                "face_revision",
-                dict(revision) | {"id": "back-revision", "face_id": "f:" + "9" * 32},
-            )
-            before = db.rows("translation")
-            assert (
-                populate_name_translation(
-                    db,
-                    baseline.sources(),
-                    revision_id="back-revision",
-                    lang="zh-Hant",
-                    links=result,
-                )
-                is None
-            )
-            assert db.rows("translation") == before
-            # Exact owner hash differs; same face and shared build context are insufficient.
-
-            unit = TextInterner(db).intern(
-                LocalizedText(lang="ja", text="Synthetic different name")
-            )
-            db.update("face_revision", {"id": "link-revision"}, {"name_unit_id": unit})
-            assert (
-                populate_name_translation(
-                    db,
-                    baseline.sources(),
-                    revision_id="link-revision",
-                    lang="zh-Hant",
-                    links=result,
-                )
-                is None
-            )
-            assert db.rows("translation") == before
 
 
 @pytest.mark.parametrize(
@@ -261,36 +183,6 @@ def test_source_refusals_rollback(
                 stores={"test-store": fixture.store},
             )
         assert {t: db.rows(t) for t in before} == before
-
-
-@pytest.mark.parametrize("relation", ["same_character", "name_only"])
-def test_confirmed_browsing_relation_never_supplies_name(
-    baseline: Fixture, database: DatabaseTemplate, tmp_path: Path, relation: str
-) -> None:
-
-    record = object_value(parse(baseline.record))
-    object_value(object_value(record["data"])["value"])["relation"] = relation
-    fixture = signed(copied(baseline, tmp_path / "repo"), [record])
-    with database.copy() as db:
-        fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
-        assert len(result.fresh) == 1
-        assert not result.eligible(db, fixture.sources(), "link-revision")
-        assert (
-            populate_name_translation(
-                db,
-                fixture.sources(),
-                revision_id="link-revision",
-                lang="zh-Hant",
-                links=result,
-            )
-            is None
-        )
 
 
 def test_owner_source_must_replay_its_printing(
@@ -509,79 +401,6 @@ def dual(tmp_path_factory: pytest.TempPathFactory) -> Fixture:
     return make_fixture(tmp_path_factory.mktemp("digital-link-dual"), dual=True)
 
 
-def test_two_same_name_cards_need_context_assignment_and_third_is_not_adopted(
-    dual: Fixture, database: DatabaseTemplate
-) -> None:
-    with database.copy() as db:
-        dual.publish(db)
-        result = import_links(
-            db, dual.inputs(), build=dual.build, stores={"test-store": dual.store}
-        )
-        assert len(result.fresh) == 2
-        first = select_name(
-            db,
-            card_id=dual.card.id,
-            face_id=dual.face.id,
-            lang="zh-Hant",
-            eligible_links=result.eligible(db, dual.sources(), "link-revision"),
-        )
-        second = select_name(
-            db,
-            card_id=dual.others[0][0].id,
-            face_id=dual.others[0][1].id,
-            lang="zh-Hant",
-            eligible_links=result.eligible(db, dual.sources(), "other-link-revision-1"),
-        )
-        assert first is not None
-        assert first[0] == "合成測試名"
-        assert second is not None
-        assert second[0] == "第二個測試譯名"
-        with pytest.raises(
-            ValueError,
-            match=r"^Ambiguous source name requires adopted context assignment$",
-        ):
-            populate_name_translation(
-                db,
-                dual.sources(),
-                revision_id="link-revision",
-                lang="zh-Hant",
-                links=result,
-            )
-        with db.transaction():
-            card = dict(dual.card.model_dump(mode="json"))
-            card["id"] = "c:" + "9" * 32
-            db.insert("card", card)
-            db.insert(
-                "face",
-                {
-                    "id": "f:" + "8" * 32,
-                    "card_id": card["id"],
-                    "ordinal": 0,
-                    "side": "front",
-                },
-            )
-            revision = next(
-                r.values
-                for r in db.rows("face_revision")
-                if r.values["id"] == "link-revision"
-            )
-            db.insert(
-                "face_revision",
-                dict(revision)
-                | {"id": "third-link-revision", "face_id": "f:" + "8" * 32},
-            )
-            assert (
-                populate_name_translation(
-                    db,
-                    dual.sources(),
-                    revision_id="third-link-revision",
-                    lang="zh-Hant",
-                    links=result,
-                )
-                is None
-            )
-
-
 def test_owner_rechecks_materialized_target_against_adoption(
     dual: Fixture, database: DatabaseTemplate
 ) -> None:
@@ -745,43 +564,6 @@ def test_jp_owner_does_not_probe_same_number_english_printing(
             )
         )
         assert result.eligible(db, sources, "link-revision")
-
-
-def test_card_level_relation_is_browsable_but_never_supplies_owner_name(
-    baseline: Fixture, database: DatabaseTemplate, tmp_path: Path
-) -> None:
-    record = object_value(parse(baseline.record))
-    subject = object_value(object_value(record["data"])["subject"])
-    subject.update(face_id=None, digital_phase=None)
-    record["record_key"] = canonical(["digital_link_adoption", subject, 1]).decode()
-    fixture = signed(copied(baseline, tmp_path / "repo"), [record])
-    with database.copy() as db:
-        fixture.publish(db)
-        result = import_links(
-            db,
-            fixture.inputs(),
-            build=fixture.build,
-            stores={"test-store": fixture.store},
-        )
-        assert len(result.fresh) == 1
-        row = next(
-            r.values
-            for r in db.rows("digital_link")
-            if r.values["card_id"] == fixture.card.id
-        )
-        assert row["face_id"] is None
-        assert row["digital_face_id"] is None
-        assert not result.eligible(db, fixture.sources(), "link-revision")
-        assert (
-            populate_name_translation(
-                db,
-                fixture.sources(),
-                revision_id="link-revision",
-                lang="zh-Hant",
-                links=result,
-            )
-            is None
-        )
 
 
 @pytest.mark.parametrize("name", ["commands.py", "sources.py"])

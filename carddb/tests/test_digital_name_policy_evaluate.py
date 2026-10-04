@@ -12,6 +12,12 @@ import sve_carddb.digital_name_policies.evaluate as module
 from sve_carddb.digital_links.catalogue import complete_inventory
 from sve_carddb.digital_links.evidence import Evidence
 from sve_carddb.digital_links.importer import review_context
+from sve_carddb.digital_name_policies.current_evaluate import (
+    Catalogue as CurrentCatalogue,
+)
+from sve_carddb.digital_name_policies.current_evaluate import (
+    catalogue as current_catalogue,
+)
 from sve_carddb.digital_name_policies.evaluate import (
     Catalogue,
     OwnerEvidence,
@@ -43,13 +49,15 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> PolicyFixture:
 
 
 @pytest.fixture(scope="module")
-def catalogues(baseline: PolicyFixture) -> tuple[Catalogue, Catalogue]:
+def catalogues(baseline: PolicyFixture) -> tuple[CurrentCatalogue, Catalogue]:
     snapshot = baseline.snapshot()
-    loaded = snapshot.effective("names")
-    sources = historical_sources(
+    loaded = snapshot.effective("links")
+    historical = historical_sources(
         loaded, {"test-store": baseline.digital.store}, baseline.root
     )
-    return catalogue(loaded, sources), catalogue(snapshot.effective("links"), sources)
+    return current_catalogue(
+        snapshot.current_names[0], baseline.digital.sources()
+    ), catalogue(loaded, historical)
 
 
 def synthetic(
@@ -64,7 +72,7 @@ def observed(baseline: PolicyFixture) -> OwnerEvidence:
 
 
 def test_full_catalogue_qualifies_first_game_and_plans_all_targets(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue]
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue]
 ) -> None:
     names, links = catalogues
     evidence = observed(baseline)
@@ -93,7 +101,9 @@ def test_full_catalogue_qualifies_first_game_and_plans_all_targets(
     "missing", ["null", "empty", "whitespace", "kana", "phase", "language", "different"]
 )
 def test_first_game_failure_never_borrows_second_game(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue], missing: str
+    baseline: PolicyFixture,
+    catalogues: tuple[CurrentCatalogue, Catalogue],
+    missing: str,
 ) -> None:
     names, links = catalogues
     changed = list(names.names)
@@ -140,7 +150,7 @@ def test_first_game_failure_never_borrows_second_game(
 
 
 def test_only_second_game_and_exact_cjk_are_eligible(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue]
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue]
 ) -> None:
     names, _ = catalogues
     second_only = replace(
@@ -167,7 +177,7 @@ def test_only_second_game_and_exact_cjk_are_eligible(
     ],
 )
 def test_no_normalization_or_trim(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue], text: str
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue], text: str
 ) -> None:
     names, links = catalogues
     assert (
@@ -178,7 +188,7 @@ def test_no_normalization_or_trim(
 
 def test_hash_collision_does_not_establish_name_equality(
     baseline: PolicyFixture,
-    catalogues: tuple[Catalogue, Catalogue],
+    catalogues: tuple[CurrentCatalogue, Catalogue],
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
 
@@ -197,7 +207,7 @@ def test_hash_collision_does_not_establish_name_equality(
 
 
 def test_independent_exclusions_and_multiple_name_support(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue]
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue]
 ) -> None:
     names, links = catalogues
     owner = baseline.owner()
@@ -235,7 +245,7 @@ def test_independent_exclusions_and_multiple_name_support(
 
 
 def test_typed_purposes_cannot_be_interchanged(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue]
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue]
 ) -> None:
     names, links = catalogues
     with pytest.raises(
@@ -249,7 +259,7 @@ def test_typed_purposes_cannot_be_interchanged(
 
 
 def test_unknown_printing_never_borrows_current(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue]
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue]
 ) -> None:
     owner = baseline.owner(state="unknown").model_copy(update={"kind": "printing_face"})
     sources = baseline.digital.sources()
@@ -367,15 +377,15 @@ def test_current_comment_change_does_not_invalidate_historical_catalogue(
         "__file__",
         str(copied.root / "carddb/src/sve_carddb/catalog/adoption_sources.py"),
     )
-    loaded = copied.snapshot().effective("names")
+    loaded = copied.snapshot().effective("links")
     sources = historical_sources(
         loaded, {"test-store": copied.digital.store}, copied.root
     )
-    assert catalogue(loaded, sources).purpose == "names"
+    assert catalogue(loaded, sources).purpose == "links"
 
 
 def test_catalogue_must_use_policy_pins(baseline: PolicyFixture) -> None:
-    loaded = baseline.snapshot().effective("names")
+    loaded = baseline.snapshot().effective("links")
     sources = baseline.digital.sources()
     with pytest.raises(
         ValueError, match=r"^Digital-name catalogue differs from approved frozen pins$"
@@ -409,7 +419,7 @@ def test_entire_null_hant_page_still_blocks_qualification(
 
 
 def test_rule_plans_reject_cross_build_owners(
-    baseline: PolicyFixture, catalogues: tuple[Catalogue, Catalogue]
+    baseline: PolicyFixture, catalogues: tuple[CurrentCatalogue, Catalogue]
 ) -> None:
     evidence = synthetic(baseline.owner(), "Synthetic card")
     with pytest.raises(
@@ -439,7 +449,7 @@ def test_catalogue_refusals_are_reachable(baseline: PolicyFixture, fault: str) -
     from sve_carddb.digital_name_policies.evaluate import _parents  # ruff: ignore[import-outside-top-level] -- checks the catalogue parent boundary directly
     from sve_carddb.digital_name_policies.loader import LoadedPolicy  # ruff: ignore[import-outside-top-level] -- detached invalid policy is created without touching an adopted input
 
-    loaded = baseline.snapshot().effective("names" if fault != "target" else "links")
+    loaded = baseline.snapshot().effective("links")
     sources = historical_sources(
         loaded, {"test-store": baseline.digital.store}, baseline.root
     )
@@ -472,6 +482,7 @@ def test_catalogue_refusals_are_reachable(baseline: PolicyFixture, fault: str) -
                 "source_lang": "ja",
                 "source_name_hash": digest(b"absent name"),
                 "reason": "Synthetic missing name",
+                "kind": "name",
             }
         ]
         message = "Digital-name exclusion cannot locate its frozen Japanese name"
@@ -494,7 +505,7 @@ def test_catalogue_refusals_are_reachable(baseline: PolicyFixture, fault: str) -
 def test_catalogue_rejects_duplicate_id_even_when_rows_equal(
     baseline: PolicyFixture,
 ) -> None:
-    loaded = baseline.snapshot().effective("names")
+    loaded = baseline.snapshot().effective("links")
     sources = historical_sources(
         loaded, {"test-store": baseline.digital.store}, baseline.root
     )
