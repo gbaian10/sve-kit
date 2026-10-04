@@ -8,11 +8,6 @@ from pydantic import JsonValue
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.template_parameters.models import SourceSpan
 from sve_carddb.template_parameters.spans import Located, verify
-from sve_carddb.template_translations.current_models import (
-    DefinitionRecord,
-    TranslationRecord,
-    VariantRecord,
-)
 from sve_carddb.template_translations.loader import payload
 from sve_carddb.template_translations.text import Literal, Parameter
 from sve_carddb.template_translations.text import parse as parse_text
@@ -20,6 +15,11 @@ from sve_carddb.template_translations.text import parse as parse_text
 if TYPE_CHECKING:
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.template_translations.current import Validated
+    from sve_carddb.template_translations.current_models import (
+        DefinitionRecord,
+        TranslationRecord,
+        VariantRecord,
+    )
     from sve_carddb.template_translations.sources import Reconstructed
 
 
@@ -103,11 +103,7 @@ def bindings(
     """Require an exact whole source field; an unresolved position blocks partial translation."""
     if digest(text.encode()) != ref.text_hash:
         raise ValueError("Template field source hash differs from its context")
-    members = {m.entry.id: m for m in validated.members}
-    field = sorted(
-        (m for m in members.values() if m.entry.source_ref == ref),
-        key=lambda m: m.candidate.source_span.segments[0].start,
-    )
+    field = validated.field_members.get(ref, ())
     if not text:
         if field:
             raise ValueError("Empty template field cannot have source bindings")
@@ -116,14 +112,7 @@ def bindings(
         return None
     if any(m.field_text != text for m in field):
         raise ValueError("Template field bytes differ from verified source")
-    definitions = {
-        r.data.id: r
-        for r in validated.inputs.records
-        if isinstance(r, DefinitionRecord)
-    }
-    matches = {
-        entry_id: definitions[identifier] for entry_id, identifier in validated.matches
-    }
+    matches = validated.matched_definitions
     if any(m.entry.id not in matches for m in field):
         return None
     if field[0].entry.role == "flavor":
@@ -192,7 +181,7 @@ def _params(member: Reconstructed, definition: DefinitionRecord) -> bytes:
     return canonical(result)
 
 
-def render(  # ruff: ignore[too-many-arguments,too-many-locals] -- complete source, selected targets and referenced labels jointly determine one context
+def render(  # ruff: ignore[too-many-arguments] -- complete source, selected targets and referenced labels jointly determine one context
     validated: Validated,
     ref: SourceRef,
     context_id: str,
@@ -218,20 +207,11 @@ def render(  # ruff: ignore[too-many-arguments,too-many-locals] -- complete sour
         if lang == definition.data.source_lang:
             return Result(None, ("same_source_language",))
         variant = selected.get(definition.data.id, "default")
-        found = [
-            r
-            for r in validated.inputs.records
-            if isinstance(r, (TranslationRecord, VariantRecord))
-            and r.data.template_id == definition.data.id
-            and r.data.lang == lang
-            and (r.data.variant_key if isinstance(r, VariantRecord) else "default")
-            == variant
-        ]
-        if len(found) != 1:
+        target = validated.target_records.get((definition.data.id, lang, variant))
+        if target is None:
             if variant != "default":
                 raise ValueError("Template pin references a missing current variant")
             return Result(None, ("missing_template_translation",))
-        target = found[0]
         rendered = _fragment(binding, target, lang, labels)
         if rendered is None:
             return Result(None, ("missing_term_translation",))

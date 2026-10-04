@@ -1,6 +1,8 @@
 """Read editable template values without raw reconstruction or adoption-history gates."""
 
 from dataclasses import dataclass
+from functools import cached_property
+from types import MappingProxyType
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue, ValidationError
@@ -35,6 +37,9 @@ CURRENT_FORMAT = 2
 CURRENT_INVENTORY_FORMAT = 3
 
 if TYPE_CHECKING:
+    from collections.abc import Mapping
+
+    from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.template_translations.current_sources import Sources
     from sve_carddb.template_translations.sources import Reconstructed
@@ -253,6 +258,54 @@ class Validated:
     source_report: bytes
     members: tuple[Reconstructed, ...]
     matches: tuple[tuple[str, str], ...]
+
+    @cached_property
+    def field_members(self) -> Mapping[SourceRef, tuple[Reconstructed, ...]]:
+        """Index only this build's verified source closure, never a cross-build success cache."""
+        fields: dict[SourceRef, list[Reconstructed]] = {}
+        for member in self.members:
+            fields.setdefault(member.entry.source_ref, []).append(member)
+        return MappingProxyType(
+            {
+                ref: tuple(
+                    sorted(
+                        items, key=lambda m: m.candidate.source_span.segments[0].start
+                    )
+                )
+                for ref, items in fields.items()
+            }
+        )
+
+    @cached_property
+    def matched_definitions(self) -> Mapping[str, DefinitionRecord]:
+        """Reuse the validated identity map for all fields in this build."""
+        definitions = {
+            record.data.id: record
+            for record in self.inputs.records
+            if isinstance(record, DefinitionRecord)
+        }
+        return MappingProxyType(
+            {entry: definitions[identifier] for entry, identifier in self.matches}
+        )
+
+    @cached_property
+    def target_records(
+        self,
+    ) -> Mapping[tuple[str, str, str], TranslationRecord | VariantRecord]:
+        """Keep named alternatives separate from ordinary current targets."""
+        return MappingProxyType(
+            {
+                (
+                    record.data.template_id,
+                    record.data.lang,
+                    record.data.variant_key
+                    if isinstance(record, VariantRecord)
+                    else "default",
+                ): record
+                for record in self.inputs.records
+                if isinstance(record, (TranslationRecord, VariantRecord))
+            }
+        )
 
 
 def validate_templates(inputs: Inputs, sources: Sources) -> Validated:

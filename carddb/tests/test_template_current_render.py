@@ -347,3 +347,90 @@ def test_reference_interpolation_tracks_exact_positions_and_requires_target_labe
         ValueError, match=r"^Current reference label selection must be unique$"
     ):
         _fragment(binding, target, "zh-Hant", (label, label))
+
+
+def test_current_package_splits_yaml_and_preserves_shared_closure(
+    current_case: Case, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from sve_carddb.template_translations.current import from_files  # ruff: ignore[import-outside-top-level] -- reconstructed package readback
+    from sve_carddb.template_translations.current_write import compose  # ruff: ignore[import-outside-top-level] -- current packaging boundary
+    from sve_carddb.template_translations.files import json_bytes  # ruff: ignore[import-outside-top-level] -- shared canonical YAML hash
+    from sve_carddb.translations.models import Index  # ruff: ignore[import-outside-top-level] -- shared index wire
+
+    monkeypatch.setattr(
+        "sve_carddb.template_translations.current_write.TARGET_BYTES", 1
+    )
+    inventory = current_case.inputs.inventories[0]
+    package = compose(
+        current_case.inputs.files,
+        current_case.inputs.records,
+        inventory.source_batches,
+        inventory.entries,
+    )
+    assert from_files(package).records == current_case.inputs.records
+    index = Index.model_validate_json(json_bytes(package.index))
+    assert index.translation_authored_format == 2
+    assert all(
+        digest(content) == {**index.includes, **index.inventories}[path]
+        for path, _, content in package.content
+    )
+    assert all(len(raw) < 1048576 for _, raw, _ in package.content)
+    assert all(b"decisions:" not in raw for _, raw, _ in package.content)
+
+
+def test_processing_list_keeps_unknown_fields_candidates_and_quality(
+    verified: Validated,
+) -> None:
+    from sve_carddb.template_translations.migration_definitions import Definitions  # ruff: ignore[import-outside-top-level] -- synthetic migration input
+    from sve_carddb.template_translations.migration_report import processing_list  # ruff: ignore[import-outside-top-level] -- one processing report
+    from sve_carddb.template_translations.migration_targets import Pending, Targets  # ruff: ignore[import-outside-top-level] -- inactive drafts never become target records
+
+    records = tuple(
+        r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
+    )
+    member = verified.members[0]
+    pending = Pending(
+        "effect", "Tsynthetic", "N", True, ("anonymous_ambiguous",), (member.entry.id,)
+    )
+    targets = Targets(verified.inputs.translations(), (pending,), ())
+    report = canonical(
+        [
+            {
+                "effect_coverage": {
+                    "failures": [
+                        {
+                            "source_version_id": member.entry.source_ref.source_version_id,
+                            "locator": "/faces/1/text",
+                            "reason": "unknown_effect_presence",
+                        }
+                    ]
+                },
+                "flavor_fields": [
+                    {
+                        "source_version_id": member.entry.source_ref.source_version_id,
+                        "locator": "/faces/1/flavor",
+                        "state": "unknown",
+                    }
+                ],
+            }
+        ]
+    )
+    rows = processing_list(
+        Definitions(records, (), ()),
+        verified.members,
+        (targets,),
+        (),
+        verified.matches,
+        source_report=report,
+    )
+    reasons = {str(row["reason"]) for row in rows}
+    assert reasons == {
+        "anonymous_ambiguous",
+        "new_template",
+        "low_confidence",
+        "unknown_effect_presence",
+        "unknown_flavor_source",
+    }
+    assert all(row["affected_cards"] == 1 for row in rows)
+    assert b'"text"' not in canonical(list(rows))
+    assert not any(row["reason"] == "missing_translation" for row in rows)
