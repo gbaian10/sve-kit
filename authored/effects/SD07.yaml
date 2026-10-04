@@ -51,7 +51,7 @@ cards:
                 to: field
         targets:
           - key: '1'
-            select: &id001
+            select:
               side: opponent
               zone: field
               type: follower
@@ -75,7 +75,10 @@ cards:
         quick: true
         targets:
           - key: '1'
-            select: *id001
+            select:
+              side: opponent
+              zone: field
+              type: follower
             min: 1
             max: 1
         costs:
