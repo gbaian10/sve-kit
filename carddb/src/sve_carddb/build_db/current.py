@@ -2,10 +2,18 @@
 
 from dataclasses import replace
 
-from sve_carddb.build_db import t1, t1_json
+from sve_carddb.build_db import current_templates, t1, t1_json
 from sve_carddb.build_db.compiler import CompiledSchema, compile_schema
 from sve_carddb.build_db.domains import HASH, LANG
-from sve_carddb.build_db.model import Check, Column, ForeignKey, Kind, Table, Unique
+from sve_carddb.build_db.model import (
+    Capability,
+    Check,
+    Column,
+    ForeignKey,
+    Kind,
+    Table,
+    Unique,
+)
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t0_json import schemas
 
@@ -102,7 +110,7 @@ def compile_current_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchem
                 query_checks=tuple(
                     check
                     for check in table.query_checks
-                    if check.name != "name_use_adopted_variant"
+                    if check.name == "name_use_confirmed_identity"
                 ),
             )
         elif table.name == "translation_selection":
@@ -128,16 +136,30 @@ def compile_current_build(requested: tuple[str, ...] = ("t0",)) -> CompiledSchem
                 foreign_keys=(*table.foreign_keys, SOURCE),
             )
     registry = Registry(
-        tables=tuple(
-            replacements.get(table.name, table) for table in t1.REGISTRY.tables
+        tables=(
+            *(replacements.get(table.name, table) for table in t1.REGISTRY.tables),
+            *current_templates.TABLES,
         ),
-        capabilities=t1.REGISTRY.capabilities,
+        capabilities=(
+            *(
+                replace(cap, requires=("t0", "translation_evidence"))
+                if cap.name == "translation_names"
+                else cap
+                for cap in t1.REGISTRY.capabilities
+            ),
+            Capability(
+                "translation_templates",
+                tuple(t.name for t in current_templates.TABLES),
+                requires=("translation_names",),
+            ),
+        ),
     )
     return compile_schema(
         registry,
         requested,
         schemas()
         | t1_json.schemas()
+        | current_templates.schemas()
         | {
             "TranslationTokens": {"type": "null"},
             "semantic_sections": {

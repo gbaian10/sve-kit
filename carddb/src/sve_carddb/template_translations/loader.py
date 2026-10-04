@@ -11,9 +11,13 @@ from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
 from sve_carddb.template_sources.flavor import VERSION as FLAVOR_VERSION
+from sve_carddb.template_translations.current_models import (
+    DefinitionRecord as CurrentDefinitionRecord,
+)
 from sve_carddb.template_translations.files import (
     INVENTORY,
     SHARD,
+    Files,
     immutable,
     json_bytes,
     read,
@@ -33,9 +37,12 @@ from sve_carddb.translations.loader import Snapshot as Glossary
 from sve_carddb.translations.loader import validate_snapshot
 
 if TYPE_CHECKING:
-    from sve_carddb.template_translations.files import Files
+    from collections.abc import Mapping
+
     from sve_carddb.template_translations.sources import Reconstructed, TemplateSources
 
+
+DefinitionLike = DefinitionRecord | CurrentDefinitionRecord
 
 LEGACY_WIDTH = 10
 INVENTORY_V2_FORMAT = 2
@@ -58,7 +65,7 @@ def key(record: Record) -> str:
     ).decode()
 
 
-def payload(member: Reconstructed, record: DefinitionRecord) -> bytes:
+def payload(member: Reconstructed, record: DefinitionLike) -> bytes:
     """Source locators are provenance; the six semantic fields identify content."""
     data = record.data
     return canonical(
@@ -74,12 +81,41 @@ def payload(member: Reconstructed, record: DefinitionRecord) -> bytes:
 
 
 @dataclass(frozen=True)
-class Snapshot:
+class TemplateInputs:
     revision: str
     index: bytes
     shards: tuple[tuple[str, bytes, bytes], ...]
     inventories: tuple[tuple[str, bytes, bytes], ...]
     glossary: Glossary
+
+    def envelopes(self) -> tuple[Shard, ...]:
+        """Return detached models so readers cannot mutate the stored inputs."""
+        return tuple(
+            Shard.model_validate_json(content) for _, _, content in self.shards
+        )
+
+    def records(self) -> tuple[tuple[Record, str], ...]:
+        """Keep legacy decisions available for conversion, without source reconstruction."""
+        return tuple(
+            (r, s.default_decision_id) for s in self.envelopes() for r in s.records
+        )
+
+    def effective_translations(self) -> tuple[TranslationRecord, ...]:
+        """Reading a selected translation does not establish its source applicability."""
+        latest: dict[tuple[str, str], TranslationRecord] = {}
+        for record, _ in self.records():
+            if isinstance(record, TranslationRecord):
+                identity = record.data.template_id, record.data.lang
+                if (
+                    identity not in latest
+                    or latest[identity].data.revision < record.data.revision
+                ):
+                    latest[identity] = record
+        return tuple(latest[k] for k in sorted(latest))
+
+
+@dataclass(frozen=True)
+class Snapshot(TemplateInputs):
     source_reports: tuple[tuple[bytes, bytes, bytes], ...]
     frequencies: tuple[tuple[str, int], ...]
     unadopted_parents: tuple[tuple[str, str], ...]
@@ -92,31 +128,6 @@ class Snapshot:
                     return None
                 return record.data.supersedes_id
         raise ValueError("Unknown adopted template definition")
-
-    def envelopes(self) -> tuple[Shard, ...]:
-        """Return detached wire models rather than mutable verified state."""
-        return tuple(
-            Shard.model_validate_json(content) for _, _, content in self.shards
-        )
-
-    def records(self) -> tuple[tuple[Record, str], ...]:
-        """Keep every immutable revision and its exact decision."""
-        return tuple(
-            (r, s.default_decision_id) for s in self.envelopes() for r in s.records
-        )
-
-    def effective_translations(self) -> tuple[TranslationRecord, ...]:
-        """Project terminal revisions only after the complete history was validated."""
-        latest: dict[tuple[str, str], TranslationRecord] = {}
-        for record, _ in self.records():
-            if isinstance(record, TranslationRecord):
-                identity = record.data.template_id, record.data.lang
-                if (
-                    identity not in latest
-                    or latest[identity].data.revision < record.data.revision
-                ):
-                    latest[identity] = record
-        return tuple(latest[k] for k in sorted(latest))
 
     def pins(self) -> dict[str, object]:
         """Distinguish canonical index hashes from exact Git byte pins."""
@@ -268,9 +279,10 @@ def _inventories(  # ruff: ignore[complex-structure] -- each immutable shard is 
 
 
 def _definitions(
-    records: tuple[tuple[Record, str], ...], members: dict[str, Reconstructed]
+    records: tuple[tuple[Record | CurrentDefinitionRecord, str | None], ...],
+    members: dict[str, Reconstructed],
 ) -> tuple[
-    dict[str, DefinitionRecord],
+    dict[str, DefinitionLike],
     tuple[tuple[str, int], ...],
     tuple[tuple[str, str], ...],
 ]:
@@ -289,7 +301,7 @@ def _definitions(
     allocations: dict[str, str] = {}
     matches: dict[str, tuple[str, ...]] = {}
     for record, _ in records:
-        if not isinstance(record, DefinitionRecord):
+        if not isinstance(record, (DefinitionRecord, CurrentDefinitionRecord)):
             continue
         representative, content, old = _definition(record, members)
         data = record.data
@@ -307,7 +319,9 @@ def _definitions(
     for record in definitions.values():
         _allocation(record, definitions)
         allowed = {members[i].entry.source_ref for i in matches[record.data.id]}
-        if any(e.source_ref not in allowed for e in record.evidence):
+        if isinstance(record, DefinitionRecord) and any(
+            e.source_ref not in allowed for e in record.evidence
+        ):
             raise ValueError(
                 "Template definition evidence must belong to its matched family"
             )
@@ -316,7 +330,7 @@ def _definitions(
 
 
 def _current_frequencies(
-    definitions: dict[str, DefinitionRecord], matches: dict[str, tuple[str, ...]]
+    definitions: dict[str, DefinitionLike], matches: dict[str, tuple[str, ...]]
 ) -> tuple[tuple[str, int], ...]:
     retired = {r.data.supersedes_id for r in definitions.values()}
     claimed: dict[str, str] = {}
@@ -335,11 +349,11 @@ def _current_frequencies(
 
 
 def _allocation(
-    record: DefinitionRecord, definitions: dict[str, DefinitionRecord]
+    record: DefinitionLike, definitions: Mapping[str, DefinitionLike]
 ) -> None:
     """Only an existing different payload at every shorter prefix permits extension."""
     data = record.data
-    if len(data.id) - 1 == LEGACY_WIDTH:
+    if isinstance(record, CurrentDefinitionRecord) or len(data.id) - 1 == LEGACY_WIDTH:
         return
     for width in range(16, len(data.id) - 1, 2):
         previous = definitions.get("T" + data.content_hash[7 : 7 + width])
@@ -350,7 +364,7 @@ def _allocation(
 
 
 def _translations(
-    records: tuple[tuple[Record, str], ...], definitions: dict[str, DefinitionRecord]
+    records: tuple[tuple[Record, str], ...], definitions: dict[str, DefinitionLike]
 ) -> None:
     chains: dict[tuple[str, str], list[TranslationRecord]] = defaultdict(list)
     for record, _ in records:
@@ -372,12 +386,11 @@ def _translations(
             raise ValueError("Template translation revision chain has a gap or fork")
 
 
-def load_templates(
-    repository: PinnedRepository, authored_revision: str, sources: TemplateSources
-) -> Snapshot:
-    """Load a pinned complete translation index; no missing area becomes an empty set."""
+def _read_inputs(
+    repository: PinnedRepository, authored_revision: str
+) -> TemplateInputs:
+    """Read the current tree without requiring raw sources or replaying Git history."""
     files = read(repository, authored_revision)
-    immutable(repository, authored_revision)
     glossary = Glossary(
         files.index,
         tuple(
@@ -397,32 +410,78 @@ def load_templates(
     seen = set()
     for path, _, content in shards:
         shard = _shard(content)
-        envelope(shard, path.split("/")[2])
+        filing = path.split("/")[2]
         for record in shard.records:
+            if record.filing_key != filing or record.record_key != key(record):
+                raise ValueError(
+                    "Template record kind key or filing differs from its batch"
+                )
             if record.record_key in seen:
                 raise ValueError("Duplicate immutable adopted template record")
             seen.add(record.record_key)
             records.append((record, shard.default_decision_id))
-    members, reports = _inventories(files, sources)
-    for record, _ in records:
-        for evidence in record.evidence:
-            sources.evidence(evidence.source_ref)
-    definitions, frequencies, unadopted = _definitions(tuple(records), members)
-    _translations(tuple(records), definitions)
-    return Snapshot(
+    for path, _, raw in files.content:
+        if INVENTORY.fullmatch(path):
+            _inventory(raw)
+    return TemplateInputs(
         authored_revision,
         files.index,
         shards,
         tuple(f for f in files.content if INVENTORY.fullmatch(f[0])),
         glossary,
+    )
+
+
+def read_templates(
+    repository: PinnedRepository, authored_revision: str
+) -> TemplateInputs:
+    """Validate current structural references without raw reads or history traversal."""
+    inputs = _read_inputs(repository, authored_revision)
+    records = inputs.records()
+    definitions: dict[str, DefinitionLike] = {
+        record.data.id: record
+        for record, _ in records
+        if isinstance(record, DefinitionRecord)
+    }
+    _translations(records, definitions)
+    return inputs
+
+
+def validate_templates(inputs: TemplateInputs, sources: TemplateSources) -> Snapshot:
+    """Build validation owns source reconstruction; a basic read is not its result."""
+    files = Files(inputs.revision, inputs.index, inputs.glossary.closure)
+    records = inputs.records()
+    members, reports = _inventories(files, sources)
+    for record, _ in records:
+        for evidence in record.evidence:
+            sources.evidence(evidence.source_ref)
+    definitions, frequencies, unadopted = _definitions(records, members)
+    _translations(records, definitions)
+    return Snapshot(
+        inputs.revision,
+        inputs.index,
+        inputs.shards,
+        inputs.inventories,
+        inputs.glossary,
         reports,
         frequencies,
         unadopted,
     )
 
 
+def load_templates(
+    repository: PinnedRepository, authored_revision: str, sources: TemplateSources
+) -> Snapshot:
+    """Legacy intake remains available during the explicit new-format conversion."""
+    inputs = _read_inputs(repository, authored_revision)
+    immutable(repository, authored_revision)
+    for path, _, raw in inputs.shards:
+        envelope(_shard(raw), path.split("/")[2])
+    return validate_templates(inputs, sources)
+
+
 def _definition(
-    record: DefinitionRecord, members: dict[str, Reconstructed]
+    record: DefinitionLike, members: dict[str, Reconstructed]
 ) -> tuple[Reconstructed, bytes, bool]:
     data = record.data
     representative = members.get(data.inventory_id)
@@ -461,7 +520,7 @@ def _definition(
 
 def _frequency(
     representative: Reconstructed,
-    record: DefinitionRecord,
+    record: DefinitionLike,
     members: dict[str, Reconstructed],
     *,
     old: bool,
@@ -471,7 +530,7 @@ def _frequency(
 
 def _matching_members(
     representative: Reconstructed,
-    record: DefinitionRecord,
+    record: DefinitionLike,
     members: dict[str, Reconstructed],
     *,
     old: bool,
@@ -504,7 +563,7 @@ def _matching_members(
 
 
 def _parent_chains(
-    definitions: dict[str, DefinitionRecord], members: dict[str, Reconstructed]
+    definitions: dict[str, DefinitionLike], members: dict[str, Reconstructed]
 ) -> tuple[tuple[str, str], ...]:
     unadopted = []
     for record in definitions.values():

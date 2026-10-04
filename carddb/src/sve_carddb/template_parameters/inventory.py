@@ -67,7 +67,10 @@ def build(
         )
     for current in sources.inventory.current:
         source, raw, _ = sources.read(current.source_version_id, parser_version=PARSER)
-        _, document = project(raw, source.url, "jp")
+        if source.id in scan.documents:
+            document = scan.documents[source.id]
+        else:
+            _, document = project(raw, source.url, "jp")
         for locator, text, section in fields(document):
             if text is None:
                 continue
