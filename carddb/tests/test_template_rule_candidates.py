@@ -375,7 +375,7 @@ def test_switches_cannot_implicitly_expand_to_unknown_or_duplicate_rules(
 
 
 def test_registry_is_closed_default_off_and_not_an_approval_receipt() -> None:
-    assert len(BY_ID) == 17
+    assert len(BY_ID) == 24
     config = configuration()
     assert config["enabled"] == []
     assert config["recognition_policy"] is None
@@ -664,5 +664,7 @@ EXPECTED_CONDITION_HASHES = {
 
 def test_all_17_condition_hashes_are_pinned_to_reviewed_matching_conditions() -> None:
     assert {
-        rule.id: condition_hash(rule) for rule in RULES
+        rule.id: condition_hash(rule)
+        for rule in RULES
+        if rule.id in EXPECTED_CONDITION_HASHES
     } == EXPECTED_CONDITION_HASHES

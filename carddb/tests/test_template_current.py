@@ -31,7 +31,7 @@ from sve_carddb.template_translations.current_models import (
 )
 from sve_carddb.template_translations.current_sources import Generated, Sources
 from sve_carddb.template_translations.definitions import payload
-from sve_carddb.template_translations.members import ORDINALS
+from sve_carddb.template_translations.members import POSITIVE_ROLES
 from sve_carddb.template_translations.models import Definition
 
 from .adoption_fixtures import commit, git
@@ -115,7 +115,7 @@ def _current_definition(member: Reconstructed) -> DefinitionRecord:
                 type=h.type or "uint",
                 occurrences=(h.occurrence,),
                 reference_kind=h.reference_kind,
-                min=(1 if role in ORDINALS else 0) if h.type == "uint" else None,
+                min=(1 if role in POSITIVE_ROLES else 0) if h.type == "uint" else None,
                 max=SAFE_INTEGER if h.type == "uint" else None,
             )
             for h, role in zip(member.hints, member.roles, strict=True)
