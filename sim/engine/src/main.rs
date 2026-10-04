@@ -20,10 +20,10 @@ use alloc::sync::Arc;
 use core::error::Error;
 use core::fmt::Debug;
 use core::result;
-use std::env::args;
 use std::fs::{create_dir_all, write};
-use std::path::{Path, PathBuf};
+use std::path::Path;
 
+use clap::Parser as _;
 use serde_json::{Value, to_vec_pretty};
 use sve_engine::adapter::{Adapter, AiAdapter, AssistAdapter, ReplayAdapter};
 use sve_engine::ai::Profile;
@@ -40,35 +40,27 @@ use sve_scenario_runner::{
 
 type Result<T> = result::Result<T, Box<dyn Error>>;
 
+mod cli;
+use cli::{Cli, Mode};
+
 fn main() -> Result<()> {
-    let mut arguments = args().skip(1);
-    let snapshot = PathBuf::from(arguments.next().ok_or(
-        "usage: sve-prototype SNAPSHOT [ROOT] [all|g1|ai|replay|assist|validate|rules|gate] [OUTPUT] [SELECTION|KNOWN]",
-    )?);
-    let root = PathBuf::from(arguments.next().unwrap_or_else(|| ".".into()));
-    let mode = arguments.next().unwrap_or_else(|| "all".into());
-    let output = PathBuf::from(
-        arguments
-            .next()
-            .unwrap_or_else(|| "target/prototype".into()),
-    );
+    let Cli {
+        snapshot,
+        root,
+        mode,
+        output,
+        selection_or_known,
+    } = Cli::parse();
     create_dir_all(&output)?;
     let catalog = Arc::new(Catalog::load(&snapshot, &root.join("authored"))?);
-    if mode == "rules" {
-        return rules(
-            &catalog,
-            &root,
-            &output,
-            arguments.next().map(PathBuf::from).as_deref(),
-        );
+    if mode == Mode::Rules {
+        return rules(&catalog, &root, &output, selection_or_known.as_deref());
     }
-    if mode == "gate" {
-        let known = arguments
-            .next()
-            .map_or_else(|| root.join("docs/m0/known-failures.yaml"), PathBuf::from);
+    if mode == Mode::Gate {
+        let known = selection_or_known.unwrap_or_else(|| root.join("docs/m0/known-failures.yaml"));
         return strict_gate(&catalog, &root, &output, &known);
     }
-    if mode == "validate" {
+    if mode == Mode::Validate {
         println!("Loaded authored programs: {}", catalog.authored_count());
         println!("Rejected at load: {}", catalog.rejections().len());
         for (card, findings) in catalog.rejections() {
@@ -78,7 +70,7 @@ fn main() -> Result<()> {
         }
         return Ok(());
     }
-    if mode == "all" || mode == "g1" {
+    if matches!(mode, Mode::All | Mode::G1) {
         let questions = load_dir(&root.join("tests/rules-scenarios/questions"))?;
         let selection = load_selection(&root.join("tests/rules-scenarios/g1-selection.yaml"))?;
         let reports = score_g1(
@@ -90,15 +82,12 @@ fn main() -> Result<()> {
         retain(&output.join("g1.txt"), &reports)?;
         println!("G1 {:?}", summary(&reports));
     }
-    if matches!(mode.as_str(), "all" | "replay" | "assist") {
+    if matches!(mode, Mode::All | Mode::Replay | Mode::Assist) {
         let fixtures = load_fixtures(&root.join("tests/architecture-fixtures"))?;
-        architecture(&catalog, &fixtures, &mode, &output)?;
+        architecture(&catalog, &fixtures, mode, &output)?;
     }
-    if mode == "all" || mode == "ai" {
+    if matches!(mode, Mode::All | Mode::Ai) {
         intelligence(&catalog, &root, &output)?;
-    }
-    if !matches!(mode.as_str(), "all" | "g1" | "replay" | "assist" | "ai") {
-        return Err("unknown report mode".into());
     }
     Ok(())
 }
@@ -178,7 +167,7 @@ where
 fn architecture(
     catalog: &Arc<Catalog>,
     fixtures: &ArchFixtures,
-    mode: &str,
+    mode: Mode,
     output: &Path,
 ) -> Result<()> {
     let mut replay =
@@ -186,13 +175,13 @@ fn architecture(
     let mut assist =
         || -> Box<dyn AssistEngine> { Box::new(AssistAdapter::new(Arc::clone(catalog))) };
     let options = ArchOptions::default();
-    if mode == "all" || mode == "replay" {
+    if matches!(mode, Mode::All | Mode::Replay) {
         retain(
             &output.join("replay.txt"),
             &check_replay(&mut replay, fixtures, &options),
         )?;
     }
-    if mode == "all" || mode == "assist" {
+    if matches!(mode, Mode::All | Mode::Assist) {
         retain(
             &output.join("assist.txt"),
             &check_assist(&mut assist, &mut replay, fixtures, &options),

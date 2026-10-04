@@ -21,6 +21,13 @@ Modes are `all`, `g1`, `ai`, `replay`, `assist`, `validate`, `rules` and `gate`.
 contains unchanged runner reports, a Q4 audit and two core-written search forests.
 Forest identities are hypothetical and do not reuse unseen match IDs.
 
+The positional interface is `sve-prototype SNAPSHOT [ROOT] [MODE] [OUTPUT]
+[SELECTION_OR_KNOWN]`. `SNAPSHOT` is required; `ROOT`, `MODE` and `OUTPUT` default
+to `.`, `all` and `target/prototype`. The final path is used by `rules` and `gate`.
+Use `--help` or `--version` without a snapshot. Invalid modes, unknown options and
+excess arguments exit with status 2 before input loading or report creation.
+Put `--` before positional arguments if a path starts with a dash.
+
 `all` runs G1 and the three architecture/AI suites. Use `rules` without a selection
 to run all 706 public scenarios, or supply a selection file as the final argument,
 for example the G1 selection:
