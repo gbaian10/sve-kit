@@ -390,9 +390,9 @@ CharacteristicPatch 初版參數為 `GrantAbility / SuppressAbility / SetKind / 
 
 ## 11. 裁定登錄與證據型別
 
-`RulingRecord {id,question,decision,evidence:List<Evidence>,strength:Official|Generalized|Inferred|Undecided,decided_by:{who:user|agents,date},applies_to:List<TemplateId | IrElementId>,hint:{zh-TW,ja},supersedes?,note?}`。`Evidence {ref,kind,quote?,question?,date?,version?,url?,reason?,note?}`，`kind` 封閉為 direct／supporting／counter／terminology／community／project：CR 條文用 `ref: "CR x.y.z"`＋`quote`＋`version`；Q&A 用 `ref: "Q####"`＋`quote`（回答）＋`question`＋`date`；卡文用 `ref: <卡號>`＋`quote`＋`date`（發售日）；英文官網等外部來源另附 `url`；專案決定用 `ref: project, kind: project`＋`reason`＋`date`，不假造官方編號。`applies_to` 的值是句型 ID（`T…`，來自全卡句型分類）或 IR 元素 ID（如 `E.stat-change`）；後者用於影響不限於封閉句型集合的引擎層語義。同一 Q&A 去重並保留適用情境。Undecided 不能驅動規則提示或自動結算；Inferred 提示必說本專案解讀。
+`RulingRecord {id,question,decision,evidence:List<Evidence>,strength:Official|Generalized|Inferred|Undecided,decided_on:Date,applies_to:List<TemplateId | IrElementId>,hint:{zh-TW,ja},supersedes?,note?}`。`Evidence {ref,kind,quote?,question?,date?,version?,url?,reason?,note?}`，`kind` 封閉為 direct／supporting／counter／terminology／community／project：CR 條文用 `ref: "CR x.y.z"`＋`quote`＋`version`；Q&A 用 `ref: "Q####"`＋`quote`（回答）＋`question`＋`date`；卡文用 `ref: <卡號>`＋`quote`＋`date`（發售日）；英文官網等外部來源另附 `url`；專案決定用 `ref: project, kind: project`＋`reason`＋`date`，不假造官方編號。`applies_to` 的值是句型 ID（`T…`，來自全卡句型分類）或 IR 元素 ID（如 `E.stat-change`）；後者用於影響不限於封閉句型集合的引擎層語義。同一 Q&A 去重並保留適用情境。Undecided 不能驅動規則提示或自動結算；Inferred 提示必說本專案解讀。
 
-正式位置是 `authored/rulings/`：R-0001～R-0009 經使用者裁定（`decided_by.who: user`）；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred，`decided_by.who: agents`。`decided_by.who` 只允許 `user` 或 `agents`。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。參見 [ADR-0011](../adr/0011-rulings-evidence.md)。
+正式位置是 `authored/rulings/`：R-0001～R-0009 經使用者裁定；六項專案解讀登錄為 R-0010～R-0015，標 strength: inferred。不存 `decided_by` 的決定者，裁定日期以頂層 `decided_on` 保留；證據、結論與強度仍完整保留。條文更新按依賴圖反查 IR、巨集與卡片 meta 重審。參見 [ADR-0011](../adr/0011-rulings-evidence.md)。
 
 ## 12. 未決範圍
 
