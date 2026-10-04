@@ -64,7 +64,7 @@ def test_complete_entry_and_explicit_empty(case: Case) -> None:
         ("symlink", "Symlink"),
         ("cross_entry", "cross-entry"),
         ("unknown", "Invalid adoption fields"),
-        ("duplicate", "Duplicate"),
+        ("duplicate", "Invalid authored YAML syntax"),
         ("bool_format", "integer one"),
         ("sequence", "sequence"),
         ("absolute", "cross-entry"),

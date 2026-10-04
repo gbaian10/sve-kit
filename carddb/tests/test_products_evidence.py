@@ -174,7 +174,7 @@ def test_shared_evidence_links_are_deduplicated_and_distinct_locators_survive(
     shared = family("BP02_extra")
     shared["filing_key"] = "BP02"
     shared["evidence"] = first["evidence"]
-    # Shared inputs are serialized as separate arrays, since authored YAML forbids aliases.
+    # Keep fixture serialization independent of Python object sharing.
 
     raw = obj(json.loads(json.dumps(envelope([first, shared]))))
     install(product_root, NAME, raw)
