@@ -19,8 +19,8 @@ cache files enter the asset root. Old immutable blobs remain intact.
 Both image APIs require an explicit adopted crop collection, even when empty.
 First call `image_crops.load_image_crops(authored_root,
 authored_revision=<full Git SHA>)` and pass its result as `crops=` to
-`build_jp_assets` and `publish_jp_image_bundle`. The loader reads all shards and
-receipts in `authored/image-crops/`, without an index, and checks their complete
+`build_jp_assets` and `publish_jp_image_bundle`. The loader reads all shards
+in `authored/image-crops/`, without an index, and checks their complete
 file set and exact bytes against the pinned revision. It validates EN rows too;
 the JP importer still does not convert or bind EN sources. An absent directory
 at that revision is an explicitly empty closure.
@@ -64,15 +64,15 @@ the recipe pin. The bundle consumer rechecks these pins and independently
 compares each source's actual `VariantSet.crop_box` with its adopted or default
 box using verified oriented dimensions. The snapshot preview's image path loads
 its own adopted closure, checks externally supplied image builds the same way,
-and pins all crop files including unused rows and historical receipts. Text-only
+and pins all crop files including unused rows. Text-only
 previews do not load or pin crop inputs. The export CLI only reuses a complete
 cache entry for the selected box; it never repairs missing artifacts.
 
 Crop reports count distinct applied sources, list unused rows (including EN),
 annotation mismatches and other-printing candidates for the same effective
 permanent card/face. These diagnostics neither inherit boxes nor block builds.
-`art_webp_review: pending_coordinator_review` records that the RGB crop receipt
-does not approve encoded WebP output. Technical review and upload authorization
+`art_webp_review: pending_coordinator_review` records that approving the RGB crop
+does not approve the encoded WebP output. Technical review and upload authorization
 remain separate operations.
 
 Image IDs bind source versions; bound DB asset IDs also retain exact original src

@@ -52,9 +52,8 @@ no image publication is claimed.
 Prepare a separate private image library and recipe cache before exporting.
 `build_regional_assets(FrozenSources(...), roots, region=pin.region, crops=crops,
 workers=2)` converts one exclusively regional image batch. Load the complete
-`authored/image-crops` closure at the same revision, including unused records and
-receipts. Keep the JP and EN sealed batches independent, and retain each original
-PNG. The existing `build_jp_assets` API remains JP-only.
+`authored/image-crops` closure at the same revision, including unused records.
+Keep the JP and EN sealed batches independent, and retain each original PNG. The existing `build_jp_assets` API remains JP-only.
 
 ```bash
 sve-carddb snapshot export-offline --inputs recipe.json \

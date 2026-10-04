@@ -32,7 +32,7 @@ from sve_carddb.snapshot.values import (
 )
 
 from .adoption_fixtures import commit
-from .image_crop_fixtures import RECEIPT, initialize, install, record
+from .image_crop_fixtures import SHARD, initialize, install, record
 from .shared_case_fixtures import TextCaseTemplate
 from .test_registry import make_inputs
 from .test_snapshot_preview import prepare_build
@@ -229,7 +229,7 @@ def crop_recipe(
     )
 
 
-def test_adopted_preview_pins_receipts_unused_en_and_real_box(
+def test_adopted_preview_pins_shards_unused_en_and_real_box(
     prepared_image_build: tuple[
         Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
     ],
@@ -275,7 +275,7 @@ def test_adopted_preview_pins_receipts_unused_en_and_real_box(
     assert result.projection.tables["image_variant"]
 
 
-def test_preview_consumer_rejects_old_box_and_dirty_receipt(
+def test_preview_consumer_rejects_old_box_and_dirty_shard(
     prepared_image_build: tuple[
         Case, Inputs, ImageBuild, PreviewRoots, tuple[ImageReference, ...]
     ],
@@ -290,8 +290,8 @@ def test_preview_consumer_rejects_old_box_and_dirty_receipt(
         ValueError, match=r"^Image crop box differs from adopted source crop$"
     ):
         build(recipe, images=images, image_root=roots.preview)
-    receipt = recipe.repo / "authored" / RECEIPT
-    receipt.write_bytes(receipt.read_bytes() + b"\n")
+    shard = recipe.repo / "authored" / SHARD
+    shard.write_bytes(shard.read_bytes() + b"\n")
     with pytest.raises(
         ValueError, match=r"^Image crop bytes differ from pinned authored revision$"
     ):
