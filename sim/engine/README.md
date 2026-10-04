@@ -83,3 +83,27 @@ does not provide cross-version migration, `save/2`, or server input authorizatio
 The default `runner` feature enables evaluation adapters and the CLI. The
 library builds for `wasm32-unknown-unknown` with `--no-default-features`; browser
 bindings, host time and execution have not been validated.
+
+New games and observation-based samples use `chacha12-sha256-rand09-v1`:
+`ChaCha12Rng` from rand_chacha 0.9.0, with rand 0.9.5's unbiased range sampler
+and slice shuffle. These versions are pinned because sampling is part of the
+replay sequence. The seed is SHA-256 of the bytes
+`sve-engine/chacha12-sha256-rand09-v1\0` followed by the exact UTF-8 seed string;
+the stream and word position start at zero. Future sequence changes need a new
+algorithm name and must retain readers for previous algorithms.
+
+Trusted saves retain the algorithm, seed, stream and complete word position.
+The 68-bit word position is encoded as `[low_u64, high_u64]` so JSON round trips
+do not truncate it. Player packets contain none of this private RNG state.
+Scripted random outcomes still take precedence and do not consume that stream;
+search sampling owns a separate stream and cannot advance the authoritative one.
+
+Original numeric `rng` saves restore with the original FNV-1a seed fold,
+SplitMix64 words, rejection sampler and modulo shuffle. Their serialization and
+continuation remain unchanged. Use `Game::new_with_random_algorithm` or
+`Game::from_observation_with_random_algorithm` with `RandomAlgorithm::Legacy`
+when recreating an old position from its seed. The default constructors now
+select the named algorithm; numeric saves never switch algorithms on restore.
+This is an RNG compatibility boundary inside the prototype's trusted
+`astra-save/1`, not a general save migration or untrusted-input authorization
+system. Older binaries cannot read the new RNG objects.

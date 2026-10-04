@@ -463,30 +463,3 @@ fn max_damage(value: &Value) -> i64 {
         Value::Null | Value::Bool(_) | Value::Number(_) | Value::String(_) => 0,
     }
 }
-
-/// Seeded search randomness, entirely separate from a match's authoritative random stream.
-#[derive(Debug, Clone)]
-pub(crate) struct Random(u64);
-impl Random {
-    pub(crate) fn new(seed: &str) -> Self {
-        Self(seed.bytes().fold(0xcbf2_9ce4_8422_2325_u64, |s, b| {
-            (s ^ u64::from(b)).wrapping_mul(0x0000_0100_0000_01b3)
-        }))
-    }
-    const fn next(&mut self) -> u64 {
-        self.0 = self.0.wrapping_add(0x9e37_79b9_7f4a_7c15);
-        let mut n = self.0;
-        n = (n ^ (n >> 30)).wrapping_mul(0xbf58_476d_1ce4_e5b9);
-        n = (n ^ (n >> 27)).wrapping_mul(0x94d0_49bb_1331_11eb);
-        n ^ (n >> 31)
-    }
-    pub(crate) fn shuffle<T>(&mut self, items: &mut [T]) {
-        for i in (1..items.len()).rev() {
-            if let Ok(bound) = u64::try_from(i.saturating_add(1))
-                && let Ok(j) = usize::try_from(self.next().checked_rem(bound).unwrap_or_default())
-            {
-                items.swap(i, j);
-            }
-        }
-    }
-}
