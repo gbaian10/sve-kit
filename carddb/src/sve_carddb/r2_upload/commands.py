@@ -12,6 +12,7 @@ from sve_carddb.r2_upload.plan import UploadError, plan_preview
 from sve_carddb.r2_upload.s3 import S3, Credentials
 from sve_carddb.r2_upload.upload import upload
 from sve_carddb.r2_upload.v2.commands import upload_v2
+from sve_carddb.r2_upload.v2.gc_commands import gc_v2
 
 
 def _authorization(execute: bool, confirmed: bool) -> None:
@@ -62,3 +63,5 @@ def upload_command(
 
 
 app.command("upload-v2")(upload_v2)
+
+app.command("gc-v2")(gc_v2)

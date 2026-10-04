@@ -13,11 +13,14 @@ from xml.etree import ElementTree as ET  # ruff: ignore[suspicious-xml-etree-imp
 import httpx
 
 from sve_carddb.r2_upload.s3 import Credentials, sign
+from sve_carddb.snapshot.publish.plan import IMAGE_KEY, INDEX, JSON_KEY
 from sve_carddb.snapshot.publish.storage import PublishError, Stored
-from sve_carddb.snapshot.values import canonical
+from sve_carddb.snapshot.values import canonical, digest, integer
 
 if TYPE_CHECKING:
     from collections.abc import Callable, Iterator
+
+    from pydantic import JsonValue
 
 LEASE_KEY = "coordination/snapshot-v2-writer.json"
 LEASE_HEADERS = {"content-type": "application/json", "cache-control": "no-store"}
@@ -120,7 +123,7 @@ class R2Store:
     ) -> bool:
         """Never retry writes or downgrade an unsupported condition to a plain PUT."""
         if key != LEASE_KEY:
-            self._verify_lease()
+            self.verify_lease()
         if set(headers) - {"content-type", "cache-control", "content-encoding"}:
             raise PublishError("Unsupported object metadata")
         if expected is not None and (
@@ -151,8 +154,38 @@ class R2Store:
         if not expected or not any(key.startswith(p) for p in PUBLIC_PREFIXES):
             raise PublishError("Invalid conditional deletion request")
         raise PublishError(
-            "R2 conditional DELETE is unverified; collection is disabled"
+            "R2 conditional DELETE is unverified; use separately approved GC"
         )
+
+    def delete_approved(
+        self, key: str, *, index: Stored, candidate: dict[str, JsonValue]
+    ) -> None:
+        """Explicit GC alone may delete without If-Match under a verified lease.
+
+        Atomicity is the maintainer-approved single-writer assumption, not an
+        S3 conditional-delete guarantee. Recheck the full index immediately last.
+        """
+        if (
+            candidate.get("key") != key
+            or not any(key.startswith(p) for p in PUBLIC_PREFIXES)
+            or not (JSON_KEY.fullmatch(key) or IMAGE_KEY.fullmatch(key))
+        ):
+            raise PublishError("GC deletion key is outside the approved public scope")
+        self.verify_lease()
+        value = self.get(key)
+        if (
+            value is None
+            or value.etag != candidate.get("etag")
+            or len(value.raw) != integer(candidate.get("bytes"))
+            or digest(value.raw) != candidate.get("sha256")
+        ):
+            raise PublishError("GC candidate changed before deletion")
+        if self.get(INDEX) != index:
+            raise PublishError("GC current/previous index changed before deletion")
+        self.verify_lease()
+        with self._response(self._request("DELETE", key)) as response:
+            if response.status_code not in {HTTPStatus.OK, HTTPStatus.NO_CONTENT}:
+                raise PublishError("R2 approved DELETE failed; inspect before retry")
 
     def keys(self, prefix: str) -> tuple[str, ...]:
         """Bounded ListObjectsV2 pagination only in explicitly public namespaces."""
@@ -179,7 +212,8 @@ class R2Store:
                 raise PublishError("R2 inventory pagination repeats a token")
             seen.add(token)
 
-    def _verify_lease(self) -> None:
+    def verify_lease(self) -> None:
+        """Require the currently held deployment-wide CAS owner before mutations."""
         if self._lease is None or self.get(LEASE_KEY) != self._lease:
             raise PublishError("Deployment writer lease changed; stop and review")
 
@@ -215,7 +249,7 @@ class R2Store:
             yield
         finally:
             try:
-                self._verify_lease()
+                self.verify_lease()
                 if not self.put(
                     LEASE_KEY,
                     canonical({"format": 1, "owner": None}),

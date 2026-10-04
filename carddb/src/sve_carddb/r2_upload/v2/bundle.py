@@ -309,7 +309,7 @@ def report(release: Release, ledger: Ledger) -> dict[str, object]:
         if release.media.state["revision"] in versions
         else None,
         "would_collect": [],
-        "collection": "disabled_unverified_conditional_delete",
+        "collection": "separate_per_run_approval_required",
         "remote_existence": "not_checked",
         "manifest_sha256": release.entry["manifest_sha256"],
     }

@@ -188,7 +188,7 @@ def test_conditional_delete_is_disabled_without_even_a_read_or_delete(
     store, state, _ = remote
     with pytest.raises(
         PublishError,
-        match=r"^R2 conditional DELETE is unverified; collection is disabled$",
+        match=r"^R2 conditional DELETE is unverified; use separately approved GC$",
     ):
         store.delete(KEY, expected='"x"')
     assert state.requests == []

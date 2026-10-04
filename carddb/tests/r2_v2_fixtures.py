@@ -35,6 +35,7 @@ class ServerState:
     sequence: int = 0
     status: int | None = None
     fail_put: int | None = None
+    delete_status: int | None = None
     cdn_status: int | None = None
     race_lease: bool = False
     page_size: int = 2
@@ -166,6 +167,13 @@ class Handler(BaseHTTPRequestHandler):
                     self.respond(200, obj.raw, obj.headers | {"etag": obj.etag})
             elif self.command == "PUT":
                 self.put_object(key, raw, headers)
+            elif self.command == "DELETE":
+                state.operations.append(("DELETE", key, headers.get("if-match")))
+                if state.delete_status is not None:
+                    self.respond(state.delete_status, state.error_body)
+                    return
+                state.objects.pop(key, None)
+                self.respond(204)
             else:
                 self.respond(405)
 

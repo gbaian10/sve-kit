@@ -58,8 +58,9 @@ changes state/checkpoints. Counts and bytes are complete local **candidates**, n
 remote missing-object counts. Image `v` ranges distinguish all display tokens from
 the newly reserved token. Index size/previous come from durable receipts; execute
 must reconcile them with the real index. No remote inventory can be discovered
-without I/O. `would_collect` is empty because R2 collection is disabled, rather
-than a guessed list of obsolete objects. A Brotli bundle requires the same pinned
+without I/O. `would_collect` is empty because collection requires a separate
+per-run inventory and consent, rather than a guessed list of obsolete objects.
+A Brotli bundle requires the same pinned
 `--brotli-command` as its producer; gzip-only needs no external compressor.
 
 ## Explicit maintainer execution
@@ -110,15 +111,56 @@ silently generating a replacement. Retry an unchanged bundle/version only after
 review; changed input or unknown external image bytes are refused. A failed write
 may have changed origin bytes without switching current, as defined by #297.
 
-## Conditional deletion and acceptance boundary
+## Per-run collection and acceptance boundary
 
 Cloudflare's [S3 compatibility table](https://developers.cloudflare.com/r2/api/s3/api/)
 explicitly lists conditional PUT but does **not** promise atomic `If-Match` on
-`DeleteObject`. Therefore `R2Store.delete` fails before any HTTP; GC is disabled.
-GET followed by a plain DELETE would introduce a race and is not a fallback.
+`DeleteObject`. The generic conditional `R2Store.delete` still fails before HTTP;
+it never silently downgrades that contract. The separate `r2 gc-v2` workflow uses
+the maintainer-approved single cooperating writer model and **unconditional
+DELETE**, rather than claiming atomic conditional deletion. Every writer must
+honor the same lease, including maintenance scripts. A writer bypassing the lease
+can race between the final reads and DELETE; this workflow cannot protect against
+such non-cooperating writes.
+
+The default command only displays an already saved local approval list. It reads
+no credentials and performs no HTTP. Explicit `--inspect-remote` requires
+`--confirm-maintainer-authorization` and one or more exact `--namespace` flags.
+It checks the independently pinned ledger, acquires the writer lease, reconciles
+the remote current/previous index with durable receipts, and records unreferenced
+keys, ETags, hashes, counts and bytes in a new mode-600 `--plan-file`. Public objects
+are only read; acquiring/releasing the coordination lease uses conditional PUT.
+Only `snapshots/blobs/`, `snapshots/manifests/` and each explicit public image-size
+prefix are accepted. An irregular key aborts the entire inspection, rather than
+being skipped. Raw, inventory, crawl manifests, backups and authored data are
+outside these namespaces.
+
+Both retained versions' JSON closures **and image paths** remain protected, as do
+legal sealed/failed attempts. A missing retained member stops collection. The
+inspection releases the lease while the maintainer reviews its saved list; it
+does not hold a lock across an unbounded human wait. Actual execution requires
+`--execute --confirm-maintainer-authorization --confirm-delete 'DELETE-V2 sha256:…'`,
+where the exact confirmation string is printed with that list. Execution acquires
+the lease and reproduces the full approved inventory under it. Any inventory,
+candidate, receipt or index change requires a new list and fresh consent.
+**The execution replan and every deletion share that single writer lease.**
+Immediately before each unconditional DELETE it rechecks candidate bytes/ETag,
+the full current/previous index and ownership of the lease. Lost ownership stops
+without deleting; a DELETE transport failure is never retried automatically.
+Partial completion requires another inspection and consent, not replaying a
+stale list. Collection is never automatic after publication.
+
+```bash
+uv --directory carddb run sve-carddb r2 gc-v2 \
+  --plan-file /private/reviews/gc.json \
+  --ledger-dir /explicit/primary --backup-dir /independent/backup \
+  --checkpoint-file /third/checkpoints/release.json
+```
+
+This example is an offline display of an existing list; add the explicit remote
+flags only after authorization. Target/credential inputs follow `upload-v2`.
 ListObjectsV2 is prefix-restricted and checks bounded UTF-8 XML and pagination,
-but listing does not enable deletion. A future atomic-deletion implementation
-requires separate evidence and review. No actual R2 conditional support has been
+but listing alone does not enable deletion. No actual R2 conditional support has been
 measured by these localhost tests.
 
 Real R2 consistency/conditions, deployed Cache Rules, full-query cache separation,

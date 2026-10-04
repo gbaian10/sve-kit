@@ -74,11 +74,8 @@ def _execute(
     account_id: str | None,
     bucket: str | None,
 ) -> dict[str, object]:
-    account = account_id or os.environ.get("R2_ACCOUNT_ID", "")
-    target = bucket or os.environ.get("R2_DEV_BUCKET", "")
-    if not account or not target:
-        raise PublishError("Execution requires an explicit R2 account ID and bucket")
     credentials = Credentials.environment()
+    account, target = target_values(account_id, bucket)
     with (
         httpx.Client(
             trust_env=False, follow_redirects=False, timeout=30
@@ -101,3 +98,12 @@ def _execute(
             }
         finally:
             save_checkpoint(checkpoint, ledger)
+
+
+def target_values(account_id: str | None, bucket: str | None) -> tuple[str, str]:
+    """Require both explicit deployment values before any HTTP client is opened."""
+    account = account_id or os.environ.get("R2_ACCOUNT_ID", "")
+    target = bucket or os.environ.get("R2_DEV_BUCKET", "")
+    if not account or not target:
+        raise PublishError("Execution requires an explicit R2 account ID and bucket")
+    return account, target
