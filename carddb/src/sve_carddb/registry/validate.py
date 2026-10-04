@@ -237,7 +237,7 @@ FIELDS = {
     "card": "id layout identity_state home_set_id",
     "face": "id card_id ordinal side",
     "printing": "id card_id region card_no variant_key home_set_id source_face_map observation",
-    "card_int_id": "int_id printing_id allocated_at",
+    "card_int_id": "int_id printing_id",
     "region_mapping_review": "card_id target_region state as_of coverage_scope coverage_hash observations",
     "art": "id card_id face_id classification uses observation",
     "card_related": "id from_card_id to_card_id relation source_kind target_printing_id suggested_count dsl_id evidence",

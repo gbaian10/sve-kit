@@ -43,7 +43,7 @@ if TYPE_CHECKING:
         ("printing", "variant_key", 1),
         ("card_int_id", "int_id", True),
         ("card_int_id", "int_id", 4294967296),
-        ("card_int_id", "allocated_at", "2026-02-30"),
+        ("card_int_id", "allocated_at", "2026-10-01"),
         ("region_mapping_review", "coverage_hash", "sha256:wrong"),
         ("region_mapping_review", "as_of", "yesterday"),
         ("region_mapping_review", "coverage_hash", "sha256:" + "0" * 64 + "\n"),

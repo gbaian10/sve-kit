@@ -137,7 +137,7 @@ JP 初始分組依全部面同名／同職業／同種類／同數值／同特�
 
 ### 3.2 UInt32
 
-`card_int_id` 的 `data` 僅 `int_id/printing_id/allocated_at`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-09-28-v1` 決定，程式唯一定義在 `sve_carddb.registry.allocation`：
+`card_int_id` 的 `data` 僅 `int_id/printing_id`；`record_key` 為 `card_int_id:<printing_id>`。已配發記錄不修改、不刪除、不重用，沒有 decision。型別上限仍是 UInt32（4294967295），可用號段由版本化配號政策 `region-ranges-2026-09-28-v1` 決定，程式唯一定義在 `sve_carddb.registry.allocation`：
 
 | 號段（閉區間） | 用途 |
 | -------------- | ---- |

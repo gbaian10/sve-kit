@@ -87,7 +87,6 @@ def publish(
                 {
                     "printing_id": "missing",
                     "int_id": 20001,
-                    "allocated_at": "2026-09-30",
                 },
             )
         return input_record(BUILD, expected[:-1] if failure == "closure" else expected)

@@ -75,7 +75,6 @@ class EnglishPrintingData(PrintingData):
 class AllocationData(RecordData):
     int_id: Annotated[int, Field(ge=0, le=4294967295)]
     printing_id: PrintingId
-    allocated_at: Date
 
 
 class MappingReviewData(RecordData):

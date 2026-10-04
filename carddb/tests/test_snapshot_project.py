@@ -307,7 +307,7 @@ def test_corrections_do_not_mark_shared_text_or_other_printing(db: Database) -> 
         db.insert("printing", raw | {"id": "other", "card_no": "TEST-002"})
         db.insert(
             "card_int_id",
-            {"printing_id": "other", "int_id": 20002, "allocated_at": "2026-09-29"},
+            {"printing_id": "other", "int_id": 20002},
         )
         db.insert(
             "printing_face",
@@ -1069,7 +1069,6 @@ def dual_region(db: Database) -> None:
             {
                 "printing_id": "printing-en",
                 "int_id": 20002,
-                "allocated_at": "2026-09-29",
             },
         )
         db.insert(
@@ -1431,7 +1430,7 @@ def test_unknown_other_printing_prevents_known_debut(db: Database) -> None:
         )
         db.insert(
             "card_int_id",
-            {"printing_id": "undated", "int_id": 20002, "allocated_at": "2026-09-29"},
+            {"printing_id": "undated", "int_id": 20002},
         )
         db.insert(
             "printing_face",

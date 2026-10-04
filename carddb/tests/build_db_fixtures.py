@@ -63,7 +63,6 @@ def rows() -> dict[str, dict[str, Value]]:
         "card_int_id": {
             "int_id": 20001,
             "printing_id": "printing",
-            "allocated_at": DATE,
         },
         "rules_name": {
             "id": "rules_name",

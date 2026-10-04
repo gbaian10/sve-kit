@@ -154,7 +154,6 @@ def seed() -> list[dict[str, Any]]:
                 "data": {
                     "int_id": 60001 + offset,
                     "printing_id": pid,
-                    "allocated_at": "2026-10-01",
                 },
             }
         )

@@ -589,7 +589,6 @@ def test_batch_decision_samples_and_all_json_positive_shapes(db: Database) -> No
     [
         "source_record",
         "decision",
-        "card_int_id",
         "face_revision",
         "rules_profile_revision",
     ],

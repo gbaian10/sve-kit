@@ -231,7 +231,6 @@ class Builder:
                 {
                     "int_id": next_ids[region],
                     "printing_id": identifier,
-                    "allocated_at": self.inputs.receipt.reviewed_on,
                 },
             )
             next_ids[region] += 1
