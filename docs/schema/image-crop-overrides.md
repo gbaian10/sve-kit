@@ -105,7 +105,7 @@ F1 依[建置輸入紀錄](source-archive.md#221-建置輸入紀錄與完整使�
 
 既有 recipe 已支援來源綁定的整數覆寫，新增採納資料不改 recipe_version；解碼、編碼、縮放或框演算法改變才按既有規則換 recipe。快取 key 包含來源 hash、實際框與完整 recipe：新框取得新 key，`reuse_only` 若沒有新框結果必須失敗，不得借用舊框的完整五檔。
 
-新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值；1.x 保留其七欄解讀。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
+新 key 下五檔會重新產製。在來源與 recipe 不變時，card 三檔輸入不變，內容定址後仍可共用原 blob；art 兩檔改為新 WebP hash／path。不改寫內容定址的建置 blob。`img:binding:` 不依賴裁切，來源／頁面 binding 不變時保持原值。2.0 的公開 key 固定、只換 art_version 並覆寫有變動的 art bytes，card 三檔版本沿用；欄序依 snapshot-format §2.1，不公開框。
 
 採納資料與 F1 的變動產生新的影像建置輸入指紋，須重產受影響的預覽、影像分片、清單、壓縮旁檔與 2.0 發布凍結包，不拿舊清單充作已完成覆寫。preview 只供本機使用；R2 僅透過 `r2 upload-v2` 發布 2.0 凍結包。發布須分開驗 current＋previous 的 metadata 聯集及僅 current 的圖片集合；previous 圖片引用不保留舊 WebP，不要求同 key 符合兩版輸出。新圖驗妥才切快照，再清理失去 current 引用的 key，合法在途 staging 另計；使用隔離 preview 根，不混入任意無引用檔案。
 

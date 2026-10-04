@@ -1,11 +1,10 @@
 # JP preview 建置與前端接線
 
-本文既有命令與內容定址圖片輸出描述的是已實作 1.x；2.0 規格不表示這些入口已完成升級。
-2.0 須同步 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度) 與
-[傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：輸出卡包 media 的版本／尺寸，
-從建置 hash path 產生固定 ID key，圖片可受控覆寫、JSON 不可變，驗新 v 後才切指標；
-preview 配號與快取仍隔離，不寫正式 current／previous 索引。圖片只取 current，metadata 僅最新＋前一版。
-正式 publisher 仍拒絕 preview 版號；不得把 preview 直接升格或把本文件的舊 create-only 規則當 2.0 已驗收。
+preview 僅供本機，匯出器預設產出 2.0。圖片投影依 [圖片發布契約](image-variants.md#20-圖片-url版本與新鮮度)
+與 [傳輸 §5.4](snapshot-transport.md#54-format-200-卡包-media-與-id-圖片)：從建置 hash path
+產生固定 ID key，卡包 media 提供版本／尺寸；圖片可受控覆寫，JSON 不可變。
+preview 配號與快取仍隔離，不寫正式 current／previous 索引。正式 R2 發布另用 upload-v2
+與 2.0 凍結包，不能把 preview 直接升格。
 
 preview 使用正式傳輸契約與共用匯出器，但不是正式發布。`data_version` 必須有
 `preview-` 前綴，`regions` 固定為 `jp`。payload 的欄位、分片 N、bootstrap/detail
@@ -69,8 +68,8 @@ preview 的壓縮旁檔只供本機載入與容量檢查，不作 R2 發布輸�
 R2 僅透過 `r2 upload-v2` 發布通過驗證的 2.0 凍結包；凍結包、ledger、checkpoint
 與 CDN 驗證條件依 [發布契約](snapshot-format.md#41-發布窗口圖片新鮮度與回收) 及 [R2 接線](../../carddb/src/sve_carddb/r2_upload/v2/README.md)。
 
-公開 WebP 存於 `images/sha256/<前兩碼>/<64hex>.webp`。先驗證／寫入圖片，再寫 images
-分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，依 hash 去重。
+建置輸入的 WebP 使用內容定址 hash path；preview 輸出為 2.0 的固定 ID key。先驗證／寫入圖片，再寫 images
+分片與其餘快照成員；只複製公開 `printing_image` 引用且可用、核可的變體，不以來源 hash 當公開 URL。
 不複製原始 PNG、數位卡圖或圖片庫的其他檔案。切換前再驗公開資產的 hash、bytes 與
 實際解碼格式／尺寸；中斷可以留下未引用的完整資產，但既有完整 preview 與指標不變。
 
@@ -92,14 +91,11 @@ preview 根下的 `private/` 與 `reports/` 不屬於公開內容；整個 previ
 每個版本的共用／混區 File 整檔計入，不按語言比例分攤。約 1 MiB 是盡量的約略目標，
 2 MiB 可接受；更大須停下交維護者決定該配置。raw／gzip 另報，不設 gzip 啟動 1 MiB gate。
 
-[傳輸契約 §5.1](snapshot-transport.md#51-format-110-固定配置) 的 1.1.0 是獨立協商的新配置，
-舊 1.0.0／N=1 預覽仍可使用；producer／reader 未同步前不切到新 minor。新配置移動的
-只有同名兩表的整表儲存與固定分片配置，pending／名稱／facet／公開欄位不縮減。
-每個實際資料 File（含 types）raw≤512 KiB，完整文字仍守 40／8／10 MiB。
-首屏後預取所有 images metadata bytes，不建立全庫物件索引、也不預取全部圖片 blob；
-所選頁面才解析必要 image 列與下載可見圖。saveData 可延後背景工作，未完成須標進度。
-完整 metadata 傳輸與冷／暖頁成本另報，不能把延後下載當成節流或離線已完成；
-CacheStorage 的已驗 bytes 成功保存且未被清除時，翻回暖頁不向外重抓。
+[傳輸契約 §5.1](snapshot-transport.md#51-format-200-固定配置) 與 §5.4 定義 2.0 的 N=64、固定 bands
+及卡包 media；pending／名稱／facet／公開欄位不因容量縮減。
+每個資料 File（含 types）raw≤512 KiB，完整文字仍守 40／8／10 MiB。
+只載可見面的卡包 media 與圖片；全域來源詳情按需，不全量預取圖片或建立全庫影像索引。
+未完成的下載須標進度，CacheStorage 已驗 bytes 保存成功且未清除時，暖頁 metadata 不向外重抓。
 
 `snapshot publish MANIFEST` 在任何寫入前拒絕 `preview-` 產物。正式發布其餘閘門與
 current／previous 版本索引依 snapshot-format §4.1，屬 #34 的發布工作；目前命令在正式版號下也會停止；改掉前綴不能把 preview
@@ -131,7 +127,7 @@ M3 畫面驗收與其餘正式閘門應分別確認，不因成功載入 preview
 含圖配方使用同一凍結 image batch 作來源校正證據與圖片來源；圖片引用取自凍結頁面的
 實際 `<img src>` 與已採用的 `source_face_map`，不能由卡號推算 URL，也不按邏輯面順序
 猜測正反面。`printing_image` 以版次／面指向 `image_asset`，`image_variant` 提供每個
-尺寸的 path／WebP 格式／實際尺寸／bytes；images 分片描述與 config 的尺寸契約一致。
+尺寸的 WebP 格式／實際尺寸／bytes；公開 path 由永久 int_id、face ordinal 與 size_key 組成；images 分片描述與 config 的尺寸契約一致。
 
 `unfetched`／`missing` 只有 metadata，沒有變體或假路徑；`pending`／`withdrawn` 亦無
 公開變體。第三方 approved 圖片須通過 DB 的逐圖片 confirmed 審核與來源證據閘門；
@@ -141,6 +137,6 @@ writer 必須拿到該圖片的已驗證審核集合，不能拿另一張的審�
 不會獨立查核私人審核決定或來源證據。
 
 M3 可直接選 `purpose=art` 的 `art_s`／`art_m`（上限 160×120／384×288，實際維持
-4:3，配方為 integer-4x3-v2），改用 producer 提供的 path，無須再套用前端裁切公式。
+4:3，配方為 integer-4x3-v2），依 producer 的 media 版本組出固定 ID URL，無須再套用前端裁切公式。
 詳情／正反面使用 `card_s`／`card_m`／`card_l`；縮圖不可放大原圖，應以變體實際尺寸
 為準。缺圖或狀態未核可時維持佔位，不把 metadata 的來源網址當公開資產路徑。

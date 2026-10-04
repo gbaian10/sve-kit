@@ -1,14 +1,14 @@
 # 快照機器契約與共用樣本
 
-欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。機器資源位於 `carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json`，隨 carddb wheel 打包；採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:1.0.0`，所有 `$ref` 都在檔內。
+欄位語意依 [快照格式](snapshot-format.md)，傳輸與版本規則依 [傳輸契約](snapshot-transport.md)。機器資源位於 `carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json`，隨 carddb wheel 打包；採 JSON Schema Draft 2020-12，識別為 `urn:sve-kit:snapshot:2.0.0`，所有 `$ref` 都在檔內。
 
-此資源釘候選 format `1.0.0`、bucket_count=1；它是可核算的契約配置，不宣稱正式容量凍結。正式配置仍依傳輸契約 §5 量測；更換配置須依其版本規則同步 Schema、樣本與 reader 支援表。
+此資源釘候選 format `2.0.0`、bucket_count=64；它是可核算的契約配置，不宣稱正式容量凍結。正式配置仍依傳輸契約 §5 量測；更換配置須依其版本規則同步 Schema、樣本與 reader 支援表。
 
-公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `1.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
+公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `2.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
 
 **使用者核可 2026-10-01（未核對 EN 繁中）**：FieldTranslation.basis 新增 `shared_jp_unchecked`，tuple 欄序不變。它表示同卡身分／面對應已確認、文字尚未核對，reader 必顯示「日英文字尚未核對」；已知相關 divergence 或日英段落數不同的受影響 section／effect 欄不可用此值，缺譯回 EN 原文；不按 ordinal 猜配。這是 docs 契約擴充，現有 Schema/golden/reader 尚未同步，不能宣稱現行機器契約已接受新值。首次產出前須在翻譯投影實作中同步三者並驗未核對／已核對切換；候選期依上段修訂，若實作前已正式凍結，則升 minor、提高 min_reader_version 並協商 `unchecked-jp-translation-v1` capability，舊 reader 拒收以免漏標示。
 
-**使用者核可 2026-10-01**：`product.product_type` 的既有 tuple 位置可為 null，與官方商品無 exact confirmed `family.public_code` 型別對應時的 DB 欄位一致；人工 product 輸入仍必填 Code。本候選 format 尚無正式發布快照，直接同步 nullable Schema、type descriptor 與獨立 golden，維持候選 `1.0.0`；正式凍結後的同類相容性變更須另依傳輸契約升版與同步 reader。
+**使用者核可 2026-10-01**：`product.product_type` 的既有 tuple 位置可為 null，與官方商品無 exact confirmed `family.public_code` 型別對應時的 DB 欄位一致；人工 product 輸入仍必填 Code。本候選 format 尚無正式發布快照，直接同步 nullable Schema、type descriptor 與獨立 golden，維持候選 `2.0.0`；正式凍結後的同類相容性變更須另依傳輸契約升版與同步 reader。
 
 ## 資源入口
 
@@ -18,10 +18,10 @@
 | Config、Types | 設定與固定巢狀 descriptor |
 | Container | 40 文字及 3 影像集合的 fragment 容器 |
 | 集合名、`集合名_partition` | 完整邏輯 row tuple、各欄位分割 row tuple |
-| RegionView、PrintingFace、Section 等 | 25 種巢狀 tuple，含 PrintingFaceBootstrap／Detail |
+| RegionView、PrintingFace、Section 等 | 固定巢狀 tuple，含 PrintingFaceBootstrap／Detail |
 | ParameterSchema、CorrectionValue | 保留為 JSON 的有限值域；field 與更正值另於所屬 tuple 綁定 |
 | Programs、TextAll | 空程式包及文字容器聯集 |
-| Changes、Index、IndexPage | 既有 1.x 摘要與 index_format=1 的歷史形狀；2.0 另定 Index v2，不再使用 IndexPage |
+| Changes、Index、IndexEntry | 變動摘要與 index_format=2 的 current／previous 入口 |
 
 可直接以 `#/$defs/Manifest` 等片段作驗證入口。`x-columns`、`x-types`、`x-primary-key`、`x-fragments`、`x-tables` 是供固定 accessor 使用的註記；接受／拒絕 JSON 形狀使用標準 keywords。資料內 types 另以 const 驗完整 descriptor，不能讓 payload 的註記改變解碼方式。
 
@@ -31,7 +31,7 @@ Schema 驗欄序、tuple 長度、required-nullable、額外欄及 enum。跨值
 
 ## Schema 產生與維護
 
-`contract.schema.json` 是提交並隨套件發布的產生結果，不直接手改。`schema/v1/source.json` 保存物件定義、tuple 欄位與約束；欄位的 `from` 指向完整邏輯 tuple，讓分割列共用型別與 descriptor。產生器 `sve_carddb.snapshot.generate_schema` 展開固定長度、欄序、Types、fragment 與 changes 的主鍵／欄位白名單；`schema_patterns.py` 組合日期與 URI pattern，來源中的 `pattern: {use: ...}` 只供產生器使用，不會出現在公開 Schema。
+`contract.schema.json` 是提交並隨套件發布的產生結果，不直接手改。`schema/v2/source.json` 保存物件定義、tuple 欄位與約束；欄位的 `from` 指向完整邏輯 tuple，讓分割列共用型別與 descriptor。產生器 `sve_carddb.snapshot.generate_schema` 展開固定長度、欄序、Types、fragment 與 changes 的主鍵／欄位白名單；`schema_patterns.py` 組合日期與 URI pattern，來源中的 `pattern: {use: ...}` 只供產生器使用，不會出現在公開 Schema。
 
 修改對應的來源定義或 pattern 後，從 repo 根目錄重產：
 
@@ -44,7 +44,7 @@ uv --directory carddb run pytest tests/test_snapshot_contract.py
 
 ## 共用合成樣本
 
-索引為 `tests/fixtures/snapshot-contract/v1/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
+索引為 `tests/fixtures/snapshot-contract/v2/index.json`。所有內容都是手寫合成資料，不含官方卡文；沒有爬取、建置 DB 或 producer 依賴。`expected-logical.json` 的物件列與 wire tuples 分別撰寫，不從 reader 解碼或 producer 匯出產生預期值。
 
 | 檔案 | 驗收用途 |
 | --- | --- |
@@ -52,13 +52,15 @@ uv --directory carddb run pytest tests/test_snapshot_contract.py
 | expected-logical.json | join 後全部 43 集合；未使用集合為 []，無 row_index／face_ordinal |
 | text-all.json | 與個別文字下載得到相同 logical view |
 | schema-valid.json | 各集合／巢狀型別與附屬容器的正例；形狀例不要求獨立形成引用閉包 |
-| schema-invalid.json | 共用形狀反例，含非法日期／時間、非 ASCII 數字與 URI；有 raw_json 時先驗原始 JSON bytes 邊界 |
-| reader-invalid.json | 依賴 hash、row_index、face_ordinal、descriptor、欄序、引用、參數域與多語宣告不一致等反例 |
-| vectors.json | canonical 控制字元與 Unicode 排序、固定 SHA-256 分片向量 |
+| schema-invalid-core.json、schema-invalid.json | 共用核心與圖片形狀反例，含非法日期／時間、非 ASCII 數字與 URI；有 raw_json 時先驗原始 JSON bytes 邊界 |
+| reader-invalid-core.json、reader-invalid.json | 核心與圖片反例：依賴 hash、row_index、face_ordinal、descriptor、欄序、引用、參數域與多語宣告不一致等反例 |
+| vectors.json、bucket-cases.json | canonical 控制字元與 Unicode 排序、固定 SHA-256 分片向量 |
 
 樣本為便於審核的排版 JSON，manifest 的 hash／bytes 指向其 canonical 表示。Harness 先解析排版樣本並 canonical 序列化，交 reader 驗 bytes；不可更新 manifest 來掩蓋未預期差異。實際下載的 payload 直接驗收到的未壓縮 bytes，不先重序列化修復。`raw_json` 反例必須保留原字串，不先 parse/stringify 消除錯誤。
 
-reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定一次替換。rehash=true 時只更新該 payload 的 File hash／bytes／path、text_all.contains 的同鍵 hash；detail 刪列案例還同步該片 row_counts，以確保錯誤發生在 join。它不修 base/dependencies、不重建 text_all；這些案例使用個別下載入口。rehash=false 保留原封套。可選 error 是 Python harness 的錯誤訊息片段，用來確認反例觸及預期檢查；其他 reader 須驗相同失敗原因，不要求相同訊息文字。所有反例均須拒收，不得補值或 fallback。
+reader-invalid 每例以 target（manifest 或 payload 邏輯鍵）、path（物件鍵／陣列位置序列）、value 指定替換；setup 是依序套用的前置變更。核心與圖片反例都定位到 2.0 的實際 fragments，不依賴舊版單檔位置。
+測試 harness 重算受影響 File 的 hash／bytes／path／row_counts，並重釘原本有效的 FileRef；故意錯誤的 pin 不修復。manifest 本身的錯誤在重釘後套用，確保觸及該守門。rehash=false 保留目標原封套；不重建 text_all，這些反例使用個別下載入口。
+error 釘住預期失敗原因；其他 reader 不要求相同訊息文字。所有反例均須拒收，不得補值或 fallback。
 
 ## Python 獨立 reader
 
@@ -94,15 +96,14 @@ CI 路徑分流須讓 `carddb/src/sve_carddb/snapshot/schema/**` 觸發 web 契�
 
 ## 2.0 圖片與有限保留的機器契約
 
-本節是待實作契約，不表示現有 v1／v1_1 資源已支援。新快照資源另放 `schema/v2/`，
-識別 `urn:sve-kit:snapshot:2.0.0`，從 source descriptor 生成，不手改產生結果；golden 另放 v2。
-1.x 資源保留原解讀；未曾正式發布，不要求先上線過渡版。首發 2.0 **必須**同步 1.2 同名規則的 Schema、producer 與 reader 驗證，不能宣稱現有實作已完成。
+2.0 資源位於 `schema/v2/`，識別 `urn:sve-kit:snapshot:2.0.0`，從 source descriptor 生成；共用 golden 位於 v2。
+1.x 的 producer、reader、Schema 與專用樣本退役，歷史只留 Git，不設相容分支。
 required_capabilities 已固定包含 digital-same-name-links-v1；即使 same_name 列為空，也不得省略能力、相關 Schema 或 reader 驗證。
 尚未完成時不得發布 2.0，不能以「可整合」為由裁掉必要能力。
 
 同步項目包括 printing_image 的 media 欄序／ImageDisplayVariant、移除公開 image_variant.path、
 固定 N／band width／dependencies、image-id-url-v1 與同名規則能力，以及獨立 index_format=2 的 current／previous。
-舊 IndexPage 只供舊格式測試；新索引只允許兩筆入口，不產 pages 或每代索引歷史。
+索引只允許 current／previous 兩筆入口，不產 pages 或每代索引歷史。
 Index 的 revision／Entry 欄位、JSON 閉包及 changes 非遞迴規則依 snapshot-format §4.1；
 unknown index_format 必拒收，不能把它當成空 pages。
 
