@@ -13,6 +13,7 @@ import typer
 
 from sve_carddb.r2_upload.plan import UploadError
 from sve_carddb.r2_upload.s3 import Credentials
+from sve_carddb.r2_upload.sdk import sdk_client
 from sve_carddb.r2_upload.v2.adapter import R2Store
 from sve_carddb.r2_upload.v2.bundle import (
     ledger_at,
@@ -70,9 +71,7 @@ def _execute(
     credentials = Credentials.environment()
     account, target = target_values(account_id, bucket)
     with (
-        httpx.Client(
-            trust_env=False, follow_redirects=False, timeout=30
-        ) as origin_client,
+        sdk_client(account, target, credentials) as origin_client,
         httpx.Client(trust_env=False, follow_redirects=False, timeout=30) as cdn_client,
     ):
         store = R2Store(account, target, credentials, origin_client)

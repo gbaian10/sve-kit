@@ -76,7 +76,9 @@ must have different operator-scoped credentials. Agents do not execute this
 against a real service. CI only runs the synthetic tests; no R2 secrets belong
 in Actions.
 
-The HTTPS endpoint is derived from the account and bucket. SigV4 signs the exact
+The origin uses the shared typed boto3 boundary in `../sdk.py`; the CDN remains
+an unsigned httpx client. The HTTPS endpoint is derived from the account and
+bucket. The SDK applies SigV4 to the exact
 conditional headers, payload and sorted percent-encoded query parameters, including
 list continuation tokens. PUT uses `If-None-Match: *` or an opaque `If-Match` ETag;
 412 means a failed condition. Unsupported conditions/statuses, redirects and

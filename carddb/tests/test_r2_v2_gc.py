@@ -17,6 +17,7 @@ from sve_carddb.snapshot.publish.plan import INDEX
 from sve_carddb.snapshot.publish.storage import PublishError, Stored
 from sve_carddb.snapshot.values import canonical, digest, string
 
+from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_fixtures import ACCOUNT, BUCKET
 from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- shared loopback server fixture
 from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- dependency of remote
@@ -25,6 +26,8 @@ from .snapshot_publish_fixtures import images as images  # ruff: ignore[useless-
 from .snapshot_publish_fixtures import ledger as ledger  # ruff: ignore[useless-import-alias] -- independent two-version history
 from .test_r2_v2_bundle import frozen as frozen  # ruff: ignore[useless-import-alias] -- isolated state copies
 from .test_r2_v2_bundle import frozen_base as frozen_base  # ruff: ignore[useless-import-alias] -- shared synthetic producer
+
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -192,6 +195,7 @@ def test_offline_gc_cli_lists_saved_plan_without_reading_credentials(
         pytest.fail("offline GC opened a client")
 
     monkeypatch.setattr(httpx, "Client", forbidden)
+    monkeypatch.setattr("sve_carddb.r2_upload.sdk.Session", forbidden)
     args = [
         "r2",
         "gc-v2",
@@ -227,6 +231,7 @@ def test_cli_inspection_then_explicit_consent_is_required_for_deletion(
         assert kwargs["follow_redirects"] is False
         return real_client(transport=transport, trust_env=False, follow_redirects=False)
 
+    install_mock_sdk(monkeypatch, transport)
     monkeypatch.setattr(httpx, "Client", factory)
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")

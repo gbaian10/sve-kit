@@ -7,14 +7,17 @@ import httpx
 import pytest
 
 from sve_carddb.r2_upload.v2 import adapter
-from sve_carddb.r2_upload.v2.adapter import LEASE_HEADERS, LEASE_KEY, R2Store, _page
+from sve_carddb.r2_upload.v2.adapter import LEASE_HEADERS, LEASE_KEY, R2Store
 from sve_carddb.r2_upload.v2.freshness import CDNFreshness, cdn_root
 from sve_carddb.snapshot.publish.storage import PublishError, Stored
 from sve_carddb.snapshot.values import canonical
 
-from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS, NOW
+from .r2_sdk_fixtures import inventory, mock_client
+from .r2_v2_fixtures import ACCOUNT, BUCKET, CREDENTIALS
 from .r2_v2_fixtures import remote as remote  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
 from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register shared pytest fixture
+
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from .r2_v2_fixtures import Loopback, ServerState
@@ -120,7 +123,7 @@ def test_cross_adapter_lease_excludes_second_writer_and_is_reusable(
     remote: tuple[R2Store, ServerState, Loopback],
 ) -> None:
     first, state, _ = remote
-    second = R2Store(ACCOUNT, BUCKET, CREDENTIALS, first.client, lambda: NOW)
+    second = R2Store(ACCOUNT, BUCKET, CREDENTIALS, first.client)
     with (
         first.exclusive(),
         pytest.raises(
@@ -260,7 +263,7 @@ def test_inventory_xml_refuses_entities_unknown_root_and_malformed_bytes(
     xml: bytes, message: str
 ) -> None:
     with pytest.raises(PublishError, match=r"^" + message + "$"):
-        _page(xml, "snapshots/blobs/")
+        inventory(xml, "snapshots/blobs/")
 
 
 @pytest.mark.parametrize(
@@ -382,6 +385,8 @@ def test_put_refuses_non_object_preconditions_before_http(
         ("prefix", "R2 inventory prefix differs from request"),
         ("key", "R2 inventory contains invalid keys"),
         ("flag", "R2 inventory lacks a truncation flag"),
+        ("empty-flag", "R2 inventory lacks a truncation flag"),
+        ("invalid-flag", "R2 inventory lacks a truncation flag"),
         ("token", "R2 inventory lacks a continuation token"),
     ],
 )
@@ -395,11 +400,20 @@ def test_inventory_rejects_out_of_scope_and_incomplete_pages(
         + "</Prefix><Contents><Key>"
         + ("private/x" if change == "key" else prefix + "x")
         + "</Key></Contents><IsTruncated>"
-        + ("" if change == "flag" else "true" if change == "token" else "false")
+        + ("true" if change == "token" else "false")
         + "</IsTruncated></ListBucketResult>"
     )
+    if change in {"flag", "empty-flag", "invalid-flag"}:
+        raw = raw.replace(
+            "<IsTruncated>false</IsTruncated>",
+            ""
+            if change == "flag"
+            else "<IsTruncated></IsTruncated>"
+            if change == "empty-flag"
+            else "<IsTruncated>invalid</IsTruncated>",
+        )
     with pytest.raises(PublishError, match="^" + message + "$"):
-        _page(raw.encode(), prefix)
+        inventory(raw.encode(), prefix)
 
 
 def test_list_repeating_token_stops_without_infinite_requests() -> None:
@@ -420,7 +434,14 @@ def test_list_repeating_token_stops_without_infinite_requests() -> None:
         return httpx.Response(200, stream=httpx.ByteStream(raw.encode()))
 
     with httpx.Client(transport=httpx.MockTransport(handle)) as client:
-        store = R2Store(ACCOUNT, BUCKET, CREDENTIALS, client, lambda: NOW)
+        store = R2Store(
+            ACCOUNT,
+            BUCKET,
+            CREDENTIALS,
+            mock_client(
+                client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+            ),
+        )
         with pytest.raises(
             PublishError, match=r"^R2 inventory pagination repeats a token$"
         ):

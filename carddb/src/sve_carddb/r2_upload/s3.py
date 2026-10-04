@@ -1,207 +1,112 @@
-"""Small conditional-object S3 boundary with SigV4 and no ambient credentials."""
+"""Conditional preview objects through the typed boto3 S3 boundary."""
 
-import hashlib
-import hmac
-import os
-import re
 import time
 from dataclasses import dataclass, field
-from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
-from urllib.parse import parse_qsl, quote
 
-import httpx
+from botocore.exceptions import (
+    BotoCoreError,
+    ClientError,
+    ConnectionClosedError,
+    ConnectTimeoutError,
+    EndpointConnectionError,
+    IncompleteReadError,
+    ReadTimeoutError,
+    ResponseStreamingError,
+)
 
 from sve_carddb.r2_upload.plan import UploadError
+from sve_carddb.r2_upload.sdk import (
+    BoundaryError,
+    bounded,
+    object_headers,
+    put_parameters,
+    status,
+    validate_key,
+    validate_target,
+)
+from sve_carddb.r2_upload.sdk import Credentials as Credentials  # ruff: ignore[useless-import-alias] -- preserve the existing credentials import boundary
 
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-
-@dataclass(frozen=True, repr=False)
-class Credentials:
-    """Local operator credentials are never included in reports or representations."""
-
-    access_key: str
-    secret_key: str
-
-    @classmethod
-    def environment(cls) -> Credentials:
-        """Read only explicit R2 variables, never a profile or credential file."""
-        access = os.environ.get("SVE_R2_ACCESS_KEY_ID", "")
-        secret = os.environ.get("SVE_R2_SECRET_ACCESS_KEY", "")
-        if not access or not secret:
-            raise UploadError("Explicit local R2 credentials are required")
-        return cls(access, secret)
-
-
-def sign(
-    request: httpx.Request,
-    credentials: Credentials,
-    now: datetime,
-    *,
-    region: str = "auto",
-) -> None:
-    """Sign the exact conditional headers and payload sent to the R2 S3 endpoint."""
-    timestamp = now.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
-    day = timestamp[:8]
-    hashed = hashlib.sha256(request.content).hexdigest()
-    request.headers["x-amz-date"] = timestamp
-    request.headers["x-amz-content-sha256"] = hashed
-    headers = {
-        key.lower(): " ".join(value.split())
-        for key, value in request.headers.items()
-        if key.lower() not in {"authorization", "content-length"}
-    }
-    names = ";".join(sorted(headers))
-    canonical = "\n".join(
-        (
-            request.method,
-            request.url.raw_path.split(b"?", 1)[0].decode("ascii"),
-            "&".join(
-                key + "=" + value
-                for key, value in sorted(
-                    (quote(k, safe="-_.~"), quote(v, safe="-_.~"))
-                    for k, v in parse_qsl(
-                        request.url.query.decode("ascii"), keep_blank_values=True
-                    )
-                )
-            ),
-            "".join(key + ":" + headers[key] + "\n" for key in sorted(headers)),
-            names,
-            hashed,
-        )
-    )
-    scope = day + "/" + region + "/s3/aws4_request"
-    signing = "\n".join(
-        (
-            "AWS4-HMAC-SHA256",
-            timestamp,
-            scope,
-            hashlib.sha256(canonical.encode()).hexdigest(),
-        )
-    )
-    key = ("AWS4" + credentials.secret_key).encode()
-    for part in (day, region, "s3", "aws4_request"):
-        key = hmac.digest(key, part.encode(), "sha256")
-    signature = hmac.new(key, signing.encode(), "sha256").hexdigest()
-    request.headers["authorization"] = (
-        "AWS4-HMAC-SHA256 Credential="
-        + credentials.access_key
-        + "/"
-        + scope
-        + ", SignedHeaders="
-        + names
-        + ", Signature="
-        + signature
-    )
+    from types_boto3_s3 import S3Client
 
 
 @dataclass(frozen=True)
 class Remote:
-    """Verified raw response bytes and object metadata; never an error body."""
-
     raw: bytes
-    headers: httpx.Headers
+    headers: dict[str, str]
 
 
-@dataclass
+@dataclass(repr=False)
 class S3:
-    """Injected client permits synthetic tests without a real connection."""
-
     account_id: str
     bucket: str
-    credentials: Credentials = field(repr=False)
-    client: httpx.Client = field(repr=False)
-    clock: Callable[[], datetime] = field(default=lambda: datetime.now(UTC), repr=False)
-    wait: Callable[[float], None] = field(default=time.sleep, repr=False)
+    credentials: Credentials
+    client: S3Client
+    wait: Callable[[float], None] = field(default=time.sleep)
 
     def __post_init__(self) -> None:
-        """Restrict requests to an explicit account and bucket."""
-        if not re.fullmatch(r"[0-9a-f]{32}", self.account_id):
-            raise UploadError(
-                "R2 account ID must be 32 lowercase hexadecimal characters"
-            )
-        if not re.fullmatch(r"[a-z0-9][a-z0-9-]{1,61}[a-z0-9]", self.bucket):
-            raise UploadError("Invalid R2 bucket name")
-
-    def _request(
-        self, method: str, key: str, raw: bytes, headers: dict[str, str]
-    ) -> httpx.Request:
-        if key.startswith("/") or ".." in key.split("/"):
-            raise UploadError("Invalid object key")
-        url = (
-            "https://"
-            + self.account_id
-            + ".r2.cloudflarestorage.com/"
-            + self.bucket
-            + "/"
-            + quote(key, safe="/")
-        )
-        request = httpx.Request(
-            method, url, headers=headers | {"accept-encoding": "identity"}, content=raw
-        )
-        sign(request, self.credentials, self.clock())
-        return request
+        """Pin the preview client to the explicit account and bucket."""
+        validate_target(self.account_id, self.bucket)
+        if (
+            self.client.meta.endpoint_url
+            != f"https://{self.account_id}.r2.cloudflarestorage.com"
+        ):
+            raise UploadError("S3 client differs from the explicit R2 account")
 
     def get(self, key: str, *, limit: int) -> Remote | None:
-        """Read bounded identity bytes; redirects and encoded responses fail closed."""
+        """Only transient reads retry, with a fixed finite backoff."""
+        validate_key(key)
         delays = (0.5, 1.0)
         for attempt in range(3):
             try:
                 return self._get_once(key, limit=limit)
             except (
-                httpx.TimeoutException,
-                httpx.NetworkError,
-                httpx.RemoteProtocolError,
+                ReadTimeoutError,
+                ConnectTimeoutError,
+                EndpointConnectionError,
+                ConnectionClosedError,
+                IncompleteReadError,
+                ResponseStreamingError,
             ):
                 if attempt == len(delays):
                     break
                 self.wait(delays[attempt])
-            except httpx.HTTPError:
+            except BotoCoreError, BoundaryError:
                 break
         raise UploadError("R2 transport failed") from None
 
     def _get_once(self, key: str, *, limit: int) -> Remote | None:
-        response = self.client.send(
-            self._request("GET", key, b"", {}), stream=True, follow_redirects=False
-        )
         try:
-            if response.status_code == HTTPStatus.NOT_FOUND:
+            response = self.client.get_object(Bucket=self.bucket, Key=key)
+        except ClientError as error:
+            if status(error) == HTTPStatus.NOT_FOUND:
                 return None
-            if response.status_code != HTTPStatus.OK:
-                raise UploadError("R2 object read failed")
-            if response.headers.get("content-encoding", "identity") != "identity":
+            raise UploadError("R2 object read failed") from None
+        body = response["Body"]
+        try:
+            if response.get("ContentEncoding", "identity") != "identity":
                 raise UploadError("R2 object has unexpected content encoding")
-            chunks = bytearray()
-            for chunk in response.iter_bytes():
-                chunks.extend(chunk)
-                if len(chunks) > limit:
-                    raise UploadError("R2 object exceeds expected size")
-            return Remote(bytes(chunks), response.headers)
+            try:
+                raw = bounded(body, limit)
+            except BoundaryError:
+                raise UploadError("R2 object exceeds expected size") from None
+            return Remote(raw, object_headers(response))
         finally:
-            response.close()
+            body.close()
 
     def put(self, key: str, raw: bytes, headers: dict[str, str]) -> bool:
-        """Return false only for a failed precondition; never retry a write implicitly."""
+        """A 412 alone means conflict; uncertain writes never retry."""
+        validate_key(key)
         try:
-            response = self.client.send(
-                self._request("PUT", key, raw, headers),
-                stream=True,
-                follow_redirects=False,
-            )
-            try:
-                if response.status_code == HTTPStatus.PRECONDITION_FAILED:
-                    return False
-                if response.status_code not in {
-                    HTTPStatus.OK,
-                    HTTPStatus.CREATED,
-                    HTTPStatus.NO_CONTENT,
-                }:
-                    raise UploadError("R2 conditional object write failed")
-                return True
-            finally:
-                response.close()
-        except httpx.HTTPError:
+            self.client.put_object(**put_parameters(self.bucket, key, raw, headers))
+        except ClientError as error:
+            if status(error) == HTTPStatus.PRECONDITION_FAILED:
+                return False
+            raise UploadError("R2 conditional object write failed") from None
+        except BotoCoreError, BoundaryError:
             raise UploadError("R2 transport failed") from None
+        return True

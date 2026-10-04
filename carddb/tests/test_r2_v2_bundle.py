@@ -25,10 +25,13 @@ from sve_carddb.snapshot.publish import Ledger, PublishError, Release, publish
 from sve_carddb.snapshot.publish.plan import INDEX
 from sve_carddb.snapshot.values import canonical, object_value, parse, string
 
+from .r2_sdk_fixtures import install_mock_sdk
 from .r2_v2_fixtures import ACCOUNT, BUCKET
 from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register shared localhost pytest fixture
 from .snapshot_publish_fixtures import FakeCDN, FakeS3, candidate, version
 from .snapshot_publish_fixtures import images as images  # ruff: ignore[useless-import-alias] -- shared module-scoped image library
+
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -223,6 +226,7 @@ def test_default_dry_run_reads_no_credentials_creates_no_client_or_mutations(
 
     monkeypatch.setattr(Credentials, "environment", forbidden)
     monkeypatch.setattr(httpx, "Client", forbidden)
+    monkeypatch.setattr("sve_carddb.r2_upload.sdk.Session", forbidden)
     before = {
         p: p.read_bytes()
         for root in (
@@ -396,6 +400,7 @@ def test_execute_and_identical_retry_use_v2_publisher_and_advance_checkpoint(
             transport=transport, trust_env=False, follow_redirects=False, timeout=30
         )
 
+    install_mock_sdk(monkeypatch, transport)
     monkeypatch.setattr(httpx, "Client", factory)
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
@@ -449,6 +454,7 @@ def test_execute_failure_keeps_current_absent_records_checkpoint_and_resumes(
     def factory(**_kwargs: object) -> httpx.Client:
         return real_client(transport=transport, trust_env=False, follow_redirects=False)
 
+    install_mock_sdk(monkeypatch, transport)
     monkeypatch.setattr(httpx, "Client", factory)
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-access")
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-secret")
@@ -493,6 +499,7 @@ def test_missing_explicit_environment_never_opens_http(
         pytest.fail("missing credential or target reached HTTP")
 
     monkeypatch.setattr(httpx, "Client", forbidden)
+    monkeypatch.setattr("sve_carddb.r2_upload.sdk.Session", forbidden)
     for key, value in {
         "SVE_R2_ACCESS_KEY_ID": "synthetic-access",
         "SVE_R2_SECRET_ACCESS_KEY": "synthetic-secret",

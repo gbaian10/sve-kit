@@ -3,7 +3,6 @@
 import gzip
 import json
 from dataclasses import replace
-from functools import partial
 from typing import TYPE_CHECKING
 
 import httpx
@@ -18,23 +17,19 @@ from sve_carddb.r2_upload.plan import (
     pointer_value,
     read_member,
 )
-from sve_carddb.r2_upload.s3 import S3, Credentials, sign
+from sve_carddb.r2_upload.s3 import S3, Credentials
 from sve_carddb.r2_upload.upload import _pointer, upload
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
-from .r2_upload_fixtures import (
-    ACCOUNT,
-    BUCKET,
-    CREDENTIALS,
-    NOW,
-    Store,
-    verify_signature,
-)
+from .r2_sdk_fixtures import install_mock_sdk, mock_client
+from .r2_upload_fixtures import ACCOUNT, BUCKET, CREDENTIALS, Store
 from .r2_upload_fixtures import local as local  # ruff: ignore[useless-import-alias] -- register shared test fixtures
 from .r2_upload_fixtures import previous as previous  # ruff: ignore[useless-import-alias] -- genuinely complete old published version
 from .r2_upload_fixtures import public_plan as public_plan  # ruff: ignore[useless-import-alias] -- register the validated immutable module base
 from .r2_upload_fixtures import public_template as public_template  # ruff: ignore[useless-import-alias] -- register shared test fixtures
 from .test_snapshot_preview_images import images as images  # ruff: ignore[useless-import-alias] -- register the synthetic image template
+
+pytestmark = pytest.mark.usefixtures("close_sdk_clients")
 
 if TYPE_CHECKING:
     from sve_carddb.r2_upload.plan import Plan
@@ -300,7 +295,14 @@ def test_endpoint_is_an_explicit_account_and_bucket(
         transport=httpx.MockTransport(lambda _r: httpx.Response(404))
     ) as client:
         with pytest.raises(UploadError, match="^" + message + "$"):
-            S3(account, bucket, CREDENTIALS, client)
+            S3(
+                account,
+                bucket,
+                CREDENTIALS,
+                mock_client(
+                    client, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
+                ),
+            )
 
 
 def test_missing_credentials_and_representations_do_not_leak(
@@ -335,39 +337,11 @@ def test_pointer_and_member_helpers_do_not_accept_arbitrary_paths(local: Plan) -
         remote.get("../private", limit=1)
 
 
-def test_sigv4_is_deterministic_for_fixed_time_and_covers_payload() -> None:
-    request = httpx.Request(
-        "PUT",
-        "https://"
-        + ACCOUNT
-        + ".r2.cloudflarestorage.com/"
-        + BUCKET
-        + "/snapshots/example.json",
-        headers={
-            "if-none-match": "*",
-            "content-type": "application/json",
-            "cache-control": "no-store",
-        },
-        content=b"{}",
-    )
-    sign(request, CREDENTIALS, NOW)
-    verify_signature(request)
-
-
 def test_cli_execute_wires_scoped_s3_and_disables_ambient_transport(
     local: Plan, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     store = Store()
-    original = httpx.Client
-
-    def factory(**kwargs: object) -> httpx.Client:
-        assert kwargs == {"trust_env": False, "follow_redirects": False, "timeout": 30}
-        return original(transport=httpx.MockTransport(store.handle))
-
-    monkeypatch.setattr(httpx, "Client", factory)
-    monkeypatch.setattr(
-        "sve_carddb.r2_upload.commands.S3", partial(S3, clock=lambda: NOW)
-    )
+    install_mock_sdk(monkeypatch, httpx.MockTransport(store.handle))
     monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", CREDENTIALS.access_key)
     monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", CREDENTIALS.secret_key)
     result = CliRunner().invoke(

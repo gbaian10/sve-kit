@@ -3,7 +3,17 @@
 This command validates the complete public preview transport and uses the R2
 S3-compatible API for conditional object writes. It does not build a snapshot,
 read source archives or open the crawl manifest. Brotli uses the locked PyPI
-`brotli` package.
+`brotli` package. Signing and S3 request/response serialization use the locked
+`boto3` SDK; strict S3 types come from the maintained `types-boto3[s3]` dev
+dependency (the successor to `boto3-stubs`).
+
+`sdk.py` isolates SDK configuration and package-model loading from AWS
+environment variables, profiles and user model directories. Its SDK event
+boundary permits one send per operation, preserves undecoded object bytes and
+bounds XML input before the SDK parses it. Debug logging for SDK/HTTP namespaces
+is suppressed while the client is open and restored on close, so credentials
+and signed headers cannot enter debug reports. The CLI uses clients sequentially;
+share neither a client nor its logging scope between concurrent publishers.
 
 Run from the repository root with an absolute, non-symlink preview directory:
 
