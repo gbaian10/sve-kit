@@ -52,8 +52,7 @@ impl Fixture {
         let facts = definitions.iter().map(|(number, name, kind, title)| json!({"number":number,"faces":[{"name":name,"card_type":kind,"title":title,"card_class":"ニュートラル","cost":"0","power":"2","hp":"3","traits":[],"sections":[]}]})).collect();
         let mut programs = json!({"version":"astra/1","cards":{}});
         for (number, ..) in definitions {
-            programs["cards"][number] =
-                json!({"status":"complete","review":"synthetic","abilities":[]});
+            programs["cards"][number] = json!({"status":"complete","abilities":[]});
         }
         programs["cards"]["lesson"]["rules_name"] = json!("synthetic-lesson");
         programs["cards"]["alias"]["abilities"] = json!([{"kind":"static","line":1_u8,"body":{"op":"name_alias","subjects":"self","name":"synthetic-lesson","while_zone":"any"}}]);
