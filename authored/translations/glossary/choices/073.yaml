@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:a3229c1c821ae0ec0aea10d2525f98de949ac7cde5bd77abede888584f747e11
+records:
+  - record_key: '["glossary_choice","term:name.unbound_emotion","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.unbound_emotion
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 沸騰吧感情
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:a3229c1c821ae0ec0aea10d2525f98de949ac7cde5bd77abede888584f747e11
+    scope: batch
+    membership_hash: sha256:a3229c1c821ae0ec0aea10d2525f98de949ac7cde5bd77abede888584f747e11
+    members:
+      -   - '["glossary_choice","term:name.unbound_emotion","zh-Hant",1]'
+          - sha256:c63cd40143829866370062bf91dc9c3e8c4e2616a4e77d8b8c772ee99ab9abe9
+    sample_ids:
+      - '["glossary_choice","term:name.unbound_emotion","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:06.903Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

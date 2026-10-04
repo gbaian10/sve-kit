@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:2dc19ce871dac0086a9eef1c359306d97ef853510535f2186eb56f7feafe3936
+records:
+  - record_key: '["glossary_choice","term:name.miroir","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.miroir
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: miroir
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:2dc19ce871dac0086a9eef1c359306d97ef853510535f2186eb56f7feafe3936
+    scope: batch
+    membership_hash: sha256:2dc19ce871dac0086a9eef1c359306d97ef853510535f2186eb56f7feafe3936
+    members:
+      -   - '["glossary_choice","term:name.miroir","zh-Hant",1]'
+          - sha256:7c99fa1dbefbe8ec4df7748500ffdb45cfbf121f59986d514b7947367114ac8a
+    sample_ids:
+      - '["glossary_choice","term:name.miroir","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:45:58.806Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

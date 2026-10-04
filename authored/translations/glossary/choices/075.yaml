@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:d09b1302f8c61238d62c1dc00dd8741e25dec5d237b2c99790cd2afd3c953acb
+records:
+  - record_key: '["glossary_choice","term:name.prank_proclamation","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.prank_proclamation
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 惡作劇宣言
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:d09b1302f8c61238d62c1dc00dd8741e25dec5d237b2c99790cd2afd3c953acb
+    scope: batch
+    membership_hash: sha256:d09b1302f8c61238d62c1dc00dd8741e25dec5d237b2c99790cd2afd3c953acb
+    members:
+      -   - '["glossary_choice","term:name.prank_proclamation","zh-Hant",1]'
+          - sha256:eca339b3ae84f8a42dea435db0c9d2b85f8c271bbc88a0f7cf62ce339064016d
+    sample_ids:
+      - '["glossary_choice","term:name.prank_proclamation","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:11.745Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

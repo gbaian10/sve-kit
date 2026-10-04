@@ -1,0 +1,44 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:e33d9a2bc6478e5f27356cc9fef86198890a4d272001f3dc2af7d5cd1a32c013
+records:
+  - record_key: '["glossary_choice","term:name.my_life_my_sounds","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.my_life_my_sounds
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: My Life，My Sounds
+      origin: project
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:e33d9a2bc6478e5f27356cc9fef86198890a4d272001f3dc2af7d5cd1a32c013
+    scope: batch
+    membership_hash: sha256:e33d9a2bc6478e5f27356cc9fef86198890a4d272001f3dc2af7d5cd1a32c013
+    members:
+      -   - '["glossary_choice","term:name.my_life_my_sounds","zh-Hant",1]'
+          - sha256:9a10e943cf38540fcbb9a5bbd35e65c20878533183fcc05d58116c662620d06d
+    sample_ids:
+      - '["glossary_choice","term:name.my_life_my_sounds","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:45:55.881Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

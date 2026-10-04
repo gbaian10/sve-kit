@@ -1,0 +1,44 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:74e8b631afcdd2004883e7f4cc35d6769f191183cdb10764b90de6e32d19dd76
+records:
+  - record_key: '["glossary_choice","term:name.center_street","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.center_street
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Center of Street
+      origin: project
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:74e8b631afcdd2004883e7f4cc35d6769f191183cdb10764b90de6e32d19dd76
+    scope: batch
+    membership_hash: sha256:74e8b631afcdd2004883e7f4cc35d6769f191183cdb10764b90de6e32d19dd76
+    members:
+      -   - '["glossary_choice","term:name.center_street","zh-Hant",1]'
+          - sha256:e5a2347bfed26ac37354ed13d3c656976274c092cb47fcbbbfc9965c44a692e8
+    sample_ids:
+      - '["glossary_choice","term:name.center_street","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:22.078Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

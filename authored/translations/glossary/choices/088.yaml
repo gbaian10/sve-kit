@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:c17f46374dee32af83ae5f6e0bf4eef08bf9ef1a32938c712eedb443a8ddeb71
+records:
+  - record_key: '["glossary_choice","term:name.fortuna_regina","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.fortuna_regina
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Fortuna Regina
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:c17f46374dee32af83ae5f6e0bf4eef08bf9ef1a32938c712eedb443a8ddeb71
+    scope: batch
+    membership_hash: sha256:c17f46374dee32af83ae5f6e0bf4eef08bf9ef1a32938c712eedb443a8ddeb71
+    members:
+      -   - '["glossary_choice","term:name.fortuna_regina","zh-Hant",1]'
+          - sha256:e33be3ae68c7af047b5df6fbd64370bca4f9b1418cc187d98ada2a9aa0a5a99b
+    sample_ids:
+      - '["glossary_choice","term:name.fortuna_regina","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:31.338Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

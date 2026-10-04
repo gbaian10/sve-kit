@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:2feeb9be65ff5b4516c7f9919056da543c7b6d36646ab317fb325718aed9a3d2
+records:
+  - record_key: '["glossary_choice","term:name.sparkling_days","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.sparkling_days
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 心動☆無限
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:2feeb9be65ff5b4516c7f9919056da543c7b6d36646ab317fb325718aed9a3d2
+    scope: batch
+    membership_hash: sha256:2feeb9be65ff5b4516c7f9919056da543c7b6d36646ab317fb325718aed9a3d2
+    members:
+      -   - '["glossary_choice","term:name.sparkling_days","zh-Hant",1]'
+          - sha256:97401f4fda655e1ca398c2d8f3750db30c87b9e0a9044946075b9b1a0791b84c
+    sample_ids:
+      - '["glossary_choice","term:name.sparkling_days","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:25.908Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

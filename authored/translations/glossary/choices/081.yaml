@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:f646acac32474a8fa4922b979a235174a2502813df08786dde319fc2ebba6f03
+records:
+  - record_key: '["glossary_choice","term:name.cool_pendant","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.cool_pendant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cool墜飾
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:f646acac32474a8fa4922b979a235174a2502813df08786dde319fc2ebba6f03
+    scope: batch
+    membership_hash: sha256:f646acac32474a8fa4922b979a235174a2502813df08786dde319fc2ebba6f03
+    members:
+      -   - '["glossary_choice","term:name.cool_pendant","zh-Hant",1]'
+          - sha256:77b7ed3d109775603e0c2b4a0ca58692c97559db8a6ee75285b0e246c80f63af
+    sample_ids:
+      - '["glossary_choice","term:name.cool_pendant","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:20.680Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

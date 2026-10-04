@@ -1,0 +1,49 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:781b74a3dc0509b1cc4c797715749bb8a6067ab5f59409da2c7db2bdfa034180
+records:
+  - record_key: '["glossary_choice","term:name.zizdvend_fate_s_arbiter","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.zizdvend_fate_s_arbiter
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 天命的編纂者‧吉茲德文德
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: delegated_glossary
+        delegation:
+          authorized_by: gbaian10
+          authorization_basis: 維護者 gbaian10 看過低信心清單後表示「看完了 我不一個個點了 都同意 繼續做吧」，並委託協調者採納整批 969 筆候選卡名；維持日文原名的一筆不配發，實際採納 968 筆。
+          authorization_date: '2026-10-04'
+          scope:
+            - '["glossary_choice","term:name.zizdvend_fate_s_arbiter","zh-Hant",1]'
+          decided_by: Claude Opus 5.5（協調者 SVE-online，維護者委託）
+          decided_at: '2026-10-04T00:00:00Z'
+          decided_precision: day
+          decision_basis: 維護者 gbaian10 整批同意的 73 筆低信心選詞未逐項點選，協調者 Claude Opus 5.5 以獨立委託批次採納本收據範圍；排除逐項核可的 22 筆、其餘委託的 873 筆及維持日文原名的一筆。
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:781b74a3dc0509b1cc4c797715749bb8a6067ab5f59409da2c7db2bdfa034180
+    scope: batch
+    membership_hash: sha256:781b74a3dc0509b1cc4c797715749bb8a6067ab5f59409da2c7db2bdfa034180
+    members:
+      -   - '["glossary_choice","term:name.zizdvend_fate_s_arbiter","zh-Hant",1]'
+          - sha256:bfa6551ab7a2efaa1a473d0e4fb25d6c3880e4e1ea0a794b7bbc1a3e9ac0c16d
+    sample_ids:
+      - '["glossary_choice","term:name.zizdvend_fate_s_arbiter","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: Claude Opus 5.5（協調者 SVE-online，維護者委託）
+    reviewed_at: '2026-10-04T00:00:00Z'
+    reviewed_precision: day
+    note: 維護者委託；協調者決定；不是維護者親自核可。維護者 gbaian10 整批同意的 73 筆選詞由協調者以委託方式採納本分片成員，排除逐項核可的 22 筆、其餘委託的 873 筆及維持日文原名的一筆。
+    state: confirmed
+    category: glossary_choice
+    policy_id: delegated-card-names-v1

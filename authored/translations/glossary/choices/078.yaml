@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:a2766fbb9cc6d5fd2fe4b65c5e23695a5fded9ec7e1b82d9cf1db73955ba239b
+records:
+  - record_key: '["glossary_choice","term:name.cute_pendant","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.cute_pendant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cute墜飾
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:a2766fbb9cc6d5fd2fe4b65c5e23695a5fded9ec7e1b82d9cf1db73955ba239b
+    scope: batch
+    membership_hash: sha256:a2766fbb9cc6d5fd2fe4b65c5e23695a5fded9ec7e1b82d9cf1db73955ba239b
+    members:
+      -   - '["glossary_choice","term:name.cute_pendant","zh-Hant",1]'
+          - sha256:a95d515c459a2f731898a6bdf08114b73c811c1798dd59daced72dbd86b51b03
+    sample_ids:
+      - '["glossary_choice","term:name.cute_pendant","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:17.496Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

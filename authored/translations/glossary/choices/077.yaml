@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:01da70f9ba5d7f480989d6cbfa49b8f7a6f771807a45c18fb9ffad6059627734
+records:
+  - record_key: '["glossary_choice","term:name.cute_tiara","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.cute_tiara
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Cute后冠
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:01da70f9ba5d7f480989d6cbfa49b8f7a6f771807a45c18fb9ffad6059627734
+    scope: batch
+    membership_hash: sha256:01da70f9ba5d7f480989d6cbfa49b8f7a6f771807a45c18fb9ffad6059627734
+    members:
+      -   - '["glossary_choice","term:name.cute_tiara","zh-Hant",1]'
+          - sha256:ce3f33894342b991ad56915c94048b18a310754e686c9207f845da9f1894af97
+    sample_ids:
+      - '["glossary_choice","term:name.cute_tiara","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:14.827Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

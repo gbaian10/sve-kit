@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:842f4d994f05ebec149aa11879441b18d694299075d1d241549d9964d94c6475
+records:
+  - record_key: '["glossary_choice","term:name.passion_pendant","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.passion_pendant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Passion墜飾
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:842f4d994f05ebec149aa11879441b18d694299075d1d241549d9964d94c6475
+    scope: batch
+    membership_hash: sha256:842f4d994f05ebec149aa11879441b18d694299075d1d241549d9964d94c6475
+    members:
+      -   - '["glossary_choice","term:name.passion_pendant","zh-Hant",1]'
+          - sha256:e4aa9e97e5b2f263ee30129c9629d47388dbaa60e7926b27f274adbcf9c6adc5
+    sample_ids:
+      - '["glossary_choice","term:name.passion_pendant","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:30.039Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1

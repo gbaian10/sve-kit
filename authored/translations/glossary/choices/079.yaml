@@ -1,0 +1,40 @@
+translation_authored_format: 1
+kind: translation_shard
+default_decision_id: d:e253561ea7f82921455506a3dff9c818bb8d6f2b0e17fbae90694ee5898e3e2a
+records:
+  - record_key: '["glossary_choice","term:name.glitz_glam_parade","zh-Hant",1]'
+    kind: glossary_choice
+    filing_key: choices
+    data:
+      term_id: term:name.glitz_glam_parade
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 閃亮裝飾☆遊行
+      origin: machine
+      concept_evidence: []
+      source_claim:
+      adoption_review:
+        mode: human
+        delegation:
+      adoption_no: 1
+      predecessor:
+    evidence: []
+decisions:
+  - id: d:e253561ea7f82921455506a3dff9c818bb8d6f2b0e17fbae90694ee5898e3e2a
+    scope: batch
+    membership_hash: sha256:e253561ea7f82921455506a3dff9c818bb8d6f2b0e17fbae90694ee5898e3e2a
+    members:
+      -   - '["glossary_choice","term:name.glitz_glam_parade","zh-Hant",1]'
+          - sha256:1ecf6344f7007f984637f54a68780c66dcd48e330c062c96c0787ae5577d87e2
+    sample_ids:
+      - '["glossary_choice","term:name.glitz_glam_parade","zh-Hant",1]'
+    authored_by: Codex gpt-6.1-sol
+    authored_at: '2026-10-04T05:11:10Z'
+    reviewed_by: gbaian10
+    reviewed_at: '2026-10-04T04:46:18.526Z'
+    reviewed_precision: instant
+    note: 維護者 gbaian10 逐項核可本分片的卡名選詞，逐項核可共 22 筆；本決定不含其餘整批同意或委託的選詞，維持日文原名的一筆不採納。
+    state: confirmed
+    category: glossary_choice
+    policy_id: human-card-names-v1
