@@ -227,12 +227,11 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
         TranslationRecord,
     )
     from sve_carddb.template_translations.current_sources import Sources  # ruff: ignore[import-outside-top-level] -- one current source scan
-    from sve_carddb.template_translations.migration_definitions import derive  # ruff: ignore[import-outside-top-level] -- real semantic definitions
 
     from .adoption_fixtures import commit  # ruff: ignore[import-outside-top-level] -- isolated author fixture
     from .test_effect_presence import page  # ruff: ignore[import-outside-top-level] -- synthetic page
     from .test_source_archive import _put, _resource, _store  # ruff: ignore[import-outside-top-level] -- synthetic sealed source
-    from .test_template_current import _write  # ruff: ignore[import-outside-top-level] -- shared indexed fixture
+    from .test_template_current import _current_definition, _write  # ruff: ignore[import-outside-top-level] -- shared synthetic definitions and indexed fixture
 
     store = _store(tmp_path / "more-sources")
     text = "甲2枚（乙）<br>甲3枚"
@@ -244,7 +243,9 @@ def test_render_keeps_layout_and_appends_anchored_reminder_once(  # ruff: ignore
         {store.store_id: store.root}, References(), current_case.sources.rules
     )
     generated = sources.generate((batch,))
-    definitions = derive((), generated.entries).records
+    definitions = tuple(
+        {r.data.id: r for r in map(_current_definition, generated.entries)}.values()
+    )
     targets: list[TranslationRecord] = []
     for definition in definitions:
         role = definition.data.source_span.role
@@ -376,61 +377,3 @@ def test_current_package_splits_yaml_and_preserves_shared_closure(
     )
     assert all(len(raw) < 1048576 for _, raw, _ in package.content)
     assert all(b"decisions:" not in raw for _, raw, _ in package.content)
-
-
-def test_processing_list_keeps_unknown_fields_candidates_and_quality(
-    verified: Validated,
-) -> None:
-    from sve_carddb.template_translations.migration_definitions import Definitions  # ruff: ignore[import-outside-top-level] -- synthetic migration input
-    from sve_carddb.template_translations.migration_report import processing_list  # ruff: ignore[import-outside-top-level] -- one processing report
-    from sve_carddb.template_translations.migration_targets import Pending, Targets  # ruff: ignore[import-outside-top-level] -- inactive drafts never become target records
-
-    records = tuple(
-        r for r in verified.inputs.records if isinstance(r, DefinitionRecord)
-    )
-    member = verified.members[0]
-    pending = Pending(
-        "effect", "Tsynthetic", "N", True, ("anonymous_ambiguous",), (member.entry.id,)
-    )
-    targets = Targets(verified.inputs.translations(), (pending,), ())
-    report = canonical(
-        [
-            {
-                "effect_coverage": {
-                    "failures": [
-                        {
-                            "source_version_id": member.entry.source_ref.source_version_id,
-                            "locator": "/faces/1/text",
-                            "reason": "unknown_effect_presence",
-                        }
-                    ]
-                },
-                "flavor_fields": [
-                    {
-                        "source_version_id": member.entry.source_ref.source_version_id,
-                        "locator": "/faces/1/flavor",
-                        "state": "unknown",
-                    }
-                ],
-            }
-        ]
-    )
-    rows = processing_list(
-        Definitions(records, (), ()),
-        verified.members,
-        (targets,),
-        (),
-        verified.matches,
-        source_report=report,
-    )
-    reasons = {str(row["reason"]) for row in rows}
-    assert reasons == {
-        "anonymous_ambiguous",
-        "new_template",
-        "low_confidence",
-        "unknown_effect_presence",
-        "unknown_flavor_source",
-    }
-    assert all(row["affected_cards"] == 1 for row in rows)
-    assert b'"text"' not in canonical(list(rows))
-    assert not any(row["reason"] == "missing_translation" for row in rows)

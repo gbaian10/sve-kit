@@ -61,13 +61,6 @@ invalid bytes are not silently normalized.
 `text.parse()` retains the finite placeholder language. Parameters are exactly
 `{{slot_name}}`; braces and backslashes in literal text must be escaped. Unknown,
 unused or malformed slots fail. No expressions or global N/X substitutions exist.
-`migration_alignment.align()` only aligns distinct, uniquely identified markers or
-explicit target labels, with exact occurrence counts. Multiple anonymous N slots,
-literal-marker conflicts and absent reference labels remain unresolved drafts.
-`preparation.convert()` verifies the resulting explicit target coordinates and raw
-round-trip; its old `candidate_only` tag is a helper result, not an adoption gate.
-`migration_drafts` joins old drafts and review flags by ID and preserves the union
-of original low confidence and unresolved unsure flags without requiring reviews.
 
 The old `loader.load_templates`, v1/v2 inventory models, frozen semantic interpreter
 and approval helpers remain available only for explicit legacy conversion and

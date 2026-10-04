@@ -16,18 +16,12 @@ from sve_carddb.template_translations.current import (
 )
 from sve_carddb.template_translations.current_build import populate
 from sve_carddb.template_translations.current_models import (
+    Candidate,
     CandidateRecord,
     DefinitionRecord,
 )
 from sve_carddb.template_translations.current_render import render
 from sve_carddb.template_translations.current_write import compose
-from sve_carddb.template_translations.migration_definitions import Definitions
-from sve_carddb.template_translations.migration_report import processing_list
-from sve_carddb.template_translations.migration_targets import (
-    Pending,
-    Targets,
-    candidates,
-)
 from sve_carddb.translations.loader import load_glossary
 
 from .adoption_fixtures import commit
@@ -37,14 +31,23 @@ from .test_template_current import Case, current_case
 __all__ = ("current_case",)
 
 
-def pending(entries: tuple[str, ...] = ()) -> Pending:
-    return Pending(
-        "effect",
-        "old-draft",
-        "N 與『X』 {{未綁定",
-        False,
-        ("draft_anonymous_slot_ambiguous",),
-        entries,
+def pending(entries: tuple[str, ...] = ()) -> CandidateRecord:
+    return CandidateRecord(
+        record_key=canonical(
+            ["template_translation_candidate", "effect", "old-draft", "zh-Hant"]
+        ).decode(),
+        kind="template_translation_candidate",
+        data=Candidate(
+            source_kind="effect",
+            candidate_id="old-draft",
+            lang="zh-Hant",
+            text="N 與『X』 {{未綁定",
+            inventory_ids=entries,
+            reasons=("draft_anonymous_slot_ambiguous",),
+        ),
+        origin="machine",
+        low_confidence=False,
+        note="",
     )
 
 
@@ -57,10 +60,9 @@ def wire(record: CandidateRecord) -> dict[str, JsonValue]:
 
 
 def test_candidate_preserves_unparsed_final_draft_and_has_no_definition_fk() -> None:
-    original = pending()
-    record = candidates((original,))[0]
+    record = pending()
     assert shard(canonical(wire(record))).records == (record,)
-    assert record.data.text == original.text
+    assert record.data.text == "N 與『X』 {{未綁定"
     assert record.data.inventory_ids == ()
     assert record.origin == "machine"
     assert not record.low_confidence
@@ -92,7 +94,7 @@ def test_candidate_closed_data_refuses_invalid_values(
     field: str,
     value: JsonValue,
 ) -> None:
-    content = wire(candidates((pending(),))[0])
+    content = wire(pending())
     record = object_value(array(content["records"])[0])
     object_value(record["data"])[field] = value
     with pytest.raises(ValueError, match=r"^Invalid current template shard$"):
@@ -100,25 +102,19 @@ def test_candidate_closed_data_refuses_invalid_values(
 
 
 def test_candidate_refuses_official_origin_and_surrogate_utf8() -> None:
-    content = wire(candidates((pending(),))[0])
+    content = wire(pending())
     record = object_value(array(content["records"])[0])
     record["origin"] = "official"
     with pytest.raises(ValueError, match=r"^Invalid current template shard$"):
         shard(canonical(content))
-    content = wire(candidates((pending(),))[0])
+    content = wire(pending())
     raw = canonical(content).replace(b"N ", b"\\ud800 ", 1)
     with pytest.raises(ValueError, match=r"^Invalid current template shard$"):
         shard(raw)
 
 
 def test_candidate_duplicate_key_never_selects_by_file_order() -> None:
-    original = pending()
-    assert len(candidates((original, original))) == 1
-    with pytest.raises(
-        ValueError, match=r"^Migration candidate keys contain conflicting final drafts$"
-    ):
-        candidates((original, replace(original, text="另一個原稿")))
-    content = wire(candidates((original,))[0])
+    content = wire(pending())
     content["records"] = array(content["records"]) * 2
     with pytest.raises(
         ValueError, match=r"^Current template selection keys must be unique and exact$"
@@ -129,7 +125,7 @@ def test_candidate_duplicate_key_never_selects_by_file_order() -> None:
 def test_candidate_dedicated_path_is_checked_by_both_readers(
     current_case: Case,
 ) -> None:
-    record = candidates((pending(),))[0]
+    record = pending()
     raw = canonical(wire(record))
     validate_foreign(
         "translations/templates/template_translation_candidate/001.yaml", raw
@@ -161,7 +157,7 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
     current_case: Case,
 ) -> None:
     member = current_case.generated.entries[0]
-    record = candidates((pending((member.entry.id,)),))[0]
+    record = pending((member.entry.id,))
     definitions = tuple(
         r for r in current_case.inputs.records if isinstance(r, DefinitionRecord)
     )
@@ -230,22 +226,8 @@ def test_candidate_never_renders_projects_or_bypasses_source_checks(
         from_files(
             compose(
                 current_case.inputs.files,
-                candidates((pending(("inv:absent",)),)),
+                (pending(("inv:absent",)),),
                 inventory.source_batches,
                 inventory.entries,
             )
         )
-
-
-def test_missing_candidate_source_counts_as_unknown_not_zero() -> None:
-    original = pending()
-    rows = processing_list(
-        Definitions((), (), ()),
-        (),
-        (Targets((), (original,), ()),),
-        (),
-        (),
-    )
-    assert len(rows) == 1
-    assert rows[0]["data_id"] == original.identifier
-    assert rows[0]["affected_cards"] is None

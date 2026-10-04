@@ -17,7 +17,6 @@ from sve_carddb.template_parameter_rules.current import parse as parse_rules
 from sve_carddb.template_parameters.models import Schema
 from sve_carddb.template_parameters.references import References
 from sve_carddb.template_translations.current import (
-    migrate_shard,
     read_templates,
     shard,
     validate_templates,
@@ -30,10 +29,10 @@ from sve_carddb.template_translations.current_models import (
     TranslationRecord,
 )
 from sve_carddb.template_translations.current_sources import Generated, Sources
+from sve_carddb.template_translations.models import Definition
 
 from .adoption_fixtures import commit, git
 from .template_intake_fixtures import definition
-from .template_intake_fixtures import shard as legacy_shard
 from .test_effect_presence import page
 from .test_source_archive import _put, _resource, _store
 
@@ -43,6 +42,7 @@ if TYPE_CHECKING:
     from pytest_mock import MockerFixture
 
     from sve_carddb.template_translations.current import Inputs
+    from sve_carddb.template_translations.sources import Reconstructed
 
 
 @dataclass(frozen=True)
@@ -102,11 +102,21 @@ def current_case(tmp_path: Path) -> Case:
     return Case(root, revision, inputs, sources, generated)
 
 
+def _current_definition(member: Reconstructed) -> DefinitionRecord:
+    value = definition(member, new=True)
+    return DefinitionRecord(
+        record_key=str(value["record_key"]),
+        kind="sentence_template",
+        data=Definition.model_validate_json(canonical(value["data"])),
+        origin="project",
+        low_confidence=False,
+        note="",
+    )
+
+
 def _records(generated: Generated) -> Shard:
     member = next(m for m in generated.entries if m.entry.role == "body")
-    definitions = migrate_shard(canonical(legacy_shard([definition(member, new=True)])))
-    target = definitions.records[0]
-    assert isinstance(target, DefinitionRecord)
+    target = _current_definition(member)
     schema = target.data.parameter_schema
     text = "Synthetic " + " ".join("{{" + s.name + "}}" for s in schema.slots)
     translation = TranslationRecord(
@@ -122,9 +132,7 @@ def _records(generated: Generated) -> Shard:
     return Shard(
         translation_authored_format=2,
         kind="translation_shard",
-        records=tuple(
-            sorted((*definitions.records, translation), key=lambda r: r.record_key)
-        ),
+        records=tuple(sorted((target, translation), key=lambda r: r.record_key)),
     )
 
 
@@ -347,53 +355,16 @@ def test_current_rule_git_mode_is_checked(current_case: Case) -> None:
         load(PinnedRepository(current_case.repository), revision)
 
 
-def test_definition_migration_preserves_existing_payload_slots_and_id(
-    current_case: Case,
-) -> None:
-    from sve_carddb.template_translations.migration_definitions import derive  # ruff: ignore[import-outside-top-level] -- migration uses the same validated source fixture
-
-    definitions = tuple(
-        record
-        for record in current_case.inputs.records
-        if isinstance(record, DefinitionRecord)
-    )
-    result = derive(definitions, current_case.generated.entries)
-    assert result.records == definitions
-    assert result.representatives == tuple(
-        (r.data.id, r.data.inventory_id) for r in definitions
-    )
-    assert not result.issues
-
-
-def test_definition_migration_never_promotes_pending_source(current_case: Case) -> None:
-    from sve_carddb.template_translations.migration_definitions import derive  # ruff: ignore[import-outside-top-level] -- pending source is distinct from missing translation
-
-    members = tuple(
-        replace(member, pending=("missing_card_name_concept",))
-        for member in current_case.generated.entries
-    )
-    result = derive((), members)
-    assert not result.records
-    assert result.issues == tuple(
-        (member.entry.id, ("missing_card_name_concept",)) for member in members
-    )
-
-
 def test_new_definition_uses_payload_id_and_verifies_its_source(
     current_case: Case,
 ) -> None:
-    from sve_carddb.template_translations.migration_definitions import derive  # ruff: ignore[import-outside-top-level] -- derive actual semantic definitions
-
-    result = derive((), current_case.generated.entries)
-    assert len(result.records) == 1
-    definition = result.records[0]
-    assert definition.data.id == "T" + definition.data.content_hash[7:23]
-    assert definition.data.supersedes_id is not None
+    record = _current_definition(current_case.generated.entries[0])
+    assert record.data.id == "T" + record.data.content_hash[7:23]
     verified = validate_templates(
-        replace(current_case.inputs, records=result.records), current_case.sources
+        replace(current_case.inputs, records=(record,)), current_case.sources
     )
-    assert verified.frequencies == ((definition.data.id, 1),)
-    assert verified.missing_translations == (definition.data.id,)
+    assert verified.frequencies == ((record.data.id, 1),)
+    assert verified.missing_translations == (record.data.id,)
 
 
 def test_current_vocabulary_requires_catalog_authority_and_retains_composites() -> None:
@@ -425,109 +396,3 @@ def test_current_vocabulary_requires_catalog_authority_and_retains_composites() 
         "special_kinds": [],
     }
     assert refs.proposed_vocabulary("class", "Unknown").target is None
-
-
-def test_effect_conversion_preserves_final_text_and_retains_pending_source(
-    current_case: Case,
-) -> None:
-    from sve_carddb.template_translations.migration_drafts import EffectDraft  # ruff: ignore[import-outside-top-level] -- private draft conversion
-    from sve_carddb.template_translations.migration_targets import effects  # ruff: ignore[import-outside-top-level] -- conversion boundary
-    from sve_carddb.template_translations.preparation import Draft  # ruff: ignore[import-outside-top-level] -- synthetic draft
-
-    definitions = tuple(
-        r for r in current_case.inputs.records if isinstance(r, DefinitionRecord)
-    )
-    member = current_case.generated.entries[0]
-    assert member.candidate.legacy_id is not None
-    value = EffectDraft(
-        Draft(
-            template=member.candidate.legacy_id,
-            normalized=member.normalized,
-            zh="自撰 N 次",
-            confidence="high",
-            note="",
-        ),
-        False,
-    )
-    pending = replace(
-        member,
-        entry=member.entry.model_copy(update={"id": "inv:unresolved"}),
-        pending=("missing_card_name_concept",),
-    )
-    result = effects(
-        definitions, (member, pending), (value,), current_case.inputs.translations(), {}
-    )
-    assert result.records == current_case.inputs.translations()
-    assert result.dispositions == (
-        ("effect", value.draft.template, "active_and_pending"),
-    )
-    assert result.pending[0].text == value.draft.zh
-    assert result.pending[0].reasons == ("missing_card_name_concept",)
-
-
-def test_effect_conversion_aligns_known_unique_marker_and_never_activates_missing_source(
-    current_case: Case,
-) -> None:
-    from sve_carddb.template_translations.migration_drafts import EffectDraft  # ruff: ignore[import-outside-top-level] -- source/draft accounting
-    from sve_carddb.template_translations.migration_targets import effects  # ruff: ignore[import-outside-top-level] -- preserve original target wording
-    from sve_carddb.template_translations.preparation import Draft  # ruff: ignore[import-outside-top-level] -- synthetic original
-
-    definitions = tuple(
-        r for r in current_case.inputs.records if isinstance(r, DefinitionRecord)
-    )
-    member = current_case.generated.entries[0]
-    assert member.candidate.legacy_id is not None
-    draft = Draft(
-        template=member.candidate.legacy_id,
-        normalized=member.normalized,
-        zh="自撰 N 次",
-        confidence="low",
-        note="",
-    )
-    result = effects(definitions, (member,), (EffectDraft(draft, True),), (), {})
-    assert result.records[0].data.text == "自撰 {{slot_0}} 次"
-    assert result.records[0].low_confidence
-    assert result.records[0].origin == "machine"
-    missing = effects((), (), (EffectDraft(draft, True),), (), {})
-    assert not missing.records
-    assert missing.pending[0].text == draft.zh
-    assert missing.pending[0].reasons == ("draft_source_missing",)
-
-
-def test_repeated_slots_merge_only_with_equal_roles_values_and_unit_rules_across_family(
-    current_case: Case,
-) -> None:
-    from sve_carddb.template_parameters.analysis import prepared  # ruff: ignore[import-outside-top-level] -- independent synthetic source spans
-    from sve_carddb.template_sources.normalizer import partition  # ruff: ignore[import-outside-top-level] -- source partition
-    from sve_carddb.template_translations.migration_definitions import (  # ruff: ignore[import-outside-top-level] -- conservative schema relation
-        schema as derive_schema,
-    )
-    from sve_carddb.template_translations.sources import Reconstructed  # ruff: ignore[import-outside-top-level] -- typed source boundary
-
-    from .test_template_parameters import candidate  # ruff: ignore[import-outside-top-level] -- exact synthetic hint generation
-
-    def member(text: str) -> Reconstructed:
-        part = partition(text)[0]
-        normalized = prepared(text, part)[0].normalized
-        value = candidate(text)
-        hints = tuple(h.model_copy(update={"issues": ()}) for h in value.slots)
-        return Reconstructed(
-            current_case.generated.entries[0].entry,
-            value,
-            normalized,
-            text,
-            hints,
-            tuple("numeric" for h in hints),
-            (),
-        )
-
-    first, same, different = (
-        member(text) for text in ("甲2枚、乙2枚", "甲3枚、乙3枚", "甲3枚、乙4枚")
-    )
-    merged = derive_schema(first, (first, same))
-    assert len(merged.slots) == 1
-    assert len(merged.slots[0].occurrences) == 2
-    separated = derive_schema(first, (first, different))
-    assert len(separated.slots) == 2
-    different_role = replace(same, roles=("numeric", "health_value"))
-    assert len(derive_schema(first, (first, different_role)).slots) == 2
