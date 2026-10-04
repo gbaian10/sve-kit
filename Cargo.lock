@@ -921,6 +921,8 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "jsonschema",
+ "rand",
+ "rand_chacha",
  "serde",
  "serde-saphyr",
  "serde_json",
