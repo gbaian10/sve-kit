@@ -10,7 +10,6 @@ from sve_carddb.wording_adoptions.policy import (
     equivalent_matches,
     load_policy,
     verify_matches,
-    verify_policy_reviewer,
 )
 from sve_carddb.wording_adoptions.reconstruction import scope_evidence
 
@@ -273,7 +272,7 @@ def replay_adoptions(
                 "Evidence batch is outside its corresponding reviewed contexts"
             )
         decision = snapshot.decisions[snapshot.record_decisions[record.record_key]]
-        policy_files = _review(record, scope, decision, previous, reconstruction)
+        policy_files = _review(record, scope, previous, reconstruction)
         result[record.record_key] = ReplayedAdoption(
             record,
             decision,
@@ -290,7 +289,6 @@ def replay_adoptions(
 def _review(
     record: AdoptionRecord,
     scope: ReconstructedScope,
-    decision: Decision,
     previous: FaceObservation | None,
     reconstruction: Reconstructor,
 ) -> Mapping[str, bytes]:
@@ -300,10 +298,9 @@ def _review(
     if data.review.mode == "approved_rules":
         if data.review.rule_set is None:
             raise ValueError("Approved-rule adoption has no policy pin")
-        policy, approval, policy_files = load_policy(
+        policy, _, policy_files = load_policy(
             reconstruction.repository, data.review.rule_set
         )
-        verify_policy_reviewer(approval, decision)
         verify_matches(
             data.review.rule_matches,
             equivalent_matches(

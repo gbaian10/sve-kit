@@ -132,11 +132,6 @@ def envelope(records: list[Object]) -> Object:
                 "membership_hash": "",
                 "members": [],
                 "sample_ids": [],
-                "authored_by": "synthetic-author",
-                "authored_at": "2026-09-30T12:34:56Z",
-                "reviewed_by": "synthetic-reviewer",
-                "reviewed_at": "2026-09-30T00:00:00Z",
-                "reviewed_precision": "day",
                 "note": "Synthetic review note",
             }
         ],

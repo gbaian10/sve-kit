@@ -32,7 +32,7 @@ if TYPE_CHECKING:
         "keys",
         "objects",
         "presence",
-        "reviewer",
+        "answer",
         "indexes",
         "same-content",
         "adjacent",
@@ -52,15 +52,12 @@ def test_secondary_model_refusals(  # ruff: ignore[complex-structure] -- table o
         model = models.Observation
         wire = data.observations[0].model_dump(mode="json")
         wire["source_index"] = data.observations[0].source_index + 1
-    elif change == "reviewer":
+    elif change == "answer":
         model = models.OrderReceipt
         wire = {
-            "reviewed_by": " ",
-            "reviewed_at": "2026-10-02T00:00:00Z",
-            "reviewed_precision": "day",
             "before_observation_keys": ["a"],
             "after_observation_keys": ["b"],
-            "note": "Synthetic answer",
+            "note": " ",
         }
     elif change in {"indexes", "same-content"}:
         model = models.PreviousOrder
@@ -104,7 +101,7 @@ def test_secondary_model_refusals(  # ruff: ignore[complex-structure] -- table o
         "keys": "Receipt keys must be sorted and unique",
         "objects": "Receipt objects must be canonically sorted and unique",
         "presence": "Presence proof disagrees with observation source/index",
-        "reviewer": "Order receipt requires a named reviewer and actual answer",
+        "answer": "Order receipt requires an actual answer",
         "indexes": "Order evidence indexes must be sorted and unique",
         "same-content": "Same-content previous order has no evidence or answer",
         "adjacent": "Order evidence must join adjacent levels",

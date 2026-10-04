@@ -116,7 +116,6 @@ def test_confirmed_family_and_identity_are_one_graph(
             assert sources["authored/" + shard.path]["authored_revision"] == REVISION
             assert decisions[review.id]["sample_ids"] == Json(list(review.sample_ids))
             assert decisions[review.id]["note"] == review.note
-            assert decisions[review.id]["reviewed_at"] == review.reviewed_at
             assert decisions[review.id]["membership_hash"] == review.membership_hash
             assert any(
                 link["source_id"] == sources["authored/" + shard.path]["id"]
@@ -163,9 +162,6 @@ def test_missing_or_proposed_parent_keeps_existing_preview_rejection(
         decision(raw).update(
             state="proposed",
             sample_ids=[],
-            reviewed_by=None,
-            reviewed_at=None,
-            reviewed_precision=None,
         )
         install(product_root, NAME, raw)
     plan = plan_preview(product_root, evidence(inputs), regions=("jp",))
@@ -189,9 +185,6 @@ def test_proposed_retains_audit_without_adopted_parent(product_root: Path) -> No
     decision(raw).update(
         state="proposed",
         sample_ids=[],
-        reviewed_by=None,
-        reviewed_at=None,
-        reviewed_precision=None,
     )
     install(product_root, NAME, raw)
     catalog = load_products(product_root, registry=load_registry(product_root))

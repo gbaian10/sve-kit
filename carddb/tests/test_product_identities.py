@@ -53,10 +53,6 @@ def wire_error(area: str, field: str) -> str:
         ("record", "record_key"): "Product identity record key mismatch",
         ("match", "product_url"): "records.0.data:value_error",
         ("match", "kind"): "records.0.data.match:union_tag_invalid",
-        ("decision", "reviewed_by"): "decisions.0:value_error",
-        ("decision", "reviewed_at"): "decisions.0:value_error",
-        ("decision", "reviewed_precision"): "decisions.0:value_error",
-        ("decision", "authored_by"): "decisions.0:value_error",
     }
     prefixes = {
         "index": "Invalid product identity fields: ",
@@ -562,9 +558,6 @@ def test_proposed_identity_fails_its_state_constraint_with_valid_proposed_metada
     review.update(
         state="proposed",
         sample_ids=[],
-        reviewed_by=None,
-        reviewed_at=None,
-        reviewed_precision=None,
     )
     with pytest.raises(ValidationError, match="Input should be 'confirmed'"):
         IdentityDecision.model_validate(review)
@@ -758,11 +751,7 @@ class TestIdentityWireConstraints:
                 "decision": decision(shard),
             }[area]
             target[field] = value
-        expected = (
-            "decisions.0.reviewed_precision:literal_error"
-            if area == "decision" and field == "reviewed_precision" and value == "month"
-            else wire_error(area, field)
-        )
+        expected = wire_error(area, field)
         with pytest.raises(ValueError, match=re.escape(expected)):
             check_wire(tmp_path, index, shard, area, field)
 
@@ -774,7 +763,6 @@ class TestIdentityWireConstraints:
             ("data", "match"),
             ("match", "expansion_code"),
             ("record", "evidence"),
-            ("decision", "reviewed_precision"),
         ],
     )
     def test_required_nullable_and_nonnullable_fields(

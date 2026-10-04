@@ -304,12 +304,12 @@ def test_legacy_entry_points_still_refuse_nonempty(
         ValueError,
         match=r"^Nonempty identity transitions require effective projection support$",
     ):
-        plan_files(root, [], "reviewer", "2026-10-01", loaded=(files.index(), {}))
+        plan_files(root, [], loaded=(files.index(), {}))
     with pytest.raises(
         ValueError,
         match=r"^Nonempty identity transitions require effective projection support$",
     ):
-        relayout(root, [], {})
+        relayout(root, [])
 
 
 def renewal_record(record: dict[str, Any], files: RegistryFiles) -> dict[str, Any]:
@@ -529,8 +529,6 @@ def test_unconfirmed_dependency_cannot_be_inferred(
             decision = shard.decisions[0]
             decision.state = "proposed"
             decision.sample_ids = []
-            decision.reviewed_by = None
-            decision.reviewed_at = None
             raw = shard.model_dump(mode="json")
             content = wire(raw)
             shards.append(

@@ -55,7 +55,7 @@ TABLES = (
                 "image_confirmed_review",
                 "SELECT 1 FROM image_asset AS a JOIN decision AS d ON d.id = a.review_decision_id "
                 "WHERE a.origin = 'third_party' AND a.publication_state = 'approved' "
-                "AND (d.state != 'confirmed' OR d.reviewed_by IS NULL OR d.reviewed_at IS NULL) LIMIT 1",
+                "AND (d.state != 'confirmed') LIMIT 1",
                 ("image_asset", "decision"),
             ),
             QueryCheck(

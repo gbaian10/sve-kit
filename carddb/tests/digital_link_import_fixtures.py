@@ -269,14 +269,7 @@ def make_fixture(  # ruff: ignore[complex-structure,too-many-statements,too-many
             else {},
         ),
     )
-    write_files(
-        plan_files(
-            root / "authored",
-            build_registry(registry_inputs, {}),
-            "Synthetic human",
-            "2026-09-28",
-        )
-    )
+    write_files(plan_files(root / "authored", build_registry(registry_inputs, {})))
     registry = load_registry(root / "authored")
     printing = next(
         r.data

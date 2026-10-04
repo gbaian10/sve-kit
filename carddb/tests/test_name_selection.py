@@ -12,7 +12,6 @@ def candidate(text: str, origin: str = "machine") -> NameCandidate:
         origin,
         "digital_official" if origin.startswith("official_") else "unofficial",
         "synthetic-decision",
-        "2026-10-03T00:00:00Z",
         None,
         counterpart_checked=origin.startswith("official_"),
     )

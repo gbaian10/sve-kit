@@ -22,10 +22,6 @@ def rows() -> dict[str, dict[str, Value]]:
             "state": "confirmed",
             "scope": "record",
             "category": "synthetic",
-            "authored_by": "fixture",
-            "authored_at": INSTANT,
-            "reviewed_by": "reviewer",
-            "reviewed_at": INSTANT,
             "note": "",
         },
         "decision_source": {

@@ -138,40 +138,12 @@ class DecisionMetadata(RecordData):
     membership_hash: Hash
     members: tuple[tuple[Text, Hash], ...]
     sample_ids: tuple[Text, ...]
-    authored_by: Text
-    authored_at: Instant
-    reviewed_by: Text | None
-    reviewed_at: Instant | None
-    reviewed_precision: Literal["day", "instant"] | None
     note: str = ""
 
     @model_validator(mode="after")
     def _review(self) -> Self:
-        if not self.authored_by.strip():
-            raise ValueError("Authored author must be named")
-        if self.state == "proposed":
-            if self.sample_ids or any(
-                value is not None
-                for value in (
-                    self.reviewed_by,
-                    self.reviewed_at,
-                    self.reviewed_precision,
-                )
-            ):
-                raise ValueError("Proposed decisions must have no review metadata")
-        elif (
-            not self.reviewed_by
-            or not self.reviewed_by.strip()
-            or self.reviewed_at is None
-            or self.reviewed_precision is None
-        ):
-            raise ValueError("Confirmed decisions require complete review metadata")
-        if (
-            self.reviewed_precision == "day"
-            and self.reviewed_at is not None
-            and not self.reviewed_at.endswith("T00:00:00Z")
-        ):
-            raise ValueError("Day review precision requires UTC midnight encoding")
+        if self.state == "proposed" and self.sample_ids:
+            raise ValueError("Proposed decisions must have no checked members")
         return self
 
 

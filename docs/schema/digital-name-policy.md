@@ -16,7 +16,7 @@ SVE 與數位完整日文名稱逐字相同，不 trim、normalize、casefold �
 背面不借正面，unknown printed 不借 current，舊印刷名用自己的原文。
 
 選用優先序為：明示卡名選詞覆寫 > 合格的直接官方名 > 自己有效同卡精確面供名 > 其他有效 glossary 選詞 > 原文。
-明示覆寫以 `name_overrides` 指定精確 owner／source_hash／term_id，不從 reviewed_by 或 sample_ids 推測。
+明示覆寫以 `name_overrides` 指定精確 owner／source_hash／term_id，不從 sample_ids 推測。
 轉換必須把舊優先級的實際勝出結果保留下來；官方與專案詞的單純字面差異列報告，不因此全部回原文。
 真正語義歧義列清單；同名瀏覽不供名。origin=official 不表示官方實體繁中版，顯示標「數位版官方卡名」。
 

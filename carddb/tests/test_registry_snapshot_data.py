@@ -95,7 +95,7 @@ def test_observation_identity_and_shape(
     inputs.mapping.targets.clear()
     inputs.mapping.original_art.clear()
     inputs.mapping.reskins.clear()
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
 
     def damage(entry: Entry) -> None:
         observed = entry.data["observation"]
@@ -213,7 +213,7 @@ def test_source_face_map_is_not_replaced_with_ordinal(
     double = card("DF01-001", "Front")
     double.faces.append(card("unused", "Back").faces[0])
     inputs.jp[double.number] = double
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
     index, entries = load(tmp_path)
     printing = next(
         e

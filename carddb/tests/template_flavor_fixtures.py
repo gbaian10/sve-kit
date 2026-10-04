@@ -75,14 +75,7 @@ def flavor_case(tmp_path_factory: pytest.TempPathFactory) -> Case:
             separate_groups={"jp:" + number: number for number in jp},
         ),
     )
-    write_files(
-        plan_files(
-            repository / "authored",
-            build_registry(inputs, {}),
-            "Synthetic human",
-            "2026-09-28",
-        )
-    )
+    write_files(plan_files(repository / "authored", build_registry(inputs, {})))
     index_file = repository / "authored/translations/index.yaml"
     index_file.parent.mkdir(parents=True)
     index_file.write_bytes(

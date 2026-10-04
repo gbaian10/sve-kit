@@ -64,8 +64,6 @@ def main() -> None:
         files = plan_files(
             root,
             entries,
-            inputs.receipt.reviewed_by,
-            inputs.receipt.reviewed_on,
             loaded=(index, existing),
         )
         if args.check and files:

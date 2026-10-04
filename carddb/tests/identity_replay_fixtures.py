@@ -205,7 +205,7 @@ def seed() -> list[dict[str, Any]]:
 
 def basis(root: Path, rows: list[dict[str, Any]]) -> RegistryFiles:
     entries = [Entry.model_validate(row) for row in rows]
-    write_files(plan_files(root, entries, "synthetic-reviewer", "2026-10-01"))
+    write_files(plan_files(root, entries))
     return read_base_files(root)
 
 

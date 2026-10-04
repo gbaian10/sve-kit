@@ -56,11 +56,6 @@ class Decision(BaseModel):
     membership_hash: str
     members: list[tuple[str, str]]
     sample_ids: list[str]
-    authored_by: str
-    authored_at: str
-    reviewed_by: str | None
-    reviewed_at: str | None
-    reviewed_precision: Literal["day"] = "day"
 
 
 class Shard(BaseModel):
@@ -333,15 +328,11 @@ def _check_samples(decision: Decision, checked: list[str]) -> None:
         decision.sample_ids
     ) <= set(checked):
         raise ValueError("Checked members must be a unique subset of the batch")
-    if decision.state == "confirmed" and (
-        decision.sample_ids != checked
-        or not decision.reviewed_by
-        or not decision.reviewed_at
-    ):
+    if decision.state == "confirmed" and (decision.sample_ids != checked):
         raise ValueError("Confirmed batch must explicitly check every member")
 
 
-def _shard(records: list[Entry], reviewed_by: str, reviewed_on: str) -> Shard:
+def _shard(records: list[Entry]) -> Shard:
     if records[0].kind == "card_int_id":
         return Shard(default_decision_id=None, records=records, decisions=[])
     items = members(records)
@@ -357,10 +348,6 @@ def _shard(records: list[Entry], reviewed_by: str, reviewed_on: str) -> Shard:
         membership_hash=checksum,
         members=items,
         sample_ids=[] if proposed else [key for key, _ in items],
-        authored_by="registry-tool",
-        authored_at=reviewed_on + "T00:00:00Z",
-        reviewed_by=None if proposed else reviewed_by,
-        reviewed_at=None if proposed else reviewed_on + "T00:00:00Z",
     )
     return Shard(default_decision_id=decision.id, records=records, decisions=[decision])
 
@@ -426,8 +413,6 @@ def _area(entry: Entry) -> str:
 def plan_files(
     root: Path,
     entries: list[Entry],
-    reviewer: str,
-    day: str,
     *,
     loaded: tuple[Index, dict[str, Entry]] | None = None,
 ) -> dict[Path, bytes]:
@@ -453,16 +438,14 @@ def plan_files(
             max((int(path.stem) for path in directory.glob("[0-9]*.yaml")), default=0)
             + 1
         )
-        _split(directory, sorted(records, key=order), (reviewer, day), number, files)
+        _split(directory, sorted(records, key=order), number, files)
     if not files:
         return {}
     return _finish(root, index, entries, files)
 
 
-def relayout(
-    root: Path, entries: list[Entry], reviews: dict[tuple[str, str], tuple[str, str]]
-) -> dict[Path, bytes]:
-    """Lay out a complete registry from scratch, one reviewer/day per (area, owner).
+def relayout(root: Path, entries: list[Entry]) -> dict[Path, bytes]:
+    """Lay out a complete registry from scratch, grouped by (area, owner).
 
     Only for the one-time pre-publication reshard; normal runs append via plan_files.
     """
@@ -474,7 +457,7 @@ def relayout(
     files: dict[Path, bytes] = {}
     for group, records in sorted(groups.items()):
         directory = _directory(root, *group)
-        _split(directory, sorted(records, key=order), reviews[group], 1, files)
+        _split(directory, sorted(records, key=order), 1, files)
     return _finish(root, Index(), entries, files)
 
 
@@ -509,23 +492,22 @@ def _directory(root: Path, area: str, owner: str) -> Path:
 def _split(
     directory: Path,
     records: list[Entry],
-    review: tuple[str, str],
     number: int,
     files: dict[Path, bytes],
 ) -> None:
     """Fill each shard up to the target, measured on its final encoded YAML."""
     while records:
-        count, data = _fit(records, review)
+        count, data = _fit(records)
         files[directory / f"{number:03}.yaml"] = data
         records, number = records[count:], number + 1
 
 
-def _fit(records: list[Entry], review: tuple[str, str]) -> tuple[int, bytes]:
+def _fit(records: list[Entry]) -> tuple[int, bytes]:
     cache: dict[int, bytes] = {}
 
     def size(count: int) -> int:
         if count not in cache:
-            cache[count] = encode(_shard(records[:count], *review))
+            cache[count] = encode(_shard(records[:count]))
         return len(cache[count])
 
     if size(len(records)) <= TARGET_BYTES:

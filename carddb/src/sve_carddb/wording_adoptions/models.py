@@ -9,7 +9,6 @@ from sve_carddb.products.models import DecisionMetadata, Evidence
 from sve_carddb.registry.records import (
     FaceId,
     Hash,
-    Instant,
     PrintingId,
     RecordData,
     Region,
@@ -101,23 +100,14 @@ class Observation(RecordData):
 
 
 class OrderReceipt(RecordData):
-    reviewed_by: Text
-    reviewed_at: Instant
-    reviewed_precision: Literal["day", "instant"]
     before_observation_keys: Annotated[tuple[Text, ...], Field(min_length=1)]
     after_observation_keys: Annotated[tuple[Text, ...], Field(min_length=1)]
     note: Text
 
     @model_validator(mode="after")
     def _review(self) -> Self:
-        if not self.reviewed_by.strip() or not self.note.strip():
-            raise ValueError(
-                "Order receipt requires a named reviewer and actual answer"
-            )
-        if self.reviewed_precision == "day" and not self.reviewed_at.endswith(
-            "T00:00:00Z"
-        ):
-            raise ValueError("Day order precision requires UTC midnight")
+        if not self.note.strip():
+            raise ValueError("Order receipt requires an actual answer")
         ordered(self.before_observation_keys)
         ordered(self.after_observation_keys)
         return self

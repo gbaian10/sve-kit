@@ -132,9 +132,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
             input_hashes={"jp": "sha256:" + "0" * 64},
         ),
     )
-    write_files(
-        plan_files(authored, build(registry, {}), "synthetic-reviewer", "2026-09-29")
-    )
+    write_files(plan_files(authored, build(registry, {})))
     plan = plan_preview(
         authored,
         FrozenRegions(

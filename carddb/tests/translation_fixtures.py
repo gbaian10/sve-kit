@@ -107,10 +107,6 @@ def template() -> DatabaseTemplate:
                     "state": "confirmed",
                     "scope": "record",
                     "category": "synthetic",
-                    "authored_by": "Synthetic",
-                    "authored_at": INSTANT,
-                    "reviewed_by": "Synthetic human",
-                    "reviewed_at": INSTANT,
                     "note": "",
                 },
             )

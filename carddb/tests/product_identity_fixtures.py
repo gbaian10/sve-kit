@@ -259,7 +259,7 @@ def identity_template(tmp_path_factory: pytest.TempPathFactory) -> IdentityTempl
             input_hashes={"jp": "sha256:" + "1" * 64},
         ),
     )
-    write_files(plan_files(root, build(inputs, {}), "synthetic-reviewer", "2026-09-30"))
+    write_files(plan_files(root, build(inputs, {})))
     family_record = family("TEST")
     obj(family_record["data"])["public_code"] = "Test-A"
     install(root, "products/family/TEST/001.yaml", envelope([family_record]))

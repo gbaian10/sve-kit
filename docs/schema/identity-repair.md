@@ -56,7 +56,7 @@ sample_ids 恰含該 key。核對者必須實際核對 updates 所涵蓋的全�
 semantic_hash=H(完整 transition)，membership_hash=H(排序後 members)，decision.id=`d:` 加 membership hash 的完整 64 hex。
 完整 after、前件 refs、移轉清單與 evidence 都在 hash 內；不是只 hash 永久 ID 或新增 printing 的差集。
 沒有 record 或 decision 自我引用。新的核可必須是新 transition、新 members、新 decision；
-不沿用舊 reviewed_by／時間冒充這次核對。
+不沿用舊決定冒充這次核對；決定不保存姓名／時間。
 
 ## 3. 完整替代內容與決定續版
 
@@ -358,9 +358,7 @@ decision = {
     "state": "confirmed", "scope": "batch", "category": "identity_transition",
     "policy_id": "identity-transition-v1", "membership_hash": membership_hash,
     "members": members, "sample_ids": [record["record_key"]],
-    "authored_by": "example-author", "authored_at": "2026-10-01T00:00:00Z",
-    "reviewed_by": "example-reviewer", "reviewed_at": "2026-10-01T00:00:00Z",
-    "reviewed_precision": "day", "note": "合成例，非真實核可",
+    "note": "合成例，非真實核可",
 }
 shard = {"identity_transition_format": 1, "kind": "identity_transition_shard",
          "default_decision_id": decision["id"], "records": [record], "decisions": [decision]}
@@ -494,7 +492,7 @@ print(json.dumps({"apply": apply_shard, "revert": revert_shard, "index": revert_
 
 | 正例 | 必拒絕或隔離的反例 |
 | --- | --- |
-| 乾淨 checkout 依 pins 重建同一有效投影 | 靠現有 dist、latest raw、檔名字典序、reviewed_at 或最新日期選贏家 |
+| 乾淨 checkout 依 pins 重建同一有效投影 | 靠現有 dist、latest raw、檔名字典序或最新日期選贏家 |
 | 舊 bytes／IDs 不變，續版有新 hash／decision | 改舊 record、刪舊分片、只更新 index hash、重用 int_id、外層核對掩蓋漏看成員 |
 | merge／split／雙面 reassign 完整列面與所有 art uses | 漏背面、漏 art、丟 null、重複移 printing、跨 face 共用 art、墓碑 FK 懸空 |
 | after 與 moves 恰好一致，修復有 confirmed | 父 card 偷改、空修復、proposed／sampled 修復、自指與環 |

@@ -95,12 +95,9 @@ predecessor 仍須精確 hash，因其用途是驗續版鏈。歷史解析依核
 
 ### 2.1 決定、成員與 hash
 
-decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sample_ids,authored_by,authored_at,reviewed_by,reviewed_at,reviewed_precision,note`。
+decision 恰有 `id,state,scope,category,policy_id,membership_hash,members,sample_ids,note`。
 state 固定 confirmed、scope 固定 batch；一筆也是一成員 batch。其他 state 不得進入入口，候選留 authored 外。
-reviewed_by／reviewed_at 須記維護者實際確認者與時間；確認者須為本契約在 repo 明列的維護者，
-本版名單恰為 `gbaian10`，按 exact 識別驗證，不由 caller 新增。工具與模型名稱不得出現在 reviewed_by，
-製作者與確認者分開記錄；名單變更須修改受版控契約及本入口驗證。日精度沿 authored-layout 的 day 編碼，否則 instant。
-authored_by／authored_at 記真正製作封套者／時間，不冒充核對者。note 可為空字串。
+決定不保存製作者／核對者姓名、時間或精度；loader 不驗帳號名單。note 可省略或為空字串。
 
 | record.kind（area） | category | policy_id |
 | --- | --- | --- |
@@ -458,7 +455,6 @@ production 採納／觀測數、合成案例、實跑 mutants 分開報，未知
 | C23 | 只驗勝出者，忽略未知競爭者／忽略 home_set／忽略 override | 各自檢出 method 或選擇錯誤 |
 | C24 | 先濾 JP 再驗 EN 壞分片／半筆失敗仍提交 DB | 全入口失敗且交易回滾 |
 | C26 | type 標記缺定義／未採納／停用／重複／非 type 帶標記／漏直接依賴／同 raw 同 code 異標記 | 各自拒絕；JP／EN 完整原值及正確基本卡種＋標記通過 |
-| C27 | reviewed_by 為工具／模型名稱或不在 repo 明列維護者名單內的識別 | 拒絕；名字非空亦不能代替名單檢查 |
 | C25 | YAML 只換排版／輸入檔順序改／新卡包僅新增無關卡／重建程式或背景更新但相關內容相同 | canonical 決定不變；詞彙與 default override 保持有效，F1 記新實際輸入 |
 
 驗收須另覆蓋合法的新採納、完整續版、撤回／恢復、literal/uint/variable、雙面與多區互不污染。

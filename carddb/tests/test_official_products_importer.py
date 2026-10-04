@@ -529,9 +529,7 @@ def test_english_inclusions_obey_existing_identity_gate(
     )
     for directory in ("ids", "registry"):
         shutil.rmtree(fixture.root / directory)
-    write_files(
-        plan_files(fixture.root, build(inputs, {}), "synthetic-reviewer", "2026-09-30")
-    )
+    write_files(plan_files(fixture.root, build(inputs, {})))
     jp_evidence = CardEvidence.from_card(
         fixture.pages[0].source, "jp", jp_card, (FaceEvidence("LG", None),)
     )
@@ -795,9 +793,7 @@ def test_proposed_family_does_not_supply_official_product_type(
     proposed = family("PROPOSED")
     obj(proposed["data"]).update(public_code="Test-A", kind="deck")
     shard = envelope([proposed])
-    decision(shard).update(
-        state="proposed", reviewed_by=None, reviewed_at=None, reviewed_precision=None
-    )
+    decision(shard).update(state="proposed")
     sign(shard)
     install(fixture.root, "products/family/PROPOSED/001.yaml", shard)
     fixture.catalog = load_products(fixture.root, registry=fixture.preview.snapshot)

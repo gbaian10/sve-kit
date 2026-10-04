@@ -190,9 +190,7 @@ def _envelopes(db: Database, snapshot: AdoptionSnapshot) -> None:
             raise ValueError(
                 "Adoption decision is already imported or has conflicting identity"
             )
-        fields = decision.model_dump(
-            mode="json", exclude={"members", "reviewed_precision"}
-        )
+        fields = decision.model_dump(mode="json", exclude={"members"})
         row: dict[str, Value] = {
             key: value
             for key, value in fields.items()

@@ -164,14 +164,24 @@ def test_bad_en_policy_application_blocks_jp_build_before_any_write(
     shutil.copytree(case.root, root)
     shard_path = root / "authored/wording-adoptions/en/001.yaml"
     shard = object_value(read_yaml(shard_path))
-    object_value(array(shard["decisions"])[0])["reviewed_by"] = "Different reviewer"
-    shard_path.write_bytes(canonical(shard))
-    index_path = root / "authored/wording-adoptions/index.yaml"
-    index = object_value(read_yaml(index_path))
-    object_value(index["includes"])["wording-adoptions/en/001.yaml"] = digest(
-        canonical(shard)
+    record = object_value(array(shard["records"])[0])
+    data = object_value(record["data"])
+    selected = data["selected_observation_key"]
+    object_value(data["review"])["rule_matches"] = [
+        {
+            "from_observation_key": selected,
+            "to_observation_key": selected,
+            "rule_id": "wp:eol-v1",
+            "field": "text",
+            "before_range": [0, 0],
+            "after_range": [0, 0],
+        }
+    ]
+    install_adoptions(
+        root / "authored",
+        [AdoptionRecord.model_validate_json(canonical(record))],
+        region="en",
     )
-    index_path.write_bytes(canonical(index))
     revision = commit(root)
     stores = {"wording-store": case.store, "en-wording-store": english}
     snapshot = load_adoptions(
@@ -188,7 +198,10 @@ def test_bad_en_policy_application_blocks_jp_build_before_any_write(
         with db.transaction():
             case.base.stage(db)
         before = {t.name: db.rows(t.name) for t in schema.tables}
-        with pytest.raises(ValueError, match="policy approver"):
+        with pytest.raises(
+            ValueError,
+            match=r"\ARule matches do not cover exactly the recomputed full diff\Z",
+        ):
             importer.import_adoptions(db, **inputs)
         assert before == {t.name: db.rows(t.name) for t in schema.tables}
 

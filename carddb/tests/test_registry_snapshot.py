@@ -85,8 +85,6 @@ def test_snapshot_cannot_be_changed_through_legacy_copies(registry_root: Path) -
         "id",
         "pointer",
         "checked_missing",
-        "reviewer",
-        "reviewed_at",
     ],
 )
 def test_each_confirmed_envelope_invariant(registry_root: Path, damage: str) -> None:
@@ -107,10 +105,6 @@ def test_each_confirmed_envelope_invariant(registry_root: Path, damage: str) -> 
         shard.default_decision_id = "d:" + "0" * 64
     elif damage == "checked_missing":
         decision.sample_ids = []
-    elif damage == "reviewer":
-        decision.reviewed_by = None
-    else:
-        decision.reviewed_at = None
     rewrite(registry_root, path, shard)
     with pytest.raises(ValueError, match=r"Decision membership|Confirmed batch"):
         load_registry(registry_root)
@@ -156,7 +150,9 @@ def test_indexed_closure_is_mandatory(registry_root: Path, kind: str) -> None:
     if kind == "missing":
         path.unlink()
     elif kind == "modified":
-        path.write_text(path.read_text().replace("reviewer", "other-reviewer"))
+        path.write_text(
+            path.read_text().replace("identity-init-2026-09-28-v1", "other-policy")
+        )
     else:
         (path.parent / "999.yaml").write_text("not: a valid shard\n")
     with pytest.raises(ValueError, match=r"closure|immutable shard"):
@@ -267,13 +263,25 @@ def test_duplicate_allocations_cannot_hide_in_another_shard(
         load_registry(registry_root)
 
 
-@pytest.mark.parametrize("field", ["authored_at", "reviewed_at", "authored_by"])
-def test_typed_decision_metadata(registry_root: Path, field: str) -> None:
+@pytest.mark.parametrize(
+    "field",
+    ["authored_by", "authored_at", "reviewed_by", "reviewed_at", "reviewed_precision"],
+)
+def test_removed_decision_metadata_is_rejected(registry_root: Path, field: str) -> None:
     path, shard = decision_shard(registry_root)
-    decision = shard.decisions[0]
-    damaged = decision.model_dump()
-    damaged[field] = "not-an-instant" if field.endswith("_at") else ""
-    shard.decisions[0] = type(decision).model_validate(damaged)
-    rewrite(registry_root, path, shard)
-    with pytest.raises(ValueError, match="Invalid registry decision fields"):
+    raw = shard.model_dump(mode="json")
+    raw["decisions"][0][field] = "obsolete"
+    target = registry_root / path
+    from sve_carddb.registry.inputs import canonical  # ruff: ignore[import-outside-top-level] -- raw obsolete fields must bypass the typed writer
+
+    target.write_bytes(canonical(raw))
+    index_path = registry_root / "ids/index.yaml"
+    index = Index.model_validate(read_yaml(index_path))
+    index.includes[path.relative_to(registry_root).as_posix()] = digest(raw)
+    index_path.write_bytes(encode(index))
+    with pytest.raises(ValidationError) as caught:
         load_registry(registry_root)
+    errors = caught.value.errors(include_input=False)
+    assert [(e["type"], e["loc"]) for e in errors] == [
+        ("extra_forbidden", ("decisions", 0, field))
+    ]

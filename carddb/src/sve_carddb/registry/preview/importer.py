@@ -134,10 +134,6 @@ def _authored(db: Database, plan: PreviewPlan, revision: str) -> dict[str, str]:
                     "membership_hash": decision.membership_hash,
                     "policy_id": decision.policy_id,
                     "sample_ids": Json(list(decision.sample_ids)),
-                    "authored_by": decision.authored_by,
-                    "authored_at": decision.authored_at,
-                    "reviewed_by": decision.reviewed_by,
-                    "reviewed_at": decision.reviewed_at,
                     "note": "Historic registry decision; source matching is recorded separately.",
                 },
             )

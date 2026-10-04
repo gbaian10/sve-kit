@@ -6,7 +6,7 @@ from pydantic import JsonValue
 
 from sve_carddb.snapshot.values import canonical, digest, object_value
 
-from .translation_fixtures import INSTANT, reference
+from .translation_fixtures import reference
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -93,11 +93,6 @@ def envelope(records: list[dict[str, JsonValue]]) -> dict[str, JsonValue]:
                 "membership_hash": checksum,
                 "members": members,
                 "sample_ids": [records[0]["record_key"]],
-                "authored_by": "Synthetic tool",
-                "authored_at": INSTANT,
-                "reviewed_by": "gbaian10",
-                "reviewed_at": INSTANT,
-                "reviewed_precision": "day",
                 "note": "Synthetic actual sample.",
             }
         ],

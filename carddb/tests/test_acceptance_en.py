@@ -158,7 +158,7 @@ def make_case(
     )
     if correction:
         batch = add_correction(store, inputs)
-    write_files(plan_files(root, build(inputs, {}), "synthetic-reviewer", "2026-10-01"))
+    write_files(plan_files(root, build(inputs, {})))
     install(root, "products/family/SYN/001.yaml", envelope([family("SYN")]))
     identity = plan_preview(
         root,

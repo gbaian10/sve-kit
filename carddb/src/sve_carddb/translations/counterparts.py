@@ -17,7 +17,6 @@ class NameCandidate:
     origin: str
     authority: str
     decision_id: str | None
-    reviewed_at: str
     source: Source | None
     refs: tuple[SourceRef, ...] = ()
     counterpart_checked: bool = False
@@ -30,7 +29,5 @@ def first_counterpart(candidates: tuple[NameCandidate, ...]) -> NameCandidate | 
         if len({candidate.text for candidate in matches}) > 1:
             raise ValueError("Ambiguous adopted digital names")
         if matches:
-            return min(
-                matches, key=lambda c: (c.text, c.decision_id or "", c.reviewed_at)
-            )
+            return min(matches, key=lambda c: (c.text, c.decision_id or ""))
     return None

@@ -55,7 +55,7 @@ def build_registry_root(inputs: Inputs, tmp_path: Path) -> Path:
             reason="Synthetic candidate",
         ),
     ]
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
     return tmp_path
 
 

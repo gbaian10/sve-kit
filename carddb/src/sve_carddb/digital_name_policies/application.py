@@ -8,7 +8,6 @@ from pydantic import JsonValue
 from sve_carddb.build_db import Json
 from sve_carddb.digital_links.loader import link_id
 from sve_carddb.digital_name_policies.loader import load
-from sve_carddb.maintainers import is_maintainer
 from sve_carddb.translations.counterparts import NameCandidate
 from sve_carddb.translations.digital import name_proof
 
@@ -121,7 +120,6 @@ def _counterparts(  # ruff: ignore[too-many-locals] -- relation, actual sample m
         for key, decision in decisions.items()
         if key in fresh
         and key in links.checked_members
-        and is_maintainer(records[decision]["reviewed_by"])
         and records[decision]["state"] in {"sampled", "confirmed"}
         and isinstance(records[decision]["sample_ids"], Json)
         and _sample_member(key, records[decision]["sample_ids"])
@@ -157,7 +155,6 @@ def _counterparts(  # ruff: ignore[too-many-locals] -- relation, actual sample m
                 "official_" + str(card["game"]),
                 "digital_official",
                 str(decision["id"]),
-                str(decision["reviewed_at"]),
                 source,
                 (ref,),
                 counterpart_checked=str(link["id"]) in checked,

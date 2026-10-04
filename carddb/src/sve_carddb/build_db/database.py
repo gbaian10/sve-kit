@@ -11,7 +11,6 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_db.model import Table, Value, identifier
 from sve_carddb.build_db.t0_json import sorted_unique, symbol_valid
 from sve_carddb.build_db.validation import Rules, SQLValue, decode, encode, fullmatch
-from sve_carddb.maintainers import is_maintainer, listed
 
 if TYPE_CHECKING:
     from collections.abc import Iterator, Mapping
@@ -45,10 +44,6 @@ def _raw_rows(value: object) -> tuple[tuple[SQLValue, ...], ...]:
 
 def install_functions(connection: sqlite3.Connection, schema: CompiledSchema) -> Rules:
     """Install deterministic CHECK functions before executing compiled DDL."""
-    listed()
-    connection.create_function(
-        "sve_is_maintainer", 1, is_maintainer, deterministic=True
-    )
     rules = Rules(dict(schema.json_schemas))
     connection.create_function("sve_fullmatch", 2, fullmatch, deterministic=True)
     connection.create_function("sve_json_valid", 2, rules.sql_json, deterministic=True)

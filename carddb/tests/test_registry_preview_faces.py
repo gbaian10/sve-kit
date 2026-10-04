@@ -32,7 +32,7 @@ def test_reversed_source_face_map_retains_per_face_credits(
         card = collection[number]
         card.faces.append(card.faces[0].model_copy(deep=True))
         card.faces[1].name += " back"
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
 
     def reverse(entry: Entry) -> None:
         maps = entry.data["source_face_map"]
@@ -75,7 +75,7 @@ def test_reskin_requires_every_endpoint_variant_not_just_one(
     second.number = "BP02-999EN"
     inputs.en[second.number] = second
     inputs.mapping.targets[second.number] = "BP02-071"
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
     inputs.en["BP02-070EN"].faces[0].text = "Changed one variant only."
     plan = plan_preview(tmp_path, evidence(inputs), regions=("en",))
     assert len(plan.included("card")) == 2
@@ -92,7 +92,7 @@ def test_extraction_factory_rejects_missing_face_metadata(inputs: Inputs) -> Non
 def test_premium_is_only_known_for_exact_pure_premium(
     tmp_path: Path, inputs: Inputs
 ) -> None:
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
     provider = evidence(inputs)
     cards = dict(provider.cards)
     for number, rarity in (("BP02-071", "プレミアム"), ("PR-001", "LG・プレミアム")):
@@ -119,7 +119,7 @@ def test_art_group_requires_sources_for_all_its_uses(
     inputs.mapping.targets[second.number] = "BP02-071"
     inputs.mapping.original_art.add(second.number)
     inputs.receipt.art_groups = [["BP02-070EN", second.number]]
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
     inputs.en["BP02-070EN"].faces[0].text = "Changed one art use only."
     plan = plan_preview(tmp_path, evidence(inputs), regions=("en",))
     assert len(plan.included("printing")) == 2
@@ -136,7 +136,7 @@ def test_conflicting_face_rarity_requires_review(
         card = collection[number]
         card.faces.append(card.faces[0].model_copy(deep=True))
         card.faces[1].name += " back"
-    write_files(plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, build(inputs, {})))
     provider = evidence(inputs)
     cards = dict(provider.cards)
     original = cards["jp", "BP02-071"]

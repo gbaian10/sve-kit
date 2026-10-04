@@ -22,7 +22,7 @@ A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合�
 | 表 | 建置期欄位、鍵與約束 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `source_record` | `id:ID PK,kind:official_page\|official_api\|official_pdf\|image\|third_party_page\|third_party_audio\|authored,url:Text?,raw_locator:Text?,fetched_at:Instant?,etag:Text?,last_modified:Text?,sha256:Hash,parser_version:Text?,authored_path:Text?,authored_revision:Text?`；每次內容版本另存；抓取 URL/時間/hash 必填，ETag 可空；不取代抓取 manifest |
-| `decision` | `id:ID PK,state:proposed\|model_reviewed\|sampled\|confirmed\|rejected\|disputed,scope:record\|batch,category:Code,membership_hash:Hash?,policy_id:Code?,sample_ids:Json?,authored_by:Text,authored_at:Instant,reviewed_by:Text?,reviewed_at:Instant?,confidence:high\|medium\|low?,note:Text`；sampled/confirmed 必須有人名、時間；batch 另須精確成員集合；決定不可覆寫 |
+| `decision` | `id:ID PK,state:proposed\|model_reviewed\|sampled\|confirmed\|rejected\|disputed,scope:record\|batch,category:Code,membership_hash:Hash?,policy_id:Code?,sample_ids:Json?,confidence:high\|medium\|low?,note:Text`；sampled/confirmed 須有實際 checked 成員；batch 另須精確成員集合；決定不可覆寫 |
 | `decision_source` | `decision_id→decision,source_id→source_record,role:Text,locator:Text?,quote:Text?`；`PK(decision_id,source_id,role)` |
 | `language` | `code:Lang PK,fallback_order:Json,display_name:Text`；fallback 只供介面詞彙，不套用卡文 |
 | `vocabulary` | `kind:Code,code:Code,label_unit_id→text_unit,active:Bool`；`PK(kind,code)`，code 是固定小寫英文搜尋代碼 |
@@ -32,6 +32,8 @@ A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合�
 `text_unit.lang` 與 `search_alias.lang` 必須以 `FK(lang)→language(code)` 引用已登錄語言，避免文字或搜尋別名缺少對應的語言配置。新增語言先登錄 `language`，不把外鍵限縮成初始三語的 enum；此規則不將其他 Lang 欄或 JSON 成員自動轉成 SQL FK。
 
 record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱。構築另有下述政策例外；翻譯及詞彙／語言 format 2 不使用 decision，見 §9；其餘類別的人工門檻不變。
+
+決定不保存製作者／核對者姓名、時間或精度；建置只驗狀態、成員及來源，不以個人流程欄位作 CHECK 或發布門檻。
 
 批次決定以精確 `(record_key,semantic_content_hash)` 成員集合排序後計 `membership_hash`，`sample_ids` 必須是集合子集；不可讓日後新增／修改列繼承舊抽查。各具體表自己的 `decision_id` 是 FK，封套在匯入時展開，不使用可逃避 FK 的 subject 表。證據 source 可多筆。
 
@@ -50,7 +52,7 @@ record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由�
 只驗格式、來源、唯一鍵、參數、引用與當前清冊一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
 新格式指回 authored source_record，不能產生假的 decision 或全面放寬其他入口的 FK。
 
-**構築採納的明示例外**：依維護者 2026-10-03「比照翻譯」的決定及 [構築採納 §1](construction-adoption.md#1-專用入口與採納封套)，首輪須有維護者實際抽查與政策核可收據；之後由 Claude 系、Codex 系各一個模型對最終值及官方來源互審，無分歧且全體政策檢查通過者，可以 `adoption_review.mode=approved_policy`、confirmed batch 採納。sample_ids 恰列全體 checked，表示政策機械全查；reviewed_by／reviewed_at／reviewed_precision 取政策核可維護者的真實事件，authored_by／authored_at 記當次工具與時間，note 明示「政策核可」，不能把模型填成人工核可者。真人抽查／處理分歧另記實際事件，分歧走 human 批次，不混入政策批次；首輪或政策收據／loader 未到位一律拒絕。其餘類別的人工門檻不變，此例外不擴及身分／跨區核對、勘誤、更正、翻譯或其他採納入口。
+**構築採納的明示例外**：依維護者 2026-10-03「比照翻譯」的決定及 [構築採納 §1](construction-adoption.md#1-專用入口與採納封套)，首輪須有維護者實際抽查與政策核可收據；之後由 Claude 系、Codex 系各一個模型對最終值及官方來源互審，無分歧且全體政策檢查通過者，可以 `adoption_review.mode=approved_policy`、confirmed batch 採納。sample_ids 恰列全體 checked，表示政策機械全查；note 明示「政策核可」，不能把模型檢查宣稱為逐筆人工核可。真人抽查／處理分歧另記實際事件，分歧走 human 批次，不混入政策批次；首輪或政策收據／loader 未到位一律拒絕。其餘類別的人工門檻不變，此例外不擴及身分／跨區核對、勘誤、更正、翻譯或其他採納入口。
 
 sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。非翻譯的 confidence 沿原用途；翻譯 low_confidence 亦供待校對呈現。
 
@@ -310,7 +312,7 @@ PR2／PR3 實作時須同步 DDL、表格、inventory 測試與 consumer。
 
 人工輸入列共用 `authored_source_id→source_record,record_key,origin:official|project|machine,low_confidence:Bool`。
 來源記本次讀到的檔案／版本，record_key 定位該檔內記錄；不是新的核可表。
-新格式不含 decision_id、reviewed_by／at、sample_ids。過渡 DDL 可保留 nullable decision_id 供 legacy 列，
+新格式不含決定封套與樣本欄位。過渡 DDL 可保留 nullable decision_id 供 legacy 列，
 兩種來源須互斥且各驗原格式；新列不得造假 decision。registry、wording、digital-links 等其他表的 decision FK 不變。
 
 各表的目標差異如下；這些是待實作設計，不是現行 DDL 宣告：
@@ -421,7 +423,7 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 建置約束將上述來源狀態與公開衍生檔政策具體化如下：
 
 - `availability=available` 必須有 `content_hash/mime/width/height/bytes`，mime 非空、寬高為正；這些 metadata 不代替實際 bytes 解碼與比對。
-- `publication_state=withdrawn` 必須有非空白 `withdrawal_reason`；官方 approved 必須 available，且 `review_decision_id` 為 null。第三方 approved 必須有 confirmed decision、核對人與時間，`decision_source` 連回該圖的 `source_id`。
+- `publication_state=withdrawn` 必須有非空白 `withdrawal_reason`；官方 approved 必須 available，且 `review_decision_id` 為 null。第三方 approved 必須有 confirmed decision，`decision_source` 連回該圖的 `source_id`。
 - `image_variant.size_key` 以 FK 引用 `image_size.key`。每筆 variant 只能引用 available 且 approved 的 image_asset；pending／withdrawn／missing／unfetched 不得保有公開 variant 列。
 - 建置 variant 的 format 固定 webp，size 設定不得為 `is_original=true`；path 必須等於該列 sha256 推得的 `images/sha256/<前兩碼>/<64hex>.webp`。檔案實際 hash／尺寸／bytes 與完整檔位集合另由影像產製與發布驗證器核對。此 path 是建置內容定址位置；2.0 公開 ID key／query 由發布投影生成，不能把這個本機 path 當 2.0 圖片 URL，見 [image-variants](image-variants.md)。
 
@@ -443,13 +445,13 @@ shared 預設、EN 真差異才 override；同樣的 region blocks 使共用機�
 
 | 表                       | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `source_correction`      | `id:ID PK,printing_id→printing,face_id→face,field:Text,expected_source_unit_id→text_unit?,expected_raw_value:Json,corrected_value:Json,expected_source_hash:Hash,reason:Text,decision_id→decision,reported_to_official:Bool,reported_on:Date?,report_url:Text?,state:active\|upstream_fixed\|needs_review\|retired`；A；face 必須屬該 printing，field 使用白名單；核對者／日期由 decision 提供；`FK(printing_id,face_id)→printing_face(printing_id,face_id)` |
+| `source_correction`      | `id:ID PK,printing_id→printing,face_id→face,field:Text,expected_source_unit_id→text_unit?,expected_raw_value:Json,corrected_value:Json,expected_source_hash:Hash,reason:Text,decision_id→decision,reported_to_official:Bool,reported_on:Date?,report_url:Text?,state:active\|upstream_fixed\|needs_review\|retired`；A；face 必須屬該 printing，field 使用白名單；採納狀態由 decision 提供；`FK(printing_id,face_id)→printing_face(printing_id,face_id)`     |
 | `correction_evidence`    | `correction_id→source_correction,source_id→source_record,kind:card_image\|other_printing\|official_page,locator:Text,quote:Text?` `PK(correction_id,source_id,kind)`；A；來源 image 可無文字 quote，但必須釘檔案 hash 和定位                                                                                                                                                                                                                                 |
 | `correction_application` | `correction_id→source_correction,source_id→source_record,result_unit_id→text_unit?,face_revision_id→face_revision?,status:applied\|already_fixed\|conflict` `PK(correction_id,source_id)`；D；文字修正必填 `result_unit_id`，規則資料修正必填 `face_revision_id`                                                                                                                                                                                             |
 
 建置的 expected_raw_value／corrected_value 使用公開更正值的 field／型別配對，JSON null 與 SQL NULL 分開；這不擴張 authored 入口的 effect／card_type 白名單。active／upstream_fixed 的採納決定須為 confirmed，needs_review 可保留 proposed；成功 application（applied／already_fixed）亦須 confirmed。文字欄位 effect／name／flavor／other 的成功 application 必填 result_unit_id；規則資料欄位 card_type／cost／attack／defense／traits／titles／special_kinds 必填 face_revision_id。conflict 表示尚未套用，不要求成功產物；任何非空 face_revision_id 都必須符合更正的 face 與 printing.region。這些是提交前的結構與採納檢查，原值／觀測 hash、實際更正結果、證據內容與當次狀態轉換仍由匯入與領域驗證器核對。
 
-先比本次原值：已等於 `corrected_value`→不再套，`upstream_fixed` 並警告退役；符合 `expected_raw_value`＋hash→套用；其他`→needs_review`、不套用。更正引用 evidence 的圖片/其他版次/官方頁 exact hash，核對者日期與是否回報留建置資料庫。`text_unit` 去重後沒有來源欄，觀測來源由 revision/application 表示。
+先比本次原值：已等於 `corrected_value`→不再套，`upstream_fixed` 並警告退役；符合 `expected_raw_value`＋hash→套用；其他`→needs_review`、不套用。更正引用 evidence 的圖片/其他版次/官方頁 exact hash，採納決定與是否回報留建置資料庫。`text_unit` 去重後沒有來源欄，觀測來源由 revision/application 表示。
 
 卡表快照只在受影響 revision/printing/field 的 correction 內嵌 `{field,corrected_from,is_corrected,reason,source_url}`；不要掛在共享 `text_unit` 上，避免同字串其他卡也被標更正。公開 field 與原值型別統一依 [傳輸契約 §3.3](snapshot-transport.md#33-公開更正值)。人工更正不稱官方勘誤。
 
@@ -536,9 +538,9 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 ### 17.1 `mirror_reviewed`
 
-非官方卡圖須由人確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`。建置資料庫的 `image_asset` 保留 `source_url`、`source_id`、`content_hash` 與 `review_decision_id→decision`；`third_party` 且 approved 時此 FK 必填，decision.state=confirmed，`reviewed_by/reviewed_at` 必填。確認釘住該 `image_asset` 的 `source_url/source_id/content_hash`，`decision_source` 連回原始來源；每張都須核對，可用全體 checked 的 confirmed batch，`sampled/model_reviewed` 不足以放行。圖片內容或來源換版需新 `image_asset`／新確認，不得沿用先前 approved。
+非官方卡圖須由人確認來源與圖片內容後，才能鏡像至 R2、產生公開 `image_variant/path`。建置資料庫的 `image_asset` 保留 `source_url`、`source_id`、`content_hash` 與 `review_decision_id→decision`；`third_party` 且 approved 時此 FK 必填，decision.state=confirmed。確認釘住該 `image_asset` 的 `source_url/source_id/content_hash`，`decision_source` 連回原始來源；每張都須核對，可用全體 checked 的 confirmed batch，`sampled/model_reviewed` 不足以放行。圖片內容或來源換版需新 `image_asset`／新確認，不得沿用先前 approved。
 
-`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖的 approved 規則見下段。確認者留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
+`publication_state=pending` 時可保留來源 metadata 供查卡，但不出公開 variant/blob path、不以第三方圖 hotlink 代替；UI 顯示「圖片尚未確認」及來源連結/文字卡面。confirmed 後 approved 才可由 R2 顯示與依既有按需規則快取。官方圖的 approved 規則見下段。確認決定留建置資料庫，不把人名或 decision 稽核資料加入卡表快照；卡表快照仍保留 `source_url` 與 `publication_state`。
 
 `origin=official` 的圖在官方來源歸屬、頁面原樣 `img src` 與解析後來源 URL 的對應、實際取得 bytes 的來源 hash 及圖片解碼／寬高驗證均通過後，由建置器設為 `publication_state=approved`，`review_decision_id=null`，不要求逐圖人工 decision。尚未完成或驗證失敗為 pending，並留下建置診斷；availability 仍按抓取結果表示 available/missing/unfetched，不能把 pending 當 missing，也不能把只有 URL 的 unfetched 圖當已通過。來源或內容換版須重新驗證；withdrawn 不因再次驗證通過而自動恢復 approved。
 

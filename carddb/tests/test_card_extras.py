@@ -435,7 +435,7 @@ def test_errata_rejects_invented_identity_or_confirmation(
                 db.update(
                     "decision",
                     {"id": "decision"},
-                    {"state": "proposed", "reviewed_by": None, "reviewed_at": None},
+                    {"state": "proposed"},
                 )
     plan = plan_card_extras(db, (), errata=(item,))
     before = db.rows("source_record")

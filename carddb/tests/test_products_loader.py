@@ -55,7 +55,6 @@ def test_complete_immutable_snapshot_retains_review_precision_and_bytes(
     assert len(snapshot.records) == 3
     loaded = next(s for s in snapshot.shards if s.path == NAME)
     assert loaded.content_hash == checksum(json.loads(loaded.content))
-    assert loaded.envelope.decisions[0].reviewed_precision == "day"
     assert loaded.envelope.decisions[0].note == "Synthetic review note"
     record = snapshot.records['["product_family","BP02"]']
     assert isinstance(record, FamilyRecord)
@@ -179,16 +178,6 @@ def test_each_review_field(product_root: Path, field: str, value: JsonValue) -> 
         load(product_root)
 
 
-def test_instant_review_is_preserved(product_root: Path) -> None:
-    raw = shard(product_root)
-    decision(raw)["reviewed_precision"] = "instant"
-    decision(raw)["reviewed_at"] = "2026-09-30T12:34:56.123Z"
-    install(product_root, NAME, raw)
-    assert any(
-        d.reviewed_precision == "instant" for d in load(product_root).decisions.values()
-    )
-
-
 @pytest.mark.parametrize(
     ("field", "value"),
     [
@@ -204,9 +193,6 @@ def test_proposed_rejects_each_review_claim(
     raw = shard(product_root)
     decision(raw).update(
         state="proposed",
-        reviewed_by=None,
-        reviewed_at=None,
-        reviewed_precision=None,
         sample_ids=[],
     )
     decision(raw)[field] = value

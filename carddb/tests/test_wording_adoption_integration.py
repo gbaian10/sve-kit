@@ -171,26 +171,6 @@ def test_failure_after_two_physical_writes_rolls_back_every_new_row(
         assert before == {t.name: db.rows(t.name) for t in schema.tables}
 
 
-@pytest.mark.parametrize("change", ["reviewer", "date", "precision", "note"])
-def test_policy_application_cannot_impersonate_another_policy_approval(
-    adoption_case: AdoptionCase, change: str
-) -> None:
-    case = adoption_case
-    original = case.replayed[0].decision
-    fields = {
-        "reviewer": {"reviewed_by": "Different reviewer"},
-        "date": {"reviewed_at": "2026-10-01T00:00:00Z"},
-        "precision": {"reviewed_precision": "instant"},
-        "note": {"note": "Synthetic per-card answer"},
-    }
-    decision = original.model_copy(update=fields[change])
-    snapshot = dataclasses.replace(case.snapshot, decisions={decision.id: decision})
-    with pytest.raises(ValueError, match="impersonates"):
-        replay_adoptions(
-            snapshot, Reconstructor(case.root, {"wording-store": case.store})
-        )
-
-
 def test_existing_physical_observation_cannot_be_rebound_to_another_revision(
     adoption_case: AdoptionCase,
 ) -> None:
