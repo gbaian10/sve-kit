@@ -1,54 +1,529 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:9d430adebe30e7853e8fecc7899db2046bb542de827231e40e07d430a555e12d
 records:
-  - record_key: '["glossary_choice","term:trait.geo_theogonia","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:ability.rally","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.geo_theogonia
+      term_id: term:ability.rally
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/26
+          text_hash: sha256:7679113f520b4b3c7b523fe711e57c149cf637031b9f162e58b232f4ed316cc3
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '26'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/26
+            text_hash: sha256:e73b7be6f0d5c286a5674414f162c4bde8742f86fc0d5e5cf9058935634a5f83
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/26
+            text_hash: sha256:7679113f520b4b3c7b523fe711e57c149cf637031b9f162e58b232f4ed316cc3
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.reanimate","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.reanimate
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/19
+          text_hash: sha256:177b1a9903fd4ae8237dcb45a874984f6f5f58de82c10a5200da33ac17c907d4
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '19'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/19
+            text_hash: sha256:95b556eb014217b8fe0f95de425611f14d33ff08542376ffdb96990cf9c12478
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/19
+            text_hash: sha256:177b1a9903fd4ae8237dcb45a874984f6f5f58de82c10a5200da33ac17c907d4
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.secret_art","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.secret_art
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/41
+          text_hash: sha256:51bd96fab9ab9240feb3885cdbeee6e06e4bafd0c11bba29f89d07b5903dfe8c
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '41'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/41
+            text_hash: sha256:af05d63b616675a9c44d95f3cd1dd231ef54e0e2aedb682ee40769fcdf81b10c
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/41
+            text_hash: sha256:51bd96fab9ab9240feb3885cdbeee6e06e4bafd0c11bba29f89d07b5903dfe8c
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.single_drive","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.single_drive
       lang: zh-Hant
       value:
         kind: authored
-        text: 吉歐‧提格尼亞
-      origin: project
+        text: 單重驅動
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.spell_boost","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.spell_boost
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魔力增幅
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.spell_chain","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.spell_chain
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魔力連鎖
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.stack","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.stack
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+          source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+          parser: translation-sv1-v1
+          locator: /data/cards/5578/skill_disc
+          text_hash: sha256:faaafab12e7f87ca9048fbd6e81a6ade020acccd1270d72b352fb38c55736cc5
+        span:
+          start: 77
+          end: 79
+      concept_evidence:
+        - kind: effect_term
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:86de774acfcbb1869f83c75fff58d85841f98d8a531064ecc230e8abb1470529
+            parser: translation-sv1-v1
+            locator: /data/cards/5578/skill_disc
+            text_hash: sha256:e1ee314a01247e260eada364892be26fef07f414fda071cf48abcd23019ac653
+          jp_span:
+            start: 84
+            end: 88
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:436acec4e107f4fee0bf45920d2a30ca6fc6949d6bfde7b38fc61f06acf823c2
+            source_version_id: src:v1:af838349f7a702c348c8628fb12dcf24d2d8b949376f1c6c4c6706fd368c3c1c
+            parser: translation-sv1-v1
+            locator: /data/cards/5578/skill_disc
+            text_hash: sha256:faaafab12e7f87ca9048fbd6e81a6ade020acccd1270d72b352fb38c55736cc5
+          target_span:
+            start: 77
+            end: 79
+          concept_note: 同一封存一代官方卡表 API 的上游 card_id=107341020、相同 skill_disc 欄位，日文「スタック」與繁中「蓄積」唯一出現片段逐字對應。證據只核對此術語選詞，不宣稱日英 SVE 身分或整張卡效果等義。
+      source_claim:
+        source_work: Shadowverse
+        source_urls:
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=ja
+          - https://shadowverse-portal.com/api/v1/cards?format=json&lang=zh-tw
+        claimed_source: 已封存一代官方 API 同卡／同效果欄位的繁中術語片段
+        note: 維護者 2026-10-03 指出蓄積是一代線上版既有繁中；本次唯讀核對封存日文與繁中同上游卡號，依 glossary-adoption §3 追加官方來源 adoption，不改字、不改舊概念或第一版來源主張。
+  - record_key: '["glossary_choice","term:ability.twin_drive","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.twin_drive
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 雙重驅動
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.union_burst","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.union_burst
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: UB
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.unleashed_secret_art","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.unleashed_secret_art
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/42
+          text_hash: sha256:ae92cae6ccc2627ddc2f98190dc47c87432fb011c971db4d612f0ac654cd94f5
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '42'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/42
+            text_hash: sha256:b7cd3fd52dc042f88f67b0c186f5bdddcf018545e25e0f558a4e0e37e1e39773
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/42
+            text_hash: sha256:ae92cae6ccc2627ddc2f98190dc47c87432fb011c971db4d612f0ac654cd94f5
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.vengeance","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.vengeance
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 復仇
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.add_to_deck","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.add_to_deck
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 增加…到自己的牌堆中
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.add_to_hand","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.add_to_hand
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 增加…到手牌中
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.banish","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.banish
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 使…消失
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.choose","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.choose
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 指定
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.destroy","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.destroy
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 破壞
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.discard","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.discard
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 捨棄
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.distribute","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.distribute
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 任意分配
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.draw","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.draw
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 抽取1張卡片
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.drive_check","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.drive_check
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 驅動檢查
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.engage","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.engage
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 橫置
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.equip","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.equip
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 裝備
       concept_evidence: []
       source_claim:
         source_work: 公主連結
         source_urls:
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+          - https://forum.gamer.com.tw/C.php?bsn=30861&snA=15674
         claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:trait.geo_theogonia","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 〈ジオ・テオゴニア〉 → 吉歐‧提格尼亞；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:9d430adebe30e7853e8fecc7899db2046bb542de827231e40e07d430a555e12d
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:9d430adebe30e7853e8fecc7899db2046bb542de827231e40e07d430a555e12d
-    members:
-      -   - '["glossary_choice","term:trait.geo_theogonia","zh-Hant",1]'
-          - sha256:6dd016e85bf3a16cfd63a9b6ce2d3b32e5b04b098aac72303d38be42faa4a60f
-    sample_ids:
-      - '["glossary_choice","term:trait.geo_theogonia","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 〈ジオ・テオゴニア〉 → 吉歐‧提格尼亞；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+  - record_key: '["glossary_choice","term:action.evolve","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.evolve
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 進化
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:action.ignore","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:action.ignore
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 無視
+      concept_evidence: []
+      source_claim:
+        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_urls: []
+        claimed_source: 數位版 both 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。

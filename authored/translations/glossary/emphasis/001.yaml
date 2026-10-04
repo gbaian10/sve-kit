@@ -1,1147 +1,195 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:4122f5bb77ede1efced5a5855f47b0111b1d095fdc404fa9bc271de1f5ced9b8
 records:
-  - record_key: '["glossary_emphasis_choice","term:action.add_to_deck",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.add_to_deck"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.add_to_deck
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.add_to_hand",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.add_to_hand"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.add_to_hand
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.banish",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.banish"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.banish
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.choose",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.choose"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.choose
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.destroy",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.destroy"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.destroy
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.discard",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.discard"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.discard
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.distribute",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.distribute"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.distribute
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.draw",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.draw"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.draw
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.drive_check",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.drive_check"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.drive_check
       value: true
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.equip",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.equip"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.equip
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.evolve",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.evolve"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.evolve
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.ignore",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.ignore"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.ignore
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.leave_play",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.leave_play"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.leave_play
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.look",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.look"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.look
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.lose",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.lose"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.lose
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.place",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.place"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.place
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.play",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.play"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.play
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.put_into_play",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.put_into_play"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.put_into_play
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.restore",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.restore"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.restore
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.return_to_deck",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.return_to_deck"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.return_to_deck
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.return_to_hand",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.return_to_hand"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.return_to_hand
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.reveal",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.reveal"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.reveal
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.search",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.search"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.search
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_emphasis_choice","term:action.shuffle",1]'
+  - record_key: '["glossary_emphasis_choice","term:action.shuffle"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_emphasis_choice
-    filing_key: emphasis
     data:
       term_id: term:action.shuffle
       value: false
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者交由協調者決定特殊詞加粗；translation-decisions.md 加粗判定，glossary-adoption §4／§5。本次 84 筆精確表追加核可，各 scope 僅涵蓋此次 Bool 採納。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.banish",1]'
-            - '["glossary_emphasis_choice","term:action.choose",1]'
-            - '["glossary_emphasis_choice","term:action.destroy",1]'
-            - '["glossary_emphasis_choice","term:action.discard",1]'
-            - '["glossary_emphasis_choice","term:action.distribute",1]'
-            - '["glossary_emphasis_choice","term:action.draw",1]'
-            - '["glossary_emphasis_choice","term:action.drive_check",1]'
-            - '["glossary_emphasis_choice","term:action.equip",1]'
-            - '["glossary_emphasis_choice","term:action.evolve",1]'
-            - '["glossary_emphasis_choice","term:action.ignore",1]'
-            - '["glossary_emphasis_choice","term:action.leave_play",1]'
-            - '["glossary_emphasis_choice","term:action.look",1]'
-            - '["glossary_emphasis_choice","term:action.lose",1]'
-            - '["glossary_emphasis_choice","term:action.place",1]'
-            - '["glossary_emphasis_choice","term:action.play",1]'
-            - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-            - '["glossary_emphasis_choice","term:action.restore",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-            - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-            - '["glossary_emphasis_choice","term:action.reveal",1]'
-            - '["glossary_emphasis_choice","term:action.search",1]'
-            - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:4122f5bb77ede1efced5a5855f47b0111b1d095fdc404fa9bc271de1f5ced9b8
-    state: confirmed
-    scope: batch
-    category: glossary_emphasis_choice
-    policy_id: glossary-emphasis-51-v1
-    membership_hash: sha256:4122f5bb77ede1efced5a5855f47b0111b1d095fdc404fa9bc271de1f5ced9b8
-    members:
-      -   - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-          - sha256:e01e165aacad7920eb13fc3925f8d85af18922099eb8a8e51a8dfbefce6f4951
-      -   - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-          - sha256:2e5429b39394bb93265fc74f705fcd574849e24cf1d6b5f5227d7560e55f7fe0
-      -   - '["glossary_emphasis_choice","term:action.banish",1]'
-          - sha256:8fc73c8f4f0df3c698345a654002d95668cecf5f3f010deeb5ca89d80b4dd4ba
-      -   - '["glossary_emphasis_choice","term:action.choose",1]'
-          - sha256:f9707c05b3e0de69ad64310c40f60484fd981e320ea28626c69d4d00aae97bdd
-      -   - '["glossary_emphasis_choice","term:action.destroy",1]'
-          - sha256:635a9b747d76523e08e00ac25f00f8ad850937cc8884c934c3b1dbc3aa3c0305
-      -   - '["glossary_emphasis_choice","term:action.discard",1]'
-          - sha256:bf25e65e181dad64365e55fe17d39e42ce4fac05f48d1878373329af27830b40
-      -   - '["glossary_emphasis_choice","term:action.distribute",1]'
-          - sha256:030d808a0ecea72137ccb143d29a713ad69d1e37b1e37f5482c26088193a702b
-      -   - '["glossary_emphasis_choice","term:action.draw",1]'
-          - sha256:c17134227f540faa31325cb8d404f25a775116f5c4492c483a51bd2937a53ca6
-      -   - '["glossary_emphasis_choice","term:action.drive_check",1]'
-          - sha256:e7d3b0ace6c86da71efa537d372feaf979d4b85e88a6f8b5f5a98a11a902b734
-      -   - '["glossary_emphasis_choice","term:action.equip",1]'
-          - sha256:ab507a88e369ba293ec431cd17b82af2d2d4d700dcff28fe3b53fba949bf32dc
-      -   - '["glossary_emphasis_choice","term:action.evolve",1]'
-          - sha256:a0b2e66a381a0c1e8bb0e3ee9db429aee7696a12f01ca37ef88477f65dc173f5
-      -   - '["glossary_emphasis_choice","term:action.ignore",1]'
-          - sha256:64e54ceadfbe1265606ff0adc31c665b314407706c114918150dc875a13af242
-      -   - '["glossary_emphasis_choice","term:action.leave_play",1]'
-          - sha256:9b511ccfe9ee1fcbdbdae25eb91a7d38ae1fb096c24f8f1b892bb8b58f2923af
-      -   - '["glossary_emphasis_choice","term:action.look",1]'
-          - sha256:76ea271fc47e45fa4ed63fb14b09f689a911bac8249d03fee87993b36761073e
-      -   - '["glossary_emphasis_choice","term:action.lose",1]'
-          - sha256:174715831a5b8b9ddb473fde13741ba20861b87dc814a46420ce2cd1b85fc288
-      -   - '["glossary_emphasis_choice","term:action.place",1]'
-          - sha256:40d66aa6a16ce32fbd66137bfe38d74362de1122e22332130b64e70fce837503
-      -   - '["glossary_emphasis_choice","term:action.play",1]'
-          - sha256:c29f9ca2686c4d099eb1f5646564290173e977c04e29e430cfec426dae0ade53
-      -   - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-          - sha256:4c781668c2cbcc11620a59479fe1e6eda53d191dd10d001589b76fd191207556
-      -   - '["glossary_emphasis_choice","term:action.restore",1]'
-          - sha256:d2913390bf05affdd53c632683a53f8b436a04a056dc083dd20e2dde2a97e90e
-      -   - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-          - sha256:85b04732234eb384831cffd6e807041313cfbcce487ee8356d2852daf17d54ed
-      -   - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-          - sha256:a330bfa8ceb864141e7aca97e6bfe7ebc44608973d88d71a89e776f82f9a2c59
-      -   - '["glossary_emphasis_choice","term:action.reveal",1]'
-          - sha256:55b2f2c31049b30cce3a297a9d3441b9df366923e8ce26b6d2a38c75d9449389
-      -   - '["glossary_emphasis_choice","term:action.search",1]'
-          - sha256:f33bc79a2d2fc5ec60c5a74b62123e4526e438e5ed8cf6e49f49b0447640b31e
-      -   - '["glossary_emphasis_choice","term:action.shuffle",1]'
-          - sha256:7e86b7121544e2d6f5fb2139afa46a36073c04d3dc73c9d0fb9dba3ef072a799
-    sample_ids:
-      - '["glossary_emphasis_choice","term:action.add_to_deck",1]'
-      - '["glossary_emphasis_choice","term:action.add_to_hand",1]'
-      - '["glossary_emphasis_choice","term:action.banish",1]'
-      - '["glossary_emphasis_choice","term:action.choose",1]'
-      - '["glossary_emphasis_choice","term:action.destroy",1]'
-      - '["glossary_emphasis_choice","term:action.discard",1]'
-      - '["glossary_emphasis_choice","term:action.distribute",1]'
-      - '["glossary_emphasis_choice","term:action.draw",1]'
-      - '["glossary_emphasis_choice","term:action.drive_check",1]'
-      - '["glossary_emphasis_choice","term:action.equip",1]'
-      - '["glossary_emphasis_choice","term:action.evolve",1]'
-      - '["glossary_emphasis_choice","term:action.ignore",1]'
-      - '["glossary_emphasis_choice","term:action.leave_play",1]'
-      - '["glossary_emphasis_choice","term:action.look",1]'
-      - '["glossary_emphasis_choice","term:action.lose",1]'
-      - '["glossary_emphasis_choice","term:action.place",1]'
-      - '["glossary_emphasis_choice","term:action.play",1]'
-      - '["glossary_emphasis_choice","term:action.put_into_play",1]'
-      - '["glossary_emphasis_choice","term:action.restore",1]'
-      - '["glossary_emphasis_choice","term:action.return_to_deck",1]'
-      - '["glossary_emphasis_choice","term:action.return_to_hand",1]'
-      - '["glossary_emphasis_choice","term:action.reveal",1]'
-      - '["glossary_emphasis_choice","term:action.search",1]'
-      - '["glossary_emphasis_choice","term:action.shuffle",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:51:42Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者在維護者委託下追加加粗決定：表向き=false、裏向き=false（一般方向描述，成對）；アクト状態=true（由特殊術語アクト派生的狀態名）；カウンター=true（特殊物件名）；サイコロ=false（一般遊戲工具）；交戦ダメージ=false；交戦相手=false。其餘 77 筆照 Codex 的逐筆提案值採用。原提案檔案 hash sha256:7ed5700f8f74e484faf62d4629c7a438424a72f26e184bf1373aa3bc26c7ad73。加粗是可修訂紀錄；維護者已說之後看畫面再調，不把這次委託決定寫成維護者親自逐筆核可。本收據僅覆蓋本 batch 的精確 scope，不沿用首次 key 配發或繁中選詞收據。

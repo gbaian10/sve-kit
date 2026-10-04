@@ -1,0 +1,502 @@
+translation_authored_format: 2
+kind: translation_shard
+records:
+  - record_key: '["glossary_choice","term:trait.marine","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.marine
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/tribe_names/17
+          text_hash: sha256:44467431f287c6168cbbac6b069f676f66b943031a7ddf93db8e36b6e4de8ec9
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: tribe_names
+          entry_key: '17'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/17
+            text_hash: sha256:44467431f287c6168cbbac6b069f676f66b943031a7ddf93db8e36b6e4de8ec9
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/17
+            text_hash: sha256:44467431f287c6168cbbac6b069f676f66b943031a7ddf93db8e36b6e4de8ec9
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:trait.mejiro_family","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.mejiro_family
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 目白家
+      concept_evidence: []
+      source_claim:
+        source_work: 賽馬娘
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/賽馬娘_Pretty_Derby
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+  - record_key: '["glossary_choice","term:trait.mercenary","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.mercenary
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傭兵
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.merchant","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.merchant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 商人
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.mercurius_foundation","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.mercurius_foundation
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 墨丘利財團
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://www.princessconnect.so-net.tw/role
+          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+  - record_key: '["glossary_choice","term:trait.mount","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.mount
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 載具
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.musical","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.musical
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 歌手
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：使用者交由 Claude 決定（信心低的詞不逐一確認；顯示時會加粗並可對照原文）
+  - record_key: '["glossary_choice","term:trait.natura","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.natura
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 自然
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.necromancer","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.necromancer
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 死靈術師
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.nightmare","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.nightmare
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 王宮騎士團
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://www.princessconnect.so-net.tw/role
+          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+  - record_key: '["glossary_choice","term:trait.ninja","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.ninja
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 忍者
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.noble","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.noble
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 貴族
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.officer","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.officer
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/tribe_names/2
+          text_hash: sha256:eaa8dd04fd6812c86800f56d49beea7370c5acd08ac2f97d19cc335820c03abc
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: tribe_names
+          entry_key: '2'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/2
+            text_hash: sha256:8fbb183df9cb2873cc42fe7a1d2aa577eb35753d872a0cd7fdeadd2e63af9acf
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/2
+            text_hash: sha256:eaa8dd04fd6812c86800f56d49beea7370c5acd08ac2f97d19cc335820c03abc
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:trait.omen","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.omen
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 絕傑
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.onmyoji","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.onmyoji
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 陰陽師
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.oracle_think_tank","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.oracle_think_tank
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 神諭智庫
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.pale_moon","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.pale_moon
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蒼月
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.passion","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.passion
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Passion
+      concept_evidence: []
+      source_claim:
+        source_work: 偶像大師 灰姑娘女孩
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.phoenix","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.phoenix
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 不死鳥
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.pixie","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.pixie
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/tribe_names/5
+          text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: tribe_names
+          entry_key: '5'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/5
+            text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/5
+            text_hash: sha256:3602014779bdc7396fd097da57ee2b4735d9994edd331b2a4d469448966b71a8
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:trait.priconne","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.priconne
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 公主連結
+      concept_evidence: []
+      source_claim:
+        source_work: 公主連結
+        source_urls:
+          - https://www.princessconnect.so-net.tw/news/newsDetail/3350
+          - https://www.princessconnect.so-net.tw/role
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+  - record_key: '["glossary_choice","term:trait.prince","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.prince
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 王子
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.princess","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.princess
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 公主
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:trait.puppetry","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:trait.puppetry
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/tribe_names/15
+          text_hash: sha256:cfabe4c78b660c669330f45a0df21570a10f4de02f989b78523d8d090ff58b52
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: tribe_names
+          entry_key: '15'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/15
+            text_hash: sha256:8f0298f9c8a835e73f6ec8f040fd778b1b681f776df8d351f95d3ba88c854cc6
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/tribe_names/15
+            text_hash: sha256:cfabe4c78b660c669330f45a0df21570a10f4de02f989b78523d8d090ff58b52
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:

@@ -1,295 +1,408 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:d38378d21a51399bafc70da42edf1c58faf9e67c3eef5661cdec224e73c0855e
 records:
-  - record_key: '["glossary_choice","term:ability.feed","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.legend_race_vs_narita_brian","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.feed
+      term_id: term:name.legend_race_vs_narita_brian
       lang: zh-Hant
       value:
         kind: authored
-        text: 用餐
-      origin: project
+        text: 傳奇競賽 VS成田白仁
       concept_evidence: []
       source_claim:
-        source_work: 賽馬娘
-        source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:ability.possession","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:ability.possession
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 憑依
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 卡片戰鬥先導者
-        source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:object.advance_marker","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:object.advance_marker
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 進階卡
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：使用者 2026-10-02 在對話中定案 消歧說明：另見「エボルヴ」：同一層級的另一種卡種
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.cool","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.cool
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: Cool
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 偶像大師 灰姑娘女孩
-        source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.cute","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.cute
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: Cute
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 偶像大師 灰姑娘女孩
-        source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.friendship_club","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.friendship_club
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 好朋友社
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
+        source_work: Uma Musume
         source_urls:
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.imas_cg","zh-Hant",1]'
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_narita_taishin","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.imas_cg
+      term_id: term:name.legend_race_vs_narita_taishin
       lang: zh-Hant
       value:
         kind: authored
-        text: 灰姑娘
-      origin: project
+        text: 傳奇競賽 VS成田大進
       concept_evidence: []
       source_claim:
-        source_work: 偶像大師 灰姑娘女孩
-        source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.luminary","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_nice_nature","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.luminary
+      term_id: term:name.legend_race_vs_nice_nature
       lang: zh-Hant
       value:
         kind: authored
-        text: 先導
-      origin: project
+        text: 傳奇競賽 VS優秀素質
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.passion","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_oguri_cap","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.passion
+      term_id: term:name.legend_race_vs_oguri_cap
       lang: zh-Hant
       value:
         kind: authored
-        text: Passion
-      origin: project
+        text: 傳奇競賽 VS小栗帽
       concept_evidence: []
       source_claim:
-        source_work: 偶像大師 灰姑娘女孩
-        source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.ward_office","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_rice_shower","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.ward_office
+      term_id: term:name.legend_race_vs_rice_shower
       lang: zh-Hant
       value:
         kind: authored
-        text: 區公所
-      origin: project
+        text: 傳奇競賽 VS米浴
       concept_evidence: []
       source_claim:
-        source_work:
-        source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.wyrmkin","zh-Hant",1]'
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_sakura_bakushin_o","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.wyrmkin
+      term_id: term:name.legend_race_vs_sakura_bakushin_o
       lang: zh-Hant
       value:
         kind: authored
-        text: 龍裔
-      origin: project
+        text: 傳奇競賽 VS櫻花驀進王
       concept_evidence: []
       source_claim:
-        source_work:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_seiun_sky","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_seiun_sky
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS青雲天空
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_silence_suzuka","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_silence_suzuka
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS無聲鈴鹿
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_special_week","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_special_week
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS特別週
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_super_creek","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_super_creek
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS超級小溪
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_symboli_rudolf","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_symboli_rudolf
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS魯道夫象徵
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_t_m_opera_o","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_t_m_opera_o
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS好歌劇
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_taiki_shuttle","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_taiki_shuttle
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS大樹快車
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_tamamo_cross","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_tamamo_cross
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS玉藻十字
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_tokai_teio","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_tokai_teio
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS東海帝皇
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_vodka","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_vodka
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS伏特加
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.legend_race_vs_winning_ticket","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.legend_race_vs_winning_ticket
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 傳奇競賽 VS勝利獎券
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=34421&snA=6452
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.lelouch_lamperouge","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lelouch_lamperouge
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 魯路修‧蘭佩洛基
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lelouch_leader_of_the_black_knights","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lelouch_leader_of_the_black_knights
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 黑色騎士團總司令‧魯路修
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lelouch_righteous_emperor","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lelouch_righteous_emperor
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 正義的皇帝‧魯路修
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：使用者 2026-10-02 在對話中同意：職業維持龍族、種族用龍裔 消歧說明：另見職業「ドラゴン」（龍族）：竜族是特性欄的種族，348 張卡全在龍族職業內但範圍較小，卡文會寫「竜族・從者」，所以不能同名
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:d38378d21a51399bafc70da42edf1c58faf9e67c3eef5661cdec224e73c0855e
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:d38378d21a51399bafc70da42edf1c58faf9e67c3eef5661cdec224e73c0855e
-    members:
-      -   - '["glossary_choice","term:ability.feed","zh-Hant",1]'
-          - sha256:3e42da0e9e4052024d8feac2138e61d5ec333eccd13778a8272f2004bce88a4d
-      -   - '["glossary_choice","term:ability.possession","zh-Hant",1]'
-          - sha256:dc96c65b469fc279f2c5971e899114e1ab979ef79df5dfedfda3df4010cfb37f
-      -   - '["glossary_choice","term:object.advance_marker","zh-Hant",1]'
-          - sha256:68ffabcd37d16ec4a77a5b791766f2e60695743d2f228fbbc4995f564f49f769
-      -   - '["glossary_choice","term:trait.cool","zh-Hant",1]'
-          - sha256:74df6af80b2f9420a000eca0c76af3e5e023cc871513d30974c4d9898ea0143d
-      -   - '["glossary_choice","term:trait.cute","zh-Hant",1]'
-          - sha256:4274e34e63ad5ee24dfd91aedffdb2567babfed58c71099576a6812427ff3129
-      -   - '["glossary_choice","term:trait.friendship_club","zh-Hant",1]'
-          - sha256:919068911d6f818dcaaa58be5e0232ff3405cac8762e7701a83f5363c96cd016
-      -   - '["glossary_choice","term:trait.imas_cg","zh-Hant",1]'
-          - sha256:595878a3f8ca759d0bcd95856e8f895b0dafa4e503398548d7960c20bf950eab
-      -   - '["glossary_choice","term:trait.luminary","zh-Hant",1]'
-          - sha256:d97759addc36051a6fdca31e4b9ee50c42769230dfeef5aa40373a4e3b859ff2
-      -   - '["glossary_choice","term:trait.passion","zh-Hant",1]'
-          - sha256:a579161f03d1aa569d30c3b91ebb411d9f93b7863d2835216c4122ad3edca038
-      -   - '["glossary_choice","term:trait.ward_office","zh-Hant",1]'
-          - sha256:ccea743781860aa05f9d7bdb0175766ed8589db68186fd0464c8e63c30348d3d
-      -   - '["glossary_choice","term:trait.wyrmkin","zh-Hant",1]'
-          - sha256:49c235f1882a093c457d504aa32b459536dec0b89f8f3c00f12af528c9875f86
-    sample_ids:
-      - '["glossary_choice","term:ability.feed","zh-Hant",1]'
-      - '["glossary_choice","term:ability.possession","zh-Hant",1]'
-      - '["glossary_choice","term:object.advance_marker","zh-Hant",1]'
-      - '["glossary_choice","term:trait.cool","zh-Hant",1]'
-      - '["glossary_choice","term:trait.cute","zh-Hant",1]'
-      - '["glossary_choice","term:trait.friendship_club","zh-Hant",1]'
-      - '["glossary_choice","term:trait.imas_cg","zh-Hant",1]'
-      - '["glossary_choice","term:trait.luminary","zh-Hant",1]'
-      - '["glossary_choice","term:trait.passion","zh-Hant",1]'
-      - '["glossary_choice","term:trait.ward_office","zh-Hant",1]'
-      - '["glossary_choice","term:trait.wyrmkin","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: gbaian10
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者在確認頁核可此繁中選詞；日期照定案檔或追加紀錄（day，無時分秒）。首次配發 key 是協調者另行核可，origin 的專案歸類依委託政策，不表示維護者親自驗過官方來源；本次未採納英文，也未核可加粗。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.leon_soryu","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.leon_soryu
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 蒼龍雷昂
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.leon_soryu_wind_of_justice","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.leon_soryu_wind_of_justice
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔正義之風〕蒼龍雷昂
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lets_clean_up","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lets_clean_up
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 要來打掃囉♡
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.lhynkal_foolish_sage","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.lhynkal_foolish_sage
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 愚昧的賢者‧琳庫露
+      concept_evidence: []
+      source_claim:

@@ -1,509 +1,91 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:698abff263bf530fcf674e0c416fe25d71a6ab2c42007d4ba018dbe0eedee666
 records:
-  - record_key: '["glossary_term","term:trait.necromancer"]'
+  - record_key: '["glossary_term","term:name.center_street"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.necromancer
-      category: trait
-      concept_key: trait.necromancer
+      id: term:name.center_street
+      category: card_name
+      concept_key: name.center_street
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:cf70dd1690f705dc816dc9cac2c49cad7f0b5184e14e142d7039da956dde0a1a
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:fc9de5f237a36f6280e01e694e7e901d3d352a24d39f22ebd5e3d1228e2d9483
-      source_span:
-        start: 0
-        end: 4
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.nightmare"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.nightmare
-      category: trait
-      concept_key: trait.nightmare
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:96fac6fe40e562d9dc2ee3032c2dc7921fb227dbd1c2e50adefad9bdcb65d672
-      source_span:
-        start: 5
-        end: 14
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.ninja"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.ninja
-      category: trait
-      concept_key: trait.ninja
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:5527e889cfebde76c0a1d40db7fa95641c5c324e985184795356b54ce13607a6
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b972b57cfa634a3514eea21f42d9e8c549563ec085c686576cc53ba44d23a22b
-      source_span:
-        start: 3
-        end: 5
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.noble"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.noble
-      category: trait
-      concept_key: trait.noble
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:fd4bb912ea14ecae784ff27832800487c0c6e40ee2ebee30c2a602a3438dfec0
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:6ddb39fc7c12e26aeaac97c226f09a14cfff60293d0beaad4bead632f6d7be3c
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.officer"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.officer
-      category: trait
-      concept_key: trait.officer
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:26d24ce00c4067d8d1530e8815b304f51c0c177a84453dd85dd79ac431dfd766
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:ef0ac5ef3db14208fc6b5aa063725bf061542b8b8db5559d8d50bb5a5ff0819e
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.omen"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.omen
-      category: trait
-      concept_key: trait.omen
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:e7c9bd82fabd9f06e391acf686ab332eb49ac26487c6394b3fa808cf785bd1b7
+        source_version_id: src:v1:2744943a7674bbc0707c1a7abbe471e5880edd1a513fdb9b9624f00acb9bbd9d
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:994102f036db62b505f30c81f7cfa97581967d9ce297fda1867aeedf10a77790
+        text_hash: sha256:6582bbe2f21b835feecaa6139ae0c96e097e4a893965b34bc97043a8917494e1
       source_span:
-        start: 3
-        end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.onmyoji"]'
+  - record_key: '["glossary_term","term:name.ceo_amaterasu"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.onmyoji
-      category: trait
-      concept_key: trait.onmyoji
+      id: term:name.ceo_amaterasu
+      category: card_name
+      concept_key: name.ceo_amaterasu
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:c435c728394a49d4b7d03880609aef11e25eac38bc8a4c54d47b10e27fc70ef5
+        source_version_id: src:v1:0d4a8b804d45022666f5c349746a89c0e53f7274466b8ee400195bf0664922ce
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:89db3008e40af875367b28a7f0b3af77a16a81a37c1708c04590f539cb933bff
+        locator: /faces/0/name
+        text_hash: sha256:151d23a26d541724cf7270682de979cacd57528ff5b878b0dc5fced469eac697
       source_span:
-        start: 4
-        end: 7
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.oracle_think_tank"]'
+  - record_key: '["glossary_term","term:name.cerberus_festive_hound"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.oracle_think_tank
-      category: trait
-      concept_key: trait.oracle_think_tank
+      id: term:name.cerberus_festive_hound
+      category: card_name
+      concept_key: name.cerberus_festive_hound
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:bdb2c89271937473cf2f3967ecfea103abff17a6bff5b3caed6eed30c3bb34b7
+        source_version_id: src:v1:f21442d5f85b252e1b37dca5934eadbf16975345eefc8106d07c3c64e6256fd4
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:c2a51f62111f8dbdd3d0790e9b374b9032874b8f68041b90949ed06ef137b5da
+        locator: /faces/0/name
+        text_hash: sha256:464e2f889caf9692a7e0f6c24efb16843db07d47f920a005be308c22328c5e89
       source_span:
-        start: 7
-        end: 17
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.pale_moon"]'
+  - record_key: '["glossary_term","term:name.chain_attack_sutherland"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.pale_moon
-      category: trait
-      concept_key: trait.pale_moon
+      id: term:name.chain_attack_sutherland
+      category: card_name
+      concept_key: name.chain_attack_sutherland
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:6ae5483f96473cd4a34d111ff4b0e2a01fca98c1d69a21a301e4421f6a09438b
+        source_version_id: src:v1:549105ae104b2c4a9213b6dac457016db487d9f110302d9560b00e8325f05e00
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:4f94e091e3e73b66861f95c997fbb799fa083f5803f1d4e459396a9209b9b9b7
+        locator: /faces/0/name
+        text_hash: sha256:93da3fbf76b465838c9ec191ac92d1f84a6168c7667a8e533859baabcbe91d2e
       source_span:
-        start: 7
-        end: 13
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.passion"]'
+  - record_key: '["glossary_term","term:name.champion_s_passion"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.passion
-      category: trait
-      concept_key: trait.passion
+      id: term:name.champion_s_passion
+      category: card_name
+      concept_key: name.champion_s_passion
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
@@ -512,900 +94,366 @@ records:
         locator: /faces/0/name
         text_hash: sha256:8d8ba86f4716eb927c3b884c6b5b5ec2f079c20bfd505bc219130d55d0778077
       source_span:
-        start: 0
-        end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.phoenix"]'
+  - record_key: '["glossary_term","term:name.chaos_grimoire"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.phoenix
-      category: trait
-      concept_key: trait.phoenix
+      id: term:name.chaos_grimoire
+      category: card_name
+      concept_key: name.chaos_grimoire
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:d59390c598f42620a98db26c9fcc45e2888401884e17da29d9dde72987a6669a
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b6fd957976a019651ca37613d45bb8702bcc74787a39c636aaa61d6a6d3f1363
-      source_span:
-        start: 0
-        end: 3
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.pixie"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.pixie
-      category: trait
-      concept_key: trait.pixie
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:3c9c3c40699dfdf432392f432967fc805cc97b04e3a0750456205eae9922bf8d
-        parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:1c6191cc955eb23c323d07ab79102e144e70d7da2e99e8f8b889cb02fef0de24
-      source_span:
-        start: 18
-        end: 20
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.priconne"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.priconne
-      category: trait
-      concept_key: trait.priconne
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b347fe2687d68cefa1276197952196c95ffdfdb48a84777fbf6e5f0020335b12
-      source_span:
-        start: 0
-        end: 4
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.prince"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.prince
-      category: trait
-      concept_key: trait.prince
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:418b5ee92e67b8cd41752f93100f7b769e5f8c78a7e89a99046585f6e18c97c2
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:9afccd2b572d1c989fcb500c7e492b1605b89a4662b84ac02574357e6e492d36
-      source_span:
-        start: 4
-        end: 8
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.princess"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.princess
-      category: trait
-      concept_key: trait.princess
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:c1aca52dd07bc1b2b10dfe7fc7105fc97b504388233b2b892bae113f953598a0
+        source_version_id: src:v1:672365c3801f392f6ae855d23076695d3c27614c00fd21b106e24aefe5f83bdc
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:120bb37dd3c163532f2e800c89f6b0bb01f8e71dd29ebdad759914bd07b15922
+        text_hash: sha256:bc21143273824c0151789e4d5893a16ec9d6916993782167941bcc2f818a1577
       source_span:
-        start: 3
-        end: 8
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.puppetry"]'
+  - record_key: '["glossary_term","term:name.charles_zi_britannia"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.puppetry
-      category: trait
-      concept_key: trait.puppetry
+      id: term:name.charles_zi_britannia
+      category: card_name
+      concept_key: name.charles_zi_britannia
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:72250179818710a4e4b912fc6276b018980a0f4a42e588d5c7c381196fdba06f
+        source_version_id: src:v1:400e8507a91dee23a71c11c3f784a36e418de2694322ed07aa79d94949444afc
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:cc4510f6e81bcc76e3014cad0f0b9cfa39ca94299dd07afafdb4f40fdb01b11d
+        text_hash: sha256:6c3cf513d1e0d19b6a336578a13f4ece25dea677bda8ca91c5891d56c8bc29db
       source_span:
-        start: 3
-        end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.rage_legion"]'
+  - record_key: '["glossary_term","term:name.chellerific_carnival"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.rage_legion
-      category: trait
-      concept_key: trait.rage_legion
+      id: term:name.chellerific_carnival
+      category: card_name
+      concept_key: name.chellerific_carnival
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:0450198cae9ee2b4f32531bd2bc757815d4648271bdb35f18ec8d96164ee081a
+        source_version_id: src:v1:bf6f431a7e0e03cb32d51db0d3cfc3d1901dc2759c62c9ea7408a81a2c3047bb
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:e3c0d61d8a5e7525cbe9acf729eef4908e3c3ee57a4b0867fb27792f0f28b6dd
+        locator: /faces/0/name
+        text_hash: sha256:1c28c00315617c552021d7ded72816b30685d63fb68056362b1f5d6cb06ad0a4
       source_span:
-        start: 5
-        end: 15
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.richmond_corporation"]'
+  - record_key: '["glossary_term","term:name.cheshire_cat"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.richmond_corporation
-      category: trait
-      concept_key: trait.richmond_corporation
+      id: term:name.cheshire_cat
+      category: card_name
+      concept_key: name.cheshire_cat
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:015c801771d5e4c74f6855e821a5f07d8b9bebefc2dbeb3e0fe838bacfcc8f38
+        source_version_id: src:v1:cfdfe39c2a55d61e6b24afd06512c71bc4536c11b268652e82f511804ee99d92
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:a0abef8344acfc6a3691713ae4e63f51a3f80756ade6656e54c79b19df4abda8
+        locator: /faces/0/name
+        text_hash: sha256:148cc18c61d7e683f6919e764703efd888ce7b9e2a0ed54089e55bfa4175cdd6
       source_span:
-        start: 5
-        end: 14
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.royal_paladin"]'
+  - record_key: '["glossary_term","term:name.cheval_grand"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.royal_paladin
-      category: trait
-      concept_key: trait.royal_paladin
+      id: term:name.cheval_grand
+      category: card_name
+      concept_key: name.cheval_grand
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:1f422fd24fb69f7062457c51a524607431a60294306b755e596540e685589c84
+        source_version_id: src:v1:02940addbcfb526a687396fc5d74a68ab443c6e9560aa3bc0a354790a89c44c8
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:685bb11f214ad109dd097a0d7b5399180365cf7f5d4a437a6cd4e69ceb4d6ee4
+        locator: /faces/0/name
+        text_hash: sha256:95f42094ffe843ee01296f8415fd986cb995fe601f1d920d7c4214d76c5305f1
       source_span:
-        start: 7
-        end: 16
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.sarendia_orphanage"]'
+  - record_key: '["glossary_term","term:name.chie_sasaki_step_to_the_future"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.sarendia_orphanage
-      category: trait
-      concept_key: trait.sarendia_orphanage
+      id: term:name.chie_sasaki_step_to_the_future
+      category: card_name
+      concept_key: name.chie_sasaki_step_to_the_future
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:6abd399fa9d017216fa97102edbc5f940af2f85bd6e680dd8dfd97646b62568f
+        source_version_id: src:v1:0f283a4b888f8b9716297283ea81e499e84aa9365778f6d69baed8a8aa9e89e1
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:455392394ad0b39508423884db045a0a5946dddc67cd3e515fa57a9748f14988
+        locator: /faces/0/name
+        text_hash: sha256:a5ab6204597eb7e5d2848ef9663ef14f3d71e1d94ffda0025349a5b3f13bddf2
       source_span:
-        start: 5
-        end: 14
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.seven_crowns"]'
+  - record_key: '["glossary_term","term:name.chieri_ogata_happiness_tune"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.seven_crowns
-      category: trait
-      concept_key: trait.seven_crowns
+      id: term:name.chieri_ogata_happiness_tune
+      category: card_name
+      concept_key: name.chieri_ogata_happiness_tune
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:8ce27828b2a39abc79d23087091733fbd84c6161013cd1f08072b151b0ed5026
+        source_version_id: src:v1:4fb10bc45fa58f13e45d3a0659464b0402240bb612e611f561224906214895fd
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:96fac6fe40e562d9dc2ee3032c2dc7921fb227dbd1c2e50adefad9bdcb65d672
+        locator: /faces/0/name
+        text_hash: sha256:0d694e509a3779a37725a4f54d05782a0cfb13e277ed95af88abe30dbffd2898
       source_span:
-        start: 15
-        end: 17
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.shadow_paladin"]'
+  - record_key: '["glossary_term","term:name.chieru"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.shadow_paladin
-      category: trait
-      concept_key: trait.shadow_paladin
+      id: term:name.chieru
+      category: card_name
+      concept_key: name.chieru
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:f40b8b025f76b166ae98fadfdaada44a74479a7e6c066ea7a36cb1b76472be9f
+        source_version_id: src:v1:4b91217194c40864c591e3d954a8a88d265451a3079ff624937d0d5a607bfe00
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:1a4a5295679fc2d5b30edfdba0ac2b91b706ca50a1add2875aa87be515947770
+        locator: /faces/0/name
+        text_hash: sha256:acfc082b8dbf785b08d9f94b59575a6fdc931d8a3de1bdc9c47f963548781a32
       source_span:
-        start: 7
-        end: 16
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.shikigami"]'
+  - record_key: '["glossary_term","term:name.chika"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.shikigami
-      category: trait
-      concept_key: trait.shikigami
+      id: term:name.chika
+      category: card_name
+      concept_key: name.chika
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:c435c728394a49d4b7d03880609aef11e25eac38bc8a4c54d47b10e27fc70ef5
+        source_version_id: src:v1:9e41ca5e890e0b634a681ed2b95b750088a2256958bb799d716974a0af0737ca
         parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:c74a202f995ba394b133136296e13a26ea9845a676ce1967c341126f729f4711
+        locator: /faces/0/name
+        text_hash: sha256:6cd5216a43534bfe85ed67a243c8369a0f69b51ea5706dfabfc5b09243424f40
       source_span:
-        start: 105
-        end: 107
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.supreme"]'
+  - record_key: '["glossary_term","term:name.chika_yokoyama"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.supreme
-      category: trait
-      concept_key: trait.supreme
+      id: term:name.chika_yokoyama
+      category: card_name
+      concept_key: name.chika_yokoyama
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:56a74762222de4715b0c71cc8764399b69395520e6bf82f07c31db76566e52e9
+        source_version_id: src:v1:301ea49fc329aa3310c5fba2173e6fa3e09f3a490e66d23d00a3606c040ef2c8
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:1db9432bf98ff0debf51e061358a58d9eb0d179b27ef068d74c17d5f0bf53b0c
+        locator: /faces/0/name
+        text_hash: sha256:95f98f5c39b9d425ac7ac53d50bf35285b97b0eda3e969670aba432053e9c709
       source_span:
-        start: 3
-        end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.necromancer"]'
-            - '["glossary_term","term:trait.nightmare"]'
-            - '["glossary_term","term:trait.ninja"]'
-            - '["glossary_term","term:trait.noble"]'
-            - '["glossary_term","term:trait.officer"]'
-            - '["glossary_term","term:trait.omen"]'
-            - '["glossary_term","term:trait.onmyoji"]'
-            - '["glossary_term","term:trait.oracle_think_tank"]'
-            - '["glossary_term","term:trait.pale_moon"]'
-            - '["glossary_term","term:trait.passion"]'
-            - '["glossary_term","term:trait.phoenix"]'
-            - '["glossary_term","term:trait.pixie"]'
-            - '["glossary_term","term:trait.priconne"]'
-            - '["glossary_term","term:trait.prince"]'
-            - '["glossary_term","term:trait.princess"]'
-            - '["glossary_term","term:trait.puppetry"]'
-            - '["glossary_term","term:trait.rage_legion"]'
-            - '["glossary_term","term:trait.richmond_corporation"]'
-            - '["glossary_term","term:trait.royal_paladin"]'
-            - '["glossary_term","term:trait.sarendia_orphanage"]'
-            - '["glossary_term","term:trait.seven_crowns"]'
-            - '["glossary_term","term:trait.shadow_paladin"]'
-            - '["glossary_term","term:trait.shikigami"]'
-            - '["glossary_term","term:trait.supreme"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-decisions:
-  - id: d:698abff263bf530fcf674e0c416fe25d71a6ab2c42007d4ba018dbe0eedee666
-    state: confirmed
-    scope: batch
-    category: glossary_term
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:698abff263bf530fcf674e0c416fe25d71a6ab2c42007d4ba018dbe0eedee666
-    members:
-      -   - '["glossary_term","term:trait.necromancer"]'
-          - sha256:bef68aaada6d611e849fe9a00d5365037c68b24f0436afc21caf23249f32a908
-      -   - '["glossary_term","term:trait.nightmare"]'
-          - sha256:ac7f90ebf411c488b5400d265785669d0d1201b7e67874861065f6bc911ae687
-      -   - '["glossary_term","term:trait.ninja"]'
-          - sha256:70cf467055abfec1d556f03630951724f47e178d08a88cbd6f14f692c90f72c2
-      -   - '["glossary_term","term:trait.noble"]'
-          - sha256:45f10e6b423863383ab45b6850dab3251a62fc220bffd1fbe2787336c80b9fbe
-      -   - '["glossary_term","term:trait.officer"]'
-          - sha256:5d99f0471dd71fd3b72fa818b556a34bca601ac8e9dad017ce02c5cefc7d9bd6
-      -   - '["glossary_term","term:trait.omen"]'
-          - sha256:8fc775969a7a26101a6350dd6522a6e3561d1102693842baa5f3ee625555c07c
-      -   - '["glossary_term","term:trait.onmyoji"]'
-          - sha256:d1b6b7f130eb50fa32da23eea04fe586f1d67008b394df78191c166b88b9d7dc
-      -   - '["glossary_term","term:trait.oracle_think_tank"]'
-          - sha256:d37db6ebbb614d32cd8a55c2d8e5a201d7479415598b3f1d5632f0b3db911370
-      -   - '["glossary_term","term:trait.pale_moon"]'
-          - sha256:0230026812d00ac96b668c654b10617448f91597951f7a4947a1722a322a41be
-      -   - '["glossary_term","term:trait.passion"]'
-          - sha256:6d1d0041707b8fc098ca8f66b6aa2ea46fb96960759ec1b39188ee3a04a11794
-      -   - '["glossary_term","term:trait.phoenix"]'
-          - sha256:6414105b7175fa666828c463a42a3a60f8f53139ce2f4f639019df32708ab356
-      -   - '["glossary_term","term:trait.pixie"]'
-          - sha256:d8eefea8a2cf0d5d206a2f4f08fbb58a5c469e13689ad19232ba5e093d29fdb4
-      -   - '["glossary_term","term:trait.priconne"]'
-          - sha256:1d8e15a438035cbb0f3e852fa30481755dff5fc7fb5544997ed3bbc9106f45f7
-      -   - '["glossary_term","term:trait.prince"]'
-          - sha256:0a1e089650824236da30f229df03d976cf498d8d1f2ae8dbf78c4948253628e5
-      -   - '["glossary_term","term:trait.princess"]'
-          - sha256:e3c5264b0ee3cc891ce0209eae8caa6579738a3c6fcf2aa715553e48df4fd06a
-      -   - '["glossary_term","term:trait.puppetry"]'
-          - sha256:6627b07cd74eb4014a678b7f24faaa762ba42df1a8da24f913427f9c88d24acd
-      -   - '["glossary_term","term:trait.rage_legion"]'
-          - sha256:a6b5221c162796a7d9e223bc94607bedb5835878a674b31ecdd0a958746d986f
-      -   - '["glossary_term","term:trait.richmond_corporation"]'
-          - sha256:37fd3a733a74f8149a16b970674be2b9c6d6e7f11d715383bdc07ffddc3306b8
-      -   - '["glossary_term","term:trait.royal_paladin"]'
-          - sha256:478d3934434fe36b69bf17213797268b994d11036d464914fe9b20bed032f6dc
-      -   - '["glossary_term","term:trait.sarendia_orphanage"]'
-          - sha256:d694a3a5cea82ed27a6dc50deca63873e583b0d23138c9438da20ee9b17a14fd
-      -   - '["glossary_term","term:trait.seven_crowns"]'
-          - sha256:99e4b57620072c2880807c9c3e110630ae15ae0df1973334ab3428942ee6ff42
-      -   - '["glossary_term","term:trait.shadow_paladin"]'
-          - sha256:745ba826e1a4d21350efc053444692d13a2fc2b62e24e0fd6cda11d16ad78992
-      -   - '["glossary_term","term:trait.shikigami"]'
-          - sha256:05d9c3512df0de35ab2d87a187b0c4aa2ba98028c00cf73b7ec8ff740a2b5666
-      -   - '["glossary_term","term:trait.supreme"]'
-          - sha256:e1b36730b6d87dc3f24e0a58e98f5cafa481c116d44ac51873d595fd2e23aef8
-    sample_ids:
-      - '["glossary_term","term:trait.necromancer"]'
-      - '["glossary_term","term:trait.nightmare"]'
-      - '["glossary_term","term:trait.ninja"]'
-      - '["glossary_term","term:trait.noble"]'
-      - '["glossary_term","term:trait.officer"]'
-      - '["glossary_term","term:trait.omen"]'
-      - '["glossary_term","term:trait.onmyoji"]'
-      - '["glossary_term","term:trait.oracle_think_tank"]'
-      - '["glossary_term","term:trait.pale_moon"]'
-      - '["glossary_term","term:trait.passion"]'
-      - '["glossary_term","term:trait.phoenix"]'
-      - '["glossary_term","term:trait.pixie"]'
-      - '["glossary_term","term:trait.priconne"]'
-      - '["glossary_term","term:trait.prince"]'
-      - '["glossary_term","term:trait.princess"]'
-      - '["glossary_term","term:trait.puppetry"]'
-      - '["glossary_term","term:trait.rage_legion"]'
-      - '["glossary_term","term:trait.richmond_corporation"]'
-      - '["glossary_term","term:trait.royal_paladin"]'
-      - '["glossary_term","term:trait.sarendia_orphanage"]'
-      - '["glossary_term","term:trait.seven_crowns"]'
-      - '["glossary_term","term:trait.shadow_paladin"]'
-      - '["glossary_term","term:trait.shikigami"]'
-      - '["glossary_term","term:trait.supreme"]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+  - record_key: '["glossary_term","term:name.chimera_test_subject"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chimera_test_subject
+      category: card_name
+      concept_key: name.chimera_test_subject
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:97b49c299de134e39545d24312990b6caa1b5604d3edddd466b1a3af9e806919
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:cda3e6ba5e0859028a2318203925fe6aecf8259a529f1ba22eb60bb6b49cd830
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.chitose_kurosaki"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chitose_kurosaki
+      category: card_name
+      concept_key: name.chitose_kurosaki
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2b501f2647c9569f1b68a5747f879238fed1e6f2edfbb52be6f45c6afdd947d3
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:740589e0388fa0b337746786746c88d01238eba099629e18b9333cdeca09a620
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.chitose_kurosaki_memento_mori"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chitose_kurosaki_memento_mori
+      category: card_name
+      concept_key: name.chitose_kurosaki_memento_mori
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:c4c9b0a719a5745141766a79fd99efa3448a3796b1a5142c4b95f6062c8769bf
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:6ad58b23ac19a8a3088a746082c4540d1a40d6b1435a6efff8ee3ed51071b9d0
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.chivalrous_charge"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chivalrous_charge
+      category: card_name
+      concept_key: name.chivalrous_charge
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:0f5e8e64205fc3c608981ffb3147e18751eea010052ff4bdd779cde197a9367f
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:17a3b20fb12c96c3f615f8254af14d41448087d81529a6c825193bef8eb3013e
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.chiyo_shirayuki"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chiyo_shirayuki
+      category: card_name
+      concept_key: name.chiyo_shirayuki
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:49099646b7096df90538979604fbfac1f266f136f0bc9006d1c25a7bf46dd991
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:6152feb0ef8f83e145da1d3fa9879722b0a1122f3ea3db448a362c1d0fa49b1c
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.chizuru_matsuo"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chizuru_matsuo
+      category: card_name
+      concept_key: name.chizuru_matsuo
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:448a7f2990f57472864e388c0a07a4590ade44fb3158431544493fcc670905dc
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:184197427748c47f3b79b87a8bd66a2f7e856a29d64cbf9e84b60b595c416ad7
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.chloe"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.chloe
+      category: card_name
+      concept_key: name.chloe
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:56bdd53ad434c98865371d1752116e72b94217387b24200b959fd27b18a6ede4
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:f83e6d2b36dea10454d1910ce24e3232135eb0753d338c79775720143c05a865
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.christina"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.christina
+      category: card_name
+      concept_key: name.christina
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:0512733df32c3187245472978f51c13665d132212da5a178cc0e11d9f8fa1959
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:82fdeefccac96c12ee5c9f4baae6847722caec2bc74462972fca2d1ae9719bc6
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.clandestine_dealings"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.clandestine_dealings
+      category: card_name
+      concept_key: name.clandestine_dealings
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:7fab711cc71a961ea34232399043fb2375f238d8f725b9a6fdf854a53ac8d5be
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:e4b05a26decc96109cb9ea56eaaecbb47f54ab25ee31e9887db3da41b3723e86
+      source_span:
+      authored_source_ja:
+      missing_source_reason:

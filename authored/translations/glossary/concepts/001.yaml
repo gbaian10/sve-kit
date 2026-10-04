@@ -1,10 +1,11 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:6d07dc75c94c70f82977e18147d371220f725d889e1ea33c3c7f2c1f5aa794f9
 records:
   - record_key: '["glossary_term","term:ability.accelerate"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.accelerate
       category: ability
@@ -19,45 +20,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.activation"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.activation
       category: ability
@@ -74,45 +41,11 @@ records:
         end: 55
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.advance_activation"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.advance_activation
       category: ability
@@ -129,45 +62,11 @@ records:
         end: 8
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.box_packing"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.box_packing
       category: ability
@@ -184,45 +83,11 @@ records:
         end: 112
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.choice"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.choice
       category: ability
@@ -239,45 +104,11 @@ records:
         end: 15
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.combo"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.combo
       category: ability
@@ -294,45 +125,11 @@ records:
         end: 41
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.countdown"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.countdown
       category: ability
@@ -347,45 +144,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.crimson"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.crimson
       category: ability
@@ -402,45 +165,11 @@ records:
         end: 13
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.crystallize"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.crystallize
       category: ability
@@ -455,45 +184,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.earth_rite"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.earth_rite
       category: ability
@@ -510,45 +205,11 @@ records:
         end: 14
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.enhance"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.enhance
       category: ability
@@ -563,45 +224,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.fanfare"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.fanfare
       category: ability
@@ -618,45 +245,11 @@ records:
         end: 8
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.feed"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.feed
       category: ability
@@ -673,45 +266,11 @@ records:
         end: 23
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.fusion"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.fusion
       category: ability
@@ -728,45 +287,11 @@ records:
         end: 34
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.invocation"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.invocation
       category: ability
@@ -781,45 +306,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.last_words"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.last_words
       category: ability
@@ -836,45 +327,11 @@ records:
         end: 12
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.lesson"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.lesson
       category: ability
@@ -891,45 +348,11 @@ records:
         end: 46
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.mode"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.mode
       category: ability
@@ -946,45 +369,11 @@ records:
         end: 19
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.necrocharge"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.necrocharge
       category: ability
@@ -1001,45 +390,11 @@ records:
         end: 72
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.necromancy"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.necromancy
       category: ability
@@ -1054,45 +409,11 @@ records:
       source_span:
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.overflow"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.overflow
       category: ability
@@ -1109,45 +430,11 @@ records:
         end: 90
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.possession"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.possession
       category: ability
@@ -1164,45 +451,11 @@ records:
         end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.quick"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.quick
       category: ability
@@ -1219,45 +472,11 @@ records:
         end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
   - record_key: '["glossary_term","term:ability.race"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
       id: term:ability.race
       category: ability
@@ -1274,126 +493,3 @@ records:
         end: 36
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:ability.accelerate"]'
-            - '["glossary_term","term:ability.activation"]'
-            - '["glossary_term","term:ability.advance_activation"]'
-            - '["glossary_term","term:ability.box_packing"]'
-            - '["glossary_term","term:ability.choice"]'
-            - '["glossary_term","term:ability.combo"]'
-            - '["glossary_term","term:ability.countdown"]'
-            - '["glossary_term","term:ability.crimson"]'
-            - '["glossary_term","term:ability.crystallize"]'
-            - '["glossary_term","term:ability.earth_rite"]'
-            - '["glossary_term","term:ability.enhance"]'
-            - '["glossary_term","term:ability.fanfare"]'
-            - '["glossary_term","term:ability.feed"]'
-            - '["glossary_term","term:ability.fusion"]'
-            - '["glossary_term","term:ability.invocation"]'
-            - '["glossary_term","term:ability.last_words"]'
-            - '["glossary_term","term:ability.lesson"]'
-            - '["glossary_term","term:ability.mode"]'
-            - '["glossary_term","term:ability.necrocharge"]'
-            - '["glossary_term","term:ability.necromancy"]'
-            - '["glossary_term","term:ability.overflow"]'
-            - '["glossary_term","term:ability.possession"]'
-            - '["glossary_term","term:ability.quick"]'
-            - '["glossary_term","term:ability.race"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-decisions:
-  - id: d:6d07dc75c94c70f82977e18147d371220f725d889e1ea33c3c7f2c1f5aa794f9
-    state: confirmed
-    scope: batch
-    category: glossary_term
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:6d07dc75c94c70f82977e18147d371220f725d889e1ea33c3c7f2c1f5aa794f9
-    members:
-      -   - '["glossary_term","term:ability.accelerate"]'
-          - sha256:bf67c797414b2083c93491f0fab7fd8680c49f46de5d781242f9d1761c5ec14b
-      -   - '["glossary_term","term:ability.activation"]'
-          - sha256:9eca44de5e2d77003cbeaa0c8edb18e25a012f0ea77000acc6632b23da346154
-      -   - '["glossary_term","term:ability.advance_activation"]'
-          - sha256:6ef887012f84fa4cf4d1a62a8a7b8f7b56b08c5d97c45d28bed168dc3b47f05f
-      -   - '["glossary_term","term:ability.box_packing"]'
-          - sha256:643233c8d11738485b10807886e24a74ff23004fd0824defa16dc56ec905db7c
-      -   - '["glossary_term","term:ability.choice"]'
-          - sha256:e59455e0d8cac64a4eb420c1ea9033e9b9093d2f195c6b3fd5bafc667fe85007
-      -   - '["glossary_term","term:ability.combo"]'
-          - sha256:63b7746f7ce3720018d5099737d44580226b8a69f3cb397952b994b483a94bf1
-      -   - '["glossary_term","term:ability.countdown"]'
-          - sha256:850803a5674cf34a7e961f384df8f6563442101ec972725e2fdb26a0af5f08a6
-      -   - '["glossary_term","term:ability.crimson"]'
-          - sha256:2c9581d9c42f7188dc857e1a828cfa58bda53309bffbb7d6c7911c9a99a481b1
-      -   - '["glossary_term","term:ability.crystallize"]'
-          - sha256:3719bf09069ef2c976c0e084bfbbfdd6642d8c74284936c77965b13b67b8b344
-      -   - '["glossary_term","term:ability.earth_rite"]'
-          - sha256:8c9e313d32fdb417e5faa0798048b23d319675fdcc726f386322795be77268a1
-      -   - '["glossary_term","term:ability.enhance"]'
-          - sha256:0265ad9bbbad0023c1a1b5e8676b8f0dc13acdd28c84da47a768623a8089e5d9
-      -   - '["glossary_term","term:ability.fanfare"]'
-          - sha256:427476970ce94c878271d6e45988cb19df871e4a22f715b7949698ebbbd286b5
-      -   - '["glossary_term","term:ability.feed"]'
-          - sha256:d304f8b292ca24b6e09dec081eef6564a85a72759add44a4b7834fe3a080c143
-      -   - '["glossary_term","term:ability.fusion"]'
-          - sha256:516a72c9c37f9f0d8cf25f03ea4b4ec9f88229653e6bc3d0e45c9820d727f5e3
-      -   - '["glossary_term","term:ability.invocation"]'
-          - sha256:817e66a00a28592ac122694d155f82795f46ec1f8f4daacf92fc5d138925f640
-      -   - '["glossary_term","term:ability.last_words"]'
-          - sha256:53374bb545853602e64090662268e26b69ccb86174f0bd879bf2de04b8361314
-      -   - '["glossary_term","term:ability.lesson"]'
-          - sha256:df063ddc60074816d80cde9db34fd435e137ad152b181386024bb050b6046d51
-      -   - '["glossary_term","term:ability.mode"]'
-          - sha256:182d26879cef8d0c71c9dc9916645e6a24b703f2ad0ef70c306fa81956dc6953
-      -   - '["glossary_term","term:ability.necrocharge"]'
-          - sha256:c1783e8beb3fb599a167e4bd9aaf32d0f7842b92495c61435b26f37805145ea9
-      -   - '["glossary_term","term:ability.necromancy"]'
-          - sha256:a3fa49f21c73341d3a3237893c353ce4872b7138df35dcafb629b6eccf21f9db
-      -   - '["glossary_term","term:ability.overflow"]'
-          - sha256:c9b7b0f8c64da7efa2efe69e09ac3f30a092a130d5b6ad647c5e66509d52e2a5
-      -   - '["glossary_term","term:ability.possession"]'
-          - sha256:4a2dfbb50f7d696326a42960d64809943ab1b5574d6d4b742db830ac3547c622
-      -   - '["glossary_term","term:ability.quick"]'
-          - sha256:83ff44e9aceb48d6c3c6a4ed98aa5749234bc2afe12cb815ab87d75f61254b70
-      -   - '["glossary_term","term:ability.race"]'
-          - sha256:11e1339eb23186496199fd95c546a9b95ea90a160984c5906a76fc274b07e0b1
-    sample_ids:
-      - '["glossary_term","term:ability.accelerate"]'
-      - '["glossary_term","term:ability.activation"]'
-      - '["glossary_term","term:ability.advance_activation"]'
-      - '["glossary_term","term:ability.box_packing"]'
-      - '["glossary_term","term:ability.choice"]'
-      - '["glossary_term","term:ability.combo"]'
-      - '["glossary_term","term:ability.countdown"]'
-      - '["glossary_term","term:ability.crimson"]'
-      - '["glossary_term","term:ability.crystallize"]'
-      - '["glossary_term","term:ability.earth_rite"]'
-      - '["glossary_term","term:ability.enhance"]'
-      - '["glossary_term","term:ability.fanfare"]'
-      - '["glossary_term","term:ability.feed"]'
-      - '["glossary_term","term:ability.fusion"]'
-      - '["glossary_term","term:ability.invocation"]'
-      - '["glossary_term","term:ability.last_words"]'
-      - '["glossary_term","term:ability.lesson"]'
-      - '["glossary_term","term:ability.mode"]'
-      - '["glossary_term","term:ability.necrocharge"]'
-      - '["glossary_term","term:ability.necromancy"]'
-      - '["glossary_term","term:ability.overflow"]'
-      - '["glossary_term","term:ability.possession"]'
-      - '["glossary_term","term:ability.quick"]'
-      - '["glossary_term","term:ability.race"]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。

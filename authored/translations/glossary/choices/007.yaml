@@ -1,53 +1,393 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:336e047ebd477f830686e6e358d527a374b7a8e7bf9eeabfc33d25bdfaab4627
 records:
-  - record_key: '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.aria_dancing_fairy","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:zone.evolve_deck
+      term_id: term:name.aria_dancing_fairy
       lang: zh-Hant
       value:
         kind: authored
-        text: 進化牌堆
-      origin: project
+        text: 舞動的妖精‧阿麗雅
       concept_evidence: []
       source_claim:
-        source_work:
+  - record_key: '["glossary_choice","term:name.aria_fairy_princess","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aria_fairy_princess
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 妖精公主‧阿麗雅
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.arisa","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.arisa
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 亞里莎
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
         source_urls: []
-        claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 消歧說明：另見「エボルヴ」：卡種與牌組用名詞形
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 エボルヴデッキ → 進化牌堆；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:336e047ebd477f830686e6e358d527a374b7a8e7bf9eeabfc33d25bdfaab4627
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:336e047ebd477f830686e6e358d527a374b7a8e7bf9eeabfc33d25bdfaab4627
-    members:
-      -   - '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
-          - sha256:92f9509f31aff0836056677737ccb40455177dde07208ffcc1180e36782577cd
-    sample_ids:
-      - '["glossary_choice","term:zone.evolve_deck","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 エボルヴデッキ → 進化牌堆；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.arisa_forest_archer","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.arisa_forest_archer
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 森林的弓箭手‧亞里莎
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.arisu_tachibana","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.arisu_tachibana
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 橘愛麗絲
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_U149
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.arisu_tachibana_ikenai_go_ahead","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.arisu_tachibana_ikenai_go_ahead
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔不可以的GO AHEAD〕橘愛麗絲
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_U149
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.asaka_narumi","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asaka_narumi
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 鳴海淺香
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.asaka_narumi_on_to_the_fascinating_stage","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asaka_narumi_on_to_the_fascinating_stage
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔前往魅惑的舞台〕鳴海淺香
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.asterisk","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asterisk
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: '*（Asterisk）'
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_(動畫
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.aston_machan","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aston_machan
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 奧斯頓真弓
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.asuka_ninomiya_blossoming_jewel","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asuka_ninomiya_blossoming_jewel
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔綻放吧Jewel〕二宮飛鳥
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.asuka_ninomiya_fragments_of_an_idol","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asuka_ninomiya_fragments_of_an_idol
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔《偶像》的碎片〕二宮飛鳥
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.asuka_ninomiya_gentle_evening","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asuka_ninomiya_gentle_evening
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔悠然等待之宵〕二宮飛鳥
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.asuka_ninomiya_sweet_charming","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.asuka_ninomiya_sweet_charming
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔Charming Sweet〕二宮飛鳥
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.at_the_end_of_the_day","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.at_the_end_of_the_day
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 一天落幕之時
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.aurelia_blooming_blade","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aurelia_blooming_blade
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 爛漫的劍技‧奧蕾莉亞
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.aurora_healing","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.aurora_healing
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 極光治癒
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.avaritia","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.avaritia
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 阿瓦莉提亞
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.awakening_of_twin_blades","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.awakening_of_twin_blades
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 雙劍覺醒
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.ayane","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.ayane
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 綾音
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.ayumi","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.ayumi
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 步未
+      concept_evidence: []
+      source_claim:
+        source_work: Princess Connect Re Dive
+        source_urls:
+          - https://github.com/Expugn/priconne-database
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.azuki_momoi","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.azuki_momoi
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 桃井小豆
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩角色列表
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.balliamo","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.balliamo
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Balliamo?
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.bamboo_memory","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.bamboo_memory
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 青竹回憶
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.

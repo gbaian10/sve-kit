@@ -1,53 +1,687 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:9703d586c340755c1ea6126259c8ea7278619d9049fe00b13c5067e16c3704d8
 records:
-  - record_key: '["glossary_choice","term:zone.ex","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:ability.accelerate","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:zone.ex
+      term_id: term:ability.accelerate
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/22
+          text_hash: sha256:415607ae76ddc4b5b4be96e8ab95804e621583b60c77be1531e1d2271c83922a
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '22'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/22
+            text_hash: sha256:a7a37ef6ff1ce2a4dd8548047bd3926ea55395e7ee31e9848958f84ddd67a77b
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/22
+            text_hash: sha256:415607ae76ddc4b5b4be96e8ab95804e621583b60c77be1531e1d2271c83922a
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.activation","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.activation
       lang: zh-Hant
       value:
         kind: authored
-        text: EX區
-      origin: project
+        text: 起動
       concept_evidence: []
       source_claim:
         source_work:
         source_urls: []
         claimed_source:
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。 原稿選詞理由：依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_choice","term:zone.ex","zh-Hant",1]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 EXエリア → EX區；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:9703d586c340755c1ea6126259c8ea7278619d9049fe00b13c5067e16c3704d8
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:9703d586c340755c1ea6126259c8ea7278619d9049fe00b13c5067e16c3704d8
-    members:
-      -   - '["glossary_choice","term:zone.ex","zh-Hant",1]'
-          - sha256:8942f1480503aebb6fda92cea4eacd7dd4c82f1d5c0400249a1efe9061f61de5
-    sample_ids:
-      - '["glossary_choice","term:zone.ex","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。terms-final.json sha256:76e81355253d8b03c50aaadbf8eab79786187977875961d096ca513663eb01e6；原稿條目 EXエリア → EX區；translation-decisions.md 2026-10-02 追加／一致性調整／參考其他卡牌遊戲／委託低信心詞的決定。依其他卡牌遊戲官方繁中用法調整（使用者授權協調者自行調整後告知）日期以追加紀錄為準，不沿用草稿 10-01；僅覆蓋此次選詞，與 key／加粗核可不同。
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.advance_activation","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.advance_activation
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 進階起動
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.box_packing","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.box_packing
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 裝箱
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.choice","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.choice
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 命運抉擇
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse
+        source_urls: []
+        claimed_source: 數位版 sv1 的繁中術語主張
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.combo","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.combo
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/29
+          text_hash: sha256:1039da93a371e467cc8fb79dd46a2196672a8c252e055ceef65721e642ba4559
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '29'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/29
+            text_hash: sha256:52a444a3c6b1e38a51a6bd9d8190c14f57a649801c5300cc804d152d61b80eb3
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/29
+            text_hash: sha256:1039da93a371e467cc8fb79dd46a2196672a8c252e055ceef65721e642ba4559
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.countdown","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.countdown
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/13
+          text_hash: sha256:9169ac082036ee8c8fb02f92fd9f17f95cb060a6a4a484caff845baee212110c
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '13'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/13
+            text_hash: sha256:b7ee2aa842629355fd2cd355735087c367e3c3fd16bbfd6df62d3ad3a51eb6d6
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/13
+            text_hash: sha256:9169ac082036ee8c8fb02f92fd9f17f95cb060a6a4a484caff845baee212110c
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.crimson","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.crimson
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 真紅
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.crystallize","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.crystallize
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/24
+          text_hash: sha256:91e1d418fb6f091ea47a3089dcc4090814afc382a09153058128548f0920d6ea
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '24'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/24
+            text_hash: sha256:91e1d418fb6f091ea47a3089dcc4090814afc382a09153058128548f0920d6ea
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/24
+            text_hash: sha256:91e1d418fb6f091ea47a3089dcc4090814afc382a09153058128548f0920d6ea
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.earth_rite","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.earth_rite
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/15
+          text_hash: sha256:a250818b578af85560d9b64e2a3b626deec20bd24b905bd818b8ed558fdc953f
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '15'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/15
+            text_hash: sha256:f860ecef252d37d5b473a0f69d3ca2d163ccd1b1faf819928fdc961bdcc59210
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/15
+            text_hash: sha256:a250818b578af85560d9b64e2a3b626deec20bd24b905bd818b8ed558fdc953f
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.enhance","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.enhance
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/18
+          text_hash: sha256:8ce31ad9864b1dd139d8962c8c92f428d2b62b3522644cace41cc78897ead549
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '18'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/18
+            text_hash: sha256:e127424ec7c910f75650589e9c5f5dc6fb0618da5541412d0a6958b7f3a72d45
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/18
+            text_hash: sha256:8ce31ad9864b1dd139d8962c8c92f428d2b62b3522644cace41cc78897ead549
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.fanfare","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.fanfare
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/1
+          text_hash: sha256:ec43a79ee33e30e0f9f1de2f9035b7004ef3144a8b28d927169f7fa604594c48
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '1'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/1
+            text_hash: sha256:f9c792cbbd15ade9017c67e35e862ed08d6b0c32ccde3ae0f9d11d493cae2264
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/1
+            text_hash: sha256:ec43a79ee33e30e0f9f1de2f9035b7004ef3144a8b28d927169f7fa604594c48
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.feed","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.feed
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 用餐
+      concept_evidence: []
+      source_claim:
+        source_work: 賽馬娘
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.fusion","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.fusion
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/25
+          text_hash: sha256:b9419eb861de3c799d1579cec12ddc51a6951ec0742f92556c9793feb165e271
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '25'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/25
+            text_hash: sha256:b9419eb861de3c799d1579cec12ddc51a6951ec0742f92556c9793feb165e271
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/25
+            text_hash: sha256:b9419eb861de3c799d1579cec12ddc51a6951ec0742f92556c9793feb165e271
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.invocation","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.invocation
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/23
+          text_hash: sha256:c62929f6a8bd14fd39361499ebf75a6c3c63077d420e10d9105d3db20d024e36
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '23'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/23
+            text_hash: sha256:a556fc025720eedcdcc6dac67b455d4e8d6a1d32e708559efa954aa9e97680aa
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/23
+            text_hash: sha256:c62929f6a8bd14fd39361499ebf75a6c3c63077d420e10d9105d3db20d024e36
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.last_words","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.last_words
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/2
+          text_hash: sha256:827c642e85bf991b313c7286d56ec128a3b179996ffb2cfee22dd09f3227d3fb
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '2'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/2
+            text_hash: sha256:2a127f6730c91335dc1d4092aadb943bd03618e8cd8089f3b455e6b9d638b63f
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/2
+            text_hash: sha256:827c642e85bf991b313c7286d56ec128a3b179996ffb2cfee22dd09f3227d3fb
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.lesson","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.lesson
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 課程
+      concept_evidence: []
+      source_claim:
+        source_work: 偶像大師 灰姑娘女孩
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=28688&snA=388
+          - https://forum.gamer.com.tw/C.php?bsn=28688&snA=4476
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_星光舞台
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
+  - record_key: '["glossary_choice","term:ability.mode","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.mode
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/34
+          text_hash: sha256:47a270081ab2892f63d740bc61cd7b17b04d9d3947b3123be8db9e0d97c12c83
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '34'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/34
+            text_hash: sha256:99d01e5c2b5fd389d898f9e664473e7b09aeb371d474d1f0b03f4b8b6acc1273
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/34
+            text_hash: sha256:47a270081ab2892f63d740bc61cd7b17b04d9d3947b3123be8db9e0d97c12c83
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.necrocharge","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.necrocharge
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 死靈充能
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.necromancy","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.necromancy
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/14
+          text_hash: sha256:a36884931b5ace1d296696ab25e0763b1bfc5ca408d00d577e9d9c1af3f89b17
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '14'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/14
+            text_hash: sha256:d110e812e3d902c2527f8e9e32df103508396f874abf8a8500dc78b216f517f4
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/14
+            text_hash: sha256:a36884931b5ace1d296696ab25e0763b1bfc5ca408d00d577e9d9c1af3f89b17
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.overflow","zh-Hant"]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.overflow
+      lang: zh-Hant
+      value:
+        kind: source
+        source_ref:
+          store_id: gbaian10-home
+          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+          parser: translation-svwb-v1
+          locator: /data/skill_names/10
+          text_hash: sha256:d8957cc196786cb81b98f4c157cb63aa6e97e8beeed56cfa32d8e58165d93fb3
+        span:
+      concept_evidence:
+        - kind: dictionary_entry
+          dictionary_kind: skill_names
+          entry_key: '10'
+          jp_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
+            parser: translation-svwb-v1
+            locator: /data/skill_names/10
+            text_hash: sha256:9fb5292d33e8920a612f75044a4639f0d2f2e5313eed66ae8dd879c40793d5c1
+          target_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
+            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
+            parser: translation-svwb-v1
+            locator: /data/skill_names/10
+            text_hash: sha256:d8957cc196786cb81b98f4c157cb63aa6e97e8beeed56cfa32d8e58165d93fb3
+          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
+      source_claim:
+  - record_key: '["glossary_choice","term:ability.possession","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.possession
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 憑依
+      concept_evidence: []
+      source_claim:
+        source_work: 卡片戰鬥先導者
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
+  - record_key: '["glossary_choice","term:ability.quick","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.quick
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Quick
+      concept_evidence: []
+      source_claim:
+        source_work:
+        source_urls: []
+        claimed_source:
+        note: 2026-10-03 維護者本人在譯文抽查後決定將「快速」改為「Quick」，是專案選詞，並非官方繁中出處主張。決定依據：events-glossary-quick-1.md；完整原話與紀錄 hash 見本批 decision.note。
+  - record_key: '["glossary_choice","term:ability.race","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:ability.race
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 參賽
+      concept_evidence: []
+      source_claim:
+        source_work: 賽馬娘
+        source_urls: []
+        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
+        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。

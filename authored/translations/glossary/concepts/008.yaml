@@ -1,1411 +1,459 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:9afc54820264e91430244b4e36dd06eb8dcfadaaf10cfe461212c88840a5aac1
 records:
-  - record_key: '["glossary_term","term:trait.encroacher"]'
+  - record_key: '["glossary_term","term:name.bansai_suzuki_clone_technique"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.encroacher
-      category: trait
-      concept_key: trait.encroacher
+      id: term:name.bansai_suzuki_clone_technique
+      category: card_name
+      concept_key: name.bansai_suzuki_clone_technique
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:1d437055266b9f1dfa44296f6ea508cf927557cae2096ed822f1d34f1aa934ef
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:2043ef36fdc5e4ce840ab2326cd0ea6e0bc9dff03c84aae2343cc01d2a3a00e7
-      source_span:
-        start: 7
-        end: 13
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.fable"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.fable
-      category: trait
-      concept_key: trait.fable
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:4afc84763ef357e186686feb521bfb78e34d6c695d2ade98aaefa546ea9063aa
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:a89579274a001d95f829f9d5653cfac3ca6fbf6daf545f8fadc40950dd595aa9
-      source_span:
-        start: 2
-        end: 4
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.fae_touched"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.fae_touched
-      category: trait
-      concept_key: trait.fae_touched
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:f1424b3c3ab951ec25a5bbe4ff43fe2cec1fba79b5ed324848b2523743b8deda
+        source_version_id: src:v1:20ab672fab689084a9f0502d90edb5af8bb9ddd469980ab33ca95a787f88b344
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:dba814d1b967746d581efa17ceb815c925aeeafb55616e0c8b68e94f412144f8
+        text_hash: sha256:99fb396fe4b88991fcfc05e471d4e4bf8e1613bc6e593ca60cb9b7ef9d23017c
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.faith"]'
+  - record_key: '["glossary_term","term:name.bansai_suzuki_deacon_shinobi"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.faith
-      category: trait
-      concept_key: trait.faith
+      id: term:name.bansai_suzuki_deacon_shinobi
+      category: card_name
+      concept_key: name.bansai_suzuki_deacon_shinobi
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:8a2ac759e342b1bac8934a825ea6a44f5f718a140d172a9670be91674e7598e3
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:3e2b0c578db1df14d82fa1251782e12a63945ddc6ac13cd23dcc3506c9640fbf
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.fallen_angel"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.fallen_angel
-      category: trait
-      concept_key: trait.fallen_angel
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:8294f75cac1ee45ef7e5098e444120692ff9e2c9565bbf7119587ad2ec15854b
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:eb9b8f8da7f4be2588cf8463e43ca0fb016c5ec550d073bb2ea9b07c2e4f1bb6
-      source_span:
-        start: 3
-        end: 6
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.festive"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.festive
-      category: trait
-      concept_key: trait.festive
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:b6b45af979a87ba9336bfef4b3083b67f6a3cf58335e3ece6cde75819774fefc
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:82e48ad4bad2d768aa19a77af1ac60b9c5af71d5f748d4fe003c8244ae1ca327
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.fiend"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.fiend
-      category: trait
-      concept_key: trait.fiend
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:a65e6e546405245ff1d044cc7f003f6428aa457aea7c7057d98caf49d4e1a7b4
+        source_version_id: src:v1:2dcdb86fe316d728aacab81d64191787f4c5265ae2781816119dc7a3df30ad4c
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:eb725eaf12a44a36d3837846fa2170485f91a711d77065ab7aa91297eeb83264
+        text_hash: sha256:a1bbea3d0d598346031ccf4256b7d23a3b5836031a640c4202c1a51eb0598e51
       source_span:
-        start: 3
-        end: 5
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.forbidden"]'
+  - record_key: '["glossary_term","term:name.barcgal"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.forbidden
-      category: trait
-      concept_key: trait.forbidden
+      id: term:name.barcgal
+      category: card_name
+      concept_key: name.barcgal
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:e130e0a1feec15a2717a000d9a6a5d67c0065c30dab866de5b267096d8206e03
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:5bfb6b4bf64eaa7669e50acde7505c1e415b7868dfe686256c2229be283b18ce
-      source_span:
-        start: 5
-        end: 7
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.forestier"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.forestier
-      category: trait
-      concept_key: trait.forestier
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:05066b4c8202c855e225a4aa9002c10c040a1469690ebc6f78ed40eee4940c9f
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:ac565581facb974ae85607529576b10eb7321c1505de99dd4c9a0da72b3aa364
-      source_span:
-        start: 5
-        end: 12
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.friendship_club"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.friendship_club
-      category: trait
-      concept_key: trait.friendship_club
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:d4ed5fee2a1def34413295aac0e1c137511ecc66a4d82e4b656bbc59c7bdeae5
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b5fc60e079b647f7783c9f7e7cc02ebba28c6f8d2ca1bb8576b2447d31315808
-      source_span:
-        start: 5
-        end: 10
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.geo_gehenna"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.geo_gehenna
-      category: trait
-      concept_key: trait.geo_gehenna
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:66eea5ed6c2125b4d60673b219af608edfc38c7f4ae282d9acfbbafe64b1359a
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:158e1117a0e6835c0cd5477ef77ba40a287a78df62a7e887c0b9a3c361a2bf2f
-      source_span:
-        start: 5
-        end: 13
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.geo_niflhel"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.geo_niflhel
-      category: trait
-      concept_key: trait.geo_niflhel
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:5c4de27a630c6467dae84c508b4147aadeb5e96252eaf649256c540f7db71782
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:564d89a76301758351034cc9ea48d78788ba51151f8aa0f8af9645c63386d8c1
-      source_span:
-        start: 5
-        end: 15
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.geo_theogonia"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.geo_theogonia
-      category: trait
-      concept_key: trait.geo_theogonia
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:e493eb904d00279e702b355f4f1c1d8254651e8f49b616beae1d08f7bdb0e065
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:d6296650471ef191d89854487686f50a91867368189f5d8ab8ec9388c4688b0a
-      source_span:
-        start: 5
-        end: 15
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.gigant"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.gigant
-      category: trait
-      concept_key: trait.gigant
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:65d03a32e7892f0b78d66b7690032a1a665b12754f8d8a2ab996b5311d361996
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:546c36f1a69183bad823d2912ff80129a422f9a753f022c6bf1045266a72325e
-      source_span:
-        start: 0
-        end: 2
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.goblinoid"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.goblinoid
-      category: trait
-      concept_key: trait.goblinoid
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:e96488d6ec3b0fb894e82baa3ee614c3dec728696a95278bcd66978244dc39a6
+        source_version_id: src:v1:84beee668101d227fcfa1d8096fc5ec187817fc6f144c433101921e7f6dd3a6d
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:a28c44dbfc0ad331db94c9a9474b8b5a86f76feab0879794066ecfecd62df0ed
+        text_hash: sha256:3a532849f8d78fc9589bcc689f1f57db3efa14be2f374e872598f47e3f8a8cfe
       source_span:
-        start: 0
-        end: 4
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.golem"]'
+  - record_key: '["glossary_term","term:name.barking_manticore"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.golem
-      category: trait
-      concept_key: trait.golem
+      id: term:name.barking_manticore
+      category: card_name
+      concept_key: name.barking_manticore
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:4d5cc8da59be97898f626f71b34bdd12ef1dcf126c5d02e7922e452016d4a2eb
-        parser: translation-jp-v1
-        locator: /faces/0/text
-        text_hash: sha256:04ce597a6867ca688dad379ddf2d9bcd94d5834de7fd9a0476b2ebce4342c1aa
-      source_span:
-        start: 39
-        end: 43
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.gorgon"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.gorgon
-      category: trait
-      concept_key: trait.gorgon
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:5f703a1c237cff1e60dcb569025a0d7b6d0fb6f64f96ea0f71459c29eb363b23
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b7ac90de3776497dbaf878831e1026f2487ef05e84b3c08ed92b9195f7873948
-      source_span:
-        start: 3
-        end: 8
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.gourmet_guild"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.gourmet_guild
-      category: trait
-      concept_key: trait.gourmet_guild
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:7e8ae2fd659265e94949ba89a93472b5dfaaa2c13afafbc1add4c45d921d3c3f
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:b347fe2687d68cefa1276197952196c95ffdfdb48a84777fbf6e5f0020335b12
-      source_span:
-        start: 5
-        end: 8
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.guild_association"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.guild_association
-      category: trait
-      concept_key: trait.guild_association
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:3b29246455a9b828f9435bcf37396f57c36dc9c441fc8258e1c03c000fbe5f91
-        parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:6798351e3434530f2d2c3856d1d7a71eff7478a8b9cf616f7eea7bd6bc33f9fc
-      source_span:
-        start: 5
-        end: 12
-      authored_source_ja:
-      missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.heir"]'
-    kind: glossary_term
-    filing_key: concepts
-    data:
-      id: term:trait.heir
-      category: trait
-      concept_key: trait.heir
-      source_ref:
-        store_id: gbaian10-home
-        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:9cb2ff1d760c1d56013d596f74e698c28c327f0634bdfed1634f8a1413c3d157
+        source_version_id: src:v1:4d8e6dd65391e5ee19785a670c87ff89d11a4d62be28fc3ff407237ae16d7283
         parser: translation-jp-v1
         locator: /faces/0/name
-        text_hash: sha256:7d4fad51eed04a7d2c5ca0192fbdb604681192d544f522af45c7aa2925640795
+        text_hash: sha256:cfcaaf6ce4ac181df34cd52197567a323776ec0bee8f22b54c3826ffcf514b1d
       source_span:
-        start: 3
-        end: 6
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.heroic"]'
+  - record_key: '["glossary_term","term:name.battle_maiden_tagitsuhime"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.heroic
-      category: trait
-      concept_key: trait.heroic
+      id: term:name.battle_maiden_tagitsuhime
+      category: card_name
+      concept_key: name.battle_maiden_tagitsuhime
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:1d7c379b09930867d35862ecf3650b75d7ba0644af4b3776b759c1c371a11422
+        source_version_id: src:v1:776ec98190e273faa454515fade8a3a272adcf868b899069dbcba434a9882059
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:c821405c07206fe11eeac352fcde41fcf5296daa074ef14c77f930f4a3df0655
+        locator: /faces/0/name
+        text_hash: sha256:52d04d1b076dafe79d44b4fd462e1795b6fde0867d29e607fa421854dc2d2be4
       source_span:
-        start: 3
-        end: 7
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.hunter"]'
+  - record_key: '["glossary_term","term:name.battle_siren_cynthia"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.hunter
-      category: trait
-      concept_key: trait.hunter
+      id: term:name.battle_siren_cynthia
+      category: card_name
+      concept_key: name.battle_siren_cynthia
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:46b24890ddebe13803d376a9ba7285b828855ecb5fdd302cdb843e89fc47eaa2
+        source_version_id: src:v1:994341a8d15f089b9aaf1238684dbe6cd5ed41b18c6cc225052a495462ba5bf9
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:8c39864fadaa7c80beeef9252fbc4cedf9a2492173b406ec7b103a5b976d4614
+        locator: /faces/0/name
+        text_hash: sha256:c0c41e3c0de5948756c40abb518bebdb7038c6bad9a9532031a76894a401f6cf
       source_span:
-        start: 0
-        end: 2
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.idolatry"]'
+  - record_key: '["glossary_term","term:name.battle_sister_chocolat"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.idolatry
-      category: trait
-      concept_key: trait.idolatry
+      id: term:name.battle_sister_chocolat
+      category: card_name
+      concept_key: name.battle_sister_chocolat
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:b393de33d8937d568857f5c66d66add6092850a4b39c5ff00337b792afd84781
+        source_version_id: src:v1:6a5eecb714f158df84a0272f23194b6bd1dd267a43b2316d16074c8aeea2e2b9
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:1fc2299295c565b1be28f6a6aef318f3eb28bbbfbedbcb06a2afa20fe0d58260
+        locator: /faces/0/name
+        text_hash: sha256:1af478211eedfdb7926887c21dcc2635522174a03290cd35d66578f75084c472
       source_span:
-        start: 3
-        end: 7
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-  - record_key: '["glossary_term","term:trait.imas_cg"]'
+  - record_key: '["glossary_term","term:name.battle_sister_cocoa"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_term
-    filing_key: concepts
     data:
-      id: term:trait.imas_cg
-      category: trait
-      concept_key: trait.imas_cg
+      id: term:name.battle_sister_cocoa
+      category: card_name
+      concept_key: name.battle_sister_cocoa
       source_ref:
         store_id: gbaian10-home
         batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
-        source_version_id: src:v1:7ea142d17fa0cae5520100100dd572a64938cff3a28ea99e71d2c4b3f77ea5a1
+        source_version_id: src:v1:39df674f71f24b13af0daa5bbe02764509b842ef8510bf893b56330d988d5da8
         parser: translation-jp-v1
-        locator: /faces/0/trait_raw
-        text_hash: sha256:26b096056503883f0c1a0870dd8c7545f71a91b8ef3de7c4003e09f251bcbbe9
+        locator: /faces/0/name
+        text_hash: sha256:a9eb97e902f83b10d92850cb6a9c1108da2473a3cd51c17c2dcd040070320358
       source_span:
-        start: 0
-        end: 4
       authored_source_ja:
       missing_source_reason:
-      adoption_review:
-        mode: delegated_glossary
-        delegation:
-          authorized_by: gbaian10
-          authorization_basis: 2026-10-02 維護者委託協調者處理術語採納與永久 key 配發；glossary-adoption §4。僅適用本次 scope，新增詞或改字須另記新收據。
-          authorization_date: '2026-10-02'
-          scope:
-            - '["glossary_term","term:trait.encroacher"]'
-            - '["glossary_term","term:trait.fable"]'
-            - '["glossary_term","term:trait.fae_touched"]'
-            - '["glossary_term","term:trait.faith"]'
-            - '["glossary_term","term:trait.fallen_angel"]'
-            - '["glossary_term","term:trait.festive"]'
-            - '["glossary_term","term:trait.fiend"]'
-            - '["glossary_term","term:trait.forbidden"]'
-            - '["glossary_term","term:trait.forestier"]'
-            - '["glossary_term","term:trait.friendship_club"]'
-            - '["glossary_term","term:trait.geo_gehenna"]'
-            - '["glossary_term","term:trait.geo_niflhel"]'
-            - '["glossary_term","term:trait.geo_theogonia"]'
-            - '["glossary_term","term:trait.gigant"]'
-            - '["glossary_term","term:trait.goblinoid"]'
-            - '["glossary_term","term:trait.golem"]'
-            - '["glossary_term","term:trait.gorgon"]'
-            - '["glossary_term","term:trait.gourmet_guild"]'
-            - '["glossary_term","term:trait.guild_association"]'
-            - '["glossary_term","term:trait.heir"]'
-            - '["glossary_term","term:trait.heroic"]'
-            - '["glossary_term","term:trait.hunter"]'
-            - '["glossary_term","term:trait.idolatry"]'
-            - '["glossary_term","term:trait.imas_cg"]'
-          decided_by: Claude（協調者，維護者委託）
-          decided_at: '2026-10-02T00:00:00Z'
-          decided_precision: day
-          decision_basis: 2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
-    evidence: []
-decisions:
-  - id: d:9afc54820264e91430244b4e36dd06eb8dcfadaaf10cfe461212c88840a5aac1
-    state: confirmed
-    scope: batch
-    category: glossary_term
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:9afc54820264e91430244b4e36dd06eb8dcfadaaf10cfe461212c88840a5aac1
-    members:
-      -   - '["glossary_term","term:trait.encroacher"]'
-          - sha256:d446247f0d9f41e0182bacfb549b70acc78b739dc28e32d495e22304f30452a9
-      -   - '["glossary_term","term:trait.fable"]'
-          - sha256:ca31c51b7d48f58655e0958ae41d3cdfb4b91bfc7c7d081e95126555f506201d
-      -   - '["glossary_term","term:trait.fae_touched"]'
-          - sha256:6f12507caef1ab575cecfd3320a8d2c4a5ecc21ef1e0f054f4cd1cb4e91aece2
-      -   - '["glossary_term","term:trait.faith"]'
-          - sha256:47d622a9eb4372090d4ca29f321e55a85e1b86b34b6720820608f0179cec7859
-      -   - '["glossary_term","term:trait.fallen_angel"]'
-          - sha256:ba3b963e2e5ce3f36a94bd62a6ba15c3b9e9d255cf900abfe2dfc0edbf8d5efc
-      -   - '["glossary_term","term:trait.festive"]'
-          - sha256:590ca1962f0b408e425eb49d19a1cf7ec4777c094e04ae579bf9ac5ef77fb85d
-      -   - '["glossary_term","term:trait.fiend"]'
-          - sha256:dd2b6a01dde983203ddd7a61fb82c5c8355b71981208c2fe03b8b40caaa8d234
-      -   - '["glossary_term","term:trait.forbidden"]'
-          - sha256:3f9896b9e42c837fd772e4661334018316b92d15d555f8388ae6014b18e2f172
-      -   - '["glossary_term","term:trait.forestier"]'
-          - sha256:c767eed1064d303e388f23bbf0d8ffabc61ec5507caa6941650624ea4a1ebab0
-      -   - '["glossary_term","term:trait.friendship_club"]'
-          - sha256:6e36f1393bc8e034c4f866b514399eb07f967cef4f6fca66ed1e243ac40b4f22
-      -   - '["glossary_term","term:trait.geo_gehenna"]'
-          - sha256:aa5d00c7334456a6de709c6df4da664335f7b6eb40043982a3e247a258adca4c
-      -   - '["glossary_term","term:trait.geo_niflhel"]'
-          - sha256:9f901525301f3f774e1323f1a38ebe7a7dad6d5213d460ac743e74ac658a70cd
-      -   - '["glossary_term","term:trait.geo_theogonia"]'
-          - sha256:c3db5831099daf3e7ccbdf8ed412ee460c1628ee86f9228c8a571a21022269ae
-      -   - '["glossary_term","term:trait.gigant"]'
-          - sha256:31815ae89193ac8ff5da411a4b768d3b676122c8777df83737f0e455a1c8dd92
-      -   - '["glossary_term","term:trait.goblinoid"]'
-          - sha256:c6f458aa748555d17e389928084df7dd9d52dc79920bbb284b70231a7a3da9be
-      -   - '["glossary_term","term:trait.golem"]'
-          - sha256:b4450e8456e5a09dbe6cbd88ee98cd074256629a9cf25dcca8d6bbe861919e5b
-      -   - '["glossary_term","term:trait.gorgon"]'
-          - sha256:68ac3617e92047fc3e2c96223534c0f11f78094d77b9c4f0a4bcfb70b29bcbc2
-      -   - '["glossary_term","term:trait.gourmet_guild"]'
-          - sha256:860d4dd97f728baea49a240a56ae87941619d795f7822b57f08582598004df44
-      -   - '["glossary_term","term:trait.guild_association"]'
-          - sha256:016498b84d5ab5f13c7199aaca73c7a9d460fdfe6f89da14a445184af91b6c94
-      -   - '["glossary_term","term:trait.heir"]'
-          - sha256:733f94dcd3577c7ea00d455f5be43be72ba21498441c7cbe3f74083b23586a93
-      -   - '["glossary_term","term:trait.heroic"]'
-          - sha256:9b4d17fd66595993a870521f8cc69341938b189c5e2dbbfb99f9956c26245db9
-      -   - '["glossary_term","term:trait.hunter"]'
-          - sha256:c6ca6824d14a6d32f568444b5b4b148a0d76a6a8f9d04df69766048bb16437ec
-      -   - '["glossary_term","term:trait.idolatry"]'
-          - sha256:71143b25a914c12120dcbe6dd6a068a851b5f80dc9ff908566864e2a038909aa
-      -   - '["glossary_term","term:trait.imas_cg"]'
-          - sha256:7a0aa90093450403fea2644d6aaf7b1169cd7a3c49bca49cbd16115f7653f8b5
-    sample_ids:
-      - '["glossary_term","term:trait.encroacher"]'
-      - '["glossary_term","term:trait.fable"]'
-      - '["glossary_term","term:trait.fae_touched"]'
-      - '["glossary_term","term:trait.faith"]'
-      - '["glossary_term","term:trait.fallen_angel"]'
-      - '["glossary_term","term:trait.festive"]'
-      - '["glossary_term","term:trait.fiend"]'
-      - '["glossary_term","term:trait.forbidden"]'
-      - '["glossary_term","term:trait.forestier"]'
-      - '["glossary_term","term:trait.friendship_club"]'
-      - '["glossary_term","term:trait.geo_gehenna"]'
-      - '["glossary_term","term:trait.geo_niflhel"]'
-      - '["glossary_term","term:trait.geo_theogonia"]'
-      - '["glossary_term","term:trait.gigant"]'
-      - '["glossary_term","term:trait.goblinoid"]'
-      - '["glossary_term","term:trait.golem"]'
-      - '["glossary_term","term:trait.gorgon"]'
-      - '["glossary_term","term:trait.gourmet_guild"]'
-      - '["glossary_term","term:trait.guild_association"]'
-      - '["glossary_term","term:trait.heir"]'
-      - '["glossary_term","term:trait.heroic"]'
-      - '["glossary_term","term:trait.hunter"]'
-      - '["glossary_term","term:trait.idolatry"]'
-      - '["glossary_term","term:trait.imas_cg"]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: Claude（協調者，維護者委託）
-    reviewed_at: '2026-10-02T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者委託；協調者決定；不是維護者親自核可。2026-10-02 協調者追加決定：key 提案 r2（264 glossary＋15 vocabulary，6aabb818304c53b56ee88ceaf0b21105f38f7dcb）已逐筆看過，核可照此配發。本收據只覆蓋 scope 中的首次 glossary key 配發；不表示核可繁中選詞或加粗。對照表檔案 hash sha256:2cbd7b1636849622bc22ebd0196083aead26be9d200003b5a5091573253dc182。
+  - record_key: '["glossary_term","term:name.battleship_intelligence"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.battleship_intelligence
+      category: card_name
+      concept_key: name.battleship_intelligence
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:24c8c2b79366d12f174bf4a06c549b106f4484706a43c3863a8d98a7dc790e0a
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:69d63164ebd89952645831d9952a535c6c72e8428c0ac879b39ae794098a1938
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.beachside_memories"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.beachside_memories
+      category: card_name
+      concept_key: name.beachside_memories
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:6d6592ee475b5da0e495aaab71dc6b79503120d9432fcec0a15648d5b9e11804
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:bea3a0a278053f59f24505d2e614b5f112ccf77c9e2f58faab4435421975774a
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.beastcall_aria"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.beastcall_aria
+      category: card_name
+      concept_key: name.beastcall_aria
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:e4ffddf088dec01e6f1eb2d30a415c3bfe61014c087ab9680e1e3321c98fa721
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:d14fdb4fb6a40f63323c99cfd2734950ff76614bf3b8cad9ca28103027748035
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.beastly_vow"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.beastly_vow
+      category: card_name
+      concept_key: name.beastly_vow
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:4867eb996814fe7638ae8cc03231716c89c4377730fc97d83ac6d95a9363aa8c
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:00b24a7adb4bb5b03993146af6c4beb21cb67533c751d0d87b203c346f01a906
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bejeweled_advisor"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bejeweled_advisor
+      category: card_name
+      concept_key: name.bejeweled_advisor
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:7d20998c21adfc8e7eb353f9f447d0941ebb7d70c81208172c4c1484e2911ef9
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:a9216a6bac28d423f4978a110cd1e5f18ba37653082319590b69ee0be7acae85
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bejeweled_bouncer"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bejeweled_bouncer
+      category: card_name
+      concept_key: name.bejeweled_bouncer
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:2bfa939aa65265c5ef63874800f71825465eba51428691b9ace790d1bd1a3c8e
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:f481da52b16119e93af9928d5fc3b8e0f3b8c48a8020b4d1bbe7a14092b74ff0
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bejeweled_supermodel"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bejeweled_supermodel
+      category: card_name
+      concept_key: name.bejeweled_supermodel
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:532b5f052c11773c525218d30e180daa9428ab922b80659497f017319fa25929
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:4876a105dc34b452e8837792f88894df0faf4f480206e25fc82d0f936d05a2d6
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bellicosity_dragon"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bellicosity_dragon
+      category: card_name
+      concept_key: name.bellicosity_dragon
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:602f5713647c9c655dba36636171e86b1dfe301de30e5ed41ad2061cf975c978
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:8fb307a93ac8f26ecc094385eb3e75a1010f66aa914cff6f3c2d01b8a8eab938
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.berserk_dragon"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.berserk_dragon
+      category: card_name
+      concept_key: name.berserk_dragon
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:3f57dd7a8adca83f951c50276c87b62a5dac08dff25e59d163185c64b83cb2fa
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:1b97da9d1c96a9f37f0e0a490433a2c490de9e0116b4f57c7d9b6bf5e9895a1b
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.beryl_dreameater"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.beryl_dreameater
+      category: card_name
+      concept_key: name.beryl_dreameater
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:6b845cb910039e249ada07a4c9b0e0e1dace5539f72b711abac8099e9d45394d
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:6c8e74f6ca36bea8c4c49649da987dd58761870e8652826227f4fa0447739f54
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.biko_pegasus"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.biko_pegasus
+      category: card_name
+      concept_key: name.biko_pegasus
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:7bfd64ec0c734e31219bc621ea6216726b59f428ec1320320153cf8f95e5178d
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:bad0b9019f4a053e396536f2e6ac5e45201ab3217763ac69cdd6f5b2e8da6b5f
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.bird_s_eye_investigator"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.bird_s_eye_investigator
+      category: card_name
+      concept_key: name.bird_s_eye_investigator
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:4b930b34df5ae90385a2e567a20fe15e46f401f18af4ef63e8c7888ed67e1982
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:85c574f81153c08b5756e6d7e87396a1d82439aa17f1d29c73a6e0e80d1a0b76
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.biwa_hayahide"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.biwa_hayahide
+      category: card_name
+      concept_key: name.biwa_hayahide
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:c3587a8917512e34e5c8927f81ceab8fb20c284412ddb16cd58f50b7b8d99da4
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:330fcc73f15df6a7b84facceeed8d601245136f1cd1e422f8b5826a07734016b
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.black_sage_charon"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.black_sage_charon
+      category: card_name
+      concept_key: name.black_sage_charon
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:84c08affa7e8283ccc3de0adcd213fcc0f885445a0edbad9851258d1df013a4f
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:abb6a051f9331a2e3a3a362136f346bffa0279682ff2e5b6e98e5fab0d21d0cb
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.blaster_blade"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.blaster_blade
+      category: card_name
+      concept_key: name.blaster_blade
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:5f3587e6c6528dea63a5c274113536398598defa64cbd63cfae25eee9e73a8ff
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:f8e87dbb25aebbe616edf4dd8828e30e3d2ad4c558b3648e8df33b76f8f531aa
+      source_span:
+      authored_source_ja:
+      missing_source_reason:
+  - record_key: '["glossary_term","term:name.blaster_dark"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_term
+    data:
+      id: term:name.blaster_dark
+      category: card_name
+      concept_key: name.blaster_dark
+      source_ref:
+        store_id: gbaian10-home
+        batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+        source_version_id: src:v1:6d481f8416ff192667231080a66ee55d259cb099085d50756ed037494dcd48f6
+        parser: translation-jp-v1
+        locator: /faces/0/name
+        text_hash: sha256:9b121d6d864d99a2401d52c5246b785d5abbfba3ca5432dba4665f1fc9ea5c70
+      source_span:
+      authored_source_ja:
+      missing_source_reason:

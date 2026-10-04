@@ -1,681 +1,365 @@
-translation_authored_format: 1
+translation_authored_format: 2
 kind: translation_shard
-default_decision_id: d:57e077750b52dffc275d9ea9f38c440608d90b5a2345fa0644834221481629e2
 records:
-  - record_key: '["glossary_choice","term:ability.fanfare","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.fiery_paean","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:ability.fanfare
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/skill_names/1
-          text_hash: sha256:ec43a79ee33e30e0f9f1de2f9035b7004ef3144a8b28d927169f7fa604594c48
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: skill_names
-          entry_key: '1'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/skill_names/1
-            text_hash: sha256:f9c792cbbd15ade9017c67e35e862ed08d6b0c32ccde3ae0f9d11d493cae2264
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/skill_names/1
-            text_hash: sha256:ec43a79ee33e30e0f9f1de2f9035b7004ef3144a8b28d927169f7fa604594c48
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:action.choose","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:action.choose
+      term_id: term:name.fiery_paean
       lang: zh-Hant
       value:
         kind: authored
-        text: 指定
-      origin: project
+        text: 誓約之炎
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:action.evolve","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.filene_unmelting_whitefrost","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:action.evolve
+      term_id: term:name.filene_unmelting_whitefrost
       lang: zh-Hant
       value:
         kind: authored
-        text: 進化
-      origin: project
+        text: 不融的銀冰‧菲琳
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:event.evolve","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.fine_motion","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:event.evolve
-      lang: zh-Hant
-      value:
-        kind: source
-        source_ref:
-          store_id: gbaian10-home
-          batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-          source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-          parser: translation-svwb-v1
-          locator: /data/skill_names/3
-          text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
-        span:
-      origin: official_svwb
-      concept_evidence:
-        - kind: dictionary_entry
-          dictionary_kind: skill_names
-          entry_key: '3'
-          jp_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:1918b5fd371783f0f54a5615b843ef0b2492f4bd50a83a79601fbc4618782af4
-            parser: translation-svwb-v1
-            locator: /data/skill_names/3
-            text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
-          target_ref:
-            store_id: gbaian10-home
-            batch_id: sha256:0a38f2f717d7e0a06ac527f5422ff5ff78571d0f9a8b7818045d14b4c9c4bc66
-            source_version_id: src:v1:69733cd553d2d4ed82d5e94d3c4842790a12a0eaeb4e3678c123f2d302c5d41a
-            parser: translation-svwb-v1
-            locator: /data/skill_names/3
-            text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
-          concept_note: 同一官方字典鍵，譯詞沿維護者確認頁採納。
-      source_claim:
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:object.card","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:object.card
+      term_id: term:name.fine_motion
       lang: zh-Hant
       value:
         kind: authored
-        text: 卡片
-      origin: project
+        text: 美妙姿勢
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:player.opponent","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:player.opponent
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 敵方
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:player.self","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:player.self
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 自己
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:rule.cost","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:rule.cost
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 消費
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:rule.damage","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:rule.damage
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 傷害
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:stat.health","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:stat.health
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 生命值
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.alter_maiden","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.alter_maiden
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 幻變少女
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
+        source_work: Uma Musume
         source_urls:
-          - https://forum.gamer.com.tw/Co.php?bsn=30861&sn=472531
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.elizabeth_park","zh-Hant",1]'
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.flame_of_hope_aermo","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.elizabeth_park
+      term_id: term:name.flame_of_hope_aermo
       lang: zh-Hant
       value:
         kind: authored
-        text: 伊麗莎白牧場
-      origin: project
+        text: 希望之火 艾爾摩
       concept_evidence: []
       source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.forestier","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.forestier
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 森林守衛
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.guild_association","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.guild_association
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 公會管理協會
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
+        source_work: Cardfight Vanguard
         source_urls: []
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.little_lyrical","zh-Hant",1]'
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.flame_of_promise_aermo","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:trait.little_lyrical
+      term_id: term:name.flame_of_promise_aermo
       lang: zh-Hant
       value:
         kind: authored
-        text: 小小甜心
-      origin: project
+        text: 約定之火 艾爾摩
       concept_evidence: []
       source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.lucent_academy","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.lucent_academy
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 月光學院
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.mercurius_foundation","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.mercurius_foundation
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 墨丘利財團
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.tracen_academy","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.tracen_academy
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 特雷森學園
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 賽馬娘
-        source_urls:
-          - https://game.udn.com/game/story/122089/6098786
-          - https://zh.wikipedia.org/zh-tw/賽馬娘_Pretty_Derby
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.twilight_caravan","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.twilight_caravan
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 暮光流星群
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.twinkle_wish","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.twinkle_wish
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 破曉之星
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:trait.weissflugel","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:trait.weissflugel
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 純白之翼
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 公主連結
-        source_urls:
-          - https://www.princessconnect.so-net.tw/role
-          - https://zh.wikipedia.org/zh-tw/超異域公主連結☆Re:Dive角色列表
-        claimed_source: 原作／台灣社群繁中名稱主張，尚無官方凍結同概念證據
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:zone.battlefield","zh-Hant",1]'
-    kind: glossary_choice
-    filing_key: choices
-    data:
-      term_id: term:zone.battlefield
-      lang: zh-Hant
-      value:
-        kind: authored
-        text: 戰場
-      origin: project
-      concept_evidence: []
-      source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_work: Cardfight Vanguard
         source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:zone.deck","zh-Hant",1]'
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.flash_shield_iseult","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:zone.deck
+      term_id: term:name.flash_shield_iseult
       lang: zh-Hant
       value:
         kind: authored
-        text: 牌堆
-      origin: project
+        text: 閃光之盾‧伊索德
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
-        source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-  - record_key: '["glossary_choice","term:zone.hand","zh-Hant",1]'
+  - record_key: '["glossary_choice","term:name.flogal","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
     kind: glossary_choice
-    filing_key: choices
     data:
-      term_id: term:zone.hand
+      term_id: term:name.flogal
       lang: zh-Hant
       value:
         kind: authored
-        text: 手牌
-      origin: project
+        text: 弗洛加爾
       concept_evidence: []
       source_claim:
-        source_work: 'Shadowverse／Shadowverse: Worlds Beyond'
+        source_work: Cardfight Vanguard
         source_urls: []
-        claimed_source: 數位版 both 的繁中術語主張
-        note: 本專案採用定案繁中；來源優先序及選詞依 terms-final.json／translation-decisions.md。來源主張與 URL 未經 frozen 同概念驗證，不能標為官方來源；依 2026-10-02 協調者決定及 glossary-adoption §3 以 project 採納，補到證據須追加下一 adoption。 原稿沒有來源 URL，不補猜測網址。
-      adoption_review:
-        mode: human
-        delegation:
-      adoption_no: 1
-      predecessor:
-    evidence: []
-decisions:
-  - id: d:57e077750b52dffc275d9ea9f38c440608d90b5a2345fa0644834221481629e2
-    state: confirmed
-    scope: batch
-    category: glossary_choice
-    policy_id: glossary-initial-51-v1
-    membership_hash: sha256:57e077750b52dffc275d9ea9f38c440608d90b5a2345fa0644834221481629e2
-    members:
-      -   - '["glossary_choice","term:ability.fanfare","zh-Hant",1]'
-          - sha256:81df569a728cce4b3c7746278da1297026edab021c916167179146a945c04b2a
-      -   - '["glossary_choice","term:action.choose","zh-Hant",1]'
-          - sha256:3d709907af799f441d7a79c780585a76cd1fed6ad06888986257ec8fed3c595c
-      -   - '["glossary_choice","term:action.evolve","zh-Hant",1]'
-          - sha256:79de77f0555dd6be60006412eaf578ea6e96cef611c20d6561c262de0f05ef89
-      -   - '["glossary_choice","term:event.evolve","zh-Hant",1]'
-          - sha256:3e33ea1accf4cb2531a5923940d6aada4a6de5fad34c7682fbed46a8363f8be6
-      -   - '["glossary_choice","term:object.card","zh-Hant",1]'
-          - sha256:18ea0aef367333abc6ba6f3d8cb0db860cfa2ca8b818098515bed9f3fbeb123c
-      -   - '["glossary_choice","term:player.opponent","zh-Hant",1]'
-          - sha256:a8d69a915c0de7a99bb78c467173ab5e89e5c784b56ba55ad6816e7914a3ac88
-      -   - '["glossary_choice","term:player.self","zh-Hant",1]'
-          - sha256:d14a42d8510c9058ead4c67b1df306b5eafb23111d297ff4110887a901233b08
-      -   - '["glossary_choice","term:rule.cost","zh-Hant",1]'
-          - sha256:ee5c0038b93cb99d24150e4adefe87cd7812a55d8f0c57597fab761c9e71ca05
-      -   - '["glossary_choice","term:rule.damage","zh-Hant",1]'
-          - sha256:de1a759d53cbf98f72854e09d4fd3618cc93847363789caa48a7276ebe49c493
-      -   - '["glossary_choice","term:stat.health","zh-Hant",1]'
-          - sha256:8a793946222bb54358a02e68ff4c9cbf160e710a6aed53d751ae07da4e0b23f1
-      -   - '["glossary_choice","term:trait.alter_maiden","zh-Hant",1]'
-          - sha256:ec84218a1c28913d73bd0c692c6269f96bf687eebb85ce3a49ea7e7694646928
-      -   - '["glossary_choice","term:trait.elizabeth_park","zh-Hant",1]'
-          - sha256:c6cec7546540600b0585ef3e041928259d1cf9d55beeea6dac2ee08678f4a519
-      -   - '["glossary_choice","term:trait.forestier","zh-Hant",1]'
-          - sha256:7853b49ddd7c6e9a05b80f64e6254ca5d8f6a3c41e90fbd1860b548bdbd6f013
-      -   - '["glossary_choice","term:trait.guild_association","zh-Hant",1]'
-          - sha256:053604bc45581c8df6fbff3f40670a43a13af33264e221203bad7235231169cc
-      -   - '["glossary_choice","term:trait.little_lyrical","zh-Hant",1]'
-          - sha256:3b3d08bf9227194c201b3a16181fc334c2594a93405db45a08a74a2dfeaebbdf
-      -   - '["glossary_choice","term:trait.lucent_academy","zh-Hant",1]'
-          - sha256:29a63a55bfd2b4fe9c81f394db91e44071c1166efb9467c117bf63cb418f1695
-      -   - '["glossary_choice","term:trait.mercurius_foundation","zh-Hant",1]'
-          - sha256:af7217c6e5965c9488281dae645f474911b91e4392914d9685cc908c336ee67b
-      -   - '["glossary_choice","term:trait.tracen_academy","zh-Hant",1]'
-          - sha256:99a7f4a58534c97924fc502f9426ab1e4dd08b068712a3921662134e3387d0f2
-      -   - '["glossary_choice","term:trait.twilight_caravan","zh-Hant",1]'
-          - sha256:a496a4ff3f88bb63de02464f341310802139381d88e481d07ff2232b70e44e00
-      -   - '["glossary_choice","term:trait.twinkle_wish","zh-Hant",1]'
-          - sha256:eb244caac8fba99c8f24aa99e4e629ce1d3c664b37f186d9257e2882ca3aa602
-      -   - '["glossary_choice","term:trait.weissflugel","zh-Hant",1]'
-          - sha256:6a809a6385e5d828e51e415e4bcabfb034e77a6248ec72365f3101e035d02d01
-      -   - '["glossary_choice","term:zone.battlefield","zh-Hant",1]'
-          - sha256:a01e3981bbe4f4720ed615c22e55b884baaf237f4c85fe139088fc1e62f73187
-      -   - '["glossary_choice","term:zone.deck","zh-Hant",1]'
-          - sha256:da510ae7b8e2e9ac33a420889a1fe8fbe4b55b46f54a3b279d0b85dc09b3321a
-      -   - '["glossary_choice","term:zone.hand","zh-Hant",1]'
-          - sha256:7a0af49a9ec5502311e5c4f26214514d9fad584f4367d0e9cf5910f01944337d
-    sample_ids:
-      - '["glossary_choice","term:ability.fanfare","zh-Hant",1]'
-      - '["glossary_choice","term:action.choose","zh-Hant",1]'
-      - '["glossary_choice","term:action.evolve","zh-Hant",1]'
-      - '["glossary_choice","term:event.evolve","zh-Hant",1]'
-      - '["glossary_choice","term:object.card","zh-Hant",1]'
-      - '["glossary_choice","term:player.opponent","zh-Hant",1]'
-      - '["glossary_choice","term:player.self","zh-Hant",1]'
-      - '["glossary_choice","term:rule.cost","zh-Hant",1]'
-      - '["glossary_choice","term:rule.damage","zh-Hant",1]'
-      - '["glossary_choice","term:stat.health","zh-Hant",1]'
-      - '["glossary_choice","term:trait.alter_maiden","zh-Hant",1]'
-      - '["glossary_choice","term:trait.elizabeth_park","zh-Hant",1]'
-      - '["glossary_choice","term:trait.forestier","zh-Hant",1]'
-      - '["glossary_choice","term:trait.guild_association","zh-Hant",1]'
-      - '["glossary_choice","term:trait.little_lyrical","zh-Hant",1]'
-      - '["glossary_choice","term:trait.lucent_academy","zh-Hant",1]'
-      - '["glossary_choice","term:trait.mercurius_foundation","zh-Hant",1]'
-      - '["glossary_choice","term:trait.tracen_academy","zh-Hant",1]'
-      - '["glossary_choice","term:trait.twilight_caravan","zh-Hant",1]'
-      - '["glossary_choice","term:trait.twinkle_wish","zh-Hant",1]'
-      - '["glossary_choice","term:trait.weissflugel","zh-Hant",1]'
-      - '["glossary_choice","term:zone.battlefield","zh-Hant",1]'
-      - '["glossary_choice","term:zone.deck","zh-Hant",1]'
-      - '["glossary_choice","term:zone.hand","zh-Hant",1]'
-    authored_by: Codex gpt-6.1-sol
-    authored_at: '2026-10-02T04:39:40Z'
-    reviewed_by: gbaian10
-    reviewed_at: '2026-10-01T00:00:00Z'
-    reviewed_precision: day
-    note: 維護者在確認頁核可此繁中選詞；日期照定案檔或追加紀錄（day，無時分秒）。首次配發 key 是協調者另行核可，origin 的專案歸類依委託政策，不表示維護者親自驗過官方來源；本次未採納英文，也未核可加粗。
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.flowers_for_you","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.flowers_for_you
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 將雛菊獻給妳
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/supports
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.follower_reas","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.follower_reas
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 隨從 雷亞斯
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes identify model translation/transliteration/composition of the complete name or part of it. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.forte_duskwing_tyrant","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.forte_duskwing_tyrant
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 黑翼霸道‧法露特
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.forth_into_the_great_age_of_agriculture","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.forth_into_the_great_age_of_agriculture
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 開幕！大農耕時代！
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.fortuna_regina","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.fortuna_regina
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: Fortuna Regina
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.fox_of_invitation","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.fox_of_invitation
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 招來之狐
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.francoise_bejeweled_manager","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.francoise_bejeweled_manager
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 珠寶經理‧芙拉裘
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.frederica_miyamoto","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.frederica_miyamoto
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 宮本芙蕾德莉卡
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://zh.wikipedia.org/zh-tw/偶像大師_灰姑娘女孩_U149
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.fuji_kiseki","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.fuji_kiseki
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 富士奇石
+      concept_evidence: []
+      source_claim:
+        source_work: Uma Musume
+        source_urls:
+          - https://gametora.com/zh-tw/umamusume/characters
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.full_bloom_panorama","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.full_bloom_panorama
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 盛開的全景
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.full_moon_of_centennial_demise","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.full_moon_of_centennial_demise
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 佰亡的滿月
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.fullbau","zh-Hant"]'
+    origin: machine
+    low_confidence: true
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.fullbau
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 弗爾巴烏
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.fumika_sagisawa","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.fumika_sagisawa
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 鷺澤文香
+      concept_evidence: []
+      source_claim:
+        source_work: The Idolmaster Cinderella Girls
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.fumika_sagisawa_cinderella_girl","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.fumika_sagisawa_cinderella_girl
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 〔灰姑娘女孩〕鷺澤文香
+      concept_evidence: []
+      source_claim:
+        source_work: Shadowverse or collaboration names
+        source_urls:
+          - https://forum.gamer.com.tw/C.php?bsn=29330&snA=20394
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Complete wording matches a cited local research result; official frozen authority is not claimed. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.future_knight_llew","zh-Hant"]'
+    origin: project
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.future_knight_llew
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 未來的騎士 琉
+      concept_evidence: []
+      source_claim:
+        source_work: Cardfight Vanguard
+        source_urls: []
+        claimed_source: Local draft attribution and collaboration research; no frozen official translation proof
+        note: Draft notes attribute the complete name to an existing game/community name; provenance remains unverified. URLs are source claims, not verified official evidence. Two-model review concerns wording only.
+  - record_key: '["glossary_choice","term:name.galan","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.galan
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 伽藍
+      concept_evidence: []
+      source_claim:
+  - record_key: '["glossary_choice","term:name.galmieux_the_fifth_omen","zh-Hant"]'
+    origin: machine
+    low_confidence: false
+    note: ''
+    kind: glossary_choice
+    data:
+      term_id: term:name.galmieux_the_fifth_omen
+      lang: zh-Hant
+      value:
+        kind: authored
+        text: 第五絕傑‧嘉魯蜜兒
+      concept_evidence: []
+      source_claim:

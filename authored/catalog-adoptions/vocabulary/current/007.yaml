@@ -1,0 +1,303 @@
+catalog_adoption_format: 2
+kind: catalog_adoption_shard
+records:
+  - record_key: '["vocabulary_adoption",{"code":"weissflugel","kind":"trait"}]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: weissflugel
+      value:
+        label:
+          kind: source
+          source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:cf0f5eb977bd47cabc4d5543b6e73369b411adffb758a1d1047545fbd0857283
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:2f9ce6e93f4606913171880417345670d1b97af230c07eb96617db36a3ce8b3a
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Weissflugel
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:1324e0339130d0b1c13b2a0b55b9cacbf0a2533cc6e0c777eb5ac14aa2be8ac3
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:92517c03175378383c8a92c06ac0335ab910f56d61a56c2bc364fb1e7a308dd7
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ヴァイスフリューゲル
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:cf0f5eb977bd47cabc4d5543b6e73369b411adffb758a1d1047545fbd0857283
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:2f9ce6e93f4606913171880417345670d1b97af230c07eb96617db36a3ce8b3a
+            special_kinds: []
+        active: true
+      evidence:
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:cf0f5eb977bd47cabc4d5543b6e73369b411adffb758a1d1047545fbd0857283
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:2f9ce6e93f4606913171880417345670d1b97af230c07eb96617db36a3ce8b3a
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+            source_version_id: src:v1:1324e0339130d0b1c13b2a0b55b9cacbf0a2533cc6e0c777eb5ac14aa2be8ac3
+            parser: official-en-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:92517c03175378383c8a92c06ac0335ab910f56d61a56c2bc364fb1e7a308dd7
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+  - record_key: '["vocabulary_adoption",{"code":"witch","kind":"class"}]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: class
+        code: witch
+      value:
+        label:
+          kind: source
+          source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:af0cf43b904342cf9c60046e5e227e776714a8c851177fccf50225876fdfca7a
+            parser: official-jp-exact-v1
+            locator: /faces/0/card_class
+            text_hash: sha256:8c8d80f67f58cba97e93397428fcf72863258a8b2ac3f7f00b5f6984436deb28
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Runecraft
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:68724ad359bd6fa10b5eaa85bc5e8815a30b585eafb180b98b51aa968b9ff40e
+              parser: official-en-exact-v1
+              locator: /faces/0/info/Class
+              text_hash: sha256:dbabdeb497b4efaa7963320b2f1e8f3008a66ef0d1d571ea22bcb1bb0a6878ed
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: ウィッチ
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:af0cf43b904342cf9c60046e5e227e776714a8c851177fccf50225876fdfca7a
+              parser: official-jp-exact-v1
+              locator: /faces/0/card_class
+              text_hash: sha256:8c8d80f67f58cba97e93397428fcf72863258a8b2ac3f7f00b5f6984436deb28
+            special_kinds: []
+        active: true
+      evidence:
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:af0cf43b904342cf9c60046e5e227e776714a8c851177fccf50225876fdfca7a
+            parser: official-jp-exact-v1
+            locator: /faces/0/card_class
+            text_hash: sha256:8c8d80f67f58cba97e93397428fcf72863258a8b2ac3f7f00b5f6984436deb28
+          role: 維護者確認的完整職業或卡種原文欄位；僅證明原值，代碼與特殊標記採納依第 2 版完整確認事件。
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+            source_version_id: src:v1:68724ad359bd6fa10b5eaa85bc5e8815a30b585eafb180b98b51aa968b9ff40e
+            parser: official-en-exact-v1
+            locator: /faces/0/info/Class
+            text_hash: sha256:dbabdeb497b4efaa7963320b2f1e8f3008a66ef0d1d571ea22bcb1bb0a6878ed
+          role: 維護者確認的完整職業或卡種原文欄位；僅證明原值，代碼與特殊標記採納依第 2 版完整確認事件。
+  - record_key: '["vocabulary_adoption",{"code":"wyrmkin","kind":"trait"}]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: wyrmkin
+      value:
+        label:
+          kind: source
+          source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:484301f94817a96b857334316b4b586c6ed66496a110eb63c8eb0f65c989b878
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:6919754fd7967782a7c5e4f87a99eaf1c36b17e7a0f4bde6306b511fe8a79307
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Wyrmkin
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:edef5302c357cd961d859f557340648b62a1d3386924a754c174b2feb1024a34
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:bd7447650bf1afaf58a532bc282371f62311002bd0b110ad3eecc2a530e77a04
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 竜族
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:484301f94817a96b857334316b4b586c6ed66496a110eb63c8eb0f65c989b878
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:6919754fd7967782a7c5e4f87a99eaf1c36b17e7a0f4bde6306b511fe8a79307
+            special_kinds: []
+        active: true
+      evidence:
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:484301f94817a96b857334316b4b586c6ed66496a110eb63c8eb0f65c989b878
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:6919754fd7967782a7c5e4f87a99eaf1c36b17e7a0f4bde6306b511fe8a79307
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+            source_version_id: src:v1:edef5302c357cd961d859f557340648b62a1d3386924a754c174b2feb1024a34
+            parser: official-en-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:bd7447650bf1afaf58a532bc282371f62311002bd0b110ad3eecc2a530e77a04
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+  - record_key: '["vocabulary_adoption",{"code":"yokai","kind":"trait"}]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: yokai
+      value:
+        label:
+          kind: source
+          source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:77edaaa74398bed1cc495f6c87f2aecee8e684e8b4049429fa0e0fa8937f8646
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:d15c9b5eb5ba7aa26e804ccb6f8abb916f8e45b8e29d55343c6f80f0d83ba3b0
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Yokai
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:f872149ac25aff043e0a3c79f5317f04ca09a6d8733d0ecd6a840c3ba904ef5c
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:7c323379d9b908e046065e26ab6e225e2c4723c38ef63da010a7a5df84b23cab
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 妖怪
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:77edaaa74398bed1cc495f6c87f2aecee8e684e8b4049429fa0e0fa8937f8646
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/1
+              text_hash: sha256:d15c9b5eb5ba7aa26e804ccb6f8abb916f8e45b8e29d55343c6f80f0d83ba3b0
+            special_kinds: []
+        active: true
+      evidence:
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:77edaaa74398bed1cc495f6c87f2aecee8e684e8b4049429fa0e0fa8937f8646
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:d15c9b5eb5ba7aa26e804ccb6f8abb916f8e45b8e29d55343c6f80f0d83ba3b0
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+            source_version_id: src:v1:f872149ac25aff043e0a3c79f5317f04ca09a6d8733d0ecd6a840c3ba904ef5c
+            parser: official-en-exact-v1
+            locator: /faces/0/traits/1
+            text_hash: sha256:7c323379d9b908e046065e26ab6e225e2c4723c38ef63da010a7a5df84b23cab
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+  - record_key: '["vocabulary_adoption",{"code":"zealot","kind":"trait"}]'
+    origin: official
+    low_confidence: false
+    note: ''
+    kind: vocabulary_adoption
+    data:
+      subject:
+        kind: trait
+        code: zealot
+      value:
+        label:
+          kind: source
+          source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:e694abd443f66d56d23af8470b38e1ee55fa3b14a6da7584d696d0ea3b4588fd
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:0453ff385abbb50a699adaa08fb43e35d8029995e6a4573a644ab01cc809a9d3
+        raw_mappings:
+          - region: en
+            lang: en
+            raw: Zealot
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+              source_version_id: src:v1:f735a0e14715fbbb70f4792f9b91a313b4e8cb95caee76125839c9554bb050a6
+              parser: official-en-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:fc159fb4165c7f8044a980092904dbf86fb115a6514824dbb6455333abc45b37
+            special_kinds: []
+          - region: jp
+            lang: ja
+            raw: 狂信
+            source_ref:
+              store_id: gbaian10-home
+              batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+              source_version_id: src:v1:e694abd443f66d56d23af8470b38e1ee55fa3b14a6da7584d696d0ea3b4588fd
+              parser: official-jp-exact-v1
+              locator: /faces/0/traits/0
+              text_hash: sha256:0453ff385abbb50a699adaa08fb43e35d8029995e6a4573a644ab01cc809a9d3
+            special_kinds: []
+        active: true
+      evidence:
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:2bf20b2ff9ae9e21be688dbf5a91d4cd7803fa0e253206ecbdcb55e334cbe9c4
+            source_version_id: src:v1:e694abd443f66d56d23af8470b38e1ee55fa3b14a6da7584d696d0ea3b4588fd
+            parser: official-jp-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:0453ff385abbb50a699adaa08fb43e35d8029995e6a4573a644ab01cc809a9d3
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+        - source_ref:
+            store_id: gbaian10-home
+            batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
+            source_version_id: src:v1:f735a0e14715fbbb70f4792f9b91a313b4e8cb95caee76125839c9554bb050a6
+            parser: official-en-exact-v1
+            locator: /faces/0/traits/0
+            text_hash: sha256:fc159fb4165c7f8044a980092904dbf86fb115a6514824dbb6455333abc45b37
+          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
