@@ -66,7 +66,7 @@ class AdoptionReview(RecordData):
 class SourceClaim(RecordData):
     source_work: Text | None
     source_urls: tuple[Text, ...]
-    claimed_source: Text | None
+    claimed_source: Text | None = None
     note: Text
 
     @model_validator(mode="after")

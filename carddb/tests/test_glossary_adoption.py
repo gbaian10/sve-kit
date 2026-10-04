@@ -186,6 +186,16 @@ def claim() -> dict[str, JsonValue]:
     }
 
 
+def test_source_claim_allows_omitted_attribution() -> None:
+    data = claim()
+    data.pop("claimed_source")
+    result = SourceClaim.model_validate_json(canonical(data))
+    assert result.claimed_source is None
+    assert result.source_work == data["source_work"]
+    assert list(result.source_urls) == data["source_urls"]
+    assert result.note == data["note"]
+
+
 @pytest.mark.parametrize("field", ["source_work", "claimed_source", "note"])
 def test_source_claim_nonblank(field: str) -> None:
     data = claim()
