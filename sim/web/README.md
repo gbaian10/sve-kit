@@ -131,10 +131,13 @@ reader in `carddb/src/sve_carddb/snapshot/`.
   silently accepted the way `JSON.parse` would; `canonical()` writes the exact bytes hashes refer to.
 - `sha256.ts`: synchronous SHA-256 and the `sha256-mod-v1` bucket function.
 - `schema.ts` + `validator.ts`: the published JSON Schema is loaded from `carddb/` at build time
-  (one source of truth, no copy) and interpreted by a small validator that supports exactly the
-  keywords the schema uses; an unknown keyword fails at load, so the schema cannot quietly mean
-  more than the reader checks. `schema.test.ts` runs the shared positive and negative examples
-  through both this validator and ajv, which must agree.
+  (one source of truth, no copy). `scripts/schema/` compiles Ajv2020 standalone validators;
+  runtime dispatch never compiles schemas or uses `new Function`, including in the decode Worker.
+  Annotation keywords `x-columns`, `x-types`, `x-primary-key`, `x-fragments` and `x-tables` are
+  registered explicitly; any other unknown keyword fails the build. Only the eight reader
+  entry definitions are bundled; the conformance build also checks every named definition.
+  `schema.test.ts` runs shared positive and negative examples through standalone and live Ajv,
+  which must agree. Schema failures keep their `schema` code, while Ajv supplies the path and keyword.
 - `decode.ts`, `reader.ts`, `semantics.ts`: fixed accessors from `x-columns`/`x-types`,
   manifest and container checks, `row_index`/`face_ordinal` joins, reference closure and the
   cross-row rules JSON Schema cannot express. Every rejection is a `SnapshotError` with a fixed
@@ -287,3 +290,13 @@ Added once pages exist:
 - knip
 - First-load size budget script
 - Component tests that the jsx-a11y component mapping (`CardImage`, `Link`, `Button`) matches the rendered DOM
+
+The package scripts compile schemas before dev, build, preview, typecheck, test, knip and fixture
+commands. Generated JavaScript lives only in `node_modules/.cache/sve-schema/`. Fixed Vite/TypeScript
+aliases use the committed `compiled-validators.d.ts`, so clean-checkout lint and type checking
+do not need generated files. Run `bun run schema:compile` before invoking Vite, Vitest or a
+fixture script directly.
+Generation uses Bun, Node APIs and Vite, without shell utilities or OS-specific dependencies.
+
+Production builds include `third-party-licenses.md` from Vite's dependency license reporting,
+and `snapshot-validator-LICENSE.md` for Ajv and its helpers already bundled into generated code.

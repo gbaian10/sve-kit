@@ -1,3 +1,5 @@
+import compiled from "#snapshot-validators"
+
 import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json"
 import shardedContract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1_1/contract.schema.json"
 import v2Contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json"
@@ -17,9 +19,9 @@ export const SCHEMA_ID = "urn:sve-kit:snapshot:1.0.0"
 // A plain JSON import works in Vite, Vitest and Bun scripts alike; the file is our own published
 // resource, so the strict byte boundary that snapshot data goes through is not needed here.
 export const schemaRoot: JsonObject = objectValue(contract)
-export const validator = new SchemaValidator(schemaRoot)
-const shardedValidator = new SchemaValidator(objectValue(shardedContract))
-const v2Validator = new SchemaValidator(objectValue(v2Contract))
+const validator = new SchemaValidator(schemaRoot, compiled, "v1")
+const shardedValidator = new SchemaValidator(objectValue(shardedContract), compiled, "v1_1")
+const v2Validator = new SchemaValidator(objectValue(v2Contract), compiled, "v2")
 
 function forVersion(version: string): SchemaValidator {
   const selected =

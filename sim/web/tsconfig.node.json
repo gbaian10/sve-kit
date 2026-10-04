@@ -5,5 +5,11 @@
     "lib": ["es2024"],
     "types": ["node"]
   },
-  "include": ["*.config.ts", "tests/*.ts", "types", "scripts/**/*.ts"]
+  "include": [
+    "*.config.ts",
+    "tests/*.ts",
+    "types",
+    "scripts/**/*.ts",
+    "src/data/format-v1/compiled-validators.d.ts"
+  ]
 }

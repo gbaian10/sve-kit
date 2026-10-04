@@ -2,6 +2,8 @@
 import Ajv2020 from "ajv/dist/2020"
 import { describe, expect, it } from "vitest"
 
+import compiled from "#snapshot-conformance"
+
 import { SnapshotError } from "./errors"
 import { type JsonObject, type JsonValue, parseStrict } from "./json"
 import {
@@ -15,8 +17,10 @@ import {
   schemaRoot,
   tables,
   validate,
-  validator,
 } from "./schema"
+import { SchemaValidator } from "./validator"
+
+const validator = new SchemaValidator(schemaRoot, compiled, "v1")
 
 const fixtures = import.meta.glob<string>(
   "../../../../../tests/fixtures/snapshot-contract/v1/**/*.json",
@@ -149,7 +153,7 @@ describe("contract schema", () => {
       validate("Manifest", broken)
     }).toThrow(/schema at published_at: .*pattern/)
     const failure = validator.validate("Section", [0, "t:ja:0", "rule", 9])
-    expect(failure?.keyword).toBe("items")
+    expect(failure?.keyword).toBe("maxItems")
   })
 
   it("compiles $ref, if/then/else, not, contains and propertyNames the way ajv does", () => {

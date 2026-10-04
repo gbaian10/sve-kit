@@ -1,4 +1,4 @@
-import { createReadStream, realpathSync, statSync } from "node:fs"
+import { createReadStream, readFileSync, realpathSync, statSync } from "node:fs"
 import type { IncomingMessage, ServerResponse } from "node:http"
 import path from "node:path"
 
@@ -78,11 +78,39 @@ const cdnDir = process.env["SVE_CDN_DIR"] ?? path.join(import.meta.dirname, "fix
 const previewDir = process.env["SVE_PREVIEW_DIR"]
 
 export default defineConfig({
+  resolve: {
+    alias: {
+      "#snapshot-validators": path.resolve(
+        import.meta.dirname,
+        "node_modules/.cache/sve-schema/validators.js",
+      ),
+      "#snapshot-conformance": path.resolve(
+        import.meta.dirname,
+        "node_modules/.cache/sve-schema/conformance.cjs",
+      ),
+    },
+  },
+  build: { license: { fileName: "third-party-licenses.md" } },
   // Lets the dev badge hide its root switch when no preview root is configured.
   define: {
     "import.meta.env.SVE_PREVIEW_CONFIGURED": JSON.stringify(previewDir === undefined ? "" : "1"),
   },
   plugins: [
+    {
+      name: "snapshot-validator-license",
+      apply: "build",
+      generateBundle() {
+        // Helpers are already bundled into generated standalone code, so package discovery misses them.
+        this.emitFile({
+          type: "asset",
+          fileName: "snapshot-validator-LICENSE.md",
+          source: readFileSync(
+            new URL("./node_modules/.cache/sve-schema/licenses.md", import.meta.url),
+            "utf8",
+          ),
+        })
+      },
+    },
     react(),
     tailwindcss(),
     serveSnapshotRoot("/cdn", cdnDir),
