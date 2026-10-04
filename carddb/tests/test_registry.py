@@ -115,11 +115,11 @@ def test_rerun_and_append_preserve_all_old_ids(inputs: Inputs, tmp_path: Path) -
     inputs.mapping.reskins = {}
     first = build(inputs, {})
     validate(first)
-    files = plan_files(tmp_path, first, "reviewer", "2026-09-28")
+    files = plan_files(tmp_path, first)
     write_files(files)
     index, old = load(tmp_path)
     assert index.next_int_id == {"en": 60003, "jp": 20003}
-    assert plan_files(tmp_path, build(inputs, old), "reviewer", "2026-09-28") == {}
+    assert plan_files(tmp_path, build(inputs, old)) == {}
     before = {path: path.read_bytes() for path in files}
     inputs.jp["AA01-001"] = card("AA01-001", "名前")
     inputs.jp["AA01-002"] = card("AA01-002", "別名")
@@ -133,7 +133,7 @@ def test_rerun_and_append_preserve_all_old_ids(inputs: Inputs, tmp_path: Path) -
     added = new["printing:" + permanent_id("p", "jp:AA01-001")]
     original = old["printing:" + permanent_id("p", "jp:BP02-071")]
     assert added.data["card_id"] == original.data["card_id"]
-    appended = plan_files(tmp_path, second, "reviewer", "2026-09-29")
+    appended = plan_files(tmp_path, second)
     assert tmp_path / "ids" / "BP02" / "002.yaml" in appended
     write_files(appended)
     assert all(
@@ -158,13 +158,13 @@ def test_source_changes_and_deletions_fail_closed(
     inputs: Inputs, tmp_path: Path
 ) -> None:
     first = build(inputs, {})
-    write_files(plan_files(tmp_path, first, "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, first))
     _, existing = load(tmp_path)
     inputs.en["BP02-070EN"].faces[0].text = "Changed rule."
     with pytest.raises(ValueError, match="requires re-review"):
-        plan_files(tmp_path, build(inputs, existing), "reviewer", "2026-09-29")
+        plan_files(tmp_path, build(inputs, existing))
     with pytest.raises(ValueError, match="delete"):
-        plan_files(tmp_path, first[:-1], "reviewer", "2026-09-29")
+        plan_files(tmp_path, first[:-1])
 
 
 @pytest.mark.parametrize(
@@ -265,7 +265,7 @@ def test_yaml_size_boundary(tmp_path: Path) -> None:
 def test_shard_mutation_and_interrupted_write_rejected(
     inputs: Inputs, tmp_path: Path
 ) -> None:
-    files = plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28")
+    files = plan_files(tmp_path, build(inputs, {}))
     write_files(files)
     orphan = tmp_path / "registry" / "card" / "unindexed.yaml"
     orphan.write_text("orphan: true\n")
@@ -582,8 +582,6 @@ def test_official_promotions_have_user_confirmed_decisions(
         assert decision.state == "confirmed"
         if path.parent.name == "BP07":
             continue
-        assert decision.reviewed_by == "user"
-        assert decision.reviewed_at == "2026-09-28T00:00:00Z"
         assert decision.sample_ids == [key for key, _ in decision.members]
         promoted.extend(shard.records)
     assert len(promoted) == 8
@@ -700,18 +698,12 @@ def test_cursor_mismatch_and_regression_rejected(
     check_cursors({"en": 60003, "jp": 20003}, entries)
     with pytest.raises(ValueError, match="high-water"):
         check_cursors({"en": 60003, "jp": 20004}, entries)
-    write_files(plan_files(tmp_path, entries, "reviewer", "2026-09-28"))
+    write_files(plan_files(tmp_path, entries))
     index, old = load(tmp_path)
     index.next_int_id["jp"] = 20009
     inputs.jp["PR-002"] = card("PR-002", "別名")
     with pytest.raises(ValueError, match="backwards"):
-        plan_files(
-            tmp_path,
-            build(inputs, old),
-            "reviewer",
-            "2026-09-29",
-            loaded=(index, old),
-        )
+        plan_files(tmp_path, build(inputs, old), loaded=(index, old))
 
 
 def test_shards_fill_to_target_measured_on_final_yaml(
@@ -729,10 +721,10 @@ def test_shards_fill_to_target_measured_on_final_yaml(
         ),
         key=storage.record_order(entries),
     )
-    envelope = storage._shard(printings[:4], "reviewer", "2026-09-28")
+    envelope = storage._shard(printings[:4])
     target = len(encode(envelope))
     monkeypatch.setattr(storage, "TARGET_BYTES", target)
-    files = plan_files(tmp_path, entries, "reviewer", "2026-09-28")
+    files = plan_files(tmp_path, entries)
     shards = [
         Shard.model_validate(yaml_parser().load(data))
         for path, data in sorted(files.items())
@@ -753,15 +745,11 @@ def test_single_oversized_record_fails_clearly(
     monkeypatch.setattr(storage, "TARGET_BYTES", 10)
     monkeypatch.setattr(storage, "MAX_BYTES", 1000)
     with pytest.raises(ValueError, match="Single registry record exceeds 1 MiB"):
-        plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28")
+        plan_files(tmp_path, build(inputs, {}))
 
 
 def test_full_relayout_reproduces_first_write(inputs: Inputs, tmp_path: Path) -> None:
-    first = plan_files(tmp_path, build(inputs, {}), "reviewer", "2026-09-28")
+    first = plan_files(tmp_path, build(inputs, {}))
     write_files(first)
     _, entries = load(tmp_path)
-    reviews = {
-        (storage._area(entry), entry.owner): ("reviewer", "2026-09-28")
-        for entry in entries.values()
-    }
-    assert relayout(tmp_path, list(entries.values()), reviews) == first
+    assert relayout(tmp_path, list(entries.values())) == first

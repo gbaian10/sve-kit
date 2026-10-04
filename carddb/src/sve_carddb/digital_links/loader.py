@@ -9,7 +9,6 @@ from pydantic import JsonValue, ValidationError
 
 from sve_carddb.catalog.adoption_loader import ordered
 from sve_carddb.digital_links.models import Index, Record, Shard
-from sve_carddb.maintainers import is_maintainer
 from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest
@@ -156,10 +155,6 @@ def load_links(  # ruff: ignore[complex-structure] -- whole-entry validation pre
 def _envelope(  # ruff: ignore[complex-structure] -- membership and actual receipt are independently checked
     shard: Shard, filing: str
 ) -> None:
-    if not is_maintainer(shard.decisions[0].reviewed_by):
-        raise ValueError(
-            "Digital-link confirmer must be a repository-listed maintainer"
-        )
     keys = tuple(record.record_key for record in shard.records)
     if keys != tuple(sorted(set(keys))):
         raise ValueError("Digital-link members must be sorted and unique")

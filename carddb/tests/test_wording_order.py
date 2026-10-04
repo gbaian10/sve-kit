@@ -73,9 +73,6 @@ def with_products(case: AdoptionCase, change: str) -> ReconstructedScope:
         decision(raw).update(
             state="proposed",
             sample_ids=[],
-            reviewed_by=None,
-            reviewed_at=None,
-            reviewed_precision=None,
         )
     parsed = Shard.model_validate_json(canonical(raw))
     data = {

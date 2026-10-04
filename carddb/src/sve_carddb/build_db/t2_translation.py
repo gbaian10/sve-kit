@@ -91,7 +91,7 @@ TABLES = (
                 "SELECT 1 FROM translation_use AS u JOIN translation_context AS c ON c.id=u.context_id "
                 "LEFT JOIN decision AS d ON d.id=c.decision_id "
                 "WHERE c.semantic_variant != 'default' AND (d.id IS NULL "
-                "OR d.category!='context_assignment' OR NOT sve_is_maintainer(d.reviewed_by) "
+                "OR d.category!='context_assignment' "
                 "OR d.state NOT IN ('sampled','confirmed') OR NOT EXISTS "
                 "(SELECT 1 FROM decision_source AS s WHERE s.decision_id=d.id "
                 "AND s.role LIKE 'name_identity:%')) LIMIT 1",

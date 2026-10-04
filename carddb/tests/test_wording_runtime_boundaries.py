@@ -116,7 +116,6 @@ def test_replay_refuses_missing_predecessor_and_invalid_review(
             replay._review(
                 record,
                 case.scope,
-                case.replayed[0].decision,
                 prior if change == "identity" else case.replayed[0].previous,
                 reconstruction,
             )

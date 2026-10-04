@@ -96,9 +96,7 @@ def populate_families(
             },
         )
         decision = shard.envelope.decisions[0]
-        values = decision.model_dump(
-            mode="json", exclude={"members", "reviewed_precision"}
-        )
+        values = decision.model_dump(mode="json", exclude={"members"})
         # DB has no precision/member columns; the immutable envelope retains both.
         row: dict[str, Value] = {
             key: value

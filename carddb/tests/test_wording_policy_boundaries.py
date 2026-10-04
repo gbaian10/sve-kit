@@ -126,7 +126,7 @@ def test_policy_path_refusal_precedes_any_blob_read(
 
 @pytest.mark.parametrize(
     "change",
-    ["policy-format", "rules", "approval-format", "answer", "midnight", "actions"],
+    ["policy-format", "rules", "approval-format", "answer", "actions"],
 )
 def test_policy_and_approval_models_refuse_each_format_violation(
     policy: Policy, change: str
@@ -150,17 +150,14 @@ def test_policy_and_approval_models_refuse_each_format_violation(
     elif change == "approval-format":
         wire["rule_approval_format"] = True
     elif change == "answer":
-        wire["reviewed_by"] = " "
-    elif change == "midnight":
-        wire["reviewed_at"] = "2026-10-02T01:00:00Z"
+        wire["note"] = " "
     else:
         wire["rules"] = []
     message = {
         "policy-format": "Policy format must be an integer",
         "rules": "Policy rules must be sorted, unique and nonempty",
         "approval-format": "Approval format must be an integer",
-        "answer": "Policy approval requires an actual named answer",
-        "midnight": "Day policy approval requires UTC midnight",
+        "answer": "Policy approval requires an actual answer",
         "actions": "Approved actions must be sorted, unique and nonempty",
     }[change]
     with pytest.raises(ValidationError) as error:

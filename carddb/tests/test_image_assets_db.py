@@ -130,9 +130,7 @@ def make_staged(
         ),
     )
     authored = tmp_path / "authored"
-    write_files(
-        plan_files(authored, build(inputs, {}), "synthetic-reviewer", "2026-09-29")
-    )
+    write_files(plan_files(authored, build(inputs, {})))
     provider = FrozenJP(
         store.root,
         store.store_id,

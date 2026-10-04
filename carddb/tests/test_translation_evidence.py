@@ -160,8 +160,6 @@ def test_high_confidence_does_not_promote_review(
                 {
                     "state": state,
                     "confidence": "high",
-                    "reviewed_by": None,
-                    "reviewed_at": None,
                 },
             )
 

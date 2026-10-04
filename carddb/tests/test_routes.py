@@ -143,7 +143,7 @@ def test_same_number_variants_require_exact_confirmed_override() -> None:
             db.update(
                 "decision",
                 {"id": "decision"},
-                {"state": "proposed", "reviewed_at": None, "reviewed_by": None},
+                {"state": "proposed"},
             )
             populate_routes(db)
 
@@ -258,7 +258,7 @@ def test_alias_requires_confirmation_and_direct_canonical_target() -> None:
             db.update(
                 "decision",
                 {"id": "decision"},
-                {"state": "proposed", "reviewed_by": None, "reviewed_at": None},
+                {"state": "proposed"},
             )
             build_index(db)
         with pytest.raises(ValueError, match="directly target"), db.transaction():

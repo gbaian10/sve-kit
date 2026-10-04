@@ -12,7 +12,6 @@ from sve_carddb.registry.records import (
     EnglishPrintingData,
     FaceId,
     Hash,
-    Instant,
     PrintingId,
     RecordData,
     Text,
@@ -327,22 +326,7 @@ class Decision(RecordData):
     membership_hash: Hash
     members: Annotated[tuple[tuple[Text, Hash], ...], Field(min_length=1, max_length=1)]
     sample_ids: Annotated[tuple[Text, ...], Field(min_length=1, max_length=1)]
-    authored_by: Text
-    authored_at: Instant
-    reviewed_by: Text
-    reviewed_at: Instant
-    reviewed_precision: Literal["day", "instant"]
     note: str
-
-    @model_validator(mode="after")
-    def _review(self) -> Decision:
-        if not self.authored_by.strip() or not self.reviewed_by.strip():
-            raise ValueError("Transition author and reviewer must be named")
-        if self.reviewed_precision == "day" and not self.reviewed_at.endswith(
-            "T00:00:00Z"
-        ):
-            raise ValueError("Day review precision requires UTC midnight encoding")
-        return self
 
 
 class Envelope(RecordData):

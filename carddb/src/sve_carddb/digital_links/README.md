@@ -39,8 +39,8 @@ digital names make a relation stale; a program version change alone does not.
 Complete builds must combine all stage usages and call
 `input_record(...).verify(..., complete=True)` before export.
 
-Receipts require an explicit nonblank author and the repository-listed maintainer
-`gbaian10` as exact reviewer, as in the existing catalog adoption loader.
+Decisions do not store author or reviewer identities, and the loader does not
+check an account list. State and checked membership requirements still apply.
 Synthetic tests exercise this format without creating real adoption data.
 
 ## Offline candidates

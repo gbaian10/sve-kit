@@ -49,11 +49,6 @@ def pack(record: dict[str, Any]) -> dict[str, Any]:
         "membership_hash": membership,
         "members": members,
         "sample_ids": [record["record_key"]],
-        "authored_by": "synthetic-author",
-        "authored_at": "2026-10-01T00:00:00Z",
-        "reviewed_by": "synthetic-reviewer",
-        "reviewed_at": "2026-10-01T00:00:00Z",
-        "reviewed_precision": "day",
         "note": "Synthetic receipt only",
     }
     return {

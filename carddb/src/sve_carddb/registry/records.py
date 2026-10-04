@@ -151,11 +151,6 @@ class BatchDecision(RecordData):
     membership_hash: Hash
     members: tuple[tuple[Text, Hash], ...]
     sample_ids: tuple[Text, ...]
-    authored_by: Text
-    authored_at: Instant
-    reviewed_by: Text | None
-    reviewed_at: Instant | None
-    reviewed_precision: Literal["day"]
 
 
 DATA_MODELS: dict[str, type[RecordData]] = {

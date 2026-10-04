@@ -23,7 +23,6 @@ from sve_carddb.catalog.adoption_models import (
 )
 from sve_carddb.catalog.current_models import Shard as CurrentShard
 from sve_carddb.catalog.current_models import key as current_key
-from sve_carddb.maintainers import is_maintainer
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -272,8 +271,6 @@ def _check_shard(shard: Shard, path: str) -> None:  # ruff: ignore[complex-struc
     area, filing = Path(path).parts[1:3]
     kind, policy = _AREAS[area]
     decision = shard.decisions[0]
-    if not is_maintainer(decision.reviewed_by):
-        raise ValueError("Adoption confirmer must be a repository-listed maintainer")
     if decision.category != kind or decision.policy_id != policy:
         raise ValueError("Adoption category/policy does not match area")
     keys = [record.record_key for record in shard.records]

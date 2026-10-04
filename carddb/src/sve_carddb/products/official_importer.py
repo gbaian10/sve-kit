@@ -45,9 +45,7 @@ def _audit(db: Database, identities: ProductIdentities) -> list[SourceUse]:
             },
         )
         decision = shard.envelope.decisions[0]
-        values = decision.model_dump(
-            mode="json", exclude={"members", "reviewed_precision"}
-        )
+        values = decision.model_dump(mode="json", exclude={"members"})
         row: dict[str, Value] = {
             key: value
             for key, value in values.items()

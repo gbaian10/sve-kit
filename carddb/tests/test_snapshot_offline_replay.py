@@ -462,7 +462,7 @@ def test_native_export_offline_current_catalog_without_adapters(  # ruff: ignore
         ),
         {},
     )
-    write_files(plan_files(root / "authored", identities, "gbaian10", "2026-10-02"))
+    write_files(plan_files(root / "authored", identities))
     homes = {
         str(entry.data["home_set_id"]) for entry in identities if entry.kind == "card"
     }

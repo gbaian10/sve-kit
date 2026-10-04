@@ -95,9 +95,6 @@ def record() -> dict[str, JsonValue]:
                     "basis": "reviewed_order",
                     "evidence_indexes": [],
                     "review_receipt": {
-                        "reviewed_by": "Synthetic Reviewer",
-                        "reviewed_at": "2026-10-01T00:00:00Z",
-                        "reviewed_precision": "day",
                         "before_observation_keys": [keys[0]],
                         "after_observation_keys": [keys[1]],
                         "note": "Synthetic explicit adoption order",

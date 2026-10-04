@@ -189,9 +189,6 @@ def test_chain_answer_must_bind_the_exact_prior_selected_observation(
         "basis": "reviewed_order",
         "evidence_indexes": [],
         "review_receipt": {
-            "reviewed_by": "Synthetic maintainer",
-            "reviewed_at": "2026-10-02T00:00:00Z",
-            "reviewed_precision": "day",
             "note": "Synthetic independent successor answer",
             "before_observation_keys": ["synthetic-wrong-key"],
             "after_observation_keys": [second.data.selected_observation_key],

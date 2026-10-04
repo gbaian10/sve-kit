@@ -284,9 +284,6 @@ def make_adoption_case(root: Path, *, human: bool = False) -> AdoptionCase:  # r
         )
     )
     order_answer: dict[str, JsonValue] = {
-        "reviewed_by": "Synthetic order reviewer",
-        "reviewed_at": "2026-10-02T00:00:00Z",
-        "reviewed_precision": "day",
         "before_observation_keys": list(levels[0]),
         "after_observation_keys": list(levels[-1]),
         "note": "Synthetic explicit adoption order; not an official date.",
@@ -342,7 +339,7 @@ def make_adoption_case(root: Path, *, human: bool = False) -> AdoptionCase:  # r
                             "authored_revision": initial_revision,
                             "path": "authored/wording-rules/145-v1.policy.yaml",
                             "hash": digest(canonical(policy_raw)),
-                            "approval_receipt_hash": "sha256:a3b941d010708dac6f295ad563b0954bf1d4d7608d0ae77319795c6fc80e8198",
+                            "approval_receipt_hash": "sha256:ecc415f8ccd8355bdfb69a72a8e5e95a01af96d8a1d7f70b590410892da2ce23",
                         },
                         "rule_matches": [m.model_dump(mode="json") for m in matches],
                     },
@@ -440,11 +437,6 @@ def install_adoptions(
                 "membership_hash": checksum,
                 "members": members,
                 "sample_ids": [r.record_key for r in ordered],
-                "authored_by": "Synthetic tool",
-                "authored_at": "2026-10-02T01:00:00Z",
-                "reviewed_by": "gbaian10",
-                "reviewed_at": "2026-10-02T00:00:00Z",
-                "reviewed_precision": "day",
                 "note": "政策核可；synthetic policy application, not per-card human review.",
             }
         ],

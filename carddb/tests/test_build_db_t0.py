@@ -106,9 +106,6 @@ def test_t0_without_engine_cannot_claim_support(
     ("table", "updates"),
     [
         ("source_record", {"kind": "official_page"}),
-        ("decision", {"reviewed_by": None}),
-        ("decision", {"reviewed_at": None}),
-        ("decision", {"reviewed_by": " "}),
         ("decision", {"sample_ids": Json([])}),
         ("decision", {"scope": "batch"}),
         ("identity_change", {"new_card_id": "old_card"}),
@@ -588,7 +585,6 @@ def test_batch_decision_samples_and_all_json_positive_shapes(db: Database) -> No
     "table",
     [
         "source_record",
-        "decision",
         "face_revision",
         "rules_profile_revision",
     ],

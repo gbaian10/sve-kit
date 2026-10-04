@@ -85,7 +85,7 @@ def frozen_registry(tmp_path: Path, inputs: Inputs) -> tuple[Path, FrozenRegions
         )
     ]
     root = tmp_path / "authored"
-    write_files(plan_files(root, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(root, build(inputs, {})))
     sealed = seal_batch(store)
     return root, FrozenRegions(
         jp=FrozenJP(

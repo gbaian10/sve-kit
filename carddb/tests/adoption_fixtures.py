@@ -129,11 +129,6 @@ def envelope(
         "membership_hash": checksum,
         "members": members,
         "sample_ids": [object_value(r)["record_key"] for r in records],
-        "authored_by": "Synthetic author",
-        "authored_at": "2026-10-01T00:00:00Z",
-        "reviewed_by": "gbaian10",
-        "reviewed_at": "2026-10-01T00:00:00Z",
-        "reviewed_precision": "day",
         "note": "Synthetic data only.",
     }
     prefix = "catalog_adoption" if entry == "catalog-adoptions" else "display_override"

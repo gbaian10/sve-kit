@@ -79,7 +79,7 @@ class Case:
 def make_case(
     root: Path, inputs: Inputs, *, regions: tuple[Region, ...] = ("jp", "en")
 ) -> Case:
-    write_files(plan_files(root, build(inputs, {}), "reviewer", "2026-09-28"))
+    write_files(plan_files(root, build(inputs, {})))
     for identifier in ("BP02", "PR", "GF01"):
         install(
             root,

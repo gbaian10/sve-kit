@@ -7,7 +7,7 @@ from typing import Annotated, Literal
 from pydantic import Field, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_models import Predecessor, ReviewContext, SourceRef
-from sve_carddb.products.models import Instant, Lang
+from sve_carddb.products.models import Lang
 from sve_carddb.registry.records import (
     CardId,
     FaceId,
@@ -98,24 +98,7 @@ class Decision(RecordData):
     membership_hash: Hash
     members: tuple[tuple[Text, Hash], ...]
     sample_ids: tuple[Text, ...]
-    authored_by: Text
-    authored_at: Instant
-    reviewed_by: Text
-    reviewed_at: Instant
-    reviewed_precision: Literal["day", "instant"]
     note: str
-
-    @model_validator(mode="after")
-    def _review(self) -> Decision:
-        if not self.authored_by.strip() or not self.reviewed_by.strip():
-            raise ValueError(
-                "Digital-link decision requires named author and human reviewer"
-            )
-        if self.reviewed_precision == "day" and not self.reviewed_at.endswith(
-            "T00:00:00Z"
-        ):
-            raise ValueError("Digital-link day precision requires UTC midnight")
-        return self
 
 
 class Envelope(RecordData):

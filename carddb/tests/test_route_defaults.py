@@ -108,7 +108,7 @@ def test_confirmed_override_precedes_general_dates_and_keeps_url_identity() -> N
             db.update(
                 "decision",
                 {"id": "decision"},
-                {"state": "proposed", "reviewed_by": None, "reviewed_at": None},
+                {"state": "proposed"},
             )
             select_defaults(db)
 

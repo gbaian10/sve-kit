@@ -64,10 +64,6 @@ TABLES = (
                 nullable=True,
                 json_schema="decision_sample_ids",
             ),
-            Column("authored_by", Kind.TEXT),
-            Column("authored_at", Kind.TEXT, pattern=INSTANT),
-            Column("reviewed_by", Kind.TEXT, nullable=True),
-            Column("reviewed_at", Kind.TEXT, nullable=True, pattern=INSTANT),
             Column(
                 "confidence",
                 Kind.TEXT,
@@ -78,9 +74,6 @@ TABLES = (
         ),
         ("id",),
         checks=(
-            Check(
-                "state NOT IN ('sampled', 'confirmed') OR (reviewed_by IS NOT NULL AND length(trim(reviewed_by)) > 0 AND reviewed_at IS NOT NULL)"
-            ),
             Check(
                 "(scope = 'record' AND membership_hash IS NULL AND policy_id IS NULL AND sample_ids IS NULL) OR (scope = 'batch' AND membership_hash IS NOT NULL AND policy_id IS NOT NULL AND sample_ids IS NOT NULL)"
             ),

@@ -315,13 +315,13 @@ def test_blank_human_receipt_reaches_validator(tmp_path: Path, field: str) -> No
 @pytest.mark.parametrize(
     "reviewer", ["Codex gpt-6.1-sol", "Synthetic tool", " gbaian10"]
 )
-def test_confirmer_is_exact_listed_maintainer(tmp_path: Path, reviewer: str) -> None:
+def test_removed_confirmer_field_is_rejected(tmp_path: Path, reviewer: str) -> None:
     shard = envelope([record()])
     decision(shard)["reviewed_by"] = reviewer
     write(tmp_path, {SHARD: shard})
     with pytest.raises(
         ValueError,
-        match=r"^Digital-link confirmer must be a repository-listed maintainer$",
+        match=r"^Invalid digital-link fields$",
     ):
         load_links(tmp_path)
 

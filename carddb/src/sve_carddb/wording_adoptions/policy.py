@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING, Literal, Self
 from pydantic import JsonValue, field_validator, model_validator
 
 from sve_carddb.registry.inputs import JSON_VALUE
-from sve_carddb.registry.records import Hash, Instant, RecordData, Text
+from sve_carddb.registry.records import Hash, RecordData, Text
 from sve_carddb.registry.yaml_reader import parse_yaml
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.wording_adoptions.models import RuleMatch, ordered_objects
@@ -16,7 +16,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.catalog.adoption_sources import PinnedRepository
     from sve_carddb.text_observations.models import FaceContent
-    from sve_carddb.wording_adoptions.models import Decision, RuleSet
+    from sve_carddb.wording_adoptions.models import RuleSet
 
 
 class Rule(RecordData):
@@ -65,9 +65,6 @@ class Approval(RecordData):
     kind: Literal["wording_rule_approval"]
     policy_id: Text
     rule_set_hash: Hash
-    reviewed_by: Text
-    reviewed_at: Instant
-    reviewed_precision: Literal["day", "instant"]
     rules: tuple[ApprovedAction, ...]
     note: Text
 
@@ -80,12 +77,8 @@ class Approval(RecordData):
 
     @model_validator(mode="after")
     def _answer(self) -> Self:
-        if not self.reviewed_by.strip() or not self.note.strip():
-            raise ValueError("Policy approval requires an actual named answer")
-        if self.reviewed_precision == "day" and not self.reviewed_at.endswith(
-            "T00:00:00Z"
-        ):
-            raise ValueError("Day policy approval requires UTC midnight")
+        if not self.note.strip():
+            raise ValueError("Policy approval requires an actual answer")
         keys = tuple(r.rule_id for r in self.rules)
         if keys != tuple(sorted(set(keys))) or not keys:
             raise ValueError("Approved actions must be sorted, unique and nonempty")
@@ -126,20 +119,6 @@ def load_policy(
     ):
         raise ValueError("Policy conditions have no supported fixed matcher contract")
     return policy, approval, files
-
-
-def verify_policy_reviewer(approval: Approval, decision: Decision) -> None:
-    """The application author is separate from the original policy approver."""
-    if (
-        decision.reviewed_by,
-        decision.reviewed_at,
-        decision.reviewed_precision,
-    ) != (
-        approval.reviewed_by,
-        approval.reviewed_at,
-        approval.reviewed_precision,
-    ) or "政策核可" not in decision.note:
-        raise ValueError("Adoption decision impersonates the policy approver")
 
 
 def _eol_pair(before: FaceContent, after: FaceContent) -> dict[str, tuple[str, str]]:

@@ -5,7 +5,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
-from sve_carddb.registry.storage import _area, load, read_yaml, relayout, write_files
+from sve_carddb.registry.storage import load, read_yaml, relayout, write_files
 from sve_carddb.snapshot.values import canonical, digest, object_value
 from sve_carddb.translations.models import IdentityBasis
 from sve_carddb.translations.name_identity import IdentityEvidence
@@ -108,11 +108,7 @@ def test_current_physical_observation_and_identity(
             object_value(entry.data["observation"])["observation_hash"] = digest(
                 b"wrong"
             )
-    reviews = {
-        (_area(entry), entry.owner): ("Synthetic human", "2026-10-01")
-        for entry in entries.values()
-    }
-    write_files(relayout(root, list(entries.values()), reviews))
+    write_files(relayout(root, list(entries.values())))
     current = basis(fixture, commit(fixture.root))
     with pytest.raises(ValueError, match="^" + re.escape(message) + "$"):
         IdentityEvidence(fixture.sources(), current.authored_revision).association(
