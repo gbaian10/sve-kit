@@ -52,7 +52,7 @@ records:
             parser: official-jp-exact-v1
             locator: /faces/0/traits/1
             text_hash: sha256:2f9ce6e93f4606913171880417345670d1b97af230c07eb96617db36a3ce8b3a
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
             store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
@@ -60,7 +60,7 @@ records:
             parser: official-en-exact-v1
             locator: /faces/0/traits/1
             text_hash: sha256:92517c03175378383c8a92c06ac0335ab910f56d61a56c2bc364fb1e7a308dd7
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"witch","kind":"class"}]'
     origin: official
     low_confidence: false
@@ -112,7 +112,7 @@ records:
             parser: official-jp-exact-v1
             locator: /faces/0/card_class
             text_hash: sha256:8c8d80f67f58cba97e93397428fcf72863258a8b2ac3f7f00b5f6984436deb28
-          role: 維護者確認的完整職業或卡種原文欄位；僅證明原值，代碼與特殊標記採納依第 2 版完整確認事件。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
             store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
@@ -120,7 +120,7 @@ records:
             parser: official-en-exact-v1
             locator: /faces/0/info/Class
             text_hash: sha256:dbabdeb497b4efaa7963320b2f1e8f3008a66ef0d1d571ea22bcb1bb0a6878ed
-          role: 維護者確認的完整職業或卡種原文欄位；僅證明原值，代碼與特殊標記採納依第 2 版完整確認事件。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"wyrmkin","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -172,7 +172,7 @@ records:
             parser: official-jp-exact-v1
             locator: /faces/0/traits/0
             text_hash: sha256:6919754fd7967782a7c5e4f87a99eaf1c36b17e7a0f4bde6306b511fe8a79307
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
             store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
@@ -180,7 +180,7 @@ records:
             parser: official-en-exact-v1
             locator: /faces/0/traits/0
             text_hash: sha256:bd7447650bf1afaf58a532bc282371f62311002bd0b110ad3eecc2a530e77a04
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"yokai","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -232,7 +232,7 @@ records:
             parser: official-jp-exact-v1
             locator: /faces/0/traits/1
             text_hash: sha256:d15c9b5eb5ba7aa26e804ccb6f8abb916f8e45b8e29d55343c6f80f0d83ba3b0
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
             store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
@@ -240,7 +240,7 @@ records:
             parser: official-en-exact-v1
             locator: /faces/0/traits/1
             text_hash: sha256:7c323379d9b908e046065e26ab6e225e2c4723c38ef63da010a7a5df84b23cab
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
   - record_key: '["vocabulary_adoption",{"code":"zealot","kind":"trait"}]'
     origin: official
     low_confidence: false
@@ -292,7 +292,7 @@ records:
             parser: official-jp-exact-v1
             locator: /faces/0/traits/0
             text_hash: sha256:0453ff385abbb50a699adaa08fb43e35d8029995e6a4573a644ab01cc809a9d3
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
         - source_ref:
             store_id: gbaian10-home
             batch_id: sha256:4583861566767ba2236eaefe32023dd80ce895262f68620a8e2654ac32d2c446
@@ -300,4 +300,4 @@ records:
             parser: official-en-exact-v1
             locator: /faces/0/traits/0
             text_hash: sha256:fc159fb4165c7f8044a980092904dbf86fb115a6514824dbb6455333abc45b37
-          role: 凍結來源的完整特性元件或稱號 exact 原值；代碼與已列出的日英寫法對應依確認頁的維護者本人按鍵，非譯名或額外身分採納。
+          role: 凍結來源的精確詞彙原值；代碼與日英寫法對應由維護者確認，非譯名或額外身分採納。
