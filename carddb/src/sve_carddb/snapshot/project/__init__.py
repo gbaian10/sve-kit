@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 from sve_carddb.routes.defaults import select_defaults
-from sve_carddb.snapshot.contract import columns, definition, tables, validate
+from sve_carddb.snapshot.contract import definition, tables, validate
 from sve_carddb.snapshot.project.closure import (
     prune,
     select_regions,
@@ -31,7 +31,7 @@ from sve_carddb.snapshot.project.regions import (
     region_views,
     support,
 )
-from sve_carddb.snapshot.project.shape import tuple_value
+from sve_carddb.snapshot.project.shape import source_tuple
 from sve_carddb.snapshot.project.source import Record, Source, json_list
 from sve_carddb.snapshot.project.translations import Texts, keywords, translations
 from sve_carddb.snapshot.semantics import ordered_rows, validate_view
@@ -103,13 +103,7 @@ def _validate(view: dict[str, list[Record]]) -> None:
     for table, rows in view.items():
         for row in rows:
             candidate = object_value(parse(canonical(row)))
-            # #145 owns the schema extension; existing fields remain contract-checked.
-            if table == "face" and "wording" not in columns("face"):
-                candidate.pop("wording")
-            if table == "printing" and "observations" not in columns("PrintingFace"):
-                for face in array(candidate["faces"]):
-                    object_value(face).pop("observations")
-            tuple_value(table, candidate)
+            source_tuple(table, candidate)
     validate_closure(view)
     validate_identities(view)
 

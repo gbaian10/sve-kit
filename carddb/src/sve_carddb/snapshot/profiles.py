@@ -2,8 +2,6 @@
 
 from dataclasses import dataclass
 
-LEGACY = "1.0.0"
-SHARDED = "1.1.0"
 MEDIA = "2.0.0"
 
 
@@ -14,30 +12,17 @@ class Profile:
     buckets: int
     capabilities: tuple[str, ...]
 
-    def width(self, role: str, partition: str, kind: str, owner: str) -> int:
+    @staticmethod
+    def width(role: str, partition: str, kind: str, owner: str) -> int:
         """Keep physical membership stable across data versions, including exceptions."""
-        if self.version == LEGACY:
-            return 1
         if role == "images":
-            return 1 if kind == "global" else 32 if self.version == MEDIA else 64
+            return 1 if kind == "global" else 32
         if role == "bootstrap":
             return 8 if kind == "global" else 32 if owner in {"BP01", "CP04"} else 64
         return 2 if kind == "global" and partition == "detail" else 32
 
 
 PROFILES = (
-    Profile(LEGACY, "v1", 1, ("column-partition-v1", "fragment-container-v1")),
-    Profile(
-        SHARDED,
-        "v1_1",
-        64,
-        (
-            "column-partition-v1",
-            "fragment-container-v1",
-            "image-entity-buckets-v1",
-            "rules-name-on-demand-v1",
-        ),
-    ),
     Profile(
         MEDIA,
         "v2",

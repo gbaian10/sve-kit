@@ -6,12 +6,12 @@ from importlib.resources import files
 from jsonschema import Draft202012Validator
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.profiles import LEGACY, profile
+from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
 
 
 @cache
-def schema(format_version: str = LEGACY) -> dict[str, JsonValue]:
+def schema(format_version: str = MEDIA) -> dict[str, JsonValue]:
     """Load the self-contained schema without network resolution."""
     resource = files("sve_carddb.snapshot").joinpath(
         "schema/" + profile(format_version).resource + "/contract.schema.json"
@@ -19,12 +19,12 @@ def schema(format_version: str = LEGACY) -> dict[str, JsonValue]:
     return object_value(parse(resource.read_bytes()))
 
 
-def definition(name: str, format_version: str = LEGACY) -> dict[str, JsonValue]:
+def definition(name: str, format_version: str = MEDIA) -> dict[str, JsonValue]:
     """Get a named format definition."""
     return object_value(object_value(schema(format_version)["$defs"])[name])
 
 
-def validate(name: str, value: JsonValue, format_version: str = LEGACY) -> None:
+def validate(name: str, value: JsonValue, format_version: str = MEDIA) -> None:
     """Validate shape and primitive boundaries against a fixed definition."""
     canonical(value)
     selected = schema(format_version) | {"$ref": "#/$defs/" + name}
@@ -32,7 +32,7 @@ def validate(name: str, value: JsonValue, format_version: str = LEGACY) -> None:
     Draft202012Validator(selected).validate(value)
 
 
-def columns(name: str, format_version: str = LEGACY) -> list[str]:
+def columns(name: str, format_version: str = MEDIA) -> list[str]:
     """Return the immutable column order for a row or nested tuple."""
     return [
         string(item) for item in array(definition(name, format_version)["x-columns"])
@@ -44,13 +44,13 @@ def tables() -> list[str]:
     return [string(item) for item in array(definition("Container")["x-tables"])]
 
 
-def row_type(table: str, partition: str, format_version: str = LEGACY) -> str:
+def row_type(table: str, partition: str, format_version: str = MEDIA) -> str:
     """Resolve a fragment's fixed row type."""
     mapping = object_value(definition("Container", format_version)["x-fragments"])
     return string(object_value(mapping[table])[partition])
 
 
-def descriptor(name: str, format_version: str = LEGACY) -> dict[str, JsonValue]:
+def descriptor(name: str, format_version: str = MEDIA) -> dict[str, JsonValue]:
     """Return the format-authoritative descriptor, never a payload override."""
     return {
         "columns": definition(name, format_version)["x-columns"],
@@ -59,7 +59,7 @@ def descriptor(name: str, format_version: str = LEGACY) -> dict[str, JsonValue]:
 
 
 def _decode_type(
-    kind: dict[str, JsonValue], value: JsonValue, format_version: str = LEGACY
+    kind: dict[str, JsonValue], value: JsonValue, format_version: str = MEDIA
 ) -> JsonValue:
     if "nullable" in kind:
         return (
@@ -78,7 +78,7 @@ def _decode_type(
 
 
 def decode(
-    name: str, value: JsonValue, format_version: str = LEGACY
+    name: str, value: JsonValue, format_version: str = MEDIA
 ) -> dict[str, JsonValue]:
     """Decode a validated tuple with a fixed descriptor."""
     kinds = array(definition(name, format_version)["x-types"])
@@ -90,7 +90,7 @@ def decode(
     }
 
 
-def _references(kind: dict[str, JsonValue], format_version: str = LEGACY) -> set[str]:
+def _references(kind: dict[str, JsonValue], format_version: str = MEDIA) -> set[str]:
     if "ref" in kind:
         name = string(kind["ref"])
         return {name} | required_types(name, format_version)
@@ -100,7 +100,7 @@ def _references(kind: dict[str, JsonValue], format_version: str = LEGACY) -> set
     return set()
 
 
-def required_types(name: str, format_version: str = LEGACY) -> set[str]:
+def required_types(name: str, format_version: str = MEDIA) -> set[str]:
     """Compute nested descriptor closure from the fixed, acyclic schema."""
     result: set[str] = set()
     for item in array(definition(name, format_version)["x-types"]):

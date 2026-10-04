@@ -133,7 +133,7 @@
     "name": "programs-fail-closed",
     "schema": "Programs",
     "value": {
-      "format_version": "1.0.0",
+      "format_version": "2.0.0",
       "entries": [
         {
           "id": "program:a",
@@ -166,34 +166,8 @@
     "name": "unknown-format",
     "schema": "Programs",
     "value": {
-      "format_version": "1.1.0",
+      "format_version": "3.0.0",
       "entries": []
-    }
-  },
-  {
-    "name": "preview-in-index",
-    "schema": "IndexPage",
-    "value": {
-      "index_format": 1,
-      "entries": [
-        {
-          "data_version": "preview-20260929T010203Z-0001",
-          "published_at": "2026-09-29T01:02:03Z",
-          "format_version": "1.0.0",
-          "min_reader_version": "1.0.0",
-          "required_capabilities": [
-            "column-partition-v1",
-            "fragment-container-v1"
-          ],
-          "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
-          "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "engine_support_target": {
-            "engine_version": null,
-            "engine_build_hash": null,
-            "validation_policy_id": null
-          }
-        }
-      ]
     }
   },
   {
@@ -310,63 +284,6 @@
     "name": "url-empty-host",
     "schema": "URL",
     "value": "https:///missing-host"
-  },
-  {
-    "name": "Index-first_data_version-unicode",
-    "schema": "Index",
-    "value": {
-      "index_format": 1,
-      "revision": 1,
-      "pages": [
-        {
-          "path": "snapshots/versions/page.json",
-          "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-          "first_data_version": "２０２６0929T010203Z-0001",
-          "last_data_version": "20260929T010203Z-0001",
-          "count": 1
-        }
-      ]
-    }
-  },
-  {
-    "name": "Index-last_data_version-unicode",
-    "schema": "Index",
-    "value": {
-      "index_format": 1,
-      "revision": 1,
-      "pages": [
-        {
-          "path": "snapshots/versions/page.json",
-          "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-          "first_data_version": "20260929T010203Z-0001",
-          "last_data_version": "２０２６0929T010203Z-0001",
-          "count": 1
-        }
-      ]
-    }
-  },
-  {
-    "name": "IndexPage-data_version-unicode",
-    "schema": "IndexPage",
-    "value": {
-      "index_format": 1,
-      "entries": [
-        {
-          "data_version": "２０２６0929T010203Z-0001",
-          "published_at": "2026-09-29T01:02:03Z",
-          "format_version": "1.0.0",
-          "min_reader_version": "1.0.0",
-          "required_capabilities": [],
-          "manifest_path": "snapshots/manifest.json",
-          "manifest_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-          "engine_support_target": {
-            "engine_version": null,
-            "engine_build_hash": null,
-            "validation_policy_id": null
-          }
-        }
-      ]
-    }
   },
   {
     "name": "URL-multiple-userinfo-separators",

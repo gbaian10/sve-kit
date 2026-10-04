@@ -21,7 +21,7 @@ from sve_carddb.snapshot.offline import build as build_offline
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.build import Inputs, build
 from sve_carddb.snapshot.preview.media_state import reservation
-from sve_carddb.snapshot.profiles import LEGACY, MEDIA, profile
+from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
@@ -54,7 +54,7 @@ def export_command(  # ruff: ignore[too-many-arguments, too-many-positional-argu
     image_cache_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
-    format_version: Annotated[str, typer.Option()] = LEGACY,
+    format_version: Annotated[str, typer.Option()] = MEDIA,
 ) -> None:
     """Require explicit roots and pins; write no formal index, active state or cache."""
     profile(format_version)
@@ -113,7 +113,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     image_cache_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
-    format_version: Annotated[str, typer.Option()] = LEGACY,
+    format_version: Annotated[str, typer.Option()] = MEDIA,
 ) -> None:
     """Export both launch regions to an isolated preview plus a verified private DB bundle."""
     profile(format_version)
@@ -193,8 +193,8 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
     image_execution: dict[str, int] | None,
     version: str,
 ) -> None:
-    def seal(plan: MediaPlan | None) -> None:
-        projection = built.projection if plan is None else plan.projection
+    def seal(plan: MediaPlan) -> None:
+        projection = plan.projection
         snapshot = export_snapshot(
             projection, built.ownership, batch, brotli=codec, format_version=version
         )
@@ -219,19 +219,16 @@ def _finish(  # ruff: ignore[too-many-arguments, too-many-positional-arguments] 
             report["image_execution"] = dict(image_execution)
         typer.echo(canonical(report).decode())
 
-    if version == MEDIA:
-        with reservation(roots) as (revision, previous):
-            seal(
-                prepare_media(
-                    built.projection,
-                    image_source,
-                    revision=revision,
-                    previous=previous,
-                    confirmed_images=built.confirmed_images,
-                )
+    with reservation(roots) as (revision, previous):
+        seal(
+            prepare_media(
+                built.projection,
+                image_source,
+                revision=revision,
+                previous=previous,
+                confirmed_images=built.confirmed_images,
             )
-    else:
-        seal(None)
+        )
 
 
 @app.command("publish")

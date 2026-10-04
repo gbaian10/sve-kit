@@ -24,6 +24,7 @@ from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline, offline_images
 from sve_carddb.snapshot.export import export_snapshot
+from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.values import digest, object_value, parse
 from sve_carddb.sources import official_en
@@ -143,7 +144,7 @@ def regional_images(
     return recipe, assets, roots
 
 
-@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
+@pytest.mark.parametrize("format_version", ["2.0.0"])
 def test_bilingual_images_bundle_snapshot_and_preview(
     format_version: str,
     regional_images: tuple[Inputs, ImageBuild, PreviewRoots],
@@ -167,19 +168,27 @@ def test_bilingual_images_bundle_snapshot_and_preview(
         "en_image_variant",
     } <= {use.usage for use in record.uses}
     assert (tmp_path / "bundle/inputs.json").read_bytes() == built.input_content
+    plan = prepare_media(
+        built.projection,
+        roots.preview,
+        revision=1,
+        confirmed_images=built.confirmed_images,
+    )
     snapshot = export_snapshot(
-        built.projection, built.ownership, recipe.batch(), format_version=format_version
+        plan.projection, built.ownership, recipe.batch(), format_version=format_version
     )
     output = Roots(tmp_path / "preview", roots.cdn)
     write_preview(
-        snapshot, output, built.report, regions=("en", "jp"), image_source=roots.preview
+        snapshot,
+        output,
+        built.report,
+        regions=("en", "jp"),
+        image_source=roots.preview,
+        media_plan=plan,
+        confirmed_images=built.confirmed_images,
     )
-    for row in built.projection.tables["image_variant"]:
-        path = row["path"]
-        assert isinstance(path, str)
-        assert (output.preview / path).read_bytes() == (
-            roots.preview / path
-        ).read_bytes()
+    for path, raw in plan.blobs(roots.preview):
+        assert (output.preview / path).read_bytes() == raw
     assert (output.preview / "snapshots/preview/current.json").is_file()
 
 

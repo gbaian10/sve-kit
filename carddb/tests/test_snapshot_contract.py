@@ -1,11 +1,10 @@
 """Consume shared, handwritten contract fixtures without a producer or database."""
 
-import json
 from pathlib import Path
 
 import pytest
 from jsonschema import Draft202012Validator, ValidationError
-from pydantic import JsonValue, TypeAdapter
+from pydantic import JsonValue
 
 from sve_carddb.snapshot.contract import definition, schema, tables, validate
 from sve_carddb.snapshot.generate_schema import generate
@@ -20,19 +19,13 @@ from sve_carddb.snapshot.values import (
     string,
 )
 
-FIXTURES = Path(__file__).resolve().parents[2] / "tests/fixtures/snapshot-contract/v1"
-ADAPTER: TypeAdapter[JsonValue] = TypeAdapter(JsonValue)
-
-
-def fixture(name: str) -> JsonValue:
-    return ADAPTER.validate_python(json.loads((FIXTURES / name).read_bytes()))
-
-
-def payloads() -> dict[str, bytes]:
-    return {
-        path.stem: canonical(fixture("payloads/" + path.name))
-        for path in (FIXTURES / "payloads").glob("*.json")
-    }
+from .snapshot_contract_fixtures import (
+    _replace,
+    _reseal,
+    attachments,
+    fixture,
+    payloads,
+)
 
 
 def test_schema_is_valid_and_covers_every_collection() -> None:
@@ -47,7 +40,7 @@ def test_schema_is_valid_and_covers_every_collection() -> None:
 def test_schema_regeneration_matches_committed_bytes() -> None:
     resource = (
         Path(__file__).resolve().parents[1]
-        / "src/sve_carddb/snapshot/schema/v1/contract.schema.json"
+        / "src/sve_carddb/snapshot/schema/v2/contract.schema.json"
     )
     assert generate() == resource.read_bytes()
 
@@ -64,7 +57,7 @@ def test_schema_requires_no_optional_format_checker() -> None:
                 check(item)
 
     check(schema())
-    for raw in array(fixture("schema-invalid.json")):
+    for raw in array(fixture("schema-invalid-core.json")):
         case = object_value(raw)
         if "raw_json" in case:
             continue
@@ -76,7 +69,7 @@ def test_schema_requires_no_optional_format_checker() -> None:
 
 @pytest.mark.parametrize(
     "case",
-    array(fixture("schema-invalid.json")),
+    array(fixture("schema-invalid-core.json")),
     ids=lambda case: object_value(case)["name"],
 )
 def test_shared_schema_counterexamples(case: JsonValue) -> None:
@@ -140,86 +133,49 @@ def test_golden_join_matches_independent_logical_view() -> None:
 
 def test_text_all_matches_individual_downloads() -> None:
     blobs = payloads()
-    attachments = {key: blobs[key] for key in ("images", "programs")}
     assert read_text_all(
-        fixture("manifest.json"), canonical(fixture("text-all.json")), attachments
+        fixture("manifest.json"),
+        canonical(fixture("text-all.json")),
+        attachments(blobs),
     ) == fixture("expected-logical.json")
-
-
-def _replace(value: JsonValue, path: list[JsonValue], replacement: JsonValue) -> None:
-    current = value
-    for segment in path[:-1]:
-        current = (
-            array(current)[segment]
-            if isinstance(segment, int)
-            else object_value(current)[string(segment)]
-        )
-    last = path[-1]
-    if isinstance(last, int):
-        array(current)[last] = replacement
-    else:
-        object_value(current)[string(last)] = replacement
-
-
-def _reseal(manifest: dict[str, JsonValue], key: str, data: bytes) -> None:
-    file = next(
-        object_value(item)
-        for item in array(manifest["files"])
-        if object_value(item)["key"] == key
-    )
-    hashed = digest(data)
-    file.update(
-        sha256=hashed, bytes=len(data), path="snapshots/blobs/" + hashed[7:] + ".json"
-    )
-    # Semantic mutations must pass the byte-integrity gate to exercise joins.
-    if key in {"detail", "history"}:
-        description = object_value(manifest["text_all"])
-        for ref in array(description["contains"]):
-            if object_value(ref)["key"] == key:
-                object_value(ref)["sha256"] = hashed
-    if key in {"bootstrap", "detail", "history", "images"}:
-        decoded = object_value(parse(data))
-        file["row_counts"] = [
-            {
-                "table": table,
-                "owner": fragment["owner"],
-                "bucket": fragment["bucket"],
-                "partition": fragment["partition"],
-                "count": len(array(fragment["rows"])),
-            }
-            for table, entries in object_value(decoded["tables"]).items()
-            for raw in array(entries)
-            for fragment in (object_value(raw),)
-        ]
-
-
-def _apply_reader_change(
-    manifest: dict[str, JsonValue], blobs: dict[str, bytes], item: dict[str, JsonValue]
-) -> None:
-    target = string(item["target"])
-    value = manifest if target == "manifest" else parse(blobs[target])
-    _replace(value, array(item["path"]), item["value"])
-    if target != "manifest":
-        blobs[target] = canonical(value)
-        if item.get("rehash", True):
-            if target == "bootstrap":
-                _replace_bootstrap(manifest, blobs, value)
-            else:
-                _reseal(manifest, target, blobs[target])
 
 
 @pytest.mark.parametrize(
     "case",
-    array(fixture("reader-invalid.json")),
+    array(fixture("reader-invalid-core.json")),
     ids=lambda case: object_value(case)["name"],
 )
 def test_shared_reader_counterexamples(case: JsonValue) -> None:
     item = object_value(case)
+
     manifest = object_value(fixture("manifest.json"))
-    blobs = payloads()
-    for raw in array(item.get("setup", [])):
-        _apply_reader_change(manifest, blobs, object_value(raw))
-    _apply_reader_change(manifest, blobs, item)
+    values = {key: parse(raw) for key, raw in payloads().items()}
+    for raw in [*array(item.get("setup", [])), item]:
+        mutation = object_value(raw)
+        target = string(mutation["target"])
+        _replace(
+            manifest if target == "manifest" else values[target],
+            array(mutation["path"]),
+            mutation["value"],
+        )
+    blobs = _reseal(manifest, values)
+    if item["target"] == "manifest":
+        _replace(manifest, array(item["path"]), item["value"])
+    if not item.get("rehash", True) and item["target"] != "manifest":
+        target = string(item["target"])
+        original_file = next(
+            object_value(f)
+            for f in array(object_value(fixture("manifest.json"))["files"])
+            if object_value(f)["key"] == target
+        )
+        current_file = next(
+            object_value(f)
+            for f in array(manifest["files"])
+            if object_value(f)["key"] == target
+        )
+        current_file.update(
+            {key: original_file[key] for key in ("sha256", "bytes", "path")}
+        )
     with pytest.raises(
         (ValueError, ValidationError, KeyError, TypeError),
         match=string(item["error"]) if "error" in item else None,
@@ -292,71 +248,61 @@ def test_invalid_json_boundary(data: bytes) -> None:
 
 
 def test_resources_available_from_package() -> None:
-    assert schema()["$id"] == "urn:sve-kit:snapshot:1.0.0"
+    assert schema()["$id"] == "urn:sve-kit:snapshot:2.0.0"
     assert len(canonical(schema())) < 1024 * 1024
 
 
-def _replace_bootstrap(
-    manifest: dict[str, JsonValue], blobs: dict[str, bytes], value: JsonValue
-) -> None:
-    blobs["bootstrap"] = canonical(value)
-    _reseal(manifest, "bootstrap", blobs["bootstrap"])
-    hashed = digest(blobs["bootstrap"])
-    files = {
-        string(object_value(item)["key"]): object_value(item)
-        for item in array(manifest["files"])
-    }
-    files["detail"]["dependencies"] = [{"key": "bootstrap", "sha256": hashed}]
-    detail = object_value(parse(blobs["detail"]))
-    for table in ("printing", "face_revision"):
-        fragment = object_value(array(object_value(detail["tables"])[table])[0])
-        object_value(object_value(fragment["base"])["file"])["sha256"] = hashed
-    for ref in array(object_value(manifest["text_all"])["contains"]):
-        if object_value(ref)["key"] == "bootstrap":
-            object_value(ref)["sha256"] = hashed
-    blobs["detail"] = canonical(detail)
-    _reseal(manifest, "detail", blobs["detail"])
-
-
-def test_sorted_base_is_required_even_with_valid_new_hashes() -> None:
-    manifest = object_value(fixture("manifest.json"))
-    blobs = payloads()
-    boot = object_value(parse(blobs["bootstrap"]))
-    fragment = object_value(array(object_value(boot["tables"])["printing"])[0])
-    fragment["rows"] = list(reversed(array(fragment["rows"])))
-    _replace_bootstrap(manifest, blobs, boot)
-    with pytest.raises(ValueError, match="Rows must be sorted"):
-        read_snapshot(manifest, blobs)
-
-
 def test_dangling_vocabulary_is_not_repaired() -> None:
+
     manifest = object_value(fixture("manifest.json"))
-    blobs = payloads()
-    boot = object_value(parse(blobs["bootstrap"]))
-    fragment = object_value(array(object_value(boot["tables"])["face_revision"])[0])
+    values = {key: parse(raw) for key, raw in payloads().items()}
+    bootstrap = next(
+        object_value(v)
+        for key, v in values.items()
+        if key.startswith("bootstrap/")
+        and "face_revision" in object_value(object_value(v)["tables"])
+    )
+    fragment = object_value(
+        array(object_value(bootstrap["tables"])["face_revision"])[0]
+    )
     array(array(fragment["rows"])[0])[5] = "missing_type"
-    _replace_bootstrap(manifest, blobs, boot)
     with pytest.raises(ValueError, match="Vocabulary reference missing"):
-        read_snapshot(manifest, blobs)
+        read_snapshot(manifest, _reseal(manifest, values))
 
 
 def test_text_all_cannot_silently_replace_member_content() -> None:
     manifest = object_value(fixture("manifest.json"))
     union = object_value(fixture("text-all.json"))
     member = object_value(array(union["members"])[0])
-    object_value(member["payload"])["format_version"] = "2.0.0"
+    object_value(member["payload"])["format_version"] = "1.0.0"
     data = canonical(union)
     description = object_value(manifest["text_all"])
     hashed = digest(data)
     description.update(
         sha256=hashed, bytes=len(data), path="snapshots/blobs/" + hashed[7:] + ".json"
     )
-    attachments = {key: payloads()[key] for key in ("images", "programs")}
     with pytest.raises(ValidationError):
-        read_text_all(manifest, data, attachments)
+        read_text_all(manifest, data, attachments(payloads()))
 
 
-def test_older_minimum_reader_version_is_compatible() -> None:
+def test_reader_minimum_version_is_fixed() -> None:
     manifest = object_value(fixture("manifest.json"))
     manifest["min_reader_version"] = "0.9.0"
-    assert read_snapshot(manifest, payloads()) == fixture("expected-logical.json")
+    with pytest.raises(ValidationError):
+        read_snapshot(manifest, payloads())
+
+
+def test_sorted_base_is_required_even_with_valid_new_hashes() -> None:
+
+    manifest = object_value(fixture("manifest.json"))
+    values = {key: parse(raw) for key, raw in payloads().items()}
+    fragment = next(
+        object_value(f)
+        for key, raw in values.items()
+        if key.startswith("bootstrap/")
+        for f in array(object_value(object_value(raw)["tables"]).get("face", []))
+        if len(array(object_value(f)["rows"])) > 1
+    )
+    fragment["rows"] = list(reversed(array(fragment["rows"])))
+    with pytest.raises(ValueError, match=r"^Rows must be sorted with unique keys$"):
+        read_snapshot(manifest, _reseal(manifest, values))

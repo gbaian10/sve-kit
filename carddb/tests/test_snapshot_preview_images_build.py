@@ -20,6 +20,7 @@ from sve_carddb.image_assets import (
 from sve_carddb.image_crops import load_image_crops
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot.export import export_snapshot
+from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import Roots, write_preview
 from sve_carddb.snapshot.preview.build import build
 from sve_carddb.snapshot.values import (
@@ -159,18 +160,24 @@ def test_build_mounts_images_with_exact_source_closure_and_two_faces(
         built.report["incomplete_formal_gates"]
     )
     assert built.projection.metadata["source_windows"] == []
-    snapshot = export_snapshot(built.projection, built.ownership, recipe.batch())
+    plan = prepare_media(
+        built.projection,
+        image_roots.preview,
+        revision=1,
+        confirmed_images=built.confirmed_images,
+    )
+    snapshot = export_snapshot(plan.projection, built.ownership, recipe.batch())
     report = write_preview(
         snapshot,
         Roots(tmp_path / "output", image_roots.cdn),
         built.report,
         image_source=image_roots.preview,
+        media_plan=plan,
         confirmed_images=built.confirmed_images,
     )
     assert integer(object_value(report["images"])["unique_files"]) > 0
     assert all(
-        (tmp_path / "output" / string(row["path"])).is_file()
-        for row in tables["image_variant"]
+        (tmp_path / "output" / string(row["path"])).is_file() for row in plan.assets
     )
     with pytest.raises(ValueError, match="pinned image batch"):
         build(

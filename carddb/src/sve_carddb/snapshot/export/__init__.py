@@ -10,7 +10,7 @@ from sve_carddb.snapshot.contract import columns, definition, row_type, tables, 
 from sve_carddb.snapshot.export.compression import Blob, Brotli, compress, recipe
 from sve_carddb.snapshot.export.layout import Group, Layout, Ownership, references
 from sve_carddb.snapshot.export.wire import container, encode
-from sve_carddb.snapshot.profiles import LEGACY, MEDIA
+from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.profiles import profile as profile_for
 from sve_carddb.snapshot.project.source import json_list
 from sve_carddb.snapshot.reader import read_snapshot
@@ -222,43 +222,13 @@ def _fragments(
     return container(fragments, layout.profile.version)
 
 
-def _add_groups(
-    layout: Layout,
-    files: _Files,
-    groups: dict[Group, dict[str, list[Record]]],
-    config: Record,
-) -> None:
-    for group, records in sorted(groups.items()):
-        file = files.add(
-            _file_key(group),
-            group.role,
-            _fragments(layout, group, records, None),
-            [_reference(config)] if group.role == "images" else [],
-        )
-        split = {
-            table: rows
-            for table, rows in records.items()
-            if table in {"printing", "face_revision"} and group.partition == "bootstrap"
-        }
-        if split:
-            detail = Group("text", "detail", group.kind, group.identifier, group.bucket)
-            # Separate the positional detail from full-row detail fragments in this group.
-            files.add(
-                _file_key(detail) + "/columns",
-                "text",
-                _fragments(layout, detail, split, file),
-                [_reference(file)],
-            )
-
-
 def _dependencies(
-    layout: Layout,
     table: str,
     fragment: Record,
     bootstrap_refs: dict[str, dict[str, Record]] | None,
 ) -> list[Record]:
     refs: list[Record] = []
-    if layout.profile.version == MEDIA and table == "printing_image":
+    if table == "printing_image":
         if bootstrap_refs is None:
             raise ValueError("Media requires bootstrap locations")
         for raw_row in array(fragment["rows"]):
@@ -297,7 +267,7 @@ def _seal_bands(
                 for fragment in array(raw):
                     fragments.setdefault(table, []).append(fragment)
                     for ref in _dependencies(
-                        layout, table, object_value(fragment), bootstrap_refs
+                        table, object_value(fragment), bootstrap_refs
                     ):
                         dependencies[string(ref["key"])] = ref
         tables_value: Record = {
@@ -359,7 +329,7 @@ def export_snapshot(
     batch: Batch,
     *,
     brotli: Brotli | None = None,
-    format_version: str = LEGACY,
+    format_version: str = MEDIA,
 ) -> Snapshot:
     """Export an explicitly selected fixed wire profile and verify the independent join."""
     if not batch.data_version.startswith("preview-"):
@@ -385,10 +355,7 @@ def export_snapshot(
         "programs", "programs", {"format_version": format_version, "entries": []}, []
     )
     groups = _partition(layout)
-    if format_version != LEGACY:
-        _add_bands(layout, files, groups, config)
-    else:
-        _add_groups(layout, files, groups, config)
+    _add_bands(layout, files, groups, config)
     contains: list[JsonValue] = [
         _reference(file)
         for key, file in sorted(files.files.items())

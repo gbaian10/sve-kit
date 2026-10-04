@@ -83,8 +83,8 @@ def test_schema_regeneration_and_frozen_column_boundaries() -> None:
         "art_version",
         "variants",
     ]
-    assert columns("printing_image") == ["printing_id", "face_id", "image_id"]
-    assert "path" in columns("image_variant")
+    assert columns("printing_image") == columns("printing_image", MEDIA)
+    assert "path" not in columns("image_variant")
     assert "path" not in columns("image_variant", MEDIA)
     assert profile(MEDIA).width("images", "detail", "home_set", "BP01") == 32
     assert profile(MEDIA).width("images", "detail", "global", "") == 1
@@ -636,7 +636,7 @@ def test_same_name_capability_nonempty_and_old_profile_rejects(
         )["digital_link"][0]["review_level"]
         == "unreviewed"
     )
-    with pytest.raises(ValidationError):
+    with pytest.raises(ValueError, match=r"^Unsupported snapshot format profile$"):
         validate("digital_link", encode("digital_link", row), "1.1.0")
 
 
@@ -973,11 +973,13 @@ def test_prepare_rejects_face_absent_from_printing(images: PublicImages) -> None
         prepare_media(projection, images.library, revision=7)
 
 
-def test_legacy_writer_rejects_media_plan(images: PublicImages, tmp_path: Path) -> None:
+def test_writer_rejects_mismatched_media_plan(
+    images: PublicImages, tmp_path: Path
+) -> None:
     plan = prepare_media(images.projection, images.library, revision=7)
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
     with pytest.raises(
-        ValueError, match=r"^Legacy preview cannot consume a media plan$"
+        ValueError, match=r"^Preview requires the matching verified media plan$"
     ):
         write_preview(
             images.snapshot(), roots, {}, image_source=images.library, media_plan=plan

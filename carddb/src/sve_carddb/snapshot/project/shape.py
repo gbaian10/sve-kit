@@ -27,3 +27,21 @@ def tuple_value(name: str, record: dict[str, JsonValue]) -> list[JsonValue]:
     ]
     validate(name, result)
     return result
+
+
+def source_tuple(name: str, record: dict[str, JsonValue]) -> None:
+    """Validate current build inputs before media versions are reserved."""
+    if name == "printing_image":
+        if set(record) != {"printing_id", "face_id", "image_id"}:
+            raise ValueError("Source printing image whitelist mismatch")
+        for value in record.values():
+            validate("ID", value)
+    elif name == "image_variant":
+        if set(record) != {*columns(name), "path"}:
+            raise ValueError("Source image variant whitelist mismatch")
+        validate("Path", record["path"])
+        tuple_value(
+            name, {key: value for key, value in record.items() if key != "path"}
+        )
+    else:
+        tuple_value(name, record)

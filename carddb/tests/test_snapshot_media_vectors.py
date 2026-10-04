@@ -12,16 +12,10 @@ from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.media import image_url
 from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.reader import read_index, read_snapshot, select_index_entry
-from sve_carddb.snapshot.values import (
-    array,
-    canonical,
-    digest,
-    object_value,
-    parse,
-    string,
-)
+from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
 
-from .test_snapshot_contract import _replace
+from .snapshot_contract_fixtures import _replace, _reseal
+from .snapshot_contract_fixtures import wire as wire  # ruff: ignore[useless-import-alias] -- share one immutable golden input per module
 
 if TYPE_CHECKING:
     from pydantic import JsonValue
@@ -31,79 +25,6 @@ GOLDEN = Path(__file__).resolve().parents[2] / "tests/fixtures/snapshot-contract
 
 def fixture(name: str) -> JsonValue:
     return parse((GOLDEN / name).read_bytes())
-
-
-@pytest.fixture(scope="module")
-def wire() -> tuple[dict[str, JsonValue], dict[str, JsonValue]]:
-    manifest = object_value(fixture("manifest.json"))
-    payloads = {
-        string(f["key"]): parse(
-            (GOLDEN / "payloads" / Path(string(f["path"])).name).read_bytes()
-        )
-        for raw in array(manifest["files"])
-        for f in (object_value(raw),)
-    }
-    return manifest, payloads
-
-
-def _reseal(
-    manifest: dict[str, JsonValue], payloads: dict[str, JsonValue]
-) -> dict[str, bytes]:
-    files = {
-        string(f["key"]): f
-        for raw in array(manifest["files"])
-        for f in (object_value(raw),)
-    }
-
-    def rebind(value: JsonValue) -> None:
-        if isinstance(value, dict):
-            if set(value) == {"key", "sha256"} and value["key"] in files:
-                value["sha256"] = files[string(value["key"])]["sha256"]
-            else:
-                for child in value.values():
-                    rebind(child)
-        elif isinstance(value, list):
-            for child in value:
-                rebind(child)
-
-    # Rebind exact bootstrap pins before sealing dependent text and media files.
-    order = sorted(
-        files,
-        key=lambda k: (
-            0
-            if files[k]["role"] in {"config", "programs", "bootstrap"}
-            else 2
-            if files[k]["role"] == "images"
-            else 1,
-            k,
-        ),
-    )
-    blobs: dict[str, bytes] = {}
-    for key in order:
-        payload = object_value(payloads[key])
-        rebind(payload)
-        rebind(files[key]["dependencies"])
-        raw = canonical(payload)
-        hashed = digest(raw)
-        files[key].update(
-            sha256=hashed,
-            bytes=len(raw),
-            path="snapshots/blobs/" + hashed[7:] + ".json",
-        )
-        files[key]["row_counts"] = [
-            {
-                "table": table,
-                **{f: fragment[f] for f in ("owner", "bucket", "partition")},
-                "count": len(array(fragment["rows"])),
-            }
-            for table, entries in object_value(payload.get("tables", {})).items()
-            for raw_fragment in array(entries)
-            for fragment in (object_value(raw_fragment),)
-        ]
-        blobs[key] = raw
-    rebind(manifest["config_ref"])
-    rebind(manifest["text_all"])
-    return blobs
 
 
 @pytest.mark.parametrize(

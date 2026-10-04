@@ -35,7 +35,7 @@ def configuration(source: Source, settings: Settings) -> Record:
         if size not in array(sizes):
             raise ValueError("Build image size differs from fixed public config")
     config: Record = {
-        "format_version": "1.0.0",
+        "format_version": "2.0.0",
         "languages": json_list(
             source.rows("language", "code,fallback_order,display_name")
         ),

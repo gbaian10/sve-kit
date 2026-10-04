@@ -6,7 +6,7 @@ from pathlib import Path
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.profiles import LEGACY, PROFILES, profile
+from sve_carddb.snapshot.profiles import MEDIA, PROFILES, profile
 from sve_carddb.snapshot.schema_patterns import patterns
 from sve_carddb.snapshot.values import array, object_value, parse, string
 
@@ -118,7 +118,7 @@ def _changes(
     return {"type": "array", "items": {"oneOf": branches}}
 
 
-def generate(format_version: str = LEGACY) -> bytes:
+def generate(format_version: str = MEDIA) -> bytes:
     """Regenerate schema bytes solely from the packaged declarative source."""
     source = object_value(
         parse(

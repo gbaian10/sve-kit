@@ -24,8 +24,16 @@ from sve_carddb.snapshot.export import (
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.layout import Layout
 from sve_carddb.snapshot.export.measure import measure, update
+from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.reader import read_text_all
-from sve_carddb.snapshot.values import array, canonical, object_value, parse, string
+from sve_carddb.snapshot.values import (
+    array,
+    bucket,
+    canonical,
+    object_value,
+    parse,
+    string,
+)
 
 from .snapshot_project_fixtures import populate, schema
 from .test_snapshot_project import projected
@@ -39,7 +47,19 @@ def logical() -> tuple[Projection, Ownership]:
         with db.transaction():
             populate(db)
         projection = projected(db)
-        return projection, Ownership.from_database(db, projection)
+        projection = replace(
+            projection,
+            tables=projection.tables
+            | {
+                "image_asset": [
+                    row | {"availability": "unfetched", "publication_state": "pending"}
+                    for row in projection.tables["image_asset"]
+                ],
+                "image_variant": [],
+            },
+        )
+        prepared = prepare_media(projection, None, revision=1).projection
+        return prepared, Ownership.from_database(db, projection)
 
 
 @pytest.fixture(scope="module")
@@ -221,12 +241,13 @@ def test_order_changes_rebind_every_positional_detail(
     changed = export_snapshot(projection, Ownership(homes), BATCH)
     updates = update(exported, changed)
     assert any(
-        string(key).endswith("/columns") for key in array(updates["changed_keys"])
+        string(key).startswith("text/detail/home_set/")
+        for key in array(updates["changed_keys"])
     )
     keys = [
         string(key)
         for key in array(updates["changed_keys"])
-        if string(key).endswith("/columns")
+        if string(key).startswith("text/detail/home_set/")
     ]
     for key in keys:
         assert changed.payloads[key].raw != exported.payloads[key].raw
@@ -237,17 +258,23 @@ def test_inserting_a_sorted_base_row_shifts_old_indices(
 ) -> None:
     projection, ownership = cloned(logical)
     inserted = deepcopy(projection.tables["printing"][0])
-    inserted.update(id="a:synthetic-first", card_no="TEST-0")
+    identifier = next(
+        f"a:synthetic-{n}"
+        for n in range(1000)
+        if bucket([f"a:synthetic-{n}"], 64)
+        == bucket([projection.tables["printing"][0]["id"]], 64)
+    )
+    inserted.update(id=identifier, int_id=999, card_no="TEST-0")
     projection.tables["printing"].insert(0, inserted)
     changed = export_snapshot(
         projection,
-        Ownership(dict(ownership.printing_home) | {"a:synthetic-first": "family"}),
+        Ownership(dict(ownership.printing_home) | {identifier: "family"}),
         BATCH,
     )
     key = next(
         key
         for key in changed.payloads
-        if key.endswith("/columns")
+        if key.startswith("text/detail/home_set/")
         and "printing"
         in object_value(object_value(parse(changed.payloads[key].raw))["tables"])
     )
@@ -303,7 +330,7 @@ def test_printing_uses_registered_home_even_when_card_has_another_home(
 def test_pending_display_name_and_facets_are_bootstrapped_without_current() -> None:
     from sve_carddb.snapshot.project import Projection  # ruff: ignore[import-outside-top-level] -- construct a public view independently of the producer
 
-    from .test_snapshot_contract import fixture  # ruff: ignore[import-outside-top-level] -- shared golden contains only synthetic text
+    from .snapshot_contract_fixtures import fixture  # ruff: ignore[import-outside-top-level] -- shared golden contains only synthetic text
     from .test_snapshot_wording import pending_view  # ruff: ignore[import-outside-top-level] -- independent accepted public pending case
 
     view, manifest, _ = pending_view()
@@ -483,7 +510,9 @@ def test_name_translation_and_facet_dictionary_closure(
         selected = translations[identifier]
         assert selected["source_unit_id"] in texts
         assert selected["text_unit_id"] in texts
-    assert records["vocabulary"] == logical[0].tables["vocabulary"]
+    assert sorted(records["vocabulary"], key=canonical) == sorted(
+        logical[0].tables["vocabulary"], key=canonical
+    )
     assert records["keyword"] == logical[0].tables["keyword"]
 
 
@@ -545,7 +574,7 @@ def test_extra_nested_audit_field_is_not_silently_removed() -> None:
         )
 
 
-@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
+@pytest.mark.parametrize("format_version", ["2.0.0"])
 def test_single_oversized_fragment_is_reported_instead_of_silently_dropped(
     format_version: str,
     logical: tuple[Projection, Ownership],

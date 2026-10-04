@@ -10,8 +10,7 @@ from pydantic import JsonValue
 
 from sve_carddb.snapshot.export.compression import compress
 from sve_carddb.snapshot.export.measure import measure
-from sve_carddb.snapshot.preview.images import image_blobs, verify_images
-from sve_carddb.snapshot.profiles import MEDIA
+from sve_carddb.snapshot.preview.images import require_confirmed
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, string
@@ -134,7 +133,6 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         image_source,
         confirmed_images,
         media_plan,
-        string(snapshot.manifest["format_version"]),
     )
     for key, blob in snapshot.payloads.items():
         path = string(descriptions[key]["path"])
@@ -171,7 +169,7 @@ def write_preview(  # ruff: ignore[too-many-arguments] -- the output boundary bi
         "images": image_report,
     }
     _write(roots, "reports/" + hashed[7:] + ".json", canonical(report), immutable=True)
-    _verify_written_images(joined, roots, confirmed_images, media_plan)
+    _verify_written_images(roots, media_plan)
     _write(roots, "snapshots/preview/current.json", canonical(pointer), immutable=False)
     if media_plan is not None:
         _write(
@@ -188,19 +186,13 @@ def _write_brotli(roots: Roots, path: str, raw: bytes | None) -> None:
         _write(roots, path + ".br", raw, immutable=True)
 
 
-def _verify_written_images(
-    joined: dict[str, list[Record]],
-    roots: Roots,
-    confirmed_images: frozenset[str],
-    media_plan: MediaPlan | None,
-) -> None:
+def _verify_written_images(roots: Roots, media_plan: MediaPlan | None) -> None:
     if media_plan is None:
-        verify_images(joined, roots.preview, confirmed_images)
-    else:
-        for asset in media_plan.assets:
-            raw = roots.destination(string(asset["path"])).read_bytes()
-            if digest(raw) != asset["sha256"] or len(raw) != asset["bytes"]:
-                raise ValueError("Written media differs from sealed plan")
+        raise ValueError("Preview requires the matching verified media plan")
+    for asset in media_plan.assets:
+        raw = roots.destination(string(asset["path"])).read_bytes()
+        if digest(raw) != asset["sha256"] or len(raw) != asset["bytes"]:
+            raise ValueError("Written media differs from sealed plan")
 
 
 def _publish_images(
@@ -209,43 +201,22 @@ def _publish_images(
     image_source: Path | None,
     confirmed_images: frozenset[str],
     media_plan: MediaPlan | None,
-    version: str,
 ) -> dict[str, JsonValue]:
-    image_report: dict[str, JsonValue]
-    if version == MEDIA:
-        if media_plan is None or media_plan.projection.tables != tables:
-            raise ValueError("Preview requires the matching verified media plan")
-        if media_plan.assets and image_source is None:
-            raise ValueError("Preview media requires an explicit asset source")
-        image_files, image_bytes = 0, 0
-        if image_source is not None:
-            for path, raw in media_plan.blobs(image_source):
-                _write(roots, path, raw, immutable=False)
-                image_files += 1
-                image_bytes += len(raw)
-        image_report = {"unique_files": image_files, "unique_bytes": image_bytes}
-        _write(
-            roots,
-            "private/media-plans/" + digest(canonical(media_plan.state))[7:] + ".json",
-            canonical({"state": media_plan.state, "assets": list(media_plan.assets)}),
-            immutable=True,
-        )
-    else:
-        if media_plan is not None:
-            raise ValueError("Legacy preview cannot consume a media plan")
-        image_report = _write_images(tables, roots, image_source, confirmed_images)
-    return image_report
-
-
-def _write_images(
-    tables: dict[str, list[Record]],
-    roots: Roots,
-    image_source: Path | None,
-    confirmed_images: frozenset[str],
-) -> dict[str, JsonValue]:
+    if media_plan is None or media_plan.projection.tables != tables:
+        raise ValueError("Preview requires the matching verified media plan")
+    require_confirmed(tables, confirmed_images)
+    if media_plan.assets and image_source is None:
+        raise ValueError("Preview media requires an explicit asset source")
     image_files, image_bytes = 0, 0
-    for path, raw in image_blobs(tables, image_source, confirmed_images):
-        _write(roots, path, raw, immutable=True)
-        image_files += 1
-        image_bytes += len(raw)
+    if image_source is not None:
+        for path, raw in media_plan.blobs(image_source):
+            _write(roots, path, raw, immutable=False)
+            image_files += 1
+            image_bytes += len(raw)
+    _write(
+        roots,
+        "private/media-plans/" + digest(canonical(media_plan.state))[7:] + ".json",
+        canonical({"state": media_plan.state, "assets": list(media_plan.assets)}),
+        immutable=True,
+    )
     return {"unique_files": image_files, "unique_bytes": image_bytes}
