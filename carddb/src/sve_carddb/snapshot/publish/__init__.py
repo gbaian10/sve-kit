@@ -18,6 +18,7 @@ from sve_carddb.snapshot.publish.plan import (
     JSON_KEY,
     Release,
     closure,
+    release_attachments,
     verify_media,
 )
 from sve_carddb.snapshot.publish.state import (
@@ -39,7 +40,6 @@ from sve_carddb.snapshot.values import (
 )
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.export import Brotli
     from sve_carddb.snapshot.publish.storage import Freshness, ObjectStore, Stored
 
 __all__ = ["Ledger", "PublishError", "Release", "collect", "publish"]
@@ -242,8 +242,6 @@ def publish(
     store: ObjectStore,
     release: Release,
     freshness: Freshness,
-    *,
-    brotli: Brotli | None = None,
 ) -> dict[str, JsonValue]:
     """Resume pinned writes, verify full URL bytes, and CAS the index last.
 
@@ -258,7 +256,7 @@ def publish(
             release.media,
             release.source,
             cdn_root=release.cdn_root,
-            brotli=brotli,
+            attachments=release_attachments(release),
             changes=None if release.changes is None else canonical(release.changes),
             confirmed_images=release.confirmed_images,
         )

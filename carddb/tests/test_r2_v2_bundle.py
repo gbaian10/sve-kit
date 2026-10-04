@@ -1,10 +1,11 @@
 """Offline default, pinned formal inputs, checkpoint and localhost execution."""
 
 import json
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from shutil import copytree
 from typing import TYPE_CHECKING
 
+import brotli
 import httpx
 import pytest
 from typer.testing import CliRunner
@@ -19,13 +20,14 @@ from sve_carddb.r2_upload.v2.bundle import (
     verify_checkpoint,
     write_bundle,
 )
-from sve_carddb.snapshot.publish import Ledger, PublishError, Release
+from sve_carddb.snapshot.export.compression import python_brotli
+from sve_carddb.snapshot.publish import Ledger, PublishError, Release, publish
 from sve_carddb.snapshot.publish.plan import INDEX
 from sve_carddb.snapshot.values import canonical, object_value, parse, string
 
 from .r2_v2_fixtures import ACCOUNT, BUCKET
 from .r2_v2_fixtures import server as server  # ruff: ignore[useless-import-alias] -- register shared localhost pytest fixture
-from .snapshot_publish_fixtures import candidate
+from .snapshot_publish_fixtures import FakeCDN, FakeS3, candidate, version
 from .snapshot_publish_fixtures import images as images  # ruff: ignore[useless-import-alias] -- shared module-scoped image library
 
 if TYPE_CHECKING:
@@ -85,6 +87,108 @@ def frozen(frozen_base: Frozen, tmp_path: Path) -> Frozen:
     checkpoint = tmp_path / "checkpoint.json"
     save_checkpoint(checkpoint, ledger)
     return Frozen(root, ledger, frozen_base.release, checkpoint)
+
+
+@pytest.fixture(scope="module")
+def brotli_base(
+    images: PublicImages, tmp_path_factory: pytest.TempPathFactory
+) -> Frozen:
+    base = tmp_path_factory.mktemp("r2-v2-brotli")
+    ledger = Ledger(base / "ledger", base / "backup")
+    ledger.initialize()
+    first = candidate(ledger, images, brotli=python_brotli())
+    store = FakeS3()
+    publish(ledger, store, first, FakeCDN(store))
+    release = candidate(
+        ledger, images, from_version=version(first), brotli=python_brotli()
+    )
+    path = string(release.entry["manifest_path"]) + ".br"
+    manifest = canonical(release.snapshot.manifest)
+    alternate = brotli.compress(manifest, quality=4)
+    assert alternate != next(m.raw for m in release.members if m.key == path)
+    release = replace(
+        release,
+        members=tuple(
+            replace(m, raw=alternate) if m.key == path else m for m in release.members
+        ),
+    )
+    root = base / "bundle"
+    root.mkdir()
+    write_bundle(root, release)
+    checkpoint = base / "checkpoint.json"
+    save_checkpoint(checkpoint, ledger)
+    return Frozen(root, ledger, release, checkpoint)
+
+
+def test_frozen_brotli_transport_preserves_alternate_encoding_without_recompression(
+    brotli_base: Frozen,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def forbidden(*_args: object, **_kwargs: object) -> bytes:
+        pytest.fail("Frozen validation must not recompress Brotli")
+
+    monkeypatch.setattr(brotli, "compress", forbidden)
+    actual = load_bundle(
+        brotli_base.root, brotli_base.ledger, cdn_root="https://cdn.invalid/"
+    )
+    assert actual.members == brotli_base.release.members
+    assert actual.entry == brotli_base.release.entry
+    assert actual.snapshot == brotli_base.release.snapshot
+    assert (
+        report(actual, brotli_base.ledger)["candidate_bytes"]
+        == report(brotli_base.release, brotli_base.ledger)["candidate_bytes"]
+    )
+
+
+@pytest.mark.parametrize("attachment", ["manifest", "changes"])
+@pytest.mark.parametrize("encoding", ["raw", "gzip", "br"])
+def test_corrupted_frozen_brotli_attachments_fail_before_credentials(
+    brotli_base: Frozen,
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    attachment: str,
+    encoding: str,
+) -> None:
+    root = tmp_path / "bundle"
+    copytree(brotli_base.root, root)
+    key = (
+        string(brotli_base.release.entry["manifest_path"])
+        if attachment == "manifest"
+        else string(
+            object_value(brotli_base.release.snapshot.manifest["changes_ref"])["path"]
+        )
+    )
+    suffix = {"raw": "", "gzip": ".gz", "br": ".br"}[encoding]
+    path = root / (key + suffix)
+    raw = path.read_bytes()
+    path.write_bytes(bytes([raw[0] ^ 0xFF]) + raw[1:])
+
+    def forbidden() -> Credentials:
+        pytest.fail("Invalid transport must fail before credentials")
+
+    monkeypatch.setattr(Credentials, "environment", forbidden)
+    args = Frozen(
+        root, brotli_base.ledger, brotli_base.release, brotli_base.checkpoint
+    ).args()
+    result = CliRunner().invoke(
+        app, [*args, "--execute", "--confirm-maintainer-authorization"]
+    )
+    assert result.exit_code == 2
+
+
+def test_brotli_cli_dry_run_never_reads_credentials(
+    brotli_base: Frozen, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    def forbidden() -> Credentials:
+        pytest.fail("Offline Brotli validation must not read credentials")
+
+    monkeypatch.setattr(Credentials, "environment", forbidden)
+    result = CliRunner().invoke(app, [*brotli_base.args(), "--dry-run"])
+    assert result.exit_code == 0, result.exception
+    assert (
+        json.loads(result.output)["candidate_files"]
+        == len(brotli_base.release.members) + len(brotli_base.release.assets) + 1
+    )
 
 
 def test_roundtrip_preserves_exact_transport_assets_and_reservation(

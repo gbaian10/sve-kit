@@ -15,6 +15,7 @@ from jsonschema import ValidationError as SchemaError
 from PIL import Image
 
 from sve_carddb.image_variants import SIZES
+from sve_carddb.snapshot.export.compression import verify_brotli
 from sve_carddb.snapshot.publication import require_preview
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import (
@@ -29,7 +30,6 @@ from sve_carddb.snapshot.values import (
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.snapshot.export import Brotli
 
 POINTER = "snapshots/preview/current.json"
 _JSON = re.compile(r"snapshots/(?:blobs|manifests)/[0-9a-f]{64}\.json\Z")
@@ -169,23 +169,25 @@ def _encodings(
     raw: bytes,
     files: dict[str, bytes | None],
     allowed: set[str],
-    brotli: Brotli | None,
 ) -> None:
     if files.get(key + ".gz") != gzip.compress(raw, compresslevel=9, mtime=0):
         raise UploadError("Missing or inconsistent canonical gzip member")
     allowed.add(key + ".gz")
     if key + ".br" in files:
-        if brotli is None:
-            raise UploadError("Brotli members require the explicit producer compressor")
-        if files[key + ".br"] != brotli.compress(raw):
-            raise UploadError("Inconsistent Brotli member")
+        encoded = files[key + ".br"]
+        if encoded is None:
+            raise UploadError("Missing Brotli member")
+        try:
+            verify_brotli(encoded, raw)
+        except ValueError:
+            raise UploadError("Inconsistent Brotli member") from None
         allowed.add(key + ".br")
 
 
-def plan_preview(root: Path, *, brotli: Brotli | None = None) -> Plan:
+def plan_preview(root: Path) -> Plan:
     """Check all complete local versions, excluding private/report trees without reading them."""
     try:
-        return _plan(root, brotli)
+        return _plan(root)
     except UploadError:
         raise
     except OSError, ValueError, KeyError, TypeError, SchemaError:
@@ -193,7 +195,7 @@ def plan_preview(root: Path, *, brotli: Brotli | None = None) -> Plan:
         raise UploadError("Public preview validation failed") from None
 
 
-def _plan(root: Path, brotli: Brotli | None) -> Plan:
+def _plan(root: Path) -> Plan:
     files = _scan(root)
     pointer_raw = files.get(POINTER)
     if pointer_raw is None:
@@ -219,8 +221,8 @@ def _plan(root: Path, brotli: Brotli | None) -> Plan:
             regions=tuple(string(region) for region in array(manifest["regions"])),
         )
         allowed.add(key)
-        _encodings(key, raw, files, allowed, brotli)
-        joined = _payloads(manifest, files, allowed, brotli)
+        _encodings(key, raw, files, allowed)
+        joined = _payloads(manifest, files, allowed)
         _image_metadata(joined, expected_images, allowed)
     if set(files) != allowed:
         raise UploadError("Public tree contains unreferenced or private members")
@@ -236,7 +238,6 @@ def _payloads(
     manifest: dict[str, JsonValue],
     files: dict[str, bytes | None],
     allowed: set[str],
-    brotli: Brotli | None,
 ) -> dict[str, list[dict[str, JsonValue]]]:
     descriptions = [object_value(d) for d in array(manifest["files"])]
     union = object_value(manifest["text_all"])
@@ -254,7 +255,7 @@ def _payloads(
             raise UploadError("Payload hash or size mismatch")
         _public_json(data, image_payload=description.get("role") == "images")
         allowed.add(path)
-        _encodings(path, data, files, allowed, brotli)
+        _encodings(path, data, files, allowed)
         compressed = object_value(description["compressed_bytes"])
         for codec, suffix in (("gzip", ".gz"), ("br", ".br")):
             encoded = files.get(path + suffix)

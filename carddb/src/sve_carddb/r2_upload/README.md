@@ -2,7 +2,8 @@
 
 This command validates the complete public preview transport and uses the R2
 S3-compatible API for conditional object writes. It does not build a snapshot,
-read source archives or open the crawl manifest. It adds no dependency.
+read source archives or open the crawl manifest. Brotli uses the locked PyPI
+`brotli` package.
 
 Run from the repository root with an absolute, non-symlink preview directory:
 
@@ -27,35 +28,27 @@ Only these public keys are permitted:
 Every retained manifest must be a complete JP or sorted EN+JP preview under the
 existing publication contract. EN-only and other regional scopes remain rejected.
 Validation checks content addresses, sizes, independent
-snapshot and full-text readers, reference closure, canonical compressed bytes,
+snapshot and full-text readers, reference closure, canonical gzip bytes, decoded
+Brotli content,
 public image bindings, all five image sizes, and decoded WebP format/dimensions.
 Unknown files, PNG, private fields/recipes, local paths, symlinks, special files,
 and unreferenced objects fail before HTTP. Original root-relative `img src`
 values remain web references when their source URL has a public HTTPS base;
 filesystem path forms are rejected in those fields too.
 
-A preview containing Brotli siblings requires an explicitly selected producer-compatible
-encoder. The repository supplies `carddb/tools/brotli-preview`; prepare carddb's
-existing uv environment first. It uses the system `libbrotlienc.so.1`, requires
-libbrotli 1.0.9, and fixes generic mode, quality 11 and lgwin 22. Missing or different
-libraries fail without installation or fallback. All 203 Brotli members of the
-measured preview matched this recipe. The official Brotli CLI's default window
-has not been verified; quality alone does not prove identical bytes.
+Optional `.br` siblings are validated by bounded decompression against their raw
+JSON, regardless of producer version or quality. The checked-in lockfile supplies
+the Python Brotli package; no system library, shell wrapper or executable pin is
+required. Invalid, truncated, trailing or mismatched streams fail offline.
+Existing preview files are read without alteration or recompression.
 
-The wrapper accepts `--version` and `-q 11 -c` with stdin/stdout bytes:
-
-```bash
-uv --directory carddb run sve-carddb r2 upload-preview \
-  --preview-dir /explicit/preview --dry-run \
-  --brotli-command "$PWD/carddb/tools/brotli-preview"
-```
-
-The selected encoder's output must match every existing `.br` byte for byte.
-A local encoder may run even in offline mode; it must be a trusted offline
-program. No encoder is discovered or installed implicitly. Gzip-only previews
-need no external encoder. Both encoder invocations receive only a fixed PATH,
-LANG and LC_ALL; credentials and ambient Python, loader and proxy settings are
-not inherited.
+For a new snapshot, `snapshot export` and `snapshot export-offline` accept
+`--brotli` (default `--no-brotli`). Encoding uses generic mode, quality 11 and
+lgwin 22, and records the package version in the private compression recipe.
+The public raw JSON and gzip rules are unchanged. Upload commands need no
+Brotli option. Frozen formal bundles retain their exact manifest and changes
+representations during dry-run and retry; decoding does not authorize replacing
+an existing immutable object with a different encoding.
 
 ## Maintainer execution
 
@@ -79,7 +72,7 @@ uv --directory carddb run sve-carddb r2 upload-preview \
   --execute --confirm-maintainer-authorization
 ```
 
-Add `--brotli-command` when required. The endpoint is fixed to HTTPS on the
+The endpoint is fixed to HTTPS on the
 explicit account's `r2.cloudflarestorage.com`; proxies, environment HTTP options
 and redirects are disabled. This uses signed GET and PUT requests, not the
 public CDN URL. Unset the credential variables after use.
@@ -115,10 +108,10 @@ The client has a 30-second per-I/O timeout and no whole-run deadline.
 ## Execution and rerun cost
 
 The measured preview has 33,863 files / 1,121,058,055 bytes. One local dry-run,
-including 203 Brotli recompressions, took about five minutes; allow 5–7 minutes
-under varying load. Execute performs three complete local validations, roughly
-15–21 minutes before accounting for network work. Tests use tiny shared synthetic
-bases rather than this production comparison.
+using the former 203-member Brotli recompression check, took about five minutes.
+That historical timing does not measure the current decompression check. Execute
+performs three complete local validations before accounting for network work.
+Tests use tiny shared synthetic bases rather than this production comparison.
 
 For 33,862 immutable members and one pointer, first publication requires about
 101,591 sequential requests without retries and about 1.12 GB upload plus 1.12 GB

@@ -6,13 +6,11 @@ from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] --
 from typing import TYPE_CHECKING, Annotated
 
 if TYPE_CHECKING:
-    from sve_carddb.snapshot.export import Brotli
     from sve_carddb.snapshot.publish import Ledger, Release
 
 import httpx
 import typer
 
-from sve_carddb.r2_upload.compression import command_brotli
 from sve_carddb.r2_upload.plan import UploadError
 from sve_carddb.r2_upload.s3 import Credentials
 from sve_carddb.r2_upload.v2.adapter import R2Store
@@ -39,7 +37,6 @@ def upload_v2(  # ruff: ignore[too-many-arguments] -- all deployment and recover
     confirm_maintainer_authorization: Annotated[bool, typer.Option()] = False,
     account_id: Annotated[str | None, typer.Option()] = None,
     bucket: Annotated[str | None, typer.Option()] = None,
-    brotli_command: Annotated[Path | None, typer.Option()] = None,
 ) -> None:
     """Dry-run is offline and read-only; execution never promotes preview artifacts."""
     try:
@@ -47,13 +44,10 @@ def upload_v2(  # ruff: ignore[too-many-arguments] -- all deployment and recover
         root = checked_cdn_root(cdn_base_url)
         ledger = ledger_at(ledger_dir, backup_dir)
         verify_checkpoint(checkpoint_file, ledger)
-        codec = None if brotli_command is None else command_brotli(brotli_command)
-        release = load_bundle(release_dir, ledger, cdn_root=root, brotli=codec)
+        release = load_bundle(release_dir, ledger, cdn_root=root)
         result = report(release, ledger)
         if execute:
-            result |= _execute(
-                ledger, release, checkpoint_file, codec, account_id, bucket
-            )
+            result |= _execute(ledger, release, checkpoint_file, account_id, bucket)
         typer.echo(json.dumps(result, sort_keys=True, separators=(",", ":")))
     except (PublishError, UploadError) as error:
         raise typer.BadParameter(str(error)) from None
@@ -70,7 +64,6 @@ def _execute(
     ledger: Ledger,
     release: Release,
     checkpoint: Path,
-    codec: Brotli | None,
     account_id: str | None,
     bucket: str | None,
 ) -> dict[str, object]:
@@ -89,7 +82,6 @@ def _execute(
                 store,
                 release,
                 CDNFreshness(release.cdn_root, cdn_client),
-                brotli=codec,
             )
             return {
                 "mode": "execute",

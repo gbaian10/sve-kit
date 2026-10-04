@@ -11,7 +11,7 @@ from jsonschema import ValidationError as SchemaError
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.contract import validate
-from sve_carddb.snapshot.export.compression import compress
+from sve_carddb.snapshot.export.compression import Blob, compress, verify_brotli
 from sve_carddb.snapshot.media import display_url, image_path, prepare_media
 from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.project.source import json_list
@@ -28,7 +28,7 @@ from sve_carddb.snapshot.values import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Iterator, Mapping
     from pathlib import Path
 
     from sve_carddb.snapshot.export import Brotli, Snapshot
@@ -94,6 +94,8 @@ def _members(
         raise PublishError("Invalid immutable member key")
     if compressed != gzip.compress(raw, compresslevel=9, mtime=0):
         raise PublishError("Invalid canonical gzip representation")
+    if br is not None:
+        verify_brotli(br, raw)
     if digest(raw)[7:] != path.rsplit("/", 1)[1][:-5]:
         raise PublishError("Immutable member content address mismatch")
     headers = {"content-type": "application/json", "cache-control": IMMUTABLE}
@@ -152,6 +154,7 @@ def prepare(  # ruff: ignore[too-many-arguments] -- compressor, CDN root and per
     brotli: Brotli | None = None,
     changes: bytes | None = None,
     confirmed_images: frozenset[str] = frozenset(),
+    attachments: Mapping[str, Blob] | None = None,
 ) -> Release:
     """Validate a caller's formal artifact; never promote preview data implicitly."""
     try:
@@ -163,6 +166,7 @@ def prepare(  # ruff: ignore[too-many-arguments] -- compressor, CDN root and per
             brotli=brotli,
             changes=changes,
             confirmed_images=confirmed_images,
+            attachments=attachments,
         )
     except PublishError:
         raise
@@ -182,6 +186,7 @@ def _prepare(  # ruff: ignore[too-many-arguments] -- explicit independent public
     brotli: Brotli | None = None,
     changes: bytes | None = None,
     confirmed_images: frozenset[str] = frozenset(),
+    attachments: Mapping[str, Blob] | None = None,
 ) -> Release:
     """Validate a caller's formal artifact; never promote preview data implicitly."""
     require_formal(snapshot.manifest)
@@ -199,13 +204,13 @@ def _prepare(  # ruff: ignore[too-many-arguments] -- explicit independent public
     ):
         raise PublishError("Explicit HTTPS CDN root required")
     snapshot.verify(media.projection)
-    attachments = {
+    text_attachments = {
         key: blob.raw
         for key, blob in snapshot.payloads.items()
         if key == "programs" or key.startswith("images/")
     }
     if (
-        read_text_all(snapshot.manifest, snapshot.text_all.raw, attachments)
+        read_text_all(snapshot.manifest, snapshot.text_all.raw, text_attachments)
         != media.projection.tables
     ):
         raise PublishError("Formal text union and shards differ")
@@ -214,7 +219,7 @@ def _prepare(  # ruff: ignore[too-many-arguments] -- explicit independent public
     for raw in array(manifest["files"]):
         file = object_value(raw)
         blob = snapshot.payloads[string(file["key"])]
-        _blob(file, blob.raw, blob.gzip, blob.br, brotli)
+        _blob(file, blob.raw, blob.gzip, blob.br)
         members.extend(_members(string(file["path"]), blob.raw, blob.gzip, blob.br))
     union = object_value(manifest["text_all"])
     _blob(
@@ -222,7 +227,6 @@ def _prepare(  # ruff: ignore[too-many-arguments] -- explicit independent public
         snapshot.text_all.raw,
         snapshot.text_all.gzip,
         snapshot.text_all.br,
-        brotli,
     )
     members.extend(
         _members(
@@ -232,10 +236,10 @@ def _prepare(  # ruff: ignore[too-many-arguments] -- explicit independent public
             snapshot.text_all.br,
         )
     )
-    change_value, change_members = _changes(manifest, changes, brotli)
-    members.extend(change_members)
-    encoded = compress(canonical(manifest), brotli)
+    encoded = _manifest_blob(manifest, brotli, attachments)
     manifest_path = "snapshots/manifests/" + digest(encoded.raw)[7:] + ".json"
+    change_value, change_members = _changes(manifest, changes, brotli, attachments)
+    members.extend(change_members)
     members.extend(_members(manifest_path, encoded.raw, encoded.gzip, encoded.br))
     # Deduplicate shared raw/compressed blobs, refusing inconsistent metadata.
     unique: dict[str, Member] = {}
@@ -279,7 +283,6 @@ def _blob(
     raw: bytes,
     gz: bytes,
     br: bytes | None,
-    brotli: Brotli | None,
 ) -> None:
     if digest(raw) != ref["sha256"] or len(raw) != ref["bytes"]:
         raise PublishError("Transport bytes differ from manifest")
@@ -288,8 +291,48 @@ def _blob(
         None if br is None else len(br)
     ):
         raise PublishError("Transport encoded lengths differ from manifest")
-    if br is not None and (brotli is None or brotli.compress(raw) != br):
-        raise PublishError("Brotli requires the pinned producer compressor")
+
+
+def _encoded(
+    path: str, raw: bytes, brotli: Brotli | None, attachments: Mapping[str, Blob] | None
+) -> Blob:
+    if attachments is None:
+        return compress(raw, brotli)
+    blob = attachments[path]
+    if blob.raw != raw:
+        raise PublishError("Frozen attachment differs from canonical content")
+    return blob
+
+
+def _manifest_blob(
+    manifest: dict[str, JsonValue],
+    brotli: Brotli | None,
+    attachments: Mapping[str, Blob] | None,
+) -> Blob:
+    raw = canonical(manifest)
+    path = "snapshots/manifests/" + digest(raw)[7:] + ".json"
+    expected = {path}
+    if manifest["changes_ref"] is not None:
+        expected.add(string(object_value(manifest["changes_ref"])["path"]))
+    if attachments is not None and set(attachments) != expected:
+        raise PublishError("Frozen attachments differ from the manifest closure")
+    return _encoded(path, raw, brotli, attachments)
+
+
+def release_attachments(release: Release) -> dict[str, Blob]:
+    """Preserve frozen manifest/changes bytes when validating or resuming a release."""
+    paths = {string(release.entry["manifest_path"])}
+    ref = release.snapshot.manifest["changes_ref"]
+    if ref is not None:
+        paths.add(string(object_value(ref)["path"]))
+    members = {member.key: member.raw for member in release.members}
+    try:
+        return {
+            path: Blob(members[path], members.get(path + ".br"), members[path + ".gz"])
+            for path in paths
+        }
+    except KeyError:
+        raise PublishError("Frozen attachment is missing") from None
 
 
 def _assets(
@@ -373,7 +416,10 @@ def verify_media(release: Release, previous: JsonValue) -> None:
 
 
 def _changes(
-    manifest: dict[str, JsonValue], changes: bytes | None, brotli: Brotli | None
+    manifest: dict[str, JsonValue],
+    changes: bytes | None,
+    brotli: Brotli | None,
+    attachments: Mapping[str, Blob] | None,
 ) -> tuple[dict[str, JsonValue] | None, list[Member]]:
     members: list[Member] = []
     change_value = None
@@ -389,9 +435,9 @@ def _changes(
             or change_value["to_data_version"] != manifest["data_version"]
         ):
             raise PublishError("Changes are not canonical or target another release")
-        encoded = compress(changes, brotli)
         ref = object_value(manifest["changes_ref"])
-        _blob(ref, encoded.raw, encoded.gzip, encoded.br, brotli)
+        encoded = _encoded(string(ref["path"]), changes, brotli, attachments)
+        _blob(ref, encoded.raw, encoded.gzip, encoded.br)
         members.extend(
             _members(string(ref["path"]), encoded.raw, encoded.gzip, encoded.br)
         )

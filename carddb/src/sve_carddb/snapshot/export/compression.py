@@ -1,10 +1,12 @@
-"""Deterministic, recipe-bound compression without an implicit Brotli dependency."""
+"""Deterministic compression and bounded verification of transfer encodings."""
 
 import gzip
 import platform
 import zlib
 from dataclasses import dataclass
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Protocol, cast
+
+import brotli as library
 
 if TYPE_CHECKING:
     from collections.abc import Callable
@@ -16,6 +18,50 @@ class Brotli:
 
     version: str
     compress: Callable[[bytes], bytes]
+
+
+def python_brotli() -> Brotli:
+    """Record the installed package version, keeping quality and window explicit."""
+
+    def encode(raw: bytes) -> bytes:
+        try:
+            return library.compress(
+                raw, mode=library.MODE_GENERIC, quality=11, lgwin=22
+            )
+        except library.error:
+            raise ValueError("Brotli compression failed") from None
+
+    return Brotli("brotli " + library.__version__, encode)
+
+
+class _BoundedDecoder(Protocol):
+    # brotli-stubs 1.2.0 omits the native 1.2.0 bounded streaming API.
+    def process(self, data: bytes, *, output_buffer_limit: int) -> bytes: ...
+    def is_finished(self) -> bool: ...
+
+
+def verify_brotli(encoded: bytes, raw: bytes) -> None:
+    """Accept any complete Brotli stream of these exact bytes without recompression."""
+    decoder = cast("_BoundedDecoder", library.Decompressor())
+    offset = 0
+    pending = encoded
+    try:
+        while True:
+            decoded = decoder.process(pending, output_buffer_limit=64 * 1024)
+            end = offset + len(decoded)
+            if end > len(raw) or decoded != raw[offset:end]:
+                raise ValueError("Invalid Brotli representation")
+            offset = end
+            if decoder.is_finished():
+                if offset != len(raw):
+                    raise ValueError("Invalid Brotli representation")
+                return
+            # Consuming all input can still leave buffered output to drain.
+            if not decoded:
+                raise ValueError("Invalid Brotli representation")
+            pending = b""
+    except library.error:
+        raise ValueError("Invalid Brotli representation") from None
 
 
 @dataclass(frozen=True)

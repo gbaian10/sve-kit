@@ -1,7 +1,6 @@
 """Explicit preview mode and fail-closed formal publication command boundary."""
 
-import subprocess  # ruff: ignore[suspicious-subprocess-import] -- explicitly injected optional compressor boundary
-from pathlib import Path
+from pathlib import Path  # ruff: ignore[typing-only-standard-library-import] -- Typer resolves runtime annotations
 from typing import TYPE_CHECKING, Annotated
 
 import typer
@@ -14,7 +13,8 @@ from sve_carddb.image_assets import (
     build_regional_assets,
 )
 from sve_carddb.image_crops import load_image_crops
-from sve_carddb.snapshot.export import Brotli, export_snapshot
+from sve_carddb.snapshot.export import export_snapshot
+from sve_carddb.snapshot.export.compression import python_brotli
 from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.offline import Inputs as OfflineInputs
 from sve_carddb.snapshot.offline import build as build_offline
@@ -25,19 +25,10 @@ from sve_carddb.snapshot.profiles import LEGACY, MEDIA, profile
 from sve_carddb.snapshot.publication import require_formal, require_preview
 from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
+if TYPE_CHECKING:
+    from sve_carddb.snapshot.export import Brotli
+
 app = typer.Typer(no_args_is_help=True, help="Export isolated offline previews.")
-
-
-def command_brotli(command: Path) -> Brotli:
-    """Use an explicitly supplied compressor, rather than an undeclared dependency."""
-    executable = str(command.resolve(strict=True))
-    version = subprocess.check_output([executable, "--version"], text=True).strip()  # ruff: ignore[subprocess-without-shell-equals-true] -- explicit caller-selected executable, no shell
-    pin = version + " / " + digest(Path(executable).read_bytes())
-
-    def compress(raw: bytes) -> bytes:
-        return subprocess.check_output([executable, "-q", "11", "-c"], input=raw)  # ruff: ignore[subprocess-without-shell-equals-true] -- explicit caller-selected executable, no shell
-
-    return Brotli(pin, compress)
 
 
 def verify_inputs(roots: Roots, inputs: Inputs | OfflineInputs) -> None:
@@ -56,9 +47,7 @@ def export_command(  # ruff: ignore[too-many-arguments, too-many-positional-argu
     inputs: Annotated[Path, typer.Option(exists=True, dir_okay=False)],
     preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
     cdn_dir: Annotated[Path, typer.Option(envvar="SVE_CDN_DIR")],
-    brotli_command: Annotated[
-        Path | None, typer.Option(exists=True, dir_okay=False)
-    ] = None,
+    brotli: Annotated[bool, typer.Option("--brotli/--no-brotli")] = False,
     image_assets_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
@@ -73,7 +62,7 @@ def export_command(  # ruff: ignore[too-many-arguments, too-many-positional-argu
     roots.verify()
     recipe = Inputs.model_validate_json(inputs.read_bytes())
     verify_inputs(roots, recipe)
-    codec = None if brotli_command is None else command_brotli(brotli_command)
+    codec = python_brotli() if brotli else None
     if (image_assets_dir is None) != (image_cache_dir is None):
         raise typer.BadParameter(
             "Image asset and cache roots must be provided together"
@@ -117,9 +106,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
     preview_dir: Annotated[Path, typer.Option(envvar="SVE_PREVIEW_DIR")],
     cdn_dir: Annotated[Path, typer.Option(envvar="SVE_CDN_DIR")],
     bundle_dir: Annotated[Path, typer.Option()],
-    brotli_command: Annotated[
-        Path | None, typer.Option(exists=True, dir_okay=False)
-    ] = None,
+    brotli: Annotated[bool, typer.Option("--brotli/--no-brotli")] = False,
     image_assets_dir: Annotated[
         Path | None, typer.Option(exists=True, file_okay=False)
     ] = None,
@@ -141,7 +128,7 @@ def export_offline_command(  # ruff: ignore[too-many-arguments, too-many-positio
             )
     if inputs.resolve().is_relative_to(preview_dir.resolve()):
         raise ValueError("Offline preview must be disjoint from recipe")
-    codec = None if brotli_command is None else command_brotli(brotli_command)
+    codec = python_brotli() if brotli else None
     if (image_assets_dir is None) != (image_cache_dir is None):
         raise typer.BadParameter(
             "Image asset and cache roots must be provided together"

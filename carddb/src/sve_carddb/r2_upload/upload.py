@@ -15,7 +15,6 @@ from sve_carddb.snapshot.values import digest
 
 if TYPE_CHECKING:
     from sve_carddb.r2_upload.s3 import S3, Remote
-    from sve_carddb.snapshot.export import Brotli
 
 
 def _same(remote: Remote | None, member: Member) -> None:
@@ -105,11 +104,9 @@ def _pointer(plan: Plan, remote: S3, prior: Remote | None, pointer: Member) -> b
     return True
 
 
-def upload(
-    plan: Plan, remote: S3, *, brotli: Brotli | None = None
-) -> dict[str, object]:
+def upload(plan: Plan, remote: S3) -> dict[str, object]:
     """Revalidate before I/O and publication; never delete or overwrite members."""
-    if plan_preview(plan.root, brotli=brotli) != plan:
+    if plan_preview(plan.root) != plan:
         raise UploadError("Local public inventory changed")
     prior = remote.get(POINTER, limit=4096)
     if prior is not None:
@@ -133,7 +130,7 @@ def upload(
             first = False
             counts[category + "_files"] += 1
             counts[category + "_bytes"] += member.size
-    if plan_preview(plan.root, brotli=brotli) != plan:
+    if plan_preview(plan.root) != plan:
         raise UploadError("Local public inventory changed")
     pointer = next(m for m in plan.members if m.key == POINTER)
     category = "uploaded" if _pointer(plan, remote, prior, pointer) else "skipped"
