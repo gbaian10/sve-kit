@@ -1,16 +1,13 @@
 """Independent strict-rule examples, writer round trips and production validation."""
 
-import importlib
-import sys
+import traceback
 from pathlib import Path
 from typing import TYPE_CHECKING
 
 import pytest
-import yaml
 from pydantic import JsonValue, RootModel, ValidationError
-from ruamel.yaml import YAML
 
-from sve_carddb.registry import storage, yaml_reader
+from sve_carddb.registry import storage
 from sve_carddb.registry.inputs import canonical, digest
 from sve_carddb.registry.storage import MAX_BYTES, encode, read_yaml
 
@@ -34,41 +31,27 @@ def test_all_production_files_pass_strict_reader(path: Path) -> None:
 @pytest.mark.parametrize(
     ("source", "error", "message"),
     [
-        pytest.param("a: &unused value", TypeError, "Anchors", id="scalar-anchor"),
-        pytest.param("a: &unused [value]", TypeError, "Anchors", id="sequence-anchor"),
+        pytest.param("a: *undefined", ValueError, "syntax", id="undefined-alias"),
+        pytest.param("a: &x [*x]", ValueError, "syntax", id="cyclic-sequence"),
+        pytest.param("a: &x {b: *x}", ValueError, "syntax", id="cyclic-map"),
+        pytest.param("a: 1\na: 2", ValueError, "syntax", id="duplicate-key"),
         pytest.param(
-            "a: &unused {k: value}", TypeError, "Anchors", id="mapping-anchor"
+            "a: [{b: 1, 'b': 2}]", ValueError, "syntax", id="nested-duplicate-key"
         ),
-        pytest.param("a: *undefined", TypeError, "Aliases", id="alias-alone"),
-        pytest.param("a: !!str value", TypeError, "tags", id="scalar-tag"),
-        pytest.param("a: ! value", TypeError, "tags", id="non-specific-tag"),
-        pytest.param("a: !!seq [value]", TypeError, "tags", id="sequence-tag"),
-        pytest.param("a: !!map {k: value}", TypeError, "tags", id="mapping-tag"),
-        pytest.param(
-            "a: !!python/object:os.system {}", TypeError, "tags", id="object-tag"
-        ),
-        pytest.param("a: 1\na: 2", ValueError, "Duplicate", id="duplicate-key"),
-        pytest.param(
-            "a: [{b: 1, 'b': 2}]", ValueError, "Duplicate", id="nested-duplicate-key"
-        ),
-        pytest.param("<<: value", ValueError, "Merge", id="merge-key-alone"),
-        pytest.param(
-            "a: [{'<<': {k: v}}]", ValueError, "Merge", id="quoted-nested-merge-key"
-        ),
-        pytest.param("1: value", TypeError, "keys must be strings", id="integer-key"),
-        pytest.param(
-            "true: value", TypeError, "keys must be strings", id="boolean-key"
-        ),
-        pytest.param("null: value", TypeError, "keys must be strings", id="null-key"),
-        pytest.param(
-            "? [a, b]\n: value", TypeError, "keys must be strings", id="collection-key"
-        ),
+        pytest.param("1: value", ValidationError, "string_type", id="integer-key"),
+        pytest.param("true: value", ValidationError, "string_type", id="boolean-key"),
+        pytest.param("null: value", ValidationError, "string_type", id="null-key"),
+        pytest.param("? [a, b]\n: value", ValueError, "syntax", id="sequence-key"),
+        pytest.param("? {a: b}\n: value", ValueError, "syntax", id="mapping-key"),
         pytest.param("%YAML 1.1\n---\na: value", ValueError, "1.2", id="yaml-1.1"),
-        pytest.param("%YAML 1.3\n---\na: value", ValueError, "syntax", id="yaml-1.3"),
+        pytest.param("%YAML 1.3\n---\na: value", ValueError, "1.2", id="yaml-1.3"),
+        pytest.param("%YAML 2.0\n---\na: value", ValueError, "1.2", id="yaml-2.0"),
         pytest.param(
-            "a: 1\n---\na: 2", TypeError, "one YAML document", id="multiple-documents"
+            "a: 1\n---\na: 2", ValueError, "one YAML document", id="multiple-documents"
         ),
+        pytest.param("---\n---", ValueError, "one YAML document", id="empty-documents"),
         pytest.param("[unclosed", ValueError, "syntax", id="malformed"),
+        pytest.param("a:\n\tb: 1", ValueError, "syntax", id="indentation-tab"),
     ],
 )
 def test_each_syntax_rule_independently(
@@ -126,21 +109,21 @@ def test_only_utf8_input(tmp_path: Path, data: bytes) -> None:
         ("2024-01-01T12:34:56Z", "2024-01-01T12:34:56Z"),
         ("1:20", "1:20"),
         ("1:20.5", "1:20.5"),
-        ("0777", 777),
-        ("-0777", -777),
+        ("0777", "0777"),
+        ("-0777", "-0777"),
         ("0o777", 511),
-        ("0b101", 5),
+        ("0b101", "0b101"),
         ("0xFF", 255),
         ("+0o17", 15),
         ("-0xF", -15),
         ("0", 0),
-        ("1_000", 1000),
+        ("1_000", "1_000"),
         ("1e3", 1000.0),
         ("-2E-2", -0.02),
         ("1.0", 1.0),
         (".5", 0.5),
         (".5e+3", 500.0),
-        (".5e3", ".5e3"),
+        (".5e3", 500.0),
         ("true", True),
         ("TRUE", True),
         ("False", False),
@@ -170,7 +153,7 @@ def test_yaml12_scalar_values_and_types(
 def test_yaml12_directive_and_utf8_bom(tmp_path: Path, prefix: str) -> None:
     path = tmp_path / "input.yaml"
     path.write_text(prefix + "a: true\nb: 0777")
-    assert read_yaml(path) == {"a": True, "b": 777}
+    assert read_yaml(path) == {"a": True, "b": "0777"}
 
 
 ROUND_TRIP: list[JsonValue] = [
@@ -218,38 +201,6 @@ def test_ruamel_encoder_round_trip(tmp_path: Path, value: JsonValue) -> None:
     assert digest(result) == digest(value)
 
 
-def test_c_extension_is_required(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    path = tmp_path / "input.yaml"
-    path.write_text("a: value")
-    monkeypatch.setattr(yaml, "__with_libyaml__", False)
-    with pytest.raises(RuntimeError, match="libyaml C extension"):
-        read_yaml(path)
-
-
-def test_import_without_c_extension_fails_explicitly(
-    monkeypatch: pytest.MonkeyPatch,
-) -> None:
-    with monkeypatch.context() as patch:
-        patch.setitem(sys.modules, "yaml.cyaml", None)
-        with pytest.raises(RuntimeError, match="libyaml C extension"):
-            importlib.reload(yaml_reader)
-    importlib.reload(yaml_reader)
-
-
-def test_one_c_parser_without_ruamel_or_second_yaml_pass(
-    tmp_path: Path, mocker: MockerFixture
-) -> None:
-    path = tmp_path / "input.yaml"
-    path.write_text("a: [true, 0777, value]")
-    constructor = mocker.spy(yaml_reader, "CSafeLoader")
-    mocker.patch.object(YAML, "scan", side_effect=AssertionError("second YAML pass"))
-    mocker.patch.object(YAML, "load", side_effect=AssertionError("pure YAML reader"))
-    assert read_yaml(path) == {"a": [True, 777, "value"]}
-    constructor.assert_called_once()
-
-
 def test_strict_json_validation_is_retained(
     tmp_path: Path, mocker: MockerFixture
 ) -> None:
@@ -261,67 +212,99 @@ def test_strict_json_validation_is_retained(
 
 
 @pytest.mark.parametrize(
-    "character", ["\u0085", "\u2028", "\u2029"], ids=["nel", "ls", "ps"]
-)
-@pytest.mark.parametrize(
-    "template",
-    ["a: 1{}b: 2\n", "a: 'x{}y'\n", "# comment{}\na: 1\n"],
-    ids=["structure", "scalar", "comment"],
-)
-def test_raw_unicode_breaks_fail_before_c_parser(
-    tmp_path: Path, mocker: MockerFixture, character: str, template: str
-) -> None:
-    path = tmp_path / "input.yaml"
-    path.write_text(template.format(character), encoding="utf-8")
-    constructor = mocker.spy(yaml_reader, "CSafeLoader")
-    with pytest.raises(ValueError, match="Raw Unicode line separators"):
-        read_yaml(path)
-    constructor.assert_not_called()
-
-
-@pytest.mark.parametrize(
-    "source",
+    ("source", "expected"),
     [
-        "\ufeff\ufeffa: 1\n",
-        "---\n\ufeffa: 1\n",
-        "a: 1\n\ufeffb: 2\n",
-        "a: 'x\ufeffy'\n",
-        "# comment\ufeff\na: 1\n",
+        ("a: &x value\nb: *x", {"a": "value", "b": "value"}),
+        ("a: &x [true, 2]\nb: *x", {"a": [True, 2], "b": [True, 2]}),
+        ("a: &x {k: value}\nb: *x", {"a": {"k": "value"}, "b": {"k": "value"}}),
+        (
+            "base: &x {k: 1}\nvalue: {<<: *x, k: 2}",
+            {"base": {"k": 1}, "value": {"k": 2}},
+        ),
+        ("<<: {k: value}", {"k": "value"}),
+        ('"<<": {k: value}', {"<<": {"k": "value"}}),
+        ("a: !!str true", {"a": "true"}),
+        ("a: !!seq [value]", {"a": ["value"]}),
+        ("a: !!map {k: value}", {"a": {"k": "value"}}),
+        ("a: !!python/object:os.system {}", {"a": {}}),
+        ("%FOO bar\n---\na: value", {"a": "value"}),
+        ("", None),
+        ("---", None),
+        ("# only a comment", None),
     ],
-    ids=["double-leading", "document", "key", "scalar", "comment"],
+    ids=[
+        "scalar-alias",
+        "sequence-alias",
+        "mapping-alias",
+        "merge-override",
+        "merge",
+        "quoted-merge",
+        "string-tag",
+        "sequence-tag",
+        "mapping-tag",
+        "object-tag-is-data",
+        "unknown-directive",
+        "empty-stream",
+        "empty-document",
+        "comment-stream",
+    ],
 )
-def test_interior_bom_is_rejected(
-    tmp_path: Path, mocker: MockerFixture, source: str
+def test_package_expansion_and_explicit_tags(
+    tmp_path: Path, source: str, expected: JsonValue
 ) -> None:
     path = tmp_path / "input.yaml"
     path.write_text(source, encoding="utf-8")
-    constructor = mocker.spy(yaml_reader, "CSafeLoader")
-    with pytest.raises(ValueError, match="BOM is only allowed"):
+    value = read_yaml(path)
+    assert value == expected
+    assert canonical(value) == canonical(expected)
+
+
+@pytest.mark.parametrize("tag", ["!custom", "!include", "!env", "!secret"])
+def test_custom_tags_do_not_escape_strict_json_or_access_external_values(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mocker: MockerFixture, tag: str
+) -> None:
+    external = tmp_path / "external.txt"
+    external.write_text("synthetic-private-sentinel")
+    monkeypatch.setenv("SYNTHETIC_VARIABLE", "synthetic-env-sentinel")
+    path = tmp_path / "input.yaml"
+    path.write_text(f"a: {tag} {external}")
+    read = mocker.spy(Path, "read_bytes")
+    with pytest.raises(ValidationError, match="invalid-json-value"):
         read_yaml(path)
-    constructor.assert_not_called()
+    read.assert_called_once_with(path)
 
 
 @pytest.mark.parametrize(
-    "source",
-    [
-        "a:\tb\n",
-        "a: b\t\n",
-        "a: 1 \t# c\n",
-        "a: 'x\ty'\n",
-        "a: |\n  x\ty\n",
-        "# comment\t\na: 1\n",
-    ],
-    ids=["separator", "trailing", "before-comment", "quoted", "block", "comment"],
+    "character",
+    ["\u0085", "\u2028", "\u2029", "\ufeff", "\t"],
+    ids=["nel", "ls", "ps", "bom", "tab"],
 )
-def test_all_raw_tabs_are_rejected(
-    tmp_path: Path, mocker: MockerFixture, source: str
+@pytest.mark.parametrize("style", ["plain", "quoted", "block", "comment"])
+def test_legal_raw_characters_are_delegated_to_package(
+    tmp_path: Path, character: str, style: str
 ) -> None:
+    text = "x" + character + "y"
+    if style == "quoted":
+        source, expected = "a: '" + text + "'\n", text
+    elif style == "block":
+        source, expected = "a: |\n  " + text + "\n", text + "\n"
+    elif style == "comment":
+        source, expected = "# comment" + character + "\na: value\n", "value"
+    else:
+        source, expected = "a: " + text + "\n", text
     path = tmp_path / "input.yaml"
     path.write_text(source, encoding="utf-8")
-    constructor = mocker.spy(yaml_reader, "CSafeLoader")
-    with pytest.raises(ValueError, match="Raw tab characters"):
+    assert read_yaml(path) == {"a": expected}
+
+
+def test_parser_diagnostics_do_not_expose_source_text(tmp_path: Path) -> None:
+    path = tmp_path / "input.yaml"
+    path.write_text("synthetic-secret-sentinel: [unclosed")
+    with pytest.raises(ValueError, match=r"^Invalid authored YAML syntax$") as error:
         read_yaml(path)
-    constructor.assert_not_called()
+    exposed = "".join(traceback.format_exception(error.value))
+    assert "synthetic-secret-sentinel" not in exposed
+    assert "YAMLRocksDecodeError" not in exposed
 
 
 @pytest.mark.parametrize(
@@ -348,13 +331,12 @@ def test_escaped_characters_preserve_values(
 @pytest.mark.parametrize(
     "character", ["\u0085", "\u2028", "\u2029"], ids=["nel", "ls", "ps"]
 )
-def test_encoder_raw_breaks_fail_explicitly(tmp_path: Path, character: str) -> None:
+def test_encoder_raw_breaks_preserve_values(tmp_path: Path, character: str) -> None:
     path = tmp_path / "input.yaml"
     data = encode(RootModel[JsonValue]("x" + character + "y"))
     assert character in data.decode("utf-8")
     path.write_bytes(data)
-    with pytest.raises(ValueError, match="Raw Unicode line separators"):
-        read_yaml(path)
+    assert read_yaml(path) == "x" + character + "y"
 
 
 def test_encoder_escapes_tab_and_bom_for_round_trip(tmp_path: Path) -> None:
@@ -365,34 +347,3 @@ def test_encoder_escapes_tab_and_bom_for_round_trip(tmp_path: Path) -> None:
     assert "\ufeff" not in data.decode("utf-8")
     path.write_bytes(data)
     assert read_yaml(path) == value
-
-
-@pytest.mark.parametrize(
-    ("source", "expected"),
-    [
-        ("1__0", 10),
-        ("1_", 1),
-        ("+_1", 1),
-        ("0x_1", 1),
-        ("0b1__0", 2),
-        ("0o1_7_", 15),
-        ("1_0.5_", 10.5),
-    ],
-    ids=[
-        "double",
-        "trailing",
-        "after-sign",
-        "after-prefix",
-        "binary-double",
-        "octal-trailing",
-        "float-trailing",
-    ],
-)
-def test_underscore_boundaries_preserve_values(
-    tmp_path: Path, source: str, expected: JsonValue
-) -> None:
-    path = tmp_path / "input.yaml"
-    path.write_text("a: " + source)
-    value = read_yaml(path)
-    assert value == {"a": expected}
-    assert canonical(value) == canonical({"a": expected})

@@ -109,7 +109,7 @@ def yaml_parser() -> YAML:
 
 
 def read_yaml(path: Path) -> JsonValue:
-    """Reject aliases, tags, duplicate keys, non-core values and large files."""
+    """Require bounded UTF-8 YAML, JSON values and finite canonical content."""
     return _read_yaml_content(path)[0]
 
 
