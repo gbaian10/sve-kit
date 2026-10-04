@@ -63,7 +63,7 @@ class EffectTerm(RecordData):
     jp_span: Span
     target_ref: SourceRef
     target_span: Span
-    concept_note: Text
+    concept_note: Text | None = None
 
 
 class DictionaryEntry(RecordData):
@@ -72,7 +72,7 @@ class DictionaryEntry(RecordData):
     entry_key: Text
     jp_ref: SourceRef
     target_ref: SourceRef
-    concept_note: Text
+    concept_note: Text | None = None
 
 
 class RevisionOwner(RecordData):

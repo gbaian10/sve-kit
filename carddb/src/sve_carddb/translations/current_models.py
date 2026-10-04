@@ -137,7 +137,7 @@ class Quality(RecordData):
     record_key: Text
     origin: Origin
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 class TermRecord(Quality):

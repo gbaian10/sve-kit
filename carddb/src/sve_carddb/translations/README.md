@@ -1,7 +1,7 @@
 # Glossary and digital names
 
 The translation entry accepts format 2 only. Indexed shards contain
-`record_key/kind/data/origin/low_confidence/note`, with no decisions, revision
+`record_key/kind/data/origin/low_confidence` with an optional `note`, with no decisions, revision
 chains or approval events. `Snapshot.current_records()` exposes the complete
 current glossary and name overrides. Selection keys and concept IDs stay stable
 when wording or notes change. Every unindexed file, including temporary files,

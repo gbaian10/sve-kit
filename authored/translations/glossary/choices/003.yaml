@@ -4,7 +4,6 @@ records:
   - record_key: '["glossary_choice","term:action.leave_play","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.leave_play
@@ -21,7 +20,6 @@ records:
   - record_key: '["glossary_choice","term:action.look","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.look
@@ -38,7 +36,6 @@ records:
   - record_key: '["glossary_choice","term:action.lose","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.lose
@@ -55,7 +52,6 @@ records:
   - record_key: '["glossary_choice","term:action.place","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.place
@@ -72,7 +68,6 @@ records:
   - record_key: '["glossary_choice","term:action.play","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.play
@@ -89,7 +84,6 @@ records:
   - record_key: '["glossary_choice","term:action.put_into_play","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.put_into_play
@@ -106,7 +100,6 @@ records:
   - record_key: '["glossary_choice","term:action.restore","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.restore
@@ -123,7 +116,6 @@ records:
   - record_key: '["glossary_choice","term:action.return_to_deck","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.return_to_deck
@@ -140,7 +132,6 @@ records:
   - record_key: '["glossary_choice","term:action.return_to_hand","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.return_to_hand
@@ -157,7 +148,6 @@ records:
   - record_key: '["glossary_choice","term:action.reveal","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.reveal
@@ -174,7 +164,6 @@ records:
   - record_key: '["glossary_choice","term:action.search","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.search
@@ -191,7 +180,6 @@ records:
   - record_key: '["glossary_choice","term:action.shuffle","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.shuffle
@@ -208,7 +196,6 @@ records:
   - record_key: '["glossary_choice","term:action.stand","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.stand
@@ -225,7 +212,6 @@ records:
   - record_key: '["glossary_choice","term:action.super_evolve","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.super_evolve
@@ -242,7 +228,6 @@ records:
   - record_key: '["glossary_choice","term:action.transform","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:action.transform
@@ -259,7 +244,6 @@ records:
   - record_key: '["glossary_choice","term:duration.per_turn","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:duration.per_turn
@@ -276,7 +260,6 @@ records:
   - record_key: '["glossary_choice","term:duration.this_turn","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:duration.this_turn
@@ -293,7 +276,6 @@ records:
   - record_key: '["glossary_choice","term:duration.until_turn_end","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:duration.until_turn_end
@@ -310,7 +292,6 @@ records:
   - record_key: '["glossary_choice","term:event.attack","zh-Hant"]'
     origin: official
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:event.attack
@@ -340,12 +321,10 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/4
             text_hash: sha256:29ebdf2209a25632c47943d02a1fd533b3330b72e33e5cbda8a9099b8b34f86f
-          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:event.combat","zh-Hant"]'
     origin: official
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:event.combat
@@ -375,12 +354,10 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/17
             text_hash: sha256:ec24a66afe850cf224d178477d3fde0e81901f5635a187a3b6e6e4f1aa6941ec
-          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:event.enter_play","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:event.enter_play
@@ -397,7 +374,6 @@ records:
   - record_key: '["glossary_choice","term:event.evolve","zh-Hant"]'
     origin: official
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:event.evolve
@@ -427,12 +403,10 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/3
             text_hash: sha256:68d7a1f96c95c42c543a4b80bb7399a6ba37dc94b9cd91821766f9b1bd71156e
-          concept_note: 同概念依精確來源定位核對。
       source_claim:
   - record_key: '["glossary_choice","term:event.gain_drive","zh-Hant"]'
     origin: project
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:event.gain_drive
@@ -449,7 +423,6 @@ records:
   - record_key: '["glossary_choice","term:event.super_evolve","zh-Hant"]'
     origin: official
     low_confidence: false
-    note: ''
     kind: glossary_choice
     data:
       term_id: term:event.super_evolve
@@ -479,5 +452,4 @@ records:
             parser: translation-svwb-v1
             locator: /data/skill_names/33
             text_hash: sha256:24e5619046edee5b106a27689488d8d855b1aa01123fe228e0f85d55aa1fde0c
-          concept_note: 同概念依精確來源定位核對。
       source_claim:
