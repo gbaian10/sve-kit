@@ -159,36 +159,13 @@ class AdoptionSources:
         self,
         stores: Mapping[str, Path],
         repository: PinnedRepository,
-        *,
-        historical: bool = False,
     ) -> None:
         self.stores = dict(stores)
         self.repository = repository
-        self.historical = historical
         self.batches: dict[str, FrozenSources] = {}
         self.uses: list[SourceUse] = []
         self.cache: dict[bytes, tuple[LocalizedText, Source, JsonValue]] = {}
         self.registries: dict[bytes, RegistrySnapshot] = {}
-
-    def recipe(self, parser: str, context: BuildContext) -> Normalizer:
-        """Resolve a fully pinned recipe for historical or current frozen observations."""
-        config = parse(context.configuration.encode())
-        if not isinstance(config, dict) or not isinstance(
-            recipes := config.get("catalog_source_recipes"), dict
-        ):
-            raise ValueError("Catalog source recipes must be an object")  # ruff: ignore[type-check-without-type-error] -- expose a domain refusal at the catalog entry, not an incidental boundary TypeError
-        try:
-            pin = Normalizer.model_validate_json(canonical(recipes.get(parser)))
-        except ValidationError:
-            raise ValueError("Invalid pinned source recipe fields") from None
-        if pin.version != parser:
-            raise ValueError("Source parser recipe ID mismatch")
-        _source_recipe(pin)
-        self.repository.implementation(
-            pin, context, current_runtime=not self.historical
-        )
-        self._runtime(pin, context)
-        return pin
 
     def registry(self, review: ReviewContext) -> RegistrySnapshot:
         """Replay the complete reviewed registry from its immutable authored revision."""
@@ -244,19 +221,18 @@ class AdoptionSources:
         """Resolve JSON Pointer and hash the exact nonempty UTF-8 string."""
         key = canonical([ref.model_dump(mode="json"), review.model_dump(mode="json")])
         if key not in self.cache:
-            config = object_value(parse(review.context.configuration.encode()))
-            recipes = object_value(config.get("catalog_source_recipes"))
+            config = parse(review.context.configuration.encode())
+            if not isinstance(config, dict) or not isinstance(
+                recipes := config.get("catalog_source_recipes"), dict
+            ):
+                raise ValueError("Catalog source recipes must be an object")
             try:
                 pin = Normalizer.model_validate_json(canonical(recipes.get(ref.parser)))
             except ValidationError:
                 raise ValueError("Invalid pinned source recipe fields") from None
             if pin.version != ref.parser:
                 raise ValueError("Source parser recipe ID mismatch")
-            self.repository.implementation(
-                pin,
-                review.context,
-                current_runtime=not self.historical,
-            )
+            self.repository.implementation(pin, review.context)
             self._runtime(pin, review.context)
             source, raw, descriptor = self.batch(ref.batch_id).read(
                 ref.source_version_id,
@@ -282,8 +258,9 @@ class AdoptionSources:
         """Historical provenance is checked separately from fixed installed execution."""
         return _projection(pin, raw, url)
 
-    def _runtime(self, pin: Normalizer, context: BuildContext) -> None:
-        # Historical recipe closures cannot grow without a new recipe version.
+    @staticmethod
+    def _runtime(pin: Normalizer, context: BuildContext) -> None:
+        # Recipe dependency closures cannot grow without a new recipe version.
         required = {
             "carddb/uv.lock",
             "carddb/pyproject.toml",
@@ -305,17 +282,6 @@ class AdoptionSources:
             required.add("carddb/src/sve_carddb/sources/official_en.py")
         required.add(pin.code_path)
         dependencies = {p.name: p.sha256 for p in context.dependencies}
-        if self.historical:
-            if not required <= dependencies.keys():
-                raise ValueError(
-                    "Source parser runtime/dependency closure cannot be replayed"
-                )
-            files = self.repository.read_many(
-                context.program_revision, tuple(sorted(required))
-            )
-            if any(dependencies[name] != digest(raw) for name, raw in files.items()):
-                raise ValueError("Review dependency hash mismatch")
-            return
         runtime = Path(__file__).resolve().parents[4]
         for name in required:
             path = runtime / name

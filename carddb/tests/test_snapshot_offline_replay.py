@@ -1,6 +1,5 @@
 """Native current offline composition verifies actual synthetic frozen sources."""
 
-import copy
 import shutil
 from dataclasses import replace
 from typing import TYPE_CHECKING
@@ -361,22 +360,6 @@ def test_export_offline_replays_current_sources_after_pinned_update(  # ruff: ig
     }
 
 
-@pytest.mark.parametrize("recipes", [None, [], "invalid", 1])
-def test_catalog_recipe_configuration_has_an_explicit_refusal(
-    baseline: VocabularyCase, recipes: JsonValue
-) -> None:
-    from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository  # ruff: ignore[import-outside-top-level] -- isolate the resolver boundary
-
-    build = baseline.build()
-    config = copy.deepcopy(object_value(parse(build.configuration.encode())))
-    config["catalog_source_recipes"] = recipes
-    build = build.model_copy(update={"configuration": canonical(config).decode()})
-    with pytest.raises(ValueError, match=r"^Catalog source recipes must be an object$"):
-        AdoptionSources(
-            {"test-store": baseline.archive}, PinnedRepository(baseline.case.repository)
-        ).recipe("exact-json-v1", build)
-
-
 @pytest.mark.parametrize(
     "path",
     [
@@ -401,21 +384,6 @@ def test_offline_recipe_rejects_each_missing_current_parser(
         ValueError, match=r"^Offline catalog parser dependency is absent$"
     ):
         offline._catalog_source_recipes(baseline.case.revision, dependencies)
-
-
-def test_catalog_recipe_configuration_cannot_be_absent(
-    baseline: VocabularyCase,
-) -> None:
-    from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository  # ruff: ignore[import-outside-top-level] -- isolate the resolver boundary
-
-    build = baseline.build()
-    config = object_value(parse(build.configuration.encode()))
-    del config["catalog_source_recipes"]
-    build = build.model_copy(update={"configuration": canonical(config).decode()})
-    with pytest.raises(ValueError, match=r"^Catalog source recipes must be an object$"):
-        AdoptionSources(
-            {"test-store": baseline.archive}, PinnedRepository(baseline.case.repository)
-        ).recipe("exact-json-v1", build)
 
 
 @pytest.mark.parametrize("recipes", [None, [], "invalid", 1, "absent"])

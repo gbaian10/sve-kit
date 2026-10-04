@@ -148,7 +148,6 @@ def test_trait_locator_is_an_exact_ascii_component_path(
     sources = AdoptionSources(
         {"test-store": case.vocabulary.archive},
         PinnedRepository(case.vocabulary.case.repository),
-        historical=True,
     )
     record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))
@@ -300,7 +299,6 @@ def test_trait_projection_shape_is_checked_independently_of_the_text_resolver(
     sources = AdoptionSources(
         {"test-store": case.vocabulary.archive},
         PinnedRepository(case.vocabulary.case.repository),
-        historical=True,
     )
     record = VocabularyRecord.model_validate_json(canonical(term(case, mapping)))
     review = ReviewContext.model_validate_json(canonical(case.vocabulary.case.review))

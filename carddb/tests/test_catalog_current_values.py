@@ -5,6 +5,7 @@ from dataclasses import replace
 from typing import TYPE_CHECKING
 
 import pytest
+from pydantic import JsonValue
 
 from sve_carddb.build_db import create_database
 from sve_carddb.build_db.current import compile_current_build
@@ -122,3 +123,59 @@ def test_native_current_entry_rejects_unpinned_catalog(
         assert not db.rows("source_record")
         assert not db.rows("language")
         assert not db.rows("vocabulary")
+
+
+@pytest.mark.parametrize(
+    ("mutation", "message"),
+    [
+        ("self", "Adopted language has invalid fallback closure"),
+        ("duplicate", "Adopted language has invalid fallback closure"),
+        ("unregistered", "Adopted language has invalid fallback closure"),
+        ("ja_policy", "Adopted language violates approved UI fallback order"),
+        ("zh_policy", "Adopted language violates approved UI fallback order"),
+    ],
+)
+def test_current_ui_fallback_closure_and_policy(
+    current_baseline: Case, tmp_path: Path, mutation: str, message: str
+) -> None:
+    root = tmp_path / "repository"
+    shutil.copytree(current_baseline.repository, root)
+    case = replace(current_baseline, repository=root, root=root / "authored")
+    path = "catalog-adoptions/languages/shared/001.yaml"
+    payload = object_value(read_yaml(case.root / path))
+    rows = array(payload["records"])
+    if mutation == "unregistered":
+        payload["records"] = [
+            row
+            for row in rows
+            if object_value(object_value(object_value(row)["data"])["subject"])["code"]
+            != "en"
+        ]
+    else:
+        code = "zh-Hant" if mutation == "zh_policy" else "ja"
+        row = next(
+            object_value(row)
+            for row in rows
+            if object_value(object_value(object_value(row)["data"])["subject"])["code"]
+            == code
+        )
+        object_value(object_value(row["data"])["value"])["fallback_order"] = list[
+            JsonValue
+        ](
+            {
+                "self": ["ja", "en"],
+                "duplicate": ["en", "en"],
+                "ja_policy": [],
+                "zh_policy": ["en", "ja"],
+            }[mutation]
+        )
+    (case.root / path).write_bytes(canonical(payload))
+    index_path = case.root / "catalog-adoptions/index.yaml"
+    index = object_value(read_yaml(index_path))
+    object_value(index["includes"])[path] = digest(canonical(payload))
+    index_path.write_bytes(canonical(index))
+    case = replace(case, revision=commit(root))
+    with create_database(compile_current_build()) as db:
+        with pytest.raises(ValueError, match="^" + message + "$"), db.transaction():
+            _populate_adoptions(db, case.inputs(), build=case.build(), stores={})
+        assert not db.rows("source_record")
