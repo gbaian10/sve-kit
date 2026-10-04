@@ -16,7 +16,7 @@ pub mod ai;
 pub mod assist;
 pub mod catalog;
 pub mod game;
-pub mod random;
+mod random;
 pub mod replay;
 
 /// Failures outside ordinary illegal player actions.

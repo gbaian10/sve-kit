@@ -43,7 +43,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 
 use crate::catalog::Catalog;
-use crate::random::{Random, RandomAlgorithm};
+use crate::random::Random;
 use crate::{EngineFailure, Result, invalid};
 
 /// Seat or referee requesting an observation.
@@ -269,38 +269,16 @@ impl Game {
     ///
     /// # Errors
     /// Rejects missing card facts, malformed positions and unsupported historical state.
+    #[expect(
+        clippy::too_many_lines,
+        reason = "All initial authoritative fields are assembled together for snapshot auditing."
+    )]
     pub fn new(
         catalog: Arc<Catalog>,
         setup: &Value,
         facts: &Value,
         random: &Value,
         seed: &str,
-    ) -> Result<Self> {
-        Self::new_with_random_algorithm(
-            catalog,
-            setup,
-            facts,
-            random,
-            seed,
-            RandomAlgorithm::ChaCha12V1,
-        )
-    }
-
-    /// Builds a position using an explicit algorithm for seed-based reconstruction.
-    ///
-    /// # Errors
-    /// Rejects missing card facts, malformed positions and unsupported historical state.
-    #[expect(
-        clippy::too_many_lines,
-        reason = "All initial authoritative fields are assembled together for snapshot auditing."
-    )]
-    pub fn new_with_random_algorithm(
-        catalog: Arc<Catalog>,
-        setup: &Value,
-        facts: &Value,
-        random: &Value,
-        seed: &str,
-        algorithm: RandomAlgorithm,
     ) -> Result<Self> {
         let mut position = Self::prepare_opening(setup);
         if position["history"] == "none" {
@@ -417,7 +395,7 @@ impl Game {
             random_index: 0,
             random_cursors: BTreeMap::new(),
             schedule: turns::TurnSchedule::load(&position["semantic_state"]["turn_schedule"])?,
-            rng: Random::new(seed, algorithm),
+            rng: Random::new(seed),
             next_object: 1,
             next_event: 1,
             next_group: 1,
