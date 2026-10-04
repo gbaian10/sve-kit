@@ -6,9 +6,15 @@
 
 公開 enum 是固定集合，新增值會讓持有舊 Schema 的 reader 拒收含新值的快照。format `2.0.0` 仍為候選、尚無正式發布快照，候選期間直接修訂 Schema 與 golden；正式凍結後，同類新增值須依傳輸契約 §1.1 升 minor 並提高 `min_reader_version`，同步 reader 支援，不改變既有 enum 值的語義。
 
-**使用者核可 2026-10-01（未核對 EN 繁中）**：FieldTranslation.basis 新增 `shared_jp_unchecked`，tuple 欄序不變。它表示同卡身分／面對應已確認、文字尚未核對，reader 必顯示「日英文字尚未核對」；已知相關 divergence 或日英段落數不同的受影響 section／effect 欄不可用此值，缺譯回 EN 原文；不按 ordinal 猜配。這是 docs 契約擴充，現有 Schema/golden/reader 尚未同步，不能宣稱現行機器契約已接受新值。首次產出前須在翻譯投影實作中同步三者並驗未核對／已核對切換；候選期依上段修訂，若實作前已正式凍結，則升 minor、提高 min_reader_version 並協商 `unchecked-jp-translation-v1` capability，舊 reader 拒收以免漏標示。
+**使用者核可 2026-10-01（未核對 EN 繁中）**：FieldTranslation.basis 新增 `shared_jp_unchecked`，tuple 欄序不變。它表示同卡身分／面對應已確認、文字尚未核對，reader 必顯示「日英文字尚未核對」；已知相關 divergence 或日英段落數不同的受影響 section／effect 欄不可用此值，缺譯回 EN 原文；不按 ordinal 猜配。2.0 候選 Schema、共用 golden 與 Python／TS reader 同步此值，驗未核對／已核對切換；與翻譯待校對旗標分開，不建立 aligned 語義核對或自動支援。
 
 **使用者核可 2026-10-01**：`product.product_type` 的既有 tuple 位置可為 null，與官方商品無 exact confirmed `family.public_code` 型別對應時的 DB 欄位一致；人工 product 輸入仍必填 Code。本候選 format 尚無正式發布快照，直接同步 nullable Schema、type descriptor 與獨立 golden，維持候選 `2.0.0`；正式凍結後的同類相容性變更須另依傳輸契約升版與同步 reader。
+
+當前 `Translation` 為 `id/source_unit_id/target_lang/text_unit_id/origin/authority/low_confidence` 七欄；
+origin=`official/project/machine`，authority 與來源類別分開，low_confidence 必填且不允許 scalar coercion。
+bootstrap／detail descriptor 與完整 tuple 一致，不輸出 translation.status 或內部決定／清冊。
+共用 v2 golden 同時包含 project/false 名稱與 machine/true 效果，獨立邏輯 oracle、分片聯集及 text_all 皆驗完整來源／譯文閉包；
+共用反例拒絕舊 status、缺 Bool、null／0／1／字串 Bool 與舊 origin，兩個 reader 也驗重新釘 hash 後的完整快照，不能只驗單列。
 
 ## 資源入口
 
