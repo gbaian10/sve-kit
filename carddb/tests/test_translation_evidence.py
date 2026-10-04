@@ -8,7 +8,6 @@ import pytest
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import canonical
 from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.translations.digital import select_name
 from sve_carddb.translations.loader import load_glossary
 from sve_carddb.translations.models import Span
 from sve_carddb.translations.sources import excerpt, pointer, project
@@ -146,43 +145,12 @@ def test_every_unindexed_file_is_rejected(
         load_glossary(root)
 
 
-def test_sv1_priority_and_all_faces(digital_template: DatabaseTemplate) -> None:
-    with digital_template.copy() as db:
-        assert select_name(db, card_id="card", face_id="front", lang="zh-Hant") == (
-            "sv1:normal zh-Hant",
-            "official_sv1",
-            "decision",
-        )
-        assert select_name(db, card_id="card", face_id="back", lang="zh-Hant") == (
-            "sv1:evolved zh-Hant",
-            "official_sv1",
-            "decision",
-        )
-        assert select_name(db, card_id="card", face_id="front", lang="en") is None
-        assert (
-            select_name(
-                db, card_id="card", face_id="front", lang="zh-Hant", field="effect"
-            )
-            is None
-        )
-
-
-@pytest.mark.parametrize("relation", ["same_character", "name_only"])
-def test_relation_is_not_concept_adoption(
-    digital_template: DatabaseTemplate, relation: str
-) -> None:
-    with digital_template.copy() as db, db.transaction():
-        for row in db.rows("digital_link"):
-            db.update("digital_link", {"id": row.values["id"]}, {"relation": relation})
-        assert select_name(db, card_id="card", face_id="front", lang="zh-Hant") is None
-
-
 @pytest.mark.parametrize("state", ["proposed", "model_reviewed"])
 def test_high_confidence_does_not_promote_review(
     digital_template: DatabaseTemplate, state: str
 ) -> None:
     with digital_template.copy() as db:
-        with (  # ruff: ignore[pytest-raises-with-multiple-statements] -- assert selection independently before commit rejects the link
+        with (
             pytest.raises(sqlite3.IntegrityError, match="digital_link_adopted"),
             db.transaction(),
         ):
@@ -196,30 +164,6 @@ def test_high_confidence_does_not_promote_review(
                     "reviewed_at": None,
                 },
             )
-            assert (
-                select_name(db, card_id="card", face_id="front", lang="zh-Hant") is None
-            )
-
-
-def test_fallback_to_sv1_and_missing_face_does_not_guess(
-    digital_template: DatabaseTemplate,
-) -> None:
-    with digital_template.copy() as db, db.transaction():
-        db.delete("digital_link", {"id": "svwb:normal"})
-        selected = select_name(db, card_id="card", face_id="front", lang="zh-Hant")
-        assert selected is not None
-        assert selected[1] == "official_sv1"
-        db.update("digital_link", {"id": "sv1:normal"}, {"face_id": None})
-        assert select_name(db, card_id="card", face_id="front", lang="zh-Hant") is None
-
-
-def test_unlocated_digital_face_is_missing_translation(
-    digital_template: DatabaseTemplate,
-) -> None:
-    with digital_template.copy() as db, db.transaction():
-        db.delete("digital_link", {"id": "svwb:normal"})
-        db.update("digital_link", {"id": "sv1:normal"}, {"digital_face_id": None})
-        assert select_name(db, card_id="card", face_id="front", lang="zh-Hant") is None
 
 
 @pytest.mark.parametrize("span", [(0, 5), (2, 1), (0, 3)])
@@ -327,42 +271,3 @@ def test_frozen_endpoint_failure(
 ) -> None:
     with pytest.raises(ValueError, match="^" + message + "$"):
         project(canonical(raw), url, game)
-
-
-@pytest.mark.parametrize(
-    ("fault", "message"),
-    [
-        ("owner", "Name owner/card mismatch"),
-        ("parent", "Digital link parent mismatch"),
-        ("language", "Digital name language mismatch"),
-        ("ambiguous", "Ambiguous adopted digital names"),
-    ],
-)
-def test_selection_rejects_inconsistent_owner_evidence(
-    digital_template: DatabaseTemplate, fault: str, message: str
-) -> None:
-    with digital_template.copy() as db:
-        with (  # ruff: ignore[pytest-raises-with-multiple-statements] -- inspect corrupt graph before commit-time constraints and roll back on refusal
-            pytest.raises(ValueError, match="^" + message + "$"),
-            db.transaction(),
-        ):
-            if fault == "parent":
-                db.update(
-                    "digital_link",
-                    {"id": "svwb:normal"},
-                    {"digital_face_id": "sv1:normal"},
-                )
-            elif fault == "language":
-                db.update(
-                    "digital_text",
-                    {"digital_face_id": "svwb:normal", "lang": "zh-Hant"},
-                    {"name_unit_id": "svwb:normal:ja"},
-                )
-            elif fault == "ambiguous":
-                db.update("digital_link", {"id": "sv1:evolved"}, {"face_id": "front"})
-            select_name(
-                db,
-                card_id="other" if fault == "owner" else "card",
-                face_id="front",
-                lang="zh-Hant",
-            )

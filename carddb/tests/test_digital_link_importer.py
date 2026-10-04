@@ -25,7 +25,7 @@ from sve_carddb.registry.records import EnglishPrintingData
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.source_archive import ArchiveError
 from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.translations.digital import configuration, import_digital, select_name
+from sve_carddb.translations.digital import configuration, import_digital
 from sve_carddb.translations.sources import Sources
 
 from .adoption_fixtures import commit
@@ -73,11 +73,40 @@ def test_real_entry_proves_relation_name_and_no_coverage(
         )
         assert len(result.fresh) == 1
         assert result.stale == result.withdrawn == ()
-        chosen = select_name(
-            db, card_id=baseline.card.id, face_id=baseline.face.id, lang="zh-Hant"
+        links = [
+            row.values
+            for row in db.rows("digital_link")
+            if row.values["card_id"] == baseline.card.id
+            and row.values["face_id"] == baseline.face.id
+        ]
+        assert len(links) == 1
+        link = links[0]
+        assert link["relation"] == "same_card"
+        face = next(
+            row.values
+            for row in db.rows("digital_face")
+            if row.values["id"] == link["digital_face_id"]
         )
-        assert chosen is not None
-        assert chosen[:2] == ("合成測試名", "official_svwb")
+        assert face["digital_card_id"] == link["digital_card_id"]
+        assert face["phase"] == "normal"
+        card = next(
+            row.values
+            for row in db.rows("digital_card")
+            if row.values["id"] == link["digital_card_id"]
+        )
+        assert (card["game"], card["official_id"]) == ("svwb", "22345678")
+        name = next(
+            row.values
+            for row in db.rows("digital_text")
+            if row.values["digital_face_id"] == face["id"]
+            and row.values["lang"] == "zh-Hant"
+        )
+        unit = next(
+            row.values
+            for row in db.rows("text_unit")
+            if row.values["id"] == name["name_unit_id"]
+        )
+        assert (unit["lang"], unit["text"]) == ("zh-Hant", "合成測試名")
         assert db.rows("digital_link_coverage") == ()
         assert result.eligible(db, baseline.sources(), "link-revision")
         used = {

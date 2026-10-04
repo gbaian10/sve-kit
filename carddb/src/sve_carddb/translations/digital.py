@@ -9,7 +9,6 @@ from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.products.models import LocalizedText
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.text_observations.intern import TextInterner
-from sve_carddb.translations.counterparts import NameCandidate, first_counterpart
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database
@@ -196,73 +195,6 @@ def import_digital(  # ruff: ignore[complex-structure,too-many-branches,too-many
                         ),
                     },
                 )
-
-
-def select_name(  # ruff: ignore[complex-structure] -- each name source needs both relation and exact-face eligibility
-    db: Database,
-    *,
-    card_id: str,
-    face_id: str,
-    lang: str,
-    field: str = "name",
-    eligible_links: frozenset[str] | None = None,
-) -> tuple[str, str, str] | None:
-    """Use only adopted same-card, exact-face names; confidence never promotes links."""
-    if field != "name":
-        return None
-    decisions = {r.values["id"]: r.values for r in db.rows("decision")}
-    faces = {r.values["id"]: r.values for r in db.rows("digital_face")}
-    sve = {r.values["id"]: r.values for r in db.rows("face")}
-    if face_id not in sve or sve[face_id]["card_id"] != card_id:
-        raise ValueError("Name owner/card mismatch")
-    digital = {r.values["id"]: r.values for r in db.rows("digital_card")}
-    texts = {r.values["id"]: r.values for r in db.rows("text_unit")}
-    candidates: dict[str, set[tuple[str, str, str]]] = {"svwb": set(), "sv1": set()}
-    for row in db.rows("digital_link"):
-        link = row.values
-        if eligible_links is not None and link["id"] not in eligible_links:
-            continue
-        if (
-            link["card_id"] != card_id
-            or link["face_id"] != face_id
-            or link["digital_face_id"] is None
-            or link["relation"] != "same_card"
-            or decisions[link["decision_id"]]["state"] not in {"sampled", "confirmed"}
-        ):
-            continue
-        face = faces.get(link["digital_face_id"])
-        if face is None or face["digital_card_id"] != link["digital_card_id"]:
-            raise ValueError("Digital link parent mismatch")
-        game = str(digital[link["digital_card_id"]]["game"])
-        for text in db.rows("digital_text"):
-            if (
-                text.values["digital_face_id"] == face["id"]
-                and text.values["lang"] == lang
-            ):
-                unit = texts[text.values["name_unit_id"]]
-                if unit["lang"] != lang:
-                    raise ValueError("Digital name language mismatch")
-                candidates[game].add(
-                    (str(unit["text"]), "official_" + game, str(link["decision_id"]))
-                )
-    selected = first_counterpart(
-        tuple(
-            NameCandidate(
-                text=name,
-                origin=origin,
-                authority="digital_official",
-                decision_id=decision,
-                reviewed_at=str(decisions[decision]["reviewed_at"]),
-                source=None,
-            )
-            for values in candidates.values()
-            for name, origin, decision in sorted(values)
-        )
-    )
-    if selected is None:
-        return None
-    assert selected.decision_id is not None
-    return selected.text, selected.origin, selected.decision_id
 
 
 def name_proof(  # ruff: ignore[too-many-locals] -- exact names need both frozen API identity and language pins
