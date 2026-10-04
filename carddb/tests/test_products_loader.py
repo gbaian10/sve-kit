@@ -67,6 +67,22 @@ def test_complete_immutable_snapshot_retains_review_precision_and_bytes(
     assert "Synthetic family" not in json.dumps(snapshot.report())
 
 
+def test_omitted_empty_note_preserves_decision_and_record_identity(
+    product_root: Path,
+) -> None:
+    value = shard(product_root)
+    decision(value)["note"] = ""
+    install(product_root, NAME, value)
+    before = load(product_root)
+    del decision(value)["note"]
+    install(product_root, NAME, value)
+    after = load(product_root)
+    assert after.decisions == before.decisions
+    assert after.records == before.records
+    assert after.report() == before.report()
+    assert after.index_content != before.index_content
+
+
 def test_index_hash_is_independent_of_yaml_serialization(product_root: Path) -> None:
     path = product_root / NAME
     path.write_text(

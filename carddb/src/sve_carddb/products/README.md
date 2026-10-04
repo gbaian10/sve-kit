@@ -29,6 +29,7 @@ meaning of a locator, raw evidence closure or release eligibility.
 complete shard as an authored `source_record`, pinned by full Git SHA, path and
 canonical hash; every decision links back to that envelope. DB decision columns
 retain the supplied review time, membership hash, checked set and original note.
+An omitted decision note is read as an empty string; substantive notes remain unchanged.
 Review precision and full members remain accessible through the immutable
 source envelope, since the DB has no columns for them.
 

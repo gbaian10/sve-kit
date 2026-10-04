@@ -151,7 +151,7 @@ class DecisionMetadata(RecordData):
     reviewed_by: Text | None
     reviewed_at: Instant | None
     reviewed_precision: Literal["day", "instant"] | None
-    note: str
+    note: str = ""
 
     @model_validator(mode="after")
     def _review(self) -> Self:
