@@ -44,7 +44,9 @@ def processing_list(  # ruff: ignore[complex-structure] -- each independent migr
                 "type": kind,
                 "data_id": identifier,
                 "reason": reason,
-                "affected_cards": len({pages[e] for e in entries if e in pages}),
+                "affected_cards": len({pages[e] for e in entries})
+                if entries and all(e in pages for e in entries)
+                else None,
                 "recommendation": recommendation,
             }
         )

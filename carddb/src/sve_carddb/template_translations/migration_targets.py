@@ -5,6 +5,8 @@ from typing import TYPE_CHECKING
 
 from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_translations.current_models import (
+    Candidate,
+    CandidateRecord,
     Translation,
     TranslationRecord,
 )
@@ -276,3 +278,42 @@ def layouts(definitions: tuple[DefinitionRecord, ...]) -> tuple[TranslationRecor
         target = translation(record.data.id, "{{" + slots[0].name + "}}", low=False)
         result.append(target.model_copy(update={"origin": "project"}))
     return tuple(result)
+
+
+def candidates(pending: tuple[Pending, ...]) -> tuple[CandidateRecord, ...]:
+    """Preserve exact inactive target drafts; neither anonymous markers nor quality enables them."""
+    records: dict[str, CandidateRecord] = {}
+    for item in pending:
+        data = Candidate.model_validate(
+            {
+                "source_kind": item.kind,
+                "candidate_id": item.identifier,
+                "lang": "zh-Hant",
+                "text": item.text,
+                "inventory_ids": tuple(sorted(set(item.entries))),
+                "reasons": tuple(sorted(set(item.reasons))),
+            }
+        )
+        key = canonical(
+            [
+                "template_translation_candidate",
+                data.source_kind,
+                data.candidate_id,
+                data.lang,
+            ]
+        ).decode()
+        value = CandidateRecord(
+            record_key=key,
+            kind="template_translation_candidate",
+            data=data,
+            origin="machine",
+            low_confidence=item.low_confidence,
+            note="",
+        )
+        previous = records.get(key)
+        if previous is not None and previous != value:
+            raise ValueError(
+                "Migration candidate keys contain conflicting final drafts"
+            )
+        records[key] = value
+    return tuple(records[key] for key in sorted(records))

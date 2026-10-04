@@ -16,6 +16,14 @@ semantic/source fields; translations contain only `template_id,lang,text`.
 The shared glossary reader owns glossary/name values; template code uses that
 snapshot instead of maintaining a parallel glossary.
 
+Unresolved original drafts use `template_translation_candidate` in their dedicated
+indexed shard area. Their source kind, stable draft ID, language, exact target text,
+current inventory IDs and sorted reason codes are closed data. Anonymous N/X and
+malformed placeholder syntax remain untouched; candidates need no definition ID.
+They never become active targets, variants, bindings, pins or translated coverage,
+even with low confidence false. Missing source counts remain unknown. Referenced
+inventory entries must exist and full builds still verify their entire raw closure.
+
 `current.validate_templates(inputs, sources)` is a separate full build operation.
 `current_sources.Sources` uses the installed parser, normalizer, reference data and
 explicit current rule switches to enumerate every declared frozen JP batch once.

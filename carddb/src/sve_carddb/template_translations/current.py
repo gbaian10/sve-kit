@@ -9,6 +9,7 @@ from pydantic import JsonValue, ValidationError
 
 from sve_carddb.snapshot.values import canonical, object_value, parse
 from sve_carddb.template_translations.current_models import (
+    CandidateRecord,
     DefinitionRecord,
     Inventory,
     Record,
@@ -47,6 +48,15 @@ if TYPE_CHECKING:
 
 def key(record: Record) -> str:
     """Current selection keys exclude translated text, notes and adoption metadata."""
+    if isinstance(record, CandidateRecord):
+        return canonical(
+            [
+                record.kind,
+                record.data.source_kind,
+                record.data.candidate_id,
+                record.data.lang,
+            ]
+        ).decode()
     if isinstance(record, VariantRecord):
         return canonical(
             [
@@ -141,7 +151,7 @@ def validate_foreign(path: str, raw: bytes) -> None:
         else:
             _inventory(raw)
     elif value.get("translation_authored_format") == CURRENT_FORMAT:
-        shard(raw)
+        _candidate_path(path, shard(raw).records)
     else:
         _shard(raw)
 
@@ -192,7 +202,9 @@ def _collect(files: Files) -> tuple[dict[str, Record], list[Inventory], set[str]
                 entries.add(entry.id)
             inventories.append(current)
         elif SHARD.fullmatch(path) and path.startswith("translations/templates/"):
-            for record in shard(raw).records:
+            values = shard(raw).records
+            _candidate_path(path, values)
+            for record in values:
                 if record.record_key in records:
                     raise ValueError("Duplicate current template selection key")
                 records[record.record_key] = record
@@ -200,6 +212,14 @@ def _collect(files: Files) -> tuple[dict[str, Record], list[Inventory], set[str]
 
 
 def _references(records: dict[str, Record], entries: set[str]) -> None:
+    for record in records.values():
+        if (
+            isinstance(record, CandidateRecord)
+            and not set(record.data.inventory_ids) <= entries
+        ):
+            raise ValueError(
+                "Current template candidate references an absent inventory entry"
+            )
     definitions = {
         record.data.id: record
         for record in records.values()
@@ -223,6 +243,16 @@ def _references(records: dict[str, Record], entries: set[str]) -> None:
             visited.add(parent)
             parent = definitions[parent].data.supersedes_id
     _texts(records, definitions)
+
+
+def _candidate_path(path: str, records: tuple[Record, ...]) -> None:
+    candidate_area = path.startswith(
+        "translations/templates/template_translation_candidate/"
+    )
+    if any(isinstance(record, CandidateRecord) != candidate_area for record in records):
+        raise ValueError(
+            "Current template candidates require their dedicated shard area"
+        )
 
 
 def _texts(
@@ -358,7 +388,9 @@ def validate_templates(inputs: Inputs, sources: Sources) -> Validated:
         tuple(sorted(missing)),
         tuple(
             sorted(
-                record.record_key for record in inputs.records if record.low_confidence
+                record.record_key
+                for record in inputs.records
+                if record.low_confidence and not isinstance(record, CandidateRecord)
             )
         ),
         generated.report,

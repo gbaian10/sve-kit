@@ -38,6 +38,43 @@ class TranslationRecord(RecordData):
     note: str
 
 
+class Candidate(RecordData):
+    source_kind: Literal["effect", "flavor"]
+    candidate_id: Text
+    lang: Lang
+    text: Text
+    inventory_ids: tuple[Text, ...]
+    reasons: Annotated[
+        tuple[Annotated[str, Field(pattern=r"^[a-z][a-z0-9_]*\Z")], ...],
+        Field(min_length=1),
+    ]
+
+    @field_validator("text")
+    @classmethod
+    def _utf8(cls, value: str) -> str:
+        value.encode("utf-8")
+        return value
+
+    @model_validator(mode="after")
+    def _ordered(self) -> Self:
+        if self.inventory_ids != tuple(
+            sorted(set(self.inventory_ids))
+        ) or self.reasons != tuple(sorted(set(self.reasons))):
+            raise ValueError(
+                "Candidate references and reasons must be sorted and unique"
+            )
+        return self
+
+
+class CandidateRecord(RecordData):
+    record_key: Text
+    kind: Literal["template_translation_candidate"]
+    data: Candidate
+    origin: Literal["project", "machine"]
+    low_confidence: bool
+    note: str
+
+
 class Variant(Translation):
     variant_key: Code
 
@@ -58,7 +95,8 @@ class VariantRecord(RecordData):
 
 
 Record = Annotated[
-    DefinitionRecord | TranslationRecord | VariantRecord, Field(discriminator="kind")
+    DefinitionRecord | TranslationRecord | CandidateRecord | VariantRecord,
+    Field(discriminator="kind"),
 ]
 
 
