@@ -1,13 +1,6 @@
 import { afterEach, describe, expect, it, vi } from "vitest"
 
-import {
-  createPrefsStore,
-  DEFAULT_PREFS,
-  LEGACY_UI_LANGUAGE_KEY,
-  PREFS_KEY,
-  readPrefs,
-  writePrefs,
-} from "./prefs"
+import { createPrefsStore, DEFAULT_PREFS, PREFS_KEY, readPrefs, writePrefs } from "./prefs"
 
 afterEach(() => {
   vi.restoreAllMocks()
@@ -83,19 +76,6 @@ describe("readPrefs", () => {
       expect(readPrefs()).toEqual(DEFAULT_PREFS)
     },
   )
-
-  it("migrates the legacy ui-language key when no prefs are stored", () => {
-    localStorage.setItem(LEGACY_UI_LANGUAGE_KEY, "en")
-    expect(readPrefs().uiLanguage).toBe("en")
-    localStorage.setItem(LEGACY_UI_LANGUAGE_KEY, "zh-CN")
-    expect(readPrefs().uiLanguage).toBeNull()
-  })
-
-  it("prefers the prefs object over the legacy key", () => {
-    localStorage.setItem(LEGACY_UI_LANGUAGE_KEY, "en")
-    writePrefs({ ...DEFAULT_PREFS, uiLanguage: "ja" })
-    expect(readPrefs().uiLanguage).toBe("ja")
-  })
 
   it("survives storage that throws", () => {
     vi.spyOn(Storage.prototype, "getItem").mockImplementation(blocked)
