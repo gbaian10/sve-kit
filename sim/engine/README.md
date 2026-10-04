@@ -98,12 +98,8 @@ do not truncate it. Player packets contain none of this private RNG state.
 Scripted random outcomes still take precedence and do not consume that stream;
 search sampling owns a separate stream and cannot advance the authoritative one.
 
-Original numeric `rng` saves restore with the original FNV-1a seed fold,
-SplitMix64 words, rejection sampler and modulo shuffle. Their serialization and
-continuation remain unchanged. Use `Game::new_with_random_algorithm` or
-`Game::from_observation_with_random_algorithm` with `RandomAlgorithm::Legacy`
-when recreating an old position from its seed. The default constructors now
-select the named algorithm; numeric saves never switch algorithms on restore.
-This is an RNG compatibility boundary inside the prototype's trusted
-`astra-save/1`, not a general save migration or untrusted-input authorization
-system. Older binaries cannot read the new RNG objects.
+RNG objects must include the known algorithm name; numeric states and objects
+without an algorithm are rejected. No legacy RNG or seed reconstruction path is
+retained: the handwritten generator was never deployed and has no real saves.
+The prototype's trusted `astra-save/1` container is unchanged; this does not add
+general save migration or untrusted-input authorization.
