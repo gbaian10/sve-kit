@@ -3,10 +3,8 @@
 import re
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- enumerate immutable Git objects without executing repository code
 from dataclasses import dataclass
-from datetime import datetime
 from types import MappingProxyType
 from typing import TYPE_CHECKING, Annotated, Literal
-from uuid import UUID
 
 from pydantic import Field, JsonValue, ValidationError, field_validator, model_validator
 
@@ -26,12 +24,8 @@ if TYPE_CHECKING:
     from sve_carddb.source_archive import Descriptor
 
 PREFIX = "authored/image-crops/"
-_SHARD = re.compile(
-    r"authored/image-crops/(?!receipts/)[A-Za-z0-9_-]+/[0-9]{3,}\.yaml\Z"
-)
-_RECEIPT = re.compile(r"authored/image-crops/receipts/([a-z][a-z0-9_-]{0,63})\.yaml\Z")
+_SHARD = re.compile(r"authored/image-crops/[A-Za-z0-9_-]+/[0-9]{3,}\.yaml\Z")
 HexHash = Annotated[str, Field(pattern=r"^[0-9a-f]{64}\Z")]
-ReceiptId = Annotated[str, Field(pattern=r"^[a-z][a-z0-9_-]{0,63}\Z")]
 Nonnegative = Annotated[int, Field(ge=0)]
 Positive = Annotated[int, Field(gt=0)]
 
@@ -41,16 +35,19 @@ def conversion_image_id(source_version_id: str) -> str:
     return "img:v1:" + digest(canonical({"source_id": source_version_id}))[7:]
 
 
-class CropMember(RecordData):
+class CropRecord(RecordData):
     source_key: Hash
     source_sha256: HexHash
     left: Nonnegative
     top: Nonnegative
     width: Positive
     height: Positive
+    reason: str
+    region: Region
+    card_no: str
 
     @model_validator(mode="after")
-    def _ratio(self) -> CropMember:
+    def _ratio(self) -> CropRecord:
         if self.width * 3 != self.height * 4:
             raise ValueError("Crop must have an exact 4:3 ratio")
         return self
@@ -80,13 +77,6 @@ class CropMember(RecordData):
         """Return oriented integer coordinates without rotating the artwork."""
         return CropBox(self.left, self.top, self.width, self.height)
 
-
-class CropRecord(CropMember):
-    reason: str
-    receipt_id: ReceiptId
-    region: Region
-    card_no: str
-
     @field_validator("reason", "card_no")
     @classmethod
     def _nonblank(cls, value: str) -> str:
@@ -108,45 +98,9 @@ class CropRecord(CropMember):
 
 
 class CropShard(RecordData):
-    image_crop_format: Annotated[int, Field(ge=1, le=1)]
+    image_crop_format: Annotated[int, Field(ge=2, le=2)]
     kind: Literal["crop_override_shard"]
     records: Annotated[tuple[CropRecord, ...], Field(min_length=1)]
-
-
-class CropApproval(RecordData):
-    image_crop_format: Annotated[int, Field(ge=1, le=1)]
-    kind: Literal["crop_approval"]
-    receipt_id: ReceiptId
-    approved_at: str
-    approval_message_id: str
-    preview_sha256: Hash
-    approval_subject: Literal["rgb_crop_comparison"]
-    members: Annotated[tuple[CropMember, ...], Field(min_length=1)]
-
-    @field_validator("approved_at")
-    @classmethod
-    def _instant(cls, value: str) -> str:
-        if (
-            re.fullmatch(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?Z", value)
-            is None
-        ):
-            raise ValueError("Crop approval requires a UTC RFC 3339 instant")
-        datetime.fromisoformat(value)
-        return value
-
-    @field_validator("approval_message_id")
-    @classmethod
-    def _uuid(cls, value: str) -> str:
-        if str(UUID(value)) != value:
-            raise ValueError("Crop approval requires a canonical message UUID")
-        return value
-
-    @model_validator(mode="after")
-    def _members(self) -> CropApproval:
-        keys = tuple(member.key for member in self.members)
-        if keys != tuple(sorted(set(keys))):
-            raise ValueError("Crop approval members must be sorted and unique")
-        return self
 
 
 @dataclass(frozen=True)
@@ -156,13 +110,13 @@ class ImageCrops:
     records: Mapping[tuple[str, str], CropRecord]
 
     def dependencies(self) -> dict[str, bytes]:
-        """Pin receipts and unused regional rows along with the selected crops."""
+        """Pin unused regional rows along with the selected crops."""
         return dict(self.files)
 
     def configuration(self) -> dict[str, JsonValue]:
         """Declare the complete no-index closure, including an explicitly empty one."""
         return {
-            "image_crop_format": 1,
+            "image_crop_format": 2,
             "authored_revision": self.revision,
             "files": [
                 {"name": name, "sha256": digest(raw)}
@@ -171,7 +125,7 @@ class ImageCrops:
         }
 
     def verify_context(self, build: BuildContext) -> None:
-        """Caller-provided pins may check but cannot replace adopted receipts."""
+        """Caller-provided pins may check but cannot replace authored crop inputs."""
         config = parse(build.configuration.encode())
         if not isinstance(config, dict) or canonical(
             config.get("image_crop_overrides")
@@ -269,7 +223,7 @@ def _disk(root: Path) -> dict[str, bytes]:
 
 
 def load_image_crops(root: Path, *, authored_revision: str) -> ImageCrops:
-    """Validate all shards and receipts before selecting any region or source."""
+    """Validate all shards before selecting any region or source."""
     if re.fullmatch(r"[0-9a-f]{40}", authored_revision) is None:
         raise ValueError("Image crop revision must be a full Git SHA")
     repository = PinnedRepository(root.parent)
@@ -288,37 +242,15 @@ def load_image_crops(root: Path, *, authored_revision: str) -> ImageCrops:
 
 def _records(files: dict[str, bytes]) -> dict[tuple[str, str], CropRecord]:
     records: dict[tuple[str, str], CropRecord] = {}
-    approvals: dict[str, CropApproval] = {}
     for name, raw in sorted(files.items()):
-        if match := _RECEIPT.fullmatch(name):
-            approval = _model(CropApproval, raw)
-            if approval.receipt_id != match[1]:
-                raise ValueError("Crop receipt ID differs from filename")
-            approvals[approval.receipt_id] = approval
-        elif _SHARD.fullmatch(name):
-            shard = _model(CropShard, raw)
-            keys = tuple((r.region, r.card_no, *r.key) for r in shard.records)
-            if keys != tuple(sorted(keys)):
-                raise ValueError("Image crop shard records must be sorted")
-            for record in shard.records:
-                if record.key in records:
-                    raise ValueError("Duplicate global image crop key")
-                records[record.key] = record
-        else:
+        if _SHARD.fullmatch(name) is None:
             raise ValueError("Unsafe image crop input path")
-    _check_approvals(records, approvals)
+        shard = _model(CropShard, raw)
+        keys = tuple((r.region, r.card_no, *r.key) for r in shard.records)
+        if keys != tuple(sorted(keys)):
+            raise ValueError("Image crop shard records must be sorted")
+        for record in shard.records:
+            if record.key in records:
+                raise ValueError("Duplicate global image crop key")
+            records[record.key] = record
     return records
-
-
-def _check_approvals(
-    records: dict[tuple[str, str], CropRecord], approvals: dict[str, CropApproval]
-) -> None:
-    members = {
-        identifier: {member.key: member.box() for member in approval.members}
-        for identifier, approval in approvals.items()
-    }
-    for record in records.values():
-        if record.receipt_id not in members:
-            raise ValueError("Image crop approval receipt is missing")
-        if members[record.receipt_id].get(record.key) != record.box():
-            raise ValueError("Image crop approval source or box mismatch")

@@ -1,4 +1,4 @@
-"""Small synthetic crop shards and receipts with isolated immutable Git pins."""
+"""Small synthetic crop shards with isolated immutable Git pins."""
 
 import json
 from typing import TYPE_CHECKING
@@ -19,7 +19,6 @@ if TYPE_CHECKING:
     from sve_carddb.source_archive import Descriptor
 
 SHARD = "image-crops/TEST/001.yaml"
-RECEIPT = "image-crops/receipts/synthetic.yaml"
 
 
 @pytest.fixture(scope="session")
@@ -45,7 +44,6 @@ def record(descriptor: Descriptor) -> dict[str, JsonValue]:
         "width": 64,
         "height": 48,
         "reason": "Synthetic shifted crop",
-        "receipt_id": "synthetic",
         "region": "jp",
         "card_no": "TEST-001",
     }
@@ -55,7 +53,7 @@ def install(root: Path, records: list[dict[str, JsonValue]]) -> None:
     write(
         root / SHARD,
         {
-            "image_crop_format": 1,
+            "image_crop_format": 2,
             "kind": "crop_override_shard",
             "records": sorted(
                 records,
@@ -65,28 +63,6 @@ def install(root: Path, records: list[dict[str, JsonValue]]) -> None:
                     str(r["source_key"]),
                     str(r["source_sha256"]),
                 ),
-            ),
-        },
-    )
-    members = [
-        {
-            key: row[key]
-            for key in ("source_key", "source_sha256", "left", "top", "width", "height")
-        }
-        for row in records
-    ]
-    write(
-        root / RECEIPT,
-        {
-            "image_crop_format": 1,
-            "kind": "crop_approval",
-            "receipt_id": "synthetic",
-            "approved_at": "2026-10-02T12:34:56.789Z",
-            "approval_message_id": "00000000-0000-4000-8000-000000000001",
-            "preview_sha256": digest(b"synthetic RGB approval preview"),
-            "approval_subject": "rgb_crop_comparison",
-            "members": sorted(
-                members, key=lambda r: (str(r["source_key"]), str(r["source_sha256"]))
             ),
         },
     )

@@ -165,7 +165,7 @@ def english_images(  # ruff: ignore[too-many-locals] -- seal the shared minimal 
     )
 
 
-def test_en_original_src_double_faces_and_crop_receipt(
+def test_en_original_src_double_faces_and_crop_report(
     english_images: EnglishImages,
 ) -> None:
     case = english_images
