@@ -11,13 +11,25 @@ and `Inputs.configuration()` supplies the `digital_link_authored` build pin.
 Build configuration also declares canonical-sorted unique `digital_link_sources`
 (store/batch pairs), `catalog_registry`, `translation_recipes`, and
 `digital_evidence` from `translations.digital.configuration()`.
-Within a caller-owned transaction call `populate_links()`, then pass its result
-to `populate_name_translation(..., links=result)`. Standalone `import_links()`
-owns its transaction. Results retain fresh, stale and withdrawn terminal records,
-decisions and the input usage record. Each name owner independently revalidates
-its Japanese name, card, face, printing source and exact adopted digital name.
-Missing coverage does not prevent an eligible name. Printed owners and semantic
-context assignments remain separate work.
+Within a caller-owned transaction call `populate_links()`. The composer in
+`snapshot/offline_names.py` passes its result as `links=result` to
+`digital_name_policies.application.prepare()` and `populate()`, which delegate to
+`current_application`. Standalone `import_links()` owns its transaction. Link
+results retain fresh, stale and withdrawn terminal records, decisions and the
+input usage record. The application consumes each owner's link proof through
+`DigitalLinkResult.eligible_owner(db, sources, owner, name_ref=...)`, independently
+revalidating its Japanese name, card, face, printing source and exact adopted
+digital name. Missing coverage does not prevent an eligible name.
+
+`translations.current_names.prepare()` validates current concept associations
+and semantic assignments. Its resolver reports `ambiguous_name_concept` or
+`missing_name_concept` rather than choosing an arbitrary glossary concept; other
+legal policy or counterpart candidates still require their own evidence.
+`translations.counterparts.first_counterpart()` selects sv1 before svwb and rejects
+different adopted names within the same game. The current application supports
+known printed owners and generates current translations, uses and display
+bindings. The old name intake has been removed; remaining #53 requirements must
+extend these current paths rather than restore historical name replay.
 
 Historical review contexts validate their declared dependencies and recipes
 against immutable Git blobs. They describe the past review, rather than requiring
