@@ -119,10 +119,6 @@ job = "web"
 [hooks.web-test]
 job = "web"
 
-[hooks.no-push-to-main]
-job = "none"
-reason = "Local guard against pushing to main; CI never pushes."
-
 [hooks.commitizen]
 job = "commit"
 
