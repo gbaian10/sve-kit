@@ -7,9 +7,8 @@ from typing import Annotated
 
 import typer
 
-from sve_carddb.r2_upload.plan import UploadError, read_member
-from sve_carddb.r2_upload.s3 import Credentials
-from sve_carddb.r2_upload.sdk import sdk_client
+from sve_carddb.r2_upload.boundary import UploadError, read_member
+from sve_carddb.r2_upload.sdk import Credentials, sdk_client
 from sve_carddb.r2_upload.v2 import gc
 from sve_carddb.r2_upload.v2.adapter import PUBLIC_PREFIXES, R2Store
 from sve_carddb.r2_upload.v2.bundle import directory, ledger_at, verify_checkpoint

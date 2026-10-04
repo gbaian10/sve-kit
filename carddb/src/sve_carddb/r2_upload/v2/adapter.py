@@ -10,7 +10,7 @@ from uuid import uuid4
 from botocore.exceptions import BotoCoreError, ClientError
 from botocore.parsers import ResponseParserError
 
-from sve_carddb.r2_upload.plan import UploadError
+from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import (
     BoundaryError,
     Credentials,

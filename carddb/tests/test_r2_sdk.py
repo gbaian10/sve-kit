@@ -17,10 +17,9 @@ from botocore.httpsession import URLLib3Session
 from botocore.stub import Stubber
 
 from sve_carddb.r2_upload import sdk
-from sve_carddb.r2_upload.plan import UploadError
-from sve_carddb.r2_upload.s3 import S3
+from sve_carddb.r2_upload.boundary import UploadError
 from sve_carddb.r2_upload.sdk import BoundaryError, Credentials, bounded, sdk_client
-from sve_carddb.r2_upload.v2.adapter import R2Store
+from sve_carddb.r2_upload.v2.adapter import LEASE_KEY, R2Store
 from sve_carddb.snapshot.publish.storage import PublishError, Stored
 
 from .r2_sdk_fixtures import MockHTTP, mock_client
@@ -63,22 +62,14 @@ def test_native_sdk_keeps_conditions_and_exact_compressed_bytes(
     state, loopback = server
     native = NativeLoopback(loopback.root)
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS, http_session=native) as client:
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client)
-        headers = {
-            "content-type": "application/json",
-            "cache-control": "no-store",
-            "if-none-match": "*",
-        }
-        assert remote.put("synthetic.json", b"{}", headers)
-        assert not remote.put("synthetic.json", b"changed", headers)
-        first = remote.get("synthetic.json", limit=2)
-        assert first is not None
-        assert remote.put(
-            "synthetic.json",
-            b"new",
-            {k: v for k, v in headers.items() if k != "if-none-match"}
-            | {"if-match": first.headers["etag"]},
-        )
+        remote = R2Store(ACCOUNT, BUCKET, CREDENTIALS, client)
+        headers = {"content-type": "application/json", "cache-control": "no-store"}
+        with remote.exclusive():
+            assert remote.put("synthetic.json", b"{}", headers, expected=None)
+            assert not remote.put("synthetic.json", b"changed", headers, expected=None)
+            first = remote.get("synthetic.json")
+            assert first is not None
+            assert remote.put("synthetic.json", b"new", headers, expected=first.etag)
         raw = gzip.compress(b"synthetic compressed sibling", mtime=0)
         state.objects["synthetic.json.gz"] = Stored(
             raw,
@@ -105,24 +96,25 @@ def test_native_sdk_lost_write_response_is_not_replayed(
     native = NativeLoopback(loopback.root)
     native.lose_put = True
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS, http_session=native) as client:
-        with pytest.raises(UploadError, match=r"^R2 transport failed$"):
-            S3(ACCOUNT, BUCKET, CREDENTIALS, client).put(
-                "synthetic.json",
+        with pytest.raises(PublishError, match=r"^R2 transport or protocol failed$"):
+            R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).put(
+                LEASE_KEY,
                 b"{}",
-                {"if-none-match": "*", "content-type": "application/json"},
+                {"content-type": "application/json"},
+                expected=None,
             )
     assert len(state.requests) == 1
-    assert state.objects["synthetic.json"].raw == b"{}"
+    assert state.objects[LEASE_KEY].raw == b"{}"
 
 
 def test_typed_stubber_checks_both_put_conditions_and_metadata() -> None:
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS) as client, Stubber(client) as stub:
         expected = {
             "Bucket": BUCKET,
-            "Key": "synthetic.json",
+            "Key": LEASE_KEY,
             "Body": b"{}",
             "ContentType": "application/json",
-            "Metadata": {"sha256": "synthetic-hash"},
+            "CacheControl": "no-store",
         }
         stub.add_response("put_object", {}, expected | {"IfNoneMatch": "*"})
         stub.add_client_error(
@@ -131,15 +123,10 @@ def test_typed_stubber_checks_both_put_conditions_and_metadata() -> None:
             http_status_code=412,
             expected_params=expected | {"IfMatch": '"opaque"'},
         )
-        remote = S3(ACCOUNT, BUCKET, CREDENTIALS, client)
-        headers = {
-            "content-type": "application/json",
-            "x-amz-meta-sha256": "synthetic-hash",
-        }
-        assert remote.put("synthetic.json", b"{}", headers | {"if-none-match": "*"})
-        assert not remote.put(
-            "synthetic.json", b"{}", headers | {"if-match": '"opaque"'}
-        )
+        remote = R2Store(ACCOUNT, BUCKET, CREDENTIALS, client)
+        headers = {"content-type": "application/json", "cache-control": "no-store"}
+        assert remote.put(LEASE_KEY, b"{}", headers, expected=None)
+        assert not remote.put(LEASE_KEY, b"{}", headers, expected='"opaque"')
         stub.assert_no_pending_responses()
 
 
@@ -197,8 +184,7 @@ def test_aws_environment_and_files_cannot_reconfigure_the_sdk(
                 http, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS
             )
             assert (
-                S3(ACCOUNT, BUCKET, CREDENTIALS, client).get("synthetic", limit=1)
-                is None
+                R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).get("synthetic") is None
             )
     finally:
         active = False
@@ -224,8 +210,8 @@ def test_sdk_debug_logging_cannot_print_auth_or_error_contents(
         with sdk_client(
             ACCOUNT, BUCKET, CREDENTIALS, http_session=MockHTTP(http)
         ) as client:
-            with pytest.raises(UploadError, match=r"^R2 object read failed$"):
-                S3(ACCOUNT, BUCKET, CREDENTIALS, client).get("synthetic", limit=1)
+            with pytest.raises(PublishError, match=r"^R2 object read failed$"):
+                R2Store(ACCOUNT, BUCKET, CREDENTIALS, client).get("synthetic")
     assert "synthetic-access" not in caplog.text
     assert "synthetic-secret" not in caplog.text
     assert "Signature=" not in caplog.text
@@ -289,19 +275,24 @@ def test_sdk_does_not_accept_noncontractual_success_status(
         return httpx.Response(code)
 
     with httpx.Client(transport=httpx.MockTransport(handler)) as http:
-        remote = S3(
+        remote = R2Store(
             ACCOUNT,
             BUCKET,
             CREDENTIALS,
             mock_client(http, account=ACCOUNT, bucket=BUCKET, credentials=CREDENTIALS),
         )
         operation = (
-            partial(remote.get, "synthetic", limit=1)
+            partial(remote.get, "synthetic")
             if method == "GET"
-            else partial(remote.put, "synthetic", b"x", {"if-none-match": "*"})
+            else partial(remote.put, LEASE_KEY, b"x", {}, expected=None)
         )
         with pytest.raises(
-            UploadError, match=r"^R2 (object read|conditional object write) failed$"
+            PublishError,
+            match=(
+                r"^R2 object read failed$"
+                if method == "GET"
+                else r"^R2 conditional PUT failed; no unconditional fallback$"
+            ),
         ):
             operation()
     assert len(calls) == 1
@@ -310,10 +301,23 @@ def test_sdk_does_not_accept_noncontractual_success_status(
 def test_injected_client_cannot_silently_select_another_account() -> None:
     with sdk_client(ACCOUNT, BUCKET, CREDENTIALS) as client:
         with pytest.raises(
-            UploadError, match=r"^S3 client differs from the explicit R2 account$"
-        ):
-            S3("e" * 32, BUCKET, CREDENTIALS, client)
-        with pytest.raises(
             PublishError, match=r"^S3 client differs from the explicit R2 account$"
         ):
             R2Store("e" * 32, BUCKET, CREDENTIALS, client)
+
+
+@pytest.mark.parametrize(
+    "missing", ["SVE_R2_ACCESS_KEY_ID", "SVE_R2_SECRET_ACCESS_KEY"]
+)
+def test_ambient_aws_credentials_never_complete_a_partial_r2_pair(
+    monkeypatch: pytest.MonkeyPatch, missing: str
+) -> None:
+    monkeypatch.setenv("SVE_R2_ACCESS_KEY_ID", "synthetic-explicit-access")
+    monkeypatch.setenv("SVE_R2_SECRET_ACCESS_KEY", "synthetic-explicit-secret")
+    monkeypatch.delenv(missing)
+    monkeypatch.setenv("AWS_ACCESS_KEY_ID", "synthetic-fallback-access")
+    monkeypatch.setenv("AWS_SECRET_ACCESS_KEY", "synthetic-fallback-secret")
+    with pytest.raises(
+        UploadError, match=r"^Explicit local R2 credentials are required$"
+    ):
+        Credentials.environment()

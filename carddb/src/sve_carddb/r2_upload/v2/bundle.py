@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING
 from jsonschema import ValidationError as SchemaError
 from pydantic import JsonValue
 
-from sve_carddb.r2_upload.plan import read_member
+from sve_carddb.r2_upload.boundary import read_member
 from sve_carddb.snapshot.export import Blob, Snapshot
 from sve_carddb.snapshot.media import MediaPlan
 from sve_carddb.snapshot.project import Projection

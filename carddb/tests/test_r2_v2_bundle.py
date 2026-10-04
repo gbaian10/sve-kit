@@ -11,7 +11,7 @@ import pytest
 from typer.testing import CliRunner
 
 from sve_carddb.cli import app
-from sve_carddb.r2_upload.s3 import Credentials
+from sve_carddb.r2_upload.sdk import Credentials
 from sve_carddb.r2_upload.v2 import commands
 from sve_carddb.r2_upload.v2.bundle import (
     load_bundle,
