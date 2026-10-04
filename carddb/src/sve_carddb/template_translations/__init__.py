@@ -1,1 +1,1 @@
-"""Prepare exact template translation bytes without asserting human adoption."""
+"""Editable current template definitions, translations and build validation."""

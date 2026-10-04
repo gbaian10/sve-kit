@@ -30,9 +30,9 @@ explicit current rule switches to enumerate every declared frozen JP batch once.
 It reuses parsed documents within that build. Inventory format 3 contains only
 `template_source_format,kind,source_batches,entries`; no producer or output-manifest
 pin is needed. Every actual entry must appear exactly once and equal its declared
-source position. Fingerprint reproduction and full source coverage are reported
-separately: presence-v1 unknown pages still make coverage incomplete even when
-all known source positions agree. Parsing an inventory is not a successful build.
+source position. Full source coverage is reported separately from positional agreement:
+presence-v1 unknown pages still make coverage incomplete even when all known
+source positions agree. Parsing an inventory is not a successful build.
 
 Definitions must reproduce the six-field semantic payload and its content hash,
 exact source spans, slot types, semantic roles, safe integer bounds, raw values
@@ -62,9 +62,12 @@ invalid bytes are not silently normalized.
 `{{slot_name}}`; braces and backslashes in literal text must be escaped. Unknown,
 unused or malformed slots fail. No expressions or global N/X substitutions exist.
 
-The old `loader.load_templates`, v1/v2 inventory models, frozen semantic interpreter
-and approval helpers remain available only for explicit legacy conversion and
-regression diagnostics. They are not the current read/build path. `current_build.populate()` projects the verified definitions and current targets
+Historical adoption loaders, inventory formats 1/2, approval receipts and frozen
+semantic interpreters have been removed. Git retains their history; current builds
+need no legacy template catalog or historical environment. Shared member, schema
+and family checks live in `members` and `definitions`.
+
+`current_build.populate()` projects the verified definitions and current targets
 into the shared current DB schema. `populate_field()` checks each face/printing
 field before writing contexts, uses, bindings and selections. `current_render`
 requires the whole field, appends anchored reminders once, preserves layout,

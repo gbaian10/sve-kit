@@ -20,7 +20,7 @@ from sve_carddb.template_translations.flavor_models import (
     FlavorEntry,
     FlavorSpan,
 )
-from sve_carddb.template_translations.sources import Reconstructed, _members
+from sve_carddb.template_translations.members import Reconstructed, _members
 from sve_carddb.translations.sources import pointer
 
 if TYPE_CHECKING:

@@ -5,14 +5,9 @@ from typing import TYPE_CHECKING, Protocol
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.values import canonical, digest
-from sve_carddb.translations.loader import load_glossary, record_hash
-from sve_carddb.translations.models import TermRecord
-from sve_carddb.translations.sources import excerpt
+from sve_carddb.snapshot.values import digest
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.build_inputs import Source
     from sve_carddb.catalog.adoption_models import SourceRef
     from sve_carddb.text_observations.vocabulary import Vocabulary
@@ -110,37 +105,3 @@ class References:
             if name in raw
             for identifier, category, checksum in self.terms[name]
         )
-
-
-def adopted(root: Path, sources: Evidence) -> References:
-    """Reuse the full glossary closure and frozen source validator before exact lookup."""
-    snapshot = load_glossary(root)
-    result = References(pins={"glossary": snapshot.pins()})
-    for record, _ in snapshot.effective():
-        if not isinstance(record, TermRecord):
-            continue
-        data = record.data
-        if data.source_ref is None:
-            raw = data.authored_source_ja
-        else:
-            lang, text, _ = sources.text(data.source_ref)
-            if lang != "ja":
-                raise ValueError(
-                    "Parameter concepts require exact Japanese source names"
-                )
-            raw = excerpt(text, data.source_span)
-        if not isinstance(raw, str) or not raw:
-            raise ValueError("Parameter concept source must be nonempty exact text")
-        checksum = record_hash(record)
-        result.terms.setdefault(raw, []).append((data.id, data.category, checksum))
-        if data.category == "card_name":
-            result.card_names.setdefault(raw, []).append((data.id, checksum))
-    result.pins["exact_concepts_hash"] = digest(
-        canonical(
-            {
-                digest(raw.encode()): [list(item) for item in values]
-                for raw, values in sorted(result.terms.items())
-            }
-        )
-    )
-    return result

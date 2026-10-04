@@ -8,20 +8,18 @@ from pydantic import JsonValue
 
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.snapshot.values import array, canonical, digest, object_value
-from sve_carddb.template_sources.models import Entry, Recipe
+from sve_carddb.template_sources.models import Entry
 from sve_carddb.template_sources.normalizer import (
     VERSION,
     Part,
     partition,
     verify_partition,
 )
-from sve_carddb.template_sources.pins import PARSER, verify_recipes
+from sve_carddb.template_sources.pins import PARSER
 from sve_carddb.text_observations.presence import detect_presence
 from sve_carddb.translations.sources import pointer, project
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     from sve_carddb.build_inputs import Source
     from sve_carddb.frozen_sources import FrozenSources
     from sve_carddb.text_observations.presence import PresenceState
@@ -37,7 +35,6 @@ class Occurrence:
 
 @dataclass
 class Scan:
-    recipes: tuple[Recipe, ...]
     expected_versions: tuple[str, ...]
     entries: list[Entry] = field(default_factory=list)
     occurrences: list[Occurrence] = field(default_factory=list)
@@ -164,16 +161,12 @@ def _presence(
         )
 
 
-def _scan(
-    sources: FrozenSources, pins: tuple[Recipe, ...], *, keep_documents: bool = False
-) -> Scan:
+def _scan(sources: FrozenSources) -> Scan:
     if [(scope.provider, scope.kind) for scope in sources.inventory.scope] != [
         ("jp", "card")
     ]:
         raise ValueError("Template checkpoint requires an exclusively JP card batch")
-    scan = Scan(
-        pins, tuple(item.source_version_id for item in sources.inventory.current)
-    )
+    scan = Scan(tuple(item.source_version_id for item in sources.inventory.current))
     scan.history_gaps = len(sources.inventory.history_gaps)
     for current in sources.inventory.current:
         source, raw, descriptor = sources.read(
@@ -189,8 +182,7 @@ def _scan(
         try:
             lang, document = project(raw, source.url, "jp")
             projected = fields(document)
-            if keep_documents:
-                scan.documents[source.id] = document
+            scan.documents[source.id] = document
         except ValueError, LookupError, UnicodeError:
             scan.failures.append(
                 {"source_version_id": source.id, "reason": "jp_projection_failed"}
@@ -230,17 +222,9 @@ def _scan(
     return scan
 
 
-def scan_batch(
-    sources: FrozenSources, *, repository: Path, pins: tuple[Recipe, ...]
-) -> Scan:
-    """Retain the legacy pinned recipe route for explicit migration diagnostics."""
-    verify_recipes(repository, pins)
-    return _scan(sources, pins)
-
-
 def scan_current(sources: FrozenSources) -> Scan:
     """The installed parser enumerates the complete sealed batch, without old producers."""
-    return _scan(sources, (), keep_documents=True)
+    return _scan(sources)
 
 
 def _proof_entries(proof: dict[str, JsonValue]) -> tuple[set[str], bool]:

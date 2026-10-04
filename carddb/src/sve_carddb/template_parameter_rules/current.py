@@ -8,11 +8,10 @@ from pydantic import ValidationError, field_validator, model_validator
 
 from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.registry.records import RecordData
-from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_parameter_rules.models import LEGACY_IDS, RuleId
-from sve_carddb.template_parameter_rules.replay import resolve_roles
 from sve_carddb.template_parameter_rules.repository import LIMIT, git
 from sve_carddb.template_parameter_rules.repository import revision as check_revision
+from sve_carddb.template_parameter_rules.resolve import resolve_roles
 from sve_carddb.template_parameters.inventory import Candidates
 from sve_carddb.template_parameters.rule_candidates import BY_ID
 from sve_carddb.template_translations.files import json_bytes
@@ -104,28 +103,3 @@ def resolve(
         for key in rules.enabled()
     }
     return resolve_roles(candidates, roles, roles=("body", "reminder"))
-
-
-def migrate(policy: bytes) -> Rules:
-    """Transfer explicitly listed old rules; this does not infer extra matcher consent."""
-    from sve_carddb.template_parameter_rules.loader import parse_policy  # ruff: ignore[import-outside-top-level] -- legacy envelopes remain separate from the current reader
-
-    old = parse_policy(policy)
-    return Rules.model_validate_json(
-        canonical(
-            {
-                "parameter_rule_format": 2,
-                "kind": "template_parameter_rules",
-                "rules": [
-                    {
-                        "rule_id": rule.rule_id,
-                        "enabled": True,
-                        "origin": "project",
-                        "low_confidence": False,
-                        "note": "",
-                    }
-                    for rule in old.rules
-                ],
-            }
-        )
-    )

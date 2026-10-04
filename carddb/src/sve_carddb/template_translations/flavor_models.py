@@ -7,10 +7,9 @@ from typing import Annotated, Literal
 
 from pydantic import Field, field_validator
 
-from sve_carddb.catalog.adoption_models import Batch, SourceRef
+from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.registry.records import Hash, RecordData, Text
 from sve_carddb.template_parameters.models import Range
-from sve_carddb.translations.models import IdentityBasis
 
 
 class FlavorSpan(RecordData):
@@ -57,9 +56,3 @@ class FlavorOwner:
             "printing_id": self.printing_id,
             "face_id": self.face_id,
         }
-
-
-class FlavorInputs(RecordData):
-    source_batch: Batch
-    identity_basis: IdentityBasis | None
-    identity_batches: tuple[Batch, ...]
