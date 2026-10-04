@@ -4,7 +4,6 @@ import { type Accent, isAccent, isThemePref, type ThemePref } from "../domain/th
 import { isUiLanguage, type UiLanguage } from "../i18n/languages"
 
 export const PREFS_KEY = "sve-kit:prefs"
-export const LEGACY_UI_LANGUAGE_KEY = "sve-kit:ui-language"
 const PREFS_VERSION = 1
 
 export const CARD_EDITIONS = ["jp", "en"] as const
@@ -107,9 +106,7 @@ export function readPrefs(source?: StorageSource): Prefs {
     const storage = resolveStorage(source)
     const raw = storage.getItem(PREFS_KEY)
     if (raw !== null) return sanitize(JSON.parse(raw))
-    // The first release stored only the UI language under its own key.
-    const legacy = storage.getItem(LEGACY_UI_LANGUAGE_KEY)
-    return isUiLanguage(legacy) ? { ...DEFAULT_PREFS, uiLanguage: legacy } : DEFAULT_PREFS
+    return DEFAULT_PREFS
   } catch {
     return DEFAULT_PREFS
   }
