@@ -67,3 +67,23 @@ def test_source_media_requires_every_field(
         del record[field]
         with pytest.raises(ValueError, match="whitelist mismatch"):
             source_tuple(table, record)
+
+
+@pytest.mark.parametrize(
+    "path",
+    [
+        "images/foo.webp",
+        "images/sha256/bb/" + "aa" * 32 + ".webp",
+        "images/sha256/aa/" + "aa" * 32 + ".png",
+        "images/sha256/aa/" + "aa" * 32 + ".webp\n",
+    ],
+)
+def test_source_variant_requires_exact_content_address(
+    inputs: dict[str, dict[str, JsonValue]], path: str
+) -> None:
+    record = inputs["image_variant"] | {"path": path}
+    with pytest.raises(
+        ValueError,
+        match=r"^Source image variant requires a content-addressed WebP path$",
+    ):
+        source_tuple("image_variant", record)
