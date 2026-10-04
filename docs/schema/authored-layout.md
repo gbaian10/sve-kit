@@ -532,9 +532,9 @@ family 的 id、code、public_code 各自唯一；已被 home_set_id 引用的�
 
 ### 10.4 新定的決定形式與匯入投影
 
-每個商品分片使用 batch 決定，恰有 `id, state, scope, category, policy_id, membership_hash, members, sample_ids, authored_by, authored_at, reviewed_by, reviewed_at, reviewed_precision, note`。scope 固定 `batch`、category 固定 `product_catalog`、policy_id 固定 `product-authored-v1`；state 限 `proposed/confirmed`。members 為排序唯一的 `[record_key,semantic_hash]` 二元素陣列，恰好包含本檔全部記錄；semantic_hash 對完整 record（含 evidence）套 §2 canonical recipe，membership_hash 對 members 套同 recipe，id 為 `d:` 加完整 membership hash 的 64 hex。default_decision_id 必須指向此 id。
+每個商品分片使用 batch 決定，必須有 `id, state, scope, category, policy_id, membership_hash, members, sample_ids, authored_by, authored_at, reviewed_by, reviewed_at, reviewed_precision`，可附 `note`。scope 固定 `batch`、category 固定 `product_catalog`、policy_id 固定 `product-authored-v1`；state 限 `proposed/confirmed`。members 為排序唯一的 `[record_key,semantic_hash]` 二元素陣列，恰好包含本檔全部記錄；semantic_hash 對完整 record（含 evidence）套 §2 canonical recipe，membership_hash 對 members 套同 recipe，id 為 `d:` 加完整 membership hash 的 64 hex。default_decision_id 必須指向此 id。
 
-confirmed 必須由實際核對者填人名、核對時間，sample_ids 恰為全體 members 的 record_key 集合（排序、無重複）；不是抽查。只有日精度的真實核對日期才使用 §2 的 UTC 日界編碼，reviewed_precision=day；確知時間則為 instant。proposed 的 sample_ids=[]、reviewed_by/reviewed_at/reviewed_precision=null；兩種狀態均須實際 authored_by／authored_at，note 為 Text（可空字串，不是 null）。不能沿用 identity_registry 的決定、把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
+confirmed 必須由實際核對者填人名、核對時間，sample_ids 恰為全體 members 的 record_key 集合（排序、無重複）；不是抽查。只有日精度的真實核對日期才使用 §2 的 UTC 日界編碼，reviewed_precision=day；確知時間則為 instant。proposed 的 sample_ids=[]、reviewed_by/reviewed_at/reviewed_precision=null；兩種狀態均須實際 authored_by／authored_at，note 可省略，讀取時視為空字串；若提供則為 Text（可空字串，不是 null）。不能沿用 identity_registry 的決定、把來源頁重複次數當人工確認，或用 confidence 提升採納狀態。
 
 這些欄位是本格式的明示人工採納收據，不新增 product／printing_product 的 DB decision_id 欄。匯入每個分片時以完整 authored revision、分片路徑及 canonical hash 建立 authored source_record；決定以 decision_source 指回完整封套及全部 evidence 的 raw source_record。product_family.decision_id 指該決定；人工 product／printing_product.source_id 指上述 authored source_record，沿 decision_source 可追回核對及原始證據。文字以既有 text_unit 邊界建立後填 name_unit_id／note_unit_id，不另建第二套文字真值。
 
