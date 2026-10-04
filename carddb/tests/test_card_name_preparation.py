@@ -525,7 +525,7 @@ def test_individual_reviewer_must_be_maintainer() -> None:
     with pytest.raises(ValidationError) as caught:
         IndividualApproval.model_validate_json(canonical(data))
     assert [(e["loc"], e["type"]) for e in caught.value.errors()] == [
-        (("reviewed_by",), "literal_error")
+        (("reviewed_by",), "value_error")
     ]
 
 

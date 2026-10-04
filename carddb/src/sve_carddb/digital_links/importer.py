@@ -23,6 +23,7 @@ from sve_carddb.digital_links.loader import Snapshot, link_id, load_links
 from sve_carddb.digital_links.models import Record, Shard, SveName
 from sve_carddb.digital_links.models import Value as LinkValue
 from sve_carddb.frozen_sources import FrozenSources
+from sve_carddb.maintainers import is_maintainer
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.digital import import_digital
@@ -355,7 +356,7 @@ def populate_links(  # ruff: ignore[complex-structure,too-many-branches,too-many
             for shard, _ in resolved
             for decision in shard.decisions
             for key in decision.sample_ids
-            if decision.reviewed_by == "gbaian10"
+            if is_maintainer(decision.reviewed_by)
             and decision.state in {"sampled", "confirmed"}
         ),
     )

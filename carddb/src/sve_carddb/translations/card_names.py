@@ -7,6 +7,7 @@ from typing import Annotated, Literal
 from pydantic import Field
 
 from sve_carddb.catalog.adoption_models import SourceRef  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves this inherited model field at runtime
+from sve_carddb.maintainers import Maintainer  # ruff: ignore[typing-only-first-party-import] -- Pydantic resolves the reviewer validator at runtime
 from sve_carddb.registry.records import Hash, Instant, RecordData, Text
 from sve_carddb.registry.storage import MAX_BYTES, encode
 from sve_carddb.snapshot.values import canonical, digest
@@ -42,7 +43,7 @@ class Candidate(RecordData):
 
 class IndividualApproval(RecordData):
     kind: Literal["individual"]
-    reviewed_by: Literal["gbaian10"]
+    reviewed_by: Maintainer
     reviewed_at: Instant
     basis: Text
     values: Annotated[tuple[tuple[Text, Hash], ...], Field(min_length=1)]

@@ -8,6 +8,7 @@ from pydantic import Field, JsonValue, field_validator
 
 from sve_carddb.build_inputs import Revision
 from sve_carddb.catalog.adoption_models import Batch, Normalizer
+from sve_carddb.maintainers import Maintainer
 from sve_carddb.registry.records import CardId, Hash, Instant, RecordData, Text
 
 PolicyId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
@@ -61,7 +62,7 @@ class Approval(Envelope):
     policy_hash: Hash
     approved_document_hash: Hash
     presented_text_hash: Hash
-    reviewed_by: Literal["gbaian10"]
+    reviewed_by: Maintainer
     reviewed_at: Instant
     reviewed_precision: Literal["instant"]
     approval_events: Annotated[tuple[Event, ...], Field(min_length=1)]

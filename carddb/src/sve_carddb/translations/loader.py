@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue, ValidationError
 
 from sve_carddb.catalog.adoption_loader import ordered
+from sve_carddb.maintainers import is_maintainer
 from sve_carddb.registry.records import RecordData
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
@@ -332,7 +333,7 @@ def _envelope(shard: Shard, filing: str) -> None:  # ruff: ignore[complex-struct
         ):
             raise ValueError("Translation record kind/key/filing mismatch")
         if isinstance(record, (AssignmentRecord, ConceptRecord)):
-            if decision.reviewed_by != "gbaian10":
+            if not is_maintainer(decision.reviewed_by):
                 raise ValueError("Name override requires the maintainer human reviewer")
             if (
                 isinstance(record, ConceptRecord)
