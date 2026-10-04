@@ -43,7 +43,7 @@ pub(crate) fn resource(role: &str, number: &str, source: &str, template: bool) -
 pub(crate) fn rules(snapshot: &str, titles: Value, resources: Value) -> Value {
     let mut result = json!({"version":"engine-rules/1","scope":{"region":"jp","rules_version":"synthetic-1","rules_source_version_id":format!("src:v1:{}", "a".repeat(64))},
         "input":{"kind":"legacy-jp","snapshot_sha256":hash(snapshot.as_bytes())},
-        "evidence":[{"id":"synthetic","source_version_id":format!("src:v1:{}", "a".repeat(64)),"rule_refs":["1.2.3"],"checked_on":"2026-10-03","checked_by":"synthetic-model"}]});
+        "evidence":[{"id":"synthetic","source_version_id":format!("src:v1:{}", "a".repeat(64)),"rule_refs":["1.2.3"],"checked_on":"2026-10-03"}]});
     result["titles"] = titles;
     result["resources"] = resources;
     result
