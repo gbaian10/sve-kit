@@ -306,6 +306,20 @@ is a bug the tests would not notice; add a test, or explain why it cannot change
 pre-commit run --hook-stage manual cargo-mutants
 ```
 
+## Choosing libraries
+
+Use the standard library or a maintained, mature package for general-purpose
+parsers, schema validation, signatures, locks, queues and CLI plumbing. Keep
+project-specific rules at the package boundary rather than writing a parser or
+reimplementing those general-purpose facilities. Avoiding a dependency is not
+itself a reason to write a replacement.
+
+Record only the license, Linux and macOS support, required behavior, performance
+and size, and maintenance status when choosing a library. If available libraries
+cannot meet the requirements, document the specific gaps for review. Add a new
+dependency in a small dependency-only PR before integrating it into application
+code.
+
 ## Keeping tools up to date
 
 | What                                                                | How it is updated                                                                                   |
