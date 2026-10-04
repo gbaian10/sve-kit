@@ -58,7 +58,7 @@ metadata 依 hash 保存：`receipts/<64hex>.json`、`descriptors/<64hex>.json` 
 
 raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha256，`raw_locator` 是具名 store＋相對內容定址 path；來源 kind 依實際用途映射 official_page/official_api/official_pdf/image 等建置 enum。`url` 沿 descriptor；fetched_at／ETag 等採 first_receipt_id 的已知來源值，後續觀測留收據，不就地修改同一版本。不能把 observed_at 填成未知的原始 fetched_at。
 
-**使用者核可（2026-10-01，F1 方案 A）**：同一 raw 來源版本只投影一列 `source_record`，`parser_version` 一律 null；每個實際使用的 `(source_version_id, usage, parser pin)` 另存於與 DB／report 一起輸出的建置輸入紀錄。不能以不同 parser 或用途配假 raw ID。authored 來源維持自身 Git／內容版號，`parser_version` 仍為 `registry-envelope-v1` 或 `product-authored-v1`，不混成爬取 raw。
+**使用者核可（2026-10-01，F1 方案 A）**：同一 raw 來源版本只投影一列 `source_record`，`parser_version` 一律 null；每個實際使用的 `(source_version_id, usage, parser pin)` 另存於與 DB／report 一起輸出的建置輸入紀錄。不能以不同 parser 或用途配假 raw ID。authored 來源記實際 Git／檔案內容版號；parser_version 按入口為 registry-envelope-v1、product-authored-v1、translation-current-v2 或 catalog-current-v2，不混成爬取 raw，也不假造人工核可。
 
 共用列的 id／url／raw hash 取 descriptor，raw_locator 為具名 store＋相對內容定址 path；fetched_at／ETag／Last-Modified 採 descriptor.first_receipt_id，fetched_at 使用該收據的 last_changed_at 並轉 UTC Z，不以 URL 首次抓取、批次最新 receipt 或 observed_at 替代。官方 JP／EN 卡片 HTML 的 kind 為 official_page，須驗來源身分與 HTML media type；不得按身分／商品用途分成不同 kind。相同 ID 的全部版本 metadata（含 kind、locator、HTTP metadata 及空 parser／authored 欄）逐欄相同才可重用；任一衝突整筆匯入交易回滾，禁止 `INSERT OR IGNORE` 或任取先寫入者。
 
@@ -66,9 +66,9 @@ raw 來源的 `source_record.id` 使用 source_version_id，`sha256` 是 raw_sha
 
 #### 2.2.1 建置輸入紀錄與完整使用閉包
 
-歷史模板清冊的單次 F1 依[清冊重算契約 §4](template-source-replay.md#4-群組全歷史與單次-f1)：
-program_revision 記實際 H，各組 producer／凍結版本／預期及實際結果與用途映射另外保留。
-本節 context／uses／四檔 bundle 形狀和獨立 expected 驗證不變，不以 output root 代替完整 uses。
+翻譯 format 2 的清冊依[當前重產契約](template-source-replay.md)用本次程式及指定來源驗證，
+不再保存或重播歷史 producer／expected。一般翻譯 reader 不呼叫來源重播；建置仍記當次實際輸入與用途。
+以下來源歸檔及既有 build bundle 的完整性規則不變，不為翻譯新增核可證明、事件收據或另一種封存容器。
 
 F1 的建置輸入紀錄使用 `input_format: 1`，由 `context` 與排序唯一的 `uses` 組成，採 canonical-json-v1，完整 hash 可重算。紀錄不含卡片效果文或私人絕對路徑。
 
