@@ -19,38 +19,43 @@ ID/Text/Code 是 UTF-8 非空字串（內容 Text 可空）；ID 不透明、永
 
 A＝authored 人寫或工具輔助採納，C＝爬取，D＝推導，M＝混合；建置資料庫與卡表快照都可由釘住的輸入重建不進 git；歷史 raw／來源版本 inventory 不可刪，保存與凍結契約見 [source-archive.md](source-archive.md)。工具產生的永久 registry 是不能重新配號的維護狀態，例外進 authored。純推導欄位不需要 decision。
 
-| 表                | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                     |
+| 表 | 建置期欄位、鍵與約束 |
 | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `source_record`   | `id:ID PK,kind:official_page\|official_api\|official_pdf\|image\|third_party_page\|third_party_audio\|authored,url:Text?,raw_locator:Text?,fetched_at:Instant?,etag:Text?,last_modified:Text?,sha256:Hash,parser_version:Text?,authored_path:Text?,authored_revision:Text?`；每次內容版本另存；抓取 URL/時間/hash 必填，ETag 可空；不取代抓取 manifest                   |
-| `decision`        | `id:ID PK,state:proposed\|model_reviewed\|sampled\|confirmed\|rejected\|disputed,scope:record\|batch,category:Code,membership_hash:Hash?,policy_id:Code?,sample_ids:Json?,authored_by:Text,authored_at:Instant,reviewed_by:Text?,reviewed_at:Instant?,confidence:high\|medium\|low?,note:Text`；sampled/confirmed 必須有人名、時間；batch 另須精確成員集合；決定不可覆寫 |
-| `decision_source` | `decision_id→decision,source_id→source_record,role:Text,locator:Text?,quote:Text?`；`PK(decision_id,source_id,role)`                                                                                                                                                                                                                                                     |
-| `language`        | `code:Lang PK,fallback_order:Json,display_name:Text`；fallback 只供介面詞彙，不套用卡文                                                                                                                                                                                                                                                                                  |
-| `vocabulary`      | `kind:Code,code:Code,label_unit_id→text_unit,active:Bool`；`PK(kind,code)`，code 是固定小寫英文搜尋代碼                                                                                                                                                                                                                                                                  |
+| `source_record` | `id:ID PK,kind:official_page\|official_api\|official_pdf\|image\|third_party_page\|third_party_audio\|authored,url:Text?,raw_locator:Text?,fetched_at:Instant?,etag:Text?,last_modified:Text?,sha256:Hash,parser_version:Text?,authored_path:Text?,authored_revision:Text?`；每次內容版本另存；抓取 URL/時間/hash 必填，ETag 可空；不取代抓取 manifest |
+| `decision` | `id:ID PK,state:proposed\|model_reviewed\|sampled\|confirmed\|rejected\|disputed,scope:record\|batch,category:Code,membership_hash:Hash?,policy_id:Code?,sample_ids:Json?,authored_by:Text,authored_at:Instant,reviewed_by:Text?,reviewed_at:Instant?,confidence:high\|medium\|low?,note:Text`；sampled/confirmed 必須有人名、時間；batch 另須精確成員集合；決定不可覆寫 |
+| `decision_source` | `decision_id→decision,source_id→source_record,role:Text,locator:Text?,quote:Text?`；`PK(decision_id,source_id,role)` |
+| `language` | `code:Lang PK,fallback_order:Json,display_name:Text,authored_source_id→source_record?,record_key:Text?,origin:official\|project\|machine?,low_confidence:Bool`；fallback 只供介面詞彙，不套用卡文 |
+| `vocabulary` | `kind:Code,code:Code,label_unit_id→text_unit,active:Bool,authored_source_id→source_record?,record_key:Text?,origin:official\|project\|machine?,low_confidence:Bool`；`PK(kind,code)`，code 是固定小寫英文搜尋代碼 |
+
+language／vocabulary 由 format 2 產生時，authored_source_id、record_key、origin 均非 null；
+尚未轉換的既有配置可為 null，不能用這個過渡空值輸入新的無來源資料。
 
 `text_unit.lang` 與 `search_alias.lang` 必須以 `FK(lang)→language(code)` 引用已登錄語言，避免文字或搜尋別名缺少對應的語言配置。新增語言先登錄 `language`，不把外鍵限縮成初始三語的 enum；此規則不將其他 Lang 欄或 JSON 成員自動轉成 SQL FK。
 
-record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱。翻譯與構築另有下述政策例外；其餘類別的人工門檻不變。
+record scope 的 `membership_hash/policy_id/sample_ids` 均為 null，決定由唯一實體引用及 immutable authored revision 釘住；batch 三欄必填，sampled 的 `sample_ids` 非空。confirmed 全筆核對的 batch 以 `sample_ids` 列出全部成員（即 checked 集合），不得只簽未看過的候選。使用者 2026-10-01 核可的表記規則是明示例外：依 authored-layout §9.5 逐觀測機械全查並釘政策收據，記 `record.data.review.mode=approved_rules`，不冒稱逐組人工審閱。構築另有下述政策例外；翻譯及詞彙／語言 format 2 不使用 decision，見 §9；其餘類別的人工門檻不變。
 
 批次決定以精確 `(record_key,semantic_content_hash)` 成員集合排序後計 `membership_hash`，`sample_ids` 必須是集合子集；不可讓日後新增／修改列繼承舊抽查。各具體表自己的 `decision_id` 是 FK，封套在匯入時展開，不使用可逃避 FK 的 subject 表。證據 source 可多筆。
 
-| 類別                                           | 最低發布要求                                                                                                 | 未達要求                                                     |
-| ---------------------------------------------- | ---------------------------------------------------------------------------                                  | ------------------------------------------------------------ |
-| 日英卡片身分對應                               | confirmed；每筆兩端與全部 face 都有人確認，可一次簽整批但須明示全體 checked                                  | EN 可有獨立 provisional card；不合併 JP，不共用譯文/DSL      |
-| 插畫、標誌、數位對應、序號、翻譯               | sampled 或 confirmed，批次模型處理＋人抽查，例外另審                                                         | `proposed/model_reviewed` 不進已採納功能；顯示未知           |
-| 再錄表記差異                                   | 已核可規則完整涵蓋或 confirmed batch 全體 checked；規則／人工證據依 authored-layout §9.5，工具不擴張規則範圍 | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動   |
-| 確認無跨區對應                                 | confirmed，記查核範圍與 `as_of`；這是已查無對應，不是永遠不會發行                                            | 未查/證據不足維持 unmapped/pending                           |
-| JP 身分初始化                                  | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理                                      | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
-| 正式勘誤適用範圍、來源更正、身分修復、語義分歧 | confirmed，需精確來源證據                                                                                    | 隔離衝突；不得自動執行受影響規則                             |
-| 官方頁現行文字、路由、流水配號、預設入口       | 確定性規則與來源可重建，不要求人工 decision                                                                  | 衝突才交人工                                                 |
-| DSL                                            | §10 的不同作者審核或巨集機械門檻；實跑另判定                                                                 | 卡文可發布，自動能力不放行                                   |
+| 類別 | 最低發布要求 | 未達要求 |
+| ---------------------------------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| 日英卡片身分對應 | confirmed；每筆兩端與全部 face 都有人確認，可一次簽整批但須明示全體 checked | EN 可有獨立 provisional card；不合併 JP，不共用譯文/DSL |
+| 插畫、標誌、數位對應、序號 | sampled 或 confirmed，批次模型處理＋人抽查，例外另審 | `proposed/model_reviewed` 不進已採納功能；顯示未知 |
+| 再錄表記差異 | 已核可規則完整涵蓋或 confirmed batch 全體 checked；規則／人工證據依 authored-layout §9.5，工具不擴張規則範圍 | 未核對候選不替換已採納 current/DSL；無舊版時可讀來源並手動 |
+| 確認無跨區對應 | confirmed，記查核範圍與 `as_of`；這是已查無對應，不是永遠不會發行 | 未查/證據不足維持 unmapped/pending |
+| JP 身分初始化 | 工具以所有面卡名/卡種/數值/效果/sections 產候選，批次採納，歧義逐項處理 | 依 §3.1 同卡通則；真語義歧義才隔離，不因插畫/表記差異拆 card |
+| 正式勘誤適用範圍、來源更正、身分修復、語義分歧 | confirmed，需精確來源證據 | 隔離衝突；不得自動執行受影響規則 |
+| 官方頁現行文字、路由、流水配號、預設入口 | 確定性規則與來源可重建，不要求人工 decision | 衝突才交人工 |
+| DSL | §10 的不同作者審核或巨集機械門檻；實跑另判定 | 卡文可發布，自動能力不放行 |
 
-**翻譯門檻的明示例外**：依 [翻譯契約 §2](translation-contract.md#2-人工採納入口)，長尾模板譯本完成不同模型互審且無分歧，可引用首輪真實抽查決定與核可政策收據，以 `adoption_review.mode=approved_policy`、confirmed batch 採納，不要求當批另有人類樣本。全體 checked 表示依政策完整檢查；成員一律 machine，政策核可者／時間與本次工具套用者／時間分開保存。有分歧者仍交使用者，裸 model_reviewed 不達此例外；此例外不擴及其他翻譯類別或身分／跨區核對。
+**翻譯及詞彙當前資料**：依[翻譯契約](translation-contract.md)及 catalog format 2，
+只驗格式、來源、唯一鍵、參數、引用與當前清冊一致；低信心顯示待校對，不使用 sampled／confirmed 或批准收據。
+新格式指回 authored source_record，不能產生假的 decision 或全面放寬其他入口的 FK。
 
 **構築採納的明示例外**：依維護者 2026-10-03「比照翻譯」的決定及 [構築採納 §1](construction-adoption.md#1-專用入口與採納封套)，首輪須有維護者實際抽查與政策核可收據；之後由 Claude 系、Codex 系各一個模型對最終值及官方來源互審，無分歧且全體政策檢查通過者，可以 `adoption_review.mode=approved_policy`、confirmed batch 採納。sample_ids 恰列全體 checked，表示政策機械全查；reviewed_by／reviewed_at／reviewed_precision 取政策核可維護者的真實事件，authored_by／authored_at 記當次工具與時間，note 明示「政策核可」，不能把模型填成人工核可者。真人抽查／處理分歧另記實際事件，分歧走 human 批次，不混入政策批次；首輪或政策收據／loader 未到位一律拒絕。其餘類別的人工門檻不變，此例外不擴及身分／跨區核對、勘誤、更正、翻譯或其他採納入口。
 
-sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。confidence 只用於排審優先序。
+sampled 與上述政策採納均不能顯示「逐筆人工確認」；卡表快照以 `review_level` 或快照清單的 coverage 區分人工抽查與政策檢查。非翻譯的 confidence 沿原用途；翻譯 low_confidence 亦供待校對呈現。
 
-獨立 same_name 政策的待啟用投影另依 [數位名字政策](digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替政策依據；內部 confirmed 只表示完整 checked_by_rules，sample_ids=[] 刻意不同於模板／wording 格式，不改其原樣本語意。
+獨立 same_name 政策的待啟用投影另依 [數位名字政策](digital-name-policy.md)：公開 unreviewed、relation 區分規則與真人，coverage 不代替政策依據；內部 confirmed 只表示完整 checked_by_rules，sample_ids=[] 與 wording 的原樣本語意分開；當前翻譯資料已不用 samples。
 
 vocabulary 的 code 自身就是 `[a-z][a-z0-9_-]*`；官方 GR 等另留 raw。實作複合 FK 時，子欄另加普通 TEXT kind 欄、DEFAULT 與 CHECK 固定值，例如 `class_kind='class'`，`FK(class_kind,class_code)→vocabulary(kind,code)`。不依賴尚未實測的 generated column。全文邏輯表省略這些固定欄，DDL 產生器必須展開；可空 code 仍要 kind 非空且固定。
 
@@ -273,34 +278,57 @@ sv1 9 位字串 ID，svwb 8 位；網址模板與語言 map 為 config：sv1 `ht
 
 ## 9. 翻譯、句型與術語
 
-風味文字沿本節既有模板與 use／selection，不新增表；printing_face.flavor 的整段零參數規則及譯本採納依 [風味文字契約](flavor-translation.md)。flavor 原文與譯文仍按版次面選用，不由 current 推定。
+本節為[翻譯 format 2](translation-contract.md)的目標建置模型，實作須同步 DDL 與 consumer。
+模板功能、術語／名字／風味、owner/use 與跨區適用檢查保留；取消人工採納鏈及歷史重播門檻。
+不要求首輪抽查、雙模型 agreed 或合併前人工命令；資料可在普通 PR 直接修改。
 
-**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文版獨有才用英文。同日追加核可：EN 同卡身分確認後先顯示 JP 繁中，以 shared_jp_unchecked 標「日英文字尚未核對」；完成核對且適用時改 shared_jp。已知 divergence 不套用此例外，官方 counterpart／DSL／機制仍受 §5 約束。首輪先翻高頻模板，模型互審，使用者抽查前約 100 個與全部分歧；模型譯文仍標 machine。技術封套、持久來源清冊與推導契約見 [翻譯契約](translation-contract.md)，不宣稱匯入器已實作。
+一般譯文／選詞投影 variant_key=default；具名候選帶自己的 key，不當成不可變 revision。
+沒有候選能力的過渡 consumer 不得忽略非空候選或 pin；啟用前須同步 loader、DDL、依賴鍵與 renderer。
 
-| 表                      | 建置期欄位、鍵與約束                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `glossary_term`         | `id:ID PK,category:keyword\|ability\|trait\|rule_term\|card_name,source_ja:Text,concept_key:Text UNIQUE,decision_id→decision`                                                                                                                                                                                                                                                                                                                                                                                |
-| `glossary_translation`  | `term_id→glossary_term,lang:Lang,text:Text,origin:official_svwb\|official_sv1\|project\|community\|machine,source_id→source_record?,decision_id→decision` `PK(term_id,lang)`；每概念語系一個選定譯法，候選留來源／決定紀錄                                                                                                                                                                                                                                                                                   |
-| `sentence_template`     | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:Text,parameter_schema:Json,content_hash:Hash,supersedes_id→sentence_template?,decision_id→decision`；內容不可變，舊 10 hex ID 保留並檢查碰撞；新增版本用新 ID                                                                                                                                                                                                                                |
-| `template_translation`  | `template_id→sentence_template,lang:Lang,revision:UInt,text:Text,status:draft\|reviewed,origin:project\|machine,decision_id→decision` `PK(template_id,lang,revision)`；不可變版本，當前發布選該精確模板修訂／lang 最高已審版本                                                                                                                                                                                                                                                                               |
-| `template_component`    | `parent_id→sentence_template,ordinal:UInt,child_id→sentence_template` `PK(parent_id,ordinal)`；無環，父子都釘修訂                                                                                                                                                                                                                                                                                                                                                                                            |
-| `text_template_binding` | `id:ID PK,context_id→translation_context,ordinal:UInt,template_id→sentence_template,params:Json,source_span:Json,decision_id→decision?`；D（人工只採納匹配例外），`UQ(context_id,ordinal)`；每次建置當前一組，source_span.segments 全體不重疊且涵蓋完整效果，params 中 card／term 引用建置驗 FK                                                                                                                                                                                                              |
-| `translation`           | `id:ID PK,context_id→translation_context,target_lang:Lang,revision:UInt,text:Text,tokens:Json?,origin:official_sve\|official_svwb\|official_sv1\|project\|machine\|community,authority:sve_official\|digital_official\|unofficial,status:draft\|reviewed\|stale,source_hash:Hash,source_id→source_record?,translated_by:Text,translated_at:Instant,decision_id→decision?`；`UQ(context_id,target_lang,revision)`                                                                                             |
-| `translation_binding`   | `translation_id→translation,binding_id→text_template_binding,template_id→sentence_template,lang:Lang,translation_revision:UInt` `PK(前兩欄)`；`FK(template_id,lang,translation_revision)→template_translation`；`template_id` 必須等於 binding 的值，lang 必須等於 `translation.target_lang`；`binding.context_id` 必須等於 `translation.context_id`；D                                                                                                                                                      |
-| `translation_term`      | `translation_id→translation,term_id→glossary_term` `PK(兩欄)`；D，支援術語變更反查                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `translation_selection` | `context_id→translation_context,target_lang:Lang,translation_id→translation` `PK(前兩欄)`；D，`target_lang` 與 `context_id` 必須與選中的 translation 一致，僅選未 stale 的發布版本                                                                                                                                                                                                                                                                                                                           |
-| `translation_context`   | `id:ID PK,source_unit_id→text_unit,semantic_variant:Code,decision_id→decision?`；`UQ(source_unit_id,semantic_variant)`，default 為無歧義通用語意，非 default 須採納理由                                                                                                                                                                                                                                                                                                                                      |
-| `translation_use`       | `id:ID PK,context_id→translation_context,field:Code,ordinal:UInt?,face_revision_id→face_revision?,printing_id:ID?,face_id:ID?,qa_version_id→qa_version?,cr_clause_id→cr_clause?,vocabulary_kind:Code?,vocabulary_code:Code?,keyword_id→keyword?,product_family_id→product_family?,product_id→product?`；恰一 owner 組非空；`FK(printing_id,face_id)→printing_face(printing_id,face_id)`，`FK(vocabulary_kind,vocabulary_code)→vocabulary(kind,code)`；owner/field/ordinal 條件唯一，來源 text 必須同 context |
+人工輸入列共用 `authored_source_id→source_record,record_key,origin:official|project|machine,low_confidence:Bool`。
+來源記本次讀到的檔案／版本，record_key 定位該檔內記錄；不是新的核可表。
+新格式不含 decision_id、reviewed_by／at、sample_ids。過渡 DDL 可保留 nullable decision_id 供 legacy 列，
+兩種來源須互斥且各驗原格式；新列不得造假 decision。registry、wording、digital-links 等其他表的 decision FK 不變。
 
-所有句型含只出現一次者都用模板翻，子句組合無環，params/span 完整覆蓋原文。同一語意模板與參數只選一個翻法；`translation_context=(source_unit,semantic_variant)` 區分同字串不同語意，`translation_selection` `PK(context_id,target_lang)`。`translation_use` 明確綁引用者，禁止任意每卡另翻同語意句。只有經採納的語意歧義（同名不同角色等）才新增 variant；FieldTranslation 由此選用，不只是前端標記。模板 ID 沿用現有內容指紋；不設 `template_revision` 層，parameter `schema/normalizer/semantic_variant` 改變都須新 ID，舊 ID 不改，supersedes 連回。既有 10 hex 前綴碰撞必停，不能默認不會撞；新分叉 ID 由 registry 加長且不重配舊 ID。
+| 表 | 建置期欄位、鍵與約束 |
+| --- | --- |
+| `glossary_term` | `id:ID PK,category:keyword\|ability\|trait\|rule_term\|card_name,source_ja:Text,concept_key:Text UNIQUE,emphasis:Bool?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；永久概念；emphasis 是當前加粗推導值，rule_term 缺設定為 null，其餘固定 true |
+| `glossary_translation` | `term_id→glossary_term,lang:Lang,variant_key:Code,text:Text,source_id→source_record?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；`PK(term_id,lang,variant_key)`；default 是當前一般選詞，其他為明示候選，source_id 留實際官方來源 |
+| `sentence_template` | `id:ID PK,level:sentence\|clause,source_lang:Lang,normalized_text:Text,normalizer_version:Text,semantic_variant:Text,parameter_schema:Json,content_hash:Hash,supersedes_id:ID?,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；語義內容指紋不含譯文或 note；supersedes 可指清冊舊 ID，不造假父列 |
+| `template_translation` | `template_id→sentence_template,lang:Lang,variant_key:Code,text:Text,authored_source_id→source_record,record_key:Text,origin:official\|project\|machine,low_confidence:Bool`；`PK(template_id,lang,variant_key)`；default 是一般譯文，其餘為明示候選；只有當前文字，無不可變 revision 或人審 status |
+| `template_component` | `parent_id→sentence_template,ordinal:UInt,child_id→sentence_template`；`PK(parent_id,ordinal)`；無環；首版只驗資料，不啟用子句拼接 |
+| `text_template_binding` | `id:ID PK,context_id→translation_context,ordinal:UInt,template_id→sentence_template,params:Json,source_span:Json`；`UQ(context_id,ordinal)`；完整覆蓋原文、參數驗型別及引用；每次重建 |
+| `translation` | `id:ID PK,context_id→translation_context,target_lang:Lang,revision:UInt,text:Text,tokens:Json?,origin:official\|project\|machine,authority:sve_official\|digital_official\|unofficial,low_confidence:Bool,source_hash:Hash,source_id→source_record?`；`UQ(context_id,target_lang,revision)`；revision 為 52-bit 產物內容鍵；首版 tokens=null |
+| `translation_binding` | `translation_id→translation,binding_id→text_template_binding,template_id→sentence_template,lang:Lang,variant_key:Code`；`PK(translation_id,binding_id)`；`FK(template_id,lang,variant_key)→template_translation(template_id,lang,variant_key)`；模板等於 binding 所用者，context／目標語言相符 |
+| `translation_term` | `translation_id→translation,term_id→glossary_term`；`PK(translation_id,term_id)`；供相依詞庫反查 |
+| `translation_selection` | `context_id→translation_context,target_lang:Lang,translation_id→translation`；`PK(context_id,target_lang)`；選中 translation 的 context／目標語言相符，只選當次有效值 |
+| `translation_context` | `id:ID PK,source_unit_id→text_unit,semantic_variant:Code`；`UQ(source_unit_id,semantic_variant)`；非 default 需明示歧義理由 |
+| `translation_use` | `id:ID PK,context_id→translation_context,field:Code,ordinal:UInt?,face_revision_id→face_revision?,printing_id:ID?,face_id:ID?,qa_version_id→qa_version?,cr_clause_id→cr_clause?,vocabulary_kind:Code?,vocabulary_code:Code?,keyword_id→keyword?,product_family_id→product_family?,product_id→product?`；恰一 owner 組非空；`FK(printing_id,face_id)→printing_face(printing_id,face_id)`，`FK(vocabulary_kind,vocabulary_code)→vocabulary(kind,code)`；owner/field/ordinal 條件唯一，來源 text 必須等於 context |
 
-人工模板譯本與選詞的不可變修訂保留於 authored，建置資料庫保存本次使用的修訂、作者、來源 hash 與模板依賴。context/use/binding、渲染後 translation/selection 每次重建；只有當前 binding 組及所需歷史來源的各自 context，不混入衝突的舊組外鍵。歷史生成物由釘住的 F1 輸入與演算法版本重算，不承諾公開歷史快照可下載，不要求同一 DB 保存全部歷史推導組；卡表快照只出 selected text/origin/authority/status 與少量跨區適用選擇。英文官方自動優先由已確認 card＋face 共用和 divergence 例外決定，不逐單元人工 equivalence。繁中從 JP 模板共用到 EN，已核對為 shared_jp，未核對但身分已確認為 shared_jp_unchecked，EN 不另寫一份；若 divergence 則按該區獨立翻譯或回原文。
+完整 translation_use owner 欄位為 face_revision_id、printing_id/face_id、qa_version_id、cr_clause_id、
+vocabulary_kind/vocabulary_code、keyword_id、product_family_id、product_id，恰一組非 null。
+來源 text 必須等於 context 原文；printing_face 只用自身已知 printed 名稱／效果／風味，unknown 不借 current。
+ordinal 只用於 section/action_label，欄位合法組合依翻譯契約 §6.3；未實作能力不得假裝支援。
 
-`translation_use` 的 owner 是翻譯**來源**欄位，`context.source_unit` 必須等於該 owner 的原文。EN 的 `FieldTranslation.basis=shared_jp` 由 JP owner 的 use＋已確認面對應/語義核對推導；shared_jp_unchecked 則僅放寬尚未完成語義核對的顯示，仍須來源完整、已確認身分且無已知相關 divergence，不把 JP `source_unit` 硬綁成 EN owner 的原文；`official_counterpart` 亦由已核對 counterpart 原文產生選用。這些投影只重用可驗來源，不能繞過 owner/context 一致性檢查。counterpart 逐 owner 直接供 FieldTranslation 引用，不占 `(context,target_lang)` 的共用 selection；同原文的不同卡可以有各自官英用字。推導 translation.id/revision 採內容定址，細節依翻譯契約 §6.2，不按執行時間配號。
+所有句型包括單次出現者用模板，固定字／參數／片段不可漏。相同語義與參數保持同翻法，
+真正歧義才用明示 semantic_variant；pin 只選已存在的具名替代值，不造假語義。
+name、effect、flavor 共用字串時仍逐 use 驗欄位資格。
+官名／counterpart 逐 owner 供選用，不因相同 context 讓第三張卡借到官方資格。
+風味的零參數整段比對與衝突降級沿[風味契約](flavor-translation.md)。
 
-術語來源主張、無 raw 的專案概念與委託歸因依 [術語採納擴充](glossary-adoption.md)；未驗官方出處的詞先有效採納 project，不改 origin 列舉。rule_term 加粗從獨立 glossary_emphasis_choice 歷史推導，其他型別依固定規則；不在不可變 glossary_term 加欄、不把 translation.tokens 當已核可的公開標記。位置／加粗要出貨仍需該文件 §6 所列的獨立格式審核。
+context、use、binding、render ID 依[穩定 ID 契約](translation-contract.md#62-穩定-id)。
+origin 是來源類別，provider 留實際 source；authority 保留 sve_official/digital_official/unofficial。
+只要渲染使用機器譯文／選詞即 machine，否則效果為 project/unofficial；單一官方來源字串才能沿其官方 authority。
+low_confidence 沿實際依賴 OR 傳播，通過自動檢查後直接顯示待校對；未知來源／錯引用不以旗標放行。
+不再把 sampled/confirmed 或舊 reviewed 狀態當翻譯完整性證明；能否供顯示由當次檢查與缺項結果決定。
 
-卡名官方數位譯名可由獨立核可的名字政策或自己的真人同卡精確面證據供名，兩者共用 sv1→svwb；效果翻譯永遠 unofficial。machine 審過仍 origin=machine。缺任一句模板不能把混合未翻段落標完整翻譯。來源更新與參數/術語改版反查後自動重算，失敗列清單，舊譯文不可當新語義版本；不要求逐卡重新採納生成全文，批次人工抽查仍驗實際成員與政策；完整取用矩陣在快照 §5。
+context/use/binding/selection 每次重建，DB 只放本次有效組；改詞／加粗重算相依結果，未變的 note 不影響語義 ID。
+來源變動不得沿用錯配舊譯文，缺任何必要譯詞／匹配則回原文並列一張清單，不假稱整段已翻。
+歷史由 Git 保存，清冊在 CI／建置用當前程式與固定輸入重產，不執行歷史 producer 或核可事件。
+
+繁中共用 JP 來源規則、shared_jp／shared_jp_unchecked 及 divergence 的隔離仍適用。
+EN 的 FieldTranslation 引用 JP owner 的合法 use，不將 EN source_unit 改成 JP；不據翻譯顯示放行 DSL 等義。
+快照只出選中資料；新 origin／low_confidence 與加粗位置須同步公開契約及 reader 後啟用，不能在舊 tuple 偷增欄。
 
 ## 10. DSL、驗證與未實作卡片頁
 
@@ -471,7 +499,7 @@ official route 由 `card_no_state=official` 的 printing 自動推導，舊號/�
 
 `region_text_review` 的規則 hash 在 JP/EN 規則 bundle 變更時失效；純已採納等義表記不失效，卡名/官英顯示選用另檢 exact 名稱來源，沒有 fresh aligned 不能以「沒有 divergence」當核對完成。
 
-建置資料庫開啟 `foreign_keys`，PK/UQ/CHECK、`foreign_key_check/integrity_check` 全過；驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料依各自類別處理，不能假造 FK；§4 表記未定的觀測仍公開顯示，不能把診斷隔離集合當整卡排除閘門。
+建置資料庫開啟 `foreign_keys`，PK/UQ/CHECK、`foreign_key_check/integrity_check` 全過；對仍使用決定封套的入口驗批次成員 hash、跨區全筆確認、各面歸屬/數量、日期不重疊、永久配號/alias 無環、模板碰撞與依賴、逐字證據、DSL exact tuple、機制 freshness、圖片狀態。未採納資料依各自類別處理，不能假造 FK；§4 表記未定的觀測仍公開顯示，不能把診斷隔離集合當整卡排除閘門。
 
 卡表快照由欄位白名單生成，驗 JSON Schema、引用閉包（包括 nested ID）、相容能力、完整文字包/分片等價、row counts/檔 hash、公開欄位無本機路徑/私密資料。不要把建置資料庫的 SQL 表直接 dump。機械驗證通過不表示卡片語意已由人確認；手機解析/常駐/更新峰值須另測。詳見 [snapshot-format.md](snapshot-format.md) 與 [size-budget.md](size-budget.md)。
 
@@ -521,7 +549,7 @@ DDL 宣告可編譯、匯入器完成、領域驗證器完成是分開的狀態�
 same_character/name_only不能**經該關係**直接供官方名或battle語音；自己獨立名字政策可供名，不授語音。
 政策same_name屬待啟用新relation，固定卡層級兩面null、effect_similarity=null，公開unreviewed；
 內部approved_rules application的confirmed僅表示完整checked_by_rules，不代表真人。sample_ids=[]是本新格式刻意規定，
-不改模板／wording以全機械成員列samples的既有格式。其餘review映射不變；政策與真人統計分開，coverage不能代policy basis。
-啟用前須程式PR同步DDL／schema／projector／reader與反例；卡名typed證明走既有翻譯表與source_record/F1，不造same_card。
+不改 wording 以全機械成員列 samples 的既有格式；翻譯 format 2 已不使用 samples。其餘review映射不變；政策與真人統計分開，coverage不能代policy basis。
+啟用前須程式PR同步DDL／schema／projector／reader與反例；卡名來源走本節翻譯表與source_record/F1，不造same_card或新的核可證明。
 digital_voice/card_voice與digital_art_link仍只驗自己的原合法證據，不因新relation放行。
 發布按§16／§18驗實際能力與非空引用閉包，不要求card/game都有coverage；unknown不當已查無。

@@ -1,30 +1,24 @@
-# 數位官方卡名與同名瀏覽連結政策
+# 數位官方卡名與同名瀏覽規則
 
-本契約落實維護者分別明示同意的卡名與連結規則。兩份規則各有政策檔、核可收據及初始排除清單，不能互相代簽。
-政策核可不等於逐卡人工核對；入口格式與能力實作也不等於已發布。現行 `digital-links` format 1 的真人門檻保持，
-新政策必須有完整 loader、來源重播、逐 owner 驗證與正式投影才可套用。本文不修改現行 DDL／公開枚舉權威表列。
+名字使用[翻譯當前資料格式](translation-contract.md)與下列可修改規則，不需核可頁、approval 或點擊紀錄。
+同名瀏覽與真人數位卡關係仍是不同能力；名字規則不改卡片身分或人工同卡對應。
 
 ## 1. 名稱採用與關係分開
 
-卡名政策只處理 JP 實體卡面自己的 `face_revision.name`／實際已知 `printing_face.name`，取繁中名字。
-SVE 與數位日文完整字串須逐字相同，不 trim、正規化、casefold 或刪字，hash 命中後仍比完整字串。
-只查政策釘住的同遊戲完整凍結目錄；所有同名 ID／實際 phase 的繁中名稱須非 null、非空、非純空白、
-不含政策明定的假名佔位字元，且完整字串恰只有一種。缺任一語言／phase、同名異譯不能只挑合格項。
-JA 與繁中相同但全漢字仍可用；Unicode 最低檢查表由政策明列，不因新的診斷自行擴張核可 matcher。
+只處理 JP 面自己的 face_revision.name／已知 printing_face.name，取繁中名稱。
+SVE 與數位完整日文名稱逐字相同，不 trim、normalize、casefold 或刪字；hash 相同仍比 exact 字串。
+完整數位目錄中同名 ID／各實際 phase 的繁中名須非 null、非空、非純空白、通過最低文字檢查，
+且恰一個 exact 譯名；不能只挑合格的一筆。JA／繁中同字但全漢字仍可用。
 
-名稱取詞唯一順序為 **sv1 → svwb**，獨立名字政策與真正人審同卡證據共用同一 resolver。
-自動名字規則只有一代完全沒有該 exact 名稱才直接用二代；一代有名但缺譯／異譯不能借二代目錄跳過。
-合法完整目錄的歧義／缺譯，可由 owner 自己有效的真人同卡精確面連結及必要語義指派供名：
-confirmed 本筆在 checked，或 sampled 本筆在實際 sample_ids；無合格一代人審候選才用合格二代。
-來源損壞、錯父卡／面、壞 hash 仍整次拒絕；第三張無自己的有效依據不得借另外兩張的名字。
-真人選詞 > 合格政策官方名 > 必要的自己真人同卡供名 > 其他合法選詞 > 原文。
-順位第一只收真正看過的 confirmed checked／sampled sample 成員；sampled 非樣本仍有效，但按真實 origin 放其他合法選詞順位。
-純譯名差異選勝出名稱並報差異，不因此退回原文；真正語義歧義仍須消歧，機器來源審過仍 machine。
+取詞順序仍為 sv1 → svwb；只有 sv1 完全沒有該 exact 名稱才自動試 svwb。
+一代有名但缺譯／異譯時，不借二代跳過歧義；可用 owner 自己既有的有效真人同卡精確面關係供名。
+該關係的資格仍按 digital-links 契約驗，不把名字資料的低信心或 PR 接受當成新同卡證明。
+背面不借正面，unknown printed 不借 current，舊印刷名用自己的原文。
 
-每個 owner 驗自己的永久身分、registry／transition／source_face_map、來源語言及完整名稱。
-背面不借正面，unknown printed 不借 current，印刷舊名依自己的來源取名。直接名字不要求先配 glossary 概念，
-也不供 `glossary_choice.digital_name` 的同概念證據；效果引用與概念／語義指派仍各自驗，整段效果仍 unofficial。
-畫面標「數位版官方卡名」，不表示官方實體繁中版或逐筆真人確認同卡。不改約 960 筆名字的既有委託範圍。
+選用優先序為：明示卡名選詞覆寫 > 合格的直接官方名 > 自己有效同卡精確面供名 > 其他有效 glossary 選詞 > 原文。
+明示覆寫以 `name_overrides` 指定精確 owner／source_hash／term_id，不從 reviewed_by 或 sample_ids 推測。
+轉換必須把舊優先級的實際勝出結果保留下來；官方與專案詞的單純字面差異列報告，不因此全部回原文。
+真正語義歧義列清單；同名瀏覽不供名。origin=official 不表示官方實體繁中版，顯示標「數位版官方卡名」。
 
 ## 2. 同名規則瀏覽連結
 
@@ -43,8 +37,8 @@ application 可沿 decision FK 記 approved_rules／完整 checked_by_rules，�
 
 fresh 真人同 card/game/ID 的任何合法關係優先，抑制同組重複規則連結。
 真人負面、stale 或撤回不被一般規則復活。真人撤回後若要放行該對規則連結，僅維護者明示指定卡對，
-追加輕量 rule_resume 收據，釘原 terminal 的 record_key／hash／decision_id、政策 hash、卡對、真實訊息 UUID／instant、
-理由與前件／結果 hash；不恢復真人採納，不繞來源／排除，新 terminal 再變須重新放行。
+沿既有 rule_resume 收據釘原 terminal 的 record_key／hash／decision_id、政策 hash、卡對、
+真實訊息 UUID／instant、理由及前件／結果 hash；不恢復真人採納，不繞來源／排除，新 terminal 再變須重新放行。
 政策卡層轉真人卡層且完整 subject 相同時沿原 ID；真人精確面是不同 subject，另 ID 並抑制原規則列。
 ID 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，relation、時間、政策／清單 hash 不參與。
 
@@ -53,7 +47,59 @@ ID 仍為 `dl:`＋H(`["digital-link-v1",subject]`)，relation、時間、政策�
 草稿 93／2,041 約 4.6% 是警訊而非誤連率：84 同角色、8 兩代判斷不一、1 只有同名，全部在 232 待確認內。
 維護者選「照規則連」，初始排除空；不改草稿原關係、不把它們記成真人 same_card，錯連數仍未知。
 
-## 3. 政策、核可文件與可攜入口
+## 3. 可修改的名字規則入口
+
+| 檔案 | 完整頂層欄位 |
+| --- | --- |
+| `digital-name-policies/index.yaml` | `digital_name_policy_index_format:2,kind:digital_name_policy_index,policies` |
+| `digital-name-policies/<policy_id>/current.yaml` | `digital_name_policy_format:2,kind:digital_name_policy,policy_id,purpose,content,origin,low_confidence,note` |
+
+新 names 項的 policies 值是 `{path,hash}`，hash 是 canonical 檔案完整性檢查，不是核可文件 hash。
+purpose=names；content 恰為 `{scope,game_priority,target_minimum_check,excluded_names,name_overrides}`。
+scope 恰為 `{field,owners,region,source_lang,target_lang}`，固定 name、
+`[face_revision.name,known_printing_face.name]`、jp、ja、zh-Hant；game_priority 恰為 `[sv1,svwb]`。
+
+target_minimum_check 恰為 `{kana_ranges,whitespace_codepoints,trim_or_normalize}`；
+兩個 Unicode code-point 表從舊有效規則無損轉入，trim_or_normalize=false。
+範圍須合法且不重疊，程式依該表自動檢查，不讀私人測量報告或 known_limits 敘述來決定行為。
+excluded_names 是按 source_name_hash 排序唯一的 `{source_lang,source_name_hash,reason}` 陣列；
+source_lang=ja、hash 取完整 exact 名稱，reason 非空，不把整份官方名字表複製進 Git。
+排除只停自動官名，不撤真人數位關係；不能借真人 link 繞回自動取名，明示選詞覆寫仍可用。
+name_overrides 是 `{owner,source_hash,term_id}` 陣列：owner 用翻譯契約的具名 owner，
+source_hash 必須等於自己的 exact 名稱，term_id 必須存在且為 card_name；同 owner／來源不能有兩個指派。
+既有資料來源 hash 在此防錯配，不是新的核可收據。
+
+資料可直接修改，note 可空，來源類別／低信心沿翻譯契約；不保存人名、日期、事件、私有檔名或頁面 hash。
+規則只保留實際取名所需條件，去掉歷史答案、呈現文件、批准章節與 approval/exclusions 的配對封套。
+輸入目錄的版本由建置配置與 CI 私有資料鎖定檔提供，不嵌每筆核可時的機器／程式閉包。
+
+同一 index 在過渡期仍可含原 format 1 的 links 版本陣列，由舊格式 reader 處理；不得把它當 format 2 names 解析。
+本次只轉名字資料，§2 同名瀏覽及真人 digital-links 的非翻譯採納不隨之放寬。
+舊 names policy／approval／exclusions 僅供取出有效條件，轉換完成後不再是當前入口的必要檔案。
+
+## 4. 建置與公開邊界
+
+讀取只做結構及索引檢查；本次建置自動驗完整目錄、來源語言、owner、最低文字條件與排除，生成名字。
+不重新播放舊核可／目錄歷史，不要求先把同一 PR 的程式 merge 才能寫資料。
+來源壞掉失敗，無合格候選回其他有效詞或原文並列清單；低信心譯文依翻譯契約直接顯示待校對。
+名字、glossary 概念、圖／語音與效果資格仍各自檢查，不能以新 origin 列舉取代它們。
+直接官方名字的 render-v2 dependency_key 只含所選 game、exact JA／繁中 hash 與取名 recipe 語義；
+不含後補概念、owner、整批目錄或規則檔案 hash。補概念不讓普通名字整批換 ID；
+來源文字／選詞／取名語義改變則重算。只用名字不要求發布 digital_link／圖或整份數位目錄。
+
+## 5. 自動檢查
+
+至少驗 exact 名稱、兩代順序、同名異譯、缺 phase、錯卡面、未知 printed、排除與覆寫、缺譯回原文。
+CI 固定輸入可重新產生相同名字及診斷清單；測試不需重建點擊或核可網頁。
+公開 provider／authority 由實際來源投影，與低信心欄位的 producer／reader 版本一起更新，不能冒作真人逐卡已審。
+
+## 6. 非翻譯 links 保留的 format 1 契約
+
+下列保留既有 names/links 共用載體的定義，**只有 purpose=links 繼續適用**；
+names 的 format 1 描述僅供轉換，不是 §3 當前名字規則的門檻。index format 2 可容納下列 links 版本陣列。
+本節不新增收據；非翻譯連結的核可、來源及排除條件原樣保留，不能將它們移用到翻譯。
+
+### 6.1 政策、核可文件與可攜入口
 
 沿 authored-layout 的嚴格 YAML 1.2、安全路徑、全入口查重、canonical-json-v1 與單檔 <1 MiB。
 未知欄／格式、Bool 當整數、symlink、缺檔、孤立／未索引檔、hash 不符、分叉或缺號均拒絕。
@@ -90,27 +136,17 @@ projection_recipe 恰為 `approved-digital-name-document-v1`，content **逐欄�
 不聲稱重新驗了原頁，也不因私人頁不在 CI 而使真實採納失效。CI／build 無法重新驗證 content 是否確為核可文件的逐欄投影，也無法重驗 evidence_hashes 所指的私人檔案；這兩項由採納審核者在採納當下核對並留審核紀錄。缺 supported projection recipe 即拒絕使用。
 
 content 保留核可當時的文件原文，包含「本次答案尚待最終政策核可」「本次不生成收據」及 proposed_…_not_merged 等歷史措辭；不為消除這些字句而改寫投影。實際核可狀態以對應 `.approval.yaml` 為準，條文是否已合併以正式 docs 為準，不能僅靠 content 的呈現狀態判定。
-任何操作文字、matcher、枚舉、scope 或來源語意改變須另核可；來源／清單有限續版依 §5，不借純 metadata 投影改規則。
+任何操作文字、matcher、枚舉、scope 或來源語意改變須另核可；來源／清單有限續版依 §6.3，不借純 metadata 投影改規則。
 
-## 4. 真實核可與初始清單
+### 6.2 真實核可與初始清單
 
-reviewed_by 逐字等於明列維護者 `gbaian10`；reviewed_precision=instant，reviewed_at 為本政策真正按鍵時間。
+reviewed_by 逐字等於實際核可的維護者帳號；reviewed_precision=instant，reviewed_at 為本政策真正按鍵時間。
 approval_events 是按事件時間排序的非空陣列；每項恰為 `{kind,at,uuid,source_hash,locator,value}`。
 kind=page_button/message；按鍵沒有訊息 UUID 時 uuid=null，value 是原始按鍵 JSON 完整值；
 message 的 uuid 是真實訊息 ID，value=null，source_hash 釘不可變事件摘要，locator 精確定位該訊息。
 按鍵必驗 policy_hash=approved_document_hash、text_sha256=presented_text_hash、value=agree；拒絕背景／作答紀錄代替明示核可。
 evidence_hashes 是不可變來源檔名 → exact bytes hash 映射，只含 basename／安全相對路徑，不存私人絕對路徑、憑證或官方名稱。
 政策／規則文本不是官方卡文，可入 git；完整官方目錄／卡名表與私人頁面不進 git。
-首批 evidence_hashes 的鍵沿既有收據，私人證據根是保存事件檔與 final-approval-page 的同一目錄；
-重驗時恰依下表定位，不搜尋其他同名檔，也不更改已採納鍵名。後續若需新的鍵路徑約定，另定新格式，不回寫舊收據。
-
-| 鍵 | 相對私人證據根的定位 |
-| --- | --- |
-| `events-card-names-5.md`／`events-card-names-5-supplement.md` | 同名不可變事件檔 |
-| `name-final.html` | `final-approval-page/name-final.html` |
-| `name2_policy/<purpose>.json` | `final-approval-page/saved/name2_policy/<purpose>.json` |
-| `<purpose>-policy.parsed.json`／`<purpose>-policy.canonical.json`／`<purpose>-policy.plain.md`／`<purpose>-final-exclusions.json` | `final-approval-page/final-approval-data/` 下同名檔 |
-
 disclosed_changes 是恰含 `{rule_id,removed,added,disclosed_at,accepted_message_uuid}` 的排序陣列，依 rule_id 排序。若有已揭露並接受的刻意差異，disclosed_at 指真正揭露時間，accepted_message_uuid 指收據內接受差異的真實訊息；沒有差異時陣列空。note 明示政策核可、無逐筆／抽樣樣本；不引用其他政策來補假樣本。
 
 初始排除 entries 恰等於已核可文件的完整最終清單。
@@ -119,15 +155,7 @@ names entry 為 `{source_lang,source_name_hash,reason}`；links entry 為
 `{kind:name,source_lang,source_name_hash,reason}` 或 `{kind:card_target,card_id,game,official_id,reason}`。
 完整鍵排序唯一，理由非空；清單可以空但必明示，不為空清單另造操作事件。
 
-### 4.1 首批實際核可
-
-本批卡名收據同時引用政策按鍵與真實口頭同意訊息；連結收據引用自己的按鍵。
-卡名第8條少「不因報告另擋發布」、第13條少「未來另審格式」且加「本卡名政策」限定，
-是已逐句揭露並接受的刻意差異，不還原、不重算原核可 hash。disclosed_at 指按鍵前的真正揭露時間；
-兩筆 accepted_message_uuid 均指收據內口頭同意訊息。連結沒有此差異，陣列空。
-本批 names／link name／card_target 三類初始排除均空。這些是首批事實，不將後續其他政策一律要求成相同差異或口頭事件。
-
-## 5. 續版與排除
+### 6.3 續版與排除
 
 第三題 agree：新 JP 凍結批次自己的 owner 符合有效政策／指定目錄，就沿用，逐批報新增，不冒稱真人逐張看過。
 第四題選 **乙，兩政策共用**：純新增、完整符合各自條件、舊名稱／資格／取名遊戲／既有連結與對應未變，
@@ -144,7 +172,7 @@ links 排除只移除規則證據：同名排除不移除其他合法名字對�
 政策 hash、精確操作／理由、前件與結果集合 hash；remove 是新記錄，不刪歷史。
 修改規則／遊戲範圍不能借輕量清單收據，未支持續版格式不得靜默套用。
 
-## 6. 來源、F1、穩定 ID 與能力啟用
+### 6.4 來源與能力啟用
 
 歷史背景由宣告的不可變 Git 版本驗，不與目前磁碟執行期比較；正式來源基準用 main 保留的 commit，
 不能用會被 squash 掉的功能分支 commit。目前程式／parser／checker 的完整依賴另釘並重驗使用，
@@ -152,35 +180,8 @@ links 排除只移除規則證據：同名排除不移除其他合法名字對�
 F1 包含政策索引／完整 pair／清單及鏈、核可摘要、所有 raw descriptor／來源／parser、逐 owner 與實際使用；
 完整 `record.verify(...,complete=True)` 不能由子階段 partial verify 代替。
 
-名稱 loader 回傳獨立 typed frozen NamePolicyResult，同一 resolver 明示接政策 result 與真正 B 結果，
-不向 DB 塞假 digital_link／同概念。名字走既有 text_unit／translation/use／FieldTranslation，decision_id 可 null。
-直接政策名字沿 render-v1，詞彙鍵含所選 game、exact JA／繁中 hash 與取名 recipe 語意，
-不加入後補概念、owner、整批目錄、政策／收據／清單 hash、時間或資格 checker；完整證據留 F1。
-真正效果／term 引用才依賴概念／choice；概念補配不讓普通名字整批換 ID。
-原文、所選字串或取名語意實際改變仍按既有 recipe 重算，不能藉穩定 ID 隱藏差異。
-
 純名字政策不要求發布數位卡／圖／link；同名瀏覽才啟用最小 digital_card／digital_face／digital_text／
 digital_link／digital_endpoint 閉包，不因查整份目錄把所有數位內容公開。
 same_name 啟用前由程式 PR 同步 DDL、公開 relation 白名單、typed projector、fixtures 與 reader，
 新增枚舉以 minor＋`digital-same-name-links-v1` required capability／min_reader 拒舊讀者；改欄序或既有意義需 major。
 review_level 原四值不變。正式檔案／表列不能在 docs-only PR 先改成已支援，舊快照不回寫。
-
-## 7. 後續程式反例
-
-以下是必備合成驗收，不宣稱已有這些政策 loader 測試。
-
-| 情境 | 預期 |
-| --- | --- |
-| 用背景表態／作答紀錄、錯政策按鍵、缺卡名口頭同意或錯 UUID | 收據拒絕，不補造樣本 |
-| 投影改一個規則、來源 pin 或答案，仍引用舊核可 hash | 採納拒絕；只容許固定非操作欄省略 |
-| 同名目錄有異譯／缺譯；兩 owner 各有真正 B＋指派，第三張無 B | 前兩張各取自己名字，第三張不借；排除不能借 B |
-| 完整目錄子集、phase／目標語遺漏、錯來源父卡、背面借正面、unknown printed 借 current | 各自拒絕或保持缺譯，不能當已知 |
-| same_name 供名字／概念／語音，或由 Source.review 投成 confirmed | 各自拒絕；規則瀏覽固定卡層雙 null／unreviewed |
-| 同名多 ID／兩代／多面與 phase | 所有 card/game/ID 去重列出，所有來源保留，不展開面×phase |
-| 真人撤回／負面，被規則無事件復活；有新 terminal 沿舊 rule_resume | 拒絕；有效精確放行也不恢復真人結果 |
-| Q4乙純新增帶舊名／資格／遊戲／對應變更，或格式未支援就續版 | 拒絕自動續版，舊指定目錄只出差異報告 |
-| 只改現在程式註解，歷史原 pins 可驗；漏 F1 使用 | 前者歷史有效，後者完整建置拒絕 |
-| 原政策／收據／清單改字、分叉、漏檔、未索引、symlink、錯 hash | 全入口拒絕，失敗不留半批資料 |
-
-CLI 彩色輸出、無全域 git 設定、caller transaction rollback 與 runtime 閉包按既有規則驗。
-政策數量與正式 owner 使用／link 出貨數分開報告，不拿候選2,041名／3,376配對當已發布量。

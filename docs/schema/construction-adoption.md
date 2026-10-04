@@ -46,7 +46,7 @@ review_context.context 的釘版 configuration 的 `construction_review_stores` 
 
 ### 1.2 政策、首輪抽查與核可收據載體
 
-沿 [translation-policy §1–§5](translation-policy.md#1-重用與新入口) 的 index／policy／approval、不可變五欄 pin 與真實首輪語意，建立本入口專用載體；不重用翻譯政策本身。下列路徑均相對 authored，三檔及索引進 Git，只存 ID／hash／核對摘要與真人事件，不存公告原文或私人路徑。
+本節獨立定義構築入口的 index／policy／approval、不可變五欄 pin 與真實首輪語意；翻譯入口簡化不改本節的非翻譯採納條件。下列路徑均相對 authored，三檔及索引進 Git，只存 ID／hash／核對摘要與真人事件，不存公告原文或私人路徑。
 
 | 路徑 | 完整頂層欄位 |
 | --- | --- |

@@ -27,9 +27,9 @@
 | 定案（技術契約） | 模板、詞彙、翻譯採納 | `translations/index.yaml`、`translations/{templates,glossary,overrides,region-reviews}/<filing_key>/<sequence>.yaml`、`translations/template-sources/<sequence>.yaml`；推導結果不進 authored，見 §6 |
 | 定案（技術契約） | 詞彙、記號、搜尋別名、特殊構築名稱、語言 | `catalog-adoptions/index.yaml` 與分片，見[採納契約 §2](catalog-route-adoption.md#2-入口分片與封套) |
 | 定案（技術契約） | 同號路由與預設版次覆寫 | `display-overrides/index.yaml` 與分片，見[覆寫契約 §5](catalog-route-adoption.md#5-同號路由與預設版次覆寫)；永久路由修復仍走 identity-transitions |
-| 定案（技術契約） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`、政策／核可收據配對、`digital-name-exclusions/`；依[數位名字政策](digital-name-policy.md)，實際政策核可不是真人同卡樣本，未支援完整能力不得套用 |
-| 定案（技術契約） | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
-| 定案（技術契約） | 模板參數辨識政策／核可收據 | `template-parameter-rules/<policy_id>.policy.yaml`／`.approval.yaml`；無 index，單一真實事件可涵蓋明列規則，依[辨識政策契約](template-parameter-policy.md)，不授權模板定義／譯本採納 |
+| 定案（新格式） | 數位名字／同名瀏覽政策 | `digital-name-policies/index.yaml`；名字用可修改的 current 規則，同名瀏覽維持獨立非翻譯入口，見[名字契約](digital-name-policy.md) |
+| legacy，僅供轉換 | 模板採納政策／核可收據 | `translation-policies/index.yaml`、`translation-policies/<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml`；無文字摘要進索引，首輪實際抽查、不可變索引與五欄 pin 依 [模板採納政策契約](translation-policy.md)，未支援完整 loader 前不得套用 |
+| 定案（新格式） | 模板參數辨識規則 | `template-parameter-rules/current.yaml`，format 2；規則與必要反例隨程式 PR 修改，不需 approval |
 | 定案（技術契約） | 來源綁定的插畫裁切覆寫 | `image-crops/<filing_key>/<sequence>.yaml`、`image-crops/receipts/<receipt_id>.yaml`；無 index、全體查重，列不存 image_id，依[覆寫契約](image-crop-overrides.md)；不表示 loader 或資料已完成 |
 | 提案 | DSL、設定 | `effects/`、`macros/`、`config/` 等，見後續各節；跨區語義差異採納改走 translations/region-reviews |
 
@@ -46,6 +46,9 @@ YAML 固定 1.2 core schema、單一文件、UTF-8；所有鍵必須是字串，
 構築採納另有獨立 `construction-policies/index.yaml` 與 `<policy_id>.policy.yaml`／`.approval.yaml`／`.review-queue.yaml` 政策閉包，見[構築採納 §1.2](construction-adoption.md#12-政策首輪抽查與核可收據載體)；不列採納 includes，不借翻譯政策授權。載體／loader 與真實首輪收據未到位時，不得政策採納。
 
 ## 2. 分片、批次決定與來源
+
+本節決定封套用於仍採該格式的身分／商品等入口；翻譯 format 2、詞彙／語言 format 2 與名字當前規則
+依各自契約，不使用本節的 membership、sample_ids 或核可收據。共通 YAML、安全路徑、大小與引用檢查仍適用。
 
 每個身分登錄分片有 `authored_format: 1`（分片格式未變；`ids/index.yaml` 為 2，見下）、`kind: registry_shard`、`default_decision_id`、`records`、`decisions`。每筆 record 固定為 `record_key/kind/owner/data`；`data` 是該 kind 的資料。配號以外，匯入時將封套的 decision 展開成具體資料表 FK，不另建立 subject 真值表。配號分片的 decision 為 null，decisions 為空。
 
@@ -224,39 +227,30 @@ corrections 元素包含 region、card_no、face_index、field、expected_raw_va
 
 ## 6. 模板、翻譯與語義例外
 
-模板來源清冊的新格式為 `template_source_format:2`，頂層恰為
-`{template_source_format,kind,recipes,replay_context,entries}`，仍由 translations index.inventories
-釘完整 canonical hash。recipes 六欄、entries 八欄不變；replay_context 的凍結語義、producer 環境、
-逐清冊 inputs 與不可變六流 expected_outputs 依[歷史清冊重算契約](template-source-replay.md)。
-環境差異只記錄，輸出漂移或超預算分別回 replay_output_mismatch／replay_budget_exceeded；
-不將結構通過當來源重算通過，完整 C+hash 合併及首次獨立驗證前不寫真實清冊。
-格式修訂不修改已採納歷史 bytes；若發現正式 v1，停止新採納並另審追加遷移。
+翻譯的 index／分片使用 `translation_authored_format:2`，清冊使用 `template_source_format:3`，
+完整欄位依[翻譯契約](translation-contract.md)與[清冊重產契約](template-source-replay.md)。
+舊決定封套、membership、核可收據、採納鏈、歷史 producer／expected 只供轉換，不是新 reader 的必要輸入。
+資料可直接改，退回用 git revert；只記來源類別 official/project/machine、低信心及必要資料理由。
 
-`context_assignment` 的 data 必備自己的 identity_basis，固定三欄不可變 Git 背景沿
-[翻譯契約 §6.1.1](translation-contract.md#611-context_assignment-的不可變身分背景)。
-每筆歷史按自己的背景驗，當次再按 owner 原文與有效身分判適用；不得從 consumer revision 補值，
-也不以只驗 frozen 來源代替。新增欄位須先完成 loader／offline 閉包才可採納真實指派；
-不改既有 glossary 分片、公開快照或模板／詞彙的人工與委託門檻。
+模板功能全部保留：固定字、參數、句型比對、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
+[辨識規則](template-parameter-policy.md)由現行程式與當前設定提供；風味依[整段模板契約](flavor-translation.md)。
+純譯文／note 改字不換模板或術語 ID；真正固定字／參數語義改變才是另一模板。
+一般讀取驗結構與引用，CI／建置用本次固定來源重產清冊比檔案，不逐次回放 Git 祖先或舊環境。
+context/use/binding、渲染全文與 selection 由工具推導，不存另一份逐卡翻譯真值。
 
-card_name_concept 於 translations/overrides 只採納卡／面與 exact 名稱到 glossary 概念的人工例外；預設唯一 exact 名稱匹配每次建置自動重算，不寫關聯紀錄。來源 hash、身分基準、預設名稱面及修復後重驗依 [卡名概念關聯契約](card-name-concepts.md)。不更改已採納 glossary 分片，也不以此關聯替代數位 same-card link。
+context_assignment／card_name_concept 只對自己的 owner 與 exact 原文有效，建置驗目前身分與原文；
+不再釘核可時 identity_basis 或要求手動 base-main 檢查。它們不取代跨區身分或數位同卡關係。
+同名歧義與撤回仍有明示資料，不能因移除收據就按字串猜配對。
+術語與加粗的當前值見[術語契約](glossary-adoption.md)，class/type 仍引用 vocabulary。
 
-風味文字重用 templates 與 template-sources 封套，不另設自由譯文入口；整段零參數模板、flavor role、獨立 recipe／新 ID 及譯本政策見 [風味文字契約](flavor-translation.md)。符合專屬 exact 邊界的定義可依有效政策逐筆機械全查後採納，不必每包人工抽查；不宣稱 loader 或首輪抽查已完成。
+繁中以 JP 原文為主；EN 已確認同卡而文字未核對時沿 shared_jp_unchecked 顯示提示，
+已核對為 shared_jp，已知 divergence 不共用受影響欄位；不放行未核對的 DSL／機制或官方 counterpart。
+origin 與 authority 分開，本站效果翻譯仍 unofficial；機器譯文人看過仍 machine。
+低信心但自動檢查通過的譯文直接顯示待校對，可切原文；壞結構／錯來源不渲染。
 
-術語的 2026-10-02 擴充見 [術語採納、委託收據與加粗](glossary-adoption.md)：這是維護者委託下的協調者決定，不記為使用者親自核可。採納入口保留真實決定者、未驗主張來源與連續加粗選擇；class／card_type 仍走 vocabulary。公開位置／加粗格式擴充只列影響提案，沒有更改現有快照。
-
-**使用者已核可（2026-10-01）**：繁中以日文卡文為來源；日英身分已確認同卡一律用日文，只有兩區版本明顯不同或英文獨有才用英文。EN 卡面在同卡身分確認後先顯示 JP 繁中，文字未核對時加「日英文字尚未核對」標示；核對完成且適用時移除標示，已知 divergence 不共用受影響欄。這不放行未核對的 DSL／機制或官方 counterpart。
-
-**同日已核可的抽查方式**：先翻高頻模板、長尾後補，不按卡包；每個模板由一個模型翻、另一個模型審，使用者整體只抽查前約 100 個高頻模板及所有模型分歧。實際完成樣本與精確成員才可形成 sampled batch，不預填確認；無分歧長尾可引用首輪抽查決定與核可政策收據，以 confirmed batch 採納，不要求每批另有人類樣本，具體例外見翻譯契約 §2。機器譯文即使使用者親自看過也仍標 machine。
-
-[翻譯契約](translation-contract.md) 定義採納封套、來源清冊、owner／同字異義／counterpart、原文分段與重建規則。只有人工決定及其核可政策下的採納進 authored；context/use/binding、渲染後譯文與 selection 每次建置推導，不逐卡保存或重簽。模板拆分與用途改綁在首版即以重建處理，來源只用既有封存批次，不新增永久物件庫。
-
-模板長尾 `approved_policy` 的正式政策／收據、首輪樣本與唯一索引依 [模板採納政策契約](translation-policy.md)。該入口在 authored 內自行證明有效採納，F1 設定只複核；不借表記政策、glossary 委託或呼叫端同名 pin 放行。
-
-模板數值／術語 slot 的辨識核可另依[模板參數辨識政策契約](template-parameter-policy.md)。獨立 kind 與無索引 policy／approval pair 以 recipe config 的五欄 pin 引用；一個真實整體對話事件可覆蓋明列規則。有 hash 事件驗三元組，沒有條件物件的舊事件保留當時版本／頁面證據，row 另以 presented_in／restriction_ids 明示連到目前三元組與有限限制，不回填原事件或虛構逐題點擊。頁面例子只作呈現證據，不是 human sample_ids；效果模板定義與譯本仍依各自門檻採納。
-
-sentence_template 的 ID 與完整六欄 payload 不可變；既有 prefix+10hex 保留，新 normalizer/schema/語義需新 ID 與 supersedes。模板譯本有自己的只增 revision。跨區 divergence 的完整封套改由 translation-contract §7 定義，本節不另留一份不相容的舊示意格式。
-
-origin/authority 分開：本站效果翻譯永遠 unofficial；官方 counterpart 逐 owner 取有證據的官方原文，不占共用 translation_selection。JP 繁中透過 FieldTranslation 選給 EN：已核對為 shared_jp，尚未核對為 shared_jp_unchecked；兩者都不把 EN owner 的原文改成 JP。
+平常一個新包只需一個資料 PR 與一張低信心／新句型／缺項清單，
+不要求首輪抽查、逐筆雙模型、approved_policy、額外核可頁或手動合併前驗證。
+官方 CI 輸入沿現有私有 testdata repo 及鎖定檔，個人機器路徑與事件不得進 committed 資料。
 
 ## 7. DSL 與拒絕輸入
 
@@ -272,7 +266,9 @@ effects/index.yaml 提供 `card_id`＋scope＋file/record key；即使候選 YAM
 
 route/default 純推導；authored 只寫 alias、variant `route_override`、`default_printing_override`。canonical 編碼 exact 原卡號，folded 輸入只在唯一時轉址。UI `fallback_order` 只用介面詞彙，卡文保留所選區原文。
 
-詞彙、記號、搜尋別名、特殊構築名稱、語言，以及同號 variant／default 覆寫的獨立入口、精確成員 hash、只增續版與 freshness，見 [詞彙與路由採納契約](catalog-route-adoption.md)。封套已定為共享 review_context、穩定鍵依賴，default freshness 只驗同卡同區候選；記號翻譯由建置自動選用。使用者 2026-10-01 已核可一般版稀有度白名單與繁中缺譯先日文再英文；卡框／標誌的個別判斷不在本次核可範圍；格式不等於真實資料已採納，不把任意既有 confirmed 決定視為合法採納；翻譯仍走 §6，永久 alias／改號仍走 §12。
+詞彙／語言採[format 2 當前入口](catalog-route-adoption.md#0-詞彙與語言-format-2)，保留 code 與映射檢查、移除收據。
+搜尋別名、記號定義、特殊構築名稱及路由覆寫仍用原入口，永久 alias／改號走 §12。
+一般版稀有度白名單與繁中缺譯先日文再英文不變；翻譯標籤及記號文案走 §6。
 
 公開的 text_symbol／ruling hints 使用 [傳輸契約 §3.2 的 ParameterSchema](snapshot-transport.md#32-公開參數宣告)，不把建置模板的參數或引用直接投影為公開物件。
 
@@ -633,10 +629,9 @@ confirmed_none／reskin 續版及有效投影順序見 [身分修復與決定續
 
 ## 13. 數位名字與同名瀏覽政策
 
-[digital-name-policy-v1](digital-name-policy.md) 沿§9.5政策／核可配對與不可變pin，
-但兩政策各自有真實全文核可事件，不能借wording／glossary／模板事件。
-卡名取詞與同名瀏覽不混入身分／真人digital-links封套，不記官方原文或平行卡名詞庫。
-政策資料、收據與清單存在不表示新loader、正式build或發布已驗收；格式未知拒絕，coverage首批不採納。
+[名字當前規則](digital-name-policy.md)用可修改的設定與當次完整來源供名，不再要求 approval 配對。
+名字取詞、同名瀏覽與真人 digital-links 的資格分開；格式支援不代表來源已齊或已有正式投影。
+不在 authored 維護另一份可機械重產的數位官方卡名表，也不以同名瀏覽授予同卡／效果／語音資格。
 
 ## 14. 引擎能力與資源身分設定
 

@@ -1,13 +1,26 @@
-# 詞彙、記號與路由採納契約
+# 詞彙當前資料與其他採納入口
 
-引用與授權：範例中沿用的官方卡名、商品名、詞彙及卡文片段不在本專案授權內；
-專案欄位、合成值、中文說明與資料規則依文件授權。來源及適用範圍見[文件引用說明](../quotations.md)。
+2026-10-04 起，vocabulary／language 使用可直接修訂的 format 2，取消核可封套、點擊紀錄及採納鏈。
+職業、卡種、特性、稱號與介面語言仍保留永久 code、exact 原值映射及引用檢查。
+本次不放寬 display-overrides、身分、勘誤、構築名稱、搜尋別名、記號定義等非翻譯採納。
+下文 format 1 的收據／續版規則對 vocabulary／language **僅供 legacy 轉換**，對其餘入口仍沿既有契約。
 
-本文件細化 [build-db §2／§15](build-db.md#15-網址搜尋預設版次與記號) 的 authored 輸入，詞彙入口擴充歸屬 #28；繁中 vocabulary_choice 採納歸屬 #51，標籤翻譯選用投影歸屬 #53。
-**封套、覆寫格式與展示集合為技術契約；一般版稀有度白名單與繁中介面缺譯順序經使用者 2026-10-01 核可**。
-§1 摘錄既定語意；§2–§6 定義輸入，§7 區分已核可稀有度與加工證據邊界，§8 分列技術預設與使用者核可政策。
-格式不表示資料已採納；仍須 loader 通過 §9，且每筆真實資料有適用採納，才能供正式建置。
-本契約不以任意 confirmed 決定或 caller 提供的布林值代替採納。
+## 0. 詞彙與語言 format 2
+
+catalog-adoptions/index.yaml 為 `{catalog_adoption_format:2,kind:catalog_adoption_index,includes}`；
+vocabulary／languages 分片為 `{catalog_adoption_format:2,kind:catalog_adoption_shard,records}`。
+includes 的 canonical hash 只驗檔案完整；過渡期可索引其他 area 的 format 1 分片，按各檔版本分派。
+不再掃全部歷史，當前目錄仍須完整索引、安全路徑、唯一鍵、無缺檔／多檔且每檔小於 1 MiB。
+
+record 恰為 `{record_key,kind,data,origin,low_confidence,note}`；品質欄位沿翻譯契約。
+kind 為 vocabulary_adoption/language_adoption；record_key 是 `[kind,subject]` canonical JSON 字串。
+data 恰為 `{subject,value,evidence}`，subject/value 沿 §4 表格，evidence 為 §2.2 的來源引用陣列，
+不含私人證據或人員事件。null value 表示明示停用；code 不因此供另一概念重用。
+外鍵依賴從 value 自動取得，去掉手寫 dependencies、review_context、adoption_no、predecessor 及 reason 雜湊鏈；理由只在 note。
+
+直接修訂 value 與拼法，新增 commit 保存歷史。一般 reader 驗格式／引用；建置自動驗當前來源、
+唯一映射、特殊標記及語言 fallback。來源損壞失敗，未知 raw 列缺項，不產暫碼或靠翻譯猜代碼。
+DB 由當前 record 投影並指回 authored_source_id，不能建立假 confirmed decision；其餘入口的 decision 約束不變。
 
 ## 1. 既定邊界
 
@@ -17,8 +30,8 @@
 - 卡號與區域構築名稱保留 exact 原值；跨區同名不能混群。構築名稱不是搜尋別名，也不合併 card 身分。
 - 一般路由與預設版次由確定性規則推導；同號 variant 與人工 default 才採納覆寫。
   改卡片預設不改版次 URL；永久入口、改號與身分修復仍依 [identity-repair](identity-repair.md)。
-- 繁中來源與翻譯採納一律依 [translation-contract](translation-contract.md)。術語的逐條確認仍在該流程，
-  不因本封套 confirmed 而把未採納譯詞升級。日／英 UI 不回退繁中，UI fallback 不套用卡文。
+- 繁中來源與翻譯採納一律依 [translation-contract](translation-contract.md)。翻譯詞的來源與低信心沿新格式，
+  code 的存在不授予官方翻譯權威。日／英 UI 不回退繁中，UI fallback 不套用卡文。
 - 卡文記號只做文字與圖示呈現，不產生自身 has、遊戲規則或引擎支援；Q 保留 literal，變數白名單仍只有 X。
 - 本契約不收官方卡文全文；官方字句以凍結來源引用重建。例子與驗收鍵均為合成資料。
 
@@ -114,12 +127,12 @@ loader 必須重算三層 hash、驗 category/policy/area/kind 與精確成員�
 
 ### 2.2 來源與 freshness
 
-evidence 沿 [translation-contract §2](translation-contract.md#2-人工採納入口) 的排序去重
-`{source_ref,role}` 陣列；source_ref 的 parser/locator/text_hash 指向凍結投影的 exact 字串。
+evidence 為排序去重的 `{source_ref,role}` 陣列；source_ref 沿
+[translation-contract §2](translation-contract.md#2-當前資料入口) 六欄，parser/locator/text_hash 指向凍結投影的 exact 字串。
 圖片人工核對可改用 `{image_ref,role}`，image_ref 恰為
 `{store_id,batch_id,source_version_id,raw_hash,printing_id,face_id}`，須驗圖像 descriptor/raw hash 及版次面關聯。
-兩種 ref 恰擇一；role 非空，不將圖片 hash 當作文字 hash。所有批次列入 review_context.source_batches。
-純自撰的 code、別名或介面配置可 evidence=[]，但依賴、核對收據不可缺；聲稱官方原值／名稱／記號者必有來源。
+兩種 ref 恰擇一；role 非空，不將圖片 hash 當作文字 hash。format 1 的批次列入 review_context.source_batches；format 2 由本次建置來源集合提供。
+純自撰的 code、別名或介面配置可 evidence=[]；format 1 仍須依賴與核對收據，format 2 不含這些欄位；聲稱官方原值／名稱／記號者必有來源。
 
 每個實際使用的 source version 都驗 batch/descriptor/receipt/raw 閉包、parser 程式與設定 pin、locator 和 exact bytes。
 人工依賴解析到的有效版本須驗完整 decision/member/hash 與來源，但 hash 改變本身不使引用者 stale。
@@ -176,25 +189,23 @@ F1 釘兩個入口與所有分片的 exact bytes／canonical hash、完整 autho
 本版 vocabulary.kind 白名單恰為 class/type/special_kind/rarity/trait/title/frame/stamp_series。
 class/type 的首批 code 清單與 preview 對照沿[正式 catalog 輸入](catalog-inputs.md)；
 special_kind 此次限 evolve/advance/token，用於基本卡種的明示特殊標記，不擴充 vocabulary_choice 的翻譯 kind。
-技術預設 P8 先做查卡所需的固定 enum；新增對照須明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
+先做查卡所需的固定 enum；新增對照須明列來源表／欄、專用 kind 與完整 code 對照，更新受版控白名單後才能載入；
 不能由 caller 在 configuration 填任意 kind 就擴張。keyword/stamp/product_family/card 保留給各自目標表，不能冒充詞彙。
 raw_mappings 是排序唯一的 `{region,lang,raw,source_ref,special_kinds}` 陣列；region 為 jp/en，lang 須與來源一致。
 special_kinds 為必填、按 code 排序唯一的陣列；非 type 必為 []。type 的每個完整 raw 映射到 subject.code
 這個基本卡種及明示標記組合，沒有標記亦明填 []；不把進化／進階／衍生物配成 type。
 標記只允許 evolve/advance/token，每個都須引用有效且 active 的 vocabulary(kind=special_kind,code)，
-直接引用完整列入 dependencies，不能借 glossary、inactive／撤回列或任意同名 code。
+format 2 的直接引用由工具自動收集，不能借 glossary、inactive／撤回列或任意同名 code。
 首批 special_kind 是自撰標記定義，raw_mappings=[]；定義標籤不冒稱官方來源，不假造一條 raw binding 來通過驗證。
 
-本次僅新增 raw_mappings 的必填 special_kinds 欄位，仍用 catalog_adoption_format=1，僅因目前尚無正式
-catalog-adoptions 採納分片，才可在首次資料前調整。啟用後不得默補已簽歷史欄位或改舊 bytes，
-須另審格式相容策略；未支援此擴充的 loader 明確拒收，不當作空集合。
+format 2 的 special_kinds 仍必填；欄位缺漏是格式錯誤，不由 loader 默補舊資料。
 
 每個 raw 保留原欄位的 exact source_ref，type 的 locator 仍指完整 card_type／info/Card Type，不用切片字串假造來源。
 基本卡種＋標記的解讀由完整 value 的適用採納核對，exact 來源證據本身不等於分類核可。
 有效且 active 的映射中，相同 kind/region/lang/raw 必只有一組 `(code,special_kinds)`，
 同 code 卻標記不同、重複同一原值但借不同 ref，亦拒絕；來源證據可另放 evidence，不建立多條衝突映射。
 已驗相同原值的當次觀測只重用這一組，不通用 split、trim 或猜新拼法；未知原值拒絕並列缺項，不產生暫碼。
-建置／更新工具須列出需維護者確認的新完整原值與對應候選，不能只報泛稱錯誤或自動沿舊收據放行。
+建置／更新工具列出未知原值與候選，修正當前映射後自動重驗，不以點擊收據作門檻。
 
 停用的歷史映射不參與選用，但不可重用其 code 給另一概念。空陣列允許純介面 enum，但不能假稱已涵蓋官方原值。
 來源的未知符號（含 `-`）如何投影 null 須有欄位 recipe，不把它自動採為職業或稀有度 code。
@@ -210,7 +221,7 @@ language.code 沿 Lang；fallback_order 不含自身、未知語言或重複項�
 它是完整依序嘗試清單，不遞迴串接其他語言的清單；ja→en 與 en→ja 可並存，不因互相備援誤判為循環。ja/en 清單不得含 zh-Hant；
 最終基底回退亦不得繞過這項限制，基底為繁中時改用穩定 code。
 使用者 2026-10-01 核可繁中介面依序回退日文、英文，完整 fallback_order 與末端呈現見 §8.1；
-語言配置修改也需續版，不改卡面地區與卡文來源。
+語言配置可直接修改當前值，不改卡面地區與卡文來源。
 
 ### 4.2 搜尋別名
 
@@ -305,28 +316,16 @@ source_localization 恰為 `{lang,name,tooltip,copy_pattern}`，後三項為 §4
 所有文案與翻譯的 placeholder 必依 parameter_schema 驗證，不能引入新參數或藏執行語言。
 三語缺項如實缺譯，不能先填未採納文字湊滿三語；32 是候選觀測數，非格式上限或已核可名單。
 
-**翻譯入口的技術擴充**：在 translations/glossary 入口增加 `symbol_localization_choice`，
-record_key 為 `["symbol_localization_choice",symbol_id,lang,adoption_no]` 的 canonical JSON 字串，
-data 恰為 `{symbol_id,lang,symbol_basis,value,origin,concept_evidence,adoption_no,predecessor}`。
-symbol_basis 釘 `{code,parameter_schema_hash,source_localization_hash}`，均可從上述基底重算；
-parameter_schema_hash=H(parameter_schema)，source_localization_hash=H(重建後的 `{lang,name,tooltip,copy_pattern}` 純字串物件)。
-不 hash 原始 TextValue 的來源 locator 或整筆 symbol record_hash，來源證據補充而文案不變時不使譯本失效。
-value 為 null（撤回），或 `{name,tooltip,copy_pattern}`，各值**直接沿用** translation-contract §5 的 value union，
-採納門檻／來源／續版全部沿該翻譯契約，無模板長尾例外。
-origin／concept_evidence 一律各為以 name/tooltip/copy_pattern 為鍵的完整映射，逐欄沿該契約的 origin enum／證據陣列驗證；
-value=null 時兩者亦為 null。category 固定 symbol_localization_choice、policy_id 固定 translation-symbol-choice-v1，
-其餘決定與 members/hash 規則沿 translation-contract §2。
-不把 tooltip 或 copy_pattern 偽裝 glossary_term，也不新增公開 translation owner／FieldTranslation enum。
-
-建置依 `(symbol_id,lang)` 解析選詞鏈的最後有效版，不按檔案順序或回挑更早版本。
-同語言不得另以 choice 覆蓋基底 source_localization；改基底仍走 symbol 續版。
-choice 必有有效採納、symbol_basis 與目前基底相符、參數相容，才產公開 Localization 純字串；
-文案修訂只新增 choice，工具重建即可，不再新增 symbol 採納決定。撤回或 basis 不匹配則該語言缺譯，
-依技術預設 P7 回原記號並列診斷，不把舊譯文套新基底，也不退回撤回前的舊 choice。
-來源／封套損壞仍是建置錯誤；正常缺譯不阻擋記號啟用。F1 記當次選到的精確 choice hash／decision，
-公開不新增稽核欄位，不在 authored 保存推導選用結果。
-此新增 translation kind 須由 loader 明示支援並驗完整契約；尚未實作的 loader 不得靜默忽略或當作其他 kind。
-技術預設 P7 允許三語尚未齊全的記號啟用，缺譯回原記號；已核可的術語來源優先順序不在此重定。
+**記號譯文**使用 translation format 2 的 symbol_localization_choice：
+data 恰為 `{symbol_id,lang,symbol_basis,value,concept_evidence}`，品質欄位在 record。
+symbol_basis 為 `{code,parameter_schema_hash,source_localization_hash}`，由當前基底自動計算防錯配；
+value=null 為撤回，否則為 `{name,tooltip,copy_pattern}`，各值沿 glossary 的 value union。
+concept_evidence 以 name/tooltip/copy_pattern 為鍵；origin 為整筆來源類別，混合機器內容時為 machine，
+只有三欄皆為有效官方來源才可 official。此彙整不抹去各 source_ref 的 provider。
+選擇鍵為 `(symbol_id,lang)`，直接修改；不存成員 hash／approval／adoption_no。
+同語言不另以 choice 覆蓋基底 source_localization；base 改變須重驗 params 與 basis，不把舊文字套新記號。
+不增 glossary_term、公開 owner 或 FieldTranslation enum；缺譯回原記號，低信心沿翻譯呈現，
+來源損壞仍失敗。locale 文案改字不需新增 symbol 定義的核可；記號定義本身仍走原入口。
 
 ## 7. 預設版次與一般版分類
 
@@ -425,10 +424,10 @@ P4 繁中介面缺翻譯時先日文、再英文，只影響介面詞彙標籤�
 候選的頻次不是核可；萃取修正後須重產 trait 清單，不能採用被切成半截的複合特性。
 已進行的術語逐條確認、繁中來源、數位優先與社群參考不在此重開政策問題。
 
-## 9. 獨立反例與定向突變驗收
+## 9. 自動反例與 legacy 驗收
 
 這是未來 loader 的驗收規格，**不是已執行測試或突變數量**。
-每列先有最小成功基例，僅改單一條件；斜線列出的條件各建獨立例，再刪除相應 guard 做定向突變。
+保留能驗錯配、引用及 fallback 的反例；vocabulary／language format 2 不測已移除的收據鏈，資料 PR 不要求逐 guard 定向突變。
 正常 baseline 須通過、反例須以該原因失敗，才算 killed；不把 unrelated FK 失敗或語法錯當攔到約束。
 production 採納／觀測數、合成案例、實跑 mutants 分開報，未知未測不填零通過。
 
