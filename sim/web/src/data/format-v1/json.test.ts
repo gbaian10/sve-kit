@@ -1,5 +1,6 @@
 // @vitest-environment node
-import { describe, expect, it } from "vitest"
+import * as jsonc from "jsonc-parser"
+import { afterEach, describe, expect, it, vi } from "vitest"
 
 import vectorsText from "../../../../../tests/fixtures/snapshot-contract/v1/vectors.json?raw"
 import { SnapshotError } from "./errors"
@@ -16,12 +17,14 @@ import { hex } from "./sha256"
 
 const vectors = parseStrict(vectorsText) as JsonObject
 
-function rejects(input: Uint8Array | string): string {
+afterEach(() => vi.restoreAllMocks())
+
+function rejects(input: Uint8Array | string): SnapshotError {
   try {
     parseStrict(input)
   } catch (error) {
     expect(error).toBeInstanceOf(SnapshotError)
-    return (error as SnapshotError).message
+    return error as SnapshotError
   }
   throw new Error(`accepted ${JSON.stringify(input)}`)
 }
@@ -44,43 +47,108 @@ describe("parseStrict", () => {
   })
 
   it.each([
-    ['{"a":1,"a":2}', "duplicate"],
-    ["1.0", "floating"],
-    ["1e3", "floating"],
-    ["NaN", "unexpected"],
-    ["Infinity", "unexpected"],
-    ["-", "invalid number"],
-    ["01", "trailing"],
-    ["9007199254740992", "unsafe"],
-    ["-9007199254740992", "unsafe"],
-    ["99999999999999999999", "unsafe"],
-    ['"\\ud800"', "surrogate"],
-    ['"\\udc00"', "surrogate"],
-    ['"\\ud800x"', "surrogate"],
-    ['"\\ud800\\u0041"', "surrogate"],
-    ['"a\nb"', "control"],
-    ['"\\x"', "escape"],
-    ['"\\u12"', "unicode"],
-    ["[1,]", "unexpected"],
-    ["{}{}", "trailing"],
-    ["", "end of input"],
-    ['{"a" 1}', "expected :"],
-    ["[1 2]", "expected , or ]"],
-    ["tru", "literal"],
-  ])("rejects %s", (input, detail) => {
-    expect(rejects(input)).toContain(detail)
+    '{"a":1,"a":2}',
+    "1.0",
+    "1e3",
+    "NaN",
+    "Infinity",
+    "-",
+    "01",
+    "9007199254740992",
+    "-9007199254740992",
+    "99999999999999999999",
+    '"\\ud800"',
+    '"\\udc00"',
+    '"\\ud800x"',
+    '"\\ud800\\u0041"',
+    '"a\nb"',
+    '"\\x"',
+    '"\\u12"',
+    "[1,]",
+    "{}{}",
+    "",
+    '{"a" 1}',
+    "[1 2]",
+    "tru",
+  ])("rejects %s", (input) => {
+    expect(rejects(input).code).toBe("json")
+  })
+
+  it.each([
+    '{"a":1,"\\u0061":2}',
+    '{"x":{"a":1,"a":2}}',
+    '{"x":[{"a":1,"a":2}]}',
+    '{"\\ud800":1}',
+    "/*comment*/{}",
+    '{"a":/*comment*/1}',
+    "{}//comment",
+    '{"a":1,}',
+    "[1,]",
+    " \t\r\n ",
+    "0.0",
+    "1E0",
+    "-0e0",
+    "1e999",
+  ])("rejects visitor policy and strict grammar counterexample %s", (input) => {
+    expect(rejects(input).code).toBe("json")
+  })
+
+  it("keeps repeated keys in different objects and number-like strings", () => {
+    expect(parseStrict('{"a":1,"x":{"a":2},"rows":[{"a":3},{"a":4}],"label":"1e0"}')).toEqual({
+      a: 1,
+      x: { a: 2 },
+      rows: [{ a: 3 }, { a: 4 }],
+      label: "1e0",
+    })
+    expect(parseStrict("[9007199254740991,-9007199254740991]")).toEqual([
+      9007199254740991, -9007199254740991,
+    ])
+  })
+
+  it("disables comments, trailing commas and empty content in the upstream visitor", () => {
+    const visitor = vi.spyOn(jsonc, "visit")
+    expect(parseStrict("{}")).toEqual({})
+    expect(visitor).toHaveBeenCalledWith("{}", expect.any(Object), {
+      disallowComments: true,
+      allowTrailingComma: false,
+      allowEmptyContent: false,
+    })
+  })
+
+  it.each([
+    jsonc.ParseErrorCode.InvalidSymbol,
+    jsonc.ParseErrorCode.InvalidNumberFormat,
+    jsonc.ParseErrorCode.PropertyNameExpected,
+    jsonc.ParseErrorCode.ValueExpected,
+    jsonc.ParseErrorCode.ColonExpected,
+    jsonc.ParseErrorCode.CommaExpected,
+    jsonc.ParseErrorCode.CloseBraceExpected,
+    jsonc.ParseErrorCode.CloseBracketExpected,
+    jsonc.ParseErrorCode.EndOfFileExpected,
+    jsonc.ParseErrorCode.InvalidCommentToken,
+    jsonc.ParseErrorCode.UnexpectedEndOfComment,
+    jsonc.ParseErrorCode.UnexpectedEndOfString,
+    jsonc.ParseErrorCode.UnexpectedEndOfNumber,
+    jsonc.ParseErrorCode.InvalidUnicode,
+    jsonc.ParseErrorCode.InvalidEscapeCharacter,
+    jsonc.ParseErrorCode.InvalidCharacter,
+  ])("rejects every upstream parser error (%s), even on otherwise valid JSON", (code) => {
+    vi.spyOn(jsonc, "visit").mockImplementation((_text, visitor) => {
+      visitor.onError?.(code, 0, 1, 0, 0)
+    })
+    expect(rejects("null").code).toBe("json")
   })
 
   it("rejects lone surrogates in string input too", () => {
-    expect(rejects('"\ud800"')).toContain("surrogate")
-    expect(rejects('{"\ud800":1}')).toContain("surrogate")
-    expect(rejects('"\udc00x"')).toContain("surrogate")
+    expect(rejects('"\ud800"').code).toBe("json")
+    expect(rejects('{"\ud800":1}').code).toBe("json")
+    expect(rejects('"\udc00x"').code).toBe("json")
   })
 
   it("rejects a byte order mark and invalid UTF-8 bytes", () => {
-    expect(rejects(new Uint8Array([0xef, 0xbb, 0xbf, 0x7b, 0x7d]))).toContain("unexpected")
-    expect(rejects(new Uint8Array([0x22, 0xff, 0x22]))).toContain("UTF-8")
-    expect(rejects(new Uint8Array([0x22, 0xed, 0xa0, 0x80, 0x22]))).toContain("UTF-8")
+    expect(rejects(new Uint8Array([0xef, 0xbb, 0xbf, 0x7b, 0x7d])).code).toBe("json")
+    expect(rejects(new Uint8Array([0x22, 0xff, 0x22])).code).toBe("json")
+    expect(rejects(new Uint8Array([0x22, 0xed, 0xa0, 0x80, 0x22])).code).toBe("json")
   })
 
   it("does not let a __proto__ key touch the prototype", () => {
