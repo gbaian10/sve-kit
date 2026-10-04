@@ -13,6 +13,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import ValidationError
+from rich.console import Console
 from typer.testing import CliRunner
 
 from sve_carddb import cli
@@ -677,6 +678,10 @@ def test_archive_settings_require_absolute_paths(tmp_path: Path, field: str) -> 
 def test_configured_cli_refresh_uses_protection_and_finishes_backup(
     store: ArchiveStore, tmp_path: Path, monkeypatch: pytest.MonkeyPatch, mode: str
 ) -> None:
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.setenv("TERM", "xterm-256color")
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setattr(cli, "console", Console(force_terminal=True, soft_wrap=True))
     monkeypatch.setenv("SVE_DATA_DIR", str(store.data_root))
     monkeypatch.setenv("SVE_ARCHIVE_ROOT", str(store.root))
     monkeypatch.setenv("SVE_ARCHIVE_STORE_ID", store.store_id)
@@ -718,6 +723,9 @@ def test_configured_cli_refresh_uses_protection_and_finishes_backup(
     )
     assert result.exit_code == 0, result.output
     assert '"source_versions": 2' in result.output
+    report_json = result.stdout[result.stdout.index("{") :]
+    assert "\x1b" not in report_json
+    assert archive.CapacityReport.model_validate_json(report_json).source_versions == 2
     assert list((tmp_path / "backup" / "restore-checks").glob("*.json"))
     monkeypatch.setattr(cli, "_refresh_writer", original)
 

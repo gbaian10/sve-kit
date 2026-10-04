@@ -688,7 +688,7 @@ def archive_capacity(
     except (ArchiveError, ManifestError) as exc:
         console.print(f"[red]stopped:[/red] {exc}")
         raise typer.Exit(1) from exc
-    console.print_json(report.model_dump_json())
+    typer.echo(report.model_dump_json(indent=2))
 
 
 @archive_app.command("extract-cards")
@@ -930,7 +930,7 @@ def _finish_refresh(writer: RefreshWriter) -> None:
         )
     writer.finish_batch(result)
     console.print(f"source archive batch: {result.batch_id}")
-    console.print(report.model_dump_json(indent=2))
+    typer.echo(report.model_dump_json(indent=2))
 
 
 def _recover(settings: Settings, manifest: Manifest) -> None:
