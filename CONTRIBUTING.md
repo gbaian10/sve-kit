@@ -269,9 +269,6 @@ enabled: official test data is read at runtime and is not embedded in the compil
 Private test data, raw reports and output are never cached. Checkout explicitly cleans
 the workspace so test execution does not depend on a previous job's outputs.
 
-When needed and explicitly requested, manually compare the old and new YAML readers with
-`uv --directory carddb run pytest manual_tests/yaml_reader_equivalence.py`; CI never runs this check.
-
 ### Private test data and fork PRs
 
 The permanently private testdata repository holds the engine JSONL and 19 original

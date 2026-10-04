@@ -210,8 +210,6 @@ ignore = [
     # "yoda-conditions",
 ]
 
-"./manual_tests/*.py" = ["D", "relative-imports", "magic-value-comparison"]
-
 [tool.ruff.lint.isort]
 known-first-party = []
 split-on-trailing-comma = false
