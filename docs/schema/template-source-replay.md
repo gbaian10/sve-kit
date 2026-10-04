@@ -38,9 +38,7 @@ flavor 為全段、level=sentence、line_ordinal=0、normalizer_id=flavor-exact-
 可信任 CI 缺輸入失敗；fork 明示只跑合成測試，不輸出官方全文 log／cache／artifact。
 建置 inputs 記當次程式、輸入與實際使用資料，不替舊環境生成新的凍結證明。
 
-## 4. Legacy 只供轉換
+## 4. 舊清冊的保存
 
-inventory format 1/2 的 recipes、replay_context、producer environment、expected_outputs、
-六流摘要與全部祖先不變檢查不再是新格式的讀取條件。
-轉換取出全部有效 entry，重新產生 format 3 並核對來源覆蓋、定義及原本可匹配的位置；不直接改版號假裝完成。
-Git 保留舊內容，不改寫歷史；缺必要來源或不能無損轉換者明列原因，不能悄悄少搬。
+當前入口只接受 format 3，來源覆蓋、定義與可匹配位置依 §2 重產核對，不能僅修改版號冒充有效清冊。
+舊 format 1/2 的 producer 環境、輸出摘要與祖先資料留在 Git 歷史，不作現行讀取或重播條件；缺必要來源或無法保留的內容仍須明列原因。

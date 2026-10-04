@@ -3,7 +3,7 @@
 本契約保留清冊、句型比對、固定字與參數定義、譯文、術語、卡名、風味、加粗、新卡自動套用及未匹配清單。
 2026-10-04 起，翻譯資料採可直接修訂的當前值；Git 保存修改歷史，退回使用 git revert。
 不再用決定封套、收據、成員雜湊、只增不改、歷史重播、首輪抽查、雙模型或手動合併前檢查作載入門檻。
-本文件定義目標格式；程式、資料、建置投影與 reader 必須配套切換，不表示舊 loader 已能讀新格式。
+本文件定義當前資料格式；建置投影與 reader 的公開欄位仍須依 §8 配套驗證。
 
 ## 1. 來源與顯示原則
 
@@ -33,8 +33,8 @@ filing_key 為 `[A-Za-z0-9_-]+`，sequence 為三位以上十進位字串，記�
 
 includes／inventories 均是 authored 相對路徑到解析後 canonical JSON SHA-256 的映射，由工具更新。
 它們只檢查檔案完整性，不是核可證明；index 不釘自身或同 PR 未來的 commit。
-新 index 過渡期間可同時索引舊、新分片，各檔版本明示；兩個 reader 都須能辨識整個入口的版本與檔案閉包。
-舊分片只供轉換與過渡，不得把「舊資料曾被修改」當作拒讀新格式的理由。
+翻譯入口只接受 format 2 分片與 format 3 清冊；glossary 與模板 reader 均驗整個入口的檔案閉包。
+舊格式留在 Git 歷史，不作現行載入分支。
 
 record 完整欄位為 `{record_key,kind,data,origin,low_confidence,note}`。
 record_key 是下表選擇鍵前加 kind 的 canonical JSON 陣列字串；全入口唯一，不再包含 adoption_no 或 revision。
@@ -65,7 +65,7 @@ matches 為 null（回自動比對）或 `{template_id,source_span,params}` 陣�
 context_assignment 的 concept_key 可 null；非 default variant 須非空理由。card_name_concept 的 term_id 可 null，表示撤回指派。
 owner／field／ordinal 的組合及來源雜湊由本次有效身分與原文自動核對，不再要求歷史背景在 base main 的祖先。
 同名不代表同概念。region-reviews 中的 region_text_review／region_divergence 同時控制 DSL／機制，
-保留原格式與 build-db §5 的決定及 freshness 檢查，不轉成本節 record；index 過渡讀取不得忽略它們。
+保留原格式與 build-db §5 的決定及 freshness 檢查，不轉成本節 record；區域核對的獨立讀取不得忽略它們。
 counterpart 仍須兩側精確原文及有效同卡／面關係。
 
 translation_override 的 pin 以 templates=`[{template_id,lang,variant_key}]`、
@@ -308,11 +308,7 @@ CI 自動驗格式、key／ID 唯一、參數對齊、引用與 owner、來源�
 CI 不讀個人檔案、不即時爬站；報告列 ID／原因，不在 log、cache 或 artifact 放官方全文。
 保留能抓錯的行為反例；資料 PR 不要求每個 guard 都做一次定向突變，不另加人工合併前命令。
 
-## 9. 舊格式轉換
+## 9. 舊格式的保存
 
-format 1 的 decisions、membership、sampled/confirmed、policy／approval／review queue、adoption_no／predecessor
-及 inventory 1/2 的 producer／expected／replay_context 僅供讀出舊有效值；新資料不再寫入這些機制。
-轉換保留模板、參數、有效選詞、加粗、來源類別、排除及撤回的語義；不能用舊核可紀錄造新核可事件。
-官方數位卡名繼續由當前規則與來源產生。機器草稿通過格式／引用檢查即可入庫，原低信心或仍有語意疑義者標旗標。
-匿名參數無法無損對齊者依 §2.1 保留候選原稿並列清單；不將錯誤正文混入可渲染集合。
-共同 index 切換先讓兩個 reader 認新格式，再分批換 glossary／模板資料；各批可獨立驗證，不改寫 Git 歷史。
+當前資料保留有效模板、參數、選詞、加粗、來源類別、排除與撤回語義；無法無損綁定的譯文依 §2.1 保留候選原稿並列原因，不混入可渲染集合。
+舊決定、收據、修訂鏈及清冊環境留在 Git 歷史，現行入口不載入或重播，也不據此補造核可事件；原始來源歸檔的保存責任不變。
