@@ -9,6 +9,7 @@ from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 
 import pytest
+from rich.console import Console
 from typer.testing import CliRunner
 
 import sve_carddb.source_archive as archive
@@ -640,6 +641,36 @@ def test_cli_restores_first_batch_and_allows_later_manual_check(
     )
     assert checked.exit_code == 0, checked.output
     assert len(restored) == 3
+
+
+def test_cli_capacity_json_ignores_terminal_colors(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    store = _store(tmp_path)
+    raw = b"synthetic image"
+    _put(store, _resource("https://example.invalid/a.png", "raw/a.png", raw), raw)
+    batch = seal_batch(store)
+    monkeypatch.setenv("SVE_DATA_DIR", str(store.data_root))
+    monkeypatch.setenv("FORCE_COLOR", "1")
+    monkeypatch.setenv("TERM", "xterm-256color")
+    monkeypatch.delenv("NO_COLOR", raising=False)
+    monkeypatch.setattr(cli, "console", Console(force_terminal=True, width=32))
+    result = CliRunner().invoke(
+        cli.app,
+        [
+            "archive",
+            "capacity",
+            str(store.root),
+            batch.batch_id,
+            "--store-id",
+            store.store_id,
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert "\x1b" not in result.stdout
+    report = archive.CapacityReport.model_validate_json(result.stdout)
+    assert report.source_versions == 1
+    assert report.unique_raw_logical_bytes == len(raw)
 
 
 def test_cli_read_only_restore_reports_success_without_receipt(
