@@ -90,7 +90,7 @@ class Policy(RecordData):
     content: Content
     origin: Origin
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 class CurrentEntry(RecordData):

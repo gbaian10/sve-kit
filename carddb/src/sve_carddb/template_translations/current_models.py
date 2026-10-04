@@ -26,7 +26,7 @@ class DefinitionRecord(RecordData):
     data: Definition
     origin: Literal["official", "project", "machine"]
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 class TranslationRecord(RecordData):
@@ -35,7 +35,7 @@ class TranslationRecord(RecordData):
     data: Translation
     origin: Literal["official", "project", "machine"]
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 class Candidate(RecordData):
@@ -72,7 +72,7 @@ class CandidateRecord(RecordData):
     data: Candidate
     origin: Literal["project", "machine"]
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 class Variant(Translation):
@@ -91,7 +91,7 @@ class VariantRecord(RecordData):
     data: Variant
     origin: Literal["official", "project", "machine"]
     low_confidence: bool
-    note: str
+    note: str = ""
 
 
 Record = Annotated[
