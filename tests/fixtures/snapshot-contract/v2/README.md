@@ -1,9 +1,9 @@
 # Synthetic snapshot 2.0 contract fixtures
 
 These handwritten synthetic wire and logical examples contain no official card
-text or image binaries. They extend the independent 1.1 oracle without calling
-an exporter or reader to generate the expected objects. `index.json` lists the
-shared Python and TypeScript inputs. Frozen `v1/` and `v1_1/` fixtures are unchanged.
+text or image binaries. Expected objects are independent of the exporter and
+reader. `index.json` lists the shared Python and TypeScript inputs. Core schema,
+reader, canonical and bucket vectors use the current 2.0 shape.
 
 The profile is format `2.0.0`, 64 buckets, with all six required capabilities.
 JSON files are indented for review; manifest hashes and sizes describe
@@ -21,7 +21,7 @@ wire capability only, not adoption of any real name-policy links.
 
 ## Shared rejection procedure
 
-`reader-invalid.json` uses the v1 mutation convention: `name`, `target`, `path`,
+`reader-invalid.json` and `reader-invalid-core.json` use `name`, `target`, `path`,
 `value`, `rehash`, optional ordered `setup`, and `error`. A target is `manifest`
 or a manifest file key. Integer path segments index arrays; strings index objects.
 For each case, copy the golden; apply setup then the primary replacement.
@@ -41,7 +41,8 @@ endpoints, and exact media dependency closure. The ordinal case adds an unprinte
 face and orders the card face list accordingly, so it reaches identity uniqueness
 rather than the earlier printing-face join check.
 
-`schema-invalid.json` supplies a `target` definition and rejected tuple `value`.
+`schema-invalid.json` and `schema-invalid-core.json` supply a `target` definition
+and rejected tuple `value`. `schema-valid.json` covers current definitions.
 For invalid numbers outside canonical-json-v1, `raw_json` preserves the exact
 input and `error` identifies rejection at that earlier boundary. Do not coerce
 booleans, strings or floats into integers before validation.

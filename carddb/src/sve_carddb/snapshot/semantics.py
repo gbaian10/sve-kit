@@ -6,7 +6,7 @@ from urllib.parse import quote, urlsplit
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.contract import definition
-from sve_carddb.snapshot.profiles import LEGACY, profile
+from sve_carddb.snapshot.profiles import profile
 from sve_carddb.snapshot.values import (
     array,
     bucket,
@@ -513,8 +513,6 @@ def _wording(view: View) -> None:
 def validate_placement(view: View, manifest: Row, fragments: list[Fragment]) -> None:
     """Recompute entity buckets from joined identities, independently of the exporter."""
     selected = profile(string(manifest["format_version"]))
-    if selected.version == LEGACY:
-        return
     faces = {string(row["id"]): row for row in view["face"]}
     bases = {
         (

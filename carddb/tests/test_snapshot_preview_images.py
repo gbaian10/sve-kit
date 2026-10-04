@@ -18,6 +18,7 @@ from sve_carddb.build_db import create_database
 from sve_carddb.cli import app
 from sve_carddb.image_variants import SIZES, build_variants
 from sve_carddb.snapshot.export import Ownership, export_snapshot
+from sve_carddb.snapshot.media import MediaPlan, prepare_media
 from sve_carddb.snapshot.preview import Roots, _write, write_preview
 from sve_carddb.snapshot.preview.build import Built
 from sve_carddb.snapshot.preview.images import image_blobs
@@ -49,11 +50,32 @@ class PublicImages:
     ownership: Ownership
     library: Path
 
-    def snapshot(self, tables: dict[str, list[Record]] | None = None) -> Snapshot:
-        projection = self.projection
-        if tables is not None:
-            projection = replace(projection, tables=tables)
-        return export_snapshot(projection, self.ownership, BATCH)
+    def plan(
+        self,
+        tables: dict[str, list[Record]] | None = None,
+        *,
+        confirmed_images: frozenset[str] = frozenset(),
+    ) -> MediaPlan:
+        projection = (
+            self.projection
+            if tables is None
+            else replace(self.projection, tables=tables)
+        )
+        return prepare_media(
+            projection, self.library, revision=1, confirmed_images=confirmed_images
+        )
+
+    def snapshot(
+        self,
+        tables: dict[str, list[Record]] | None = None,
+        *,
+        confirmed_images: frozenset[str] = frozenset(),
+    ) -> Snapshot:
+        return export_snapshot(
+            self.plan(tables, confirmed_images=confirmed_images).projection,
+            self.ownership,
+            BATCH,
+        )
 
     def tables(self) -> dict[str, list[Record]]:
         return deepcopy(self.projection.tables)
@@ -102,7 +124,11 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
     roots.formal.mkdir()
     (roots.formal / "sentinel").write_bytes(b"formal unchanged")
-    members = dict(image_blobs(images.projection.tables, library))
+    plan = images.plan()
+    members = {
+        string(asset["path"]): (library / string(asset["source"])).read_bytes()
+        for asset in plan.assets
+    }
     sealed: set[str] = set()
 
     def observed(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
@@ -112,7 +138,9 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
         sealed.add(path)
 
     monkeypatch.setattr(writer_module, "_write", observed)
-    report = write_preview(images.snapshot(), roots, {}, image_source=library)
+    report = write_preview(
+        images.snapshot(), roots, {}, image_source=library, media_plan=images.plan()
+    )
     assert report["images"] == {
         "unique_files": len(members),
         "unique_bytes": sum(map(len, members.values())),
@@ -142,7 +170,12 @@ def test_writer_publishes_only_listed_webps_and_consistent_art_contract(
         if row["size_key"] in {"art_s", "art_m"}:
             assert integer(row["width"]) * 3 == integer(row["height"]) * 4
     again = Roots(tmp_path / "again", roots.formal)
-    assert write_preview(images.snapshot(), again, {}, image_source=library) == report
+    assert (
+        write_preview(
+            images.snapshot(), again, {}, image_source=library, media_plan=images.plan()
+        )
+        == report
+    )
     assert {
         p.relative_to(roots.preview): p.read_bytes()
         for p in roots.preview.rglob("*")
@@ -166,7 +199,9 @@ def test_unavailable_or_unapproved_images_have_metadata_only(
         asset["withdrawal_reason"] = "Synthetic withdrawal"
     tables["image_variant"] = []
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
-    report = write_preview(images.snapshot(tables), roots, {})
+    report = write_preview(
+        images.snapshot(tables), roots, {}, media_plan=images.plan(tables)
+    )
     assert report["images"] == {"unique_files": 0, "unique_bytes": 0}
     assert not (roots.preview / "images").exists()
     assert asset in tables["image_asset"]
@@ -187,7 +222,13 @@ def test_writer_refuses_incomplete_available_image_closure(
     ]
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
     with pytest.raises(ValueError, match="all five sizes"):
-        write_preview(images.snapshot(tables), roots, {}, image_source=images.library)
+        write_preview(
+            images.snapshot(tables),
+            roots,
+            {},
+            image_source=images.library,
+            media_plan=images.plan(tables),
+        )
     assert not roots.preview.exists()
 
 
@@ -201,20 +242,22 @@ def test_third_party_approval_requires_each_image_confirmed(
     roots = Roots(tmp_path / "preview", tmp_path / "formal")
     if state == "confirmed":
         assert write_preview(
-            images.snapshot(tables),
+            images.snapshot(tables, confirmed_images=confirmed),
             roots,
             {},
             image_source=images.library,
             confirmed_images=confirmed,
+            media_plan=images.plan(tables, confirmed_images=confirmed),
         )["images"]
     else:
         with pytest.raises(ValueError, match="individual confirmed"):
             write_preview(
-                images.snapshot(tables),
+                images.snapshot(tables, confirmed_images=confirmed),
                 roots,
                 {},
                 image_source=images.library,
                 confirmed_images=confirmed,
+                media_plan=images.plan(tables, confirmed_images=confirmed),
             )
         assert not roots.preview.exists()
 
@@ -368,7 +411,7 @@ def test_interruption_keeps_old_complete_preview(
     tables["image_asset"][0].update(
         {"availability": "unfetched", "publication_state": "pending"}
     )
-    write_preview(images.snapshot(tables), roots, {})
+    write_preview(images.snapshot(tables), roots, {}, media_plan=images.plan(tables))
     old = {p: p.read_bytes() for p in roots.preview.rglob("*") if p.is_file()}
     calls = 0
 
@@ -389,7 +432,13 @@ def test_interruption_keeps_old_complete_preview(
 
     monkeypatch.setattr(writer_module, "_write", failing)
     with pytest.raises((OSError, ValueError)):
-        write_preview(images.snapshot(), roots, {}, image_source=images.library)
+        write_preview(
+            images.snapshot(),
+            roots,
+            {},
+            image_source=images.library,
+            media_plan=images.plan(),
+        )
     assert all(p.read_bytes() == raw for p, raw in old.items())
     assert not (roots.preview / "snapshots/versions").exists()
     assert not roots.formal.exists()
@@ -409,7 +458,11 @@ def test_image_source_roots_must_be_disjoint(
         source = formal
     with pytest.raises(ValueError, match="disjoint"):
         write_preview(
-            images.snapshot(), Roots(preview, formal), {}, image_source=source
+            images.snapshot(),
+            Roots(preview, formal),
+            {},
+            image_source=source,
+            media_plan=images.plan(),
         )
     assert list(tmp_path.iterdir()) == []
 
@@ -476,6 +529,7 @@ def test_writer_rejects_relative_preview_before_writes(
             Roots(Path("relative-preview"), tmp_path / "formal"),
             {},
             image_source=images.library,
+            media_plan=images.plan(),
         )
     assert list(tmp_path.iterdir()) == []
 

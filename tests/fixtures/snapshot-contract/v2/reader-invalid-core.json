@@ -4,7 +4,7 @@
     "target": "manifest",
     "path": [
       "files",
-      2,
+      19,
       "dependencies",
       0,
       "sha256"
@@ -14,7 +14,7 @@
   },
   {
     "name": "base-hash",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -28,13 +28,13 @@
   },
   {
     "name": "row-index-out-of-range",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/1",
     "path": [
       "tables",
       "printing",
       0,
       "rows",
-      1,
+      0,
       0
     ],
     "value": 2,
@@ -42,21 +42,7 @@
   },
   {
     "name": "row-index-duplicate",
-    "target": "detail",
-    "path": [
-      "tables",
-      "printing",
-      0,
-      "rows",
-      1,
-      0
-    ],
-    "value": 0,
-    "rehash": true
-  },
-  {
-    "name": "row-index-missing",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/1",
     "path": [
       "tables",
       "printing",
@@ -69,6 +55,39 @@
         [
           [
             0,
+            "t:ja:c011ad4340c14396",
+            "t:ja:b17a760c59cb19db",
+            null,
+            "verified",
+            [],
+            [
+              [
+                0,
+                "t:ja:b17a760c59cb19db",
+                "rule"
+              ]
+            ],
+            [
+              [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:effect",
+                "own_source"
+              ]
+            ],
+            [
+              [
+                "name",
+                "Synthetic old front",
+                true,
+                "Synthetic printed correction",
+                "https://example.invalid/correction"
+              ]
+            ]
+          ],
+          [
+            1,
             null,
             null,
             null,
@@ -77,6 +96,44 @@
             [],
             [],
             []
+          ]
+        ]
+      ],
+      [
+        0,
+        [
+          [
+            0,
+            "t:ja:c011ad4340c14396",
+            "t:ja:b17a760c59cb19db",
+            null,
+            "verified",
+            [],
+            [
+              [
+                0,
+                "t:ja:b17a760c59cb19db",
+                "rule"
+              ]
+            ],
+            [
+              [
+                "effect",
+                null,
+                "zh-Hant",
+                "tr:effect",
+                "own_source"
+              ]
+            ],
+            [
+              [
+                "name",
+                "Synthetic old front",
+                true,
+                "Synthetic printed correction",
+                "https://example.invalid/correction"
+              ]
+            ]
           ],
           [
             1,
@@ -92,12 +149,24 @@
         ]
       ]
     ],
+    "rehash": true
+  },
+  {
+    "name": "row-index-missing",
+    "target": "text/detail/home_set/set%3Aa/band/0",
+    "path": [
+      "tables",
+      "printing",
+      0,
+      "rows"
+    ],
+    "value": [],
     "rehash": true,
     "error": "Missing, duplicate, unordered or out-of-range row_index"
   },
   {
     "name": "face-ordinal-out-of-range",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -113,7 +182,7 @@
   },
   {
     "name": "face-ordinal-duplicate",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -129,7 +198,7 @@
   },
   {
     "name": "face-ordinal-missing",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -156,7 +225,7 @@
   },
   {
     "name": "dangling-text",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -170,7 +239,7 @@
   },
   {
     "name": "duplicate-translation",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -199,7 +268,7 @@
   },
   {
     "name": "wrong-translation-partition",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -221,7 +290,7 @@
   },
   {
     "name": "wrong-descriptor",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "types",
       "Section",
@@ -235,7 +304,7 @@
   },
   {
     "name": "wrong-columns",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -253,7 +322,7 @@
     "target": "manifest",
     "path": [
       "files",
-      2,
+      19,
       "row_counts",
       0,
       "count"
@@ -281,7 +350,7 @@
       "partitioning",
       "bucket_count"
     ],
-    "value": 2,
+    "value": 1,
     "rehash": false
   },
   {
@@ -290,7 +359,7 @@
     "path": [
       "min_reader_version"
     ],
-    "value": "2.0.0",
+    "value": "3.0.0",
     "rehash": false
   },
   {
@@ -298,7 +367,7 @@
     "target": "manifest",
     "path": [
       "files",
-      2,
+      19,
       "dependencies"
     ],
     "value": [],
@@ -321,7 +390,7 @@
   },
   {
     "name": "malformed-text-id",
-    "target": "detail",
+    "target": "text/detail/global/global/band/23",
     "path": [
       "tables",
       "text_unit",
@@ -335,7 +404,7 @@
   },
   {
     "name": "current-in-history",
-    "target": "history",
+    "target": "text/history/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -349,7 +418,7 @@
   },
   {
     "name": "dangling-vocabulary",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -369,7 +438,7 @@
   },
   {
     "name": "spelling-undeclared",
-    "target": "detail",
+    "target": "text/detail/global/global/band/18",
     "path": [
       "tables",
       "text_symbol",
@@ -386,7 +455,7 @@
   },
   {
     "name": "spelling-disabled-uint",
-    "target": "detail",
+    "target": "text/detail/global/global/band/18",
     "path": [
       "tables",
       "text_symbol",
@@ -404,7 +473,7 @@
   },
   {
     "name": "spelling-disabled-variable",
-    "target": "detail",
+    "target": "text/detail/global/global/band/18",
     "path": [
       "tables",
       "text_symbol",
@@ -422,7 +491,7 @@
   },
   {
     "name": "parameter-inverted",
-    "target": "detail",
+    "target": "text/detail/global/global/band/18",
     "path": [
       "tables",
       "text_symbol",
@@ -441,7 +510,7 @@
   },
   {
     "name": "parameter-duplicate",
-    "target": "detail",
+    "target": "text/detail/global/global/band/18",
     "path": [
       "tables",
       "text_symbol",
@@ -478,7 +547,7 @@
   },
   {
     "name": "parameter-unsorted",
-    "target": "detail",
+    "target": "text/detail/global/global/band/18",
     "path": [
       "tables",
       "text_symbol",
@@ -512,7 +581,7 @@
   },
   {
     "name": "hint-parameters-disagree",
-    "target": "detail",
+    "target": "text/detail/global/global/band/6",
     "path": [
       "tables",
       "ruling_revision",
@@ -533,7 +602,7 @@
   },
   {
     "name": "variant-unapproved",
-    "target": "images",
+    "target": "images/detail/global/global/band/55",
     "path": [
       "tables",
       "image_asset",
@@ -548,7 +617,7 @@
   },
   {
     "name": "variant-unavailable",
-    "target": "images",
+    "target": "images/detail/global/global/band/55",
     "path": [
       "tables",
       "image_asset",
@@ -581,7 +650,7 @@
   },
   {
     "name": "revision-date-unicode",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -595,7 +664,7 @@
   },
   {
     "name": "pending-cross-face-observation",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -614,7 +683,7 @@
   },
   {
     "name": "pending-candidate-without-own-observation",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -633,7 +702,7 @@
   },
   {
     "name": "pending-null-cannot-replace-available-observation",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -652,7 +721,7 @@
   },
   {
     "name": "pending-undated-inventory-incomplete",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -669,7 +738,7 @@
   },
   {
     "name": "pending-preserves-valid-current",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -689,7 +758,7 @@
   },
   {
     "name": "pending-current-display-must-match",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -709,7 +778,7 @@
   },
   {
     "name": "pending-display-not-candidate",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -728,7 +797,7 @@
     "error": "Display is not a pending candidate",
     "setup": [
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -740,7 +809,7 @@
         "value": []
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -757,7 +826,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "card_engine_support",
@@ -776,7 +845,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -792,7 +861,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/global/global/band/7",
         "path": [
           "tables",
           "product",
@@ -804,7 +873,7 @@
         "value": "2026-01-01"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/global/global/band/7",
         "path": [
           "tables",
           "product",
@@ -816,7 +885,7 @@
         "value": "day"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "printing_product"
@@ -824,10 +893,10 @@
         "value": [
           {
             "owner": {
-              "kind": "home_set",
-              "id": "set:a"
+              "id": "set:a",
+              "kind": "home_set"
             },
-            "bucket": 0,
+            "bucket": 29,
             "partition": "bootstrap",
             "base": null,
             "columns": [
@@ -852,11 +921,31 @@
                 "unknown"
               ]
             ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": []
           }
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face_revision",
@@ -868,7 +957,7 @@
         "value": "r:a1"
       },
       {
-        "target": "history",
+        "target": "text/history/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face_revision",
@@ -883,7 +972,7 @@
   },
   {
     "name": "pending-display-cross-face",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -894,12 +983,11 @@
     ],
     "value": "f:b",
     "rehash": true,
-    "error": "Current revision belongs",
-    "setup": []
+    "error": "Current revision belongs"
   },
   {
     "name": "pending-display-cross-region",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face_revision",
@@ -910,12 +998,11 @@
     ],
     "value": "en",
     "rehash": true,
-    "error": "Current revision belongs",
-    "setup": []
+    "error": "Current revision belongs"
   },
   {
     "name": "pending-latest-without-day",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -934,7 +1021,7 @@
     "error": "complete release day",
     "setup": [
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -946,7 +1033,7 @@
         "value": []
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -963,7 +1050,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "card_engine_support",
@@ -985,7 +1072,7 @@
   },
   {
     "name": "pending-latest-null-candidate",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing_product"
@@ -993,10 +1080,10 @@
     "value": [
       {
         "owner": {
-          "kind": "home_set",
-          "id": "set:a"
+          "id": "set:a",
+          "kind": "home_set"
         },
-        "bucket": 0,
+        "bucket": 29,
         "partition": "bootstrap",
         "base": null,
         "columns": [
@@ -1019,7 +1106,28 @@
             "other",
             null,
             "unknown"
-          ],
+          ]
+        ]
+      },
+      {
+        "owner": {
+          "id": "set:a",
+          "kind": "home_set"
+        },
+        "bucket": 43,
+        "partition": "bootstrap",
+        "base": null,
+        "columns": [
+          "printing_id",
+          "product_id",
+          "available_on",
+          "date_precision",
+          "date_raw",
+          "inclusion_kind",
+          "note_unit_id",
+          "first_inclusion_state"
+        ],
+        "rows": [
           [
             "p:b",
             "prod:null",
@@ -1037,7 +1145,7 @@
     "error": "unavailable/latest",
     "setup": [
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1049,7 +1157,7 @@
         "value": []
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1066,7 +1174,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "card_engine_support",
@@ -1085,7 +1193,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1101,7 +1209,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/global/global/band/7",
         "path": [
           "tables",
           "product",
@@ -1113,7 +1221,7 @@
         "value": "2026-01-01"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/global/global/band/7",
         "path": [
           "tables",
           "product",
@@ -1125,7 +1233,7 @@
         "value": "day"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "printing_product"
@@ -1133,10 +1241,10 @@
         "value": [
           {
             "owner": {
-              "kind": "home_set",
-              "id": "set:a"
+              "id": "set:a",
+              "kind": "home_set"
             },
-            "bucket": 0,
+            "bucket": 29,
             "partition": "bootstrap",
             "base": null,
             "columns": [
@@ -1161,11 +1269,31 @@
                 "unknown"
               ]
             ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": []
           }
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1182,7 +1310,7 @@
   },
   {
     "name": "pending-display-not-latest",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -1201,7 +1329,7 @@
     "error": "unavailable/latest",
     "setup": [
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1213,7 +1341,7 @@
         "value": []
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1230,7 +1358,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "card_engine_support",
@@ -1249,7 +1377,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1265,7 +1393,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/global/global/band/7",
         "path": [
           "tables",
           "product",
@@ -1277,7 +1405,7 @@
         "value": "2026-01-01"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/global/global/band/7",
         "path": [
           "tables",
           "product",
@@ -1289,7 +1417,7 @@
         "value": "day"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "printing_product"
@@ -1297,10 +1425,10 @@
         "value": [
           {
             "owner": {
-              "kind": "home_set",
-              "id": "set:a"
+              "id": "set:a",
+              "kind": "home_set"
             },
-            "bucket": 0,
+            "bucket": 29,
             "partition": "bootstrap",
             "base": null,
             "columns": [
@@ -1325,11 +1453,31 @@
                 "unknown"
               ]
             ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": []
           }
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1343,7 +1491,7 @@
         "value": []
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1359,7 +1507,7 @@
         "value": "r:a1"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "printing_product"
@@ -1367,10 +1515,10 @@
         "value": [
           {
             "owner": {
-              "kind": "home_set",
-              "id": "set:a"
+              "id": "set:a",
+              "kind": "home_set"
             },
-            "bucket": 0,
+            "bucket": 29,
             "partition": "bootstrap",
             "base": null,
             "columns": [
@@ -1393,7 +1541,28 @@
                 "other",
                 null,
                 "unknown"
-              ],
+              ]
+            ]
+          },
+          {
+            "owner": {
+              "id": "set:a",
+              "kind": "home_set"
+            },
+            "bucket": 43,
+            "partition": "bootstrap",
+            "base": null,
+            "columns": [
+              "printing_id",
+              "product_id",
+              "available_on",
+              "date_precision",
+              "date_raw",
+              "inclusion_kind",
+              "note_unit_id",
+              "first_inclusion_state"
+            ],
+            "rows": [
               [
                 "p:b",
                 "prod:null",
@@ -1409,13 +1578,13 @@
         ]
       },
       {
-        "target": "detail",
+        "target": "text/detail/home_set/set%3Aa/band/1",
         "path": [
           "tables",
           "printing",
           0,
           "rows",
-          1,
+          0,
           1,
           0,
           5
@@ -1432,7 +1601,7 @@
   },
   {
     "name": "pending-region-without-printing",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -1461,12 +1630,11 @@
       ]
     ],
     "rehash": true,
-    "error": "requires pending wording",
-    "setup": []
+    "error": "requires pending wording"
   },
   {
     "name": "pending-candidate-cross-region",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -1484,7 +1652,7 @@
     "error": "another printing face/region",
     "setup": [
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "printing",
@@ -1496,7 +1664,7 @@
         "value": "en"
       },
       {
-        "target": "detail",
+        "target": "text/detail/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "printing",
@@ -1510,7 +1678,7 @@
         "value": []
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1562,7 +1730,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1592,7 +1760,7 @@
         ]
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "card_engine_support",
@@ -1614,7 +1782,7 @@
   },
   {
     "name": "pending-observation-cross-region",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -1636,7 +1804,7 @@
     "error": "Observation revision belongs",
     "setup": [
       {
-        "target": "history",
+        "target": "text/history/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face_revision",
@@ -1648,7 +1816,7 @@
         "value": "en"
       },
       {
-        "target": "bootstrap",
+        "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
         "path": [
           "tables",
           "face",
@@ -1667,7 +1835,7 @@
   },
   {
     "name": "pending-wording-unsorted",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -1723,12 +1891,11 @@
       ]
     ],
     "rehash": true,
-    "error": "Rows must be sorted with unique keys",
-    "setup": []
+    "error": "Rows must be sorted with unique keys"
   },
   {
     "name": "pending-candidates-unsorted",
-    "target": "bootstrap",
+    "target": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "face",
@@ -1750,12 +1917,11 @@
       ]
     ],
     "rehash": true,
-    "error": "Rows must be sorted with unique keys",
-    "setup": []
+    "error": "Rows must be sorted with unique keys"
   },
   {
     "name": "pending-observations-unsorted",
-    "target": "detail",
+    "target": "text/detail/home_set/set%3Aa/band/0",
     "path": [
       "tables",
       "printing",
@@ -1779,7 +1945,6 @@
       ]
     ],
     "rehash": true,
-    "error": "Rows must be sorted with unique keys",
-    "setup": []
+    "error": "Rows must be sorted with unique keys"
   }
 ]

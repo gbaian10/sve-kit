@@ -7,7 +7,6 @@ from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.values import array, object_value, parse, string
 
 if TYPE_CHECKING:
@@ -29,20 +28,14 @@ def _percentiles(values: list[int]) -> dict[str, JsonValue]:
 
 def _index(
     snapshot: Snapshot,
-) -> tuple[dict[str, set[str]], dict[str, list[tuple[str, str]]], list[list[str]]]:
-    assets: dict[str, set[str]] = {}
+) -> tuple[dict[str, list[tuple[str, str]]], list[list[str]]]:
     bindings: dict[str, list[tuple[str, str]]] = {}
     owners: dict[str, set[str]] = {}
     regions: dict[str, str] = {}
     for key, blob in snapshot.payloads.items():
         value = object_value(parse(blob.raw))
         for table, entries in object_value(value.get("tables", {})).items():
-            if table not in {
-                "printing",
-                "printing_image",
-                "image_asset",
-                "image_variant",
-            }:
+            if table not in {"printing", "printing_image"}:
                 continue
             for raw in array(entries):
                 fragment = object_value(raw)
@@ -51,11 +44,6 @@ def _index(
                     row = dict(zip(columns, array(raw_row), strict=True))
                     if table == "printing" and fragment["partition"] == "bootstrap":
                         regions[string(row["id"])] = string(row["region"])
-                    elif table in {"image_asset", "image_variant"}:
-                        image = string(
-                            row["id" if table == "image_asset" else "image_id"]
-                        )
-                        assets.setdefault(image, set()).add(key)
                     elif table == "printing_image":
                         printing = string(row["printing_id"])
                         bindings.setdefault(printing, []).append(
@@ -63,7 +51,7 @@ def _index(
                         )
                         owner = string(object_value(fragment["owner"])["id"])
                         owners.setdefault(owner, set()).add(printing)
-    return assets, bindings, _pages(owners, regions)
+    return bindings, _pages(owners, regions)
 
 
 def _pages(owners: dict[str, set[str]], regions: dict[str, str]) -> list[list[str]]:
@@ -119,18 +107,16 @@ class Replay:
 
 def page_image_cost(snapshot: Snapshot) -> dict[str, JsonValue]:
     """Replay sorted 24-printing owner pages with all their face images, without blobs."""
-    assets, bindings, pages = _index(snapshot)
+    bindings, pages = _index(snapshot)
     replay = Replay()
     has_br = all(blob.br is not None for blob in snapshot.payloads.values())
     for page in pages:
         wanted = {image for printing in page for _, image in bindings[printing]}
         needed = {key for printing in page for key, _ in bindings[printing]}
-        if snapshot.manifest["format_version"] != MEDIA:
-            needed |= {key for image in wanted for key in assets[image]}
         replay.page(snapshot, needed, wanted)
     return {
         "model": "sorted owner/region pages; 24 printings, all bound images; metadata only",
-        "source_details_required": snapshot.manifest["format_version"] != MEDIA,
+        "source_details_required": False,
         "page_count": len(pages),
         "images_per_page": _percentiles(replay.images),
         "cold": {

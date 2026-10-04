@@ -9,7 +9,7 @@ from sve_carddb.snapshot.contract import (
     required_types,
     row_type,
 )
-from sve_carddb.snapshot.profiles import LEGACY
+from sve_carddb.snapshot.profiles import MEDIA
 from sve_carddb.snapshot.values import array, object_value, string
 
 
@@ -33,7 +33,7 @@ def _value(
 
 
 def encode(
-    name: str, row: dict[str, JsonValue], format_version: str = LEGACY
+    name: str, row: dict[str, JsonValue], format_version: str = MEDIA
 ) -> list[JsonValue]:
     """Reject missing/extra fields before emitting positional wire values."""
     names = columns(name, format_version)
@@ -48,7 +48,7 @@ def encode(
 
 
 def container(
-    tables: dict[str, JsonValue], format_version: str = LEGACY
+    tables: dict[str, JsonValue], format_version: str = MEDIA
 ) -> dict[str, JsonValue]:
     """Attach exactly the transitive nested descriptors used by these fragments."""
     used: set[str] = set()

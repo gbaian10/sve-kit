@@ -19,6 +19,7 @@ from sve_carddb.registry.records import PrintingData
 from sve_carddb.registry.snapshot import load_registry
 from sve_carddb.snapshot.export import Ownership, export_snapshot
 from sve_carddb.snapshot.export.compression import python_brotli, verify_brotli
+from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.preview import (
     Roots,
     _write,
@@ -33,7 +34,7 @@ from sve_carddb.snapshot.preview.build import (
     publication_printings,
 )
 from sve_carddb.snapshot.preview.commands import verify_inputs
-from sve_carddb.snapshot.project import project
+from sve_carddb.snapshot.project import Projection, project
 from sve_carddb.snapshot.project.records import art_records, initial
 from sve_carddb.snapshot.project.source import Source
 from sve_carddb.snapshot.publication import require_formal, require_preview
@@ -60,7 +61,7 @@ if TYPE_CHECKING:
 
     from sve_carddb.registry.storage import Entry
     from sve_carddb.snapshot.export import Snapshot
-    from sve_carddb.snapshot.project import Projection
+    from sve_carddb.snapshot.media import MediaPlan
 
     from .shared_case_fixtures import CorrectionCaseTemplate, TextCaseTemplate
     from .text_observation_fixtures import Case
@@ -83,7 +84,9 @@ def logical() -> tuple[Projection, Ownership]:
                 "image_variant": [],
             },
         )
-        return projection, Ownership.from_database(db, projection)
+        return prepare_media(
+            projection, None, revision=1
+        ).projection, Ownership.from_database(db, projection)
 
 
 @pytest.fixture(params=["formal_version", "en_region"])
@@ -101,7 +104,9 @@ def test_writer_rejects_non_preview_manifest(
 ) -> None:
     with pytest.raises(ValueError, match="Preview requires"):
         write_preview(
-            invalid_preview, Roots(tmp_path / "preview", tmp_path / "formal"), {}
+            invalid_preview,
+            Roots(tmp_path / "preview", tmp_path / "formal"),
+            {},
         )
     assert list(tmp_path.iterdir()) == []
 
@@ -132,7 +137,7 @@ def test_export_entry_rejects_non_preview_manifest(
     )
     assert isinstance(result.exception, ValueError)
     assert str(result.exception).startswith("Preview requires")
-    assert not (tmp_path / "preview").exists()
+    assert not (tmp_path / "preview/snapshots").exists()
     assert not (tmp_path / "formal").exists()
 
 
@@ -186,7 +191,9 @@ def test_direct_writer_refuses_overlapping_roots(
     if relation == "formal_child":
         formal /= "child"
     with pytest.raises(ValueError, match="disjoint"):
-        write_preview(exported, Roots(preview, formal), {})
+        write_preview(
+            exported, Roots(preview, formal), {}, media_plan=preview_plan(exported)
+        )
     assert list(tmp_path.iterdir()) == []
 
 
@@ -215,7 +222,12 @@ def test_writer_preserves_formal_state_and_independent_join(
     roots.formal.mkdir()
     sentinel = roots.formal / "active-cache"
     sentinel.write_bytes(b"formal state")
-    report = write_preview(exported, roots, {"input_sha256": "sha256:" + "a" * 64})
+    report = write_preview(
+        exported,
+        roots,
+        {"input_sha256": "sha256:" + "a" * 64},
+        media_plan=preview_plan(exported),
+    )
     pointer = object_value(
         parse((roots.preview / "snapshots/preview/current.json").read_bytes())
     )
@@ -234,7 +246,13 @@ def test_writer_preserves_formal_state_and_independent_join(
     assert sentinel.read_bytes() == b"formal state"
     assert list(roots.formal.iterdir()) == [sentinel]
     assert (
-        write_preview(exported, roots, {"input_sha256": "sha256:" + "a" * 64}) == report
+        write_preview(
+            exported,
+            roots,
+            {"input_sha256": "sha256:" + "a" * 64},
+            media_plan=preview_plan(exported),
+        )
+        == report
     )
 
 
@@ -246,7 +264,7 @@ def test_failed_artifact_write_keeps_old_preview_pointer(
     first = object_value(array(exported.manifest["files"])[0])
     _write(roots, string(first["path"]), b"corrupt existing bytes", immutable=True)
     with pytest.raises(ValueError, match="Immutable"):
-        write_preview(exported, roots, {})
+        write_preview(exported, roots, {}, media_plan=preview_plan(exported))
     assert (
         roots.preview / "snapshots/preview/current.json"
     ).read_bytes() == b"old preview"
@@ -280,7 +298,9 @@ def test_preview_pointer_follows_every_immutable_member(
 
     def observed_write(roots: Roots, path: str, raw: bytes, *, immutable: bool) -> None:
         nonlocal pointer_written
-        if not immutable:
+        if path == "private/media-committed.json":
+            assert pointer_written
+        elif not immutable:
             assert path == "snapshots/preview/current.json"
             assert expected <= sealed
             assert all((roots.preview / member).is_file() for member in expected)
@@ -292,7 +312,7 @@ def test_preview_pointer_follows_every_immutable_member(
             sealed.add(path)
 
     monkeypatch.setattr(writer_module, "_write", observed_write)
-    write_preview(exported, roots, {}, brotli=codec)
+    write_preview(exported, roots, {}, brotli=codec, media_plan=preview_plan(exported))
     assert pointer_written
 
 
@@ -313,7 +333,7 @@ def test_late_immutable_failure_preserves_old_pointer(
 
     monkeypatch.setattr(writer_module, "_write", failing_write)
     with pytest.raises(OSError, match="late immutable"):
-        write_preview(exported, roots, {})
+        write_preview(exported, roots, {}, media_plan=preview_plan(exported))
     assert (
         roots.preview / "snapshots/preview/current.json"
     ).read_bytes() == b"old preview"
@@ -394,7 +414,11 @@ def test_build_keeps_errata_pending_and_filters_diagnostic_identity(
     assert built.projection.metadata["source_windows"] == []
     assert built.projection.metadata["restriction_coverage"] == []
     assert built.report["input_sha256"] == digest(built.input_content)
-    snapshot = export_snapshot(built.projection, built.ownership, recipe.batch())
+    snapshot = export_snapshot(
+        prepare_media(built.projection, None, revision=1).projection,
+        built.ownership,
+        recipe.batch(),
+    )
     snapshot.verify(built.projection)
     with pytest.raises(ValueError, match="immutable input"):
         verify_inputs(Roots(recipe.repo / "output", tmp_path / "formal"), recipe)
@@ -510,9 +534,11 @@ def test_build_excludes_conflicted_publication_but_retains_identity(
         case.plan.publication_identity()
     )
     assert built.report["excluded_printings"]
-    export_snapshot(built.projection, built.ownership, recipe.batch()).verify(
-        built.projection
-    )
+    export_snapshot(
+        prepare_media(built.projection, None, revision=1).projection,
+        built.ownership,
+        recipe.batch(),
+    ).verify(prepare_media(built.projection, None, revision=1).projection)
 
 
 def test_project_refuses_publication_printing_absent_from_build() -> None:
@@ -554,10 +580,10 @@ def cli_recipe(tmp_path: Path) -> dict[str, JsonValue]:
     }
 
 
-@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
+@pytest.mark.parametrize("format_version", [None, "2.0.0"])
 @pytest.mark.parametrize("with_brotli", [False, True])
 def test_cli_export_explicit_env_roots(
-    format_version: str,
+    format_version: str | None,
     with_brotli: bool,
     logical: tuple[Projection, Ownership],
     tmp_path: Path,
@@ -577,8 +603,7 @@ def test_cli_export_explicit_env_roots(
             "export",
             "--inputs",
             str(path),
-            "--format-version",
-            format_version,
+            *(["--format-version", format_version] if format_version else []),
             "--brotli" if with_brotli else "--no-brotli",
         ],
         env={
@@ -600,11 +625,39 @@ def test_cli_export_explicit_env_roots(
     manifest = object_value(
         parse((root / string(pointer["manifest_path"])).read_bytes())
     )
-    assert manifest["format_version"] == format_version
+    assert manifest["format_version"] == "2.0.0"
     br_files = list((root / "snapshots").rglob("*.json.br"))
     assert bool(br_files) == with_brotli
     for member in br_files:
         verify_brotli(member.read_bytes(), member.with_suffix("").read_bytes())
+
+
+@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0", "1.2.0"])
+def test_cli_rejects_retired_formats_before_inputs(
+    format_version: str, tmp_path: Path
+) -> None:
+    path = tmp_path / "inputs.json"
+    path.write_text("{}")
+    preview = tmp_path / "preview"
+    result = CliRunner().invoke(
+        app,
+        [
+            "snapshot",
+            "export",
+            "--inputs",
+            str(path),
+            "--format-version",
+            format_version,
+            "--preview-dir",
+            str(preview),
+            "--cdn-dir",
+            str(tmp_path / "formal"),
+        ],
+    )
+    assert result.exit_code != 0
+    assert isinstance(result.exception, ValueError)
+    assert str(result.exception) == "Unsupported snapshot format profile"
+    assert not preview.exists()
 
 
 def test_review_joins_follow_filtered_primary_keys() -> None:
@@ -681,3 +734,11 @@ def test_renamed_preview_is_not_a_formal_release(
     assert result.exit_code != 0
     assert "Formal release gates are not implemented yet (#34)" in result.output
     assert sorted(p.name for p in tmp_path.iterdir()) == ["renamed.json"]
+
+
+def preview_plan(snapshot: Snapshot) -> MediaPlan:
+    view = read_snapshot(
+        snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
+    )
+    config = object_value(parse(snapshot.payloads["config"].raw))
+    return prepare_media(Projection(view, config, snapshot.manifest), None, revision=1)

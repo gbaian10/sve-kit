@@ -25,15 +25,7 @@ def _members(
 ) -> dict[str, Record]:
     """Require the caller's DB-verified review set, not an independent review audit."""
     assets = {string(row["id"]): row for row in tables["image_asset"]}
-    for identifier, asset in assets.items():
-        if (
-            asset["origin"] == "third_party"
-            and asset["publication_state"] == "approved"
-            and identifier not in confirmed_images
-        ):
-            raise ValueError(
-                "Third-party preview image needs individual confirmed review"
-            )
+    require_confirmed(tables, confirmed_images)
     bound = {string(row["image_id"]) for row in tables["printing_image"]}
     members: dict[str, Record] = {}
     for variant in tables["image_variant"]:
@@ -107,9 +99,17 @@ def image_blobs(
         yield path, raw
 
 
-def verify_images(
-    tables: dict[str, list[Record]], source: Path, confirmed_images: frozenset[str]
+def require_confirmed(
+    tables: dict[str, list[Record]], confirmed_images: frozenset[str]
 ) -> None:
-    """Recheck published assets before switching the pointer to their manifest."""
-    for _path, _raw in image_blobs(tables, source, confirmed_images):
-        pass
+    """Keep the builder's DB-verified third-party review set at the output boundary."""
+    assets = {string(row["id"]): row for row in tables["image_asset"]}
+    for identifier, asset in assets.items():
+        if (
+            asset["origin"] == "third_party"
+            and asset["publication_state"] == "approved"
+            and identifier not in confirmed_images
+        ):
+            raise ValueError(
+                "Third-party preview image needs individual confirmed review"
+            )

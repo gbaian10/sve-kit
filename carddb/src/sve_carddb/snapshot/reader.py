@@ -41,8 +41,6 @@ from sve_carddb.snapshot.values import (
 if TYPE_CHECKING:
     from collections.abc import Mapping
 
-FORMAT = "1.0.0"
-CAPABILITIES = {"column-partition-v1", "fragment-container-v1"}
 type Row = dict[str, JsonValue]
 type View = dict[str, list[Row]]
 
@@ -522,12 +520,11 @@ def read_snapshot(manifest_value: JsonValue, payloads: Mapping[str, bytes]) -> V
     _current(view, fragments)
     validate_view(view, manifest, fragments)
     validate_placement(view, manifest, fragments)
-    if selected.version == MEDIA:
-        validate_media(view, fragments, files, object_value(manifest["config_ref"]))
-        config = object_value(
-            parse(payloads[string(object_value(manifest["config_ref"])["key"])])
-        )
-        validate_digital(view, config)
+    validate_media(view, fragments, files, object_value(manifest["config_ref"]))
+    config = object_value(
+        parse(payloads[string(object_value(manifest["config_ref"])["key"])])
+    )
+    validate_digital(view, config)
     return view
 
 

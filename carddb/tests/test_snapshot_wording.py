@@ -9,7 +9,7 @@ from sve_carddb.snapshot.reader import _container, _current
 from sve_carddb.snapshot.semantics import _wording_display, validate_view
 from sve_carddb.snapshot.values import array, object_value, parse, string
 
-from .test_snapshot_contract import fixture, payloads
+from .snapshot_contract_fixtures import fixture, payloads
 
 if TYPE_CHECKING:
     from sve_carddb.snapshot.reader import Fragment, Row, View

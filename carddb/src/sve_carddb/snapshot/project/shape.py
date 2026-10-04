@@ -1,5 +1,7 @@
 """Validate logical records against the same fixed descriptors as the wire contract."""
 
+import re
+
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.contract import columns, definition, validate
@@ -27,3 +29,31 @@ def tuple_value(name: str, record: dict[str, JsonValue]) -> list[JsonValue]:
     ]
     validate(name, result)
     return result
+
+
+def source_tuple(name: str, record: dict[str, JsonValue]) -> None:
+    """Validate current build inputs before media versions are reserved."""
+    if name == "printing_image":
+        if set(record) != {"printing_id", "face_id", "image_id"}:
+            raise ValueError("Source printing image whitelist mismatch")
+        for value in record.values():
+            validate("ID", value)
+    elif name == "image_variant":
+        if set(record) != {*columns(name), "path"}:
+            raise ValueError("Source image variant whitelist mismatch")
+        validate("Path", record["path"])
+        if (
+            re.fullmatch(
+                r"images/sha256/([0-9a-f]{2})/\1[0-9a-f]{62}\.webp",
+                string(record["path"]),
+            )
+            is None
+        ):
+            raise ValueError(
+                "Source image variant requires a content-addressed WebP path"
+            )
+        tuple_value(
+            name, {key: value for key, value in record.items() if key != "path"}
+        )
+    else:
+        tuple_value(name, record)

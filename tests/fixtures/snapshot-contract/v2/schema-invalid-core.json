@@ -133,7 +133,7 @@
     "name": "programs-fail-closed",
     "schema": "Programs",
     "value": {
-      "format_version": "1.0.0",
+      "format_version": "2.0.0",
       "entries": [
         {
           "id": "program:a",
@@ -166,34 +166,8 @@
     "name": "unknown-format",
     "schema": "Programs",
     "value": {
-      "format_version": "1.1.0",
+      "format_version": "3.0.0",
       "entries": []
-    }
-  },
-  {
-    "name": "preview-in-index",
-    "schema": "IndexPage",
-    "value": {
-      "index_format": 1,
-      "entries": [
-        {
-          "data_version": "preview-20260929T010203Z-0001",
-          "published_at": "2026-09-29T01:02:03Z",
-          "format_version": "1.0.0",
-          "min_reader_version": "1.0.0",
-          "required_capabilities": [
-            "column-partition-v1",
-            "fragment-container-v1"
-          ],
-          "manifest_path": "snapshots/manifests/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
-          "manifest_sha256": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
-          "engine_support_target": {
-            "engine_version": null,
-            "engine_build_hash": null,
-            "validation_policy_id": null
-          }
-        }
-      ]
     }
   },
   {
@@ -312,63 +286,6 @@
     "value": "https:///missing-host"
   },
   {
-    "name": "Index-first_data_version-unicode",
-    "schema": "Index",
-    "value": {
-      "index_format": 1,
-      "revision": 1,
-      "pages": [
-        {
-          "path": "snapshots/versions/page.json",
-          "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-          "first_data_version": "２０２６0929T010203Z-0001",
-          "last_data_version": "20260929T010203Z-0001",
-          "count": 1
-        }
-      ]
-    }
-  },
-  {
-    "name": "Index-last_data_version-unicode",
-    "schema": "Index",
-    "value": {
-      "index_format": 1,
-      "revision": 1,
-      "pages": [
-        {
-          "path": "snapshots/versions/page.json",
-          "sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-          "first_data_version": "20260929T010203Z-0001",
-          "last_data_version": "２０２６0929T010203Z-0001",
-          "count": 1
-        }
-      ]
-    }
-  },
-  {
-    "name": "IndexPage-data_version-unicode",
-    "schema": "IndexPage",
-    "value": {
-      "index_format": 1,
-      "entries": [
-        {
-          "data_version": "２０２６0929T010203Z-0001",
-          "published_at": "2026-09-29T01:02:03Z",
-          "format_version": "1.0.0",
-          "min_reader_version": "1.0.0",
-          "required_capabilities": [],
-          "manifest_path": "snapshots/manifest.json",
-          "manifest_sha256": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
-          "engine_support_target": {
-            "engine_version": null,
-            "engine_build_hash": null,
-            "validation_policy_id": null
-          }
-        }
-      ]
-    }
-  },
-  {
     "name": "URL-multiple-userinfo-separators",
     "schema": "URL",
     "value": "https://a@b@example.invalid/"
@@ -452,5 +369,85 @@
       [],
       []
     ]
+  },
+  {
+    "name": "preview-in-index-current",
+    "schema": "Index",
+    "value": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "preview-20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "2.0.0",
+        "min_reader_version": "2.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010.json",
+        "manifest_sha256": "sha256:569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010"
+      },
+      "previous": null
+    }
+  },
+  {
+    "name": "preview-in-index-previous",
+    "schema": "Index",
+    "value": {
+      "index_format": 2,
+      "revision": 3,
+      "current": {
+        "data_version": "20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "2.0.0",
+        "min_reader_version": "2.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010.json",
+        "manifest_sha256": "sha256:569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010"
+      },
+      "previous": {
+        "data_version": "preview-20260929T010203Z-0001",
+        "published_at": "2026-09-29T01:02:03Z",
+        "format_version": "2.0.0",
+        "min_reader_version": "2.0.0",
+        "required_capabilities": [
+          "column-partition-v1",
+          "digital-same-name-links-v1",
+          "fragment-container-v1",
+          "image-entity-buckets-v1",
+          "image-id-url-v1",
+          "rules-name-on-demand-v1"
+        ],
+        "engine_support_target": {
+          "engine_build_hash": null,
+          "engine_version": null,
+          "validation_policy_id": null
+        },
+        "manifest_path": "snapshots/manifests/569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010.json",
+        "manifest_sha256": "sha256:569f13bd1ab15f5e0057dea7c2b2539e9f9978cd5a557c57a5c3af6c50af4010"
+      }
+    }
   }
 ]

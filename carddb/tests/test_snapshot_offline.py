@@ -27,6 +27,7 @@ from sve_carddb.products import OfficialProducts, ProductIdentities
 from sve_carddb.registry.records import PrintingData
 from sve_carddb.snapshot import offline
 from sve_carddb.snapshot.export import export_snapshot
+from sve_carddb.snapshot.media import prepare_media
 from sve_carddb.snapshot.offline import (
     Inputs,
     RegionalInput,
@@ -260,7 +261,11 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
     assert built.projection.metadata["errata_card_ids"] == []
     assert built.projection.metadata["source_windows"] == []
     assert built.projection.metadata["restriction_coverage"] == []
-    snapshot = export_snapshot(built.projection, built.ownership, recipe.batch())
+    snapshot = export_snapshot(
+        prepare_media(built.projection, None, revision=1).projection,
+        built.ownership,
+        recipe.batch(),
+    )
     joined = read_snapshot(
         snapshot.manifest, {key: blob.raw for key, blob in snapshot.payloads.items()}
     )
@@ -269,6 +274,7 @@ def test_regional_build_projects_qa_related_and_reskin_with_complete_sources(
         snapshot,
         Roots(tmp_path / "preview", tmp_path / "formal"),
         built.report,
+        media_plan=prepare_media(built.projection, None, revision=1),
         regions=("en", "jp"),
     )
     assert report["pointer"]
@@ -403,9 +409,11 @@ def test_errata_fragments_dates_and_multiple_notices_remain_independent(
     )
     assert len(array(built.projection.metadata["errata_card_ids"])) == 1
     assert built.report["supplemental_restrictions"]
-    export_snapshot(built.projection, built.ownership, recipe.batch()).verify(
-        built.projection
-    )
+    export_snapshot(
+        prepare_media(built.projection, None, revision=1).projection,
+        built.ownership,
+        recipe.batch(),
+    ).verify(built.projection)
 
 
 @pytest.mark.parametrize(
@@ -453,7 +461,7 @@ def test_offline_coverage_remains_unknown(
         require_offline_coverage(poisoned, errata=False)
 
 
-@pytest.mark.parametrize("format_version", ["1.0.0", "1.1.0"])
+@pytest.mark.parametrize("format_version", ["2.0.0"])
 def test_offline_cli_writes_private_bundle_and_dual_preview(
     format_version: str,
     prepared: tuple[Case, Inputs, tuple[CardPage, ...]],

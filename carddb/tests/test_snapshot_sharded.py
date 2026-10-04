@@ -8,16 +8,15 @@ from typing import TYPE_CHECKING
 from zlib import compress as synthetic_compress
 
 import pytest
-from jsonschema import Draft202012Validator, ValidationError
+from jsonschema import ValidationError
 from pydantic import JsonValue
 
-from sve_carddb.snapshot.contract import definition, schema, tables, validate
+from sve_carddb.snapshot.contract import validate
 from sve_carddb.snapshot.export import Brotli, Ownership, Snapshot, export_snapshot
 from sve_carddb.snapshot.export.layout import Group, Layout
 from sve_carddb.snapshot.export.measure import measure, update
 from sve_carddb.snapshot.export.page_cost import Replay, page_image_cost
-from sve_carddb.snapshot.generate_schema import generate
-from sve_carddb.snapshot.profiles import LEGACY, SHARDED, profile
+from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.project import Projection
 from sve_carddb.snapshot.reader import read_snapshot, read_text_all
 from sve_carddb.snapshot.values import (
@@ -31,7 +30,7 @@ from sve_carddb.snapshot.values import (
     string,
 )
 
-from .test_snapshot_contract import fixture
+from .snapshot_contract_fixtures import fixture
 from .test_snapshot_export import BATCH, cloned
 from .test_snapshot_export import logical as logical  # ruff: ignore[useless-import-alias] -- reuse expensive module setup
 from .test_snapshot_wording import pending_view
@@ -39,7 +38,7 @@ from .test_snapshot_wording import pending_view
 if TYPE_CHECKING:
     from collections.abc import Iterator
 
-GOLDEN = Path(__file__).resolve().parents[2] / "tests/fixtures/snapshot-contract/v1_1"
+GOLDEN = Path(__file__).resolve().parents[2] / "tests/fixtures/snapshot-contract/v2"
 CODEC = Brotli("synthetic-zlib-not-real-br-v1", synthetic_compress)
 
 
@@ -55,6 +54,37 @@ def fragments(snapshot: Snapshot) -> Iterator[tuple[str, str, dict[str, JsonValu
 @pytest.fixture(scope="module")
 def expanded(logical: tuple[Projection, Ownership]) -> tuple[Projection, Ownership]:
     projection, ownership = cloned(logical)
+    projection.tables["image_asset"][0].update(
+        availability="available", publication_state="approved", origin="official"
+    )
+    projection.tables["image_variant"] = [
+        {
+            "image_id": "image",
+            "size_key": size,
+            "format": "webp",
+            "width": width,
+            "height": height,
+            "bytes": 100,
+        }
+        for size, width, height in [
+            ("art_m", 160, 120),
+            ("art_s", 80, 60),
+            ("card_l", 320, 448),
+            ("card_m", 160, 224),
+            ("card_s", 80, 112),
+        ]
+    ]
+    binding = projection.tables["printing_image"][0]
+    binding.update(
+        publication_state="approved",
+        availability="available",
+        card_version=1,
+        art_version=1,
+        variants=[
+            {key: row[key] for key in ("size_key", "width", "height")}
+            for row in projection.tables["image_variant"]
+        ],
+    )
     homes = dict(ownership.printing_home)
     seed = deepcopy(projection.tables["printing"][0])
     for n in range(40):
@@ -68,7 +98,7 @@ def expanded(logical: tuple[Projection, Ownership]) -> tuple[Projection, Ownersh
 
 @pytest.fixture(scope="module")
 def sharded(expanded: tuple[Projection, Ownership]) -> Snapshot:
-    return export_snapshot(*expanded, BATCH, brotli=CODEC, format_version=SHARDED)
+    return export_snapshot(*expanded, BATCH, brotli=CODEC, format_version=MEDIA)
 
 
 @pytest.fixture(scope="module")
@@ -82,22 +112,6 @@ def golden() -> tuple[dict[str, JsonValue], dict[str, bytes], JsonValue]:
         for f in (object_value(raw),)
     }
     return manifest, blobs, parse((GOLDEN / "expected-logical.json").read_bytes())
-
-
-def test_frozen_legacy_and_new_schema_regeneration() -> None:
-    for version, directory in ((LEGACY, "v1"), (SHARDED, "v1_1")):
-        Draft202012Validator.check_schema(schema(version))
-        resource = (
-            Path(__file__).resolve().parents[1]
-            / "src/sve_carddb/snapshot/schema"
-            / directory
-            / "contract.schema.json"
-        )
-        assert generate(version) == resource.read_bytes()
-    for name, old in object_value(schema()["$defs"]).items():
-        if "x-columns" in object_value(old):
-            assert definition(name, SHARDED) == old
-    assert definition("Container", SHARDED)["x-tables"] == list(tables())
 
 
 def test_independent_minor_golden(
@@ -149,15 +163,17 @@ def test_same_profile_produces_equal_bytes(
         *expanded,
         replace(BATCH, data_version="preview-20261003T010203Z-0001"),
         brotli=CODEC,
-        format_version=SHARDED,
+        format_version=MEDIA,
     )
     sharded.assert_identical(again)
     sharded.verify(expanded[0])
     assert object_value(sharded.manifest["partitioning"])["bucket_count"] == 64
     assert sharded.manifest["required_capabilities"] == [
         "column-partition-v1",
+        "digital-same-name-links-v1",
         "fragment-container-v1",
         "image-entity-buckets-v1",
+        "image-id-url-v1",
         "rules-name-on-demand-v1",
     ]
 
@@ -194,7 +210,7 @@ def test_owner_exception_is_fixed(
         projection,
         Ownership(dict.fromkeys(ownership.printing_home, owner)),
         BATCH,
-        format_version=SHARDED,
+        format_version=MEDIA,
     )
     keys = {
         k
@@ -244,7 +260,7 @@ def test_full_pk_variant_mutation_is_rejected_by_independent_reader(
     with pytest.raises(
         ValueError, match=r"^Fragment entity bucket does not match fixed profile$"
     ):
-        export_snapshot(*expanded, BATCH, format_version=SHARDED)
+        export_snapshot(*expanded, BATCH, format_version=MEDIA)
 
 
 def test_rules_name_tables_are_wholly_on_demand(sharded: Snapshot) -> None:
@@ -263,7 +279,7 @@ def test_pending_display_and_dual_faces_survive_minor() -> None:
         Projection(view, object_value(fixture("payloads/config.json")), manifest),
         Ownership({"p:a": "set:a", "p:b": "set:a"}),
         BATCH,
-        format_version=SHARDED,
+        format_version=MEDIA,
     )
     result.verify(Projection(view, {}, {}))
     assert not view["face"][0]["current"]
@@ -301,7 +317,7 @@ def test_image_increment_changes_only_one_entity_file(
     projection, ownership = cloned(expanded)
     projection.tables["image_variant"][0]["bytes"] = 321
     changed = export_snapshot(
-        projection, ownership, BATCH, brotli=CODEC, format_version=SHARDED
+        projection, ownership, BATCH, brotli=CODEC, format_version=MEDIA
     )
     cost = update(sharded, changed, brotli=CODEC)
     assert cost["changed_keys"] == [
@@ -317,7 +333,7 @@ def test_image_increment_changes_only_one_entity_file(
 def test_metadata_page_cost_distinguishes_transfer_from_heap(sharded: Snapshot) -> None:
     cost = page_image_cost(sharded)
     assert cost["page_count"] == 1
-    assert object_value(object_value(cost["cold"])["requests"])["max"] == 2
+    assert object_value(object_value(cost["cold"])["requests"])["max"] == 1
     assert object_value(cost["warm"])["requests"] == 0
     assert cost["image_blob_bytes"] is None
     assert object_value(cost["lru"])["fits"] is True
@@ -349,7 +365,7 @@ def test_lru_pins_over_limit_and_evicts_unpinned(sharded: Snapshot) -> None:
 
 def test_default_schema_does_not_silently_negotiate_new_minor() -> None:
     with pytest.raises(ValidationError):
-        validate("Programs", {"format_version": SHARDED, "entries": []})
+        validate("Programs", {"format_version": "3.0.0", "entries": []})
     with pytest.raises(ValueError, match=r"^Unsupported snapshot format profile$"):
         profile("1.1.1")
 
@@ -368,7 +384,7 @@ def image_mutation(
     key = string(file["key"])
     value = object_value(parse(blobs.pop(key)))
     if change == "mixed_profile":
-        value["format_version"] = LEGACY
+        value["format_version"] = "1.0.0"
     elif change == "wrong_key":
         file["key"] = key + "/extra"
     else:
@@ -450,7 +466,16 @@ def test_non_available_images_retain_metadata_without_variants(
             availability=availability, publication_state=state, withdrawal_reason=reason
         )
     projection.tables["image_variant"] = []
-    result = export_snapshot(projection, ownership, BATCH, format_version=SHARDED)
+    for binding in projection.tables["printing_image"]:
+        binding.update(
+            availability=availability,
+            publication_state=state,
+            withdrawal_reason=reason,
+            variants=[],
+            card_version=None,
+            art_version=None,
+        )
+    result = export_snapshot(projection, ownership, BATCH, format_version=MEDIA)
     assert len([f for _, t, f in fragments(result) if t == "image_asset"]) == 1
     assert not any(t == "image_variant" for _, t, _ in fragments(result))
     result.verify(projection)
@@ -506,7 +531,7 @@ def test_incremental_replacements_are_bounded(
         assert old != text["id"]
         prefix = "bootstrap/bootstrap/global/"
     result = export_snapshot(
-        projection, ownership, BATCH, brotli=CODEC, format_version=SHARDED
+        projection, ownership, BATCH, brotli=CODEC, format_version=MEDIA
     )
     keys = list(
         map(string, array(update(sharded, result, brotli=CODEC)["changed_keys"]))
@@ -532,7 +557,7 @@ def test_incremental_replacements_are_bounded(
 
 
 def test_exact_fixed_band_width_matrix() -> None:
-    selected = profile(SHARDED)
+    selected = profile(MEDIA)
     assert list(
         starmap(
             selected.width,
@@ -549,7 +574,7 @@ def test_exact_fixed_band_width_matrix() -> None:
                 ("text", "history", "home_set", "BP02"),
             ],
         )
-    ) == [1, 64, 8, 32, 32, 64, 2, 32, 32, 32]
+    ) == [1, 32, 8, 32, 32, 64, 2, 32, 32, 32]
 
 
 def test_shared_full_sha_bucket_goldens() -> None:
@@ -566,7 +591,7 @@ def test_pending_to_current_rebuilds_only_owner_bootstrap_and_details() -> None:
     config = object_value(fixture("payloads/config.json"))
     ownership = Ownership({"p:a": "set:a", "p:b": "set:a"})
     initial = export_snapshot(
-        Projection(view, config, metadata), ownership, BATCH, format_version=SHARDED
+        Projection(view, config, metadata), ownership, BATCH, format_version=MEDIA
     )
     settled = deepcopy(view)
     settled["face"][0].update(
@@ -577,7 +602,7 @@ def test_pending_to_current_rebuilds_only_owner_bootstrap_and_details() -> None:
     )
     settled["card_engine_support"][0]["region_blocks"] = []
     result = export_snapshot(
-        Projection(settled, config, metadata), ownership, BATCH, format_version=SHARDED
+        Projection(settled, config, metadata), ownership, BATCH, format_version=MEDIA
     )
     keys = list(map(string, array(update(initial, result)["changed_keys"])))
     assert keys
@@ -672,7 +697,7 @@ def test_new_card_does_not_move_existing_owner_or_image_files(
         Ownership(dict(ownership.printing_home) | {"new:printing": "family"}),
         BATCH,
         brotli=CODEC,
-        format_version=SHARDED,
+        format_version=MEDIA,
     )
     keys = array(update(sharded, result, brotli=CODEC)["changed_keys"])
     assert keys

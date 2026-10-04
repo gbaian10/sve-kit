@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 from pydantic import JsonValue
 
 from sve_carddb.snapshot.contract import columns, definition
-from sve_carddb.snapshot.profiles import LEGACY, profile
+from sve_carddb.snapshot.profiles import MEDIA, profile
 from sve_carddb.snapshot.project.source import Source
 from sve_carddb.snapshot.values import array, bucket, object_value, string
 
@@ -77,7 +77,7 @@ class Layout:
     """Indexes for fixed partitioning; no nearest-reference owner inference."""
 
     def __init__(
-        self, view: View, ownership: Ownership, count: int, format_version: str = LEGACY
+        self, view: View, ownership: Ownership, count: int, format_version: str = MEDIA
     ) -> None:
         self.profile = profile(format_version)
         self.view = view
@@ -128,7 +128,7 @@ class Layout:
             )
             identifier = string(self.cards[entity]["home_set_id"])
             key = [entity]
-        elif self.profile.version != LEGACY and table in {
+        elif table in {
             "image_asset",
             "image_variant",
         }:
