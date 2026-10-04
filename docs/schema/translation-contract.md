@@ -200,6 +200,7 @@ glossary 保留 `term:<concept_key>` 永久概念，category=keyword/ability/tra
 官方來源可使用 source_ref 重建文字，專案／機器詞用自寫 text；official 不能單憑相似字串判定。
 來源類別 official 與公開 authority 分開：數位官方名稱仍是 digital_official，整段效果機器翻譯仍 unofficial。
 既有 source_claim 只保留可公開的作品／URL／簡短未驗理由，不記本機證據；來源不明不得硬升 official。
+claimed_source 是選填的出處主張；沒有具體主張就省略，不用本機草稿套話代替。
 
 ## 6. 建置、穩定 ID 與失效
 
