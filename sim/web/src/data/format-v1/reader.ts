@@ -21,13 +21,17 @@ import { descriptor, primaryKey, requiredTypes, rowType, tables, validate } from
 import { validateConfig, validateFragments, validateView } from "./semantics"
 import { digest } from "./sha256"
 
-const FORMATS = ["1.0.0", "1.1.0", "2.0.0"]
+const FORMAT = "2.0.0"
 /** This reader's own contract version (transport §1.1), independent of the web app version. */
 const READER_CONTRACT_VERSION = "2.0.0"
-const CAPABILITIES: readonly string[] = ["column-partition-v1", "fragment-container-v1"]
-const SHARDED_CAPABILITIES = [...CAPABILITIES, "image-entity-buckets-v1", "rules-name-on-demand-v1"]
-
-const V2_CAPABILITIES = [...SHARDED_CAPABILITIES, "digital-same-name-links-v1", "image-id-url-v1"]
+const CAPABILITIES: readonly string[] = [
+  "column-partition-v1",
+  "fragment-container-v1",
+  "image-entity-buckets-v1",
+  "rules-name-on-demand-v1",
+  "digital-same-name-links-v1",
+  "image-id-url-v1",
+]
 
 export type View = Record<string, Row[]>
 
@@ -130,7 +134,7 @@ export function readPayload(file: JsonObject, data: Uint8Array): JsonValue {
   return value
 }
 
-export function readContainer(file: JsonObject, value: JsonObject, version = "1.0.0"): Fragment[] {
+export function readContainer(file: JsonObject, value: JsonObject, version = "2.0.0"): Fragment[] {
   validate("Container", value, [], version)
   const key = stringValue(file["key"])
   const result: Fragment[] = []
@@ -147,10 +151,7 @@ export function readContainer(file: JsonObject, value: JsonObject, version = "1.
           : "text"
       if (
         role !== file["role"] ||
-        !(
-          integerValue(fragment["bucket"]) >= 0 &&
-          integerValue(fragment["bucket"]) < (version === "1.0.0" ? 1 : 64)
-        )
+        !(integerValue(fragment["bucket"]) >= 0 && integerValue(fragment["bucket"]) < 64)
       ) {
         fail(
           "fragment-profile",
@@ -559,17 +560,11 @@ export function isCompatible(entry: JsonObject): boolean {
   const capabilities = arrayValue(entry["required_capabilities"] ?? null).map((item) =>
     stringValue(item),
   )
-  const capabilitiesForFormat =
-    entry["format_version"] === "2.0.0"
-      ? V2_CAPABILITIES
-      : entry["format_version"] === "1.1.0"
-        ? SHARDED_CAPABILITIES
-        : CAPABILITIES
   return (
-    FORMATS.includes(stringValue(entry["format_version"])) &&
+    entry["format_version"] === FORMAT &&
     !newerThan(stringValue(entry["min_reader_version"]), versionTuple(READER_CONTRACT_VERSION)) &&
-    capabilities.length === capabilitiesForFormat.length &&
-    capabilitiesForFormat.every((capability) => capabilities.includes(capability))
+    capabilities.length === CAPABILITIES.length &&
+    CAPABILITIES.every((capability) => capabilities.includes(capability))
   )
 }
 
@@ -577,15 +572,12 @@ export function isCompatible(entry: JsonObject): boolean {
 export function verifyManifest(manifestValue: JsonValue): { manifest: JsonObject; files: Files } {
   const manifest = objectValue(manifestValue)
   const version = stringValue(manifest["format_version"])
-  if (!FORMATS.includes(version)) fail("unsupported-version", "unsupported format")
+  if (version !== FORMAT) fail("unsupported-version", "unsupported format")
   validate("Manifest", manifestValue, [], version)
   if (!isCompatible(manifest))
     fail("unsupported-version", "unsupported format, reader version or capability")
   const all = files(manifest)
-  if (
-    version !== "1.0.0" &&
-    [...all.values()].some((file) => integerValue(file["bytes"]) > 512 * 1024)
-  )
+  if ([...all.values()].some((file) => integerValue(file["bytes"]) > 512 * 1024))
     fail("fragment-profile", "data file exceeds fixed 512 KiB limit")
   const identities = new Set<string>()
   for (const file of all.values()) {
@@ -652,14 +644,8 @@ export function readSnapshot(
   unique(view)
   closure(view, manifest)
   current(view, fragments)
-  if (manifest["format_version"] === "2.0.0") {
-    validateMediaIdentities(view)
-    validateMediaDependencies(
-      fragments,
-      all,
-      stringValue(objectValue(manifest["config_ref"])["key"]),
-    )
-  }
+  validateMediaIdentities(view)
+  validateMediaDependencies(fragments, all, stringValue(objectValue(manifest["config_ref"])["key"]))
   validateView(view, manifest, fragments)
   validatePlacement(fragments, stringValue(manifest["format_version"]))
   return view
@@ -673,7 +659,7 @@ export function readTextAll(
 ): View {
   const manifest = objectValue(manifestValue)
   const version = stringValue(manifest["format_version"])
-  if (!FORMATS.includes(version)) fail("unsupported-version", "unsupported format")
+  if (version !== FORMAT) fail("unsupported-version", "unsupported format")
   validate("Manifest", manifestValue, [], version)
   const description = objectValue(manifest["text_all"] ?? null)
   const value = objectValue(readPayload(description, data))

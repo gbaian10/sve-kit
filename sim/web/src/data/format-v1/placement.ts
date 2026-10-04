@@ -19,14 +19,14 @@ const CARDS = new Set([
 const PRINTINGS = new Set(["printing", "printing_product", "printing_image"])
 const ARTS = new Set(["art", "digital_art_link"])
 
-/** Fixed 1.1 membership is checked independently of the producer's file names. */
+/** Fixed 2.0 membership is checked independently of the producer's file names. */
 export function validatePlacement(
   fragments: readonly Fragment[],
   version: string,
   bootstrap: readonly Fragment[] = [],
   knownFaces?: ReadonlyMap<string, JsonValue>,
 ): void {
-  if (version !== "1.1.0" && version !== "2.0.0") return
+  if (version !== "2.0.0") fail("unsupported-version", "unsupported placement profile")
   const all = [...bootstrap, ...fragments]
   const faces =
     knownFaces ??
@@ -57,9 +57,7 @@ export function validatePlacement(
       role === "images"
         ? kind === "global"
           ? 1
-          : version === "2.0.0"
-            ? 32
-            : 64
+          : 32
         : role === "bootstrap"
           ? kind === "global"
             ? 8

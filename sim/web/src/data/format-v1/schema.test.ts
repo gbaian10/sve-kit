@@ -4,8 +4,10 @@ import { describe, expect, it } from "vitest"
 
 import compiled from "#snapshot-conformance"
 
+import positives from "../../../fixtures/schema-positive.json"
+import { v2Fixture } from "../v2-fixture"
 import { SnapshotError } from "./errors"
-import { type JsonObject, type JsonValue, parseStrict } from "./json"
+import { type JsonObject, type JsonValue, parseStrict, stringValue } from "./json"
 import {
   columns,
   definition,
@@ -20,19 +22,27 @@ import {
 } from "./schema"
 import { SchemaValidator } from "./validator"
 
-const validator = new SchemaValidator(schemaRoot, compiled, "v1")
+const validator = new SchemaValidator(schemaRoot, compiled, "v2")
 
-const fixtures = import.meta.glob<string>(
-  "../../../../../tests/fixtures/snapshot-contract/v1/**/*.json",
-  { query: "?raw", import: "default", eager: true },
-)
-
-// Formatted review copies; the counterexamples deliberately hold values (2^53) the strict parser
-// refuses, so the harness reads them like Python's json.loads and applies strictness per case.
 function fixture(name: string): JsonValue {
-  const key = Object.keys(fixtures).find((path) => path.endsWith(`/v1/${name}`))
-  if (!key) throw new Error(`fixture ${name} missing`)
-  return JSON.parse(fixtures[key] ?? "") as JsonValue
+  if (name === "schema-valid.json") return positives
+  if (name === "schema-invalid.json")
+    return (v2Fixture(name) as JsonObject[]).map((item) => ({
+      ...item,
+      schema: item["target"] ?? null,
+    }))
+  if (name.startsWith("payloads/")) {
+    const role = name.slice("payloads/".length, -".json".length)
+    const manifest = v2Fixture("manifest.json") as JsonObject
+    const file = (manifest["files"] as JsonObject[]).find(
+      (file) =>
+        file["role"] === role ||
+        ((role === "detail" || role === "history") && file["role"] === "text"),
+    )
+    if (!file) throw new Error("missing golden payload")
+    return v2Fixture(`payloads/${stringValue(file["sha256"]).slice(7)}.json`)
+  }
+  return v2Fixture(name)
 }
 
 const ajv = new Ajv2020({ strict: false, allErrors: false })

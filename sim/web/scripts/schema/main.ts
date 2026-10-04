@@ -9,7 +9,7 @@ const webRoot = path.resolve(import.meta.dirname, "../..")
 const schemaDir = path.resolve(webRoot, "../../carddb/src/sve_carddb/snapshot/schema")
 const output = path.join(webRoot, "node_modules/.cache/sve-schema")
 const roots: Record<string, object> = {}
-for (const version of ["v1", "v1_1", "v2"]) {
+for (const version of ["v2"]) {
   roots[version] = JSON.parse(
     await readFile(path.join(schemaDir, version, "contract.schema.json"), "utf8"),
   ) as object
@@ -20,16 +20,7 @@ await writeFile(
   path.join(output, "standalone.cjs"),
   compileSchemas(
     roots,
-    new Set([
-      "Manifest",
-      "Container",
-      "Config",
-      "Programs",
-      "TextAll",
-      "Index",
-      "IndexPage",
-      "printing_image",
-    ]),
+    new Set(["Manifest", "Container", "Config", "Programs", "TextAll", "Index", "printing_image"]),
   ),
 )
 await writeFile(path.join(output, "entry.js"), 'export { default } from "./standalone.cjs"\n')

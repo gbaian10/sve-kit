@@ -318,7 +318,7 @@ export function validateView(view: View, manifest: Row, fragments: readonly Frag
   if (supported.size !== cardIds.size || [...cardIds].some((id) => !supported.has(id)))
     fail("support-missing", "every card requires support")
   validateImageRows(view)
-  if (manifest["format_version"] === "2.0.0") validateMediaDetails(view)
+  validateMediaDetails(view)
   validateDigitalLinks(view)
 }
 
@@ -379,16 +379,15 @@ const TEMPLATE_PARAMETERS: readonly (readonly [string, string, readonly string[]
 ]
 
 /** Language fallback closure and the finite URL template parameter lists. */
-export function validateConfig(config: Row, version = "1.0.0"): void {
+export function validateConfig(config: Row, version = "2.0.0"): void {
+  if (version !== "2.0.0") fail("unsupported-version", "unsupported config profile")
   if (
-    version === "2.0.0" &&
     arrayValue(config["digital_endpoints"])
       .map((v) => stringValue(objectValue(v)["game"]))
       .join(",") !== "sv1,svwb"
   )
     fail("config-url-template", "2.0 requires sorted sv1/svwb endpoints")
   if (
-    version === "2.0.0" &&
     arrayValue(config["digital_endpoints"])
       .map((v) => stringValue(objectValue(v)["refresh_policy"]))
       .join(",") !== "frozen,on_sve_release"

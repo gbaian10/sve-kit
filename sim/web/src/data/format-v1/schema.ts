@@ -1,8 +1,6 @@
 import compiled from "#snapshot-validators"
 
-import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1/contract.schema.json"
-import shardedContract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v1_1/contract.schema.json"
-import v2Contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json"
+import contract from "../../../../../carddb/src/sve_carddb/snapshot/schema/v2/contract.schema.json"
 import { fail } from "./errors"
 import {
   arrayValue,
@@ -14,29 +12,19 @@ import {
 } from "./json"
 import { SchemaValidator } from "./validator"
 
-export const SCHEMA_ID = "urn:sve-kit:snapshot:1.0.0"
+export const SCHEMA_ID = "urn:sve-kit:snapshot:2.0.0"
 
 // A plain JSON import works in Vite, Vitest and Bun scripts alike; the file is our own published
 // resource, so the strict byte boundary that snapshot data goes through is not needed here.
 export const schemaRoot: JsonObject = objectValue(contract)
-const validator = new SchemaValidator(schemaRoot, compiled, "v1")
-const shardedValidator = new SchemaValidator(objectValue(shardedContract), compiled, "v1_1")
-const v2Validator = new SchemaValidator(objectValue(v2Contract), compiled, "v2")
+const validator = new SchemaValidator(schemaRoot, compiled, "v2")
 
 function forVersion(version: string): SchemaValidator {
-  const selected =
-    version === "1.0.0"
-      ? validator
-      : version === "1.1.0"
-        ? shardedValidator
-        : version === "2.0.0"
-          ? v2Validator
-          : undefined
-  if (!selected) fail("unsupported-version", "unsupported schema profile")
-  return selected
+  if (version !== "2.0.0") fail("unsupported-version", "unsupported schema profile")
+  return validator
 }
 
-export function definition(name: string, version = "1.0.0"): JsonObject {
+export function definition(name: string, version = "2.0.0"): JsonObject {
   return forVersion(version).definition(name)
 }
 
@@ -45,7 +33,7 @@ export function validate(
   name: string,
   value: JsonValue,
   path: JsonPath = [],
-  version = "1.0.0",
+  version = "2.0.0",
 ): void {
   const selected = forVersion(version)
   const failure = selected.validate(name, value)
@@ -58,7 +46,7 @@ function strings(value: JsonValue): string[] {
 }
 
 /** The immutable column order of a row or nested tuple. */
-export function columns(name: string, version = "1.0.0"): string[] {
+export function columns(name: string, version = "2.0.0"): string[] {
   return strings(definition(name, version)["x-columns"] ?? null)
 }
 
@@ -68,14 +56,14 @@ export function tables(): string[] {
 }
 
 /** A fragment's fixed row type, e.g. printing + detail -> printing_detail. */
-export function rowType(table: string, partition: string, version = "1.0.0"): string {
+export function rowType(table: string, partition: string, version = "2.0.0"): string {
   const selected = forVersion(version)
   const mapping = objectValue(selected.definition("Container")["x-fragments"] ?? null)
   return stringValue(objectValue(mapping[table] ?? null)[partition] ?? null)
 }
 
 /** The format-authoritative descriptor; payload descriptors must equal it, never replace it. */
-export function descriptor(name: string, version = "1.0.0"): JsonObject {
+export function descriptor(name: string, version = "2.0.0"): JsonObject {
   const def = definition(name, version)
   return { columns: def["x-columns"] ?? null, items: def["x-types"] ?? null }
 }
@@ -98,7 +86,7 @@ function references(kind: JsonObject, into: Set<string>, version: string): void 
 }
 
 /** Every nested descriptor a row type needs, from the fixed acyclic schema. */
-export function requiredTypes(name: string, version = "1.0.0"): Set<string> {
+export function requiredTypes(name: string, version = "2.0.0"): Set<string> {
   const result = new Set<string>()
   for (const item of arrayValue(definition(name, version)["x-types"] ?? null))
     references(objectValue(item), result, version)

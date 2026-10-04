@@ -33,7 +33,7 @@ describe("independent fixed placement matrix", () => {
   it.each([
     ["image_asset", "detail", null, 1],
     ["image_variant", "detail", null, 1],
-    ["printing_image", "detail", "TEST", 64],
+    ["printing_image", "detail", "TEST", 32],
     ["vocabulary", "bootstrap", null, 8],
     ["card", "bootstrap", "TEST", 64],
     ["card", "bootstrap", "BP01", 32],
@@ -45,7 +45,7 @@ describe("independent fixed placement matrix", () => {
   ] as const)("%s/%s/%s must use width %i", (table, part, home, width) => {
     const valid = fragment(table, part, home, width)
     expect(() => {
-      validatePlacement([valid], "1.1.0")
+      validatePlacement([valid], "2.0.0")
     }).not.toThrow()
     const incorrect = {
       ...valid,
@@ -55,7 +55,7 @@ describe("independent fixed placement matrix", () => {
       ),
     }
     expect(() => {
-      validatePlacement([incorrect], "1.1.0")
+      validatePlacement([incorrect], "2.0.0")
     }).toThrow("file does not match fixed band")
   })
   it.each([
@@ -71,10 +71,10 @@ describe("independent fixed placement matrix", () => {
     const width = home === null ? 1 : 64
     const correct = bucket([key], 64)
     expect(() => {
-      validatePlacement([fragment(table, part, home, width, [row], correct)], "1.1.0")
+      validatePlacement([fragment(table, part, home, width, [row], correct)], "2.0.0")
     }).not.toThrow()
     expect(() => {
-      validatePlacement([fragment(table, part, home, width, [row], (correct + 1) % 64)], "1.1.0")
+      validatePlacement([fragment(table, part, home, width, [row], (correct + 1) % 64)], "2.0.0")
     }).toThrow("entity bucket mismatch")
   })
 })

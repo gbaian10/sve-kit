@@ -1,7 +1,6 @@
 // @vitest-environment node
 import { describe, expect, it, vi } from "vitest"
 
-import { buildSnapshot } from "../../scripts/fixture/build"
 import { memoryCache as storage } from "../test-utils/cache"
 import type { Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
@@ -12,11 +11,11 @@ import { MetadataBytes } from "./metadata"
 import { requestQueue } from "./request-queue"
 
 const golden = import.meta.glob<string>(
-  "../../../../tests/fixtures/snapshot-contract/v1_1/**/*.json",
+  "../../../../tests/fixtures/snapshot-contract/v2/**/*.json",
   { query: "?raw", import: "default", eager: true },
 )
 const value = (name: string): JsonValue => {
-  const key = Object.keys(golden).find((path) => path.endsWith(`/v1_1/${name}`))
+  const key = Object.keys(golden).find((path) => path.endsWith(`/v2/${name}`))
   if (!key) throw new Error("missing golden")
   return JSON.parse(golden[key] ?? "") as JsonValue
 }
@@ -28,10 +27,11 @@ const source = new Map(
     canonical(value(`payloads/${stringValue(file["sha256"]).slice(7)}.json`)),
   ]),
 )
-source.set("manifest.json", rawManifest)
+const manifestPath = `snapshots/manifests/${digest(rawManifest).slice(7)}.json`
+source.set(manifestPath, rawManifest)
 source.set(
   "snapshots/preview/current.json",
-  canonical({ manifest_path: "manifest.json", manifest_sha256: digest(rawManifest) }),
+  canonical({ manifest_path: manifestPath, manifest_sha256: digest(rawManifest) }),
 )
 const face = { printingId: "p:a", faceId: "f:a" }
 
@@ -64,7 +64,7 @@ const metadataFiles = (number: number) =>
   )
 
 describe("page image metadata", () => {
-  it("locates the printing owner then the image entity; does not download unrelated files or picture blobs", async () => {
+  it("locates the printing owner media; does not download unrelated files or picture blobs", async () => {
     const served = serve()
     const client = createSnapshotClient("/cdn", {
       entry: "preview",
@@ -75,11 +75,11 @@ describe("page image metadata", () => {
     expect(client.snapshot()).not.toBeNull()
     const before = served.paths.length
     const page = await loadImagePage(client, [face, face])
-    expect(page.cardImage("p:a", "f:a")?.src).toMatch(/^\/cdn\/images\/sha256\//)
-    expect(page.asset("p:a", "f:a")?.["id"]).toBe("img:a")
+    expect(page.cardImage("p:a", "f:a")?.src).toBe("/cdn/images/card_l/1.webp?v=7")
+    expect(page.asset("p:a", "f:a")?.["image_id"]).toBe("img:a")
     expect(page.asset("p:b", "f:b")).toBeUndefined()
-    expect(served.paths.slice(before)).toHaveLength(2)
-    expect(new Set(served.paths.slice(before)).size).toBe(2)
+    expect(served.paths.slice(before)).toHaveLength(1)
+    expect(new Set(served.paths.slice(before)).size).toBe(1)
     expect(served.paths.some((path) => path.startsWith("images/"))).toBe(false)
     await client.prefetchImages()
     const done = served.paths.length
@@ -113,23 +113,6 @@ describe("page image metadata", () => {
       ])
     await loadImagePage(client, [face])
     expect(parse.mock.calls.length).toBeGreaterThan(overlapping)
-  })
-  it("legacy unsharded images are derived once per snapshot even without persistent cache", async () => {
-    const built = await buildSnapshot({
-      encodeImage: ({ width }) =>
-        Promise.resolve(new TextEncoder().encode(`synthetic-${String(width)}`)),
-    })
-    const served = serve(built.files)
-    const client = createSnapshotClient("/cdn", { fetch: served.fetcher })
-    await client.load()
-    const parse = vi.spyOn(client, "fragments")
-    const index = await loadImagePage(client, [face])
-    const once = parse.mock.calls.length
-    expect(once).toBe(1)
-    expect(await loadImagePage(client, [{ printingId: "other", faceId: "other" }])).toBe(index)
-    expect(await loadImagePage(client, [face])).toBe(index)
-    expect(parse).toHaveBeenCalledTimes(once)
-    expect(served.paths.filter((path) => path.startsWith("images/"))).toHaveLength(0)
   })
   it("does not background-download anything without persistent storage", async () => {
     let requests = 0

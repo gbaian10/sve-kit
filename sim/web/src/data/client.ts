@@ -240,54 +240,32 @@ export function createSnapshotClient(
       parseStrict(await fetchBytes(fetcher, url(INDEX_PATH), { cache: "no-cache" })),
     )
     requireIndexFormat(index, "the version index")
-    const modern = index["index_format"] === 2
-    if (modern) validateIndex2(index)
-    else validate("Index", index)
+    validateIndex2(index)
     const revision = integerValue(index["revision"])
     if (revision < lastRevision)
       throw new SnapshotError("blob-integrity", "version index revision went backwards")
     const signature = canonicalText(index)
     if (revision === lastRevision && lastIndex !== signature)
       throw new SnapshotError("blob-integrity", "version index changed without a new revision")
-    if (modern) {
-      const current = objectValue(index["current"])
-      const previous = index["previous"] === null ? null : objectValue(index["previous"])
-      if (
-        previous &&
-        (current["data_version"] === previous["data_version"] ||
-          stringValue(current["published_at"]) < stringValue(previous["published_at"]))
-      )
-        throw new SnapshotError("blob-integrity", "invalid current/previous ordering")
-      lastRevision = revision
-      lastIndex = signature
-      for (const [source, candidate] of [
-        ["current", current],
-        ["previous", previous],
-      ] as const) {
-        if (candidate && isCompatible(candidate)) {
-          return { chosen: candidate, source }
-        }
-      }
-      throw new NoCompatibleVersion(
-        "no current or previous snapshot is compatible; update the site",
-      )
-    }
-    const pages = arrayValue(index["pages"]).map((page) => objectValue(page))
-    for (const page of pages.reverse()) {
-      const data = await fetchVerified(stringValue(page["path"]), stringValue(page["sha256"]))
-      const value = objectValue(parseStrict(data))
-      requireIndexFormat(value, "a version index page")
-      validate("IndexPage", value)
-      const entries = arrayValue(value["entries"]).map((item) => objectValue(item))
-      for (const candidate of entries.reverse()) {
-        if (isCompatible(candidate)) {
-          lastRevision = revision
-          lastIndex = signature
-          return { chosen: candidate, source: "current" }
-        }
+    const current = objectValue(index["current"])
+    const previous = index["previous"] === null ? null : objectValue(index["previous"])
+    if (
+      previous &&
+      (current["data_version"] === previous["data_version"] ||
+        stringValue(current["published_at"]) < stringValue(previous["published_at"]))
+    )
+      throw new SnapshotError("blob-integrity", "invalid current/previous ordering")
+    lastRevision = revision
+    lastIndex = signature
+    for (const [source, candidate] of [
+      ["current", current],
+      ["previous", previous],
+    ] as const) {
+      if (candidate && isCompatible(candidate)) {
+        return { chosen: candidate, source }
       }
     }
-    throw new NoCompatibleVersion("no published snapshot is readable by this version of the site")
+    throw new NoCompatibleVersion("no current or previous snapshot is compatible; update the site")
   }
 
   const download = async (previous: LoadedSnapshot | null): Promise<LoadedSnapshot> => {
@@ -344,11 +322,10 @@ export function createSnapshotClient(
       else throw new SnapshotError("shape", "unexpected startup payload")
     }
     if (!config) throw new SnapshotError("config-programs-count", "config file missing")
-    if (version === "2.0.0")
-      validateMediaIdentities({
-        printing: bootstrap.filter((f) => f.table === "printing").flatMap((f) => f.rows),
-        face: bootstrap.filter((f) => f.table === "face").flatMap((f) => f.rows),
-      })
+    validateMediaIdentities({
+      printing: bootstrap.filter((f) => f.table === "printing").flatMap((f) => f.rows),
+      face: bootstrap.filter((f) => f.table === "face").flatMap((f) => f.rows),
+    })
     const faceCards = new Map(
       bootstrap
         .filter((fragment) => fragment.table === "face")
@@ -395,10 +372,9 @@ export function createSnapshotClient(
           [...candidate.files].filter(
             ([, file]) =>
               file["role"] === "images" &&
-              (candidate.manifest["format_version"] !== "2.0.0" ||
-                arrayValue(file["row_counts"]).some(
-                  (c) => objectValue(c)["table"] === "printing_image",
-                )),
+              arrayValue(file["row_counts"]).some(
+                (c) => objectValue(c)["table"] === "printing_image",
+              ),
           ),
         ),
         fetcher,
@@ -458,8 +434,7 @@ export function createSnapshotClient(
     const data =
       role === "images" &&
       metadata &&
-      (snapshot.manifest["format_version"] !== "2.0.0" ||
-        arrayValue(file["row_counts"]).some((c) => objectValue(c)["table"] === "printing_image"))
+      arrayValue(file["row_counts"]).some((c) => objectValue(c)["table"] === "printing_image")
         ? await metadata.read(key)
         : await fetchVerified(
             stringValue(file["path"]),
@@ -483,10 +458,8 @@ export function createSnapshotClient(
       ])
         (view[fragment.table] ??= []).push(...fragment.rows)
       validateImageRows(view)
-      if (version === "2.0.0") {
-        for (const row of view["printing_image"] ?? []) validateMedia(row)
-        validateMediaFile(fragments, snapshot)
-      }
+      for (const row of view["printing_image"] ?? []) validateMedia(row)
+      validateMediaFile(fragments, snapshot)
     }
     const digitalView: Record<string, JsonObject[]> = {}
     for (const fragment of fragments) (digitalView[fragment.table] ??= []).push(...fragment.rows)

@@ -4,8 +4,8 @@ import { describe, expect, it } from "vitest"
 import { buildSnapshot } from "../../scripts/fixture/build"
 import { type Fetcher } from "./cdn"
 import { createSnapshotClient } from "./client"
-import { stringValue } from "./format-v1/json"
-import { imageSource, loadImagePage } from "./images"
+import { type JsonObject, stringValue } from "./format-v1/json"
+import { loadImagePage } from "./images"
 import { bucketOf, createLocator, GLOBAL_OWNER, homeSetOwner } from "./locator"
 import { createCardIndex } from "./store"
 import { createTextResolver } from "./text"
@@ -33,28 +33,18 @@ const index = createCardIndex(snapshot)
 describe("locator", () => {
   it("maps every fragment identity to exactly one file", () => {
     const locate = createLocator(snapshot.files)
-    expect(
-      locate({ table: "text_unit", owner: GLOBAL_OWNER, bucket: 0, partition: "detail" }),
-    ).toBe("text/global")
-    expect(
-      locate({
-        table: "printing",
-        owner: homeSetOwner("set:bp01"),
-        bucket: 0,
-        partition: "detail",
-      }),
-    ).toBe("text/bp01")
-    expect(
-      locate({
-        table: "face_revision",
-        owner: homeSetOwner("set:bp01"),
-        bucket: 0,
-        partition: "history",
-      }),
-    ).toBe("history/bp01")
-    expect(
-      locate({ table: "image_variant", owner: GLOBAL_OWNER, bucket: 0, partition: "detail" }),
-    ).toBe("images")
+    for (const [key, file] of snapshot.files) {
+      for (const row of file["row_counts"] as JsonObject[]) {
+        expect(
+          locate({
+            table: stringValue(row["table"]),
+            owner: row["owner"] as JsonObject,
+            bucket: Number(row["bucket"]),
+            partition: row["partition"] as "bootstrap" | "detail" | "history",
+          }),
+        ).toBe(key)
+      }
+    }
     expect(
       locate({
         table: "printing",
@@ -95,33 +85,51 @@ describe("text resolver", () => {
     const revision = index.currentRevision("f:bp01-001", "jp")
     const nameUnit = stringValue(revision?.["name_unit_id"])
     expect(text.textOf(nameUnit)).toBe("試作の見習い兵")
-    const detail = await client.fragments("text/bp01")
+    const detail = await client.fragments(
+      createLocator(snapshot.files)({
+        table: "face_revision",
+        owner: homeSetOwner("set:bp01"),
+        bucket: bucketOf(["c:bp01-001"], 64),
+        partition: "detail",
+      }) ?? "",
+    )
     const full = detail
-      .find((fragment) => fragment.table === "face_revision")
-      ?.rows.find((row) => row["id"] === revision?.["id"])
+      .filter((fragment) => fragment.table === "face_revision")
+      .flatMap((fragment) => fragment.rows)
+      .find((row) => row["id"] === revision?.["id"])
     const effectUnit = stringValue(full?.["effect_unit_id"])
     expect(text.textOf(effectUnit)).toBeUndefined()
     await text.ensure([effectUnit, nameUnit])
     expect(text.textOf(effectUnit)).toBe("【ファンファーレ】自分のリーダーを1回復する。")
     expect(
-      requests.filter((path) => path === snapshot.files.get("text/global")?.["path"]),
+      requests.filter(
+        (path) =>
+          path ===
+          snapshot.files.get(
+            createLocator(snapshot.files)({
+              table: "text_unit",
+              owner: GLOBAL_OWNER,
+              bucket: bucketOf([effectUnit], 64),
+              partition: "detail",
+            }) ?? "",
+          )?.["path"],
+      ),
     ).toHaveLength(1)
   })
 })
 
 describe("images", () => {
-  it("indexes printing faces to content-addressed variants", async () => {
+  it("indexes printing faces to versioned integer-ID variants", async () => {
     const images = await loadImagePage(client, [
       { printingId: "p:bp01-001", faceId: "f:bp01-001" },
       { printingId: "p:bp01-040", faceId: "f:bp01-040" },
     ])
     const source = images.cardImage("p:bp01-001", "f:bp01-001")
     expect(source?.width).toBe(459)
-    expect(source?.src.startsWith("/cdn/images/sha256/")).toBe(true)
+    expect(source?.src.startsWith("/cdn/images/card_l/")).toBe(true)
     expect(source?.srcSet.split(", ")).toHaveLength(3)
     expect(source?.srcSet).toContain(" 128w")
     expect(images.cardImage("p:bp01-040", "f:bp01-040")).toBeUndefined()
     expect(images.asset("p:bp01-040", "f:bp01-040")?.["publication_state"]).toBe("withdrawn")
-    expect(imageSource("/x", [])).toBeUndefined()
   })
 })

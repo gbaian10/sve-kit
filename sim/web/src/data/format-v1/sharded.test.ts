@@ -13,11 +13,11 @@ import { readContainer, readSnapshot, readTextAll, verifyManifest } from "./read
 import { digest } from "./sha256"
 
 const files = import.meta.glob<string>(
-  "../../../../../tests/fixtures/snapshot-contract/v1_1/**/*.json",
+  "../../../../../tests/fixtures/snapshot-contract/v2/**/*.json",
   { query: "?raw", import: "default", eager: true },
 )
 function fixture(path: string): JsonValue {
-  const key = Object.keys(files).find((key) => key.endsWith(`/v1_1/${path}`))
+  const key = Object.keys(files).find((key) => key.endsWith(`/v2/${path}`))
   if (!key) throw new Error("missing shared fixture")
   return JSON.parse(files[key] ?? "") as JsonValue
 }
@@ -29,7 +29,7 @@ const payloads = new Map(
   ]),
 )
 
-describe("1.1 shared wire contract", () => {
+describe("2.0 shared wire contract", () => {
   it("joins the independently written multibucket golden to the unchanged logical view", () => {
     expect(canonicalText(readSnapshot(manifest, payloads))).toBe(
       canonicalText(fixture("expected-logical.json")),
@@ -49,7 +49,7 @@ describe("1.1 shared wire contract", () => {
     if (!file) throw new Error("missing image fixture")
     const container = objectValue(fixture(`payloads/${stringValue(file["sha256"]).slice(7)}.json`))
     container["format_version"] = "1.0.0"
-    expect(() => readContainer(file, container, "1.1.0")).toThrow(/schema/)
+    expect(() => readContainer(file, container, "2.0.0")).toThrow(/schema/)
   })
   it("rejects data files over the frozen raw budget before requesting payloads", () => {
     const value = structuredClone(manifest)
@@ -79,7 +79,7 @@ describe("1.1 shared wire contract", () => {
     for (const fragments of Object.values(objectValue(container["tables"])))
       for (const entry of fragments as JsonObject[]) entry["bucket"] = 64
     for (const count of file["row_counts"] as JsonObject[]) count["bucket"] = 64
-    expect(() => readContainer(file, container, "1.1.0")).toThrow("fragment-profile")
+    expect(() => readContainer(file, container, "2.0.0")).toThrow("fragment-profile")
   })
   it("rejects a resealed variant bucket that follows its full PK instead of image id", () => {
     const m = structuredClone(manifest)
