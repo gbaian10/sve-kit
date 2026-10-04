@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from http import HTTPStatus
 from typing import TYPE_CHECKING
-from urllib.parse import quote
+from urllib.parse import parse_qsl, quote
 
 import httpx
 
@@ -58,8 +58,16 @@ def sign(
     canonical = "\n".join(
         (
             request.method,
-            request.url.raw_path.decode("ascii"),
-            "",
+            request.url.raw_path.split(b"?", 1)[0].decode("ascii"),
+            "&".join(
+                key + "=" + value
+                for key, value in sorted(
+                    (quote(k, safe="-_.~"), quote(v, safe="-_.~"))
+                    for k, v in parse_qsl(
+                        request.url.query.decode("ascii"), keep_blank_values=True
+                    )
+                )
+            ),
             "".join(key + ":" + headers[key] + "\n" for key in sorted(headers)),
             names,
             hashed,

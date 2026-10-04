@@ -11,6 +11,7 @@ from sve_carddb.r2_upload.compression import command_brotli
 from sve_carddb.r2_upload.plan import UploadError, plan_preview
 from sve_carddb.r2_upload.s3 import S3, Credentials
 from sve_carddb.r2_upload.upload import upload
+from sve_carddb.r2_upload.v2.commands import upload_v2
 
 
 def _authorization(execute: bool, confirmed: bool) -> None:
@@ -58,3 +59,6 @@ def upload_command(
         raise typer.BadParameter(str(error)) from None
     except OSError, ValueError:
         raise typer.BadParameter("Local upload preparation failed") from None
+
+
+app.command("upload-v2")(upload_v2)
