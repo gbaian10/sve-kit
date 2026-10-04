@@ -8,9 +8,9 @@ application is described below.
 `load(authored, repository, authored_revision)` requires a full immutable Git SHA,
 regular indexed files, exact checkout bytes and complete closure. Names accept
 only editable format-two business conditions and quality fields. Versioned links
-retain format-one policy/approval/exclusion histories and their immutable bindings;
-their receipts cannot supply name translation authority. New link semantics need
-reviewed loader support. Hash consistency alone does not prove human approval.
+retain format-one policy/exclusion histories and their content bindings. Approval
+receipts are not an input or a loading gate. New link semantics need reviewed
+loader support. Hash consistency alone does not prove human approval.
 
 `historical_sources()` verifies historical parser/config/registry pins against
 immutable Git blobs. `require_runtime()` independently checks the currently

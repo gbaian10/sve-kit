@@ -228,7 +228,7 @@ def test_name_and_link_policies_keep_separate_catalogue_pins(
     object_value(object_value(raw["content"])["catalogue_pins"])[
         "private_name_list_hash"
     ] = digest(b"different private diagnostic metadata")
-    different = LoadedPolicy(canonical(raw), links.approval, links.exclusions)
+    different = LoadedPolicy(canonical(raw), links.exclusions)
     snapshot = replace(
         snapshot,
         policies=tuple(different if p is links else p for p in snapshot.policies),

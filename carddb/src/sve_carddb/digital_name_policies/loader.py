@@ -3,7 +3,6 @@
 import re
 import subprocess  # ruff: ignore[suspicious-subprocess-import] -- Git object enumeration uses a validated revision and argument vector
 from dataclasses import dataclass
-from datetime import datetime
 from pathlib import Path, PurePosixPath
 from typing import TYPE_CHECKING
 
@@ -14,7 +13,6 @@ from sve_carddb.digital_name_policies.current_models import CurrentEntry
 from sve_carddb.digital_name_policies.current_models import Index as CurrentIndex
 from sve_carddb.digital_name_policies.current_models import Policy as CurrentPolicy
 from sve_carddb.digital_name_policies.models import (
-    Approval,
     CardTargetExclusion,
     CataloguePins,
     Entry,
@@ -70,10 +68,6 @@ SEMANTICS = {
 }
 ADOPTED_PROJECTIONS = {
     "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:d070390485462df20759cacf0a20c1bef2aa632ebb433a0d6ab5b7e2f6501938",
-}
-
-ADOPTED_APPROVALS = {
-    "sha256:0742f89d50384f076eb3ab219b6a369af60708f3d5d52d3d1b53b33d98d1389d": "sha256:b7245f9890324c09817bc140ccb3e732899449b9641483e4f5a97dc6509d084a",
 }
 
 
@@ -134,16 +128,11 @@ def semantics(content: dict[str, JsonValue], purpose: str) -> str:
 @dataclass(frozen=True)
 class LoadedPolicy:
     policy: bytes
-    approval: bytes
     exclusions: bytes
 
     def document(self) -> Policy:
         """Return a detached operation document."""
         return model(Policy, parse(self.policy))
-
-    def receipt(self) -> Approval:
-        """Return a detached approval without claiming to replay private evidence."""
-        return model(Approval, parse(self.approval))
 
     def excluded(self) -> Exclusions:
         """Return the independently approved initial exclusion list."""
@@ -189,7 +178,7 @@ class Snapshot:
         }
 
 
-def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statements,too-many-locals] -- whole index and receipt closure must be checked before returning any policy
+def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statements,too-many-locals] -- whole index and policy closure must be checked before returning any policy
     root: Path, repository: Path, revision: str
 ) -> Snapshot:
     """Verify Git file modes, complete index closure and exact on-disk bytes."""
@@ -288,7 +277,6 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
         for entry in entries:
             stem = f"{entry.version:03}"
             policy_path = f"digital-name-policies/{identifier}/{stem}.policy.yaml"
-            receipt_path = policy_path.replace(".policy.yaml", ".approval.yaml")
             exclusion_path = f"digital-name-exclusions/{identifier}/{stem}.yaml"
             if entry.path != policy_path or entry.exclusions_path != exclusion_path:
                 raise ValueError("Digital-name policy indexed path mismatch")
@@ -299,30 +287,29 @@ def load(  # ruff: ignore[complex-structure,too-many-branches,too-many-statement
             )
             if entry.predecessor != predecessor:
                 raise ValueError("Digital-name policy predecessor mismatch")
-            paths = (policy_path, receipt_path, exclusion_path)
+            paths = (policy_path, exclusion_path)
             if any(p not in values for p in paths):
                 raise ValueError("Digital-name policy indexed member is missing")
-            hashes = (entry.hash, entry.approval_receipt_hash, entry.exclusions_hash)
+            hashes = (entry.hash, entry.exclusions_hash)
             if any(
                 digest(canonical(values[p])) != h
                 for p, h in zip(paths, hashes, strict=True)
             ):
                 raise ValueError("Digital-name policy indexed hash mismatch")
-            policy, receipt, excluded = (
+            policy, excluded = (
                 model(Policy, values[policy_path]),
-                model(Approval, values[receipt_path]),
                 model(Exclusions, values[exclusion_path]),
             )
             if (
                 any(
                     v.policy_id != identifier or v.version != entry.version
-                    for v in (policy, receipt, excluded)
+                    for v in (policy, excluded)
                 )
                 or excluded.purpose != policy.purpose
             ):
                 raise ValueError("Digital-name policy envelope identity mismatch")
             _content(policy)
-            _approval(policy, receipt, excluded, entry)
+            _exclusions(policy, excluded)
             expected.update(paths)
             policies.append(LoadedPolicy(*(canonical(values[p]) for p in paths)))
             previous = entry
@@ -377,15 +364,7 @@ def _content(policy: Policy) -> None:
             raise ValueError("Digital-name link registry pins mismatch")
 
 
-def _approval(
-    policy: Policy, receipt: Approval, exclusions: Exclusions, entry: Entry
-) -> None:
-    if (
-        receipt.policy_hash != entry.hash
-        or receipt.approved_document_hash != policy.approved_document_hash
-        or receipt.initial_exclusions_hash != entry.exclusions_hash
-    ):
-        raise ValueError("Digital-name approval hash closure mismatch")
+def _exclusions(policy: Policy, exclusions: Exclusions) -> None:
     final_hash = object_value(policy.content["exclusions"])["initial_exclusions_hash"]
     if final_hash != exclusions.approved_list_hash:
         raise ValueError("Digital-name approved exclusion hash mismatch")
@@ -406,77 +385,3 @@ def _approval(
             keys.append(("name", item.source_lang, item.source_name_hash))
     if keys != sorted(set(keys)):
         raise ValueError("Digital-name exclusions must be sorted and unique")
-    _events(policy, receipt)
-
-
-def _events(  # ruff: ignore[complex-structure] -- button, messages and disclosure are one approval evidence graph
-    policy: Policy, receipt: Approval
-) -> None:
-    # These locators bind the first approval layout in contract §4; a new layout needs a loader and SEMANTICS update.
-    events = receipt.approval_events
-    times = tuple(datetime.fromisoformat(e.at) for e in events)
-    if times != tuple(sorted(times)) or len(
-        {canonical(e.model_dump(mode="json")) for e in events}
-    ) != len(events):
-        raise ValueError("Digital-name approval events must be sorted and unique")
-    if any(not _portable(name) for name in receipt.evidence_hashes):
-        raise ValueError("Unsafe digital-name approval evidence key")
-    if (
-        receipt.evidence_hashes.get(policy.purpose + "-policy.canonical.json")
-        != policy.approved_document_hash
-        or receipt.evidence_hashes.get(policy.purpose + "-policy.plain.md")
-        != receipt.presented_text_hash
-    ):
-        raise ValueError("Digital-name approval evidence hash mismatch")
-    buttons = [e for e in events if e.kind == "page_button"]
-    if len(buttons) != 1:
-        raise ValueError(
-            "Digital-name approval requires exactly one explicit policy button"
-        )
-    button = buttons[0]
-    expected = {
-        "at": receipt.reviewed_at,
-        "id": policy.purpose,
-        "note": "",
-        "policy_hash": policy.approved_document_hash,
-        "text_sha256": receipt.presented_text_hash,
-        "value": "agree",
-    }
-    if (
-        button.uuid is not None
-        or button.at != receipt.reviewed_at
-        or button.value != expected
-        or button.locator != f"name2_policy/{policy.purpose}.json"
-        or receipt.evidence_hashes.get(button.locator) != button.source_hash
-    ):
-        raise ValueError(
-            "Digital-name approval button does not approve this policy text"
-        )
-    messages = {e.uuid: e for e in events if e.kind == "message"}
-    if any(
-        e.uuid is None
-        or e.value is not None
-        or e.locator != e.uuid
-        or e.source_hash not in receipt.evidence_hashes.values()
-        for e in messages.values()
-    ) or len(messages) != len([e for e in events if e.kind == "message"]):
-        raise ValueError("Digital-name approval message evidence mismatch")
-    changes = receipt.disclosed_changes
-    if tuple(c.rule_id for c in changes) != tuple(sorted({c.rule_id for c in changes})):
-        raise ValueError("Digital-name disclosures must be sorted and unique")
-    for change in changes:
-        accepted = messages.get(change.accepted_message_uuid)
-        if (
-            accepted is None
-            or datetime.fromisoformat(change.disclosed_at)
-            > datetime.fromisoformat(receipt.reviewed_at)
-            or datetime.fromisoformat(accepted.at)
-            < datetime.fromisoformat(change.disclosed_at)
-        ):
-            raise ValueError("Digital-name disclosed change lacks timely acceptance")
-    approved_receipt_hash = ADOPTED_APPROVALS.get(policy.approved_document_hash)
-    if (
-        approved_receipt_hash is not None
-        and digest(canonical(receipt.model_dump(mode="json"))) != approved_receipt_hash
-    ):
-        raise ValueError("Previously adopted digital-name approval changed")

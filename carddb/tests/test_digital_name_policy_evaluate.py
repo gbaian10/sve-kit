@@ -470,7 +470,7 @@ def test_catalogue_refusals_are_reachable(baseline: PolicyFixture, fault: str) -
         object_value(object_value(document["content"])["catalogue_pins"])[
             "count_replay_main_revision"
         ] = "0" * 40
-        broken = LoadedPolicy(canonical(document), loaded.approval, loaded.exclusions)
+        broken = LoadedPolicy(canonical(document), loaded.exclusions)
         with pytest.raises(
             ValueError, match=r"^Digital-name historical program tree is unavailable$"
         ):
@@ -499,7 +499,7 @@ def test_catalogue_refusals_are_reachable(baseline: PolicyFixture, fault: str) -
             }
         ]
         message = "Digital-name exclusion cannot locate its card target"
-    broken = LoadedPolicy(loaded.policy, loaded.approval, canonical(excluded))
+    broken = LoadedPolicy(loaded.policy, canonical(excluded))
     with pytest.raises(ValueError, match="^" + message + "$"):
         catalogue(broken, sources)
 
