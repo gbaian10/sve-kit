@@ -154,9 +154,6 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> VocabularyCase:
         }
     definition = term("rule.synthetic")
     object_value(definition["data"])["source_ref"] = references["term"]
-    definition["evidence"] = [
-        {"source_ref": references["evidence"], "role": "Synthetic historical reference"}
-    ]
     selected = choice("rule.synthetic")
     chosen = object_value(selected["data"])
     chosen["value"] = {
