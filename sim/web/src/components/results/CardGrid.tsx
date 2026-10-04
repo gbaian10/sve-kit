@@ -102,6 +102,12 @@ function CardCell({
           {cell.name.missingTranslation && (
             <span className="truncate text-11 text-text-3">{t("card.noTranslation")}</span>
           )}
+          {cell.name.lowConfidence && (
+            <span className="text-11 text-text-3">{t("card.translationProofreading")}</span>
+          )}
+          {cell.name.sourceUnchecked && (
+            <span className="text-11 text-text-3">{t("card.sourceUnchecked")}</span>
+          )}
           {cell.summary.wordingPending && (
             <span className="mt-1 self-start rounded-control border border-border-strong px-1.5 py-0.5 text-11 text-text-2">
               {t("card.wordingPending")}

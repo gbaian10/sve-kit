@@ -113,7 +113,7 @@ export function SuggestList({
                   if (!stale) onPick(index)
                 }}
                 className={cn(
-                  "flex h-14 w-full cursor-pointer items-center gap-3 px-4 text-left",
+                  "flex min-h-14 w-full cursor-pointer items-center gap-3 px-4 py-1 text-left",
                   active ? "bg-surface-2" : "hover:bg-surface-2",
                 )}
               >
@@ -130,6 +130,12 @@ export function SuggestList({
                     {row.name.primary.text}
                   </span>
                   <span className="truncate text-12 text-text-3">{details.join(" · ")}</span>
+                  {(row.name.lowConfidence || row.name.sourceUnchecked) && (
+                    <span className="flex flex-wrap gap-x-2 text-11 text-text-3">
+                      {row.name.lowConfidence && <span>{t("card.translationProofreading")}</span>}
+                      {row.name.sourceUnchecked && <span>{t("card.sourceUnchecked")}</span>}
+                    </span>
+                  )}
                 </span>
               </button>
             )

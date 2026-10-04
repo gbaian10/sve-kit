@@ -74,13 +74,21 @@ function nameOf(index: CardIndex, revision: Row): NameSource | undefined {
   const lang = stringValue(unit["lang"])
   if (!isTextLang(lang)) return undefined
   const translations: Partial<Record<TextLang, string>> = {}
+  const translationQuality: NonNullable<NameSource["translationQuality"]> = {}
   for (const entry of revision["translations"] as Row[]) {
     if (entry["field"] !== "name") continue
     const target = stringValue(entry["target_lang"])
     const text = translationText(index, stringValue(entry["translation_id"]))
-    if (isTextLang(target) && text !== undefined) translations[target] = text
+    if (isTextLang(target) && text !== undefined) {
+      translations[target] = text
+      const translation = index.translation(stringValue(entry["translation_id"]))
+      translationQuality[target] = {
+        lowConfidence: translation?.["low_confidence"] === true,
+        sourceUnchecked: entry["basis"] === "shared_jp_unchecked",
+      }
+    }
   }
-  return { original: { lang, text: stringValue(unit["text"]) }, translations }
+  return { original: { lang, text: stringValue(unit["text"]) }, translations, translationQuality }
 }
 
 function searchName(lang: TextLang, text: string): SearchName {

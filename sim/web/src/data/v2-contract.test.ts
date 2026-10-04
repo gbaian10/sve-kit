@@ -306,3 +306,25 @@ describe("official shared v2 contract inventory", () => {
     }
   })
 })
+
+describe("current translation wire", () => {
+  it.each(
+    cases("schema_invalid").filter((item) => stringValue(item["name"]).startsWith("Translation-")),
+  )("rejects $name inside the full snapshot, including its resealed dependencies", (item) => {
+    const input = wire()
+    input.payloads.set("bootstrap/bootstrap/global/global/band/2", objectValue(item["value"]))
+    expect(errorCode(() => readSnapshot(input.manifest, reseal(input)))).toBe("schema")
+  })
+  it("keeps the independently written low-confidence machine row in the joined text closure", () => {
+    const input = wire()
+    const view = readSnapshot(
+      input.manifest,
+      new Map([...input.payloads].map(([key, value]) => [key, canonical(value)])),
+    )
+    const row = view["translation"]?.find((value) => value["id"] === "tr:effect")
+    expect(row).toMatchObject({ origin: "machine", authority: "unofficial", low_confidence: true })
+    expect(row).not.toHaveProperty("status")
+    expect(view["text_unit"]?.some((unit) => unit["id"] === row?.["source_unit_id"])).toBe(true)
+    expect(view["text_unit"]?.some((unit) => unit["id"] === row?.["text_unit_id"])).toBe(true)
+  })
+})
