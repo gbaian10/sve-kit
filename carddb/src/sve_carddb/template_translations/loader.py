@@ -11,6 +11,9 @@ from sve_carddb.catalog.adoption_sources import PinnedRepository
 from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.template_parameters.analysis import VERSION_PARAMETERS
 from sve_carddb.template_sources.flavor import VERSION as FLAVOR_VERSION
+from sve_carddb.template_translations.current_models import (
+    DefinitionRecord as CurrentDefinitionRecord,
+)
 from sve_carddb.template_translations.files import (
     INVENTORY,
     SHARD,
@@ -37,6 +40,8 @@ if TYPE_CHECKING:
     from sve_carddb.template_translations.sources import Reconstructed, TemplateSources
 
 
+DefinitionLike = DefinitionRecord | CurrentDefinitionRecord
+
 LEGACY_WIDTH = 10
 INVENTORY_V2_FORMAT = 2
 INVENTORY_WIRE: TypeAdapter[Inventory | InventoryV2] = TypeAdapter(
@@ -58,7 +63,7 @@ def key(record: Record) -> str:
     ).decode()
 
 
-def payload(member: Reconstructed, record: DefinitionRecord) -> bytes:
+def payload(member: Reconstructed, record: DefinitionLike) -> bytes:
     """Source locators are provenance; the six semantic fields identify content."""
     data = record.data
     return canonical(
@@ -272,9 +277,10 @@ def _inventories(  # ruff: ignore[complex-structure] -- each immutable shard is 
 
 
 def _definitions(
-    records: tuple[tuple[Record, str], ...], members: dict[str, Reconstructed]
+    records: tuple[tuple[Record | CurrentDefinitionRecord, str | None], ...],
+    members: dict[str, Reconstructed],
 ) -> tuple[
-    dict[str, DefinitionRecord],
+    dict[str, DefinitionLike],
     tuple[tuple[str, int], ...],
     tuple[tuple[str, str], ...],
 ]:
@@ -293,7 +299,7 @@ def _definitions(
     allocations: dict[str, str] = {}
     matches: dict[str, tuple[str, ...]] = {}
     for record, _ in records:
-        if not isinstance(record, DefinitionRecord):
+        if not isinstance(record, (DefinitionRecord, CurrentDefinitionRecord)):
             continue
         representative, content, old = _definition(record, members)
         data = record.data
@@ -311,7 +317,9 @@ def _definitions(
     for record in definitions.values():
         _allocation(record, definitions)
         allowed = {members[i].entry.source_ref for i in matches[record.data.id]}
-        if any(e.source_ref not in allowed for e in record.evidence):
+        if isinstance(record, DefinitionRecord) and any(
+            e.source_ref not in allowed for e in record.evidence
+        ):
             raise ValueError(
                 "Template definition evidence must belong to its matched family"
             )
@@ -320,7 +328,7 @@ def _definitions(
 
 
 def _current_frequencies(
-    definitions: dict[str, DefinitionRecord], matches: dict[str, tuple[str, ...]]
+    definitions: dict[str, DefinitionLike], matches: dict[str, tuple[str, ...]]
 ) -> tuple[tuple[str, int], ...]:
     retired = {r.data.supersedes_id for r in definitions.values()}
     claimed: dict[str, str] = {}
@@ -338,12 +346,10 @@ def _current_frequencies(
     return tuple(sorted(frequencies, key=lambda p: (-p[1], p[0])))
 
 
-def _allocation(
-    record: DefinitionRecord, definitions: dict[str, DefinitionRecord]
-) -> None:
+def _allocation(record: DefinitionLike, definitions: dict[str, DefinitionLike]) -> None:
     """Only an existing different payload at every shorter prefix permits extension."""
     data = record.data
-    if len(data.id) - 1 == LEGACY_WIDTH:
+    if isinstance(record, CurrentDefinitionRecord) or len(data.id) - 1 == LEGACY_WIDTH:
         return
     for width in range(16, len(data.id) - 1, 2):
         previous = definitions.get("T" + data.content_hash[7 : 7 + width])
@@ -354,7 +360,7 @@ def _allocation(
 
 
 def _translations(
-    records: tuple[tuple[Record, str], ...], definitions: dict[str, DefinitionRecord]
+    records: tuple[tuple[Record, str], ...], definitions: dict[str, DefinitionLike]
 ) -> None:
     chains: dict[tuple[str, str], list[TranslationRecord]] = defaultdict(list)
     for record, _ in records:
@@ -428,7 +434,7 @@ def read_templates(
     """Validate current structural references without raw reads or history traversal."""
     inputs = _read_inputs(repository, authored_revision)
     records = inputs.records()
-    definitions = {
+    definitions: dict[str, DefinitionLike] = {
         record.data.id: record
         for record, _ in records
         if isinstance(record, DefinitionRecord)
@@ -471,7 +477,7 @@ def load_templates(
 
 
 def _definition(
-    record: DefinitionRecord, members: dict[str, Reconstructed]
+    record: DefinitionLike, members: dict[str, Reconstructed]
 ) -> tuple[Reconstructed, bytes, bool]:
     data = record.data
     representative = members.get(data.inventory_id)
@@ -510,7 +516,7 @@ def _definition(
 
 def _frequency(
     representative: Reconstructed,
-    record: DefinitionRecord,
+    record: DefinitionLike,
     members: dict[str, Reconstructed],
     *,
     old: bool,
@@ -520,7 +526,7 @@ def _frequency(
 
 def _matching_members(
     representative: Reconstructed,
-    record: DefinitionRecord,
+    record: DefinitionLike,
     members: dict[str, Reconstructed],
     *,
     old: bool,
@@ -553,7 +559,7 @@ def _matching_members(
 
 
 def _parent_chains(
-    definitions: dict[str, DefinitionRecord], members: dict[str, Reconstructed]
+    definitions: dict[str, DefinitionLike], members: dict[str, Reconstructed]
 ) -> tuple[tuple[str, str], ...]:
     unadopted = []
     for record in definitions.values():

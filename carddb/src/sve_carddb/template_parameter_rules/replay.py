@@ -246,8 +246,19 @@ def _historical_positions(
 def _resolve(
     loaded: Loaded | None, candidates: Candidates
 ) -> tuple[tuple[bytes, ...], tuple[bytes, ...]]:
-    rules = {} if loaded is None else {r.rule_id: r for r in loaded.policy.rules}
+    rules = (
+        {}
+        if loaded is None
+        else {r.rule_id: r.recognized_role for r in loaded.policy.rules}
+    )
     roles = () if loaded is None else loaded.policy.scope.roles
+    return resolve_roles(candidates, rules, roles=roles)
+
+
+def resolve_roles(
+    candidates: Candidates, rules: dict[str, str], *, roles: tuple[str, ...]
+) -> tuple[tuple[bytes, ...], tuple[bytes, ...]]:
+    """Resolve only actual matching positions; enabling rules does not erase other causes."""
     matches = {
         (str(row["inventory_id"]), str(row["slot"])): row
         for row in candidates.rule_matches
@@ -293,7 +304,7 @@ def _resolve(
                             "inventory_id": candidate.inventory_id,
                             "slot": hint.name,
                             "rule_id": rule_id,
-                            "recognized_role": allowed.recognized_role,
+                            "recognized_role": allowed,
                             "raw_hash": hint.raw_hash,
                             "source_segments": [
                                 s.model_dump(mode="json") for s in hint.source_segments

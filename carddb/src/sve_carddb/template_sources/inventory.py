@@ -45,6 +45,7 @@ class Scan:
     fields: list[dict[str, JsonValue]] = field(default_factory=list)
     failures: list[dict[str, JsonValue]] = field(default_factory=list)
     history_gaps: int = 0
+    documents: dict[str, JsonValue] = field(default_factory=dict)
 
 
 def entry(ref: SourceRef, part: Part, normalizer_id: str) -> Entry:
@@ -163,11 +164,9 @@ def _presence(
         )
 
 
-def scan_batch(
-    sources: FrozenSources, *, repository: Path, pins: tuple[Recipe, ...]
+def _scan(
+    sources: FrozenSources, pins: tuple[Recipe, ...], *, keep_documents: bool = False
 ) -> Scan:
-    """No caller-selected subset can silently shrink the sealed current coverage set."""
-    verify_recipes(repository, pins)
     if [(scope.provider, scope.kind) for scope in sources.inventory.scope] != [
         ("jp", "card")
     ]:
@@ -190,6 +189,8 @@ def scan_batch(
         try:
             lang, document = project(raw, source.url, "jp")
             projected = fields(document)
+            if keep_documents:
+                scan.documents[source.id] = document
         except ValueError, LookupError, UnicodeError:
             scan.failures.append(
                 {"source_version_id": source.id, "reason": "jp_projection_failed"}
@@ -227,6 +228,19 @@ def scan_batch(
     if len({item.id for item in scan.entries}) != len(scan.entries):
         raise ValueError("Template inventory entry IDs must be unique")
     return scan
+
+
+def scan_batch(
+    sources: FrozenSources, *, repository: Path, pins: tuple[Recipe, ...]
+) -> Scan:
+    """Retain the legacy pinned recipe route for explicit migration diagnostics."""
+    verify_recipes(repository, pins)
+    return _scan(sources, pins)
+
+
+def scan_current(sources: FrozenSources) -> Scan:
+    """The installed parser enumerates the complete sealed batch, without old producers."""
+    return _scan(sources, (), keep_documents=True)
 
 
 def _proof_entries(proof: dict[str, JsonValue]) -> tuple[set[str], bool]:
