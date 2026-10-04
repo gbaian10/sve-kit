@@ -23,7 +23,7 @@ SCALARS = {
     "stamp": "id,code,series_code,text_raw,kind,displayed_year",
     "text_unit": "id,lang,text",
     "face_revision": "id,face_id,region,revision,effective_from,effective_until,temporal_status,change_kind,name_unit_id,effect_unit_id,class_code,type_code,cost,attack,defense",
-    "translation": "id,target_lang,origin,authority,status",
+    "translation": "id,target_lang,origin,authority,low_confidence",
     "qa": "id,region,official_number,source_url",
     "qa_version": "id,qa_id,revision,published_on,updated_on,date_raw,question_unit_id,answer_unit_id,state",
     "cr_version": "id,region,version,published_on,effective_on,source_url",

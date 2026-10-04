@@ -2,7 +2,7 @@
   "envelope": {
     "$schema": "https://json-schema.org/draft/2020-12/schema",
     "$id": "urn:sve-kit:snapshot:2.0.0",
-    "$comment": "Fixed 2.0.0 profile; permanent printing media URLs. Generated from source.json; frozen 1.x resources are unchanged.",
+    "$comment": "Fixed 2.0.0 profile; permanent printing media URLs. Generated from source.json; selected current translations retain their quality flags.",
     "oneOf": [
       {
         "$ref": "#/$defs/Manifest"
@@ -2930,6 +2930,7 @@
             "enum": [
               "own_source",
               "shared_jp",
+              "shared_jp_unchecked",
               "official_counterpart"
             ]
           },
@@ -2937,6 +2938,7 @@
             "enum": [
               "own_source",
               "shared_jp",
+              "shared_jp_unchecked",
               "official_counterpart"
             ]
           }
@@ -6228,22 +6230,16 @@
         "origin": {
           "schema": {
             "enum": [
-              "official_sve",
-              "official_svwb",
-              "official_sv1",
+              "official",
               "project",
-              "machine",
-              "community"
+              "machine"
             ]
           },
           "descriptor": {
             "enum": [
-              "official_sve",
-              "official_svwb",
-              "official_sv1",
+              "official",
               "project",
-              "machine",
-              "community"
+              "machine"
             ]
           }
         },
@@ -6263,20 +6259,12 @@
             ]
           }
         },
-        "status": {
+        "low_confidence": {
           "schema": {
-            "enum": [
-              "draft",
-              "reviewed",
-              "stale"
-            ]
+            "$ref": "#/$defs/Bool"
           },
           "descriptor": {
-            "enum": [
-              "draft",
-              "reviewed",
-              "stale"
-            ]
+            "scalar": "Bool"
           }
         }
       },
@@ -9684,7 +9672,7 @@
         "authority": {
           "from": "translation"
         },
-        "status": {
+        "low_confidence": {
           "from": "translation"
         }
       },
@@ -9710,7 +9698,7 @@
         "authority": {
           "from": "translation"
         },
-        "status": {
+        "low_confidence": {
           "from": "translation"
         }
       },

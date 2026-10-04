@@ -1,7 +1,7 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "urn:sve-kit:snapshot:2.0.0",
-  "$comment": "Fixed 2.0.0 profile; permanent printing media URLs. Generated from source.json; frozen 1.x resources are unchanged.",
+  "$comment": "Fixed 2.0.0 profile; permanent printing media URLs. Generated from source.json; selected current translations retain their quality flags.",
   "$defs": {
     "ID": {
       "type": "string",
@@ -475,6 +475,7 @@
           "enum": [
             "own_source",
             "shared_jp",
+            "shared_jp_unchecked",
             "official_counterpart"
           ]
         }
@@ -517,6 +518,7 @@
           "enum": [
             "own_source",
             "shared_jp",
+            "shared_jp_unchecked",
             "official_counterpart"
           ]
         }
@@ -4051,12 +4053,9 @@
         },
         {
           "enum": [
-            "official_sve",
-            "official_svwb",
-            "official_sv1",
+            "official",
             "project",
-            "machine",
-            "community"
+            "machine"
           ]
         },
         {
@@ -4067,11 +4066,7 @@
           ]
         },
         {
-          "enum": [
-            "draft",
-            "reviewed",
-            "stale"
-          ]
+          "$ref": "#/$defs/Bool"
         }
       ],
       "items": false,
@@ -4084,7 +4079,7 @@
         "text_unit_id",
         "origin",
         "authority",
-        "status"
+        "low_confidence"
       ],
       "x-types": [
         {
@@ -4101,12 +4096,9 @@
         },
         {
           "enum": [
-            "official_sve",
-            "official_svwb",
-            "official_sv1",
+            "official",
             "project",
-            "machine",
-            "community"
+            "machine"
           ]
         },
         {
@@ -4117,11 +4109,7 @@
           ]
         },
         {
-          "enum": [
-            "draft",
-            "reviewed",
-            "stale"
-          ]
+          "scalar": "Bool"
         }
       ],
       "x-primary-key": [
@@ -9501,12 +9489,9 @@
         },
         {
           "enum": [
-            "official_sve",
-            "official_svwb",
-            "official_sv1",
+            "official",
             "project",
-            "machine",
-            "community"
+            "machine"
           ]
         },
         {
@@ -9517,11 +9502,7 @@
           ]
         },
         {
-          "enum": [
-            "draft",
-            "reviewed",
-            "stale"
-          ]
+          "$ref": "#/$defs/Bool"
         }
       ],
       "items": false,
@@ -9534,7 +9515,7 @@
         "text_unit_id",
         "origin",
         "authority",
-        "status"
+        "low_confidence"
       ],
       "x-types": [
         {
@@ -9551,12 +9532,9 @@
         },
         {
           "enum": [
-            "official_sve",
-            "official_svwb",
-            "official_sv1",
+            "official",
             "project",
-            "machine",
-            "community"
+            "machine"
           ]
         },
         {
@@ -9567,11 +9545,7 @@
           ]
         },
         {
-          "enum": [
-            "draft",
-            "reviewed",
-            "stale"
-          ]
+          "scalar": "Bool"
         }
       ]
     },
@@ -9598,7 +9572,7 @@
             "text_unit_id",
             "origin",
             "authority",
-            "status"
+            "low_confidence"
           ]
         },
         "rows": {
@@ -9635,12 +9609,9 @@
         },
         {
           "enum": [
-            "official_sve",
-            "official_svwb",
-            "official_sv1",
+            "official",
             "project",
-            "machine",
-            "community"
+            "machine"
           ]
         },
         {
@@ -9651,11 +9622,7 @@
           ]
         },
         {
-          "enum": [
-            "draft",
-            "reviewed",
-            "stale"
-          ]
+          "$ref": "#/$defs/Bool"
         }
       ],
       "items": false,
@@ -9668,7 +9635,7 @@
         "text_unit_id",
         "origin",
         "authority",
-        "status"
+        "low_confidence"
       ],
       "x-types": [
         {
@@ -9685,12 +9652,9 @@
         },
         {
           "enum": [
-            "official_sve",
-            "official_svwb",
-            "official_sv1",
+            "official",
             "project",
-            "machine",
-            "community"
+            "machine"
           ]
         },
         {
@@ -9701,11 +9665,7 @@
           ]
         },
         {
-          "enum": [
-            "draft",
-            "reviewed",
-            "stale"
-          ]
+          "scalar": "Bool"
         }
       ]
     },
@@ -9732,7 +9692,7 @@
             "text_unit_id",
             "origin",
             "authority",
-            "status"
+            "low_confidence"
           ]
         },
         "rows": {
@@ -13786,6 +13746,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
@@ -16875,7 +16836,7 @@
                         "text_unit_id",
                         "origin",
                         "authority",
-                        "status"
+                        "low_confidence"
                       ]
                     },
                     "maxItems": 0
@@ -18922,7 +18883,7 @@
                         "text_unit_id",
                         "origin",
                         "authority",
-                        "status"
+                        "low_confidence"
                       ]
                     },
                     "minItems": 1,
@@ -20988,7 +20949,7 @@
                         "text_unit_id",
                         "origin",
                         "authority",
-                        "status"
+                        "low_confidence"
                       ]
                     },
                     "maxItems": 0

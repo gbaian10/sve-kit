@@ -27,6 +27,17 @@ class DisplayBinding:
 
 
 @dataclass(frozen=True)
+class DisplayCheck:
+    """An aligned current display_checks pair, bound to both exact owner texts."""
+
+    source_use_id: str
+    counterpart_owner: tuple[str, ...]
+    source_unit_id: str
+    counterpart_unit_id: str
+    counterpart: bool = False
+
+
+@dataclass(frozen=True)
 class Decisions:
     """Carry verified build projections; absence never proves cross-region equivalence."""
 
@@ -36,6 +47,7 @@ class Decisions:
         default_factory=dict
     )
     display_bindings: tuple[DisplayBinding, ...] = ()
+    display_checks: tuple[DisplayCheck, ...] = ()
     private_digital: bool = False
     related_regions: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
     active_scopes: Mapping[str, tuple[str, ...]] = field(default_factory=dict)
