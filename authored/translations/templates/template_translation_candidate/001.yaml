@@ -140,21 +140,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T01c2a2b06f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T01c2a2b06f
-      lang: zh-Hant
-      text: '{UB}{起動}移除這張卡片的N個河馬君指示物：自己的主戰者{生命值}+N。抽取N張卡片。'
-      inventory_ids:
-        - inv:3a88758928bdd35dec907a2c2a05edb4808beeea79bde417b91050156dd31fdb
-        - inv:6e1c402f3605ad51f993a7007bd3e624924606725d5601a3345cdead7b25865b
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","T02161b86fe","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -278,21 +263,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0420700613","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0420700613
-      lang: zh-Hant
-      text: 【攻擊時】在自己戰場上的全部『X』上放置N個GIGA指示物。
-      inventory_ids:
-        - inv:4bd0b0129edd4b98bd3517cbff55a15dbb6290e4dc5adac1247564af7cbae2f4
-        - inv:ffd6f3b326f4522be86f15f13cfc0724bf0ce4b4f7c8d205754ae6640226e7ab
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","T0456012426","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -409,21 +379,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T06d8a497d8","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T06d8a497d8
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}、將戰場上的N張載具・卡片{橫置}：指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。'
-      inventory_ids:
-        - inv:6f50ae9f463f10456623934b320a1deba989f23e4502596aed26e2ce5e9e2cac
-        - inv:875562fa062423880638e837461c5f9cfde5291bf64d78258117f544a55aab68
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T06e16fa71e","zh-Hant"]'
@@ -618,24 +573,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T099ab2c1cc","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T099ab2c1cc
-      lang: zh-Hant
-      text: 自己的主要階段到來時，指定自己戰場上任意張數的其他卡片。在其與這張卡片上各放置N個祈禱指示物。
-      inventory_ids:
-        - inv:2ada321916c046c4ee08437c1379f887d8ae48301e3c3f1bfddbcc5f3cdd42c9
-        - inv:555ff8b66292e877933bcde8933f179da216aa520cdab8653ca6125c0e02e669
-        - inv:83ed405833e1f6b502bd30886c03e6e6a486e9581adec45f636b94dda3f3781c
-        - inv:fa98a5e51637b1cebf082c92f5fcdbae28d9cea43dcdcb1c1a0541d1bf9c7418
-        - inv:fe5a5ada6878a941ba0ffcb48c20a65a30218fa5c92908f0c2436be1f8a152c7
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T09eb480f3a","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -681,21 +618,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0a73672c9c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0a73672c9c
-      lang: zh-Hant
-      text: 自己的結束階段到來時，在這張卡片上放置N個河馬君指示物。
-      inventory_ids:
-        - inv:58247f1d6b7193cb85aa01322db550f4e6d41aa0a0edc1a90fcac7836eea1125
-        - inv:aa8ec45c4e4c5aaae31f37a9671c0863296ffd804607a14b0cd656ffd26207c7
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","T0a9fed8f0a","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -865,21 +787,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0c98542e5e","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0c98542e5e
-      lang: zh-Hant
-      text: 使自己主戰者的{生命值}增加時，將這張卡片{橫置}：指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。
-      inventory_ids:
-        - inv:24b1447d32676f63c37d46f3c3bb113ef1ff708aaf140a56e279ae0ff94ecd38
-        - inv:7e98948d058948bc97733ad0d9262a40781de60c958dffa5a5c8172b3e1d4714
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0d6108c64c","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -929,21 +836,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0e2e005160","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0e2e005160
-      lang: zh-Hant
-      text: '{入場曲}在這張卡片上放置N個加虐指示物。抽取N張卡片。'
-      inventory_ids:
-        - inv:bfddec772d77631e484e8f1a56c457aa9656221f72e105d5d83f78bf80dc5778
-        - inv:cc4c7f668b277b72b64d3dbabd38c7622c4186f1c8c073e5e71d89d18827b2d2
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T0ee289e833","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -959,21 +851,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0efa6cd433","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0efa6cd433
-      lang: zh-Hant
-      text: '{起動}移除戰場上N個『X』的N個GIGA指示物：給予敵方戰場上的全部從者N點傷害。這張卡片{攻擊力}+N/{生命值}+N，並獲得【疾馳】。'
-      inventory_ids:
-        - inv:695418004e1fb38fee6808d2bfe4c39f0136ab1d124a627dbd3fe0b023419254
-        - inv:dfce81dea55565299e2e99fcad19cfe960376fd197e25dd7f9ce6df9f830ab55
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","T0f800303da","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1018,21 +895,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T0ff2143622","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T0ff2143622
-      lang: zh-Hant
-      text: 在自己戰場上的全部『X』上各放置N個GIGA指示物。抽取N張卡片。
-      inventory_ids:
-        - inv:a4e59bca5c57827d71b57a90ebc89c1cdef453a5f306e18fa4ad005e6d1abf77
-        - inv:f4e4ab361dd1055f02f6d8c5c95303990b65af23133693e7f338b2f2a3834a81
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","T106058c8a9","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1066,21 +928,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T108fe64ee6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T108fe64ee6
-      lang: zh-Hant
-      text: 【進化時】給予自己的主戰者N點傷害。N名敵方玩家公開手牌。自己從其中指定N張。敵方將其捨棄。
-      inventory_ids:
-        - inv:0b10564e7c4e44911e935a3b1a9957bc735aedc436f05acf282a1d996af18bfe
-        - inv:1435ebed7479cda708a7419a9ca06bf7a5edeafcdbe9885e6bd56e898194906f
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T10e87c792c","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1099,21 +946,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1163cc2a4c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1163cc2a4c
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}、將戰場上的N張其他偶像歌手・卡片放置到墓場：指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。'
-      inventory_ids:
-        - inv:53e92b666fadfc3329f379543ec314bee4f358374ee753e085f3157cd229546a
-        - inv:ef9f88f6079260f239d384563961c37c7240bcac4b7b21c1dd0b23928cd4e30b
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T116828047e","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1127,41 +959,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T11a208d0c0","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T11a208d0c0
-      lang: zh-Hant
-      text: 自己的結束階段到來時，如果本回合中自己曾捨棄手牌，則指定敵方的N名主戰者或敵方的N個從者。給予其N點傷害。
-      inventory_ids:
-        - inv:010e9f2401e4434b7e2bca197f45e0dc894b67cdbcdad2c2ec4447dff5ca5309
-        - inv:c99e1ec8e49e663556c473ea867871c9d890e78b3cf6f7dc6bee36344b367d78
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T11d92d3771","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T11d92d3771
-      lang: zh-Hant
-      text: '{入場曲}移除這張卡片的N個融合指示物：召喚N個『X』到戰場上。'
-      inventory_ids:
-        - inv:10709fdfc60c9e0773f8421ae99ac92ab7035b270729f882041b9b05e4e08067
-        - inv:1c8cbc619f7eaf0fb7fb9442d9f5d729d5a4031b13271abd8cd55107eff0362e
-        - inv:4ea1c661d7b51ea386daacc9feb291b5fddb7a33cf6728b136dc26516cf3474b
-        - inv:68c31ae0cc64b3eede7186e14966b45ce55e46c6b4b4e02a3c98cceeda760259
-        - inv:d01c183417e7155e0f4f3a441541169c5940200f558008010aceed7d31ddc59b
-        - inv:d4a7f46f00934c75717c629d951079318dc77bd447aa4cbbb7d292e15e90e7fe
-        - inv:e3838124b571cadd8e4ce7c3a1c0886ea243407266f6b79537da69b25930f85f
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T11e19f64ad","zh-Hant"]'
@@ -1396,20 +1193,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T14e3b7bea9","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T14e3b7bea9
-      lang: zh-Hant
-      text: '{入場曲}指定敵方的N名主戰者。給予其N點傷害。'
-      inventory_ids:
-        - inv:491f2e116b7796da732d8205a847636b6f1583d436708b0064cd5bbf4de1a3bd
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T150086b5ef","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1608,21 +1391,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T175d6e9e32","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T175d6e9e32
-      lang: zh-Hant
-      text: 自己的結束階段到來時，指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。如果自己EX區的紋章為N張以上，則轉變為N點傷害。如果為N張，則轉變為N點傷害。
-      inventory_ids:
-        - inv:06eda6fbf8cc330062b5ba1013406056a65c1f01582081d9327be85e98ac6f5f
-        - inv:6e99e2016154db0a4883613871930f9e34e8b0fc365e739f4d916308d169c191
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1793b2ddc5","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1635,21 +1403,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T183eda96d7","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T183eda96d7
-      lang: zh-Hant
-      text: 每回合N次，自己使用原始消費N以上的卡片時，指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。抽取N張卡片。
-      inventory_ids:
-        - inv:6f28a58b75df108dc6f30749964839e5f89bd01c4e93a3ef5f72f3b3fb35a35d
-        - inv:a30882e767180633aaead92b5f29137d88891d7a01f261a41b9447030e77843b
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1884f0b463","zh-Hant"]'
@@ -1806,21 +1559,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: true
-  - record_key: '["template_translation_candidate","effect","T1abb10f415","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1abb10f415
-      lang: zh-Hant
-      text: 從下列之中選擇N項。【N】指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。抽取N張卡片。【N】{消費N}：指定敵方的N名主戰者或敵方戰場上的N個從者。如果自己墓場的學院・卡片為N張以上，則給予其N點傷害。抽取N張卡片。
-      inventory_ids:
-        - inv:9d6b970bed07e621c92958001d406bfb54719a87c1d20496641f97d8b4dd15b8
-        - inv:db2a812979c3d04f347821284dcdfb72b9127c3bcc371bfd97e82ac3fea944ed
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1b3704b138","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -1835,20 +1573,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1b87b6fcb8","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1b87b6fcb8
-      lang: zh-Hant
-      text: '{起動}{消費N}將這張卡片{橫置}：指定敵方的N名主戰者或敵方戰場上的N個從者。給予其與「這張卡片的攻擊力」相同的傷害。'
-      inventory_ids:
-        - inv:b5626203f4920146a637cc9892c3444927ee8754ea806203d8294aa7addbbbf2
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1c6a3fdb12","zh-Hant"]'
@@ -2020,36 +1744,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1db59220d6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1db59220d6
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}：指定敵方的N名主戰者或敵方戰場上的N個從者。給予其N點傷害。此能力在自己的消失區為N張以上時可使用。'
-      inventory_ids:
-        - inv:c67ee39f2e804b4f35479688a15b61931d184e21114589cc477e2d50cadf8f7e
-        - inv:fb4b76049cbf914a6f0153d4f02478d5bbdf1249e94ea5f1686d5ff1882170ff
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T1e750755eb","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T1e750755eb
-      lang: zh-Hant
-      text: 自己戰場上的從者進化時，在自己EX區的這張卡片上放置N個戰意指示物。如果這張卡片的戰意指示物為N個以上，則可以將這張卡片召喚到戰場上。如果如此做，則戰場上的這張卡片進化。
-      inventory_ids:
-        - inv:72f1e31a5e5d90884e5e8b714e347961c70b5c1d00a25a87a4deef74c5f65c2c
-        - inv:d54d95d5d8fc013e90156cfe1a568ab427e3bb7475dac64880fb23e8f662d8a2
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T1eea3826eb","zh-Hant"]'
@@ -2237,21 +1931,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T224a565171","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T224a565171
-      lang: zh-Hant
-      text: 自己的主要階段到來時，移除EX區中這張卡片的N個休眠指示物：如果這張卡片上未放置休眠指示物，則將這張卡片召喚到戰場上。
-      inventory_ids:
-        - inv:01da49a9fcee567d17ef5f243980deba06e2077df046437490031cac1a10e051
-        - inv:8bd8e74e3c49a7a23f24913508e07b409246258094e666f967a36c714c1f73a5
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T226387ccde","zh-Hant"]'
@@ -2524,21 +2203,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T254aed2cd5","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T254aed2cd5
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}：指定自己戰場上的N個{龍族}從者。使其{攻擊力}+N。此能力在這張卡片的雷指示物為N個以上時可使用。'
-      inventory_ids:
-        - inv:a1aa9639d4251720da2f0f5326e6799c6da15be61be0cc883cd5f015cf3cfe63
-        - inv:d3d9cc89736aaac890dea9bfd2801ab8209d1fb9ceca86cb1fb51714a644ddda
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T25869686a8","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2613,21 +2277,6 @@ records:
         - signed_numeric_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T262555486d","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T262555486d
-      lang: zh-Hant
-      text: '{入場曲}如果這張卡片是從手牌以外進入戰場的，則在這張卡片上放置N個河馬君指示物。'
-      inventory_ids:
-        - inv:172909ff413d39407a7dd47cdbc47c9bf235d89eba1028afaddb823d9f7b413c
-        - inv:71096d0189dba4dbdb64ba6ccf62064eb63ac4a5204a28cfa5cef3c9eda3da3e
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: true
   - record_key: '["template_translation_candidate","effect","T26638fe9f5","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -2640,21 +2289,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T26bc16d9eb","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T26bc16d9eb
-      lang: zh-Hant
-      text: 自己的主要階段到來時，指定敵方的N名主戰者或敵方的N個從者。給予其N點傷害。
-      inventory_ids:
-        - inv:bc2d43fbe169bb1e30ee5b5aab368aab563dd76a8feeeb52ef398aa59a59ce45
-        - inv:c2849a5b39ad7f5bd0378deec227a1e9d9933816338b7c332d76257b6fa6637b
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T26c217e4db","zh-Hant"]'
@@ -3200,21 +2834,6 @@ records:
         - numeric_role_requires_review
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T3274c5c0ea","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T3274c5c0ea
-      lang: zh-Hant
-      text: 自己的主要階段到來時，或融合了自己的財寶・卡片時，或自己使用財寶・卡片時，在這張卡片上放置N個返還指示物。如果這張卡片的返還指示物為N個以上，則這張卡片消失。從自己的牌堆中搜尋N張盜賊・卡片，增加到手牌中。
-      inventory_ids:
-        - inv:2c8e9c0b388d95247d9dc3f8c510d9189d596766a673b048be6d860d7393fa58
-        - inv:8acb97bc20ef0c43bc984ad1b1639d4234ed3835d8baeeedecaf59609700dd90
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T32d588f527","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -3250,21 +2869,6 @@ records:
       reasons:
         - alignment_definition_unavailable
         - signed_numeric_requires_review
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T331a47eee6","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T331a47eee6
-      lang: zh-Hant
-      text: '{起動}將這張卡片{橫置}：指定敵方戰場上的N個從者。將其破壞。給予其主戰者N點傷害。此能力在這張卡片的雷指示物為N個以上時可使用。'
-      inventory_ids:
-        - inv:a17b06c1ce90007b84f4257149c22b4899be1be0425da2e9ee5a5a3d41c19cb7
-        - inv:f6455e9bb46596ea7678dadf47bed828d3e07dcb5a877ece68219dc9f1e3b3c1
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
   - record_key: '["template_translation_candidate","effect","T3336a5dde4","zh-Hant"]'
@@ -3450,20 +3054,6 @@ records:
         - missing_card_name_concept
     origin: machine
     low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T369480f20c","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T369480f20c
-      lang: zh-Hant
-      text: '{謝幕曲}給予敵方的全部主戰者N點傷害。將這張卡片放置到牌堆從上數來第N張的位置或牌堆底。'
-      inventory_ids:
-        - inv:27152cc2a9a21acd34e94fbb6d2a702cf25cc2eba4a9818419acccef02c4b1ed
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
-    origin: machine
-    low_confidence: false
   - record_key: '["template_translation_candidate","effect","T36e6699ce6","zh-Hant"]'
     kind: template_translation_candidate
     data:
@@ -3562,21 +3152,5 @@ records:
       reasons:
         - alignment_definition_unavailable
         - missing_card_name_concept
-    origin: machine
-    low_confidence: false
-  - record_key: '["template_translation_candidate","effect","T383cd55c1f","zh-Hant"]'
-    kind: template_translation_candidate
-    data:
-      source_kind: effect
-      candidate_id: T383cd55c1f
-      lang: zh-Hant
-      text: '{入場曲}將N個護符放置到墓場：指定敵方的N名主戰者或敵方的N個從者。給予其N點傷害。'
-      inventory_ids:
-        - inv:9ed97117ee45836a9f33f58c7c7e307c126f83286b6233597c20a382f196e65a
-        - inv:bd2e28fc382ddfac946a94b74c0976a206897d18f4385bec71c838d117f74b4d
-        - inv:f8f88a2879dd1f414113e9d8f2413f2665d412f8b5688f6f2a26adc2cf312ddd
-      reasons:
-        - alignment_definition_unavailable
-        - numeric_role_requires_review
     origin: machine
     low_confidence: false
