@@ -8,9 +8,9 @@
 
 另有獨立已核可的 [名字／同名瀏覽政策](digital-name-policy.md)：卡名只採用合格官方字串；同名連結另產卡層級 same_name，依規則先視為同卡但未逐筆確認，只作瀏覽，不作同概念、效果、圖或語音證據。新能力未實作前不能套入現行真人分片。
 
-現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包；`select_name()` 可篩已採納的同卡同面關係；選詞的目標契約改為 sv1→svwb，與獨立名字政策共用同一 resolver；目前實作須後續同步。`translations/names.py` 的 `populate_name_translation()` 可產生 JP→zh-Hant 的 translation 列，尚未支援語義指派、printed owner、use／selection。`translations/importer.py` 已能驗 glossary 的 `digital_name` 證據，但只讀 DB 關係，不建立它們。本入口的 composer 重用數位閉包與名稱選取，名稱產生者另外要求逐 owner 的採納結果，見 §8。
+現有 `translations/digital.py` 的 `import_digital()` 可重建指定數位卡、父卡與名稱面／語言的最小閉包。`snapshot/offline_names.py` 的 composer 將 link 結果交給 `digital_name_policies.application`，由 `current_application` 產生 current 名稱與公開 bindings；真人同卡候選先經 `DigitalLinkResult.eligible_owner()` 逐 owner 驗證，再沿 `translations/counterparts.py` 的 sv1→svwb 順位選取。`translations/current_names.py` 以 current 概念與語義指派解析 owner，`translations/importer.py` 驗 glossary 的 `digital_name` 證據，不建立 link。舊名稱入口已移除；#53 的後續 owner-aware 工作須接上述 current 路徑，不能恢復歷史名稱重播。逐 owner 的採納結果界線見 §8。
 
-registry 固定永久身分；`curation/` 尚無格式／loader。已正式採納的 glossary format 1 及其全入口 loader 不能直接混入新 kind。本契約採獨立入口，共用既有 YAML、canonical hash、batch 決定、predecessor、SourceRef、凍結 parser 與 F1，不改 glossary 必填欄位或重寫舊分片。
+registry 固定永久身分；`curation/` 尚無格式／loader。glossary 現行入口只收 current format 2，不含採納決定或歷史續版鏈，不能混入本入口的 kind。本契約採獨立的 digital-links format 1 入口，共用既有 YAML、canonical hash、batch 決定、predecessor、SourceRef、凍結 parser 與 F1，不改 glossary 必填欄位或將其轉回歷史封套。
 
 ## 2. 入口、分片與封套
 
@@ -134,22 +134,22 @@ author source_record／decision_source 保存完整 index、分片 bytes、autho
 
 ## 6. 每個名稱 owner 的使用閘門
 
-關係採納不是 context 級別的永久名稱授權。後續 #53 對每個 `face_revision.name`／`printing_face.name` 都要重驗以下條件，再產生或引用 translation：獨立名字政策先依第1步驗 owner、再驗政策完整目錄資格；下列第2至4步只在第5步允許的真人供名路徑使用，不是合格政策名字必須先有 link 的條件。
+關係採納不是 context 級別的永久名稱授權。current 名稱路徑對每個 `face_revision.name`／`printing_face.name` 驗自己的來源；#53 後續接線也須遵守以下條件，再產生或引用 translation：獨立名字政策先依第1步驗 owner、再驗政策完整目錄資格；下列第2至4步只在第5步允許的真人供名路徑使用，不是合格政策名字必須先有 link 的條件。
 
 1. 取得 owner 自己的實際原文、source_unit／hash 與凍結來源；由 registry/source_face_map 驗同 card／同 face。face_revision 用該 revision 的來源；printing_face 只用該版已知 printed 字串與它的印刷依據，unknown 直接缺譯，不以 current 填補。
 2. 找到本次 fresh、sampled/confirmed、relation=same_card 且精確兩面皆有值的 link。它的 card_id／face_id 必與此 owner 相同；digital_face 必屬宣告 digital_card。不同版次可共用同永久 card/face 的 link，但仍各自驗自己的來源，不能用另一張卡同名當身分證據。
 3. 重播 link 的 SVE 名稱依據與 owner 自己的凍結名稱。owner 的完整 exact 名稱必等於此同 card/face 的至少一項已採納 sve_names；可由同卡同面再錄的另一來源證明相同名字，不要求原 raw 頁永不更新，但不能只比共用 context／顯示名。印刷名與 current 不同時，印刷名須有自己的已採納名稱依據，不能繼承 current 的結果。
 4. 重播該 link 的 digital_names：同 game／official_id／phase 的 ja 及目標語名字須與本次數位 DB 完整字串相符；目標語缺少仍缺少。digital ja 與 SVE ja 不必相等，但這一對 exact 名稱必在同概念人工核對依據內。不得借另一數位面、base 卡或另一語言的名字。
-5. 先取此 owner 符合獨立名字政策的官方名；政策因目錄同名異譯／缺譯而不合格時，才驗前述自己的真人同卡精確面證據與必要語義指派。逐名排除不得借任何真人 link 繞回自動官方名。兩條供名路徑沿 `select_name()` 的 sv1→svwb 共用 resolver，重用 `populate_name_translation()` 的凍結名稱證據、origin/authority 與穩定 ID 配方；政策路徑只有一代完全無此名才直接用二代，真人路徑沒有合格一代候選才退合格二代。純譯名字串差異按總順位取勝出名字並報差異，不退回原文；真正語義歧義仍須指派，不按 ID、hash 或 confidence 任取。兩條皆無合法來源才走其他合法選詞或 pending／原文；完整順位依 [數位名字政策 §1](digital-name-policy.md#1-名稱採用與關係分開)。
+5. 依 [數位名字政策 §1](digital-name-policy.md#1-名稱採用與關係分開) 的完整順位，先處理有效的逐 owner 選詞覆寫，再取合格政策名字；政策因目錄同名異譯／缺譯而不合格時，才取前述自己的真人同卡精確面候選。逐名排除不得借任何真人 link 繞回自動官方名。現行選取由 `digital_name_policies.current_application` 處理；政策路徑只有一代完全無此名才直接用二代，真人路徑由 `counterparts.first_counterpart()` 在沒有合格一代候選時退合格二代，同一遊戲多個相異已採納名字則拒絕。凍結名稱證據、`origin=official`／`authority=digital_official`、品質旗標與 current 穩定 ID 都由 current 路徑產生，不帶舊名稱選取的決定欄位。純譯名字串差異按總順位取勝出名字並報差異，不退回原文；真正語義歧義仍須指派，不按 ID、hash 或 confidence 任取。兩條皆無合法來源才走其他合法選詞或 pending／原文。
 6. 只有此 owner 的產生呼叫返回的 translation 才可建立 use／FieldTranslation；不能先有 translation_selection 就跳過前五步。即使其他 owner 共用 source_unit/context 且已有官方譯文，沒有自己有效政策證明或真人 link 的第三張卡仍缺譯。
 
-**現有函式的界線**：`select_name()` 只接 card/face，不接 owner 原文；`populate_name_translation()` 只接 JP revision，沒有本契約的 sve_names 入口，也沒有 printed/context_assignment 支援。實作本入口時先把 fresh 證據與 DB 關係接好；#53 的 owner-aware 接線必須在既有選詞／名稱產生路徑增加上述條件，不另實作一套排序，也不能把全域 DB 暫改後假裝只剩某 owner 的合格候選。入口匯入通過不能宣稱所有 owner 已可用。
+**現有函式的界線**：`DigitalLinkResult.eligible_owner()` 接受 face_revision 或 printing_face 的 `NameOwner` 與可選的精確 `name_ref`，逐 owner 驗自己的原文與 link 證據。`current_names.prepare()` 驗當次概念／語義指派；`current_application` 選取並產生 current translation/use 與 display bindings。#53 須在這些 current 接點補其餘需求，不另實作一套排序，也不能把全域 DB 暫改後假裝只剩某 owner 的合格候選。link 入口匯入通過不能宣稱 #53 全部需求或所有 owner 已完成供名。
 
-兩張同 JP 原文、不同改編概念／官方譯名，須有已採納 `context_assignment` 釘每個 owner 的 source_hash／variant／concept_key 與同字異義理由，分開 context。沒有有效指派時，現有 `populate_name_translation()` 的「Ambiguous source name requires adopted context assignment」拒絕保留；不是按 card ID 自動開 variant 或提供自由譯文。#53 接線後才可產生兩份各有依據的官方名，第三張沒有同卡 link 且政策目錄不合格時仍不能借用任一份。
+兩張同 JP 原文、不同改編概念／官方譯名，須有有效的 current `context_assignment` 釘每個 owner 的 source_hash／variant／concept_key 與同字異義理由，分開 context。`current_names.prepare()` 驗指派與當次來源，返回的 resolver 在概念不唯一／缺少時分別回報 `ambiguous_name_concept`／`missing_name_concept`；這是 current 診斷，不是舊入口的例外訊息。不能據此按 card ID 自動開 variant 或任選概念；沒有確定概念便不能取該概念的 glossary choice，其他合法政策／真人候選仍各自驗證。`counterparts.first_counterpart()` 對同一遊戲多個相異已採納名字另以「Ambiguous adopted digital names」拒絕。#53 須沿這些 current 診斷與供名閘門接線；第三張沒有自己的同卡 link 且政策目錄不合格時，仍不能借用任一份。
 
 `glossary_choice.concept_evidence.digital_name` 沿既有 `{digital_face_id,sve_owner,jp_ref,target_ref,decision_id}`，其中 sve_owner 是永久 SVE face；jp_ref／target_ref 是數位 JA／目標語名稱，不等於 owner 的 SVE 名稱依據。匯入器須同時驗本契約的 fresh link 及其 SVE 證據；不能因 glossary choice 有官方 origin 就放行另一 owner。card_name 概念的預設指派另依翻譯契約／後續 intake，不在這裡靠字串生成 term ID。
 
-單一名稱保留 official_svwb／official_sv1、digital_official；效果翻譯仍 unofficial，取了官方卡名不升整段效果權威。缺官方候選可走另外已採納的專案選詞或明示 pending／原文，不自動採納草稿譯名。printed 的缺譯也不回用 current 譯文。
+單一 current 官方名稱使用 `origin=official`／`authority=digital_official`，遊戲與凍結來源留在其依據；效果的專案翻譯仍為 `authority=unofficial`，取了官方卡名不升整段效果權威。缺官方候選可走另外有效的 current 專案選詞或明示 pending／原文，不自動採納草稿譯名。printed 的缺譯也不回用 current 譯文。
 
 ## 7. 草稿遷入前置與反例驗收
 
@@ -232,9 +232,9 @@ docs 階段只審上述形狀與邊界；程式階段再測嚴格入口、交易
 
 建置設定另需 `digital_link_sources`：按 canonical 值排序唯一的 `{store_id,batch_id}` 陣列，列本次明示凍結來源。`catalog_registry` 沿既有 registry pin；`translation_recipes` 沿既有凍結 parser pin。`digital_evidence` 沿既有 `translations.digital.configuration()`，列明示 API refs 與 targets。歷史封套的 review_context 分別由不可變 Git 驗程式／依賴與 recipe，使用目前解析器重驗凍結證據；目前建置才驗載入的執行期；本次來源另驗全部名稱閉包，不能只交目標語或已選目標的子集。
 
-在 caller-owned transaction 內先呼叫 `populate_links()`，再交結果給 `populate_name_translation(..., links=result)`。獨立的 `import_links()` 包裝才開 transaction。結果含 fresh records、stale／withdrawn record keys、決定對照及 F1 input record。它按 card／face 索引已驗的 terminal records；`result.eligible(db, sources, revision_id)` 每次仍驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision。`select_name(..., eligible_links=...)` 是此證據範圍內的 DB 選詞工具，不另建名稱算法。
+在 caller-owned transaction 內先呼叫 `populate_links()`；`snapshot/offline_names.Composer` 將結果以 `links=result` 交給 `digital_name_policies.application.prepare()`／`populate()`，再委派 `current_application` 驗期望來源閉包與產生 current 名稱。獨立的 `import_links()` 包裝才開 transaction。link 結果含 fresh records、stale／withdrawn record keys、決定對照及 F1 input record，並按 card／face 索引已驗的 terminal records。application 的 `_counterparts()` 經 `result.eligible_owner(db, sources, owner, name_ref=...)` 每次重驗此 owner 的 JP hash、registry/source_face_map、實際 frozen printing 來源與採納的兩端名字，並比對 materialized link 的完整 subject／值／decision；`counterparts.first_counterpart()` 只在此證據範圍內選真人候選，不另建名稱算法。
 
-啟用 `digital_link_authored` 的名稱匯入缺 result 即拒絕。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時仍拒絕歧義。pending wording 的 JP revision 同樣可驗；printed owner、語義指派、translation use／selection 仍由 #53 接續，不能用本 API 宣稱已完成它們。匯入器只做 partial F1 verify；完整建置必須把 result.record.uses、逐 owner 的 sources.uses 及其他階段使用合併，用 `input_record(...).verify(..., complete=True)` 驗實際 DB raw source 閉包後才輸出。
+離線 composer 以釘住的 authored Git tree 與本機入口是否存在共同判定是否匯入 link；兩者不一致即拒絕，沒有入口不偽造空採納結果。沒有 link result 時，不提供真人同卡候選；政策名字仍按其獨立條件判斷。另一 owner 不因已有 context／translation 得到權限；同原文異譯而未有 context_assignment 時回報上述概念診斷，不任選概念。pending wording 的 JP revision 同樣可驗；printed owner、語義指派與 current translation/use／bindings 已有現行接點，#53 的其餘需求須沿此路徑接續，不能用 link API 宣稱全部完成。匯入器只做 partial F1 verify；完整建置必須把 result.record.uses、逐 owner 的 sources.uses 及其他階段使用合併，用 `input_record(...).verify(..., complete=True)` 驗實際 DB raw source 閉包後才輸出。
 
 ### 8.1 候選工具
 
