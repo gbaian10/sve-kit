@@ -77,7 +77,7 @@ IFS= read -r -p 'Development bucket: ' R2_DEV_BUCKET
 
 貼上秘密只發生在不回顯的 read 提示，不打進指令或歷史。不要 `env`、`set` 或 trace 輸出值。
 作業結束執行 `unset SVE_R2_ACCESS_KEY_ID SVE_R2_SECRET_ACCESS_KEY` 再 `exit`。
-工具給外部 Brotli 子行程的環境只含固定 PATH／LANG／LC_ALL，不傳憑證或代理設定。
+Brotli 由鎖定的 Python 套件在行程內處理，不啟動外部壓縮子行程；離線檢查不讀憑證。
 
 ## 4. 維護者設定 Access 與所有入口保護
 
@@ -158,27 +158,29 @@ mise exec -- bun run wrangler deploy --config wrangler.dev.jsonc
 及 [從 Pages 遷移](https://developers.cloudflare.com/workers/static-assets/migration-guides/migrate-from-pages/)。
 本文不依賴 Pages project、Pages Functions 或 pages.dev 別名。
 
-## 6. 可執行的 Brotli 包裝程式與離線對帳
+## 6. 套件化 Brotli 與離線對帳
 
-從 repo 根先依既有 setup 準備 carddb `.venv`，再使用版控內的協定入口：
+從 repo 根依 lockfile 準備 carddb `.venv`，直接驗證公開預覽：
 
 ```bash
-uv --directory carddb sync --all-groups
-carddb/tools/brotli-preview --version
+uv --directory carddb sync --locked
 uv --directory carddb run sve-carddb r2 upload-preview \
-  --preview-dir /explicit/preview --dry-run \
-  --brotli-command "$PWD/carddb/tools/brotli-preview"
+  --preview-dir /explicit/preview --dry-run
 ```
 
-`carddb/tools/brotli-preview` 使用本專案 Python，呼叫系統既有 `libbrotlienc.so.1`，
-固定檢查 **libbrotli 1.0.9、generic mode、quality 11、lgwin 22**。本機實測的 203 個 br
-逐份重壓皆相同。其他版本或缺函式庫即停止，不自動安裝或降級；維護者另安排環境準備。
-工具接受 `--version`、`-q 11 -c`（stdin／stdout bytes），預覽來源保持唯讀。
+`.br` 使用 `uv.lock` 鎖定的 PyPI `brotli` 在行程內串流解碼，逐段核對原始 JSON。
+無效、截斷、尾隨 bytes、超出 raw 長度或內容不同即停止；manifest 壓縮大小與完整
+閉包檢查仍須通過。不同 producer／quality 的合法表示可驗證，不要求重壓後 bytes 相同。
+既有預覽保持唯讀，不能刪 br 讓驗證放行，也不能因解壓相等就覆寫既有不可變物件。
 
-直接安裝官方 brotli CLI 是否採相同預設視窗 **未驗證**；可能不相符，不能以「同樣 q11」
-推定 byte 相同。只在重新比對全部 br 都相同後才改用別的 encoder，不能刪 br 讓驗證放行。
-沒有 br 時可不提供 encoder。工具的 dry-run 不讀憑證或建立 HTTP client；明示 encoder
-會執行本機子行程，但該程式不連網、不抓來源或開 live manifest。
+新建置的 `snapshot export`／`snapshot export-offline` 以 `--brotli` 啟用壓縮，預設
+`--no-brotli`；producer 固定 generic mode、quality 11、lgwin 22，私人 recipe 記錄
+套件版本。上傳命令不需 Brotli 選項，亦不依賴系統函式庫、外部 encoder 或包裝程式。
+正式 2.0 凍結包的 manifest／changes 壓縮表示在回讀與重試時原樣保留，不以新套件重壓。
+dry-run 不讀憑證或建立 HTTP client，不連網、不抓來源或開 live manifest。
+
+先前實測的 203 個 br 曾以舊 libbrotli 1.0.9 配方逐份重壓相同；這是歷史測量，
+不能當作 PyPI 實作的重測結果，原重壓耗時也不代表目前串流解壓檢查的耗時。
 
 核對 candidate_files／candidate_bytes、各類 totals 與 manifest pin。private／reports
 不遍歷、不讀、不傳；公開樹的未知檔案、PNG、未引用資產、私有配方／欄位、本機路徑、壞
@@ -195,7 +197,6 @@ hash／壓縮／圖片即停止。離線數字是本機候選，遠端是否存�
 ```bash
 uv --directory carddb run sve-carddb r2 upload-preview \
   --preview-dir /explicit/preview \
-  --brotli-command "$PWD/carddb/tools/brotli-preview" \
   --account-id "$R2_ACCOUNT_ID" --bucket "$R2_DEV_BUCKET" \
   --execute --confirm-maintainer-authorization
 ```
