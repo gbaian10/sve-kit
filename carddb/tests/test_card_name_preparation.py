@@ -404,6 +404,7 @@ def test_individual_choice_and_delegated_key_have_separate_events() -> None:
     assert decision.reviewed_at == approval.reviewed_at
     assert decision.reviewed_precision == "instant"
     assert decision.state == "confirmed"
+    assert decision.policy_id == "human-card-names-v1"
     assert decision.sample_ids == (choice.record_key,)
     assert "不是維護者親自核可" not in decision.note
     assert approval.basis in decision.note
@@ -443,6 +444,32 @@ def test_individual_event_requires_exact_value_and_members() -> None:
         build(
             (change(row, text="合成改名"),), choices={row.concept_key: individual(row)}
         )
+
+
+@pytest.mark.parametrize("other_prepared", [False, True])
+def test_individual_event_cannot_include_unassigned_choice(
+    other_prepared: bool,
+) -> None:
+    first, second = candidate(), candidate("test_moon")
+    approval = individual(first)
+    broad = IndividualApproval(
+        kind=approval.kind,
+        reviewed_by=approval.reviewed_by,
+        reviewed_at=approval.reviewed_at,
+        basis=approval.basis,
+        values=tuple(sorted(approval.values + individual(second).values)),
+    )
+    rows = (first, second) if other_prepared else (first,)
+    events: dict[str, card_names.ChoiceEvent] = {first.concept_key: broad}
+    if other_prepared:
+        data = receipt(rows, choice=True).model_dump(mode="json")
+        data["scope"] = [card_names._keys(second)[1]]
+        events[second.concept_key] = Delegation.model_validate_json(canonical(data))
+    with pytest.raises(
+        ValueError,
+        match=r"^Individual card-name approval must match exact assigned values$",
+    ):
+        build(rows, choices=events)
 
 
 def test_term_cannot_borrow_individual_word_approval() -> None:
