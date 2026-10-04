@@ -96,7 +96,6 @@ from sve_carddb.sources import official_sv1 as sv1
 from sve_carddb.sources import official_svwb as svwb
 from sve_carddb.sources.official_jp import parse_list_first
 from sve_carddb.store import UnsafePathError
-from sve_carddb.translations.commands import app as translations_app
 
 if TYPE_CHECKING:
     from collections.abc import Awaitable, Callable, Generator
@@ -104,7 +103,6 @@ if TYPE_CHECKING:
 app = typer.Typer(no_args_is_help=True, help="Crawl and build the SVE card database.")
 app.add_typer(digital_links_app, name="digital-links")
 app.add_typer(digital_name_policies_app, name="digital-name-policies")
-app.add_typer(translations_app, name="translations")
 crawl_app = typer.Typer(
     no_args_is_help=True, help="Fetch official pages into SVE_DATA_DIR."
 )

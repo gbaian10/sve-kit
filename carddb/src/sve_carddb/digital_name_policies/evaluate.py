@@ -18,7 +18,7 @@ from sve_carddb.extract.compare_jp import legacy_projection
 from sve_carddb.extract.official_jp import extract_card
 from sve_carddb.registry.records import CardId, FaceId, PrintingId, RecordData, Text
 from sve_carddb.registry.review import observation
-from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.sources import Sources
 
@@ -236,25 +236,14 @@ def catalogue(loaded: LoadedPolicy, sources: Sources) -> Catalogue:
         for card, game, official in targets
     ):
         raise ValueError("Digital-name exclusion cannot locate its card target")
-    whitespace: frozenset[int] = frozenset()
-    kana: tuple[tuple[int, int], ...] = ()
-    if document.purpose == "names":
-        matcher = object_value(document.content["target_minimum_check"])
-        whitespace = frozenset(
-            int(str(c)) for c in array(matcher["whitespace_codepoints"])
-        )
-        kana = tuple(
-            (int(str(array(pair)[0])), int(str(array(pair)[1])))
-            for pair in array(matcher["kana_ranges"])
-        )
     return Catalogue(
         digest(loaded.policy),
         document.purpose,
         tuple(names),
         uses_sorted(sources.uses),
         loaded.receipt().reviewed_at,
-        whitespace,
-        kana,
+        frozenset(),
+        (),
         name_exclusions,
         targets,
     )
@@ -400,7 +389,7 @@ def name_result(
 
 
 def rule_links(
-    owners: tuple[OwnerEvidence, ...], frozen: Catalogue
+    owners: tuple[OwnerEvidence, ...], frozen: Catalogue | CurrentCatalogue
 ) -> tuple[RuleLinkPlan, ...]:
     """Propose deduplicated card/game/ID plans, never same_card human records."""
     if frozen.purpose != "links":

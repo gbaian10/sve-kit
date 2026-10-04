@@ -14,7 +14,6 @@ from sve_carddb.catalog.adoption_loader import load_adoptions
 from sve_carddb.digital_links.loader import load_links
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import array, object_value
-from sve_carddb.translations.card_names import IndividualApproval
 
 from . import adoption_fixtures, digital_link_fixtures
 
@@ -45,19 +44,10 @@ def test_shipped_policy_preserves_current_identity() -> None:
 
 @pytest.mark.usefixtures("configured")
 @pytest.mark.parametrize("reviewer", ["gbaian10", "second-maintainer"])
-def test_shared_annotation_and_individual_receipt_accept_listed(
+def test_shared_annotation_accepts_listed(
     reviewer: str,
 ) -> None:
     assert TypeAdapter(maintainers.Maintainer).validate_python(reviewer) == reviewer
-    receipt = IndividualApproval.model_validate_json(
-        '{"kind":"individual","reviewed_by":"'
-        + reviewer
-        + '","reviewed_at":"2026-10-04T00:00:00Z","basis":"synthetic event",'
-        + '"values":[["synthetic-key","sha256:'
-        + "1" * 64
-        + '"]]}',
-    )
-    assert receipt.reviewed_by == reviewer
 
 
 @pytest.mark.usefixtures("configured")

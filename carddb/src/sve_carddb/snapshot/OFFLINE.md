@@ -10,18 +10,26 @@ The recipe is JSON matching `sve_carddb.snapshot.offline.Inputs`: `repo`, `archi
 `image_batch`, `parser_version`), `revision`, `as_of`,
 `data_version`, `published_at`, `feedback_url`, `grammar_version` and
 `normalizer_version`. Vocabulary and UI languages are derived from the complete
-`authored/catalog-adoptions` entry at the pinned revision by `derive_catalog`.
-No caller vocabulary JSON or language settings are accepted. Adopted EN and JA
-languages are required; immutable receipts, source evidence and their complete
-source-use closure are checked and included in the build. The complete existing `authored/translations` entry is explicitly enabled,
-with the glossary evidence tables compiled. Catalog receipt evidence uses its
-historical immutable Git background; glossary evidence uses the current build
-runtime. The build itself pins `catalog_source_recipes`, `translation_recipes`,
+`authored/catalog-adoptions` entry at the pinned revision by
+`catalog.current.prepare` and written by `catalog.current.populate`. The catalog
+index and every shard must use format 2. No caller vocabulary JSON or language
+settings are accepted. Adopted EN and JA languages are required. The complete
+existing `authored/translations` entry is explicitly enabled with its current
+format 2 glossary. `compile_current_build` compiles the current catalog and
+glossary evidence tables for both the initial build and bundle reconstruction.
+
+Authored input bytes are checked against the immutable Git revision. Catalog
+and glossary frozen evidence is validated against the current `BuildContext`
+and its parser recipes. Their complete expected source-use closure is checked
+independently of database insertion; missing imported catalog or glossary uses
+fail before preview or bundle publication. Glossary source uses are collected
+from current terms, concepts, choices and vocabulary values, including their
+source spans and same-concept evidence.
+
+The build itself pins `catalog_source_recipes`, `translation_recipes`,
 all package Python dependencies except generated `_version.py`, `uv.lock` and
-`pyproject.toml`. Translation recipes cover JP, sv1 and svwb frozen projections;
-they do not grant digital same-card eligibility. Expected glossary source uses
-are independently replayed from every historical member, including superseded
-and withdrawn records, rather than copied from the import result. Missing
+`pyproject.toml`. Translation recipes cover EN, JP, sv1 and svwb frozen projections;
+they do not grant digital same-card eligibility. Missing
 trait/title or other raw-field adoptions fail closed rather than generating codes.
 Image batches always verify authored correction evidence. Image publication is
 optional and requires the two explicit image roots below; EN card text remains
@@ -125,11 +133,18 @@ formal release gates and the separate Web consumer acceptance.
 
 ## Validation boundary
 
-The synthetic CLI replay tests exercise sealed catalog and glossary evidence,
-current recipe pins, immutable receipts and the complete source-use verification
-through preview and bundle output. Their physical card inventory is empty.
+The native synthetic CLI test seals JP and EN card pages, registers two separate
+card identities and product families, and exports a 2.0 preview and private
+SQLite bundle using format 2 catalog and current glossary inputs. It uses the
+actual frozen providers, compiler and catalog composition without adapters or
+monkeypatching. Assertions cover both regions, physical card rows, current
+authored provenance and retained catalog/glossary source uses.
+
+Focused replay tests use an empty physical inventory to isolate current
+catalog/glossary evidence and recipe pins. They independently check the complete
+source-use closure and reject missing catalog or glossary uses before output.
 Supplemental tests exercise card observations with mocked catalog composition.
-Neither test group claims complete real-card, catalog and translation acceptance.
+These synthetic tests do not claim complete real-card, catalog and translation acceptance.
 When real raw-field adoptions block the build, later-stage diagnostic runs must
 be identified separately; an empty substitute for a blocked phase does not
 prove the original phase or authorize a candidate for publication.

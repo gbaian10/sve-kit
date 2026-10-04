@@ -169,5 +169,414 @@
         ]
       ]
     ]
+  },
+  {
+    "name": "Translation-low_confidence-null",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                null
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-zero",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                0
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-one",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                1
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-old-status",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                "reviewed"
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-string",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial",
+                "true"
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-low_confidence-missing",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "machine",
+                "unofficial"
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-official_sve",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "official_sve",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-official_sv1",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "official_sv1",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-official_svwb",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "official_svwb",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
+  },
+  {
+    "name": "Translation-origin-community",
+    "target": "Container",
+    "value": {
+      "format_version": "2.0.0",
+      "tables": {
+        "translation": [
+          {
+            "base": null,
+            "bucket": 23,
+            "columns": [
+              "id",
+              "source_unit_id",
+              "target_lang",
+              "text_unit_id",
+              "origin",
+              "authority",
+              "low_confidence"
+            ],
+            "owner": {
+              "id": null,
+              "kind": "global"
+            },
+            "partition": "bootstrap",
+            "rows": [
+              [
+                "tr:invalid",
+                "t:ja:synthetic",
+                "zh-Hant",
+                "t:zh-Hant:synthetic",
+                "community",
+                "unofficial",
+                true
+              ]
+            ]
+          }
+        ]
+      },
+      "types": {}
+    }
   }
 ]

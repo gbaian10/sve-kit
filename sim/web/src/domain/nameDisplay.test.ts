@@ -49,3 +49,43 @@ describe("displayName", () => {
     })
   })
 })
+
+describe("current translation quality", () => {
+  const low: NameSource = {
+    ...jp,
+    translationQuality: {
+      "zh-Hant": { lowConfidence: true, sourceUnchecked: false },
+      en: { lowConfidence: false, sourceUnchecked: true },
+    },
+  }
+  it("shows a low-confidence translation with its exact original instead of falling back", () => {
+    expect(displayName(low, "zh-TW", "translated")).toEqual({
+      primary: { text: "試作妖精", lang: "zh-Hant" },
+      secondary: { text: "試作の妖精", lang: "ja" },
+      missingTranslation: false,
+      lowConfidence: true,
+    })
+  })
+  it("keeps the source-check notice distinct from translation confidence", () => {
+    expect(displayName(low, "en", "translated")).toEqual({
+      primary: { text: "Prototype Fairy", lang: "en" },
+      missingTranslation: false,
+      sourceUnchecked: true,
+    })
+    expect(displayName(low, "zh-TW", "both")).toMatchObject({ lowConfidence: true })
+  })
+  it("shows no translation notice when the original or a missing-language fallback is displayed", () => {
+    expect(displayName(low, "zh-TW", "original")).toEqual({
+      primary: jp.original,
+      missingTranslation: false,
+    })
+    expect(displayName(low, "ja", "translated")).toEqual({
+      primary: jp.original,
+      missingTranslation: false,
+    })
+    expect(displayName({ ...low, translations: {} }, "en", "translated")).toEqual({
+      primary: jp.original,
+      missingTranslation: true,
+    })
+  })
+})

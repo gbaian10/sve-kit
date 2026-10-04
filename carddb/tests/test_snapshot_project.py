@@ -18,6 +18,7 @@ from sve_carddb.snapshot.contract import tables
 from sve_carddb.snapshot.project import (
     Decisions,
     DisplayBinding,
+    DisplayCheck,
     DisplayText,
     display_text,
     effective_support,
@@ -281,7 +282,9 @@ def test_selected_translation_is_owner_bound_and_missing_language_keeps_source(
     assert revision["effect_unit_id"] == TEXT
     assert one(result, "translation")["source_unit_id"] == TEXT
     with db.transaction():
-        db.update("translation", {"id": "translation"}, {"status": "stale"})
+        db.delete(
+            "translation_selection", {"context_id": "context", "target_lang": "zh-Hant"}
+        )
     result = projected(db)
     assert result.tables["translation"] == []
     assert one(result, "face_revision")["translations"] == []
@@ -702,7 +705,6 @@ def test_two_contexts_for_same_source_can_select_different_field_translations(
                 "id": "context2",
                 "source_unit_id": TEXT,
                 "semantic_variant": "second",
-                "decision_id": "decision",
             },
         )
         db.insert(
@@ -784,6 +786,11 @@ def test_translation_owner_and_ordinal_are_exact(
                 "translation_context",
                 {"id": "context"},
                 {"source_unit_id": keyword_text},
+            )
+            db.update(
+                "translation",
+                {"id": "translation"},
+                {"source_hash": digest(b"Synthetic keyword")},
             )
     result = projected(db)
     assert len(result.tables["translation"]) == 1
@@ -1002,6 +1009,11 @@ def test_unadopted_observation_requires_wording_adapter(db: Database) -> None:
 def test_exact_public_text_id_is_rechecked(db: Database) -> None:
     with db.transaction():
         db.update("text_unit", {"id": TEXT}, {"text": "Changed synthetic text"})
+        db.update(
+            "translation",
+            {"id": "translation"},
+            {"source_hash": digest(b"Changed synthetic text")},
+        )
     with pytest.raises(ValueError, match="Text ID"):
         projected(db)
 
@@ -1021,8 +1033,28 @@ def test_independent_ancillary_oracle_matches_complete_rows(db: Database) -> Non
         assert result.tables[table] == rows, table
 
 
+EN_TEXT = "t:en:" + digest(b"Synthetic official")[7:23]
+
+
 def dual_region(db: Database) -> None:
     with db.transaction():
+        db.insert(
+            "language",
+            {
+                "code": "en",
+                "display_name": "Synthetic English",
+                "fallback_order": Json(["ja"]),
+            },
+        )
+        db.insert(
+            "text_unit",
+            {
+                "id": EN_TEXT,
+                "lang": "en",
+                "text": "Synthetic official",
+                "content_hash": digest(b"Synthetic official"),
+            },
+        )
         db.insert(
             "printing",
             dict(db.rows("printing")[0].values)
@@ -1042,12 +1074,22 @@ def dual_region(db: Database) -> None:
         )
         db.insert(
             "printing_face",
-            dict(db.rows("printing_face")[0].values) | {"printing_id": "printing-en"},
+            dict(db.rows("printing_face")[0].values)
+            | {
+                "printing_id": "printing-en",
+                "printed_name_unit_id": EN_TEXT,
+                "printed_effect_unit_id": EN_TEXT,
+            },
         )
         db.insert(
             "face_revision",
             dict(db.rows("face_revision")[0].values)
-            | {"id": "revision-en", "region": "en"},
+            | {
+                "id": "revision-en",
+                "region": "en",
+                "name_unit_id": EN_TEXT,
+                "effect_unit_id": EN_TEXT,
+            },
         )
         db.insert(
             "face_current",
@@ -1082,7 +1124,12 @@ def test_shared_jp_preserves_source_owner_context(
     dual_region(db)
     chosen = replace(
         decisions(),
-        aligned_regions=frozenset({("card", "en")}) if aligned else frozenset(),
+        aligned_regions=frozenset({("card", "en")}),
+        display_checks=(
+            DisplayCheck("use", ("face_revision", "revision-en"), TEXT, EN_TEXT),
+        )
+        if aligned
+        else (),
         display_bindings=(
             DisplayBinding(
                 "use", ("face_revision", "revision-en"), "zh-Hant", "shared_jp"
@@ -1135,13 +1182,17 @@ def test_official_counterpart_uses_direct_id_without_common_selection(
             {"id": "translation"},
             {
                 "target_lang": "en",
-                "origin": "official_sve",
+                "text": "Synthetic official",
+                "origin": "official",
                 "authority": "sve_official",
             },
         )
     chosen = replace(
         decisions(),
         aligned_regions=frozenset({("card", "en")}),
+        display_checks=(
+            DisplayCheck("use", ("face_revision", "revision-en"), TEXT, EN_TEXT, True),
+        ),
         display_bindings=(
             DisplayBinding(
                 "use",
@@ -1206,11 +1257,29 @@ def test_wording_candidate_must_be_an_observed_existing_revision(db: Database) -
         projected(db, replace(decisions(), wording={"face": (wording,)}))
 
 
-@pytest.mark.parametrize("status", ["draft", "stale"])
-def test_unreviewed_translation_never_ships(db: Database, status: str) -> None:
+@pytest.mark.parametrize("origin", ["official", "project", "machine"])
+@pytest.mark.parametrize("low_confidence", [False, True])
+def test_current_selected_translation_ships_without_review_status(
+    db: Database, origin: str, *, low_confidence: bool
+) -> None:
     with db.transaction():
-        db.update("translation", {"id": "translation"}, {"status": status})
-    assert projected(db).tables["translation"] == []
+        db.update(
+            "translation",
+            {"id": "translation"},
+            {
+                "origin": origin,
+                "low_confidence": low_confidence,
+            },
+        )
+    result = projected(db)
+    assert one(result, "translation")["origin"] == origin
+    assert one(result, "translation")["low_confidence"] is low_confidence
+    assert "status" not in one(result, "translation")
+    display = display_text(
+        result.tables, one(result, "face_revision"), "name", "zh-Hant"
+    )
+    assert display.text == "Synthetic translation"
+    assert not display.missing_translation
 
 
 def test_empty_mechanic_universe_needs_explicit_complete_all(db: Database) -> None:
@@ -1237,6 +1306,7 @@ def test_empty_mechanic_universe_needs_explicit_complete_all(db: Database) -> No
 
 
 def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> None:
+    dual_region(db)
     with db.transaction():
         db.insert(
             "translation",
@@ -1244,7 +1314,7 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
             | {
                 "id": "official",
                 "target_lang": "en",
-                "origin": "official_sve",
+                "origin": "official",
                 "authority": "sve_official",
                 "text": "Synthetic official",
             },
@@ -1263,6 +1333,9 @@ def test_counterpart_replaces_only_its_owner_common_selection(db: Database) -> N
     chosen = replace(
         decisions(),
         aligned_regions=frozenset({("card", "en")}),
+        display_checks=(
+            DisplayCheck("use", ("face_revision", "revision-en"), TEXT, EN_TEXT, True),
+        ),
         display_bindings=(
             DisplayBinding(
                 "use",
@@ -1736,7 +1809,7 @@ def test_direct_own_name_replaces_shared_choice_only_on_its_owner(db: Database) 
             row
             | {
                 "id": "official-name",
-                "origin": "official_sv1",
+                "origin": "official",
                 "authority": "digital_official",
                 "text": "Synthetic official name",
             },

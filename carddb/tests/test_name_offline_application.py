@@ -2,13 +2,15 @@
 
 import shutil
 from dataclasses import replace
+from types import SimpleNamespace
 from typing import TYPE_CHECKING
 
 import pytest
 from pydantic import JsonValue
 
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.database import open_database
-from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES, compile_build
+from sve_carddb.build_db.t1 import MINIMUM_CAPABILITIES
 from sve_carddb.catalog import adoption_importer
 from sve_carddb.catalog.models import Catalog
 from sve_carddb.catalog.projection import CatalogProjection
@@ -34,7 +36,7 @@ if TYPE_CHECKING:
     from sve_carddb.digital_links.importer import Result as LinkResult
     from sve_carddb.digital_name_policies.application import Result
     from sve_carddb.text_observations import TextPlan
-    from sve_carddb.translations.name_replay import NameReplay
+    from sve_carddb.translations.current_names import Names
 
 
 @pytest.fixture(scope="module")
@@ -158,11 +160,14 @@ def catalogue(monkeypatch: pytest.MonkeyPatch) -> None:
         ),
         vocabulary,
     )
+    monkeypatch.setattr(offline, "_adoption_uses", lambda *_args: ())
     monkeypatch.setattr(adoption_importer, "AdoptionInputs", CatalogInputs)
     monkeypatch.setattr(
-        adoption_importer, "derive_catalog", lambda *_args, **_kwargs: projection
+        offline,
+        "_prepare_catalog",
+        lambda *_args, **_kwargs: SimpleNamespace(projection=projection),
     )
-    monkeypatch.setattr(adoption_importer, "populate_adoptions", populate)
+    monkeypatch.setattr(offline, "_populate_adoptions", populate)
 
 
 def test_offline_name_policy_reconstructs_identical_bundle(
@@ -182,8 +187,13 @@ def test_offline_name_policy_reconstructs_identical_bundle(
         for p in (tmp_path / "second").rglob("*")
         if p.is_file()
     }
-    assert object_value(first.report["name_application"])["policy_covered_owners"] == 1
-    assert first.projection.tables["translation"][0]["origin"] == "official_sv1"
+    assert object_value(first.report["name_application"])["covered_owners"] == 1
+    translation = first.projection.tables["translation"][0]
+    assert translation["origin"] == "official"
+    assert translation["authority"] == "digital_official"
+    assert translation["low_confidence"] is False
+    assert "status" not in translation
+    assert "decision_id" not in translation
     assert (
         object_value(
             array(first.projection.tables["face_revision"][0]["translations"])[0]
@@ -192,12 +202,12 @@ def test_offline_name_policy_reconstructs_identical_bundle(
     )
     assert not first.projection.tables["digital_link"]
     assert first.projection.config["digital_endpoints"] == []
-    schema = compile_build(
+    schema = compile_current_build(
         (*MINIMUM_CAPABILITIES, "en", "translation_evidence", "translation_names")
     )
     with open_database(schema, tmp_path / "first/build.sqlite") as db:
         assert db.rows("digital_link")
-        assert any(
+        assert not any(
             r.values["category"] == "digital_name_policy" for r in db.rows("decision")
         )
     assert digest(first.input_content) == first.report["input_sha256"]
@@ -216,7 +226,7 @@ def test_offline_detects_missing_name_application_source_use(
         *,
         context: BuildContext,
         stores: dict[str, Path],
-        replay: NameReplay,
+        replay: Names,
         links: LinkResult | None,
     ) -> Result:
         result = original(

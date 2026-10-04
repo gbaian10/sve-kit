@@ -104,3 +104,22 @@ def test_shared_v2_index_cases(case: JsonValue) -> None:
         assert (None if selected is None else selected["data_version"]) == item[
             "selected_data_version"
         ]
+
+
+@pytest.mark.parametrize(
+    "case",
+    [
+        item
+        for item in array(fixture("schema-invalid.json"))
+        if string(object_value(item)["name"]).startswith("Translation-")
+    ],
+    ids=lambda c: object_value(c)["name"],
+)
+def test_current_translation_shape_rejected_inside_resealed_wire(
+    wire: tuple[dict[str, JsonValue], dict[str, JsonValue]], case: JsonValue
+) -> None:
+    manifest, payloads = deepcopy(wire)
+    payloads["bootstrap/bootstrap/global/global/band/2"] = object_value(case)["value"]
+    blobs = _reseal(manifest, payloads)
+    with pytest.raises(ValidationError):
+        read_snapshot(manifest, blobs)

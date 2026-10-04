@@ -7,11 +7,9 @@ from pydantic import JsonValue
 
 from sve_carddb.snapshot.values import canonical
 from sve_carddb.template_parameters.current_references import adopted
-from sve_carddb.translations.current import convert
-from sve_carddb.translations.models import TermRecord
+from sve_carddb.translations.current_models import TermRecord
 
-from .name_replay_fixtures import name_term
-from .translation_fixtures import write
+from .translation_fixtures import name_term, write
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -27,9 +25,7 @@ class NoSources:
 
 def test_current_reference_uses_full_current_glossary(tmp_path: Path) -> None:
     values = [
-        convert(TermRecord.model_validate_json(canonical(name_term()))).model_dump(
-            mode="json"
-        )
+        TermRecord.model_validate_json(canonical(name_term())).model_dump(mode="json")
     ]
     write(
         tmp_path,

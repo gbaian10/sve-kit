@@ -7,20 +7,15 @@ import pytest
 
 from sve_carddb.build_inputs import BuildContext
 from sve_carddb.digital_links.importer import Inputs, populate_links
-from sve_carddb.digital_name_policies.application import _counterparts, prepare
+from sve_carddb.digital_name_policies.application import _counterparts
 from sve_carddb.snapshot.values import array, canonical, object_value, parse
 from sve_carddb.translations.digital import configuration
-from sve_carddb.translations.name_build import NameOwner
-from sve_carddb.translations.name_selection import select_owner_name
+from sve_carddb.translations.name_sources import NameOwner
 
 from .adoption_fixtures import commit
 from .digital_link_fixtures import envelope, write
-from .name_application_fixtures import (
-    ApplicationCase,
-    application_case,
-    printed_owner,
-    staged,
-)
+from .name_application_fixtures import ApplicationCase, application_case, printed_owner
+from .test_name_current_application import current_case
 
 if TYPE_CHECKING:
     from pathlib import Path
@@ -32,7 +27,7 @@ def baseline(tmp_path_factory: pytest.TempPathFactory) -> ApplicationCase:
 
 
 def links_case(case: ApplicationCase, root: Path, *, sample: str) -> ApplicationCase:
-    changed = staged(case, root, {})
+    changed = current_case(case, root)
     normal = object_value(parse(case.fixture.digital.record))
     evolved = object_value(parse(canonical(normal)))
     subject = object_value(object_value(evolved["data"])["subject"])
@@ -133,21 +128,6 @@ def test_counterpart_priority_requires_actual_sample_and_rechecks_printing(
                 owner,
                 name_ref=proof.model_copy(update={"parser": "translation-en-v1"}),
             )
-        policy = prepare(
-            db, case.inputs, case.texts, sources=case.sources(), replay=case.replay
-        ).owners[0]
-        invalid = replace(policy.result, status="untranslated", game=None, text=None)
-        selected = select_owner_name(
-            policy.source,
-            invalid,
-            context_hash=invalid.context_hash,
-            choices=(),
-            counterparts=candidates,
-            policy_candidate=None,
-        )
-        assert selected.reason == "counterpart"
-        assert selected.candidate is not None
-        assert selected.candidate.counterpart_checked
         card = case.fixture.digital.card.model_dump(mode="json")
         db.insert("card", card | {"id": "third-card"})
         db.insert(

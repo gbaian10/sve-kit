@@ -12,7 +12,7 @@ from sve_carddb.template_translations.current_models import (
     VariantRecord,
 )
 from sve_carddb.template_translations.current_render import Label, Result, render
-from sve_carddb.translations.name_build import NameOwner, _row
+from sve_carddb.translations.name_sources import NameOwner, _row
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import Database, Value

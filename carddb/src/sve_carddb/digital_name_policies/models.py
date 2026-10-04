@@ -13,7 +13,7 @@ from sve_carddb.registry.records import CardId, Hash, Instant, RecordData, Text
 
 PolicyId = Annotated[str, Field(pattern=r"^[A-Za-z0-9_-]+\Z")]
 Positive = Annotated[int, Field(ge=1)]
-Purpose = Literal["names", "links"]
+Purpose = Literal["links"]
 UUID = Annotated[str, Field(pattern=r"^[0-9a-f]{8}(-[0-9a-f]{4}){3}-[0-9a-f]{12}\Z")]
 
 
@@ -95,7 +95,7 @@ class Exclusions(Envelope):
     kind: Literal["digital_name_initial_exclusions"]
     purpose: Purpose
     approved_list_hash: Hash
-    entries: tuple[NameExclusion | LinkNameExclusion | CardTargetExclusion, ...]
+    entries: tuple[LinkNameExclusion | CardTargetExclusion, ...]
 
 
 class Entry(RecordData):

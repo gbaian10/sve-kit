@@ -174,3 +174,39 @@ describe("pending display in the list", () => {
     })
   })
 })
+
+describe("current name translations", () => {
+  it("retains a low-confidence selected name in display and search, independent of unchecked source", () => {
+    const revised = {
+      ...snapshot,
+      bootstrap: snapshot.bootstrap.map((fragment) => ({
+        ...fragment,
+        rows: fragment.rows.map((row) => {
+          if (fragment.table === "translation")
+            return { ...row, origin: "machine", low_confidence: true }
+          if (fragment.table === "face_revision")
+            return {
+              ...row,
+              translations: (row["translations"] as { basis: string }[]).map((value) => ({
+                ...value,
+                basis: "shared_jp_unchecked",
+              })),
+            }
+          return row
+        }),
+      })),
+    }
+    const current = createCatalog(revised)
+    const name = current.summary("p:bp01-001")?.name
+    expect(name?.translations["zh-Hant"]).toBe(
+      catalog.summary("p:bp01-001")?.name.translations["zh-Hant"],
+    )
+    expect(name?.translationQuality?.["zh-Hant"]).toEqual({
+      lowConfidence: true,
+      sourceUnchecked: true,
+    })
+    expect(current.entries.find((entry) => entry.cardId === "c:bp01-001")?.names).toEqual(
+      catalog.entries.find((entry) => entry.cardId === "c:bp01-001")?.names,
+    )
+  })
+})

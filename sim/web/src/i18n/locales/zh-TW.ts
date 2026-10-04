@@ -87,6 +87,8 @@ const zhTW = {
     retry: "下載卡圖資訊",
   },
   card: {
+    translationProofreading: "待校對",
+    sourceUnchecked: "日英文字尚未核對",
     wordingPending: "卡文未定",
     candidatesUnselected: "有多個候選，尚未選定",
     provisionalWording: "依已知發售日暫顯，尚未採納",

@@ -5,14 +5,12 @@ from typing import TYPE_CHECKING
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
-from sve_carddb.translations.current import convert
 from sve_carddb.translations.current_models import (
     ChoiceRecord,
     TermRecord,
     VocabularyRecord,
 )
 from sve_carddb.translations.importer import validate_choice
-from sve_carddb.translations.models import Shard as LegacyShard
 from sve_carddb.translations.sources import Sources
 
 if TYPE_CHECKING:
@@ -27,8 +25,6 @@ if TYPE_CHECKING:
 def authored_sources(db: Database, snapshot: Snapshot, revision: str) -> dict[str, str]:
     """Record real indexed bytes; these rows describe inputs, not approval events."""
     result = {}
-    old_paths = {}
-    identifiers = {}
     for path, exact, content in snapshot.shards:
         identifier = (
             "authored:translations:"
@@ -47,15 +43,8 @@ def authored_sources(db: Database, snapshot: Snapshot, revision: str) -> dict[st
             },
             ("id",),
         )
-        identifiers[path] = identifier
-        if object_value(parse(content))["translation_authored_format"] == 1:
-            for record in LegacyShard.model_validate_json(content).records:
-                old_paths[record.record_key] = path
-        else:
-            for raw_record in array(object_value(parse(content))["records"]):
-                result[str(object_value(raw_record)["record_key"])] = identifier
-    for record, _ in snapshot.effective():
-        result[convert(record).record_key] = identifiers[old_paths[record.record_key]]
+        for raw_record in array(object_value(parse(content))["records"]):
+            result[str(object_value(raw_record)["record_key"])] = identifier
     return result
 
 
@@ -105,7 +94,7 @@ def populate(  # ruff: ignore[complex-structure,too-many-branches] -- source val
             if lang != record.data.subject.source_lang:
                 raise ValueError("Name concept language differs from physical source")
     # Owner/face applicability is verified against this build, not old adoption bases.
-    from sve_carddb.translations.current_names import prepare  # ruff: ignore[import-outside-top-level] -- owner checks share current resolved sources without importing the legacy application
+    from sve_carddb.translations.current_names import prepare  # ruff: ignore[import-outside-top-level] -- owner checks share current resolved sources without introducing a module import cycle
 
     prepare(snapshot, originals, inputs, sources, db)
     insert_raw_sources(db, (use.source for use in sources.uses))

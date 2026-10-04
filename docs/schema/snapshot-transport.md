@@ -346,7 +346,9 @@ config 與 programs 各一檔，key 分別為 `config`、`programs`。無列 buc
 
 ### 5.4 format 2.0.0 卡包 media 與 ID 圖片
 
-format_version、min_reader_version 均為 `2.0.0`。公開欄序依 snapshot-format，canonical、owner、分片鍵與裝檔依本文件前述各節。required_capabilities 恰為排序的：
+format_version、min_reader_version 均為 `2.0.0`。公開欄序依 snapshot-format，canonical、owner、分片鍵及文字裝檔依本文件前述配置。translation 固定七欄的最後一欄為必填 Bool `low_confidence`，origin 為 `official/project/machine`；bootstrap／detail 使用相同完整七欄，FieldTranslation.basis 同步接受 `shared_jp_unchecked`。reader 依固定 Schema 拒絕舊 status 字串、舊 origin、缺欄與非 Bool，不兼容兩種七欄形狀。
+
+2.0 尚未正式首發，本候選契約同步 producer、Python／TS reader、共用 golden 與 Web 合成快照，不增加能力旗標；正式發布後同類破壞性欄型更動須升 major。required_capabilities 恰為排序的：
 
 ```json
 [
@@ -397,7 +399,7 @@ version 為 1..2^53−1 或 null，狀態／空陣列約束依 snapshot-format �
 | 型別 | 完整欄位與計數 |
 | --- | --- |
 | ReviewCoverage | `{entity:printing/art,region:Region,total:UInt,unreviewed:UInt,model_reviewed:UInt,sampled:UInt,confirmed:UInt}`；按 entity/region 排序，四種狀態數合計 total，按出貨永久 ID 去重；art 可在兩個 region 各計一次 |
-| TranslationCoverage | `{region:Region,target_lang:Lang,total_fields:UInt,translated_fields:UInt,missing_fields:UInt}`；按 region/target_lang 排序，translated+missing=total；計 current face_revision 的 name/effect 及每個 section 的使用位置，不計歷史或 printing 倍數；target_lang 等於原文語言的組合不列；實際可選 FieldTranslation 才算 translated |
+| TranslationCoverage | `{region:Region,target_lang:Lang,total_fields:UInt,translated_fields:UInt,missing_fields:UInt}`；按 region/target_lang 排序，translated+missing=total；計 current face_revision 的 name/effect 及每個 section 的使用位置，不計歷史或 printing 倍數；target_lang 等於原文語言的組合不列；實際可選 FieldTranslation 才算 translated；low_confidence=true 仍計 translated，沒有有效選用才計 missing，不另推導人工審核狀態 |
 | MechanicCoverage | `{region:Region,scope:Code,total_cards:UInt,any_annotated_cards:UInt,fully_annotated_cards:UInt,unknown_cards:UInt,eligibility:"all_non_retired_cards_in_region",by_keyword:[{keyword_id:ID,complete_cards:UInt}]}`；按 region/scope 排序、keyword 按 ID 排序；沿 snapshot-format §8 的 fresh／EN block／分母規則 |
 | SourceWindow | `{kind:errata/qa/cardlist/cr,region:Region,scope_key:Text,from_date:Date,until_date:Date?,as_of:Date,state:complete/partial,source_url:URL}`；scope_key 限 `region:*` 或 `product:<id>` |
 | RestrictionCoverage | `{profile_id:ID,from_date:Date,until_date:Date?,state:complete/partial,source_url:URL}`；source_id 投影為公開來源 URL，不出建置 FK |

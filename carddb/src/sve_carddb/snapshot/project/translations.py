@@ -8,7 +8,11 @@ from sve_carddb.snapshot.values import array, digest, object_value, string
 if TYPE_CHECKING:
     from pydantic import JsonValue
 
-    from sve_carddb.snapshot.project.evidence import Decisions, DisplayBinding
+    from sve_carddb.snapshot.project.evidence import (
+        Decisions,
+        DisplayBinding,
+        DisplayCheck,
+    )
 
 
 class Texts:
@@ -135,25 +139,157 @@ def source_unit(owner: Record, field: str, ordinal: JsonValue) -> JsonValue:
     return owner[key]
 
 
+def _source_owner(source: Source, key: tuple[str, ...]) -> Record | None:
+    if key[0] == "face_revision":
+        row = source.index(
+            "face_revision", "id,face_id,region,name_unit_id,effect_unit_id"
+        ).get(key[1])
+        if row is None:
+            return None
+        return row | {
+            "sections": [
+                pick(item, "ordinal,text_unit_id,kind")
+                for item in source.matching(
+                    "face_text_section",
+                    "revision_id,ordinal,text_unit_id,kind",
+                    revision_id=key[1],
+                )
+            ]
+        }
+    if key[0] == "printing_face":
+        matches = source.matching(
+            "printing_face",
+            "printing_id,face_id,printed_name_unit_id,printed_effect_unit_id,flavor_unit_id,printed_text_state",
+            printing_id=key[1],
+            face_id=key[2],
+        )
+        if not matches:
+            return None
+        return matches[0] | {
+            "sections": [
+                pick(item, "ordinal,text_unit_id,kind")
+                for item in source.matching(
+                    "printing_text_section",
+                    "printing_id,face_id,ordinal,text_unit_id,kind",
+                    printing_id=key[1],
+                    face_id=key[2],
+                )
+            ]
+        }
+    return None
+
+
 def _current_region(
-    view: dict[str, list[Record]],
-    key: tuple[str, ...],
+    source: Source, key: tuple[str, ...]
 ) -> tuple[str, str, str] | None:
     if key[0] == "face_revision":
-        revision = next(row for row in view["face_revision"] if row["id"] == key[1])
+        revision = source.index("face_revision", "id,face_id,region").get(key[1])
+        if revision is None:
+            return None
         face_id, region = string(revision["face_id"]), string(revision["region"])
-        face = next(row for row in view["face"] if row["id"] == face_id)
+        face = source.index("face", "id,card_id")[face_id]
         if not any(
-            object_value(raw)["region"] == region
-            and object_value(raw)["revision_id"] == key[1]
-            for raw in array(face["current"])
+            row["region"] == region and row["revision_id"] == key[1]
+            for row in source.matching(
+                "face_current", "face_id,region,revision_id", face_id=face_id
+            )
         ):
             return None
         return string(face["card_id"]), face_id, region
     if key[0] == "printing_face":
-        printing = next(row for row in view["printing"] if row["id"] == key[1])
+        printing = source.index("printing", "id,card_id,region").get(key[1])
+        if printing is None:
+            return None
         return string(printing["card_id"]), key[2], string(printing["region"])
     return None
+
+
+def _binding_identity(
+    source: Source, use: Record, binding: DisplayBinding
+) -> tuple[str, str, str] | None:
+    original = _current_region(source, _owner(use))
+    if original is None:
+        return None
+    card_id, face_id, region = original
+    if binding.basis == "official_counterpart":
+        if binding.destination != _owner(use):
+            raise ValueError("Official counterpart must keep the display source owner")
+        if binding.target_lang != {"jp": "en", "en": "ja"}[region]:
+            raise ValueError("Official counterpart language mismatch")
+    else:
+        destination = _current_region(source, binding.destination)
+        if destination is None:
+            return None
+        if destination[:2] != (card_id, face_id) or destination[2] == region:
+            raise ValueError("Cross-region translation owner mismatch")
+        if region != "jp" or destination[2] != "en" or binding.target_lang != "zh-Hant":
+            raise ValueError("Shared JP translation region/language mismatch")
+    return original
+
+
+def _display_checks(
+    source: Source, use: Record, decisions: Decisions, identity: tuple[str, str, str]
+) -> tuple[DisplayCheck, ...]:
+    checks = tuple(
+        check for check in decisions.display_checks if check.source_use_id == use["id"]
+    )
+    original_owner = _source_owner(source, _owner(use))
+    if original_owner is None:
+        return ()
+    unit = source_unit(original_owner, string(use["field"]), use["ordinal"])
+    for check in checks:
+        peer = _source_owner(source, check.counterpart_owner)
+        relation = _current_region(source, check.counterpart_owner)
+        if peer is None or relation is None:
+            raise ValueError("Translation display check owner is unavailable")
+        if relation[:2] != identity[:2] or relation[2] == identity[2]:
+            raise ValueError("Translation display check identity mismatch")
+        if (
+            unit != check.source_unit_id
+            or source_unit(peer, string(use["field"]), use["ordinal"])
+            != check.counterpart_unit_id
+        ):
+            raise ValueError("Translation display check source mismatch")
+    return checks
+
+
+def _unchecked_source_available(
+    source: Source, view: dict[str, list[Record]], use: Record, binding: DisplayBinding
+) -> bool:
+    original_owner = _source_owner(source, _owner(use))
+    owner = _owners(view)[binding.destination]
+    if original_owner is None:
+        return False
+    field = string(use["field"])
+    if (
+        source_unit(owner, field, use["ordinal"]) is None
+        or source_unit(original_owner, field, use["ordinal"]) is None
+    ):
+        return False
+    return field not in {"effect", "section"} or len(
+        array(original_owner["sections"])
+    ) == len(array(owner["sections"]))
+
+
+def _counterpart_text(
+    source: Source, checks: tuple[DisplayCheck, ...], binding: DisplayBinding
+) -> bool:
+    peers = [check for check in checks if check.counterpart]
+    if not peers:
+        return False
+    if binding.translation_id is None:
+        raise ValueError("Official counterpart requires a direct translation ID")
+    translation = source.index("translation", "id,text,target_lang")[
+        binding.translation_id
+    ]
+    units = source.index("text_unit", "id,text,lang")
+    if not any(
+        translation["text"] == units[check.counterpart_unit_id]["text"]
+        and translation["target_lang"] == units[check.counterpart_unit_id]["lang"]
+        for check in peers
+    ):
+        raise ValueError("Official counterpart text differs from its checked source")
+    return True
 
 
 def _cross_region_allowed(
@@ -163,32 +299,41 @@ def _cross_region_allowed(
     binding: DisplayBinding,
     decisions: Decisions,
 ) -> bool:
-    original = _current_region(view, _owner(use))
-    if original is None:
+    identity = _binding_identity(source, use, binding)
+    if identity is None or not _confirmed_mapping(source, view, identity[0]):
         return False
-    card_id, face_id, region = original
+    if _divergent(source, identity[0], string(use["field"])):
+        return False
+    checks = _display_checks(source, use, decisions, identity)
     if binding.basis == "official_counterpart":
-        if binding.destination != _owner(use):
-            raise ValueError("Official counterpart must keep the display source owner")
-        if binding.target_lang != {"jp": "en", "en": "ja"}[region]:
-            raise ValueError("Official counterpart language mismatch")
-    else:
-        destination = _current_region(view, binding.destination)
-        if destination is None:
-            return False
-        if destination[:2] != (card_id, face_id) or destination[2] == region:
-            raise ValueError("Cross-region translation owner mismatch")
-        if region != "jp" or destination[2] != "en" or binding.target_lang != "zh-Hant":
-            raise ValueError("Shared JP translation region/language mismatch")
-    if (card_id, "en") not in decisions.aligned_regions:
-        return False
-    scope = "name" if use["field"] == "name" else "rules"
-    return not any(
+        return _counterpart_text(source, checks, binding)
+    matching = [
+        check for check in checks if check.counterpart_owner == binding.destination
+    ]
+    if binding.basis == "shared_jp":
+        return bool(matching)
+    if matching:
+        raise ValueError("Checked JP translation must use shared_jp")
+    return _unchecked_source_available(source, view, use, binding)
+
+
+def _confirmed_mapping(
+    source: Source, view: dict[str, list[Record]], card_id: str
+) -> bool:
+    card = next(row for row in view["card"] if row["id"] == card_id)
+    regions = {
+        row["region"]
+        for row in source.matching("printing", "id,card_id,region", card_id=card_id)
+    }
+    return card["identity_state"] == "confirmed" and regions == {"jp", "en"}
+
+
+def _divergent(source: Source, card_id: str, field: str) -> bool:
+    scope = "name" if field == "name" else "rules"
+    return any(
         row["resolved"] is False and row["field_scope"] in {scope, "all"}
         for row in source.matching(
-            "region_divergence",
-            "card_id,region,field_scope,resolved",
-            card_id=card_id,
+            "region_divergence", "card_id,region,field_scope,resolved", card_id=card_id
         )
     )
 
@@ -198,7 +343,7 @@ class _SelectedTranslations:
         self, source: Source, view: dict[str, list[Record]], texts: Texts
     ) -> None:
         self.public = {string(row["id"]): row for row in view["translation"]}
-        self.internal = source.index("translation", "id,context_id,text")
+        self.internal = source.index("translation", "id,context_id,text,source_hash")
         self.contexts = source.index("translation_context", "id,source_unit_id")
         self.selections = source.rows(
             "translation_selection", "context_id,target_lang,translation_id"
@@ -212,7 +357,7 @@ class _SelectedTranslations:
         selected: Record,
         basis: str,
     ) -> None:
-        """Keep only reviewed selections and their exact source/text closure."""
+        """Keep selected current values and their exact source/text closure."""
         identifier = string(selected["translation_id"])
         translation, details = self.public[identifier], self.internal[identifier]
         if (
@@ -220,16 +365,16 @@ class _SelectedTranslations:
             or translation["target_lang"] != selected["target_lang"]
         ):
             raise ValueError("Translation selection context mismatch")
-        if translation["status"] != "reviewed":
-            return
         if basis == "official_counterpart" and (
-            translation["origin"] != "official_sve"
+            translation["origin"] != "official"
             or translation["authority"] != "sve_official"
         ):
             raise ValueError("Official counterpart origin/authority mismatch")
-        translation["source_unit_id"] = self.contexts[string(use["context_id"])][
-            "source_unit_id"
-        ]
+        unit_id = self.contexts[string(use["context_id"])]["source_unit_id"]
+        original = self.texts.by_id[string(unit_id)]
+        if details["source_hash"] != digest(string(original["text"]).encode()):
+            raise ValueError("Translation source hash differs from its current context")
+        translation["source_unit_id"] = unit_id
         translation["text_unit_id"] = self.texts.intern(
             string(translation["target_lang"]), string(details["text"])
         )
@@ -283,6 +428,19 @@ class _SelectedTranslations:
             self.append(owner, use, row, binding.basis)
 
 
+def _direct_binding(
+    chosen: _SelectedTranslations, owner: Record, use: Record, binding: DisplayBinding
+) -> None:
+    if binding.destination != _owner(use):
+        raise ValueError("Direct own-source binding must keep its exact owner")
+    if (
+        source_unit(owner, string(use["field"]), use["ordinal"])
+        != chosen.contexts[string(use["context_id"])]["source_unit_id"]
+    ):
+        raise ValueError("Translation owner/context source mismatch")
+    chosen.bind(owner, use, binding)
+
+
 def translations(  # ruff: ignore[complex-structure] -- own-source and cross-region bindings must enforce independent owner gates
     source: Source, view: dict[str, list[Record]], texts: Texts, decisions: Decisions
 ) -> None:
@@ -302,21 +460,25 @@ def translations(  # ruff: ignore[complex-structure] -- own-source and cross-reg
             if selected["context_id"] == use["context_id"]:
                 chosen.append(owner, use, selected, "own_source")
     for binding in decisions.display_bindings:
-        if binding.basis not in {"own_source", "shared_jp", "official_counterpart"}:
+        if binding.basis not in {
+            "own_source",
+            "shared_jp",
+            "shared_jp_unchecked",
+            "official_counterpart",
+        }:
             raise ValueError("Unknown translation display basis")
         use = uses[binding.source_use_id]
         owner = owners.get(binding.destination)
-        if owner is None or _owner(use) not in owners:
+        original_owner = owners.get(_owner(use)) or _source_owner(source, _owner(use))
+        if owner is None or original_owner is None:
             continue
+        if (
+            source_unit(original_owner, string(use["field"]), use["ordinal"])
+            != chosen.contexts[string(use["context_id"])]["source_unit_id"]
+        ):
+            raise ValueError("Translation owner/context source mismatch")
         if binding.basis == "own_source":
-            if binding.destination != _owner(use):
-                raise ValueError("Direct own-source binding must keep its exact owner")
-            if (
-                source_unit(owner, string(use["field"]), use["ordinal"])
-                != chosen.contexts[string(use["context_id"])]["source_unit_id"]
-            ):
-                raise ValueError("Translation owner/context source mismatch")
-            chosen.bind(owner, use, binding)
+            _direct_binding(chosen, owner, use, binding)
         elif _cross_region_allowed(source, view, use, binding, decisions):
             chosen.bind(owner, use, binding)
     used = {

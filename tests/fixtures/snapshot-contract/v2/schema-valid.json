@@ -175,7 +175,7 @@
       "t:zh-Hant:8967c9d899bcfc91",
       "project",
       "unofficial",
-      "reviewed"
+      false
     ]
   },
   {
@@ -1781,7 +1781,7 @@
                     "text_unit_id",
                     "origin",
                     "authority",
-                    "status"
+                    "low_confidence"
                   ],
                   "owner": {
                     "id": null,
@@ -1796,7 +1796,7 @@
                       "t:zh-Hant:8967c9d899bcfc91",
                       "project",
                       "unofficial",
-                      "reviewed"
+                      false
                     ]
                   ]
                 }
@@ -1901,6 +1901,7 @@
                     "enum": [
                       "own_source",
                       "shared_jp",
+                      "shared_jp_unchecked",
                       "official_counterpart"
                     ]
                   }
@@ -2071,6 +2072,7 @@
                     "enum": [
                       "own_source",
                       "shared_jp",
+                      "shared_jp_unchecked",
                       "official_counterpart"
                     ]
                   }
@@ -2513,6 +2515,7 @@
                     "enum": [
                       "own_source",
                       "shared_jp",
+                      "shared_jp_unchecked",
                       "official_counterpart"
                     ]
                   }
@@ -3059,7 +3062,7 @@
                     "text_unit_id",
                     "origin",
                     "authority",
-                    "status"
+                    "low_confidence"
                   ],
                   "owner": {
                     "id": null,
@@ -3072,9 +3075,9 @@
                       "t:ja:b17a760c59cb19db",
                       "zh-Hant",
                       "t:zh-Hant:396cbc2e2e8d61a1",
-                      "project",
+                      "machine",
                       "unofficial",
-                      "reviewed"
+                      true
                     ]
                   ]
                 }
@@ -3700,6 +3703,7 @@
                     "enum": [
                       "own_source",
                       "shared_jp",
+                      "shared_jp_unchecked",
                       "official_counterpart"
                     ]
                   }
@@ -3974,6 +3978,7 @@
                     "enum": [
                       "own_source",
                       "shared_jp",
+                      "shared_jp_unchecked",
                       "official_counterpart"
                     ]
                   }
@@ -4229,6 +4234,7 @@
                     "enum": [
                       "own_source",
                       "shared_jp",
+                      "shared_jp_unchecked",
                       "official_counterpart"
                     ]
                   }

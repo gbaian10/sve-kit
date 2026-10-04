@@ -12,7 +12,7 @@ from sve_carddb.snapshot.project.closure import (
     validate_identities,
 )
 from sve_carddb.snapshot.project.display import DisplayText, display_text
-from sve_carddb.snapshot.project.evidence import Decisions, DisplayBinding
+from sve_carddb.snapshot.project.evidence import Decisions, DisplayBinding, DisplayCheck
 from sve_carddb.snapshot.project.metadata import Settings, configuration, summaries
 from sve_carddb.snapshot.project.observations import corrections, observations
 from sve_carddb.snapshot.project.records import (
@@ -43,6 +43,7 @@ if TYPE_CHECKING:
 __all__ = [
     "Decisions",
     "DisplayBinding",
+    "DisplayCheck",
     "DisplayText",
     "Projection",
     "Settings",

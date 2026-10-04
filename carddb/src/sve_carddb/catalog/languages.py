@@ -25,7 +25,10 @@ def register_languages(db: Database, languages: tuple[Language, ...]) -> None:
             "display_name": language.display_name,
         }
         if language.code in existing:
-            if existing[language.code] != values:
+            # Provenance belongs to the adoption; registration compares UI configuration.
+            if any(
+                existing[language.code][key] != value for key, value in values.items()
+            ):
                 raise ValueError("Conflicting language configuration")
         else:
             db.insert("language", values)

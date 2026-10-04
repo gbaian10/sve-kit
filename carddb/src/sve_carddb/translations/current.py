@@ -1,10 +1,8 @@
-"""Read current values without creating reviews or replaying historical decisions."""
+"""Validate current glossary keys and references without review history."""
 
 from typing import TYPE_CHECKING
 
-from pydantic import TypeAdapter
-
-from sve_carddb.snapshot.values import canonical, digest, object_value, parse
+from sve_carddb.snapshot.values import canonical, digest
 from sve_carddb.translations.current_models import (
     AssignmentRecord,
     ChoiceRecord,
@@ -18,63 +16,20 @@ from sve_carddb.translations.current_models import (
 
 if TYPE_CHECKING:
     from sve_carddb.translations.loader import Snapshot
-    from sve_carddb.translations.models import Record as LegacyRecord
-
-CURRENT_FORMAT = 2
-ADAPTER = TypeAdapter[Record](Record)
-
-
-def convert(record: LegacyRecord, *, low_confidence: bool = False) -> Record:
-    """Extract an effective legacy value; approval metadata is deliberately omitted."""
-    data = record.data.model_dump(mode="json")
-    origin = data.pop("origin", "project")
-    if origin in {"official_sv1", "official_svwb"}:
-        origin = "official"
-    elif origin == "community":
-        origin = "project"
-    for field in ("adoption_review", "adoption_no", "predecessor", "identity_basis"):
-        data.pop(field, None)
-    for evidence in data.get("concept_evidence", []):
-        if isinstance(evidence, dict):
-            evidence.pop("decision_id", None)
-            if "concept_note" in evidence:
-                evidence["concept_note"] = "同概念依精確來源定位核對。"
-    claim = data.get("source_claim")
-    if isinstance(claim, dict):
-        claim["note"] = "保留所列翻譯來源主張，不據此認定為官方譯名。"
-    raw = {
-        "record_key": record.record_key,
-        "kind": record.kind,
-        "data": data,
-        "origin": origin,
-        "low_confidence": low_confidence,
-        "note": "",
-    }
-    # Validation precedes key derivation; the legacy revision is not a selection key.
-    typed = ADAPTER.validate_json(canonical(raw))
-    return ADAPTER.validate_json(canonical({**raw, "record_key": key(typed)}))
 
 
 def records(snapshot: Snapshot) -> tuple[Record, ...]:
-    """Normalize legacy terminal values and current values into one detached view."""
-    from sve_carddb.translations.loader import Snapshot as LegacySnapshot  # ruff: ignore[import-outside-top-level] -- the legacy snapshot owns format-one chain validation
-
-    legacy = LegacySnapshot(
-        snapshot.index,
-        tuple(
-            f
-            for f in snapshot.shards
-            if object_value(parse(f[2]))["translation_authored_format"] == 1
-        ),
+    """Read detached current values from every verified glossary shard."""
+    return tuple(
+        sorted(
+            (
+                record
+                for _, _, content in snapshot.shards
+                for record in Shard.model_validate_json(content).records
+            ),
+            key=lambda record: record.record_key,
+        )
     )
-    current = [convert(r) for r, _ in legacy.effective()]
-    for _, _, content in snapshot.shards:
-        if (
-            object_value(parse(content))["translation_authored_format"]
-            == CURRENT_FORMAT
-        ):
-            current.extend(Shard.model_validate_json(content).records)
-    return tuple(sorted(current, key=lambda r: r.record_key))
 
 
 def semantic_hash(record: Record) -> str:

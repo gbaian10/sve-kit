@@ -4,13 +4,14 @@
 # ruff: file-ignore[typing-only-first-party-import] -- Pydantic resolves inherited candidate models at runtime
 
 import re
-from typing import Literal
+from typing import Annotated, Literal
+
+from pydantic import Field
 
 from sve_carddb.catalog.adoption_models import SourceRef
 from sve_carddb.registry.records import RecordData, Text
 from sve_carddb.registry.storage import MAX_BYTES
 from sve_carddb.snapshot.values import canonical
-from sve_carddb.translations.card_names import NameKey
 from sve_carddb.translations.current_models import (
     ChoiceData,
     ChoiceRecord,
@@ -21,6 +22,10 @@ from sve_carddb.translations.current_models import (
 )
 from sve_carddb.translations.loader import Snapshot
 from sve_carddb.translations.models import AuthoredValue, SourceClaim
+
+NameKey = Annotated[
+    str, Field(pattern=r"^name\.[a-z][a-z0-9]*(?:_[a-z0-9]+)*\Z", max_length=96)
+]
 
 
 class Candidate(RecordData):

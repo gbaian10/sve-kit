@@ -26,7 +26,6 @@ from sve_carddb.translations.loader import validate_snapshot
 
 LEGACY_ID_LENGTH = 11
 CURRENT_FORMAT = 2
-CURRENT_INVENTORY_FORMAT = 3
 
 if TYPE_CHECKING:
     from collections.abc import Mapping

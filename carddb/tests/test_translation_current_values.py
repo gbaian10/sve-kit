@@ -9,10 +9,10 @@ from pydantic import JsonValue
 
 from sve_carddb.registry.storage import read_yaml
 from sve_carddb.snapshot.values import canonical, digest, object_value
-from sve_carddb.translations.current import convert, semantic_hash
-from sve_carddb.translations.current_models import Shard
+from sve_carddb.translations.current import semantic_hash
+from sve_carddb.translations.current_models import ChoiceRecord, Shard, TermRecord
 from sve_carddb.translations.loader import load_glossary
-from sve_carddb.translations.models import AuthoredValue, ChoiceRecord, TermRecord
+from sve_carddb.translations.models import AuthoredValue
 
 from .translation_fixtures import choice, term
 
@@ -46,7 +46,7 @@ def _write(root: Path, records: list[dict[str, JsonValue]]) -> None:
 
 def _records() -> list[dict[str, JsonValue]]:
     return [
-        convert(r).model_dump(mode="json")
+        r.model_dump(mode="json")
         for r in (
             TermRecord.model_validate_json(canonical(term())),
             ChoiceRecord.model_validate_json(canonical(choice())),

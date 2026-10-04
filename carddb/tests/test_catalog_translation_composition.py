@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from sve_carddb.build_db import create_database
-from sve_carddb.build_db.t1 import compile_build
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_inputs import BuildContext, SourceUse
 from sve_carddb.catalog.adoption_importer import import_adoptions
 from sve_carddb.frozen_sources import FrozenSources
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 
 @pytest.fixture(scope="module")
 def schema() -> CompiledSchema:
-    return compile_build(("t0", "translation_evidence"))
+    return compile_current_build(("t0", "translation_evidence"))
 
 
 @pytest.fixture(scope="module")
@@ -90,13 +90,13 @@ def test_composes_all_264_synthetic_choices_and_keeps_review_policies_separate(
         assert len(db.rows("glossary_term")) == 264
         assert len(db.rows("glossary_translation")) == 264
         assert len(db.rows("vocabulary")) == 3
-        assert {"Synthetic human", "gbaian10"} <= {
+        assert {"gbaian10"} == {
             row.values["reviewed_by"] for row in db.rows("decision")
         }
         assert "translation_authored" in result.context.configuration
-        assert any(
-            row.values["authored_path"] == "authored/translations/index.yaml"
-            for row in db.rows("source_record")
+        assert all(
+            row.values["authored_source_id"] is not None
+            for row in db.rows("glossary_term")
         )
 
 
@@ -223,7 +223,7 @@ def test_late_choice_error_rolls_back_catalog_and_all_glossary_rows(
             object_value(read_yaml(case.case.root / choice_path))["records"]
         )
     ]
-    object_value(choices[-1]["data"])["origin"] = "official_svwb"
+    choices[-1]["origin"] = "official"
     write(
         case.case.root,
         {concept_path: envelope(definitions), choice_path: envelope(choices)},
@@ -257,10 +257,9 @@ def test_unsupported_vocabulary_choice_remains_atomic_and_fail_closed(
     selected = copy.deepcopy(choice())
     selected.update(
         record_key=canonical(
-            ["vocabulary_choice", "type", "follower", "zh-Hant", 1]
+            ["vocabulary_choice", "type", "follower", "zh-Hant"]
         ).decode(),
         kind="vocabulary_choice",
-        filing_key="vocabulary",
     )
     data = object_value(selected["data"])
     data.pop("term_id")
@@ -272,7 +271,7 @@ def test_unsupported_vocabulary_choice_remains_atomic_and_fail_closed(
     )
     case = replace(case, case=replace(case.case, revision=commit(case.case.repository)))
     inputs = replace(case.case.inputs(), include_translations=True)
-    message = "Vocabulary label projection belongs to #53; glossary import is atomic"
+    message = "Vocabulary label projection belongs to catalog composition"
     with create_database(schema) as db:
         with pytest.raises(TypeError, match="^" + re.escape(message) + "$"):
             import_adoptions(

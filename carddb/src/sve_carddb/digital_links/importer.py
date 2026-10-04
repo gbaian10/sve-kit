@@ -27,7 +27,7 @@ from sve_carddb.maintainers import is_maintainer
 from sve_carddb.snapshot.values import array, canonical, digest, object_value, parse
 from sve_carddb.sources.official_jp import card_url
 from sve_carddb.translations.digital import import_digital
-from sve_carddb.translations.name_build import NameOwner, name_source
+from sve_carddb.translations.name_sources import NameOwner, name_source
 from sve_carddb.translations.sources import Sources
 
 if TYPE_CHECKING:

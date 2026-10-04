@@ -5,9 +5,10 @@ from itertools import starmap
 from typing import TYPE_CHECKING
 
 from sve_carddb.build_db import Capability, Column, Json, Kind, Table, compile_schema
+from sve_carddb.build_db.current import compile_current_build
 from sve_carddb.build_db.registry import Registry
 from sve_carddb.build_db.t1 import REGISTRY, compile_minimum
-from sve_carddb.build_db.t2_translation import TABLES as NAME_TABLES
+from sve_carddb.build_db.t2_translation import TABLES as ORIGINAL_NAME_TABLES
 from sve_carddb.snapshot.project import Decisions, Settings
 from sve_carddb.snapshot.values import digest, parse
 
@@ -17,6 +18,15 @@ from .build_db_t1b_fixtures import rows as ancillary_rows
 
 if TYPE_CHECKING:
     from sve_carddb.build_db import CompiledSchema, Database, Value
+
+CURRENT = compile_current_build(("t0", "translation_names"))
+CURRENT_NAMES = {table.name: table for table in CURRENT.tables}
+NAME_TABLES = tuple(
+    CURRENT_NAMES[table.name]
+    if table.name in {"translation", "translation_context", "translation_selection"}
+    else table
+    for table in ORIGINAL_NAME_TABLES
+)
 
 TEXT = "t:ja:" + digest(b"Synthetic text")[7:23]
 SETTINGS = Settings("https://example.invalid/feedback", "synthetic-v1", "synthetic-v1")
@@ -205,7 +215,6 @@ def extras() -> dict[str, dict[str, Value]]:
             "id": "context",
             "source_unit_id": TEXT,
             "semantic_variant": "default",
-            "decision_id": None,
         },
         "translation": {
             "id": "translation",
@@ -215,9 +224,8 @@ def extras() -> dict[str, dict[str, Value]]:
             "text": "Synthetic translation",
             "origin": "project",
             "authority": "unofficial",
-            "status": "reviewed",
-            "source_hash": "sha256:" + "a" * 64,
-            "translated_by": "PRIVATE TRANSLATOR",
+            "low_confidence": False,
+            "source_hash": digest(b"Synthetic text"),
         },
         "translation_selection": {
             "context_id": "context",

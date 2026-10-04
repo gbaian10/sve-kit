@@ -69,7 +69,7 @@
     },
     {
       "key": "bootstrap/bootstrap/global/global/band/2",
-      "sha256": "sha256:ddc1e889c12c2361f691b665b7c49c15776103616088a74090dc683c8365352a",
+      "sha256": "sha256:65c6fceabe26cde6be131f421469e21cff9c385f271333d972284c7578755a17",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -84,7 +84,7 @@
                 "text_unit_id",
                 "origin",
                 "authority",
-                "status"
+                "low_confidence"
               ],
               "owner": {
                 "id": null,
@@ -99,7 +99,7 @@
                   "t:zh-Hant:8967c9d899bcfc91",
                   "project",
                   "unofficial",
-                  "reviewed"
+                  false
                 ]
               ]
             }
@@ -110,7 +110,7 @@
     },
     {
       "key": "bootstrap/bootstrap/global/global/band/3",
-      "sha256": "sha256:35f53f8e7672d27819882018396de1524b74b9abdd657a05424e61a8eda2ec65",
+      "sha256": "sha256:e4692fbe7f73426b20326fd3fa59128a1b381b0dbae1b4ed7a54d0b392277c8a",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -204,6 +204,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
@@ -268,7 +269,7 @@
     },
     {
       "key": "bootstrap/bootstrap/global/global/band/7",
-      "sha256": "sha256:b3e98ad378c902c0852c7c40afcb7fbd7b4f55de4fdb916793514d79cfd5ad34",
+      "sha256": "sha256:8061467b4f68b2988ec5b5b21aa05610808d9902d4e1b8cd96741469ff3616f1",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -374,6 +375,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
@@ -384,7 +386,7 @@
     },
     {
       "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-      "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729",
+      "sha256": "sha256:4b25eacbdc3804a57e454505c2e695c26e8cd3a95f978be55eedb85ca1281b78",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -816,6 +818,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
@@ -1276,7 +1279,7 @@
     },
     {
       "key": "text/detail/global/global/band/18",
-      "sha256": "sha256:8ebc790e3960735a352c2bb94cdf228308373d430161c5c6e5ffe1585e7482e8",
+      "sha256": "sha256:5afc0ecdd8b8c32d4b08994e045f188d0105334afd4d464e2a97fffd3b349eae",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -1362,7 +1365,7 @@
                 "text_unit_id",
                 "origin",
                 "authority",
-                "status"
+                "low_confidence"
               ],
               "owner": {
                 "id": null,
@@ -1375,9 +1378,9 @@
                   "t:ja:b17a760c59cb19db",
                   "zh-Hant",
                   "t:zh-Hant:396cbc2e2e8d61a1",
-                  "project",
+                  "machine",
                   "unofficial",
-                  "reviewed"
+                  true
                 ]
               ]
             }
@@ -1733,7 +1736,7 @@
     },
     {
       "key": "text/detail/home_set/set%3Aa/band/0",
-      "sha256": "sha256:2412b3c3ade2723edccabb7baf564cfcea6abcf70331062a40740589cc66f41a",
+      "sha256": "sha256:c42c57dab2f0aaeda46e3a59947024c5979be4784bb2b684f5e3a4bf04d89a63",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -1743,7 +1746,7 @@
                 "bucket": 26,
                 "file": {
                   "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                  "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+                  "sha256": "sha256:4b25eacbdc3804a57e454505c2e695c26e8cd3a95f978be55eedb85ca1281b78"
                 },
                 "owner": {
                   "id": "set:a",
@@ -1826,7 +1829,7 @@
                 "bucket": 29,
                 "file": {
                   "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                  "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+                  "sha256": "sha256:4b25eacbdc3804a57e454505c2e695c26e8cd3a95f978be55eedb85ca1281b78"
                 },
                 "owner": {
                   "id": "set:a",
@@ -2003,6 +2006,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
@@ -2117,7 +2121,7 @@
     },
     {
       "key": "text/detail/home_set/set%3Aa/band/1",
-      "sha256": "sha256:68c1871dbc157101f46a1e19a021fa8e2e1629d43e1eb169da706664ad5904ef",
+      "sha256": "sha256:cdf129ec111fab91b4c85ac7807e1a42422b57f585c1b4178cb1e21b5e195741",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -2127,7 +2131,7 @@
                 "bucket": 43,
                 "file": {
                   "key": "bootstrap/bootstrap/home_set/set%3Aa/band/0",
-                  "sha256": "sha256:73c0a6e2d6d9b9222ca59d24c03f311c31d0d611777002b657c4acf091dbc729"
+                  "sha256": "sha256:4b25eacbdc3804a57e454505c2e695c26e8cd3a95f978be55eedb85ca1281b78"
                 },
                 "owner": {
                   "id": "set:a",
@@ -2277,6 +2281,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
@@ -2391,7 +2396,7 @@
     },
     {
       "key": "text/history/home_set/set%3Aa/band/0",
-      "sha256": "sha256:36d63e74a18080b65d2e5cd9274b2613cfa3cd58f04177f1161afdcaad34aaac",
+      "sha256": "sha256:0fb0272ba7b43c63565af1342049ec73d7651fc5b13eea6326937726357f5069",
       "payload": {
         "format_version": "2.0.0",
         "tables": {
@@ -2532,6 +2537,7 @@
                 "enum": [
                   "own_source",
                   "shared_jp",
+                  "shared_jp_unchecked",
                   "official_counterpart"
                 ]
               }
