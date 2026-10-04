@@ -51,3 +51,45 @@ def effect_drafts(drafts: bytes, reviews: bytes) -> tuple[EffectDraft, ...]:
     if set(result) != set(verdicts):
         raise ValueError("Template draft review coverage differs from drafts")
     return tuple(result[key] for key in sorted(result))
+
+
+@dataclass(frozen=True)
+class FlavorDraft:
+    identifier: str
+    source_hash: str
+    source_text: str
+    text: str
+    low_confidence: bool
+
+
+def flavor_drafts(raw: bytes) -> tuple[FlavorDraft, ...]:
+    """Exact whole paragraphs remain private inputs; their hashes locate current fields."""
+    from sve_carddb.snapshot.values import digest  # ruff: ignore[import-outside-top-level] -- flavor draft hashes are independent of N/X recipes
+
+    result = {}
+    for line in raw.splitlines():
+        row = object_value(parse(line))
+        identifier = row.get("flavor_id")
+        source, text, confidence = (
+            row.get("source_text"),
+            row.get("zh_hant"),
+            row.get("confidence"),
+        )
+        if (
+            not isinstance(identifier, str)
+            or not isinstance(source, str)
+            or not isinstance(text, str)
+            or confidence not in {"high", "medium", "low"}
+        ):
+            raise ValueError("Invalid flavor translation draft")
+        try:
+            checksum = digest(source.encode())
+            text.encode()
+        except UnicodeError:
+            raise ValueError("Invalid flavor translation draft") from None
+        if identifier != checksum[7:23] or identifier in result:
+            raise ValueError("Duplicate or mismatched flavor draft fingerprint")
+        result[identifier] = FlavorDraft(
+            identifier, checksum, source, text, confidence == "low"
+        )
+    return tuple(result[key] for key in sorted(result))

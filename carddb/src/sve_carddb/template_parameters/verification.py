@@ -105,8 +105,9 @@ def _value(raw: str, kind: str, hint: Hint) -> object:
         raise ValueError(
             "Reference parameter requires matching adopted concept evidence"
         )
+    if hint.reference_kind == "vocabulary" and _current_vocabulary(hint):
+        return hint.target
     if hint.reference_kind != "term":
-        # No adopted catalog/card-name identity adapter exists at this candidate checkpoint.
         raise ValueError(
             "Reference parameter requires an implemented adopted evidence adapter"
         )
@@ -145,3 +146,23 @@ def verify_candidate(
         raise ValueError(
             "Parameter candidate must replay exact spans roles and semantic evidence"
         )
+
+
+def _current_vocabulary(hint: Hint) -> bool:
+    target = hint.target
+    if target is None or set(target) != {
+        "kind",
+        "vocabulary_kind",
+        "vocabulary_code",
+        "special_kinds",
+    }:
+        return False
+    kind, code = target["vocabulary_kind"], target["vocabulary_code"]
+    if not isinstance(kind, str) or not isinstance(code, str):
+        return False
+    return (
+        kind in {"class", "type"}
+        and kind == hint.semantic_role
+        and re.fullmatch(r"[a-z][a-z0-9_-]*", code) is not None
+        and target["special_kinds"] == []
+    )

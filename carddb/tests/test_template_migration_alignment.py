@@ -3,6 +3,7 @@
 import re
 
 import pytest
+from pydantic import JsonValue
 
 from sve_carddb.snapshot.values import digest
 from sve_carddb.template_parameters.models import Range, Schema, Slot
@@ -112,3 +113,28 @@ def test_low_confidence_is_union_of_original_flag_and_unsure_review() -> None:
         + "$",
     ):
         effect_drafts(raw, reviews.splitlines()[0])
+
+
+def test_flavor_draft_preserves_exact_paragraphs_and_quality() -> None:
+    from sve_carddb.snapshot.values import canonical  # ruff: ignore[import-outside-top-level] -- synthetic private input
+    from sve_carddb.template_translations.migration_drafts import flavor_drafts  # ruff: ignore[import-outside-top-level] -- exact flavor reader
+
+    source = " Synthetic２\r\n Test "
+    value: dict[str, JsonValue] = {
+        "flavor_id": digest(source.encode())[7:23],
+        "source_text": source,
+        "zh_hant": "自撰譯文",
+        "confidence": "low",
+    }
+    loaded = flavor_drafts(canonical(value))[0]
+    assert loaded.source_text == source
+    assert loaded.low_confidence
+    assert loaded.source_hash == digest(source.encode())
+    with pytest.raises(
+        ValueError, match=r"^Duplicate or mismatched flavor draft fingerprint$"
+    ):
+        flavor_drafts(canonical({**value, "flavor_id": "0" * 16}))
+    with pytest.raises(
+        ValueError, match=r"^Duplicate or mismatched flavor draft fingerprint$"
+    ):
+        flavor_drafts(canonical(value) + b"\n" + canonical(value))

@@ -91,3 +91,48 @@ def test_current_flavor_still_checks_exact_own_physical_text(
         ValueError, match=r"^Flavor owner source differs from its exact physical field$"
     ):
         sources.generate((Batch(store_id="test-store", batch_id=flavor_case.batch),))
+
+
+def test_flavor_conversion_preserves_exact_final_text_and_draft_accounting(
+    flavor_case: Case,
+) -> None:
+    from sve_carddb.snapshot.values import digest  # ruff: ignore[import-outside-top-level] -- stable private draft fingerprint
+    from sve_carddb.template_translations.migration_definitions import derive  # ruff: ignore[import-outside-top-level] -- use actual current flavor sources
+    from sve_carddb.template_translations.migration_drafts import FlavorDraft  # ruff: ignore[import-outside-top-level] -- private original target
+    from sve_carddb.template_translations.migration_targets import flavors, translation  # ruff: ignore[import-outside-top-level] -- final text precedence
+
+    sources = provider(flavor_case)
+    result = sources.generate(
+        (Batch(store_id="test-store", batch_id=flavor_case.batch),)
+    )
+    definitions = derive((), result.entries)
+    member = next(m for m in result.entries if m.entry.role == "flavor")
+    definition = next(
+        r for r in definitions.records if r.data.inventory_id == member.entry.id
+    )
+    draft = FlavorDraft(
+        digest(member.normalized.encode())[7:23],
+        digest(member.normalized.encode()),
+        member.normalized,
+        "舊稿",
+        False,
+    )
+    final = translation(definition.data.id, "定稿\\{原樣\\}", low=True)
+    targets = flavors(definitions.records, result.entries, (draft,), (final,))
+    assert targets.records == (final,)
+    assert not targets.pending
+    assert targets.dispositions == (("flavor", draft.identifier, "active"),)
+    flagged = flavors(
+        definitions.records,
+        result.entries,
+        (draft,),
+        (final.model_copy(update={"low_confidence": False}),),
+        quality_flags={definition.data.id: ("proper_name_needs_confirmation",)},
+    )
+    assert flagged.records[0].data == final.data
+    assert flagged.records[0].low_confidence
+    assert not flagged.pending
+    missing = flavors((), (), (draft,))
+    assert not missing.records
+    assert missing.pending[0].text == draft.text
+    assert missing.pending[0].reasons == ("draft_source_missing",)
