@@ -91,8 +91,11 @@ export default defineConfig({
         // Helpers are already bundled into generated standalone code, so package discovery misses them.
         this.emitFile({
           type: "asset",
-          fileName: "snapshot-validator-LICENSE.txt",
-          source: readFileSync(new URL("./node_modules/ajv/LICENSE", import.meta.url), "utf8"),
+          fileName: "snapshot-validator-LICENSE.md",
+          source: readFileSync(
+            new URL("./node_modules/.cache/sve-schema/licenses.md", import.meta.url),
+            "utf8",
+          ),
         })
       },
     },

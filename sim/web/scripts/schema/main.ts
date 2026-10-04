@@ -48,6 +48,7 @@ await build({
     emptyOutDir: false,
     copyPublicDir: false,
     minify: true,
+    license: { fileName: "licenses.md" },
     lib: { entry: path.join(output, "entry.js"), formats: ["es"], fileName: () => "validators.js" },
   },
 })

@@ -297,4 +297,4 @@ run `bun run schema:compile` before invoking Vite, Vitest, TypeScript or a fixtu
 Generation uses Bun, Node APIs and Vite, without shell utilities or OS-specific dependencies.
 
 Production builds include `third-party-licenses.md` from Vite's dependency license reporting,
-and `snapshot-validator-LICENSE.txt` for Ajv helpers already bundled into generated code.
+and `snapshot-validator-LICENSE.md` for Ajv and its helpers already bundled into generated code.
