@@ -139,6 +139,13 @@ describe("parseStrict", () => {
     expect(rejects("null").code).toBe("json")
   })
 
+  it.each(["\u00a0", "\v", "\f", "\u2028", "\u2029"])(
+    "rejects non-JSON spacing between tokens (%j)",
+    (space) => {
+      expect(rejects(`[1,${space}2]`).code).toBe("json")
+    },
+  )
+
   it("rejects lone surrogates in string input too", () => {
     expect(rejects('"\ud800"').code).toBe("json")
     expect(rejects('{"\ud800":1}').code).toBe("json")
