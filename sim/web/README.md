@@ -126,9 +126,10 @@ declares them (list a rule twice when it fires twice). Update the fixtures toget
 [snapshot-contract.md](../../docs/schema/snapshot-contract.md), and mirrors the Python reference
 reader in `carddb/src/sve_carddb/snapshot/`.
 
-- `json.ts`: the strict JSON boundary (canonical-json-v1). Bytes are parsed by our own parser, so
-  duplicate keys, floats, unsafe integers, a BOM and lone surrogates are rejected instead of being
-  silently accepted the way `JSON.parse` would; `canonical()` writes the exact bytes hashes refer to.
+- `json.ts`: the strict JSON boundary (canonical-json-v1). Microsoft jsonc-parser visits decoded keys and tokens
+  with comments and trailing commas disabled; every parser error is rejected. The visitor rejects
+  duplicate keys, floating spellings, unsafe integers and lone surrogates before native `JSON.parse`
+  builds the value (including own `__proto__` keys and canonical negative zero); `canonical()` writes the exact bytes hashes refer to.
 - `sha256.ts`: synchronous SHA-256 and the `sha256-mod-v1` bucket function.
 - `schema.ts` + `validator.ts`: the published JSON Schema is loaded from `carddb/` at build time
   (one source of truth, no copy). `scripts/schema/` compiles Ajv2020 standalone validators;
