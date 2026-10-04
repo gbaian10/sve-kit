@@ -1,7 +1,7 @@
 """Atomic authored adoption projection; the caller-only staging API stays fail closed."""
 
 import re
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import TYPE_CHECKING
 
 from pydantic import JsonValue
@@ -10,6 +10,7 @@ from sve_carddb.build_db import Json
 from sve_carddb.build_db.rows import insert_exact
 from sve_carddb.build_inputs import input_record, insert_raw_sources
 from sve_carddb.catalog import adoption_validation as validate
+from sve_carddb.catalog import current as current_catalog
 from sve_carddb.catalog.adoption_loader import AdoptionSnapshot, load_adoptions
 from sve_carddb.catalog.adoption_models import (
     AliasRecord,
@@ -23,6 +24,9 @@ from sve_carddb.catalog.adoption_models import (
     VocabularyRecord,
 )
 from sve_carddb.catalog.adoption_sources import AdoptionSources, PinnedRepository
+from sve_carddb.catalog.current_models import (
+    VocabularyRecord as CurrentVocabularyRecord,
+)
 from sve_carddb.catalog.languages import register_languages
 from sve_carddb.catalog.projection import CatalogProjection, project_catalog
 from sve_carddb.catalog.rules_names import populate_rules_names, register_name
@@ -115,6 +119,11 @@ class AdoptionInputs:
                 "include_translations": self.include_translations,
                 "authored_revision": self.authored_revision,
                 "inputs": [s.pins() for s in snapshots],
+                "current": [
+                    r.model_dump(mode="json")
+                    for snapshot in snapshots
+                    for r in snapshot.current_records()
+                ],
                 "effective": [
                     {
                         "record_key": r.record_key,
@@ -137,9 +146,10 @@ class PreparedAdoptions:
     sources: AdoptionSources
     effective: tuple[tuple[Record, str], ...]
     reviews: dict[str, ReviewContext]
+    current: current_catalog.Prepared | None = None
 
 
-def _prepare_adoptions(  # ruff: ignore[complex-structure] -- validate complete immutable inputs, history and current frozen evidence before projection
+def _prepare_adoptions(  # ruff: ignore[complex-structure,too-many-locals] -- validate complete immutable inputs, history and current frozen evidence before projection
     db: Database,
     inputs: AdoptionInputs,
     *,
@@ -154,6 +164,23 @@ def _prepare_adoptions(  # ruff: ignore[complex-structure] -- validate complete 
         configuration.get(key) != value for key, value in inputs.configuration().items()
     ):
         raise ValueError("Build configuration does not pin adoption inputs")
+    current_values = (
+        current_catalog.prepare(snapshots, inputs.repository, build, stores)
+        if any(s.has_current for s in snapshots)
+        else None
+    )
+    snapshots = tuple(
+        replace(
+            snapshot,
+            shards=tuple(
+                s
+                for s in snapshot.shards
+                if object_value(parse(s.content)).get("catalog_adoption_format")
+                != current_catalog.CURRENT_FORMAT
+            ),
+        )
+        for snapshot in snapshots
+    )
     repository = PinnedRepository(inputs.repository)
     repository.context(build)
     current = AdoptionSources(stores, repository)
@@ -216,9 +243,23 @@ def _prepare_adoptions(  # ruff: ignore[complex-structure] -- validate complete 
         for shard in snapshot.shards
         for record in shard.envelope().records
     }
-    _dependencies(effective, db, text_plan)
+    active = (
+        {}
+        if current_values is None
+        else {
+            _dependency_key(
+                "vocabulary" if r.kind == "vocabulary_adoption" else "language",
+                r.data.subject.model_dump(mode="json"),
+            ): r.data.value is not None
+            and (not isinstance(r, CurrentVocabularyRecord) or r.data.value.active)
+            for r in current_values.records
+        }
+    )
+    _dependencies(effective, db, text_plan, current_active=active)
     _freshness(effective, reviews, sources, db, text_plan)
-    return PreparedAdoptions(snapshots, sources, effective, reviews)
+    if current_values is not None:
+        sources.uses.extend(current_values.sources.uses)
+    return PreparedAdoptions(snapshots, sources, effective, reviews, current_values)
 
 
 def _current_recipes(
@@ -265,6 +306,8 @@ def _derive_prepared(
     projection = project_catalog(
         prepared.effective, prepared.reviews, prepared.sources, text_plan
     )
+    if prepared.current is not None:
+        projection = current_catalog.merge(prepared.current, projection)
     if text_plan is not None:
         required = set()
         for item in (*text_plan.observations, *text_plan.candidates()):
@@ -345,6 +388,10 @@ def _populate_prepared(
         if (language_item := validate.language(r, registered)) is not None
     )
     register_languages(db, languages)
+    if prepared.current is not None:
+        current_catalog.populate(
+            db, prepared.current.snapshots, prepared.current, inputs.authored_revision
+        )
     texts = TextInterner(db, published=())
     _retained_vocabulary(snapshots, effective, reviews, sources, db, texts)
     for record, decision in effective:
@@ -666,8 +713,13 @@ def _owned(record: Record) -> bytes | None:
 
 
 def _dependencies(
-    effective: tuple[tuple[Record, str], ...], db: Database, plan: TextPlan | None
+    effective: tuple[tuple[Record, str], ...],
+    db: Database,
+    plan: TextPlan | None,
+    *,
+    current_active: dict[bytes, bool] | None = None,
 ) -> None:
+    current_active = current_active or {}
     owners = {_owned(r): r for r, _ in effective if _owned(r) is not None}
     graph: dict[bytes, set[bytes]] = {}
     for record, _ in effective:
@@ -689,6 +741,11 @@ def _dependencies(
                             [owner.kind, owner.data.subject.model_dump(mode="json")]
                         )
                     )
+            elif _dependency_key(dependency.table, dependency.key) in current_active:
+                if not current_active[
+                    _dependency_key(dependency.table, dependency.key)
+                ]:
+                    raise ValueError("Adoption dependency is withdrawn or inactive")
             else:
                 _external(dependency.table, dependency.key, db, plan)
     _acyclic(graph)

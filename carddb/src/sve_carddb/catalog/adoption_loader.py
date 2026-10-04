@@ -21,12 +21,16 @@ from sve_carddb.catalog.adoption_models import (
     SymbolRecord,
     VocabularyRecord,
 )
+from sve_carddb.catalog.current_models import Shard as CurrentShard
+from sve_carddb.catalog.current_models import key as current_key
 from sve_carddb.registry.storage import read_yaml
-from sve_carddb.snapshot.values import canonical, digest
+from sve_carddb.snapshot.values import canonical, digest, object_value, parse
 
 if TYPE_CHECKING:
+    from sve_carddb.catalog.current_models import Record as CurrentRecord
     from sve_carddb.registry.records import RecordData
 
+CURRENT_FORMAT = 2
 Entry = Literal["catalog-adoptions", "display-overrides"]
 _AREAS = {
     "vocabulary": ("vocabulary_adoption", "catalog-vocabulary-v1"),
@@ -84,11 +88,32 @@ class AdoptionSnapshot:
     index_content: bytes
     shards: tuple[LoadedShard, ...]
 
+    @property
+    def has_current(self) -> bool:
+        """Keep format dispatch local to each shard."""
+        return any(
+            object_value(parse(s.content)).get("catalog_adoption_format")
+            == CURRENT_FORMAT
+            for s in self.shards
+        )
+
+    def current_records(self) -> tuple[CurrentRecord, ...]:
+        """Read current vocabulary values without creating adoption envelopes."""
+        return tuple(
+            r
+            for s in self.shards
+            if object_value(parse(s.content)).get("catalog_adoption_format")
+            == CURRENT_FORMAT
+            for r in CurrentShard.model_validate_json(s.content).records
+        )
+
     def records(self) -> tuple[tuple[Record, str], ...]:
         """Retain all historical members with their actual batch decisions."""
         return tuple(
             (record, shard.envelope().default_decision_id)
             for shard in self.shards
+            if object_value(parse(shard.content)).get("catalog_adoption_format")
+            != CURRENT_FORMAT
             for record in shard.envelope().records
         )
 
@@ -142,7 +167,7 @@ def _model[T: RecordData](model: type[T], raw: JsonValue) -> T:
         raise ValueError("Invalid adoption fields") from None
 
 
-def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ignore[complex-structure,too-many-locals] -- complete entry closure is validated before projection
+def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ignore[complex-structure,too-many-locals,too-many-branches,too-many-statements] -- complete entry closure is validated before projection
     """Validate the entire enabled entry, including every area and historical revision."""
     if entry not in {"catalog-adoptions", "display-overrides"}:
         raise ValueError("Unknown adoption entry")
@@ -166,7 +191,7 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ig
     for file in directory.rglob("*"):
         if file.is_symlink():
             raise ValueError("Symlink adoption input")
-        if file.suffix.lower() in {".yaml", ".yml"} and file != path:
+        if not file.is_dir() and file != path:
             present.add(file.relative_to(root).as_posix())
     areas = (
         "vocabulary|languages|aliases|symbols|rules-names"
@@ -182,9 +207,6 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ig
         sequences[match[1], match[2]].append(int(match[3]))
     if present != set(index.includes):
         raise ValueError("Adoption indexed file closure differs from disk")
-    for numbers in sequences.values():
-        if sorted(numbers) != list(range(1, len(numbers) + 1)):
-            raise ValueError("Adoption shard sequence must start at one without gaps")
     shards = []
     for name, checksum in sorted(index.includes.items()):
         file = root / name
@@ -193,6 +215,28 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ig
         _format(content, field)
         if digest(canonical(content)) != checksum:
             raise ValueError("Adoption shard canonical hash mismatch")
+        if (
+            entry == "catalog-adoptions"
+            and object_value(content)[field] == CURRENT_FORMAT
+        ):
+            current = _model(CurrentShard, content)
+            keys = [r.record_key for r in current.records]
+            if keys != sorted(set(keys)):
+                raise ValueError("Current catalog records must be sorted and unique")
+            for record in current.records:
+                area = (
+                    "vocabulary"
+                    if record.kind == "vocabulary_adoption"
+                    else "languages"
+                )
+                if Path(name).parts[1] != area or record.record_key != current_key(
+                    record
+                ):
+                    raise ValueError("Current catalog key or area mismatch")
+            shards.append(
+                LoadedShard(name, file.read_bytes(), checksum, canonical(content))
+            )
+            continue
         shard = (
             _model(CatalogShard, content)
             if entry == "catalog-adoptions"
@@ -202,13 +246,33 @@ def load_adoptions(root: Path, *, entry: Entry) -> AdoptionSnapshot:  # ruff: ig
         shards.append(
             LoadedShard(name, file.read_bytes(), checksum, canonical(content))
         )
+    current_groups = {
+        tuple(shard.path.split("/")[1:3])
+        for shard in shards
+        if object_value(parse(shard.content)).get("catalog_adoption_format")
+        == CURRENT_FORMAT
+    }
+    for group, numbers in sequences.items():
+        if group not in current_groups and sorted(numbers) != list(
+            range(1, len(numbers) + 1)
+        ):
+            raise ValueError("Adoption shard sequence must start at one without gaps")
     snapshot = AdoptionSnapshot(entry, path.read_bytes(), canonical(raw), tuple(shards))
     _chains(snapshot)
+    keys = [r.record_key for r in snapshot.current_records()]
+    legacy_keys = [subject_key(r).decode() for r, _ in snapshot.effective()]
+    if len(set(keys + legacy_keys)) != len(keys + legacy_keys):
+        raise ValueError("Duplicate current catalog selection key")
     return snapshot
 
 
 def _format(raw: JsonValue, field: str) -> None:
-    if not isinstance(raw, dict) or type(raw.get(field)) is not int or raw[field] != 1:
+    if (
+        not isinstance(raw, dict)
+        or type(raw.get(field)) is not int
+        or raw[field]
+        not in ({1, CURRENT_FORMAT} if field == "catalog_adoption_format" else {1})
+    ):
         raise ValueError("Adoption format must be integer one")
 
 
@@ -272,6 +336,11 @@ def _chains(snapshot: AdoptionSnapshot) -> None:  # ruff: ignore[complex-structu
     seen: set[str] = set()
     decisions: set[str] = set()
     for shard in snapshot.shards:
+        if (
+            object_value(parse(shard.content)).get("catalog_adoption_format")
+            == CURRENT_FORMAT
+        ):
+            continue
         decision = shard.envelope().default_decision_id
         if decision in decisions:
             raise ValueError("Duplicate adoption decision")

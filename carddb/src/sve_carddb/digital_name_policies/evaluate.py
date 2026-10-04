@@ -27,6 +27,9 @@ if TYPE_CHECKING:
     from pathlib import Path
 
     from sve_carddb.digital_links.evidence import Name
+    from sve_carddb.digital_name_policies.current_evaluate import (
+        Catalogue as CurrentCatalogue,
+    )
     from sve_carddb.digital_name_policies.loader import LoadedPolicy
 
 
@@ -331,7 +334,9 @@ def owner_text(
     )
 
 
-def name_result(evidence: OwnerEvidence, frozen: Catalogue) -> NamePolicyResult:
+def name_result(
+    evidence: OwnerEvidence, frozen: Catalogue | CurrentCatalogue
+) -> NamePolicyResult:
     """Pure eligibility after owner evidence validation; this is never human review."""
     owner, text, owner_uses = evidence.owner, evidence.text, evidence.uses
     if frozen.purpose != "names":

@@ -23,6 +23,10 @@ if TYPE_CHECKING:
 
 CODE_PATH = "carddb/src/sve_carddb/translations/sources.py"
 RUNTIME = (
+    "carddb/src/sve_carddb/translations/current.py",
+    "carddb/src/sve_carddb/translations/current_models.py",
+    "carddb/src/sve_carddb/translations/current_importer.py",
+    "carddb/src/sve_carddb/translations/current_names.py",
     "carddb/uv.lock",
     "carddb/pyproject.toml",
     CODE_PATH,

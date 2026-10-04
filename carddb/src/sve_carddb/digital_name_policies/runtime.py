@@ -28,6 +28,9 @@ RUNTIME = tuple(
                     "runtime",
                     "owners",
                     "application",
+                    "current_models",
+                    "current_evaluate",
+                    "current_application",
                 )
             ),
         }

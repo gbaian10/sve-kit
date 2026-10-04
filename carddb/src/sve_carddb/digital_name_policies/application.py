@@ -51,10 +51,12 @@ class Inputs:
     root: Path
     repository: Path
     authored_revision: str
-    application_at: str
+    application_at: str = ""
 
     def __post_init__(self) -> None:
         """Reject missing audit time before reading any policy or archive."""
+        if not self.application_at and self.load().current_names:
+            return
         try:
             TypeAdapter(Instant, config={"regex_engine": "python-re"}).validate_python(
                 self.application_at
@@ -71,6 +73,13 @@ class Inputs:
     def configuration(self) -> dict[str, JsonValue]:
         """Declare the selected policy and the explicit first-application baseline."""
         snapshot = self.load()
+        if snapshot.current_names:
+            return {
+                "digital_name_application": {
+                    "recipe": "owner-name-current-v2",
+                    **snapshot.pins(),
+                }
+            }
         return {
             "digital_name_application": {
                 "recipe": "owner-name-v1",
@@ -444,6 +453,14 @@ def populate(
     links: LinkResult | None = None,
 ) -> Result:
     """Recompute at the write boundary; callers cannot substitute a forged plan."""
+    if inputs.load().current_names:
+        from sve_carddb.digital_name_policies.current_application import (  # ruff: ignore[import-outside-top-level] -- format dispatch avoids the legacy/current application import cycle
+            populate as populate_current,
+        )
+
+        return populate_current(
+            db, inputs, texts, sources=sources, replay=replay, links=links
+        )
     plan = prepare(db, inputs, texts, sources=sources, replay=replay, links=links)
     selected = tuple(o for o in plan.owners if o.selection.reason == "policy")
     insert_raw_sources(db, (use.source for use in plan.uses))
