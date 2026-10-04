@@ -6,6 +6,7 @@ import sharp from "sharp"
 
 import { buildSnapshot, canonicalSize, type ImageRequest } from "./build"
 import { convertLocal, type LocalRecord, outputTargetError } from "./local"
+import { parseLocalArgs } from "./local-args"
 
 // Written into every output directory; the tool only ever replaces a directory carrying it.
 const MARKER = ".sve-local-snapshot"
@@ -35,13 +36,6 @@ function checkedOutput(out: string, list: string, dataDir: string): string {
   return target
 }
 
-// Real-looking local snapshot for demos: the private JP card list plus the crawled card images,
-// written to SVE_CDN_DIR (never into the repo). Delete it once M2 delivers real snapshots.
-function argument(name: string): string | undefined {
-  const index = process.argv.indexOf(`--${name}`)
-  return index === -1 ? undefined : process.argv[index + 1]
-}
-
 async function encodeImage({ width, height, seed, source }: ImageRequest): Promise<Uint8Array> {
   const image =
     source === null
@@ -61,10 +55,13 @@ async function encodeImage({ width, height, seed, source }: ImageRequest): Promi
   return new Uint8Array(await image.webp({ quality: 80 }).toBuffer())
 }
 
+// Real-looking local snapshot for demos: the private JP card list plus the crawled card images,
+// written to SVE_CDN_DIR (never into the repo). Delete it once M2 delivers real snapshots.
 async function main(): Promise<void> {
+  const args = parseLocalArgs(process.argv.slice(2))
   const list = process.env["SVE_TEST_SNAPSHOT"]
   const dataDir = process.env["SVE_DATA_DIR"]
-  const out = argument("out") ?? process.env["SVE_CDN_DIR"]
+  const out = args.out ?? process.env["SVE_CDN_DIR"]
   if (list === undefined || dataDir === undefined || out === undefined) {
     throw new Error("SVE_TEST_SNAPSHOT, SVE_DATA_DIR and SVE_CDN_DIR (or --out) must be set")
   }
@@ -73,11 +70,8 @@ async function main(): Promise<void> {
     .split("\n")
     .filter((line) => line.trim() !== "")
     .map((line) => JSON.parse(line) as LocalRecord)
-  const sets =
-    argument("sets")
-      ?.split(",")
-      .filter((set) => set !== "") ?? []
-  const limit = Number(argument("limit") ?? "300")
+  const sets = args.sets?.split(",").filter((set) => set !== "") ?? []
+  const limit = Number(args.limit ?? "300")
   const imageRoot = path.join(dataDir, "media/images/jp")
   const converted = convertLocal(records, {
     sets,
